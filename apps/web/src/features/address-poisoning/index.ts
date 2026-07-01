@@ -6,7 +6,7 @@
  * Gated by the ADDRESS_POISONING_PROTECTION chain feature flag.
  */
 export { default as useAddressSimilarity } from './hooks/useAddressSimilarity'
-export { default as useAddressSimilarityGate } from './hooks/useAddressSimilarityGate'
-export type { AddressSimilarityGate } from './hooks/useAddressSimilarityGate'
-export { default as AddressSimilarityWarning } from './components/AddressSimilarityWarning'
-export { default as SimilarAddressConfirmDialog } from './components/SimilarAddressConfirmDialog'
+export { default as useAddressPoisoningGuard } from './hooks/useAddressPoisoningGuard'
+export type { GuardContext } from './hooks/useAddressPoisoningGuard'
+export { default as AddressPoisoningGuard } from './components/AddressPoisoningGuard'
+export type { AddressPoisoningGuardProps } from './components/AddressPoisoningGuard'

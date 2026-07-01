@@ -28,13 +28,8 @@ import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TOOLTIP_TITLES } from '@/components/tx-flow/common/constants'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import { useMemo, useState } from 'react'
-import { isAddress } from 'ethers'
-import {
-  useAddressSimilarityGate,
-  AddressSimilarityWarning,
-  SimilarAddressConfirmDialog,
-} from '@/features/address-poisoning'
+import { useState } from 'react'
+import { AddressPoisoningGuard } from '@/features/address-poisoning'
 
 type FormData = Pick<AddOwnerFlowProps | ReplaceOwnerFlowProps, 'newOwner' | 'threshold'>
 
@@ -69,14 +64,8 @@ export const ChooseOwner = ({
 
   const { name, ens, resolving } = useAddressResolver(address)
 
-  // Address-poisoning: warn (and, for a both-ends match, gate) when the new signer
-  // dangerously resembles an address the user explicitly trusts.
-  const ownerAddress = useMemo(() => {
-    const raw = address?.split(':').pop()
-    return raw && isAddress(raw) ? raw : undefined
-  }, [address])
-  const similarityGate = useAddressSimilarityGate(ownerAddress)
-  const [isCompareOpen, setIsCompareOpen] = useState(false)
+  // Address-poisoning guard: warns + blocks (until verified) when the new signer resembles a trusted anchor.
+  const [poisoningBlocked, setPoisoningBlocked] = useState(false)
 
   // Address book, ENS
   const fallbackName = name || ens
@@ -153,24 +142,7 @@ export const ChooseOwner = ({
             />
           </FormControl>
 
-          {similarityGate.match && (
-            <Box sx={{ mt: -1 }}>
-              <AddressSimilarityWarning match={similarityGate.match} onReview={() => setIsCompareOpen(true)} />
-            </Box>
-          )}
-
-          {similarityGate.match && ownerAddress && (
-            <SimilarAddressConfirmDialog
-              open={isCompareOpen}
-              candidate={ownerAddress}
-              match={similarityGate.match}
-              onConfirm={() => {
-                similarityGate.acknowledge()
-                setIsCompareOpen(false)
-              }}
-              onCancel={() => setIsCompareOpen(false)}
-            />
-          )}
+          <AddressPoisoningGuard name="newOwner.address" context="add-entity" onBlockedChange={setPoisoningBlocked} />
 
           <Divider className={commonCss.nestedDivider} />
 
@@ -254,7 +226,7 @@ export const ChooseOwner = ({
               data-testid="add-owner-next-btn"
               variant="contained"
               type="submit"
-              disabled={!isValid || resolving || similarityGate.isBlocked}
+              disabled={!isValid || resolving || poisoningBlocked}
             >
               Next
             </Button>

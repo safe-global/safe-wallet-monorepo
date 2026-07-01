@@ -47,14 +47,9 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import { type BaseSyntheticEvent, useCallback, useMemo, useState } from 'react'
-import { FormProvider, useForm, useWatch, type Validate } from 'react-hook-form'
-import { isAddress } from 'ethers'
+import { FormProvider, useForm, type Validate } from 'react-hook-form'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import {
-  useAddressSimilarityGate,
-  AddressSimilarityWarning,
-  SimilarAddressConfirmDialog,
-} from '@/features/address-poisoning'
+import { AddressPoisoningGuard } from '@/features/address-poisoning'
 import SignerSelector from '@/components/common/SignerSelector'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import SignatureIcon from '@/public/images/transactions/signature.svg'
@@ -122,17 +117,8 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
   const { handleSubmit, formState } = methods
 
-  // Mode A: warn (and gate) when the proposer address being entered resembles a trusted anchor.
-  const addressValue = useWatch({ control: methods.control, name: 'address' })
-  const similarityCandidate = useMemo(() => {
-    if (isEditing) return undefined
-    const raw = String(addressValue ?? '')
-      .split(':')
-      .pop()
-    return raw && isAddress(raw) ? raw : undefined
-  }, [isEditing, addressValue])
-  const similarityGate = useAddressSimilarityGate(similarityCandidate)
-  const [isCompareOpen, setIsCompareOpen] = useState(false)
+  // Address-poisoning guard: warns + blocks (until verified) when the proposer address resembles a trusted anchor.
+  const [poisoningBlocked, setPoisoningBlocked] = useState(false)
 
   const onConfirm = handleSubmit(async (data: ProposerEntry) => {
     if (!wallet) return
@@ -321,23 +307,10 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
               )}
             </Box>
 
-            {!isEditing && similarityGate.match && (
+            {!isEditing && (
               <Box mb={2}>
-                <AddressSimilarityWarning match={similarityGate.match} onReview={() => setIsCompareOpen(true)} />
+                <AddressPoisoningGuard name="address" context="add-entity" onBlockedChange={setPoisoningBlocked} />
               </Box>
-            )}
-
-            {!isEditing && similarityGate.match && similarityCandidate && (
-              <SimilarAddressConfirmDialog
-                open={isCompareOpen}
-                candidate={similarityCandidate}
-                match={similarityGate.match}
-                onConfirm={() => {
-                  similarityGate.acknowledge()
-                  setIsCompareOpen(false)
-                }}
-                onCancel={() => setIsCompareOpen(false)}
-              />
             )}
 
             <Box mb={2}>
@@ -397,7 +370,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
                     isParentLoading ||
                     (isEditing && !canEdit) ||
                     !formState.isValid ||
-                    similarityGate.isBlocked
+                    poisoningBlocked
                   }
                   sx={{ minWidth: '122px', minHeight: '36px' }}
                 >

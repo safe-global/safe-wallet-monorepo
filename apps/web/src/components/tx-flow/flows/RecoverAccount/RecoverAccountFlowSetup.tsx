@@ -10,23 +10,17 @@ import {
   IconButton,
   Tooltip,
   Alert,
-  Box,
 } from '@mui/material'
 import { useForm, FormProvider, useFieldArray, useFormContext, useWatch, Controller } from 'react-hook-form'
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactElement } from 'react'
-import { isAddress } from 'ethers'
 
 import TxCard from '../../common/TxCard'
 import AddIcon from '@/public/images/common/add.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { RecoverAccountFlowFields } from '.'
 import AddressBookInput from '@/components/common/AddressBookInput'
-import {
-  useAddressSimilarityGate,
-  AddressSimilarityWarning,
-  SimilarAddressConfirmDialog,
-} from '@/features/address-poisoning'
+import { AddressPoisoningGuard } from '@/features/address-poisoning'
 import { TOOLTIP_TITLES } from '../../common/constants'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -82,29 +76,18 @@ function NewSignerRow({
   const { control, trigger } = useFormContext<RecoverAccountFlowProps>()
   const { safeAddress } = useSafeInfo()
   const fieldName = `${RecoverAccountFlowFields.owners}.${index}.value` as const
-  const value = useWatch({ control, name: fieldName })
   const newOwners = useWatch({ control, name: RecoverAccountFlowFields.owners })
-  const [isCompareOpen, setIsCompareOpen] = useState(false)
+  const [blocked, setBlocked] = useState(false)
+  const blockedRef = useRef(blocked)
+  blockedRef.current = blocked
 
-  const candidate = useMemo(() => {
-    const raw = String(value ?? '')
-      .split(':')
-      .pop()
-    return raw && isAddress(raw) ? raw : undefined
-  }, [value])
-  const gate = useAddressSimilarityGate(candidate)
-
-  const blockedRef = useRef(gate.isBlocked)
-  blockedRef.current = gate.isBlocked
-
+  // Report blocked state up so the parent can gate Next; re-validate so the field reflects it.
   useEffect(() => {
-    onBlockedChange(fieldId, gate.isBlocked)
-  }, [fieldId, gate.isBlocked, onBlockedChange])
-
-  // Re-validate when the gate state changes so the field reflects the block.
+    onBlockedChange(fieldId, blocked)
+  }, [fieldId, blocked, onBlockedChange])
   useEffect(() => {
     void trigger(fieldName)
-  }, [gate.match?.anchor, gate.isBlocked, trigger, fieldName])
+  }, [blocked, trigger, fieldName])
 
   const validate = (val: string) => {
     if (sameAddress(val, safeAddress)) {
@@ -122,23 +105,7 @@ function NewSignerRow({
     <Fragment>
       <Grid item xs={11}>
         <AddressBookInput label={`Signer ${index + 1}`} name={fieldName} required fullWidth validate={validate} />
-        {gate.match && (
-          <Box mt={1}>
-            <AddressSimilarityWarning match={gate.match} onReview={() => setIsCompareOpen(true)} />
-          </Box>
-        )}
-        {gate.match && candidate && (
-          <SimilarAddressConfirmDialog
-            open={isCompareOpen}
-            candidate={candidate}
-            match={gate.match}
-            onConfirm={() => {
-              gate.acknowledge()
-              setIsCompareOpen(false)
-            }}
-            onCancel={() => setIsCompareOpen(false)}
-          />
-        )}
+        <AddressPoisoningGuard name={fieldName} context="add-entity" onBlockedChange={setBlocked} />
       </Grid>
 
       <Grid

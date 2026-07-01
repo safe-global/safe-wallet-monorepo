@@ -7,14 +7,8 @@ import type { NftTransferParams } from '.'
 import ImageFallback from '@/components/common/ImageFallback'
 import TxCard from '../../common/TxCard'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { useContext, useEffect, useMemo, useState } from 'react'
-import { isAddress } from 'ethers'
-import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import {
-  useAddressSimilarity,
-  AddressSimilarityWarning,
-  SimilarAddressConfirmDialog,
-} from '@/features/address-poisoning'
+import { useContext, useMemo, useState } from 'react'
+import { AddressPoisoningGuard } from '@/features/address-poisoning'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
 
@@ -108,20 +102,8 @@ const SendNftBatch = () => {
   const recipientArray = useMemo(() => [recipient], [recipient])
   useSafeShieldForRecipients(recipientArray)
 
-  // Address-poisoning: warn + gate when the recipient resembles a trusted anchor.
-  const candidateRecipient = useMemo(() => {
-    const raw = String(recipient ?? '')
-      .split(':')
-      .pop()
-    return raw && isAddress(raw) ? raw : undefined
-  }, [recipient])
-  const similarityMatch = useAddressSimilarity(candidateRecipient)
-  const [acknowledged, setAcknowledged] = useState(false)
-  const [isCompareOpen, setIsCompareOpen] = useState(false)
-  useEffect(() => {
-    setAcknowledged(false)
-  }, [candidateRecipient])
-  const isPoisoningBlocked = similarityMatch?.severity === Severity.CRITICAL && !acknowledged
+  // Address-poisoning guard: warns + blocks (until verified) when the recipient resembles a trusted anchor.
+  const [poisoningBlocked, setPoisoningBlocked] = useState(false)
 
   const onFormSubmit = (data: FormData) => {
     onNext({
@@ -138,24 +120,9 @@ const SendNftBatch = () => {
             <AddressBookInput name={Field.recipient} canAdd={isAddressValid} />
           </FormControl>
 
-          {similarityMatch && (
-            <Box sx={{ mb: 3, mt: -1 }}>
-              <AddressSimilarityWarning match={similarityMatch} onReview={() => setIsCompareOpen(true)} />
-            </Box>
-          )}
-
-          {similarityMatch && candidateRecipient && (
-            <SimilarAddressConfirmDialog
-              open={isCompareOpen}
-              candidate={candidateRecipient}
-              match={similarityMatch}
-              onConfirm={() => {
-                setAcknowledged(true)
-                setIsCompareOpen(false)
-              }}
-              onCancel={() => setIsCompareOpen(false)}
-            />
-          )}
+          <Box sx={{ mb: 3, mt: -1 }}>
+            <AddressPoisoningGuard name={Field.recipient} context="recipient" onBlockedChange={setPoisoningBlocked} />
+          </Box>
 
           <Typography
             data-testid="selected-nfts"
@@ -173,7 +140,7 @@ const SendNftBatch = () => {
           <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 
           <CardActions>
-            <Button variant="contained" type="submit" disabled={isPoisoningBlocked}>
+            <Button variant="contained" type="submit" disabled={poisoningBlocked}>
               Next
             </Button>
           </CardActions>

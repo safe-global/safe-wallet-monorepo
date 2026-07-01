@@ -11,13 +11,7 @@ import { useTokenAmount } from '../utils'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { isAddress } from 'ethers'
-import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import {
-  useAddressSimilarity,
-  AddressSimilarityWarning,
-  SimilarAddressConfirmDialog,
-} from '@/features/address-poisoning'
+import { AddressPoisoningGuard } from '@/features/address-poisoning'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { selectSpendingLimits } from '@/features/spending-limits'
 import { useAppSelector } from '@/store'
@@ -62,37 +56,16 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
   const recipient = watch(recipientFieldName)
   const tokenAddress = watch(getFieldName(TokenTransferFields.tokenAddress, fieldArray))
 
-  // Address-poisoning: warn (and gate on a both-ends match) when the recipient
-  // dangerously resembles an address the user explicitly trusts.
-  const candidateRecipient = useMemo(() => {
-    const raw = String(recipient ?? '')
-      .split(':')
-      .pop()
-    return raw && isAddress(raw) ? raw : undefined
-  }, [recipient])
-  const similarityMatch = useAddressSimilarity(candidateRecipient)
-  const [acknowledged, setAcknowledged] = useState(false)
-  const [isCompareOpen, setIsCompareOpen] = useState(false)
-  const matchRef = useRef(similarityMatch)
-  matchRef.current = similarityMatch
-  const acknowledgedRef = useRef(acknowledged)
-  acknowledgedRef.current = acknowledged
-
-  // A new recipient must be re-acknowledged; re-validate when match/ack changes.
-  useEffect(() => {
-    setAcknowledged(false)
-  }, [candidateRecipient])
+  // Address-poisoning guard: warns + blocks (until verified) when the recipient
+  // resembles a trusted address. The guard reads/writes this field directly; we mirror
+  // its blocked state into form validity so the flow's Next button stays disabled.
+  const [poisoningBlocked, setPoisoningBlocked] = useState(false)
+  const blockedRef = useRef(poisoningBlocked)
+  blockedRef.current = poisoningBlocked
+  const validateSimilarity = useCallback(() => (blockedRef.current ? false : undefined), [])
   useEffect(() => {
     void trigger(recipientFieldName)
-  }, [similarityMatch?.anchor, similarityMatch?.severity, acknowledged, trigger, recipientFieldName])
-
-  const validateSimilarity = useCallback(async () => {
-    // Block a both-ends (CRITICAL) lookalike until acknowledged. Return `false`
-    // (invalid, no message) so the inline warning card is the single explanation.
-    if (matchRef.current?.severity === Severity.CRITICAL && !acknowledgedRef.current) {
-      return false
-    }
-  }, [])
+  }, [poisoningBlocked, trigger, recipientFieldName])
 
   const selectedToken = balancesItems.find((item) => sameAddress(item.tokenInfo.address, tokenAddress))
 
@@ -152,9 +125,7 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
           <AddressBookInput name={recipientFieldName} canAdd={isAddressValid} validate={validateSimilarity} />
         </FormControl>
 
-        {similarityMatch && (
-          <AddressSimilarityWarning match={similarityMatch} onReview={() => setIsCompareOpen(true)} />
-        )}
+        <AddressPoisoningGuard name={recipientFieldName} context="recipient" onBlockedChange={setPoisoningBlocked} />
 
         <FormControl fullWidth>
           <TokenAmountInput
@@ -205,19 +176,6 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
             </Button>
           </Track>
         </Box>
-      )}
-
-      {similarityMatch && candidateRecipient && (
-        <SimilarAddressConfirmDialog
-          open={isCompareOpen}
-          candidate={candidateRecipient}
-          match={similarityMatch}
-          onConfirm={() => {
-            setAcknowledged(true)
-            setIsCompareOpen(false)
-          }}
-          onCancel={() => setIsCompareOpen(false)}
-        />
       )}
     </Stack>
   )

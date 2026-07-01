@@ -2,17 +2,12 @@ import { Alert, DialogActions, Button, DialogContent } from '@mui/material'
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { Plus } from 'lucide-react'
-import { Controller, FormProvider, useForm, useWatch } from 'react-hook-form'
+import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
-import { useMemo, useState, type ReactNode } from 'react'
-import { isAddress } from 'ethers'
+import { useState, type ReactNode } from 'react'
 import AddressInput from '@/components/common/AddressInput'
 import NameInput from '@/components/common/NameInput'
-import {
-  useAddressSimilarityGate,
-  AddressSimilarityWarning,
-  SimilarAddressConfirmDialog,
-} from '@/features/address-poisoning'
+import { AddressPoisoningGuard } from '@/features/address-poisoning'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import useChains from '@/hooks/useChains'
@@ -83,16 +78,8 @@ const AddContactDialog = ({
   const { handleSubmit, formState, control, reset } = methods
   const { errors } = formState
 
-  // Mode A: warn (and gate) when the contact address being entered resembles a trusted anchor.
-  const addressValue = useWatch({ control, name: 'address' })
-  const similarityCandidate = useMemo(() => {
-    const raw = String(addressValue ?? '')
-      .split(':')
-      .pop()
-    return raw && isAddress(raw) ? raw : undefined
-  }, [addressValue])
-  const similarityGate = useAddressSimilarityGate(similarityCandidate)
-  const [isCompareOpen, setIsCompareOpen] = useState(false)
+  // Address-poisoning guard: warns + blocks (until verified) when the contact address resembles a trusted anchor.
+  const [poisoningBlocked, setPoisoningBlocked] = useState(false)
 
   const handleClose = () => {
     setOpen(false)
@@ -164,22 +151,7 @@ const AddContactDialog = ({
                 <NameInput name="name" label="Name" required />
                 <AddressInput name="address" label="Address or ENS" required showPrefix={false} chain={ensChain} />
 
-                {similarityGate.match && (
-                  <AddressSimilarityWarning match={similarityGate.match} onReview={() => setIsCompareOpen(true)} />
-                )}
-
-                {similarityGate.match && similarityCandidate && (
-                  <SimilarAddressConfirmDialog
-                    open={isCompareOpen}
-                    candidate={similarityCandidate}
-                    match={similarityGate.match}
-                    onConfirm={() => {
-                      similarityGate.acknowledge()
-                      setIsCompareOpen(false)
-                    }}
-                    onCancel={() => setIsCompareOpen(false)}
-                  />
-                )}
+                <AddressPoisoningGuard name="address" context="add-entity" onBlockedChange={setPoisoningBlocked} />
 
                 <div>
                   <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>
@@ -217,7 +189,7 @@ const AddContactDialog = ({
               <Button
                 type="submit"
                 variant="contained"
-                disabled={!formState.isValid || isSubmitting || similarityGate.isBlocked}
+                disabled={!formState.isValid || isSubmitting || poisoningBlocked}
                 disableElevation
               >
                 {isSubmitting ? <Spinner className="size-5" /> : submitLabel}

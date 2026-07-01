@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Box, CircularProgress, FormControl, Grid, IconButton, SvgIcon, Typography } from '@mui/material'
-import { isAddress } from 'ethers'
+import { CircularProgress, FormControl, Grid, IconButton, SvgIcon, Typography } from '@mui/material'
 import NameInput from '@/components/common/NameInput'
 import InputAdornment from '@mui/material/InputAdornment'
 import AddressBookInput from '@/components/common/AddressBookInput'
@@ -14,12 +13,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import css from './styles.module.css'
 import classNames from 'classnames'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import {
-  useAddressSimilarity,
-  AddressSimilarityWarning,
-  SimilarAddressConfirmDialog,
-} from '@/features/address-poisoning'
+import { AddressPoisoningGuard } from '@/features/address-poisoning'
 
 const OwnerRow = ({
   index,
@@ -51,30 +45,15 @@ const OwnerRow = ({
     return Array.from({ length: owners.length }, (_, i) => `${groupName}.${i}`)
   }, [owners, groupName])
 
-  // Address-poisoning: flag a signer that dangerously resembles a trusted anchor.
-  const candidateAddress = useMemo(() => {
-    const raw = owner.address?.split(':').pop()
-    return raw && isAddress(raw) ? raw : undefined
-  }, [owner.address])
-  const similarityMatch = useAddressSimilarity(candidateAddress)
-  const [acknowledged, setAcknowledged] = useState(false)
-  const [isCompareOpen, setIsCompareOpen] = useState(false)
-  // Refs so the (memoized) validator reads current values without re-creating.
-  const matchRef = useRef(similarityMatch)
-  matchRef.current = similarityMatch
-  const acknowledgedRef = useRef(acknowledged)
-  acknowledgedRef.current = acknowledged
+  // Address-poisoning guard: warns + blocks (until verified) when the signer resembles a trusted
+  // anchor. Mirror its blocked state into form validity (the flow's Next gates on it).
   const addressFieldName = `${fieldName}.address`
-
-  // A new candidate must be re-acknowledged.
-  useEffect(() => {
-    setAcknowledged(false)
-  }, [candidateAddress])
-
-  // Re-run validation when the match or acknowledgement changes so the gate updates.
+  const [poisoningBlocked, setPoisoningBlocked] = useState(false)
+  const blockedRef = useRef(poisoningBlocked)
+  blockedRef.current = poisoningBlocked
   useEffect(() => {
     void trigger(addressFieldName)
-  }, [similarityMatch?.anchor, similarityMatch?.severity, acknowledged, trigger, addressFieldName])
+  }, [poisoningBlocked, trigger, addressFieldName])
 
   const validateOwnerAddress = useCallback(
     async (address: string) => {
@@ -85,10 +64,9 @@ const OwnerRow = ({
       if (owners.filter((owner: NamedAddress) => sameAddress(owner.address, address)).length > 1) {
         return 'Signer is already added'
       }
-      // Block a both-ends (CRITICAL) lookalike until acknowledged. Return `false`
-      // (invalid, no message) so the inline warning card is the single explanation
-      // rather than duplicating it as a field error.
-      if (matchRef.current?.severity === Severity.CRITICAL && !acknowledgedRef.current) {
+      // Block until the guard's verification is satisfied (false = invalid, no message;
+      // the guard banner is the single explanation).
+      if (blockedRef.current) {
         return false
       }
     },
@@ -119,7 +97,7 @@ const OwnerRow = ({
         className={classNames({ [css.helper]: walletIsOwner })}
         sx={{
           alignItems: 'center',
-          marginBottom: !readOnly && similarityMatch ? 1 : 3,
+          marginBottom: 3,
           flexWrap: ['wrap', undefined, 'nowrap'],
         }}
       >
@@ -182,23 +160,8 @@ const OwnerRow = ({
         )}
       </Grid>
 
-      {!readOnly && similarityMatch && (
-        <Box sx={{ mb: 3 }}>
-          <AddressSimilarityWarning match={similarityMatch} onReview={() => setIsCompareOpen(true)} />
-        </Box>
-      )}
-
-      {!readOnly && similarityMatch && candidateAddress && (
-        <SimilarAddressConfirmDialog
-          open={isCompareOpen}
-          candidate={candidateAddress}
-          match={similarityMatch}
-          onConfirm={() => {
-            setAcknowledged(true)
-            setIsCompareOpen(false)
-          }}
-          onCancel={() => setIsCompareOpen(false)}
-        />
+      {!readOnly && (
+        <AddressPoisoningGuard name={addressFieldName} context="add-entity" onBlockedChange={setPoisoningBlocked} />
       )}
     </>
   )

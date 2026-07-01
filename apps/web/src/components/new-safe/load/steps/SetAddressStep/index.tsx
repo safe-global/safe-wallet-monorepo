@@ -21,13 +21,8 @@ import { useMnemonicSafeName } from '@/hooks/useMnemonicName'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import AddressInput from '@/components/common/AddressInput'
-import React, { useMemo, useState } from 'react'
-import { isAddress } from 'ethers'
-import {
-  useAddressSimilarityGate,
-  AddressSimilarityWarning,
-  SimilarAddressConfirmDialog,
-} from '@/features/address-poisoning'
+import React, { useState } from 'react'
+import { AddressPoisoningGuard } from '@/features/address-poisoning'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useChainId from '@/hooks/useChainId'
 import { useAppSelector } from '@/store'
@@ -70,15 +65,8 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
   const randomName = useMnemonicSafeName()
   const { ens, name, resolving } = useAddressResolver(safeAddress)
 
-  // Mode A: warn (and gate) when the Safe address being loaded resembles a trusted anchor.
-  const similarityCandidate = useMemo(() => {
-    const raw = String(safeAddress ?? '')
-      .split(':')
-      .pop()
-    return raw && isAddress(raw) ? raw : undefined
-  }, [safeAddress])
-  const similarityGate = useAddressSimilarityGate(similarityCandidate)
-  const [isCompareOpen, setIsCompareOpen] = useState(false)
+  // Address-poisoning guard: warns + blocks (until verified) when the Safe address resembles a trusted anchor.
+  const [poisoningBlocked, setPoisoningBlocked] = useState(false)
 
   // Address book, ENS, mnemonic
   const fallbackName = name || ens || randomName
@@ -173,24 +161,7 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
             name={Field.address}
           />
 
-          {similarityGate.match && (
-            <Box mt={2}>
-              <AddressSimilarityWarning match={similarityGate.match} onReview={() => setIsCompareOpen(true)} />
-            </Box>
-          )}
-
-          {similarityGate.match && similarityCandidate && (
-            <SimilarAddressConfirmDialog
-              open={isCompareOpen}
-              candidate={similarityCandidate}
-              match={similarityGate.match}
-              onConfirm={() => {
-                similarityGate.acknowledge()
-                setIsCompareOpen(false)
-              }}
-              onCancel={() => setIsCompareOpen(false)}
-            />
-          )}
+          <AddressPoisoningGuard name={Field.address} context="add-entity" onBlockedChange={setPoisoningBlocked} />
 
           <Typography
             sx={{
@@ -228,7 +199,7 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
               type="submit"
               variant="contained"
               size="large"
-              disabled={!isValid || similarityGate.isBlocked}
+              disabled={!isValid || poisoningBlocked}
             >
               Next
             </Button>
