@@ -78,8 +78,8 @@ function SpaceAddressBookTable({
         <TableHeader>
           <TableRow>
             <TableHead className="w-[20%]">Name</TableHead>
-            <TableHead className="w-[30%]">Address</TableHead>
-            <TableHead className="w-[15%]">Chains</TableHead>
+            <TableHead className={isSmallScreen ? 'w-[30%]' : 'w-[37%]'}>Address</TableHead>
+            <TableHead className={isSmallScreen ? 'w-[15%]' : 'w-[8%]'}>Chains</TableHead>
             {hasMiddleColumn && <TableHead className="w-[20%]">{showAddedBy ? 'Added by' : 'Last updated'}</TableHead>}
             <TableHead className={hasMiddleColumn ? 'w-[15%]' : 'w-[35%]'} />
           </TableRow>
@@ -101,7 +101,9 @@ function SpaceAddressBookTable({
                     {entry.isLocal && <HardDrive className="text-muted-foreground size-4 flex-shrink-0" />}
                     <span className="min-w-0 truncate">{entry.name}</span>
                   </TooltipTrigger>
-                  <TooltipContent>{entry.name}</TooltipContent>
+                  <TooltipContent align="start" alignOffset={6}>
+                    {entry.name}
+                  </TooltipContent>
                 </Tooltip>
               </TableCell>
 
