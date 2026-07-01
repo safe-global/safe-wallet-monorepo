@@ -1,12 +1,15 @@
 import { renderHook } from '@testing-library/react'
 import { getAddress } from 'ethers'
 import { useAppSelector } from '@/store'
+import { useHasFeature } from '@/hooks/useChains'
 import { buildSimilarityIndex } from '@safe-global/utils/utils/addressSimilarity'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import useListSimilarities from '../useListSimilarities'
 
 jest.mock('@/store', () => ({ useAppSelector: jest.fn() }))
+jest.mock('@/hooks/useChains', () => ({ useHasFeature: jest.fn() }))
 const mockUseAppSelector = useAppSelector as jest.Mock
+const mockUseHasFeature = useHasFeature as jest.Mock
 
 const ANCHOR = getAddress('0xa1b2c3d4e5f60718293a4b5c6d7e8f9012345678')
 const CRITICAL = getAddress('0xa1b2000000000000000000000000000000005678') // shares a1b2 + 5678
@@ -17,6 +20,7 @@ describe('useListSimilarities', () => {
   beforeEach(() => {
     // Real engine index built from a single trusted anchor.
     mockUseAppSelector.mockReturnValue(buildSimilarityIndex([ANCHOR]))
+    mockUseHasFeature.mockReturnValue(true)
   })
 
   it('returns an empty map for an empty list', () => {
@@ -50,5 +54,11 @@ describe('useListSimilarities', () => {
     const { result } = renderHook(() => useListSimilarities([ANCHOR, CRITICAL]))
     expect(result.current.get(ANCHOR)?.match).toBeUndefined() // the trusted original
     expect(result.current.get(CRITICAL)?.match?.severity).toBe(Severity.CRITICAL) // the impostor
+  })
+
+  it('returns an empty map when the ADDRESS_POISONING_PROTECTION flag is off', () => {
+    mockUseHasFeature.mockReturnValue(false)
+    const { result } = renderHook(() => useListSimilarities([CRITICAL]))
+    expect(result.current.size).toBe(0)
   })
 })

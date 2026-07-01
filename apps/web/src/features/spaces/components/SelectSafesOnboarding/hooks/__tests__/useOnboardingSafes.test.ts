@@ -14,6 +14,7 @@ describe('useOnboardingSafes', () => {
     jest.spyOn(useChains, 'default').mockImplementation(() => ({
       configs: [{ chainId: '1' } as Chain],
     }))
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true) // Mode B gated by ADDRESS_POISONING_PROTECTION
     jest.spyOn(useWallet, 'default').mockReturnValue({
       address: '0xWallet',
     } as ReturnType<typeof useWallet.default>)

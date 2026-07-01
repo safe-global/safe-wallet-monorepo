@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { detectListSimilarities, detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
 import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 import { selectAnchorIndex } from '../store'
@@ -17,14 +19,16 @@ export type SelectionSimilarity = { match?: SimilarityMatch; intraList?: boolean
  *    other even when neither is trusted. Skipped for anchors (never flag a trusted safe here).
  *
  * Display-only surfaces should use `useListSimilarities` (anchor only) instead.
- * Pass a referentially-stable `addresses` array.
+ * Gated by the ADDRESS_POISONING_PROTECTION chain flag (consistent with Mode A) — returns an
+ * empty map when the flag is off. Pass a referentially-stable `addresses` array.
  */
 const useSelectionSimilarities = (addresses: string[]): Map<string, SelectionSimilarity> => {
+  const isEnabled = useHasFeature(FEATURES.ADDRESS_POISONING_PROTECTION)
   const anchorIndex = useAppSelector(selectAnchorIndex)
 
   return useMemo(() => {
     const result = new Map<string, SelectionSimilarity>()
-    if (addresses.length === 0) return result
+    if (!isEnabled || addresses.length === 0) return result
 
     const anchorAnnotations = detectListSimilarities(addresses, anchorIndex)
     const intraList = detectSimilarAddresses(addresses)
@@ -40,7 +44,7 @@ const useSelectionSimilarities = (addresses: string[]): Map<string, SelectionSim
       }
     }
     return result
-  }, [addresses, anchorIndex])
+  }, [isEnabled, addresses, anchorIndex])
 }
 
 export default useSelectionSimilarities
