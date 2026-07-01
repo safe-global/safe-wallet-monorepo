@@ -9,6 +9,7 @@ export type SecurityChecksSectionProps = {
   results: Record<string, ScanResult>
   safeQueryParam?: string
   onRemoveModule?: (address: string) => void
+  onHnSignupClick?: () => void
 }
 
 /** Severity order of the grade groups; the passing group is always rendered last. */
@@ -19,8 +20,15 @@ const SecurityChecksSection = ({
   results,
   safeQueryParam,
   onRemoveModule,
+  onHnSignupClick,
 }: SecurityChecksSectionProps): ReactElement | null => {
-  const { isReady, failingRows, passingRows } = useSecurityChecks(scanContext, results, safeQueryParam, onRemoveModule)
+  const { isReady, failingRows, passingRows } = useSecurityChecks(
+    scanContext,
+    results,
+    safeQueryParam,
+    onRemoveModule,
+    onHnSignupClick,
+  )
 
   // Feature not yet loaded — render nothing; the panel skeleton covers this state.
   if (!isReady) return null

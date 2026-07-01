@@ -47,9 +47,9 @@ jest.mock('@/components/common/NameInput', () => ({
 
 jest.mock('@/components/common/AddressInput', () => ({
   __esModule: true,
-  default: ({ name, label }: { name: string; label: string }) => {
+  default: ({ name, label, chain }: { name: string; label: string; chain?: { chainId: string } }) => {
     const { register } = (jest.requireActual('react-hook-form') as typeof ReactHookForm).useFormContext()
-    return <input aria-label={label} {...register(name, { required: true })} />
+    return <input aria-label={label} data-ens-chain={chain?.chainId ?? ''} {...register(name, { required: true })} />
   },
 }))
 
@@ -162,7 +162,7 @@ describe('AddContactDialog', () => {
     expect(order).toEqual(['start', 'submit'])
   })
 
-  it('on result.error shows an alert, keeps the dialog open, and does not fire onSuccess or notify', async () => {
+  it('on result.error shows an alert, dispatches an error toast, keeps the dialog open, and does not fire onSuccess', async () => {
     const onSuccess = jest.fn()
     const submit = jest.fn().mockResolvedValue({ error: { status: 500 } })
     render(<AddContactDialog {...baseProps} submit={submit} onSuccess={onSuccess} />)
@@ -174,16 +174,44 @@ describe('AddContactDialog', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Something went wrong. Please try again.')).toBeInTheDocument()
+      expect(screen.getByText(/Something went wrong \(500\)/)).toBeInTheDocument()
     })
     expect(onSuccess).not.toHaveBeenCalled()
-    expect(mockDispatch).not.toHaveBeenCalled()
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'notifications/show',
+      payload: expect.objectContaining({ variant: 'error' }),
+    })
     expect(screen.getByRole('dialog')).toBeInTheDocument()
   })
 
-  it('on thrown error shows an alert and keeps the dialog open', async () => {
+  it('bubbles the backend message into both the alert and the error toast', async () => {
+    const submit = jest.fn().mockResolvedValue({
+      error: { status: 422, data: { message: 'name must contain only valid characters' } },
+    })
+    render(<AddContactDialog {...baseProps} submit={submit} />)
+    openDialog()
+    fillRequiredFields()
+
+    const submitButton = screen.getByRole('button', { name: 'Add contact' })
+    await waitFor(() => expect(submitButton).not.toBeDisabled())
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('name must contain only valid characters')).toBeInTheDocument()
+    })
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'notifications/show',
+      payload: expect.objectContaining({
+        message: 'name must contain only valid characters',
+        variant: 'error',
+      }),
+    })
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+  })
+
+  it('on a thrown error bubbles the message into the alert and the error toast, keeping the dialog open', async () => {
     const onSuccess = jest.fn()
-    const submit = jest.fn().mockRejectedValue(new Error('boom'))
+    const submit = jest.fn().mockRejectedValue({ status: 422, data: { message: 'invalid characters in name' } })
     render(<AddContactDialog {...baseProps} submit={submit} onSuccess={onSuccess} />)
     openDialog()
     fillRequiredFields()
@@ -193,7 +221,11 @@ describe('AddContactDialog', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Something went wrong. Please try again.')).toBeInTheDocument()
+      expect(screen.getByText('invalid characters in name')).toBeInTheDocument()
+    })
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'notifications/show',
+      payload: expect.objectContaining({ message: 'invalid characters in name', variant: 'error' }),
     })
     expect(onSuccess).not.toHaveBeenCalled()
     expect(screen.getByRole('dialog')).toBeInTheDocument()
@@ -204,5 +236,12 @@ describe('AddContactDialog', () => {
     openDialog()
 
     expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument()
+  })
+
+  it('resolves ENS on mainnet by passing the mainnet chain to the address input', () => {
+    render(<AddContactDialog {...baseProps} submit={jest.fn()} />)
+    openDialog()
+
+    expect(screen.getByLabelText('Address or ENS')).toHaveAttribute('data-ens-chain', '1')
   })
 })

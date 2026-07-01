@@ -9,6 +9,7 @@ const protectedRoutes: string[] = [
   'app-settings',
   'accounts-sheet',
   'networks-sheet',
+  'supported-networks',
   'confirmations-sheet',
   'change-signer-sheet',
   'notifications-opt-in',

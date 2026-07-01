@@ -139,8 +139,10 @@ describe('ImportAddressBookDialog', () => {
     jest.useRealTimers()
   })
 
-  it('shows an inline error when the mutation returns an error', async () => {
-    upsertionSpyFn.mockResolvedValue({ error: { status: 500 } })
+  it('bubbles the backend error message inline when the mutation returns an error', async () => {
+    upsertionSpyFn.mockResolvedValue({
+      error: { status: 422, data: { message: 'name must contain only valid characters' } },
+    })
 
     mockedUseAllAddressBooks.mockReturnValue({
       '1': { '0x123': 'Alice' },
@@ -152,7 +154,7 @@ describe('ImportAddressBookDialog', () => {
     await userEvent.click(screen.getByText(/Import contacts \(1\)/i))
 
     await waitFor(() => {
-      expect(screen.getByText(/Something went wrong\. Please try again\./i)).toBeInTheDocument()
+      expect(screen.getByText(/name must contain only valid characters/i)).toBeInTheDocument()
     })
     expect(screen.getByRole('button', { name: /Import contacts \(1\)/i })).not.toBeDisabled()
   })

@@ -121,7 +121,7 @@ describe('SpaceActivityLog', () => {
     mockPages({
       '': {
         results: [buildEvent('3'), buildEvent('2')],
-        next: 'https://gw/v1/spaces/1/audit-log?cursor=limit%3D2%26offset%3D2',
+        next: 'https://gw/v1/spaces/uuid-1/audit-log?cursor=limit%3D2%26offset%3D2',
         previous: null,
         count: 3,
       },
@@ -144,7 +144,7 @@ describe('SpaceActivityLog', () => {
     mockPages({
       '': {
         results: [buildEvent('1')],
-        next: 'https://gw/v1/spaces/1/audit-log?cursor=limit%3D1%26offset%3D1',
+        next: 'https://gw/v1/spaces/uuid-1/audit-log?cursor=limit%3D1%26offset%3D1',
         previous: null,
         count: 2,
       },
@@ -162,7 +162,7 @@ describe('SpaceActivityLog', () => {
     mockPages({
       '': {
         results: [buildEvent('1')],
-        next: 'https://gw/v1/spaces/1/audit-log?cursor=limit%3D1%26offset%3D1',
+        next: 'https://gw/v1/spaces/uuid-1/audit-log?cursor=limit%3D1%26offset%3D1',
         previous: null,
         count: 2,
       },
@@ -185,7 +185,7 @@ describe('SpaceActivityLog', () => {
     mockPages({
       '': {
         results: [buildEvent('1')],
-        next: 'https://gw/v1/spaces/1/audit-log?cursor=limit%3D1%26offset%3D1',
+        next: 'https://gw/v1/spaces/uuid-1/audit-log?cursor=limit%3D1%26offset%3D1',
         previous: null,
         count: 2,
       },

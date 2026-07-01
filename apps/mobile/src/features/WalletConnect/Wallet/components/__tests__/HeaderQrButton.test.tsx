@@ -5,6 +5,11 @@ import { HeaderQrButton } from '../HeaderQrButton'
 const mockPush = jest.fn()
 jest.mock('expo-router', () => ({
   router: { push: (path: string) => mockPush(path) },
+  // Run the focus callback once on mount (resets the open-guard).
+  useFocusEffect: (cb: () => void) => {
+    const React = require('react')
+    React.useEffect(cb, [])
+  },
 }))
 
 const mockUseHasFeature = jest.fn()
@@ -38,5 +43,38 @@ describe('HeaderQrButton', () => {
 
     fireEvent.press(getByLabelText('Scan WalletConnect QR'))
     expect(mockPush).toHaveBeenCalledWith('/wallet-connect-scan')
+  })
+
+  it('opens the scanner only once on rapid taps', () => {
+    mockUseHasFeature.mockReturnValue(true)
+    const store = createTestStore({ activeSafe })
+    const { getByLabelText } = renderWithStore(<HeaderQrButton />, store)
+    const button = getByLabelText('Scan WalletConnect QR')
+
+    fireEvent.press(button)
+    fireEvent.press(button)
+    fireEvent.press(button)
+
+    expect(mockPush).toHaveBeenCalledTimes(1)
+  })
+
+  it('re-enables the button after the fallback timeout when focus never resets it', () => {
+    jest.useFakeTimers()
+    try {
+      mockUseHasFeature.mockReturnValue(true)
+      const store = createTestStore({ activeSafe })
+      const { getByLabelText } = renderWithStore(<HeaderQrButton />, store)
+      const button = getByLabelText('Scan WalletConnect QR')
+
+      fireEvent.press(button)
+      expect(mockPush).toHaveBeenCalledTimes(1)
+
+      // Without the fallback this second tap would be a no-op (guard still latched).
+      jest.advanceTimersByTime(500)
+      fireEvent.press(button)
+      expect(mockPush).toHaveBeenCalledTimes(2)
+    } finally {
+      jest.useRealTimers()
+    }
   })
 })

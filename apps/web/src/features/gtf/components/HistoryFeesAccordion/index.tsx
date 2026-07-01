@@ -12,7 +12,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { HistoryFeesData } from '../../hooks/useHistoryFeesBreakdown'
 import { FeeBreakdownRow } from '../shared/FeeBreakdownRow'
-import { EXECUTION_FEE_TOOLTIP, GAS_FEE_TOOLTIP } from '../shared/tooltips'
+import { GAS_FEE_TOOLTIP } from '../shared/tooltips'
 import css from './styles.module.css'
 import accordionCss from '@/styles/accordion.module.css'
 
@@ -84,7 +84,7 @@ const HistoryFeesAccordion = ({
 
       <AccordionDetails sx={{ p: 0 }}>
         <div className={css.breakdownContainer}>
-          <FeeBreakdownRow {...data.executionFee} tooltip={EXECUTION_FEE_TOOLTIP} strikeAs="del" />
+          <FeeBreakdownRow {...data.executionFee} strikeAs="del" />
           <FeeBreakdownRow {...data.gasFee} tooltip={GAS_FEE_TOOLTIP} strikeAs="del" />
         </div>
       </AccordionDetails>

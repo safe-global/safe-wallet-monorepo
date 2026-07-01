@@ -3,9 +3,28 @@ import SafeSelectorTriggerContent from '../SafeSelectorTriggerContent'
 import type { SafeItemData } from '../../types'
 
 const mockUseSafeDisplayName = jest.fn()
+const mockUseChain = jest.fn()
+const mockUseIsHypernativeGuard = jest.fn()
 
 jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: (...args: unknown[]) => mockUseSafeDisplayName(...args),
+}))
+
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  useChain: (...args: unknown[]) => mockUseChain(...args),
+  useHasFeature: () => false,
+}))
+
+jest.mock('@/features/hypernative', () => ({
+  __esModule: true,
+  HypernativeFeature: {},
+  useIsHypernativeGuard: (...args: unknown[]) => mockUseIsHypernativeGuard(...args),
+}))
+
+jest.mock('@/features/__core__', () => ({
+  __esModule: true,
+  useLoadFeature: () => ({ SafeHeaderHnTooltip: () => null }),
 }))
 
 jest.mock('../SafeBalanceBlock', () => {
@@ -38,6 +57,8 @@ describe('SafeSelectorTriggerContent', () => {
   beforeEach(() => {
     jest.resetAllMocks()
     mockUseSafeDisplayName.mockReturnValue('')
+    mockUseChain.mockReturnValue(undefined)
+    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: false })
   })
 
   it('resolves name per chain without using the cross-chain item name', () => {
@@ -120,5 +141,27 @@ describe('SafeSelectorTriggerContent', () => {
 
     expect(getByTestId('safe-balance-block')).toBeInTheDocument()
     expect(queryByTestId('safe-selector-not-activated-icon')).not.toBeInTheDocument()
+  })
+
+  it('renders a block explorer link for the selected chain when it has an explorer', () => {
+    mockUseChain.mockReturnValue({
+      chainId: '137',
+      blockExplorerUriTemplate: { address: 'https://polygonscan.com/address/{{address}}', txHash: '', api: '' },
+    })
+    const item = createItem()
+
+    const { getByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="137" />)
+
+    expect(mockUseChain).toHaveBeenCalledWith('137')
+    expect(getByTestId('safe-item-explorer-link')).toHaveAttribute('href', 'https://polygonscan.com/address/0xabc')
+  })
+
+  it('omits the explorer link when the selected chain has no block explorer', () => {
+    mockUseChain.mockReturnValue({ chainId: '1' })
+    const item = createItem()
+
+    const { queryByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="1" />)
+
+    expect(queryByTestId('safe-item-explorer-link')).not.toBeInTheDocument()
   })
 })

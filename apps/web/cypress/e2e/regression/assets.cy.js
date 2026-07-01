@@ -43,13 +43,16 @@ describe('Assets tests', () => {
       assets.currencyDaiCap,
     ]
 
-    assets.toggleShowAllTokens(false)
     assets.toggleHideDust(false)
-    main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther])
-    main.verifyValuesDoNotExist(assets.tokenListTable, spamTokens)
+
+    // On chains without portfolio support (Sepolia), trusted filtering is disabled, so
+    // "Default tokens" behaves like "All tokens". Asserting the two modes show different
+    // lists requires a portfolio-supported chain (e.g. mainnet).
+    // Mirrors the same assertions in smoke/assets.cy.js.
+    assets.toggleShowAllTokens(false)
+    main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther, ...spamTokens])
 
     assets.toggleShowAllTokens(true)
-    assets.toggleHideDust(false)
     spamTokens.push(constants.tokenNames.sepoliaEther)
     main.verifyValuesExist(assets.tokenListTable, spamTokens)
   })

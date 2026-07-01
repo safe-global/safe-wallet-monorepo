@@ -6,18 +6,25 @@ import reducer, {
   pushPending,
   removePending,
   setOutstandingRequest,
+  markOutstandingProposing,
+  markReviewAbandoned,
   clearOutstandingRequest,
+  rejectPending,
+  sessionRequestReceived,
   clearWalletKitState,
   selectSessions,
   selectSessionCount,
   selectCurrentRequest,
   selectOutstandingRequestByHash,
+  selectVerifyByTopic,
+  selectDappMetadataByTxHash,
   walletKitSliceName,
   type PendingItem,
 } from '../walletKitSlice'
 import type { SessionTypes } from '@walletconnect/types'
 
-const session = (topic: string): SessionTypes.Struct => ({ topic }) as unknown as SessionTypes.Struct
+const session = (topic: string, metadata?: SessionTypes.Struct['peer']['metadata']): SessionTypes.Struct =>
+  ({ topic, peer: { metadata } }) as unknown as SessionTypes.Struct
 
 const proposalItem = (id: number): PendingItem => ({ kind: 'proposal', id, proposal: { id } as never })
 const requestItem = (id: number): PendingItem => ({
@@ -36,7 +43,7 @@ describe('walletKitSlice reducers', () => {
     let state = reducer(undefined, setSessions({ a: session('a') }))
     expect(Object.keys(state.sessions)).toEqual(['a'])
 
-    state = reducer(state, addSession(session('b')))
+    state = reducer(state, addSession({ session: session('b'), verifyVariant: 'verified' }))
     expect(Object.keys(state.sessions)).toEqual(['a', 'b'])
 
     state = reducer(state, removeSession('a'))
@@ -56,21 +63,118 @@ describe('walletKitSlice reducers', () => {
     expect(state.pending).toEqual([proposalItem(1)])
   })
 
+  it('markOutstandingProposing toggles the flag and is a no-op for unknown hashes', () => {
+    let state = reducer(
+      undefined,
+      setOutstandingRequest({
+        safeTxHash: '0xhash',
+        topic: 't',
+        id: 7,
+        method: 'wallet_sendCalls',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
+    )
+    state = reducer(state, markOutstandingProposing({ safeTxHash: '0xhash', proposing: true }))
+    expect(state.outstandingRequests['0xhash'].proposing).toBe(true)
+    state = reducer(state, markOutstandingProposing({ safeTxHash: '0xhash', proposing: false }))
+    expect(state.outstandingRequests['0xhash'].proposing).toBe(false)
+    state = reducer(state, markOutstandingProposing({ safeTxHash: '0xnope', proposing: true }))
+    expect(state.outstandingRequests['0xnope']).toBeUndefined()
+  })
+
+  it('markReviewAbandoned sets cancelRequested and is a no-op for unknown hashes', () => {
+    let state = reducer(
+      undefined,
+      setOutstandingRequest({
+        safeTxHash: '0xhash',
+        topic: 't',
+        id: 7,
+        method: 'eth_sendTransaction',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
+    )
+    state = reducer(state, markReviewAbandoned({ safeTxHash: '0xhash' }))
+    expect(state.outstandingRequests['0xhash'].cancelRequested).toBe(true)
+    state = reducer(state, markReviewAbandoned({ safeTxHash: '0xnope' }))
+    expect(state.outstandingRequests['0xnope']).toBeUndefined()
+  })
+
   it('setOutstandingRequest / clearOutstandingRequest key by safeTxHash', () => {
     let state = reducer(
       undefined,
-      setOutstandingRequest({ safeTxHash: '0xhash', topic: 't', id: 7, method: 'wallet_sendCalls' }),
+      setOutstandingRequest({
+        safeTxHash: '0xhash',
+        topic: 't',
+        id: 7,
+        method: 'wallet_sendCalls',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
     )
-    expect(state.outstandingRequests['0xhash']).toEqual({ topic: 't', id: 7, method: 'wallet_sendCalls' })
+    expect(state.outstandingRequests['0xhash']).toEqual({
+      topic: 't',
+      id: 7,
+      method: 'wallet_sendCalls',
+      chainId: '1',
+      safeAddress: '0xsafe',
+    })
     state = reducer(state, clearOutstandingRequest('0xhash'))
     expect(state.outstandingRequests).toEqual({})
   })
 
+  it('rejectPending and sessionRequestReceived are no-op signals (state unchanged)', () => {
+    const start = reducer(undefined, { type: '@@init' })
+    expect(reducer(start, rejectPending({ kind: 'request', id: 1 } as never))).toBe(start)
+    expect(reducer(start, sessionRequestReceived({ id: 1 } as never))).toBe(start)
+  })
+
   it('clearWalletKitState resets to initial', () => {
-    let state = reducer(undefined, addSession(session('a')))
+    let state = reducer(undefined, addSession({ session: session('a'), verifyVariant: 'verified' }))
     state = reducer(state, clearWalletKitState())
     expect(state.sessions).toEqual({})
     expect(state.pending).toEqual([])
+  })
+
+  it('addSession records the verify variant; removeSession clears it', () => {
+    let state = reducer(undefined, addSession({ session: session('a'), verifyVariant: 'verified' }))
+    expect(state.verifyByTopic).toEqual({ a: 'verified' })
+
+    state = reducer(state, removeSession('a'))
+    expect(state.verifyByTopic).toEqual({})
+  })
+
+  it('setSessions prunes verifyByTopic to the incoming topics but keeps active ones', () => {
+    let state = reducer(undefined, addSession({ session: session('a'), verifyVariant: 'verified' }))
+    state = reducer(state, addSession({ session: session('b'), verifyVariant: 'malicious' }))
+
+    // Rehydrate: only 'a' is still active -> 'b' is pruned, 'a' is kept.
+    state = reducer(state, setSessions({ a: session('a') }))
+    expect(state.verifyByTopic).toEqual({ a: 'verified' })
+  })
+
+  it('setSessions with no active sessions prunes verifyByTopic entirely', () => {
+    let state = reducer(undefined, addSession({ session: session('a'), verifyVariant: 'verified' }))
+    // Rehydrate path where getActiveSessions() returns nothing must not leave a growing map.
+    state = reducer(state, setSessions({}))
+    expect(state.verifyByTopic).toEqual({})
+  })
+
+  it('setSessions never adds verifyByTopic entries for restored sessions', () => {
+    const state = reducer(undefined, setSessions({ a: session('a'), b: session('b') }))
+    expect(state.verifyByTopic).toEqual({})
+  })
+
+  it('selectVerifyByTopic returns the map', () => {
+    const state = reducer(undefined, addSession({ session: session('a'), verifyVariant: 'verified' }))
+    expect(selectVerifyByTopic({ [walletKitSliceName]: state } as never)).toEqual({ a: 'verified' })
+  })
+
+  it('clear resets verifyByTopic', () => {
+    let state = reducer(undefined, addSession({ session: session('a'), verifyVariant: 'verified' }))
+    state = reducer(state, clearWalletKitState())
+    expect(state.verifyByTopic).toEqual({})
   })
 })
 
@@ -90,12 +194,48 @@ describe('walletKitSlice selectors', () => {
   it('selectOutstandingRequestByHash looks up by hash', () => {
     const state = reducer(
       undefined,
-      setOutstandingRequest({ safeTxHash: '0xabc', topic: 't', id: 1, method: 'eth_sendTransaction' }),
+      setOutstandingRequest({
+        safeTxHash: '0xabc',
+        topic: 't',
+        id: 1,
+        method: 'eth_sendTransaction',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
     )
     expect(selectOutstandingRequestByHash(wrap(state), '0xabc')).toEqual({
       topic: 't',
       id: 1,
       method: 'eth_sendTransaction',
+      chainId: '1',
+      safeAddress: '0xsafe',
     })
+  })
+
+  it('selectDappMetadataByTxHash resolves safeTxHash → session peer metadata', () => {
+    const metadata = {
+      name: 'Uniswap',
+      description: 'Swap tokens',
+      url: 'https://uniswap.org',
+      icons: ['https://x/i.png'],
+    }
+    let state = reducer(undefined, addSession({ session: session('t', metadata), verifyVariant: 'verified' }))
+    state = reducer(
+      state,
+      setOutstandingRequest({
+        safeTxHash: '0xabc',
+        topic: 't',
+        id: 1,
+        method: 'eth_sendTransaction',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
+    )
+    expect(selectDappMetadataByTxHash(wrap(state), '0xabc')).toEqual(metadata)
+  })
+
+  it('selectDappMetadataByTxHash returns undefined for an unknown hash (non-WC tx)', () => {
+    const state = reducer(undefined, { type: '@@init' })
+    expect(selectDappMetadataByTxHash(wrap(state), '0xnope')).toBeUndefined()
   })
 })

@@ -13,7 +13,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import useChainId from '@/hooks/useChainId'
 import { useTransactionsGetMultipleTransactionDetailsQuery } from '@safe-global/store/gateway/transactions'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
-import { isGtfSafePaid } from '@/features/gtf/utils/isGtfSafePaid'
+import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import ModalDialog from '@/components/common/ModalDialog'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 
@@ -21,7 +21,7 @@ const ALL_SAFE_PAID_TOOLTIP =
   "Bulk execution is not available when all ready transactions pay fees from the Safe. You'd pay gas twice, once from the Safe and once from your signer wallet."
 
 const NOT_BATCHABLE_TOOLTIP =
-  'Batch execution is only available for transactions that have been fully signed and are strictly sequential in Safe Account nonce.'
+  'Batch execution is only available for transactions that have been fully signed and are strictly sequential in Safe account nonce.'
 
 const BATCHABLE_TOOLTIP = 'All highlighted transactions will be included in the batch execution.'
 

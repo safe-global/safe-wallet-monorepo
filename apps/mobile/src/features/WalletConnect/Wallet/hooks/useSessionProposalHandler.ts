@@ -2,9 +2,9 @@ import { useEffect } from 'react'
 import { getSdkError } from '@walletconnect/utils'
 import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
 import { useStore } from 'react-redux'
-import { useToastController } from '@tamagui/toast'
 import { getEip155ChainId } from '@safe-global/utils/features/walletconnect/utils'
 import { useAppDispatch } from '@/src/store/hooks'
+import { showToast } from '@/src/store/toastSlice'
 import type { RootState } from '@/src/store'
 import { pushPending } from '../store/walletKitSlice'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
@@ -50,7 +50,6 @@ const safeRejectSession = async (
 export const useSessionProposalHandler = (walletKit: IWalletKit | null) => {
   const dispatch = useAppDispatch()
   const store = useStore<RootState>()
-  const toast = useToastController()
 
   useEffect(() => {
     if (!walletKit) {
@@ -97,11 +96,7 @@ export const useSessionProposalHandler = (walletKit: IWalletKit | null) => {
         })
         const dappName = proposal.params.proposer.metadata.name || 'This dApp'
         const networkName = selectChainById(state, activeSafe.chainId)?.chainName ?? 'this network'
-        toast.show(`${dappName} doesn't support ${networkName}`, {
-          native: false,
-          duration: 3000,
-          variant: 'error',
-        })
+        dispatch(showToast({ message: `${dappName} doesn't support ${networkName}`, duration: 3000, variant: 'error' }))
         return
       }
 
@@ -111,7 +106,7 @@ export const useSessionProposalHandler = (walletKit: IWalletKit | null) => {
     return () => {
       walletKit.off('session_proposal', onProposal)
     }
-  }, [walletKit, dispatch, store, toast])
+  }, [walletKit, dispatch, store])
 }
 
 export const rejectProposal = async (walletKit: IWalletKit, id: number): Promise<void> => {

@@ -158,6 +158,43 @@ describe('SecurityChecksSection', () => {
       expect(screen.getByRole('link', { name: /review modules/i })).toBeInTheDocument()
     })
 
+    it('opens the Hypernative signup flow for a partner-tagged guard nudge', () => {
+      const onHnSignupClick = jest.fn()
+      renderPanel({
+        results: {
+          ...allClearResults,
+          guard: mkResult({
+            status: 'partial',
+            severity: 'Medium',
+            remediation: 'Guard recommended.',
+            ctaLabelOverride: 'Set up protection',
+            partner: 'hypernative',
+          }),
+        },
+        onHnSignupClick,
+      })
+      fireEvent.click(screen.getByText('Transaction guard is recommended'))
+      fireEvent.click(screen.getByRole('button', { name: /set up protection/i }))
+      expect(onHnSignupClick).toHaveBeenCalled()
+    })
+
+    it('falls back to a deep-link for a partner nudge when no signup handler is provided', () => {
+      renderPanel({
+        results: {
+          ...allClearResults,
+          guard: mkResult({
+            status: 'partial',
+            severity: 'Medium',
+            remediation: 'Guard recommended.',
+            ctaLabelOverride: 'Set up protection',
+            partner: 'hypernative',
+          }),
+        },
+      })
+      fireEvent.click(screen.getByText('Transaction guard is recommended'))
+      expect(screen.getByRole('link', { name: /set up protection/i })).toBeInTheDocument()
+    })
+
     it('does not render a CTA when safeQueryParam is missing', () => {
       renderPanel({
         safeQueryParam: undefined,

@@ -38,7 +38,7 @@ interface SectionOptions {
   onClose: () => void
   headerPaddingTopClass: string
   openSafeTrackingLabel: OVERVIEW_LABELS
-  headerTestId?: string
+  sectionTestId?: string
   headerAction?: React.ReactNode
   /** Render the section even when it has no items (header + action stay visible). */
   alwaysShow?: boolean
@@ -50,11 +50,8 @@ const renderSection = (title: string, items: AllSafeItems, opts: SectionOptions)
   // Keep the section (header + action) when it has no items but should stay visible (e.g. Trusted Safes).
   if (items.length === 0 && !opts.alwaysShow) return null
   return (
-    <>
-      <div
-        className={`flex items-center justify-between gap-1.5 px-2 pb-1 ${opts.headerPaddingTopClass}`}
-        data-testid={opts.headerTestId}
-      >
+    <div data-testid={opts.sectionTestId}>
+      <div className={`flex items-center justify-between gap-1.5 px-2 pb-1 ${opts.headerPaddingTopClass}`}>
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</span>
         {opts.headerAction}
       </div>
@@ -80,7 +77,7 @@ const renderSection = (title: string, items: AllSafeItems, opts: SectionOptions)
           />
         ),
       )}
-    </>
+    </div>
   )
 }
 
@@ -191,7 +188,7 @@ const AccountsModal = ({
                 onClose,
                 headerPaddingTopClass: 'pt-1',
                 openSafeTrackingLabel: trackingLabel,
-                headerTestId: 'pinned-accounts',
+                sectionTestId: 'pinned-accounts',
                 // The Trusted Safes section (with its Manage action) stays visible even with no trusted safes.
                 alwaysShow: Boolean(onManageTrustedSafes),
                 emptyHint: search.trim() ? undefined : 'No trusted Safes yet',

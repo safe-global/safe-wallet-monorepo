@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import NextLink from 'next/link'
 import Identicon from '@/components/common/Identicon'
+import AddressWithCopy from '@/components/common/AddressWithCopy'
 import { FiatBalance } from '@/features/spaces'
-import MultiAccountContextMenu from '@/components/sidebar/SafeListContextMenu/MultiAccountContextMenu'
+import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
 import { AccountItem as BaseAccountItem } from '../../../AccountItem'
 import { AddNetworkButton } from '../../../AddNetworkButton'
 import { useMultiAccountItemData } from '../../../../hooks/useMultiAccountItemData'
@@ -148,9 +149,7 @@ const MultiAccountItem = ({ multiSafeAccountItem, onLinkClick, isSpaceSafe = fal
               <Typography variant="paragraph-medium" className="text-foreground truncate">
                 {displayName}
               </Typography>
-              <Typography variant="paragraph-mini" color="muted" className="truncate">
-                {shortenAddress(address)}
-              </Typography>
+              <AddressWithCopy address={address} />
             </div>
           </div>
 

@@ -258,7 +258,7 @@ const AddAccounts = ({
         })
 
         if (result.error) {
-          const msg = getRtkQueryErrorMessage(result.error) || 'Something went wrong adding one or more Safe Accounts.'
+          const msg = getRtkQueryErrorMessage(result.error) || 'Something went wrong adding one or more Safe accounts.'
           setError(msg.replace(/:\s*Key\s*\(.*$/, ''))
           return
         }
@@ -279,7 +279,7 @@ const AddAccounts = ({
         })
 
         if (result.error) {
-          setError(getRtkQueryErrorMessage(result.error) || 'Something went wrong removing one or more Safe Accounts.')
+          setError(getRtkQueryErrorMessage(result.error) || 'Something went wrong removing one or more Safe accounts.')
           return
         }
 
@@ -405,7 +405,7 @@ const AddAccounts = ({
                         <X className="size-5" />
                       </Button>
                       <Typography variant="h2" align="center" className="flex-1">
-                        Add Safe Accounts
+                        Add Safe accounts
                       </Typography>
                       <div className="size-10" />
                     </div>

@@ -25,8 +25,8 @@ type Consequence = { variant: 'danger' | 'success'; text: string }
 
 const CONSEQUENCES: Consequence[] = [
   { variant: 'danger', text: 'Members lose access to this workspace immediately.' },
-  { variant: 'danger', text: 'Member list and Safe Account names are deleted.' },
-  { variant: 'success', text: 'Linked Safe Accounts keep working — only the workspace is removed.' },
+  { variant: 'danger', text: 'Member list and Safe account names are deleted.' },
+  { variant: 'success', text: 'Linked Safe accounts keep working — only the workspace is removed.' },
 ]
 
 const ConsequenceRow = ({ variant, text }: Consequence) => (

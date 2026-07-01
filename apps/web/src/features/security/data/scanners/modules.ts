@@ -111,8 +111,8 @@ export const modulesScanner: SecurityScanner = {
     if (activeModules.length === 0) {
       const score = 100
       return {
-        status: 'clear',
-        severity: getSeverityFromScore(score),
+        status: 'not_applicable',
+        severity: getSeverityFromScore(score, { excluded: true }),
         score,
         evidence: [{ label: 'Status', value: 'No modules installed' }],
         remediation: '',
