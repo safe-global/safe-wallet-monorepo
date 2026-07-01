@@ -172,7 +172,7 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
             type="submit"
             variant="contained"
             onClick={handleConfirm}
-            disabled={!!nameError || isSubmitting}
+            disabled={isSubmitting}
             disableElevation
           >
             {isSubmitting ? <CircularProgress size={20} /> : 'Request to add'}
