@@ -10,6 +10,7 @@ import * as useChains from '@/hooks/useChains'
 import * as useDarkMode from '@/hooks/useDarkMode'
 import EthHashInfo from '.'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 
 const originalClipboard = { ...global.navigator.clipboard }
 
@@ -381,6 +382,43 @@ describe('EthHashInfo', () => {
         'href',
         'https://rinkeby.etherscan.io/address/0x0000000000000000000000000000000000005AFE',
       )
+    })
+  })
+
+  describe('similarity (Mode B highlight)', () => {
+    const ADDR = '0xAABBccddeeff00112233445566778899aabbCCDD'
+
+    it('does not alter rendering without a similarity match', () => {
+      const { queryByText } = render(<EthHashInfo address={ADDR} shortAddress={false} showName={false} />)
+      expect(queryByText(ADDR)).toBeInTheDocument()
+    })
+
+    it('highlights both ends in the error tone for a critical match', () => {
+      const { container } = render(
+        <EthHashInfo
+          address={ADDR}
+          shortAddress={false}
+          showName={false}
+          similarity={{ anchor: ADDR.slice(2).toLowerCase(), prefixLen: 4, suffixLen: 4, severity: Severity.CRITICAL }}
+        />,
+      )
+      const boldTexts = Array.from(container.querySelectorAll('b')).map((b) => b.textContent)
+      expect(boldTexts).toContain('AABB') // front matched
+      expect(boldTexts).toContain('CCDD') // back matched
+    })
+
+    it('highlights only the matching end for a one-end warn match', () => {
+      const { container } = render(
+        <EthHashInfo
+          address={ADDR}
+          shortAddress={false}
+          showName={false}
+          similarity={{ anchor: ADDR.slice(2).toLowerCase(), prefixLen: 4, suffixLen: 0, severity: Severity.WARN }}
+        />,
+      )
+      const boldTexts = Array.from(container.querySelectorAll('b')).map((b) => b.textContent)
+      expect(boldTexts).toContain('AABB') // front matched
+      expect(boldTexts).not.toContain('CCDD') // back did not match → not highlighted
     })
   })
 })

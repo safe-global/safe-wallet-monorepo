@@ -8,6 +8,8 @@
 export { default as useAddressSimilarity } from './hooks/useAddressSimilarity'
 export { default as useAddressPoisoningGuard } from './hooks/useAddressPoisoningGuard'
 export type { GuardContext, BlockedHint } from './hooks/useAddressPoisoningGuard'
+export { default as useListSimilarities } from './hooks/useListSimilarities'
 export { default as AddressPoisoningGuard } from './components/AddressPoisoningGuard'
 export type { AddressPoisoningGuardProps } from './components/AddressPoisoningGuard'
 export { default as GuardBlockedHint } from './components/GuardBlockedHint'
+export { default as SimilarityFlag } from './components/SimilarityFlag'

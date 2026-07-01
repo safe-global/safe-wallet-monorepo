@@ -5,14 +5,17 @@ import css from '../AccountItems/styles.module.css'
 import type { SafeItem } from '@/hooks/safes'
 import { SpacesFeature } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
+import { SimilarityFlag } from '@/features/address-poisoning'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 
 export interface SafeListItemProps {
   safeItem: SafeItem
   onLinkClick?: () => void
   isSpaceSafe?: boolean
+  similarity?: SimilarityMatch | null
 }
 
-export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: SafeListItemProps) => {
+export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false, similarity }: SafeListItemProps) => {
   const spaces = useLoadFeature(SpacesFeature)
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -39,6 +42,7 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
 
   const statusChips = (
     <>
+      <SimilarityFlag match={similarity} />
       <AccountItem.StatusChip
         isActivating={isActivating}
         isReadOnly={safeItem.isReadOnly}
@@ -69,7 +73,12 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
         threshold={threshold}
         owners={owners.length}
       />
-      <AccountItem.Info address={safeItem.address} chainId={safeItem.chainId} name={isSpaceSafe ? safeItem.name : name}>
+      <AccountItem.Info
+        address={safeItem.address}
+        chainId={safeItem.chainId}
+        name={isSpaceSafe ? safeItem.name : name}
+        similarity={similarity}
+      >
         {!isMobile && statusChips}
       </AccountItem.Info>
       <AccountItem.ChainBadge chainId={safeItem.chainId} />

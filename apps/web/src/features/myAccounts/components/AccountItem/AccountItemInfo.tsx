@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Typography } from '@mui/material'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { type ContactSource } from '@/hooks/useAllAddressBooks'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 import css from '../AccountItems/styles.module.css'
 
 export interface AccountItemInfoProps {
@@ -16,6 +17,8 @@ export interface AccountItemInfoProps {
   showCopyButton?: boolean // Show copy button next to address
   hasExplorer?: boolean // Show explorer link next to address
   highlight4bytes?: boolean // Highlight first 4 and last 4 chars (for similar addresses)
+  /** Address-poisoning Mode B: highlight the matching end characters in the match's tone. */
+  similarity?: SimilarityMatch | null
   monospace?: boolean // Use monospace font for address (easier to compare)
   'data-testid'?: string
 }
@@ -37,6 +40,7 @@ function AccountItemInfo({
   hasExplorer = false,
   monospace = false,
   highlight4bytes = false,
+  similarity,
   'data-testid': testId,
 }: AccountItemInfoProps) {
   return (
@@ -73,6 +77,7 @@ function AccountItemInfo({
             showCopyButton={showCopyButton}
             hasExplorer={hasExplorer}
             highlight4bytes={highlight4bytes}
+            similarity={similarity}
           />
         )}
       </Typography>

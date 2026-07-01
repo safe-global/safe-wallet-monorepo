@@ -1,10 +1,12 @@
 import classnames from 'classnames'
-import type { ReactElement, ReactNode, SyntheticEvent } from 'react'
+import type { CSSProperties, ReactElement, ReactNode, SyntheticEvent } from 'react'
 import { isAddress } from 'ethers'
 import { useTheme } from '@mui/material/styles'
 import { Box, Tooltip } from '@mui/material'
 import { Building2, HardDrive } from 'lucide-react'
 import useMediaQuery from '@mui/material/useMediaQuery'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 import Identicon from '../../Identicon'
 import CopyAddressButton from '../../CopyAddressButton'
 import ExplorerButton, { type ExplorerButtonProps } from '../../ExplorerButton'
@@ -34,6 +36,8 @@ export type EthHashInfoProps = {
   addressBookNameSource?: ContactSource
   highlight4bytes?: boolean
   badgeTooltip?: ReactNode
+  /** Address-poisoning Mode B: highlight the matching end characters in the tone of the match. */
+  similarity?: SimilarityMatch | null
 }
 
 const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
@@ -58,10 +62,12 @@ const SrcEthHashInfo = ({
   addressBookNameSource,
   highlight4bytes = false,
   badgeTooltip,
+  similarity,
 }: EthHashInfoProps): ReactElement => {
   const shouldPrefix = isAddress(address)
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const showShort = shortAddress || isMobile
   const identicon = <Identicon address={address} size={avatarSize} />
   const shouldCopyPrefix = shouldPrefix && copyPrefix
 
@@ -85,10 +91,35 @@ const SrcEthHashInfo = ({
     address
   )
 
+  // Mode B: colour the matching end characters (the 4 hex after `0x` when the front matches,
+  // and/or the last 4 when the back matches) so a look-alike can't hide in a list at a glance.
+  const similarityAddress = (): ReactNode => {
+    const isCritical = similarity?.severity === Severity.CRITICAL
+    const hlStyle: CSSProperties = {
+      backgroundColor: isCritical ? 'var(--color-error-background)' : 'var(--color-warning-background)',
+      color: isCritical ? 'var(--color-error-dark)' : 'var(--color-warning-dark)',
+      borderRadius: '2px',
+      padding: '0 1px',
+      fontWeight: 700,
+    }
+    const front = (similarity?.prefixLen ?? 0) >= 4
+    const back = (similarity?.suffixLen ?? 0) >= 4
+    return (
+      <>
+        {address.slice(0, 2)}
+        {front ? <b style={hlStyle}>{address.slice(2, 6)}</b> : address.slice(2, 6)}
+        {showShort ? '…' : address.slice(6, -4)}
+        {back ? <b style={hlStyle}>{address.slice(-4)}</b> : address.slice(-4)}
+      </>
+    )
+  }
+
+  const addressBody = similarity ? similarityAddress() : showShort ? shortenAddress(address) : highlightedAddress
+
   const addressElement = (
     <>
       {showPrefix && shouldPrefix && prefix && <b>{prefix}:</b>}
-      <span>{shortAddress || isMobile ? shortenAddress(address) : highlightedAddress}</span>
+      <span>{addressBody}</span>
     </>
   )
 
