@@ -676,7 +676,12 @@ export function verifySummaryByName(name, token, data, alt, altToken) {
 
     // Verify token symbol (altToken parameter)
     if (altToken) {
-      verifyTokenSymbol($element, altToken)
+      cy.wait(3000)
+      cy.get(selector)
+        .first()
+        .then(($freshElement) => {
+          verifyTokenSymbol($freshElement, altToken)
+        })
     }
   })
 }

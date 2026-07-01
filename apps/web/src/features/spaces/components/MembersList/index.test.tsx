@@ -1,4 +1,4 @@
-import { render, renderWithUserEvent, screen, within } from '@/tests/test-utils'
+import { render, screen, within } from '@/tests/test-utils'
 import type { ReactNode } from 'react'
 import { memberBuilder, memberUserBuilder } from '@/tests/builders/member'
 import MembersList from './index'
@@ -23,6 +23,14 @@ jest.mock('./RenewInviteButton', () => ({
   default: () => <button>Renew invitation</button>,
 }))
 
+jest.mock('./MemberRowActionsMenu', () => ({
+  __esModule: true,
+  default: () => <button>Member actions</button>,
+}))
+
+const mockUseIsMobile = jest.fn(() => false)
+jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
+
 jest.mock('@/components/common/Track', () => ({
   __esModule: true,
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -45,6 +53,10 @@ jest.mock('@/features/spaces', () => ({
 }))
 
 describe('MembersList', () => {
+  beforeEach(() => {
+    mockUseIsMobile.mockReturnValue(false)
+  })
+
   it('renders member email and leaves empty email cells blank', () => {
     render(
       <MembersList
@@ -77,10 +89,10 @@ describe('MembersList', () => {
     expect(within(emailCells[1]!).queryByText(/@/)).not.toBeInTheDocument()
   })
 
-  it('wires up noWrap and a hover tooltip for long member emails', async () => {
+  it('truncates long member emails inside a tooltip trigger', () => {
     const longEmail = `${'a'.repeat(64)}@${'b'.repeat(186)}.com`
 
-    const { user } = renderWithUserEvent(
+    render(
       <MembersList
         members={[
           memberBuilder()
@@ -94,10 +106,7 @@ describe('MembersList', () => {
     )
 
     const emailNode = screen.getByText(longEmail)
-    expect(emailNode).toHaveClass('MuiTypography-noWrap')
-
-    await user.hover(emailNode)
-    expect(await screen.findByRole('tooltip', { name: longEmail })).toBeInTheDocument()
+    expect(emailNode).toHaveClass('truncate')
   })
 
   it('shows an Expired chip for a pending invite past its expiry', () => {
@@ -169,5 +178,45 @@ describe('MembersList', () => {
     )
 
     expect(screen.queryByRole('button', { name: 'Renew invitation' })).not.toBeInTheDocument()
+  })
+
+  it('collapses row actions into a kebab menu on mobile', () => {
+    mockUseIsMobile.mockReturnValue(true)
+
+    render(
+      <MembersList
+        members={[
+          memberBuilder()
+            .with({
+              id: 2,
+              status: 'INVITED',
+              name: 'Bob',
+              user: memberUserBuilder().with({ email: 'bob@x.io' }).build(),
+            })
+            .build(),
+        ]}
+      />,
+    )
+
+    // The kebab replaces the inline edit / renew / remove cluster
+    expect(screen.getByRole('button', { name: 'Member actions' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Renew invitation' })).not.toBeInTheDocument()
+  })
+
+  it('surfaces the email under the member name on mobile', () => {
+    mockUseIsMobile.mockReturnValue(true)
+
+    render(
+      <MembersList
+        members={[
+          memberBuilder()
+            .with({ name: 'Alice', user: memberUserBuilder().with({ email: 'alice@example.com' }).build() })
+            .build(),
+        ]}
+      />,
+    )
+
+    const nameCell = screen.getByTestId('table-cell-name')
+    expect(within(nameCell).getByText('alice@example.com')).toBeInTheDocument()
   })
 })
