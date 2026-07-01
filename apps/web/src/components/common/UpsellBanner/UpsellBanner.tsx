@@ -14,7 +14,6 @@ type UpsellBannerProps = {
   'data-testid'?: string
 }
 
-/** Shared horizontal "Get flat pricing" upsell card: icon · caller-supplied text · CTA. */
 export const UpsellBanner = ({
   children,
   ctaLabel,

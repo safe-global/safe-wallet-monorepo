@@ -5,15 +5,16 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { AppRoutes } from '@/config/routes'
 import { UpsellBanner } from '@/components/common/UpsellBanner'
+import css from './PostExecUpsellBanner.module.css'
 
-// TODO(PLA-1690 / PLA-1691): replace the static placeholder with the real per-tx fee snapshot.
+// TODO: replace the static placeholder with the real per-tx fee snapshot.
 const PLACEHOLDER_FEE = '$12.40'
 
 const PostExecUpsellBanner = ({ className }: { className?: string }): ReactElement | null => {
   const isBillingVisible = useIsBillingVisible()
   const spaceId = useCurrentSpaceId()
 
-  // TODO(PLA-1699): also hide for active-plan Spaces once subscription data is wired outside the billing page.
+  // TODO: also hide for active-plan Spaces once subscription data is wired outside the billing page.
   if (isBillingVisible !== true) {
     return null
   }
@@ -27,10 +28,10 @@ const PostExecUpsellBanner = ({ className }: { className?: string }): ReactEleme
         onCtaClick={() => trackEvent(SPACE_EVENTS.COMPARE_PLANS_CLICKED)}
         data-testid="post-exec-upsell-banner"
       >
-        <Typography fontWeight={600} sx={{ fontSize: 14, lineHeight: '20px' }}>
+        <Typography variant="inherit" className={css.title}>
           Get flat pricing
         </Typography>
-        <Typography color="text.secondary" sx={{ fontSize: 12, lineHeight: '16px' }}>
+        <Typography variant="inherit" className={css.description}>
           You paid <strong>{PLACEHOLDER_FEE}</strong> in fees for this transaction.
         </Typography>
       </UpsellBanner>

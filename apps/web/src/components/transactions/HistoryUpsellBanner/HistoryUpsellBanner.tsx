@@ -5,15 +5,16 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { AppRoutes } from '@/config/routes'
 import { UpsellBanner } from '@/components/common/UpsellBanner'
+import css from './styles.module.css'
 
-// TODO(PLA-1681 / PLA-1555): replace these static placeholders with the real 30-day tier-status figures.
+// TODO: replace these static placeholders with the real 30-day tier-status figures.
 const PLACEHOLDER = { periodDays: 30, movedUsd: '$432K', txCount: '41', feesUsd: '$70' }
 
 const HistoryUpsellBanner = (): ReactElement | null => {
   const isBillingVisible = useIsBillingVisible()
   const spaceId = useCurrentSpaceId()
 
-  // TODO(PLA-1699): also hide for active-plan Spaces once subscription data is wired outside the billing page.
+  // TODO: also hide for active-plan Spaces once subscription data is wired outside the billing page.
   if (isBillingVisible !== true) {
     return null
   }
@@ -26,10 +27,10 @@ const HistoryUpsellBanner = (): ReactElement | null => {
       onCtaClick={() => trackEvent(SPACE_EVENTS.EXPLORE_PLANS_CLICKED)}
       data-testid="history-upsell-banner"
     >
-      <Typography fontWeight={600} sx={{ fontSize: 18, lineHeight: '27px' }}>
+      <Typography variant="inherit" className={css.title}>
         Get flat pricing
       </Typography>
-      <Typography sx={{ fontSize: 16, lineHeight: '24px' }}>
+      <Typography variant="inherit" className={css.description}>
         In the past {PLACEHOLDER.periodDays} days, you moved <strong>{PLACEHOLDER.movedUsd}</strong> across{' '}
         <strong>{PLACEHOLDER.txCount}</strong> transactions and spent {PLACEHOLDER.feesUsd} in fees.
       </Typography>

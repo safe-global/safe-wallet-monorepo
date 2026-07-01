@@ -3,8 +3,6 @@
   padding: var(--space-4) var(--space-7);
 }
 
-/* Upsell banner sits between the divider and the status stepper. Aligns with .row sides;
-   negative bottom offsets the stepper .row's --space-4 top to the design's --space-3 gap. */
 .upsellBanner {
   width: 100%;
   padding: var(--space-3) var(--space-7) 0;

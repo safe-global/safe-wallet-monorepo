@@ -14,7 +14,6 @@
     0 4px 6px -4px rgba(0, 0, 0, 0.1);
 }
 
-/* Green glow blob, top-right (mirrors Figma node 13002:41745) */
 .glow {
   position: absolute;
   top: -60px;
