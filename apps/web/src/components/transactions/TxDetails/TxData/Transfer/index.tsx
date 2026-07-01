@@ -1,9 +1,11 @@
+import { useMemo } from 'react'
 import type { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransferDirection } from '@safe-global/store/gateway/types'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { TransferTx } from '@/components/transactions/TxInfo'
 import { isTxQueued } from '@/utils/transaction-guards'
+import { useListSimilarities, SimilarityFlag } from '@/features/address-poisoning'
 import { Box, Stack, Typography } from '@mui/material'
 
 import TransferActions from '@/components/transactions/TxDetails/TxData/Transfer/TransferActions'
@@ -47,6 +49,11 @@ const TransferTxInfo = ({ txInfo, txStatus, trusted, imitation }: TransferTxInfo
   const address = direction.toUpperCase() === TransferDirection.INCOMING ? txInfo.sender : txInfo.recipient
   const directionLabel = direction === TransferDirection.INCOMING ? 'From' : 'To'
 
+  // Mode B: flag a counterparty that resembles a trusted anchor (address-poisoning look-alike),
+  // e.g. an incoming transfer from an address imitating one of your trusted contacts.
+  const similarityAddresses = useMemo(() => [address.value], [address.value])
+  const similarityMatch = useListSimilarities(similarityAddresses).get(address.value)?.match
+
   return (
     <Box display="flex" flexDirection="column" gap={1}>
       <TransferTxInfoMain txInfo={txInfo} txStatus={txStatus} trusted={trusted} imitation={imitation} />
@@ -65,9 +72,11 @@ const TransferTxInfo = ({ txInfo, txStatus, trusted, imitation }: TransferTxInfo
           showPrefix={false}
           avatarSize={32}
           trusted={trusted && !imitation}
+          similarity={similarityMatch}
         >
           <TransferActions address={address.value} txInfo={txInfo} trusted={trusted} />
         </NamedAddressInfo>
+        <SimilarityFlag match={similarityMatch} />
       </Box>
       {imitation && <ImitationTransactionWarning />}
     </Box>
