@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
@@ -74,12 +74,7 @@ const AddToWorkspaceButton = ({ address, name, chainIds }: AddToWorkspaceButtonP
     return button
   }
 
-  return (
-    <Tooltip>
-      <TooltipTrigger render={<div className="inline-flex w-fit" />}>{button}</TooltipTrigger>
-      <TooltipContent>Rename this contact to add it to the workspace. {nameError}</TooltipContent>
-    </Tooltip>
-  )
+  return <InvalidContactNameTooltip nameError={nameError}>{button}</InvalidContactNameTooltip>
 }
 
 export default AddToWorkspaceButton

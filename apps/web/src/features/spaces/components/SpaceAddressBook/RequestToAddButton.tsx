@@ -10,11 +10,7 @@ import {
   Typography,
 } from '@mui/material'
 import { Button } from '@/components/ui/button'
-import {
-  Tooltip as UITooltip,
-  TooltipContent as UITooltipContent,
-  TooltipTrigger as UITooltipTrigger,
-} from '@/components/ui/tooltip'
+import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { Badge } from '@/components/ui/badge'
 import ModalDialog from '@/components/common/ModalDialog'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -117,14 +113,7 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
 
   return (
     <>
-      {nameError ? (
-        <UITooltip>
-          <UITooltipTrigger render={<div className="inline-flex w-fit" />}>{trigger}</UITooltipTrigger>
-          <UITooltipContent>Rename this contact to add it to the workspace. {nameError}</UITooltipContent>
-        </UITooltip>
-      ) : (
-        trigger
-      )}
+      {nameError ? <InvalidContactNameTooltip nameError={nameError}>{trigger}</InvalidContactNameTooltip> : trigger}
 
       <ModalDialog open={open} onClose={() => setOpen(false)} dialogTitle="Request to add contact" hideChainIndicator>
         <DialogContent sx={{ py: 2 }}>

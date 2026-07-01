@@ -55,3 +55,6 @@ export const getContactId = (contact: ContactItem) => {
 // name schema before they can be proposed to the workspace.
 export const validateContactName = (name: string): string | undefined =>
   validateName(sanitizeName(name), { minLength: NAME_MIN_LENGTH, maxLength: ADDRESS_BOOK_NAME_MAX_LENGTH })
+
+export const getRenameContactTooltip = (nameError: string): string =>
+  `Rename this contact to add it to the workspace. ${nameError}`

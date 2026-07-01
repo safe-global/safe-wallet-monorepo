@@ -4,7 +4,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { Controller, useFormContext, useWatch } from 'react-hook-form'
 import type { ImportContactsFormValues } from './ImportAddressBookDialog'
-import { getSelectedAddresses, getContactId, validateContactName } from '../utils'
+import { getSelectedAddresses, getContactId, validateContactName, getRenameContactTooltip } from '../utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useGetSpaceAddressBook } from '@/features/spaces'
 import { cn } from '@/utils/cn'
@@ -94,7 +94,7 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
                       </TooltipTrigger>
                       <TooltipContent>
                         {nameError
-                          ? `Rename this contact to add it to the workspace. ${nameError}`
+                          ? getRenameContactTooltip(nameError)
                           : alreadyAdded
                             ? 'You already added a contact with this address.'
                             : 'You already selected a contact with this address.'}
