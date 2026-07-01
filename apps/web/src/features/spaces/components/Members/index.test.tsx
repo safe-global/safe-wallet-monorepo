@@ -12,10 +12,6 @@ jest.mock('@/features/spaces', () => ({
   useSpaceMembersByStatus: () => mockUseSpaceMembersByStatus(),
 }))
 
-jest.mock('@/hooks/useDarkMode', () => ({
-  useDarkMode: jest.fn(() => false),
-}))
-
 jest.mock('../MembersList', () => ({
   __esModule: true,
   default: ({ members }: { members: MemberDto[] }) => (
