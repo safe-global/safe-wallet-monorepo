@@ -132,6 +132,21 @@ describe('useResolvedGasToken', () => {
     })
   })
 
+  // Regression: if getNonces rejects, the hook must not get stuck in `resolving` forever, it falls
+  // back to the Safe current nonce so the probe still fires and resolution progresses.
+  it('falls back to the current Safe nonce and still resolves when getNonces rejects', async () => {
+    ;(getNonces as jest.Mock).mockRejectedValue(new Error('RPC down'))
+    jest.spyOn(useBalancesModule, 'default').mockReturnValue(buildBalances([ethBalance, safeTokenBalance]))
+    const spy = jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(successfulProbe)
+
+    const { result } = renderHook(() => useResolvedGasToken(SAFE_TOKEN_ADDRESS, erc20Tx))
+
+    await waitFor(() => expect(result.current).toEqual({ status: 'resolved', address: ETH_ADDRESS }))
+    expect(spy.mock.calls.at(-1)?.[0]).toMatchObject({
+      tx: expect.objectContaining({ nonce: mockSafe.nonce }),
+    })
+  })
+
   it('falls through from errored alternatives to the sent token when it probes 200', async () => {
     jest.spyOn(useBalancesModule, 'default').mockReturnValue(buildBalances([ethBalance, safeTokenBalance]))
     // ETH (the alternative, tried first) errors; the sent token (SAFE) probes 200. Keyed by the

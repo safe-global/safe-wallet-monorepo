@@ -61,10 +61,14 @@ export const useResolvedGasToken = (
   const [recommendedNonce] = useAsync(async () => {
     if (!safe.chainId || !safeAddress) return
     if (!safe.deployed) return 0
-    const nonces = await getNonces(safe.chainId, safeAddress)
-    return nonces?.recommendedNonce
+    try {
+      const nonces = await getNonces(safe.chainId, safeAddress)
+      return nonces?.recommendedNonce ?? safe.nonce
+    } catch {
+      return safe.nonce
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [safeAddress, safe.chainId, safe.deployed, safe.txQueuedTag, safe.txHistoryTag])
+  }, [safeAddress, safe.chainId, safe.deployed, safe.nonce, safe.txQueuedTag, safe.txHistoryTag])
 
   const candidates = useMemo(() => {
     if (!balances?.items || !sentTokenAddress) return []
