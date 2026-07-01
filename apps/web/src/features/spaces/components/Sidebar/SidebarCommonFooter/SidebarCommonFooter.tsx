@@ -15,6 +15,7 @@ import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
 import { openCookieBanner } from '@/store/popupSlice'
 import { BEAMER_SELECTOR } from '@/services/beamer'
 import { ApiCtaSidebar } from '../ApiCtaSidebar'
+import { GetFlatPricingBanner } from '../GetFlatPricingBanner'
 import { SidebarIndexingStatus } from '../SidebarIndexingStatus'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { LS_KEY } from '@/config/gateway'
@@ -72,6 +73,7 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
       )}
 
       <SidebarMenu className="gap-0.5">
+        {!isSafeSidebar && <GetFlatPricingBanner />}
         <ApiCtaSidebar />
 
         <SidebarMenuItem className={css.footerHelpRow}>

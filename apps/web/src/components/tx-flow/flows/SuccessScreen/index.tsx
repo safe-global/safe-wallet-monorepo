@@ -21,6 +21,7 @@ import { usePredictSafeAddressFromTxDetails } from '@/hooks/usePredictSafeAddres
 import { AppRoutes } from '@/config/routes'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import Track from '@/components/common/Track'
+import PostExecUpsellBanner from './PostExecUpsellBanner'
 
 interface Props {
   /** The ID assigned to the transaction in the client-gateway */
@@ -98,6 +99,7 @@ const SuccessScreen = ({ txId, txHash }: Props) => {
       {!error && (
         <>
           <Divider />
+          <PostExecUpsellBanner className={css.upsellBanner} />
           <div className={css.row}>
             <StatusStepper status={status} txHash={localTxHash} />
           </div>

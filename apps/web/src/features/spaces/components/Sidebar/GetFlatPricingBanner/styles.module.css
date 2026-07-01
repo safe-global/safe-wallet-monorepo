@@ -1,0 +1,42 @@
+.banner {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  background-color: var(--color-background-muted-secondary);
+  color: var(--color-foreground);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+/* Green glow blob, top-right (mirrors Figma node 13002:41745) */
+.glow {
+  position: absolute;
+  top: -60px;
+  right: -20px;
+  z-index: -1;
+  width: 160px;
+  height: 160px;
+  transform: rotate(126.72deg);
+  background-color: rgba(18, 255, 128, 0.8);
+  opacity: 0.5;
+  filter: blur(115px);
+  pointer-events: none;
+}
+
+.iconBadge {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  background-color: var(--color-secondary-background);
+  color: var(--color-secondary-main);
+}

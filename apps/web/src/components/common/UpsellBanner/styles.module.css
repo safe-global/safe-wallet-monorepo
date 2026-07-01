@@ -1,0 +1,62 @@
+.banner {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px;
+  border-radius: 16px;
+  background-color: var(--color-background-muted-secondary);
+  color: var(--color-text-primary);
+}
+
+.elevationLg {
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+.elevationMd {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+.glow {
+  position: absolute;
+  top: -390px;
+  left: 15%;
+  right: -15%;
+  z-index: -1;
+  height: 367px;
+  background-color: rgba(18, 255, 128, 0.7);
+  opacity: 0.5;
+  filter: blur(116px);
+  pointer-events: none;
+}
+
+.iconBadge {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  background-color: var(--color-secondary-background);
+  color: var(--color-secondary-main);
+}
+
+.content {
+  display: flex;
+  flex: 1 0 0;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ctaButton {
+  flex-shrink: 0;
+  border-radius: 12px;
+}

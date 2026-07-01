@@ -1,0 +1,1 @@
+export { GetFlatPricingBanner } from './GetFlatPricingBanner'
