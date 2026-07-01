@@ -64,7 +64,7 @@ export const useResolvedGasToken = (
     const nonces = await getNonces(safe.chainId, safeAddress)
     return nonces?.recommendedNonce
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [safeAddress, safe.chainId, safe.txQueuedTag, safe.txHistoryTag])
+  }, [safeAddress, safe.chainId, safe.deployed, safe.txQueuedTag, safe.txHistoryTag])
 
   const candidates = useMemo(() => {
     if (!balances?.items || !sentTokenAddress) return []
@@ -92,7 +92,7 @@ export const useResolvedGasToken = (
   )
 
   const probe = useGetGtfFeePreviewQuery(
-    canProbe && tx && chain
+    canProbe && tx && chain && recommendedNonce !== undefined
       ? {
           chainId: chain.chainId,
           safeAddress,
@@ -100,7 +100,7 @@ export const useResolvedGasToken = (
             ...tx,
             gasToken: currentCandidate,
             numberSignatures: safe.threshold,
-            nonce: recommendedNonce ?? 0,
+            nonce: recommendedNonce,
             fiatCode: toSupportedFiatCode(currency),
           },
         }
