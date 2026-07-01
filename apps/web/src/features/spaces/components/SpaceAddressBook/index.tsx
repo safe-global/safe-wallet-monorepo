@@ -72,9 +72,9 @@ const SpaceAddressBook = () => {
     }))
   }, [allLocalAddressBooks, user?.wallets])
 
-  // My contacts = the local address book (no space contacts)
+  // Local contacts = the local address book (no space contacts)
   // Contacts that duplicate a space address are marked and sorted to the bottom
-  const myContacts: AddressBookEntry[] = useMemo(() => {
+  const sortedLocalContacts: AddressBookEntry[] = useMemo(() => {
     const spaceAddresses = new Set(addressBookItems.map((item) => item.address.toLowerCase()))
 
     const marked = localContacts.map((entry) => ({
@@ -89,7 +89,7 @@ const SpaceAddressBook = () => {
     () => filteredAllRaw.map((item) => ({ ...item, isLocal: false })),
     [filteredAllRaw],
   )
-  const filteredMine = useAddressBookSearch(myContacts, searchQuery) as AddressBookEntry[]
+  const filteredMine = useAddressBookSearch(sortedLocalContacts, searchQuery) as AddressBookEntry[]
 
   const pendingAddresses = useMemo(
     () => new Set(pendingRequests.map((r) => r.address.toLowerCase())),
@@ -121,7 +121,7 @@ const SpaceAddressBook = () => {
             {isPrivateAddressBookEnabled && (
               <>
                 <TabsTrigger value="mine" className="cursor-pointer">
-                  My contacts ({myContacts.length})
+                  Local contacts ({sortedLocalContacts.length})
                 </TabsTrigger>
                 <TabsTrigger value="pending" className="cursor-pointer">
                   Pending ({pendingRequests.length})
@@ -143,7 +143,7 @@ const SpaceAddressBook = () => {
                 )}
                 {isPrivateAddressBookEnabled && activeTab === 'mine' && <AddLocalContact />}
               </div>
-              {(activeTab === 'workspace' ? addressBookItems.length > 0 : myContacts.length > 0) && (
+              {(activeTab === 'workspace' ? addressBookItems.length > 0 : sortedLocalContacts.length > 0) && (
                 <div className="relative w-full sm:w-[320px]">
                   <Search className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
                   <Input
