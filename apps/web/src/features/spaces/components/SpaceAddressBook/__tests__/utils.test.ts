@@ -1,6 +1,13 @@
 import type { AddressBookState } from '@/store/addressBookSlice'
-import { createContactItems, flattenAddressBook, getSelectedAddresses, validateContactName } from '../utils'
+import {
+  createContactItems,
+  flattenAddressBook,
+  getRenameContactTooltip,
+  getSelectedAddresses,
+  validateContactName,
+} from '../utils'
 import type { ImportContactsFormValues } from '../Import/ImportAddressBookDialog'
+import { EMPTY_NAME_MESSAGE } from '@safe-global/utils/validation/names'
 
 describe('space address book utils', () => {
   describe('flattenAddressBook', () => {
@@ -214,6 +221,19 @@ describe('space address book utils', () => {
     it('rejects names with characters the workspace book does not allow', () => {
       expect(validateContactName('name!')).toMatch(/can only contain/)
       expect(validateContactName('100%')).toMatch(/can only contain/)
+    })
+
+    it('rejects names that sanitize to empty', () => {
+      expect(validateContactName('   ')).toBe(EMPTY_NAME_MESSAGE)
+      expect(validateContactName('​‍‮')).toBe(EMPTY_NAME_MESSAGE)
+    })
+  })
+
+  describe('getRenameContactTooltip', () => {
+    it('appends the validation error to the rename prompt', () => {
+      expect(getRenameContactTooltip('Invalid characters')).toBe(
+        'Rename this contact to add it to the workspace. Invalid characters',
+      )
     })
   })
 })

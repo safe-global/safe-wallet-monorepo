@@ -44,6 +44,23 @@ describe('RequestToAddButton', () => {
     await waitFor(() => expect(screen.getByText('Requested')).toBeInTheDocument())
   })
 
+  it('submits the sanitized name so it matches the validated value', async () => {
+    mockCreateRequest.mockResolvedValue({ data: {} })
+    render(<RequestToAddButton address={address} name=" Alice‚Bob " chainIds={['1']} />, {
+      initialReduxState: { addressBook: { '1': { [address]: ' Alice‚Bob ' } } },
+    })
+
+    await userEvent.click(screen.getByRole('button', { name: 'Request to add' }))
+    await userEvent.click(screen.getByTestId('confirm-request-btn'))
+
+    await waitFor(() => {
+      expect(mockCreateRequest).toHaveBeenCalledWith({
+        spaceId: MOCK_SPACE_UUID,
+        createAddressBookRequestDto: { address, name: "Alice'Bob", chainIds: ['1'] },
+      })
+    })
+  })
+
   it('disables the button and does not open the dialog when the name has invalid characters', async () => {
     render(<RequestToAddButton address={address} name="José 🦄" chainIds={['1']} />)
 
