@@ -13,8 +13,8 @@ export function RemoveRecoveryFlowOverview({ delayModifier }: RecoveryFlowProps)
   return (
     <TxCard>
       <Typography variant="body2">
-        This transaction will remove the recovery module from your Safe Account. You will no longer be able to recover
-        your Safe Account.
+        This transaction will remove the recovery module from your Safe account. You will no longer be able to recover
+        your Safe account.
       </Typography>
 
       <Typography variant="body2">

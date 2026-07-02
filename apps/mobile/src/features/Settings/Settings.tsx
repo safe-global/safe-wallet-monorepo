@@ -229,7 +229,7 @@ export const Settings = ({
               <View flex={1} padding="$5">
                 <Alert
                   type="warning"
-                  info="Your Safe Account's base contract is not supported. You should migrate it to a compatible
+                  info="Your Safe account's base contract is not supported. You should migrate it to a compatible
               version. Use the web app for this."
                   message="Base contract is not supported"
                 />

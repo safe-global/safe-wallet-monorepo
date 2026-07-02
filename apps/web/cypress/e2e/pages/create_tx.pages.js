@@ -123,7 +123,7 @@ const bulkConfirmationText = (tx) =>
   `This transaction batches a total of ${tx} transactions from your queue into a single Ethereum transaction`
 
 const disabledBultExecuteBtnTooltip =
-  'Batch execution is only available for transactions that have been fully signed and are strictly sequential in Safe Account nonce'
+  'Batch execution is only available for transactions that have been fully signed and are strictly sequential in Safe account nonce'
 const enabledBulkExecuteBtnTooltip = 'All highlighted transactions will be included in the batch execution'
 
 const bulkExecuteBtnStr = 'Bulk execute'
@@ -676,7 +676,12 @@ export function verifySummaryByName(name, token, data, alt, altToken) {
 
     // Verify token symbol (altToken parameter)
     if (altToken) {
-      verifyTokenSymbol($element, altToken)
+      cy.wait(3000)
+      cy.get(selector)
+        .first()
+        .then(($freshElement) => {
+          verifyTokenSymbol($freshElement, altToken)
+        })
     }
   })
 }

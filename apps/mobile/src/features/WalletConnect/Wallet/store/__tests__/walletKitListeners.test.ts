@@ -91,7 +91,11 @@ const dispatchPropose = (store: Store) =>
     }) as never,
   )
 
-const rejectedResponse = expect.objectContaining({ error: expect.anything() })
+// Assert the WC USER_REJECTED code (5000) survives — passing only the .message would collapse it
+// to -32000, which dApps can't read as a rejection.
+const rejectedResponse = expect.objectContaining({
+  error: expect.objectContaining({ code: getSdkError('USER_REJECTED').code }),
+})
 
 // Flush pending microtasks + timers so a no-op effect has had its chance to run before we
 // assert that nothing happened (jest.useFakeTimers() is global in this project).

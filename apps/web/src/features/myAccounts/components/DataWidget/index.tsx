@@ -44,7 +44,7 @@ export const DataWidget = (): ReactElement => {
           <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
             <b>{hasData ? 'Export or import your Safe data' : 'Import your Safe data'}</b>
             <Tooltip
-              title="Download or upload your local data with your added Safe Accounts, address book and settings."
+              title="Download or upload your local data with your added Safe accounts, address book and settings."
               placement="top"
               arrow
             >

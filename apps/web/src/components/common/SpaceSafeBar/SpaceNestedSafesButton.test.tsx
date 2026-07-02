@@ -37,7 +37,7 @@ jest.mock('@/hooks/useNestedSafesVisibility', () => ({
   useNestedSafesVisibility: jest.fn(),
 }))
 
-jest.mock('@/components/sidebar/NestedSafesPopover', () => ({
+jest.mock('@/components/nested-safes/NestedSafesPopover', () => ({
   NestedSafesPopover: (props: Record<string, unknown>) => (
     <div data-testid="nested-safes-popover" data-open={String(!!props.anchorEl)} />
   ),

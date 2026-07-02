@@ -27,7 +27,7 @@ export const navItems: DynamicNavItem[] = [
     href: AppRoutes.spaces.index,
   },
   {
-    label: 'Safe Accounts',
+    label: 'Safe accounts',
     icon: <SvgIcon component={AccountsIcon} inheritViewBox />,
     href: AppRoutes.spaces.safeAccounts,
   },

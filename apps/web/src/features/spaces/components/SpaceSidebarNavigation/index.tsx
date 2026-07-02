@@ -7,7 +7,7 @@ import {
   SidebarListItemButton,
   SidebarListItemIcon,
   SidebarListItemText,
-} from '@/components/sidebar/SidebarList'
+} from '@/components/common/SidebarList'
 import { useCurrentSpaceId, useIsActiveMember } from '@/features/spaces'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'

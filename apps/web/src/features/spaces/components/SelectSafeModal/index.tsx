@@ -24,7 +24,7 @@ import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 const SWAP_DISABLED_TOOLTIP = 'Swap is not supported on this chain. Try another chain.'
 const SWAP_DISABLED_CF_TOOLTIP = 'This account is not activated yet and cannot swap.'
 
-const QrModal = dynamic(() => import('@/components/sidebar/QrCodeButton/QrModal'))
+const QrModal = dynamic(() => import('@/components/common/QrCodeButton/QrModal'))
 
 const SelectSafeModal = () => {
   const [query, setQuery] = useState('')

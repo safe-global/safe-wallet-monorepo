@@ -17,7 +17,7 @@ const Open: NextPage = () => {
         <SafeLogo href={logoHref} />
       </div>
       <Head>
-        <title>{`${BRAND_NAME} – Create Safe Account`}</title>
+        <title>{`${BRAND_NAME} – Create Safe account`}</title>
       </Head>
 
       <CreateSafe />

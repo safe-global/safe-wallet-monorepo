@@ -12,7 +12,7 @@ type OnlyOwnerOrProposerProps = {
 
 enum Message {
   WalletNotConnected = 'Please connect your wallet',
-  NotSafeOwnerOrProposer = 'Your connected wallet is not a signer or proposer of this Safe Account',
+  NotSafeOwnerOrProposer = 'Your connected wallet is not a signer or proposer of this Safe account',
 }
 
 const OnlyOwnerOrProposer = ({ children, placement = 'bottom' }: OnlyOwnerOrProposerProps): ReactElement => {

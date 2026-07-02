@@ -13,7 +13,7 @@ const SafeLoadingError = ({ children }: { children: ReactNode }): ReactElement =
   return (
     <PagePlaceholder
       img={<img src="/images/common/error.png" alt="A vault with a red icon in the bottom right corner" />}
-      text="This Safe Account couldn't be loaded"
+      text="This Safe account couldn't be loaded"
     >
       <Link href={AppRoutes.welcome.index} passHref legacyBehavior>
         <Button variant="contained" color="primary" size="large" sx={{ mt: 2 }}>

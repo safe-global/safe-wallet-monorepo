@@ -14,8 +14,6 @@ import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { AddressBookEntry } from './SpaceAddressBookTable'
-import { useDarkMode } from '@/hooks/useDarkMode'
-import { cn } from '@/utils/cn'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
@@ -36,7 +34,6 @@ const SpaceAddressBook = () => {
   const [activeTab, setActiveTab] = useState('workspace')
   const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
-  const isDarkMode = useDarkMode()
   const isPrivateAddressBookEnabled = useHasFeature(FEATURES.PRIVATE_ADDRESS_BOOK) ?? false
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: user } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
@@ -100,7 +97,7 @@ const SpaceAddressBook = () => {
     <>
       {isInvited && <PreviewInvite />}
 
-      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+      <div>
         <div className="mb-6 flex flex-col gap-6">
           <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
             Address book
@@ -131,7 +128,7 @@ const SpaceAddressBook = () => {
           </TabsList>
 
           {(activeTab === 'workspace' || activeTab === 'mine') && (
-            <div className="mb-4 mt-4 flex items-center gap-2">
+            <div className="mt-6 flex items-center gap-2">
               <div className="flex shrink-0 gap-2">
                 {isAdmin && activeTab === 'workspace' && (
                   <>
@@ -158,7 +155,7 @@ const SpaceAddressBook = () => {
             </div>
           )}
 
-          <div className="bg-card rounded-lg border p-4">
+          <div className="bg-card mt-6 rounded-lg p-4">
             <TabsContent value="workspace">
               {searchQuery && filteredAll.length === 0 ? (
                 <p className="text-muted-foreground mb-2 text-sm">Found 0 results</p>

@@ -1,6 +1,7 @@
 import { EIP155 } from '@safe-global/utils/features/walletconnect/constants'
 
-// EIP-1193 / WC namespace methods this wallet supports.
+// Intentionally excludes the read-only methods: those are proxied opportunistically, and a strict
+// dApp that gates on the namespace can fall back to its own RPC (mirrors web's safe-wallet-provider).
 export const WALLET_SUPPORTED_METHODS = [
   'eth_accounts',
   'eth_chainId',
@@ -15,7 +16,8 @@ export const WALLET_SUPPORTED_METHODS = [
 
 export type SupportedMethod = (typeof WALLET_SUPPORTED_METHODS)[number]
 
-// Read-only methods proxied to the chain RPC (ethers JsonRpcProvider).
+// Proxied to the chain RPC. Params aren't range-validated (e.g. eth_getLogs block range); the
+// configured RPC enforces its own limits — an accepted limitation.
 export const READ_ONLY_RPC_ALLOW_LIST = [
   'eth_blockNumber',
   'eth_call',
