@@ -17,6 +17,7 @@ import type { SafeItemData, SafeItemDataChain } from '../types'
 interface MultiChainSafeItemRowProps {
   item: SafeItemData
   match?: SimilarityMatch
+  intraList?: boolean
 }
 
 function StatusBadge({ chain }: { chain: SafeItemDataChain }) {
@@ -34,7 +35,7 @@ function StatusBadge({ chain }: { chain: SafeItemDataChain }) {
   return null
 }
 
-const MultiChainSafeItemRow = ({ item, match }: MultiChainSafeItemRowProps) => {
+const MultiChainSafeItemRow = ({ item, match, intraList }: MultiChainSafeItemRowProps) => {
   const chainId = item.chains[0]?.chainId ?? ''
   const resolvedName = useSafeDisplayName(item.address, chainId, item.name)
 
@@ -45,7 +46,7 @@ const MultiChainSafeItemRow = ({ item, match }: MultiChainSafeItemRowProps) => {
           name={resolvedName}
           address={item.address}
           className="flex-1 min-w-0"
-          flag={<SimilarityFlag match={match} />}
+          flag={<SimilarityFlag match={match} intraList={intraList} />}
         />
         <div className="flex items-center bg-muted rounded-full p-0.5 shrink-0">
           {item.chains.slice(0, 3).map((chainItem, index) => (

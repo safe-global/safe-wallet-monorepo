@@ -79,7 +79,8 @@ const ADDR_A = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 const buildHookReturn = (overrides: Partial<ReturnType<typeof useAccountsModalItems>> = {}) => ({
   trustedItems: [],
   otherItems: [safeItem('1', ADDR_A)],
-  getMatch: () => undefined,
+  getSimilarity: () => undefined,
+  similaritySeverity: null,
   isLoading: false,
   isOwnedSafesError: false,
   refetchOwnedSafes: jest.fn(),
@@ -167,6 +168,30 @@ describe('AccountsModal', () => {
 
     expect(screen.queryByTestId('empty-pinned-list')).not.toBeInTheDocument()
     expect(screen.queryByTestId('safe-item-card-mock')).not.toBeInTheDocument()
+  })
+
+  it('shows an amber similar-address banner for a one-end (caution) similarity', () => {
+    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ similaritySeverity: 'warning' }))
+
+    render(<AccountsModal open onClose={jest.fn()} />)
+
+    expect(screen.getByTestId('similar-address-alert')).toHaveAttribute('data-severity', 'warning')
+  })
+
+  it('shows a red similar-address banner when a both-ends (high risk) similarity is present', () => {
+    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ similaritySeverity: 'error' }))
+
+    render(<AccountsModal open onClose={jest.fn()} />)
+
+    expect(screen.getByTestId('similar-address-alert')).toHaveAttribute('data-severity', 'error')
+  })
+
+  it('hides the similar-address banner when there are no similarities', () => {
+    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ similaritySeverity: null }))
+
+    render(<AccountsModal open onClose={jest.fn()} />)
+
+    expect(screen.queryByTestId('similar-address-alert')).not.toBeInTheDocument()
   })
 
   it('shows the connect-wallet hint and still lists local safes when no wallet is connected', () => {

@@ -22,7 +22,8 @@ import MultiSafeItemCard from './MultiSafeItemCard'
 import { useAccountsModalItems } from './useAccountsModalItems'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import type { AllSafeItems } from '@/hooks/safes'
-import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
+import type { SelectionSimilarity } from '@/features/address-poisoning'
+import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
 
 interface AccountsModalProps {
   open: boolean
@@ -34,7 +35,7 @@ interface AccountsModalProps {
 }
 
 interface SectionOptions {
-  getMatch: (address: string) => SimilarityMatch | undefined
+  getSimilarity: (address: string) => SelectionSimilarity | undefined
   onClose: () => void
   headerPaddingTopClass: string
   openSafeTrackingLabel: OVERVIEW_LABELS
@@ -58,12 +59,14 @@ const renderSection = (title: string, items: AllSafeItems, opts: SectionOptions)
       {items.length === 0 && opts.emptyHint && (
         <p className="px-2 pb-2 pt-1 text-sm text-muted-foreground">{opts.emptyHint}</p>
       )}
-      {items.map((item) =>
-        isMultiChainSafeItem(item) ? (
+      {items.map((item) => {
+        const similarity = opts.getSimilarity(item.address)
+        return isMultiChainSafeItem(item) ? (
           <MultiSafeItemCard
             key={item.address}
             item={item}
-            match={opts.getMatch(item.address)}
+            match={similarity?.match}
+            intraList={similarity?.intraList}
             onClose={opts.onClose}
             openSafeTrackingLabel={opts.openSafeTrackingLabel}
           />
@@ -71,12 +74,13 @@ const renderSection = (title: string, items: AllSafeItems, opts: SectionOptions)
           <SafeItemCard
             key={`${item.chainId}:${item.address}`}
             safeItem={item}
-            match={opts.getMatch(item.address)}
+            match={similarity?.match}
+            intraList={similarity?.intraList}
             onClose={opts.onClose}
             openSafeTrackingLabel={opts.openSafeTrackingLabel}
           />
-        ),
-      )}
+        )
+      })}
     </div>
   )
 }
@@ -93,8 +97,16 @@ const AccountsModal = ({
   const isWalletConnected = Boolean(wallet)
   const connectWallet = useConnectWallet()
   const router = useRouter()
-  const { trustedItems, otherItems, getMatch, isLoading, isOwnedSafesError, refetchOwnedSafes, isQualifiedSafe } =
-    useAccountsModalItems({ search, open })
+  const {
+    trustedItems,
+    otherItems,
+    getSimilarity,
+    similaritySeverity,
+    isLoading,
+    isOwnedSafesError,
+    refetchOwnedSafes,
+    isQualifiedSafe,
+  } = useAccountsModalItems({ search, open })
 
   // Bottom-fade scroll hint, shown only while more rows lie below the fold.
   const { setScrollNode, showFade } = useBottomScrollFade([
@@ -103,6 +115,7 @@ const AccountsModal = ({
     otherItems.length,
     isWalletConnected,
     isOwnedSafesError,
+    similaritySeverity,
   ])
 
   // Unmount the dialog while the wallet-connect modal is open: the shadcn Dialog
@@ -170,8 +183,13 @@ const AccountsModal = ({
             </p>
           ) : (
             <>
+              {similaritySeverity && (
+                <div className="px-2 pb-2 pt-1">
+                  <SimilarAddressAlert severity={similaritySeverity} />
+                </div>
+              )}
               {renderSection('Trusted Safes', trustedItems, {
-                getMatch,
+                getSimilarity,
                 onClose,
                 headerPaddingTopClass: 'pt-1',
                 openSafeTrackingLabel: trackingLabel,
@@ -203,7 +221,7 @@ const AccountsModal = ({
                 ),
               })}
               {renderSection('Other Safes', otherItems, {
-                getMatch,
+                getSimilarity,
                 onClose,
                 headerPaddingTopClass: 'pt-2',
                 openSafeTrackingLabel: trackingLabel,

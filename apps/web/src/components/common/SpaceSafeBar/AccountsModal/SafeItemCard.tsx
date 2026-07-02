@@ -32,6 +32,8 @@ import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity
 interface SafeItemCardProps {
   safeItem: SafeItem
   match?: SimilarityMatch
+  /** True when the match is against another safe in this list (not a trusted anchor) — tunes the tooltip copy. */
+  intraList?: boolean
   onClose: () => void
   openSafeTrackingLabel?: OVERVIEW_LABELS
 }
@@ -39,6 +41,7 @@ interface SafeItemCardProps {
 const SafeItemCard = ({
   safeItem,
   match,
+  intraList,
   onClose,
   openSafeTrackingLabel = OVERVIEW_LABELS.top_bar,
 }: SafeItemCardProps) => {
@@ -104,6 +107,7 @@ const SafeItemCard = ({
 
       {/* Name + address + optional status badge */}
       <div data-testid="name-column" className="flex min-w-0 w-[160px] shrink-0 flex-col gap-0.5 overflow-hidden">
+        <SimilarityFlag match={match} intraList={intraList} />
         <div className="flex items-center gap-1 min-w-0">
           <span className="truncate text-sm font-semibold text-foreground">{displayName}</span>
           {addressBookItem?.name && addressBookItem.source && <NameSourceIcon source={addressBookItem.source} />}
@@ -112,7 +116,6 @@ const SafeItemCard = ({
           <ShortAddressWithTooltip address={safeItem.address} similarity={match} />
           <CopyAddressButton address={safeItem.address} />
         </div>
-        <SimilarityFlag match={match} />
         {!undeployedSafe && safeItem.isReadOnly && !match && <ReadOnlyBadge />}
       </div>
 

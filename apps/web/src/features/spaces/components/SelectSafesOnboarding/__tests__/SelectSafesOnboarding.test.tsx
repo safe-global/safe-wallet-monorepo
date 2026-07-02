@@ -50,6 +50,7 @@ jest.mock('../hooks/useOnboardingSafes', () => ({
     trustedSafes: mockTrustedSafes,
     ownedSafes: mockOwnedSafes,
     similarAddresses: new Set<string>(),
+    similarities: new Map(),
     handleSearch: jest.fn(),
   }),
 }))

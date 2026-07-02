@@ -12,6 +12,8 @@ import { type AllSafeItems } from '@/hooks/safes'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import OnboardingSafesList from './components/OnboardingSafesList'
+import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import ConnectWalletHint from '../ConnectWalletHint'
 import useOnboardingNavigation from './hooks/useOnboardingNavigation'
 import useOnboardingSafes from './hooks/useOnboardingSafes'
@@ -32,6 +34,15 @@ const SelectSafesOnboarding = (): ReactElement => {
   const { spaceId, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
   const { trustedSafes, ownedSafes, similarities, handleSearch, hasNoSafes } = useOnboardingSafes()
   const allSafes = useMemo<AllSafeItems>(() => [...trustedSafes, ...ownedSafes], [trustedSafes, ownedSafes])
+  // Banner tone: red if any both-ends look-alike among the candidates, else amber if any one-end, else none.
+  const similaritySeverity = useMemo(() => {
+    let hasWarn = false
+    for (const { match } of similarities.values()) {
+      if (match?.severity === Severity.CRITICAL) return 'error' as const
+      if (match) hasWarn = true
+    }
+    return hasWarn ? ('warning' as const) : null
+  }, [similarities])
   const { formMethods, onSubmit, selectedSafesLength, error, isSubmitting } = useOnboardingSubmit(
     spaceId,
     redirectToNextStep,
@@ -90,7 +101,9 @@ const SelectSafesOnboarding = (): ReactElement => {
           </Alert>
         ) : (
           <>
-            <InputGroup className="bg-card px-2 shrink-0">
+            {similaritySeverity && <SimilarAddressAlert severity={similaritySeverity} className="shrink-0" />}
+            {/* Keep search reachable while scrolling the list — the intro/banner above still scroll away. */}
+            <InputGroup className="sticky top-0 z-10 bg-card px-2 shrink-0">
               <InputGroupAddon>
                 <Search className="size-4" />
               </InputGroupAddon>

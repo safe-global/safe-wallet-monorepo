@@ -4,7 +4,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { AccountItem } from '@/features/myAccounts'
 import Identicon from '@/components/common/Identicon'
 import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
-import EthHashInfo from '@/components/common/EthHashInfo'
+import { ShortAddressWithTooltip } from '@/components/common/SpaceSafeBar/AccountsModal/shared'
 import { SimilarityFlag } from '@/features/address-poisoning'
 import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
@@ -82,20 +82,9 @@ export const SafeCardLayout = ({
           <span className="truncate text-base font-medium text-foreground">{name || shortenAddress(address)}</span>
         </div>
         <div className="flex min-w-0 items-center gap-1.5">
-          <span className="block min-w-0 break-all text-xs text-muted-foreground">
-            {match ? (
-              <EthHashInfo
-                address={address}
-                showAvatar={false}
-                showCopyButton={false}
-                showPrefix={false}
-                shortAddress={false}
-                similarity={match}
-              />
-            ) : (
-              shortenAddress(address)
-            )}
-          </span>
+          {/* Short address (first4…last4) with the matching chars highlighted; hover reveals the full
+              address — same pattern as the All Accounts window. */}
+          <ShortAddressWithTooltip address={address} similarity={match} />
           <CopyAddressIconButton address={address} />
         </div>
       </div>

@@ -112,7 +112,9 @@ const SrcEthHashInfo = ({
       <>
         {address.slice(0, 2)}
         {frontLen > 0 && <b style={hlStyle}>{address.slice(2, frontEnd)}</b>}
-        {showShort ? '…' : address.slice(frontEnd, backStart)}
+        {/* Collapse the middle only when the caller explicitly asked for a short address — NOT merely on
+            mobile — so a look-alike shown for comparison always renders its full middle. */}
+        {shortAddress ? '…' : address.slice(frontEnd, backStart)}
         {backLen > 0 && <b style={hlStyle}>{address.slice(backStart)}</b>}
       </>
     )
@@ -183,7 +185,15 @@ const SrcEthHashInfo = ({
 
         <div className={classnames(css.addressContainer, { [css.inline]: onlyName })}>
           {(!onlyName || !name) && (
-            <Box fontWeight="inherit" fontSize="inherit" overflow="hidden" textOverflow="ellipsis">
+            <Box
+              fontWeight="inherit"
+              fontSize="inherit"
+              // A similarity row must show every character for comparison — wrap the full address instead
+              // of clipping it with an ellipsis.
+              overflow={similarity ? 'visible' : 'hidden'}
+              textOverflow={similarity ? 'clip' : 'ellipsis'}
+              sx={similarity ? { whiteSpace: 'normal', wordBreak: 'break-all' } : undefined}
+            >
               {copyAddress ? (
                 <CopyAddressButton prefix={prefix} address={address} copyPrefix={shouldCopyPrefix} trusted={trusted}>
                   {addressElement}

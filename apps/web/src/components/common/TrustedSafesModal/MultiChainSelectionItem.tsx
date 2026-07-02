@@ -83,7 +83,9 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
     setExpanded((prev) => !prev)
   }
 
-  const statusChips = <SimilarityFlag match={multiSafe.similarity?.match} intraList={multiSafe.similarity?.intraList} />
+  const similarityFlag = (
+    <SimilarityFlag match={multiSafe.similarity?.match} intraList={multiSafe.similarity?.intraList} />
+  )
 
   return (
     <div data-testid="safe-list-item" className={classnames(css.multiListItem, css.listItem, 'my-0.5')}>
@@ -107,9 +109,8 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
                 hasExplorer
                 showPrefix={false}
                 similarity={multiSafe.similarity?.match}
-              >
-                {statusChips}
-              </AccountItem.Info>
+                flag={similarityFlag}
+              />
               <AccountItem.ChainBadge safes={safes} />
               <AccountItem.Balance fiatTotal={totalFiatValue?.toString()} isLoading={totalFiatValue === undefined} />
               <AccountItem.ContextMenu

@@ -29,6 +29,8 @@ import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity
 interface MultiSafeItemCardProps {
   item: MultiChainSafeItem
   match?: SimilarityMatch
+  /** True when the match is against another safe in this list (not a trusted anchor) — tunes the tooltip copy. */
+  intraList?: boolean
   onClose: () => void
   openSafeTrackingLabel?: OVERVIEW_LABELS
 }
@@ -36,6 +38,7 @@ interface MultiSafeItemCardProps {
 const MultiSafeItemCard = ({
   item,
   match,
+  intraList,
   onClose,
   openSafeTrackingLabel = OVERVIEW_LABELS.top_bar,
 }: MultiSafeItemCardProps) => {
@@ -88,6 +91,7 @@ const MultiSafeItemCard = ({
 
             {/* Name + address */}
             <div className="flex min-w-0 w-[160px] shrink-0 flex-col gap-0.5 overflow-hidden">
+              <SimilarityFlag match={match} intraList={intraList} />
               <div className="flex items-center gap-1 min-w-0">
                 <span className="truncate text-sm font-semibold text-foreground">{displayName}</span>
                 {addressBookItem?.name && addressBookItem.source && <NameSourceIcon source={addressBookItem.source} />}
@@ -96,7 +100,6 @@ const MultiSafeItemCard = ({
                 <ShortAddressWithTooltip address={address} similarity={match} />
                 <CopyAddressButton address={address} />
               </div>
-              <SimilarityFlag match={match} />
             </div>
 
             {/* Stacked chain logos */}

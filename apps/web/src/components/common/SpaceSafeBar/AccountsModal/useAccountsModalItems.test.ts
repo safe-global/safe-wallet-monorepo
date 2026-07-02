@@ -40,9 +40,9 @@ jest.mock('@/store', () => ({
   useAppSelector: () => ({ orderBy: mockOrderBy }),
 }))
 
-// Mode B anchor detection reads the anchor-index selector; stub it (this test uses a bare selector mock).
+// Mode B similarity detection reads the anchor-index selector; stub it (this test uses a bare selector mock).
 jest.mock('@/features/address-poisoning', () => ({
-  useListSimilarities: () => new Map(),
+  useSelectionSimilarities: () => new Map(),
 }))
 
 const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock

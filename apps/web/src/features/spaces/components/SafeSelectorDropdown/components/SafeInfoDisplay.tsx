@@ -31,11 +31,11 @@ const SafeInfoDisplay = ({ name, address, className, threshold, owners, flag }: 
         {threshold !== undefined && owners !== undefined && <ThresholdBadge threshold={threshold} owners={owners} />}
       </div>
       <div className="flex flex-col items-start flex-1 min-w-0">
+        {flag}
         <div className="flex items-center gap-1.5 min-w-0 max-w-full">
           <Typography variant="paragraph-small-medium" className="truncate">
             {displayName}
           </Typography>
-          {flag}
         </div>
         <div className="flex items-center gap-1 min-w-0">
           <Typography variant="paragraph-mini" color="muted" className="truncate">

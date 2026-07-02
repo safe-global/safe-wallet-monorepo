@@ -70,7 +70,9 @@ const useOnboardingSafes = () => {
     () => [...trustedSafeItems, ...ownedSafeItems].map((s) => s.address),
     [trustedSafeItems, ownedSafeItems],
   )
-  const selectionSimilarities = useSelectionSimilarities(similarityAddresses)
+  // flagAnchors: also flag a trusted (anchor) Safe that looks like another listed Safe — the list mixes
+  // trusted + owned, and the user wants two look-alikes flagged regardless of which is trusted.
+  const selectionSimilarities = useSelectionSimilarities(similarityAddresses, { flagAnchors: true })
   const similarities = useMemo(() => {
     const map = new Map<string, SelectionSimilarity>()
     for (const [address, similarity] of selectionSimilarities) map.set(address.toLowerCase(), similarity)

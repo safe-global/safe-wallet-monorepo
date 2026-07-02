@@ -3,7 +3,7 @@ import { getAddress } from 'ethers'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import type { ListAnnotation } from '@safe-global/utils/utils/addressSimilarity.types'
 import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
-import useListSimilarities from '@/features/address-poisoning/hooks/useListSimilarities'
+import { useListSimilarities } from '@/features/address-poisoning'
 import { useManageNestedSafes } from './useManageNestedSafes'
 
 jest.mock('@/hooks/useSafeAddress', () => ({ __esModule: true, default: () => '0xParentSafe' }))

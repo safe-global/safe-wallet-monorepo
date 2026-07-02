@@ -15,8 +15,8 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { showNotification } from '@/store/notificationsSlice'
-import { useListSimilarities } from '@/features/address-poisoning'
-import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
+import { useSelectionSimilarities, type SelectionSimilarity } from '@/features/address-poisoning'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { trackEvent } from '@/services/analytics'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 
@@ -122,15 +122,25 @@ export function useAccountsModalItems({ search, open }: { search: string; open: 
     [otherMultiChainSafes, otherSingleSafes, comparator],
   )
 
-  // Mode B: flag any listed safe that resembles a trusted anchor (impostor-next-to-real).
+  // Mode B: flag any listed safe that resembles a trusted anchor (impostor-next-to-real) OR another
+  // safe in this list (two owned look-alikes). Anchor + intra-list combined, like the selection surfaces.
   const similarityAddresses = useMemo(() => allItems.map((item) => item.address), [allItems])
-  const similarities = useListSimilarities(similarityAddresses)
-  const getMatch = useMemo(() => {
-    const byLower = new Map<string, SimilarityMatch>()
-    similarities.forEach((annotation) => {
-      if (annotation.match) byLower.set(annotation.address.toLowerCase(), annotation.match)
+  const similarities = useSelectionSimilarities(similarityAddresses, { flagAnchors: true })
+  const { getSimilarity, similaritySeverity } = useMemo(() => {
+    const byLower = new Map<string, SelectionSimilarity>()
+    let hasCritical = false
+    let hasWarn = false
+    similarities.forEach((similarity, address) => {
+      if (!similarity.match) return
+      byLower.set(address.toLowerCase(), similarity)
+      if (similarity.match.severity === Severity.CRITICAL) hasCritical = true
+      else hasWarn = true
     })
-    return (address: string): SimilarityMatch | undefined => byLower.get(address.toLowerCase())
+    return {
+      getSimilarity: (address: string): SelectionSimilarity | undefined => byLower.get(address.toLowerCase()),
+      // Banner tone: red if any both-ends look-alike, else amber if any one-end, else no banner.
+      similaritySeverity: hasCritical ? ('error' as const) : hasWarn ? ('warning' as const) : null,
+    }
   }, [similarities])
 
   const matchesSearch = (item: SafeItem | MultiChainSafeItem, query: string): boolean => {
@@ -169,7 +179,8 @@ export function useAccountsModalItems({ search, open }: { search: string; open: 
   return {
     trustedItems,
     otherItems,
-    getMatch,
+    getSimilarity,
+    similaritySeverity,
     // In workspace context the exclusion set depends on space safes — show the skeleton
     // until both arrive, otherwise the user briefly sees safes that ARE in the workspace
     // before the filter kicks in (contradicting the "Safes not in this workspace" title).

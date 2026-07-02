@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import { useBottomScrollFade } from '@/hooks/useBottomScrollFade'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useListSimilarities } from '@/features/address-poisoning'
+import { useSelectionSimilarities } from '@/features/address-poisoning'
 import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
@@ -83,9 +83,10 @@ const SafeDropdownContainer = ({
   const resolveName = useSafeNameResolver()
   const wallet = useWallet()
 
-  // Mode B: flag any dropdown row that resembles a trusted anchor (impostor-next-to-real).
+  // Mode B: flag any dropdown row that resembles a trusted anchor OR another listed row. Anchors are
+  // flagged too (display surface), covering both data sources this dropdown shows (space + trusted safes).
   const addresses = useMemo(() => items.map((item) => item.address), [items])
-  const similarities = useListSimilarities(addresses)
+  const similarities = useSelectionSimilarities(addresses, { flagAnchors: true })
 
   // Multi-chain items stay visible even when currently selected so the user can expand and switch chains.
   const structuralItems = items.filter((item) => item.chains.length > 1 || item.id !== selectedItemId)
@@ -123,9 +124,11 @@ const SafeDropdownContainer = ({
     }
 
     return filteredItems.map((item) => {
-      const match = similarities.get(item.address)?.match
+      const similarity = similarities.get(item.address)
+      const match = similarity?.match
+      const intraList = similarity?.intraList
       if (item.chains.length > 1) {
-        return <MultiChainSafeItemRow key={item.id} item={item} match={match} />
+        return <MultiChainSafeItemRow key={item.id} item={item} match={match} intraList={intraList} />
       }
       return (
         <SelectItem
@@ -133,7 +136,7 @@ const SafeDropdownContainer = ({
           value={item.id}
           className="h-auto py-4 px-4 rounded-lg my-1 data-[state=checked]:bg-muted hover:bg-muted/30 cursor-pointer"
         >
-          <SafeItem {...item} match={match} />
+          <SafeItem {...item} match={match} intraList={intraList} />
         </SelectItem>
       )
     })

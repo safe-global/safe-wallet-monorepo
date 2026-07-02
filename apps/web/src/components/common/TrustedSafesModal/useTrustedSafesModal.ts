@@ -103,8 +103,9 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     return allSafes?.map((safe) => safe.address) ?? []
   }, [allSafes])
 
-  // Combined anchor + intra-list detection (Mode B). Keyed by lowercase address for lookup.
-  const selectionSimilarities = useSelectionSimilarities(addresses)
+  // Combined anchor + intra-list detection (Mode B). flagAnchors so two trusted look-alikes are flagged
+  // too. Keyed by lowercase address for lookup.
+  const selectionSimilarities = useSelectionSimilarities(addresses, { flagAnchors: true })
   const similarityByAddress = useMemo(() => {
     const map = new Map<string, SelectionSimilarity>()
     for (const [address, similarity] of selectionSimilarities) map.set(address.toLowerCase(), similarity)

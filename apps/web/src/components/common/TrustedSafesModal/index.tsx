@@ -3,7 +3,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useIsQualifiedSafe } from '@/features/spaces'
-import SecurityBanner from './SecurityBanner'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
 import TrustedSafesList from './TrustedSafesList'
 import SimilarityConfirmDialog from './SimilarityConfirmDialog'
 import SelectAllConfirmDialog from './SelectAllConfirmDialog'
@@ -41,6 +42,11 @@ const TrustedSafesModal = ({ modal }: TrustedSafesModalProps) => {
 
   const isInSpace = useIsQualifiedSafe()
 
+  // Always-on "verify before you trust" notice; escalate to red if any candidate is a both-ends look-alike.
+  const bannerSeverity = availableItems.some((item) => item.similarity?.match?.severity === Severity.CRITICAL)
+    ? 'error'
+    : 'warning'
+
   const pendingItem = pendingConfirmation
     ? availableItems.find((s) => s.address.toLowerCase() === pendingConfirmation)
     : null
@@ -54,7 +60,12 @@ const TrustedSafesModal = ({ modal }: TrustedSafesModalProps) => {
           </DialogHeader>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-6 pt-4">
-            <SecurityBanner title="Verify before you trust" />
+            <SimilarAddressAlert
+              severity={bannerSeverity}
+              className="mb-4"
+              title="Verify before you trust"
+              description="Some Safes linked to your wallet may be malicious or impersonations (address poisoning). Only trust Safes you can verify."
+            />
 
             {isInSpace && (
               <Alert className="mb-4 border-transparent bg-[var(--color-info-background)]" data-testid="space-notice">

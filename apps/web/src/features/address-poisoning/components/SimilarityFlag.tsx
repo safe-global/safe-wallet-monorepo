@@ -33,6 +33,7 @@ const SimilarityFlag = ({
 
   const isCritical = match.severity === Severity.CRITICAL
   const label = isCritical ? 'High risk' : 'Caution'
+  const toneColor = isCritical ? 'var(--color-error-dark)' : 'var(--color-warning-dark)'
 
   let tip: string
   if (intraList) {
@@ -57,6 +58,10 @@ const SimilarityFlag = ({
         component="span"
         role="status"
         aria-label={tip}
+        // Colour set via inline `style` (not just sx) so host hover/focus rules that force a text
+        // colour on descendants (e.g. shadcn SelectItem's `focus:**:text-accent-foreground`) can't
+        // repaint the pill on hover.
+        style={{ color: toneColor }}
         sx={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -71,11 +76,18 @@ const SimilarityFlag = ({
           lineHeight: 1.4,
           whiteSpace: 'nowrap',
           cursor: 'default',
+          // Hug the label — never stretch to fill a flex-column parent (kept the pill full-width before).
+          width: 'fit-content',
+          maxWidth: '100%',
           bgcolor: isCritical ? 'var(--color-error-background)' : 'var(--color-warning-background)',
-          color: isCritical ? 'var(--color-error-dark)' : 'var(--color-warning-dark)',
         }}
       >
-        <TriangleAlert size={12} style={{ flexShrink: 0 }} />
+        {/* Pin colour AND size inline so host rules can't repaint (SelectItem's focus:**:text-…) or
+            resize (SelectItem's [&_svg]:size-4) the icon — keeps the pill identical across surfaces. */}
+        <TriangleAlert
+          size={12}
+          style={{ flexShrink: 0, width: 12, height: 12, color: toneColor, stroke: toneColor }}
+        />
         {label}
       </Box>
     </Tooltip>

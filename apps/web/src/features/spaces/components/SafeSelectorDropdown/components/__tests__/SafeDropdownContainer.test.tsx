@@ -63,7 +63,7 @@ jest.mock('@/components/common/SafeListSortToggle', () => ({
 
 // Mode B similarity detection reads the anchor-index selector; stub it (store-free container test).
 jest.mock('@/features/address-poisoning', () => ({
-  useListSimilarities: () => new Map(),
+  useSelectionSimilarities: () => new Map(),
 }))
 
 const createItem = (overrides: Partial<SafeItemData> = {}): SafeItemData => ({

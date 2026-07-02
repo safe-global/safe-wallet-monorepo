@@ -173,7 +173,7 @@ describe('useOnboardingSafes', () => {
         },
       })
 
-      // Only the impostor (owned) is flagged; the trusted anchor itself is not.
+      // Pure anchor hit: only the impostor (owned) is flagged; the trusted original it imitates is not.
       expect(isFlagged(result.current.similarities, addr2)).toBe(true)
       expect(isFlagged(result.current.similarities, addr1)).toBe(false)
     })

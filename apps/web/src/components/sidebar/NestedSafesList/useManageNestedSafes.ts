@@ -8,7 +8,7 @@ import { useCuratedNestedSafes } from '@/hooks/useCuratedNestedSafes'
 import { detectSimilarAddresses, buildSimilarityIndex } from '@safe-global/utils/utils/addressSimilarity'
 import type { SimilarityDetectionResult, SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import useListSimilarities from '@/features/address-poisoning/hooks/useListSimilarities'
+import { useListSimilarities } from '@/features/address-poisoning'
 
 const toggleAddress = (prev: Set<string>, normalizedAddress: string): Set<string> => {
   const next = new Set(prev)

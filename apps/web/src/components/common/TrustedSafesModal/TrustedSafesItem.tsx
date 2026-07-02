@@ -43,7 +43,6 @@ const TrustedSafesItem = ({ safe, onToggle }: TrustedSafesItemProps) => {
           awaitingConfirmation={safeOverview.awaitingConfirmation ?? 0}
         />
       )}
-      <SimilarityFlag match={safe.similarity?.match} intraList={safe.similarity?.intraList} />
     </>
   )
 
@@ -59,6 +58,7 @@ const TrustedSafesItem = ({ safe, onToggle }: TrustedSafesItemProps) => {
         showCopyButton
         hasExplorer
         similarity={safe.similarity?.match}
+        flag={<SimilarityFlag match={safe.similarity?.match} intraList={safe.similarity?.intraList} />}
       >
         {statusChips}
       </AccountItem.Info>

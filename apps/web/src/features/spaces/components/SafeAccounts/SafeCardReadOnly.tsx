@@ -30,6 +30,8 @@ import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity
 interface SafeCardReadOnlyProps {
   safe: SafeItem | MultiChainSafeItem
   match?: SimilarityMatch
+  /** True when the match is against another listed safe (not a trusted anchor) — tunes the tooltip copy. */
+  intraList?: boolean
   hideContextMenu?: boolean
   className?: string
   showPending?: boolean
@@ -41,6 +43,7 @@ interface SafeCardReadOnlyProps {
 const SafeCardReadOnly = ({
   safe,
   match,
+  intraList,
   className,
   showPending = true,
   onClick,
@@ -112,15 +115,23 @@ const SafeCardReadOnly = ({
           </span>
 
           <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-            <SimilarityFlag match={match} />
+            <SimilarityFlag match={match} intraList={intraList} />
 
-            <div className="flex min-w-0 items-center gap-2">
-              <span className="truncate text-base font-medium text-foreground">
-                {displayName || shortenAddress(safe.address)}
-              </span>
-            </div>
+            {/* Named safes keep the name as the bold title. */}
+            {displayName && (
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="truncate text-base font-medium text-foreground">{displayName}</span>
+              </div>
+            )}
             <div className="flex min-w-0 items-center gap-1.5">
-              <span className="block min-w-0 break-all text-xs text-muted-foreground">
+              {/* A flagged row shows the FULL highlighted address (never shortened) so the user can
+                  compare every character; nameless rows promote the address to the primary line. */}
+              <span
+                className={cn(
+                  'block min-w-0 break-all',
+                  displayName ? 'text-xs text-muted-foreground' : 'text-sm font-medium text-foreground',
+                )}
+              >
                 {match ? (
                   <EthHashInfo
                     address={safe.address}

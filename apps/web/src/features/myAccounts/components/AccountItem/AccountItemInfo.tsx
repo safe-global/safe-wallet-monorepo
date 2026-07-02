@@ -11,6 +11,7 @@ export interface AccountItemInfoProps {
   name?: string
   chainName?: string // For multi-chain items, show chain name instead of address
   children?: ReactNode // For chips or other content below the address
+  flag?: ReactNode // Rendered above the name (e.g. an address-poisoning similarity badge)
   showPrefix?: boolean
   fullAddress?: boolean // Show full address instead of truncated
   addressBookNameSource?: ContactSource
@@ -33,6 +34,7 @@ function AccountItemInfo({
   name,
   chainName,
   children,
+  flag,
   showPrefix = true,
   fullAddress = false,
   addressBookNameSource,
@@ -45,6 +47,7 @@ function AccountItemInfo({
 }: AccountItemInfoProps) {
   return (
     <div className={css.accountItemInfo} data-testid={testId}>
+      {flag}
       <Typography
         variant="body2"
         component="div"

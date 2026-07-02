@@ -169,12 +169,13 @@ const AddAccounts = ({
     spaceSafes,
   ])
 
-  // Selection surface: anchor (resembles a trusted safe) + intra-list (two candidates collide) — see useSelectionSimilarities.
+  // anchor (resembles a trusted safe) + intra-list (two candidates collide); flagAnchors so a trusted
+  // Safe that looks like another listed Safe is flagged too.
   const similarityAddresses = useMemo(
     () => [...trustedSafes, ...ownedSafes].map((s) => s.address),
     [trustedSafes, ownedSafes],
   )
-  const selectionSimilarities = useSelectionSimilarities(similarityAddresses)
+  const selectionSimilarities = useSelectionSimilarities(similarityAddresses, { flagAnchors: true })
   const similarities = useMemo(() => {
     const map = new Map<string, SelectionSimilarity>()
     for (const [address, similarity] of selectionSimilarities) map.set(address.toLowerCase(), similarity)
