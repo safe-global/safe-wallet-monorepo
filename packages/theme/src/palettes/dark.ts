@@ -9,6 +9,7 @@ const darkPalette: ColorPalette = {
     primary: '#FFFFFF',
     secondary: '#636669',
     muted: '#737373',
+    mutedStrong: '#A1A3A7',
     disabled: 'rgba(255, 255, 255, 0.3)',
     contrast: '#000000',
   },

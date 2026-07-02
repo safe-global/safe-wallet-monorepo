@@ -3,10 +3,11 @@ import { useContext, useRef, useState } from 'react'
 import { Alert, Divider, MenuItem, Popover, SvgIcon, Tooltip, Typography } from '@mui/material'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import ArrowUpRightIcon from '@/public/images/common/arrow-up-right.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import CaretDownIcon from '@/public/images/common/caret-down.svg'
 import TokenIcon from '@/components/common/TokenIcon'
+import PlanStatusChip from '../PlanStatusChip'
+import { usePlanStatus } from '../PlanStatusChip/usePlanStatus'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
@@ -26,8 +27,6 @@ const onActivateKey = (open: () => void) => (e: KeyboardEvent) => {
     open()
   }
 }
-const HOW_FEES_WORK_URL = 'https://help.safe.global/articles/9993850744-safewallet-gas-fees-faq'
-
 const TotalOutgoingSection = ({ totalOutgoing }: { totalOutgoing: TotalOutgoing }): ReactElement => (
   <div className={css.totalOutgoing}>
     <Typography variant="body2" fontWeight={700}>
@@ -279,6 +278,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
     safeHasEnoughGas,
   } = props
   const { gtfPaymentMode, setGtfPaymentMode } = useContext(SafeTxContext)
+  const planStatus = usePlanStatus()
   const chain = useCurrentChain()
   const nativeDisplay = {
     symbol: chain?.nativeCurrency.symbol ?? '',
@@ -309,10 +309,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
         <Typography variant="subtitle2" fontWeight={700}>
           Fees
         </Typography>
-        <a href={HOW_FEES_WORK_URL} target="_blank" rel="noreferrer" className={css.howFeesWork}>
-          How fees work
-          <SvgIcon component={ArrowUpRightIcon} inheritViewBox sx={{ fontSize: '16px' }} />
-        </a>
+        <PlanStatusChip planStatus={planStatus} />
       </div>
 
       <div className={css.feeCard}>

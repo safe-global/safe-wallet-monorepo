@@ -1,0 +1,85 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: 32px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.chip:hover {
+  opacity: 0.85;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.text {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.planName {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--color-text-primary);
+}
+
+.status {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.separator {
+  color: var(--color-text-primary);
+}
+
+.arrow {
+  color: var(--color-text-muted);
+}
+
+.success {
+  background-color: var(--color-success-background);
+}
+
+.success .status {
+  color: var(--color-success-dark);
+}
+
+.success .dot {
+  background-color: var(--color-success-main);
+}
+
+.warning {
+  background-color: var(--color-warning-background);
+}
+
+.warning .status {
+  color: var(--color-warning-dark);
+}
+
+.warning .dot {
+  background-color: var(--color-warning-main);
+}
+
+.error {
+  background-color: var(--color-error-background);
+}
+
+.error .status {
+  color: var(--color-error-dark);
+}
+
+.error .dot {
+  background-color: var(--color-error-main);
+}

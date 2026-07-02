@@ -1,0 +1,396 @@
+.paper {
+  width: 560px;
+  max-width: calc(100vw - 32px);
+  border-radius: 16px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.close {
+  color: var(--color-text-muted-strong);
+}
+
+/* ---- Status pill ---- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.pillDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.success {
+  background-color: var(--color-success-background);
+  color: var(--color-success-dark);
+}
+
+.success .pillDot {
+  background-color: var(--color-success-main);
+}
+
+.warning {
+  background-color: var(--color-warning-background);
+  color: var(--color-warning-dark);
+}
+
+.warning .pillDot {
+  background-color: var(--color-warning-main);
+}
+
+.error {
+  background-color: var(--color-error-background);
+  color: var(--color-error-dark);
+}
+
+.error .pillDot {
+  background-color: var(--color-error-main);
+}
+
+/* ---- Plan heading + safes selector ---- */
+.planLine {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.planHeading {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.planTitle {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 28.8px;
+  letter-spacing: -1px;
+  color: var(--color-text-primary);
+}
+
+.renewal {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--color-text-primary);
+}
+
+.safesSelector {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--color-border-light);
+  border-radius: 24px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.safesSelector:hover {
+  background-color: var(--color-background-main);
+}
+
+.avatarStack {
+  display: inline-flex;
+  align-items: center;
+}
+
+.avatar {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1.5px solid var(--color-background-paper);
+}
+
+.avatar:not(:first-of-type) {
+  margin-left: -8px;
+}
+
+.avatarMore {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  margin-left: -8px;
+  padding: 0 6px;
+  border-radius: 32px;
+  background-color: var(--color-background-main);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.safesLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+/* ---- Usage rows ---- */
+.tiles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 16px 24px 16px 16px;
+  border-radius: 20px;
+  background-color: var(--color-background-main);
+}
+
+.rowLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--color-text-primary);
+}
+
+.rowIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background-color: var(--color-background-muted-secondary);
+  color: var(--color-text-muted);
+}
+
+.rowValue {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.rowDot {
+  align-self: center;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.dotWarning {
+  background-color: var(--color-warning-main);
+}
+
+.dotError {
+  background-color: var(--color-error-main);
+}
+
+.rowRemaining {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--color-text-primary);
+}
+
+.rowTotal {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--color-text-secondary);
+}
+
+/* ---- PAYG footnote ---- */
+.paygFootnote {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.paygLink {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-position: from-font;
+}
+
+/* ---- Workspace promo ---- */
+.promo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.promoTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.promoText {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+/* ---- Plans comparison ---- */
+.plans {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.plansHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.plansTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.compareLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.compareLink:hover {
+  color: var(--color-text-primary);
+}
+
+.plansRow {
+  display: flex;
+  gap: 12px;
+}
+
+.planCard {
+  flex: 1 0 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background-color: var(--color-background-main);
+}
+
+.planCardActive {
+  background-color: var(--color-background-paper);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+.planName {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.planPrice {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.planPriceAmount {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.planPriceUnit {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.planActiveTag {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.featureList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.featureRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+.featureCheck {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--color-success-main);
+}
+
+/* ---- CTA ---- */
+.cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  width: 100%;
+  min-height: 40px;
+  padding: 10px var(--space-3);
+  border-radius: 12px;
+  background-color: var(--color-primary-main);
+  color: var(--color-text-contrast);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.cta:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 600px) {
+  .plansRow {
+    flex-direction: column;
+  }
+}

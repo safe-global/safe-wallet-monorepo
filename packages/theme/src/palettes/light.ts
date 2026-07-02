@@ -9,6 +9,7 @@ const lightPalette: ColorPalette = {
     primary: '#121312',
     secondary: '#A1A3A7',
     muted: '#737373',
+    mutedStrong: '#525252',
     disabled: '#DDDEE0',
     contrast: '#FFFFFF',
   },

@@ -7,6 +7,7 @@ export interface ColorPalette {
     primary: string
     secondary: string
     muted: string
+    mutedStrong: string
     disabled: string
     contrast: string
   }
