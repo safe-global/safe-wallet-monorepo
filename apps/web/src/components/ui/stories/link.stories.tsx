@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { ExternalLink } from 'lucide-react'
 import { Link } from '../link'
 
 const meta = {
@@ -35,6 +36,9 @@ export const AllVariants: Story = {
       </Link>
       <Link href="#" variant="inherit">
         Inherit
+      </Link>
+      <Link href="#" variant="default">
+        <ExternalLink /> With icon
       </Link>
     </div>
   ),

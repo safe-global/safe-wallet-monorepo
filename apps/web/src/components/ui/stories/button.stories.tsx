@@ -98,6 +98,22 @@ export const AllVariants: Story = {
         <div className="flex flex-wrap items-center gap-4">
           <Button>Normal</Button>
           <Button disabled>Disabled</Button>
+          <Button aria-invalid>Invalid</Button>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="mb-4 text-lg font-semibold">Expanded (menu trigger open)</h3>
+        <div className="flex flex-wrap items-center gap-4">
+          <Button variant="outline" aria-expanded>
+            Outline
+          </Button>
+          <Button variant="secondary" aria-expanded>
+            Secondary
+          </Button>
+          <Button variant="ghost" aria-expanded>
+            Ghost
+          </Button>
         </div>
       </div>
 

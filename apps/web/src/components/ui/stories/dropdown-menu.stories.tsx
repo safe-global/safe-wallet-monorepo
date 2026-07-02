@@ -1,11 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuShortcut,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -107,7 +111,7 @@ export const AllVariants: Story = {
         </div>
       </div>
 
-      <div>
+      <div style={{ marginBottom: '2rem' }}>
         <h3 className="mb-4 text-lg font-semibold">With Submenu</h3>
         <div
           style={{
@@ -129,6 +133,110 @@ export const AllVariants: Story = {
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
               <DropdownMenuItem>Item 2</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Item States (destructive, disabled, shortcut)</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <DropdownMenu>
+            <DropdownMenuTrigger render={<Button>Item States</Button>} />
+            <DropdownMenuContent>
+              <DropdownMenuItem>
+                <User />
+                Profile
+                <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+              </DropdownMenuItem>
+              <DropdownMenuItem disabled>
+                <Settings />
+                Settings (disabled)
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive">
+                <LogOut />
+                Delete account
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Inset Items</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <DropdownMenu>
+            <DropdownMenuTrigger render={<Button>Inset Items</Button>} />
+            <DropdownMenuContent>
+              <DropdownMenuLabel inset>Appearance</DropdownMenuLabel>
+              <DropdownMenuItem inset>Light</DropdownMenuItem>
+              <DropdownMenuItem inset>Dark</DropdownMenuItem>
+              <DropdownMenuItem inset>System</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Checkbox Items</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <DropdownMenu>
+            <DropdownMenuTrigger render={<Button>Checkbox Items</Button>} />
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Panels</DropdownMenuLabel>
+              <DropdownMenuCheckboxItem checked>Status bar</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>Activity bar</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem disabled checked>
+                Panel (disabled)
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="mb-4 text-lg font-semibold">Radio Group</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <DropdownMenu>
+            <DropdownMenuTrigger render={<Button>Radio Group</Button>} />
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+              <DropdownMenuRadioGroup value="name">
+                <DropdownMenuRadioItem value="name">Name</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="date">Date</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="size" disabled>
+                  Size (disabled)
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

@@ -99,6 +99,118 @@ export const AllVariants: Story = {
         </div>
       </div>
 
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">With Addon (Block Start)</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <div style={{ width: '300px' }}>
+            <InputGroup>
+              <InputGroupAddon align="block-start">
+                <InputGroupText>Amount</InputGroupText>
+              </InputGroupAddon>
+              <InputGroupInput placeholder="0.00" />
+            </InputGroup>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Button Sizes</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <div style={{ width: '300px' }}>
+            <InputGroup>
+              <InputGroupInput placeholder="Extra small button" />
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton size="xs">Send</InputGroupButton>
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
+          <div style={{ width: '300px' }}>
+            <InputGroup>
+              <InputGroupInput placeholder="Small button" />
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton size="sm">Send</InputGroupButton>
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
+          <div style={{ width: '300px' }}>
+            <InputGroup>
+              <InputGroupInput placeholder="Icon xs button" />
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton size="icon-xs">
+                  <Send />
+                </InputGroupButton>
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
+          <div style={{ width: '300px' }}>
+            <InputGroup>
+              <InputGroupInput placeholder="Icon sm button" />
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton size="icon-sm">
+                  <Send />
+                </InputGroupButton>
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Invalid</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <div style={{ width: '300px' }}>
+            <InputGroup>
+              <InputGroupAddon align="inline-start">
+                <Mail />
+              </InputGroupAddon>
+              <InputGroupInput placeholder="Email" aria-invalid defaultValue="not-an-email" />
+            </InputGroup>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Disabled</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <div style={{ width: '300px' }}>
+            <InputGroup data-disabled="true">
+              <InputGroupAddon align="inline-start">
+                <Search />
+              </InputGroupAddon>
+              <InputGroupInput placeholder="Disabled" disabled />
+            </InputGroup>
+          </div>
+        </div>
+      </div>
+
       <div>
         <h3 className="mb-4 text-lg font-semibold">With Textarea</h3>
         <div

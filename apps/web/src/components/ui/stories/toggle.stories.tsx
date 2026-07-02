@@ -63,7 +63,7 @@ export const AllVariants: Story = {
         </div>
       </div>
 
-      <div>
+      <div style={{ marginBottom: '2rem' }}>
         <h3 className="mb-4 text-lg font-semibold">With Icons</h3>
         <div
           style={{
@@ -81,6 +81,46 @@ export const AllVariants: Story = {
           </Toggle>
           <Toggle variant="outline">
             <Underline />
+          </Toggle>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Disabled</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(120px, max-content))',
+            gap: '1rem',
+            justifyItems: 'start',
+          }}
+        >
+          <Toggle disabled>Disabled</Toggle>
+          <Toggle disabled aria-pressed>
+            Disabled pressed
+          </Toggle>
+          <Toggle variant="outline" disabled>
+            Disabled
+          </Toggle>
+          <Toggle variant="outline" disabled aria-pressed>
+            Disabled pressed
+          </Toggle>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="mb-4 text-lg font-semibold">Invalid</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(120px, max-content))',
+            gap: '1rem',
+            justifyItems: 'start',
+          }}
+        >
+          <Toggle aria-invalid>Invalid</Toggle>
+          <Toggle variant="outline" aria-invalid>
+            Invalid
           </Toggle>
         </div>
       </div>

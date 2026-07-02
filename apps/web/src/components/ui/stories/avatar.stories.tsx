@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Avatar, AvatarImage, AvatarFallback, AvatarBadge, AvatarGroup, AvatarGroupCount } from '../avatar'
-import { Check } from 'lucide-react'
+import { Check, Users } from 'lucide-react'
 
 /**
  * Avatar Component Stories
@@ -82,6 +82,31 @@ export const AllVariants: Story = {
       </div>
 
       <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Fallback on broken image</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(60px, max-content))',
+            gap: '1rem',
+            justifyItems: 'start',
+          }}
+        >
+          <Avatar size="default">
+            <AvatarImage src="https://example.com/does-not-exist.png" alt="Broken" />
+            <AvatarFallback>DF</AvatarFallback>
+          </Avatar>
+          <Avatar size="sm">
+            <AvatarImage src="https://example.com/does-not-exist.png" alt="Broken" />
+            <AvatarFallback>SM</AvatarFallback>
+          </Avatar>
+          <Avatar size="xs">
+            <AvatarImage src="https://example.com/does-not-exist.png" alt="Broken" />
+            <AvatarFallback>XS</AvatarFallback>
+          </Avatar>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
         <h3 className="mb-4 text-lg font-semibold">With Badge</h3>
         <div
           style={{
@@ -101,7 +126,9 @@ export const AllVariants: Story = {
           <Avatar size="sm">
             <AvatarImage src="https://github.com/shadcn.png" alt="Small" />
             <AvatarFallback>SM</AvatarFallback>
-            <AvatarBadge />
+            <AvatarBadge>
+              <Check />
+            </AvatarBadge>
           </Avatar>
           <Avatar size="xs">
             <AvatarImage src="https://github.com/shadcn.png" alt="Extra Small" />
@@ -148,7 +175,7 @@ export const AllVariants: Story = {
               <AvatarGroupCount>+3</AvatarGroupCount>
             </AvatarGroup>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
             <span className="w-20 text-sm text-muted-foreground">Extra Small</span>
             <AvatarGroup>
               <Avatar size="xs">
@@ -163,6 +190,22 @@ export const AllVariants: Story = {
                 <AvatarFallback>U3</AvatarFallback>
               </Avatar>
               <AvatarGroupCount>+3</AvatarGroupCount>
+            </AvatarGroup>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <span className="w-20 text-sm text-muted-foreground">Icon count</span>
+            <AvatarGroup>
+              <Avatar>
+                <AvatarImage src="https://github.com/shadcn.png" alt="User 1" />
+                <AvatarFallback>U1</AvatarFallback>
+              </Avatar>
+              <Avatar>
+                <AvatarImage src="https://github.com/vercel.png" alt="User 2" />
+                <AvatarFallback>U2</AvatarFallback>
+              </Avatar>
+              <AvatarGroupCount>
+                <Users />
+              </AvatarGroupCount>
             </AvatarGroup>
           </div>
         </div>

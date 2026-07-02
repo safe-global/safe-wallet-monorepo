@@ -74,6 +74,12 @@ export const AllVariants: Story = {
               <NativeSelectOption value="option-1">Option 1</NativeSelectOption>
             </NativeSelect>
           </div>
+          <div style={{ width: '200px' }}>
+            <NativeSelect aria-invalid>
+              <NativeSelectOption value="">Invalid</NativeSelectOption>
+              <NativeSelectOption value="option-1">Option 1</NativeSelectOption>
+            </NativeSelect>
+          </div>
         </div>
       </div>
 

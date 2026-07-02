@@ -151,6 +151,38 @@ export const AllVariants: Story = {
         </div>
       </div>
 
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">With Image</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <div style={{ maxWidth: '100%', width: '300px' }}>
+            <Card>
+              <img
+                src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'300'%20height%3D'140'%3E%3Crect%20width%3D'300'%20height%3D'140'%20fill%3D'%236366f1'%2F%3E%3C%2Fsvg%3E"
+                alt="Cover"
+                width={300}
+                height={140}
+              />
+              <CardHeader>
+                <CardTitle>Image First Child</CardTitle>
+                <CardDescription>
+                  Top padding removed, image corners rounded (has-[&gt;img:first-child]:pt-0)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p>Media card with a leading cover image.</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+
       <div>
         <h3 className="mb-4 text-lg font-semibold">All Sizes × Compositions</h3>
         <div style={{ display: 'block' }}>

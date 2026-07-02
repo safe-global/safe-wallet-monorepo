@@ -12,7 +12,7 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'secondary', 'destructive', 'outline', 'ghost', 'link'],
+      options: ['default', 'secondary', 'destructive', 'outline', 'warning', 'success', 'ghost', 'link'],
     },
   },
 } satisfies Meta<typeof Badge>
@@ -38,6 +38,8 @@ export const AllVariants: Story = {
           <Badge variant="secondary">Secondary</Badge>
           <Badge variant="destructive">Destructive</Badge>
           <Badge variant="outline">Outline</Badge>
+          <Badge variant="warning">Warning</Badge>
+          <Badge variant="success">Success</Badge>
           <Badge variant="ghost">Ghost</Badge>
           <Badge variant="link">Link</Badge>
         </div>
@@ -57,6 +59,8 @@ export const AllVariants: Story = {
           <Badge variant="secondary">Updated</Badge>
           <Badge variant="destructive">Error</Badge>
           <Badge variant="outline">Draft</Badge>
+          <Badge variant="warning">Expiring</Badge>
+          <Badge variant="success">Active</Badge>
           <Badge variant="ghost">Pending</Badge>
           <Badge variant="link">View</Badge>
         </div>

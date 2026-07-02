@@ -51,6 +51,14 @@ export const AllVariants: Story = {
             <Switch checked disabled />
             <span className="text-sm">Checked Disabled</span>
           </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Switch aria-invalid />
+            <span className="text-sm">Invalid</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Switch checked aria-invalid />
+            <span className="text-sm">Checked Invalid</span>
+          </div>
         </div>
       </div>
 

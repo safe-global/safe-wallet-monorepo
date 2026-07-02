@@ -1,5 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../select'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from '../select'
 
 /**
  * Select Component Stories
@@ -75,6 +84,15 @@ export const AllVariants: Story = {
               <SelectItem value="option-2">Option 2</SelectItem>
             </SelectContent>
           </Select>
+          <Select>
+            <SelectTrigger>
+              <SelectValue placeholder="Placeholder" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="option-1">Option 1</SelectItem>
+              <SelectItem value="option-2">Option 2</SelectItem>
+            </SelectContent>
+          </Select>
           <Select disabled>
             <SelectTrigger>
               <SelectValue placeholder="Disabled" />
@@ -122,6 +140,32 @@ export const AllVariants: Story = {
                 <SelectItem value="carrot">Carrot</SelectItem>
                 <SelectItem value="broccoli">Broccoli</SelectItem>
               </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div style={{ marginTop: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">With Separator &amp; Disabled Item</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(250px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <Select defaultValue="option-1">
+            <SelectTrigger>
+              <SelectValue placeholder="Select option" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="option-1">Option 1</SelectItem>
+              <SelectItem value="option-2">Option 2</SelectItem>
+              <SelectSeparator />
+              <SelectItem value="option-3" disabled>
+                Disabled option
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>

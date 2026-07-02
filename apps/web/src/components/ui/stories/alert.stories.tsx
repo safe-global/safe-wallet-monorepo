@@ -48,6 +48,18 @@ export const AllVariants: Story = {
               <AlertDescription>This is a destructive alert message.</AlertDescription>
             </Alert>
           </div>
+          <div style={{ width: '400px' }}>
+            <Alert variant="warning">
+              <AlertTitle>Warning Alert</AlertTitle>
+              <AlertDescription>This is a warning alert message.</AlertDescription>
+            </Alert>
+          </div>
+          <div style={{ width: '400px' }}>
+            <Alert variant="success">
+              <AlertTitle>Success Alert</AlertTitle>
+              <AlertDescription>This is a success alert message.</AlertDescription>
+            </Alert>
+          </div>
         </div>
       </div>
 
