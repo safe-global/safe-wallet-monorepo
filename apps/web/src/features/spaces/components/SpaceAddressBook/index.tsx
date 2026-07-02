@@ -189,7 +189,14 @@ const SpaceAddressBook = () => {
                       showAddedBy={false}
                       renderExtraAction={(entry) => {
                         if (entry.isDuplicate) {
-                          return <Badge variant="secondary">Already shared</Badge>
+                          return (
+                            <Tooltip>
+                              <TooltipTrigger render={<span className="inline-flex" />}>
+                                <Badge variant="secondary">Already shared</Badge>
+                              </TooltipTrigger>
+                              <TooltipContent>Already saved in your workspace address book</TooltipContent>
+                            </Tooltip>
+                          )
                         }
                         if (isAdmin) {
                           return (
