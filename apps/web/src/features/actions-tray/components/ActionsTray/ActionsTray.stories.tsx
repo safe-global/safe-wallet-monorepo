@@ -5,7 +5,7 @@ import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import ActionsTray from './ActionsTray'
 
 const meta = {
-  title: 'Features/Actions Tray/ActionsTray',
+  title: 'Features/ActionsTray/ActionsTray',
   component: ActionsTray,
   loaders: [mswLoader],
   parameters: {

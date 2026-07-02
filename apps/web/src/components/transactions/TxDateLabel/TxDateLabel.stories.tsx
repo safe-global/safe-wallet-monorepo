@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import TxDateLabel from './index'
 
 const meta: Meta<typeof TxDateLabel> = {
-  title: 'Components/Base/TxDateLabel',
+  title: 'Components/Transactions/TxDateLabel',
   component: TxDateLabel,
   parameters: { layout: 'padded' },
   decorators: [

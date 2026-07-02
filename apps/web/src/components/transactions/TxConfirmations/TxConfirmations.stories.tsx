@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import TxConfirmations from './index'
 
 const meta: Meta<typeof TxConfirmations> = {
-  title: 'Components/Base/TxConfirmations',
+  title: 'Components/Transactions/TxConfirmations',
   component: TxConfirmations,
   parameters: { layout: 'centered' },
   decorators: [

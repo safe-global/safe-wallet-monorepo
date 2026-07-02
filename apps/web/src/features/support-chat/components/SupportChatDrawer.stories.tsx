@@ -25,7 +25,7 @@ const baseUser: UserIdentity = {
 }
 
 const meta = {
-  title: 'Features/Support Chat/SupportChatDrawer',
+  title: 'Features/SupportChat/SupportChatDrawer',
   component: SupportChatDrawer,
   parameters: {
     layout: 'fullscreen',

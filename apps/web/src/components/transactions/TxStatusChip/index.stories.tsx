@@ -3,7 +3,7 @@ import { Check, Clock } from 'lucide-react'
 import StatusChip from './index'
 
 const meta: Meta<typeof StatusChip> = {
-  title: 'Components/Base/TxStatusChip',
+  title: 'Components/Transactions/TxStatusChip',
   component: StatusChip,
   parameters: { layout: 'centered' },
   decorators: [
