@@ -109,20 +109,20 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
       )}
 
       {pinnedSafes.length > 0 && (
-        <div className="mb-4 flex items-center gap-1.5">
-          <BookmarkIcon className="text-foreground size-4 [&_path]:stroke-current" />
-          <Typography variant="paragraph-small-bold">Trusted Safes</Typography>
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <BookmarkIcon className="text-foreground size-4 [&_path]:stroke-current" />
+            <Typography variant="paragraph-small-bold">Trusted Safes</Typography>
+          </div>
+          <Button variant="outline" size="sm" onClick={modal.open} data-testid="add-more-safes-button">
+            Manage trusted Safes
+          </Button>
         </div>
       )}
 
       {pinnedSafes.length > 0 && (
         <section data-testid="pinned-accounts" className="mb-4">
           <SafeAccountsTable items={pinnedSafes} onLinkClick={onLinkClick} />
-          <div className="mt-3 flex justify-center">
-            <Button variant="outline" size="sm" onClick={modal.open} data-testid="add-more-safes-button">
-              Manage trusted Safes
-            </Button>
-          </div>
         </section>
       )}
 
