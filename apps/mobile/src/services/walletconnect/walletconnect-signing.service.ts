@@ -30,9 +30,12 @@ export interface SigningResponse {
   safeTransactionHash: string
 }
 
-// domain.chainId is a bigint; JSON.stringify can't serialize it, so emit bigints as strings.
-const stringifyTypedData = (typedData: unknown): string =>
-  JSON.stringify(typedData, (_key, value) => (typeof value === 'bigint' ? value.toString() : value))
+// chainId → number (EIP-712 uint256; a string is rejected by strict wallets); other bigints →
+// string to keep uint256 precision. Exported for the hash-preservation test.
+export const stringifyTypedData = (typedData: unknown): string =>
+  JSON.stringify(typedData, (key, value) =>
+    typeof value !== 'bigint' ? value : key === 'chainId' ? Number(value) : value.toString(),
+  )
 
 export const signWithWalletConnect = async (params: WalletConnectSigningParams): Promise<SigningResponse> => {
   const { chain, activeSafe, txId, signerAddress, safeVersion, provider, prebuiltSafeTx } = params

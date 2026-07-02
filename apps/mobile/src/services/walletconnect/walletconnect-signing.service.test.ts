@@ -167,9 +167,24 @@ describe('signWithWalletConnect', () => {
     const { method, params } = mockProvider.request.mock.calls[0][0]
     expect(method).toBe(SigningMethod.ETH_SIGN_TYPED_DATA_V4)
     expect(params[0]).toBe('0xSignerAddress')
-    // The bigint domain.chainId must serialize (plain JSON.stringify throws) as a decimal string.
+    // bigint chainId serializes as a number (EIP-712 uint256), not a string.
     const parsed = JSON.parse(params[1])
-    expect(parsed.domain.chainId).toBe('1')
+    expect(parsed.domain.chainId).toBe(1)
+  })
+
+  it('serializes a large bigint message field as a string without precision loss', async () => {
+    const bigValue = BigInt('123456789012345678901234567890')
+    mockGenerateTypedData.mockReturnValueOnce({
+      ...mockTypedData,
+      domain: { verifyingContract: '0xSafeAddress', chainId: BigInt(137) },
+      message: { to: '0xRecipient', value: bigValue },
+    })
+
+    await signWithWalletConnect(defaultParams)
+
+    const parsed = JSON.parse(mockProvider.request.mock.calls[0][0].params[1])
+    expect(parsed.domain.chainId).toBe(137)
+    expect(parsed.message.value).toBe('123456789012345678901234567890')
   })
 
   it('throws when provider returns non-string signature', async () => {
