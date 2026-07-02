@@ -1,8 +1,10 @@
+import { useMemo } from 'react'
 import { blo } from 'blo'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Typography } from '@/components/ui/typography'
 import { getInitials, getSafeDisplayInfo } from '../utils'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
+import { useListSimilarities, SimilarityFlag } from '@/features/address-poisoning'
 import SafeBalanceBlock from './SafeBalanceBlock'
 import ThresholdBadge from './ThresholdBadge'
 import CopyAddressButton from './CopyAddressButton'
@@ -29,6 +31,10 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
   const chainConfig = useChain(selectedChain?.chainId ?? '')
   const blockExplorerLink = chainConfig ? getBlockExplorerLink(chainConfig, selectedItem.address) : undefined
 
+  // Mode B: warn (icon + tooltip) if the current Safe resembles a trusted anchor (address-poisoning).
+  const similarityAddresses = useMemo(() => [selectedItem.address], [selectedItem.address])
+  const similarityMatch = useListSimilarities(similarityAddresses).get(selectedItem.address)?.match
+
   return (
     <div className="flex items-center gap-2 sm:gap-4 w-full">
       <div className="relative shrink-0">
@@ -39,9 +45,12 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
         <ThresholdBadge threshold={selectedItem.threshold} owners={selectedItem.owners} />
       </div>
       <div className="flex flex-col items-start flex-1 min-w-0" data-testid="safe-selector-trigger-details">
-        <Typography data-testid="safe-selector-trigger-name" variant="paragraph-small-medium" className="truncate">
-          {displayName}
-        </Typography>
+        <div className="flex items-center gap-1 min-w-0 max-w-full">
+          <Typography data-testid="safe-selector-trigger-name" variant="paragraph-small-medium" className="truncate">
+            {displayName}
+          </Typography>
+          <SimilarityFlag match={similarityMatch} iconOnly />
+        </div>
         <div className="flex items-center gap-1 min-w-0">
           <Typography data-testid="safe-selector-trigger-address" variant="paragraph-mini" color="muted">
             {shortAddress}

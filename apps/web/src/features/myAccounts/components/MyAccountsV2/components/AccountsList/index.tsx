@@ -17,6 +17,7 @@ import MigrationPrompt from '../../../MigrationPrompt'
 import TrustedSafesModal from '@/components/common/TrustedSafesModal'
 import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import useMigrationPrompt from '../../../../hooks/useMigrationPrompt'
+import { useSelectionSimilarities, useSimilarityGroups, SimilarityGroupContainer } from '@/features/address-poisoning'
 import AccountItem from '../AccountItem'
 
 type AccountsListProps = {
@@ -24,6 +25,48 @@ type AccountsListProps = {
   safes: AllSafeItemsGrouped
   onLinkClick?: () => void
   isSidebar?: boolean
+}
+
+/**
+ * Renders a list of accounts with Mode B protection: visually-similar safes are framed together in a
+ * "verify carefully" box, and every row carries a similarity badge above its name.
+ */
+const SimilarityGroupedList = ({ items, onLinkClick }: { items: AllSafeItems; onLinkClick?: () => void }) => {
+  const addresses = useMemo(() => items.map((item) => item.address), [items])
+  const similarities = useSelectionSimilarities(addresses, { flagAnchors: true })
+  const { groups, ungrouped } = useSimilarityGroups(addresses)
+  const byAddress = useMemo(() => new Map(items.map((item) => [item.address.toLowerCase(), item])), [items])
+
+  return (
+    <div className="flex flex-col gap-2">
+      {groups.map((group) => (
+        <SimilarityGroupContainer key={group.key} critical={group.isCritical}>
+          {group.addresses.map((address) => {
+            const item = byAddress.get(address.toLowerCase())
+            return item ? (
+              <AccountItem
+                key={item.address}
+                safe={item}
+                onLinkClick={onLinkClick}
+                similarity={similarities.get(item.address)}
+              />
+            ) : null
+          })}
+        </SimilarityGroupContainer>
+      ))}
+      {ungrouped.map((address) => {
+        const item = byAddress.get(address.toLowerCase())
+        return item ? (
+          <AccountItem
+            key={item.address}
+            safe={item}
+            onLinkClick={onLinkClick}
+            similarity={similarities.get(item.address)}
+          />
+        ) : null
+      })}
+    </div>
+  )
 }
 
 const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) => {
@@ -82,11 +125,7 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
         <Typography variant="paragraph-small" color="muted" className="mb-2">
           Found {filteredSafes.length} result{maybePlural(filteredSafes)}
         </Typography>
-        <div className="flex flex-col gap-2">
-          {filteredSafes.map((item) => (
-            <AccountItem key={item.address} safe={item} onLinkClick={onLinkClick} />
-          ))}
-        </div>
+        <SimilarityGroupedList items={filteredSafes} onLinkClick={onLinkClick} />
       </>
     )
   }
@@ -107,7 +146,7 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
           <Typography variant="paragraph-small-bold" className="mb-2">
             Current Safe account
           </Typography>
-          <AccountItem safe={currentSafeItem} onLinkClick={onLinkClick} />
+          <SimilarityGroupedList items={currentSafeItem ? [currentSafeItem] : []} onLinkClick={onLinkClick} />
         </section>
       )}
 
@@ -120,11 +159,7 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
 
       {pinnedSafes.length > 0 && (
         <section data-testid="pinned-accounts" className="mb-4">
-          <div className="flex flex-col gap-2">
-            {pinnedSafes.map((item) => (
-              <AccountItem key={item.address} safe={item} onLinkClick={onLinkClick} />
-            ))}
-          </div>
+          <SimilarityGroupedList items={pinnedSafes} onLinkClick={onLinkClick} />
           <div className="mt-3 flex justify-center">
             <Button variant="outline" size="sm" onClick={modal.open} data-testid="add-more-safes-button">
               Manage trusted Safes

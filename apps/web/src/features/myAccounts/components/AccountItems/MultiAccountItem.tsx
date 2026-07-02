@@ -15,6 +15,7 @@ import { type MultiChainSafeItem, type SafeItem } from '@/hooks/safes'
 import { AddNetworkButton } from '../AddNetworkButton'
 import MultiAccountContextMenu from '@/components/sidebar/SafeListContextMenu/MultiAccountContextMenu'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
+import { SimilarityFlag, type SelectionSimilarity } from '@/features/address-poisoning'
 
 function MultiChainSubItem({
   safeItem,
@@ -75,9 +76,15 @@ type MultiAccountItemProps = {
   safeOverviews?: SafeOverview[]
   onLinkClick?: SafeListProps['onLinkClick']
   isSpaceSafe?: boolean
+  similarity?: SelectionSimilarity
 }
 
-const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = false }: MultiAccountItemProps) => {
+const MultiAccountItem = ({
+  onLinkClick,
+  multiSafeAccountItem,
+  isSpaceSafe = false,
+  similarity,
+}: MultiAccountItemProps) => {
   const spaces = useLoadFeature(SpacesFeature)
   const {
     address,
@@ -137,6 +144,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
                 showPrefix={false}
                 addressBookNameSource={isSpaceSafe ? ContactSource.space : undefined}
                 data-testid="group-address"
+                flag={<SimilarityFlag match={similarity?.match} intraList={similarity?.intraList} />}
               />
               <AccountItem.ChainBadge safes={sortedSafes} />
               <AccountItem.Balance

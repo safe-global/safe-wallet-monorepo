@@ -24,10 +24,13 @@ const SimilarityFlag = ({
   match,
   anchorName,
   intraList = false,
+  iconOnly = false,
 }: {
   match?: SimilarityMatch | null
   anchorName?: string
   intraList?: boolean
+  /** Render just the tone-coloured warning icon (with tooltip), no pill/label — e.g. next to a name. */
+  iconOnly?: boolean
 }): ReactElement | null => {
   if (!match) return null
 
@@ -50,6 +53,16 @@ const SimilarityFlag = ({
     tip = isCritical
       ? `Looks like ${name}, an address you trust — the middle differs. Verify before using it.`
       : `Shares the visible characters with ${name}, an address you trust. This could be a coincidence — verify.`
+  }
+
+  if (iconOnly) {
+    return (
+      <Tooltip title={tip} arrow>
+        <Box component="span" role="status" aria-label={tip} sx={{ display: 'inline-flex', lineHeight: 0 }}>
+          <TriangleAlert size={16} style={{ width: 16, height: 16, color: toneColor, stroke: toneColor }} />
+        </Box>
+      </Tooltip>
+    )
   }
 
   return (

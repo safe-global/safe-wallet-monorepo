@@ -14,6 +14,12 @@ jest.mock('@/hooks/useChains', () => ({
   useChain: (...args: unknown[]) => mockUseChain(...args),
 }))
 
+// Store-free render; stub the Mode B similarity hook/flag so the trigger doesn't need a store or flag.
+jest.mock('@/features/address-poisoning', () => ({
+  useListSimilarities: () => new Map(),
+  SimilarityFlag: () => null,
+}))
+
 jest.mock('../SafeBalanceBlock', () => {
   const Mock = () => <div data-testid="safe-balance-block" />
   Mock.displayName = 'SafeBalanceBlock'

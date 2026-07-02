@@ -18,7 +18,7 @@ import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 import WarningIcon from '@/public/images/notifications/warning.svg'
-import { SimilarityGroupContainer } from './SimilarityGroupContainer'
+import { SimilarityGroupContainer } from '@/features/address-poisoning'
 
 const MAX_NESTED_SAFES = 5
 

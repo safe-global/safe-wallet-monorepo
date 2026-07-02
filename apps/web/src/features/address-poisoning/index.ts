@@ -10,6 +10,12 @@ export { default as useAddressPoisoningGuard } from './hooks/useAddressPoisoning
 export type { GuardContext, BlockedHint } from './hooks/useAddressPoisoningGuard'
 export { default as useListSimilarities } from './hooks/useListSimilarities'
 export { default as useSelectionSimilarities, type SelectionSimilarity } from './hooks/useSelectionSimilarities'
+export {
+  default as useSimilarityGroups,
+  type SimilarityGroup,
+  type SimilarityGrouping,
+} from './hooks/useSimilarityGroups'
+export { SimilarityGroupContainer } from './components/SimilarityGroupContainer'
 export { default as AddressPoisoningGuard } from './components/AddressPoisoningGuard'
 export type { AddressPoisoningGuardProps } from './components/AddressPoisoningGuard'
 export { default as GuardBlockedHint } from './components/GuardBlockedHint'

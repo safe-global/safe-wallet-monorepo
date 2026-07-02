@@ -1,12 +1,17 @@
 import { Box, Typography } from '@mui/material'
 import type { ReactElement, ReactNode } from 'react'
 
+/**
+ * Frames a cluster of visually-similar addresses under a "verify carefully" header. Tone follows the
+ * strongest match in the cluster: red (error) when it contains a both-ends look-alike, otherwise amber
+ * (warning). Shared across surfaces that group look-alikes (nested-safe curation, Manage trusted Safes).
+ */
 export function SimilarityGroupContainer({
   children,
   critical = false,
 }: {
   children: ReactNode
-  /** Both-ends look-alike present in the group → red (high risk); otherwise amber (caution). */
+  /** Both-ends look-alike present in the cluster → red (high risk); otherwise amber (caution). */
   critical?: boolean
 }): ReactElement {
   const tone = critical ? 'error' : 'warning'

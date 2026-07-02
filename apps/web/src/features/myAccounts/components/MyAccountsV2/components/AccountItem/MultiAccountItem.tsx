@@ -6,6 +6,7 @@ import { FiatBalance } from '@/features/spaces'
 import MultiAccountContextMenu from '@/components/sidebar/SafeListContextMenu/MultiAccountContextMenu'
 import { AccountItem as BaseAccountItem } from '../../../AccountItem'
 import { AddNetworkButton } from '../../../AddNetworkButton'
+import { SimilarityFlag, type SelectionSimilarity } from '@/features/address-poisoning'
 import { useMultiAccountItemData } from '../../../../hooks/useMultiAccountItemData'
 import { useSafeItemData } from '../../../../hooks/useSafeItemData'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
@@ -93,9 +94,15 @@ type MultiAccountItemProps = {
   multiSafeAccountItem: MultiChainSafeItem
   onLinkClick?: () => void
   isSpaceSafe?: boolean
+  similarity?: SelectionSimilarity
 }
 
-const MultiAccountItem = ({ multiSafeAccountItem, onLinkClick, isSpaceSafe = false }: MultiAccountItemProps) => {
+const MultiAccountItem = ({
+  multiSafeAccountItem,
+  onLinkClick,
+  isSpaceSafe = false,
+  similarity,
+}: MultiAccountItemProps) => {
   const {
     address,
     name,
@@ -146,10 +153,11 @@ const MultiAccountItem = ({ multiSafeAccountItem, onLinkClick, isSpaceSafe = fal
               <Identicon address={address} />
             </span>
             <div className="flex min-w-0 flex-col gap-1" data-testid="group-address">
+              <SimilarityFlag match={similarity?.match} intraList={similarity?.intraList} />
               <Typography variant="paragraph-medium" className="text-foreground truncate">
                 {displayName}
               </Typography>
-              <AddressWithCopy address={address} />
+              <AddressWithCopy address={address} similarity={similarity?.match} />
             </div>
           </div>
 

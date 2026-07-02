@@ -10,14 +10,16 @@ import type { SafeItem } from '@/hooks/safes'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
+import { SimilarityFlag, type SelectionSimilarity } from '@/features/address-poisoning'
 
 type SingleAccountItemProps = {
   safeItem: SafeItem
   onLinkClick?: () => void
   isSpaceSafe?: boolean
+  similarity?: SelectionSimilarity
 }
 
-const SingleAccountItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: SingleAccountItemProps) => {
+const SingleAccountItem = ({ safeItem, onLinkClick, isSpaceSafe = false, similarity }: SingleAccountItemProps) => {
   const {
     chain,
     name,
@@ -58,12 +60,9 @@ const SingleAccountItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Singl
           </span>
 
           <div className="flex min-w-0 flex-col gap-1">
-            <Typography variant="paragraph-medium" className="text-foreground truncate">
-              {displayName}
-            </Typography>
-            <AddressWithCopy address={safeItem.address} />
-
-            <div className="mt-1 flex flex-wrap items-center gap-1">
+            {/* Risk badge shares a row with the status chips (read-only / not activated) to keep rows compact. */}
+            <div className="flex flex-wrap items-center gap-1 empty:hidden">
+              <SimilarityFlag match={similarity?.match} intraList={similarity?.intraList} />
               <BaseAccountItem.StatusChip
                 isActivating={isActivating}
                 isReadOnly={safeItem.isReadOnly}
@@ -78,6 +77,10 @@ const SingleAccountItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Singl
                 />
               )}
             </div>
+            <Typography variant="paragraph-medium" className="text-foreground truncate">
+              {displayName}
+            </Typography>
+            <AddressWithCopy address={safeItem.address} similarity={similarity?.match} />
           </div>
         </div>
 

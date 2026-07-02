@@ -5,14 +5,13 @@ import css from '../AccountItems/styles.module.css'
 import type { SafeItem } from '@/hooks/safes'
 import { SpacesFeature } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
-import { SimilarityFlag } from '@/features/address-poisoning'
-import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
+import { SimilarityFlag, type SelectionSimilarity } from '@/features/address-poisoning'
 
 export interface SafeListItemProps {
   safeItem: SafeItem
   onLinkClick?: () => void
   isSpaceSafe?: boolean
-  similarity?: SimilarityMatch | null
+  similarity?: SelectionSimilarity
 }
 
 export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false, similarity }: SafeListItemProps) => {
@@ -42,7 +41,6 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false, simil
 
   const statusChips = (
     <>
-      <SimilarityFlag match={similarity} />
       <AccountItem.StatusChip
         isActivating={isActivating}
         isReadOnly={safeItem.isReadOnly}
@@ -77,7 +75,8 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false, simil
         address={safeItem.address}
         chainId={safeItem.chainId}
         name={isSpaceSafe ? safeItem.name : name}
-        similarity={similarity}
+        similarity={similarity?.match}
+        flag={<SimilarityFlag match={similarity?.match} intraList={similarity?.intraList} />}
       >
         {!isMobile && statusChips}
       </AccountItem.Info>

@@ -58,10 +58,13 @@ const TrustedSafesItem = ({ safe, onToggle }: TrustedSafesItemProps) => {
         showCopyButton
         hasExplorer
         similarity={safe.similarity?.match}
-        flag={<SimilarityFlag match={safe.similarity?.match} intraList={safe.similarity?.intraList} />}
-      >
-        {statusChips}
-      </AccountItem.Info>
+        flag={
+          <span style={{ display: 'inline-flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+            <SimilarityFlag match={safe.similarity?.match} intraList={safe.similarity?.intraList} />
+            {statusChips}
+          </span>
+        }
+      />
       <AccountItem.ChainBadge chainId={safe.chainId} />
       <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
       <AccountItem.ContextMenu
