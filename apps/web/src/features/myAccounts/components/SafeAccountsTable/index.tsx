@@ -34,9 +34,13 @@ const headerSx = {
   py: 1.25,
   // Match the body cells' slim padding so labels align with their columns.
   px: 1,
-  '&:first-of-type': { pl: 2 },
-  '&:last-of-type': { pr: 2 },
-  borderBottom: 'none',
+  // The grey bar sits inset 4px from the panel edges: transparent borders +
+  // padding-box clip shrink the painted background without moving the cells.
+  // `&&` outranks the theme's MuiTableCell-head border-bottom.
+  backgroundClip: 'padding-box',
+  '&&': { border: '4px solid transparent', borderLeft: 'none', borderRight: 'none' },
+  '&&:first-of-type': { pl: 2, borderLeft: '4px solid transparent' },
+  '&&:last-of-type': { pr: 2, borderRight: '4px solid transparent' },
 } as const
 
 const SafeAccountsTable = ({
@@ -99,7 +103,9 @@ const SafeAccountsTable = ({
 
   return (
     <Box data-testid={testId} sx={{ width: '100%' }}>
-      <TableContainer sx={{ width: '100%', overflowX: 'auto' }}>
+      <TableContainer
+        sx={{ width: '100%', overflowX: 'auto', borderRadius: '16px', backgroundColor: 'background.paper' }}
+      >
         <Table sx={{ tableLayout: 'fixed', minWidth, borderCollapse: 'separate', borderSpacing: 0 }}>
           <TableHead>
             <TableRow>
