@@ -91,8 +91,9 @@ const SrcEthHashInfo = ({
     address
   )
 
-  // Mode B: colour the matching end characters (the 4 hex after `0x` when the front matches,
-  // and/or the last 4 when the back matches) so a look-alike can't hide in a list at a glance.
+  // Mode B: colour exactly the matching end characters — the real shared prefix/suffix lengths,
+  // not a fixed 4 — so a look-alike can't hide in a list at a glance. Each end is highlighted only
+  // when its match reaches the 4-char threshold; lengths are clamped so the two ranges never overlap.
   const similarityAddress = (): ReactNode => {
     const isCritical = similarity?.severity === Severity.CRITICAL
     const hlStyle: CSSProperties = {
@@ -102,14 +103,17 @@ const SrcEthHashInfo = ({
       padding: '0 1px',
       fontWeight: 700,
     }
-    const front = (similarity?.prefixLen ?? 0) >= 4
-    const back = (similarity?.suffixLen ?? 0) >= 4
+    const hexLen = address.length - 2
+    const frontLen = Math.min((similarity?.prefixLen ?? 0) >= 4 ? (similarity?.prefixLen ?? 0) : 0, hexLen)
+    const backLen = Math.min((similarity?.suffixLen ?? 0) >= 4 ? (similarity?.suffixLen ?? 0) : 0, hexLen - frontLen)
+    const frontEnd = 2 + frontLen
+    const backStart = address.length - backLen
     return (
       <>
         {address.slice(0, 2)}
-        {front ? <b style={hlStyle}>{address.slice(2, 6)}</b> : address.slice(2, 6)}
-        {showShort ? '…' : address.slice(6, -4)}
-        {back ? <b style={hlStyle}>{address.slice(-4)}</b> : address.slice(-4)}
+        {frontLen > 0 && <b style={hlStyle}>{address.slice(2, frontEnd)}</b>}
+        {showShort ? '…' : address.slice(frontEnd, backStart)}
+        {backLen > 0 && <b style={hlStyle}>{address.slice(backStart)}</b>}
       </>
     )
   }

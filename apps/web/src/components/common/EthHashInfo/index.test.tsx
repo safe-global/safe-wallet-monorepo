@@ -420,5 +420,20 @@ describe('EthHashInfo', () => {
       expect(boldTexts).toContain('AABB') // front matched
       expect(boldTexts).not.toContain('CCDD') // back did not match → not highlighted
     })
+
+    it('highlights the actual matched length, not a fixed 4 chars', () => {
+      const { container } = render(
+        <EthHashInfo
+          address={ADDR}
+          shortAddress={false}
+          showName={false}
+          // shares only the trailing 5 chars ("bCCDD"); front only shares 1 char (below threshold)
+          similarity={{ anchor: ADDR.slice(2).toLowerCase(), prefixLen: 1, suffixLen: 5, severity: Severity.WARN }}
+        />,
+      )
+      const boldTexts = Array.from(container.querySelectorAll('b')).map((b) => b.textContent)
+      expect(boldTexts).toContain('bCCDD') // the real 5-char suffix, not just "CCDD"
+      expect(boldTexts).not.toContain('AABB') // 1-char prefix is below the 4-char threshold → not highlighted
+    })
   })
 })
