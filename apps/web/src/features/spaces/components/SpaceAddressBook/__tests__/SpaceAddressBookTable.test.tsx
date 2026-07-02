@@ -162,9 +162,16 @@ describe('SpaceAddressBookTable', () => {
     const entry = entryBuilder().with({ isDuplicate: true }).build()
     render(<SpaceAddressBookTable entries={[entry]} />)
 
-    const nameSpan = screen.getByText(entry.name)
-    expect(nameSpan.closest('tr')).toHaveClass('opacity-50')
-    expect(nameSpan.parentElement).toHaveClass('line-through')
+    const nameTrigger = screen.getByRole('button', { name: entry.name })
+    expect(nameTrigger.closest('tr')).toHaveClass('opacity-50')
+    expect(nameTrigger.closest('div')).toHaveClass('line-through')
+  })
+
+  it('exposes the full name via a tooltip trigger in the Name column', () => {
+    const name = 'A very long contact name that would overflow the Name column'
+    render(<SpaceAddressBookTable entries={[entryBuilder().with({ name }).build()]} />)
+
+    expect(screen.getByRole('button', { name })).toBeInTheDocument()
   })
 
   it('shortens the address on mobile and shows it in full on desktop', () => {

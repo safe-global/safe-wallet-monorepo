@@ -97,15 +97,18 @@ function SpaceAddressBookTable({
       cell: (entry) => (
         <div className={cn('flex items-center gap-1.5 overflow-hidden', entry.isDuplicate && 'line-through')}>
           {entry.isLocal && <HardDrive className="text-muted-foreground size-4 flex-shrink-0" />}
-          <span className="min-w-0 truncate">{entry.name}</span>
+          <Tooltip>
+            <TooltipTrigger className="min-w-0 truncate text-left">{entry.name}</TooltipTrigger>
+            <TooltipContent>{entry.name}</TooltipContent>
+          </Tooltip>
         </div>
       ),
     },
     {
       id: 'address',
       header: 'Address',
-      width: '30%',
-      minWidth: 200,
+      width: '40%',
+      minWidth: 360,
       sortValue: (e) => e.address,
       cell: (entry) => (
         <div className="text-[0.8em] font-mono">

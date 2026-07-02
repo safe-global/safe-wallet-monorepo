@@ -1,9 +1,12 @@
 import { useState } from 'react'
+import { useMediaQuery } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { Spinner } from '@/components/ui/spinner'
+import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { NetworkLogosList } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
@@ -34,6 +37,8 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
   const spaceId = useCurrentSpaceId()
   const dispatch = useAppDispatch()
   const spaceAddressBook = useGetSpaceAddressBook()
+  const theme = useTheme()
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('lg'))
   const [approveRequest] = useAddressBookRequestsApproveRequestV1Mutation()
   const [rejectRequest] = useAddressBookRequestsRejectRequestV1Mutation()
   const [loadingId, setLoadingId] = useState<number | null>(null)
@@ -96,12 +101,12 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
   }
 
   return (
-    <Table className="table-fixed">
+    <Table className="table-fixed min-w-[720px]">
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[20%]">Name</TableHead>
-          <TableHead className="w-[30%]">Address</TableHead>
-          <TableHead className="w-[15%]">Chains</TableHead>
+          <TableHead className={isSmallScreen ? 'w-[15%]' : 'w-[20%]'}>Name</TableHead>
+          <TableHead className={isSmallScreen ? 'w-[40%]' : 'w-[32%]'}>Address</TableHead>
+          <TableHead className={isSmallScreen ? 'w-[15%]' : 'w-[13%]'}>Chains</TableHead>
           <TableHead className="w-[20%]">Requested by</TableHead>
           <TableHead className="w-[15%]" />
         </TableRow>
@@ -123,12 +128,13 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
             </TableCell>
 
             <TableCell>
-              <div className="text-[0.8em]">
+              <div className="text-[0.8em] font-mono">
                 <EthHashInfo
                   address={req.address}
                   shortAddress={false}
                   showPrefix={false}
                   showName={false}
+                  highlight4bytes
                   hasExplorer
                   showCopyButton
                   avatarSize={24}
@@ -143,7 +149,11 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
                     {chains.configs.length === req.chainIds.length ? (
                       <Badge variant="secondary">All</Badge>
                     ) : (
-                      <NetworkLogosList networks={req.chainIds.map((chainId) => ({ chainId }))} />
+                      <NetworkLogosList
+                        networks={req.chainIds.map((chainId) => ({ chainId }))}
+                        showHasMore
+                        maxVisible={3}
+                      />
                     )}
                   </span>
                 </TooltipTrigger>
@@ -159,13 +169,32 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
 
             <TableCell>
               {req.requestedBy && (
-                <EthHashInfo
-                  address={req.requestedBy}
-                  avatarSize={20}
-                  onlyName
-                  showPrefix={false}
-                  showCopyButton={false}
-                />
+                <Tooltip>
+                  <TooltipTrigger render={<span className="inline-flex min-w-0" />}>
+                    {isAddress(req.requestedBy) ? (
+                      <div className="text-[0.8em] font-mono">
+                        <EthHashInfo
+                          address={req.requestedBy}
+                          shortAddress={false}
+                          showPrefix={false}
+                          showName={false}
+                          highlight4bytes
+                          showCopyButton={false}
+                          avatarSize={20}
+                        />
+                      </div>
+                    ) : (
+                      <EthHashInfo
+                        address={req.requestedBy}
+                        avatarSize={20}
+                        onlyName
+                        showPrefix={false}
+                        showCopyButton={false}
+                      />
+                    )}
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">{req.requestedBy}</TooltipContent>
+                </Tooltip>
               )}
             </TableCell>
 
