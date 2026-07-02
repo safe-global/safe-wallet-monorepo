@@ -64,6 +64,14 @@ const config: StorybookConfig = {
     // This resolves the "unsupported file type: undefined" error when building Storybook
     ;(config.resolve.alias as Record<string, string>)['next/image'] = path.resolve(__dirname, 'mocks/nextImage.js')
 
+    // Mock next/navigation so app-router hooks (usePathname/useRouter/useSearchParams)
+    // resolve without nextjs.appDirectory, which would otherwise disable the
+    // pages-router (next/router) mock the rest of the app depends on.
+    ;(config.resolve.alias as Record<string, string>)['next/navigation'] = path.resolve(
+      __dirname,
+      'mocks/nextNavigation.js',
+    )
+
     // Remove the next-image-loader-stub that causes "unsupported file type" errors
     // when processing static image imports in Storybook builds
     // Exclude SVGs so they're handled by SVGR instead
