@@ -3,7 +3,7 @@ import NextLink from 'next/link'
 import TableCell from '@mui/material/TableCell'
 import TableRow from '@mui/material/TableRow'
 import { Badge } from '@/components/ui/badge'
-import { ChevronRight, TriangleAlert } from 'lucide-react'
+import { TriangleAlert } from 'lucide-react'
 import Identicon from '@/components/common/Identicon'
 import AddressWithCopy from '@/components/common/AddressWithCopy'
 import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
@@ -32,35 +32,22 @@ type SafeAccountTableRowProps = {
   onLinkClick?: () => void
 }
 
-const NameCellContent = ({
-  line,
-  expanded,
-  isFlagged,
-}: {
-  line: AccountLine
-  expanded?: boolean
-  isFlagged?: boolean
-}) => (
+// Fixed identicon column so the name always starts at the same x position (as in the design).
+const NameCellContent = ({ line, isFlagged }: { line: AccountLine; isFlagged?: boolean }) => (
   <div className={cn('flex min-w-0 items-center gap-3', line.indent && 'pl-9')}>
-    {line.expandable && (
-      <ChevronRight
-        className={cn('text-muted-foreground size-4 shrink-0 transition-transform', expanded && 'rotate-90')}
-      />
-    )}
-
-    {line.variant === 'child' ? (
-      <BaseAccountItem.Icon
-        address={line.address}
-        chainId={line.chainId}
-        threshold={line.threshold}
-        owners={line.owners}
-        isMultiChainItem
-      />
-    ) : (
-      <span className="inline-flex shrink-0">
+    <span className="flex w-10 shrink-0 items-center">
+      {line.variant === 'child' ? (
+        <BaseAccountItem.Icon
+          address={line.address}
+          chainId={line.chainId}
+          threshold={line.threshold}
+          owners={line.owners}
+          isMultiChainItem
+        />
+      ) : (
         <Identicon address={line.address} />
-      </span>
-    )}
+      )}
+    </span>
 
     <div className="flex min-w-0 flex-col gap-0.5">
       {isFlagged && (
@@ -100,10 +87,11 @@ const NameCell = ({
       <button
         type="button"
         onClick={onToggle}
+        aria-expanded={expanded}
         data-testid="account-group-toggle"
         className="hover:bg-muted/40 -mx-2 flex w-[calc(100%+1rem)] cursor-pointer items-center rounded-lg px-2 py-1 text-left transition-colors"
       >
-        <NameCellContent line={line} expanded={expanded} isFlagged={isFlagged} />
+        <NameCellContent line={line} isFlagged={isFlagged} />
       </button>
     )
   }
