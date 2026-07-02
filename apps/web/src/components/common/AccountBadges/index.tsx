@@ -39,7 +39,9 @@ export function PendingBadge({ count, loading = false }: { count: number; loadin
   return (
     <span
       data-testid="account-pending"
-      className={cn('bg-muted text-muted-foreground inline-flex items-center rounded-full px-2 py-0.5 text-xs')}
+      className={cn(
+        'bg-muted text-muted-foreground inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-xs',
+      )}
     >
       {count} · Pending
     </span>

@@ -22,7 +22,7 @@ const AddressWithCopy = ({
       data-testid={testId}
       variant="paragraph-mini"
       color="muted"
-      className={full ? 'whitespace-nowrap' : 'truncate'}
+      className={full ? 'whitespace-nowrap font-mono' : 'truncate'}
     >
       {full ? address : shortenAddress(address)}
     </Typography>

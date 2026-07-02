@@ -191,7 +191,12 @@ const SafeAccountTableRow = ({
             onLinkClick={onLinkClick}
           />
         ) : (
-          <div className={cn('flex items-center', column.align === 'right' ? 'justify-end' : 'justify-start')}>
+          <div
+            className={cn(
+              'flex items-center',
+              column.align === 'right' ? 'justify-end' : column.align === 'center' ? 'justify-center' : 'justify-start',
+            )}
+          >
             {column.id === 'actions' && renderActions ? (
               renderActions(line)
             ) : (

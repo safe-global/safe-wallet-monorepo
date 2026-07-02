@@ -8,7 +8,7 @@ export type SafeAccountColumn = {
   sortable: boolean
   /** The group sort key backing this column (only for sortable columns). */
   sortKey?: SafeSortColumn
-  align?: 'right'
+  align?: 'center' | 'right'
   width?: string
 }
 
@@ -19,11 +19,11 @@ export type SafeAccountColumn = {
  * long names truncate within it. The sum drives a horizontal scroll on narrow viewports.
  */
 export const SAFE_ACCOUNT_COLUMNS: SafeAccountColumn[] = [
-  { id: 'name', label: 'Name', sortable: true, sortKey: 'name', width: '400px' },
-  { id: 'threshold', label: 'Threshold', sortable: true, sortKey: 'threshold', width: '96px' },
-  { id: 'networks', label: 'Networks', sortable: true, sortKey: 'networks', width: '96px' },
-  { id: 'workspaces', label: 'Workspaces', sortable: true, sortKey: 'workspaces', width: '116px' },
-  { id: 'pending', label: 'Pending', sortable: false, width: '104px' },
+  { id: 'name', label: 'Name', sortable: true, sortKey: 'name', width: '404px' },
+  { id: 'threshold', label: 'Threshold', sortable: true, sortKey: 'threshold', align: 'center', width: '96px' },
+  { id: 'networks', label: 'Networks', sortable: true, sortKey: 'networks', align: 'center', width: '96px' },
+  { id: 'workspaces', label: 'Workspaces', sortable: true, sortKey: 'workspaces', align: 'center', width: '116px' },
+  { id: 'pending', label: 'Pending', sortable: false, align: 'center', width: '100px' },
   { id: 'balance', label: 'Balance', sortable: false, align: 'right', width: '96px' },
   { id: 'actions', label: '', sortable: false, align: 'right', width: '50px' },
 ]
