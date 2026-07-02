@@ -13799,10 +13799,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-modules-deployments@npm:^3.0.0, @safe-global/safe-modules-deployments@npm:^3.0.2":
-  version: 3.0.2
-  resolution: "@safe-global/safe-modules-deployments@npm:3.0.2"
-  checksum: 10/8b3ec33e7505aedbc214df25fe3d51d520d2572f301b9f58a9f15901deecd5e75b34f77b7aa309c56a2f8bb5831b2de820ec411665d0b777e678fab2f40269d0
+"@safe-global/safe-modules-deployments@npm:^3.0.0, @safe-global/safe-modules-deployments@npm:^3.0.2, @safe-global/safe-modules-deployments@npm:^3.0.5":
+  version: 3.0.5
+  resolution: "@safe-global/safe-modules-deployments@npm:3.0.5"
+  checksum: 10/b0362d5ba1d75840f5a7710c5413e65da37b19d1e987b0d3a89a095716c21617bccf2755af0426357e7626e6892d06e0b90a5fb88500a6009d92b7f5c22d84ab
   languageName: node
   linkType: hard
 
@@ -14081,7 +14081,7 @@ __metadata:
     "@safe-global/protocol-kit": "npm:^7.1.0"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
     "@safe-global/safe-deployments": "npm:^1.37.54"
-    "@safe-global/safe-modules-deployments": "npm:^3.0.2"
+    "@safe-global/safe-modules-deployments": "npm:^3.0.5"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
     "@safe-global/theme": "workspace:^"

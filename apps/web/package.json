@@ -82,7 +82,7 @@
     "@safe-global/protocol-kit": "^7.1.0",
     "@safe-global/safe-apps-sdk": "^9.1.0",
     "@safe-global/safe-deployments": "^1.37.54",
-    "@safe-global/safe-modules-deployments": "^3.0.2",
+    "@safe-global/safe-modules-deployments": "^3.0.5",
     "@safe-global/store": "workspace:^",
     "@safe-global/theme": "workspace:^",
     "@tailwindcss/postcss": "^4.1.18",
