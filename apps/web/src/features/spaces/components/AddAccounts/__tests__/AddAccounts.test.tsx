@@ -68,6 +68,7 @@ jest.mock('@/hooks/useDarkMode', () => ({
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: () => ({ configs: [{ chainId: '1' }] }),
+  useHasFeature: () => true,
 }))
 
 let mockAllOwned: Record<string, string[]> = {}
