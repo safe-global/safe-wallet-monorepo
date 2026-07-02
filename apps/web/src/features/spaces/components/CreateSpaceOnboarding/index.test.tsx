@@ -1,5 +1,7 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import CreateSpaceOnboarding from './index'
+import { DISALLOWED_CHARACTER_MESSAGE } from '@safe-global/utils/validation/names'
+import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 
 let mockIsCheckingAccess: boolean | undefined = false
 let mockExistingSpace: {
@@ -83,5 +85,53 @@ describe('CreateSpaceOnboarding', () => {
     render(<CreateSpaceOnboarding />)
 
     await waitFor(() => expect(screen.getByTestId('space-name-input')).not.toHaveFocus())
+  })
+
+  it('shows the disallowed-character error for invalid characters', async () => {
+    render(<CreateSpaceOnboarding />)
+
+    const input = screen.getByTestId('space-name-input')
+    fireEvent.change(input, { target: { value: 'Bad*name' } })
+
+    await waitFor(() => {
+      expect(screen.getByText(DISALLOWED_CHARACTER_MESSAGE)).toBeInTheDocument()
+    })
+    expect(input).toHaveAttribute('aria-invalid', 'true')
+  })
+
+  it('enforces the maximum length', async () => {
+    render(<CreateSpaceOnboarding />)
+
+    fireEvent.change(screen.getByTestId('space-name-input'), {
+      target: { value: 'a'.repeat(SPACE_NAME_MAX_LENGTH + 1) },
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText(`Names must be at most ${SPACE_NAME_MAX_LENGTH} characters long`)).toBeInTheDocument()
+    })
+  })
+
+  it('sanitizes the value on blur', async () => {
+    render(<CreateSpaceOnboarding />)
+
+    const input = screen.getByTestId('space-name-input') as HTMLInputElement
+    fireEvent.change(input, { target: { value: '  O’Brien  ' } })
+    fireEvent.blur(input)
+
+    await waitFor(() => {
+      expect(input.value).toBe("O'Brien")
+    })
+  })
+
+  it('accepts a valid UTF-8 name', async () => {
+    render(<CreateSpaceOnboarding />)
+
+    const input = screen.getByTestId('space-name-input')
+    fireEvent.change(input, { target: { value: 'José' } })
+
+    await waitFor(() => {
+      expect(input).not.toHaveAttribute('aria-invalid')
+    })
+    expect(screen.queryByText(DISALLOWED_CHARACTER_MESSAGE)).not.toBeInTheDocument()
   })
 })

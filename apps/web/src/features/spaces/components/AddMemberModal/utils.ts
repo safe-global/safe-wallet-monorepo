@@ -1,5 +1,6 @@
 import { isAddress } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { sanitizeName } from '@safe-global/utils/validation/names'
 import type { MemberRole } from '../../hooks/useSpaceMembers'
 import type { EmailInviteUserDto, WalletInviteUserDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
@@ -25,13 +26,14 @@ export const normalizeInviteeIdentifier = (value: string): string => value.trim(
 
 export const buildInviteUserPayload = (data: MemberField): InvitePayload => {
   const inviteeIdentifier = normalizeInviteeIdentifier(data.inviteeIdentifier)
+  const name = sanitizeName(data.name)
 
   if (isEmailAddress(inviteeIdentifier)) {
     return {
       type: 'email',
       email: inviteeIdentifier.toLowerCase(),
       role: data.role,
-      name: data.name,
+      name,
     }
   }
 
@@ -39,7 +41,7 @@ export const buildInviteUserPayload = (data: MemberField): InvitePayload => {
     type: 'wallet',
     address: inviteeIdentifier,
     role: data.role,
-    name: data.name,
+    name,
   }
 }
 
