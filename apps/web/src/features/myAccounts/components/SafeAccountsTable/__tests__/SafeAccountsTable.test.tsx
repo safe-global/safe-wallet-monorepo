@@ -31,6 +31,7 @@ const mockUseSafeAccountRows = useSafeAccountRows as jest.Mock
 
 const line = (over: Partial<AccountLine> & Pick<AccountLine, 'key' | 'displayName'>): AccountLine => ({
   variant: 'single',
+  source: { chainId: '1', address: '0x0', isReadOnly: false, isPinned: true, lastVisited: 0, name: undefined },
   address: '0x0',
   chainId: '1',
   showAddress: true,

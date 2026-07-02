@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
@@ -19,6 +19,12 @@ export type SafeAccountsTableProps = {
   items: AllSafeItems
   /** Columns to show, in the canonical order. Defaults to the full set. */
   columns?: SafeAccountColumnId[]
+  /** Overrides the actions column width — e.g. when `renderActions` renders a button instead of a menu. */
+  actionsWidth?: string
+  /** Replaces the default context-menu actions cell for each row (e.g. an "Add to workspace" button). */
+  renderActions?: (line: AccountLine) => ReactNode
+  /** Lowercased addresses to flag with a "High similarity" warning badge. */
+  flaggedAddresses?: Set<string>
   onLinkClick?: () => void
   'data-testid'?: string
 }
@@ -46,6 +52,9 @@ const headerSx = {
 const SafeAccountsTable = ({
   items,
   columns,
+  actionsWidth,
+  renderActions,
+  flaggedAddresses,
   onLinkClick,
   'data-testid': testId = 'safe-accounts-table',
 }: SafeAccountsTableProps) => {
@@ -53,10 +62,10 @@ const SafeAccountsTable = ({
   const [sort, setSort] = useState<SortState>({ orderBy: null, order: 'asc' })
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
 
-  const visibleColumns = useMemo(
-    () => (columns ? SAFE_ACCOUNT_COLUMNS.filter((c) => columns.includes(c.id)) : SAFE_ACCOUNT_COLUMNS),
-    [columns],
-  )
+  const visibleColumns = useMemo(() => {
+    const base = columns ? SAFE_ACCOUNT_COLUMNS.filter((c) => columns.includes(c.id)) : SAFE_ACCOUNT_COLUMNS
+    return actionsWidth ? base.map((c) => (c.id === 'actions' ? { ...c, width: actionsWidth } : c)) : base
+  }, [columns, actionsWidth])
 
   const minWidth = useMemo(
     () => visibleColumns.reduce((sum, column) => sum + parseInt(column.width ?? '0', 10), 0),
@@ -144,6 +153,8 @@ const SafeAccountsTable = ({
                 line={line}
                 columns={visibleColumns}
                 expanded={line.expandable ? expanded.has(groupKey) : undefined}
+                isFlagged={flaggedAddresses?.has(line.address.toLowerCase())}
+                renderActions={renderActions}
                 onToggle={line.expandable ? () => toggle(groupKey) : undefined}
                 onLinkClick={onLinkClick}
                 showDivider={index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}

@@ -22,12 +22,34 @@ jest.mock('@/components/common/TrustedSafesModal/useTrustedSafesModal', () => ({
   default: () => ({ open: jest.fn(), close: jest.fn(), isOpen: false }),
 }))
 jest.mock('@/services/analytics', () => ({ trackEvent: jest.fn() }))
-jest.mock('../SafeCardReadOnly', () => ({
-  __esModule: true,
-  default: ({ safe, action }: { safe: { address: string }; action?: ReactNode }) => (
-    <div data-testid="safe-card">
-      {safe.address}
-      {action}
+
+// Renders each top-level item and applies renderActions the way the real table does per row.
+type MockItem = { address: string; chainId?: string; safes?: unknown[] }
+type MockLine = { variant: 'single' | 'group'; source: MockItem; key: string; address: string }
+jest.mock('@/features/myAccounts', () => ({
+  SafeAccountsTable: ({
+    items,
+    renderActions,
+  }: {
+    items: MockItem[]
+    renderActions?: (line: MockLine) => ReactNode
+  }) => (
+    <div data-testid="safe-accounts-table">
+      {items.map((item) => {
+        const isMulti = Array.isArray(item.safes)
+        const line: MockLine = {
+          variant: isMulti ? 'group' : 'single',
+          source: item,
+          key: isMulti ? `multi-${item.address}` : `${item.chainId}:${item.address}`,
+          address: item.address,
+        }
+        return (
+          <div key={line.key} data-testid="safe-row">
+            {item.address}
+            {renderActions?.(line)}
+          </div>
+        )
+      })}
     </div>
   ),
 }))
@@ -67,7 +89,7 @@ describe('LocalSafeAccounts', () => {
     mockUseLocalAccountsView.mockReturnValue('list')
     render(<LocalSafeAccounts />)
 
-    expect(screen.getAllByTestId('safe-card')).toHaveLength(2)
+    expect(screen.getAllByTestId('safe-row')).toHaveLength(2)
     // safeA is already in the space, safeB is not
     expect(screen.getByRole('button', { name: 'Already added' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Add to workspace' })).toBeEnabled()

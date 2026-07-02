@@ -53,7 +53,11 @@ jest.mock('@/store/slices', () => ({
   selectUndeployedSafes: jest.fn(),
 }))
 
-jest.mock('../AccountsSafesList', () => ({
+jest.mock('@/features/myAccounts', () => ({
+  SafeAccountsTable: () => <div data-testid="safe-accounts-table" />,
+}))
+
+jest.mock('../SpaceSafeContextMenu', () => ({
   __esModule: true,
   default: () => null,
 }))

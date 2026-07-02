@@ -66,6 +66,8 @@ export { useTrustSafe } from './hooks/useTrustSafe'
 
 export { AccountItem } from './components/AccountItem'
 export { default as AddTrustedSafeDialog } from './components/NonPinnedWarning/AddTrustedSafeDialog'
+export { default as SafeAccountsTable } from './components/SafeAccountsTable'
+export type { AccountLine } from './components/SafeAccountsTable/useSafeAccountRows'
 
 // Public types
 export type * from './types'

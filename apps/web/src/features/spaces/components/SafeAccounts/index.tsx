@@ -17,12 +17,14 @@ import {
 } from '@/hooks/safes'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { useSpaceSafes, useIsInvited } from '@/features/spaces'
+import { SafeAccountsTable } from '@/features/myAccounts'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { TriangleAlert, RotateCw } from 'lucide-react'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_LABELS, SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import AccountsSafesList from './AccountsSafesList'
+import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
+import SpaceSafeContextMenu from './SpaceSafeContextMenu'
 
 const _groupAndSort = (
   items: SafeItem[],
@@ -103,7 +105,16 @@ const SpaceSafeAccounts = () => {
           ) : !hasResults && allSafes && allSafes.length === 0 ? (
             <EmptySafeAccounts />
           ) : (
-            <AccountsSafesList safes={displaySafes} similarAddresses={similarAddresses} />
+            <>
+              {similarAddresses.size > 0 && <SimilarAddressAlert />}
+              <SafeAccountsTable
+                items={displaySafes}
+                flaggedAddresses={similarAddresses}
+                renderActions={(line) =>
+                  line.variant === 'child' ? null : <SpaceSafeContextMenu safeItem={line.source} />
+                }
+              />
+            </>
           )}
         </TabsContent>
 

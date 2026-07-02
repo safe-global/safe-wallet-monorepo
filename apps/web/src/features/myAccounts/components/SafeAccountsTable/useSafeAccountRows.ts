@@ -34,6 +34,8 @@ export type AccountContextMenu =
 export type AccountLine = {
   key: string
   variant: 'single' | 'group' | 'child'
+  /** The item this line was built from — child lines reference their per-chain SafeItem. */
+  source: SafeItem | MultiChainSafeItem
   address: string
   chainId: string
   displayName: string
@@ -82,6 +84,7 @@ const buildSafeLine = (safe: SafeItem, deps: BuildDeps, variant: 'single' | 'chi
   return {
     key: `${chainId}:${address}`,
     variant,
+    source: safe,
     address,
     chainId,
     displayName: variant === 'child' ? (chain?.chainName ?? shortenAddress(address)) : name || shortenAddress(address),
@@ -145,6 +148,7 @@ const buildMultiGroup = (item: MultiChainSafeItem, deps: BuildDeps): AccountGrou
   const parent: AccountLine = {
     key: address,
     variant: 'group',
+    source: item,
     address,
     chainId: safes[0]?.chainId ?? '',
     displayName: name || shortenAddress(address),

@@ -13,7 +13,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import SafeCardReadOnly from './SafeCardReadOnly'
+import { SafeAccountsTable, type AccountLine } from '@/features/myAccounts'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import { useCurrentSpaceId } from '../../hooks/useCurrentSpaceId'
 
@@ -109,33 +109,28 @@ const LocalSafeAccounts = () => {
     )
   }
 
+  const renderAddAction = (line: AccountLine) => {
+    if (line.variant === 'child') return null
+    const underlying = isMultiChainSafeItem(line.source) ? line.source.safes : [line.source]
+    const key = isMultiChainSafeItem(line.source) ? `multi-${line.source.address}` : line.key
+    const added = underlying.every((item) => spaceMembership.has(safeKey(item.chainId, item.address)))
+    return (
+      <AddToWorkspaceButton
+        added={added}
+        loading={addingKey === key}
+        onAdd={() =>
+          handleAdd(
+            key,
+            underlying.map((item) => ({ chainId: item.chainId, address: item.address })),
+          )
+        }
+      />
+    )
+  }
+
   return (
     <div className="flex flex-col gap-2">
-      {pinnedSafes.map((safe) => {
-        const underlying = isMultiChainSafeItem(safe) ? safe.safes : [safe]
-        const key = isMultiChainSafeItem(safe) ? `multi-${safe.address}` : safeKey(safe.chainId, safe.address)
-        const added = underlying.every((item) => spaceMembership.has(safeKey(item.chainId, item.address)))
-        return (
-          <SafeCardReadOnly
-            key={key}
-            safe={safe}
-            hideContextMenu
-            showPending={false}
-            action={
-              <AddToWorkspaceButton
-                added={added}
-                loading={addingKey === key}
-                onAdd={() =>
-                  handleAdd(
-                    key,
-                    underlying.map((item) => ({ chainId: item.chainId, address: item.address })),
-                  )
-                }
-              />
-            }
-          />
-        )
-      })}
+      <SafeAccountsTable items={pinnedSafes} actionsWidth="170px" renderActions={renderAddAction} />
       <div className="mt-3 flex justify-center">
         <Button variant="outline" size="sm" onClick={modal.open} data-testid="manage-trusted-safes-button">
           Manage trusted Safes

@@ -2,7 +2,8 @@ import type { ReactNode } from 'react'
 import NextLink from 'next/link'
 import TableCell from '@mui/material/TableCell'
 import TableRow from '@mui/material/TableRow'
-import { ChevronRight } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { ChevronRight, TriangleAlert } from 'lucide-react'
 import Identicon from '@/components/common/Identicon'
 import AddressWithCopy from '@/components/common/AddressWithCopy'
 import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
@@ -23,11 +24,23 @@ type SafeAccountTableRowProps = {
   expanded?: boolean
   /** Draw a bottom divider — only true at the boundary between top-level accounts, not within a group. */
   showDivider?: boolean
+  /** Flags the row with a "High similarity" warning (address-poisoning defence). */
+  isFlagged?: boolean
+  /** Replaces the default context-menu actions cell (e.g. an "Add to workspace" button). */
+  renderActions?: (line: AccountLine) => ReactNode
   onToggle?: () => void
   onLinkClick?: () => void
 }
 
-const NameCellContent = ({ line, expanded }: { line: AccountLine; expanded?: boolean }) => (
+const NameCellContent = ({
+  line,
+  expanded,
+  isFlagged,
+}: {
+  line: AccountLine
+  expanded?: boolean
+  isFlagged?: boolean
+}) => (
   <div className={cn('flex min-w-0 items-center gap-3', line.indent && 'pl-9')}>
     {line.expandable && (
       <ChevronRight
@@ -50,6 +63,12 @@ const NameCellContent = ({ line, expanded }: { line: AccountLine; expanded?: boo
     )}
 
     <div className="flex min-w-0 flex-col gap-0.5">
+      {isFlagged && (
+        <Badge variant="warning" className="-ml-px self-start">
+          <TriangleAlert data-icon="inline-start" />
+          High similarity
+        </Badge>
+      )}
       <Tooltip>
         <TooltipTrigger render={<span />} className="block min-w-0 max-w-full">
           <Typography variant="paragraph-medium" className="text-foreground block truncate">
@@ -66,11 +85,13 @@ const NameCellContent = ({ line, expanded }: { line: AccountLine; expanded?: boo
 const NameCell = ({
   line,
   expanded,
+  isFlagged,
   onToggle,
   onLinkClick,
 }: {
   line: AccountLine
   expanded?: boolean
+  isFlagged?: boolean
   onToggle?: () => void
   onLinkClick?: () => void
 }) => {
@@ -82,7 +103,7 @@ const NameCell = ({
         data-testid="account-group-toggle"
         className="hover:bg-muted/40 -mx-2 flex w-[calc(100%+1rem)] cursor-pointer items-center rounded-lg px-2 py-1 text-left transition-colors"
       >
-        <NameCellContent line={line} expanded={expanded} />
+        <NameCellContent line={line} expanded={expanded} isFlagged={isFlagged} />
       </button>
     )
   }
@@ -90,12 +111,12 @@ const NameCell = ({
   if (line.href) {
     return (
       <NextLink href={line.href} onClick={onLinkClick} data-testid="account-row-link" className="block">
-        <NameCellContent line={line} />
+        <NameCellContent line={line} isFlagged={isFlagged} />
       </NextLink>
     )
   }
 
-  return <NameCellContent line={line} />
+  return <NameCellContent line={line} isFlagged={isFlagged} />
 }
 
 const CellContent = ({ column, line }: { column: SafeAccountColumn; line: AccountLine }): ReactNode => {
@@ -150,6 +171,8 @@ const SafeAccountTableRow = ({
   columns,
   expanded,
   showDivider,
+  isFlagged,
+  renderActions,
   onToggle,
   onLinkClick,
 }: SafeAccountTableRowProps) => (
@@ -172,10 +195,20 @@ const SafeAccountTableRow = ({
         onClick={column.id === 'actions' ? (e) => e.stopPropagation() : undefined}
       >
         {column.id === 'name' ? (
-          <NameCell line={line} expanded={expanded} onToggle={onToggle} onLinkClick={onLinkClick} />
+          <NameCell
+            line={line}
+            expanded={expanded}
+            isFlagged={isFlagged}
+            onToggle={onToggle}
+            onLinkClick={onLinkClick}
+          />
         ) : (
           <div className={cn('flex items-center', column.align === 'right' ? 'justify-end' : 'justify-start')}>
-            <CellContent column={column} line={line} />
+            {column.id === 'actions' && renderActions ? (
+              renderActions(line)
+            ) : (
+              <CellContent column={column} line={line} />
+            )}
           </div>
         )}
       </TableCell>
