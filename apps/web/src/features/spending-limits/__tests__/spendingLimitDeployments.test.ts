@@ -68,12 +68,19 @@ describe('getLatestSpendingLimitAddress', () => {
     expect(result).toBe(expectedAddress)
   })
 
-  it('should return v0.1.0 address for Base (chainId 8453)', () => {
+  it('should return the v0.1.0 address on a chain where only v0.1.0 is deployed', () => {
     const v010 = getAllowanceModuleDeployment({ version: '0.1.0' })
-    const expectedAddress = v010?.networkAddresses['8453']
-    expect(expectedAddress).toBeDefined()
+    const v011 = getAllowanceModuleDeployment({ version: '0.1.1' })
 
-    const result = getLatestSpendingLimitAddress('8453')
+    // Derive a chain that has v0.1.0 but NOT v0.1.1 instead of hardcoding one,
+    // so the test stays correct as new v0.1.1 deployments are added to the package.
+    const v010OnlyChainId = Object.keys(v010?.networkAddresses ?? {}).find(
+      (chainId) => v011?.networkAddresses[chainId] == null,
+    )
+    expect(v010OnlyChainId).toBeDefined()
+
+    const expectedAddress = v010?.networkAddresses[v010OnlyChainId as string]
+    const result = getLatestSpendingLimitAddress(v010OnlyChainId as string)
 
     expect(result).toBe(expectedAddress)
   })
@@ -101,6 +108,39 @@ describe('getDeployment', () => {
     const result = getDeployment('1', modules)
 
     expect(result).toBeUndefined()
+  })
+
+  describe('on a chain where both v0.1.0 and v0.1.1 are deployed', () => {
+    const v010 = getAllowanceModuleDeployment({ version: '0.1.0' })
+    const v011 = getAllowanceModuleDeployment({ version: '0.1.1' })
+
+    // Derive a chain that has both versions instead of hardcoding one.
+    const sharedChainId = Object.keys(v011?.networkAddresses ?? {}).find(
+      (chainId) => v010?.networkAddresses[chainId] != null,
+    )
+
+    it('sanity: such a chain exists with distinct addresses per version', () => {
+      expect(sharedChainId).toBeDefined()
+      expect(v010?.networkAddresses[sharedChainId as string]).not.toBe(v011?.networkAddresses[sharedChainId as string])
+    })
+
+    it('detects a Safe enabled with the legacy v0.1.0 module as v0.1.0', () => {
+      const legacyAddress = v010?.networkAddresses[sharedChainId as string]
+      const modules = [{ value: legacyAddress! }]
+
+      const result = getDeployment(sharedChainId as string, modules)
+
+      expect(result?.version).toBe('0.1.0')
+    })
+
+    it('detects a Safe enabled with the v0.1.1 module as v0.1.1', () => {
+      const newAddress = v011?.networkAddresses[sharedChainId as string]
+      const modules = [{ value: newAddress! }]
+
+      const result = getDeployment(sharedChainId as string, modules)
+
+      expect(result?.version).toBe('0.1.1')
+    })
   })
 })
 
