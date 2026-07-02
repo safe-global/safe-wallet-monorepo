@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react'
-import { useSpaceMembersByStatus } from './useSpaceMembers'
+import { getMemberDisplayName, useSpaceMembersByStatus } from './useSpaceMembers'
 
 /**
  * Resolves a space member's display name by user id. Returns `undefined`
@@ -11,8 +11,9 @@ export const useMemberNameResolver = (): ((userId: number | undefined) => string
   const nameByUserId = useMemo(() => {
     const map = new Map<number, string>()
     for (const member of [...activeMembers, ...invitedMembers]) {
-      if (member.name) {
-        map.set(member.user.id, member.name)
+      const displayName = getMemberDisplayName(member)
+      if (displayName) {
+        map.set(member.user.id, displayName)
       }
     }
     return map

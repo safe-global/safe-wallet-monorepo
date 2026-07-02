@@ -1,12 +1,25 @@
 import ModalDialog from '@/components/common/ModalDialog'
 import { DialogContent, DialogActions, Button, Typography } from '@mui/material'
-import { type MemberDto, useMembersUpdateRoleV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from '@/features/spaces'
+import {
+  type MemberDto,
+  useMembersUpdateAliasV1Mutation,
+  useMembersUpdateRoleV1Mutation,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import {
+  useCurrentSpaceId,
+  useAdminCount,
+  isActiveAdmin,
+  getMemberDisplayName,
+  sanitizeMemberAlias,
+  MEMBER_ALIAS_MAX_LENGTH,
+} from '@/features/spaces'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { showNotification } from '@/store/notificationsSlice'
-import { useAppDispatch } from '@/store'
 import MemberInfoForm from '../AddMemberModal/MemberInfoForm'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -22,20 +35,35 @@ type MemberField = {
 const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleClose: () => void }) => {
   const spaceId = useCurrentSpaceId()
   const dispatch = useAppDispatch()
-  const [editMember] = useMembersUpdateRoleV1Mutation()
+  const [updateAlias] = useMembersUpdateAliasV1Mutation()
+  const [updateRole] = useMembersUpdateRoleV1Mutation()
   const [error, setError] = useState<string>()
+
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
+  const adminCount = useAdminCount()
+
+  // A member may only rename themselves; the last active admin keeps their role locked to preserve ownership.
+  const canEditName = member.user.id === currentUser?.id
+  const disableRole = adminCount === 1 && isActiveAdmin(member)
+  const displayName = getMemberDisplayName(member)
 
   const methods = useForm<MemberField>({
     mode: 'onChange',
     defaultValues: {
-      name: member.name,
+      name: displayName,
       role: member.role,
     },
   })
 
-  const { handleSubmit, formState } = methods
+  const { handleSubmit, formState, watch } = methods
+  const roleValue = watch('role')
+  const sanitizedName = sanitizeMemberAlias(watch('name'))
+  const hasNameChanged = canEditName && sanitizedName !== displayName
+  const hasRoleChanged = !disableRole && roleValue !== member.role
+  const canSubmit = formState.isValid && (hasNameChanged || hasRoleChanged) && !formState.isSubmitting
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = handleSubmit(async () => {
     setError(undefined)
 
     if (!spaceId) {
@@ -44,36 +72,61 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
     }
 
     try {
-      const { error } = await editMember({
-        spaceId: spaceId ?? '',
-        userId: member.user.id,
-        updateRoleDto: {
-          role: data.role,
-        },
-      })
+      if (hasNameChanged) {
+        const { error } = await updateAlias({ spaceId, updateMemberAliasDto: { alias: sanitizedName } })
 
-      if (error) {
-        setError(getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError))
-        return
+        if (error) {
+          setError(getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError))
+          return
+        }
+      }
+
+      if (hasRoleChanged) {
+        const { error } = await updateRole({
+          spaceId,
+          userId: member.user.id,
+          updateRoleDto: { role: roleValue },
+        })
+
+        if (error) {
+          setError(getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError))
+          return
+        }
       }
     } catch (e) {
       setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
       return
     }
 
-    trackEvent(
-      { ...SPACE_EVENTS.WORKSPACE_MEMBER_ROLE_CHANGED, label: spaceId },
-      {
-        workspace_id: spaceId,
-        target_user_id: member.user.id,
-        from_role: member.role.toLowerCase(),
-        to_role: data.role.toLowerCase(),
-      },
-    )
+    if (hasNameChanged) {
+      trackEvent(
+        { ...SPACE_EVENTS.WORKSPACE_MEMBER_NAME_CHANGED, label: spaceId },
+        { workspace_id: spaceId, user_id: member.user.id },
+      )
+    }
+
+    if (hasRoleChanged) {
+      trackEvent(
+        { ...SPACE_EVENTS.WORKSPACE_MEMBER_ROLE_CHANGED, label: spaceId },
+        {
+          workspace_id: spaceId,
+          target_user_id: member.user.id,
+          from_role: member.role.toLowerCase(),
+          to_role: roleValue.toLowerCase(),
+        },
+      )
+    }
+
+    const successMessage =
+      hasNameChanged && hasRoleChanged
+        ? `Updated your name and role to ${roleValue}`
+        : hasNameChanged
+          ? 'Your name was updated'
+          : `Updated role of ${displayName} to ${roleValue}`
 
     dispatch(
       showNotification({
-        message: `Updated role of ${data.name} to ${data.role}`,
+        message: successMessage,
         variant: 'success',
         groupKey: 'update-member-success',
       }),
@@ -88,10 +141,15 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
         <form onSubmit={onSubmit}>
           <DialogContent sx={{ p: '24px !important' }}>
             <Typography mb={2}>
-              Edit the role of <b>{`${member.name}`}</b> in this space.
+              Edit <b>{displayName}</b> in this workspace.
             </Typography>
 
-            <MemberInfoForm isEdit />
+            <MemberInfoForm
+              isEdit
+              disableName={!canEditName}
+              disableRole={disableRole}
+              nameMaxLength={MEMBER_ALIAS_MAX_LENGTH}
+            />
             {error && <ErrorMessage>{error}</ErrorMessage>}
           </DialogContent>
 
@@ -99,13 +157,7 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
             <Button data-testid="cancel-btn" onClick={handleClose}>
               Cancel
             </Button>
-            <Button
-              type="submit"
-              data-testid="delete-btn"
-              variant="danger"
-              disableElevation
-              disabled={!formState.isDirty}
-            >
+            <Button type="submit" data-testid="delete-btn" variant="danger" disableElevation disabled={!canSubmit}>
               Update
             </Button>
           </DialogActions>
