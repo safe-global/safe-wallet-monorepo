@@ -16,6 +16,7 @@ export type GtfMergeContext = {
   chainId: string
   safeAddress: string
   numberSignatures: number
+  currency?: string
   dispatch: AppDispatch
 }
 
@@ -32,6 +33,7 @@ export const mergeGtfFeeParams = async ({
   chainId,
   safeAddress,
   numberSignatures,
+  currency,
   dispatch,
 }: GtfMergeContext): Promise<SafeTransaction> => {
   if (safeTx.signatures.size > 0) return safeTx
@@ -45,6 +47,7 @@ export const mergeGtfFeeParams = async ({
     safeTx,
     gasToken: gtfSelectedGasToken,
     numberSignatures,
+    currency,
     dispatch,
   })
 }
