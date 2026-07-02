@@ -95,6 +95,7 @@ export const AppSettingsContainer = () => {
           type: 'floating-menu',
           rightNode: (
             <FloatingMenu
+              testID="app-settings-appearance-button"
               onPressAction={({ nativeEvent }) => {
                 const mode = nativeEvent.event as 'auto' | 'dark' | 'light'
                 setThemePreference(mode)
