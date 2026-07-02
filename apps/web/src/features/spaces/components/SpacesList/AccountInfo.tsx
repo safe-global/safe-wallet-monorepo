@@ -2,7 +2,6 @@ import { User } from 'lucide-react'
 import { Popover, PopoverTrigger } from '@/components/ui/popover'
 import useLogout from '@/hooks/useLogout'
 import { ProfilePopoverContent } from '../Sidebar/ProfilePopoverContent'
-import css from '../Sidebar/styles.module.css'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
@@ -21,8 +20,12 @@ export const AccountInfo = ({ profileName = '', displayName = '' }: MembershipPr
 
   return (
     <Popover>
-      <PopoverTrigger className={`${css.profileTriggerAvatarPlain} cursor-pointer`} aria-label="Account menu">
-        <User className="size-5 dark:stroke-white" aria-hidden="true" />
+      {/* Sized and styled like the other topbar icon buttons (see HeaderNavigation). */}
+      <PopoverTrigger
+        className="m-1 flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg outline-none transition-colors hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-ring"
+        aria-label="Account menu"
+      >
+        <User className="size-5 text-muted-foreground" aria-hidden="true" />
       </PopoverTrigger>
 
       <ProfilePopoverContent

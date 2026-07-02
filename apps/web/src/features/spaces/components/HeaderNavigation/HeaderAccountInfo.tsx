@@ -18,7 +18,7 @@ const HeaderAccountInfo = () => {
 
   return (
     <div
-      className="flex self-stretch items-center rounded-lg bg-card px-1 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]"
+      className="flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]"
       data-testid="header-account-info"
     >
       <AccountInfo profileName={profileName} displayName={displayName} />
