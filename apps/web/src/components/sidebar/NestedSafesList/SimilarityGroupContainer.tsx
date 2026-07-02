@@ -1,20 +1,28 @@
 import { Box, Typography } from '@mui/material'
 import type { ReactElement, ReactNode } from 'react'
 
-export function SimilarityGroupContainer({ children }: { children: ReactNode }): ReactElement {
+export function SimilarityGroupContainer({
+  children,
+  critical = false,
+}: {
+  children: ReactNode
+  /** Both-ends look-alike present in the group → red (high risk); otherwise amber (caution). */
+  critical?: boolean
+}): ReactElement {
+  const tone = critical ? 'error' : 'warning'
   return (
     <Box
       sx={{
         my: 0.5,
         borderRadius: 1,
         border: '1px solid',
-        borderColor: 'warning.light',
+        borderColor: `${tone}.light`,
         overflow: 'hidden',
       }}
     >
       {/* Warning header */}
-      <Box sx={{ px: 1.5, py: 0.75, backgroundColor: 'warning.background' }}>
-        <Typography variant="caption" fontWeight={500} color="warning.main">
+      <Box sx={{ px: 1.5, py: 0.75, backgroundColor: `${tone}.background` }}>
+        <Typography variant="caption" fontWeight={500} color={`${tone}.main`}>
           Similar addresses - verify carefully
         </Typography>
       </Box>

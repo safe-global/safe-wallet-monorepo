@@ -16,6 +16,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { skipToken } from '@reduxjs/toolkit/query'
 import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import { SimilarityGroupContainer } from './SimilarityGroupContainer'
 
@@ -31,7 +32,7 @@ function NestedSafeItem({
   isSelected,
   onToggle,
   showWarning,
-  showSimilarityWarning,
+  similarity,
 }: {
   safeItem: SafeItemWithStatus
   safeOverview?: SafeOverview
@@ -40,7 +41,7 @@ function NestedSafeItem({
   isSelected: boolean
   onToggle: () => void
   showWarning: boolean
-  showSimilarityWarning: boolean
+  similarity?: SimilarityMatch
 }) {
   const {
     AccountItemButton,
@@ -84,7 +85,7 @@ function NestedSafeItem({
           chainId={safeItem.chainId}
           fullAddress
           showCopyButton
-          highlight4bytes={showSimilarityWarning}
+          similarity={similarity}
         />
         <AccountItemGroup>
           <AccountItemBalance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview} />
@@ -111,7 +112,7 @@ function NestedSafeItem({
 }
 
 interface GroupedSafes {
-  groups: { key: string; safes: NestedSafeWithStatus[] }[]
+  groups: { key: string; safes: NestedSafeWithStatus[]; isCritical: boolean }[]
   ungrouped: NestedSafeWithStatus[]
 }
 
@@ -121,7 +122,7 @@ export function NestedSafesList({
   isManageMode = false,
   onToggleSafe,
   isSafeSelected,
-  isFlagged,
+  getSimilarity,
   groupedSafes,
 }: {
   onClose: () => void
@@ -129,7 +130,7 @@ export function NestedSafesList({
   isManageMode?: boolean
   onToggleSafe?: (address: string) => void
   isSafeSelected?: (address: string) => boolean
-  isFlagged?: (address: string) => boolean
+  getSimilarity?: (address: string) => SimilarityMatch | undefined
   groupedSafes?: GroupedSafes
 }): ReactElement {
   const [showAll, setShowAll] = useState(false)
@@ -176,7 +177,7 @@ export function NestedSafesList({
     )
     const isSelected = isSafeSelected?.(safeItem.address) ?? false
     const showWarning = isManageMode && !safeItem.isValid
-    const showSimilarityWarning = isManageMode && (isFlagged?.(safeItem.address) ?? false)
+    const similarity = isManageMode ? getSimilarity?.(safeItem.address) : undefined
 
     return (
       <NestedSafeItem
@@ -188,7 +189,7 @@ export function NestedSafesList({
         isSelected={isSelected}
         onToggle={() => onToggleSafe?.(safeItem.address)}
         showWarning={showWarning}
-        showSimilarityWarning={showSimilarityWarning}
+        similarity={similarity}
       />
     )
   }
@@ -213,7 +214,7 @@ export function NestedSafesList({
       <List sx={{ gap: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', p: 0 }}>
         {/* Render similarity groups first */}
         {groupedSafes.groups.map((group) => (
-          <SimilarityGroupContainer key={group.key}>
+          <SimilarityGroupContainer key={group.key} critical={group.isCritical}>
             {group.safes.map((safe) => {
               const safeItem = toSafeItem(safe)
               return safeItem ? renderSafeItem(safeItem) : null

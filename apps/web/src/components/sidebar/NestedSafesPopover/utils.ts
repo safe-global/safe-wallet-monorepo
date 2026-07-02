@@ -16,9 +16,11 @@ export function getUncuratedCountLabel(uncuratedCount: number): string {
 
 /**
  * Returns the correct popover paper width string based on whether manage mode is active.
+ * Manage mode shows full addresses (for look-alike verification), so it needs enough width to fit a
+ * full address alongside the checkbox, balance and warning icon without truncating to an ellipsis.
  */
 export function getPopoverWidth(isManageMode: boolean): string {
-  return isManageMode ? 'min(750px, calc(100vw - 32px))' : 'min(420px, calc(100vw - 32px))'
+  return isManageMode ? 'min(900px, calc(100vw - 32px))' : 'min(420px, calc(100vw - 32px))'
 }
 
 /**

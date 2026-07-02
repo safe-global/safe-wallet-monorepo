@@ -26,6 +26,7 @@ import CheckWallet from '@/components/common/CheckWallet'
 import { useManageNestedSafes } from '@/components/sidebar/NestedSafesList/useManageNestedSafes'
 import { SimilarityConfirmDialog } from '@/components/sidebar/NestedSafesList/SimilarityConfirmDialog'
 import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 
 function PopoverHeaderAction({
   isManageMode,
@@ -123,7 +124,7 @@ function PopoverBody({
   onClose,
   toggleSafe,
   isSafeSelected,
-  isFlagged,
+  getSimilarity,
   groupedSafes,
   uncuratedCount,
   hasVisibleSafes,
@@ -137,7 +138,7 @@ function PopoverBody({
   onClose: () => void
   toggleSafe: (address: string) => void
   isSafeSelected: (address: string) => boolean
-  isFlagged: (address: string) => boolean
+  getSimilarity: (address: string) => SimilarityMatch | undefined
   groupedSafes: ReturnType<typeof useManageNestedSafes>['groupedSafes']
   uncuratedCount: number
   hasVisibleSafes: boolean
@@ -184,7 +185,7 @@ function PopoverBody({
           isManageMode={isManageMode}
           onToggleSafe={toggleSafe}
           isSafeSelected={isSafeSelected}
-          isFlagged={isFlagged}
+          getSimilarity={getSimilarity}
           groupedSafes={isManageMode ? groupedSafes : undefined}
         />
       </Box>
@@ -272,7 +273,7 @@ export function NestedSafesPopover({
     cancel,
     selectedCount,
     hasChanges,
-    isFlagged,
+    getSimilarity,
     getSimilarAddresses,
     pendingConfirmation,
     confirmSimilarAddress,
@@ -376,7 +377,7 @@ export function NestedSafesPopover({
             onClose={onClose}
             toggleSafe={toggleSafe}
             isSafeSelected={isSafeSelected}
-            isFlagged={isFlagged}
+            getSimilarity={getSimilarity}
             groupedSafes={groupedSafes}
             uncuratedCount={uncuratedCount}
             hasVisibleSafes={visibleSafes.length > 0}

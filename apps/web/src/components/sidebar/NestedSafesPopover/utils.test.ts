@@ -49,7 +49,7 @@ describe('getUncuratedCountLabel', () => {
 
 describe('getPopoverWidth', () => {
   it('returns wide width when manage mode is active', () => {
-    expect(getPopoverWidth(true)).toBe('min(750px, calc(100vw - 32px))')
+    expect(getPopoverWidth(true)).toBe('min(900px, calc(100vw - 32px))')
   })
 
   it('returns narrow width when manage mode is inactive', () => {
