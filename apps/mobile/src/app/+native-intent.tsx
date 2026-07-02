@@ -30,7 +30,7 @@ const isNonNavigationalDeepLink = (path: string): boolean => {
   if (schemeEnd === -1) {
     return false
   }
-  // Custom schemes (safe://) carry the route in the authority; https carries it in the first segment.
+  // Custom schemes (safe://) put the route in the authority; https in the first path segment.
   const [authority, firstSegment] = path.slice(schemeEnd + 3).split(/[/?#]/)
   return authority === '' || authority === 'wc' || firstSegment === 'wc'
 }

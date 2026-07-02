@@ -51,6 +51,11 @@ describe('redirectSystemPath', () => {
     expect(redirectSystemPath({ path, initial: false })).toBe(path)
   })
 
+  it('still swallows a WC envelope carrying a non-wc uri (no navigation)', () => {
+    // extractWcUri validates the pairing URI downstream; safe://wc?… never routes here.
+    expect(redirectSystemPath({ path: 'safe://wc?uri=https://evil', initial: false })).toBe('')
+  })
+
   it('redirects protected routes to home', () => {
     expect(redirectSystemPath({ path: '/sign-transaction', initial: false })).toBe('/')
   })
