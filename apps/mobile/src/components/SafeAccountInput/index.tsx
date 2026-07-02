@@ -1,6 +1,6 @@
 import React from 'react'
 import { SafeInput } from '../SafeInput'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 import { Controller } from 'react-hook-form'
 import { FormValues } from '@/src/features/ImportReadOnly/types'
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
@@ -12,12 +12,12 @@ function SafeAccountInput() {
   const {
     control,
     formState: { errors, dirtyFields },
-    watch,
   } = useFormContext<FormValues>()
 
   useImportSafe()
 
-  const result = watch('importedSafeResult')
+  // useWatch subscribes this child to the field; the watch() method only re-renders the form root.
+  const result = useWatch({ control, name: 'importedSafeResult' })
 
   return (
     <Controller

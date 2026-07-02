@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactElement } from 'react'
+import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -35,6 +35,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
     control,
     formState: { isValid, errors },
     setValue,
+    setFocus,
   } = useForm<{ name: string }>({ mode: 'onChange', defaultValues: { name: '' } })
 
   const { spaceId, isEditMode, isSpaceLoading, existingSpace } = useExistingSpace(setValue)
@@ -57,6 +58,13 @@ const CreateSpaceOnboarding = (): ReactElement => {
     pattern: { value: /^[a-zA-Z0-9 ]+$/, message: 'Workspace name must not contain special characters' },
     validate: (value) => value?.trim() !== '',
   })
+
+  const isInputDisabled = isCheckingAccess || isSpaceLoading
+  useEffect(() => {
+    if (!isEditMode && !isInputDisabled) {
+      setFocus('name')
+    }
+  }, [isEditMode, isInputDisabled, setFocus])
 
   // spaceId gate avoids leaking lastUsedSpace's safes into a fresh "create" landing.
   const { allSafes } = useSpaceSafes()
@@ -92,8 +100,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
             data-testid="space-name-input"
             placeholder="e.g. Treasury Ops, DeFi Team"
             autoComplete="off"
-            autoFocus={!isEditMode}
-            disabled={isCheckingAccess || isSpaceLoading}
+            disabled={isInputDisabled}
             className="mt-2 h-11 rounded-sm bg-card px-4"
             {...nameReg}
             onChange={(e) => {
