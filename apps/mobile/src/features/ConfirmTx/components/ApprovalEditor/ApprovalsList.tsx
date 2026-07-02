@@ -1,13 +1,15 @@
 import React from 'react'
-import { Text, XStack, YStack } from 'tamagui'
+import { Text, View, XStack, YStack } from 'tamagui'
 import { TokenType } from '@safe-global/store/gateway/types'
 import {
   PSEUDO_APPROVAL_VALUES,
   type ApprovalInfo,
 } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { Logo } from '@/src/components/Logo'
+import { Badge } from '@/src/components/Badge/Badge'
 import { EthAddress } from '@/src/components/EthAddress'
 import { SafeButton } from '@/src/components/SafeButton'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import type { Address } from '@/src/types/address'
 
 export const isEditableApproval = (approval: ApprovalInfo): boolean =>
@@ -25,9 +27,15 @@ const ApprovalItem = ({ approval, onEdit }: { approval: ApprovalInfo; onEdit?: (
         </Text>
         <XStack gap="$2" alignItems="center" flexShrink={1}>
           <Logo logoUri={approval.tokenInfo?.logoUri} size="$6" fallbackIcon="token" />
-          <Text fontSize="$4" fontWeight={600} color={isUnlimited ? '$warning' : '$color'} flexShrink={1}>
-            {isUnlimited ? 'Unlimited' : `${approval.amountFormatted} ${approval.tokenInfo?.symbol ?? ''}`.trim()}
-          </Text>
+          <Badge
+            circular={false}
+            themeName={isUnlimited ? 'badge_warning_variant2' : 'badge_warning'}
+            textContentProps={{ fontWeight: 600 }}
+            testID="approval-amount-pill"
+            content={
+              isUnlimited ? 'Unlimited' : `${approval.amountFormatted} ${approval.tokenInfo?.symbol ?? ''}`.trim()
+            }
+          />
         </XStack>
       </XStack>
 
@@ -60,17 +68,22 @@ interface ApprovalsListProps {
 export const ApprovalsList = ({ approvals, onEdit }: ApprovalsListProps) => {
   return (
     <YStack
-      backgroundColor="$warningBackground"
+      backgroundColor="$backgroundWarning"
       borderRadius="$4"
       padding="$4"
       gap="$4"
       marginTop="$4"
       testID="approval-editor"
     >
-      <YStack gap="$1">
-        <Text fontSize="$4" fontWeight={700}>
-          Allow access to tokens?
-        </Text>
+      <YStack gap="$2">
+        <XStack gap="$2" alignItems="center">
+          <View backgroundColor="$warning" borderRadius="$10" padding="$1">
+            <SafeFontIcon name="alert" color="$colorContrast" size={16} />
+          </View>
+          <Text fontSize="$4" fontWeight={700}>
+            Allow access to tokens?
+          </Text>
+        </XStack>
         <Text fontSize="$3" color="$textSecondaryLight">
           This allows the spender to spend the specified amount of your tokens.
         </Text>
