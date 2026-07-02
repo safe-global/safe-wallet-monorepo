@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { Controller, type FieldError, useFormContext } from 'react-hook-form'
 import inputCss from '@/styles/inputs.module.css'
 
-const LEGACY_MAX_LENGTH = 50
+const DEFAULT_MAX_LENGTH = 50
 
 const NameInput = ({
   name,
@@ -42,7 +42,7 @@ const NameInput = ({
       name={name}
       control={control}
       rules={{
-        maxLength: validateCharset ? undefined : LEGACY_MAX_LENGTH,
+        maxLength: validateCharset ? undefined : DEFAULT_MAX_LENGTH,
         required: validateCharset ? false : required,
         validate: (value) => {
           if (validateCharset) {

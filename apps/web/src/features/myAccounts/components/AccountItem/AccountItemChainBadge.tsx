@@ -23,12 +23,9 @@ function AccountItemChainBadge({ chainId, safes, className, imageSize = 24 }: Ac
             <NetworkLogosList networks={safes} showHasMore />
           </TooltipTrigger>
           <TooltipContent>
-            <div data-testid="multichain-tooltip">
-              <p className="text-sm">Multichain account on:</p>
+            <div data-testid="multichain-tooltip" className="flex flex-col gap-1">
               {safes.map((safeItem) => (
-                <div key={safeItem.chainId} className="py-1">
-                  <ChainIndicator imageSize={imageSize} chainId={safeItem.chainId} />
-                </div>
+                <ChainIndicator key={safeItem.chainId} imageSize={imageSize} chainId={safeItem.chainId} />
               ))}
             </div>
           </TooltipContent>

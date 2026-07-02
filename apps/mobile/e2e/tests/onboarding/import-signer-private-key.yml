@@ -28,7 +28,7 @@ tags:
 # Tap "Add Signer" button (Import signer button)
 - tapOn:
     id: 'import-signer-button'
-- assertVisible: 'Import a signer'
+- assertVisible: 'Add signer'
 - tapOn:
     id: 'seed'
 
@@ -127,12 +127,15 @@ tags:
 # Verify navigation back to signers list
 - assertVisible:
     id: 'signers-screen'
-- assertVisible: 'My signers'
+- assertVisible: 'Your signers'
 
 # Verify Signer was properly imported
 # The default signer name should be Signer-3472 (derived from address 0x3336...3472)
 - assertVisible: '.*Signer-3472.*'
 - assertVisible: '.*0x3336...3472.*'
+
+# Verify the imported signer shows the "Imported" badge
+- assertVisible: '.*Imported.*'
 
 # Click on the signer to open detail screen
 - tapOn:

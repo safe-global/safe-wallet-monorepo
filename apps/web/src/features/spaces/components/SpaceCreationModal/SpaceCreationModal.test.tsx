@@ -126,6 +126,38 @@ describe('SpaceCreationModal tracking', () => {
     expect(mockDispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: setLastUsedSpace.type }))
   })
 
+  it('surfaces the backend error message when creation fails', async () => {
+    mockCreateSpaceWithUser.mockResolvedValue({ error: { status: 422, data: { message: 'Name already taken' } } })
+
+    render(<SpaceCreationModal onClose={jest.fn()} />)
+
+    fireEvent.change(screen.getByTestId('space-name-input'), { target: { value: 'My Space' } })
+
+    const submitButton = screen.getByTestId('create-space-modal-button')
+    await waitFor(() => {
+      expect(submitButton).not.toBeDisabled()
+    })
+    fireEvent.click(submitButton)
+
+    expect(await screen.findByText('Name already taken')).toBeInTheDocument()
+  })
+
+  it('falls back to a generic message when the backend provides no error message', async () => {
+    mockCreateSpaceWithUser.mockResolvedValue({ error: { status: 500, data: {} } })
+
+    render(<SpaceCreationModal onClose={jest.fn()} />)
+
+    fireEvent.change(screen.getByTestId('space-name-input'), { target: { value: 'My Space' } })
+
+    const submitButton = screen.getByTestId('create-space-modal-button')
+    await waitFor(() => {
+      expect(submitButton).not.toBeDisabled()
+    })
+    fireEvent.click(submitButton)
+
+    expect(await screen.findByText(/Something went wrong \(500\)/)).toBeInTheDocument()
+  })
+
   it('does not track WORKSPACE_CREATED when the API returns an error', async () => {
     mockCreateSpaceWithUser.mockResolvedValue({ error: { status: 500 } })
 

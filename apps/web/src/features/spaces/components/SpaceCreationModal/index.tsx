@@ -14,6 +14,9 @@ import { showNotification } from '@/store/notificationsSlice'
 import { setLastUsedSpace } from '@/store/authSlice'
 import { useAppDispatch } from '@/store'
 import ExternalLink from '@/components/common/ExternalLink'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
 
 function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement {
   const [error, setError] = useState<string>()
@@ -52,9 +55,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
         throw response.error
       }
     } catch (error) {
-      // @ts-ignore
-      const errorMessage = error?.data?.message || 'Failed creating the workspace. Please try again.'
-      setError(errorMessage)
+      setError(getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError))
     } finally {
       setIsSubmitting(false)
     }
