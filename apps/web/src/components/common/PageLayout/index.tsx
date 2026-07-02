@@ -19,7 +19,6 @@ import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
 import { useIsTopbarElevated } from '@/hooks/useTopbarElevation'
-import { useIsSignedIn } from '@/hooks/useIsSignedIn'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -49,9 +48,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const { BatchSidebar } = useLoadFeature(BatchingFeature)
   const { SelectSafeModal } = useLoadFeature(SpacesFeature)
   const isStaticPage = STATIC_PAGE_ROUTES.includes(pathname)
-  const isSignedIn = useIsSignedIn()
-  const isWelcomeWorskpacePage = pathname === AppRoutes.welcome.spaces
-  const hideHeader = NO_HEADER_ROUTES.includes(pathname) || (isWelcomeWorskpacePage && !isSignedIn)
+  const hideHeader = NO_HEADER_ROUTES.includes(pathname)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
   const isSpaceRoute = useIsSpaceRoute()
   const parentSafe = useParentSafe()
@@ -73,13 +70,6 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       {isStaticPage && (
         <div className="px-6 py-4">
           <SafeLogo />
-        </div>
-      )}
-
-      {/* The welcome tabs hide the Topbar while signed out — keep the Safe logo visible top-left. */}
-      {(isWelcomeWorskpacePage || isWelcomeAccountsPage) && !isSignedIn && (
-        <div className="absolute left-6 top-4 z-10">
-          <SafeLogo data-testid="welcome-safe-logo" />
         </div>
       )}
 

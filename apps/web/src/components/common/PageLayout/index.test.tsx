@@ -133,63 +133,31 @@ describe('PageLayout', () => {
       expect(screen.queryByTestId('safe-logo')).not.toBeInTheDocument()
     })
 
-    it.each(NON_STATIC_ROUTES.filter((r) => !r.startsWith('/welcome')).map((r) => [r]))(
-      'renders Topbar on %s',
+    it.each(NON_STATIC_ROUTES.map((r) => [r]))('renders Topbar on %s', (pathname) => {
+      renderLayout(pathname)
+      expect(screen.getByTestId('topbar')).toBeInTheDocument()
+    })
+  })
+
+  // The Topbar carries the Safe logo and the wallet section on the welcome tabs,
+  // so it must stay visible regardless of the auth state.
+  describe('welcome pages topbar (/welcome/spaces, /welcome/accounts and /)', () => {
+    it.each([[AppRoutes.welcome.spaces], [AppRoutes.welcome.accounts], [AppRoutes.index]])(
+      'renders Topbar on %s when the user is signed in',
       (pathname) => {
+        mockUseIsSignedIn.mockReturnValue(true)
         renderLayout(pathname)
         expect(screen.getByTestId('topbar')).toBeInTheDocument()
       },
     )
-  })
 
-  describe('welcome pages topbar gating (/welcome/spaces and /)', () => {
-    it('renders Topbar on /welcome/spaces when the user is signed in', () => {
-      mockUseIsSignedIn.mockReturnValue(true)
-      renderLayout(AppRoutes.welcome.spaces)
-      expect(screen.getByTestId('topbar')).toBeInTheDocument()
-    })
-
-    it('hides Topbar on /welcome/spaces when the user is signed out (sign-in form rendered)', () => {
-      mockUseIsSignedIn.mockReturnValue(false)
-      renderLayout(AppRoutes.welcome.spaces)
-      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
-    })
-
-    it('renders Topbar on /', () => {
-      renderLayout(AppRoutes.index)
-      expect(screen.getByTestId('topbar')).toBeInTheDocument()
-    })
-  })
-
-  describe('welcome pages Safe logo', () => {
-    it.each([[AppRoutes.welcome.spaces], [AppRoutes.welcome.accounts]])(
-      'shows the Safe logo on %s when signed out (no Topbar)',
+    it.each([[AppRoutes.welcome.spaces], [AppRoutes.welcome.accounts], [AppRoutes.index]])(
+      'renders Topbar on %s when the user is signed out',
       (pathname) => {
         mockUseIsSignedIn.mockReturnValue(false)
         renderLayout(pathname)
-        expect(screen.getByTestId('welcome-safe-logo')).toBeInTheDocument()
+        expect(screen.getByTestId('topbar')).toBeInTheDocument()
       },
     )
-
-    it('does not duplicate the logo when signed in (the Topbar is shown instead)', () => {
-      mockUseIsSignedIn.mockReturnValue(true)
-      renderLayout(AppRoutes.welcome.accounts)
-      expect(screen.queryByTestId('welcome-safe-logo')).not.toBeInTheDocument()
-      expect(screen.getByTestId('topbar')).toBeInTheDocument()
-    })
-  })
-
-  describe('accounts page topbar gating (/welcome/accounts)', () => {
-    it('renders Topbar on /welcome/accounts when the user is signed in', () => {
-      mockUseIsSignedIn.mockReturnValue(true)
-      renderLayout(AppRoutes.welcome.accounts)
-      expect(screen.getByTestId('topbar')).toBeInTheDocument()
-    })
-
-    it('renders Topbar on /welcome/accounts when the user is signed out', () => {
-      mockUseIsSignedIn.mockReturnValue(false)
-      renderLayout(AppRoutes.welcome.accounts)
-      expect(screen.getByTestId('topbar')).toBeInTheDocument()
-    })
   })
 })

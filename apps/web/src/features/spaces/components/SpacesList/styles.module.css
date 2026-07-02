@@ -12,17 +12,6 @@
   margin: var(--space-2);
 }
 
-/* Signed-out top spacing, kept in sync with the Accounts page. */
-.headerSpacer {
-  padding-top: calc(var(--topbar-height) / 2);
-}
-
-@media (max-width: 899.95px) {
-  .headerSpacer {
-    padding-top: 0;
-  }
-}
-
 .spacesHeader {
   display: flex;
   justify-content: space-between;

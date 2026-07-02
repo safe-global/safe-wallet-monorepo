@@ -16,17 +16,6 @@
   margin: 0 !important;
 }
 
-/* Signed-out top spacing, kept in sync with the Workspaces page. */
-.headerSpacer {
-  padding-top: calc(var(--topbar-height) / 2);
-}
-
-@media (max-width: 899.95px) {
-  .headerSpacer {
-    padding-top: 0;
-  }
-}
-
 .safeList {
   padding: var(--space-2) var(--space-2) var(--space-3);
   margin-bottom: var(--space-1);

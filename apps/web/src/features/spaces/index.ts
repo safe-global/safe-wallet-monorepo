@@ -115,6 +115,7 @@ export { mapSpaceContactsToAddressBookState } from './utils'
 
 // Components consumed from outside the feature
 export { HeaderNavigation } from './components/HeaderNavigation'
+export { default as HeaderAccountInfo } from './components/HeaderNavigation/HeaderAccountInfo'
 export { SpacesEnhancedSidebar } from './components/Sidebar/SpacesEnhancedSidebar'
 export { default as ConnectWalletHint } from './components/ConnectWalletHint'
 export { default as ChainSelectorBlock } from './components/SafeSelectorDropdown/components/ChainSelectorBlock'

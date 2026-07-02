@@ -201,7 +201,7 @@ const SpacesList = () => {
 
   return (
     <Box className={css.container}>
-      <Box className={cn(css.mySpaces, { [css.headerSpacer]: !isUserSignedIn })}>
+      <Box className={css.mySpaces}>
         <Box className={css.spacesHeader}>
           <AccountsNavigation />
 

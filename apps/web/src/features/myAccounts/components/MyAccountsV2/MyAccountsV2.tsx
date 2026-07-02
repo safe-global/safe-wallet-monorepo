@@ -5,7 +5,6 @@ import AccountsSearch from './components/AccountsSearch'
 import madProps from '@/utils/mad-props'
 import css from '../../styles.module.css'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useIsSignedIn } from '@/hooks/useIsSignedIn'
 import { type AllSafeItemsGrouped, useAllSafesGrouped } from '@/hooks/safes'
 import classNames from 'classnames'
 import useTrackSafesCount from '../../hooks/useTrackedSafesCount'
@@ -20,7 +19,6 @@ type MyAccountsProps = {
 
 const MyAccountsV2 = ({ safes, onLinkClick, isSidebar = false }: MyAccountsProps) => {
   const wallet = useWallet()
-  const isSignedIn = useIsSignedIn()
   const [searchQuery, setSearchQuery] = useState('')
   useTrackSafesCount(safes, wallet)
 
@@ -29,7 +27,6 @@ const MyAccountsV2 = ({ safes, onLinkClick, isSidebar = false }: MyAccountsProps
       <div
         className={classNames(css.myAccounts, {
           [css.sidebarAccounts]: isSidebar,
-          [css.headerSpacer]: !isSignedIn,
         })}
       >
         <AccountsHeader isSidebar={isSidebar} onLinkClick={onLinkClick} />
