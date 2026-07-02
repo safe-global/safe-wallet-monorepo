@@ -87,7 +87,15 @@ export {
 } from './hooks/useSpaceMembers'
 
 // Hooks from useSpaceSafes.tsx
-export { useSpaceSafes } from './hooks/useSpaceSafes'
+export { useSpaceSafes, useSpaceSafesById } from './hooks/useSpaceSafes'
+
+// Reverse lookup: Safe address -> Spaces it belongs to
+export { useSafeSpaces } from './hooks/useSafeSpaces'
+export type { SafeSpacesMap } from './hooks/useSafeSpaces'
+
+// Workspaces view state (shared with welcome screen + in-safe dropdown)
+export { useWorkspacesView } from './hooks/useWorkspacesView'
+export type { WorkspacesView, WorkspacesViewKind } from './hooks/useWorkspacesView'
 
 // Hooks from useSpacePendingTransactions.ts
 export { useSpacePendingTransactions } from './hooks/useSpacePendingTransactions'

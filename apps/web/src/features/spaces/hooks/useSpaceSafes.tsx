@@ -52,3 +52,36 @@ export const useSpaceSafes = () => {
 
   return { allSafes, isLoading, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes }
 }
+
+/**
+ * Fetches the safes of an explicit space (not the current one) with optional
+ * `skip`, so callers can lazy-load a space's safes on demand — e.g. the welcome
+ * Workspaces accordion, where each space row loads its safes only when expanded.
+ *
+ * Unlike {@link useSpaceSafes} this resolves names from the local address book
+ * only (no per-space contacts fetch), keeping the lazy list lightweight.
+ */
+export const useSpaceSafesById = (spaceId: string, { skip = false }: { skip?: boolean } = {}) => {
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { currentData, isLoading, isError, error, refetch } = useSpaceSafesGetV1Query(
+    { spaceId },
+    { skip: skip || !isUserSignedIn || !spaceId, ...SPACE_REFRESH_OPTIONS },
+  )
+
+  const localAddressBook = useAppSelector(selectAllAddressBooks)
+  const { address: walletAddress = '' } = useWallet() || {}
+  const [allOwned = {}] = useAllOwnedSafes(walletAddress)
+  const allVisitedSafes = useAppSelector(selectAllVisitedSafes)
+  const { orderBy } = useAppSelector(selectOrderByPreference)
+  const sortComparator = getComparator(orderBy)
+
+  const safeItems = currentData ? _buildSafeItems(currentData.safes, localAddressBook, allOwned, allVisitedSafes) : []
+  const grouped = useAllSafesGrouped(safeItems)
+
+  const allSafes = useMemo<AllSafeItems>(
+    () => [...(grouped.allMultiChainSafes ?? []), ...(grouped.allSingleSafes ?? [])].sort(sortComparator),
+    [grouped.allMultiChainSafes, grouped.allSingleSafes, sortComparator],
+  )
+
+  return { allSafes, isLoading, isError, error, refetch }
+}
