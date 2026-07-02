@@ -28,7 +28,10 @@ export interface SafeItemData {
 }
 
 export interface SafeSelectorDropdownProps {
+  /** Full set of safes used to resolve the trigger's current safe (union of both tabs). */
   items: SafeItemData[]
+  /** Safes rendered inside the popup list. Defaults to `items`; the SafeBar passes the active tab's list. */
+  listItems?: SafeItemData[]
   selectedItemId?: string
   onItemSelect?: (itemId: string) => void
   isLoading?: boolean
@@ -36,4 +39,6 @@ export interface SafeSelectorDropdownProps {
   onRetry?: () => void
   header?: React.ReactNode
   footer?: React.ReactNode | ((close: () => void) => React.ReactNode)
+  /** Replaces the default "no safes" empty state — e.g. a "Sign in to a workspace" CTA on the Workspace tab. */
+  emptyStateOverride?: React.ReactNode
 }

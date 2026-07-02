@@ -30,6 +30,8 @@ export interface SafeDropdownContainerProps {
   onRetry?: () => void
   header?: React.ReactNode
   footer?: React.ReactNode | ((close: () => void) => React.ReactNode)
+  /** Replaces the default "no safes" empty text (not the search-empty text) — e.g. a "Sign in to a workspace" CTA. */
+  emptyStateOverride?: React.ReactNode
   closeDropdown: () => void
 }
 
@@ -75,6 +77,7 @@ const SafeDropdownContainer = ({
   onRetry,
   header,
   footer,
+  emptyStateOverride,
   closeDropdown,
 }: SafeDropdownContainerProps) => {
   const [search, setSearch] = useState('')
@@ -106,6 +109,9 @@ const SafeDropdownContainer = ({
     }
 
     if (filteredItems.length === 0) {
+      if (!query && emptyStateOverride) {
+        return <div data-testid="dropdown-empty-override">{emptyStateOverride}</div>
+      }
       return (
         <p className="px-4 py-6 text-center text-sm text-muted-foreground" data-testid="dropdown-empty">
           {query

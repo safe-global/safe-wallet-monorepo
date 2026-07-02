@@ -108,6 +108,20 @@ describe('SafeDropdownContainer', () => {
 
       expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('No safes yet')
     })
+
+    it('renders emptyStateOverride instead of the default empty text when there are no safes', () => {
+      render(
+        <SafeDropdownContainer
+          items={[]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          emptyStateOverride={<div data-testid="custom-empty">Sign in to a workspace</div>}
+        />,
+      )
+
+      expect(screen.getByTestId('custom-empty')).toBeInTheDocument()
+      expect(screen.queryByTestId('dropdown-empty')).not.toBeInTheDocument()
+    })
   })
 
   describe('footer', () => {

@@ -2,7 +2,7 @@ import { useMemo, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { isMultiChainSafeItem, flattenSafeItems } from '@/hooks/safes'
-import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
+import type { SafeItem, MultiChainSafeItem, AllSafeItems } from '@/hooks/safes'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
@@ -133,7 +133,9 @@ function buildSingleChainItem(
 }
 
 export function useSpaceSafeSelectorItems() {
-  const { dropdownSafes: allSafes, isInSpaceContext } = useSafeBarSafes()
+  const { workspaceSafes, localSafes, isInSpaceContext } = useSafeBarSafes()
+  // Union feeds the overview query once; the two lists are mapped to items separately for the tabs.
+  const allSafes = useMemo(() => [...workspaceSafes, ...localSafes], [workspaceSafes, localSafes])
   const { safe, safeAddress: reduxSafeAddress } = useSafeInfo()
   const urlSafeAddress = useSafeAddressFromUrl()
   const effectiveSafeAddress = urlSafeAddress || reduxSafeAddress
@@ -154,26 +156,41 @@ export function useSpaceSafeSelectorItems() {
     refetch: refetchOverviews,
   } = useGetMultipleSafeOverviewsQuery(flatSafes.length > 0 ? { safes: flatSafes, currency, walletAddress } : skipToken)
 
-  const items: SafeItemData[] = useMemo(() => {
-    return allSafes.map((item) => {
-      const isCurrentSafe = sameAddress(item.address, effectiveSafeAddress)
+  const buildItems = useCallback(
+    (safes: AllSafeItems): SafeItemData[] =>
+      safes.map((item) => {
+        const isCurrentSafe = sameAddress(item.address, effectiveSafeAddress)
 
-      if (isMultiChainSafeItem(item)) {
-        return buildMultiChainItem(
+        if (isMultiChainSafeItem(item)) {
+          return buildMultiChainItem(
+            item,
+            isCurrentSafe,
+            currentChainId,
+            overviews,
+            overviewsLoading,
+            safe,
+            chainConfigs,
+            undeployedSafes,
+          )
+        }
+
+        return buildSingleChainItem(
           item,
           isCurrentSafe,
-          currentChainId,
           overviews,
           overviewsLoading,
           safe,
           chainConfigs,
           undeployedSafes,
         )
-      }
+      }),
+    [effectiveSafeAddress, currentChainId, safe, overviews, overviewsLoading, chainConfigs, undeployedSafes],
+  )
 
-      return buildSingleChainItem(item, isCurrentSafe, overviews, overviewsLoading, safe, chainConfigs, undeployedSafes)
-    })
-  }, [allSafes, effectiveSafeAddress, currentChainId, safe, overviews, overviewsLoading, chainConfigs, undeployedSafes])
+  const workspaceItems = useMemo(() => buildItems(workspaceSafes), [buildItems, workspaceSafes])
+  const localItems = useMemo(() => buildItems(localSafes), [buildItems, localSafes])
+  // Back-compat: the "active" list matches the pre-tabs behaviour (space vs local by context).
+  const items = isInSpaceContext ? workspaceItems : localItems
 
   const selectedItemId = effectiveSafeAddress ? `${currentChainId}:${effectiveSafeAddress}` : ''
 
@@ -198,15 +215,18 @@ export function useSpaceSafeSelectorItems() {
     [chainConfigs, router, spaceId],
   )
 
-  const itemsNotReady = items.length === 0 && !overviewsError
+  const itemsNotReady = workspaceItems.length === 0 && localItems.length === 0 && !overviewsError
 
   return {
     items,
+    workspaceItems,
+    localItems,
     selectedItemId,
     handleItemSelect,
     isLoading: overviewsLoading || itemsNotReady,
     isError: overviewsError,
     refetch: refetchOverviews,
     isInSpaceContext,
+    hasWallet: Boolean(walletAddress),
   }
 }

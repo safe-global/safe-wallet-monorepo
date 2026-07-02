@@ -132,7 +132,9 @@ function setupDefaults(
   } = {},
 ) {
   ;(useSafeBarSafes as jest.Mock).mockReturnValue({
-    dropdownSafes: overrides.allSafes ?? [singleChainSafe],
+    workspaceSafes: [],
+    localSafes: overrides.allSafes ?? [singleChainSafe],
+    isInSpaceContext: false,
   })
   ;(useCurrentSpaceId as jest.Mock).mockReturnValue(overrides.spaceId ?? '42')
   ;(useSafeInfo as jest.Mock).mockReturnValue({
@@ -524,7 +526,11 @@ describe('useSpaceSafeSelectorItems', () => {
       safeAddress: '0xAbCdEf',
     })
     ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('0xabcdef') // lowercase vs mixed-case in item
-    ;(useSafeBarSafes as jest.Mock).mockReturnValue({ dropdownSafes: [mixedCaseSafe] })
+    ;(useSafeBarSafes as jest.Mock).mockReturnValue({
+      workspaceSafes: [],
+      localSafes: [mixedCaseSafe],
+      isInSpaceContext: false,
+    })
 
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
     // Should use live safe.threshold (3) not overview, proving case-insensitive match worked

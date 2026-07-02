@@ -57,6 +57,7 @@ function SafeSelectorDropdownSkeleton() {
 
 function SafeSelectorDropdown({
   items,
+  listItems,
   selectedItemId,
   onItemSelect,
   isLoading,
@@ -64,6 +65,7 @@ function SafeSelectorDropdown({
   onRetry,
   header,
   footer,
+  emptyStateOverride,
 }: SafeSelectorDropdownProps) {
   const hasDropdownContent = Boolean(header) || Boolean(footer) || isLoading || isError
   // Force-openable so `isSingleSafe` can't hide the chevron when only one other safe exists.
@@ -138,7 +140,7 @@ function SafeSelectorDropdown({
       </SelectTrigger>
 
       <SafeDropdownContainer
-        items={items}
+        items={listItems ?? items}
         selectedItemId={safeSelectValue}
         onItemSelect={safeItemSelect}
         isLoading={isLoading}
@@ -146,6 +148,7 @@ function SafeSelectorDropdown({
         onRetry={onRetry}
         header={header}
         footer={footer}
+        emptyStateOverride={emptyStateOverride}
         closeDropdown={closeDropdown}
       />
     </Select>

@@ -116,6 +116,10 @@ export function useSafeBarSafes() {
   return {
     dropdownSafes: isInSpaceContext ? spaceDropdownSafes : dropdownSafes,
     chainSelectorSafes: isInSpaceContext ? spaceSafes : chainSelectorSafes,
+    // Both lists are exposed so the dropdown can offer Workspace | Local tabs:
+    // `workspaceSafes` are the current space's safes, `localSafes` the trusted (pinned) ones.
+    workspaceSafes: spaceDropdownSafes,
+    localSafes: dropdownSafes,
     // Expose so the header label stays in sync with which list is shown
     isInSpaceContext,
   }
