@@ -63,6 +63,11 @@ jest.mock('../EmptySafeAccounts', () => ({
   default: () => null,
 }))
 
+jest.mock('../LocalSafeAccounts', () => ({
+  __esModule: true,
+  default: () => <div data-testid="local-safe-accounts" />,
+}))
+
 jest.mock('../../InviteBanner/PreviewInvite', () => ({ __esModule: true, default: () => null }))
 
 describe('SpaceSafeAccounts header CTA', () => {

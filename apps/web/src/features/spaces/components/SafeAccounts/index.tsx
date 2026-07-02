@@ -1,6 +1,8 @@
 import AddAccountsChooser from '../AddAccountsChooser'
 import EmptySafeAccounts from './EmptySafeAccounts'
+import LocalSafeAccounts from './LocalSafeAccounts'
 import { Stack } from '@mui/material'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
 import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
@@ -63,40 +65,52 @@ const SpaceSafeAccounts = () => {
   return (
     <>
       {isInvited && <PreviewInvite />}
-      <div className="mb-6 flex flex-col gap-6">
-        <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
-          Safe accounts
-        </Typography>
-        <Stack direction="row" justifyContent="flex-start">
-          <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
-            <AddAccountsChooser buttonVariant="default" buttonLabel="Manage accounts" entryPoint="safe_accounts" />
-          </Track>
-        </Stack>
-      </div>
+      <Typography variant="h2" className="mb-6 font-bold leading-[1] tracking-tight">
+        Safe accounts
+      </Typography>
 
-      {isSpaceSafesError ? (
-        <div className="flex items-center gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 px-5 py-4">
-          <TriangleAlert className="size-5 shrink-0 text-destructive" />
-          <div className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-destructive">Failed to load Safe accounts</span>
-            <span className="text-xs text-muted-foreground">
-              {spaceSafesError ? getRtkQueryErrorMessage(spaceSafesError) : 'Please try again.'}
-            </span>
-          </div>
-          <button
-            onClick={refetchSpaceSafes}
-            className="ml-auto flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-destructive transition-colors hover:bg-destructive/10"
-            type="button"
-          >
-            <RotateCw className="size-3.5" />
-            Retry
-          </button>
-        </div>
-      ) : !hasResults && allSafes && allSafes.length === 0 ? (
-        <EmptySafeAccounts />
-      ) : (
-        <AccountsSafesList safes={displaySafes} similarAddresses={similarAddresses} />
-      )}
+      <Tabs defaultValue="workspace">
+        <TabsList variant="line" className="mb-6">
+          <TabsTrigger value="workspace">Workspace</TabsTrigger>
+          <TabsTrigger value="local">Trusted</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="workspace">
+          <Stack direction="row" justifyContent="flex-start" sx={{ mb: 3 }}>
+            <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
+              <AddAccountsChooser buttonVariant="default" buttonLabel="Manage accounts" entryPoint="safe_accounts" />
+            </Track>
+          </Stack>
+
+          {isSpaceSafesError ? (
+            <div className="flex items-center gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 px-5 py-4">
+              <TriangleAlert className="size-5 shrink-0 text-destructive" />
+              <div className="flex flex-col gap-1">
+                <span className="text-sm font-medium text-destructive">Failed to load Safe accounts</span>
+                <span className="text-xs text-muted-foreground">
+                  {spaceSafesError ? getRtkQueryErrorMessage(spaceSafesError) : 'Please try again.'}
+                </span>
+              </div>
+              <button
+                onClick={refetchSpaceSafes}
+                className="ml-auto flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-destructive transition-colors hover:bg-destructive/10"
+                type="button"
+              >
+                <RotateCw className="size-3.5" />
+                Retry
+              </button>
+            </div>
+          ) : !hasResults && allSafes && allSafes.length === 0 ? (
+            <EmptySafeAccounts />
+          ) : (
+            <AccountsSafesList safes={displaySafes} similarAddresses={similarAddresses} />
+          )}
+        </TabsContent>
+
+        <TabsContent value="local">
+          <LocalSafeAccounts />
+        </TabsContent>
+      </Tabs>
     </>
   )
 }

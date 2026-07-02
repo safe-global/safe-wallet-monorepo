@@ -6,7 +6,7 @@ import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TriangleAlert, RotateCw } from 'lucide-react'
-import { useMemo } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import { Tooltip } from '@mui/material'
 import FiatBalance from '../SelectSafesOnboarding/components/FiatBalance'
 import ThresholdBadge from '../SelectSafesOnboarding/components/ThresholdBadge'
@@ -33,6 +33,8 @@ interface SafeCardReadOnlyProps {
   onClick?: () => void
   disabled?: boolean
   disabledTooltip?: string
+  /** Optional trailing action (e.g. "Add to workspace") rendered before the context menu. */
+  action?: ReactNode
 }
 
 const SafeCardReadOnly = ({
@@ -44,6 +46,7 @@ const SafeCardReadOnly = ({
   hideContextMenu = false,
   disabled = false,
   disabledTooltip,
+  action,
 }: SafeCardReadOnlyProps) => {
   const router = useRouter()
   const isMultiChain = isMultiChainSafeItem(safe)
@@ -189,6 +192,7 @@ const SafeCardReadOnly = ({
         </div>
 
         <div className="flex shrink-0 items-center gap-2 pl-2" onClick={(e) => e.stopPropagation()}>
+          {action}
           {spaces?.SpaceSafeContextMenu && !hideContextMenu && <spaces.SpaceSafeContextMenu safeItem={safe} />}
         </div>
       </div>
