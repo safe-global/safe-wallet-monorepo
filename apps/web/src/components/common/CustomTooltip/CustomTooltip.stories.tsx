@@ -17,7 +17,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    title: 'This is a tooltip',
+    title: 'Components/Common/CustomTooltip',
     children: <Button variant="outline">Hover me</Button>,
   },
 }

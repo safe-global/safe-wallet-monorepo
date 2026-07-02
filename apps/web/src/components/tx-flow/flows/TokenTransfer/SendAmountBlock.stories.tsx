@@ -24,7 +24,7 @@ const ethToken: Balance['tokenInfo'] = {
 }
 
 const meta: Meta<typeof SendAmountBlock> = {
-  title: 'Transactions/SendAmountBlock',
+  title: 'Components/TxFlow/SendAmountBlock',
   component: SendAmountBlock,
   decorators: [withMockProvider()],
   tags: ['autodocs'],

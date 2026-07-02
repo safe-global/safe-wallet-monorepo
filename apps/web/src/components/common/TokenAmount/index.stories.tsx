@@ -4,7 +4,7 @@ import TokenAmount from './index'
 const meta = {
   component: TokenAmount,
   parameters: {
-    componentSubtitle: 'Renders a token Amount with Token Symbol and Logo',
+    componentSubtitle: 'Components/Common/TokenAmount',
   },
 
   decorators: [

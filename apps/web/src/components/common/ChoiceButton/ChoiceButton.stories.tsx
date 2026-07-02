@@ -22,7 +22,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    title: 'Send tokens',
+    title: 'Components/Common/ChoiceButton',
     description: 'Send tokens to another address',
     icon: Send,
     onClick: () => console.log('clicked'),

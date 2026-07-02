@@ -5,7 +5,7 @@ import { StoreDecorator } from '@/stories/storeDecorator'
 const meta = {
   component: SrcEthHashInfo,
   parameters: {
-    componentSubtitle: 'Renders a hash address with options for copy and explorer link',
+    componentSubtitle: 'Components/Common/EthHashInfo/SrcEthHashInfo',
   },
 
   decorators: [

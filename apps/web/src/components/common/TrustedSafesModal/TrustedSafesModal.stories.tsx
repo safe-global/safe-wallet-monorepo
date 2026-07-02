@@ -62,7 +62,7 @@ const baseMockModal: UseTrustedSafesModalReturn = {
 }
 
 const meta = {
-  title: 'Common/TrustedSafesModal',
+  title: 'Components/Common/TrustedSafesModal',
   component: TrustedSafesModal,
   decorators: [withMockProvider()],
   parameters: {

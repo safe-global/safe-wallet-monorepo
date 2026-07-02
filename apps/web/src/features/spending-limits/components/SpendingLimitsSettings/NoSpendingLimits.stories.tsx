@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { NoSpendingLimits } from './NoSpendingLimits'
 
 const meta: Meta<typeof NoSpendingLimits> = {
-  title: 'Components/SpendingLimits/NoSpendingLimits',
+  title: 'Features/SpendingLimits/NoSpendingLimits',
   component: NoSpendingLimits,
   parameters: {
     layout: 'padded',

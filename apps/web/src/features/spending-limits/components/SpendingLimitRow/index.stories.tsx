@@ -46,7 +46,7 @@ const withForm = (Story: () => ReactElement) => {
 }
 
 const meta = {
-  title: 'Features/Spending Limits/SpendingLimitRow',
+  title: 'Features/SpendingLimits/SpendingLimitRow',
   component: SpendingLimitRow,
   loaders: [mswLoader],
   parameters: {

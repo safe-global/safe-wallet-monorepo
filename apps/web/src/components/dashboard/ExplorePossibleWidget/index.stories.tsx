@@ -7,7 +7,7 @@ import ExplorePossibleWidget from './index'
 const meta = {
   component: ExplorePossibleWidget,
   parameters: {
-    componentSubtitle: 'Renders a horizontal scrollable carousel showcasing key Safe features',
+    componentSubtitle: 'Components/Dashboard/ExplorePossibleWidget',
     nextjs: {
       appDirectory: true,
       navigation: {

@@ -12,7 +12,7 @@ const onboardingSurveyState: SurveyStateDto = {
     id: 1,
     slug: 'onboarding',
     version: 1,
-    title: 'Space Onboarding Survey',
+    title: 'Features/Spaces/SurveyOnboarding',
     subtitle: 'Per-Space onboarding questionnaire',
     surveyContent: {
       pages: [

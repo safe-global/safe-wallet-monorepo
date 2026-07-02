@@ -16,7 +16,7 @@ const setup = createMockStory({
 })
 
 const meta = {
-  title: 'Components/Nested Safes/SimilarityConfirmDialog',
+  title: 'Components/NestedSafes/SimilarityConfirmDialog',
   component: SimilarityConfirmDialog,
   loaders: [mswLoader],
   decorators: [setup.decorator],

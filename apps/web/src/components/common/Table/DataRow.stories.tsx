@@ -4,7 +4,7 @@ import { DataRow } from './DataRow'
 const meta = {
   component: DataRow,
   parameters: {
-    componentSubtitle: 'A simple label<=>value pair row for a table',
+    componentSubtitle: 'Components/Common/DataRow',
   },
   argTypes: {
     title: {

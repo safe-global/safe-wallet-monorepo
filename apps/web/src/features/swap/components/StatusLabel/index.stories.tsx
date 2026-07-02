@@ -4,7 +4,7 @@ import StatusLabel from './index'
 const meta = {
   component: StatusLabel,
   parameters: {
-    componentSubtitle: 'Renders a Status label with icon and text for a swap order',
+    componentSubtitle: 'Features/Swap/StatusLabel',
   },
 
   decorators: [

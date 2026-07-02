@@ -4,7 +4,7 @@ import OrderId from './index'
 const meta = {
   component: OrderId,
   parameters: {
-    componentSubtitle: 'Renders an order id with an external link and a copy button',
+    componentSubtitle: 'Features/Swap/OrderId',
   },
 
   decorators: [

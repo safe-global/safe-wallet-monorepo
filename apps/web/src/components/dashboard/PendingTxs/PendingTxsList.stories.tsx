@@ -146,7 +146,7 @@ const defaultSetup = createMockStory({
 })
 
 const meta = {
-  title: 'Dashboard/PendingTxsList',
+  title: 'Components/Dashboard/PendingTxsList',
   component: PendingTxsList,
   loaders: [mswLoader],
   parameters: {

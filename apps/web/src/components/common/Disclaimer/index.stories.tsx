@@ -5,7 +5,7 @@ import LegalDisclaimerContent from '@/components/common/LegalDisclaimerContent'
 const meta = {
   component: Disclaimer,
   parameters: {
-    componentSubtitle: 'Renders a Block for displaying information to the user, with a button to accept.',
+    componentSubtitle: 'Components/Common/Disclaimer',
   },
   tags: ['autodocs'],
 } satisfies Meta<typeof Disclaimer>

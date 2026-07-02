@@ -7,7 +7,7 @@ import { RouterDecorator } from '@/stories/routerDecorator'
 const meta = {
   component: EthHashInfo,
   parameters: {
-    componentSubtitle: 'Renders a hash address with options for copy and explorer link',
+    componentSubtitle: 'Components/Common/EthHashInfo',
   },
 
   decorators: [
