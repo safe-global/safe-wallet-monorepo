@@ -7,7 +7,8 @@
 
 .myAccounts {
   width: 100vw;
-  max-width: 750px;
+  /* Wide enough for the accounts table (all 7 columns) per the redesign mockups. */
+  max-width: 990px;
   margin: var(--space-2);
 }
 

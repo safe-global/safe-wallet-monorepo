@@ -14,10 +14,11 @@ import BookmarkIcon from '@/public/images/apps/bookmark.svg'
 
 import ConnectWalletPrompt from '../../../ConnectWalletPrompt'
 import MigrationPrompt from '../../../MigrationPrompt'
+import AddTrustedSafesCard from '@/components/common/AddTrustedSafesCard'
 import TrustedSafesModal from '@/components/common/TrustedSafesModal'
 import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import useMigrationPrompt from '../../../../hooks/useMigrationPrompt'
-import AccountItem from '../AccountItem'
+import SafeAccountsTable from '../../../SafeAccountsTable'
 
 type AccountsListProps = {
   searchQuery: string
@@ -82,11 +83,7 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
         <Typography variant="paragraph-small" color="muted" className="mb-2">
           Found {filteredSafes.length} result{maybePlural(filteredSafes)}
         </Typography>
-        <div className="flex flex-col gap-2">
-          {filteredSafes.map((item) => (
-            <AccountItem key={item.address} safe={item} onLinkClick={onLinkClick} />
-          ))}
-        </div>
+        <SafeAccountsTable items={filteredSafes} onLinkClick={onLinkClick} />
       </>
     )
   }
@@ -107,7 +104,7 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
           <Typography variant="paragraph-small-bold" className="mb-2">
             Current Safe account
           </Typography>
-          <AccountItem safe={currentSafeItem} onLinkClick={onLinkClick} />
+          <SafeAccountsTable items={currentSafeItem ? [currentSafeItem] : []} onLinkClick={onLinkClick} />
         </section>
       )}
 
@@ -120,11 +117,7 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
 
       {pinnedSafes.length > 0 && (
         <section data-testid="pinned-accounts" className="mb-4">
-          <div className="flex flex-col gap-2">
-            {pinnedSafes.map((item) => (
-              <AccountItem key={item.address} safe={item} onLinkClick={onLinkClick} />
-            ))}
-          </div>
+          <SafeAccountsTable items={pinnedSafes} onLinkClick={onLinkClick} />
           <div className="mt-3 flex justify-center">
             <Button variant="outline" size="sm" onClick={modal.open} data-testid="add-more-safes-button">
               Manage trusted Safes
@@ -133,17 +126,7 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
         </section>
       )}
 
-      {showEmptyState && (
-        <Typography
-          data-testid="empty-safe-list"
-          variant="paragraph-small"
-          color="muted"
-          align="center"
-          className="py-6"
-        >
-          You don&apos;t have any safes yet
-        </Typography>
-      )}
+      {showEmptyState && <AddTrustedSafesCard onAdd={modal.open} />}
 
       <TrustedSafesModal modal={modal} />
     </>
