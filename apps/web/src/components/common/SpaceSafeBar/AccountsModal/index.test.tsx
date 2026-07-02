@@ -80,7 +80,6 @@ const buildHookReturn = (overrides: Partial<ReturnType<typeof useAccountsModalIt
   trustedItems: [],
   otherItems: [safeItem('1', ADDR_A)],
   getMatch: () => undefined,
-  hasSimilarities: false,
   isLoading: false,
   isOwnedSafesError: false,
   refetchOwnedSafes: jest.fn(),
@@ -168,26 +167,6 @@ describe('AccountsModal', () => {
 
     expect(screen.queryByTestId('empty-pinned-list')).not.toBeInTheDocument()
     expect(screen.queryByTestId('safe-item-card-mock')).not.toBeInTheDocument()
-  })
-
-  it('renders the similar-address warning banner when at least one similar address is detected', () => {
-    mockUseAccountsModalItems.mockReturnValue(
-      buildHookReturn({
-        hasSimilarities: true,
-      }),
-    )
-
-    render(<AccountsModal open onClose={jest.fn()} />)
-
-    expect(screen.getByTestId('similar-address-alert')).toBeInTheDocument()
-  })
-
-  it('hides the similar-address warning banner when no similar addresses are detected', () => {
-    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ hasSimilarities: false }))
-
-    render(<AccountsModal open onClose={jest.fn()} />)
-
-    expect(screen.queryByTestId('similar-address-alert')).not.toBeInTheDocument()
   })
 
   it('shows the connect-wallet hint and still lists local safes when no wallet is connected', () => {

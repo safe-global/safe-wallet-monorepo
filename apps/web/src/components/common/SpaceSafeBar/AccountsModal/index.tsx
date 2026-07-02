@@ -14,7 +14,6 @@ import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/ov
 import InlineRetryError from '@/components/common/InlineRetryError'
 import { useBottomScrollFade } from '@/hooks/useBottomScrollFade'
 import { SafeListSkeleton } from './shared'
-import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
 import { ConnectWalletHint } from '@/features/spaces'
 import useWallet from '@/hooks/wallets/useWallet'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
@@ -94,16 +93,8 @@ const AccountsModal = ({
   const isWalletConnected = Boolean(wallet)
   const connectWallet = useConnectWallet()
   const router = useRouter()
-  const {
-    trustedItems,
-    otherItems,
-    getMatch,
-    hasSimilarities,
-    isLoading,
-    isOwnedSafesError,
-    refetchOwnedSafes,
-    isQualifiedSafe,
-  } = useAccountsModalItems({ search, open })
+  const { trustedItems, otherItems, getMatch, isLoading, isOwnedSafesError, refetchOwnedSafes, isQualifiedSafe } =
+    useAccountsModalItems({ search, open })
 
   // Bottom-fade scroll hint, shown only while more rows lie below the fold.
   const { setScrollNode, showFade } = useBottomScrollFade([
@@ -112,7 +103,6 @@ const AccountsModal = ({
     otherItems.length,
     isWalletConnected,
     isOwnedSafesError,
-    hasSimilarities,
   ])
 
   // Unmount the dialog while the wallet-connect modal is open: the shadcn Dialog
@@ -180,11 +170,6 @@ const AccountsModal = ({
             </p>
           ) : (
             <>
-              {hasSimilarities && (
-                <div className="px-2 pb-2 pt-1">
-                  <SimilarAddressAlert />
-                </div>
-              )}
               {renderSection('Trusted Safes', trustedItems, {
                 getMatch,
                 onClose,

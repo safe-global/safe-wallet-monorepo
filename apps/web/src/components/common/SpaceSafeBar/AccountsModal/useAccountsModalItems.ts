@@ -132,7 +132,6 @@ export function useAccountsModalItems({ search, open }: { search: string; open: 
     })
     return (address: string): SimilarityMatch | undefined => byLower.get(address.toLowerCase())
   }, [similarities])
-  const hasSimilarities = useMemo(() => Array.from(similarities.values()).some((a) => a.match), [similarities])
 
   const matchesSearch = (item: SafeItem | MultiChainSafeItem, query: string): boolean => {
     const name = item.name?.toLowerCase() ?? ''
@@ -171,7 +170,6 @@ export function useAccountsModalItems({ search, open }: { search: string; open: 
     trustedItems,
     otherItems,
     getMatch,
-    hasSimilarities,
     // In workspace context the exclusion set depends on space safes — show the skeleton
     // until both arrive, otherwise the user briefly sees safes that ARE in the workspace
     // before the filter kicks in (contradicting the "Safes not in this workspace" title).
