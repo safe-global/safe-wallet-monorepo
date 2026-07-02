@@ -19,7 +19,9 @@
 }
 
 .fieldControl {
-  height: var(--space-5);
+  /* Match the SearchField height (h-10 = 40px); override the shadcn trigger's
+     built-in data-[size=default]:h-9, which out-specifies a plain class. */
+  height: var(--space-5) !important;
   border-color: var(--border);
   background-color: var(--card);
   box-shadow: none;

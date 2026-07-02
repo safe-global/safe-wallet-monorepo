@@ -57,7 +57,7 @@ function AddressBookHeader({
   const canExport = Object.values(allAddressBooks).some((addressBook) => Object.keys(addressBook || {}).length > 0)
 
   return (
-    <div className="mb-6 flex flex-col gap-6 px-4">
+    <div className="mb-6 flex flex-col gap-6 px-6">
       <Typography variant="h2" className="font-bold leading-none tracking-tight">
         Address book
       </Typography>
