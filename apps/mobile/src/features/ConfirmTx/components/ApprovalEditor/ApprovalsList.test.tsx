@@ -6,7 +6,14 @@ import {
   type ApprovalInfo,
 } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { render, fireEvent } from '@/src/tests/test-utils'
-import { ApprovalsList, isEditableApproval } from './ApprovalsList'
+import { ApprovalsList } from './ApprovalsList'
+
+const erc721TokenInfo = (): NonNullable<ApprovalInfo['tokenInfo']> => ({
+  address: faker.finance.ethereumAddress(),
+  symbol: 'NFT',
+  decimals: 0,
+  type: TokenType.ERC721,
+})
 
 const buildApproval = (overrides: Partial<ApprovalInfo> = {}): ApprovalInfo => {
   const tokenAddress = faker.finance.ethereumAddress()
@@ -59,22 +66,24 @@ describe('ApprovalsList', () => {
     expect(queryByTestId('edit-approval-button')).toBeNull()
   })
 
-  it('hides the edit button for approvals that cannot be re-encoded', () => {
+  it('keeps the edit button for tokens without metadata, like web', () => {
     const approval = buildApproval({ tokenInfo: undefined })
     const { queryByTestId } = render(<ApprovalsList approvals={[approval]} onEdit={jest.fn()} />)
 
+    expect(queryByTestId('edit-approval-button')).toBeTruthy()
+  })
+
+  it('renders the whole card read-only with ERC-721 wording when the batch contains an NFT approval', () => {
+    const erc20Approval = buildApproval()
+    const erc721Approval = buildApproval({
+      tokenInfo: erc721TokenInfo(),
+      transactionIndex: 1,
+    })
+    const { getByText, queryByTestId } = render(
+      <ApprovalsList approvals={[erc20Approval, erc721Approval]} onEdit={jest.fn()} />,
+    )
+
+    expect(getByText('This allows the spender to transfer the specified token.')).toBeTruthy()
     expect(queryByTestId('edit-approval-button')).toBeNull()
-  })
-})
-
-describe('isEditableApproval', () => {
-  it('is editable for ERC-20 approve and increaseAllowance', () => {
-    expect(isEditableApproval(buildApproval())).toBe(true)
-    expect(isEditableApproval(buildApproval({ method: 'increaseAllowance' }))).toBe(true)
-  })
-
-  it('is read-only without token info or for non-transaction methods', () => {
-    expect(isEditableApproval(buildApproval({ tokenInfo: undefined }))).toBe(false)
-    expect(isEditableApproval(buildApproval({ method: 'Permit2' }))).toBe(false)
   })
 })

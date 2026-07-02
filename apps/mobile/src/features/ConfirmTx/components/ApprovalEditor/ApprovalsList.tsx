@@ -12,10 +12,6 @@ import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import type { Address } from '@/src/types/address'
 
-export const isEditableApproval = (approval: ApprovalInfo): boolean =>
-  approval.tokenInfo?.type === TokenType.ERC20 &&
-  (approval.method === 'approve' || approval.method === 'increaseAllowance')
-
 const ApprovalItem = ({ approval, onEdit }: { approval: ApprovalInfo; onEdit?: (approval: ApprovalInfo) => void }) => {
   const isUnlimited = approval.amountFormatted === PSEUDO_APPROVAL_VALUES.UNLIMITED
 
@@ -61,11 +57,17 @@ interface ApprovalsListProps {
 }
 
 /**
- * Warning card listing every token approval a dApp transaction grants. Mirrors
- * the web ApprovalEditor copy; rows are editable only when the caller passes
- * onEdit and the approval can be re-encoded.
+ * Warning card listing the token approvals a dApp transaction grants, mirroring
+ * the web ApprovalEditor (apps/web/src/components/tx/ApprovalEditor).
  */
 export const ApprovalsList = ({ approvals, onEdit }: ApprovalsListProps) => {
+  // Like web's isReadOnly: an ERC-721 approval anywhere makes the whole card read-only
+  const isErc721Approval = approvals.some((approval) => approval.tokenInfo?.type === TokenType.ERC721)
+  const isReadOnly = !onEdit || isErc721Approval
+  const subtitle = isErc721Approval
+    ? 'This allows the spender to transfer the specified token.'
+    : 'This allows the spender to spend the specified amount of your tokens.'
+
   return (
     <YStack
       backgroundColor="$backgroundWarning"
@@ -85,7 +87,7 @@ export const ApprovalsList = ({ approvals, onEdit }: ApprovalsListProps) => {
           </Text>
         </XStack>
         <Text fontSize="$3" color="$textSecondaryLight">
-          This allows the spender to spend the specified amount of your tokens.
+          {subtitle}
         </Text>
       </YStack>
 
@@ -93,7 +95,7 @@ export const ApprovalsList = ({ approvals, onEdit }: ApprovalsListProps) => {
         <ApprovalItem
           key={`${approval.tokenAddress}-${approval.transactionIndex}-${index}`}
           approval={approval}
-          onEdit={onEdit && isEditableApproval(approval) ? onEdit : undefined}
+          onEdit={isReadOnly ? undefined : onEdit}
         />
       ))}
     </YStack>
