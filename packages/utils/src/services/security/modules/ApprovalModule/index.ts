@@ -1,19 +1,30 @@
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { ERC20__factory } from '@safe-global/utils/types/contracts'
 import { normalizeTypedData } from '@safe-global/utils/utils/web3'
-import { type SafeTransaction } from '@safe-global/types-kit'
-import { id } from 'ethers'
 import { type SecurityResponse, type SecurityModule, SecuritySeverity } from '../types'
 import { decodeMultiSendData } from '@safe-global/protocol-kit'
 import {
   APPROVAL_SIGNATURE_HASH,
   INCREASE_ALLOWANCE_SIGNATURE_HASH,
+  MULTISEND_SIGNATURE_HASH,
 } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 
 export type ApprovalModuleResponse = Approval[]
 
+/**
+ * Structural subset of protocol-kit's SafeTransaction — enough to scan for
+ * approvals, so callers without an SDK transaction instance (e.g. a stashed
+ * draft's SafeTransactionData) can be scanned too.
+ */
+export type ScannableSafeTransaction = {
+  data: {
+    to: string
+    data: string
+  }
+}
+
 export type ApprovalModuleRequest = {
-  safeTransaction: SafeTransaction
+  safeTransaction: ScannableSafeTransaction
 }
 
 export type ApprovalModuleMessageRequest = {
@@ -30,7 +41,6 @@ export type Approval = {
 
 type PermitDetails = { token: string; amount: string }
 
-const MULTISEND_SIGNATURE_HASH = id('multiSend(bytes)').slice(0, 10)
 const ERC20_INTERFACE = ERC20__factory.createInterface()
 
 export class ApprovalModule implements SecurityModule<ApprovalModuleRequest, ApprovalModuleResponse> {

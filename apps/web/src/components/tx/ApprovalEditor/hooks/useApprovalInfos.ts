@@ -1,27 +1,21 @@
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useBalances from '@/hooks/useBalances'
-import { type Approval, ApprovalModule } from '@safe-global/utils/services/security/modules/ApprovalModule'
+import { ApprovalModule } from '@safe-global/utils/services/security/modules/ApprovalModule'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getERC20TokenInfoOnChain, getErc721Symbol, isErc721Token } from '@/utils/tokens'
 import { type SafeTransaction } from '@safe-global/types-kit'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { useMemo } from 'react'
-import { PSEUDO_APPROVAL_VALUES } from '../utils/approvals'
+import {
+  PSEUDO_APPROVAL_VALUES,
+  type ApprovalInfo,
+} from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import { UNLIMITED_APPROVAL_AMOUNT, UNLIMITED_PERMIT2_AMOUNT } from '@safe-global/utils/utils/tokens'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
-export type ApprovalInfo = {
-  tokenInfo: (Omit<Balance['tokenInfo'], 'logoUri' | 'name'> & { logoUri?: string }) | undefined
-  tokenAddress: string
-  spender: any
-  amount: any
-  amountFormatted: string
-  method: Approval['method']
-  /** Index of approval transaction within (batch) transaction */
-  transactionIndex: number
-}
+export type { ApprovalInfo } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 
 const DEFAULT_DECIMALS = 18
 

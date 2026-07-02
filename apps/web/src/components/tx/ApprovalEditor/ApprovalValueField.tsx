@@ -4,7 +4,7 @@ import { Autocomplete, Box, type MenuItemProps, MenuItem, SvgIcon, Tooltip } fro
 import { useController, useFormContext } from 'react-hook-form'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'
 import css from './styles.module.css'
-import { PSEUDO_APPROVAL_VALUES } from './utils/approvals'
+import { PSEUDO_APPROVAL_VALUES } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { approvalMethodDescription } from './ApprovalItem'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { TokenType } from '@safe-global/store/gateway/types'
