@@ -50,7 +50,8 @@ export function redirectSystemPath({ path, initial: _initial }: { path: string; 
     }
     return path
   } catch {
-    console.error('Error in redirectSystemPath:', path)
+    // Only the scheme — a WalletConnect pairing URI carries the session symKey.
+    console.error('Error in redirectSystemPath for scheme:', path.split(':')[0])
     return '/'
   }
 }
