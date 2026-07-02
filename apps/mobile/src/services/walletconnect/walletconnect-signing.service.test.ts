@@ -187,6 +187,29 @@ describe('signWithWalletConnect', () => {
     expect(parsed.message.value).toBe('123456789012345678901234567890')
   })
 
+  it('only coerces domain.chainId to a number — a chainId bigint in the message stays a string', async () => {
+    mockGenerateTypedData.mockReturnValueOnce({
+      ...mockTypedData,
+      domain: { verifyingContract: '0xSafeAddress', chainId: BigInt(1) },
+      message: { to: '0xRecipient', chainId: BigInt(137) },
+    })
+
+    await signWithWalletConnect(defaultParams)
+
+    const parsed = JSON.parse(mockProvider.request.mock.calls[0][0].params[1])
+    expect(parsed.domain.chainId).toBe(1)
+    expect(parsed.message.chainId).toBe('137')
+  })
+
+  it('throws when domain.chainId exceeds Number.MAX_SAFE_INTEGER', async () => {
+    mockGenerateTypedData.mockReturnValueOnce({
+      ...mockTypedData,
+      domain: { verifyingContract: '0xSafeAddress', chainId: BigInt(Number.MAX_SAFE_INTEGER) + BigInt(1) },
+    })
+
+    await expect(signWithWalletConnect(defaultParams)).rejects.toThrow('exceeds Number.MAX_SAFE_INTEGER')
+  })
+
   it('throws when provider returns non-string signature', async () => {
     mockProvider.request.mockResolvedValue(42)
 
