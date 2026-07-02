@@ -14,6 +14,7 @@ import { useTransactionSigner } from './hooks/useTransactionSigner'
 import { useTxSignerAutoSelection } from './hooks/useTxSignerAutoSelection'
 import { useAppSelector } from '@/src/store/hooks'
 import { PendingStatus, selectPendingTxById } from '@/src/store/pendingTxsSlice'
+import { selectDraftRedirect } from '@/src/store/draftTxSlice'
 import { useTransactionProcessingState } from '@/src/hooks/useTransactionProcessingState'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
@@ -31,7 +32,12 @@ const getHeaderText = (isExecuting: boolean, isSigning: boolean): string => {
 }
 
 function ConfirmTxContainer() {
-  const txId = useRoute<RouteProp<{ params: { txId: string } }>>().params.txId
+  const routeTxId = useRoute<RouteProp<{ params: { txId: string } }>>().params.txId
+  // The draft may have been rebuilt under a new safeTxHash (e.g. an edited
+  // approval amount) — resolve the redirect at render time so the screen
+  // follows the rebuilt draft without any navigation param round-trip.
+  const redirectTxId = useAppSelector((state) => selectDraftRedirect(state, routeTxId))
+  const txId = redirectTxId ?? routeTxId
   const router = useRouter()
   const pendingTx = useAppSelector((state) => selectPendingTxById(state, txId))
   const { isProcessing, isExecuting, isSigning } = useTransactionProcessingState(txId)

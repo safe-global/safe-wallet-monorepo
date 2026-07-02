@@ -5,7 +5,18 @@ import { cgwApi, type TransactionDetails } from '@safe-global/store/gateway/AUTO
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { GATEWAY_URL } from '@/src/config/constants'
 import { server } from '@/src/tests/server'
-import draftTxReducer, { clearAllDrafts, clearDraft, selectDraftByHash, setDraft, type DraftTx } from './draftTxSlice'
+import draftTxReducer, {
+  clearAllDrafts,
+  clearDraft,
+  clearDraftRedirect,
+  selectDraftByHash,
+  selectDraftRedirect,
+  setDraft,
+  setDraftRedirect,
+  type DraftTx,
+} from './draftTxSlice'
+import { setActiveSafe } from './activeSafeSlice'
+import type { Address } from '@/src/types/address'
 import type { RootState } from '@/src/store'
 
 setBaseUrl(GATEWAY_URL)
@@ -76,6 +87,45 @@ describe('draftTxSlice', () => {
     state = draftTxReducer(state, setDraft(b))
     state = draftTxReducer(state, clearAllDrafts())
     expect(state.drafts).toEqual({})
+  })
+
+  describe('redirects', () => {
+    it('stores and clears a redirect between safeTxHashes', () => {
+      let state = draftTxReducer(undefined, setDraftRedirect({ fromSafeTxHash: '0xold', toSafeTxHash: '0xnew' }))
+      expect(state.redirects?.['0xold']).toEqual('0xnew')
+
+      state = draftTxReducer(state, clearDraftRedirect('0xold'))
+      expect(state.redirects).toEqual({})
+    })
+
+    it('selectDraftRedirect resolves the new hash', () => {
+      const state = draftTxReducer(undefined, setDraftRedirect({ fromSafeTxHash: '0xold', toSafeTxHash: '0xnew' }))
+      expect(selectDraftRedirect({ draftTx: state } as RootState, '0xold')).toEqual('0xnew')
+      expect(selectDraftRedirect({ draftTx: state } as RootState, '0xnew')).toBeUndefined()
+    })
+
+    it('selectDraftRedirect follows chains from repeated edits', () => {
+      let state = draftTxReducer(undefined, setDraftRedirect({ fromSafeTxHash: '0xa', toSafeTxHash: '0xb' }))
+      state = draftTxReducer(state, setDraftRedirect({ fromSafeTxHash: '0xb', toSafeTxHash: '0xc' }))
+      expect(selectDraftRedirect({ draftTx: state } as RootState, '0xa')).toEqual('0xc')
+      expect(selectDraftRedirect({ draftTx: state } as RootState, '0xb')).toEqual('0xc')
+      expect(selectDraftRedirect({ draftTx: state } as RootState, '0xc')).toBeUndefined()
+    })
+
+    it('drops redirects together with drafts via clearAllDrafts and safe switches', () => {
+      const withRedirect = draftTxReducer(
+        undefined,
+        setDraftRedirect({ fromSafeTxHash: '0xold', toSafeTxHash: '0xnew' }),
+      )
+
+      expect(draftTxReducer(withRedirect, clearAllDrafts()).redirects).toEqual({})
+      expect(
+        draftTxReducer(
+          withRedirect,
+          setActiveSafe({ chainId: '137', address: faker.finance.ethereumAddress() as Address }),
+        ).redirects,
+      ).toEqual({})
+    })
   })
 
   describe('CGW confirms a tx for this hash', () => {
