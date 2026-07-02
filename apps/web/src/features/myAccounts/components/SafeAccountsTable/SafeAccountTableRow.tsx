@@ -14,7 +14,8 @@ import { cn } from '@/utils/cn'
 import { AccountItem as BaseAccountItem } from '../AccountItem'
 import type { AccountLine } from './useSafeAccountRows'
 import type { SafeAccountColumn } from './columns'
-import { PendingBadge, ThresholdBadge, WorkspaceAvatars } from './cells'
+import { PendingBadge, ThresholdBadge } from '@/components/common/AccountBadges'
+import { WorkspaceAvatars } from './cells'
 
 type SafeAccountTableRowProps = {
   line: AccountLine

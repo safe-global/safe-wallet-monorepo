@@ -4,7 +4,7 @@ import { Typography } from '@/components/ui/typography'
 import { getInitials, getSafeDisplayInfo } from '../utils'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeBalanceBlock from './SafeBalanceBlock'
-import ThresholdBadge from './ThresholdBadge'
+import { ThresholdBadge } from '@/components/common/AccountBadges'
 import CopyAddressButton from './CopyAddressButton'
 import ExplorerLinkButton from './ExplorerLinkButton'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
@@ -41,7 +41,6 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
           <AvatarImage src={blo(selectedItem.address as `0x${string}`)} alt={displayName} />
           <AvatarFallback>{getInitials(displayName || '?')}</AvatarFallback>
         </Avatar>
-        <ThresholdBadge threshold={selectedItem.threshold} owners={selectedItem.owners} />
       </div>
       <div className="flex flex-col items-start flex-1 min-w-0" data-testid="safe-selector-trigger-details">
         <div className="flex items-center gap-1 min-w-0">
@@ -59,6 +58,11 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
           <EnvHintButton chainId={selectedChainId} />
         </div>
       </div>
+      {selectedItem.owners > 0 && (
+        <span className="shrink-0 max-sm:hidden">
+          <ThresholdBadge threshold={selectedItem.threshold} owners={selectedItem.owners} />
+        </span>
+      )}
       {isUndeployed ? (
         <NotActivatedBadge isActivating={isActivating} data-testid="safe-selector-not-activated-icon" />
       ) : (

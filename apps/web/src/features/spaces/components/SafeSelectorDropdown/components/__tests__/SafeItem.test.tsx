@@ -75,3 +75,29 @@ describe('SafeItem undeployed state', () => {
     expect(screen.getByTestId('row-end-column')).toContainElement(screen.getByTestId('not-activated-badge'))
   })
 })
+
+describe('SafeItem row badges', () => {
+  it('renders the threshold pill with the safe setup', () => {
+    render(<SafeItem {...createItem(makeChain())} />)
+
+    expect(screen.getByTestId('account-threshold')).toHaveTextContent('1/2')
+  })
+
+  it('renders an icon-only threshold pill when the setup is unknown', () => {
+    render(<SafeItem {...createItem(makeChain())} threshold={0} owners={0} />)
+
+    expect(screen.getByTestId('account-threshold')).toHaveTextContent('')
+  })
+
+  it('renders the pending badge when the chain has queued transactions', () => {
+    render(<SafeItem {...createItem(makeChain({ queued: 3 }))} />)
+
+    expect(screen.getByTestId('account-pending')).toHaveTextContent('3 · Pending')
+  })
+
+  it('does not render the pending badge when nothing is queued', () => {
+    render(<SafeItem {...createItem(makeChain())} />)
+
+    expect(screen.queryByTestId('account-pending')).not.toBeInTheDocument()
+  })
+})

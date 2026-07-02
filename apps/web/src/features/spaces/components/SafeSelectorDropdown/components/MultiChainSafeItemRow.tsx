@@ -6,6 +6,7 @@ import { SelectItem } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
+import { PendingBadge, ThresholdBadge } from '@/components/common/AccountBadges'
 import SafeInfoDisplay from './SafeInfoDisplay'
 import BalanceDisplay from './BalanceDisplay'
 import ChainLogo from './ChainLogo'
@@ -34,11 +35,13 @@ function StatusBadge({ chain }: { chain: SafeItemDataChain }) {
 const MultiChainSafeItemRow = ({ item }: MultiChainSafeItemRowProps) => {
   const chainId = item.chains[0]?.chainId ?? ''
   const resolvedName = useSafeDisplayName(item.address, chainId, item.name)
+  const pending = item.chains.reduce((sum, chain) => sum + (chain.queued ?? 0), 0)
 
   return (
     <Collapsible className="my-1 rounded-lg">
-      <CollapsibleTrigger className="flex w-full items-center gap-3 rounded-lg px-4 py-4 text-left outline-none hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-ring cursor-pointer">
+      <CollapsibleTrigger className="flex w-full items-center gap-2 rounded-lg px-4 py-4 text-left outline-none hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-ring cursor-pointer">
         <SafeInfoDisplay name={resolvedName} address={item.address} className="flex-1 min-w-0" />
+        <ThresholdBadge threshold={item.threshold} owners={item.owners} iconOnly={!item.owners} />
         <div className="flex items-center bg-muted rounded-full p-0.5 shrink-0">
           {item.chains.slice(0, 3).map((chainItem, index) => (
             <span
@@ -58,6 +61,7 @@ const MultiChainSafeItemRow = ({ item }: MultiChainSafeItemRowProps) => {
             </span>
           )}
         </div>
+        <PendingBadge count={pending} />
         <BalanceDisplay balance={<FiatValue value={item.balance} />} isLoading={item.isLoading} />
       </CollapsibleTrigger>
 

@@ -1,6 +1,7 @@
 import FiatValue from '@/components/common/FiatValue'
 import { cn } from '@/utils/cn'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
+import { PendingBadge, ThresholdBadge } from '@/components/common/AccountBadges'
 import SafeInfoDisplay from './SafeInfoDisplay'
 import BalanceDisplay from './BalanceDisplay'
 import RowEndColumn from './RowEndColumn'
@@ -13,18 +14,14 @@ const SafeItem = ({ name, address, threshold, owners, chains, balance, isLoading
   const chainId = chains[0]?.chainId ?? ''
   const isUndeployed = Boolean(chains[0]?.isUndeployed)
   const isActivating = Boolean(chains[0]?.isActivating)
+  const pending = chains.reduce((sum, chain) => sum + (chain.queued ?? 0), 0)
 
   const resolvedName = useSafeDisplayName(address, chainId, name)
 
   return (
-    <div className={cn('flex items-center gap-3 w-full', isNested && 'pl-8')} data-testid="multichain-item-summary">
-      <SafeInfoDisplay
-        name={resolvedName}
-        address={address}
-        className="flex-1 min-w-0"
-        threshold={threshold}
-        owners={owners}
-      />
+    <div className={cn('flex items-center gap-2 w-full', isNested && 'pl-8')} data-testid="multichain-item-summary">
+      <SafeInfoDisplay name={resolvedName} address={address} className="flex-1 min-w-0" />
+      <ThresholdBadge threshold={threshold} owners={owners} iconOnly={!owners} />
       <div className="flex items-center gap-2 bg-muted rounded-full p-0.5 shrink-0">
         {chains.slice(0, 3).map((chainItem, index) => (
           <span
@@ -36,6 +33,7 @@ const SafeItem = ({ name, address, threshold, owners, chains, balance, isLoading
           </span>
         ))}
       </div>
+      <PendingBadge count={pending} />
       {isUndeployed ? (
         <RowEndColumn>
           <NotActivatedBadge isActivating={isActivating} />

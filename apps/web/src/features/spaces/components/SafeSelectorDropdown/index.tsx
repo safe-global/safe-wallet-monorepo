@@ -41,7 +41,7 @@ function buildFallbackSafeItem(selectedItemId: string | undefined, chainConfigs:
 
 function SafeSelectorDropdownSkeleton() {
   return (
-    <div className="w-full sm:w-[430px] min-h-[calc(68px)] flex items-center gap-4 rounded-lg p-2 pl-6 bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+    <div className="w-full sm:w-[543px] min-h-[calc(68px)] flex items-center gap-4 rounded-lg p-2 pl-6 bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
       <Skeleton className="size-8 shrink-0 rounded-full" />
       <div className="flex flex-1 flex-col gap-1.5">
         <Skeleton className="h-3.5 w-24 rounded-full" />
@@ -156,7 +156,7 @@ function SafeSelectorDropdown({
 
   // TODO: change rounded-lg (8px) to rounded-2xl (16px) after migrating to the new design system
   const wrapperClassName = cn(
-    'group relative w-full sm:w-[430px] min-h-[calc(68px)] flex items-center shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)] rounded-lg p-2 overflow-hidden bg-card focus:ring-0',
+    'group relative w-full sm:w-[543px] min-h-[calc(68px)] flex items-center shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)] rounded-lg p-2 overflow-hidden bg-card focus:ring-0',
     variants.wrapperClass,
   )
 

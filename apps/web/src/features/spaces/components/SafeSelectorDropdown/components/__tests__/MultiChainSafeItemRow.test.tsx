@@ -80,6 +80,28 @@ describe('MultiChainSafeItemRow chain icon overflow badge', () => {
   })
 })
 
+describe('MultiChainSafeItemRow summary badges', () => {
+  it('renders the threshold pill with the safe setup', () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'], { threshold: 2, owners: 3 })} />)
+
+    expect(screen.getByTestId('account-threshold')).toHaveTextContent('2/3')
+  })
+
+  it('sums queued transactions across chains into one pending badge', () => {
+    render(
+      <MultiChainSafeItemRow item={createItem([makeChain('1', { queued: 2 }), makeChain('137', { queued: 1 })])} />,
+    )
+
+    expect(screen.getByTestId('account-pending')).toHaveTextContent('3 · Pending')
+  })
+
+  it('does not render the pending badge when no chain has queued transactions', () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} />)
+
+    expect(screen.queryByTestId('account-pending')).not.toBeInTheDocument()
+  })
+})
+
 describe('MultiChainSafeItemRow undeployed status badge', () => {
   const expandRow = async () => {
     await userEvent.click(screen.getByRole('button'))
