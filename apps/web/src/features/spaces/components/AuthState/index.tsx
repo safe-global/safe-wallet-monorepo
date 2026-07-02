@@ -37,10 +37,6 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
 
   useEffect(() => {
     dispatch(setLastUsedSpace(spaceId))
-    // Remember the space sub-page (matched route, e.g. `/spaces/security`) so the in-Safe
-    // "Back to workspace" link returns here instead of the workspace landing. AuthState only
-    // mounts on space pages, so this is never overwritten while viewing a Safe. Scoped to the
-    // space so the consumer can discard it once the user opens a Safe in a different workspace.
     dispatch(setLastUsedSpaceOrigin({ path: router.pathname, spaceId }))
   }, [dispatch, spaceId, router.pathname])
 
