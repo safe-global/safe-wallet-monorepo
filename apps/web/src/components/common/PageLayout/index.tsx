@@ -76,6 +76,13 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         </div>
       )}
 
+      {/* The welcome tabs hide the Topbar while signed out — keep the Safe logo visible top-left. */}
+      {(isWelcomeWorskpacePage || isWelcomeAccountsPage) && !isSignedIn && (
+        <div className="absolute left-6 top-4 z-10">
+          <SafeLogo data-testid="welcome-safe-logo" />
+        </div>
+      )}
+
       {isSidebarRoute ? (
         <SideDrawer
           isOpen={isSidebarVisible}

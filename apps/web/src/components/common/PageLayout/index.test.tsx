@@ -9,7 +9,9 @@ jest.mock('@/components/common/Header/Topbar', () => {
 })
 
 jest.mock('@/components/common/SafeLogo', () => {
-  const MockSafeLogo = ({ href }: { href?: string }) => <a data-testid="safe-logo" href={href} />
+  const MockSafeLogo = ({ href, 'data-testid': testId }: { href?: string; 'data-testid'?: string }) => (
+    <a data-testid={testId ?? 'safe-logo'} href={href} />
+  )
   MockSafeLogo.displayName = 'SafeLogo'
   return { __esModule: true, default: MockSafeLogo }
 })
@@ -155,6 +157,24 @@ describe('PageLayout', () => {
 
     it('renders Topbar on /', () => {
       renderLayout(AppRoutes.index)
+      expect(screen.getByTestId('topbar')).toBeInTheDocument()
+    })
+  })
+
+  describe('welcome pages Safe logo', () => {
+    it.each([[AppRoutes.welcome.spaces], [AppRoutes.welcome.accounts]])(
+      'shows the Safe logo on %s when signed out (no Topbar)',
+      (pathname) => {
+        mockUseIsSignedIn.mockReturnValue(false)
+        renderLayout(pathname)
+        expect(screen.getByTestId('welcome-safe-logo')).toBeInTheDocument()
+      },
+    )
+
+    it('does not duplicate the logo when signed in (the Topbar is shown instead)', () => {
+      mockUseIsSignedIn.mockReturnValue(true)
+      renderLayout(AppRoutes.welcome.accounts)
+      expect(screen.queryByTestId('welcome-safe-logo')).not.toBeInTheDocument()
       expect(screen.getByTestId('topbar')).toBeInTheDocument()
     })
   })

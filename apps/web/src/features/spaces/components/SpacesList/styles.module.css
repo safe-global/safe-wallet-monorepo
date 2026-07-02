@@ -7,7 +7,8 @@
 
 .mySpaces {
   width: 100vw;
-  max-width: 750px;
+  /* Kept in sync with .myAccounts on the Trusted accounts tab so switching tabs doesn't shift the layout. */
+  max-width: 990px;
   margin: var(--space-2);
 }
 
