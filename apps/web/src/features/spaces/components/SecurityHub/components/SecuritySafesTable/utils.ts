@@ -1,6 +1,7 @@
 import type { GradeSummary, SafeGrade, ScanResult } from '@/features/security/types'
 import type { SecurityGrade } from '@/features/security/types'
 import { SAFE_GRADE_RANK, SEVERITY_RANK, type SecurityContract } from '@/features/security'
+import { AppRoutes } from '@/config/routes'
 import { DASH } from './constants'
 import type { SpaceSafeEntry } from '../../types'
 
@@ -24,6 +25,22 @@ export type GetSafeSecurityHref = (
   address: string,
   chainId: string,
 ) => { pathname: string; query: { safe: string } } | undefined
+
+/**
+ * Build the link target for a Safe's name in the Security Hub: that Safe's security settings page.
+ * Routing here (rather than /home) means browser-back from the settings page returns to the
+ * Workspace Security Hub. Returns undefined when the chain has no known short name, so the name
+ * renders as plain text instead of a broken link.
+ */
+export const buildSafeSecurityHref = (
+  chainShortNames: Record<string, string>,
+  address: string,
+  chainId: string,
+): { pathname: string; query: { safe: string } } | undefined => {
+  const shortName = chainShortNames[chainId]
+  if (!shortName) return undefined
+  return { pathname: AppRoutes.settings.security, query: { safe: `${shortName}:${address}` } }
+}
 
 /**
  * Total non-passing applicable checks for a single Safe's scan results — the same
