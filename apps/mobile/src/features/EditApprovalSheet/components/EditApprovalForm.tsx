@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Text, View, XStack, YStack } from 'tamagui'
 import { useNavigation, useRouter } from 'expo-router'
 import { useBottomSheetInternal } from '@gorhom/bottom-sheet'
@@ -19,9 +19,7 @@ import { SafeInput } from '@/src/components/SafeInput'
 import { TokenIcon } from '@/src/components/TokenIcon/TokenIcon'
 import { SafeButton } from '@/src/components/SafeButton'
 import { LoadableSwitch } from '@/src/components/LoadableSwitch'
-import { EthAddress } from '@/src/components/EthAddress'
-import { Identicon } from '@/src/components/Identicon'
-import type { Address } from '@/src/types/address'
+import { HashDisplay } from '@/src/components/HashDisplay'
 import { sanitizeDecimalInput } from '@/src/utils/formatters'
 import Logger from '@/src/utils/logger'
 
@@ -53,6 +51,8 @@ export const useEditApprovalForm = ({ draft, approval, safe }: EditApprovalFormA
           unlimited: isInitiallyUnlimited,
         }
       : undefined,
+    // Late-resolving token metadata re-fills the prefill without wiping user input
+    resetOptions: { keepDirtyValues: true },
   })
   const {
     handleSubmit,
@@ -90,10 +90,17 @@ export const useEditApprovalForm = ({ draft, approval, safe }: EditApprovalFormA
 
   const onCancel = useCallback(() => router.back(), [router])
 
+  // Keep onSave's identity stable so the sheet footer is not remounted on every render
+  const onSubmitRef = useRef(onSubmit)
+  useEffect(() => {
+    onSubmitRef.current = onSubmit
+  })
+  const onSave = useMemo(() => handleSubmit((data) => onSubmitRef.current(data)), [handleSubmit])
+
   return {
     formMethods,
     submitting,
-    onSave: handleSubmit(onSubmit),
+    onSave,
     onCancel,
     saveDisabled: (!unlimited && !isValid) || submitting || !draft || !approval || !safe,
   }
@@ -202,10 +209,7 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
           <Text color="$colorSecondary" fontSize="$5">
             Spender
           </Text>
-          <XStack gap="$2" alignItems="center">
-            <Identicon address={approval.spender as Address} size={24} />
-            <EthAddress address={approval.spender as Address} copy />
-          </XStack>
+          <HashDisplay value={approval.spender} />
         </XStack>
       </View>
     </View>

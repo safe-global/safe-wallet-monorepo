@@ -10,6 +10,8 @@ import { FormProvider } from 'react-hook-form'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { renderWithStore, createTestStore, fireEvent, waitFor } from '@/src/tests/test-utils'
 import { setDraft, type DraftTx } from '@/src/store/draftTxSlice'
+import { setActiveSafe } from '@/src/store/activeSafeSlice'
+import type { Address } from '@/src/types/address'
 import { setOutstandingRequest } from '@/src/features/WalletConnect/Wallet/store/walletKitSlice'
 import { rebuildDraftWithApproval } from '@/src/services/tx/rebuildDraftWithApproval'
 import { EditApprovalFields, EditApprovalFooter, useEditApprovalForm } from './EditApprovalForm'
@@ -67,6 +69,7 @@ const draft: DraftTx = {
 
 const setupStore = () => {
   const store = createTestStore()
+  store.dispatch(setActiveSafe({ chainId: '1', address: draft.safeAddress as Address }))
   store.dispatch(setDraft(draft))
   store.dispatch(
     setOutstandingRequest({

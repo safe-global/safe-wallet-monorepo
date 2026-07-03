@@ -54,7 +54,6 @@ export const EditApprovalSheetContainer = () => {
         title="Edit approval amount"
         FooterComponent={isLoading ? undefined : Footer}
         keyboardBehavior="extend"
-        keyboardBlurBehavior="restore"
       >
         <RestoreHeightOnKeyboardHide />
         {approval && <EditApprovalFields approval={approval} />}
