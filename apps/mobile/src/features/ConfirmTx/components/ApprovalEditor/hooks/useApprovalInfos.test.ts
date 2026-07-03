@@ -95,6 +95,7 @@ describe('useApprovalInfos', () => {
       transactionIndex: 0,
       // equal to the Safe's balance of 100 USDC
       isHighValue: false,
+      balance: '100000000',
     })
     expect(result.current?.[0].tokenInfo?.symbol).toEqual('USDC')
     expect(result.current?.[0].spender.toLowerCase()).toEqual(spender.toLowerCase())

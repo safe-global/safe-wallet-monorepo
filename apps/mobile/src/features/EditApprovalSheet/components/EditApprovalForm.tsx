@@ -8,6 +8,7 @@ import {
   type ApprovalInfo,
 } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
+import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { useAppDispatch } from '@/src/store/hooks'
 import { showToast } from '@/src/store/toastSlice'
 import { clearDraft, setDraftRedirect, type DraftTx } from '@/src/store/draftTxSlice'
@@ -101,8 +102,8 @@ export const useEditApprovalForm = ({ draft, approval, safe }: EditApprovalFormA
   }
 }
 
-/** Sheet body: description, amount input with token badge, unlimited toggle, spender */
-export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo }) => {
+/** Sheet body: description, amount input with token badge and balance, unlimited toggle, spender */
+export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { balance?: string } }) => {
   const {
     control,
     formState: { errors },
@@ -152,6 +153,12 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo }) => 
             />
           )}
         />
+        {approval.balance !== undefined && (
+          <Text fontSize="$3" color="$textSecondaryLight" marginTop="$2" testID="approval-token-balance">
+            Balance: {formatVisualAmount(approval.balance, approval.tokenInfo?.decimals)}{' '}
+            {approval.tokenInfo?.symbol ?? ''}
+          </Text>
+        )}
       </View>
 
       <View gap="$8" marginBottom="60">

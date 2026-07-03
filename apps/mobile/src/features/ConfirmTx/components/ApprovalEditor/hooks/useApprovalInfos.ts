@@ -41,6 +41,8 @@ const findTokenInfo = (
 export type ApprovalInfoWithSeverity = ApprovalInfo & {
   /** Unlimited, above the Safe's balance of the token, or the balance is unknown */
   isHighValue: boolean
+  /** The Safe's raw balance of the token; undefined when the Safe does not hold it */
+  balance?: string
 }
 
 /**
@@ -96,7 +98,7 @@ export const useApprovalInfos = (draft: DraftTx | undefined): ApprovalInfoWithSe
       )?.balance
       const isHighValue = isUnlimited || balance === undefined || approval.amount > BigInt(balance)
 
-      return { ...approval, tokenInfo, amountFormatted, isHighValue }
+      return { ...approval, tokenInfo, amountFormatted, isHighValue, balance }
     })
   }, [scannedApprovals, resolveStatic, onChainTokenInfos, balances])
 }

@@ -18,7 +18,7 @@ import { EditApprovalFields, EditApprovalFooter, useEditApprovalForm } from './E
 // cannot be rendered in tests (the bottom-sheet jest mock renders null).
 const EditApprovalForm = (props: {
   draft: DraftTx
-  approval: ApprovalInfo
+  approval: ApprovalInfo & { balance?: string }
   safe: Pick<SafeState, 'owners' | 'threshold'>
 }) => {
   const { formMethods, submitting, saveDisabled, onSave, onCancel } = useEditApprovalForm(props)
@@ -90,6 +90,19 @@ describe('EditApprovalForm', () => {
     const { getByTestId } = renderWithStore(<EditApprovalForm draft={draft} approval={approval} safe={safe} />, store)
 
     expect(getByTestId('input-approval-amount').props.value).toEqual('100')
+  })
+
+  it('shows the token balance below the amount input', () => {
+    const store = setupStore()
+    const { getByText, queryByTestId, rerender } = renderWithStore(
+      <EditApprovalForm draft={draft} approval={{ ...approval, balance: '250000000' }} safe={safe} />,
+      store,
+    )
+
+    expect(getByText('Balance: 250 USDC')).toBeTruthy()
+
+    rerender(<EditApprovalForm draft={draft} approval={approval} safe={safe} />)
+    expect(queryByTestId('approval-token-balance')).toBeNull()
   })
 
   it('rebuilds the draft with the new amount and hands state over to the new hash', async () => {
