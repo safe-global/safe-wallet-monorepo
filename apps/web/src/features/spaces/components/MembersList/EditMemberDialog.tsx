@@ -26,6 +26,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { capitalize } from '@safe-global/utils/utils/formatters'
 
 type MemberField = {
   name: string
@@ -117,12 +118,13 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
       )
     }
 
+    const roleLabel = capitalize(roleValue.toLowerCase())
     const successMessage =
       hasNameChanged && hasRoleChanged
-        ? `Updated your name and role to ${roleValue}`
+        ? `Updated your name and role to ${roleLabel}`
         : hasNameChanged
           ? 'Your name was updated'
-          : `Updated role of ${displayName} to ${roleValue}`
+          : `Updated role of ${displayName} to ${roleLabel}`
 
     dispatch(
       showNotification({

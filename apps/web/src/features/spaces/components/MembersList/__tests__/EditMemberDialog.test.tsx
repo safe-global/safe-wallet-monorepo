@@ -167,6 +167,17 @@ describe('EditMemberDialog', () => {
     expect(mockUpdateRole).toHaveBeenCalled()
   })
 
+  it('capitalizes the role in the success toast', async () => {
+    render(<EditMemberDialog member={member} handleClose={jest.fn()} />)
+    await changeRoleAndSubmit()
+
+    await waitFor(() =>
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ payload: expect.objectContaining({ message: 'Updated role of Alice to Admin' }) }),
+      ),
+    )
+  })
+
   it('falls back to a generic error when the backend provides no message', async () => {
     mockUpdateRole.mockResolvedValue({ error: { status: 500, data: {} } })
 
