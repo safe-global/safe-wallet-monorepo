@@ -36,7 +36,7 @@ export function SimilarityConfirmDialog({
           <DialogTitle className="font-bold">Similar address detected</DialogTitle>
         </DialogHeader>
         <div className="px-4">
-          <Typography variant="paragraph-small" color="muted" className="mb-4">
+          <Typography variant="paragraph-small" color="muted" className="block mb-4">
             This address looks similar to other addresses in your list. This could be a sign of an address poisoning
             attack where attackers create addresses that visually resemble legitimate ones.
           </Typography>

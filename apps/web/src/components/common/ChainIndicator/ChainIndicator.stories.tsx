@@ -3,6 +3,7 @@ import ChainIndicator from './index'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
 const meta = {
+  title: 'Components/Common/ChainIndicator',
   component: ChainIndicator,
   parameters: {
     layout: 'centered',

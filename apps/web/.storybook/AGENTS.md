@@ -6,6 +6,30 @@ This document provides quick reference patterns for creating Storybook stories. 
 - **MSW Fixtures**: `specs/001-shadcn-storybook-migration/msw-fixtures.md`
 - **Research/Learnings**: `specs/001-shadcn-storybook-migration/research.md`
 
+## Story Title Taxonomy (required)
+
+Every story file MUST set an explicit `meta.title` — untitled stories get auto-titled from their
+lowercase file path and pollute the sidebar with stray `features/…`/`components/…` groups.
+
+Exactly four top-level groups:
+
+| Group         | What belongs there                             | Example                                                                          |
+| ------------- | ---------------------------------------------- | -------------------------------------------------------------------------------- |
+| `UI/`         | Design-system atoms (`components/ui/*`)        | `UI/Button`                                                                      |
+| `Components/` | Shared, cross-feature components               | `Components/Common/EthHashInfo`, `Components/TxFlow/ConfirmationViews/SwapOrder` |
+| `Features/`   | Feature-scoped components, grouped by feature  | `Features/Spaces/SafeWidget`                                                     |
+| `Pages/`      | Full-route page stories (`src/stories/pages/`) | `Pages/Core/Home`                                                                |
+
+Rules:
+
+- The title leaf is the **component name**, never `index` (e.g. `Features/Swap/SwapOrderConfirmationView`).
+- Titles follow **domain ownership, not file location**: a Space-specific component that happens to live
+  under `components/common/` (e.g. `SpaceSafeBar/SpaceChainSelector`) is titled `Features/Spaces/…`.
+- Prefer stories that render the **real component**. Hand-built "UI patterns" mockup showcases are only
+  acceptable while a feature has no real-component stories; once real stories exist, delete the mockup
+  (precedent: `features/safe-shield` — the mockup `index.stories.tsx` was removed in favor of the real
+  `SafeShield.stories.tsx`).
+
 ## Core Patterns
 
 ### 1. MSW Handler Pattern (Use Regex, Not Wildcards)

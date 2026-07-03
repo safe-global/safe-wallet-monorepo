@@ -3,6 +3,7 @@ import { StoreDecorator } from '@/stories/storeDecorator'
 import { MigrateToL2Information } from './index'
 
 const meta = {
+  title: 'Components/TxFlow/ConfirmationViews/MigrateToL2Information',
   component: MigrateToL2Information,
   decorators: [
     (Story) => {

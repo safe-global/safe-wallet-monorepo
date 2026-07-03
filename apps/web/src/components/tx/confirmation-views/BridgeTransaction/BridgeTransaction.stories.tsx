@@ -4,6 +4,7 @@ import BridgeTransaction from './index'
 import { mockPendingBridgeTxInfo, mockFailedBridgeTxInfo, mockSuccessfulBridgeTxInfo } from './mockData'
 
 const meta = {
+  title: 'Components/TxFlow/ConfirmationViews/BridgeTransaction',
   component: BridgeTransaction,
   decorators: [
     (Story) => {

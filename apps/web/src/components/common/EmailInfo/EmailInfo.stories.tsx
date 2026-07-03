@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import EmailInfo from './index'
 
 const meta: Meta<typeof EmailInfo> = {
+  title: 'Components/Common/EmailInfo',
   component: EmailInfo,
   parameters: {
     layout: 'centered',

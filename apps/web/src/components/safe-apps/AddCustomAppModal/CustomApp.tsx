@@ -28,7 +28,7 @@ const CustomApp = ({ safeApp, shareUrl }: CustomAppProps) => {
         {safeApp.name}
       </h2>
 
-      <Typography variant="paragraph-small" className="mt-2 text-[var(--color-text-secondary)]">
+      <Typography variant="paragraph-small" className="block mt-2 text-[var(--color-text-secondary)]">
         {safeApp.description}
       </Typography>
 

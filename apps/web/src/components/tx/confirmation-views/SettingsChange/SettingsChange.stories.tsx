@@ -7,6 +7,7 @@ import { ownerAddress, txInfo } from './mockData'
 import SettingsChange from '.'
 
 const meta = {
+  title: 'Components/TxFlow/ConfirmationViews/SettingsChange',
   component: SettingsChange,
   parameters: {
     layout: 'centered',

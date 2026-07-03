@@ -3,6 +3,7 @@ import FiatValue from './index'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
 const meta = {
+  title: 'Components/Common/FiatValue',
   component: FiatValue,
   parameters: {
     layout: 'centered',

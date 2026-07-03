@@ -4,6 +4,7 @@ import VaultRedeemConfirmation from './index'
 import { mockVaultRedeemTxInfo, mockVaultRedeemTxInfoWithoutAdditionalRewards } from './mockData'
 
 const meta = {
+  title: 'Features/Earn/VaultRedeemConfirmation',
   component: VaultRedeemConfirmation,
   decorators: [
     (Story) => {

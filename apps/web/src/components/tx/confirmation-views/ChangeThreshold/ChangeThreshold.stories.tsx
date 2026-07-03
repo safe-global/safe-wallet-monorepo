@@ -5,6 +5,7 @@ import { StoreDecorator } from '@/stories/storeDecorator'
 import ChangeThreshold from './index'
 
 const meta = {
+  title: 'Components/TxFlow/ConfirmationViews/ChangeThreshold',
   component: ChangeThreshold,
   args: {
     txInfo: {

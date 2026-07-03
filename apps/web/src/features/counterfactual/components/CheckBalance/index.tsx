@@ -21,7 +21,7 @@ const CheckBalance = () => {
       <Typography variant="paragraph-bold" className="mb-2">
         Don&apos;t see your tokens?
       </Typography>
-      <Typography variant="paragraph-small" className="mb-4">
+      <Typography variant="paragraph-small" className="block mb-4">
         Your Safe account is not activated yet so we can only display your native balance. Non-native tokens may not
         show up immediately after the Safe is deployed. Finish the onboarding to deploy your account onchain and unlock
         all features.{' '}

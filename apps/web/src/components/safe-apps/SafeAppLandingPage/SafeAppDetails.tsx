@@ -17,7 +17,7 @@ const SafeAppDetails = ({ app, showDefaultListWarning }: DetailsProps) => (
 
       <div className="ml-16">
         <Typography variant="h3">{app.name}</Typography>
-        <Typography variant="paragraph-small" className="mt-2">
+        <Typography variant="paragraph-small" className="block mt-2">
           {app.description}
         </Typography>
       </div>
@@ -53,7 +53,7 @@ const SafeAppDetails = ({ app, showDefaultListWarning }: DetailsProps) => (
           <Typography className="mt-2 text-[var(--color-warning-dark)]">
             The application is not in the default Safe App list
           </Typography>
-          <Typography variant="paragraph-small" className="mt-4">
+          <Typography variant="paragraph-small" className="block mt-4">
             Check the app link and ensure it comes from a trusted source
           </Typography>
         </div>

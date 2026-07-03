@@ -137,7 +137,7 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
         text={
           <div className="mt-2">
             <Chip sx={{ borderRadius: 1, ...chipStyles }} fontWeight="normal" />
-            <Typography className="mt-2" variant="paragraph-small">
+            <Typography className="block mt-2" variant="paragraph-small">
               Export your transaction history for financial reporting.
             </Typography>
           </div>

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import WalletIcon from './index'
 
 const meta = {
+  title: 'Components/Common/WalletIcon',
   component: WalletIcon,
   parameters: {
     layout: 'centered',

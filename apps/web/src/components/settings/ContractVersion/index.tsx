@@ -70,7 +70,7 @@ export const ContractVersion = () => {
       </Typography>
 
       {safeLoaded && releaseUrl && (
-        <Typography variant="paragraph-small" className="mt-1">
+        <Typography variant="paragraph-small" className="block mt-1">
           <ExternalLink href={releaseUrl}>View release</ExternalLink>
         </Typography>
       )}

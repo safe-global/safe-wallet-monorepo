@@ -4,6 +4,7 @@ import CopyAddressButton from './index'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
 const meta = {
+  title: 'Components/Common/CopyAddressButton',
   component: CopyAddressButton,
   parameters: {
     layout: 'centered',

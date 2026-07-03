@@ -3,6 +3,7 @@ import { Typography } from '@/components/ui/typography'
 import SpendingLimitLabel from './index'
 
 const meta = {
+  title: 'Components/Common/SpendingLimitLabel',
   component: SpendingLimitLabel,
   parameters: {
     layout: 'centered',

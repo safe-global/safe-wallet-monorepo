@@ -5,6 +5,7 @@ import { Typography } from '@/components/ui/typography'
 import { CustomTooltip } from './index'
 
 const meta = {
+  title: 'Components/Common/CustomTooltip',
   component: CustomTooltip,
   parameters: {
     layout: 'centered',
@@ -17,7 +18,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    title: 'Components/Common/CustomTooltip',
+    title: 'This is a tooltip',
     children: <Button variant="outline">Hover me</Button>,
   },
 }

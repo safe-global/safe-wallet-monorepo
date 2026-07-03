@@ -51,6 +51,7 @@ const MOCK_ACCOUNTS: Account[] = [
 ]
 
 const meta: Meta<typeof AccountsWidget> = {
+  title: 'Features/MyAccounts/AccountsWidget',
   component: AccountsWidget,
   tags: ['autodocs'],
   decorators: [

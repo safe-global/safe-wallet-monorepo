@@ -3,6 +3,7 @@ import TokenIcon from './index'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
 const meta = {
+  title: 'Components/Common/TokenIcon',
   component: TokenIcon,
   parameters: {
     layout: 'centered',

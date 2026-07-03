@@ -20,6 +20,7 @@ import { createSafeInfoState } from '@/stories/mocks/defaults'
 faker.seed(456)
 
 const meta: Meta<typeof SafeShieldDisplay> = {
+  title: 'Features/SafeShield',
   component: SafeShieldDisplay,
   parameters: { layout: 'centered' },
   decorators: [

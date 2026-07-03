@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, type ReactElement } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState, type ReactElement } from 'react'
 import classnames from 'classnames'
 import Topbar from '@/components/common/Header/Topbar'
 import SafeLogo from '@/components/common/SafeLogo'
@@ -82,6 +82,28 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   useKeyboardObserver()
   const isTopbarElevated = useIsTopbarElevated()
 
+  // The Topbar is absolutely positioned, so the content reserves space for it via the
+  // `--topbar-height` CSS var. That height is not constant: below the header's `@1100px`
+  // container query the safe selector wraps onto its own row, doubling the topbar height.
+  // A fixed reserve then lets the topbar overlap the page (WA: dashboard cards clipped).
+  // Measure the real height and publish it so the reserve — and every other
+  // `--topbar-height` consumer (AppFrame, TxModalDialog, …) — tracks it.
+  // A callback ref (not an object ref + effect) so we attach the observer exactly when the
+  // conditionally-rendered topbar node mounts — an object ref can still be null when a
+  // static-deps effect first runs.
+  const topbarObserver = useRef<ResizeObserver | null>(null)
+  const topbarRef = useCallback((node: HTMLDivElement | null) => {
+    topbarObserver.current?.disconnect()
+    if (!node) return
+    const syncHeight = () => {
+      const height = Math.round(node.getBoundingClientRect().height)
+      if (height > 0) document.documentElement.style.setProperty('--topbar-height', `${height}px`)
+    }
+    syncHeight()
+    topbarObserver.current = new ResizeObserver(syncHeight)
+    topbarObserver.current.observe(node)
+  }, [])
+
   // Hide sidebar when transaction flow is open
   const isSidebarVisible = isSidebarOpen && !txFlow
 
@@ -127,6 +149,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       >
         {!hideHeader && (
           <div
+            ref={topbarRef}
             className={classnames(css.topbar, {
               [css.topbarElevated]: isTopbarElevated,
             })}

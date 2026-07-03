@@ -2,9 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react'
 import TokenAmount from './index'
 
 const meta = {
+  title: 'Components/Common/TokenAmount',
   component: TokenAmount,
   parameters: {
-    componentSubtitle: 'Components/Common/TokenAmount',
+    componentSubtitle: 'Renders a token Amount with Token Symbol and Logo',
   },
 
   decorators: [

@@ -202,7 +202,7 @@ const ActivateAccountFlow = () => {
                     <NetworkFee totalFee={totalFee} isWaived={willRelay || isWrongChain} chain={chain} />
 
                     {!willRelay && (
-                      <Typography variant="paragraph-small" color="muted" className="mt-2">
+                      <Typography variant="paragraph-small" color="muted" className="block mt-2">
                         {isWrongChain
                           ? `Switch your connected wallet to ${chain?.chainName} to see the correct estimated network fee`
                           : 'You will have to confirm a transaction with your connected wallet.'}

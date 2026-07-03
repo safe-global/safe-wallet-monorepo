@@ -75,12 +75,12 @@ export const ChooseOwner = ({
         <form onSubmit={onFormSubmit} className={commonCss.form}>
           {params.removedOwner && (
             <>
-              <Typography variant="paragraph-small" className="mb-2">
+              <Typography variant="paragraph-small" className="block mb-2">
                 {params.removedOwner &&
                   'Review the signer you want to replace in the active Safe account, then specify the new signer you want to replace it with:'}
               </Typography>
               <div className="my-6">
-                <Typography variant="paragraph-small" className="mb-2 text-muted-foreground">
+                <Typography variant="paragraph-small" className="block mb-2 text-muted-foreground">
                   Current signer
                 </Typography>
                 <EthHashInfo address={params.removedOwner.address} showCopyButton shortAddress={false} hasExplorer />

@@ -19,11 +19,11 @@ export function NestedSafeIntro({ onReviewClick }: NestedSafeIntroProps): ReactE
         Select Nested Safes
       </Typography>
 
-      <Typography variant="paragraph-small" color="muted" className="mt-2">
+      <Typography variant="paragraph-small" color="muted" className="block mt-2">
         Nested Safes can include lookalike addresses.
       </Typography>
 
-      <Typography variant="paragraph-small" color="muted" className="mt-2">
+      <Typography variant="paragraph-small" color="muted" className="block mt-2">
         Review and select the ones you recognize before adding them to your dashboard.
       </Typography>
 

@@ -95,6 +95,8 @@ const preview: Preview = {
   parameters: {
     options: {
       storySort: {
+        // Alphabetical within groups; explicit `order` entries below keep their curated order.
+        method: 'alphabetical',
         order: [
           'Pages',
           [

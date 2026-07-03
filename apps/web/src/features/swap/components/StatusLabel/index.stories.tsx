@@ -2,9 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react'
 import StatusLabel from './index'
 
 const meta = {
+  title: 'Features/Swap/StatusLabel',
   component: StatusLabel,
   parameters: {
-    componentSubtitle: 'Features/Swap/StatusLabel',
+    componentSubtitle: 'Renders a Status label with icon and text for a swap order',
   },
 
   decorators: [

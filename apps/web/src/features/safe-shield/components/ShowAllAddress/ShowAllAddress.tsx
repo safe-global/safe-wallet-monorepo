@@ -49,7 +49,7 @@ export const ShowAllAddress = ({ addresses, showImage }: ShowAllAddressProps) =>
               {showImage && <AddressImage logoUrl={item.logoUrl} />}
               <div className="flex flex-col gap-1">
                 {name && (
-                  <Typography variant="paragraph-mini" className="mb-1 text-[var(--color-text-primary)]">
+                  <Typography variant="paragraph-mini" className="block mb-1 text-[var(--color-text-primary)]">
                     {name}
                   </Typography>
                 )}

@@ -8,6 +8,7 @@ type SafeAppsListHeaderProps = {
 const SafeAppsListHeader = ({ title, amount }: SafeAppsListHeaderProps) => {
   return (
     <Typography
+      as="h2"
       variant="paragraph-small-bold"
       className="mt-[var(--space-4)] mb-[var(--space-3)] text-[var(--color-primary-light)]"
     >

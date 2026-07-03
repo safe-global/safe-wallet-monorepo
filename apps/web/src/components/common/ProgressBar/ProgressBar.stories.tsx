@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { ProgressBar } from './index'
 
 const meta = {
+  title: 'Components/Common/ProgressBar',
   component: ProgressBar,
   parameters: {
     layout: 'centered',

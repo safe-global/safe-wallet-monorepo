@@ -14,6 +14,7 @@ const FormWrapper = ({
 }
 
 const meta: Meta<typeof NameInput> = {
+  title: 'Components/Common/NameInput',
   component: NameInput,
   parameters: {
     layout: 'centered',

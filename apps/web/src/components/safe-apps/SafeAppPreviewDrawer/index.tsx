@@ -76,7 +76,7 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
             {safeApp?.name}
           </Typography>
 
-          <Typography variant="paragraph-small" className="mt-4 text-[var(--color-primary-light)]">
+          <Typography variant="paragraph-small" className="block mt-4 text-[var(--color-primary-light)]">
             {safeApp?.description}
           </Typography>
 
@@ -84,7 +84,7 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
           <SafeAppTags tags={safeApp?.tags || []} />
 
           {/* Networks */}
-          <Typography variant="paragraph-small" className="mt-4 text-[var(--color-text-secondary)]">
+          <Typography variant="paragraph-small" className="block mt-4 text-[var(--color-text-secondary)]">
             Available networks
           </Typography>
 

@@ -63,7 +63,7 @@ export function SetUpNestedSafe(): ReactElement {
     <TxCard>
       <FormProvider {...formMethods}>
         <form onSubmit={formMethods.handleSubmit(onFormSubmit)}>
-          <Typography variant="paragraph-small" className="mt-2">
+          <Typography variant="paragraph-small" className="block mt-2">
             Name your Nested Safe and select which assets to fund it with. All selected assets will be transferred when
             deployed.
           </Typography>

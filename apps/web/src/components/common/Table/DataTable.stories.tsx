@@ -3,6 +3,7 @@ import { DataTable } from './DataTable'
 import { DataRow } from '@/components/common/Table/DataRow'
 
 const meta = {
+  title: 'Components/Common/DataTable',
   component: DataTable,
   tags: ['autodocs'],
 } satisfies Meta<typeof DataTable>

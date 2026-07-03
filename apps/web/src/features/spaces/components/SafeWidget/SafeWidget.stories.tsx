@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
  */
 
 const meta: Meta<typeof SafeWidget> = {
+  title: 'Features/Spaces/SafeWidget',
   component: SafeWidget,
   tags: ['autodocs'],
   decorators: [

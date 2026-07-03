@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import UnreadBadge from './index'
 
 const meta = {
+  title: 'Components/Common/UnreadBadge',
   component: UnreadBadge,
   parameters: {
     layout: 'centered',

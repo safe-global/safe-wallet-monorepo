@@ -2,9 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { DataRow } from './DataRow'
 
 const meta = {
+  title: 'Components/Common/DataRow',
   component: DataRow,
   parameters: {
-    componentSubtitle: 'Components/Common/DataRow',
+    componentSubtitle: 'A simple label<=>value pair row for a table',
   },
   argTypes: {
     title: {

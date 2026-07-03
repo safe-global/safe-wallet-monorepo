@@ -3,6 +3,7 @@ import NetworkLogosList from './index'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
 const meta = {
+  title: 'Features/Multichain/NetworkLogosList',
   component: NetworkLogosList,
   parameters: {
     layout: 'centered',

@@ -5,6 +5,7 @@ import { mockOnChainConfirmationData, mockNestedTxDetails } from './mockData'
 import { http, HttpResponse } from 'msw'
 
 const meta = {
+  title: 'Components/Transactions/OnChainConfirmation',
   component: OnChainConfirmation,
   decorators: [
     (Story) => {

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import SplitMenuButton from './index'
 
 const meta = {
+  title: 'Components/Common/SplitMenuButton',
   component: SplitMenuButton,
   parameters: {
     layout: 'centered',

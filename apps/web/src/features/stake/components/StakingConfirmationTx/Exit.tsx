@@ -52,7 +52,7 @@ const StakingConfirmationTxExit = ({ order }: StakingOrderConfirmationViewProps)
       >
         Up to {withdrawIn}
       </FieldsGrid>
-      <Typography variant="paragraph-small" color="muted" className="mt-4">
+      <Typography variant="paragraph-small" color="muted" className="block mt-4">
         The selected amount and any rewards will be withdrawn from Dedicated Staking for ETH after the validator exit.
       </Typography>
       <Alert variant="warning" className="mb-2">

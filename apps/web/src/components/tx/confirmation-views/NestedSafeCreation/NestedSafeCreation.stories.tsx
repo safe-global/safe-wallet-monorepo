@@ -4,6 +4,7 @@ import { NestedSafeCreation } from './index'
 import { mockNestedSafeCreationTxData } from './mockData'
 
 const meta = {
+  title: 'Components/TxFlow/ConfirmationViews/NestedSafeCreation',
   component: NestedSafeCreation,
   decorators: [
     (Story) => {

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import PageHeader from './index'
 
 const meta = {
+  title: 'Components/Common/PageHeader',
   component: PageHeader,
   parameters: {
     layout: 'padded',
@@ -16,7 +17,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    title: 'Components/Common/PageHeader',
+    title: 'Transactions',
   },
 }
 

@@ -12,7 +12,7 @@ const onboardingSurveyState: SurveyStateDto = {
     id: 1,
     slug: 'onboarding',
     version: 1,
-    title: 'Features/Spaces/SurveyOnboarding',
+    title: 'Space Onboarding Survey',
     subtitle: 'Per-Space onboarding questionnaire',
     surveyContent: {
       pages: [
@@ -77,6 +77,7 @@ const baseSetup = createMockStory({
 })
 
 const meta = {
+  title: 'Features/Spaces/SurveyOnboarding',
   component: SurveyOnboarding,
   loaders: [mswLoader],
   parameters: {

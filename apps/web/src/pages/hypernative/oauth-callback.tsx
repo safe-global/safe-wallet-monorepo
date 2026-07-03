@@ -168,7 +168,7 @@ const HypernativeOAuthCallback: NextPage = () => {
               <Typography variant="h3" className="mt-6 font-bold">
                 Authentication in progress
               </Typography>
-              <Typography variant="paragraph-small" color="muted" className="mt-2">
+              <Typography variant="paragraph-small" color="muted" className="block mt-2">
                 Hypernative authentication is in progress. Don’t close this window.
               </Typography>
             </>
@@ -182,7 +182,7 @@ const HypernativeOAuthCallback: NextPage = () => {
               <Typography variant="h3" className="mt-6 font-bold">
                 Login successful
               </Typography>
-              <Typography variant="paragraph-small" color="muted" className="mt-2">
+              <Typography variant="paragraph-small" color="muted" className="block mt-2">
                 You’re now signed in to Hypernative.
               </Typography>
             </>
@@ -201,7 +201,7 @@ const HypernativeOAuthCallback: NextPage = () => {
               <Typography variant="h3" className="mt-6 font-bold">
                 Something went wrong
               </Typography>
-              <Typography variant="paragraph-small" color="muted" className="mt-2">
+              <Typography variant="paragraph-small" color="muted" className="block mt-2">
                 {errorMessage}
               </Typography>
             </>

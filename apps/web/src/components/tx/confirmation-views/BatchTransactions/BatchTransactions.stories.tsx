@@ -4,6 +4,7 @@ import BatchTransactions from './index'
 import { mockedDraftBatch } from './mockData'
 
 const meta = {
+  title: 'Components/TxFlow/ConfirmationViews/BatchTransactions',
   component: BatchTransactions,
   parameters: {
     layout: 'centered',

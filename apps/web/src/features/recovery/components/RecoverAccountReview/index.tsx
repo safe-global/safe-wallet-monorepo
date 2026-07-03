@@ -138,7 +138,7 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
         <Separator className={commonCss.nestedDivider} style={{ marginTop: 'var(--space-2)' }} />
 
         <div className="my-2">
-          <Typography variant="paragraph-small" color="muted" className="mb-2">
+          <Typography variant="paragraph-small" color="muted" className="block mb-2">
             After recovery, Safe account transactions will require:
           </Typography>
           <Typography>

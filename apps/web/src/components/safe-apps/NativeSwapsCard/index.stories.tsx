@@ -3,9 +3,10 @@ import NativeSwapsCard from './index'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
 const meta = {
+  title: 'Components/SafeApps/NativeSwapsCard',
   component: NativeSwapsCard,
   parameters: {
-    componentSubtitle: 'Components/SafeApps/NativeSwapsCard',
+    componentSubtitle: 'Renders a promo card for native swaps',
   },
 
   decorators: [

@@ -4,6 +4,7 @@ import SwapOrder from './index'
 import { mockSwapOrderTxInfo, mockTwapOrderTxInfo, mockSwapOrderTxData } from './mockData'
 
 const meta = {
+  title: 'Components/TxFlow/ConfirmationViews/SwapOrder',
   component: SwapOrder,
   decorators: [
     (Story) => {

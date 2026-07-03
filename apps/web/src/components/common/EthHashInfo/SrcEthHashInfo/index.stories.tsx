@@ -3,9 +3,10 @@ import SrcEthHashInfo from './index'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
 const meta = {
+  title: 'Components/Common/SrcEthHashInfo',
   component: SrcEthHashInfo,
   parameters: {
-    componentSubtitle: 'Components/Common/EthHashInfo/SrcEthHashInfo',
+    componentSubtitle: 'Renders a hash address with options for copy and explorer link',
   },
 
   decorators: [

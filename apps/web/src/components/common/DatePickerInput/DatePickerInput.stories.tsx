@@ -8,6 +8,7 @@ const FormWrapper = ({ children }: { children: React.ReactNode }) => {
 }
 
 const meta: Meta<typeof DatePickerInput> = {
+  title: 'Components/Common/DatePickerInput',
   component: DatePickerInput,
   parameters: {
     layout: 'centered',

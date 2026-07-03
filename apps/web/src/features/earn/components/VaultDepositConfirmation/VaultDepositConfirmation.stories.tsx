@@ -4,6 +4,7 @@ import VaultDepositConfirmation from './index'
 import { mockVaultDepositTxInfo, mockVaultDepositTxInfoWithoutAdditionalRewards } from './mockData'
 
 const meta = {
+  title: 'Features/Earn/VaultDepositConfirmation',
   component: VaultDepositConfirmation,
   decorators: [
     (Story) => {

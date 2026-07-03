@@ -8,6 +8,7 @@ import { faker } from '@faker-js/faker'
 faker.seed(123)
 
 const meta = {
+  title: 'Components/TxFlow/ConfirmationViews/UpdateSafe',
   component: _UpdateSafe,
   parameters: {
     // Stories use faker for addresses which causes non-deterministic visual tests

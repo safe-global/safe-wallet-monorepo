@@ -3,6 +3,7 @@ import { NativeStakingStatus } from '@safe-global/store/gateway/types'
 import StakingStatus from '@/components/transactions/TxDetails/TxData/Staking/StakingStatus'
 
 const meta: Meta<typeof StakingStatus> = {
+  title: 'Features/Stake/StakingStatus',
   component: StakingStatus,
   parameters: {
     layout: 'centered',

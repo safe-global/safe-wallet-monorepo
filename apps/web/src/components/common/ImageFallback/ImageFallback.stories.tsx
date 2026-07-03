@@ -3,6 +3,7 @@ import { Typography } from '@/components/ui/typography'
 import ImageFallback from './index'
 
 const meta = {
+  title: 'Components/Common/ImageFallback',
   component: ImageFallback,
   parameters: {
     layout: 'centered',

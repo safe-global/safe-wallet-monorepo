@@ -16,7 +16,7 @@ import { Eye, ExternalLink } from 'lucide-react'
  * These stories document the UI patterns.
  */
 const meta: Meta = {
-  title: 'Components/NFTs',
+  title: 'Features/NFTs',
   parameters: {
     layout: 'padded',
   },

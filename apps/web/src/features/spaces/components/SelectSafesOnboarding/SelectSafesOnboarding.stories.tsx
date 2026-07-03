@@ -13,6 +13,7 @@ const defaultSetup = createMockStory({
 })
 
 const meta = {
+  title: 'Features/Spaces/SelectSafesOnboarding',
   component: SelectSafesOnboarding,
   loaders: [mswLoader],
   parameters: {

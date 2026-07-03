@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import InitialsAvatar from './index'
 
 const meta: Meta<typeof InitialsAvatar> = {
+  title: 'Components/Common/InitialsAvatar',
   component: InitialsAvatar,
   parameters: {
     layout: 'centered',

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import PositionsSkeleton from './index'
 
 const meta = {
+  title: 'Features/Positions/PositionsSkeleton',
   component: PositionsSkeleton,
   parameters: {
     layout: 'padded',

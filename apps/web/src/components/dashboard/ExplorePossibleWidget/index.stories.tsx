@@ -5,9 +5,10 @@ import { RouterDecorator } from '@/stories/routerDecorator'
 import ExplorePossibleWidget from './index'
 
 const meta = {
+  title: 'Components/Dashboard/ExplorePossibleWidget',
   component: ExplorePossibleWidget,
   parameters: {
-    componentSubtitle: 'Components/Dashboard/ExplorePossibleWidget',
+    componentSubtitle: 'Renders a horizontal scrollable carousel showcasing key Safe features',
     nextjs: {
       appDirectory: true,
       navigation: {

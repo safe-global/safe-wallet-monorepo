@@ -4,6 +4,7 @@ import StakingTx from './index'
 import { mockStakingDepositTxInfo, mockStakingExitTxInfo, mockStakingWithdrawTxInfo } from './mockData'
 
 const meta = {
+  title: 'Components/TxFlow/ConfirmationViews/StakingTx',
   component: StakingTx,
   decorators: [
     (Story) => {

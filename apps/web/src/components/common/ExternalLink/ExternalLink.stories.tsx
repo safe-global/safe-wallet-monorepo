@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import ExternalLink from './index'
 
 const meta = {
+  title: 'Components/Common/ExternalLink',
   component: ExternalLink,
   parameters: {
     layout: 'centered',

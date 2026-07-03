@@ -88,7 +88,7 @@ const StakingConfirmationTxDeposit = ({ order, isTxDetails }: StakingOrderConfir
         )}
 
         {isOrder && (
-          <Typography variant="paragraph-small" className="mt-4 text-muted-foreground">
+          <Typography variant="paragraph-small" className="block mt-4 text-muted-foreground">
             Earn ETH rewards with dedicated validators. Rewards must be withdrawn manually, and you can request a
             withdrawal at any time.
           </Typography>

@@ -5,9 +5,10 @@ import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
 
 const meta = {
+  title: 'Components/Common/EthHashInfo',
   component: EthHashInfo,
   parameters: {
-    componentSubtitle: 'Components/Common/EthHashInfo',
+    componentSubtitle: 'Renders a hash address with options for copy and explorer link',
   },
 
   decorators: [

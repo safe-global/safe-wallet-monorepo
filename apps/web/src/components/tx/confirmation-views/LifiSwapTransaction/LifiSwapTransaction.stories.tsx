@@ -4,6 +4,7 @@ import { LifiSwapTransaction } from './index'
 import { mockLifiSwapTxInfo } from './mockData'
 
 const meta = {
+  title: 'Components/TxFlow/ConfirmationViews/LifiSwapTransaction',
   component: LifiSwapTransaction,
   decorators: [
     (Story) => {

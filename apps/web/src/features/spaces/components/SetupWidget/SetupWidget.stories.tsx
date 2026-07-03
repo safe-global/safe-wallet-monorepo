@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import SetupWidget from './index'
 
 const meta: Meta<typeof SetupWidget> = {
+  title: 'Features/Spaces/SetupWidget',
   component: SetupWidget,
   tags: ['autodocs'],
   decorators: [

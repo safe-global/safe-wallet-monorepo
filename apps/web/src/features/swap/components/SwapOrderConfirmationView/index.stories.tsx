@@ -28,6 +28,7 @@ const Order = swapOrderConfirmationViewBuilder()
   .with({ status: 'open' as OrderStatuses })
 
 const meta = {
+  title: 'Features/Swap/SwapOrderConfirmationView',
   component: CowOrderConfirmationView,
 
   decorators: [

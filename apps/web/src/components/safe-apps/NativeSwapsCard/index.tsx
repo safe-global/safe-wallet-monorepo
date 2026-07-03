@@ -32,7 +32,7 @@ const NativeSwapsCard = () => {
           Native swaps are here!
         </Typography>
 
-        <Typography variant="paragraph-small" className="mb-4 line-clamp-3 text-[var(--color-text-secondary)]">
+        <Typography variant="paragraph-small" className="block mb-4 line-clamp-3 text-[var(--color-text-secondary)]">
           Experience seamless trading with better decoding and security in native swaps.
         </Typography>
 

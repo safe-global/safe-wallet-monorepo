@@ -26,14 +26,16 @@ const Overview = (): ReactElement => {
 
   return (
     <section className="overflow-hidden rounded-3xl bg-[var(--color-background-paper)] px-6 pb-3 pt-5">
-      {!portfolio.$isDisabled && (
-        <div className="-mb-6 flex justify-end">
-          <portfolio.PortfolioRefreshHint entryPoint="Dashboard" />
-        </div>
-      )}
-      <div>
-        <div className="flex flex-col items-start justify-between md:flex-row md:items-end">
+      {/* Refresh hint pinned to the top, actions to the bottom (aligned with the balance) via a
+          stretched `justify-between` column — keeps the original look while making it impossible for
+          the hint to overlap the actions when they wrap onto a second row on narrow widths. */}
+      <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-stretch">
+        <div className="flex items-end">
           <TotalAssetValue fiatTotal={balances.fiatTotal} size="lg" title="Total balance" />
+        </div>
+
+        <div className="flex flex-col items-start gap-4 md:items-end md:justify-between">
+          {!portfolio.$isDisabled && <portfolio.PortfolioRefreshHint entryPoint="Dashboard" />}
 
           {safe.deployed && <ActionsTray noAssets={noAssets} />}
         </div>

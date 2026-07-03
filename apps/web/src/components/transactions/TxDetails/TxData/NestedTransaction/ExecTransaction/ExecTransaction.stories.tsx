@@ -6,6 +6,7 @@ import { http, HttpResponse } from 'msw'
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
 
 const meta = {
+  title: 'Components/Transactions/ExecTransaction',
   component: ExecTransaction,
   decorators: [
     (Story) => {

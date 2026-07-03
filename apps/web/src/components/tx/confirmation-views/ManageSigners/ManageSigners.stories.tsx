@@ -8,6 +8,7 @@ import { faker } from '@faker-js/faker'
 faker.seed(999)
 
 const meta = {
+  title: 'Components/TxFlow/ConfirmationViews/ManageSigners',
   component: ManageSigners,
   decorators: [
     (Story) => {

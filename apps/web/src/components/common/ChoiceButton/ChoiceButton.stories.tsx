@@ -3,6 +3,7 @@ import { Send, Plus, ArrowLeftRight, Wallet } from 'lucide-react'
 import ChoiceButton from './index'
 
 const meta = {
+  title: 'Components/Common/ChoiceButton',
   component: ChoiceButton,
   parameters: {
     layout: 'centered',
@@ -22,7 +23,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    title: 'Components/Common/ChoiceButton',
+    title: 'Send tokens',
     description: 'Send tokens to another address',
     icon: Send,
     onClick: () => console.log('clicked'),

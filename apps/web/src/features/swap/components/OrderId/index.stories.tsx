@@ -2,9 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react'
 import OrderId from './index'
 
 const meta = {
+  title: 'Features/Swap/OrderId',
   component: OrderId,
   parameters: {
-    componentSubtitle: 'Features/Swap/OrderId',
+    componentSubtitle: 'Renders an order id with an external link and a copy button',
   },
 
   decorators: [

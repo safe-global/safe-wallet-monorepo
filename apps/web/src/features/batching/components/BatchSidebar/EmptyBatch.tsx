@@ -14,14 +14,14 @@ const EmptyBatch = ({ children }: { children: ReactNode }) => (
       Add an initial transaction to the batch
     </Typography>
 
-    <Typography variant="paragraph-small" className="mt-4 mb-8 max-w-md px-2 [text-wrap:balance] sm:px-4">
+    <Typography variant="paragraph-small" className="block mt-4 mb-8 max-w-md px-2 [text-wrap:balance] sm:px-4">
       Save gas and signatures by adding multiple Safe transactions to a single batch transaction. You can reorder and
       delete individual transactions in a batch.
     </Typography>
 
     {children}
 
-    <Typography variant="paragraph-small" className="mt-12 w-full text-[var(--color-border-main)]">
+    <Typography variant="paragraph-small" className="block mt-12 w-full text-[var(--color-border-main)]">
       <span className="mb-2 block">
         <InfoIcon className="mx-auto size-6" />
       </span>
