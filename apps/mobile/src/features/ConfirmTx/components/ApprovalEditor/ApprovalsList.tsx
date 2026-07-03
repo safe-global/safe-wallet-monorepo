@@ -8,6 +8,7 @@ import {
 import { TokenIcon } from '@/src/components/TokenIcon/TokenIcon'
 import { Badge } from '@/src/components/Badge/Badge'
 import { EthAddress } from '@/src/components/EthAddress'
+import { Identicon } from '@/src/components/Identicon'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import type { Address } from '@/src/types/address'
@@ -39,7 +40,10 @@ const ApprovalItem = ({ approval, onEdit }: { approval: ApprovalInfo; onEdit?: (
         <Text color="$textSecondaryLight" fontSize="$4">
           Spender
         </Text>
-        <EthAddress address={approval.spender as Address} copy />
+        <XStack gap="$2" alignItems="center">
+          <Identicon address={approval.spender as Address} size={24} />
+          <EthAddress address={approval.spender as Address} copy />
+        </XStack>
       </XStack>
 
       {onEdit && (

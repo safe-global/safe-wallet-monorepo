@@ -18,6 +18,7 @@ import { TokenIcon } from '@/src/components/TokenIcon/TokenIcon'
 import { SafeButton } from '@/src/components/SafeButton'
 import { LoadableSwitch } from '@/src/components/LoadableSwitch'
 import { EthAddress } from '@/src/components/EthAddress'
+import { Identicon } from '@/src/components/Identicon'
 import type { Address } from '@/src/types/address'
 import { sanitizeDecimalInput } from '@/src/utils/formatters'
 import Logger from '@/src/utils/logger'
@@ -176,7 +177,10 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo }) => 
           <Text color="$colorSecondary" fontSize="$5">
             Spender
           </Text>
-          <EthAddress address={approval.spender as Address} copy />
+          <XStack gap="$2" alignItems="center">
+            <Identicon address={approval.spender as Address} size={24} />
+            <EthAddress address={approval.spender as Address} copy />
+          </XStack>
         </XStack>
       </View>
     </View>
