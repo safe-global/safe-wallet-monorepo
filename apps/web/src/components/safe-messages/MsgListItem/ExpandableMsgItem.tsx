@@ -5,17 +5,19 @@ import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBo
 
 import MsgDetails from '@/components/safe-messages/MsgDetails'
 import MsgSummary from '@/components/safe-messages/MsgSummary'
+// Reuse the shared transaction list-item card styling so signed messages match Queue items.
+import css from '@/components/transactions/TxListItem/styles.module.css'
 
 const ITEM_VALUE = 'message'
 
 const ExpandableMsgItem = ({ msg, expanded = false }: { msg: MessageItem; expanded?: boolean }): ReactElement => {
   return (
     <Accordion defaultValue={expanded ? [ITEM_VALUE] : []}>
-      <AccordionItem value={ITEM_VALUE} className="border-b-0">
+      <AccordionItem value={ITEM_VALUE} className={css.listItem}>
         <AccordionTrigger
           render={<div role="button" tabIndex={0} />}
           data-testid="message-item"
-          className="cursor-pointer justify-start overflow-x-auto py-2 hover:no-underline"
+          className="cursor-pointer justify-start overflow-x-auto px-4 py-3 hover:no-underline sm:px-6"
         >
           <MsgSummary msg={msg} />
         </AccordionTrigger>
