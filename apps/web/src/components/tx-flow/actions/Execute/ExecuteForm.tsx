@@ -349,7 +349,7 @@ export const ExecuteForm = ({
                 <Tooltip>
                   <TooltipTrigger
                     render={
-                      <div className="w-full min-w-[112px] lg:w-auto">
+                      <div className="w-full lg:w-auto">
                         <SplitMenuButton
                           selected={slotId}
                           onChange={({ id }) => onChange?.(id)}
@@ -364,7 +364,7 @@ export const ExecuteForm = ({
                   <TooltipContent side="top">{tooltip}</TooltipContent>
                 </Tooltip>
               ) : (
-                <div className="w-full min-w-[112px] lg:w-auto">
+                <div className="w-full lg:w-auto">
                   <SplitMenuButton
                     selected={slotId}
                     onChange={({ id }) => onChange?.(id)}

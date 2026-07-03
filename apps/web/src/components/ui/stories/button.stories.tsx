@@ -13,11 +13,11 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'secondary', 'outline', 'ghost', 'destructive', 'link'],
+      options: ['default', 'secondary', 'outline', 'ghost', 'destructive', 'destructive-outline', 'link'],
     },
     size: {
       control: 'select',
-      options: ['default', 'sm', 'xs', 'lg', 'action', 'icon', 'icon-sm', 'icon-xs', 'icon-lg'],
+      options: ['default', 'sm', 'xs', 'lg', 'action', 'submit', 'icon', 'icon-sm', 'icon-xs', 'icon-lg'],
     },
     disabled: {
       control: 'boolean',
@@ -43,6 +43,7 @@ export const AllVariants: Story = {
           <Button variant="outline">Outline</Button>
           <Button variant="ghost">Ghost</Button>
           <Button variant="destructive">Destructive</Button>
+          <Button variant="destructive-outline">Destructive outline</Button>
           <Button variant="link">Link</Button>
         </div>
       </div>
@@ -55,7 +56,12 @@ export const AllVariants: Story = {
           <Button size="default">Default</Button>
           <Button size="lg">Large</Button>
           <Button size="action">Action</Button>
+          <Button size="submit">Submit</Button>
         </div>
+        <p className="mt-2 text-sm text-muted-foreground">
+          <code>action</code> = toolbar/action-bar pill. <code>submit</code> = the same pill with a stable min-width for
+          modal/flow submit buttons (label can swap to a spinner without resizing).
+        </p>
       </div>
 
       <div>

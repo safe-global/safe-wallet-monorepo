@@ -15,13 +15,7 @@ const ImportAddressBook = () => {
     <>
       <Tooltip>
         <TooltipTrigger render={<div className="inline-flex" />}>
-          <Button
-            variant="outline"
-            size="lg"
-            className="px-4 py-0"
-            disabled={!hasContacts}
-            onClick={() => setOpen(true)}
-          >
+          <Button variant="outline" size="action" disabled={!hasContacts} onClick={() => setOpen(true)}>
             <ImportIcon className="size-4" />
             Import
           </Button>

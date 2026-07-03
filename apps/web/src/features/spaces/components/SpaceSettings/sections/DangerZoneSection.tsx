@@ -29,13 +29,7 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
             <TooltipTrigger
               render={
                 <span tabIndex={0}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    data-testid="space-leave-button"
-                    disabled
-                    className="text-destructive"
-                  >
+                  <Button variant="destructive-outline" size="sm" data-testid="space-leave-button" disabled>
                     Leave workspace
                   </Button>
                 </span>
@@ -45,7 +39,7 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
           </Tooltip>
         ) : (
           <Button
-            variant="outline"
+            variant="destructive-outline"
             size="sm"
             data-testid="space-leave-button"
             disabled={!isActiveMember}
@@ -53,7 +47,6 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
               setLeaveOpen(true)
               trackEvent({ ...SPACE_EVENTS.LEAVE_SPACE_MODAL, label: SPACE_LABELS.space_settings })
             }}
-            className="text-destructive"
           >
             Leave workspace
           </Button>

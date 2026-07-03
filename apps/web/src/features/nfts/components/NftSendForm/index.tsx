@@ -36,9 +36,8 @@ const NftSendForm = ({ selectedNfts }: NftSendFormProps): ReactElement => {
               <Button
                 data-testid={`nft-send-btn-${!isOk || noSelected}`}
                 type="submit"
-                size="sm"
+                size="submit"
                 disabled={!isOk || noSelected}
-                className="min-w-[10em]"
               >
                 {noSelected ? 'Send' : `Send ${selectedNfts.length} ${nftsText}`}
               </Button>

@@ -218,7 +218,7 @@ export const ExecuteThroughRoleForm = ({
           {/* Submit button, also available to non-owner role members */}
           <CheckWallet allowNonOwner checkNetwork={!submitDisabled}>
             {(isOk) => (
-              <div className="w-full min-w-[112px] lg:w-auto">
+              <div className="w-full lg:w-auto">
                 <SplitMenuButton
                   selected={slotId}
                   onChange={({ id }) => onChange?.(id)}

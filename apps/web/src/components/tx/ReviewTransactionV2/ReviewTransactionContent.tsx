@@ -93,9 +93,10 @@ export const ReviewTransactionContent = ({
                 <Button
                   data-testid="continue-sign-btn"
                   type="submit"
+                  size="submit"
                   onClick={onContinueClick}
                   disabled={!isOk || isSubmitDisabled || (needsRiskConfirmation && !isRiskConfirmed)}
-                  className="order-1 w-full min-w-[82px] lg:w-auto"
+                  className="order-1 w-full lg:w-auto"
                 >
                   {isSubmitLoading ? <Spinner className="size-5" /> : 'Continue'}
                 </Button>

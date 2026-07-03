@@ -49,8 +49,7 @@ export default function ExecuteRecoveryButton({
             onClick={onClick}
             variant="default"
             disabled={!isOk || isDisabled}
-            className="min-w-[106.5px]"
-            size={compact ? 'sm' : 'lg'}
+            size={compact ? 'sm' : 'action'}
           >
             Execute
           </Button>

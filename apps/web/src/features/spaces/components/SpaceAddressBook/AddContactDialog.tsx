@@ -136,7 +136,7 @@ const AddContactDialog = ({
 
   return (
     <>
-      <Button size="lg" className="px-4 py-0" onClick={handleOpen}>
+      <Button size="action" onClick={handleOpen}>
         <Plus className="size-4 mr-1 text-green-500" />
         {triggerLabel}
       </Button>

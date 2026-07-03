@@ -104,7 +104,7 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
               <Button variant="ghost" data-testid="cancel-btn" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button type="submit" data-testid="delete-btn" variant="destructive" disabled={!formState.isDirty}>
+              <Button type="submit" data-testid="delete-btn" disabled={!formState.isDirty}>
                 Update
               </Button>
             </div>

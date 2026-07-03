@@ -85,7 +85,7 @@ const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps
                 <RotateCw />
                 Reload
               </Button>
-              <Button variant="outline" onClick={handleOpenInNewTab} className="w-full px-4">
+              <Button variant="outline" onClick={handleOpenInNewTab} className="w-full">
                 <OpenInNewIcon />
                 Open in a new tab
               </Button>

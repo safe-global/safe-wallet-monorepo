@@ -102,9 +102,9 @@ const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
               <Button
                 data-testid="execute-through-role-form-btn"
                 variant="default"
+                size="submit"
                 type="submit"
                 disabled={!isOk || isLoading}
-                className="min-w-[112px]"
               >
                 {isLoading ? <Spinner className="size-5" /> : 'Execute'}
               </Button>

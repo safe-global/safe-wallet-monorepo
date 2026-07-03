@@ -177,7 +177,7 @@ export const CounterfactualForm = ({
           {/* Submit button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
             {(isOk) => (
-              <Button type="submit" disabled={!isOk || submitDisabled} className="min-w-[112px]">
+              <Button type="submit" size="submit" disabled={!isOk || submitDisabled}>
                 {!isSubmittable ? <Spinner className="size-5" /> : 'Execute'}
               </Button>
             )}

@@ -18,8 +18,8 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'link')
- * - `size` ('default' | 'xs' | 'sm' | 'lg' | 'action' | 'icon' | 'icon-xs' | 'icon-sm' | 'icon-lg')
+ * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'destructive-outline' | 'link')
+ * - `size` ('default' | 'xs' | 'sm' | 'lg' | 'action' | 'submit' | 'icon' | 'icon-xs' | 'icon-sm' | 'icon-lg')
  * - `render`
  * - `className`
  */
@@ -38,6 +38,10 @@ const buttonVariants = cva(
           'hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground',
         destructive:
           'bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30',
+        // Bordered destructive: for labelled destructive actions that read as a bordered button
+        // (e.g. "Leave workspace"). Replaces hand-rolled `outline` + `className="text-destructive"`.
+        'destructive-outline':
+          'border-border bg-background text-destructive hover:bg-destructive/10 hover:text-destructive dark:bg-input/30 dark:border-border shadow-xs',
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {
@@ -51,6 +55,11 @@ const buttonVariants = cva(
         // with variant="default" for the primary action and variant="secondary" for
         // secondary actions so they share one height, padding, and icon size.
         action: "h-10 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5",
+        // Modal / flow / settings submit button: the action pill plus a stable minimum width so
+        // the label can swap (e.g. "Execute" → spinner) without the button resizing. Replaces the
+        // per-call magic min-w-[82/112/114/122px]. Pair with a `w-full lg:w-auto` wrapper for the
+        // full-width-on-mobile flow submit pattern.
+        submit: "h-10 gap-2 px-6 min-w-[7rem] [&_svg:not([class*='size-'])]:size-5",
         icon: 'size-9',
         'icon-xs': "size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3",
         'icon-sm': 'size-8 in-data-[slot=button-group]:rounded-sm',

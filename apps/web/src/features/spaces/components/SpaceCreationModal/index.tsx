@@ -101,7 +101,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
               <Button
                 data-testid="create-space-modal-button"
                 type="submit"
-                className="min-w-[200px]"
+                size="submit"
                 disabled={!formState.isValid || isSubmitting}
               >
                 {isSubmitting ? <Spinner className="size-5" /> : 'Create workspace'}

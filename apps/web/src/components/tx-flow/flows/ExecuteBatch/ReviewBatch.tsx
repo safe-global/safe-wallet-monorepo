@@ -264,12 +264,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
           <div className="flex items-center gap-2 p-2">
             <CheckWallet allowNonOwner={true} checkNetwork>
               {(isOk) => (
-                <Button
-                  type="submit"
-                  disabled={!isOk || submitDisabled}
-                  onClick={handleSubmit}
-                  className="min-w-[114px]"
-                >
+                <Button type="submit" size="submit" disabled={!isOk || submitDisabled} onClick={handleSubmit}>
                   {!isSubmittable ? <Spinner className="size-5" /> : 'Submit'}
                 </Button>
               )}

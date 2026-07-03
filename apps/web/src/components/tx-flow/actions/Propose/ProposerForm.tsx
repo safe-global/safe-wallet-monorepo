@@ -92,8 +92,9 @@ export const ProposerForm = ({
             <Button
               data-testid="sign-btn"
               type="submit"
+              size="submit"
               disabled={!isOk || submitDisabled}
-              className="order-1 w-full min-w-[82px] lg:w-auto"
+              className="order-1 w-full lg:w-auto"
             >
               {!isSubmittable ? <Spinner className="size-5" /> : 'Propose transaction'}
             </Button>
