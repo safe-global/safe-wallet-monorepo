@@ -6,11 +6,29 @@ import {
   PSEUDO_APPROVAL_VALUES,
   type ApprovalInfo,
 } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
+import { FormProvider } from 'react-hook-form'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { renderWithStore, createTestStore, fireEvent, waitFor } from '@/src/tests/test-utils'
 import { setDraft, type DraftTx } from '@/src/store/draftTxSlice'
 import { setOutstandingRequest } from '@/src/features/WalletConnect/Wallet/store/walletKitSlice'
 import { rebuildDraftWithApproval } from '@/src/services/tx/rebuildDraftWithApproval'
-import { EditApprovalForm } from './EditApprovalForm'
+import { EditApprovalFields, EditApprovalFooter, useEditApprovalForm } from './EditApprovalForm'
+
+// Composes the pieces the same way EditApprovalSheet does; the sheet itself
+// cannot be rendered in tests (the bottom-sheet jest mock renders null).
+const EditApprovalForm = (props: {
+  draft: DraftTx
+  approval: ApprovalInfo
+  safe: Pick<SafeState, 'owners' | 'threshold'>
+}) => {
+  const { formMethods, submitting, saveDisabled, onSave, onCancel } = useEditApprovalForm(props)
+  return (
+    <FormProvider {...formMethods}>
+      <EditApprovalFields approval={props.approval} />
+      <EditApprovalFooter submitting={submitting} saveDisabled={saveDisabled} onSave={onSave} onCancel={onCancel} />
+    </FormProvider>
+  )
+}
 
 const mockBack = jest.fn()
 jest.mock('expo-router', () => ({
