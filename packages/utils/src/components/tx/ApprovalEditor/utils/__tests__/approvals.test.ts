@@ -66,6 +66,11 @@ describe('parseApprovalAmount', () => {
     expect(parseApprovalAmount('1.5', 6)).toEqual(1_500_000n)
     expect(parseApprovalAmount('100', 18)).toEqual(parseUnits('100', 18))
   })
+
+  it('throws for finite amounts without token decimals', () => {
+    expect(() => parseApprovalAmount('1.5', undefined)).toThrow('Cannot parse an approval amount')
+    expect(parseApprovalAmount(PSEUDO_APPROVAL_VALUES.UNLIMITED, undefined)).toEqual(UNLIMITED_APPROVAL_AMOUNT)
+  })
 })
 
 describe('updateApprovalTxs', () => {

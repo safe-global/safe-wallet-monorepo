@@ -40,9 +40,13 @@ export const isUnlimitedApproval = (amount: bigint): boolean =>
 export const formatApprovalAmount = (amount: bigint, decimals?: number | null): string =>
   isUnlimitedApproval(amount) ? PSEUDO_APPROVAL_VALUES.UNLIMITED : safeFormatUnits(amount, decimals ?? DEFAULT_DECIMALS)
 
-export const parseApprovalAmount = (amount: string, decimals: number) => {
+export const parseApprovalAmount = (amount: string, decimals?: number | null) => {
   if (amount === PSEUDO_APPROVAL_VALUES.UNLIMITED) {
     return UNLIMITED_APPROVAL_AMOUNT
+  }
+  // Fail loudly instead of encoding an amount at the wrong scale
+  if (decimals == null) {
+    throw new Error('Cannot parse an approval amount without token decimals')
   }
 
   return parseUnits(amount, decimals)
@@ -66,7 +70,7 @@ export const updateApprovalTxs = <T extends ApprovalBaseTransaction>(
         return tx
       }
       const decimals = approvalInfo.tokenInfo.decimals
-      const newAmountWei = parseApprovalAmount(newApproval, decimals ?? 0)
+      const newAmountWei = parseApprovalAmount(newApproval, decimals)
       if (tx.data.startsWith(APPROVAL_SIGNATURE_HASH)) {
         return {
           to: approvalInfo.tokenAddress,
