@@ -102,7 +102,6 @@ const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
 const QueueLabel = 'needs to be executed first'
 export const hashesText = 'Hashes'
-const TransactionSummary = 'Send '
 const transactionsPerHrStr = 'free transactions left today'
 const maxAmountBtnStr = 'Max'
 const nativeTokenTransferStr = 'ETH'
@@ -964,7 +963,7 @@ export function verifyQueueLabel() {
 }
 
 export function verifyTransactionSummary(sendValue) {
-  cy.contains(TransactionSummary + `${sendValue} ${constants.tokenAbbreviation.sep}`).should('exist')
+  cy.get('[data-testid="tx-info"]').contains(`${sendValue} ${constants.tokenAbbreviation.sep}`).should('exist')
 }
 
 export function verifyDateExists(date) {
