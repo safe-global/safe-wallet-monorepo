@@ -30,6 +30,7 @@ export const payNowExecMethod = '[data-testid="pay-now-execution-method"]'
 export const addToBatchBtn = '[data-testid="combo-submit-batching"]'
 export const executeTxBtn = '[data-testid="execute-tx-btn"]'
 const accordionDetails = '[data-testid="accordion-details"]'
+const copyTxHashBtn = '[data-testid="copy-tx-hash-btn"]'
 export const copyIcon = '[data-testid="copy-btn-icon"]'
 export const explorerBtn = '[data-testid="explorer-btn"]'
 const transactionSideList = '[data-testid="transaction-actions-list"]'
@@ -546,6 +547,15 @@ export function clickOnCopyDataBtn(expectedData) {
 
   cy.get(txStack).find('button').click()
   cy.get('@clipboardWrite').should('have.been.calledWith', expectedData)
+}
+
+export function verifyTxHashCopied(expectedHash) {
+  cy.window().then((win) => {
+    cy.stub(win.navigator.clipboard, 'writeText').as('clipboardWrite')
+  })
+
+  cy.get(copyTxHashBtn).click()
+  cy.get('@clipboardWrite').should('have.been.calledWith', expectedHash)
 }
 
 export function switchToGridView() {
