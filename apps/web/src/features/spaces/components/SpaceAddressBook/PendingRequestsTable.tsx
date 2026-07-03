@@ -8,6 +8,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import { Spinner } from '@/components/ui/spinner'
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import Identicon from '@/components/common/Identicon'
 import { NetworkLogosList } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -107,8 +108,8 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
           <TableHead className={isSmallScreen ? 'w-[15%]' : 'w-[20%]'}>Name</TableHead>
           <TableHead className={isSmallScreen ? 'w-[40%]' : 'w-[32%]'}>Address</TableHead>
           <TableHead className={isSmallScreen ? 'w-[15%]' : 'w-[13%]'}>Chains</TableHead>
-          <TableHead className="w-[20%]">Requested by</TableHead>
-          <TableHead className="w-[15%]" />
+          <TableHead className={isSmallScreen ? 'w-[20%]' : 'w-[25%]'}>Requested by</TableHead>
+          <TableHead className="w-[10%]" />
         </TableRow>
       </TableHeader>
 
@@ -184,13 +185,12 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
                         />
                       </div>
                     ) : (
-                      <EthHashInfo
-                        address={req.requestedBy}
-                        avatarSize={20}
-                        onlyName
-                        showPrefix={false}
-                        showCopyButton={false}
-                      />
+                      <span className="inline-flex min-w-0 items-center gap-2">
+                        <span className="shrink-0">
+                          <Identicon address={req.requestedBy} size={20} />
+                        </span>
+                        <span className="min-w-0 break-all text-left">{req.requestedBy}</span>
+                      </span>
                     )}
                   </TooltipTrigger>
                   <TooltipContent side="bottom">{req.requestedBy}</TooltipContent>
@@ -205,12 +205,22 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
                     <Spinner className="size-5" />
                   ) : (
                     <>
-                      <Button variant="outline" size="icon-sm" onClick={() => handleApprove(req.id)} title="Accept">
-                        <Check className="size-4" />
-                      </Button>
-                      <Button variant="outline" size="icon-sm" onClick={() => handleReject(req.id)} title="Reject">
-                        <X className="size-4" />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger render={<span className="inline-flex" />}>
+                          <Button variant="outline" size="icon-sm" onClick={() => handleApprove(req.id)}>
+                            <Check className="size-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Accept</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger render={<span className="inline-flex" />}>
+                          <Button variant="outline" size="icon-sm" onClick={() => handleReject(req.id)}>
+                            <X className="size-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Decline</TooltipContent>
+                      </Tooltip>
                     </>
                   )}
                 </span>
