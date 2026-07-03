@@ -99,19 +99,20 @@ describe('useApprovalInfos', () => {
     })
     expect(result.current?.[0].tokenInfo?.symbol).toEqual('USDC')
     expect(result.current?.[0].spender.toLowerCase()).toEqual(spender.toLowerCase())
-    // must request ALL balances, not just trusted ones
-    expect(mockUseBalances).toHaveBeenCalledWith(false, undefined, false)
+    // must request ALL balances (not just trusted), unskipped since approvals exist
+    expect(mockUseBalances).toHaveBeenCalledWith(false, undefined, false, false)
   })
 
-  it('flags approvals above the balance or with unknown balance as high value', () => {
+  it('flags approvals above the balance as high value, but not those with unknown balance', () => {
     const aboveBalance = parseUnits('101', 6)
     const draft = buildDraft({ data: ERC20_INTERFACE.encodeFunctionData('approve', [spender, aboveBalance]) })
     const { result } = renderHook(() => useApprovalInfos(draft))
     expect(result.current?.[0].isHighValue).toBe(true)
 
+    // Loading, failed, or not-held balances are not verifiably high value
     mockUseBalances.mockReturnValue({ balances: undefined })
     const { result: unknownBalanceResult } = renderHook(() => useApprovalInfos(draft))
-    expect(unknownBalanceResult.current?.[0].isHighValue).toBe(true)
+    expect(unknownBalanceResult.current?.[0].isHighValue).toBe(false)
   })
 
   it('formats the unlimited amount as the unlimited pseudo value and flags it high value', () => {
@@ -167,6 +168,20 @@ describe('useApprovalInfos', () => {
     expect(result.current).toHaveLength(1)
     expect(result.current?.[0].tokenInfo?.symbol).toEqual('ONCH')
     expect(result.current?.[0].amountFormatted).toEqual('42')
+  })
+
+  it('marks tokens resolved as ERC-721 on-chain so the card renders read-only', () => {
+    mockUseBalances.mockReturnValue({ balances: undefined })
+    mockUseGetErc20TokenInfosQuery.mockReturnValue({
+      data: {
+        [tokenAddress.toLowerCase()]: { address: tokenAddress, decimals: 0, symbol: 'NFT', type: TokenType.ERC721 },
+      },
+    })
+    const draft = buildDraft({ data: ERC20_INTERFACE.encodeFunctionData('approve', [spender, 5n]) })
+
+    const { result } = renderHook(() => useApprovalInfos(draft))
+
+    expect(result.current?.[0].tokenInfo?.type).toEqual(TokenType.ERC721)
   })
 
   it('leaves tokenInfo undefined for tokens found nowhere', () => {

@@ -2,11 +2,10 @@ import { useCallback, useMemo } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { ApprovalModule } from '@safe-global/utils/services/security/modules/ApprovalModule'
 import {
-  PSEUDO_APPROVAL_VALUES,
+  formatApprovalAmount,
+  isUnlimitedApproval,
   type ApprovalInfo,
 } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
-import { UNLIMITED_APPROVAL_AMOUNT, UNLIMITED_PERMIT2_AMOUNT } from '@safe-global/utils/utils/tokens'
-import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -16,8 +15,6 @@ import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectChainById } from '@/src/store/chains'
 import { useGetErc20TokenInfosQuery } from '@/src/store/signersBalance'
 import type { DraftTx } from '@/src/store/draftTxSlice'
-
-const DEFAULT_DECIMALS = 18
 
 const ApprovalModuleInstance = new ApprovalModule()
 
@@ -39,7 +36,7 @@ const findTokenInfo = (
 }
 
 export type ApprovalInfoWithSeverity = ApprovalInfo & {
-  /** Unlimited, above the Safe's balance of the token, or the balance is unknown */
+  /** Unlimited, or verifiably above the Safe's balance of the token */
   isHighValue: boolean
   /** The Safe's raw balance of the token; undefined when the Safe does not hold it */
   balance?: string
@@ -55,8 +52,6 @@ export type ApprovalInfoWithSeverity = ApprovalInfo & {
 export const useApprovalInfos = (draft: DraftTx | undefined): ApprovalInfoWithSeverity[] | undefined => {
   const activeSafe = useAppSelector(selectActiveSafe)
   const chain = useAppSelector((state) => (activeSafe ? selectChainById(state, activeSafe.chainId) : undefined))
-  // trusted: false — the high-value check must see untrusted and dust holdings too
-  const { balances } = useBalances(false, undefined, false)
 
   const scannedApprovals = useMemo(() => {
     const { to, data } = draft?.buildParams ?? {}
@@ -66,6 +61,10 @@ export const useApprovalInfos = (draft: DraftTx | undefined): ApprovalInfoWithSe
     const scanResult = ApprovalModuleInstance.scanTransaction({ safeTransaction: { data: { to, data } } })
     return scanResult.payload?.length ? scanResult.payload : undefined
   }, [draft])
+
+  // trusted: false — the high-value check must see untrusted and dust holdings
+  // too; skipped entirely unless the draft actually contains approvals
+  const { balances } = useBalances(false, undefined, false, !scannedApprovals)
 
   const resolveStatic = useCallback(
     (tokenAddress: string) => findTokenInfo(tokenAddress, balances, draft?.txDetails.txData?.tokenInfoIndex),
@@ -89,14 +88,14 @@ export const useApprovalInfos = (draft: DraftTx | undefined): ApprovalInfoWithSe
 
     return scannedApprovals.map((approval) => {
       const tokenInfo = resolveStatic(approval.tokenAddress) ?? onChainTokenInfos?.[approval.tokenAddress.toLowerCase()]
-      const isUnlimited = approval.amount === UNLIMITED_APPROVAL_AMOUNT || approval.amount === UNLIMITED_PERMIT2_AMOUNT
-      const amountFormatted = isUnlimited
-        ? PSEUDO_APPROVAL_VALUES.UNLIMITED
-        : safeFormatUnits(approval.amount, tokenInfo?.decimals ?? DEFAULT_DECIMALS)
+      const amountFormatted = formatApprovalAmount(approval.amount, tokenInfo?.decimals)
       const balance = balances?.items.find((item) =>
         sameAddress(item.tokenInfo.address, approval.tokenAddress),
       )?.balance
-      const isHighValue = isUnlimited || balance === undefined || approval.amount > BigInt(balance)
+      // Only flag what is verifiably risky — an unknown balance (loading,
+      // failed, or token not held) must not paint the card as a warning
+      const isHighValue =
+        isUnlimitedApproval(approval.amount) || (balance !== undefined && approval.amount > BigInt(balance))
 
       return { ...approval, tokenInfo, amountFormatted, isHighValue, balance }
     })

@@ -7,11 +7,21 @@ import {
 } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { TokenIcon } from '@/src/components/TokenIcon/TokenIcon'
 import { Badge } from '@/src/components/Badge/Badge'
-import { EthAddress } from '@/src/components/EthAddress'
-import { Identicon } from '@/src/components/Identicon'
+import { HashDisplay } from '@/src/components/HashDisplay'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
-import type { Address } from '@/src/types/address'
+
+const getAmountLabel = (approval: ApprovalInfo): string => {
+  if (approval.amountFormatted === PSEUDO_APPROVAL_VALUES.UNLIMITED) {
+    return 'Unlimited'
+  }
+  const symbol = approval.tokenInfo?.symbol ?? ''
+  // NFT approvals carry a token id, not an amount
+  if (approval.tokenInfo?.type === TokenType.ERC721) {
+    return `#${approval.amount} ${symbol}`.trim()
+  }
+  return `${approval.amountFormatted} ${symbol}`.trim()
+}
 
 const ApprovalItem = ({ approval, onEdit }: { approval: ApprovalInfo; onEdit?: (approval: ApprovalInfo) => void }) => {
   const isUnlimited = approval.amountFormatted === PSEUDO_APPROVAL_VALUES.UNLIMITED
@@ -29,9 +39,7 @@ const ApprovalItem = ({ approval, onEdit }: { approval: ApprovalInfo; onEdit?: (
             themeName={isUnlimited ? 'badge_warning_variant2' : 'badge_background'}
             textContentProps={{ fontWeight: 600 }}
             testID="approval-amount-pill"
-            content={
-              isUnlimited ? 'Unlimited' : `${approval.amountFormatted} ${approval.tokenInfo?.symbol ?? ''}`.trim()
-            }
+            content={getAmountLabel(approval)}
           />
         </XStack>
       </XStack>
@@ -40,10 +48,7 @@ const ApprovalItem = ({ approval, onEdit }: { approval: ApprovalInfo; onEdit?: (
         <Text color="$textSecondaryLight" fontSize="$4">
           Spender
         </Text>
-        <XStack gap="$2" alignItems="center">
-          <Identicon address={approval.spender as Address} size={24} />
-          <EthAddress address={approval.spender as Address} copy />
-        </XStack>
+        <HashDisplay value={approval.spender} />
       </XStack>
 
       {onEdit && (

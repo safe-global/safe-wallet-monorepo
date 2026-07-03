@@ -6,7 +6,12 @@ import {
   type ApprovalInfo,
 } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { render, fireEvent } from '@/src/tests/test-utils'
+import type { Address } from '@/src/types/address'
 import { ApprovalsList, type ApprovalListItem } from './ApprovalsList'
+
+// HashDisplay resolves display names against the active safe's address book
+const initialStore = { activeSafe: { chainId: '1', address: faker.finance.ethereumAddress() as Address } }
+const renderList = (ui: React.ReactElement) => render(ui, { initialStore })
 
 const erc721TokenInfo = (): NonNullable<ApprovalInfo['tokenInfo']> => ({
   address: faker.finance.ethereumAddress(),
@@ -37,7 +42,7 @@ const buildApproval = (overrides: Partial<ApprovalListItem> = {}): ApprovalListI
 describe('ApprovalsList', () => {
   it('renders the warning copy, amount and spender', () => {
     const approval = buildApproval()
-    const { getByText } = render(<ApprovalsList approvals={[approval]} />)
+    const { getByText } = renderList(<ApprovalsList approvals={[approval]} />)
 
     expect(getByText('Allow access to tokens?')).toBeTruthy()
     expect(getByText('This allows the spender to spend the specified amount of your tokens.')).toBeTruthy()
@@ -46,7 +51,7 @@ describe('ApprovalsList', () => {
 
   it('highlights unlimited approvals', () => {
     const approval = buildApproval({ amountFormatted: PSEUDO_APPROVAL_VALUES.UNLIMITED })
-    const { getByText } = render(<ApprovalsList approvals={[approval]} />)
+    const { getByText } = renderList(<ApprovalsList approvals={[approval]} />)
 
     expect(getByText('Unlimited')).toBeTruthy()
   })
@@ -54,7 +59,7 @@ describe('ApprovalsList', () => {
   it('calls onEdit with the approval when the edit button is pressed', () => {
     const approval = buildApproval()
     const onEdit = jest.fn()
-    const { getByTestId } = render(<ApprovalsList approvals={[approval]} onEdit={onEdit} />)
+    const { getByTestId } = renderList(<ApprovalsList approvals={[approval]} onEdit={onEdit} />)
 
     fireEvent.press(getByTestId('edit-approval-button'))
 
@@ -62,12 +67,12 @@ describe('ApprovalsList', () => {
   })
 
   it('hides the edit button without an onEdit handler', () => {
-    const { queryByTestId } = render(<ApprovalsList approvals={[buildApproval()]} />)
+    const { queryByTestId } = renderList(<ApprovalsList approvals={[buildApproval()]} />)
     expect(queryByTestId('edit-approval-button')).toBeNull()
   })
 
   it('uses the info palette for normal approvals and warning for high-value ones', () => {
-    const { getByTestId, rerender } = render(<ApprovalsList approvals={[buildApproval({ isHighValue: false })]} />)
+    const { getByTestId, rerender } = renderList(<ApprovalsList approvals={[buildApproval({ isHighValue: false })]} />)
     expect(getByTestId('approval-editor-info-icon')).toBeTruthy()
 
     rerender(<ApprovalsList approvals={[buildApproval(), buildApproval({ isHighValue: true })]} />)
@@ -76,9 +81,16 @@ describe('ApprovalsList', () => {
 
   it('keeps the edit button for tokens without metadata, like web', () => {
     const approval = buildApproval({ tokenInfo: undefined })
-    const { queryByTestId } = render(<ApprovalsList approvals={[approval]} onEdit={jest.fn()} />)
+    const { queryByTestId } = renderList(<ApprovalsList approvals={[approval]} onEdit={jest.fn()} />)
 
     expect(queryByTestId('edit-approval-button')).toBeTruthy()
+  })
+
+  it('renders NFT approvals as a token id', () => {
+    const approval = buildApproval({ tokenInfo: erc721TokenInfo(), amount: 5n, amountFormatted: '5' })
+    const { getByText } = renderList(<ApprovalsList approvals={[approval]} />)
+
+    expect(getByText('#5 NFT')).toBeTruthy()
   })
 
   it('renders the whole card read-only with ERC-721 wording when the batch contains an NFT approval', () => {
@@ -87,7 +99,7 @@ describe('ApprovalsList', () => {
       tokenInfo: erc721TokenInfo(),
       transactionIndex: 1,
     })
-    const { getByText, queryByTestId } = render(
+    const { getByText, queryByTestId } = renderList(
       <ApprovalsList approvals={[erc20Approval, erc721Approval]} onEdit={jest.fn()} />,
     )
 
