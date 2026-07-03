@@ -23,9 +23,9 @@ const AddSafeButton = ({ trackingLabel, onLinkClick }: { trackingLabel: string; 
       <Button
         data-testid="add-safe-button"
         variant="outline"
-        size="lg"
+        size="sm"
         onClick={onLinkClick}
-        className="w-full rounded-lg h-full px-5 text-base "
+        className="h-9 w-full rounded-lg px-4 font-medium max-[599px]:w-full"
         render={<NextLink href={{ pathname: AppRoutes.newSafe.load, query: { next } }} />}
       >
         <AddIcon color="currentColor" className="size-5 fill-primary" />

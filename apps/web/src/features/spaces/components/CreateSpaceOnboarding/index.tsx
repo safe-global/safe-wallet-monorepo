@@ -133,10 +133,10 @@ const CreateSpaceOnboarding = (): ReactElement => {
     <div className="flex flex-col-reverse gap-3 xl:flex-row xl:items-center">
       <Button
         type="button"
-        variant="ghost"
+        variant="secondary"
         onClick={onExit}
         disabled={isSubmitting}
-        className="w-full h-12 rounded-lg bg-muted hover:bg-border xl:flex-1"
+        className="h-12 w-full rounded-lg xl:flex-1"
       >
         <ChevronLeft className="size-4 mr-1" />
         Back
