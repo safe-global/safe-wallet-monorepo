@@ -146,8 +146,8 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
         <div>
           <OnlyOwnerOrProposer placement="top">
             {(isOk) => (
-              <Button variant="outline" onClick={onClick} disabled={!isOk || !!exportJobId}>
-                {exportJobId ? <Spinner className="size-4" /> : <ExportIcon className="size-4" />}
+              <Button variant="outline" size="action" onClick={onClick} disabled={!isOk || !!exportJobId}>
+                {exportJobId ? <Spinner className="size-5" /> : <ExportIcon className="size-5" />}
                 {exportJobId ? 'Exporting' : 'Export'}
               </Button>
             )}

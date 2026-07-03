@@ -116,7 +116,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
             return (
               <Tooltip>
                 <TooltipTrigger render={<span className={cn('inline-flex', { 'cursor-not-allowed': sendDisabled })} />}>
-                  <Button variant="default" className="px-6" onClick={handleOnSend} disabled={sendDisabled}>
+                  <Button variant="default" size="action" onClick={handleOnSend} disabled={sendDisabled}>
                     <ArrowUpRight className="size-5 text-green-400" />
                     Send
                   </Button>
@@ -129,18 +129,13 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
 
         <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
           {isSpace ? (
-            <Button
-              variant={secondaryVariant}
-              className={cn('px-6 hover:bg-border')}
-              onClick={handleOnReceive}
-              disabled={noAssets}
-            >
+            <Button variant={secondaryVariant} size="action" onClick={handleOnReceive} disabled={noAssets}>
               <ArrowDownLeft className="size-5" />
               Receive
             </Button>
           ) : (
             <QrCodeButton>
-              <Button variant={secondaryVariant} className={cn('px-6 hover:bg-border')}>
+              <Button variant={secondaryVariant} size="action">
                 <ArrowDownLeft className="size-5" />
                 Receive
               </Button>
@@ -161,7 +156,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
                       {isSpace ? (
                         <Button
                           variant={secondaryVariant}
-                          className={cn('px-6 hover:bg-border')}
+                          size="action"
                           data-testid="overview-swap-btn"
                           disabled={swapDisabled}
                           onClick={handleOnSwap}
@@ -172,7 +167,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
                       ) : (
                         <Button
                           variant={secondaryVariant}
-                          className={cn('px-6 hover:bg-border')}
+                          size="action"
                           data-testid="overview-swap-btn"
                           disabled={swapDisabled}
                           render={
@@ -199,7 +194,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
             const buildTxButton = isSpace ? (
               <Button
                 variant={secondaryVariant}
-                className="px-6 hover:bg-border"
+                size="action"
                 disabled={!isOk || noAssets}
                 onClick={handleOnBuildTx}
                 aria-label="Transaction builder"
@@ -210,8 +205,8 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
             ) : (
               <Button
                 variant={secondaryVariant}
-                size="icon"
-                className="rounded-lg hover:bg-border"
+                size="icon-lg"
+                className="rounded-lg"
                 disabled={!isOk}
                 render={isOk ? <Link href={txBuilderLink} /> : undefined}
                 aria-label="Transaction builder"

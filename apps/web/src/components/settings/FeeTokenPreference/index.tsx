@@ -311,7 +311,7 @@ export const FeeTokenPreference = () => {
             </Select>
           </div>
 
-          <Button onClick={handleSave} disabled={!selectedToken || saving || loading} className="min-w-[120px]">
+          <Button onClick={handleSave} disabled={!selectedToken || saving || loading} size="action">
             {saving ? (
               <>
                 <Spinner className="mr-1 size-4" />

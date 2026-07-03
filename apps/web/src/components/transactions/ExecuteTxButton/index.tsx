@@ -63,8 +63,7 @@ const ExecuteTxButton = ({
               onMouseLeave={onMouseLeave}
               variant="default"
               disabled={!isOk || isDisabled}
-              size={compact ? 'sm' : 'lg'}
-              className="min-w-[106.5px]"
+              size={compact ? 'sm' : 'action'}
             >
               Execute
             </Button>

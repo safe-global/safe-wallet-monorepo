@@ -38,7 +38,7 @@ const History: NextPage = () => {
           <div className="relative inline-flex">
             <PopoverTrigger
               render={
-                <Button variant="outline">
+                <Button variant="outline" size="action">
                   <ListFilter />
                   {filter?.type ?? 'Filter'}
                 </Button>

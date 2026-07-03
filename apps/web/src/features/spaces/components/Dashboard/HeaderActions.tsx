@@ -23,20 +23,20 @@ const HeaderActions = ({ onSend, onReceive, onSwap, onBuildTransaction, otherAct
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="default" className="!px-6" onClick={onSend}>
-          <ArrowUpRight className="size-4 text-green-400" />
+        <Button variant="default" size="action" onClick={onSend}>
+          <ArrowUpRight className="size-5 text-green-400" />
           Send
         </Button>
-        <Button variant="outline" className="!px-6" onClick={onReceive}>
-          <ArrowDownLeft className="size-4" />
+        <Button variant="outline" size="action" onClick={onReceive}>
+          <ArrowDownLeft className="size-5" />
           Receive
         </Button>
-        <Button variant="outline" className="!px-6" onClick={onSwap}>
-          <Repeat className="size-4" />
+        <Button variant="outline" size="action" onClick={onSwap}>
+          <Repeat className="size-5" />
           Swap
         </Button>
-        <Button variant="outline" className="!px-6" onClick={onBuildTransaction}>
-          <SquareDashedBottomCode className="size-4" />
+        <Button variant="outline" size="action" onClick={onBuildTransaction}>
+          <SquareDashedBottomCode className="size-5" />
           Build transaction
         </Button>
       </div>

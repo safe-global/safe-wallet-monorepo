@@ -32,7 +32,7 @@ const SignMsgButton = ({ msg, compact = false }: { msg: MessageItem; compact?: b
                 onClick={onClick}
                 variant={isSignable ? 'default' : 'outline'}
                 disabled={!isOk || !isSignable}
-                size={compact ? 'sm' : 'lg'}
+                size={compact ? 'sm' : 'action'}
               >
                 Sign
               </Button>

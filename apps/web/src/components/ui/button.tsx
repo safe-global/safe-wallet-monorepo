@@ -19,7 +19,7 @@ import { cn } from '@/utils/cn'
  * @remarks
  * Key Props:
  * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'link')
- * - `size` ('default' | 'xs' | 'sm' | 'lg' | 'icon' | 'icon-xs' | 'icon-sm' | 'icon-lg')
+ * - `size` ('default' | 'xs' | 'sm' | 'lg' | 'action' | 'icon' | 'icon-xs' | 'icon-sm' | 'icon-lg')
  * - `render`
  * - `className`
  */
@@ -46,6 +46,11 @@ const buttonVariants = cva(
         xs: "h-6 gap-1 px-2 text-xs in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
         sm: 'h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5',
         lg: 'h-10 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3',
+        // Prominent call-to-action pill: use for the main action(s) of a surface
+        // (Send/Receive/Swap, Confirm/Execute, Save settings, Filter/Export). Pair
+        // with variant="default" for the primary action and variant="secondary" for
+        // secondary actions so they share one height, padding, and icon size.
+        action: "h-10 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5",
         icon: 'size-9',
         'icon-xs': "size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3",
         'icon-sm': 'size-8 in-data-[slot=button-group]:rounded-sm',

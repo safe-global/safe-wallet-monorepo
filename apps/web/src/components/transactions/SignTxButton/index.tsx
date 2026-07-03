@@ -43,7 +43,7 @@ const SignTxButton = ({ txSummary, compact = false }: { txSummary: Transaction; 
                 onClick={onClick}
                 variant={compact ? 'outline' : 'default'}
                 disabled={!isOk || isDisabled}
-                size={compact ? 'sm' : 'lg'}
+                size={compact ? 'sm' : 'action'}
               >
                 Confirm
               </Button>
