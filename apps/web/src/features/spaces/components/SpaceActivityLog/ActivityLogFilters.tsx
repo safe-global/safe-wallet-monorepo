@@ -58,7 +58,7 @@ function DateFilter({
       <Input
         id={id}
         type="date"
-        className="bg-card dark:bg-card border-input w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark] [&~p]:w-40 [&~p]:text-xs"
+        className="bg-card dark:bg-card border-border w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark] [&~p]:w-40 [&~p]:text-xs"
         value={value}
         min={min}
         max={max}

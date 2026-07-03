@@ -475,7 +475,8 @@ function SidebarInput({ className, ...props }: ComponentProps<typeof Input>) {
     <Input
       data-slot="sidebar-input"
       data-sidebar="input"
-      className={cn('bg-background h-8 w-full shadow-none', className)}
+      inputSize="sm"
+      className={cn('bg-background w-full shadow-none', className)}
       {...props}
     />
   )

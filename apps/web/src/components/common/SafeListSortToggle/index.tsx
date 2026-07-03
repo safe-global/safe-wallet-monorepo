@@ -31,10 +31,10 @@ const SafeListSortToggle = () => {
         render={
           <Button
             variant="outline"
-            // Match the adjacent search InputGroup exactly: h-9, rounded-md, border-gray-100, shadow-none.
+            // Match the adjacent search InputGroup exactly: h-9, rounded-md, border-border, shadow-none.
             // Fixed width so the trigger doesn't grow/shrink between "Name" and "Last visited".
             size="default"
-            className="h-9 w-[160px] shrink-0 justify-between gap-1.5 rounded-md border-gray-100 shadow-none text-muted-foreground"
+            className="h-9 w-[160px] shrink-0 justify-between gap-1.5 rounded-md border-border shadow-none text-muted-foreground"
             data-testid="safe-list-sort-toggle"
           />
         }

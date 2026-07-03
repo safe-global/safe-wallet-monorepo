@@ -30,7 +30,7 @@ const CurrencySelect = (): ReactElement => {
         id="currency"
         size="sm"
         className={cn(
-          'h-8 min-w-[72px] border-border bg-background px-3 font-medium shadow-none',
+          'min-w-[72px] border-border bg-background px-3 font-medium shadow-none',
           'focus-visible:border-ring focus-visible:ring-ring/50',
         )}
       >

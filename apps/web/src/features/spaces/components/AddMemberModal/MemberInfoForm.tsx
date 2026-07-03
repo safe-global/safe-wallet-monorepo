@@ -17,7 +17,7 @@ const MemberInfoForm = ({ isEdit = false }: { isEdit?: boolean }) => {
         defaultValue={MemberRole.MEMBER}
         render={({ field: { value, onChange } }) => (
           <Select value={value} onValueChange={onChange} required>
-            <SelectTrigger className="min-w-[150px] py-1">
+            <SelectTrigger className="min-w-[150px]">
               <SelectValue>{(role) => <RoleMenuItem role={role as MemberRole} />}</SelectValue>
             </SelectTrigger>
             <SelectContent>
