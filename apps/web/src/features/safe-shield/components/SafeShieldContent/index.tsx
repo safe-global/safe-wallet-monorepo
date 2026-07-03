@@ -21,6 +21,8 @@ import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hypernative'
 import { useLoadFeature } from '@/features/__core__'
 import { ThreatAnalysis } from '../ThreatAnalysis'
+import { EnhancedModePaywall } from '../EnhancedModePaywall'
+import type { EnhancedModePaywall as EnhancedModePaywallState } from '../../hooks/useEnhancedModePaywall'
 
 export const SafeShieldContent = ({
   recipient,
@@ -34,6 +36,7 @@ export const SafeShieldContent = ({
   showHypernativeActiveStatus = true,
   safeAnalysis,
   onAddToTrustedList,
+  paywall,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -46,6 +49,7 @@ export const SafeShieldContent = ({
   showHypernativeActiveStatus?: boolean
   safeAnalysis?: SafeAnalysisResult | null
   onAddToTrustedList?: () => void
+  paywall?: EnhancedModePaywallState
 }): ReactElement => {
   const hn = useLoadFeature(HypernativeFeature)
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
@@ -77,8 +81,13 @@ export const SafeShieldContent = ({
           borderTop: 'none',
           borderRadius: '0px 0px 6px 6px',
           position: 'relative',
+          ...(paywall && { minHeight: 260, overflow: 'hidden' }),
         }}
       >
+        {paywall && (
+          <EnhancedModePaywall severity={highlightedSeverity} price={paywall.price} onUnlock={paywall.onUnlock} />
+        )}
+
         {showHypernativeInfo && (
           <hn.HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
         )}

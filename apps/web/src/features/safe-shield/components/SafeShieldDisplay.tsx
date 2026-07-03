@@ -19,6 +19,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
 import { useCheckSimulation } from '../hooks/useCheckSimulation'
 import type { HypernativeAuthStatus } from '@/features/hypernative'
+import type { EnhancedModePaywall } from '../hooks/useEnhancedModePaywall'
 
 const shieldLogoOnHover = {
   width: 78,
@@ -54,6 +55,7 @@ export const SafeShieldDisplay = ({
   showHypernativeActiveStatus = true,
   safeAnalysis,
   onAddToTrustedList,
+  paywall,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -65,6 +67,7 @@ export const SafeShieldDisplay = ({
   showHypernativeActiveStatus?: boolean
   safeAnalysis?: SafeAnalysisResult | null
   onAddToTrustedList?: () => void
+  paywall?: EnhancedModePaywall
 }): ReactElement => {
   const [recipientResults] = recipient || []
   const [contractResults] = contract || []
@@ -114,6 +117,7 @@ export const SafeShieldDisplay = ({
           showHypernativeActiveStatus={showHypernativeActiveStatus}
           safeAnalysis={safeAnalysis}
           onAddToTrustedList={onAddToTrustedList}
+          paywall={paywall}
         />
       </Card>
 

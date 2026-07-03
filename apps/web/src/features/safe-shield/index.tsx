@@ -3,9 +3,11 @@ import { SafeShieldDisplay } from './components/SafeShieldDisplay'
 import { useSafeShield } from './SafeShieldContext'
 import { SAFE_SHIELD_EVENTS, trackEvent } from '@/services/analytics'
 import { useHypernativeOAuth, useIsHypernativeEligible } from '@/features/hypernative'
+import { useEnhancedModePaywall } from './hooks/useEnhancedModePaywall'
 
 const SafeShieldWidget = (): ReactElement => {
   const { recipient, contract, threat, deadlock, safeTx, safeAnalysis, addToTrustedList } = useSafeShield()
+  const paywall = useEnhancedModePaywall()
   const hypernativeAuth = useHypernativeOAuth()
   const { isHypernativeEligible, isHypernativeGuard, loading: eligibilityLoading } = useIsHypernativeEligible()
   const showHnInfo = !eligibilityLoading && isHypernativeEligible
@@ -29,6 +31,7 @@ const SafeShieldWidget = (): ReactElement => {
       showHypernativeActiveStatus={showHnActiveStatus}
       safeAnalysis={safeAnalysis}
       onAddToTrustedList={addToTrustedList}
+      paywall={paywall}
     />
   )
 }

@@ -37,4 +37,20 @@ export const SAFE_SHIELD_EVENTS = {
     action: 'Report false result submitted',
     category: SAFE_SHIELD_CATEGORY,
   },
+  ENHANCED_MODE_SHOWN: {
+    action: 'Enhanced mode paywall shown',
+    category: SAFE_SHIELD_CATEGORY,
+  },
+  ENHANCED_MODE_CTA_CLICKED: {
+    action: 'Enhanced mode CTA clicked',
+    category: SAFE_SHIELD_CATEGORY,
+  },
+  ENHANCED_MODE_CONFIRMED: {
+    action: 'Enhanced mode run confirmed',
+    category: SAFE_SHIELD_CATEGORY,
+  },
+  ENHANCED_MODE_CANCELLED: {
+    action: 'Enhanced mode run cancelled',
+    category: SAFE_SHIELD_CATEGORY,
+  },
 }
