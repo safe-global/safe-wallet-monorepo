@@ -8,7 +8,6 @@ import { server } from '@/src/tests/server'
 import draftTxReducer, {
   clearAllDrafts,
   clearDraft,
-  clearDraftRedirect,
   selectDraftByHash,
   selectDraftRedirect,
   setDraft,
@@ -90,12 +89,18 @@ describe('draftTxSlice', () => {
   })
 
   describe('redirects', () => {
-    it('stores and clears a redirect between safeTxHashes', () => {
-      let state = draftTxReducer(undefined, setDraftRedirect({ fromSafeTxHash: '0xold', toSafeTxHash: '0xnew' }))
+    it('stores a redirect between safeTxHashes', () => {
+      const state = draftTxReducer(undefined, setDraftRedirect({ fromSafeTxHash: '0xold', toSafeTxHash: '0xnew' }))
       expect(state.redirects?.['0xold']).toEqual('0xnew')
+    })
 
-      state = draftTxReducer(state, clearDraftRedirect('0xold'))
+    it('drops a stale redirect when a fresh draft is stashed under its hash', () => {
+      const fresh = buildDraft({ safeTxHash: '0xold' })
+      let state = draftTxReducer(undefined, setDraftRedirect({ fromSafeTxHash: '0xold', toSafeTxHash: '0xnew' }))
+      state = draftTxReducer(state, setDraft(fresh))
+
       expect(state.redirects).toEqual({})
+      expect(state.drafts['0xold']).toEqual(fresh)
     })
 
     it('selectDraftRedirect resolves the new hash', () => {
@@ -112,19 +117,31 @@ describe('draftTxSlice', () => {
       expect(selectDraftRedirect({ draftTx: state } as RootState, '0xc')).toBeUndefined()
     })
 
-    it('drops redirects together with drafts via clearAllDrafts and safe switches', () => {
+    it('drops redirects together with clearAllDrafts and prunes them on safe switches', () => {
       const withRedirect = draftTxReducer(
         undefined,
         setDraftRedirect({ fromSafeTxHash: '0xold', toSafeTxHash: '0xnew' }),
       )
 
       expect(draftTxReducer(withRedirect, clearAllDrafts()).redirects).toEqual({})
+      // No draft survives under 0xnew for the switched-to safe → entry pruned
       expect(
         draftTxReducer(
           withRedirect,
           setActiveSafe({ chainId: '137', address: faker.finance.ethereumAddress() as Address }),
         ).redirects,
       ).toEqual({})
+    })
+
+    it('keeps redirects whose target draft survives a same-safe setActiveSafe', () => {
+      const target = buildDraft({ safeTxHash: '0xnew' })
+      let state = draftTxReducer(undefined, setDraft(target))
+      state = draftTxReducer(state, setDraftRedirect({ fromSafeTxHash: '0xold', toSafeTxHash: '0xnew' }))
+
+      state = draftTxReducer(state, setActiveSafe({ chainId: target.chainId, address: target.safeAddress as Address }))
+
+      expect(state.drafts['0xnew']).toEqual(target)
+      expect(state.redirects?.['0xold']).toEqual('0xnew')
     })
   })
 

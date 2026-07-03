@@ -31,9 +31,11 @@ const EditApprovalForm = (props: {
 }
 
 const mockBack = jest.fn()
+const mockIsFocused = jest.fn()
 jest.mock('expo-router', () => ({
   ...jest.requireActual('expo-router'),
   useRouter: () => ({ back: mockBack }),
+  useNavigation: () => ({ isFocused: mockIsFocused }),
 }))
 
 jest.mock('@/src/services/tx/rebuildDraftWithApproval', () => ({
@@ -83,6 +85,7 @@ describe('EditApprovalForm', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockRebuild.mockResolvedValue('0xnewhash')
+    mockIsFocused.mockReturnValue(true)
   })
 
   it('prefills the current approval amount', () => {
@@ -158,6 +161,22 @@ describe('EditApprovalForm', () => {
     await waitFor(() => expect(mockBack).toHaveBeenCalled())
 
     expect(mockRebuild).toHaveBeenCalledWith(expect.objectContaining({ newValue: PSEUDO_APPROVAL_VALUES.UNLIMITED }))
+  })
+
+  it('skips the trailing back() when the sheet was dismissed mid-save but still hands over state', async () => {
+    mockIsFocused.mockReturnValue(false)
+    const store = setupStore()
+    const { getByTestId } = renderWithStore(<EditApprovalForm draft={draft} approval={approval} safe={safe} />, store)
+
+    fireEvent.changeText(getByTestId('input-approval-amount'), '250')
+    fireEvent.press(getByTestId('save-approval-button'))
+
+    await waitFor(() => expect(mockRebuild).toHaveBeenCalled())
+
+    expect(mockBack).not.toHaveBeenCalled()
+    const state = store.getState()
+    expect(state.draftTx.redirects?.['0xoldhash']).toEqual('0xnewhash')
+    expect(state.walletKit.outstandingRequests['0xnewhash']).toBeDefined()
   })
 
   it('keeps everything keyed by the old hash when the rebuilt hash is unchanged', async () => {

@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import { Text, View, XStack, YStack } from 'tamagui'
-import { useRouter } from 'expo-router'
+import { useNavigation, useRouter } from 'expo-router'
 import { useBottomSheetInternal } from '@gorhom/bottom-sheet'
 import { Controller, useForm, useFormContext, useWatch } from 'react-hook-form'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
@@ -39,6 +39,7 @@ type EditApprovalFormArgs = {
 /** Form state and submit logic; accepts not-yet-loaded data — `values` prefills the form once the approval resolves */
 export const useEditApprovalForm = ({ draft, approval, safe }: EditApprovalFormArgs) => {
   const router = useRouter()
+  const navigation = useNavigation()
   const dispatch = useAppDispatch()
   const [submitting, setSubmitting] = useState(false)
 
@@ -75,7 +76,10 @@ export const useEditApprovalForm = ({ draft, approval, safe }: EditApprovalFormA
         dispatch(setDraftRedirect({ fromSafeTxHash: draft.safeTxHash, toSafeTxHash: newSafeTxHash }))
         dispatch(clearDraft(draft.safeTxHash))
       }
-      router.back()
+      // If the sheet was dismissed mid-rebuild, a second back() would pop the confirm screen
+      if (navigation.isFocused()) {
+        router.back()
+      }
     } catch (error) {
       Logger.error('rebuildDraftWithApproval failed', error)
       dispatch(showToast({ message: 'Failed to update the approval amount', duration: 3000, variant: 'error' }))
