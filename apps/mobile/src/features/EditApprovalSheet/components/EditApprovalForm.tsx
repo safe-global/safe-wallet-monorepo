@@ -98,6 +98,7 @@ export const useEditApprovalForm = ({ draft, approval, safe }: EditApprovalFormA
 export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { balance?: string } }) => {
   const {
     control,
+    setValue,
     formState: { errors },
   } = useFormContext<EditApprovalFormData>()
   const unlimited = useWatch({ control, name: 'unlimited' })
@@ -131,6 +132,7 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
               onFocus={(event) => {
                 const target = event.nativeEvent.target
                 setKeyboardTarget(typeof target === 'number' ? target : undefined)
+                setValue('unlimited', false)
               }}
               onBlur={() => {
                 setKeyboardTarget(undefined)
@@ -138,8 +140,6 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
               }}
               onChangeText={(text) => onChange(sanitizeDecimalInput(text))}
               keyboardType="decimal-pad"
-              editable={!unlimited}
-              disabled={unlimited}
               placeholder={unlimited ? 'Unlimited' : 'Amount'}
               height={64}
               fontSize={22}
