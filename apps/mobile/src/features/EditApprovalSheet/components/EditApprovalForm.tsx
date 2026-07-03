@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react'
 import { Text, View, XStack, YStack } from 'tamagui'
 import { useRouter } from 'expo-router'
+import { useBottomSheetInternal } from '@gorhom/bottom-sheet'
 import { Controller, useForm, useFormContext, useWatch } from 'react-hook-form'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import {
@@ -35,13 +36,7 @@ type EditApprovalFormArgs = {
   safe?: Pick<SafeState, 'owners' | 'threshold'>
 }
 
-/**
- * Form state and submit logic for editing an approval amount, lifted out of
- * the rendering so the sheet can wrap the scrollable fields and the pinned
- * footer in one FormProvider. Accepts not-yet-loaded data: the reactive
- * `values` option prefills the form once the approval resolves, and saving
- * stays disabled until everything is present.
- */
+/** Form state and submit logic; accepts not-yet-loaded data — `values` prefills the form once the approval resolves */
 export const useEditApprovalForm = ({ draft, approval, safe }: EditApprovalFormArgs) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
@@ -75,9 +70,7 @@ export const useEditApprovalForm = ({ draft, approval, safe }: EditApprovalFormA
       const newSafeTxHash = await rebuildDraftWithApproval({ draft, approval, newValue, safe, dispatch })
 
       if (newSafeTxHash !== draft.safeTxHash) {
-        // Atomically hand everything keyed by the old hash over to the new draft:
-        // the outstanding WC request (propose/abandon listeners) and the confirm
-        // screen (via the redirect), then drop the superseded draft.
+        // Hand everything keyed by the old hash over to the new draft before dropping it
         dispatch(rekeyOutstandingRequest({ fromSafeTxHash: draft.safeTxHash, toSafeTxHash: newSafeTxHash }))
         dispatch(setDraftRedirect({ fromSafeTxHash: draft.safeTxHash, toSafeTxHash: newSafeTxHash }))
         dispatch(clearDraft(draft.safeTxHash))
@@ -102,13 +95,17 @@ export const useEditApprovalForm = ({ draft, approval, safe }: EditApprovalFormA
   }
 }
 
-/** Sheet body: description, amount input with token badge and balance, unlimited toggle, spender */
 export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { balance?: string } }) => {
   const {
     control,
     formState: { errors },
   } = useFormContext<EditApprovalFormData>()
   const unlimited = useWatch({ control, name: 'unlimited' })
+  // Register the focused input as the sheet's keyboard target, else keyboardBehavior="extend" ignores it
+  const bottomSheetInternal = useBottomSheetInternal(true)
+  const setKeyboardTarget = (target: number | undefined) => {
+    bottomSheetInternal?.animatedKeyboardState.set((state) => ({ ...state, target }))
+  }
 
   return (
     <View width="100%" gap="$4">
@@ -131,7 +128,14 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
           render={({ field: { onChange, onBlur, value } }) => (
             <SafeInput
               value={unlimited ? '' : value}
-              onBlur={onBlur}
+              onFocus={(event) => {
+                const target = event.nativeEvent.target
+                setKeyboardTarget(typeof target === 'number' ? target : undefined)
+              }}
+              onBlur={() => {
+                setKeyboardTarget(undefined)
+                onBlur()
+              }}
               onChangeText={(text) => onChange(sanitizeDecimalInput(text))}
               keyboardType="decimal-pad"
               editable={!unlimited}
@@ -161,7 +165,7 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
         )}
       </View>
 
-      <View gap="$8" marginBottom="60">
+      <View gap="$6">
         <XStack justifyContent="space-between" alignItems="center" gap="$3">
           <YStack flexShrink={1}>
             <Text fontSize="$5" fontWeight={600}>
@@ -201,7 +205,7 @@ interface EditApprovalFooterProps {
   onCancel: () => void
 }
 
-/** Save / Cancel row, pinned to the sheet bottom via SafeBottomSheet's FooterComponent */
+/** Save / Cancel row, pinned above the keyboard via SafeBottomSheet's FooterComponent */
 export const EditApprovalFooter = ({ submitting, saveDisabled, onSave, onCancel }: EditApprovalFooterProps) => {
   return (
     <XStack backgroundColor="$backgroundSheet" paddingHorizontal="$4" paddingVertical="$3" gap="$2">
