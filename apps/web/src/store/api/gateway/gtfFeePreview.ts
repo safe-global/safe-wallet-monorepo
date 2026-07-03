@@ -56,12 +56,6 @@ export type FeePreviewRelayCost = {
 export type FeePreviewResponse = {
   txData: FeePreviewTxData
   relayCost: FeePreviewRelayCost
-  pricingContextSnapshot: {
-    phase: number
-    priceSource: string
-    priceTimestamp: number
-    gasPriceVolatilityBuffer: number
-  }
 }
 
 export type FeePreviewArg = {
@@ -71,11 +65,7 @@ export type FeePreviewArg = {
 }
 
 const isFeePreviewResponse = (value: unknown): value is FeePreviewResponse =>
-  typeof value === 'object' &&
-  value !== null &&
-  'txData' in value &&
-  'relayCost' in value &&
-  'pricingContextSnapshot' in value
+  typeof value === 'object' && value !== null && 'txData' in value && 'relayCost' in value
 
 export const gtfFeePreviewEndpoints = (builder: GatewayEndpointBuilder) => ({
   getGtfFeePreview: builder.query<FeePreviewResponse, FeePreviewArg>({
