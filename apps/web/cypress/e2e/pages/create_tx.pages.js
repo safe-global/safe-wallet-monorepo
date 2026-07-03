@@ -475,7 +475,7 @@ export function clickOnTransactionItemByName(name, token) {
       if (token) {
         $elements = $elements.filter(':contains("' + token + '")')
       }
-      cy.wrap($elements.first()).click({ force: true })
+      cy.wrap($elements.first()).scrollIntoView().click({ force: true })
     })
 }
 
@@ -485,6 +485,10 @@ export function clickOnTransactionItemByIndex(index) {
     .then(($elements) => {
       cy.wrap($elements).click({ force: true })
     })
+}
+
+export function scrollToBottom() {
+  cy.scrollTo('bottom').wait(500)
 }
 
 export function verifyExpandedDetails(data, warning) {

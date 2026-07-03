@@ -50,8 +50,9 @@ describe('[PROD] Tx history tests 2', { defaultCommandTimeout: 30000 }, () => {
     createTx.clickOnTransactionItemByName(typeOnchainRejection.title)
     createTx.verifyExpandedDetails([typeOnchainRejection.description])
     createTx.verifyActionListExists([
-      typeSideActions.rejectionCreated,
-      typeSideActions.confirmations,
+      typeSideActions.created,
+      typeSideActions.signedOneOfTwo,
+      typeSideActions.signedTwoOfTwo,
       typeSideActions.executedBy,
     ])
   })

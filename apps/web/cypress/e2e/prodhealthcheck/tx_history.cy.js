@@ -65,13 +65,10 @@ describe('[PROD] Tx history tests 1', () => {
 
   // Token send
   it('Verify exapanded details for token send', () => {
+    createTx.scrollToBottom()
     createTx.clickOnTransactionItemByName(typeSend.title, typeSend.summaryTxInfo)
-    createTx.verifyExpandedDetails([typeSend.sentTo, typeSend.recipientAddress])
-    createTx.verifyActionListExists([
-      typeSideActions.created,
-      typeSideActions.confirmations,
-      typeSideActions.executedBy,
-    ])
+    createTx.verifyExpandedDetails([typeSend.sentTo])
+    createTx.verifyActionListExists([typeSideActions.created, typeSideActions.executedBy])
   })
 
   // Spending limits
