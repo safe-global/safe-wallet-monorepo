@@ -1,8 +1,34 @@
 import * as React from 'react'
 import { Input as InputPrimitive } from '@base-ui/react/input'
+import { cva, type VariantProps } from 'class-variance-authority'
 import { cleanInputValue, parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 
 import { cn } from '@/utils/cn'
+
+/**
+ * Height sizes mirror SelectTrigger (sm h-8 / default h-9 / lg h-10) so text inputs and
+ * selects on the same row line up. Prefer `size` over a hand-rolled `className="h-…"`.
+ * Border uses the shared `--border` token (not a hard-coded gray). NB: `--input` is #fff in
+ * light mode (invisible), so a visible field border must use `border-border`, like AddressInput.
+ */
+const inputVariants = cva(
+  'dark:bg-input/30 border-border border shadow-none focus-visible:ring-0 focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md bg-transparent px-3 py-1.5 text-base transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+  {
+    variants: {
+      // Named `inputSize` (not `size`) so it doesn't collide with the native numeric `size` attr
+      // that callers spread through via `ComponentProps<'input'>`. SelectTrigger uses `size` freely
+      // because its props have no native `size`.
+      inputSize: {
+        sm: 'h-8',
+        default: 'h-9',
+        lg: 'h-10',
+      },
+    },
+    defaultVariants: {
+      inputSize: 'default',
+    },
+  },
+)
 
 /**
  * Input Component
@@ -53,12 +79,13 @@ function stripChainPrefix(value: string): string {
 function Input({
   className,
   type,
+  inputSize,
   onChange,
   onPaste,
   error,
   address,
   ...props
-}: React.ComponentProps<'input'> & { error?: string; address?: boolean }) {
+}: React.ComponentProps<'input'> & VariantProps<typeof inputVariants> & { error?: string; address?: boolean }) {
   const [hasScriptInjection, setHasScriptInjection] = React.useState(false)
 
   const handleChange = React.useCallback(
@@ -98,11 +125,7 @@ function Input({
         type={type}
         data-slot="input"
         aria-invalid={hasScriptInjection || !!error || props['aria-invalid'] || undefined}
-        className={cn(
-          'dark:bg-input/30 border-gray-100 border shadow-none focus-visible:ring-0 focus-visible:border-gray-100 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 h-9 rounded-md bg-transparent px-3 py-1.5 text-base transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
-
-          className,
-        )}
+        className={cn(inputVariants({ inputSize }), className)}
         {...props}
         onChange={handleChange}
         onPaste={handlePaste}

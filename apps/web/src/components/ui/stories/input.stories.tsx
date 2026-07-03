@@ -20,6 +20,10 @@ const meta = {
     placeholder: {
       control: 'text',
     },
+    inputSize: {
+      control: 'select',
+      options: ['sm', 'default', 'lg'],
+    },
   },
 } satisfies Meta<typeof Input>
 
@@ -83,6 +87,21 @@ export const AllVariants: Story = {
           <div style={{ width: '250px' }}>
             <Input type="tel" placeholder="Phone input" />
           </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="mb-1 text-lg font-semibold">Sizes</h3>
+        <p className="mb-4 text-sm text-muted-foreground">
+          Heights mirror <code>SelectTrigger</code> (<code>sm</code> h-8 / <code>default</code> h-9 / <code>lg</code>{' '}
+          h-10) so a text input and a select on the same row line up. Prefer <code>inputSize</code> over a hand-rolled{' '}
+          <code>className=&quot;h-…&quot;</code>. (Named <code>inputSize</code>, not <code>size</code>, to avoid the
+          native numeric <code>size</code> attr.)
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 250px)', gap: '1.5rem', alignItems: 'end' }}>
+          <Input inputSize="sm" placeholder="sm (h-8)" />
+          <Input inputSize="default" placeholder="default (h-9)" />
+          <Input inputSize="lg" placeholder="lg (h-10)" />
         </div>
       </div>
     </div>

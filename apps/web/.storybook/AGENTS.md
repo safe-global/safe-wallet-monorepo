@@ -30,6 +30,22 @@ Rules:
   (precedent: `features/safe-shield` — the mockup `index.stories.tsx` was removed in favor of the real
   `SafeShield.stories.tsx`).
 
+## Component variants over custom styling
+
+Reach for a component's **variant/size prop before a one-off `className`**. If you're hand-rolling
+padding/height/border/hover on a primitive, a variant probably exists; if the pattern recurs, add one.
+The **`UI/Button` and `UI/Input` stories are the canonical reference** — don't restate the full list here.
+Highlights so agents don't rediscover them:
+
+- **Button** — `size`: `action` (h-10 px-6 toolbar/action-bar pill: Send/Receive/Swap, Filter/Export,
+  Confirm/Execute), `submit` (action + stable min-width for modal/flow submit buttons — replaces magic
+  `min-w-[…]`); `variant`: `destructive-outline` (bordered destructive). Primary = `default`.
+- **Input** — `inputSize` `sm`/`default`/`lg` mirrors `SelectTrigger` so a field and a select on one row line up (named `inputSize`, not `size`, to dodge the native numeric `size` attr).
+- **Surface & token rules (bit you) :** filled `secondary` only reads on white/card surfaces — on the muted
+  page background use `variant="outline"`. `--input` is `#fff` in light mode, so a **visible field/button
+  border must use `border-border`, not `border-input`** (which also looks borderless in dark until you
+  switch it to `border-border`).
+
 ## Core Patterns
 
 ### 1. MSW Handler Pattern (Use Regex, Not Wildcards)

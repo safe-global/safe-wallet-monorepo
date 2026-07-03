@@ -9,7 +9,8 @@ Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide r
 - Each new feature must be behind a feature flag (stored on the CGW API in chains configs)
 - When making a new component, create a Storybook story file for it
 - Use theme variables from vars.css instead of hard-coded CSS values
-- Use MUI components and the Safe MUI theme
+- Build UI from the shadcn/ui primitives in `@/components/ui/*` (Tailwind); MUI/Emotion are removed
+- **Prefer a component's variant/size prop over one-off `className` overrides.** If you find yourself hand-rolling padding, height, border color, or hover on a `Button`/`Input`/etc., there is probably a variant for it — and if a pattern recurs, add a variant rather than repeating the classes. Watch the tokens: `--input` is white in light mode, so a visible field border needs `border-border`, not `border-input`. The `Button` and `Input` stories are the canonical variant reference; see [.storybook/AGENTS.md](.storybook/AGENTS.md#component-variants-over-custom-styling).
 
 ## Feature Architecture Import Rules
 
