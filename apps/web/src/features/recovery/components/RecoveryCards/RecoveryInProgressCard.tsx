@@ -2,6 +2,7 @@ import Track from '@/components/common/Track'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
 import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/ui/typography'
 import { useRouter } from 'next/dist/client/router'
@@ -82,7 +83,7 @@ export function RecoveryInProgressCard({ orientation = 'vertical', onClose, reco
   }
 
   return (
-    <div className={[css.card, 'flex flex-col gap-8 rounded-lg bg-[var(--color-background-paper)]'].join(' ')}>
+    <Card className={[css.card, 'flex flex-col gap-8 rounded-lg'].join(' ')}>
       <div className="flex justify-between">
         {icon}
 
@@ -110,6 +111,6 @@ export function RecoveryInProgressCard({ orientation = 'vertical', onClose, reco
           Go to queue
         </Button>
       </Track>
-    </div>
+    </Card>
   )
 }

@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { Button as ButtonPrimitive } from '@base-ui/react/button'
 import { cva, type VariantProps } from 'class-variance-authority'
 
@@ -30,7 +31,7 @@ const buttonVariants = cva(
       variant: {
         default: 'bg-primary text-primary-foreground hover:bg-primary/80 dark:[&_svg]:text-black',
         outline:
-          'border-border bg-[rgba(255,255,255,0.10)] hover:bg-[var(--unofficial-outline-hover,rgba(0,0,0,0.03))] hover:text-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 aria-expanded:bg-muted aria-expanded:text-foreground shadow-xs',
+          'border-border bg-background hover:bg-muted hover:text-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 aria-expanded:bg-muted aria-expanded:text-foreground shadow-xs',
         secondary:
           'bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground',
         ghost:
@@ -58,13 +59,39 @@ const buttonVariants = cva(
   },
 )
 
-function Button({
-  className,
-  variant = 'default',
-  size = 'default',
-  ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
-  return <ButtonPrimitive data-slot="button" className={cn(buttonVariants({ variant, size, className }))} {...props} />
+type ButtonProps = ButtonPrimitive.Props & VariantProps<typeof buttonVariants>
+type AnchorRenderElement = React.ReactElement<React.ComponentPropsWithoutRef<'a'>, 'a'>
+type AnchorButtonProps = React.ComponentPropsWithoutRef<'a'> & {
+  'data-slot': string
+}
+
+const isAnchorRender = (render: ButtonProps['render']): render is AnchorRenderElement => {
+  return React.isValidElement(render) && render.type === 'a'
+}
+
+function Button({ className, variant = 'default', size = 'default', render, nativeButton, ...props }: ButtonProps) {
+  const buttonClassName = cn(buttonVariants({ variant, size, className }))
+
+  if (isAnchorRender(render)) {
+    const anchorProps = props as React.ComponentPropsWithoutRef<'a'>
+    const clonedAnchorProps: AnchorButtonProps = {
+      ...anchorProps,
+      'data-slot': 'button',
+      className: cn(buttonClassName, render.props.className),
+    }
+
+    return React.cloneElement(render, clonedAnchorProps)
+  }
+
+  return (
+    <ButtonPrimitive
+      data-slot="button"
+      className={buttonClassName}
+      render={render}
+      nativeButton={nativeButton}
+      {...props}
+    />
+  )
 }
 
 export { Button, buttonVariants }

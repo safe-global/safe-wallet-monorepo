@@ -2,6 +2,7 @@ import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/ui/typography'
 import { useContext } from 'react'
@@ -78,10 +79,7 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
   }
 
   return (
-    <div
-      data-testid="recovery-proposal"
-      className={[css.card, 'flex flex-col gap-8 rounded-lg bg-[var(--color-background-paper)]'].join(' ')}
-    >
+    <Card data-testid="recovery-proposal" className={[css.card, 'flex flex-col gap-8 rounded-lg'].join(' ')}>
       <div className="flex justify-between">
         {icon}
 
@@ -115,7 +113,7 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
         </Button>
         {recoveryButton}
       </div>
-    </div>
+    </Card>
   )
 }
 

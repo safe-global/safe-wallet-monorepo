@@ -12,6 +12,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import { RemoveRecoveryFlow } from '@/components/tx-flow/flows'
 import { RecoveryFeature, useRecovery } from '@/features/recovery'
 import { useLoadFeature } from '@/features/__core__'
+import SettingsCard from '../SettingsCard'
 
 import css from '../TransactionGuards/styles.module.css'
 
@@ -66,35 +67,27 @@ const SafeModules = () => {
   const safeModules = safe.modules || []
 
   return (
-    <div className="rounded-lg bg-[var(--color-background-paper)] p-8">
-      <div className="grid grid-cols-1 justify-between gap-6 lg:grid-cols-[1fr_2fr]">
-        <div>
-          <Typography variant="h4">Safe modules</Typography>
-        </div>
-
-        <div>
-          <div>
-            <Typography>
-              Modules allow you to customize the access-control logic of your Safe account. Modules are potentially
-              risky, so make sure to only use modules from trusted sources. Learn more about modules{' '}
-              <ExternalLink href="https://help.safe.global/articles/5490514177-What-is-a-module?">here</ExternalLink>
-            </Typography>
-            {safeModules.length === 0 ? (
-              <NoModules />
-            ) : (
-              safeModules.map((module) => (
-                <ModuleDisplay
-                  key={module.value}
-                  chainId={safe.chainId}
-                  moduleAddress={module.value}
-                  name={module.name || undefined}
-                />
-              ))
-            )}
-          </div>
-        </div>
+    <SettingsCard title="Safe modules">
+      <div>
+        <Typography>
+          Modules allow you to customize the access-control logic of your Safe account. Modules are potentially risky,
+          so make sure to only use modules from trusted sources. Learn more about modules{' '}
+          <ExternalLink href="https://help.safe.global/articles/5490514177-What-is-a-module?">here</ExternalLink>
+        </Typography>
+        {safeModules.length === 0 ? (
+          <NoModules />
+        ) : (
+          safeModules.map((module) => (
+            <ModuleDisplay
+              key={module.value}
+              chainId={safe.chainId}
+              moduleAddress={module.value}
+              name={module.name || undefined}
+            />
+          ))
+        )}
       </div>
-    </div>
+    </SettingsCard>
   )
 }
 

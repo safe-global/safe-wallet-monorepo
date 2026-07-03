@@ -1,6 +1,8 @@
+import { createElement } from 'react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import {
+  GlobalPushNotifications,
   _mergeNotifiableSafes,
   _transformCurrentSubscribedSafes,
   _getTotalNotifiableSafes,
@@ -18,8 +20,85 @@ import {
 import type { AddedSafesState } from '@/store/addedSafesSlice'
 import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
 import type { OwnersGetAllSafesByOwnerV2ApiResponse as AllOwnedSafes } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import { render, screen } from '@/tests/test-utils'
+import useChains from '@/hooks/useChains'
+import useWallet from '@/hooks/wallets/useWallet'
+import { useAllOwnedSafes } from '@/hooks/safes'
+import { useNotificationPreferences } from '../hooks/useNotificationPreferences'
+import { useNotificationRegistrations } from '../hooks/useNotificationRegistrations'
+import { useNotificationsRenewal } from '../hooks/useNotificationsRenewal'
+
+jest.mock('@/hooks/useChains')
+
+jest.mock('@/hooks/wallets/useWallet')
+
+jest.mock('@/hooks/safes')
+
+jest.mock('../hooks/useNotificationPreferences')
+
+jest.mock('../hooks/useNotificationRegistrations')
+
+jest.mock('../hooks/useNotificationsRenewal')
+
+jest.mock('@/components/common/CheckWalletWithPermission', () => ({
+  __esModule: true,
+  default: ({ children }: { children: (isOk: boolean) => unknown }) => children(true),
+}))
+
+jest.mock('@/components/common/EthHashInfo', () => ({
+  __esModule: true,
+  default: ({ address }: { address: string }) => address,
+}))
 
 describe('GlobalPushNotifications', () => {
+  const ownerAddress = '0x1111111111111111111111111111111111111111'
+  const safeAddress = '0x2222222222222222222222222222222222222222'
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(useChains as jest.MockedFunction<typeof useChains>).mockReturnValue({
+      configs: [{ chainId: '1', chainName: 'Ethereum', shortName: 'eth' }] as Chain[],
+    })
+    ;(useWallet as jest.MockedFunction<typeof useWallet>).mockReturnValue({
+      address: ownerAddress,
+    } as ReturnType<typeof useWallet>)
+    ;(useAllOwnedSafes as jest.MockedFunction<typeof useAllOwnedSafes>).mockReturnValue([
+      { '1': [safeAddress] },
+      undefined,
+      false,
+    ] as ReturnType<typeof useAllOwnedSafes>)
+    ;(useNotificationPreferences as jest.MockedFunction<typeof useNotificationPreferences>).mockReturnValue({
+      uuid: 'uuid',
+      getAllPreferences: jest.fn(() => undefined),
+      getPreferences: jest.fn(() => undefined),
+      updatePreferences: jest.fn(),
+      createPreferences: jest.fn(),
+      deletePreferences: jest.fn(),
+      deleteAllChainPreferences: jest.fn(),
+      _getAllPreferenceEntries: jest.fn(() => Promise.resolve([])),
+      _deleteManyPreferenceKeys: jest.fn(),
+      getChainPreferences: jest.fn(() => []),
+    })
+    ;(useNotificationRegistrations as jest.MockedFunction<typeof useNotificationRegistrations>).mockReturnValue({
+      registerNotifications: jest.fn(),
+      unregisterSafeNotifications: jest.fn(),
+      unregisterDeviceNotifications: jest.fn(),
+    } as ReturnType<typeof useNotificationRegistrations>)
+    ;(useNotificationsRenewal as jest.MockedFunction<typeof useNotificationsRenewal>).mockReturnValue({
+      safesForRenewal: undefined,
+    } as ReturnType<typeof useNotificationsRenewal>)
+  })
+
+  it('renders the selectable Safe accounts inside shadcn list primitives', () => {
+    render(createElement(GlobalPushNotifications))
+
+    const list = screen.getByText('Select all').closest('[data-slot="list"]')
+
+    expect(list).toHaveClass('bg-card')
+    expect(screen.getByText('Ethereum Safe accounts').closest('[data-slot="list-item"]')).toBeInTheDocument()
+    expect(screen.getByText(safeAddress).closest('[data-slot="list-item"]')).toBeInTheDocument()
+  })
+
   describe('transformAddedSafes', () => {
     it('should transform added safes into notifiable safes', () => {
       const addedSafes = {

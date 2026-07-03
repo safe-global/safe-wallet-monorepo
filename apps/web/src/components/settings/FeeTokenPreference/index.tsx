@@ -19,6 +19,7 @@ import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { isWalletRejection } from '@/utils/wallets'
 import { didRevert, didReprice, type EthersError } from '@/utils/ethers-utils'
 import type { Erc20Token } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import SettingsCard from '@/components/settings/SettingsCard'
 
 // TODO: move to external source to prevent code edits
 const TEMPO_FEE_TOKENS = [
@@ -247,91 +248,83 @@ export const FeeTokenPreference = () => {
   const loading = loadingBalances || loadingPreference
 
   return (
-    <div data-testid="fee-token-preference-section" className="mt-4 rounded-lg bg-[var(--color-background-paper)] p-8">
-      <div className="grid grid-cols-1 justify-between gap-6 lg:grid-cols-[1fr_2fr]">
+    <SettingsCard title="Fee token preference" data-testid="fee-token-preference-section" className="mt-4">
+      {wallet ? (
         <div>
-          <Typography variant="h4">Fee token preference</Typography>
-        </div>
+          <Typography className="mb-6">
+            Select your preferred token for paying transaction fees on Tempo. This preference will be used for all
+            future transactions for the connected wallet.
+          </Typography>
 
-        <div>
-          {wallet ? (
-            <div>
-              <Typography className="mb-6">
-                Select your preferred token for paying transaction fees on Tempo. This preference will be used for all
-                future transactions for the connected wallet.
-              </Typography>
-
-              {error && (
-                <Alert variant="destructive" className="mb-4">
-                  <AlertDescription>{error}</AlertDescription>
-                  <AlertAction>
-                    <Button variant="ghost" size="icon-xs" aria-label="Dismiss" onClick={() => setError(undefined)}>
-                      <XIcon />
-                    </Button>
-                  </AlertAction>
-                </Alert>
-              )}
-
-              {success && (
-                <Alert className="mb-4">
-                  <AlertDescription>Fee token preference updated successfully!</AlertDescription>
-                  <AlertAction>
-                    <Button variant="ghost" size="icon-xs" aria-label="Dismiss" onClick={() => setSuccess(false)}>
-                      <XIcon />
-                    </Button>
-                  </AlertAction>
-                </Alert>
-              )}
-
-              <div className="mb-4 flex flex-col gap-1.5">
-                <Label htmlFor="fee-token">Fee token</Label>
-                <Select
-                  value={loading ? null : selectedToken || null}
-                  onValueChange={(value) => {
-                    setSelectedToken(value as `0x${string}`)
-                    setSuccess(false)
-                  }}
-                  disabled={loading || saving}
-                >
-                  <SelectTrigger id="fee-token" className="w-full">
-                    {loading && <Spinner className="size-5" />}
-                    <SelectValue placeholder={loading ? 'Loading...' : 'Fee token'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tokenOptions.map((token) => {
-                      const balanceStr = formatVisualAmount(token.balance.toString(), token.decimals)
-
-                      return (
-                        <SelectItem key={token.address} value={token.address}>
-                          <div className="flex w-full justify-between">
-                            <Typography>{token.name}</Typography>
-                            <Typography variant="paragraph-small" className="text-muted-foreground">
-                              Balance: {balanceStr}
-                            </Typography>
-                          </div>
-                        </SelectItem>
-                      )
-                    })}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Button onClick={handleSave} disabled={!selectedToken || saving || loading} className="min-w-[120px]">
-                {saving ? (
-                  <>
-                    <Spinner className="mr-1 size-4" />
-                    Saving...
-                  </>
-                ) : (
-                  'Save preference'
-                )}
-              </Button>
-            </div>
-          ) : (
-            <Typography>Please connect your wallet to configure fee token preference.</Typography>
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{error}</AlertDescription>
+              <AlertAction>
+                <Button variant="ghost" size="icon-xs" aria-label="Dismiss" onClick={() => setError(undefined)}>
+                  <XIcon />
+                </Button>
+              </AlertAction>
+            </Alert>
           )}
+
+          {success && (
+            <Alert className="mb-4">
+              <AlertDescription>Fee token preference updated successfully!</AlertDescription>
+              <AlertAction>
+                <Button variant="ghost" size="icon-xs" aria-label="Dismiss" onClick={() => setSuccess(false)}>
+                  <XIcon />
+                </Button>
+              </AlertAction>
+            </Alert>
+          )}
+
+          <div className="mb-4 flex flex-col gap-1.5">
+            <Label htmlFor="fee-token">Fee token</Label>
+            <Select
+              value={loading ? null : selectedToken || null}
+              onValueChange={(value) => {
+                setSelectedToken(value as `0x${string}`)
+                setSuccess(false)
+              }}
+              disabled={loading || saving}
+            >
+              <SelectTrigger id="fee-token" className="w-full">
+                {loading && <Spinner className="size-5" />}
+                <SelectValue placeholder={loading ? 'Loading...' : 'Fee token'} />
+              </SelectTrigger>
+              <SelectContent>
+                {tokenOptions.map((token) => {
+                  const balanceStr = formatVisualAmount(token.balance.toString(), token.decimals)
+
+                  return (
+                    <SelectItem key={token.address} value={token.address}>
+                      <div className="flex w-full justify-between">
+                        <Typography>{token.name}</Typography>
+                        <Typography variant="paragraph-small" className="text-muted-foreground">
+                          Balance: {balanceStr}
+                        </Typography>
+                      </div>
+                    </SelectItem>
+                  )
+                })}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Button onClick={handleSave} disabled={!selectedToken || saving || loading} className="min-w-[120px]">
+            {saving ? (
+              <>
+                <Spinner className="mr-1 size-4" />
+                Saving...
+              </>
+            ) : (
+              'Save preference'
+            )}
+          </Button>
         </div>
-      </div>
-    </div>
+      ) : (
+        <Typography>Please connect your wallet to configure fee token preference.</Typography>
+      )}
+    </SettingsCard>
   )
 }

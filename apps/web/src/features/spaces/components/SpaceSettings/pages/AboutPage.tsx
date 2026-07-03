@@ -25,9 +25,12 @@ import { Typography } from '@/components/ui/typography'
 import { useLoadFeature } from '@/features/__core__'
 import { SupportChatFeature, useSupportChat } from '@/features/support-chat'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
+import SpaceSettingsSection, { SpaceSettingsSectionTitle } from '../SpaceSettingsSection'
 
 const STATUS_PAGE_URL = 'https://status.safe.global'
 const RELEASE_URL = `${APP_HOMEPAGE}/releases/tag/web-v${APP_VERSION}`
+const ROW_BUTTON_CLASSNAME =
+  'group flex h-auto w-full justify-start gap-3 whitespace-normal rounded-md px-3 py-3 text-left font-normal text-foreground hover:bg-muted/60'
 
 type LegalLink = {
   title: string
@@ -132,10 +135,8 @@ const AboutPage = () => {
   return (
     <div data-testid="settings-about-page">
       {/* Help */}
-      <section className="bg-card rounded-2xl p-6 mb-3">
-        <Typography variant="paragraph-bold" className="mb-5 block tracking-tight">
-          Help
-        </Typography>
+      <SpaceSettingsSection>
+        <SpaceSettingsSectionTitle>Help</SpaceSettingsSectionTitle>
 
         <div className="flex flex-col -mx-2">
           <LinkRow
@@ -153,11 +154,7 @@ const AboutPage = () => {
             description="Blockchain sync status across networks"
           />
           {showSupport && (
-            <button
-              type="button"
-              onClick={handleContactSupportClick}
-              className="group flex items-center gap-3 px-3 py-3 rounded-md text-foreground text-left transition-colors hover:bg-muted/60 cursor-pointer w-full"
-            >
+            <Button type="button" variant="ghost" onClick={handleContactSupportClick} className={ROW_BUTTON_CLASSNAME}>
               <span className="shrink-0">
                 <LifeBuoy className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-accent-success" />
               </span>
@@ -173,25 +170,24 @@ const AboutPage = () => {
                 </Typography>
               </span>
               <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0 transition-colors group-hover:text-accent-success" />
-            </button>
+            </Button>
           )}
         </div>
-      </section>
+      </SpaceSettingsSection>
 
-      <section className="bg-card rounded-2xl p-6 mb-3">
-        <Typography variant="paragraph-bold" className="mb-5 block tracking-tight">
-          Legal &amp; Policies
-        </Typography>
+      <SpaceSettingsSection>
+        <SpaceSettingsSectionTitle>Legal &amp; Policies</SpaceSettingsSectionTitle>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 -mx-2">
           {LEGAL_LINKS.map((link) => (
             <LinkRow key={link.title} {...link} />
           ))}
-          <button
+          <Button
             type="button"
+            variant="ghost"
             onClick={handleCookiePrefs}
             data-testid="cookie-preferences-button"
-            className="group flex items-center gap-3 px-3 py-3 rounded-md text-foreground text-left transition-colors hover:bg-muted/60 cursor-pointer"
+            className={ROW_BUTTON_CLASSNAME}
           >
             <Settings2 className="h-4 w-4 text-muted-foreground shrink-0 transition-colors group-hover:text-accent-success" />
             <span className="flex-1 min-w-0">
@@ -206,15 +202,13 @@ const AboutPage = () => {
               </Typography>
             </span>
             <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0 transition-colors group-hover:text-accent-success" />
-          </button>
+          </Button>
         </div>
-      </section>
+      </SpaceSettingsSection>
 
       {/* Version */}
-      <section className="bg-card rounded-2xl p-6 mb-3">
-        <Typography variant="paragraph-bold" className="mb-5 block tracking-tight">
-          Version
-        </Typography>
+      <SpaceSettingsSection>
+        <SpaceSettingsSectionTitle>Version</SpaceSettingsSectionTitle>
 
         <a
           href={RELEASE_URL}
@@ -253,7 +247,7 @@ const AboutPage = () => {
             GitHub
           </Button>
         </div>
-      </section>
+      </SpaceSettingsSection>
 
       {showSupport && (
         <SupportChatDrawer open={isSupportOpen} onClose={handleSupportClose} config={config} user={user} />

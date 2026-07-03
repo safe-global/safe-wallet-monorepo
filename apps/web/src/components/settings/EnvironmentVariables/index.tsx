@@ -7,6 +7,7 @@ import useChainId from '@/hooks/useChainId'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import RpcProviderSection from './RpcProviderSection'
 import TenderlySection from './TenderlySection'
+import SettingsCard from '../SettingsCard'
 
 export enum EnvVariablesField {
   rpc = 'rpc',
@@ -65,36 +66,28 @@ const EnvironmentVariables = () => {
   const onResetTenderlyToken = () => setValue(EnvVariablesField.tenderlyToken, '')
 
   return (
-    <div className="rounded-lg bg-[var(--color-background-paper)] p-8">
-      <div className="mb-4 grid grid-cols-1 justify-between gap-6 lg:grid-cols-[1fr_2fr]">
-        <div>
-          <Typography variant="h4">Environment variables</Typography>
-        </div>
+    <SettingsCard title="Environment variables" contentClassName="mb-4">
+      <Typography className="mb-6">
+        You can override some of our default APIs here in case you need to. Proceed at your own risk.
+      </Typography>
 
-        <div>
-          <Typography className="mb-6">
-            You can override some of our default APIs here in case you need to. Proceed at your own risk.
-          </Typography>
+      <FormProvider {...formMethods}>
+        <form onSubmit={onSubmit}>
+          <RpcProviderSection onReset={onResetRpc} showResetButton={!!rpc} />
 
-          <FormProvider {...formMethods}>
-            <form onSubmit={onSubmit}>
-              <RpcProviderSection onReset={onResetRpc} showResetButton={!!rpc} />
+          <TenderlySection
+            onResetUrl={onResetTenderlyUrl}
+            onResetToken={onResetTenderlyToken}
+            showResetUrlButton={!!tenderlyURL}
+            showResetTokenButton={!!tenderlyToken}
+          />
 
-              <TenderlySection
-                onResetUrl={onResetTenderlyUrl}
-                onResetToken={onResetTenderlyToken}
-                showResetUrlButton={!!tenderlyURL}
-                showResetTokenButton={!!tenderlyToken}
-              />
-
-              <Button type="submit" className="mt-4">
-                Save
-              </Button>
-            </form>
-          </FormProvider>
-        </div>
-      </div>
-    </div>
+          <Button type="submit" className="mt-4">
+            Save
+          </Button>
+        </form>
+      </FormProvider>
+    </SettingsCard>
   )
 }
 

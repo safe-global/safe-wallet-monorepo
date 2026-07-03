@@ -9,8 +9,8 @@ import { showNotification } from '@/store/notificationsSlice'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Typography } from '@/components/ui/typography'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
+import SpaceSettingsSection, { SpaceSettingsSectionTitle } from '../SpaceSettingsSection'
 
 const MAX_NAME_LENGTH = 60
 
@@ -64,10 +64,8 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
   }
 
   return (
-    <section className="bg-card rounded-2xl p-6 mb-3">
-      <Typography variant="paragraph-bold" className="mb-5 block tracking-tight">
-        Identity
-      </Typography>
+    <SpaceSettingsSection>
+      <SpaceSettingsSectionTitle>Identity</SpaceSettingsSectionTitle>
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="space-name" className="text-muted-foreground">
@@ -101,7 +99,7 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
           </Button>
         </div>
       </div>
-    </section>
+    </SpaceSettingsSection>
   )
 }
 

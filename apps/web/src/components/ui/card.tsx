@@ -23,7 +23,7 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - Card: `size` ('default' | 'sm'), `className`
+ * - Card: `as`, `size` ('default' | 'sm'), `className`
  * - CardHeader / CardTitle / CardDescription / CardAction / CardContent / CardFooter: `className`
  *
  * Figma: https://www.figma.com/design/trBVcpjZslO63zxiNUI9io/?node-id=179:29234
@@ -35,9 +35,21 @@ import { cn } from '@/utils/cn'
  * Changelog:
  * - 2026-01-29: Removed shadow-xs and ring-1 to match Figma (no elevation/border)
  */
-function Card({ className, size = 'default', ...props }: React.ComponentProps<'div'> & { size?: 'default' | 'sm' }) {
+type CardProps<TElement extends React.ElementType = 'div'> = {
+  as?: TElement
+  size?: 'default' | 'sm'
+} & Omit<React.ComponentPropsWithoutRef<TElement>, 'as'>
+
+function Card<TElement extends React.ElementType = 'div'>({
+  as,
+  className,
+  size = 'default',
+  ...props
+}: CardProps<TElement>) {
+  const Component = as ?? 'div'
+
   return (
-    <div
+    <Component
       data-slot="card"
       data-size={size}
       className={cn(

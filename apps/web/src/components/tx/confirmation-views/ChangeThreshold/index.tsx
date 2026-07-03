@@ -22,7 +22,7 @@ function ChangeThreshold({ txInfo }: ChangeThresholdProps) {
       <ChangeSignerSetupWarning />
 
       <div>
-        <Typography variant="paragraph-small" className="text-muted-foreground mb-1">
+        <Typography variant="paragraph-small" className="block text-muted-foreground mb-1">
           Any transaction will require the confirmation of:
         </Typography>
 

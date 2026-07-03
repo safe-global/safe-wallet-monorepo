@@ -1,17 +1,11 @@
 import { useState } from 'react'
-import {
-  Alert,
-  Box,
-  Button as MuiButton,
-  CircularProgress,
-  DialogActions,
-  DialogContent,
-  Stack,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { DialogFooter } from '@/components/ui/dialog'
+import { Spinner } from '@/components/ui/spinner'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import ModalDialog from '@/components/common/ModalDialog'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ChainIndicator from '@/components/common/ChainIndicator'
@@ -111,72 +105,69 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
       </Button>
 
       <ModalDialog open={open} onClose={() => setOpen(false)} dialogTitle="Request to add contact" hideChainIndicator>
-        <DialogContent sx={{ py: 2 }}>
-          <Stack spacing={2}>
-            <Typography variant="body2" color="text.secondary">
+        <div className="px-6 py-4">
+          <div className="flex flex-col gap-4">
+            <Typography variant="paragraph-small" color="muted">
               An admin has to approve the request before the contact appears in the workspace address book.
             </Typography>
 
-            <Box>
-              <Typography variant="body2" color="text.secondary" mb={0.5}>
+            <div className="flex flex-col gap-1">
+              <Typography variant="paragraph-small" color="muted">
                 Name
               </Typography>
-              <Typography variant="body1">{name}</Typography>
-            </Box>
+              <Typography>{name}</Typography>
+            </div>
 
-            <Box>
-              <Typography variant="body2" color="text.secondary" mb={0.5}>
+            <div className="flex flex-col gap-1">
+              <Typography variant="paragraph-small" color="muted">
                 Address
               </Typography>
               <EthHashInfo address={address} shortAddress={false} showPrefix={false} showName={false} avatarSize={24} />
-            </Box>
+            </div>
 
-            <Box>
-              <Typography variant="body2" color="text.secondary" mb={1}>
+            <div className="flex flex-col gap-2">
+              <Typography variant="paragraph-small" color="muted">
                 Networks
               </Typography>
               {chains.configs.length === chainIds.length ? (
-                <Typography variant="body1">All networks</Typography>
+                <Typography>All networks</Typography>
               ) : (
-                <Tooltip
-                  title={
-                    <Stack spacing={0.5}>
+                <Tooltip>
+                  <TooltipTrigger render={<div className="inline-flex w-fit" />}>
+                    <NetworkLogosList networks={chainIds.map((chainId) => ({ chainId }))} showHasMore maxVisible={6} />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="flex flex-col gap-1">
                       {chainIds.map((chainId) => (
                         <ChainIndicator key={chainId} chainId={chainId} />
                       ))}
-                    </Stack>
-                  }
-                  placement="top"
-                  arrow
-                >
-                  <Box display="inline-flex">
-                    <NetworkLogosList networks={chainIds.map((chainId) => ({ chainId }))} showHasMore maxVisible={6} />
-                  </Box>
+                    </div>
+                  </TooltipContent>
                 </Tooltip>
               )}
-            </Box>
+            </div>
 
             {nameError && (
-              <Alert severity="warning">Rename this contact to share it with the workspace. {nameError}.</Alert>
+              <Alert variant="warning">
+                <AlertDescription>Rename this contact to share it with the workspace. {nameError}.</AlertDescription>
+              </Alert>
             )}
-          </Stack>
-        </DialogContent>
+          </div>
+        </div>
 
-        <DialogActions>
-          <MuiButton data-testid="cancel-btn" onClick={() => setOpen(false)}>
+        <DialogFooter className="px-6 pt-0 pb-6 sm:flex-row sm:justify-end">
+          <Button data-testid="cancel-btn" type="button" variant="outline" onClick={() => setOpen(false)}>
             Cancel
-          </MuiButton>
-          <MuiButton
+          </Button>
+          <Button
             data-testid="confirm-request-btn"
             type="submit"
-            variant="contained"
             onClick={handleConfirm}
             disabled={!!nameError || isSubmitting}
-            disableElevation
           >
-            {isSubmitting ? <CircularProgress size={20} /> : 'Request to add'}
-          </MuiButton>
-        </DialogActions>
+            {isSubmitting ? <Spinner className="size-5" /> : 'Request to add'}
+          </Button>
+        </DialogFooter>
       </ModalDialog>
     </>
   )

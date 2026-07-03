@@ -25,6 +25,7 @@ import { useIsMac } from '@/hooks/useIsMac'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Permission } from '@/permissions/config'
 import { useIsMobile } from '@/hooks/use-mobile'
+import SettingsCard from '@/components/settings/SettingsCard'
 
 import css from './styles.module.css'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
@@ -83,181 +84,163 @@ export const PushNotifications = (): ReactElement => {
 
   return (
     <>
-      <div className="mb-4 rounded-lg bg-[var(--color-background-paper)] p-8">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-[1fr_2fr]">
-          <div>
-            <Typography variant="h4">Push notifications</Typography>
-          </div>
+      <SettingsCard title="Push notifications" className="mb-4" contentClassName="sm:grid-cols-[1fr_2fr]">
+        <div className="flex flex-col gap-5">
+          <NotificationRenewal />
 
-          <div>
-            <div className="flex flex-col gap-5">
-              <NotificationRenewal />
+          <Typography>
+            Enable push notifications for {safeLoaded ? 'this Safe account' : 'your Safe accounts'} in your browser with
+            your signature. You will need to enable them again if you clear your browser cache. Learn more about push
+            notifications <ExternalLink href={HelpCenterArticle.PUSH_NOTIFICATIONS}>here</ExternalLink>
+          </Typography>
 
-              <Typography>
-                Enable push notifications for {safeLoaded ? 'this Safe account' : 'your Safe accounts'} in your browser
-                with your signature. You will need to enable them again if you clear your browser cache. Learn more
-                about push notifications <ExternalLink href={HelpCenterArticle.PUSH_NOTIFICATIONS}>here</ExternalLink>
-              </Typography>
+          {shouldShowMacHelper && (
+            <Alert className={css.macOsInfo}>
+              <AlertDescription>
+                <Typography variant="paragraph-small-bold" className="mb-2 block">
+                  For macOS users
+                </Typography>
+                <Typography variant="paragraph-small">
+                  Double-check that you have enabled your browser notifications under <b>System Settings</b> &gt;{' '}
+                  <b>Notifications</b> &gt; <b>Application Notifications</b> (path may vary depending on OS version).
+                </Typography>
+              </AlertDescription>
+            </Alert>
+          )}
 
-              {shouldShowMacHelper && (
-                <Alert className={css.macOsInfo}>
-                  <AlertDescription>
-                    <Typography variant="paragraph-small-bold" className="mb-2 block">
-                      For macOS users
-                    </Typography>
-                    <Typography variant="paragraph-small">
-                      Double-check that you have enabled your browser notifications under <b>System Settings</b> &gt;{' '}
-                      <b>Notifications</b> &gt; <b>Application Notifications</b> (path may vary depending on OS
-                      version).
-                    </Typography>
-                  </AlertDescription>
-                </Alert>
-              )}
+          {safeLoaded ? (
+            <>
+              <Separator />
+              <NetworkWarning action="change your notification settings" />
 
-              {safeLoaded ? (
-                <>
-                  <Separator />
-                  <NetworkWarning action="change your notification settings" />
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <EthHashInfo
-                      address={safe.address.value}
-                      showCopyButton
-                      shortAddress={isMobile}
-                      showName={true}
-                      hasExplorer
-                    />
-                    <CheckWalletWithPermission
-                      permission={Permission.EnablePushNotifications}
-                      checkNetwork={!isRegistering && safe.deployed}
-                    >
-                      {(isOk) => {
-                        const disabled = !isOk || isRegistering || !safe.deployed
-                        return (
-                          <Field orientation="horizontal" className="w-fit" data-disabled={disabled || undefined}>
-                            <Switch
-                              data-testid="notifications-switch"
-                              checked={!!preferences}
-                              onCheckedChange={handleOnChange}
-                              disabled={disabled}
-                            />
-                            <FieldLabel>{preferences ? 'On' : 'Off'}</FieldLabel>
-                          </Field>
-                        )
-                      }}
-                    </CheckWalletWithPermission>
-                  </div>
-
-                  <div className={css.globalInfo}>
-                    <Typography variant="paragraph-small">
-                      Want to setup notifications for different or all Safe accounts? You can do so in your{' '}
-                      <ShadcnLink render={<NextLink href={AppRoutes.settings.notifications} />}>
-                        global preferences
-                      </ShadcnLink>
-                      .
-                    </Typography>
-                  </div>
-                </>
-              ) : (
-                <GlobalPushNotifications />
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-      {preferences && (
-        <div className="rounded-lg bg-[var(--color-background-paper)] p-8">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-[1fr_2fr]">
-            <div>
-              <Typography variant="h4">Notification</Typography>
-            </div>
-
-            <div>
-              <div className="flex flex-col gap-4">
-                <Field orientation="horizontal" className="w-fit">
-                  <Checkbox
-                    id="incoming-txs"
-                    checked={preferences[WebhookType.INCOMING_ETHER] && preferences[WebhookType.INCOMING_TOKEN]}
-                    disabled={isUpdatingIndexedDb}
-                    onCheckedChange={(checked) => {
-                      setPreferences({
-                        ...preferences,
-                        [WebhookType.INCOMING_ETHER]: checked,
-                        [WebhookType.INCOMING_TOKEN]: checked,
-                      })
-
-                      trackEvent({ ...PUSH_NOTIFICATION_EVENTS.TOGGLE_INCOMING_TXS, label: checked })
-                    }}
-                  />
-                  <FieldLabel htmlFor="incoming-txs">Incoming transactions</FieldLabel>
-                </Field>
-
-                <Field orientation="horizontal" className="w-fit">
-                  <Checkbox
-                    id="outgoing-txs"
-                    checked={
-                      preferences[WebhookType.MODULE_TRANSACTION] &&
-                      preferences[WebhookType.EXECUTED_MULTISIG_TRANSACTION]
-                    }
-                    disabled={isUpdatingIndexedDb}
-                    onCheckedChange={(checked) => {
-                      setPreferences({
-                        ...preferences,
-                        [WebhookType.MODULE_TRANSACTION]: checked,
-                        [WebhookType.EXECUTED_MULTISIG_TRANSACTION]: checked,
-                      })
-
-                      trackEvent({ ...PUSH_NOTIFICATION_EVENTS.TOGGLE_OUTGOING_TXS, label: checked })
-                    }}
-                  />
-                  <FieldLabel htmlFor="outgoing-txs">Outgoing transactions</FieldLabel>
-                </Field>
-
-                <Field orientation="horizontal" className="w-fit" data-disabled={!isOwner || !preferences || undefined}>
-                  <Checkbox
-                    id="confirmation-requests"
-                    checked={preferences[WebhookType.CONFIRMATION_REQUEST]}
-                    disabled={isUpdatingIndexedDb || !isOwner || !preferences}
-                    onCheckedChange={(checked) => {
-                      const updateConfirmationRequestPreferences = () => {
-                        setPreferences({
-                          ...preferences,
-                          [WebhookType.CONFIRMATION_REQUEST]: checked,
-                        })
-
-                        trackEvent({ ...PUSH_NOTIFICATION_EVENTS.TOGGLE_CONFIRMATION_REQUEST, label: checked })
-                      }
-
-                      if (checked) {
-                        registerNotifications({
-                          [safe.chainId]: [safe.address.value],
-                        })
-                          .then((registered) => {
-                            if (registered) {
-                              updateConfirmationRequestPreferences()
-                            }
-                          })
-                          .catch(() => null)
-                      } else {
-                        updateConfirmationRequestPreferences()
-                      }
-                    }}
-                  />
-                  <FieldLabel htmlFor="confirmation-requests">
-                    <span className="flex flex-col">
-                      <Typography>Confirmation requests</Typography>
-                      {!preferences[WebhookType.CONFIRMATION_REQUEST] && (
-                        <Typography variant="paragraph-small" className="text-muted-foreground">
-                          {isOwner ? 'Requires your signature' : 'Only signers'}
-                        </Typography>
-                      )}
-                    </span>
-                  </FieldLabel>
-                </Field>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <EthHashInfo
+                  address={safe.address.value}
+                  showCopyButton
+                  shortAddress={isMobile}
+                  showName={true}
+                  hasExplorer
+                />
+                <CheckWalletWithPermission
+                  permission={Permission.EnablePushNotifications}
+                  checkNetwork={!isRegistering && safe.deployed}
+                >
+                  {(isOk) => {
+                    const disabled = !isOk || isRegistering || !safe.deployed
+                    return (
+                      <Field orientation="horizontal" className="w-fit" data-disabled={disabled || undefined}>
+                        <Switch
+                          data-testid="notifications-switch"
+                          checked={!!preferences}
+                          onCheckedChange={handleOnChange}
+                          disabled={disabled}
+                        />
+                        <FieldLabel>{preferences ? 'On' : 'Off'}</FieldLabel>
+                      </Field>
+                    )
+                  }}
+                </CheckWalletWithPermission>
               </div>
-            </div>
-          </div>
+
+              <div className={css.globalInfo}>
+                <Typography variant="paragraph-small">
+                  Want to setup notifications for different or all Safe accounts? You can do so in your{' '}
+                  <ShadcnLink render={<NextLink href={AppRoutes.settings.notifications} />}>
+                    global preferences
+                  </ShadcnLink>
+                  .
+                </Typography>
+              </div>
+            </>
+          ) : (
+            <GlobalPushNotifications />
+          )}
         </div>
+      </SettingsCard>
+      {preferences && (
+        <SettingsCard title="Notification" contentClassName="sm:grid-cols-[1fr_2fr]">
+          <div className="flex flex-col gap-4">
+            <Field orientation="horizontal" className="w-fit">
+              <Checkbox
+                id="incoming-txs"
+                checked={preferences[WebhookType.INCOMING_ETHER] && preferences[WebhookType.INCOMING_TOKEN]}
+                disabled={isUpdatingIndexedDb}
+                onCheckedChange={(checked) => {
+                  setPreferences({
+                    ...preferences,
+                    [WebhookType.INCOMING_ETHER]: checked,
+                    [WebhookType.INCOMING_TOKEN]: checked,
+                  })
+
+                  trackEvent({ ...PUSH_NOTIFICATION_EVENTS.TOGGLE_INCOMING_TXS, label: checked })
+                }}
+              />
+              <FieldLabel htmlFor="incoming-txs">Incoming transactions</FieldLabel>
+            </Field>
+
+            <Field orientation="horizontal" className="w-fit">
+              <Checkbox
+                id="outgoing-txs"
+                checked={
+                  preferences[WebhookType.MODULE_TRANSACTION] && preferences[WebhookType.EXECUTED_MULTISIG_TRANSACTION]
+                }
+                disabled={isUpdatingIndexedDb}
+                onCheckedChange={(checked) => {
+                  setPreferences({
+                    ...preferences,
+                    [WebhookType.MODULE_TRANSACTION]: checked,
+                    [WebhookType.EXECUTED_MULTISIG_TRANSACTION]: checked,
+                  })
+
+                  trackEvent({ ...PUSH_NOTIFICATION_EVENTS.TOGGLE_OUTGOING_TXS, label: checked })
+                }}
+              />
+              <FieldLabel htmlFor="outgoing-txs">Outgoing transactions</FieldLabel>
+            </Field>
+
+            <Field orientation="horizontal" className="w-fit" data-disabled={!isOwner || !preferences || undefined}>
+              <Checkbox
+                id="confirmation-requests"
+                checked={preferences[WebhookType.CONFIRMATION_REQUEST]}
+                disabled={isUpdatingIndexedDb || !isOwner || !preferences}
+                onCheckedChange={(checked) => {
+                  const updateConfirmationRequestPreferences = () => {
+                    setPreferences({
+                      ...preferences,
+                      [WebhookType.CONFIRMATION_REQUEST]: checked,
+                    })
+
+                    trackEvent({ ...PUSH_NOTIFICATION_EVENTS.TOGGLE_CONFIRMATION_REQUEST, label: checked })
+                  }
+
+                  if (checked) {
+                    registerNotifications({
+                      [safe.chainId]: [safe.address.value],
+                    })
+                      .then((registered) => {
+                        if (registered) {
+                          updateConfirmationRequestPreferences()
+                        }
+                      })
+                      .catch(() => null)
+                  } else {
+                    updateConfirmationRequestPreferences()
+                  }
+                }}
+              />
+              <FieldLabel htmlFor="confirmation-requests">
+                <span className="flex flex-col">
+                  <Typography>Confirmation requests</Typography>
+                  {!preferences[WebhookType.CONFIRMATION_REQUEST] && (
+                    <Typography variant="paragraph-small" className="text-muted-foreground">
+                      {isOwner ? 'Requires your signature' : 'Only signers'}
+                    </Typography>
+                  )}
+                </span>
+              </FieldLabel>
+            </Field>
+          </div>
+        </SettingsCard>
       )}
     </>
   )

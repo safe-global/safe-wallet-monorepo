@@ -72,6 +72,8 @@ describe('EnvironmentVariables', () => {
       },
     })
 
+    expect(screen.getByText('Environment variables').closest('[data-slot="card"]')).toHaveClass('p-8')
+
     // Check placeholder text is visible
     expect(screen.getByPlaceholderText(mockChain.rpcUri.value)).toBeInTheDocument()
   })

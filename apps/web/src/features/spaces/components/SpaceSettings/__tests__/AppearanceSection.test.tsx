@@ -29,6 +29,10 @@ describe('AppearanceSection', () => {
   it('selects "system" by default when no theme preference is set', () => {
     renderWithStore()
     expect(screen.getByTestId('theme-card-system')).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByTestId('theme-card-system')).toHaveAttribute('data-slot', 'button')
+    expect(screen.getByTestId('theme-card-system').querySelector('[aria-hidden="true"]')?.className).not.toContain(
+      'border-[',
+    )
     expect(screen.getByTestId('theme-card-dark')).toHaveAttribute('aria-pressed', 'false')
     expect(screen.getByTestId('theme-card-light')).toHaveAttribute('aria-pressed', 'false')
   })

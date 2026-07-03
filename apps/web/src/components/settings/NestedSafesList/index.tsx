@@ -20,6 +20,7 @@ import { useHasFeature } from '@/hooks/useChains'
 
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import SettingsCard from '@/components/settings/SettingsCard'
 
 export function NestedSafesList(): ReactElement | null {
   const isEnabled = useHasFeature(FEATURES.NESTED_SAFES)
@@ -85,44 +86,36 @@ export function NestedSafesList(): ReactElement | null {
 
   return (
     <>
-      <div className="mt-4 rounded-lg bg-[var(--color-background-paper)] p-8">
-        <div className="mb-4 grid grid-cols-1 justify-between gap-6 lg:grid-cols-[1fr_2fr]">
-          <div>
-            <Typography variant="h4">Nested Safes</Typography>
-          </div>
+      <SettingsCard title="Nested Safes" className="mt-4">
+        <Typography className="mb-6">
+          Nested Safes are separate wallets owned by your main Account, perfect for organizing different funds and
+          projects.
+        </Typography>
 
-          <div>
-            <Typography className="mb-6">
-              Nested Safes are separate wallets owned by your main Account, perfect for organizing different funds and
-              projects.
-            </Typography>
+        {rows.length === 0 && (
+          <Typography className="mb-6">
+            You don&apos;t have any Nested Safes yet. Set one up now to better organize your assets
+          </Typography>
+        )}
 
-            {rows.length === 0 && (
-              <Typography className="mb-6">
-                You don&apos;t have any Nested Safes yet. Set one up now to better organize your assets
-              </Typography>
+        {safe.deployed && (
+          <CheckWallet>
+            {(isOk) => (
+              <Button
+                onClick={() => setTxFlow(<CreateNestedSafeFlow />)}
+                variant="ghost"
+                disabled={!isOk}
+                className="mb-6"
+              >
+                <AddIcon className="size-4" />
+                Add nested Safe
+              </Button>
             )}
+          </CheckWallet>
+        )}
 
-            {safe.deployed && (
-              <CheckWallet>
-                {(isOk) => (
-                  <Button
-                    onClick={() => setTxFlow(<CreateNestedSafeFlow />)}
-                    variant="ghost"
-                    disabled={!isOk}
-                    className="mb-6"
-                  >
-                    <AddIcon className="size-4" />
-                    Add nested Safe
-                  </Button>
-                )}
-              </CheckWallet>
-            )}
-
-            {rows && rows.length > 0 && <EnhancedTable rows={rows} headCells={[]} />}
-          </div>
-        </div>
-      </div>
+        {rows && rows.length > 0 && <EnhancedTable rows={rows} headCells={[]} />}
+      </SettingsCard>
 
       {addressToRename && (
         <EntryDialog

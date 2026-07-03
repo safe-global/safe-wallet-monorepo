@@ -14,6 +14,7 @@ import { Link } from '@/components/ui/link'
 import { Typography } from '@/components/ui/typography'
 import PermissionsCheckbox from '@/components/safe-apps/PermissionCheckbox'
 import DeleteIcon from '@/public/images/common/delete.svg'
+import SettingsCard from '@/components/settings/SettingsCard'
 
 const SafeAppsPermissions = (): ReactElement => {
   const { allSafeApps } = useSafeApps()
@@ -96,9 +97,7 @@ const SafeAppsPermissions = (): ReactElement => {
   }
 
   return (
-    <div className="rounded-lg bg-[var(--color-background-paper)] p-8">
-      <Typography variant="h4">Safe Apps permissions</Typography>
-      <br />
+    <SettingsCard title="Safe Apps permissions">
       {!domains.length && (
         <Typography className="text-muted-foreground">There are no Safe Apps using permissions.</Typography>
       )}
@@ -157,7 +156,7 @@ const SafeAppsPermissions = (): ReactElement => {
           </div>
         </div>
       ))}
-    </div>
+    </SettingsCard>
   )
 }
 

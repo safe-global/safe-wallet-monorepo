@@ -3,6 +3,12 @@ import { render, waitFor } from '@/tests/test-utils'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { zeroPadValue } from 'ethers'
 import TransactionGuards from '..'
+import type { ReactNode } from 'react'
+
+jest.mock('@/components/common/CheckWallet', () => ({
+  __esModule: true,
+  default: ({ children }: { children: (isOk: boolean) => ReactNode }) => children(true),
+}))
 
 const MOCK_GUARD = zeroPadValue('0x01', 20)
 const EMPTY_LABEL = 'No transaction guard set'
@@ -21,6 +27,7 @@ describe('TransactionGuards', () => {
 
     const utils = render(<TransactionGuards />)
     await waitFor(() => expect(utils.getByText(EMPTY_LABEL)).toBeDefined())
+    expect(utils.getByText('Transaction guards').closest('[data-slot="card"]')).toHaveClass('p-8')
   })
 
   it('should render null if safe is loading', async () => {

@@ -17,9 +17,9 @@ import { cn } from '@/utils/cn'
 const typographyVariants = cva('m-0', {
   variants: {
     variant: {
-      h1: 'scroll-m-20 text-[48px] font-semibold leading-[48px] tracking-[-0.015em] text-balance',
-      h2: 'scroll-m-20 text-[30px] font-semibold leading-[30px] tracking-[-0.01em]',
-      h3: 'scroll-m-20 text-2xl font-semibold leading-[28.8px] tracking-[-0.01em]',
+      h1: 'scroll-m-20 text-[48px] font-semibold leading-[48px] tracking-normal text-balance',
+      h2: 'scroll-m-20 text-[30px] font-semibold leading-[30px] tracking-normal',
+      h3: 'scroll-m-20 text-2xl font-semibold leading-[28.8px] tracking-normal',
       h4: 'scroll-m-20 text-xl font-semibold leading-6 tracking-normal',
       paragraph: 'text-base leading-6 font-normal',
       'paragraph-medium': 'text-base leading-6 font-medium',

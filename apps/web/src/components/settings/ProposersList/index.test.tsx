@@ -99,6 +99,7 @@ describe('ProposersList', () => {
   it('should enable the Add proposer button for direct Safe owners', () => {
     const { getByTestId } = render(<ProposersList />)
 
+    expect(getByTestId('proposer-section').closest('[data-slot="card"]')).toHaveClass('mt-4')
     const button = getByTestId('add-proposer-btn')
     expect(button).not.toBeDisabled()
   })

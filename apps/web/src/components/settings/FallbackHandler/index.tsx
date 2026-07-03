@@ -15,6 +15,7 @@ import { useHasUntrustedFallbackHandler } from '@/hooks/useHasUntrustedFallbackH
 import css from '../TransactionGuards/styles.module.css'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { useIsTWAPFallbackHandler } from '@/features/swap'
+import SettingsCard from '../SettingsCard'
 
 const FALLBACK_HANDLER_VERSION = '>=1.1.1'
 
@@ -71,46 +72,41 @@ export const FallbackHandler = (): ReactElement | null => {
   ) : undefined
 
   return (
-    <div className="rounded-lg bg-[var(--color-background-paper)] p-8">
-      <div className="grid grid-cols-1 justify-between gap-6 lg:grid-cols-[1fr_2fr]">
-        <div>
-          <Typography variant="h4">Fallback handler</Typography>
-        </div>
+    <SettingsCard title="Fallback handler">
+      <div>
+        <Typography>
+          The fallback handler adds fallback logic for funtionality that may not be present in the Safe account
+          contract. Learn more about the fallback handler{' '}
+          <ExternalLink href={HelpCenterArticle.FALLBACK_HANDLER}>here</ExternalLink>
+        </Typography>
 
-        <div>
-          <div>
-            <Typography>
-              The fallback handler adds fallback logic for funtionality that may not be present in the Safe account
-              contract. Learn more about the fallback handler{' '}
-              <ExternalLink href={HelpCenterArticle.FALLBACK_HANDLER}>here</ExternalLink>
-            </Typography>
-
-            <div
-              className={classnames(css.guardDisplay, '!block', {
-                [css.warning]: !hasFallbackHandler,
-                [css.info]: hasFallbackHandler && isUntrusted,
-              })}
+        <div
+          className={classnames(css.guardDisplay, '!block', {
+            [css.warning]: !hasFallbackHandler,
+            [css.info]: hasFallbackHandler && isUntrusted,
+          })}
+        >
+          {warning && (
+            <Typography
+              variant="paragraph-small"
+              className={classnames('block w-full', { 'mb-2': hasFallbackHandler })}
             >
-              {warning && (
-                <Typography variant="paragraph-small" className={classnames('w-full', { 'mb-2': hasFallbackHandler })}>
-                  {warning}
-                </Typography>
-              )}
+              {warning}
+            </Typography>
+          )}
 
-              {safe.fallbackHandler && (
-                <EthHashInfo
-                  shortAddress={false}
-                  name={safe.fallbackHandler.name || fallbackHandlerDeployments?.contractName}
-                  address={safe.fallbackHandler.value}
-                  customAvatar={safe.fallbackHandler.logoUri || undefined}
-                  showCopyButton
-                  hasExplorer
-                />
-              )}
-            </div>
-          </div>
+          {safe.fallbackHandler && (
+            <EthHashInfo
+              shortAddress={false}
+              name={safe.fallbackHandler.name || fallbackHandlerDeployments?.contractName}
+              address={safe.fallbackHandler.value}
+              customAvatar={safe.fallbackHandler.logoUri || undefined}
+              showCopyButton
+              hasExplorer
+            />
+          )}
         </div>
       </div>
-    </div>
+    </SettingsCard>
   )
 }

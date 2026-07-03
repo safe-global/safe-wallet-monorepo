@@ -144,6 +144,9 @@
   --color-success-subtle: var(--color-success-background);
   --color-success-muted: var(--color-success-light);
   --color-success-strong: var(--color-success-dark);
+  --color-warning-subtle: var(--color-warning-background);
+  --color-warning-muted: var(--color-warning-light);
+  --color-warning-strong: var(--color-warning-dark);
   --radius-2xs: 0.25rem;
   --radius-xs: 0.5rem;
   --radius-sm: 0.5rem;

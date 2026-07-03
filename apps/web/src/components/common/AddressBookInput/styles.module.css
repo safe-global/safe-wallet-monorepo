@@ -20,14 +20,14 @@
 }
 
 /* The listbox keeps its 8px top padding (compensated by the sticky header's top: -8px)
-   but drops the bottom one so the last option's hover reaches the dropdown edge */
+   but drops the bottom one so the last option's hover reaches the dropdown edge. */
 .listbox {
   padding-bottom: 0 !important;
 }
 
 .groupHeader {
   position: sticky;
-  /* compensate the MuiAutocomplete-listbox top padding so the header sticks flush */
+  /* Compensate the listbox top padding so the header sticks flush. */
   top: -8px;
   z-index: 2;
   display: flex;
@@ -58,6 +58,9 @@
   align-items: center;
   gap: calc(var(--space-1) / 2);
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Container for user-provided names (workspace, creator). The pill background and
@@ -85,10 +88,9 @@
   border-top: 1px solid var(--color-border-light);
 }
 
-/* Match the prototype's .ab-row: 12px vertical / 16px horizontal padding.
-   !important overrides MUI's .MuiAutocomplete-option padding. */
+/* Match the prototype's .ab-row: 12px vertical / 16px horizontal padding. */
 .groupList li {
-  padding: 12px 16px !important;
+  padding: 12px 16px;
 }
 
 .option {
@@ -109,6 +111,13 @@
 .optionMain {
   flex: 1;
   min-width: 0;
+}
+
+.optionName {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .optionAddress {

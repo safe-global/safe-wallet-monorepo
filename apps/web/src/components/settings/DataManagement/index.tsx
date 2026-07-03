@@ -20,6 +20,7 @@ import css from './styles.module.css'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { ClearPendingTxs } from '../ClearPendingTxs'
+import SettingsCard from '../SettingsCard'
 
 const getExportFileName = () => {
   const today = new Date().toISOString().slice(0, 10)
@@ -77,72 +78,54 @@ const DataManagement = () => {
 
   return (
     <>
-      <div className="mb-4 rounded-lg bg-[var(--color-background-paper)] p-8">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-[1fr_2fr]">
-          <div>
-            <Typography variant="h4">Data export</Typography>
-          </div>
+      <SettingsCard title="Data export" className="mb-4" contentClassName="sm:grid-cols-[1fr_2fr]">
+        <div data-testid="export-file-section">
+          <Typography>Download your local data with your added Safe accounts, address book and settings.</Typography>
 
-          <div data-testid="export-file-section">
-            <Typography>Download your local data with your added Safe accounts, address book and settings.</Typography>
-
-            <FileListCard
-              avatar={
-                <div className={`${css.fileIcon} rounded`}>
-                  <FileIcon className="size-4 fill-none" />
-                </div>
-              }
-              title={<b>{exportFileName}</b>}
-              action={
-                <Track {...OVERVIEW_EVENTS.EXPORT_DATA} label={OVERVIEW_LABELS.settings}>
-                  <Button className={css.exportIcon} onClick={exportAppData}>
-                    <ExportIcon className="size-4" />
-                  </Button>
-                </Track>
-              }
-              addedSafes={addedSafes}
-              addressBook={addressBook}
-              settings={settings}
-              visitedSafes={visitedSafes}
-              safeApps={safeApps}
-              undeployedSafes={undeployedSafes}
-            />
-          </div>
+          <FileListCard
+            avatar={
+              <div className={`${css.fileIcon} rounded`}>
+                <FileIcon className="size-4 fill-none" />
+              </div>
+            }
+            title={<b>{exportFileName}</b>}
+            action={
+              <Track {...OVERVIEW_EVENTS.EXPORT_DATA} label={OVERVIEW_LABELS.settings}>
+                <Button className={css.exportIcon} onClick={exportAppData}>
+                  <ExportIcon className="size-4" />
+                </Button>
+              </Track>
+            }
+            addedSafes={addedSafes}
+            addressBook={addressBook}
+            settings={settings}
+            visitedSafes={visitedSafes}
+            safeApps={safeApps}
+            undeployedSafes={undeployedSafes}
+          />
         </div>
-      </div>
+      </SettingsCard>
 
-      <div className="mb-4 rounded-lg bg-[var(--color-background-paper)] p-8">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-[1fr_2fr]">
-          <div>
-            <Typography variant="h4">Data import</Typography>
-          </div>
-
-          <div>
-            <ImportFileUpload setFileName={setImportFileName} setJsonData={setJsonData} />
-          </div>
-
-          {jsonData && (
-            <ImportDialog
-              jsonData={jsonData}
-              fileName={importFileName}
-              setJsonData={setJsonData}
-              setFileName={setImportFileName}
-            />
-          )}
+      <SettingsCard title="Data import" className="mb-4" contentClassName="sm:grid-cols-[1fr_2fr]">
+        <div>
+          <ImportFileUpload setFileName={setImportFileName} setJsonData={setJsonData} />
         </div>
-      </div>
 
-      <div className="rounded-lg bg-[var(--color-background-paper)] p-8">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-[1fr_2fr]">
-          <div>
-            <Typography variant="h4">Pending transactions</Typography>
-          </div>
+        {jsonData && (
+          <ImportDialog
+            jsonData={jsonData}
+            fileName={importFileName}
+            setJsonData={setJsonData}
+            setFileName={setImportFileName}
+          />
+        )}
+      </SettingsCard>
 
-          <div data-testid="clear-pending-tx-section">
-            <ClearPendingTxs />
-          </div>
+      <SettingsCard title="Pending transactions" contentClassName="sm:grid-cols-[1fr_2fr]">
+        <div data-testid="clear-pending-tx-section">
+          <ClearPendingTxs />
         </div>
-      </div>
+      </SettingsCard>
     </>
   )
 }

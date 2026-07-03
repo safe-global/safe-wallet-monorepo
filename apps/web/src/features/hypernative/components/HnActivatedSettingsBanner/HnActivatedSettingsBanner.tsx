@@ -1,4 +1,5 @@
 import ExternalLink from '@/components/common/ExternalLink'
+import { Card } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
 import { hnActivatedSettingsBannerConfig } from './config'
 import css from './styles.module.css'
@@ -8,7 +9,7 @@ export const HnActivatedSettingsBanner = () => {
   const { title, description, statusLabel, buttonLabel, dashboardUrl } = hnActivatedSettingsBannerConfig
 
   return (
-    <div className="rounded-xl bg-[var(--color-background-paper)] p-8">
+    <Card className="p-8">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <div className="lg:col-span-4">
           <div className="flex flex-col gap-2">
@@ -31,6 +32,6 @@ export const HnActivatedSettingsBanner = () => {
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   )
 }

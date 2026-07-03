@@ -13,6 +13,7 @@ import { useContext } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
 import { RemoveGuardFlow } from '@/components/tx-flow/flows'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import SettingsCard from '../SettingsCard'
 
 const NoTransactionGuard = () => {
   return <Typography className="mt-4 text-muted-foreground">No transaction guard set</Typography>
@@ -50,29 +51,17 @@ const TransactionGuards = () => {
   }
 
   return (
-    <div className="rounded-lg bg-[var(--color-background-paper)] p-8">
-      <div className="grid grid-cols-1 justify-between gap-6 lg:grid-cols-[1fr_2fr]">
-        <div>
-          <Typography variant="h4">Transaction guards</Typography>
-        </div>
-
-        <div>
-          <div>
-            <Typography>
-              Transaction guards impose additional constraints that are checked prior to executing a Safe transaction.
-              Transaction guards are potentially risky, so make sure to only use transaction guards from trusted
-              sources. Learn more about transaction guards{' '}
-              <ExternalLink href={HelpCenterArticle.TRANSACTION_GUARD}>here</ExternalLink>.
-            </Typography>
-            {safe.guard ? (
-              <GuardDisplay guardAddress={safe.guard.value} chainId={safe.chainId} />
-            ) : (
-              <NoTransactionGuard />
-            )}
-          </div>
-        </div>
+    <SettingsCard title="Transaction guards">
+      <div>
+        <Typography>
+          Transaction guards impose additional constraints that are checked prior to executing a Safe transaction.
+          Transaction guards are potentially risky, so make sure to only use transaction guards from trusted sources.
+          Learn more about transaction guards{' '}
+          <ExternalLink href={HelpCenterArticle.TRANSACTION_GUARD}>here</ExternalLink>.
+        </Typography>
+        {safe.guard ? <GuardDisplay guardAddress={safe.guard.value} chainId={safe.chainId} /> : <NoTransactionGuard />}
       </div>
-    </div>
+    </SettingsCard>
   )
 }
 

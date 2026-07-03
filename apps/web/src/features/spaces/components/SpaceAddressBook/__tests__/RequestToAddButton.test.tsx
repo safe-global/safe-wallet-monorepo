@@ -31,6 +31,9 @@ describe('RequestToAddButton', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Request to add' }))
     expect(screen.getByText('Request to add contact')).toBeInTheDocument()
+    expect(screen.getByText('Name')).toBeInTheDocument()
+    expect(screen.getByText('Address')).toBeInTheDocument()
+    expect(screen.getByText('Networks')).toBeInTheDocument()
 
     await userEvent.click(screen.getByTestId('confirm-request-btn'))
 

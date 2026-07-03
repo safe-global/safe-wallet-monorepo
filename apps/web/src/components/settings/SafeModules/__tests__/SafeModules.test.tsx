@@ -3,6 +3,12 @@ import { render, waitFor } from '@/tests/test-utils'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import SafeModules from '..'
 import { zeroPadValue } from 'ethers'
+import type { ReactNode } from 'react'
+
+jest.mock('@/components/common/CheckWallet', () => ({
+  __esModule: true,
+  default: ({ children }: { children: (isOk: boolean) => ReactNode }) => children(true),
+}))
 
 const MOCK_MODULE_1 = zeroPadValue('0x01', 20)
 const MOCK_MODULE_2 = zeroPadValue('0x02', 20)
@@ -21,6 +27,7 @@ describe('SafeModules', () => {
 
     const utils = render(<SafeModules />)
     await waitFor(() => expect(utils.getByText('No modules enabled')).toBeDefined())
+    expect(utils.getByText('Safe modules').closest('[data-slot="card"]')).toHaveClass('p-8')
   })
 
   it('should render placeholder label if safe is loading', async () => {
