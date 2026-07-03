@@ -12,7 +12,7 @@ import { selectDraftByHash } from '@/src/store/draftTxSlice'
 import { useApprovalInfos } from '@/src/features/ConfirmTx/components/ApprovalEditor/hooks/useApprovalInfos'
 import { EditApprovalFields, EditApprovalFooter, useEditApprovalForm } from './components/EditApprovalForm'
 
-// keyboardBlurBehavior="restore" can't undo keyboardBehavior="extend" — extending moves the sheet's current index
+// Snaps back to the dynamic content-height detent — gorhom's restore can't undo keyboardBehavior="extend"
 const RestoreHeightOnKeyboardHide = () => {
   const { snapToIndex } = useBottomSheet()
 

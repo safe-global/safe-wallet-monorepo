@@ -9,7 +9,7 @@ import {
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useBalances } from '@/src/hooks/useBalances'
+import { useTokenBalances } from '@/src/hooks/useBalance'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectChainById } from '@/src/store/chains'
@@ -57,12 +57,16 @@ export const useApprovalInfos = (draft: DraftTx | undefined): ApprovalInfoWithSe
     return scanResult.payload?.length ? scanResult.payload : undefined
   }, [draft])
 
-  // trusted: false — the high-value check must see untrusted and dust holdings; skipped without approvals
-  const { balances } = useBalances(false, undefined, false, !scannedApprovals)
+  const scannedTokenAddresses = useMemo(
+    () => scannedApprovals?.map((approval) => approval.tokenAddress),
+    [scannedApprovals],
+  )
+  const balances = useTokenBalances(scannedTokenAddresses)
 
+  const tokenInfoIndex = draft?.txDetails.txData?.tokenInfoIndex
   const resolveStatic = useCallback(
-    (tokenAddress: string) => findTokenInfo(tokenAddress, balances, draft?.txDetails.txData?.tokenInfoIndex),
-    [balances, draft],
+    (tokenAddress: string) => findTokenInfo(tokenAddress, balances, tokenInfoIndex),
+    [balances, tokenInfoIndex],
   )
 
   const unresolvedAddresses = useMemo(

@@ -99,8 +99,19 @@ describe('useApprovalInfos', () => {
     })
     expect(result.current?.[0].tokenInfo?.symbol).toEqual('USDC')
     expect(result.current?.[0].spender.toLowerCase()).toEqual(spender.toLowerCase())
-    // must request ALL balances (not just trusted), unskipped since approvals exist
+    // token found in trusted balances → the untrusted query stays skipped
+    expect(mockUseBalances).toHaveBeenCalledWith(false, undefined, false, true)
+  })
+
+  it('widens to untrusted balances when a token is missing from the trusted set', () => {
+    const emptyTrusted = { balances: { fiatTotal: '0', items: [] } as unknown as Balances }
+    mockUseBalances.mockImplementation((...args: unknown[]) => (args[2] === false ? balancesWithToken() : emptyTrusted))
+    const draft = buildDraft({ data: ERC20_INTERFACE.encodeFunctionData('approve', [spender, 1_000_000n]) })
+
+    const { result } = renderHook(() => useApprovalInfos(draft))
+
     expect(mockUseBalances).toHaveBeenCalledWith(false, undefined, false, false)
+    expect(result.current?.[0].tokenInfo?.symbol).toEqual('USDC')
   })
 
   it('flags approvals above the balance as high value, but not those with unknown balance', () => {
