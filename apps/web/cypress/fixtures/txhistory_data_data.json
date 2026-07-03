@@ -75,9 +75,7 @@
       "recipientAddress": "0x06373d5e45AD31BD354CeBfA8dB4eD2c75B8708e",
       "transactionHash": "0x6a59...6a98",
       "altImage": "Sent",
-      "altToken": "ETH",
-      "txBuilderTitle": "Transaction Builder",
-      "txBuilderAltImage": "Transaction Builder"
+      "altToken": "ETH"
     },
     "onchainRejection": {
       "title": "On-chain rejection",
