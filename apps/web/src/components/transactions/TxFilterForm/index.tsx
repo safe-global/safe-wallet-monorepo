@@ -16,7 +16,6 @@ import { useCurrentChain } from '@/hooks/useChains'
 import NumberField from '@/components/common/NumberField'
 
 import css from './styles.module.css'
-import inputCss from '@/styles/inputs.module.css'
 import AddressInput from '@/components/common/AddressInput'
 
 enum TxFilterFormFieldNames {
@@ -195,7 +194,7 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                           render={({ field, fieldState }) => (
                             <NumberField
                               data-testid="amount-input"
-                              className={inputCss.input}
+                              className="h-[66px]"
                               label={
                                 fieldState.error?.message ||
                                 (isIncomingFilter ? 'Amount' : `Amount (only ${chain?.nativeCurrency.symbol || 'ETH'})`)
@@ -249,7 +248,7 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                           render={({ field, fieldState }) => (
                             <NumberField
                               data-testid="nonce-input"
-                              className={inputCss.input}
+                              className="h-[66px]"
                               label={fieldState.error?.message || 'Nonce'}
                               error={!!fieldState.error}
                               {...field}
