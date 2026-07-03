@@ -8,16 +8,12 @@ import { type SafeTransaction } from '@safe-global/types-kit'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { useMemo } from 'react'
 import {
-  PSEUDO_APPROVAL_VALUES,
+  formatApprovalAmount,
   type ApprovalInfo,
 } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
-import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
-import { UNLIMITED_APPROVAL_AMOUNT, UNLIMITED_PERMIT2_AMOUNT } from '@safe-global/utils/utils/tokens'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 export type { ApprovalInfo } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
-
-const DEFAULT_DECIMALS = 18
 
 const ApprovalModuleInstance = new ApprovalModule()
 
@@ -64,10 +60,7 @@ export const useApprovalInfos = (payload: {
             }
           }
 
-          const amountFormatted =
-            UNLIMITED_APPROVAL_AMOUNT == approval.amount || UNLIMITED_PERMIT2_AMOUNT == approval.amount
-              ? PSEUDO_APPROVAL_VALUES.UNLIMITED
-              : safeFormatUnits(approval.amount, tokenInfo?.decimals ?? DEFAULT_DECIMALS)
+          const amountFormatted = formatApprovalAmount(approval.amount, tokenInfo?.decimals)
 
           return { ...approval, tokenInfo, amountFormatted }
         }),

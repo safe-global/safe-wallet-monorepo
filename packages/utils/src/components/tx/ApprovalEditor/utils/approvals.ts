@@ -1,5 +1,6 @@
 import { ERC20__factory } from '@safe-global/utils/types/contracts'
-import { UNLIMITED_APPROVAL_AMOUNT } from '@safe-global/utils/utils/tokens'
+import { UNLIMITED_APPROVAL_AMOUNT, UNLIMITED_PERMIT2_AMOUNT } from '@safe-global/utils/utils/tokens'
+import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { Approval } from '@safe-global/utils/services/security/modules/ApprovalModule'
 import { id, parseUnits } from 'ethers'
@@ -30,6 +31,14 @@ export type ApprovalInfo = {
   /** Index of approval transaction within (batch) transaction */
   transactionIndex: number
 }
+
+const DEFAULT_DECIMALS = 18
+
+export const isUnlimitedApproval = (amount: bigint): boolean =>
+  amount === UNLIMITED_APPROVAL_AMOUNT || amount === UNLIMITED_PERMIT2_AMOUNT
+
+export const formatApprovalAmount = (amount: bigint, decimals?: number | null): string =>
+  isUnlimitedApproval(amount) ? PSEUDO_APPROVAL_VALUES.UNLIMITED : safeFormatUnits(amount, decimals ?? DEFAULT_DECIMALS)
 
 export const parseApprovalAmount = (amount: string, decimals: number) => {
   if (amount === PSEUDO_APPROVAL_VALUES.UNLIMITED) {

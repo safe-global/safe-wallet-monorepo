@@ -1,9 +1,11 @@
 import { faker } from '@faker-js/faker'
 import { parseUnits } from 'ethers'
-import { UNLIMITED_APPROVAL_AMOUNT } from '@safe-global/utils/utils/tokens'
+import { UNLIMITED_APPROVAL_AMOUNT, UNLIMITED_PERMIT2_AMOUNT } from '@safe-global/utils/utils/tokens'
 import { TokenType } from '@safe-global/store/gateway/types'
 import {
   ERC20_INTERFACE,
+  formatApprovalAmount,
+  isUnlimitedApproval,
   parseApprovalAmount,
   PSEUDO_APPROVAL_VALUES,
   updateApprovalTxs,
@@ -34,6 +36,26 @@ const encodeApprove = (spender: string, amount: bigint) =>
 
 const encodeIncreaseAllowance = (spender: string, amount: bigint) =>
   ERC20_INTERFACE.encodeFunctionData('increaseAllowance', [spender, amount])
+
+describe('formatApprovalAmount', () => {
+  it('formats unlimited amounts as the unlimited pseudo value', () => {
+    expect(formatApprovalAmount(UNLIMITED_APPROVAL_AMOUNT, 6)).toEqual(PSEUDO_APPROVAL_VALUES.UNLIMITED)
+    expect(formatApprovalAmount(UNLIMITED_PERMIT2_AMOUNT, 6)).toEqual(PSEUDO_APPROVAL_VALUES.UNLIMITED)
+  })
+
+  it('formats finite amounts with the token decimals, defaulting to 18', () => {
+    expect(formatApprovalAmount(1_500_000n, 6)).toEqual('1.5')
+    expect(formatApprovalAmount(parseUnits('2', 18), undefined)).toEqual('2')
+  })
+})
+
+describe('isUnlimitedApproval', () => {
+  it('detects both unlimited sentinels', () => {
+    expect(isUnlimitedApproval(UNLIMITED_APPROVAL_AMOUNT)).toBe(true)
+    expect(isUnlimitedApproval(UNLIMITED_PERMIT2_AMOUNT)).toBe(true)
+    expect(isUnlimitedApproval(parseUnits('100', 18))).toBe(false)
+  })
+})
 
 describe('parseApprovalAmount', () => {
   it('returns the unlimited amount for the unlimited pseudo value', () => {
