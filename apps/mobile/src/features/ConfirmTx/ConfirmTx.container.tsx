@@ -33,9 +33,7 @@ const getHeaderText = (isExecuting: boolean, isSigning: boolean): string => {
 
 function ConfirmTxContainer() {
   const routeTxId = useRoute<RouteProp<{ params: { txId: string } }>>().params.txId
-  // The draft may have been rebuilt under a new safeTxHash (e.g. an edited
-  // approval amount) — resolve the redirect at render time so the screen
-  // follows the rebuilt draft without any navigation param round-trip.
+  // A rebuilt draft (edited approval) lives under a new hash — follow the redirect at render time
   const redirectTxId = useAppSelector((state) => selectDraftRedirect(state, routeTxId))
   const txId = redirectTxId ?? routeTxId
   const router = useRouter()

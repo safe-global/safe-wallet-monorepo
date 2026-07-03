@@ -68,8 +68,7 @@ export const web3API = createApi({
         }
       },
     }),
-    // On-chain token metadata keyed by lowercased address. Contracts that are
-    // neither ERC-20 nor ERC-721 are omitted from the result.
+    // On-chain token metadata keyed by lowercased address; non-ERC-20/721 contracts are omitted
     getErc20TokenInfos: builder.query<Record<string, OnChainTokenInfo>, { addresses: string[]; chain: Chain }>({
       async queryFn({ addresses, chain }) {
         try {

@@ -10,12 +10,7 @@ interface ApprovalEditorProps {
   txId: string
 }
 
-/**
- * Shows the approvals a draft dApp transaction grants and lets the user edit
- * the amounts before signing. Renders nothing for proposed transactions (no
- * draft) or transactions without approvals; zero approvals (revokes) are
- * hidden like on web.
- */
+/** Approvals card for draft dApp transactions; hidden without a draft or non-zero approvals, like web */
 export const ApprovalEditor = ({ txId }: ApprovalEditorProps) => {
   const router = useRouter()
   const draft = useAppSelector((state) => selectDraftByHash(state, txId))

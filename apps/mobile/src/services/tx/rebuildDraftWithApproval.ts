@@ -20,10 +20,8 @@ export type RebuildDraftWithApprovalArgs = {
 }
 
 /**
- * Rebuilds a stashed draft with one approval re-encoded to a new amount and
- * runs it through the shared draft pipeline (hash, /preview, stash). Returns
- * the new safeTxHash — the caller owns re-keying the outstanding WC request
- * and dropping the old draft, and must skip both when the hash is unchanged.
+ * Re-encodes one approval and re-runs the draft pipeline, returning the new safeTxHash.
+ * The caller re-keys the WC request and drops the old draft (skip both when unchanged).
  */
 export const rebuildDraftWithApproval = async ({
   draft,
@@ -36,8 +34,7 @@ export const rebuildDraftWithApproval = async ({
   if (!to || !data) {
     throw new Error('Draft transaction has no calldata to update')
   }
-  // updateApprovalTxs silently skips approvals without decimals — fail loudly
-  // instead of stashing an unchanged draft that looks like a successful edit.
+  // Fail loudly — without decimals updateApprovalTxs would silently keep the old calldata
   if (!approval.tokenInfo) {
     throw new Error('Cannot re-encode the approval without token metadata')
   }
@@ -47,8 +44,7 @@ export const rebuildDraftWithApproval = async ({
     : [{ to, value: value ?? '0', data, operation: operation ?? OperationType.Call }]
 
   const updatedTxs = updateApprovalTxs([newValue], [approval], innerTxs)
-  // updateApprovalTxs drops the operation from re-encoded entries; restore it
-  // from the original position (approve calls are always plain calls anyway).
+  // Restore the operation that updateApprovalTxs drops from re-encoded entries
   const transactions: MetaTransactionData[] = updatedTxs.map((tx, index) => ({
     to: tx.to,
     value: tx.value,

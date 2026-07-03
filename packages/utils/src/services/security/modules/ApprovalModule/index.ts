@@ -11,11 +11,7 @@ import {
 
 export type ApprovalModuleResponse = Approval[]
 
-/**
- * Structural subset of protocol-kit's SafeTransaction — enough to scan for
- * approvals, so callers without an SDK transaction instance (e.g. a stashed
- * draft's SafeTransactionData) can be scanned too.
- */
+/** Structural subset of SafeTransaction — lets callers scan plain transaction data (e.g. a stashed draft) */
 export type ScannableSafeTransaction = {
   data: {
     to: string

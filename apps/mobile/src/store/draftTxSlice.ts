@@ -161,10 +161,7 @@ export const { setDraft, clearDraft, clearAllDrafts, setDraftRedirect } = draftT
 export const selectDraftByHash = (state: RootState, safeTxHash: string): DraftTx | undefined =>
   state.draftTx.drafts[safeTxHash]
 
-/**
- * Resolves where a rebuilt draft ended up, following chains from repeated
- * edits (old → mid → new). Returns undefined when the hash was never rebuilt.
- */
+/** Follows redirect chains from repeated edits; undefined when the hash was never rebuilt */
 export const selectDraftRedirect = (state: RootState, safeTxHash: string): string | undefined => {
   const redirects = state.draftTx.redirects
   if (!redirects) {

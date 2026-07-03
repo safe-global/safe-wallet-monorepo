@@ -70,11 +70,7 @@ interface ApprovalsListProps {
   onEdit?: (approval: ApprovalInfo) => void
 }
 
-/**
- * Card listing the token approvals a dApp transaction grants, mirroring the
- * web ApprovalEditor (apps/web/src/components/tx/ApprovalEditor). Unlimited or
- * high-value approvals use the warning palette, everything else info.
- */
+/** Lists the approvals a dApp transaction grants, mirroring web's ApprovalEditor */
 export const ApprovalsList = ({ approvals, onEdit }: ApprovalsListProps) => {
   // Like web's isReadOnly: an ERC-721 approval anywhere makes the whole card read-only
   const isErc721Approval = approvals.some((approval) => approval.tokenInfo?.type === TokenType.ERC721)

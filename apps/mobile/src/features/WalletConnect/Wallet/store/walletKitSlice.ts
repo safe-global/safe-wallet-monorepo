@@ -119,9 +119,7 @@ const walletKitSlice = createSlice({
       const { [action.payload]: _removed, ...rest } = state.outstandingRequests
       state.outstandingRequests = rest
     },
-    // The draft was rebuilt with different data (e.g. an edited approval amount), so the
-    // handed-off request now waits on a new safeTxHash. Move the entry so propose-success
-    // and abandon listeners keep finding it.
+    // The draft was rebuilt under a new safeTxHash — move the entry so propose/abandon listeners keep finding it
     rekeyOutstandingRequest(state, action: PayloadAction<{ fromSafeTxHash: string; toSafeTxHash: string }>) {
       const { fromSafeTxHash, toSafeTxHash } = action.payload
       const req = state.outstandingRequests[fromSafeTxHash]

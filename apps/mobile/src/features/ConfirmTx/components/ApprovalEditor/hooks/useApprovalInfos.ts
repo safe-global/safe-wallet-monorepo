@@ -18,9 +18,7 @@ import type { DraftTx } from '@/src/store/draftTxSlice'
 
 const ApprovalModuleInstance = new ApprovalModule()
 
-// A token the Safe never held is missing from balances, so fall back to the
-// token metadata the CGW /preview attached to the draft (tokenInfoIndex) —
-// without decimals the approval cannot be re-encoded.
+// Tokens the Safe never held are missing from balances — fall back to the CGW preview's tokenInfoIndex
 const findTokenInfo = (
   tokenAddress: string,
   balances: Balances | undefined,
@@ -43,11 +41,8 @@ export type ApprovalInfoWithSeverity = ApprovalInfo & {
 }
 
 /**
- * Scans a draft transaction for ERC-20 approve / increaseAllowance calls
- * (including inside multiSend batches) and resolves token metadata from the
- * Safe's balances, the draft's CGW preview, or on-chain — in that order,
- * mirroring web's useApprovalInfos. A token found nowhere keeps `tokenInfo:
- * undefined` and cannot be re-encoded.
+ * Scans a draft for approve / increaseAllowance calls (incl. multiSend) and resolves
+ * token metadata from balances → CGW preview → on-chain, mirroring web's useApprovalInfos
  */
 export const useApprovalInfos = (draft: DraftTx | undefined): ApprovalInfoWithSeverity[] | undefined => {
   const activeSafe = useAppSelector(selectActiveSafe)
@@ -62,8 +57,7 @@ export const useApprovalInfos = (draft: DraftTx | undefined): ApprovalInfoWithSe
     return scanResult.payload?.length ? scanResult.payload : undefined
   }, [draft])
 
-  // trusted: false — the high-value check must see untrusted and dust holdings
-  // too; skipped entirely unless the draft actually contains approvals
+  // trusted: false — the high-value check must see untrusted and dust holdings; skipped without approvals
   const { balances } = useBalances(false, undefined, false, !scannedApprovals)
 
   const resolveStatic = useCallback(
@@ -92,8 +86,7 @@ export const useApprovalInfos = (draft: DraftTx | undefined): ApprovalInfoWithSe
       const balance = balances?.items.find((item) =>
         sameAddress(item.tokenInfo.address, approval.tokenAddress),
       )?.balance
-      // Only flag what is verifiably risky — an unknown balance (loading,
-      // failed, or token not held) must not paint the card as a warning
+      // Only verifiably risky — an unknown balance (loading, failed, not held) must not paint a warning
       const isHighValue =
         isUnlimitedApproval(approval.amount) || (balance !== undefined && approval.amount > BigInt(balance))
 
