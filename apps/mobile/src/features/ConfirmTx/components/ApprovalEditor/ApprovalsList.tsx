@@ -5,7 +5,7 @@ import {
   PSEUDO_APPROVAL_VALUES,
   type ApprovalInfo,
 } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
-import { Logo } from '@/src/components/Logo'
+import { TokenIcon } from '@/src/components/TokenIcon/TokenIcon'
 import { Badge } from '@/src/components/Badge/Badge'
 import { EthAddress } from '@/src/components/EthAddress'
 import { SafeButton } from '@/src/components/SafeButton'
@@ -22,10 +22,10 @@ const ApprovalItem = ({ approval, onEdit }: { approval: ApprovalInfo; onEdit?: (
           Amount
         </Text>
         <XStack gap="$2" alignItems="center" flexShrink={1}>
-          <Logo logoUri={approval.tokenInfo?.logoUri} size="$6" fallbackIcon="token" />
+          <TokenIcon logoUri={approval.tokenInfo?.logoUri} size="$6" />
           <Badge
             circular={false}
-            themeName={isUnlimited ? 'badge_warning_variant2' : 'badge_warning'}
+            themeName={isUnlimited ? 'badge_warning_variant2' : 'badge_background'}
             textContentProps={{ fontWeight: 600 }}
             testID="approval-amount-pill"
             content={
@@ -86,9 +86,7 @@ export const ApprovalsList = ({ approvals, onEdit }: ApprovalsListProps) => {
             Allow access to tokens?
           </Text>
         </XStack>
-        <Text fontSize="$3" color="$textSecondaryLight">
-          {subtitle}
-        </Text>
+        <Text fontSize="$3">{subtitle}</Text>
       </YStack>
 
       {approvals.map((approval, index) => (
