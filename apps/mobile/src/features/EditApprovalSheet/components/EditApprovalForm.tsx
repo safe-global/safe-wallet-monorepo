@@ -128,7 +128,7 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <SafeInput
-              value={unlimited ? '' : value}
+              value={value}
               onFocus={(event) => {
                 const target = event.nativeEvent.target
                 setKeyboardTarget(typeof target === 'number' ? target : undefined)
@@ -179,7 +179,17 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
             control={control}
             name="unlimited"
             render={({ field: { onChange, value } }) => (
-              <LoadableSwitch value={value} onChange={() => onChange(!value)} testID="switch-unlimited-approval" />
+              <LoadableSwitch
+                value={value}
+                onChange={() => {
+                  const next = !value
+                  if (next) {
+                    setValue('amount', '')
+                  }
+                  onChange(next)
+                }}
+                testID="switch-unlimited-approval"
+              />
             )}
           />
         </XStack>

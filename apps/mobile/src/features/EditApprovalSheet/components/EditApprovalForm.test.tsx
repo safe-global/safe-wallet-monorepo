@@ -123,6 +123,19 @@ describe('EditApprovalForm', () => {
     expect(state.walletKit.outstandingRequests['0xnewhash']).toBeDefined()
   })
 
+  it('resets the amount when unlimited is switched on', () => {
+    const store = setupStore()
+    const { getByTestId } = renderWithStore(<EditApprovalForm draft={draft} approval={approval} safe={safe} />, store)
+
+    fireEvent.changeText(getByTestId('input-approval-amount'), '250')
+    fireEvent(getByTestId('switch-unlimited-approval'), 'onValueChange', true)
+
+    expect(getByTestId('input-approval-amount').props.value).toEqual('')
+
+    fireEvent(getByTestId('input-approval-amount'), 'focus', { nativeEvent: { target: 1 } })
+    expect(getByTestId('input-approval-amount').props.value).toEqual('')
+  })
+
   it('switches unlimited off when the amount input is focused', () => {
     const store = setupStore()
     const { getByTestId } = renderWithStore(<EditApprovalForm draft={draft} approval={approval} safe={safe} />, store)
