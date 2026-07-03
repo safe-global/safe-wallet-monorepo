@@ -113,7 +113,14 @@ const SafeAccountsTable = ({
   return (
     <Box data-testid={testId} sx={{ width: '100%' }}>
       <TableContainer
-        sx={{ width: '100%', overflowX: 'auto', borderRadius: '16px', backgroundColor: 'background.paper' }}
+        sx={{
+          width: '100%',
+          overflowX: 'auto',
+          borderRadius: '16px',
+          backgroundColor: 'background.paper',
+          border: '1px solid',
+          borderColor: 'border.light',
+        }}
       >
         <Table sx={{ tableLayout: 'fixed', minWidth, borderCollapse: 'separate', borderSpacing: 0 }}>
           <TableHead>

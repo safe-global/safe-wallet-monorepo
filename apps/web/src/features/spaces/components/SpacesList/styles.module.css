@@ -8,16 +8,14 @@
 .mySpaces {
   width: 100vw;
   /* Kept in sync with .myAccounts on the Trusted accounts tab so switching tabs doesn't shift the layout. */
-  max-width: 990px;
+  max-width: 992px;
   margin: var(--space-2);
 }
 
 .spacesHeader {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   padding: var(--space-3) 0;
-  gap: var(--space-2);
-  flex-wrap: wrap;
 }
 
 /* Soft brand-tinted radial glow behind the sign-in card. */

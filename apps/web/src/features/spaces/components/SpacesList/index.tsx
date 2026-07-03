@@ -32,18 +32,29 @@ import AddIcon from '@/public/images/common/add.svg'
 import { SPACES_LIMIT } from '@/features/spaces/constants'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
-const AddSpaceButton = ({ onClick, disabled }: { onClick?: () => void; disabled?: boolean }) => {
+const AddSpaceButton = ({
+  onClick,
+  disabled,
+  size = 'lg',
+}: {
+  onClick?: () => void
+  disabled?: boolean
+  size?: 'lg' | 'default'
+}) => {
   const button = (
     <Button
       data-testid="create-space-button"
       variant="default"
-      size="lg"
-      className={`h-full rounded-lg px-6 py-3 text-base${disabled ? ' cursor-not-allowed opacity-50 grayscale' : ''}`}
+      size={size}
+      className={cn(
+        size === 'lg' && 'h-full rounded-lg px-6 py-3 text-base',
+        disabled && 'cursor-not-allowed opacity-50 grayscale',
+      )}
       render={disabled ? <span /> : <NextLink href={AppRoutes.welcome.createSpace} />}
       disabled={disabled}
       onClick={disabled ? undefined : onClick}
     >
-      <AddIcon className="size-5 fill-primary-foreground" />
+      <AddIcon className={cn('fill-primary-foreground', size === 'lg' ? 'size-5' : 'size-4')} />
       Create workspace
     </Button>
   )
@@ -162,6 +173,7 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
 const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
+  const isDarkMode = useDarkMode()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const {
@@ -204,10 +216,6 @@ const SpacesList = () => {
       <Box className={css.mySpaces}>
         <Box className={css.spacesHeader}>
           <AccountsNavigation />
-
-          {isUserSignedIn && activeSpaces.length > 0 && (
-            <AddSpaceButton disabled={isAtSpacesLimit} onClick={onAddSpaceBtnClick} />
-          )}
         </Box>
 
         {isUserSignedIn &&
@@ -223,11 +231,36 @@ const SpacesList = () => {
         {!isUserSignedIn ? (
           <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
         ) : activeSpaces.length > 0 ? (
-          <Stack spacing={2} data-testid="org-list">
-            {activeSpaces.map((space) => (
-              <SpaceRow key={space.uuid} space={space} />
-            ))}
-          </Stack>
+          <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+            <div className="rounded-3xl bg-card pb-4">
+              <div className="flex justify-end px-4 pt-4">
+                <AddSpaceButton size="default" disabled={isAtSpacesLimit} onClick={onAddSpaceBtnClick} />
+              </div>
+
+              <div className="px-4 pt-4">
+                <div className="rounded-2xl border border-border bg-card">
+                  <div className="p-1 pb-0">
+                    <div className="flex h-9 items-center rounded-xl bg-muted pl-4">
+                      <span className="text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">
+                        Name
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="px-4 py-1" data-testid="org-list">
+                    {activeSpaces.map((space, index) => (
+                      <SpaceRow
+                        key={space.uuid}
+                        space={space}
+                        currentUserId={currentUser?.id}
+                        showDivider={index < activeSpaces.length - 1}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         ) : (
           <NoSpacesState isAtLimit={isAtSpacesLimit} />
         )}

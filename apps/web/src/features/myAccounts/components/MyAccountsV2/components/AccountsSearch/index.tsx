@@ -19,7 +19,7 @@ const AccountsSearch = ({ setSearchQuery }: AccountsSearchProps) => {
         </InputGroupAddon>
         <InputGroupInput
           id="search-by-name"
-          placeholder="Search for safes"
+          placeholder="Search for Safe accounts"
           aria-label="Search Safe list by name"
           onChange={(e) => handleSearch(e.target.value)}
         />

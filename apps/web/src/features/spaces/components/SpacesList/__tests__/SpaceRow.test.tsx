@@ -71,4 +71,18 @@ describe('SpaceRow', () => {
 
     expect(refetch).toHaveBeenCalled()
   })
+
+  it('shows the context menu only for active admins of the workspace', () => {
+    const adminSpace = {
+      ...space,
+      members: [{ user: { id: 7 }, role: 'ADMIN', status: 'ACTIVE' }],
+    } as unknown as GetSpaceResponse
+
+    const { rerender } = render(<SpaceRow space={adminSpace} currentUserId={7} />)
+    expect(screen.getByTestId('space-card-context-menu-button')).toBeInTheDocument()
+
+    // A non-member (or non-admin) gets no menu.
+    rerender(<SpaceRow space={adminSpace} currentUserId={8} />)
+    expect(screen.queryByTestId('space-card-context-menu-button')).not.toBeInTheDocument()
+  })
 })

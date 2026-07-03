@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo } from 'react'
-import useWallet from '@/hooks/wallets/useWallet'
 import { type AllSafeItems, type AllSafeItemsGrouped, getComparator, useSafesSearch } from '@/hooks/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -9,33 +8,24 @@ import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
 import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
-import BookmarkIcon from '@/public/images/apps/bookmark.svg'
 
-import ConnectWalletPrompt from '../../../ConnectWalletPrompt'
 import MigrationPrompt from '../../../MigrationPrompt'
 import AddTrustedSafesCard from '@/components/common/AddTrustedSafesCard'
-import TrustedSafesModal from '@/components/common/TrustedSafesModal'
-import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
-import useMigrationPrompt from '../../../../hooks/useMigrationPrompt'
+import type { UseTrustedSafesModalReturn } from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
+import type { UseMigrationPromptReturn } from '../../../../hooks/useMigrationPrompt'
 import SafeAccountsTable from '../../../SafeAccountsTable'
 
 type AccountsListProps = {
   searchQuery: string
   safes: AllSafeItemsGrouped
+  modal: UseTrustedSafesModalReturn
+  migration: UseMigrationPromptReturn
   onLinkClick?: () => void
-  isSidebar?: boolean
 }
 
-const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) => {
-  const wallet = useWallet()
-  const isConnected = Boolean(wallet)
-
+const AccountsList = ({ searchQuery, safes, modal, migration, onLinkClick }: AccountsListProps) => {
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = getComparator(orderBy)
-
-  const modal = useTrustedSafesModal()
-  const migration = useMigrationPrompt()
 
   const { safe: currentSafe, safeAddress } = useSafeInfo()
   const addressBook = useAddressBook()
@@ -88,10 +78,6 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
     )
   }
 
-  if (!isConnected && !migration.hasPinnedSafes) {
-    return <ConnectWalletPrompt />
-  }
-
   const showCurrentSafe = safeAddress && currentSafeItem && !currentSafeInList?.isPinned
   const showEmptyState = !migration.hasPinnedSafes && !migration.shouldShowPrompt
 
@@ -109,26 +95,12 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
       )}
 
       {pinnedSafes.length > 0 && (
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <BookmarkIcon className="text-foreground size-4 [&_path]:stroke-current" />
-            <Typography variant="paragraph-small-bold">Trusted Safes</Typography>
-          </div>
-          <Button variant="outline" size="sm" onClick={modal.open} data-testid="add-more-safes-button">
-            Manage trusted Safes
-          </Button>
-        </div>
-      )}
-
-      {pinnedSafes.length > 0 && (
         <section data-testid="pinned-accounts" className="mb-4">
           <SafeAccountsTable items={pinnedSafes} onLinkClick={onLinkClick} />
         </section>
       )}
 
       {showEmptyState && <AddTrustedSafesCard onAdd={modal.open} />}
-
-      <TrustedSafesModal modal={modal} />
     </>
   )
 }

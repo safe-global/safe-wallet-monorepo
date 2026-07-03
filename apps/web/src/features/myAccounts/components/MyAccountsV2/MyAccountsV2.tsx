@@ -1,45 +1,64 @@
 import { useState } from 'react'
-import AccountsHeader from '../AccountsHeader'
+import AccountsNavigation from '../AccountsNavigation'
 import AccountsList from './components/AccountsList'
 import AccountsSearch from './components/AccountsSearch'
+import GetStartedCard from './components/GetStartedCard'
+import TrustedAccountsActions from './components/TrustedAccountsActions'
 import madProps from '@/utils/mad-props'
 import css from '../../styles.module.css'
 import useWallet from '@/hooks/wallets/useWallet'
 import { type AllSafeItemsGrouped, useAllSafesGrouped } from '@/hooks/safes'
-import classNames from 'classnames'
 import useTrackSafesCount from '../../hooks/useTrackedSafesCount'
+import useMigrationPrompt from '../../hooks/useMigrationPrompt'
+import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
+import TrustedSafesModal from '@/components/common/TrustedSafesModal'
 import { Separator } from '@/components/ui/separator'
 import { DataWidget } from '../DataWidget'
 
 type MyAccountsProps = {
   safes: AllSafeItemsGrouped
-  isSidebar?: boolean
   onLinkClick?: () => void
 }
 
-const MyAccountsV2 = ({ safes, onLinkClick, isSidebar = false }: MyAccountsProps) => {
+const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
   const wallet = useWallet()
   const [searchQuery, setSearchQuery] = useState('')
+  const modal = useTrustedSafesModal()
+  const migration = useMigrationPrompt()
   useTrackSafesCount(safes, wallet)
+
+  const showGetStarted = !wallet && !migration.hasPinnedSafes
 
   return (
     <div data-testid="sidebar-safe-container" className={css.container}>
-      <div
-        className={classNames(css.myAccounts, {
-          [css.sidebarAccounts]: isSidebar,
-        })}
-      >
-        <AccountsHeader isSidebar={isSidebar} onLinkClick={onLinkClick} />
-
-        <div className="bg-background/50 text-card-foreground overflow-hidden rounded-xl">
-          <AccountsSearch setSearchQuery={setSearchQuery} />
-
-          {isSidebar && <Separator />}
-
-          <div className={classNames(css.safeList)}>
-            <AccountsList searchQuery={searchQuery} safes={safes} isSidebar={isSidebar} onLinkClick={onLinkClick} />
-          </div>
+      <div className={css.myAccounts}>
+        <div className="flex justify-center py-6">
+          <AccountsNavigation />
         </div>
+
+        {showGetStarted ? (
+          <GetStartedCard />
+        ) : (
+          <div className="bg-card text-card-foreground overflow-hidden rounded-3xl">
+            <TrustedAccountsActions onManage={modal.open} onLinkClick={onLinkClick} />
+
+            <AccountsSearch setSearchQuery={setSearchQuery} />
+
+            <Separator />
+
+            <div className={css.safeList}>
+              <AccountsList
+                searchQuery={searchQuery}
+                safes={safes}
+                modal={modal}
+                migration={migration}
+                onLinkClick={onLinkClick}
+              />
+            </div>
+          </div>
+        )}
+
+        <TrustedSafesModal modal={modal} />
 
         <DataWidget />
       </div>
