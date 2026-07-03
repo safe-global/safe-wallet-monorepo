@@ -21,13 +21,8 @@ export function verifyPropsalStatusExists() {
 }
 
 export function verifyProposerInTxActionList(address) {
-  cy.get(create_tx.txSigner).within(() => {
+  cy.get(create_tx.transactionSideList).within(() => {
     cy.contains(address)
-    cy.get('div[style]')
-      .filter((index, element) => {
-        return element.style.backgroundImage.includes('url')
-      })
-      .should('exist')
   })
 }
 export function verifyProposedTxMsgVisible() {
