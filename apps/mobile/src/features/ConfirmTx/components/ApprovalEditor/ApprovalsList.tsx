@@ -55,14 +55,20 @@ const ApprovalItem = ({ approval, onEdit }: { approval: ApprovalInfo; onEdit?: (
   )
 }
 
+export type ApprovalListItem = ApprovalInfo & {
+  /** Unlimited or high-value approvals render the card with warning emphasis */
+  isHighValue?: boolean
+}
+
 interface ApprovalsListProps {
-  approvals: ApprovalInfo[]
+  approvals: ApprovalListItem[]
   onEdit?: (approval: ApprovalInfo) => void
 }
 
 /**
- * Warning card listing the token approvals a dApp transaction grants, mirroring
- * the web ApprovalEditor (apps/web/src/components/tx/ApprovalEditor).
+ * Card listing the token approvals a dApp transaction grants, mirroring the
+ * web ApprovalEditor (apps/web/src/components/tx/ApprovalEditor). Unlimited or
+ * high-value approvals use the warning palette, everything else info.
  */
 export const ApprovalsList = ({ approvals, onEdit }: ApprovalsListProps) => {
   // Like web's isReadOnly: an ERC-721 approval anywhere makes the whole card read-only
@@ -71,10 +77,11 @@ export const ApprovalsList = ({ approvals, onEdit }: ApprovalsListProps) => {
   const subtitle = isErc721Approval
     ? 'This allows the spender to transfer the specified token.'
     : 'This allows the spender to spend the specified amount of your tokens.'
+  const hasHighValueApproval = approvals.some((approval) => approval.isHighValue)
 
   return (
     <YStack
-      backgroundColor="$backgroundWarning"
+      backgroundColor={hasHighValueApproval ? '$backgroundWarning' : '$infoBackground'}
       borderRadius="$4"
       padding="$4"
       gap="$4"
@@ -83,8 +90,13 @@ export const ApprovalsList = ({ approvals, onEdit }: ApprovalsListProps) => {
     >
       <YStack gap="$2">
         <XStack gap="$2" alignItems="center">
-          <View backgroundColor="$warning" borderRadius="$10" padding="$1">
-            <SafeFontIcon name="alert" color="$colorContrast" size={16} />
+          <View backgroundColor={hasHighValueApproval ? '$warning' : '$info'} borderRadius="$10" padding="$1">
+            <SafeFontIcon
+              name={hasHighValueApproval ? 'alert' : 'info'}
+              testID={hasHighValueApproval ? 'approval-editor-warning-icon' : 'approval-editor-info-icon'}
+              color="$colorContrast"
+              size={16}
+            />
           </View>
           <Text fontSize="$4" fontWeight={700}>
             Allow access to tokens?

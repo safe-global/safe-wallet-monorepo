@@ -17,7 +17,7 @@ import { useApprovalInfos } from './useApprovalInfos'
 
 const mockUseBalances = jest.fn()
 jest.mock('@/src/hooks/useBalances', () => ({
-  useBalances: () => mockUseBalances(),
+  useBalances: (...args: unknown[]) => mockUseBalances(...args),
 }))
 
 const mockUseGetErc20TokenInfosQuery = jest.fn()
@@ -93,12 +93,27 @@ describe('useApprovalInfos', () => {
       amountFormatted: '100',
       method: 'approve',
       transactionIndex: 0,
+      // equal to the Safe's balance of 100 USDC
+      isHighValue: false,
     })
     expect(result.current?.[0].tokenInfo?.symbol).toEqual('USDC')
     expect(result.current?.[0].spender.toLowerCase()).toEqual(spender.toLowerCase())
+    // must request ALL balances, not just trusted ones
+    expect(mockUseBalances).toHaveBeenCalledWith(false, undefined, false)
   })
 
-  it('formats the unlimited amount as the unlimited pseudo value', () => {
+  it('flags approvals above the balance or with unknown balance as high value', () => {
+    const aboveBalance = parseUnits('101', 6)
+    const draft = buildDraft({ data: ERC20_INTERFACE.encodeFunctionData('approve', [spender, aboveBalance]) })
+    const { result } = renderHook(() => useApprovalInfos(draft))
+    expect(result.current?.[0].isHighValue).toBe(true)
+
+    mockUseBalances.mockReturnValue({ balances: undefined })
+    const { result: unknownBalanceResult } = renderHook(() => useApprovalInfos(draft))
+    expect(unknownBalanceResult.current?.[0].isHighValue).toBe(true)
+  })
+
+  it('formats the unlimited amount as the unlimited pseudo value and flags it high value', () => {
     const draft = buildDraft({
       data: ERC20_INTERFACE.encodeFunctionData('approve', [spender, UNLIMITED_APPROVAL_AMOUNT]),
     })
@@ -106,6 +121,7 @@ describe('useApprovalInfos', () => {
     const { result } = renderHook(() => useApprovalInfos(draft))
 
     expect(result.current?.[0].amountFormatted).toEqual(PSEUDO_APPROVAL_VALUES.UNLIMITED)
+    expect(result.current?.[0].isHighValue).toBe(true)
   })
 
   it('falls back to the preview tokenInfoIndex for tokens outside the balance list', () => {

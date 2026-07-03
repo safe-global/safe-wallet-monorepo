@@ -40,14 +40,30 @@ type Story = StoryObj<typeof ApprovalsList>
 
 export const Editable: Story = {
   args: {
-    approvals: [usdcApproval],
+    approvals: [{ ...usdcApproval, isHighValue: false }],
     onEdit: () => undefined,
   },
 }
 
 export const UnlimitedAmount: Story = {
   args: {
-    approvals: [unlimitedApproval],
+    approvals: [{ ...unlimitedApproval, isHighValue: true }],
+    onEdit: () => undefined,
+  },
+}
+
+/** Below the Safe's balance — renders with the calm info palette */
+export const LowValue: Story = {
+  args: {
+    approvals: [{ ...usdcApproval, amount: 500_000n, amountFormatted: '0.5', isHighValue: false }],
+    onEdit: () => undefined,
+  },
+}
+
+/** Finite but above the Safe's balance — renders with the warning palette like unlimited */
+export const HighValue: Story = {
+  args: {
+    approvals: [{ ...usdcApproval, amount: 1_000_000_000_000n, amountFormatted: '1000000', isHighValue: true }],
     onEdit: () => undefined,
   },
 }

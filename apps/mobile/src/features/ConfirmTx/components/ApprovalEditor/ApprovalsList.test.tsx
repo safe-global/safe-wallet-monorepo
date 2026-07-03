@@ -6,7 +6,7 @@ import {
   type ApprovalInfo,
 } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { render, fireEvent } from '@/src/tests/test-utils'
-import { ApprovalsList } from './ApprovalsList'
+import { ApprovalsList, type ApprovalListItem } from './ApprovalsList'
 
 const erc721TokenInfo = (): NonNullable<ApprovalInfo['tokenInfo']> => ({
   address: faker.finance.ethereumAddress(),
@@ -15,7 +15,7 @@ const erc721TokenInfo = (): NonNullable<ApprovalInfo['tokenInfo']> => ({
   type: TokenType.ERC721,
 })
 
-const buildApproval = (overrides: Partial<ApprovalInfo> = {}): ApprovalInfo => {
+const buildApproval = (overrides: Partial<ApprovalListItem> = {}): ApprovalListItem => {
   const tokenAddress = faker.finance.ethereumAddress()
   return {
     tokenInfo: {
@@ -64,6 +64,14 @@ describe('ApprovalsList', () => {
   it('hides the edit button without an onEdit handler', () => {
     const { queryByTestId } = render(<ApprovalsList approvals={[buildApproval()]} />)
     expect(queryByTestId('edit-approval-button')).toBeNull()
+  })
+
+  it('uses the info palette for normal approvals and warning for high-value ones', () => {
+    const { getByTestId, rerender } = render(<ApprovalsList approvals={[buildApproval({ isHighValue: false })]} />)
+    expect(getByTestId('approval-editor-info-icon')).toBeTruthy()
+
+    rerender(<ApprovalsList approvals={[buildApproval(), buildApproval({ isHighValue: true })]} />)
+    expect(getByTestId('approval-editor-warning-icon')).toBeTruthy()
   })
 
   it('keeps the edit button for tokens without metadata, like web', () => {
