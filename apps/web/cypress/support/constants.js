@@ -254,7 +254,7 @@ export const addressBookErrrMsg = {
   ownSafe: 'Cannot use Safe account itself as signer',
   alreadyAdded: 'Address already added',
   ownerAdded: 'Signer is already added',
-  failedResolve: 'Failed to resolve the address',
+  failedResolve: 'ENS name not available on Sepolia',
   emptyAddress: 'Owner',
   safeAlreadyAdded: 'Safe account is already added',
   prefixMismatch: "doesn't match the current chain",
