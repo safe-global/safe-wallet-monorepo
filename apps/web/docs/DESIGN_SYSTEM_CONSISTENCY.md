@@ -56,7 +56,7 @@ _Last updated: 2026-07-04._
    (Input + absolute icon + `pl-10`, h-10) used by AddressBook + Apps; and the `InputGroup` addon pattern
    used by spaces `SearchInput`, `AccountsSearch`, and the dropdown searches. The **InputGroup pattern is
    more-used + idiomatic → canonical.** Visual/token consistency is already handled (all default to
-   `border-border` now), so what's left is the *structural* choice + normalizing height (SearchField h-10 vs
+   `border-border` now), so what's left is the _structural_ choice + normalizing height (SearchField h-10 vs
    InputGroup h-9) and icon (size/color). Needs a designer nod on the canonical look before refactoring
    ~8 usages that carry behavioral nuance (debounce, responsive width).
 2. **Finish the input audit tail.** The `input-analysis` Workflow produced 25 findings; 7 safe-fixes were

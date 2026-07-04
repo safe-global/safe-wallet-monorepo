@@ -120,7 +120,7 @@ const BatchExecuteButton = () => {
                 onMouseEnter={handleOnMouseEnter}
                 onMouseLeave={handleOnMouseLeave}
                 variant="outline"
-                size="sm"
+                size="action"
                 disabled={isDisabled}
                 onClick={handleOpenModal}
               >
