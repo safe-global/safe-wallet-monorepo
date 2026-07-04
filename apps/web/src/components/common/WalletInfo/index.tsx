@@ -101,7 +101,7 @@ export const WalletInfo = ({
       <div className="flex w-full flex-col gap-4">
         <ChainSwitcher fullWidth />
 
-        <Button size="sm" onClick={handleSwitchWallet} className="w-full">
+        <Button variant="outline" size="sm" onClick={handleSwitchWallet} className="w-full">
           Switch wallet
         </Button>
 

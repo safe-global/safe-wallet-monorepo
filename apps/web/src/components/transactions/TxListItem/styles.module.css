@@ -26,15 +26,24 @@
 }
 
 .listItem:hover,
-.listItem.batched,
-.listItem[data-open] {
+.listItem.batched {
   background-color: var(--color-secondary-background);
   border-color: var(--color-secondary-light);
 }
 
-.listItem:hover [data-slot='accordion-trigger'],
-.listItem[data-open] [data-slot='accordion-trigger'] {
+/* Expanded card stays solid white/card (declared after :hover so it wins when an open item is
+   also hovered) — the tinted fill hurt contrast on the detail content. A neutral border marks it. */
+.listItem[data-open] {
+  background-color: var(--card);
+  border-color: var(--border);
+}
+
+.listItem:hover [data-slot='accordion-trigger'] {
   background-color: var(--color-background-light);
+}
+
+.listItem[data-open] [data-slot='accordion-trigger'] {
+  background-color: var(--card);
 }
 
 .listItemNested:hover [data-slot='accordion-trigger'],

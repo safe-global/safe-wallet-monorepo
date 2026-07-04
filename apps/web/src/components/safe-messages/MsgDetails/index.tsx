@@ -89,7 +89,7 @@ const MsgDetails = ({ msg }: { msg: MessageItem }): ReactElement => {
           </div>
         )}
 
-        <div className={txDetailsCss.multiSend}>
+        <div className={classNames(txDetailsCss.multiSend, 'px-4')}>
           <Accordion
             multiple
             defaultValue={msg.confirmations
