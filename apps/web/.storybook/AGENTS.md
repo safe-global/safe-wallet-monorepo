@@ -44,7 +44,9 @@ Highlights so agents don't rediscover them:
 - **Surface & token rules (bit you) :** filled `secondary` only reads on white/card surfaces — on the muted
   page background use `variant="outline"`. `--input` is `#fff` in light mode, so a **visible field/button
   border must use `border-border`, not `border-input`** (which also looks borderless in dark until you
-  switch it to `border-border`).
+  switch it to `border-border`). The `Input`, `InputGroup`, and `SelectTrigger` primitives now default to
+  `border-border`, so you should not need to set a border color on a field — and never re-introduce
+  `border-input` or a hard-coded `border-gray-*`.
 
 ## Core Patterns
 

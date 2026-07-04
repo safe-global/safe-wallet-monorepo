@@ -140,7 +140,7 @@ const AccountsModal = ({
         </DialogHeader>
 
         <div className="flex shrink-0 items-center gap-2 px-4 py-3">
-          <InputGroup className="flex-1 rounded-md border-border shadow-none">
+          <InputGroup className="flex-1 shadow-none">
             <InputGroupAddon>
               <Search className="size-4" />
             </InputGroupAddon>

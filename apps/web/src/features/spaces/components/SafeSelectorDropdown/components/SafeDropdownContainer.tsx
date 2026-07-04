@@ -153,7 +153,7 @@ const SafeDropdownContainer = ({
             {header}
             {showSearch && (
               <div className="flex items-center gap-2 px-3 pb-2 pt-1">
-                <InputGroup className="flex-1 rounded-md border-border shadow-none">
+                <InputGroup className="flex-1 shadow-none">
                   <InputGroupAddon>
                     <Search className="size-4" />
                   </InputGroupAddon>
