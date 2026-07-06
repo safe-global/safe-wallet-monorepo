@@ -139,6 +139,21 @@ export function clickOnLetsGoBtn() {
   return cy.get(creationModalLetsGoBtn, { timeout: 60000 }).should('not.exist')
 }
 
+// Reads the created safe's address so assertions target the exact safe, not other
+// same-creator safes synced in after "Sign in to workspace".
+export function getCreatedSafeAddress() {
+  return cy
+    .get(cfSafeInfo)
+    .invoke('text')
+    .then((text) => {
+      const match = text.match(/0x[0-9a-fA-F]{40}/)
+      if (!match) {
+        throw new Error(`Could not find a safe address in the creation success screen: "${text}"`)
+      }
+      return match[0]
+    })
+}
+
 export function verifyPolicy1_1() {
   cy.contains(policy1_2).should('exist')
   // TOD: Need data-cy for containers
@@ -318,31 +333,28 @@ function getOwnerAddressInput(index) {
   return `input[name="owners.${index}.address"]`
 }
 
-export function assertCFSafeThresholdAndSigners(chainId, threshold, expectedOwnersCount, lsdata) {
-  const localStorageData = lsdata
-  const data = JSON.parse(localStorageData)
-  let thresholdFound = false
+export function assertCFSafeThresholdAndSigners(chainId, threshold, expectedOwnersCount, lsdata, safeAddress) {
+  const data = JSON.parse(lsdata)
+  const chainSafes = data[chainId] || {}
+  const matchedAddress = Object.keys(chainSafes).find((addr) => addr.toLowerCase() === safeAddress.toLowerCase())
+  const safe = matchedAddress ? chainSafes[matchedAddress] : undefined
 
-  for (const address in data[chainId]) {
-    const safe = data[chainId][address]
-
-    if (safe.props.safeAccountConfig.threshold === threshold) {
-      thresholdFound = true
-
-      const ownersCount = safe.props.safeAccountConfig.owners.length
-      if (ownersCount !== expectedOwnersCount) {
-        throw new Error(
-          `Safe at address ${address} on chain ID ${chainId} has ${ownersCount} owners, expected ${expectedOwnersCount}.`,
-        )
-      }
-
-      console.log(`Safe with threshold ${threshold} and ${expectedOwnersCount} owners exists on chain ID ${chainId}.`)
-      break
-    }
+  if (!safe) {
+    throw new Error(`No safe found at address ${safeAddress} on chain ID ${chainId}.`)
   }
 
-  if (!thresholdFound) {
-    throw new Error(`No safe found with threshold ${threshold} on chain ID ${chainId}.`)
+  const actualThreshold = safe.props.safeAccountConfig.threshold
+  if (actualThreshold !== threshold) {
+    throw new Error(
+      `Safe at address ${safeAddress} on chain ID ${chainId} has threshold ${actualThreshold}, expected ${threshold}.`,
+    )
+  }
+
+  const ownersCount = safe.props.safeAccountConfig.owners.length
+  if (ownersCount !== expectedOwnersCount) {
+    throw new Error(
+      `Safe at address ${safeAddress} on chain ID ${chainId} has ${ownersCount} owners, expected ${expectedOwnersCount}.`,
+    )
   }
 }
 

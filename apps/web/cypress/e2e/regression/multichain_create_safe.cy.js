@@ -56,10 +56,12 @@ describe('Multichain safe creation tests', () => {
     createwallet.clickOnNextBtn()
     createwallet.clickOnSignInToWorkspaceBtn()
     createwallet.clickOnReviewStepNextBtn()
-    createwallet.clickOnLetsGoBtn().then(() => {
-      let data = localStorage.getItem(constants.localStorageKeys.SAFE_v2__undeployedSafes)
-      createwallet.assertCFSafeThresholdAndSigners(constants.networkKeys.polygon, 2, 2, data)
-      createwallet.assertCFSafeThresholdAndSigners(constants.networkKeys.sepolia, 2, 2, data)
+    createwallet.getCreatedSafeAddress().then((safeAddress) => {
+      createwallet.clickOnLetsGoBtn().then(() => {
+        let data = localStorage.getItem(constants.localStorageKeys.SAFE_v2__undeployedSafes)
+        createwallet.assertCFSafeThresholdAndSigners(constants.networkKeys.polygon, 2, 2, data, safeAddress)
+        createwallet.assertCFSafeThresholdAndSigners(constants.networkKeys.sepolia, 2, 2, data, safeAddress)
+      })
     })
   })
 
@@ -74,10 +76,12 @@ describe('Multichain safe creation tests', () => {
     createwallet.clickOnNextBtn()
     createwallet.clickOnSignInToWorkspaceBtn()
     createwallet.clickOnReviewStepNextBtn()
-    createwallet.clickOnLetsGoBtn().then(() => {
-      let data = localStorage.getItem(constants.localStorageKeys.SAFE_v2__undeployedSafes)
-      createwallet.assertCFSafeThresholdAndSigners(constants.networkKeys.polygon, 1, 2, data)
-      createwallet.assertCFSafeThresholdAndSigners(constants.networkKeys.sepolia, 1, 2, data)
+    createwallet.getCreatedSafeAddress().then((safeAddress) => {
+      createwallet.clickOnLetsGoBtn().then(() => {
+        let data = localStorage.getItem(constants.localStorageKeys.SAFE_v2__undeployedSafes)
+        createwallet.assertCFSafeThresholdAndSigners(constants.networkKeys.polygon, 1, 2, data, safeAddress)
+        createwallet.assertCFSafeThresholdAndSigners(constants.networkKeys.sepolia, 1, 2, data, safeAddress)
+      })
     })
   })
 })
