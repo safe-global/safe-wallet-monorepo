@@ -229,6 +229,10 @@ export function verifyRejectBtnDisabled() {
   getRejectButton().should('be.disabled')
 }
 
+export function verifyPayNowOptionIsDisabled() {
+  cy.get(payNowExecMethod).find('input').should('be.disabled')
+}
+
 export function verifyTxRejectModalVisible() {
   main.verifyMinimumElementsCount(wallet.choiceBtn, 2)
 }

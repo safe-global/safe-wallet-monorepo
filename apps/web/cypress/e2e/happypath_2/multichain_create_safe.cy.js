@@ -30,6 +30,7 @@ describe('Happy path Multichain safe creation tests', { defaultCommandTimeout: 6
     createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
+    createwallet.clickOnSignInToWorkspaceBtn()
     createwallet.clickOnReviewStepNextBtn()
     createwallet.clickOnLetsGoBtn()
 

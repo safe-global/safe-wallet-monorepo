@@ -46,6 +46,7 @@ export const cfSafeInfo = '[data-testid="safe-info"]'
 export const connectWalletBtn = '[data-testid="connect-wallet-btn"]'
 export const continueWithWalletBtnConnected = '[data-testid="continue-with-wallet-btn"]'
 const networkSelectorItem = '[data-testid="network-selector-item"]'
+const signInToWorkspaceBtn = '[data-testid="sign-in-to-workspace-btn"]'
 
 const policy1_2 = '1/1 policy'
 export const walletName = 'test1-sepolia-safe'
@@ -121,6 +122,11 @@ export function cancelWalletCreation() {
 
 export function clickOnBackBtn() {
   main.clickOnBackBtn(backBtn)
+}
+
+export function clickOnSignInToWorkspaceBtn() {
+  cy.get(signInToWorkspaceBtn).should('be.visible').click()
+  cy.get(reviewStepNextBtn).should('not.be.disabled')
 }
 
 export function clickOnReviewStepNextBtn() {
