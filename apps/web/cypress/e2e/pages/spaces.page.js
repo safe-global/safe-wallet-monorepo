@@ -10,6 +10,7 @@ import * as navigation from './navigation.page.js'
 const orgList = '[data-testid="org-list"]'
 export const createSpaceBtn = '[data-testid="create-space-button"]'
 const sidebarLogo = '[data-testid="logo-container"]'
+const classicViewLink = '[data-testid="classic-view-link"]'
 
 // -- Space selector --
 const spaceSelectorBtn = '[data-testid="space-selector-button"]'
@@ -186,6 +187,10 @@ const spaceDashboardWidgetSelectorByTitle = {
 
 export function clickOnSignInBtn() {
   cy.get(continueWithWalletBtn).click()
+}
+
+export function clickOnUseOldUiBtn() {
+  cy.get(classicViewLink, { timeout: 30000 }).should('be.visible').click()
 }
 
 export function blockBeamer() {
