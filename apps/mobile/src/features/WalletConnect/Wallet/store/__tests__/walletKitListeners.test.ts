@@ -1,4 +1,5 @@
 import { configureStore, createListenerMiddleware } from '@reduxjs/toolkit'
+import { faker } from '@faker-js/faker'
 import { waitFor } from '@testing-library/react-native'
 import { http, HttpResponse, delay } from 'msw'
 import { formatJsonRpcResult } from '@walletconnect/jsonrpc-utils'
@@ -11,6 +12,9 @@ import { cgwClient } from '@safe-global/store/gateway/cgwClient'
 import { cgwApi, type ProposeTransactionDto } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { setActiveSafe, switchActiveChain, clearActiveSafe } from '@/src/store/activeSafeSlice'
 import { setActiveSigner } from '@/src/store/activeSignerSlice'
+import { addSafe } from '@/src/store/safesSlice'
+import { addSigner } from '@/src/store/signersSlice'
+import { generateSafeOverview, generateSigner } from '@/src/tests/factories/safe'
 import { NO_SIGNER_ERROR_CODE } from '../../services/methodRouter'
 import walletKitListeners from '../walletKitListeners'
 import {
@@ -40,8 +44,8 @@ jest.mock('../../services/methodRouter', () => ({
   routeSessionRequest: (ctx: unknown) => mockRoute(ctx),
 }))
 
-const SAFE = '0x1111111111111111111111111111111111111111'
-const OTHER_SAFE = '0x2222222222222222222222222222222222222222'
+const SAFE = faker.finance.ethereumAddress()
+const OTHER_SAFE = faker.finance.ethereumAddress()
 const HASH = '0xhash'
 const WRONG_CHAIN_CODE = getSdkError('UNSUPPORTED_CHAINS').code
 const DEFERRED = { id: 7, jsonrpc: '2.0', result: '__DEFERRED__' }
@@ -263,7 +267,7 @@ describe('walletKitListeners — safe/chain switch', () => {
 })
 
 describe('walletKitListeners — sessionRequestReceived', () => {
-  it('passes the active Safe/signer context (read from the store) to the router', async () => {
+  it('does not report hasSigner from an activeSigner selection alone', async () => {
     const store = makeStore()
     store.dispatch(setActiveSafe({ address: SAFE as `0x${string}`, chainId: '1' }))
     store.dispatch(setActiveSigner({ safeAddress: SAFE as `0x${string}`, signer: { value: '0xsigner' } as never }))
@@ -272,7 +276,44 @@ describe('walletKitListeners — sessionRequestReceived', () => {
     store.dispatch(sessionRequestReceived(makeRequest('eth_unknownMethod')))
 
     await waitFor(() => expect(mockRoute).toHaveBeenCalled())
+    expect(mockRoute).toHaveBeenCalledWith(expect.objectContaining({ activeSafeAddress: SAFE, hasSigner: false }))
+  })
+
+  it('recognises an imported signer that owns the active Safe without an activeSigner entry', async () => {
+    const OWNER = faker.finance.ethereumAddress()
+    const store = makeStore()
+    store.dispatch(
+      addSafe({
+        address: SAFE as `0x${string}`,
+        info: { '1': generateSafeOverview({ chainId: '1', owners: [OWNER], address: SAFE }) },
+      }),
+    )
+    store.dispatch(addSigner(generateSigner(OWNER)))
+    store.dispatch(setActiveSafe({ address: SAFE as `0x${string}`, chainId: '1' }))
+    mockRoute.mockResolvedValueOnce({ id: 7, jsonrpc: '2.0', error: { code: -32601, message: 'x' } })
+
+    store.dispatch(sessionRequestReceived(makeRequest('eth_sendTransaction', [{ to: '0xabc' }])))
+
+    await waitFor(() => expect(mockRoute).toHaveBeenCalled())
     expect(mockRoute).toHaveBeenCalledWith(expect.objectContaining({ activeSafeAddress: SAFE, hasSigner: true }))
+  })
+
+  it('reports hasSigner false when the imported signer is not an owner of the active Safe', async () => {
+    const store = makeStore()
+    store.dispatch(
+      addSafe({
+        address: SAFE as `0x${string}`,
+        info: { '1': generateSafeOverview({ chainId: '1', owners: [faker.finance.ethereumAddress()], address: SAFE }) },
+      }),
+    )
+    store.dispatch(addSigner(generateSigner()))
+    store.dispatch(setActiveSafe({ address: SAFE as `0x${string}`, chainId: '1' }))
+    mockRoute.mockResolvedValueOnce({ id: 7, jsonrpc: '2.0', error: { code: -32601, message: 'x' } })
+
+    store.dispatch(sessionRequestReceived(makeRequest('eth_sendTransaction', [{ to: '0xabc' }])))
+
+    await waitFor(() => expect(mockRoute).toHaveBeenCalled())
+    expect(mockRoute).toHaveBeenCalledWith(expect.objectContaining({ activeSafeAddress: SAFE, hasSigner: false }))
   })
 
   it('pushes a deferred tx request to pending instead of responding', async () => {
