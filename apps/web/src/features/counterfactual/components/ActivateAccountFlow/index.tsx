@@ -33,7 +33,7 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import CheckWallet from '@/components/common/CheckWallet'
 import { getSafeToL2SetupDeployment } from '@safe-global/safe-deployments'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { FEATURES, hasFeature, isSafeCreationSponsored } from '@safe-global/utils/utils/chains'
 import { useNativeTokenDisplay } from '@/hooks/useNativeTokenDisplay'
 import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
 import type { TransactionOptions } from '@safe-global/types-kit'
@@ -95,8 +95,8 @@ const ActivateAccountFlow = () => {
   const ownerAddresses = undeployedSafeSetup?.owners || []
   const [minRelays] = useLeastRemainingRelays(ownerAddresses)
 
-  // Every owner has remaining relays and relay method is selected
-  const canRelay = hasRemainingRelays(minRelays)
+  // Safe creation must be sponsored on this chain and every owner has remaining relays
+  const canRelay = isSafeCreationSponsored(chain) && hasRemainingRelays(minRelays)
   const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
 
   if (!undeployedSafe || !undeployedSafeSetup) return null

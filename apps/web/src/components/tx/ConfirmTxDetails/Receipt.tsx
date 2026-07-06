@@ -3,8 +3,7 @@ import { Fragment, useContext, useMemo, type ReactElement } from 'react'
 import { Box, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import TokenIcon from '@/components/common/TokenIcon'
-import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useCurrentChain, useIsUnlimitedRelay } from '@/hooks/useChains'
 import useBalances from '@/hooks/useBalances'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -45,7 +44,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
   const chain = useCurrentChain()
   const { safe, safeAddress } = useSafeInfo()
   const { safeTx, gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
-  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
+  const isGtfChain = useIsUnlimitedRelay() ?? false
   const { balances } = useBalances()
   const operation = Number(safeTxData.operation) as Operation
 

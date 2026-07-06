@@ -10,7 +10,6 @@ const FEATURE_FLAG_MAPPING: Record<string, FEATURES> = {
   stake: FEATURES.STAKING,
   swap: FEATURES.NATIVE_SWAPS,
   multichain: FEATURES.MULTI_CHAIN_SAFE_CREATION,
-  'no-fee-campaign': FEATURES.NO_FEE_NOVEMBER,
   speedup: FEATURES.SPEED_UP_TX,
   portfolio: FEATURES.PORTFOLIO_ENDPOINT,
   'targeted-outreach': FEATURES.TARGETED_SURVEY,
@@ -24,7 +23,8 @@ const FEATURE_FLAG_MAPPING: Record<string, FEATURES> = {
  * from folder names using semantic mapping or kebab-case → UPPER_SNAKE_CASE conversion.
  *
  * @param folderName - Kebab-case folder name (e.g., 'walletconnect', 'tx-notes', 'bridge')
- * @param featureFlag - Optional FEATURES enum value. If omitted, uses semantic mapping or auto-derives:
+ * @param enablement - Optional FEATURES enum value, or a custom enablement hook returning
+ *                     `boolean | undefined`. If omitted, uses semantic mapping or auto-derives:
  *                      'walletconnect' → FEATURES.NATIVE_WALLETCONNECT (mapped)
  *                      'stake' → FEATURES.STAKING (mapped)
  *                      'bridge' → FEATURES.BRIDGE (auto-derived)
@@ -43,13 +43,26 @@ const FEATURE_FLAG_MAPPING: Record<string, FEATURES> = {
  *
  * // Manual override for special cases
  * export const CustomFeature = createFeatureHandle('custom', FEATURES.CUSTOM_FLAG)
+ *
+ * // Custom enablement hook (e.g. derived from chain.relayer instead of a feature flag)
+ * export const GTFFeature = createFeatureHandle('gtf', useIsUnlimitedRelay)
  * ```
  */
 export function createFeatureHandle<T extends FeatureImplementation = FeatureImplementation>(
   folderName: string,
-  featureFlag?: FEATURES,
+  enablement?: FEATURES | (() => boolean | undefined),
 ): FeatureHandle<T> {
-  // 1. Use explicit override if provided
+  // 1a. Use a custom enablement hook if provided
+  if (typeof enablement === 'function') {
+    return {
+      name: folderName,
+      useIsEnabled: enablement,
+      load: () => import(/* webpackMode: "lazy" */ `../${folderName}/feature`) as Promise<{ default: T }>,
+    }
+  }
+
+  // 1b. Use explicit feature-flag override if provided
+  const featureFlag = enablement
   if (featureFlag !== undefined) {
     return {
       name: folderName,

@@ -1,4 +1,3 @@
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useIsUnlimitedRelay } from '@/hooks/useChains'
 
-export const useIsGtfSlotVisible = (): boolean => !!useHasFeature(FEATURES.GTF)
+export const useIsGtfSlotVisible = (): boolean => !!useIsUnlimitedRelay()

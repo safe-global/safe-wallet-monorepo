@@ -30,8 +30,7 @@ import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import useTxDetails from '@/hooks/useTxDetails'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useIsUnlimitedRelay } from '@/hooks/useChains'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 
@@ -206,7 +205,7 @@ const TxFlowProvider = <T extends unknown>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
+  const isGtfChain = useIsUnlimitedRelay() ?? false
 
   const trackTxEvent = useCallback(
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {

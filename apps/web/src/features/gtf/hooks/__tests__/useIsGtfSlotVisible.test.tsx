@@ -17,7 +17,7 @@ describe('useIsGtfSlotVisible', () => {
   })
 
   it('returns true on a non-rejection flow when GTF is enabled', () => {
-    jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(useChainsModule, 'useIsUnlimitedRelay').mockReturnValue(true)
 
     const { result } = renderHook(() => useIsGtfSlotVisible(), { wrapper: withTxFlow(false) })
 
@@ -25,7 +25,7 @@ describe('useIsGtfSlotVisible', () => {
   })
 
   it('returns true on a rejection flow when GTF is enabled (PLA-1384)', () => {
-    jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(useChainsModule, 'useIsUnlimitedRelay').mockReturnValue(true)
 
     const { result } = renderHook(() => useIsGtfSlotVisible(), { wrapper: withTxFlow(true) })
 
@@ -33,7 +33,7 @@ describe('useIsGtfSlotVisible', () => {
   })
 
   it('returns false on a non-rejection flow when GTF is disabled', () => {
-    jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(false)
+    jest.spyOn(useChainsModule, 'useIsUnlimitedRelay').mockReturnValue(false)
 
     const { result } = renderHook(() => useIsGtfSlotVisible(), { wrapper: withTxFlow(false) })
 
@@ -41,7 +41,7 @@ describe('useIsGtfSlotVisible', () => {
   })
 
   it('returns false on a rejection flow when GTF is disabled', () => {
-    jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(false)
+    jest.spyOn(useChainsModule, 'useIsUnlimitedRelay').mockReturnValue(false)
 
     const { result } = renderHook(() => useIsGtfSlotVisible(), { wrapper: withTxFlow(true) })
 

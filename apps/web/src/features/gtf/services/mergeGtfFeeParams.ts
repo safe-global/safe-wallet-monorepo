@@ -1,6 +1,6 @@
 import type { SafeTransaction } from '@safe-global/types-kit'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { isUnlimitedRelay } from '@safe-global/utils/utils/chains'
 
 import type { AppDispatch } from '@/store'
 import type { GTFContract } from '../contract'
@@ -37,7 +37,7 @@ export const mergeGtfFeeParams = async ({
   dispatch,
 }: GtfMergeContext): Promise<SafeTransaction> => {
   if (safeTx.signatures.size > 0) return safeTx
-  if (!chain || !hasFeature(chain, FEATURES.GTF)) return safeTx
+  if (!chain || !isUnlimitedRelay(chain)) return safeTx
   if (gtfPaymentMode !== 'safe' || !gtfSelectedGasToken) return safeTx
   if (!gtfFeature.$isReady || !gtfFeature.resolveFeeParams) return safeTx
 

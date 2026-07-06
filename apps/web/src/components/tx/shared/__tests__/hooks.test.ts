@@ -21,12 +21,11 @@ import {
 } from '../hooks'
 import * as recommendedNonce from '@/services/tx/tx-sender/recommendedNonce'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder, relayerBuilder } from '@/tests/builders/chains'
 import * as useChains from '@/hooks/useChains'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
 import { type SignerWallet } from '@/components/common/WalletProvider'
 import { type NestedWallet } from '@/utils/nested-safe-wallet'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import * as loadFeature from '@/features/__core__/useLoadFeature'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 
@@ -768,7 +767,7 @@ describe('SignOrExecute hooks', () => {
 
     const setupGtfChain = () => {
       const gtfChain = chainBuilder()
-        .with({ chainId: '1', features: [FEATURES.GTF] })
+        .with({ chainId: '1', relayer: relayerBuilder().with({ type: 'GTF' }).build() })
         .build()
       jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(gtfChain)
       jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({

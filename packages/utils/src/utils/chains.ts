@@ -78,6 +78,37 @@ export const hasFeature = (chain: Pick<Chain, 'features'>, feature: FEATURES): b
   return (chain.features as string[]).includes(feature)
 }
 
+/**
+ * Relay/sponsorship capability is delivered by the config service as a structured
+ * `relayer` object on each chain (see the generated `Relayer` type), replacing the
+ * legacy `RELAYING` / `GTF` / `NO_FEE_CAMPAIGN` string feature flags.
+ */
+type RelayerChain = Pick<Chain, 'relayer'>
+
+export const isRelayingEnabled = (chain?: RelayerChain): boolean => {
+  return chain?.relayer?.type != null
+}
+
+export const isUnlimitedRelay = (chain?: RelayerChain): boolean => {
+  return chain?.relayer?.type === 'GTF'
+}
+
+export const isNoFeeCampaign = (chain?: RelayerChain): boolean => {
+  return chain?.relayer?.type === 'NO_FEE_CAMPAIGN'
+}
+
+export const isSafeCreationSponsored = (chain?: RelayerChain): boolean => {
+  return isRelayingEnabled(chain) && !!chain?.relayer?.safeCreationSponsored
+}
+
+export const isSafeTransactionSponsored = (chain?: RelayerChain): boolean => {
+  return isRelayingEnabled(chain) && !!chain?.relayer?.safeTransactionSponsored
+}
+
+export const isTenderlySimulationBeforeRelayEnabled = (chain?: RelayerChain): boolean => {
+  return isRelayingEnabled(chain) && !!chain?.relayer?.enableTenderlySimulationBeforeRelay
+}
+
 export type NativeTokenDisplay = {
   showNativeInBalances: boolean
   showGasFeeEstimation: boolean

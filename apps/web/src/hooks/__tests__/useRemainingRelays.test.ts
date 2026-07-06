@@ -2,8 +2,7 @@ import { renderHook, waitFor } from '@/tests/test-utils'
 import { useLeastRemainingRelays, useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import * as useChains from '@/hooks/useChains'
-import { chainBuilder } from '@/tests/builders/chains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { chainBuilder, relayerBuilder } from '@/tests/builders/chains'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
@@ -11,9 +10,7 @@ import { GATEWAY_URL } from '@/config/gateway'
 const SAFE_ADDRESS = '0x0000000000000000000000000000000000000001'
 
 describe('fetch remaining relays hooks', () => {
-  const mockChain = chainBuilder()
-    .with({ features: [FEATURES.RELAYING], chainId: '1' })
-    .build()
+  const mockChain = chainBuilder().with({ relayer: relayerBuilder().build(), chainId: '1' }).build()
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -28,7 +25,7 @@ describe('fetch remaining relays hooks', () => {
 
   describe('useRelaysBySafe hook', () => {
     it('should not do a network request if chain does not support relay', async () => {
-      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(chainBuilder().with({ features: [] }).build())
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(chainBuilder().with({ relayer: null }).build())
 
       const { result } = renderHook(() => useRelaysBySafe())
 
@@ -150,7 +147,7 @@ describe('fetch remaining relays hooks', () => {
     })
 
     it('should not do a network request if chain does not support relay', async () => {
-      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(chainBuilder().with({ features: [] }).build())
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(chainBuilder().with({ relayer: null }).build())
 
       const { result } = renderHook(() => useLeastRemainingRelays(ownerAddresses))
 

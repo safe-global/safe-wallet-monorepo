@@ -118,14 +118,6 @@ const FEATURE_FLAG_MATRIX: Array<{
     },
   },
   {
-    label: 'no-fee-campaign',
-    featureFlag: FEATURES.NO_FEE_NOVEMBER,
-    getHandle: () => {
-      const { NoFeeCampaignFeature } = jest.requireActual('@/features/no-fee-campaign')
-      return NoFeeCampaignFeature
-    },
-  },
-  {
     label: 'portfolio',
     featureFlag: FEATURES.PORTFOLIO_ENDPOINT,
     getHandle: () => {
@@ -254,5 +246,47 @@ describe('batching feature (always enabled)', () => {
   it('has correct name', () => {
     const { BatchingFeature } = jest.requireActual('@/features/batching')
     expect(BatchingFeature.name).toBe('batching')
+  })
+})
+
+// ── Relayer-derived features (enablement from chain.relayer, not a feature flag) ──
+
+describe('no-fee-campaign feature (relayer-derived)', () => {
+  function mockIsNoFeeCampaign(returnValue: boolean | undefined) {
+    const mod = jest.requireMock('@/hooks/useChains')
+    ;(mod.useIsNoFeeCampaign as jest.Mock).mockReturnValue(returnValue)
+  }
+
+  it('is disabled when relayer type is not NO_FEE_CAMPAIGN', () => {
+    mockIsNoFeeCampaign(false)
+    const { NoFeeCampaignFeature } = jest.requireActual('@/features/no-fee-campaign')
+    const { result } = renderHook(() => useLoadFeature(NoFeeCampaignFeature))
+
+    expect(result.current.$isDisabled).toBe(true)
+    expect(result.current.$isReady).toBe(false)
+  })
+
+  it('is loading while the chain config is undefined', () => {
+    mockIsNoFeeCampaign(undefined)
+    const { NoFeeCampaignFeature } = jest.requireActual('@/features/no-fee-campaign')
+    const { result } = renderHook(() => useLoadFeature(NoFeeCampaignFeature))
+
+    expect(result.current.$isDisabled).toBe(false)
+    expect(result.current.$isReady).toBe(false)
+  })
+
+  it('useIsEnabled delegates to useIsNoFeeCampaign', () => {
+    mockIsNoFeeCampaign(true)
+    const { NoFeeCampaignFeature } = jest.requireActual('@/features/no-fee-campaign')
+    const { result } = renderHook(() => NoFeeCampaignFeature.useIsEnabled())
+
+    expect(result.current).toBe(true)
+    const mod = jest.requireMock('@/hooks/useChains')
+    expect(mod.useIsNoFeeCampaign).toHaveBeenCalled()
+  })
+
+  it('has correct name', () => {
+    const { NoFeeCampaignFeature } = jest.requireActual('@/features/no-fee-campaign')
+    expect(NoFeeCampaignFeature.name).toBe('no-fee-campaign')
   })
 })

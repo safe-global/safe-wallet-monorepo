@@ -157,6 +157,16 @@ describe('ReviewStep', () => {
     }
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
     jest.spyOn(relay, 'hasRemainingRelays').mockReturnValue(true)
+    const currentChainSpy = jest.spyOn(useChains, 'useCurrentChain').mockReturnValue({
+      ...mockChain,
+      features: [],
+      relayer: {
+        type: 'RELAY_FEE',
+        safeCreationSponsored: true,
+        safeTransactionSponsored: true,
+        enableTenderlySimulationBeforeRelay: false,
+      },
+    } as Chain)
 
     const { getByText } = render(
       <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
@@ -169,6 +179,9 @@ describe('ReviewStep', () => {
     })
 
     expect(getByText(/Who will pay gas fees:/)).toBeInTheDocument()
+
+    // Restore so the mocked current chain doesn't leak into later tests (clearAllMocks keeps implementations)
+    currentChainSpy.mockRestore()
   })
 
   const authReduxState = {

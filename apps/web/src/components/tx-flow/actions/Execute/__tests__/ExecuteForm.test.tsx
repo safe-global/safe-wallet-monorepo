@@ -8,6 +8,7 @@ import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 import * as useGasLimit from '@/hooks/useGasLimit'
 import * as useIsValidExecution from '@/hooks/useIsValidExecution'
 import * as useWalletCanRelay from '@/hooks/useWalletCanRelay'
+import * as useChains from '@/hooks/useChains'
 import * as relayUtils from '@/utils/relaying'
 import * as walletCanPay from '@/hooks/useWalletCanPay'
 import * as useValidateTxData from '@/hooks/useValidateTxData'
@@ -75,6 +76,8 @@ describe('ExecuteForm', () => {
     jest.clearAllMocks()
 
     jest.spyOn(useValidateTxData, 'useValidateTxData').mockReturnValue([undefined, undefined, false])
+    // Chain sponsors relayed transactions so the relay execution option is available
+    jest.spyOn(useChains, 'useIsSafeTransactionSponsored').mockReturnValue(true)
   })
 
   it('shows estimated fees', () => {

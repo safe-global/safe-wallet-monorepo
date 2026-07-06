@@ -10,6 +10,7 @@ const GAS_TOKEN = ZERO
 jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: () => ({ chainId: '137', nativeCurrency: { symbol: 'POL', decimals: 18, logoUri: '' } }),
   useHasFeature: () => true,
+  useIsUnlimitedRelay: () => true,
 }))
 
 jest.mock('@/hooks/useSafeInfo', () => ({

@@ -6,6 +6,7 @@ import type {
   GasPriceOracle,
   NativeCurrency,
   RpcUri,
+  Relayer,
   Theme,
   Chain,
 } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -70,6 +71,15 @@ const gasPriceOracleBuilder = (): IBuilder<GasPriceOracle> => {
   })
 }
 
+export const relayerBuilder = (): IBuilder<Relayer> => {
+  return Builder.new<Relayer>().with({
+    type: 'RELAY_FEE' as const,
+    safeCreationSponsored: true,
+    safeTransactionSponsored: true,
+    enableTenderlySimulationBeforeRelay: false,
+  })
+}
+
 const getRandomGasPriceBuilder = () => {
   const gasPriceBuilders = [gasPriceFixedBuilder(), gasPriceFixedEIP1559Builder(), gasPriceOracleBuilder()]
 
@@ -96,5 +106,6 @@ export const chainBuilder = (): IBuilder<Chain> => {
     disabledWallets: generateRandomArray(() => faker.word.sample(), { min: 1, max: 10 }),
     features: generateRandomArray(() => faker.helpers.enumValue(FEATURES), { min: 1, max: 10 }),
     recommendedMasterCopyVersion: faker.system.semver(),
+    relayer: null,
   })
 }

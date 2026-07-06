@@ -15,7 +15,7 @@ import css from './styles.module.css'
 import BalanceInfo from '@/components/tx/BalanceInfo'
 import madProps from '@/utils/mad-props'
 import { useCurrentChain } from '@/hooks/useChains'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { isUnlimitedRelay } from '@safe-global/utils/utils/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 
@@ -58,7 +58,7 @@ const _ExecutionMethodSelector = ({
 }): ReactElement | null => {
   const shouldRelay = executionMethod === ExecutionMethod.RELAY || executionMethod === ExecutionMethod.NO_FEE_CAMPAIGN
 
-  const isUnlimitedRelay = !!chain && hasFeature(chain, FEATURES.GTF)
+  const isUnlimitedRelayChain = isUnlimitedRelay(chain)
 
   const onChooseExecutionMethod = (_: ChangeEvent<HTMLInputElement>, newExecutionMethod: string) => {
     setExecutionMethod(newExecutionMethod as ExecutionMethod)
@@ -210,7 +210,7 @@ const _ExecutionMethodSelector = ({
           <span className={css.counterNumber}>{noFeeCampaign.remaining}</span> free transactions left
         </Typography>
       ) : shouldRelay && relays ? (
-        isUnlimitedRelay ? null : (
+        isUnlimitedRelayChain ? null : (
           <RemainingRelays relays={relays} tooltip={tooltip} />
         )
       ) : wallet ? (

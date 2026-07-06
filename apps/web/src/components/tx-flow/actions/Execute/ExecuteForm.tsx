@@ -6,8 +6,7 @@ import classNames from 'classnames'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import ModalDialog from '@/components/common/ModalDialog'
 import { trackError, Errors } from '@/services/exceptions'
-import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useCurrentChain, useIsUnlimitedRelay, useIsSafeTransactionSponsored } from '@/hooks/useChains'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { getTxOptions } from '@/utils/transactions'
 import useIsValidExecution from '@/hooks/useIsValidExecution'
@@ -88,7 +87,8 @@ export const ExecuteForm = ({
   // a stale `gtfPaymentMode === 'safe'` from the user's persisted preference must NOT force the
   // relay path on a tx whose payload doesn't carry the GTF fee fields (would fail in handlePayment).
   const { gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
-  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
+  const isGtfChain = useIsUnlimitedRelay() ?? false
+  const isTxSponsored = useIsSafeTransactionSponsored() ?? false
   const requiresRelay =
     (safeTx && isGtfSafePaid(safeTx.data)) ||
     (isGtfChain && !!safeTx && safeTx.signatures.size === 0 && gtfPaymentMode === 'safe' && !!gtfSelectedGasToken)
@@ -100,7 +100,8 @@ export const ExecuteForm = ({
 
   // Safe-pays bypasses the no-fee campaign and the daily relay quota (Safe funds its own relay).
   const canRelay =
-    walletCanRelay && (requiresRelay || (!isGtfChain && !noFeeCampaignEligible && hasRemainingRelays(relays[0])))
+    walletCanRelay &&
+    (requiresRelay || (isTxSponsored && !isGtfChain && !noFeeCampaignEligible && hasRemainingRelays(relays[0])))
   const canNoFeeCampaign = !requiresRelay && noFeeCampaignEligible && !gasTooHigh && !!remaining && remaining > 0
   const isLimitReached = noFeeCampaignEligible && remaining === 0
 

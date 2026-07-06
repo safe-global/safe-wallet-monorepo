@@ -33,7 +33,7 @@ import useUserNonce from '@/components/tx/AdvancedParams/useUserNonce'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { useTransactionsGetMultipleTransactionDetailsQuery } from '@safe-global/store/gateway/transactions'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
-import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/utils/chains'
+import { FEATURES, getLatestSafeVersion, hasFeature, isSafeTransactionSponsored } from '@safe-global/utils/utils/chains'
 import { useSafeShield, useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { fetchRecommendedParams } from '@/services/tx/tx-sender/recommendedNonce'
@@ -94,8 +94,8 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const onboard = useOnboard()
   const wallet = useWallet()
 
-  // Chain has relaying feature and available relays
-  const canRelay = hasRemainingRelays(relays)
+  // Chain sponsors relayed transactions and has available relays
+  const canRelay = isSafeTransactionSponsored(chain) && hasRemainingRelays(relays)
   const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
 
   // EIP-1559 gas pricing support

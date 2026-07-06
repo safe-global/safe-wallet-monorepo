@@ -5,7 +5,19 @@ import { mergeGtfFeeParams } from '../mergeGtfFeeParams'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import type { AppDispatch } from '@/store'
 
-const buildChain = (features: string[]): Chain => ({ chainId: '1', features }) as unknown as Chain
+const buildChain = (relayerType: 'GTF' | null): Chain =>
+  ({
+    chainId: '1',
+    features: [],
+    relayer: relayerType
+      ? {
+          type: relayerType,
+          safeCreationSponsored: true,
+          safeTransactionSponsored: true,
+          enableTenderlySimulationBeforeRelay: false,
+        }
+      : null,
+  }) as unknown as Chain
 
 const buildFeature = (overrides: Partial<{ $isReady: boolean; resolveFeeParams: jest.Mock }> = {}) => ({
   $isReady: overrides.$isReady ?? true,
@@ -16,7 +28,7 @@ const dispatch = jest.fn() as unknown as ReturnType<typeof jest.fn> & AppDispatc
 
 const baseArgs = (safeTx: SafeTransaction) => ({
   safeTx,
-  chain: buildChain(['GTF']),
+  chain: buildChain('GTF'),
   gtfPaymentMode: 'safe' as const,
   gtfSelectedGasToken: '0xtoken',
   chainId: '1',
@@ -43,7 +55,7 @@ describe('mergeGtfFeeParams', () => {
 
     const result = await mergeGtfFeeParams({
       ...baseArgs(safeTx),
-      chain: buildChain([]),
+      chain: buildChain(null),
       gtfFeature: feature,
     })
 

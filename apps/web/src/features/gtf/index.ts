@@ -1,8 +1,8 @@
 import { createFeatureHandle } from '@/features/__core__'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useIsUnlimitedRelay } from '@/hooks/useChains'
 import type { GTFContract } from './contract'
 
-export const GTFFeature = createFeatureHandle<GTFContract>('gtf', FEATURES.GTF)
+export const GTFFeature = createFeatureHandle<GTFContract>('gtf', useIsUnlimitedRelay)
 
 export type { GTFContract } from './contract'
 export { useFeesPreview } from './hooks/useFeesPreview'

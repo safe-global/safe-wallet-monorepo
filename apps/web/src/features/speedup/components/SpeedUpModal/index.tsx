@@ -14,7 +14,7 @@ import { useCallback, useState } from 'react'
 import GasParams from '@/components/tx/GasParams'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { getTxOptions } from '@/utils/transactions'
-import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
+import { useCurrentChain, useHasFeature, useIsUnlimitedRelay } from '@/hooks/useChains'
 import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
 import { isWalletRejection } from '@/utils/wallets'
 import { type TransactionOptions } from '@safe-global/types-kit'
@@ -45,7 +45,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
   const [speedUpFee] = useGasPrice(true)
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false)
   const isEIP1559 = useHasFeature(FEATURES.EIP1559)
-  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
+  const isGtfChain = useIsUnlimitedRelay() ?? false
 
   const wallet = useWallet()
   const onboard = useOnboard()

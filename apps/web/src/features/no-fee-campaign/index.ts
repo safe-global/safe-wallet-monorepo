@@ -1,13 +1,13 @@
 import { createFeatureHandle } from '@/features/__core__'
+import { useIsNoFeeCampaign } from '@/hooks/useChains'
 import type { NoFeeCampaignContract } from './contract'
 
 /**
  * No Fee Campaign Feature Handle
  *
- * Uses semantic mapping: 'no-fee-campaign' → FEATURES.NO_FEE_NOVEMBER
- * No second parameter needed (mapping exists in createFeatureHandle.ts)
+ * Enablement is derived from `chain.relayer.type === 'NO_FEE_CAMPAIGN'`.
  */
-export const NoFeeCampaignFeature = createFeatureHandle<NoFeeCampaignContract>('no-fee-campaign')
+export const NoFeeCampaignFeature = createFeatureHandle<NoFeeCampaignContract>('no-fee-campaign', useIsNoFeeCampaign)
 
 // Export contract type for TypeScript inference
 export type { NoFeeCampaignContract } from './contract'

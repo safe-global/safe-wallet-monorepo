@@ -19,8 +19,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import SpendingLimitRow from '../SpendingLimitRow'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useIsUnlimitedRelay } from '@/hooks/useChains'
 import { useResolvedGasToken, type FeePreviewTx } from '@/features/gtf'
 import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
 import { OperationType } from '@safe-global/types-kit'
@@ -77,7 +76,7 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
 
   const maxAmount = isSpendingLimitType && totalAmount > spendingLimitAmount ? spendingLimitAmount : totalAmount
 
-  const isGtfEnabled = useHasFeature(FEATURES.GTF)
+  const isGtfEnabled = useIsUnlimitedRelay()
   const [maxPressed, setMaxPressed] = useState(false)
 
   // Probe only after Max click — eager probing on every edit wastes network for the common case.

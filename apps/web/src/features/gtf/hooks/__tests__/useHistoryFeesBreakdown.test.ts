@@ -92,7 +92,7 @@ const buildProvider = (receipt: { gasUsed: bigint; gasPrice: bigint } | null) =>
 describe('useHistoryFeesBreakdown', () => {
   beforeEach(() => {
     jest.resetAllMocks()
-    jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(useChainsModule, 'useIsUnlimitedRelay').mockReturnValue(true)
     jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(mockChain)
     jest.spyOn(useBalancesModule, 'default').mockReturnValue(buildBalances([nativeBalance, wethBalance]))
     jest.spyOn(web3Module, 'useWeb3ReadOnly').mockReturnValue(buildProvider(null))
@@ -198,7 +198,7 @@ describe('useHistoryFeesBreakdown', () => {
   })
 
   it('returns null when GTF feature is disabled', async () => {
-    jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(false)
+    jest.spyOn(useChainsModule, 'useIsUnlimitedRelay').mockReturnValue(false)
 
     const { result } = renderHook(() => useHistoryFeesBreakdown(mockSafePaysTx))
 
