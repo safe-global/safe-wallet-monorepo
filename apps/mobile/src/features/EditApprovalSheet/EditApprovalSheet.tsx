@@ -12,7 +12,8 @@ import { selectDraftByHash } from '@/src/store/draftTxSlice'
 import { useApprovalInfos } from '@/src/features/ConfirmTx/components/ApprovalEditor/hooks/useApprovalInfos'
 import { EditApprovalFields, EditApprovalFooter, useEditApprovalForm } from './components/EditApprovalForm'
 
-// Snaps back to the dynamic content-height detent — gorhom's restore can't undo keyboardBehavior="extend"
+// Snaps back to the content-height detent that enableDynamicSizing inserts at index 0 (below the '100%'
+// snap point) — gorhom's own restore can't undo the keyboardBehavior="extend" re-layout
 const RestoreHeightOnKeyboardHide = () => {
   const { snapToIndex } = useBottomSheet()
 

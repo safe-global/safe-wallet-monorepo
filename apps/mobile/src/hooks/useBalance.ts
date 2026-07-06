@@ -3,7 +3,11 @@ import type { Balance, Balances } from '@safe-global/store/gateway/AUTO_GENERATE
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useBalances } from './useBalances'
 
-/** Balances covering the given tokens: the cached trusted set, widened to untrusted/dust only when a token is missing from it */
+/**
+ * Balances covering the given tokens: the cached trusted set, widened to untrusted/dust only when a token is missing from it.
+ * Tokens the Safe has never held (common for dApp approvals) always miss the trusted set, so the extra
+ * untrusted fetch is the expected steady state here — don't try to optimise it away.
+ */
 export const useTokenBalances = (tokenAddresses?: string[]): Balances | undefined => {
   const { balances: trustedBalances } = useBalances()
   const needsAllBalances =
