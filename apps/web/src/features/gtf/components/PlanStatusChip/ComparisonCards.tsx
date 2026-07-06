@@ -7,13 +7,17 @@ import css from './PlanStatusModal.module.css'
 const COMPARE_URL = 'https://safe.global/pricing'
 
 const Card = ({ tier, isActive }: { tier: PlanTier; isActive: boolean }): ReactElement => (
-  <div className={`${css.planCard} ${isActive ? css.planCardActive : ''}`} data-testid={`plan-card-${tier.id}`}>
-    <p className={css.planName}>{tier.name}</p>
-    <p className={css.planPrice}>
-      <span className={css.planPriceAmount}>${tier.priceMonthlyUsd.toLocaleString('en-US')}</span>
-      <span className={css.planPriceUnit}>/mo</span>
-      {isActive && <span className={css.planActiveTag}> • Active</span>}
-    </p>
+  <div className={`${css.planCard} ${isActive ? '' : css.planCardHighlight}`} data-testid={`plan-card-${tier.id}`}>
+    <div className={css.cardHeader}>
+      <p className={css.planName}>
+        {tier.name}
+        {isActive && <span className={css.planActiveTag}> · Active</span>}
+      </p>
+      <p className={css.planPrice}>
+        <span className={css.planPriceAmount}>${tier.priceMonthlyUsd.toLocaleString('en-US')}</span>
+        <span className={css.planPriceUnit}>/mo</span>
+      </p>
+    </div>
     <ul className={css.featureList}>
       {tier.features.map((feature) => (
         <li key={feature} className={css.featureRow}>

@@ -33,7 +33,7 @@ export const getModalContent = (plan: PlanStatus, spaceId: string | null): Modal
 
   const billing = billingHref(spaceId)
   const isPro = plan.planName !== 'Starter'
-  const base = { showSafesSelector: isPro, showPaygFootnote: isPro }
+  const base = { showSafesSelector: isPro, showPaygFootnote: isPro || plan.status === 'limit_reached' }
 
   if (plan.planName === 'Starter') {
     if (plan.status === 'limit_reached') {

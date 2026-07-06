@@ -1,18 +1,17 @@
-import { type ReactElement } from 'react'
+import { type ReactElement, type ReactNode } from 'react'
 import Link from 'next/link'
-import { Dialog, IconButton } from '@mui/material'
-import { ChartLine, ChevronDown, Fuel, Receipt, X } from 'lucide-react'
+import { Dialog, IconButton, SvgIcon } from '@mui/material'
+import { ChartLine, Check, ChevronDown, Fuel, Plus, X } from 'lucide-react'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { useCurrentSpaceId } from '@/features/spaces'
 import Identicon from '@/components/common/Identicon'
+import ReceiptIcon from '@/public/images/common/receipt.svg'
 import type { PlanStatus } from './types'
 import { getModalContent } from './modalContent'
 import StatusPill from './StatusPill'
 import UsageRow from './UsageRow'
 import ComparisonCards from './ComparisonCards'
 import css from './PlanStatusModal.module.css'
-
-const PAYG_URL = 'https://safe.global/pricing'
 
 const usd = (value: number): string => formatCurrency(value, 'USD', 4)
 
@@ -41,13 +40,36 @@ const SafesSelector = ({ safes }: { safes: string[] }): ReactElement => {
   )
 }
 
-const WorkspacePromo = (): ReactElement => (
+const PROMO_BULLETS = [
+  'Get flat pricing with fee-free plans',
+  'Keep all related Safes in one shared workspace',
+  'Streamline coordination across initiators, approvers, and executors',
+]
+
+const WorkspacePromo = ({ cta }: { cta: ReactNode }): ReactElement => (
   <div className={css.promo} data-testid="plan-workspace-promo">
-    <p className={css.promoTitle}>Plans live in Workspaces</p>
-    <p className={css.promoText}>
-      Plans are billed at the Workspace level. Create a Workspace to unlock fee-free volume, gasless transactions and
-      flat pricing.
+    <p className={css.promoSubtitle}>
+      Bring related Safes into a shared workspace and collaborate with your team — all in one place.
     </p>
+
+    <div className={css.promoImageBox}>
+      <img className={css.promoImage} src="/images/common/workspace-promo.png" alt="" />
+    </div>
+
+    <div className={css.promoContent}>
+      <ul className={css.promoBullets}>
+        {PROMO_BULLETS.map((text) => (
+          <li key={text} className={css.promoBullet}>
+            <span className={css.promoCheck}>
+              <Check size={12} strokeWidth={3} />
+            </span>
+            {text}
+          </li>
+        ))}
+      </ul>
+
+      {cta}
+    </div>
   </div>
 )
 
@@ -64,6 +86,13 @@ const PlanStatusModal = ({
   const content = getModalContent(planStatus, spaceId)
   const { feeFreeVolume, gaslessTransactions, paygFeesThisPeriodUsd, activeSafes } = planStatus
 
+  const cta = (
+    <Link href={content.cta.href} className={css.cta} onClick={onClose} data-testid="plan-cta">
+      {!planStatus.belongsToWorkspace && <Plus size={16} className={css.ctaIcon} />}
+      {content.cta.label}
+    </Link>
+  )
+
   return (
     <Dialog
       open={open}
@@ -72,15 +101,19 @@ const PlanStatusModal = ({
       data-testid="plan-status-modal"
     >
       <div className={css.container}>
-        <div className={css.headerRow}>
-          <StatusPill status={planStatus.status} />
-          <IconButton aria-label="close" onClick={onClose} size="small" className={css.close}>
-            <X size={16} />
-          </IconButton>
-        </div>
+        <div className={css.header}>
+          <div className={css.headerRow}>
+            {planStatus.belongsToWorkspace ? (
+              <StatusPill status={planStatus.status} />
+            ) : (
+              <p className={css.promoTitle}>Plans live in Workspaces</p>
+            )}
+            <IconButton aria-label="close" onClick={onClose} size="small" className={css.close}>
+              <X size={16} />
+            </IconButton>
+          </div>
 
-        {planStatus.belongsToWorkspace ? (
-          <>
+          {planStatus.belongsToWorkspace && (
             <div className={css.planLine}>
               <span className={css.planHeading}>
                 <span className={css.planTitle}>{planStatus.planName}</span>
@@ -88,7 +121,11 @@ const PlanStatusModal = ({
               </span>
               {content.showSafesSelector && <SafesSelector safes={activeSafes} />}
             </div>
+          )}
+        </div>
 
+        {planStatus.belongsToWorkspace ? (
+          <>
             <div className={css.tiles}>
               <UsageRow
                 icon={<ChartLine size={20} strokeWidth={1.5} />}
@@ -113,7 +150,7 @@ const PlanStatusModal = ({
                 <div className={css.row} data-testid="plan-payg-fees">
                   <div className={css.rowLabel}>
                     <span className={css.rowIcon}>
-                      <Receipt size={20} strokeWidth={1.5} />
+                      <SvgIcon component={ReceiptIcon} inheritViewBox sx={{ fontSize: 20 }} />
                     </span>
                     Pay-as-you-go fees this period:
                   </div>
@@ -122,25 +159,25 @@ const PlanStatusModal = ({
               )}
             </div>
 
-            {content.showPaygFootnote && (
-              <p className={css.paygFootnote}>
-                Transactions above your included volume are billed at{' '}
-                <a href={PAYG_URL} target="_blank" rel="noreferrer" className={css.paygLink}>
-                  pay-as-you-go rates
-                </a>
-                .
-              </p>
-            )}
-
             {content.comparison && <ComparisonCards comparison={content.comparison} />}
+
+            <div className={css.footer}>
+              {content.showPaygFootnote && (
+                <p className={css.paygFootnote}>
+                  Transactions above your included volume are billed at{' '}
+                  <a href="https://safe.global/pricing" target="_blank" rel="noreferrer" className={css.paygLink}>
+                    pay-as-you-go rates
+                  </a>
+                  .
+                </p>
+              )}
+
+              {cta}
+            </div>
           </>
         ) : (
-          <WorkspacePromo />
+          <WorkspacePromo cta={cta} />
         )}
-
-        <Link href={content.cta.href} className={css.cta} onClick={onClose} data-testid="plan-cta">
-          {content.cta.label}
-        </Link>
       </div>
     </Dialog>
   )
