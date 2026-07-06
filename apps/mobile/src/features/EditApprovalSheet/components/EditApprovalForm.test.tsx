@@ -154,6 +154,20 @@ describe('EditApprovalForm', () => {
     expect(getByTestId('switch-unlimited-approval').props.value).toBe(false)
   })
 
+  it('surfaces the empty-amount error when focusing switches unlimited off', async () => {
+    const store = setupStore()
+    const { getByTestId, getByText } = renderWithStore(
+      <EditApprovalForm draft={draft} approval={approval} safe={safe} />,
+      store,
+    )
+
+    fireEvent.changeText(getByTestId('input-approval-amount'), '')
+    fireEvent(getByTestId('switch-unlimited-approval'), 'onValueChange', true)
+    fireEvent(getByTestId('input-approval-amount'), 'focus', { nativeEvent: { target: 1 } })
+
+    await waitFor(() => expect(getByText('The value must be a number')).toBeTruthy())
+  })
+
   it('submits the unlimited pseudo value when the toggle is on', async () => {
     const store = setupStore()
     const { getByTestId } = renderWithStore(<EditApprovalForm draft={draft} approval={approval} safe={safe} />, store)

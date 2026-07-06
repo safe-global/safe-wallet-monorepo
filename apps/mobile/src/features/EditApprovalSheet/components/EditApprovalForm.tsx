@@ -110,6 +110,7 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
   const {
     control,
     setValue,
+    getValues,
     formState: { errors },
   } = useFormContext<EditApprovalFormData>()
   const unlimited = useWatch({ control, name: 'unlimited' })
@@ -143,7 +144,9 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
               onFocus={(event) => {
                 const target = event.nativeEvent.target
                 setKeyboardTarget(typeof target === 'number' ? target : undefined)
-                setValue('unlimited', false)
+                if (getValues('unlimited')) {
+                  setValue('unlimited', false, { shouldDirty: true, shouldValidate: true })
+                }
               }}
               onBlur={() => {
                 setKeyboardTarget(undefined)
