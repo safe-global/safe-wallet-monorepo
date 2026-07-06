@@ -143,6 +143,31 @@ describe('rebuildDraftWithApproval', () => {
     ).rejects.toThrow('Draft transaction has no calldata to update')
   })
 
+  it('throws instead of silently no-oping when the approval does not match its inner transaction', async () => {
+    const draft = buildDraft({
+      data: ERC20_INTERFACE.encodeFunctionData('approve', [spender, buildApproval().amount]),
+    })
+
+    // transactionIndex out of bounds
+    await expect(
+      rebuildDraftWithApproval({
+        draft,
+        approval: buildApproval({ transactionIndex: 3 }),
+        newValue: '1',
+        safe,
+        dispatch,
+      }),
+    ).rejects.toThrow('Failed to re-encode the approval transaction')
+
+    // inner tx is not an approve/increaseAllowance call
+    const transferDraft = buildDraft({ data: '0xbaddad' })
+    await expect(
+      rebuildDraftWithApproval({ draft: transferDraft, approval: buildApproval(), newValue: '1', safe, dispatch }),
+    ).rejects.toThrow('Failed to re-encode the approval transaction')
+
+    expect(mockPreviewAndStashDraft).not.toHaveBeenCalled()
+  })
+
   it('throws instead of silently no-oping when the approval has no token metadata', async () => {
     const approval = buildApproval({ tokenInfo: undefined })
     const draft = buildDraft({

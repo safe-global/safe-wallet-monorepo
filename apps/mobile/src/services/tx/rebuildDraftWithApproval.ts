@@ -44,6 +44,11 @@ export const rebuildDraftWithApproval = async ({
     : [{ to, value: value ?? '0', data, operation: operation ?? OperationType.Call }]
 
   const updatedTxs = updateApprovalTxs([newValue], [approval], innerTxs)
+  // updateApprovalTxs returns entries it skipped by reference — fail loudly instead of
+  // rebuilding an identical draft when the approval no longer matches its inner tx
+  if (updatedTxs[approval.transactionIndex] === innerTxs[approval.transactionIndex]) {
+    throw new Error('Failed to re-encode the approval transaction')
+  }
   // Restore the operation that updateApprovalTxs drops from re-encoded entries
   const transactions: MetaTransactionData[] = updatedTxs.map((tx, index) => ({
     to: tx.to,
