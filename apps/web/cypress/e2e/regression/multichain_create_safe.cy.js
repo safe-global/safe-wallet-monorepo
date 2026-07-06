@@ -36,7 +36,7 @@ describe('Multichain safe creation tests', () => {
 
   it('Verify that Relay is available for one safe creation', () => {
     createwallet.clearNetworkInput(1)
-    createwallet.enterNetwork(1, constants.networks.polygon)
+    createwallet.enterNetwork(1, constants.networks.sepolia)
     createwallet.clickOnNetwrokCheckbox()
     createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
