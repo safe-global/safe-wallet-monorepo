@@ -1,6 +1,5 @@
-import '@/src/features/WalletConnect/shared/compat'
+// Crypto polyfills live in index.js — they must run before every other module init.
 import '@/src/platform/fetch'
-import '@/src/platform/crypto-shims'
 import '@/src/platform/intl-polyfills'
 import { Stack } from 'expo-router'
 import 'react-native-reanimated'

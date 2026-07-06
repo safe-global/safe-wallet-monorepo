@@ -1,4 +1,10 @@
-// Initialize all background notification handlers FIRST - must be self-contained, no app dependencies
+// Crypto polyfills must be the first imports: @noble/* capture globalThis.crypto
+// at module-load time, so anything initializing before them permanently breaks
+// WalletConnect pairing. Only reproducible in release builds.
+import '@/src/features/WalletConnect/shared/compat'
+import '@/src/platform/crypto-shims'
+
+// Initialize all background notification handlers early - must be self-contained, no app dependencies
 import '@/src/services/notifications/backgroundHandlers'
 
 // changed to the below syntax, because on my machine I was failing to build
