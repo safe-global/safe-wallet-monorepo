@@ -200,6 +200,10 @@ export function enterRecipient(address) {
   cy.get(customRecipient).find('input').clear().type(address)
 }
 
+export function verifyBlockedAddressFormShown() {
+  cy.contains(blockedAddressStr).should('be.visible')
+}
+
 export function setSlippage(value) {
   cy.contains('button', 'Auto').next('button').find('input').clear().type(value)
 }
@@ -367,10 +371,6 @@ export function setOutputValue(value) {
 
 export function outputInputIsNotEmpty() {
   cy.get(outputCurrencyInput).find('input').invoke('val').should('not.be.empty')
-}
-
-export function enableCustomRecipient(option) {
-  if (!option) cy.get(recipientToggle).click()
 }
 
 export function enableTwapCustomRecipient(option) {

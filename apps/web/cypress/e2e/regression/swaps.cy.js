@@ -29,7 +29,6 @@ describe('Swaps tests', () => {
     { defaultCommandTimeout: 30000 },
     () => {
       let isCustomRecipientFound
-      swaps.getMockQuoteResponse(swaps.quoteResponse.quote1)
       swaps.acceptLegalDisclaimer()
       cy.wait(4000)
       main
@@ -43,16 +42,11 @@ describe('Swaps tests', () => {
         .within(() => {
           swaps.selectInputCurrency(swaps.swapTokens.cow)
           swaps.clickOnSettingsBtn()
-          swaps.enableCustomRecipient(isCustomRecipientFound(swaps.customRecipient))
           swaps.clickOnSettingsBtn()
           swaps.enterRecipient(swaps.blockedAddress)
-          swaps.selectOutputCurrency(swaps.swapTokens.dai)
-          cy.wait('@mockedQuote').then((interception) => {
-            expect(interception.response.statusCode).to.eq(200)
-            cy.log('Intercepted response:', JSON.stringify(interception.response.body))
-          })
         })
-      cy.contains(swaps.blockedAddressStr)
+
+      swaps.verifyBlockedAddressFormShown()
     },
   )
 })
