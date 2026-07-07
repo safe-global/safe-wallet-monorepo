@@ -267,8 +267,8 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(card).not.toContainElement(termsLink)
   })
 
-  // The Create workspace button sits top-right inside the workspaces panel
-  // when the user is signed in and has spaces.
+  // The Create button sits right-aligned above the workspaces list when the
+  // user is signed in and has spaces.
   it('renders the Create workspace button in the tabbed layout when signed in with active spaces', async () => {
     mockUseAppSelector.mockReturnValue(true)
     mockUseSpacesGetV1Query.mockReturnValue({

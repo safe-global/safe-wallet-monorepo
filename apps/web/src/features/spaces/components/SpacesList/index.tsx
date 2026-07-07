@@ -36,15 +36,19 @@ const AddSpaceButton = ({
   onClick,
   disabled,
   size = 'lg',
+  variant = 'default',
+  label = 'Create workspace',
 }: {
   onClick?: () => void
   disabled?: boolean
   size?: 'lg' | 'default'
+  variant?: 'default' | 'outline'
+  label?: string
 }) => {
   const button = (
     <Button
       data-testid="create-space-button"
-      variant="default"
+      variant={variant}
       size={size}
       className={cn(
         size === 'lg' && 'h-full rounded-lg px-6 py-3 text-base',
@@ -54,8 +58,13 @@ const AddSpaceButton = ({
       disabled={disabled}
       onClick={disabled ? undefined : onClick}
     >
-      <AddIcon className={cn('fill-primary-foreground', size === 'lg' ? 'size-5' : 'size-4')} />
-      Create workspace
+      <AddIcon
+        className={cn(
+          variant === 'default' ? 'fill-primary-foreground' : 'fill-foreground',
+          size === 'lg' ? 'size-5' : 'size-4',
+        )}
+      />
+      {label}
     </Button>
   )
 
@@ -218,6 +227,18 @@ const SpacesList = () => {
           <AccountsNavigation />
         </Box>
 
+        {isUserSignedIn && activeSpaces.length > 0 && (
+          <div className={cn('shadcn-scope mb-4 flex justify-end', isDarkMode && 'dark')}>
+            <AddSpaceButton
+              size="default"
+              variant="outline"
+              label="Create"
+              disabled={isAtSpacesLimit}
+              onClick={onAddSpaceBtnClick}
+            />
+          </div>
+        )}
+
         {isUserSignedIn &&
           pendingInvites.length > 0 &&
           pendingInvites.map((invitingSpace: GetSpaceResponse) => (
@@ -232,33 +253,15 @@ const SpacesList = () => {
           <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
         ) : activeSpaces.length > 0 ? (
           <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-            <div className="rounded-3xl bg-card pb-4">
-              <div className="flex justify-end px-4 pt-4">
-                <AddSpaceButton size="default" disabled={isAtSpacesLimit} onClick={onAddSpaceBtnClick} />
-              </div>
-
-              <div className="px-4 pt-4">
-                <div className="rounded-2xl border border-border bg-card">
-                  <div className="p-1 pb-0">
-                    <div className="flex h-9 items-center rounded-xl bg-muted pl-4">
-                      <span className="text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">
-                        Name
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="px-4 py-1" data-testid="org-list">
-                    {activeSpaces.map((space, index) => (
-                      <SpaceRow
-                        key={space.uuid}
-                        space={space}
-                        currentUserId={currentUser?.id}
-                        showDivider={index < activeSpaces.length - 1}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
+            <div className="rounded-3xl bg-card px-4 py-1" data-testid="org-list">
+              {activeSpaces.map((space, index) => (
+                <SpaceRow
+                  key={space.uuid}
+                  space={space}
+                  currentUserId={currentUser?.id}
+                  showDivider={index < activeSpaces.length - 1}
+                />
+              ))}
             </div>
           </div>
         ) : (

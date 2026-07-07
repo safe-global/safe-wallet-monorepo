@@ -87,7 +87,7 @@ export {
 } from './hooks/useSpaceMembers'
 
 // Hooks from useSpaceSafes.tsx
-export { useSpaceSafes, useSpaceSafesById } from './hooks/useSpaceSafes'
+export { useSpaceSafes } from './hooks/useSpaceSafes'
 
 // Reverse lookup: Safe address -> Spaces it belongs to
 export { useSafeSpaces } from './hooks/useSafeSpaces'
