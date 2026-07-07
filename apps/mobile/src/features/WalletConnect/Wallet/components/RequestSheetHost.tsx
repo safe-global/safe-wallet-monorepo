@@ -1,10 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import {
-  BottomSheetModal,
-  BottomSheetScrollView,
-  BottomSheetFooter,
-  type BottomSheetFooterProps,
-} from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetView, BottomSheetFooter, type BottomSheetFooterProps } from '@gorhom/bottom-sheet'
 import type { IWalletKit } from '@reown/walletkit'
 import { useStore } from 'react-redux'
 import { getVariable, useTheme, YStack, XStack } from 'tamagui'
@@ -175,14 +170,13 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
       footerComponent={renderFooter}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
     >
-      {/* Scrollable so content can't clip under large font scaling; the footer is pinned. */}
-      <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_CLEARANCE }}>
+      <BottomSheetView style={{ paddingBottom: insets.bottom + FOOTER_CLEARANCE }}>
         {proposal && !permissionsOpen && (
           <SessionProposalSheet pending={proposal} onOpenPermissions={openPermissions} />
         )}
         {request && !permissionsOpen && <SendTransactionSheet pending={request} onOpenPermissions={openPermissions} />}
         {(proposal || request) && permissionsOpen && <ConnectionPermissionsPanel variant={variant} />}
-      </BottomSheetScrollView>
+      </BottomSheetView>
     </BottomSheetModal>
   )
 }

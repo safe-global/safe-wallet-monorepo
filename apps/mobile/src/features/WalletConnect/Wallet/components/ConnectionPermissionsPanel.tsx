@@ -44,7 +44,7 @@ export const ConnectionPermissionsPanel: React.FC<Props> = ({ variant }) => {
         Connection request
       </Text>
 
-      <YStack gap="$6">
+      <YStack gap="$6" marginBottom="$6">
         <XStack
           gap="$3"
           paddingHorizontal="$3"
