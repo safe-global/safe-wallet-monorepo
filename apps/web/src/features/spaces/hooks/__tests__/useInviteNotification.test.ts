@@ -7,12 +7,18 @@ import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED
 import type { UserWithWallets } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { makeStore } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
+import { AppRoutes } from '@/config/routes'
 import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
 import { useInviteNotification } from '../useInviteNotification'
 
 jest.mock('@/store/authSlice', () => ({
   ...jest.requireActual('@/store/authSlice'),
   isAuthenticated: jest.fn(() => true),
+}))
+
+let mockPathname = '/some-other-page'
+jest.mock('next/router', () => ({
+  useRouter: () => ({ pathname: mockPathname }),
 }))
 
 import { isAuthenticated } from '@/store/authSlice'
@@ -42,7 +48,7 @@ const mockSpaces = (spaces: GetSpaceResponse[] | undefined) => {
 
 const renderWithStore = () => {
   const store = makeStore(undefined, { skipBroadcast: true })
-  const wrapper = ({ children }: { children: ReactNode }) => createElement(Provider, { store }, children)
+  const wrapper = ({ children }: { children: ReactNode }) => createElement(Provider, { store, children })
   const utils = renderHook(() => useInviteNotification(), { wrapper })
   return { store, ...utils }
 }
@@ -53,6 +59,7 @@ const inviteMessages = (store: ReturnType<typeof makeStore>) =>
 describe('useInviteNotification', () => {
   beforeEach(() => {
     jest.resetAllMocks()
+    mockPathname = '/some-other-page'
     ;(isAuthenticated as unknown as jest.Mock).mockReturnValue(true)
     mockUser(CURRENT_USER)
   })
@@ -70,6 +77,29 @@ describe('useInviteNotification', () => {
       "You've been invited to join Workspace A",
       "You've been invited to join Workspace B",
     ])
+  })
+
+  it('dispatches an info notification grouped and linked to the invite', () => {
+    mockSpaces([makeSpace('space-a', 'Workspace A', MemberStatus.INVITED)])
+
+    const { store } = renderWithStore()
+
+    const [notification] = selectNotifications(store.getState())
+    expect(notification).toMatchObject({
+      variant: 'info',
+      message: "You've been invited to join Workspace A",
+      groupKey: 'space-invite-space-a',
+      link: { href: AppRoutes.welcome.spaces, title: 'View invite' },
+    })
+  })
+
+  it('dispatches nothing when spaces resolve before the current user', () => {
+    mockUser(undefined)
+    mockSpaces([makeSpace('space-a', 'Workspace A', MemberStatus.INVITED)])
+
+    const { store } = renderWithStore()
+
+    expect(inviteMessages(store)).toEqual([])
   })
 
   it('does not re-dispatch for the same invite within a session on re-render', () => {
@@ -142,5 +172,27 @@ describe('useInviteNotification', () => {
       "You've been invited to join Workspace A",
       "You've been invited to join Workspace A",
     ])
+  })
+
+  it('dispatches nothing while on the workspace list page where the invite banner already shows', () => {
+    mockPathname = AppRoutes.welcome.spaces
+    mockSpaces([makeSpace('space-a', 'Workspace A', MemberStatus.INVITED)])
+
+    const { store } = renderWithStore()
+
+    expect(inviteMessages(store)).toEqual([])
+  })
+
+  it('dispatches the suppressed invite once the user navigates away from the workspace list page', () => {
+    mockPathname = AppRoutes.welcome.spaces
+    mockSpaces([makeSpace('space-a', 'Workspace A', MemberStatus.INVITED)])
+
+    const { store, rerender } = renderWithStore()
+    expect(inviteMessages(store)).toEqual([])
+
+    mockPathname = '/some-other-page'
+    rerender()
+
+    expect(inviteMessages(store)).toEqual(["You've been invited to join Workspace A"])
   })
 })

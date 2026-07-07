@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useRouter } from 'next/router'
 import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -10,6 +11,7 @@ import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
 
 export const useInviteNotification = (): void => {
   const dispatch = useAppDispatch()
+  const router = useRouter()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const notifiedUuids = useRef<Set<string>>(new Set())
 
@@ -17,6 +19,10 @@ export const useInviteNotification = (): void => {
   const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
 
   useEffect(() => {
+    // The workspace list already renders the invite banner inline, so a toast
+    // would just duplicate it. Skip here; navigating away surfaces the toast.
+    if (router.pathname === AppRoutes.welcome.spaces) return
+
     const pendingInvites = filterSpacesByStatus(currentUser, spaces ?? [], MemberStatus.INVITED)
     const pendingUuids = new Set(pendingInvites.map((space) => space.uuid))
 
@@ -40,5 +46,5 @@ export const useInviteNotification = (): void => {
         }),
       )
     }
-  }, [dispatch, currentUser, spaces])
+  }, [dispatch, currentUser, spaces, router.pathname])
 }
