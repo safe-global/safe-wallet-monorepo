@@ -141,6 +141,22 @@ describe('useFlowActivationGuard', () => {
 
       expect(guardResult).toEqual({ success: true })
     })
+
+    it('should allow access to /login when unauthenticated and the require-login gate is ON', async () => {
+      // /login is the Auth0 Application Login URI redirector; the gate must not
+      // bounce it to /welcome/spaces?next=/login before its own redirect runs.
+      setupMocks({
+        pathname: AppRoutes.login,
+        wallet: null,
+        isAuthenticated: false,
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: true })
+    })
   })
 
   // -----------------------------------------------------------------------
