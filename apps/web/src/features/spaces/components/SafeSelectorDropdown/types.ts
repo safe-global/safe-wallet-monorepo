@@ -27,6 +27,13 @@ export interface SafeItemData {
   parentSafeId?: string
 }
 
+/** Safe picked for renaming via the row's pencil button. */
+export interface SafeRenameTarget {
+  address: string
+  name: string
+  chainIds: string[]
+}
+
 export interface SafeSelectorDropdownProps {
   /** Full set of safes used to resolve the trigger's current safe (union of both tabs). */
   items: SafeItemData[]
@@ -41,4 +48,9 @@ export interface SafeSelectorDropdownProps {
   footer?: React.ReactNode | ((close: () => void) => React.ReactNode)
   /** Replaces the default "no safes" empty state — e.g. a "Sign in to a workspace" CTA on the Workspace tab. */
   emptyStateOverride?: React.ReactNode
+  /** Controlled search query. When provided the owner filters/counts across tabs with the same query. */
+  searchValue?: string
+  onSearchValueChange?: (value: string) => void
+  /** Enables the rename pencil on list rows; the dropdown closes before the callback fires. */
+  onItemRename?: (target: SafeRenameTarget) => void
 }

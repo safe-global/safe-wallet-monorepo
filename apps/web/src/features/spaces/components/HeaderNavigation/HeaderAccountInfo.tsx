@@ -17,10 +17,7 @@ const HeaderAccountInfo = () => {
   const { profileName, displayName } = getSidebarProfileInfo(membership, signerAddress, email)
 
   return (
-    <div
-      className="flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]"
-      data-testid="header-account-info"
-    >
+    <div className="flex items-center rounded-lg bg-muted" data-testid="header-account-info">
       <AccountInfo profileName={profileName} displayName={displayName} />
     </div>
   )

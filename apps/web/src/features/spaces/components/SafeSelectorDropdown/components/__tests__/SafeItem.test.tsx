@@ -6,6 +6,11 @@ jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: () => 'Test Safe',
 }))
 
+// The explorer-link lookup goes through RTK Query; the row explorer action is covered in SafeInfoDisplay tests.
+jest.mock('@/hooks/useChains', () => ({
+  useChain: () => undefined,
+}))
+
 jest.mock('../SafeInfoDisplay', () => {
   const Mock = () => <div data-testid="safe-info-display" />
   Mock.displayName = 'SafeInfoDisplay'
@@ -89,15 +94,23 @@ describe('SafeItem row badges', () => {
     expect(screen.getByTestId('account-threshold')).toHaveTextContent('')
   })
 
-  it('renders the pending badge when the chain has queued transactions', () => {
+  it('renders the compact pending badge when the chain has queued transactions', () => {
     render(<SafeItem {...createItem(makeChain({ queued: 3 }))} />)
 
-    expect(screen.getByTestId('account-pending')).toHaveTextContent('3 · Pending')
+    expect(screen.getByTestId('account-pending')).toHaveTextContent('3')
   })
 
-  it('does not render the pending badge when nothing is queued', () => {
+  it('keeps the pending column as whitespace when nothing is queued', () => {
     render(<SafeItem {...createItem(makeChain())} />)
 
     expect(screen.queryByTestId('account-pending')).not.toBeInTheDocument()
+    expect(screen.getByTestId('row-pending-column')).toBeInTheDocument()
+  })
+
+  it('renders the fixed threshold and networks columns', () => {
+    render(<SafeItem {...createItem(makeChain())} />)
+
+    expect(screen.getByTestId('row-threshold-column')).toBeInTheDocument()
+    expect(screen.getByTestId('row-networks-column')).toBeInTheDocument()
   })
 })

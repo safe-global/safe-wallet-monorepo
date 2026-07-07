@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { fireEvent, render } from '@testing-library/react'
 import SpaceSafeBar from './index'
 
 const mockItems = [
@@ -23,10 +23,29 @@ jest.mock('next/router', () => ({
 
 jest.mock('@/features/spaces', () => ({
   useIsQualifiedSafe: jest.fn(() => false),
+  matchesSafeSearch: jest.requireActual('@/features/spaces/components/SafeSelectorDropdown/utils').matchesSafeSearch,
   get SafeSelectorDropdown() {
     return jest.requireMock('@/features/spaces/components/SafeSelectorDropdown').default
   },
 }))
+
+jest.mock('@/hooks/useAllAddressBooks', () => ({
+  useSafeNameResolver: () => (_address: string, _chainId: string | undefined, preferredName?: string) =>
+    preferredName ?? '',
+}))
+
+jest.mock('@/components/address-book/EntryDialog', () => {
+  const MockEntryDialog = (props: { defaultValues?: { name: string; address: string }; chainIds?: string[] }) => (
+    <div
+      data-testid="entry-dialog"
+      data-name={props.defaultValues?.name}
+      data-address={props.defaultValues?.address}
+      data-chain-ids={JSON.stringify(props.chainIds)}
+    />
+  )
+  MockEntryDialog.displayName = 'EntryDialog'
+  return { __esModule: true, default: MockEntryDialog }
+})
 
 jest.mock('./hooks/useSpaceSafeSelectorItems', () => ({
   useSpaceSafeSelectorItems: jest.fn(),
@@ -45,6 +64,10 @@ jest.mock('./SpaceChainSelector', () => {
 jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
   const MockSafeSelectorDropdown = (props: Record<string, unknown>) => {
     const footerFn = props.footer as ((close: () => void) => React.ReactNode) | undefined
+    const onSearchValueChange = props.onSearchValueChange as ((value: string) => void) | undefined
+    const onItemRename = props.onItemRename as
+      | ((target: { address: string; name: string; chainIds: string[] }) => void)
+      | undefined
     return (
       <div
         data-testid="safe-selector-dropdown"
@@ -57,6 +80,16 @@ jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
       >
         {props.header as React.ReactNode}
         {typeof footerFn === 'function' && <div data-testid="dropdown-footer-slot">{footerFn(() => {})}</div>}
+        <input
+          data-testid="mock-search-input"
+          value={(props.searchValue as string) ?? ''}
+          onChange={(e) => onSearchValueChange?.(e.target.value)}
+        />
+        <button
+          type="button"
+          data-testid="mock-rename-btn"
+          onClick={() => onItemRename?.({ address: '0xSafe1', name: 'My Safe', chainIds: ['1'] })}
+        />
       </div>
     )
   }
@@ -68,12 +101,6 @@ jest.mock('./SpaceNestedSafesButton', () => {
   const MockSpaceNestedSafesButton = () => <div data-testid="nested-safes-button" />
   MockSpaceNestedSafesButton.displayName = 'SpaceNestedSafesButton'
   return { __esModule: true, default: MockSpaceNestedSafesButton }
-})
-
-jest.mock('./AccountsModal', () => {
-  const MockAccountsModal = () => <div data-testid="accounts-modal" />
-  MockAccountsModal.displayName = 'AccountsModal'
-  return { __esModule: true, default: MockAccountsModal }
 })
 
 jest.mock('@/features/myAccounts', () => ({
@@ -201,12 +228,13 @@ describe('SpaceSafeBar', () => {
     expect(dropdown.getAttribute('data-has-on-retry')).toBe('true')
   })
 
-  it('renders a Local footer (Manage + Add Safe Account) on the default Local tab', () => {
-    // Off the Spaces level the default tab is Local, which carries the manage/add footer.
+  it('renders the Manage trusted accounts footer on the default Local tab', () => {
+    // Off the Spaces level the default tab is Local, which carries the manage-trusted footer.
     const { getByTestId } = render(<SpaceSafeBar />)
     expect(getByTestId('safe-selector-dropdown').getAttribute('data-has-footer')).toBe('true')
-    expect(getByTestId('dropdown-manage-trusted-btn')).toBeInTheDocument()
-    expect(getByTestId('dropdown-add-account-btn')).toBeInTheDocument()
+    const manageBtn = getByTestId('dropdown-manage-trusted-btn')
+    expect(manageBtn).toHaveTextContent('Manage trusted accounts')
+    expect(manageBtn).toHaveTextContent('Add or remove accounts from this list')
   })
 
   it('does not render a footer on the Workspace tab (default in a space context)', () => {
@@ -253,7 +281,59 @@ describe('SpaceSafeBar', () => {
     mockUseSpaceBackLink.mockReturnValue({ space: { id: 1, name: 'Test Space' }, handleBackToSpace: jest.fn() })
 
     const { getByTestId } = render(<SpaceSafeBar />)
-    expect(getByTestId('dropdown-tab-workspace').textContent).toBe('Test Space')
+    expect(getByTestId('dropdown-tab-workspace').textContent).toBe('Test Space (1)')
+  })
+
+  it('labels the Local tab with the trusted accounts count', () => {
+    const { getByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('dropdown-tab-local').textContent).toBe('Trusted accounts (1)')
+  })
+
+  it('updates the tab counts while searching across both lists', () => {
+    mockUseSpaceSafeSelectorItems.mockReturnValue({
+      workspaceItems: mockItems,
+      localItems: [
+        ...mockItems,
+        {
+          id: '1:0xSafe2',
+          name: 'Other Safe',
+          address: '0xSafe2',
+          threshold: 1,
+          owners: 1,
+          balance: '0',
+          chains: [{ chainId: '1', chainName: 'Ethereum', chainLogoUri: null, shortName: 'eth' }],
+        },
+      ],
+      selectedItemId: '1:0xSafe1',
+      handleItemSelect: jest.fn(),
+      isError: false,
+      refetch: jest.fn(),
+      isInSpaceContext: true,
+      hasWallet: true,
+    })
+    mockUseIsQualifiedSafe.mockReturnValue(true)
+    mockUseSpaceBackLink.mockReturnValue({ space: { id: 1, name: 'Test Space' }, handleBackToSpace: jest.fn() })
+
+    const { getByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('dropdown-tab-workspace').textContent).toBe('Test Space (1)')
+    expect(getByTestId('dropdown-tab-local').textContent).toBe('Trusted accounts (2)')
+
+    fireEvent.change(getByTestId('mock-search-input'), { target: { value: 'Other' } })
+
+    expect(getByTestId('dropdown-tab-workspace').textContent).toBe('Test Space (0)')
+    expect(getByTestId('dropdown-tab-local').textContent).toBe('Trusted accounts (1)')
+  })
+
+  it('opens the rename dialog with the safe details when a row rename is requested', () => {
+    const { getByTestId, queryByTestId } = render(<SpaceSafeBar />)
+    expect(queryByTestId('entry-dialog')).not.toBeInTheDocument()
+
+    fireEvent.click(getByTestId('mock-rename-btn'))
+
+    const dialog = getByTestId('entry-dialog')
+    expect(dialog.getAttribute('data-name')).toBe('My Safe')
+    expect(dialog.getAttribute('data-address')).toBe('0xSafe1')
+    expect(dialog.getAttribute('data-chain-ids')).toBe('["1"]')
   })
 
   it.each([['/welcome/accounts'], ['/welcome/spaces'], ['/new-safe/create'], ['/new-safe/load']])(

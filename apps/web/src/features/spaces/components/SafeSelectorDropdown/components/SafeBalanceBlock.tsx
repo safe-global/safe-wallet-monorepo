@@ -12,7 +12,7 @@ function SafeBalanceBlock({ isLoading, balance }: SafeBalanceBlockProps) {
       {isLoading ? (
         <Skeleton className="h-4 w-16 rounded-full" />
       ) : (
-        <span data-testid="safe-selector-balance" className="text-sm text-muted-foreground">
+        <span data-testid="safe-selector-balance" className="text-sm font-medium text-foreground">
           <FiatValue value={balance} />
         </span>
       )}

@@ -122,8 +122,9 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
 
         {/* Right content (actions): ml-auto pushes it right (page padding) on one row. When the
             header wraps at/above md (sidebar shown) ml-0 left-aligns it with the context below;
-            below md (sidebar hidden) it keeps ml-auto so the wrapped rows hug the right edge. */}
-        <div className="flex items-center gap-1 shrink-0 ml-auto @max-[1100px]:min-[900px]:ml-0">
+            below md (sidebar hidden) it keeps ml-auto so the wrapped rows hug the right edge.
+            One 56px card holding the muted action chips, matching the safe-selector pill. */}
+        <div className="flex items-center gap-1 shrink-0 ml-auto @max-[1100px]:min-[900px]:ml-0 rounded-lg bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
           {showSafeToken && (
             <div className="hidden sm:block">
               <SafenetStakingButton />

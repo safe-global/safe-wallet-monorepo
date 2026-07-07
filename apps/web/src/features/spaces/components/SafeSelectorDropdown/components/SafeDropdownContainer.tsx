@@ -10,16 +10,8 @@ import useWallet from '@/hooks/wallets/useWallet'
 import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
-import type { SafeItemData } from '../types'
-
-const matchesSearch = (item: SafeItemData, displayName: string, query: string): boolean => {
-  const name = displayName.toLowerCase()
-  const address = item.address.toLowerCase()
-  if (name.includes(query) || address.includes(query)) return true
-  return item.chains.some(
-    (chain) => chain.chainName?.toLowerCase().includes(query) || chain.shortName?.toLowerCase().includes(query),
-  )
-}
+import { matchesSafeSearch } from '../utils'
+import type { SafeItemData, SafeRenameTarget } from '../types'
 
 export interface SafeDropdownContainerProps {
   items: SafeItemData[]
@@ -30,14 +22,19 @@ export interface SafeDropdownContainerProps {
   onRetry?: () => void
   header?: React.ReactNode
   footer?: React.ReactNode | ((close: () => void) => React.ReactNode)
-  /** Replaces the default "no safes" empty text (not the search-empty text) — e.g. a "Sign in to a workspace" CTA. */
+  /** Replaces the empty text when the tab has no safes at all — e.g. a "Sign in to a workspace" CTA. */
   emptyStateOverride?: React.ReactNode
   closeDropdown: () => void
+  /** Controlled search query; falls back to local state when omitted. */
+  searchValue?: string
+  onSearchValueChange?: (value: string) => void
+  /** Enables the rename pencil on rows. The dropdown closes before the callback fires. */
+  onItemRename?: (target: SafeRenameTarget) => void
 }
 
 function SafeItemSkeleton() {
   return (
-    <div className="flex items-center gap-3 px-4 py-4">
+    <div className="flex items-center gap-3 px-3 py-2">
       <Skeleton className="size-8 shrink-0 rounded-full" />
       <div className="flex flex-1 flex-col gap-1.5">
         <Skeleton className="h-3.5 w-24 rounded" />
@@ -79,22 +76,34 @@ const SafeDropdownContainer = ({
   footer,
   emptyStateOverride,
   closeDropdown,
+  searchValue,
+  onSearchValueChange,
+  onItemRename,
 }: SafeDropdownContainerProps) => {
-  const [search, setSearch] = useState('')
+  const [internalSearch, setInternalSearch] = useState('')
+  const search = searchValue ?? internalSearch
+  const setSearch = onSearchValueChange ?? setInternalSearch
   const query = search.trim().toLowerCase()
   const resolveName = useSafeNameResolver()
   const wallet = useWallet()
 
-  // Multi-chain items stay visible even when currently selected so the user can expand and switch chains.
-  const structuralItems = items.filter((item) => item.chains.length > 1 || item.id !== selectedItemId)
-  const filteredItems = query
-    ? structuralItems.filter((item) =>
-        matchesSearch(item, resolveName(item.address, item.chains[0]?.chainId, item.name), query),
-      )
-    : structuralItems
+  const handleRename = onItemRename
+    ? (target: SafeRenameTarget) => {
+        closeDropdown()
+        onItemRename(target)
+      }
+    : undefined
 
-  // Key the search bar to displayable rows, so it's hidden when there's nothing to filter.
-  const showSearch = !isError && structuralItems.length > 0
+  // The currently-open safe stays in the list (highlighted via its checked/selected state) so the
+  // user can locate it among the others.
+  const filteredItems = query
+    ? items.filter((item) =>
+        matchesSafeSearch(item, resolveName(item.address, item.chains[0]?.chainId, item.name), query),
+      )
+    : items
+
+  // A controlled search spans both tabs, so it stays visible even when the active tab has no rows.
+  const showSearch = !isError && (searchValue !== undefined || items.length > 0)
 
   // Bottom-fade scroll hint, shown only while more rows lie below the fold.
   const { setScrollNode, showFade: showScrollHint } = useBottomScrollFade([filteredItems.length, isLoading, isError])
@@ -109,7 +118,9 @@ const SafeDropdownContainer = ({
     }
 
     if (filteredItems.length === 0) {
-      if (!query && emptyStateOverride) {
+      // With no safes to search through at all, "no matches" would be misleading — keep the
+      // tab's CTA (sign in to a workspace / connect a wallet) even while a query is typed.
+      if (emptyStateOverride && items.length === 0) {
         return <div data-testid="dropdown-empty-override">{emptyStateOverride}</div>
       }
       return (
@@ -125,15 +136,30 @@ const SafeDropdownContainer = ({
 
     return filteredItems.map((item) => {
       if (item.chains.length > 1) {
-        return <MultiChainSafeItemRow key={item.id} item={item} />
+        return (
+          <MultiChainSafeItemRow
+            key={item.id}
+            item={item}
+            onRename={handleRename}
+            isSelected={item.id === selectedItemId}
+          />
+        )
       }
       return (
         <SelectItem
           key={item.id}
           value={item.id}
-          className="h-auto py-4 px-4 rounded-lg my-1 data-[state=checked]:bg-muted hover:bg-muted/30 cursor-pointer"
+          // [&>div]:min-w-0/shrink relax the built-in ItemText wrapper (shrink-0, min-width:auto in
+          // ui/select.tsx) so the name column can truncate instead of overflowing the popup.
+          // focus:bg-transparent: base-ui moves focus to the hovered option and never clears it when
+          // the pointer moves onto a non-option row (the multi-chain Collapsible), which would leave
+          // a stuck highlight — the pointer highlight is `hover:` only; keyboard nav keeps
+          // focus-visible:bg-muted.
+          // [&>span.absolute]:hidden suppresses the built-in checkmark on the selected row (it
+          // overlaps the balance column); the bg-muted highlight marks the current safe instead.
+          className="group/row h-auto py-2 px-3 rounded-lg my-0.5 focus:bg-transparent focus-visible:bg-muted data-[state=checked]:bg-muted hover:bg-muted/30 cursor-pointer [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden"
         >
-          <SafeItem {...item} />
+          <SafeItem {...item} onRename={handleRename} />
         </SelectItem>
       )
     })
@@ -156,9 +182,8 @@ const SafeDropdownContainer = ({
       <div className="flex max-h-[min(34rem,var(--available-height,34rem))] flex-col">
         {(header || showSearch) && (
           <div className="shrink-0 bg-card">
-            {header}
             {showSearch && (
-              <div className="flex items-center gap-2 px-3 pb-2 pt-1">
+              <div className="flex items-center gap-2 px-3 pb-1 pt-3">
                 <InputGroup className="flex-1 rounded-md border-gray-100 shadow-none">
                   <InputGroupAddon>
                     <Search className="size-4" />
@@ -179,6 +204,7 @@ const SafeDropdownContainer = ({
                 <SafeListSortToggle />
               </div>
             )}
+            {header}
           </div>
         )}
 

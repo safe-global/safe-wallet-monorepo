@@ -6,7 +6,15 @@ import { OVERVIEW_EVENTS, trackEvent, MixpanelEventParams } from '@/services/ana
 // Opens the current safe on its block explorer. Rendered inside the Select trigger next to the copy
 // button, so pointerdown is stopped from reaching the surrounding trigger (which would otherwise
 // toggle the dropdown); the anchor's click still navigates and opens the explorer in a new tab.
-const ExplorerLinkButton = ({ href, title = 'View on block explorer' }: { href: string; title?: string }) => {
+const ExplorerLinkButton = ({
+  href,
+  title = 'View on block explorer',
+  testId = 'safe-item-explorer-link',
+}: {
+  href: string
+  title?: string
+  testId?: string
+}) => {
   // preventDefault on pointerdown does not cancel the synthetic click, so navigation still happens.
   const stopParent = (e: MouseEvent | PointerEvent) => {
     e.stopPropagation()
@@ -30,7 +38,7 @@ const ExplorerLinkButton = ({ href, title = 'View on block explorer' }: { href: 
             onPointerDown={stopParent}
             className="shrink-0 rounded p-0.5 hover:bg-muted transition-colors cursor-pointer inline-flex"
             aria-label={title}
-            data-testid="safe-item-explorer-link"
+            data-testid={testId}
           />
         }
       >

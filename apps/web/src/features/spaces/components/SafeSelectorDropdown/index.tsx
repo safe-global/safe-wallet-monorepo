@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
+import { parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Select, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -41,7 +41,7 @@ function buildFallbackSafeItem(selectedItemId: string | undefined, chainConfigs:
 
 function SafeSelectorDropdownSkeleton() {
   return (
-    <div className="w-full sm:w-[543px] min-h-[calc(68px)] flex items-center gap-4 rounded-lg p-2 pl-6 bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+    <div className="w-full sm:w-[515px] h-10 flex items-center gap-4 rounded-lg py-0.5 pl-1.5 pr-2 bg-muted">
       <Skeleton className="size-8 shrink-0 rounded-full" />
       <div className="flex flex-1 flex-col gap-1.5">
         <Skeleton className="h-3.5 w-24 rounded-full" />
@@ -66,6 +66,9 @@ function SafeSelectorDropdown({
   header,
   footer,
   emptyStateOverride,
+  searchValue,
+  onSearchValueChange,
+  onItemRename,
 }: SafeSelectorDropdownProps) {
   const hasDropdownContent = Boolean(header) || Boolean(footer) || isLoading || isError
   // Force-openable so `isSingleSafe` can't hide the chevron when only one other safe exists.
@@ -100,6 +103,20 @@ function SafeSelectorDropdown({
   )
   const triggerItem = selectedItem ?? fallbackSelectedItem
 
+  // The trigger item for the current safe can be a chain-scoped entry while the same safe appears
+  // as a multi-chain group elsewhere in the list — check by address, not just the item's chains.
+  const isTriggerSafeMultiChain = useMemo(() => {
+    if (!triggerItem) return false
+    if (triggerItem.chains.length > 1) return true
+    return items.some((item) => sameAddress(item.address, triggerItem.address) && item.chains.length > 1)
+  }, [items, triggerItem])
+
+  // A lifted search query would otherwise persist across open/close (local state resets with the popup).
+  const handleOpenChangeWithReset = (open: boolean) => {
+    if (!open) onSearchValueChange?.('')
+    handleOpenChange(open)
+  }
+
   if (!mounted || !triggerItem) {
     if (isError && mounted) return <InlineRetryError message="Failed to load Safe data" onRetry={onRetry} />
     return <SafeSelectorDropdownSkeleton />
@@ -115,7 +132,7 @@ function SafeSelectorDropdown({
       value={safeSelectValue}
       onValueChange={handleSafeChange}
       open={variants.canOpen && !isDisabled ? dropdownOpen : false}
-      onOpenChange={isDisabled ? undefined : handleOpenChange}
+      onOpenChange={isDisabled ? undefined : handleOpenChangeWithReset}
       // Deliberately not disabled: a disabled <button> blocks the inline address actions (copy,
       // explorer, env hint). Safe switching is prevented by the forced-closed `open` above instead.
     >
@@ -123,7 +140,9 @@ function SafeSelectorDropdown({
         className={cn(
           // The wrapper's overflow-hidden clips this focus-visible ring into stray top/bottom bars,
           // so suppress it — the card shows no focus ring by design (wrapper sets focus:ring-0).
-          '-m-4 flex-1 border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-6 hover:bg-transparent dark:hover:bg-transparent data-[state=open]:bg-transparent focus-visible:ring-0 focus-visible:border-0 [&_[data-slot=select-value]]:pr-0 relative',
+          // min-w-0 (trigger + value slot): without it a long safe name can't shrink/truncate and
+          // pushes the balance and chevron out of the clipped card.
+          '-m-4 flex-1 min-w-0 border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-4 hover:bg-transparent dark:hover:bg-transparent data-[state=open]:bg-transparent focus-visible:ring-0 focus-visible:border-0 [&_[data-slot=select-value]]:pr-0 [&_[data-slot=select-value]]:min-w-0 relative',
           variants.triggerClass,
           isDisabled && 'cursor-not-allowed opacity-50',
         )}
@@ -135,7 +154,11 @@ function SafeSelectorDropdown({
         data-testid="open-safes-icon"
       >
         <SelectValue>
-          <SafeSelectorTriggerContent selectedItem={triggerItem} selectedChainId={selectedChainId} />
+          <SafeSelectorTriggerContent
+            selectedItem={triggerItem}
+            selectedChainId={selectedChainId}
+            isMultiChain={isTriggerSafeMultiChain}
+          />
         </SelectValue>
       </SelectTrigger>
 
@@ -150,19 +173,24 @@ function SafeSelectorDropdown({
         footer={footer}
         emptyStateOverride={emptyStateOverride}
         closeDropdown={closeDropdown}
+        searchValue={searchValue}
+        onSearchValueChange={onSearchValueChange}
+        onItemRename={onItemRename}
       />
     </Select>
   )
 
   // TODO: change rounded-lg (8px) to rounded-2xl (16px) after migrating to the new design system
+  // A muted 40px chip: the SpaceSafeBar pill that groups this with the nested-safes and
+  // network controls carries the white card and its shadow.
   const wrapperClassName = cn(
-    'group relative w-full sm:w-[543px] min-h-[calc(68px)] flex items-center shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)] rounded-lg p-2 overflow-hidden bg-card focus:ring-0',
+    'group relative w-full sm:w-[515px] h-10 flex items-center rounded-lg py-0.5 pl-1.5 pr-2 overflow-hidden bg-muted focus:ring-0',
     variants.wrapperClass,
   )
 
   const innerContent = (
     <>
-      <div className="pointer-events-none absolute inset-1 rounded-md bg-muted/30 opacity-0 group-hover:opacity-100" />
+      <div className="pointer-events-none absolute inset-0 rounded-lg bg-muted-foreground/5 opacity-0 group-hover:opacity-100" />
       {selectElement}
     </>
   )

@@ -110,12 +110,12 @@ export function HeaderNavigation({
     <div className={cn('flex items-center gap-1')}>
       {/* TODO: Global search button */}
       {showSearch && (
-        <div className="flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+        <div className="flex items-center rounded-lg bg-muted">
           <Button
             variant="ghost"
             size="icon-sm"
             onClick={onSearchClick}
-            className="cursor-pointer rounded-lg bg-transparent hover:bg-muted/30 transition-colors m-1"
+            className="size-10 cursor-pointer rounded-lg bg-transparent hover:bg-muted-foreground/10 transition-colors"
             aria-label="Search"
           >
             <Search className="size-5 text-muted-foreground" />
@@ -123,15 +123,12 @@ export function HeaderNavigation({
         </div>
       )}
 
-      <div
-        className="relative flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]"
-        data-testid="notifications-center"
-      >
+      <div className="relative flex items-center rounded-lg bg-muted" data-testid="notifications-center">
         <Button
           variant="ghost"
           size="icon-sm"
           onClick={onNotificationsClick}
-          className="cursor-pointer rounded-lg bg-transparent hover:bg-muted/30 transition-colors m-1"
+          className="size-10 cursor-pointer rounded-lg bg-transparent hover:bg-muted-foreground/10 transition-colors"
           aria-label="Notifications"
         >
           <Bell className="size-5 text-muted-foreground" />
@@ -152,15 +149,12 @@ export function HeaderNavigation({
       {showBatch && (
         <BatchTooltip>
           <Track {...BATCH_EVENTS.BATCH_SIDEBAR_OPEN} label={batchCount}>
-            <div
-              className="relative flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]"
-              data-track="batching: Batch sidebar open"
-            >
+            <div className="relative flex items-center rounded-lg bg-muted" data-track="batching: Batch sidebar open">
               <Button
                 variant="ghost"
                 size="icon-sm"
                 onClick={onBatchClick}
-                className="cursor-pointer rounded-lg bg-transparent hover:bg-muted/30 transition-colors m-1"
+                className="size-10 cursor-pointer rounded-lg bg-transparent hover:bg-muted-foreground/10 transition-colors"
                 aria-label="Batch transactions"
               >
                 <Layers className="size-5 text-muted-foreground" />
@@ -180,12 +174,12 @@ export function HeaderNavigation({
       )}
 
       <Track label={OVERVIEW_LABELS.top_bar} {...OVERVIEW_EVENTS.OPEN_ONBOARD}>
-        <div className="flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+        <div className="flex items-center rounded-lg bg-muted">
           <Button
             variant="ghost"
             size="sm"
             onClick={onWalletClick}
-            className="cursor-pointer gap-1.5 rounded-lg bg-transparent hover:bg-muted/30 transition-colors m-1"
+            className="h-10 px-3 cursor-pointer gap-1.5 rounded-lg bg-transparent hover:bg-muted-foreground/10 transition-colors"
             aria-label={isConnected ? `Wallet ${walletDisplayName}` : 'Connect wallet'}
             data-testid={isConnected ? 'open-account-center' : 'connect-wallet-btn'}
           >

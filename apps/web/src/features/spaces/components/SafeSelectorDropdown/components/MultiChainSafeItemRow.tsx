@@ -1,20 +1,26 @@
 import { Eye } from 'lucide-react'
 import FiatValue from '@/components/common/FiatValue'
+import { cn } from '@/utils/cn'
 import { Badge } from '@/components/ui/badge'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import { SelectItem } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
-import { PendingBadge, ThresholdBadge } from '@/components/common/AccountBadges'
+import { useChain } from '@/hooks/useChains'
+import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import SafeInfoDisplay from './SafeInfoDisplay'
 import BalanceDisplay from './BalanceDisplay'
 import ChainLogo from './ChainLogo'
+import SafeRowStats from './SafeRowStats'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
-import type { SafeItemData, SafeItemDataChain } from '../types'
+import type { SafeItemData, SafeItemDataChain, SafeRenameTarget } from '../types'
 
 interface MultiChainSafeItemRowProps {
   item: SafeItemData
+  onRename?: (target: SafeRenameTarget) => void
+  /** True when this is the currently-open safe — highlighted like a checked SelectItem. */
+  isSelected?: boolean
 }
 
 function StatusBadge({ chain }: { chain: SafeItemDataChain }) {
@@ -32,36 +38,43 @@ function StatusBadge({ chain }: { chain: SafeItemDataChain }) {
   return null
 }
 
-const MultiChainSafeItemRow = ({ item }: MultiChainSafeItemRowProps) => {
+const MultiChainSafeItemRow = ({ item, onRename, isSelected = false }: MultiChainSafeItemRowProps) => {
   const chainId = item.chains[0]?.chainId ?? ''
   const resolvedName = useSafeDisplayName(item.address, chainId, item.name)
   const pending = item.chains.reduce((sum, chain) => sum + (chain.queued ?? 0), 0)
+  const chainConfig = useChain(chainId)
+  const explorerLink = chainConfig ? getBlockExplorerLink(chainConfig, item.address) : undefined
 
   return (
-    <Collapsible className="my-1 rounded-lg">
-      <CollapsibleTrigger className="flex w-full items-center gap-2 rounded-lg px-4 py-4 text-left outline-none hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-ring cursor-pointer">
-        <SafeInfoDisplay name={resolvedName} address={item.address} className="flex-1 min-w-0" />
-        <ThresholdBadge threshold={item.threshold} owners={item.owners} iconOnly={!item.owners} />
-        <div className="flex items-center bg-muted rounded-full p-0.5 shrink-0">
-          {item.chains.slice(0, 3).map((chainItem, index) => (
-            <span
-              key={chainItem.chainId}
-              className="size-6 rounded-full border-2 border-card overflow-hidden shrink-0 inline-flex items-center justify-center"
-              style={{ marginLeft: index > 0 ? '-8px' : '0' }}
-            >
-              <ChainLogo chainId={chainItem.chainId} />
-            </span>
-          ))}
-          {item.chains.length > 3 && (
-            <span
-              className="size-6 rounded-full border-2 border-card bg-muted shrink-0 inline-flex items-center justify-center text-[10px] leading-none text-muted-foreground select-none"
-              style={{ marginLeft: '-8px' }}
-            >
-              +{item.chains.length - 3}
-            </span>
-          )}
-        </div>
-        <PendingBadge count={pending} />
+    <Collapsible className="my-0.5 rounded-lg">
+      <CollapsibleTrigger
+        className={cn(
+          'group/row flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left outline-none hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-ring cursor-pointer',
+          isSelected && 'bg-muted',
+        )}
+      >
+        <SafeInfoDisplay
+          name={resolvedName}
+          address={item.address}
+          className="flex-1 min-w-0"
+          explorerLink={explorerLink}
+          onRename={
+            onRename &&
+            (() =>
+              onRename({
+                address: item.address,
+                name: resolvedName,
+                chainIds: item.chains.map((chain) => chain.chainId),
+              }))
+          }
+        />
+        <SafeRowStats
+          threshold={item.threshold}
+          owners={item.owners}
+          chains={item.chains}
+          pending={pending}
+          thresholdIconOnly
+        />
         <BalanceDisplay balance={<FiatValue value={item.balance} />} isLoading={item.isLoading} />
       </CollapsibleTrigger>
 
