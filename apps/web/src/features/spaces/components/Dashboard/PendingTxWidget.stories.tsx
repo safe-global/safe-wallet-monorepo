@@ -66,7 +66,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     transactions: MOCK_PENDING_TRANSACTIONS,
-    remainingCount: 14,
+    onViewAll: () => {},
   },
 }
 
@@ -92,6 +92,6 @@ export const Empty: Story = {
 export const ManyPending: Story = {
   args: {
     transactions: MOCK_PENDING_TRANSACTIONS,
-    remainingCount: 42,
+    onViewAll: () => {},
   },
 }

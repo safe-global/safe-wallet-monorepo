@@ -12,7 +12,6 @@ import useTrackSafesCount from '../../hooks/useTrackedSafesCount'
 import useMigrationPrompt from '../../hooks/useMigrationPrompt'
 import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import TrustedSafesModal from '@/components/common/TrustedSafesModal'
-import { Separator } from '@/components/ui/separator'
 import { DataWidget } from '../DataWidget'
 
 type MyAccountsProps = {
@@ -39,22 +38,21 @@ const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
         {showGetStarted ? (
           <GetStartedCard />
         ) : (
-          <div className="bg-card text-card-foreground overflow-hidden rounded-3xl">
-            <TrustedAccountsActions onManage={modal.open} onLinkClick={onLinkClick} />
-
-            <AccountsSearch setSearchQuery={setSearchQuery} />
-
-            <Separator />
-
-            <div className={css.safeList}>
-              <AccountsList
-                searchQuery={searchQuery}
-                safes={safes}
-                modal={modal}
-                migration={migration}
-                onLinkClick={onLinkClick}
-              />
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="flex-1">
+                <AccountsSearch setSearchQuery={setSearchQuery} />
+              </div>
+              <TrustedAccountsActions onManage={modal.open} onLinkClick={onLinkClick} />
             </div>
+
+            <AccountsList
+              searchQuery={searchQuery}
+              safes={safes}
+              modal={modal}
+              migration={migration}
+              onLinkClick={onLinkClick}
+            />
           </div>
         )}
 

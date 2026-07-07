@@ -4,13 +4,25 @@ import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import { cn } from '@/utils/cn'
 import { AppRoutes } from '@/config/routes'
 import SafeLogo from '@/components/common/SafeLogo'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 
 export const SidebarTopBar = (): ReactElement => {
   const { state } = useSidebar()
   const isCollapsed = state === 'collapsed'
   const router = useRouter()
+  const safeAddress = useSafeAddressFromUrl()
+  const isSpaceRoute = useIsSpaceRoute()
 
-  const logoHref = router.pathname === AppRoutes.welcome.accounts ? AppRoutes.welcome.index : AppRoutes.welcome.accounts
+  // Inside a space or an individual safe the logo turns into a back-arrow pill that returns to the
+  // top-level accounts view. Elsewhere it stays a plain logo toggling between the welcome routes.
+  const isInSafeOrSpace = Boolean(safeAddress) || isSpaceRoute
+  const showBackArrow = isInSafeOrSpace && !isCollapsed
+  const logoHref = isInSafeOrSpace
+    ? AppRoutes.welcome.accounts
+    : router.pathname === AppRoutes.welcome.accounts
+      ? AppRoutes.welcome.index
+      : AppRoutes.welcome.accounts
 
   return (
     <div
@@ -18,7 +30,12 @@ export const SidebarTopBar = (): ReactElement => {
       data-sidebar-state={state}
       className={cn('relative w-full', isCollapsed ? 'min-h-16' : 'h-10')}
     >
-      <SafeLogo href={logoHref} data-testid="logo-container" className="absolute left-3 top-3 z-10" />
+      <SafeLogo
+        href={logoHref}
+        showBackArrow={showBackArrow}
+        data-testid="logo-container"
+        className={showBackArrow ? 'absolute left-2 top-1/2 z-10 -translate-y-1/2' : 'absolute left-3 top-3 z-10'}
+      />
       <SidebarTrigger
         className={cn(
           'absolute z-10 shrink-0 cursor-pointer text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent',

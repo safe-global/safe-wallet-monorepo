@@ -1,9 +1,11 @@
-import ModalDialog from '@/components/common/ModalDialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
   type SafeItem,
   type SafeItems,
   type AllSafeItems,
+  type MultiChainSafeItem,
   flattenSafeItems,
+  isMultiChainSafeItem,
   useSafesSearch,
   getComparator,
   _getMultiChainAccounts,
@@ -13,8 +15,10 @@ import {
 } from '@/hooks/safes'
 import AddManually, { type AddManuallyFormValues } from './AddManually'
 import { getSafeId } from './SafesList'
-import OnboardingSafesList from '../SelectSafesOnboarding/components/OnboardingSafesList'
 import ConnectWalletHint from '../ConnectWalletHint'
+import ExternalLink from '@/components/common/ExternalLink'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
@@ -23,7 +27,6 @@ import {
   useSpaceSafesDeleteV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import useChains from '@/hooks/useChains'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
@@ -31,12 +34,14 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
-import { Search, Plus, X, Loader2 } from 'lucide-react'
-import { useDarkMode } from '@/hooks/useDarkMode'
+import { ArrowLeft, Info, Search, Plus, Settings2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { SafeAccountsTable, type AccountLine, type SafeAccountColumnId } from '@/features/myAccounts'
+import ManageTrustedSafesContent from '@/components/common/TrustedSafesModal/ManageTrustedSafesContent'
+import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import Track from '@/components/common/Track'
 import { useEffect, useMemo, useState, useRef } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
@@ -47,8 +52,9 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/constants'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
-import { useSelectAll } from '../../hooks/useSelectAll'
 import type { AddAccountsFormValues } from '../../hooks/useSelectAll.types'
+
+const PICKER_COLUMNS: SafeAccountColumnId[] = ['select', 'name', 'threshold', 'networks', 'balance']
 
 function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSafes: AllSafeItems) {
   const flatSafeItems = flattenSafeItems(spaceSafes)
@@ -98,6 +104,7 @@ const AddAccounts = ({
   const isAdmin = useIsAdmin()
   const [open, setOpen] = useState<boolean>(false)
   const isOpen = externalOpen ?? open
+  const [view, setView] = useState<'select' | 'manage'>('select')
   const [error, setError] = useState<string>()
   const [manualSafes, setManualSafes] = useState<SafeItems>([])
   const hasResetForOpen = useRef(false)
@@ -109,7 +116,7 @@ const AddAccounts = ({
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
   const spaceId = useCurrentSpaceId()
-  const isDarkMode = useDarkMode()
+  const trustedModal = useTrustedSafesModal()
 
   // Get wallet and chain info
   const wallet = useWallet()
@@ -124,38 +131,18 @@ const AddAccounts = ({
   const allVisitedSafes = useAppSelector(selectAllVisitedSafes)
   const allSafeNames = useAppSelector(selectAllAddressBooks)
 
-  // Build trusted (pinned) and owned safes
-  const { trustedSafes, ownedSafes } = useMemo(() => {
+  // Build the trusted (pinned) safes list — owned safes are added by first trusting them via the
+  // "Manage trusted Safes" view, then they appear here. Safes already in the workspace stay in the
+  // list and open pre-checked (seeded by defaultSelectedSafes); unchecking one removes it.
+  const trustedSafes = useMemo<AllSafeItems>(() => {
     const buildItem = (chainId: string, address: string) =>
       _buildSafeItem(chainId, address, walletAddress, allAdded, allOwned, allUndeployed, allVisitedSafes, allSafeNames)
 
-    // Get safes already in the space
-    const spaceSafeIds = new Set(flattenSafeItems(spaceSafes || []).map((safe) => `${safe.chainId}:${safe.address}`))
+    const trusted = allChainIds.flatMap((chainId) =>
+      Object.keys(allAdded[chainId] || {}).map((address) => buildItem(chainId, address)),
+    )
 
-    // Trusted safes: from addedSafes (user-pinned), excluding space safes
-    const trusted = allChainIds
-      .flatMap((chainId) => Object.keys(allAdded[chainId] || {}).map((address) => buildItem(chainId, address)))
-      .filter((safe) => !spaceSafeIds.has(`${safe.chainId}:${safe.address}`))
-
-    // Owned safes: from CGW API + undeployed, excluding space safes
-    const owned = allChainIds.flatMap((chainId) => {
-      const combined = [...new Set([...(allOwned[chainId] || []), ...Object.keys(allUndeployed[chainId] || {})])]
-      return combined
-        .filter(
-          (address) =>
-            !trusted.some((t) => t.chainId === chainId && sameAddress(t.address, address)) &&
-            !spaceSafeIds.has(`${chainId}:${address}`),
-        )
-        .map((address) => buildItem(chainId, address))
-    })
-
-    // Add manually added safes to owned
-    const allOwned_ = [...owned, ...manualSafes]
-
-    return {
-      trustedSafes: _groupAndSort(trusted, sortComparator),
-      ownedSafes: _groupAndSort(allOwned_, sortComparator),
-    }
+    return _groupAndSort([...trusted, ...manualSafes], sortComparator)
   }, [
     allChainIds,
     allAdded,
@@ -166,18 +153,17 @@ const AddAccounts = ({
     allSafeNames,
     manualSafes,
     sortComparator,
-    spaceSafes,
   ])
 
-  const similarAddresses = useMemo<Set<string>>(() => {
-    const allItems = [...trustedSafes, ...ownedSafes]
-    return getFlaggedSimilarAddressSet(allItems.map((s) => s.address))
-  }, [trustedSafes, ownedSafes])
+  const similarAddresses = useMemo<Set<string>>(
+    () => getFlaggedSimilarAddressSet(trustedSafes.map((s) => s.address)),
+    [trustedSafes],
+  )
 
   const [rawSearchQuery, setRawSearchQuery] = useState('')
   const debouncedSearchQuery = useDebounce(rawSearchQuery, 300)
   const filteredTrusted = useSafesSearch(trustedSafes, debouncedSearchQuery)
-  const filteredOwned = useSafesSearch(ownedSafes, debouncedSearchQuery)
+  const visibleTrusted = debouncedSearchQuery ? filteredTrusted : trustedSafes
 
   // Build pre-checked safes from space safes
   const defaultSelectedSafes = useMemo(() => {
@@ -197,7 +183,7 @@ const AddAccounts = ({
     },
   })
 
-  const { handleSubmit, watch, setValue, reset, formState, control } = formMethods
+  const { handleSubmit, watch, setValue, reset, formState } = formMethods
 
   const selectedSafes = watch(`selectedSafes`)
   const selectedSafesLength = getSelectedSafes(selectedSafes, spaceSafes).length
@@ -205,15 +191,49 @@ const AddAccounts = ({
   const isFormDirty = selectedSafesLength > 0 || removedSafesCount > 0
   const { isSubmitting } = formState
 
-  const visibleTrusted = debouncedSearchQuery ? filteredTrusted : trustedSafes
-  const visibleOwned = debouncedSearchQuery ? filteredOwned : ownedSafes
+  // Computed inline (not memoised): react-hook-form's watch() mutates and returns the same object
+  // reference, so a useMemo keyed on `selectedSafes` would keep a stale Set and the checkboxes would
+  // never re-render even though the form value (and the footer counter) changed.
+  const selectedKeys = new Set(
+    Object.entries(selectedSafes || {})
+      .filter(([key, value]) => value && !key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX))
+      .map(([key]) => key),
+  )
 
-  const { trustedSelection, ownedSelection, handleSelectAll, isAtLimit } = useSelectAll({
-    visibleTrusted,
-    visibleOwned,
-    control,
-    setValue,
-  })
+  // Total checked safes (workspace safes are pre-checked and count toward the per-workspace cap).
+  const isAtLimit = selectedKeys.size >= SAFE_ACCOUNTS_LIMIT
+
+  // Safes already in the workspace stay visible but locked: shown checked, dimmed, and not toggleable.
+  const spaceSafeKeys = useMemo(
+    () => new Set(flattenSafeItems(spaceSafes || []).map((safe) => `${safe.chainId}:${safe.address}`)),
+    [spaceSafes],
+  )
+
+  const handleTableToggle = (line: AccountLine, nextChecked: boolean) => {
+    if (line.variant === 'group') {
+      const group = line.source as MultiChainSafeItem
+      setValue(`selectedSafes.${MULTICHAIN_SAFE_KEY_PREFIX}${group.address}`, nextChecked, { shouldValidate: true })
+      group.safes.forEach((safe) =>
+        setValue(`selectedSafes.${safe.chainId}:${safe.address}`, nextChecked, { shouldValidate: true }),
+      )
+      return
+    }
+
+    setValue(`selectedSafes.${line.key}`, nextChecked, { shouldValidate: true })
+
+    // Reconcile the multi-chain parent key when a child leaf is toggled individually.
+    const parent = visibleTrusted.find(
+      (item): item is MultiChainSafeItem =>
+        isMultiChainSafeItem(item) && item.safes.some((safe) => `${safe.chainId}:${safe.address}` === line.key),
+    )
+    if (parent) {
+      const allChecked = parent.safes.every((safe) => {
+        const key = `${safe.chainId}:${safe.address}`
+        return key === line.key ? nextChecked : Boolean(selectedSafes?.[key])
+      })
+      setValue(`selectedSafes.${MULTICHAIN_SAFE_KEY_PREFIX}${parent.address}`, allChecked, { shouldValidate: true })
+    }
+  }
 
   // Reset form when modal opens
   useEffect(() => {
@@ -311,8 +331,7 @@ const AddAccounts = ({
   })
 
   const handleAddSafe = (data: AddManuallyFormValues) => {
-    const allSafes = [...trustedSafes, ...ownedSafes]
-    const alreadyExists = allSafes.some((safe) => safe.address === data.address)
+    const alreadyExists = trustedSafes.some((safe) => safe.address === data.address)
 
     const newSafeItem: SafeItem = {
       ...data,
@@ -330,11 +349,26 @@ const AddAccounts = ({
     setValue(`selectedSafes.${safeId}`, true, { shouldValidate: true })
   }
 
+  const handleOpenManage = () => {
+    trustedModal.open()
+    setRawSearchQuery('')
+    setView('manage')
+  }
+
+  const handleBack = () => {
+    trustedModal.close()
+    setView('select')
+  }
+
+  const handleSaved = () => setView('select')
+
   const handleClose = () => {
     setError(undefined)
     setRawSearchQuery('')
     setManualSafes([])
     setValue('selectedSafes', {}) // Reset doesn't seem to work consistently with an object
+    setView('select')
+    trustedModal.close()
     setOpen(false)
     onExternalClose?.()
   }
@@ -345,25 +379,11 @@ const AddAccounts = ({
     }
   }, [debouncedSearchQuery])
 
-  const hasAvailableSafes = trustedSafes.length > 0 || ownedSafes.length > 0
-  const isListEmpty = !hasAvailableSafes && !debouncedSearchQuery
-  const hasNoSearchMatch = trustedSelection.total === 0 && ownedSelection.total === 0 && Boolean(debouncedSearchQuery)
-  const emptyStateMessage = wallet ? 'No safes on your list' : 'No saved Safe accounts yet — add one by address below.'
-
-  const listRegionRef = useRef<HTMLDivElement>(null)
-  const [isListOverflowing, setIsListOverflowing] = useState(false)
-
-  useEffect(() => {
-    const region = listRegionRef.current
-    if (!region) return
-
-    const updateOverflow = () => setIsListOverflowing(region.scrollHeight > region.clientHeight)
-    updateOverflow()
-
-    const observer = new ResizeObserver(updateOverflow)
-    observer.observe(region)
-    return () => observer.disconnect()
-  }, [visibleTrusted, visibleOwned, isListEmpty, hasNoSearchMatch])
+  const isListEmpty = trustedSafes.length === 0 && !debouncedSearchQuery
+  const hasNoSearchMatch = visibleTrusted.length === 0 && Boolean(debouncedSearchQuery)
+  const emptyStateMessage = wallet
+    ? 'No trusted Safe accounts yet — trust some via "Manage trusted Safes", or add one by address below.'
+    : 'No saved Safe accounts yet — add one by address below.'
 
   return (
     <>
@@ -393,132 +413,162 @@ const AddAccounts = ({
         </AdminOnlyWorkspaceTooltip>
       )}
 
-      <ModalDialog open={isOpen} fullScreen hideChainIndicator>
-        <div className={cn('shadcn-scope flex h-dvh max-h-dvh flex-col', isDarkMode && 'dark')}>
-          <div className="flex min-h-0 w-full min-w-0 max-w-full flex-1 flex-col overflow-hidden bg-secondary p-4">
-            <div className="mx-auto flex min-h-0 w-full min-w-0 max-w-full flex-1 flex-col gap-6 sm:max-w-[520px]">
+      <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
+        <DialogContent className="flex max-h-[90vh] w-full max-w-[min(900px,calc(100vw-2rem))] flex-col gap-0 p-0">
+          {view === 'manage' ? (
+            <>
+              <DialogHeader className="shrink-0 flex-row items-center gap-2 border-b border-border px-6 pb-4 pt-6">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  aria-label="Back"
+                  data-testid="manage-trusted-back"
+                  className="rounded-md p-1 hover:bg-muted"
+                >
+                  <ArrowLeft className="size-5" />
+                </button>
+                <DialogTitle className="font-bold">Manage trusted Safes</DialogTitle>
+              </DialogHeader>
+
+              <div className="flex min-h-0 flex-1 flex-col px-6 pb-6 pt-4">
+                <ManageTrustedSafesContent
+                  modal={trustedModal}
+                  secondaryLabel="Back"
+                  onSecondary={handleBack}
+                  onSaved={handleSaved}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <DialogHeader className="shrink-0 border-b border-border px-6 pb-4 pt-6">
+                <DialogTitle className="font-bold">Trusted Safe accounts</DialogTitle>
+              </DialogHeader>
+
               <FormProvider {...formMethods}>
-                <form onSubmit={onSubmit} className="flex min-h-0 w-full flex-1 flex-col gap-6">
-                  <div className="flex shrink-0 flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                      <Button type="button" variant="ghost" size="icon" onClick={handleClose} className="rounded-md">
-                        <X className="size-5" />
-                      </Button>
-                      <Typography variant="h2" align="center" className="flex-1">
-                        Add Safe accounts
-                      </Typography>
-                      <div className="size-10" />
+                <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col px-6 pb-6 pt-4">
+                  <div className="mb-4 flex shrink-0 items-center gap-3 rounded-2xl bg-muted p-4">
+                    <Info className="size-5 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-foreground">Only trusted Safe accounts appear here</p>
+                      <p className="text-sm text-muted-foreground">
+                        This is a curated list of Safe accounts you trust. Manage your trusted list to add or remove
+                        accounts.{' '}
+                        <ExternalLink href={HELP_CENTER_URL} noIcon sx={{ textDecoration: 'underline' }}>
+                          Learn more
+                        </ExternalLink>
+                      </p>
                     </div>
-
-                    <Typography variant="paragraph" align="center" color="muted">
-                      You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts
-                    </Typography>
-
-                    <InputGroup className="bg-card px-2">
-                      <InputGroupAddon>
-                        <Search className="size-4" />
-                      </InputGroupAddon>
-                      <InputGroupInput
-                        placeholder="Search for safes"
-                        aria-label="Search Safe list"
-                        autoComplete="off"
-                        onChange={(e) => setRawSearchQuery(e.target.value)}
-                      />
-                    </InputGroup>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleOpenManage}
+                      data-testid="open-manage-trusted-safes"
+                      className="shrink-0"
+                    >
+                      <Settings2 className="size-4" />
+                      Manage trusted Safes
+                    </Button>
                   </div>
+
+                  {!isListEmpty && (
+                    <div className="mb-3 flex shrink-0 items-center gap-3">
+                      <div
+                        className={cn(
+                          'flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm',
+                          isAtLimit ? 'font-semibold text-[#a16207]' : 'text-muted-foreground',
+                        )}
+                      >
+                        {selectedKeys.size} of {SAFE_ACCOUNTS_LIMIT} selected
+                        <Tooltip>
+                          <TooltipTrigger render={<span className="inline-flex cursor-help" />}>
+                            <Info className="size-4" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts per Workspace
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <InputGroup className="flex-1 rounded-md bg-card">
+                        <InputGroupAddon>
+                          <Search className="size-4" />
+                        </InputGroupAddon>
+                        <InputGroupInput
+                          placeholder="by name, address or network"
+                          aria-label="Search Safe accounts by name, address or network"
+                          autoComplete="off"
+                          value={rawSearchQuery}
+                          onChange={(e) => setRawSearchQuery(e.target.value)}
+                          data-testid="add-accounts-search-input"
+                        />
+                      </InputGroup>
+                    </div>
+                  )}
 
                   {!wallet && <ConnectWalletHint testId="add-accounts-connect-wallet-button" />}
 
-                  <div className="relative min-h-0 w-full min-w-0 flex-1">
-                    <div
-                      ref={listRegionRef}
-                      className="h-full w-full overflow-y-auto"
-                      data-testid="add-accounts-safes-list-region"
-                    >
-                      {isListEmpty ? (
-                        <Typography variant="paragraph" align="center" color="muted" className="py-8">
-                          {emptyStateMessage}
-                        </Typography>
-                      ) : hasNoSearchMatch ? (
-                        <Typography variant="paragraph" align="center" color="muted" className="py-8">
-                          No safes match your search
-                        </Typography>
-                      ) : (
-                        <OnboardingSafesList
-                          trustedSafes={visibleTrusted}
-                          ownedSafes={visibleOwned}
-                          similarAddresses={similarAddresses}
-                          isAtLimit={isAtLimit}
-                          trustedSelectAll={{
-                            state: trustedSelection.state,
-                            count: trustedSelection.selectedCount,
-                            total: trustedSelection.total,
-                            onToggle: (check) => handleSelectAll('trusted', check),
-                            disabled: trustedSelection.disabled,
-                          }}
-                          ownedSelectAll={{
-                            state: ownedSelection.state,
-                            count: ownedSelection.selectedCount,
-                            total: ownedSelection.total,
-                            onToggle: (check) => handleSelectAll('owned', check),
-                            disabled: ownedSelection.disabled,
-                          }}
-                        />
-                      )}
-                    </div>
-
-                    {!isListEmpty && !hasNoSearchMatch && isListOverflowing && (
-                      <div
-                        data-testid="add-accounts-list-fade"
-                        className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-secondary to-transparent"
+                  <div
+                    className="min-h-0 flex-1 overflow-y-auto overscroll-y-none pr-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
+                    data-testid="add-accounts-safes-list-region"
+                  >
+                    {isListEmpty ? (
+                      <Typography variant="paragraph" align="center" color="muted" className="py-8">
+                        {emptyStateMessage}
+                      </Typography>
+                    ) : hasNoSearchMatch ? (
+                      <Typography variant="paragraph" align="center" color="muted" className="py-8">
+                        No safes match your search
+                      </Typography>
+                    ) : (
+                      <SafeAccountsTable
+                        items={visibleTrusted}
+                        columns={PICKER_COLUMNS}
+                        plainCells
+                        flaggedAddresses={similarAddresses}
+                        selection={{
+                          selectedKeys,
+                          onToggle: handleTableToggle,
+                          isAtLimit,
+                          disabledKeys: spaceSafeKeys,
+                          disabledReason: 'This safe is already part of your workspace',
+                        }}
+                        data-testid="add-accounts-safes-table"
                       />
                     )}
                   </div>
 
                   {error && (
-                    <Alert variant="destructive" className="shrink-0">
+                    <Alert variant="destructive" className="mt-4 shrink-0">
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
                   )}
 
-                  <div className="flex shrink-0 flex-col gap-2">
+                  <div className="mt-4 flex shrink-0 flex-col gap-2">
                     <Track {...SPACE_EVENTS.ADD_ACCOUNT_MANUALLY_MODAL}>
                       <AddManually handleAddSafe={handleAddSafe} disabled={isAtLimit} />
                     </Track>
 
-                    <div className="flex shrink-0 flex-col gap-2">
-                      <Button
-                        data-testid="add-accounts-button"
-                        type="submit"
-                        size="lg"
-                        disabled={!isFormDirty || isSubmitting}
-                        className="w-full"
-                      >
-                        {isSubmitting ? (
-                          <Loader2 className="size-4 animate-spin" />
-                        ) : (
-                          `Add Accounts (${selectedSafesLength})`
-                        )}
-                      </Button>
-
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="lg"
-                        onClick={handleClose}
-                        disabled={isSubmitting}
-                        className="w-full hover:bg-card"
-                      >
-                        Cancel
-                      </Button>
-                    </div>
+                    <Button
+                      data-testid="add-accounts-button"
+                      type="submit"
+                      size="lg"
+                      disabled={!isFormDirty || isSubmitting}
+                      className="w-full"
+                    >
+                      {isSubmitting ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        `Add accounts (${selectedSafesLength})`
+                      )}
+                    </Button>
                   </div>
                 </form>
               </FormProvider>
-            </div>
-          </div>
-        </div>
-      </ModalDialog>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

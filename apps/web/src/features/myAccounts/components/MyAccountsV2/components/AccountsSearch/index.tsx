@@ -12,7 +12,7 @@ const AccountsSearch = ({ setSearchQuery }: AccountsSearchProps) => {
   const handleSearch = useCallback(debounce(setSearchQuery, 300), [])
 
   return (
-    <div className="w-full px-4 py-3">
+    <div className="w-full">
       <InputGroup className="bg-card px-3 rounded-lg">
         <InputGroupAddon align="inline-start">
           <Search />

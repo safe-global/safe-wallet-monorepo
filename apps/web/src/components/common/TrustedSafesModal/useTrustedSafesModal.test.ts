@@ -220,6 +220,37 @@ describe('useTrustedSafesModal', () => {
     )
   })
 
+  it('unpins a deselected safe pinned on a chain absent from the current list', () => {
+    // Pinned on chain 137, which is NOT among the safes returned by useAllSafes (config-scoped list).
+    const pinnedAddress = '0xfeed000000000000000000000000000000001234'
+    ;(store.useAppSelector as jest.Mock).mockReturnValue({
+      '137': { [pinnedAddress]: { owners: [], threshold: 1 } },
+    })
+
+    const { result } = renderHook(() => useTrustedSafesModal())
+
+    // Opens pre-selecting the pinned address (collected across all chains)…
+    act(() => {
+      result.current.open()
+    })
+    expect(result.current.selectedAddresses.has(pinnedAddress)).toBe(true)
+
+    // …deselecting and saving must still unpin it, even though it's not in `useAllSafes`.
+    act(() => {
+      result.current.toggleSelection(pinnedAddress)
+    })
+    act(() => {
+      result.current.submitSelection()
+    })
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'addedSafes/unpinSafe',
+        payload: { chainId: '137', address: pinnedAddress },
+      }),
+    )
+  })
+
   it('should select all safes when no similar addresses', () => {
     const { result } = renderHook(() => useTrustedSafesModal())
 

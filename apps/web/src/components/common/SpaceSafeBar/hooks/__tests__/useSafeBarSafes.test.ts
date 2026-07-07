@@ -159,6 +159,31 @@ describe('useSafeBarSafes', () => {
     expect(result.current.dropdownSafes[1].address).toBe('0xPinned')
   })
 
+  it('excludes a non-pinned current safe from localSafes (trusted tab)', () => {
+    const pinned = createSafe('0xPinned', true)
+    const current = createSafe('0xCurrentSafe', false)
+    mockAllSafes.mockReturnValue([pinned, current])
+    mockSafeAddress.mockReturnValue('0xCurrentSafe')
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    // Trusted tab lists only pinned safes — the non-trusted active safe is not injected…
+    expect(result.current.localSafes.map((s) => s.address)).toEqual(['0xPinned'])
+    // …while the selector trigger still gets the current safe via dropdownSafes.
+    expect(result.current.dropdownSafes[0].address).toBe('0xCurrentSafe')
+  })
+
+  it('keeps a pinned current safe at the front of localSafes', () => {
+    const current = createSafe('0xCurrentSafe', true)
+    const other = { ...createSafe('0xOther', true), name: 'Other' }
+    mockAllSafes.mockReturnValue([current, other])
+    mockSafeAddress.mockReturnValue('0xCurrentSafe')
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    expect(result.current.localSafes[0].address).toBe('0xCurrentSafe')
+  })
+
   it('creates fallback SafeItem when current safe is not in any list', () => {
     const pinned = createSafe('0xPinned', true)
     mockAllSafes.mockReturnValue([pinned])

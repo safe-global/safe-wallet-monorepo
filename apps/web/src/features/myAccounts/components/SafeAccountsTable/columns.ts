@@ -1,6 +1,14 @@
 import type { SafeSortColumn } from './useSafeAccountRows'
 
-export type SafeAccountColumnId = 'name' | 'threshold' | 'networks' | 'workspaces' | 'pending' | 'balance' | 'actions'
+export type SafeAccountColumnId =
+  | 'select'
+  | 'name'
+  | 'threshold'
+  | 'networks'
+  | 'workspaces'
+  | 'pending'
+  | 'balance'
+  | 'actions'
 
 export type SafeAccountColumn = {
   id: SafeAccountColumnId
@@ -27,3 +35,15 @@ export const SAFE_ACCOUNT_COLUMNS: SafeAccountColumn[] = [
   { id: 'balance', label: 'Balance', sortable: false, align: 'right', width: '96px' },
   { id: 'actions', label: '', sortable: false, align: 'right', width: '50px' },
 ]
+
+/**
+ * Leading checkbox column, prepended by the table only when selection mode is active. Kept out of
+ * SAFE_ACCOUNT_COLUMNS so callers passing an explicit `columns` list are never affected by it.
+ */
+export const SELECT_COLUMN: SafeAccountColumn = {
+  id: 'select',
+  label: '',
+  sortable: false,
+  align: 'center',
+  width: '48px',
+}

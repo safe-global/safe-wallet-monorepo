@@ -17,7 +17,7 @@ const TrustedAccountsActions = ({ onManage, onLinkClick }: { onManage: () => voi
   const next = useNewSafeNextParam()
 
   return (
-    <div className={cn('shadcn-scope flex flex-wrap justify-end gap-2 px-4 pt-4', isDarkMode && 'dark')}>
+    <div className={cn('shadcn-scope flex flex-wrap gap-2', isDarkMode && 'dark')}>
       <Track {...OVERVIEW_EVENTS.ADD_TO_WATCHLIST} label={OVERVIEW_LABELS.login_page}>
         <Button
           data-testid="add-safe-button"

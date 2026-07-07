@@ -21,12 +21,13 @@ const applyCap = (selection: ReturnType<typeof getSelectionState>, isAtLimit: bo
 
 interface Args {
   visibleTrusted: AllSafeItems
-  visibleOwned: AllSafeItems
+  /** Optional — omit for a trusted-only picker. Defaults to an empty list. */
+  visibleOwned?: AllSafeItems
   control: Control<AddAccountsFormValues>
   setValue: UseFormSetValue<AddAccountsFormValues>
 }
 
-export function useSelectAll({ visibleTrusted, visibleOwned, control, setValue }: Args) {
+export function useSelectAll({ visibleTrusted, visibleOwned = [], control, setValue }: Args) {
   const selectedSafes = useWatch({ control, name: 'selectedSafes' }) ?? {}
   const isAtLimit = useMemo(
     () =>

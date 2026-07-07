@@ -3,9 +3,19 @@ import { SidebarTopBar } from '../SidebarTopBar'
 import { AppRoutes } from '@/config/routes'
 
 const mockUseRouter = jest.fn()
+const mockUseSafeAddressFromUrl = jest.fn()
+const mockUseIsSpaceRoute = jest.fn()
 
 jest.mock('next/router', () => ({
   useRouter: () => mockUseRouter(),
+}))
+
+jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
+  useSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
+}))
+
+jest.mock('@/hooks/useIsSpaceRoute', () => ({
+  useIsSpaceRoute: () => mockUseIsSpaceRoute(),
 }))
 
 jest.mock('@/components/ui/sidebar', () => ({
@@ -20,9 +30,15 @@ jest.mock('@/components/ui/sidebar', () => ({
 }))
 
 jest.mock('@/components/common/SafeLogo', () => {
-  const MockSafeLogo = ({ href, 'data-testid': testId }: { href?: string; 'data-testid'?: string }) => (
-    <a data-testid={testId} href={href} />
-  )
+  const MockSafeLogo = ({
+    href,
+    showBackArrow,
+    'data-testid': testId,
+  }: {
+    href?: string
+    showBackArrow?: boolean
+    'data-testid'?: string
+  }) => <a data-testid={testId} href={href} data-back-arrow={String(Boolean(showBackArrow))} />
   MockSafeLogo.displayName = 'SafeLogo'
   return { __esModule: true, default: MockSafeLogo }
 })
@@ -31,6 +47,10 @@ describe('SidebarTopBar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.accounts })
+    mockUseSafeAddressFromUrl.mockReturnValue('')
+    mockUseIsSpaceRoute.mockReturnValue(false)
+    const { useSidebar } = require('@/components/ui/sidebar')
+    useSidebar.mockReturnValue({ state: 'expanded' })
   })
 
   it('renders all required elements', () => {
@@ -77,5 +97,48 @@ describe('SidebarTopBar', () => {
     render(<SidebarTopBar />)
 
     expect(screen.getByTestId('logo-container')).toHaveAttribute('href', AppRoutes.welcome.accounts)
+  })
+
+  it('shows the back-arrow pill linking to /welcome/accounts on an individual safe', () => {
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.home })
+    mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
+
+    render(<SidebarTopBar />)
+
+    const logo = screen.getByTestId('logo-container')
+    expect(logo).toHaveAttribute('data-back-arrow', 'true')
+    expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
+  })
+
+  it('shows the back-arrow pill inside a space route', () => {
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.spaces.index })
+    mockUseIsSpaceRoute.mockReturnValue(true)
+
+    render(<SidebarTopBar />)
+
+    const logo = screen.getByTestId('logo-container')
+    expect(logo).toHaveAttribute('data-back-arrow', 'true')
+    expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
+  })
+
+  it('does not show the back-arrow pill when the sidebar is collapsed', () => {
+    const { useSidebar } = require('@/components/ui/sidebar')
+    useSidebar.mockReturnValue({ state: 'collapsed' })
+    mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
+
+    render(<SidebarTopBar />)
+
+    // Still links home, but as the plain logo (no room for the pill when collapsed).
+    const logo = screen.getByTestId('logo-container')
+    expect(logo).toHaveAttribute('data-back-arrow', 'false')
+    expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
+  })
+
+  it('keeps the plain logo on the welcome accounts view (no safe, no space)', () => {
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.accounts })
+
+    render(<SidebarTopBar />)
+
+    expect(screen.getByTestId('logo-container')).toHaveAttribute('data-back-arrow', 'false')
   })
 })

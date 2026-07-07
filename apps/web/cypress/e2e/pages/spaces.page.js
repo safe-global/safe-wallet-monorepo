@@ -560,7 +560,7 @@ export function selectNetwork(network) {
 
 export function openAddAccountsToWorkspace() {
   cy.get(openAddAccountsChooserBtn, { timeout: 30000 }).should('be.visible').and('be.enabled').click({ force: true })
-  cy.contains('[role="dialog"]', 'Manage Safe accounts', { timeout: 30000 })
+  cy.contains('[role="dialog"]', 'Add Safe accounts', { timeout: 30000 })
     .should('be.visible')
     .within(() => {
       cy.get(addSpaceAccountToWorkspaceBtn, { timeout: 30000 }).should('be.visible')

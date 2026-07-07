@@ -108,37 +108,32 @@ describe('AccountsWidget', () => {
     expect(skeletons.length).toBeGreaterThan(0)
   })
 
-  it('renders the footer with remaining count', () => {
-    render(<AccountsWidget accounts={mockAccounts} remainingCount={14} />)
+  it('renders the "View all" header action with the total count when onViewAll is provided', () => {
+    render(<AccountsWidget accounts={mockAccounts} totalCount={14} onViewAll={jest.fn()} />)
 
-    expect(screen.getByText('View all accounts')).toBeInTheDocument()
+    expect(screen.getByText('View all')).toBeInTheDocument()
+    expect(screen.getByText('14')).toBeInTheDocument()
   })
 
-  it('does not render the footer when remainingCount is undefined', () => {
-    render(<AccountsWidget accounts={mockAccounts} />)
+  it('does not render the "View all" header action when onViewAll is not provided', () => {
+    render(<AccountsWidget accounts={mockAccounts} totalCount={14} />)
 
-    expect(screen.queryByText('View all accounts')).not.toBeInTheDocument()
+    expect(screen.queryByText('View all')).not.toBeInTheDocument()
   })
 
-  it('does not render the footer when loading', () => {
-    render(<AccountsWidget accounts={[]} loading remainingCount={14} />)
+  it('does not render "View all" in the empty state even when onViewAll is provided', () => {
+    render(<AccountsWidget accounts={[]} onViewAll={jest.fn()} />)
 
-    expect(screen.queryByText('View all accounts')).not.toBeInTheDocument()
+    expect(screen.queryByText('View all')).not.toBeInTheDocument()
   })
 
-  it('calls onViewAll when footer is clicked', async () => {
+  it('calls onViewAll when the "View all" header action is clicked', async () => {
     const onViewAll = jest.fn()
-    render(<AccountsWidget accounts={mockAccounts} remainingCount={14} onViewAll={onViewAll} />)
+    render(<AccountsWidget accounts={mockAccounts} totalCount={14} onViewAll={onViewAll} />)
 
-    await userEvent.click(screen.getByText('View all accounts'))
+    await userEvent.click(screen.getByText('View all'))
 
     expect(onViewAll).toHaveBeenCalledTimes(1)
-  })
-
-  it('renders a custom action node', () => {
-    render(<AccountsWidget accounts={[]} action={<button>Custom action</button>} />)
-
-    expect(screen.getByText('Custom action')).toBeInTheDocument()
   })
 
   it('renders an empty list when no accounts are provided', () => {
@@ -147,7 +142,7 @@ describe('AccountsWidget', () => {
     expect(screen.getByText('Accounts')).toBeInTheDocument()
     expect(screen.getByText('No accounts yet')).toBeInTheDocument()
     expect(screen.getByText('Add your Safe accounts to view balances and manage transactions.')).toBeInTheDocument()
-    expect(screen.queryByText('View all accounts')).not.toBeInTheDocument()
+    expect(screen.queryByText('View all')).not.toBeInTheDocument()
   })
 
   it('renders the empty state action when provided', () => {

@@ -25,14 +25,6 @@ import SafeWidget from '../SafeWidget'
 import SetupWidget from '../SetupWidget'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
-const AddActionsAction = () => {
-  return (
-    <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
-      <AddAccountsChooser buttonLabel="Manage accounts" entryPoint="dashboard" />
-    </Track>
-  )
-}
-
 const EmptyStateAddAction = () => {
   return (
     <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
@@ -81,7 +73,6 @@ const SpaceDashboard = () => {
   const safesToDisplay = safes.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
 
   const { accounts, isLoading: isOverviewLoading, error, refetch } = useSpaceAccountsData(safesToDisplay)
-  const remainingCount = Math.max(0, safeItems.length - DASHBOARD_LIST_DISPLAY_LIMIT)
 
   const handleViewAll = () => {
     if (spaceId) {
@@ -124,7 +115,6 @@ const SpaceDashboard = () => {
     )
   }
 
-  const remainingPendingTxCount = Math.max(0, pendingTxCount - PENDING_TX_DISPLAY_LIMIT)
   const showSetupWidget = safeItems.length === 0 && !isSafesLoading && !setupDismissed && !isSetupDismissedForSpace
 
   return (
@@ -144,16 +134,23 @@ const SpaceDashboard = () => {
               <AccountsWidget
                 accounts={accounts}
                 loading={isOverviewLoading}
-                remainingCount={remainingCount > 0 ? remainingCount : undefined}
+                totalCount={safeItems.length}
                 onViewAll={handleViewAll}
                 onItemClick={handleItemClick}
-                action={accounts.length > 0 ? <AddActionsAction /> : undefined}
                 emptyStateAction={<EmptyStateAddAction />}
                 error={error}
                 onRefresh={refetch}
               />
             ) : (
-              <SafeWidget title="Accounts" action={<AddActionsAction />} testId="space-dashboard-accounts-widget">
+              <SafeWidget
+                title="Accounts"
+                action={
+                  safeItems.length > 0 ? (
+                    <SafeWidget.ViewAll count={safeItems.length} onClick={handleViewAll} />
+                  ) : undefined
+                }
+                testId="space-dashboard-accounts-widget"
+              >
                 <div className="animate-pulse rounded-lg bg-muted" />
               </SafeWidget>
             )}
@@ -166,7 +163,6 @@ const SpaceDashboard = () => {
                 transactions={pendingTxs}
                 loading={isPendingTxLoading}
                 error={pendingTxError ? String(pendingTxError) : undefined}
-                remainingCount={remainingPendingTxCount > 0 ? remainingPendingTxCount : undefined}
                 onViewAll={handleViewAllPendingTxs}
                 onRefresh={refetchPendingTxs}
                 onItemClick={handlePendingTxItemClick}

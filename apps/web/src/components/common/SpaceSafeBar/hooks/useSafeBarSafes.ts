@@ -96,6 +96,14 @@ export function useSafeBarSafes() {
     return orderDropdownSafes(pinnedSafes, safeAddress, comparator, current)
   }, [pinnedSafes, allKnownSafes, safeAddress, fallbackCurrentSafe, comparator])
 
+  // Trusted tab: pinned safes only. The current safe is pulled to the front only when it's actually
+  // pinned — it's never injected, so a non-trusted active safe never shows up under "Trusted accounts".
+  // (The trigger still renders the current safe via the workspace list, which always injects it.)
+  const localSafes = useMemo<AllSafeItems>(() => {
+    const currentPinned = safeAddress ? pinnedSafes.find((s) => sameAddress(s.address, safeAddress)) : undefined
+    return orderDropdownSafes(pinnedSafes, safeAddress, comparator, currentPinned)
+  }, [pinnedSafes, safeAddress, comparator])
+
   // Space context: same ordering rule, applied to the space's safes.
   const spaceDropdownSafes = useMemo<AllSafeItems>(() => {
     const current = safeAddress
@@ -119,7 +127,7 @@ export function useSafeBarSafes() {
     // Both lists are exposed so the dropdown can offer Workspace | Local tabs:
     // `workspaceSafes` are the current space's safes, `localSafes` the trusted (pinned) ones.
     workspaceSafes: spaceDropdownSafes,
-    localSafes: dropdownSafes,
+    localSafes,
     // Expose so the header label stays in sync with which list is shown
     isInSpaceContext,
   }

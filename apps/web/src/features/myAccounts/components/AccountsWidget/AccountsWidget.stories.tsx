@@ -72,7 +72,8 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     accounts: MOCK_ACCOUNTS,
-    remainingCount: 14,
+    totalCount: 14,
+    onViewAll: () => {},
   },
 }
 
@@ -92,7 +93,8 @@ export const Loading: Story = {
 export const ManyAccounts: Story = {
   args: {
     accounts: MOCK_ACCOUNTS,
-    remainingCount: 42,
+    totalCount: 42,
+    onViewAll: () => {},
   },
 }
 

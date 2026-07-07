@@ -1,10 +1,9 @@
 import AddAccountsChooser from '../AddAccountsChooser'
 import EmptySafeAccounts from './EmptySafeAccounts'
-import LocalSafeAccounts from './LocalSafeAccounts'
 import { Stack } from '@mui/material'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Typography } from '@/components/ui/typography'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import {
@@ -14,12 +13,14 @@ import {
   _getSingleChainAccounts,
   getComparator,
   useSafeItemBuilder,
+  useSafesSearch,
 } from '@/hooks/safes'
+import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { useSpaceSafes, useIsInvited } from '@/features/spaces'
 import { SafeAccountsTable } from '@/features/myAccounts'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import { TriangleAlert, RotateCw } from 'lucide-react'
+import { TriangleAlert, RotateCw, Search } from 'lucide-react'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_LABELS, SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
@@ -62,7 +63,12 @@ const SpaceSafeAccounts = () => {
     [spaceSafeItems, sortComparator],
   )
 
-  const hasResults = displaySafes.length > 0
+  const [searchQuery, setSearchQuery] = useState('')
+  const debouncedSearchQuery = useDebounce(searchQuery.trim(), 300)
+  const filteredSafes = useSafesSearch(displaySafes, debouncedSearchQuery)
+  const visibleSafes = debouncedSearchQuery ? filteredSafes : displaySafes
+
+  const isSpaceEmpty = allSafes.length === 0
 
   return (
     <>
@@ -71,57 +77,63 @@ const SpaceSafeAccounts = () => {
         Safe accounts
       </Typography>
 
-      <Tabs defaultValue="workspace">
-        <TabsList variant="line" className="mb-6">
-          <TabsTrigger value="workspace">Workspace</TabsTrigger>
-          <TabsTrigger value="local">Trusted</TabsTrigger>
-        </TabsList>
+      <Stack direction="row" alignItems="center" gap={2} sx={{ mb: 3 }}>
+        <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
+          <AddAccountsChooser buttonVariant="default" buttonLabel="Add accounts" entryPoint="safe_accounts" />
+        </Track>
+        {!isSpaceEmpty && !isSpaceSafesError && (
+          <InputGroup className="flex-1 rounded-md bg-card">
+            <InputGroupAddon>
+              <Search className="size-4" />
+            </InputGroupAddon>
+            <InputGroupInput
+              placeholder="by name, address or network"
+              aria-label="Search Safe accounts by name, address or network"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoComplete="off"
+              data-testid="space-safe-accounts-search-input"
+            />
+          </InputGroup>
+        )}
+      </Stack>
 
-        <TabsContent value="workspace">
-          <Stack direction="row" justifyContent="flex-start" sx={{ mb: 3 }}>
-            <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
-              <AddAccountsChooser buttonVariant="default" buttonLabel="Manage accounts" entryPoint="safe_accounts" />
-            </Track>
-          </Stack>
-
-          {isSpaceSafesError ? (
-            <div className="flex items-center gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 px-5 py-4">
-              <TriangleAlert className="size-5 shrink-0 text-destructive" />
-              <div className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-destructive">Failed to load Safe accounts</span>
-                <span className="text-xs text-muted-foreground">
-                  {spaceSafesError ? getRtkQueryErrorMessage(spaceSafesError) : 'Please try again.'}
-                </span>
-              </div>
-              <button
-                onClick={refetchSpaceSafes}
-                className="ml-auto flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-destructive transition-colors hover:bg-destructive/10"
-                type="button"
-              >
-                <RotateCw className="size-3.5" />
-                Retry
-              </button>
-            </div>
-          ) : !hasResults && allSafes && allSafes.length === 0 ? (
-            <EmptySafeAccounts />
-          ) : (
-            <>
-              {similarAddresses.size > 0 && <SimilarAddressAlert />}
-              <SafeAccountsTable
-                items={displaySafes}
-                flaggedAddresses={similarAddresses}
-                renderActions={(line) =>
-                  line.variant === 'child' ? null : <SpaceSafeContextMenu safeItem={line.source} />
-                }
-              />
-            </>
-          )}
-        </TabsContent>
-
-        <TabsContent value="local">
-          <LocalSafeAccounts />
-        </TabsContent>
-      </Tabs>
+      {isSpaceSafesError ? (
+        <div className="flex items-center gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 px-5 py-4">
+          <TriangleAlert className="size-5 shrink-0 text-destructive" />
+          <div className="flex flex-col gap-1">
+            <span className="text-sm font-medium text-destructive">Failed to load Safe accounts</span>
+            <span className="text-xs text-muted-foreground">
+              {spaceSafesError ? getRtkQueryErrorMessage(spaceSafesError) : 'Please try again.'}
+            </span>
+          </div>
+          <button
+            onClick={refetchSpaceSafes}
+            className="ml-auto flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-destructive transition-colors hover:bg-destructive/10"
+            type="button"
+          >
+            <RotateCw className="size-3.5" />
+            Retry
+          </button>
+        </div>
+      ) : isSpaceEmpty ? (
+        <EmptySafeAccounts />
+      ) : visibleSafes.length === 0 ? (
+        <Typography variant="paragraph-small" color="muted" align="center" className="py-8">
+          No Safe accounts match your search
+        </Typography>
+      ) : (
+        <>
+          {similarAddresses.size > 0 && <SimilarAddressAlert />}
+          <SafeAccountsTable
+            items={visibleSafes}
+            flaggedAddresses={similarAddresses}
+            renderActions={(line) =>
+              line.variant === 'child' ? null : <SpaceSafeContextMenu safeItem={line.source} />
+            }
+          />
+        </>
+      )}
     </>
   )
 }

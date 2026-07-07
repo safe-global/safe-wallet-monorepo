@@ -1,7 +1,8 @@
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import type { AllSafeItems } from '@/hooks/safes'
 import SafeAccountsTable from '../index'
+import type { RowCheckbox } from '../SafeAccountTableRow'
 import { useSafeAccountRows, type AccountGroup, type AccountLine } from '../useSafeAccountRows'
 
 jest.mock('../useSafeAccountRows', () => {
@@ -13,9 +14,30 @@ jest.mock('../useSafeAccountRows', () => {
 // heavy per-cell rendering (identicons, chain badges, context menus, balances).
 jest.mock('../SafeAccountTableRow', () => ({
   __esModule: true,
-  default: ({ line, onToggle }: { line: { key: string; displayName: string }; onToggle?: () => void }) => (
+  default: ({
+    line,
+    onToggle,
+    checkbox,
+    onSelectToggle,
+  }: {
+    line: { key: string; displayName: string }
+    onToggle?: () => void
+    checkbox?: RowCheckbox
+    onSelectToggle?: (next: boolean) => void
+  }) => (
     <tr data-testid="row" data-key={line.key}>
       <td>
+        {checkbox && (
+          <button
+            data-testid={`select-${line.key}`}
+            data-checked={checkbox.checked}
+            data-indeterminate={checkbox.indeterminate}
+            data-disabled={checkbox.disabled}
+            data-reason={checkbox.disabledReason ?? ''}
+            onClick={() => onSelectToggle?.(!checkbox.checked)}
+            type="button"
+          />
+        )}
         {line.displayName}
         {onToggle && (
           <button data-testid={`toggle-${line.key}`} onClick={onToggle} type="button">
@@ -117,5 +139,111 @@ describe('SafeAccountsTable', () => {
     expect(screen.getByTestId('account-sort-name')).toBeInTheDocument()
     expect(screen.queryByTestId('account-sort-threshold')).not.toBeInTheDocument()
     expect(screen.queryByTestId('account-sort-workspaces')).not.toBeInTheDocument()
+  })
+
+  it('does not render checkboxes without a selection prop', () => {
+    render(<SafeAccountsTable items={items} />)
+    expect(screen.queryByTestId('select-0xB')).not.toBeInTheDocument()
+  })
+})
+
+describe('SafeAccountsTable — selection mode', () => {
+  const selectionGroups: AccountGroup[] = [
+    {
+      parent: line({ key: '0xB', displayName: 'Bravo' }),
+      children: [],
+      sort: { name: 'bravo', threshold: 2, networks: 1, workspaces: 0 },
+    },
+    {
+      parent: line({ key: '0xG', displayName: 'Group', expandable: true, variant: 'group' }),
+      children: [
+        line({ key: '1:0xG', displayName: 'Ethereum', variant: 'child', indent: true }),
+        line({ key: '2:0xG', displayName: 'Base', variant: 'child', indent: true }),
+      ],
+      sort: { name: 'group', threshold: 3, networks: 2, workspaces: 0 },
+    },
+  ]
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockUseSafeAccountRows.mockReturnValue({ groups: selectionGroups, isLoading: false })
+  })
+
+  it('renders a checkbox per row reflecting selectedKeys', () => {
+    render(<SafeAccountsTable items={items} selection={{ selectedKeys: new Set(['0xB']), onToggle: jest.fn() }} />)
+    expect(screen.getByTestId('select-0xB')).toHaveAttribute('data-checked', 'true')
+    expect(screen.getByTestId('select-0xG')).toHaveAttribute('data-checked', 'false')
+  })
+
+  it('marks a multi-chain parent indeterminate when only some children are selected', () => {
+    render(<SafeAccountsTable items={items} selection={{ selectedKeys: new Set(['1:0xG']), onToggle: jest.fn() }} />)
+    const group = screen.getByTestId('select-0xG')
+    expect(group).toHaveAttribute('data-checked', 'false')
+    expect(group).toHaveAttribute('data-indeterminate', 'true')
+  })
+
+  it('marks a multi-chain parent checked when all children are selected', () => {
+    render(
+      <SafeAccountsTable
+        items={items}
+        selection={{ selectedKeys: new Set(['1:0xG', '2:0xG']), onToggle: jest.fn() }}
+      />,
+    )
+    const group = screen.getByTestId('select-0xG')
+    expect(group).toHaveAttribute('data-checked', 'true')
+    expect(group).toHaveAttribute('data-indeterminate', 'false')
+  })
+
+  it('calls onToggle with the line and the next checked state', () => {
+    const onToggle = jest.fn()
+    render(<SafeAccountsTable items={items} selection={{ selectedKeys: new Set(), onToggle }} />)
+    fireEvent.click(screen.getByTestId('select-0xB'))
+    expect(onToggle).toHaveBeenCalledWith(expect.objectContaining({ key: '0xB' }), true)
+  })
+
+  it('disables unselected leaves when at the limit', () => {
+    render(
+      <SafeAccountsTable
+        items={items}
+        selection={{ selectedKeys: new Set(['0xB']), onToggle: jest.fn(), isAtLimit: true }}
+      />,
+    )
+    // Selected leaf stays enabled so it can be unchecked; the empty group is disabled (can't grow).
+    expect(screen.getByTestId('select-0xB')).toHaveAttribute('data-disabled', 'false')
+    expect(screen.getByTestId('select-0xG')).toHaveAttribute('data-disabled', 'true')
+  })
+
+  it('disables a leaf listed in disabledKeys and surfaces the disabled reason', () => {
+    render(
+      <SafeAccountsTable
+        items={items}
+        selection={{
+          selectedKeys: new Set(),
+          onToggle: jest.fn(),
+          disabledKeys: new Set(['0xB']),
+          disabledReason: 'Already in workspace',
+        }}
+      />,
+    )
+    const box = screen.getByTestId('select-0xB')
+    expect(box).toHaveAttribute('data-disabled', 'true')
+    expect(box).toHaveAttribute('data-reason', 'Already in workspace')
+  })
+
+  it('locks a multi-chain group whose every child is in disabledKeys', () => {
+    render(
+      <SafeAccountsTable
+        items={items}
+        selection={{
+          selectedKeys: new Set(['1:0xG', '2:0xG']),
+          onToggle: jest.fn(),
+          disabledKeys: new Set(['1:0xG', '2:0xG']),
+          disabledReason: 'Already in workspace',
+        }}
+      />,
+    )
+    const group = screen.getByTestId('select-0xG')
+    expect(group).toHaveAttribute('data-disabled', 'true')
+    expect(group).toHaveAttribute('data-reason', 'Already in workspace')
   })
 })

@@ -19,7 +19,6 @@ type SpacePendingTxItem = TransactionQueuedItem & { safeAddress?: string; chainI
 interface PendingTxWidgetProps {
   transactions: SpacePendingTxItem[]
   loading?: boolean
-  remainingCount?: number
   error?: string
   onViewAll?: () => void
   onRefresh?: () => void
@@ -38,6 +37,7 @@ const PendingTxWidget = ({
   transactions,
   loading = false,
   error,
+  onViewAll,
   onRefresh,
   onItemClick,
 }: PendingTxWidgetProps): ReactElement => {
@@ -61,7 +61,11 @@ const PendingTxWidget = ({
   }
 
   return (
-    <SafeWidget title="Pending" testId="space-dashboard-pending-widget">
+    <SafeWidget
+      title="Pending"
+      action={onViewAll && <SafeWidget.ViewAll onClick={onViewAll} />}
+      testId="space-dashboard-pending-widget"
+    >
       {loading ? (
         Array.from({ length: SKELETON_COUNT }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
       ) : transactions.length === 0 ? (

@@ -9,11 +9,63 @@ import TableRow from '@mui/material/TableRow'
 import TableSortLabel from '@mui/material/TableSortLabel'
 import type { AllSafeItems } from '@/hooks/safes'
 import { cn } from '@/utils/cn'
-import { SAFE_ACCOUNT_COLUMNS, type SafeAccountColumnId } from './columns'
-import { compareGroups, useSafeAccountRows, type AccountLine, type SafeSortColumn } from './useSafeAccountRows'
-import SafeAccountTableRow from './SafeAccountTableRow'
+import { SAFE_ACCOUNT_COLUMNS, SELECT_COLUMN, type SafeAccountColumnId } from './columns'
+import {
+  compareGroups,
+  useSafeAccountRows,
+  type AccountGroup,
+  type AccountLine,
+  type SafeSortColumn,
+} from './useSafeAccountRows'
+import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
 
 type SortState = { orderBy: SafeSortColumn | null; order: 'asc' | 'desc' }
+
+/**
+ * Optional selection (checkbox) mode. The table deals only in leaf keys (`${chainId}:${address}`,
+ * which equal a leaf AccountLine's `key`); the caller owns any multi-chain aggregate key. A group
+ * row's checkbox state is derived from its children.
+ */
+export type SafeAccountsSelection = {
+  /** Selected leaf keys (singles + per-chain children). */
+  selectedKeys: Set<string>
+  /** Fired on a checkbox toggle; `line` is the toggled row (leaf or group), `nextChecked` the desired state. */
+  onToggle: (line: AccountLine, nextChecked: boolean) => void
+  /** Global cap reached — unselected leaves and empty groups render disabled. */
+  isAtLimit?: boolean
+  /** Leaf keys to disable (and dim) regardless of the cap — e.g. safes already in the workspace. */
+  disabledKeys?: Set<string>
+  /** Tooltip explaining why `disabledKeys` rows are locked (e.g. "This safe is already part of your workspace"). */
+  disabledReason?: string
+}
+
+const getRowCheckbox = (group: AccountGroup, line: AccountLine, selection: SafeAccountsSelection): RowCheckbox => {
+  const { selectedKeys, isAtLimit, disabledKeys, disabledReason } = selection
+
+  if (line.variant === 'group') {
+    const childKeys = group.children.map((child) => child.key)
+    const selectedCount = childKeys.filter((key) => selectedKeys.has(key)).length
+    const checked = childKeys.length > 0 && selectedCount === childKeys.length
+    const lockedByReason = childKeys.length > 0 && childKeys.every((key) => disabledKeys?.has(key))
+    return {
+      checked,
+      indeterminate: selectedCount > 0 && !checked,
+      disabled: lockedByReason || (Boolean(isAtLimit) && selectedCount === 0),
+      disabledReason: lockedByReason ? disabledReason : undefined,
+      ariaLabel: line.displayName,
+    }
+  }
+
+  const lockedByReason = Boolean(disabledKeys?.has(line.key))
+  const checked = selectedKeys.has(line.key)
+  return {
+    checked,
+    indeterminate: false,
+    disabled: lockedByReason || (Boolean(isAtLimit) && !checked),
+    disabledReason: lockedByReason ? disabledReason : undefined,
+    ariaLabel: line.displayName,
+  }
+}
 
 export type SafeAccountsTableProps = {
   items: AllSafeItems
@@ -25,6 +77,12 @@ export type SafeAccountsTableProps = {
   renderActions?: (line: AccountLine) => ReactNode
   /** Lowercased addresses to flag with a "High similarity" warning badge. */
   flaggedAddresses?: Set<string>
+  /** Enables a leading checkbox column and makes rows selectable. */
+  selection?: SafeAccountsSelection
+  /** Drop per-row name/address hover tooltips and the copy icon — for modals that show the full text. */
+  plainCells?: boolean
+  /** Show a copy button and block-explorer link next to each address (as in account rows elsewhere). */
+  showAddressActions?: boolean
   onLinkClick?: () => void
   'data-testid'?: string
 }
@@ -55,6 +113,9 @@ const SafeAccountsTable = ({
   actionsWidth,
   renderActions,
   flaggedAddresses,
+  selection,
+  plainCells,
+  showAddressActions,
   onLinkClick,
   'data-testid': testId = 'safe-accounts-table',
 }: SafeAccountsTableProps) => {
@@ -64,8 +125,9 @@ const SafeAccountsTable = ({
 
   const visibleColumns = useMemo(() => {
     const base = columns ? SAFE_ACCOUNT_COLUMNS.filter((c) => columns.includes(c.id)) : SAFE_ACCOUNT_COLUMNS
-    return actionsWidth ? base.map((c) => (c.id === 'actions' ? { ...c, width: actionsWidth } : c)) : base
-  }, [columns, actionsWidth])
+    const withActions = actionsWidth ? base.map((c) => (c.id === 'actions' ? { ...c, width: actionsWidth } : c)) : base
+    return selection ? [SELECT_COLUMN, ...withActions] : withActions
+  }, [columns, actionsWidth, selection])
 
   const minWidth = useMemo(
     () => visibleColumns.reduce((sum, column) => sum + parseInt(column.width ?? '0', 10), 0),
@@ -78,13 +140,13 @@ const SafeAccountsTable = ({
     return [...groups].sort((a, b) => compareGroups(a, b, orderBy, sort.order))
   }, [groups, sort])
 
-  const lines = useMemo<Array<{ line: AccountLine; groupKey: string }>>(() => {
-    const result: Array<{ line: AccountLine; groupKey: string }> = []
+  const lines = useMemo<Array<{ line: AccountLine; groupKey: string; group: AccountGroup }>>(() => {
+    const result: Array<{ line: AccountLine; groupKey: string; group: AccountGroup }> = []
     for (const group of sortedGroups) {
-      result.push({ line: group.parent, groupKey: group.parent.key })
+      result.push({ line: group.parent, groupKey: group.parent.key, group })
       if (group.children.length > 0 && expanded.has(group.parent.key)) {
         for (const child of group.children) {
-          result.push({ line: child, groupKey: group.parent.key })
+          result.push({ line: child, groupKey: group.parent.key, group })
         }
       }
     }
@@ -154,7 +216,7 @@ const SafeAccountsTable = ({
           </TableHead>
 
           <TableBody>
-            {lines.map(({ line, groupKey }, index) => (
+            {lines.map(({ line, groupKey, group }, index) => (
               <SafeAccountTableRow
                 key={line.key}
                 line={line}
@@ -162,6 +224,10 @@ const SafeAccountsTable = ({
                 expanded={line.expandable ? expanded.has(groupKey) : undefined}
                 isFlagged={flaggedAddresses?.has(line.address.toLowerCase())}
                 renderActions={renderActions}
+                checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
+                onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
+                plainCells={plainCells}
+                showAddressActions={showAddressActions}
                 onToggle={line.expandable ? () => toggle(groupKey) : undefined}
                 onLinkClick={onLinkClick}
                 showDivider={index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}
