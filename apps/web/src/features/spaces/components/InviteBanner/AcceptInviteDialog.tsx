@@ -8,6 +8,7 @@ import { Alert, Box, Button, CircularProgress, DialogActions, DialogContent, Typ
 import { FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
+import { MEMBER_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -39,7 +40,7 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
 
     try {
       setIsSubmitting(true)
-      const response = await acceptInvite({ spaceId: space.uuid, acceptInviteDto: { name: data.name } })
+      const response = await acceptInvite({ spaceId: space.uuid, acceptInviteDto: { name: sanitizeName(data.name) } })
 
       if (response.error) {
         setError(getRtkQueryErrorMessage(response.error as FetchBaseQueryError | SerializedError))
@@ -78,7 +79,16 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
         <form onSubmit={onSubmit}>
           <DialogContent sx={{ py: 2 }}>
             <Box mb={2}>
-              <NameInput data-testid="invite-name-input" label="Name" autoFocus name="name" required />
+              <NameInput
+                data-testid="invite-name-input"
+                label="Name"
+                autoFocus
+                name="name"
+                required
+                validateCharset
+                minLength={NAME_MIN_LENGTH}
+                maxLength={MEMBER_NAME_MAX_LENGTH}
+              />
             </Box>
             <Typography variant="body2" color="text.secondary">
               How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>

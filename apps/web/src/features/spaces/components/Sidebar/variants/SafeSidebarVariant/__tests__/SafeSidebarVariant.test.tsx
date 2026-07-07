@@ -73,6 +73,10 @@ jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '42',
 }))
 
+jest.mock('@/components/common/SpaceSafeBar/hooks/useSpaceBackLink', () => ({
+  useSpaceBackLink: () => ({ handleBackToSpace: jest.fn() }),
+}))
+
 jest.mock('@/utils/colors', () => ({
   getDeterministicColor: (name: string) => `color-${name}`,
 }))

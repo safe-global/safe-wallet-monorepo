@@ -1,7 +1,4 @@
-import '@/src/features/WalletConnect/shared/compat'
-import '@/src/platform/fetch'
-import '@/src/platform/crypto-shims'
-import '@/src/platform/intl-polyfills'
+// Platform polyfills live in src/platform/polyfills.ts, imported first in index.js.
 import { Stack } from 'expo-router'
 import 'react-native-reanimated'
 import { SafeThemeProvider } from '@/src/theme/provider/safeTheme'

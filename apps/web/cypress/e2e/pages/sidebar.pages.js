@@ -2,9 +2,7 @@ import * as constants from '../../support/constants.js'
 import * as main from './main.page.js'
 import * as modal from './modals.page.js'
 import * as navigation from './navigation.page.js'
-import { safeHeaderInfo } from './import_export.pages.js'
 import * as file from './import_export.pages.js'
-import safes from '../../fixtures/safes/static.js'
 import * as address_book from './address_book.page.js'
 import * as create_wallet from '../pages/create_wallet.pages.js'
 
@@ -21,7 +19,6 @@ const sideBarListItemNeedHelp = '[data-testid="list-item-need-help"]'
 export const sidebarSettingsItem = '[data-testid="sidebar-settings-item"]'
 export const sidebarListItem = '[data-testid="sidebar-list-item"]'
 export const sideSafeListItem = '[data-testid="safe-list-item"]'
-const sidebarSafeHeader = '[data-testid="safe-header-info"]'
 const sidebarSafeContainer = '[data-testid="sidebar-safe-container"]'
 const safeItemOptionsBtn = '[data-testid="safe-options-btn"]'
 export const safeItemOptionsRenameBtn = '[data-testid="rename-btn"]'
@@ -31,7 +28,6 @@ const nameInput = '[data-testid="name-input"]'
 const saveBtn = '[data-testid="save-btn"]'
 const deleteBtn = '[data-testid="delete-btn"]'
 const readOnlyVisibility = '[data-testid="read-only-visibility"]'
-const currencySection = '[data-testid="currency-section"]'
 const missingSignatureInfo = '[data-testid="missing-signature-info"]'
 const queuedTxInfo = '[data-testid="queued-tx-info"]'
 const expandSafesList = '[data-testid="expand-safes-list"]'
@@ -151,7 +147,6 @@ export const sideBarSafesPendingActions = {
   safe1: '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
   safe1short: '0x5912...fFdb',
 }
-export const testSafeHeaderDetails = ['2/2', safes.SEP_STATIC_SAFE_9_SHORT]
 const receiveAssetsStr = 'Receive assets'
 const emptyPinnedListStr = 'Watch any Safe account to keep an eye on its activity'
 const emptySafeListStr = "You don't have any safes yet"
@@ -293,11 +288,6 @@ export function verifyNetworkIsDisplayed(netwrok) {
     .within(() => {
       cy.get(chainLogo).should('contain', netwrok)
     })
-}
-
-export function verifySafeHeaderDetails(details) {
-  main.checkTextsExistWithinElement(safeHeaderInfo, details)
-  main.verifyElementsExist([safeIcon, currencySection])
 }
 
 export function clickOnQRCodeBtn() {
@@ -587,16 +577,6 @@ export function clickOnSaveBtn() {
 
 function verifyModalRemoved() {
   main.verifyElementsCount(modal.modalTitle, 0)
-}
-
-export function checkCurrencyInHeader(currency) {
-  cy.get(sidebarSafeHeader).within(() => {
-    cy.get(currencySection).contains(currency)
-  })
-}
-
-export function checkSafeAddressInHeader(address) {
-  main.verifyValuesExist(sidebarSafeHeader, address)
 }
 
 export function verifyPinnedListIsEmpty() {

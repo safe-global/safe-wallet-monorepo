@@ -63,12 +63,13 @@ const safeSelectorThreshold = '[data-testid="safe-selector-threshold"]'
 const safeLevelNavigation = '[data-testid="safe-level-navigation"]'
 const spaceSafesNavigationBlock = '[data-testid="space-safes-navigation-block"]'
 const spaceChainNavigationButton = '[data-testid="space-chain-navigation-button"]'
-const backToSpaceBtn = '[aria-label="Back to workspace"]'
-const safeLevelNavigationBackToSpaceBtn = `${safeLevelNavigation} ${backToSpaceBtn}`
+
+// Back-to-space control now lives in the sidebar, not the safe-level navigation panel
+export const backToSpaceBtn = '[data-testid="back-to-space-button"]'
 
 // -- Space sidebar items --
 export const sidebarItemHome = '[data-testid="sidebar-item-home"]'
-export const sidebarItemAccounts = '[data-testid="sidebar-item-accounts"]'
+export const sidebarItemAccounts = '[data-testid="sidebar-item-safe-accounts"]'
 export const sidebarItemAddressBook = '[data-testid="sidebar-item-address-book"]'
 export const sidebarItemTeam = '[data-testid="sidebar-item-team"]'
 export const sidebarItemSettings = '[data-testid="sidebar-item-settings"]'
@@ -434,9 +435,16 @@ export function verifySpaceSidebarItemsNotVisible() {
 }
 
 export function verifySafeLevelNavigationElements() {
-  cy.get(safeLevelNavigationBackToSpaceBtn).should('be.visible')
   cy.get(safeLevelNavigation).find(spaceSafesNavigationBlock).should('be.visible')
   cy.get(safeLevelNavigation).find(spaceChainNavigationButton).should('be.visible')
+}
+
+export function verifyBackToSpaceButtonVisible() {
+  cy.get(backToSpaceBtn).should('be.visible')
+}
+
+export function clickBackToSpaceButton() {
+  cy.get(backToSpaceBtn).should('be.visible').click()
 }
 
 // ===========================================

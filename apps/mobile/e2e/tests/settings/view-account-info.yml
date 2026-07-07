@@ -399,9 +399,12 @@ tags:
 - tapOn:
     text: 'Remove'
 
-# Verify success toast appears
+# Verify success toast appears (optional: the toast is transient and races with
+# the redirect to onboarding when the last safe is removed, so it may already be
+# gone — the onboarding assertion below is the authoritative deletion check).
 - assertVisible:
     text: '.*The safe with address.*was deleted.*'
+    optional: true
 
 # Verify navigation to onboarding screen
 # When the last safe is deleted, the app redirects to onboarding

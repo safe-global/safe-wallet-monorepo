@@ -2,7 +2,7 @@
   "name": "@safe-global/web",
   "homepage": "https://github.com/safe-global/safe-wallet-web",
   "license": "GPL-3.0",
-  "version": "1.91.1",
+  "version": "1.92.1",
   "type": "module",
   "scripts": {
     "pw:test": "npx playwright test --config=e2e/playwright.config.ts --project=chromium",
@@ -79,10 +79,10 @@
     "@reduxjs/toolkit": "^2.11.0",
     "@reown/walletkit": "^1.2.7",
     "@safe-global/api-kit": "^5.0.1",
-    "@safe-global/protocol-kit": "^8.0.1",
+    "@safe-global/protocol-kit": "^8.0.2",
     "@safe-global/safe-apps-sdk": "^9.1.0",
-    "@safe-global/safe-deployments": "^1.37.57",
-    "@safe-global/safe-modules-deployments": "^3.0.5",
+    "@safe-global/safe-deployments": "^1.37.58",
+    "@safe-global/safe-modules-deployments": "^3.0.6",
     "@safe-global/store": "workspace:^",
     "@safe-global/theme": "workspace:^",
     "@tailwindcss/postcss": "^4.1.18",
@@ -132,6 +132,7 @@
     "tailwindcss": "^4.1.18",
     "tw-animate-css": "^1.4.0",
     "vaul": "^1.1.2",
+    "viem": "^2.21.55",
     "zodiac-roles-deployments": "^2.3.4"
   },
   "devDependencies": {

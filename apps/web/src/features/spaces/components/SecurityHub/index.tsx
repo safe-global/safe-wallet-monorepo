@@ -36,7 +36,7 @@ const SecurityHub = (): ReactElement => {
   return (
     <Box data-testid="security-hub">
       <Box mb={3} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
-        <Typography variant="h1">Security</Typography>
+        <Typography variant="h1">Security hub</Typography>
 
         <ExternalLink href={HelpCenterArticle.SAFE_SHIELD} noIcon>
           <SvgIcon

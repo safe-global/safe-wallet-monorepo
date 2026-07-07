@@ -1,6 +1,5 @@
 import { render } from '@testing-library/react'
 import SpaceSafeBar from './index'
-import { TxModalContext } from '@/components/tx-flow'
 
 const mockItems = [
   {
@@ -31,10 +30,6 @@ jest.mock('@/features/spaces', () => ({
 
 jest.mock('./hooks/useSpaceSafeSelectorItems', () => ({
   useSpaceSafeSelectorItems: jest.fn(),
-}))
-
-jest.mock('./hooks/useSpaceBackLink', () => ({
-  useSpaceBackLink: jest.fn(),
 }))
 
 jest.mock('./SpaceChainSelector', () => {
@@ -120,32 +115,18 @@ jest.mock('@/store', () => ({
   useAppSelector: () => ({}),
 }))
 
-jest.mock('./SpaceBackLink', () => {
-  const MockSpaceBackLink = (props: Record<string, unknown>) => (
-    <div
-      data-testid="space-back-link"
-      data-space-name={(props.space as { name: string })?.name}
-      data-has-on-click={String(typeof props.onClick === 'function')}
-    />
-  )
-  MockSpaceBackLink.displayName = 'SpaceBackLink'
-  return { __esModule: true, default: MockSpaceBackLink }
-})
-
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
 import { useIsQualifiedSafe } from '@/features/spaces'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
-import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 
 const mockUsePathname = usePathname as jest.Mock
 const mockUseRouter = useRouter as jest.Mock
 const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
 const mockUseSafeAddressFromUrl = useSafeAddressFromUrl as jest.Mock
 const mockUseSpaceSafeSelectorItems = useSpaceSafeSelectorItems as jest.Mock
-const mockUseSpaceBackLink = useSpaceBackLink as jest.Mock
 const mockUseWallet = useWallet as jest.Mock
 
 describe('SpaceSafeBar', () => {
@@ -161,10 +142,6 @@ describe('SpaceSafeBar', () => {
       isError: false,
       refetch: jest.fn(),
       isInSpaceContext: false,
-    })
-    mockUseSpaceBackLink.mockReturnValue({
-      space: undefined,
-      handleBackToSpace: jest.fn(),
     })
   })
 
@@ -213,10 +190,6 @@ describe('SpaceSafeBar', () => {
 
   it('passes an All Accounts footer to SafeSelectorDropdown on the Spaces level (WA-2462)', () => {
     mockUseIsQualifiedSafe.mockReturnValue(true)
-    mockUseSpaceBackLink.mockReturnValue({
-      space: { id: 1, name: 'Test Space' },
-      handleBackToSpace: jest.fn(),
-    })
 
     const { getByTestId } = render(<SpaceSafeBar />)
     expect(getByTestId('safe-selector-dropdown').getAttribute('data-has-footer')).toBe('true')
@@ -239,10 +212,6 @@ describe('SpaceSafeBar', () => {
 
   it('labels the dropdown footer "Explore other Safes" on the Spaces level', () => {
     mockUseIsQualifiedSafe.mockReturnValue(true)
-    mockUseSpaceBackLink.mockReturnValue({
-      space: { id: 1, name: 'Test Space' },
-      handleBackToSpace: jest.fn(),
-    })
 
     const { getByTestId } = render(<SpaceSafeBar />)
     expect(getByTestId('all-accounts-btn').textContent).toContain('Explore other Safes')
@@ -257,10 +226,6 @@ describe('SpaceSafeBar', () => {
       isError: false,
       refetch: jest.fn(),
       isInSpaceContext: true,
-    })
-    mockUseSpaceBackLink.mockReturnValue({
-      space: { id: 1, name: 'Test Space' },
-      handleBackToSpace: jest.fn(),
     })
 
     const { getByTestId } = render(<SpaceSafeBar />)
@@ -287,73 +252,6 @@ describe('SpaceSafeBar', () => {
 
     const { getByTestId } = render(<SpaceSafeBar />)
     expect(getByTestId('workspace-header').textContent).toBe('Safes in this workspace')
-  })
-
-  it('renders SpaceBackLink when in space context and space data is available', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
-    mockUseSpaceBackLink.mockReturnValue({
-      space: { id: 42, name: 'Acme Corp' },
-      handleBackToSpace: jest.fn(),
-    })
-
-    const { getByTestId } = render(<SpaceSafeBar />)
-    const backLink = getByTestId('space-back-link')
-    expect(backLink).toBeInTheDocument()
-    expect(backLink.getAttribute('data-space-name')).toBe('Acme Corp')
-    expect(backLink.getAttribute('data-has-on-click')).toBe('true')
-  })
-
-  it('does not render SpaceBackLink when not in space context', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(false)
-    mockUseSpaceBackLink.mockReturnValue({
-      space: { id: 42, name: 'Acme Corp' },
-      handleBackToSpace: jest.fn(),
-    })
-
-    const { queryByTestId } = render(<SpaceSafeBar />)
-    expect(queryByTestId('space-back-link')).not.toBeInTheDocument()
-  })
-
-  it('does not render SpaceBackLink when space data is undefined', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
-    mockUseSpaceBackLink.mockReturnValue({
-      space: undefined,
-      handleBackToSpace: jest.fn(),
-    })
-
-    const { queryByTestId } = render(<SpaceSafeBar />)
-    expect(queryByTestId('space-back-link')).not.toBeInTheDocument()
-  })
-
-  it('renders both SpaceBackLink and SafeSelectorDropdown together', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
-    mockUseSpaceBackLink.mockReturnValue({
-      space: { id: 1, name: 'Test Space' },
-      handleBackToSpace: jest.fn(),
-    })
-
-    const { getByTestId } = render(<SpaceSafeBar />)
-    expect(getByTestId('space-back-link')).toBeInTheDocument()
-    expect(getByTestId('safe-selector-dropdown')).toBeInTheDocument()
-  })
-
-  it('hides SpaceBackLink while a tx-flow modal is open', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
-    mockUseSpaceBackLink.mockReturnValue({
-      space: { id: 1, name: 'Test Space' },
-      handleBackToSpace: jest.fn(),
-    })
-
-    const { queryByTestId, getByTestId } = render(
-      <TxModalContext.Provider value={{ txFlow: <div />, setTxFlow: jest.fn(), setFullWidth: jest.fn() }}>
-        <SpaceSafeBar />
-      </TxModalContext.Provider>,
-    )
-
-    expect(queryByTestId('space-back-link')).not.toBeInTheDocument()
-    // Other elements still render — only the back link is hidden
-    expect(getByTestId('safe-selector-dropdown')).toBeInTheDocument()
-    expect(getByTestId('space-chain-selector')).toBeInTheDocument()
   })
 
   it.each([['/welcome/accounts'], ['/welcome/spaces'], ['/new-safe/create'], ['/new-safe/load']])(

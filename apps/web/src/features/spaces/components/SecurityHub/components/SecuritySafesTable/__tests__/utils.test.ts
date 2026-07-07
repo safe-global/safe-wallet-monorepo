@@ -1,7 +1,8 @@
 import type { ScanResult, SecurityGrade } from '@/features/security/types'
 import type { SpaceSafeEntry } from '../../../types'
-import { formatBalance, getAggregateNonPassingCount, getNonPassingCount } from '../utils'
+import { buildSafeSecurityHref, formatBalance, getAggregateNonPassingCount, getNonPassingCount } from '../utils'
 import { DASH } from '../constants'
+import { AppRoutes } from '@/config/routes'
 
 const mkResult = (status: ScanResult['status'], severity: SecurityGrade = 'Low'): ScanResult => ({
   status,
@@ -130,5 +131,29 @@ describe('formatBalance', () => {
       expect(formatBalance('1000000')).toBe('$1.0M')
       expect(formatBalance('2500000')).toBe('$2.5M')
     })
+  })
+})
+
+describe('buildSafeSecurityHref', () => {
+  const chainShortNames = { '1': 'eth', '137': 'matic' }
+  const address = '0x1234567890123456789012345678901234567890'
+
+  it("links to the Safe's security settings page with a prefixed safe param", () => {
+    expect(buildSafeSecurityHref(chainShortNames, address, '1')).toEqual({
+      pathname: AppRoutes.settings.security,
+      query: { safe: `eth:${address}` },
+    })
+  })
+
+  it('uses the short name matching the given chainId', () => {
+    expect(buildSafeSecurityHref(chainShortNames, address, '137')).toEqual({
+      pathname: AppRoutes.settings.security,
+      query: { safe: `matic:${address}` },
+    })
+  })
+
+  it('returns undefined when the chain has no known short name (renders as plain text)', () => {
+    expect(buildSafeSecurityHref(chainShortNames, address, '999')).toBeUndefined()
+    expect(buildSafeSecurityHref({}, address, '1')).toBeUndefined()
   })
 })

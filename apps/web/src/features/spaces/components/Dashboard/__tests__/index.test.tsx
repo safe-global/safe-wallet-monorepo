@@ -71,9 +71,6 @@ jest.mock('@/hooks/safes', () => ({
 }))
 
 // Stub sub-components irrelevant to tracking
-jest.mock('../MembersCard', () => () => null)
-jest.mock('../SpacesCTACard', () => () => null)
-jest.mock('../ImportAddressBookCard', () => () => null)
 jest.mock('../AddAccountsCard', () => () => null)
 jest.mock('../AggregatedBalances', () => () => null)
 jest.mock('../../InviteBanner/PreviewInvite', () => () => null)

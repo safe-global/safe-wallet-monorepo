@@ -107,5 +107,6 @@
     "textColor": "#ffffff",
     "backgroundColor": "#627EEA"
   },
-  "recommendedMasterCopyVersion": "1.4.1"
+  "recommendedMasterCopyVersion": "1.4.1",
+  "relayer": null
 }

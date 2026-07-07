@@ -2,10 +2,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { OperationType } from '@safe-global/types-kit'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useBalances from '@/hooks/useBalances'
+import { getNonces } from '@/services/tx/tx-sender/recommendedNonce'
 import { useGetGtfFeePreviewQuery } from '@/store/api/gateway'
 import { toSupportedFiatCode } from '@/store/api/gateway/gtfFeePreview'
 import { useAppSelector } from '@/store'
@@ -53,6 +55,21 @@ export const useResolvedGasToken = (
   const chain = useCurrentChain()
   const currency = useAppSelector(selectCurrency)
 
+  // The tx doesn't exist yet on the Create step. The CGW rejects nonces <= the Safe's current
+  // nonce, so probe against the recommended next nonce (the value the tx will actually get when
+  // proposed). The exact nonce doesn't change which token can cover fees.
+  const [recommendedNonce] = useAsync(async () => {
+    if (!safe.chainId || !safeAddress) return
+    if (!safe.deployed) return 0
+    try {
+      const nonces = await getNonces(safe.chainId, safeAddress)
+      return nonces?.recommendedNonce ?? safe.nonce
+    } catch {
+      return safe.nonce
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [safeAddress, safe.chainId, safe.deployed, safe.nonce, safe.txQueuedTag, safe.txHistoryTag])
+
   const candidates = useMemo(() => {
     if (!balances?.items || !sentTokenAddress) return []
 
@@ -74,10 +91,12 @@ export const useResolvedGasToken = (
 
   const currentCandidate = candidates[index]
 
-  const canProbe = Boolean(currentCandidate && tx && chain?.chainId && safeAddress && safe.threshold > 0)
+  const canProbe = Boolean(
+    currentCandidate && tx && chain?.chainId && safeAddress && safe.threshold > 0 && recommendedNonce !== undefined,
+  )
 
   const probe = useGetGtfFeePreviewQuery(
-    canProbe && tx && chain
+    canProbe && tx && chain && recommendedNonce !== undefined
       ? {
           chainId: chain.chainId,
           safeAddress,
@@ -85,6 +104,7 @@ export const useResolvedGasToken = (
             ...tx,
             gasToken: currentCandidate,
             numberSignatures: safe.threshold,
+            nonce: recommendedNonce,
             fiatCode: toSupportedFiatCode(currency),
           },
         }

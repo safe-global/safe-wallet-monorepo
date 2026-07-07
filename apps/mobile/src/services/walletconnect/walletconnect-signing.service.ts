@@ -30,6 +30,20 @@ export interface SigningResponse {
   safeTransactionHash: string
 }
 
+// domain.chainId → number (EIP-712 uint256; a string is rejected by strict wallets), scoped to
+// the domain so a chainId elsewhere in the message isn't coerced. All other bigints → string to
+// keep uint256 precision. Exported for the hash-preservation test.
+export const stringifyTypedData = (typedData: { domain: { chainId?: bigint | number } }): string => {
+  const { chainId } = typedData.domain
+  if (typeof chainId === 'bigint' && chainId > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new Error(`chainId ${chainId} exceeds Number.MAX_SAFE_INTEGER`)
+  }
+  const domain = typeof chainId === 'bigint' ? { ...typedData.domain, chainId: Number(chainId) } : typedData.domain
+  return JSON.stringify({ ...typedData, domain }, (_key, value) =>
+    typeof value === 'bigint' ? value.toString() : value,
+  )
+}
+
 export const signWithWalletConnect = async (params: WalletConnectSigningParams): Promise<SigningResponse> => {
   const { chain, activeSafe, txId, signerAddress, safeVersion, provider, prebuiltSafeTx } = params
 
@@ -64,7 +78,7 @@ export const signWithWalletConnect = async (params: WalletConnectSigningParams):
 
   const signature = await provider.request({
     method: SigningMethod.ETH_SIGN_TYPED_DATA_V4,
-    params: [signerAddress, JSON.stringify(typedData)],
+    params: [signerAddress, stringifyTypedData(typedData)],
   })
 
   if (typeof signature !== 'string') {
