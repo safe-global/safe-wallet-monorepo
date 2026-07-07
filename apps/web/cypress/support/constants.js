@@ -324,3 +324,7 @@ export const localStorageKeys = {
   SAFE_v2__visitedSafes: 'SAFE_v2__visitedSafes',
   SAFE_v2__auth: 'SAFE_v2__auth',
 }
+
+export const sessionStorageKeys = {
+  SAFE_v2__classicViewEnabled: 'SAFE_v2__classicViewEnabled',
+}
