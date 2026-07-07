@@ -12,41 +12,6 @@
   justify-content: space-between;
 }
 
-/*
- * Brand gradient stops for the "How fees work" chip (Figma PLA-1440). These are decorative
- * brand colors with no semantic equivalent in @safe-global/theme, so they live here as named
- * vars rather than bare inline hex. Fixed widths are pixel-perfect Figma values.
- */
-.howFeesWork {
-  --gtf-fees-chip-gradient-light: linear-gradient(to right, #b0ffc9, #d7f6ff 99.5%);
-  --gtf-fees-chip-gradient-dark: linear-gradient(190.78deg, #5fddff 12.5%, #12ff80 88%);
-  width: 126px;
-  height: 24px;
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 1px;
-  color: var(--color-text-primary);
-  background: var(--gtf-fees-chip-gradient-light);
-  padding: 0 6px;
-  border-radius: 4px;
-  text-decoration: none;
-  white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  line-height: 16px;
-}
-
-.howFeesWork:hover {
-  opacity: 0.85;
-}
-
-[data-theme='dark'] .howFeesWork {
-  background: var(--gtf-fees-chip-gradient-dark);
-  color: var(--color-static-main);
-}
-
 .feeCard {
   border: 1px solid var(--color-border-light);
   border-radius: 8px;

@@ -8,7 +8,9 @@ const lightPalette: ColorPalette = {
   text: {
     primary: '#121312',
     secondary: '#A1A3A7',
+    secondaryForeground: '#1F2937',
     muted: '#737373',
+    mutedStrong: '#525252',
     disabled: '#DDDEE0',
     contrast: '#FFFFFF',
   },
@@ -22,6 +24,7 @@ const lightPalette: ColorPalette = {
     main: '#12FF80',
     light: '#B0FFC9',
     background: '#EFFFF4',
+    accent: 'rgba(18, 255, 128, 0.1)',
   },
   border: {
     main: '#A1A3A7',

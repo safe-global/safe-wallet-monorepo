@@ -18,11 +18,11 @@ const defaultProps: FeesPreviewData = {
 }
 
 describe('FeesPreview', () => {
-  it('renders "Fees" header and "How fees work" link', () => {
+  it('renders "Fees" header and the plan-status chip', () => {
     render(<FeesPreview {...defaultProps} />)
 
     expect(screen.getByText('Fees')).toBeInTheDocument()
-    expect(screen.getByText(/How fees work/)).toBeInTheDocument()
+    expect(screen.getByTestId('plan-status-chip')).toBeInTheDocument()
   })
 
   it('renders payment source selector with Safe active by default', () => {

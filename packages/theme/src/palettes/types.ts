@@ -6,7 +6,9 @@ export interface ColorPalette {
   text: {
     primary: string
     secondary: string
+    secondaryForeground: string
     muted: string
+    mutedStrong: string
     disabled: string
     contrast: string
   }
@@ -20,6 +22,7 @@ export interface ColorPalette {
     main: string
     light: string
     background: string
+    accent: string
   }
   border: {
     main: string
