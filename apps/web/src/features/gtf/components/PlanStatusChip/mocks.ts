@@ -79,6 +79,16 @@ export const PLAN_STATUS_MOCKS = {
     gaslessTransactions: { used: 5, total: 15 },
     activeSafes: ACTIVE_SAFES,
   },
+  proLimit: {
+    belongsToWorkspace: true,
+    planId: 'pro',
+    planName: 'Pro',
+    status: 'limit_reached',
+    renewalDate: RENEWAL_DATE,
+    feeFreeVolume: { used: 520_000, total: 500_000 },
+    gaslessTransactions: { used: 15, total: 15 },
+    activeSafes: ACTIVE_SAFES,
+  },
   proFailed: {
     belongsToWorkspace: true,
     planId: 'pro',

@@ -44,6 +44,13 @@ describe('getModalContent', () => {
     expect(content.comparison?.tiers.map((t) => t.id)).toEqual(['pro', 'pro-plus'])
   })
 
+  it('upsells Pro → Pro+ with a comparison when the Pro limit is reached', () => {
+    const content = getModalContent(PLAN_STATUS_MOCKS.proLimit, SPACE_ID)
+    expect(content.cta).toEqual({ label: 'Upgrade to Pro+', href: billing })
+    expect(content.comparison?.activeTierId).toBe('pro')
+    expect(content.comparison?.tiers.map((t) => t.id)).toEqual(['pro', 'pro-plus'])
+  })
+
   it('offers "Update payment method" when payment failed', () => {
     const content = getModalContent(PLAN_STATUS_MOCKS.proFailed, SPACE_ID)
     expect(content.cta).toEqual({ label: 'Update payment method', href: billing })

@@ -32,6 +32,10 @@ export const ProApproachingLimit: Story = {
   args: { planStatus: PLAN_STATUS_MOCKS.proApproaching },
 }
 
+export const ProLimitReached: Story = {
+  args: { planStatus: PLAN_STATUS_MOCKS.proLimit },
+}
+
 export const ProPaymentFailed: Story = {
   args: { planStatus: PLAN_STATUS_MOCKS.proFailed },
 }

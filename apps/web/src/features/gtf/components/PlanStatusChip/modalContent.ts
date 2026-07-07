@@ -46,7 +46,7 @@ export const getModalContent = (plan: PlanStatus, spaceId: string | null): Modal
     return { ...base, cta: { label: 'Compare plans', href: billing } }
   }
 
-  if (plan.status === 'approaching_limit') {
+  if (plan.status === 'approaching_limit' || plan.status === 'limit_reached') {
     return {
       ...base,
       cta: { label: 'Upgrade to Pro+', href: billing },
