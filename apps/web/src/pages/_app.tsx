@@ -43,6 +43,7 @@ import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
 import { CounterfactualFeature, useCounterfactualSafeSync } from '@/features/counterfactual'
+import { useInviteNotification } from '@/features/spaces/hooks/useInviteNotification'
 import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
@@ -124,6 +125,7 @@ const SafeScopedSubscriptions = (): null => {
   usePortfolioRefetchOnTxHistory()
   useInvalidateOverviewsOnTx()
   useCounterfactualSafeSync()
+  useInviteNotification()
   return null
 }
 
