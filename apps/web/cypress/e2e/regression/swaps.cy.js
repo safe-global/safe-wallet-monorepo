@@ -42,6 +42,7 @@ describe('Swaps tests', () => {
         .within(() => {
           swaps.selectInputCurrency(swaps.swapTokens.cow)
           swaps.clickOnSettingsBtn()
+          swaps.enableCustomRecipient(isCustomRecipientFound(swaps.customRecipient))
           swaps.clickOnSettingsBtn()
           swaps.enterRecipient(swaps.blockedAddress)
         })

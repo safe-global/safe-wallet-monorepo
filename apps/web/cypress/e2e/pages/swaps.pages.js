@@ -378,6 +378,10 @@ export function enableTwapCustomRecipient(option) {
   if (!option) cy.get(twapsAddressToggle).eq(0).click()
 }
 
+export function enableCustomRecipient(option) {
+  if (!option) cy.get(recipientToggle).click()
+}
+
 export function disableCustomRecipient(option) {
   if (option) cy.get(recipientToggle).click()
 }
