@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { ReactElement } from 'react'
 import { GitMerge } from 'lucide-react'
 
-import { NestedSafesPopover } from '@/components/sidebar/NestedSafesPopover'
+import { NestedSafesPopover } from '@/components/nested-safes/NestedSafesPopover'
 import { useOwnersGetSafesByOwnerV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'

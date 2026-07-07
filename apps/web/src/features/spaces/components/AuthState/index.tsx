@@ -6,6 +6,7 @@ import UnauthorizedState from '../UnauthorizedState'
 import LoadingState from '../LoadingState'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated, selectIsOidcLoginPending, setLastUsedSpace } from '@/store/authSlice'
+import { setLastUsedSpaceOrigin } from '@/features/spaces/store'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { SPACE_REFRESH_OPTIONS } from '../../hooks/refreshOptions'
@@ -36,7 +37,8 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
 
   useEffect(() => {
     dispatch(setLastUsedSpace(spaceId))
-  }, [dispatch, spaceId])
+    dispatch(setLastUsedSpaceOrigin({ path: router.pathname, spaceId }))
+  }, [dispatch, spaceId, router.pathname])
 
   // !isFetching: accepting an invite refetches the space — don't redirect on the stale INVITED entry
   useEffect(() => {

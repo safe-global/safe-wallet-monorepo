@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Container } from '@/src/components/Container'
 import { View, YStack, Text, H3 } from 'tamagui'
 import { Logo } from '@/src/components/Logo'
@@ -16,6 +16,10 @@ import { Address } from '@/src/types/address'
 import { TokenAmount } from '@/src/components/TokenAmount'
 import { ParametersButton } from '@/src/components/ParametersButton'
 import { HashDisplay } from '@/src/components/HashDisplay'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { useFeesBreakdown } from '@/src/features/ConfirmTx/components/TransactionInfo/useFeesBreakdown'
+import { isERC20Transfer } from '@/src/utils/transaction-guards'
 
 interface TokenTransferProps {
   txId: string
@@ -31,6 +35,21 @@ export function TokenTransfer({ txId, txInfo, executionInfo, executedAt }: Token
 
   const recipientAddress = txInfo.recipient.value as Address
 
+  const breakdown = useFeesBreakdown({ detailedExecutionInfo: executionInfo })
+
+  // Show the Safe-paid fee in the header only when the Safe funds the fee in a token that differs
+  // from the one being sent (otherwise it's already implied by the transfer amount).
+  const safePaidFee = useMemo(() => {
+    if (!breakdown?.paidFromSafe) {
+      return undefined
+    }
+    const transferTokenAddress = isERC20Transfer(txInfo.transferInfo) ? txInfo.transferInfo.tokenAddress : ZERO_ADDRESS
+    if (sameAddress(breakdown.maxGasFee.address, transferTokenAddress)) {
+      return undefined
+    }
+    return breakdown.maxGasFee
+  }, [breakdown, txInfo])
+
   return (
     <>
       <TransactionHeader
@@ -39,15 +58,31 @@ export function TokenTransfer({ txId, txInfo, executionInfo, executedAt }: Token
         badgeThemeName="badge_error"
         badgeColor="$error"
         title={
-          <H3 fontWeight={600}>
-            <TokenAmount
-              value={value}
-              decimals={decimals}
-              tokenSymbol={tokenSymbol}
-              direction={txInfo.direction}
-              preciseAmount
-            />
-          </H3>
+          <YStack alignItems="center" gap="$1">
+            <Text color="$textSecondaryLight" fontSize="$4">
+              Sending
+            </Text>
+            <H3 fontWeight={600} textAlign="center" paddingHorizontal="$4">
+              <TokenAmount
+                value={value}
+                decimals={decimals}
+                tokenSymbol={tokenSymbol}
+                direction={txInfo.direction}
+                preciseAmount
+              />
+            </H3>
+            {safePaidFee && (
+              <H3 fontWeight={600} textAlign="center" paddingHorizontal="$4">
+                <TokenAmount
+                  value={safePaidFee.amount}
+                  decimals={safePaidFee.decimals}
+                  tokenSymbol={safePaidFee.symbol}
+                  direction={txInfo.direction}
+                  preciseAmount
+                />
+              </H3>
+            )}
+          </YStack>
         }
         submittedAt={executionInfo?.submittedAt || executedAt}
       />

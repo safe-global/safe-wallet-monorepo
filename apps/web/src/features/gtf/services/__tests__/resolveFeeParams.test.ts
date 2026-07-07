@@ -52,7 +52,6 @@ describe('resolveFeeParams', () => {
       numberSignatures: 3,
     },
     relayCost: { fiatCode: 'USD', fiatValue: '38.22' },
-    pricingContextSnapshot: { phase: 1, priceSource: 'coingecko', priceTimestamp: 0, gasPriceVolatilityBuffer: 1.3 },
   }
 
   beforeEach(() => {
@@ -87,6 +86,7 @@ describe('resolveFeeParams', () => {
           operation: safeTx.data.operation,
           gasToken: '0xa0b86991000000000000000000000000000000aa',
           numberSignatures: 3,
+          nonce: safeTx.data.nonce,
           fiatCode: 'USD',
         },
       },
@@ -105,6 +105,41 @@ describe('resolveFeeParams', () => {
       safeTx.data.nonce,
     )
     expect(result).toBe(mergedTx)
+  })
+
+  it('passes the user currency through as fiatCode (falling back to USD when unsupported)', async () => {
+    mockCreateTx.mockResolvedValue(createSafeTx('0xmerged'))
+    mockInitiate.mockReturnValue({ kind: 'thunk' })
+
+    // Supported fiat is forwarded as-is...
+    await resolveFeeParams({
+      chainId: '1',
+      safeAddress: '0xsafe',
+      safeTx,
+      gasToken: '0xa0b86991000000000000000000000000000000aa',
+      numberSignatures: 3,
+      currency: 'eur',
+      dispatch: buildDispatch(buildThunk(Promise.resolve(previewResponse))),
+    })
+    expect(mockInitiate).toHaveBeenLastCalledWith(
+      expect.objectContaining({ tx: expect.objectContaining({ fiatCode: 'EUR' }) }),
+      { forceRefetch: true },
+    )
+
+    // ...an unsupported display currency falls back to USD.
+    await resolveFeeParams({
+      chainId: '1',
+      safeAddress: '0xsafe',
+      safeTx,
+      gasToken: '0xa0b86991000000000000000000000000000000aa',
+      numberSignatures: 3,
+      currency: 'COP',
+      dispatch: buildDispatch(buildThunk(Promise.resolve(previewResponse))),
+    })
+    expect(mockInitiate).toHaveBeenLastCalledWith(
+      expect.objectContaining({ tx: expect.objectContaining({ fiatCode: 'USD' }) }),
+      { forceRefetch: true },
+    )
   })
 
   it('throws when CGW returns an unknown refundReceiver (defense-in-depth)', async () => {

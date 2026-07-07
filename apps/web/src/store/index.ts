@@ -62,6 +62,7 @@ const rootReducer = combineReducers({
   [slices.calendlySlice.name]: slices.calendlySlice.reducer,
   [slices.globalSearchSlice.name]: slices.globalSearchSlice.reducer,
   [slices.safeActionsModalSlice.name]: slices.safeActionsModalSlice.reducer,
+  [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
   [slices.gtfPaymentSourcePreferenceSlice.name]: slices.gtfPaymentSourcePreferenceSlice.reducer,
   [slices.addressPoisoningSlice.name]: slices.addressPoisoningSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,

@@ -21,6 +21,7 @@ import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { sanitizeName } from '@safe-global/utils/validation/names'
 import { addressIsNotCurrentSafe, addressIsNotOwner } from '@safe-global/utils/utils/validation'
 import { isEthSignWallet } from '@/utils/wallets'
 import { Close } from '@mui/icons-material'
@@ -128,6 +129,8 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
   const onConfirm = handleSubmit(async (data: ProposerEntry) => {
     if (!wallet) return
 
+    const name = sanitizeName(data.name)
+
     setError(undefined)
     setIsLoading(true)
 
@@ -143,7 +146,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
           // Multi-sig flow: create off-chain message on parent Safe for signature collection
           const eoaSignature = await signProposerTypedDataForSafe(chainId, data.address, parentSafeAddress, signer)
           const delegateTypedData = getDelegateTypedData(chainId, data.address) as TypedData
-          const origin = buildDelegationOrigin(proposer ? 'edit' : 'add', data.address, safeAddress, data.name)
+          const origin = buildDelegationOrigin(proposer ? 'edit' : 'add', data.address, safeAddress, name)
 
           await createDelegationMessage(dispatch, chainId, parentSafeAddress, delegateTypedData, eoaSignature, origin)
 
@@ -169,7 +172,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
       const createDelegateDto: CreateDelegateDto = {
         delegate: data.address,
         delegator,
-        label: data.name,
+        label: name,
         signature,
         safe: safeAddress,
       }

@@ -4,10 +4,10 @@ import { Spinner } from '@/components/ui/spinner'
 import { Plus } from 'lucide-react'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
-import { useCallback, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import AddressInput from '@/components/common/AddressInput'
 import NameInput from '@/components/common/NameInput'
-import { AddressPoisoningGuard, GuardBlockedHint, type BlockedHint } from '@/features/address-poisoning'
+import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import useChains from '@/hooks/useChains'
@@ -41,6 +41,7 @@ type AddContactDialogProps = {
   submit: (item: AddContactItem, spaceId: string) => Promise<{ error?: unknown }>
   onSubmitStart?: () => void
   onSuccess?: () => void
+  validateCharset?: boolean
 }
 
 const AddContactDialog = ({
@@ -53,6 +54,7 @@ const AddContactDialog = ({
   submit,
   onSubmitStart,
   onSuccess,
+  validateCharset = false,
 }: AddContactDialogProps) => {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string>()
@@ -78,14 +80,6 @@ const AddContactDialog = ({
   const { handleSubmit, formState, control, reset } = methods
   const { errors } = formState
 
-  // Address-poisoning guard: warns + blocks (until verified) when the contact address resembles a trusted anchor.
-  const [poisoningBlocked, setPoisoningBlocked] = useState(false)
-  const [poisoningHint, setPoisoningHint] = useState<BlockedHint>()
-  const onPoisoningBlockedChange = useCallback((blocked: boolean, hint?: BlockedHint) => {
-    setPoisoningBlocked(blocked)
-    setPoisoningHint(hint)
-  }, [])
-
   const handleClose = () => {
     setOpen(false)
     reset(defaultValues)
@@ -102,7 +96,7 @@ const AddContactDialog = ({
     setError(undefined)
 
     const item: AddContactItem = {
-      name: data.name,
+      name: validateCharset ? sanitizeName(data.name) : data.name,
       address: data.address,
       chainIds: data.networks.map((network) => network.chainId),
     }
@@ -153,10 +147,15 @@ const AddContactDialog = ({
               <div className="flex flex-col gap-6">
                 {intro && <p className="text-muted-foreground text-sm">{intro}</p>}
 
-                <NameInput name="name" label="Name" required />
+                <NameInput
+                  name="name"
+                  label="Name"
+                  required
+                  validateCharset={validateCharset}
+                  minLength={validateCharset ? NAME_MIN_LENGTH : undefined}
+                  maxLength={validateCharset ? ADDRESS_BOOK_NAME_MAX_LENGTH : undefined}
+                />
                 <AddressInput name="address" label="Address or ENS" required showPrefix={false} chain={ensChain} />
-
-                <AddressPoisoningGuard name="address" context="add-entity" onBlockedChange={onPoisoningBlockedChange} />
 
                 <div>
                   <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>
@@ -191,13 +190,7 @@ const AddContactDialog = ({
               <Button data-testid="cancel-btn" onClick={handleClose}>
                 Cancel
               </Button>
-              <GuardBlockedHint hint={poisoningHint} />
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={!formState.isValid || isSubmitting || poisoningBlocked}
-                disableElevation
-              >
+              <Button type="submit" variant="contained" disabled={!formState.isValid || isSubmitting} disableElevation>
                 {isSubmitting ? <Spinner className="size-5" /> : submitLabel}
               </Button>
             </DialogActions>
