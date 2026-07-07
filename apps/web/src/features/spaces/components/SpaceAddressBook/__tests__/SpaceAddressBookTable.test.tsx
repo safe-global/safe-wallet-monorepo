@@ -164,7 +164,7 @@ describe('SpaceAddressBookTable', () => {
 
     const nameTrigger = screen.getByRole('button', { name: entry.name })
     expect(nameTrigger.closest('tr')).toHaveClass('opacity-50')
-    expect(nameTrigger.closest('div')).toHaveClass('line-through')
+    expect(nameTrigger.closest('div')).not.toHaveClass('line-through')
   })
 
   it('exposes the full name via a tooltip trigger in the Name column', () => {
