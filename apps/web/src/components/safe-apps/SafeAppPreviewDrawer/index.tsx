@@ -97,10 +97,8 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
 
         <Box sx={{ display: 'flex', mt: 2 }}>
           <NetworksTooltip>
-            <NetworksTooltipTrigger>
-              <span className="inline-flex origin-left scale-85">
-                <NetworkLogosList networks={knownChainIds.map((chainId) => ({ chainId }))} showHasMore maxVisible={3} />
-              </span>
+            <NetworksTooltipTrigger render={<span className="inline-flex origin-left scale-85" />}>
+              <NetworkLogosList networks={knownChainIds.map((chainId) => ({ chainId }))} showHasMore maxVisible={3} />
             </NetworksTooltipTrigger>
             <NetworksTooltipContent>
               <div className="flex flex-col gap-1">
