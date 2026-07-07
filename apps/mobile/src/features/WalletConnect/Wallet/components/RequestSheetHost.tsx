@@ -23,10 +23,6 @@ import { ConnectionPermissionsPanel } from './ConnectionPermissionsPanel'
 
 type Props = { walletKit: IWalletKit | null }
 
-// Sheet snap indices: 0 = compact (proposal), 1 = taller (permissions panel).
-const SNAP_COMPACT = 0
-const SNAP_EXPANDED = 1
-
 // Scroll-content clearance so it never sits under the pinned footer CTA (on top of the inset).
 const FOOTER_CLEARANCE = 72
 
@@ -61,15 +57,8 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
     setPermissionsOpen(false)
   }, [current?.id, current?.kind])
 
-  // The permissions panel is taller, so grow the sheet while it's open and shrink back after.
-  const openPermissions = useCallback(() => {
-    setPermissionsOpen(true)
-    ref.current?.snapToIndex(SNAP_EXPANDED)
-  }, [])
-  const closePermissions = useCallback(() => {
-    setPermissionsOpen(false)
-    ref.current?.snapToIndex(SNAP_COMPACT)
-  }, [])
+  const openPermissions = useCallback(() => setPermissionsOpen(true), [])
+  const closePermissions = useCallback(() => setPermissionsOpen(false), [])
 
   useEffect(() => {
     if (!current || !walletKit) {
@@ -178,8 +167,8 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
   return (
     <BottomSheetModal
       ref={ref}
-      snapPoints={['40%', '60%']}
-      enableDynamicSizing={false}
+      enableDynamicSizing
+      topInset={insets.top}
       onDismiss={onSheetDismiss}
       backgroundComponent={BackgroundComponent}
       backdropComponent={renderBackdrop}

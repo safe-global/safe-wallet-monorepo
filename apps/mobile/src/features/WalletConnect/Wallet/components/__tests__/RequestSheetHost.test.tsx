@@ -12,6 +12,8 @@ const mockPresent = jest.fn()
 const mockDismiss = jest.fn()
 // Captures the latest onDismiss prop so tests can simulate a swipe-down / backdrop dismissal.
 let mockOnDismiss: (() => void | Promise<void>) | undefined
+// Captures the latest modal props so tests can assert sizing configuration.
+let mockModalProps: Record<string, unknown> | undefined
 
 // Local mock to capture imperative present/dismiss + render the footer (overrides the global mock).
 jest.mock('@gorhom/bottom-sheet', () => {
@@ -26,8 +28,9 @@ jest.mock('@gorhom/bottom-sheet', () => {
       },
       ref: React.Ref<unknown>,
     ) => {
-      react.useImperativeHandle(ref, () => ({ present: mockPresent, dismiss: mockDismiss, snapToIndex: jest.fn() }))
+      react.useImperativeHandle(ref, () => ({ present: mockPresent, dismiss: mockDismiss }))
       mockOnDismiss = props.onDismiss
+      mockModalProps = props
       return (
         <View>
           {props.children}
@@ -86,6 +89,15 @@ describe('RequestSheetHost', () => {
     mockPresent.mockClear()
     mockDismiss.mockClear()
     mockOnDismiss = undefined
+    mockModalProps = undefined
+  })
+
+  it('sizes the sheet dynamically to its content instead of fixed snap points', () => {
+    const store = proposalStore(9)
+    renderWithStore(<RequestSheetHost walletKit={fakeWalletKit} />, store)
+
+    expect(mockModalProps?.enableDynamicSizing).toBe(true)
+    expect(mockModalProps?.snapPoints).toBeUndefined()
   })
 
   it('never presents while pending is empty', () => {
