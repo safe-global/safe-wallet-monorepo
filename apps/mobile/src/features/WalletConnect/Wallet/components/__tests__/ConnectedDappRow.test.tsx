@@ -4,13 +4,22 @@ import { render, fireEvent } from '@/src/tests/test-utils'
 import { ConnectedDappRow } from '../ConnectedDappRow'
 
 // ReanimatedSwipeable renders its primary child inline and exposes renderRightActions; render
-// both so the trash action is queryable without driving a real gesture.
+// both so the trash action is queryable without driving a real gesture. A pressable stands in
+// for the open-drag gesture so the swipe-open notification is testable.
 jest.mock('react-native-gesture-handler/ReanimatedSwipeable', () => {
   const react = jest.requireActual('react')
-  const { View } = jest.requireActual('react-native')
+  const { View, Pressable } = jest.requireActual('react-native')
   return react.forwardRef(
     (
-      { children, renderRightActions }: { children: React.ReactNode; renderRightActions?: () => React.ReactNode },
+      {
+        children,
+        renderRightActions,
+        onSwipeableOpenStartDrag,
+      }: {
+        children: React.ReactNode
+        renderRightActions?: () => React.ReactNode
+        onSwipeableOpenStartDrag?: (direction: 'left' | 'right') => void
+      },
       ref: React.Ref<unknown>,
     ) => {
       react.useImperativeHandle(ref, () => ({ close: jest.fn() }))
@@ -18,6 +27,7 @@ jest.mock('react-native-gesture-handler/ReanimatedSwipeable', () => {
         <View>
           {children}
           {renderRightActions ? renderRightActions() : null}
+          <Pressable testID="swipe-open-drag" onPress={() => onSwipeableOpenStartDrag?.('right')} />
         </View>
       )
     },
@@ -78,5 +88,18 @@ describe('ConnectedDappRow', () => {
     const { getByTestId } = render(<ConnectedDappRow session={session('t2', 'Aave')} onRequestDisconnect={onRequest} />)
     fireEvent.press(getByTestId('connected-dapp-trash-t2'))
     expect(onRequest).toHaveBeenCalledWith(expect.objectContaining({ topic: 't2' }))
+  })
+
+  it('notifies onSwipeOpenStart with its swipeable handle when a swipe-open drag starts', () => {
+    const onSwipeOpenStart = jest.fn()
+    const { getByTestId } = render(
+      <ConnectedDappRow
+        session={session('t3', 'Curve')}
+        onRequestDisconnect={jest.fn()}
+        onSwipeOpenStart={onSwipeOpenStart}
+      />,
+    )
+    fireEvent.press(getByTestId('swipe-open-drag'))
+    expect(onSwipeOpenStart).toHaveBeenCalledWith(expect.objectContaining({ close: expect.any(Function) }))
   })
 })

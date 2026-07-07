@@ -14,10 +14,12 @@ interface Props {
   variant?: VerifyVariant
   /** Asks the screen to open the disconnect confirmation for this session. */
   onRequestDisconnect: (session: SessionTypes.Struct) => void
+  /** Notifies the screen that this row starts to swipe open, so it can close the previous one. */
+  onSwipeOpenStart?: (methods: SwipeableMethods) => void
 }
 
 /** A connected-dApp card; the overflow menu and a left-swipe both route to a disconnect confirmation. */
-export const ConnectedDappRow: React.FC<Props> = ({ session, variant, onRequestDisconnect }) => {
+export const ConnectedDappRow: React.FC<Props> = ({ session, variant, onRequestDisconnect, onSwipeOpenStart }) => {
   const meta = session.peer.metadata
   const swipeRef = useRef<SwipeableMethods>(null)
 
@@ -25,6 +27,12 @@ export const ConnectedDappRow: React.FC<Props> = ({ session, variant, onRequestD
     swipeRef.current?.close()
     onRequestDisconnect(session)
   }, [onRequestDisconnect, session])
+
+  const handleOpenStartDrag = useCallback(() => {
+    if (swipeRef.current) {
+      onSwipeOpenStart?.(swipeRef.current)
+    }
+  }, [onSwipeOpenStart])
 
   const renderTrash = useCallback(
     () => (
@@ -51,7 +59,12 @@ export const ConnectedDappRow: React.FC<Props> = ({ session, variant, onRequestD
   )
 
   return (
-    <ReanimatedSwipeable ref={swipeRef} renderRightActions={renderTrash} overshootRight={false}>
+    <ReanimatedSwipeable
+      ref={swipeRef}
+      renderRightActions={renderTrash}
+      overshootRight={false}
+      onSwipeableOpenStartDrag={handleOpenStartDrag}
+    >
       <XStack
         backgroundColor="$backgroundPaper"
         borderRadius="$2"

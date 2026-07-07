@@ -1,5 +1,6 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { FlatList } from 'react-native'
+import type { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable'
 import { H2, Text, YStack } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { SessionTypes } from '@walletconnect/types'
@@ -17,6 +18,16 @@ export const ConnectedDappsScreen: React.FC = () => {
   const insets = useSafeAreaInsets()
   const [selected, setSelected] = useState<SessionTypes.Struct | null>(null)
 
+  // The row currently swiped open
+  const openSwipeRef = useRef<SwipeableMethods | null>(null)
+
+  const handleSwipeOpenStart = useCallback((methods: SwipeableMethods) => {
+    if (openSwipeRef.current && openSwipeRef.current !== methods) {
+      openSwipeRef.current.close()
+    }
+    openSwipeRef.current = methods
+  }, [])
+
   const handleConfirm = useCallback(async () => {
     if (!selected) {
       return
@@ -30,9 +41,14 @@ export const ConnectedDappsScreen: React.FC = () => {
 
   const renderItem = useCallback(
     ({ item }: { item: SessionTypes.Struct }) => (
-      <ConnectedDappRow session={item} variant={verifyByTopic[item.topic]} onRequestDisconnect={setSelected} />
+      <ConnectedDappRow
+        session={item}
+        variant={verifyByTopic[item.topic]}
+        onRequestDisconnect={setSelected}
+        onSwipeOpenStart={handleSwipeOpenStart}
+      />
     ),
-    [verifyByTopic],
+    [verifyByTopic, handleSwipeOpenStart],
   )
 
   return (
