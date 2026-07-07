@@ -4,6 +4,20 @@ export const isPairingUri = (uri: string): boolean => {
   return uri.startsWith('wc:')
 }
 
+// Pull the pairing `wc:` URI out of a deep link: a bare `wc:` URI, or the mobile-linking envelope
+// `safe://wc?uri=<encoded>` / `https://app.safe.global/wc?uri=<encoded>`. Null if there is none.
+export const extractWcUri = (url: string): string | null => {
+  if (isPairingUri(url)) {
+    return url
+  }
+  try {
+    const wrapped = new URL(url).searchParams.get('uri')
+    return wrapped && isPairingUri(wrapped) ? wrapped : null
+  } catch {
+    return null
+  }
+}
+
 // CAIP-2 chain id from a numeric chain id, e.g. '1' -> 'eip155:1'.
 export const getEip155ChainId = (chainId: string): `${typeof EIP155}:${string}` => {
   return `${EIP155}:${chainId}`
