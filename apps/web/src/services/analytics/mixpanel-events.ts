@@ -64,6 +64,7 @@ export enum MixpanelEvent {
   ADDRESS_BOOK_ENTRY_CREATED = 'Address Book Entry Created',
   WORKSPACE_TRANSACTION_INITIATED = 'Workspace Transaction Initiated',
   ONBOARDING_WIZARD = 'Onboarding Wizard',
+  USE_OLD_UI = 'Use Old UI',
 }
 
 export enum WorkspaceCreateEntryPoint {

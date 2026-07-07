@@ -52,7 +52,6 @@ describe('resolveFeeParams', () => {
       numberSignatures: 3,
     },
     relayCost: { fiatCode: 'USD', fiatValue: '38.22' },
-    pricingContextSnapshot: { phase: 1, priceSource: 'coingecko', priceTimestamp: 0, gasPriceVolatilityBuffer: 1.3 },
   }
 
   beforeEach(() => {

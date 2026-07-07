@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import {
-  Alert,
   Box,
   Button as MuiButton,
   CircularProgress,
@@ -11,6 +10,7 @@ import {
   Typography,
 } from '@mui/material'
 import { Button } from '@/components/ui/button'
+import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { Badge } from '@/components/ui/badge'
 import ModalDialog from '@/components/common/ModalDialog'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -22,6 +22,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'
 import { validateContactName } from './utils'
+import { sanitizeName } from '@safe-global/utils/validation/names'
 
 type RequestToAddButtonProps = {
   address: string
@@ -58,7 +59,7 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
 
       const result = await createRequest({
         spaceId,
-        createAddressBookRequestDto: { address, name: name.trim(), chainIds },
+        createAddressBookRequestDto: { address, name: sanitizeName(name), chainIds },
       })
 
       if (result.error) {
@@ -104,11 +105,15 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
     return <Badge variant="secondary">Requested</Badge>
   }
 
+  const trigger = (
+    <Button variant="outline" size="sm" onClick={() => setOpen(true)} disabled={!!nameError}>
+      Request to add
+    </Button>
+  )
+
   return (
     <>
-      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
-        Request to add
-      </Button>
+      {nameError ? <InvalidContactNameTooltip nameError={nameError}>{trigger}</InvalidContactNameTooltip> : trigger}
 
       <ModalDialog open={open} onClose={() => setOpen(false)} dialogTitle="Request to add contact" hideChainIndicator>
         <DialogContent sx={{ py: 2 }}>
@@ -155,10 +160,6 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
                 </Tooltip>
               )}
             </Box>
-
-            {nameError && (
-              <Alert severity="warning">Rename this contact to share it with the workspace. {nameError}.</Alert>
-            )}
           </Stack>
         </DialogContent>
 
@@ -171,7 +172,7 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
             type="submit"
             variant="contained"
             onClick={handleConfirm}
-            disabled={!!nameError || isSubmitting}
+            disabled={isSubmitting}
             disableElevation
           >
             {isSubmitting ? <CircularProgress size={20} /> : 'Request to add'}

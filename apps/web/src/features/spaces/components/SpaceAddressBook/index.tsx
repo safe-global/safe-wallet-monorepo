@@ -15,6 +15,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { AddressBookEntry } from './SpaceAddressBookTable'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -113,15 +114,24 @@ const SpaceAddressBook = () => {
         >
           <TabsList variant="line" className="flex-wrap h-auto mb-4 sm:mb-0">
             <TabsTrigger value="workspace" className="cursor-pointer">
-              Workspace contacts ({addressBookItems.length})
+              <Tooltip>
+                <TooltipTrigger render={<span />}>Workspace contacts ({addressBookItems.length})</TooltipTrigger>
+                <TooltipContent>Shared contacts visible to everyone in this workspace</TooltipContent>
+              </Tooltip>
             </TabsTrigger>
             {isPrivateAddressBookEnabled && (
               <>
                 <TabsTrigger value="mine" className="cursor-pointer">
-                  Local contacts ({sortedLocalContacts.length})
+                  <Tooltip>
+                    <TooltipTrigger render={<span />}>Local contacts ({sortedLocalContacts.length})</TooltipTrigger>
+                    <TooltipContent>These contacts are in your local browser storage</TooltipContent>
+                  </Tooltip>
                 </TabsTrigger>
                 <TabsTrigger value="pending" className="cursor-pointer">
-                  Pending ({pendingRequests.length})
+                  <Tooltip>
+                    <TooltipTrigger render={<span />}>Pending ({pendingRequests.length})</TooltipTrigger>
+                    <TooltipContent>Contacts you proposed to add to the workspace</TooltipContent>
+                  </Tooltip>
                 </TabsTrigger>
               </>
             )}
@@ -179,7 +189,14 @@ const SpaceAddressBook = () => {
                       showAddedBy={false}
                       renderExtraAction={(entry) => {
                         if (entry.isDuplicate) {
-                          return <Badge variant="secondary">Already shared</Badge>
+                          return (
+                            <Tooltip>
+                              <TooltipTrigger render={<span className="inline-flex" />}>
+                                <Badge variant="secondary">Already shared</Badge>
+                              </TooltipTrigger>
+                              <TooltipContent>Already saved in your workspace address book</TooltipContent>
+                            </Tooltip>
+                          )
                         }
                         if (isAdmin) {
                           return (

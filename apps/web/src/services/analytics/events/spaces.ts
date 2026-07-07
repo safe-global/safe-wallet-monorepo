@@ -265,6 +265,10 @@ export const SPACE_EVENTS = {
     action: 'Wallet disconnected in space',
     category: SPACE_CATEGORY,
   },
+  USE_OLD_UI: {
+    action: 'Use the old UI',
+    category: SPACE_CATEGORY,
+  },
 }
 
 export enum SPACE_LABELS {
