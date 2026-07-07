@@ -5,6 +5,7 @@ import { selectActiveSigner } from '../activeSignerSlice'
 import { selectAllContacts, selectContactByAddress } from '../addressBookSlice'
 import type { RootState } from '../index'
 import { faker } from '@faker-js/faker'
+import { getAddress } from 'ethers'
 import { SignerInfo } from '@/src/types/address'
 import { createTestStore, type TestStoreState } from '@/src/tests/test-utils'
 import { generateSafeOverview } from '@/src/tests/factories/safe'
@@ -521,6 +522,17 @@ describe('signersSlice', () => {
 
       expect(selectSafeSigners(store.getState(), { address: safeAddress, chainId: '1' })).toEqual([owner])
       expect(selectSafeSigners(store.getState(), { address: safeAddress, chainId: '137' })).toEqual([])
+    })
+
+    it('matches owners and signers case-insensitively', () => {
+      const owner = getAddress(generateEthereumAddress()) // EIP-55 checksummed, as returned by CGW
+      const safeAddress = generateEthereumAddress()
+      const store = createTestStore()
+
+      store.dispatch(addSafe({ address: safeAddress, info: { '1': makeOverview('1', [owner]) } }))
+      store.dispatch(addSigner(generateSignerInfo({ value: owner.toLowerCase() as `0x${string}` })))
+
+      expect(selectSafeSigners(store.getState(), { address: safeAddress, chainId: '1' })).toEqual([owner])
     })
 
     it('returns a stable reference for unchanged state', () => {

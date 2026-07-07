@@ -8,13 +8,13 @@ const SAFE = faker.finance.ethereumAddress() as Address
 const OWNER_A = faker.finance.ethereumAddress()
 const OWNER_B = faker.finance.ethereumAddress()
 
-const overview = (chainId: string, owners: string[]) => generateSafeOverview({ chainId, owners, address: SAFE })
+const overview = (owners: string[], chainId = '1') => generateSafeOverview({ chainId, owners, address: SAFE })
 
 describe('useHasSigner', () => {
   it('returns the owners of the active Safe that have an imported signer', () => {
     const { result } = renderHook(() => useHasSigner(), {
       activeSafe: { address: SAFE, chainId: '1' },
-      safes: { [SAFE]: { '1': overview('1', [OWNER_A, OWNER_B]) } },
+      safes: { [SAFE]: { '1': overview([OWNER_A, OWNER_B]) } },
       signers: { [OWNER_A]: generateSigner(OWNER_A) },
     })
 
@@ -25,7 +25,7 @@ describe('useHasSigner', () => {
   it('returns all matching owners when several signers are imported', () => {
     const { result } = renderHook(() => useHasSigner(), {
       activeSafe: { address: SAFE, chainId: '1' },
-      safes: { [SAFE]: { '1': overview('1', [OWNER_A, OWNER_B]) } },
+      safes: { [SAFE]: { '1': overview([OWNER_A, OWNER_B]) } },
       signers: { [OWNER_A]: generateSigner(OWNER_A), [OWNER_B]: generateSigner(OWNER_B) },
     })
 
@@ -36,7 +36,7 @@ describe('useHasSigner', () => {
   it('returns hasSigner false when no imported signer is an owner', () => {
     const { result } = renderHook(() => useHasSigner(), {
       activeSafe: { address: SAFE, chainId: '1' },
-      safes: { [SAFE]: { '1': overview('1', [OWNER_A]) } },
+      safes: { [SAFE]: { '1': overview([OWNER_A]) } },
       signers: { [OWNER_B]: generateSigner(OWNER_B) },
     })
 
@@ -47,7 +47,7 @@ describe('useHasSigner', () => {
   it('only considers owners on the active chain', () => {
     const { result } = renderHook(() => useHasSigner(), {
       activeSafe: { address: SAFE, chainId: '137' },
-      safes: { [SAFE]: { '1': overview('1', [OWNER_A]), '137': overview('137', [OWNER_B]) } },
+      safes: { [SAFE]: { '1': overview([OWNER_A]), '137': overview([OWNER_B], '137') } },
       signers: { [OWNER_A]: generateSigner(OWNER_A) },
     })
 
@@ -58,7 +58,7 @@ describe('useHasSigner', () => {
   it('returns hasSigner false when the Safe overview for the active chain is not loaded', () => {
     const { result } = renderHook(() => useHasSigner(), {
       activeSafe: { address: SAFE, chainId: '137' },
-      safes: { [SAFE]: { '1': overview('1', [OWNER_A]) } },
+      safes: { [SAFE]: { '1': overview([OWNER_A]) } },
       signers: { [OWNER_A]: generateSigner(OWNER_A) },
     })
 
