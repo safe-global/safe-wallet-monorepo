@@ -47,12 +47,19 @@ function RequestedBy({ requestedBy }: { requestedBy: string }) {
   }
 
   return (
-    <span className="inline-flex min-w-0 items-center gap-2">
-      <span className="shrink-0">
-        <Identicon address={requestedBy} size={20} />
-      </span>
-      <span className="min-w-0 truncate text-left">{requestedBy}</span>
-    </span>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <span className="inline-flex min-w-0 items-center gap-2">
+            <span className="shrink-0">
+              <Identicon address={requestedBy} size={20} />
+            </span>
+            <span className="min-w-0 truncate text-left">{requestedBy}</span>
+          </span>
+        }
+      />
+      <TooltipContent side="bottom">{requestedBy}</TooltipContent>
+    </Tooltip>
   )
 }
 
