@@ -4,7 +4,8 @@ import { isMultiChainSafeItem, type AllSafeItems, type MultiChainSafeItem } from
 import type { AccountLine } from '@/features/myAccounts'
 import { SAFE_ACCOUNTS_LIMIT } from '../../../constants'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
-import type { AddAccountsFormValues } from '../../../hooks/useSelectAll.types'
+import { getSafeId, getMultiChainSafeId } from '../utils/safeIds'
+import type { AddAccountsFormValues } from '../../../hooks/addAccounts.types'
 
 interface Args {
   /** Combined trusted + owned visible items, used to reconcile multi-chain parents. */
@@ -40,10 +41,8 @@ const useOnboardingSelection = ({ items, control, setValue, flaggedOwnedAddresse
   const applyToggle = (line: AccountLine, nextChecked: boolean) => {
     if (line.variant === 'group') {
       const group = line.source as MultiChainSafeItem
-      setValue(`selectedSafes.${MULTICHAIN_SAFE_KEY_PREFIX}${group.address}`, nextChecked, { shouldValidate: true })
-      group.safes.forEach((safe) =>
-        setValue(`selectedSafes.${safe.chainId}:${safe.address}`, nextChecked, { shouldValidate: true }),
-      )
+      setValue(`selectedSafes.${getMultiChainSafeId(group)}`, nextChecked, { shouldValidate: true })
+      group.safes.forEach((safe) => setValue(`selectedSafes.${getSafeId(safe)}`, nextChecked, { shouldValidate: true }))
       return
     }
 
@@ -52,14 +51,14 @@ const useOnboardingSelection = ({ items, control, setValue, flaggedOwnedAddresse
     // Reconcile the multi-chain parent key when a child leaf is toggled individually.
     const parent = items.find(
       (item): item is MultiChainSafeItem =>
-        isMultiChainSafeItem(item) && item.safes.some((safe) => `${safe.chainId}:${safe.address}` === line.key),
+        isMultiChainSafeItem(item) && item.safes.some((safe) => getSafeId(safe) === line.key),
     )
     if (parent) {
       const allChecked = parent.safes.every((safe) => {
-        const key = `${safe.chainId}:${safe.address}`
+        const key = getSafeId(safe)
         return key === line.key ? nextChecked : Boolean(selectedSafes?.[key])
       })
-      setValue(`selectedSafes.${MULTICHAIN_SAFE_KEY_PREFIX}${parent.address}`, allChecked, { shouldValidate: true })
+      setValue(`selectedSafes.${getMultiChainSafeId(parent)}`, allChecked, { shouldValidate: true })
     }
   }
 

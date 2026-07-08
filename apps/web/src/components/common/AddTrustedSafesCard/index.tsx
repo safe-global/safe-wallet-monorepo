@@ -28,7 +28,7 @@ const AddTrustedSafesCard = ({ onAdd }: { onAdd: () => void }) => {
 
         <Button onClick={onAdd} data-testid="add-trusted-safes-button">
           <Settings2 className="size-4" />
-          Manage list
+          Manage trusted Safes
         </Button>
       </div>
     </div>

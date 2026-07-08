@@ -51,7 +51,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/constants'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
-import type { AddAccountsFormValues } from '../../hooks/useSelectAll.types'
+import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 
 const PICKER_COLUMNS: SafeAccountColumnId[] = ['select', 'name', 'threshold', 'networks', 'balance']
 
@@ -87,7 +87,7 @@ interface AddAccountsProps {
 
 const AddAccounts = ({
   buttonVariant = 'outline',
-  buttonLabel = 'Add Accounts',
+  buttonLabel = 'Add accounts',
   externalOpen,
   onExternalClose,
 }: AddAccountsProps = {}) => {
@@ -467,7 +467,7 @@ const AddAccounts = ({
                       <div
                         className={cn(
                           'flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm',
-                          isAtLimit ? 'font-semibold text-[#a16207]' : 'text-muted-foreground',
+                          isAtLimit ? 'font-semibold text-yellow-700' : 'text-muted-foreground',
                         )}
                       >
                         {selectedKeys.size} of {SAFE_ACCOUNTS_LIMIT} selected
@@ -476,7 +476,7 @@ const AddAccounts = ({
                             <Info className="size-4" />
                           </TooltipTrigger>
                           <TooltipContent>
-                            You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts per Workspace
+                            You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts per workspace
                           </TooltipContent>
                         </Tooltip>
                       </div>

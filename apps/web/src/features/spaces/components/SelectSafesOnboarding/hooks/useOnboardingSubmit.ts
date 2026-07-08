@@ -5,7 +5,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { type AllSafeItems, flattenSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
-import type { AddAccountsFormValues } from '../../../hooks/useSelectAll.types'
+import type { AddAccountsFormValues } from '../../../hooks/addAccounts.types'
 import {
   useSpaceSafesCreateV1Mutation,
   useSpaceSafesDeleteV1Mutation,

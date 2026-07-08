@@ -271,6 +271,69 @@ const CellContent = ({ column, line }: { column: SafeAccountColumn; line: Accoun
   }
 }
 
+const RowCell = ({
+  column,
+  line,
+  showDivider,
+  reorderable,
+  nameCell,
+  checkbox,
+  onSelectToggle,
+  renderActions,
+  dragHandleProps,
+}: {
+  column: SafeAccountColumn
+  line: AccountLine
+  showDivider?: boolean
+  reorderable: boolean
+  nameCell: ReactNode
+  checkbox?: RowCheckbox
+  onSelectToggle?: (next: boolean) => void
+  renderActions?: (line: AccountLine) => ReactNode
+  dragHandleProps?: DraggableProvidedDragHandleProps | null
+}) => (
+  <TableCell
+    data-testid={`account-cell-${column.id}`}
+    sx={{
+      textAlign: column.align ?? 'left',
+      verticalAlign: 'middle',
+      overflow: 'hidden',
+      // Slimmer than MUI's default 16px so the fixed column budget matches the design.
+      px: 1,
+      '&:first-of-type': { pl: 2 },
+      '&:last-of-type': { pr: 2 },
+      borderBottom: showDivider ? '1px solid' : 'none',
+      borderColor: 'divider',
+      ...(reorderable && column.width ? { width: column.width, minWidth: column.width, maxWidth: column.width } : {}),
+    }}
+    onClick={column.id === 'actions' || column.id === 'select' ? (e) => e.stopPropagation() : undefined}
+  >
+    {column.id === 'select' ? (
+      <SelectCell checkbox={checkbox} onSelectToggle={onSelectToggle} />
+    ) : column.id === 'name' ? (
+      // Reorder mode: the grip shares the Name cell's left gutter and pushes the row content
+      // right a little, so no extra column is added and the table keeps its width (no scrollbar).
+      reorderable ? (
+        <div className="flex min-w-0 items-center gap-2">
+          <ReorderHandle dragHandleProps={dragHandleProps} className="relative z-10 shrink-0" />
+          <div className="min-w-0 flex-1">{nameCell}</div>
+        </div>
+      ) : (
+        nameCell
+      )
+    ) : (
+      <div
+        className={cn(
+          'flex items-center',
+          column.align === 'right' ? 'justify-end' : column.align === 'center' ? 'justify-center' : 'justify-start',
+        )}
+      >
+        {column.id === 'actions' && renderActions ? renderActions(line) : <CellContent column={column} line={line} />}
+      </div>
+    )}
+  </TableCell>
+)
+
 const SafeAccountTableRow = ({
   line,
   columns,
@@ -325,57 +388,18 @@ const SafeAccountTableRow = ({
       }}
     >
       {columns.map((column) => (
-        <TableCell
+        <RowCell
           key={column.id}
-          data-testid={`account-cell-${column.id}`}
-          sx={{
-            textAlign: column.align ?? 'left',
-            verticalAlign: 'middle',
-            overflow: 'hidden',
-            // Slimmer than MUI's default 16px so the fixed column budget matches the design.
-            px: 1,
-            '&:first-of-type': { pl: 2 },
-            '&:last-of-type': { pr: 2 },
-            borderBottom: showDivider ? '1px solid' : 'none',
-            borderColor: 'divider',
-            ...(reorderable && column.width
-              ? { width: column.width, minWidth: column.width, maxWidth: column.width }
-              : {}),
-          }}
-          onClick={column.id === 'actions' || column.id === 'select' ? (e) => e.stopPropagation() : undefined}
-        >
-          {column.id === 'select' ? (
-            <SelectCell checkbox={checkbox} onSelectToggle={onSelectToggle} />
-          ) : column.id === 'name' ? (
-            // Reorder mode: the grip shares the Name cell's left gutter and pushes the row content
-            // right a little, so no extra column is added and the table keeps its width (no scrollbar).
-            reorderable ? (
-              <div className="flex min-w-0 items-center gap-2">
-                <ReorderHandle dragHandleProps={dragHandleProps} className="relative z-10 shrink-0" />
-                <div className="min-w-0 flex-1">{nameCell}</div>
-              </div>
-            ) : (
-              nameCell
-            )
-          ) : (
-            <div
-              className={cn(
-                'flex items-center',
-                column.align === 'right'
-                  ? 'justify-end'
-                  : column.align === 'center'
-                    ? 'justify-center'
-                    : 'justify-start',
-              )}
-            >
-              {column.id === 'actions' && renderActions ? (
-                renderActions(line)
-              ) : (
-                <CellContent column={column} line={line} />
-              )}
-            </div>
-          )}
-        </TableCell>
+          column={column}
+          line={line}
+          showDivider={showDivider}
+          reorderable={reorderable}
+          nameCell={nameCell}
+          checkbox={checkbox}
+          onSelectToggle={onSelectToggle}
+          renderActions={renderActions}
+          dragHandleProps={dragHandleProps}
+        />
       ))}
     </TableRow>
   )

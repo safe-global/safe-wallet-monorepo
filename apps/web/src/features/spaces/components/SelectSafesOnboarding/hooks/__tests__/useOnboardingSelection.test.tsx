@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react'
 import { useForm } from 'react-hook-form'
 import type { AllSafeItems } from '@/hooks/safes'
-import type { AddAccountsFormValues } from '../../../../hooks/useSelectAll.types'
+import type { AddAccountsFormValues } from '../../../../hooks/addAccounts.types'
 import useOnboardingSelection from '../useOnboardingSelection'
 
 jest.mock('@/features/spaces/constants', () => ({

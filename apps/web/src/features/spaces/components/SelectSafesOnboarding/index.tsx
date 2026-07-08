@@ -95,7 +95,7 @@ const SelectSafesOnboarding = (): ReactElement => {
             <div
               className={cn(
                 'flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm',
-                isAtLimit ? 'font-semibold text-[#a16207]' : 'text-muted-foreground',
+                isAtLimit ? 'font-semibold text-yellow-700' : 'text-muted-foreground',
               )}
             >
               {selectedKeys.size} of {SAFE_ACCOUNTS_LIMIT} selected
@@ -103,7 +103,7 @@ const SelectSafesOnboarding = (): ReactElement => {
                 <TooltipTrigger render={<span className="inline-flex cursor-help" />}>
                   <Info className="size-4" />
                 </TooltipTrigger>
-                <TooltipContent>You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts per Workspace</TooltipContent>
+                <TooltipContent>You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts per workspace</TooltipContent>
               </Tooltip>
             </div>
             <InputGroup className="flex-1 rounded-md bg-card">
