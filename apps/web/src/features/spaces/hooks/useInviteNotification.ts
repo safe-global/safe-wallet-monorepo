@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -13,7 +14,7 @@ export const useInviteNotification = (): void => {
   const dispatch = useAppDispatch()
   const router = useRouter()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const notifiedUuids = useRef<Set<string>>(new Set())
+  const notifiedInvites = useRef<Set<string>>(new Set())
 
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
@@ -24,19 +25,25 @@ export const useInviteNotification = (): void => {
     if (router.pathname === AppRoutes.welcome.spaces) return
 
     const pendingInvites = filterSpacesByStatus(currentUser, spaces ?? [], MemberStatus.INVITED)
-    const pendingUuids = new Set(pendingInvites.map((space) => space.uuid))
+    // Key on expiry too so a resend (status stays INVITED, expiry extends) re-notifies
+    const inviteKey = (space: GetSpaceResponse) => {
+      const member = space.members.find((member) => member.user.id === currentUser?.id)
+      return `${space.uuid}:${member?.inviteExpiresAt ?? ''}`
+    }
+    const pendingKeys = new Set(pendingInvites.map(inviteKey))
 
     // Drop resolved invites so a future re-invite notifies again
-    for (const uuid of notifiedUuids.current) {
-      if (!pendingUuids.has(uuid)) {
-        notifiedUuids.current.delete(uuid)
+    for (const key of notifiedInvites.current) {
+      if (!pendingKeys.has(key)) {
+        notifiedInvites.current.delete(key)
       }
     }
 
     for (const space of pendingInvites) {
-      if (notifiedUuids.current.has(space.uuid)) continue
+      const key = inviteKey(space)
+      if (notifiedInvites.current.has(key)) continue
 
-      notifiedUuids.current.add(space.uuid)
+      notifiedInvites.current.add(key)
       dispatch(
         showNotification({
           variant: 'info',

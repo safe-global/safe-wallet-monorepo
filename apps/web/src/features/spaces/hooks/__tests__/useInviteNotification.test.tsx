@@ -25,11 +25,11 @@ import { isAuthenticated } from '@/store/authSlice'
 
 const CURRENT_USER: UserWithWallets = { id: 7, wallets: [] } as unknown as UserWithWallets
 
-const makeSpace = (uuid: string, name: string, status: MemberStatus): GetSpaceResponse =>
+const makeSpace = (uuid: string, name: string, status: MemberStatus, inviteExpiresAt?: string): GetSpaceResponse =>
   ({
     uuid,
     name,
-    members: [{ id: 1, user: { id: CURRENT_USER.id }, status }],
+    members: [{ id: 1, user: { id: CURRENT_USER.id }, status, inviteExpiresAt }],
     memberCount: 1,
     safeCount: 0,
   }) as unknown as GetSpaceResponse
@@ -172,6 +172,28 @@ describe('useInviteNotification', () => {
       "You've been invited to join Workspace A",
       "You've been invited to join Workspace A",
     ])
+  })
+
+  it('re-notifies when the invite is resent with a new expiry while status stays INVITED', () => {
+    mockSpaces([makeSpace('space-a', 'Workspace A', MemberStatus.INVITED, '2026-01-01T00:00:00Z')])
+    const { store, rerender } = renderWithStore()
+    expect(inviteMessages(store)).toEqual(["You've been invited to join Workspace A"])
+
+    mockSpaces([makeSpace('space-a', 'Workspace A', MemberStatus.INVITED, '2026-02-01T00:00:00Z')])
+    rerender()
+
+    expect(inviteMessages(store)).toEqual([
+      "You've been invited to join Workspace A",
+      "You've been invited to join Workspace A",
+    ])
+  })
+
+  it('does not re-notify on re-render when the resent invite keeps the same expiry', () => {
+    mockSpaces([makeSpace('space-a', 'Workspace A', MemberStatus.INVITED, '2026-01-01T00:00:00Z')])
+    const { store, rerender } = renderWithStore()
+    rerender()
+
+    expect(inviteMessages(store)).toEqual(["You've been invited to join Workspace A"])
   })
 
   it('dispatches nothing while on the workspace list page where the invite banner already shows', () => {
