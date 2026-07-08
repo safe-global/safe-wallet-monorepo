@@ -38,6 +38,8 @@ import {
 } from './utils'
 import AddMemberInput from './AddMemberInput'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { isElevationRequiredError, useStepUp } from '@/features/oidc-auth/hooks/useStepUp'
+import { PENDING_INVITE_KEY, type PendingInvite } from '@/features/spaces/hooks/useRetryPendingInvite'
 
 export const RoleMenuItem = ({
   role,
@@ -81,6 +83,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [inviteMembers] = useMembersInviteUserV1Mutation()
+  const { stepUpWithRedirect } = useStepUp()
   const addressBook = useAddressBook()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { data: session } = useAuthGetMeV1Query(undefined, { skip: !isUserSignedIn })
@@ -173,6 +176,19 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
         onClose()
       }
       if (response.error) {
+        if (isElevationRequiredError(response.error)) {
+          // The session needs a fresh MFA challenge for this action. Persist
+          // the payload so useRetryPendingInvite can complete the invite when
+          // the user lands back on the members page, then start the step-up.
+          const pending: PendingInvite = {
+            spaceId,
+            users: [buildInviteUserPayload(data)],
+            label: data.name || inviteeIdentifier,
+          }
+          sessionStorage.setItem(PENDING_INVITE_KEY, JSON.stringify(pending))
+          stepUpWithRedirect()
+          return
+        }
         setError(getRtkQueryErrorMessage(response.error) || 'Invite failed. Please try again.')
       }
     } catch (e) {
