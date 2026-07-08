@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef, type KeyboardEvent, type Mous
 import { Copy, Check } from 'lucide-react'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { OVERVIEW_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
+import { TOOLTIP_DELAY_MS } from '../utils'
 
 // Copies a safe address to the clipboard. Used in the dropdown trigger and list rows; the rows pass
 // a distinct testId so the trigger's `copy-address-btn` stays a single, unambiguous element.
@@ -42,7 +43,7 @@ const CopyAddressButton = ({ address, testId = 'copy-address-btn' }: { address: 
   }
 
   return (
-    <Tooltip>
+    <Tooltip delay={TOOLTIP_DELAY_MS} disableHoverablePopup>
       <TooltipTrigger
         render={
           <span
@@ -59,7 +60,7 @@ const CopyAddressButton = ({ address, testId = 'copy-address-btn' }: { address: 
       >
         {copied ? <Check className="size-3 text-green-600" /> : <Copy className="size-3 text-muted-foreground" />}
       </TooltipTrigger>
-      <TooltipContent>{copied ? 'Copied!' : 'Copy address'}</TooltipContent>
+      <TooltipContent className="pointer-events-none select-none">{copied ? 'Copied!' : 'Copy address'}</TooltipContent>
     </Tooltip>
   )
 }

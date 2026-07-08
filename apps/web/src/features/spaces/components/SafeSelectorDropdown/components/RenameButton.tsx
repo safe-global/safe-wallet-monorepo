@@ -2,6 +2,7 @@ import { type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react'
 import { Pencil } from 'lucide-react'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { cn } from '@/utils/cn'
+import { TOOLTIP_DELAY_MS } from '../utils'
 
 // Opens the rename dialog for a safe row. Rendered inside a SelectItem, so pointerdown is stopped
 // from reaching the row (which would otherwise select the safe); the rename runs on click.
@@ -26,7 +27,7 @@ const RenameButton = ({ onRename, className }: { onRename: () => void; className
   }
 
   return (
-    <Tooltip>
+    <Tooltip delay={TOOLTIP_DELAY_MS} disableHoverablePopup>
       <TooltipTrigger
         render={
           <span
@@ -46,7 +47,7 @@ const RenameButton = ({ onRename, className }: { onRename: () => void; className
       >
         <Pencil className="size-3 text-muted-foreground" />
       </TooltipTrigger>
-      <TooltipContent>Rename</TooltipContent>
+      <TooltipContent className="pointer-events-none select-none">Rename</TooltipContent>
     </Tooltip>
   )
 }

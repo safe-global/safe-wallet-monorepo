@@ -39,7 +39,7 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId, isMultiChai
   const { isHypernativeGuard } = useIsHypernativeGuard()
 
   return (
-    <div className="flex items-center gap-2 sm:gap-4 w-full">
+    <div className="flex items-center gap-2 w-full">
       <div className="relative shrink-0">
         <Avatar size="sm" data-testid="safe-icon">
           <AvatarImage src={blo(selectedItem.address as `0x${string}`)} alt={displayName} />
@@ -57,7 +57,7 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId, isMultiChai
           </Typography>
           {isHypernativeGuard && <SafeHeaderHnTooltip />}
         </div>
-        <div className="flex items-center gap-1 min-w-0 max-w-full">
+        <div className="relative flex items-center gap-1 min-w-0 max-w-full">
           <FullAddress
             address={selectedItem.address}
             className="max-sm:hidden"
@@ -67,9 +67,13 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId, isMultiChai
           <Typography variant="paragraph-mini" color="muted" className="font-mono sm:hidden">
             {shortAddress}
           </Typography>
-          <CopyAddressButton address={selectedItem.address} />
-          {blockExplorerLink && <ExplorerLinkButton href={blockExplorerLink.href} title={blockExplorerLink.title} />}
-          <EnvHintButton chainId={selectedChainId} />
+          {/* On sm+ the actions overlay the tail of the address on hover (a muted fade keeps them
+              legible) so they consume no width and the full address always shows. Inline on touch. */}
+          <span className="flex shrink-0 items-center gap-0.5 sm:pointer-events-none sm:absolute sm:inset-y-0 sm:right-0 sm:z-10 sm:bg-gradient-to-l sm:from-muted sm:from-50% sm:to-transparent sm:pl-6 sm:opacity-0 sm:transition-opacity sm:group-hover:pointer-events-auto sm:group-hover:opacity-100 sm:group-focus-within:pointer-events-auto sm:group-focus-within:opacity-100">
+            <CopyAddressButton address={selectedItem.address} />
+            {blockExplorerLink && <ExplorerLinkButton href={blockExplorerLink.href} title={blockExplorerLink.title} />}
+            <EnvHintButton chainId={selectedChainId} />
+          </span>
         </div>
       </div>
       {selectedItem.owners > 0 && (

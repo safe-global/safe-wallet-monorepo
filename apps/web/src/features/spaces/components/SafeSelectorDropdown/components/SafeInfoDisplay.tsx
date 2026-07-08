@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Typography } from '@/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/utils/cn'
-import { getInitials, getSafeDisplayInfo } from '../utils'
+import { getInitials, getSafeDisplayInfo, TOOLTIP_DELAY_MS } from '../utils'
 import CopyAddressButton from './CopyAddressButton'
 import ExplorerLinkButton from './ExplorerLinkButton'
 import FullAddress from './FullAddress'
@@ -14,10 +14,6 @@ import RenameButton from './RenameButton'
 // focus would keep the actions visible after the pointer has moved on.
 const HOVER_ACTION_CLASS =
   'opacity-0 transition-opacity group-hover/row:opacity-100 group-focus-visible/row:opacity-100 focus-within:opacity-100 focus-visible:opacity-100'
-
-// The name/address tooltips are purely informational: they open only after a deliberate hover and
-// never catch the pointer (hoverable + pointer-events-none), so moving towards one dismisses it.
-const INFO_TOOLTIP_DELAY_MS = 400
 
 export interface SafeInfoDisplayProps {
   name: string
@@ -42,7 +38,7 @@ const SafeInfoDisplay = ({ name, address, className, explorerLink, onRename }: S
       </div>
       <div className="flex flex-col items-start flex-1 min-w-0">
         <div className="flex items-center gap-1 min-w-0 max-w-full">
-          <Tooltip delay={INFO_TOOLTIP_DELAY_MS} disableHoverablePopup>
+          <Tooltip delay={TOOLTIP_DELAY_MS} disableHoverablePopup>
             <TooltipTrigger render={<span />} className="block min-w-0">
               <Typography variant="paragraph-small-medium" className="block truncate">
                 {displayName}
@@ -53,7 +49,7 @@ const SafeInfoDisplay = ({ name, address, className, explorerLink, onRename }: S
           {onRename && <RenameButton onRename={onRename} className={HOVER_ACTION_CLASS} />}
         </div>
         <div className="flex items-center gap-1 min-w-0 max-w-full">
-          <Tooltip delay={INFO_TOOLTIP_DELAY_MS} disableHoverablePopup>
+          <Tooltip delay={TOOLTIP_DELAY_MS} disableHoverablePopup>
             <TooltipTrigger render={<span />} className="flex min-w-0">
               <FullAddress address={address} data-testid="safe-item-address" />
             </TooltipTrigger>

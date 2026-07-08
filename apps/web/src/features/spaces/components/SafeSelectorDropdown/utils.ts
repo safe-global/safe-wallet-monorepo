@@ -1,6 +1,12 @@
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { SafeItemData } from './types'
 
+/**
+ * Open delay for the row/trigger tooltips (copy, explorer, rename, name, address). The tooltips open
+ * only after a deliberate hover so a pointer passing through doesn't flash them.
+ */
+export const TOOLTIP_DELAY_MS = 400
+
 export const getInitials = (name: string): string => {
   return name
     .split(' ')

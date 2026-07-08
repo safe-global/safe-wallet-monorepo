@@ -2,6 +2,7 @@ import { type MouseEvent, type PointerEvent } from 'react'
 import { ExternalLink } from 'lucide-react'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { OVERVIEW_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
+import { TOOLTIP_DELAY_MS } from '../utils'
 
 // Opens the current safe on its block explorer. Rendered inside the Select trigger next to the copy
 // button, so pointerdown is stopped from reaching the surrounding trigger (which would otherwise
@@ -27,7 +28,7 @@ const ExplorerLinkButton = ({
   }
 
   return (
-    <Tooltip>
+    <Tooltip delay={TOOLTIP_DELAY_MS} disableHoverablePopup>
       <TooltipTrigger
         render={
           <a
@@ -44,7 +45,7 @@ const ExplorerLinkButton = ({
       >
         <ExternalLink className="size-3 text-muted-foreground" />
       </TooltipTrigger>
-      <TooltipContent>{title}</TooltipContent>
+      <TooltipContent className="pointer-events-none select-none">{title}</TooltipContent>
     </Tooltip>
   )
 }
