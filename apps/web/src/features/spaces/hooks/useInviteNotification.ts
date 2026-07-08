@@ -5,7 +5,7 @@ import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { showNotification } from '@/store/notificationsSlice'
+import { closeByGroupKey, showNotification } from '@/store/notificationsSlice'
 import { AppRoutes } from '@/config/routes'
 import { filterSpacesByStatus } from '@/features/spaces/utils'
 import { MemberStatus } from './useSpaceMembers'
@@ -31,11 +31,16 @@ export const useInviteNotification = (): void => {
       return `${space.uuid}:${member?.inviteExpiresAt ?? ''}`
     }
     const pendingKeys = new Set(pendingInvites.map(inviteKey))
+    const pendingUuids = new Set(pendingInvites.map((space) => space.uuid))
 
-    // Drop resolved invites so a future re-invite notifies again
+    // Forget resolved invites and dismiss their now-stale toast once no longer INVITED
     for (const key of notifiedInvites.current) {
-      if (!pendingKeys.has(key)) {
-        notifiedInvites.current.delete(key)
+      if (pendingKeys.has(key)) continue
+      notifiedInvites.current.delete(key)
+
+      const uuid = key.slice(0, key.indexOf(':'))
+      if (!pendingUuids.has(uuid)) {
+        dispatch(closeByGroupKey({ groupKey: `space-invite-${uuid}` }))
       }
     }
 

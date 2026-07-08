@@ -196,6 +196,32 @@ describe('useInviteNotification', () => {
     expect(inviteMessages(store)).toEqual(["You've been invited to join Workspace A"])
   })
 
+  it('dismisses the visible toast once the invite is accepted/declined elsewhere', () => {
+    mockSpaces([makeSpace('space-a', 'Workspace A', MemberStatus.INVITED)])
+    const { store, rerender } = renderWithStore()
+
+    const [before] = selectNotifications(store.getState())
+    expect(before.isDismissed).toBeFalsy()
+
+    mockSpaces([makeSpace('space-a', 'Workspace A', MemberStatus.ACTIVE)])
+    rerender()
+
+    const [after] = selectNotifications(store.getState())
+    expect(after.isDismissed).toBe(true)
+  })
+
+  it('keeps the toast visible on a resend while the invite stays INVITED', () => {
+    mockSpaces([makeSpace('space-a', 'Workspace A', MemberStatus.INVITED, '2026-01-01T00:00:00Z')])
+    const { store, rerender } = renderWithStore()
+
+    mockSpaces([makeSpace('space-a', 'Workspace A', MemberStatus.INVITED, '2026-02-01T00:00:00Z')])
+    rerender()
+
+    const notifications = selectNotifications(store.getState())
+    expect(notifications).toHaveLength(2)
+    expect(notifications.some((n) => n.isDismissed)).toBe(false)
+  })
+
   it('dispatches nothing while on the workspace list page where the invite banner already shows', () => {
     mockPathname = AppRoutes.welcome.spaces
     mockSpaces([makeSpace('space-a', 'Workspace A', MemberStatus.INVITED)])
