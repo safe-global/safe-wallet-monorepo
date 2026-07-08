@@ -4,6 +4,7 @@ import PendingRequestsTable from '../PendingRequestsTable'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Builder } from '@/tests/Builder'
 
+jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => false }))
 jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
