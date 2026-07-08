@@ -1,0 +1,93 @@
+name: Web Argos Storybook
+
+# Visual regression for the web Storybook: builds it statically, screenshots every
+# story in light + dark via scripts/storybook/render-sweep.ts, and uploads the
+# screenshots to Argos (same service the Cypress visual E2E suite uses).
+#
+# Requires the ARGOS_TOKEN_STORYBOOK repo secret (a dedicated Argos project for
+# Storybook, separate from the E2E project's ARGOS_TOKEN_E2E).
+
+on:
+  workflow_dispatch:
+    inputs:
+      reference_branch:
+        description: 'Argos baseline branch (default: dev)'
+        required: false
+        type: string
+      reference_commit:
+        description: 'Argos baseline commit SHA (full 40-char hex)'
+        required: false
+        type: string
+      filter:
+        description: 'Only sweep stories whose id/title contains this substring'
+        required: false
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  storybook-visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    name: Storybook visual tests (Argos)
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/yarn
+        with:
+          turbo-token: ${{ secrets.TURBO_TOKEN }}
+          turbo-team: ${{ vars.TURBO_TEAM }}
+
+      - name: Build Storybook
+        run: yarn workspace @safe-global/web build-storybook --output-dir storybook-static
+
+      # Port 4000 is whitelisted in OFFICIAL_HOSTS (src/config/constants.ts); other ports
+      # blank the host-gated pages (Imprint/Licenses) and produce false diffs.
+      - name: Serve Storybook
+        working-directory: apps/web
+        run: |
+          npx --yes http-server storybook-static -p 4000 -s &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:4000/index.json -o /dev/null && exit 0
+            sleep 2
+          done
+          echo "Storybook static server did not come up" >&2
+          exit 1
+
+      - name: Screenshot all stories (light + dark)
+        id: sweep
+        # Broken stories (SB_ERROR) exit 1 — still upload what rendered, then fail below.
+        continue-on-error: true
+        working-directory: apps/web
+        run: |
+          yarn storybook:sweep \
+            --base=http://localhost:4000 \
+            --shots=argos-screenshots \
+            --json=sweep-findings.json \
+            --concurrency=6 \
+            ${{ inputs.filter && format('--filter={0}', inputs.filter) || '' }}
+
+      - name: Upload to Argos
+        working-directory: apps/web
+        run: npx --yes @argos-ci/cli upload argos-screenshots
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN_STORYBOOK }}
+          ARGOS_REFERENCE_BRANCH: ${{ inputs.reference_branch || 'dev' }}
+          ARGOS_REFERENCE_COMMIT: ${{ inputs.reference_commit || '' }}
+
+      - name: Report broken stories
+        if: steps.sweep.outcome == 'failure'
+        working-directory: apps/web
+        run: |
+          echo "::error::render sweep flagged broken stories (SB_ERROR) — see sweep-findings.json"
+          node -e "const d=require('./sweep-findings.json'); for (const f of d.findings.filter(x=>x.issues.some(i=>i.startsWith('SB_ERROR')))) console.log(f.id, f.mode, f.issues[0])"
+          exit 1

@@ -89,5 +89,9 @@ _Last updated: 2026-07-08._
 
 - **MSW handler coverage** for the remaining non-hermetic Components/Features stories (the Pages
   group is hermetic — see `stories/mocks/handlers.ts`).
-- **Chromatic in CI** — still the highest-leverage guard (see DESIGN_SYSTEM_CONSISTENCY.md #5);
-  needs a project token.
+- **Argos Storybook visual regression** — the org already uses Argos for Cypress E2E visuals;
+  `.github/workflows/web-argos-storybook.yml` builds the Storybook, screenshots every story in
+  light + dark via `storybook:sweep`, and uploads to Argos. Needs one repo secret:
+  `ARGOS_TOKEN_STORYBOOK` (a dedicated Argos project, separate from `ARGOS_TOKEN_E2E`).
+  The `@chromatic-com/storybook` addon wiring in `preview.tsx` predates this and can be removed
+  once Argos is confirmed as the direction.

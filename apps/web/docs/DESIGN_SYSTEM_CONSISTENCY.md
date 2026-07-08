@@ -69,7 +69,9 @@ _Last updated: 2026-07-04._
 4. **Promote the render-sweep harness** (session scratchpad `render-sweep.mjs`: loads every story headless
    in light+dark, flags empty/error renders; + the `index.json` taxonomy assertions) into `scripts/storybook/`
    so CI/agents can run one command. Add a `--changed` scope.
-5. **Turn on Chromatic in CI** (`@chromatic-com/storybook` + `chromatic.modes` are already wired in
+5. **Storybook visual regression in CI — via Argos, not Chromatic** (org direction as of 2026-07-08):
+   `.github/workflows/web-argos-storybook.yml` is wired; it only needs the `ARGOS_TOKEN_STORYBOOK`
+   repo secret. ~~Turn on Chromatic in CI~~ (`@chromatic-com/storybook` + `chromatic.modes` are already wired in
    `preview.tsx`) — the highest-leverage guard for keeping this consistency from regressing. Needs a project token.
 
 ## Carried-over from the original PR (still open)
