@@ -45,6 +45,17 @@ if (typeof window !== 'undefined' && typeof window.matchMedia !== 'function') {
   })
 }
 
+// jsdom lacks ResizeObserver, which layout code (e.g. PageLayout's dynamic topbar height
+// measurement) relies on. Provide a no-op implementation so mounting those components
+// doesn't throw. Additive.
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  globalThis.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+}
+
 // Set timezone to UTC for consistent date formatting across environments
 process.env.TZ = 'UTC'
 
