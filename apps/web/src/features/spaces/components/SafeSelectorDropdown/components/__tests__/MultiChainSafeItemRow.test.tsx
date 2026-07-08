@@ -110,6 +110,72 @@ describe('MultiChainSafeItemRow summary badges', () => {
   })
 })
 
+describe('MultiChainSafeItemRow active-chain behaviour', () => {
+  it('expands by default when the group holds the active chain', () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} isSelected />)
+
+    // The per-chain rows are visible without the user expanding the group.
+    expect(screen.getByText('Chain 1')).toBeInTheDocument()
+    expect(screen.getByText('Chain 137')).toBeInTheDocument()
+  })
+
+  it('does not highlight the summary row even when it holds the active chain', () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} isSelected />)
+
+    // The highlight belongs to the active network row (via the Select value), not the summary trigger.
+    const trigger = screen.getByRole('button')
+    expect(trigger.className.split(/\s+/)).not.toContain('bg-muted')
+  })
+
+  it('stays collapsed when the group does not hold the active chain', () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} />)
+
+    expect(screen.queryByText('Chain 1')).not.toBeInTheDocument()
+    expect(screen.queryByText('Chain 137')).not.toBeInTheDocument()
+  })
+})
+
+describe('MultiChainSafeItemRow expanded per-chain rows', () => {
+  const expandRow = async () => {
+    await userEvent.click(screen.getByRole('button'))
+  }
+
+  it('shows each chain name once expanded', async () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} />)
+    await expandRow()
+
+    expect(screen.getByText('Chain 1')).toBeInTheDocument()
+    expect(screen.getByText('Chain 137')).toBeInTheDocument()
+  })
+
+  it('shows a full threshold pill on each chain row (per-chain, not icon-only)', async () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'], { threshold: 2, owners: 3 })} />)
+    await expandRow()
+
+    // Collapsed summary badge stays icon-only; the two expanded rows show the full "2/3".
+    const fullBadges = screen.getAllByText('2/3')
+    expect(fullBadges).toHaveLength(2)
+  })
+
+  it('shows per-chain pending counts (not the summed total) on the expanded rows', async () => {
+    render(
+      <MultiChainSafeItemRow item={createItem([makeChain('1', { queued: 2 }), makeChain('137', { queued: 1 })])} />,
+    )
+    await expandRow()
+
+    // Summary row (3) + the two per-chain rows (2 and 1).
+    const pendingBadges = screen.getAllByTestId('account-pending').map((el) => el.textContent)
+    expect(pendingBadges).toEqual(expect.arrayContaining(['3', '2', '1']))
+  })
+
+  it('marks a read-only chain row with a Read-only badge', async () => {
+    render(<MultiChainSafeItemRow item={createItem([makeChain('1', { isReadOnly: true }), makeChain('137')])} />)
+    await expandRow()
+
+    expect(screen.getByText('Read-only')).toBeInTheDocument()
+  })
+})
+
 describe('MultiChainSafeItemRow undeployed status badge', () => {
   const expandRow = async () => {
     await userEvent.click(screen.getByRole('button'))

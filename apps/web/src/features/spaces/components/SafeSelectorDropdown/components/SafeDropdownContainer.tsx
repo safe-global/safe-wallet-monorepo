@@ -22,8 +22,11 @@ export interface SafeDropdownContainerProps {
   onRetry?: () => void
   header?: React.ReactNode
   footer?: React.ReactNode | ((close: () => void) => React.ReactNode)
-  /** Replaces the empty text when the tab has no safes at all — e.g. a "Sign in to a workspace" CTA. */
-  emptyStateOverride?: React.ReactNode
+  /**
+   * Replaces the empty text when the tab has no safes at all — e.g. a "Sign in to a workspace" CTA.
+   * A function form receives `closeDropdown` so its actions can dismiss the popup first.
+   */
+  emptyStateOverride?: React.ReactNode | ((close: () => void) => React.ReactNode)
   closeDropdown: () => void
   /** Controlled search query; falls back to local state when omitted. */
   searchValue?: string
@@ -138,7 +141,11 @@ const SafeDropdownContainer = ({
       // With no safes to search through at all, "no matches" would be misleading — keep the
       // tab's CTA (sign in to a workspace / connect a wallet) even while a query is typed.
       if (emptyStateOverride && items.length === 0) {
-        return <div data-testid="dropdown-empty-override">{emptyStateOverride}</div>
+        return (
+          <div data-testid="dropdown-empty-override">
+            {typeof emptyStateOverride === 'function' ? emptyStateOverride(closeDropdown) : emptyStateOverride}
+          </div>
+        )
       }
       return (
         <p className="px-4 py-6 text-center text-sm text-muted-foreground" data-testid="dropdown-empty">

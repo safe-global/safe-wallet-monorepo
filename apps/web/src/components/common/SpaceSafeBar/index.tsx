@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
-import { ChevronRight, UserRoundPlus, Wallet } from 'lucide-react'
+import { ChevronRight, Settings2, UserRoundPlus, Wallet } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { SafeSelectorDropdown } from '@/features/spaces'
 import type { SafeItemData, SafeRenameTarget } from '@/features/spaces'
@@ -92,10 +92,28 @@ function SignInWorkspaceCta({ label, onSignIn }: { label: string; onSignIn: () =
 
 function ConnectWalletBody({ onConnect }: { onConnect: () => void }) {
   return (
-    <div className="flex flex-col items-center gap-3 px-4 py-8 text-center" data-testid="dropdown-connect-cta">
-      <p className="text-sm text-muted-foreground">Connect your wallet to find your Safe accounts.</p>
-      <Button variant="secondary" size="sm" onClick={onConnect} data-testid="dropdown-connect-wallet-body-btn">
+    <div className="flex flex-col items-center gap-4 px-4 py-6 text-center" data-testid="dropdown-connect-cta">
+      <Typography variant="paragraph-small-medium" className="max-w-[336px]">
+        Connect your wallet to access existing accounts or add new ones.
+      </Typography>
+      <Button variant="outline" size="sm" onClick={onConnect} data-testid="dropdown-connect-wallet-body-btn">
         <Wallet className="size-4" /> Connect wallet
+      </Button>
+    </div>
+  )
+}
+
+function NoTrustedAccountsBody({ onManage }: { onManage: () => void }) {
+  return (
+    <div className="flex flex-col items-center gap-4 px-4 py-6 text-center" data-testid="dropdown-no-trusted">
+      <div className="flex flex-col items-center gap-1">
+        <Typography variant="paragraph-small-medium">No trusted accounts</Typography>
+        <Typography variant="paragraph-mini" color="muted" className="max-w-[336px]">
+          Manage your trusted list to add or remove accounts.
+        </Typography>
+      </div>
+      <Button variant="outline" size="sm" onClick={onManage} data-testid="dropdown-manage-list-btn">
+        <Settings2 className="size-4" /> Manage list
       </Button>
     </div>
   )
@@ -111,7 +129,7 @@ function ManageTrustedFooter({ onManage }: { onManage: () => void }) {
     >
       <UserRoundPlus className="size-4 shrink-0 text-muted-foreground" />
       <span className="flex min-w-0 flex-1 flex-col">
-        <Typography variant="paragraph-small-medium">Manage trusted accounts</Typography>
+        <Typography variant="paragraph-small-medium">Manage trusted Safes</Typography>
         <Typography variant="paragraph-mini" color="muted">
           Add or remove accounts from this list
         </Typography>
@@ -196,8 +214,10 @@ function SpaceSafeBar() {
     />
   )
 
+  // The empty Local tab surfaces "Manage list" inside its empty state, so the footer row is dropped
+  // there to avoid a redundant second entry point.
   const dropdownFooter =
-    activeTab === 'local'
+    activeTab === 'local' && localItems.length > 0
       ? (close: () => void) => (
           <ManageTrustedFooter
             onManage={() => {
@@ -215,7 +235,25 @@ function SpaceSafeBar() {
         onSignIn={() => router.push({ pathname: AppRoutes.welcome.spaces })}
       />
     ) : activeTab === 'local' && !hasWallet ? (
-      <ConnectWalletBody onConnect={connectWallet} />
+      // Close the dropdown before opening onboarding — the popup renders above the wallet modal,
+      // so leaving it open hides the modal behind it.
+      (close: () => void) => (
+        <ConnectWalletBody
+          onConnect={() => {
+            close()
+            connectWallet()
+          }}
+        />
+      )
+    ) : activeTab === 'local' ? (
+      (close: () => void) => (
+        <NoTrustedAccountsBody
+          onManage={() => {
+            close()
+            trustedSafesModal.open()
+          }}
+        />
+      )
     ) : undefined
 
   return (

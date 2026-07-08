@@ -64,6 +64,7 @@ jest.mock('./SpaceChainSelector', () => {
 jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
   const MockSafeSelectorDropdown = (props: Record<string, unknown>) => {
     const footerFn = props.footer as ((close: () => void) => React.ReactNode) | undefined
+    const emptyStateOverride = props.emptyStateOverride as React.ReactNode | ((close: () => void) => React.ReactNode)
     const onSearchValueChange = props.onSearchValueChange as ((value: string) => void) | undefined
     const onItemRename = props.onItemRename as
       | ((target: { address: string; name: string; chainIds: string[] }) => void)
@@ -79,6 +80,11 @@ jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
         data-has-footer={String(typeof props.footer === 'function')}
       >
         {props.header as React.ReactNode}
+        {emptyStateOverride != null && (
+          <div data-testid="dropdown-empty-slot">
+            {typeof emptyStateOverride === 'function' ? emptyStateOverride(() => {}) : emptyStateOverride}
+          </div>
+        )}
         {typeof footerFn === 'function' && <div data-testid="dropdown-footer-slot">{footerFn(() => {})}</div>}
         <input
           data-testid="mock-search-input"
@@ -139,7 +145,10 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   default: jest.fn(() => null),
 }))
 
-jest.mock('@/components/common/ConnectWallet/useConnectWallet', () => () => jest.fn())
+jest.mock('@/components/common/ConnectWallet/useConnectWallet', () => {
+  const connect = jest.fn()
+  return { __esModule: true, default: () => connect }
+})
 
 jest.mock('@/store', () => ({
   useAppDispatch: () => jest.fn(),
@@ -148,6 +157,7 @@ jest.mock('@/store', () => ({
 
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
+import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { useIsQualifiedSafe } from '@/features/spaces'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
@@ -228,13 +238,75 @@ describe('SpaceSafeBar', () => {
     expect(dropdown.getAttribute('data-has-on-retry')).toBe('true')
   })
 
-  it('renders the Manage trusted accounts footer on the default Local tab', () => {
+  it('renders the Manage trusted Safes footer on the default Local tab', () => {
     // Off the Spaces level the default tab is Local, which carries the manage-trusted footer.
     const { getByTestId } = render(<SpaceSafeBar />)
     expect(getByTestId('safe-selector-dropdown').getAttribute('data-has-footer')).toBe('true')
     const manageBtn = getByTestId('dropdown-manage-trusted-btn')
-    expect(manageBtn).toHaveTextContent('Manage trusted accounts')
+    expect(manageBtn).toHaveTextContent('Manage trusted Safes')
     expect(manageBtn).toHaveTextContent('Add or remove accounts from this list')
+  })
+
+  it('drops the footer and shows the No trusted accounts empty state when connected with no trusted safes', () => {
+    mockUseSpaceSafeSelectorItems.mockReturnValue({
+      workspaceItems: [],
+      localItems: [],
+      selectedItemId: '',
+      handleItemSelect: jest.fn(),
+      isError: false,
+      refetch: jest.fn(),
+      isInSpaceContext: false,
+      hasWallet: true,
+    })
+
+    const { getByTestId, queryByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('safe-selector-dropdown').getAttribute('data-has-footer')).toBe('false')
+    expect(queryByTestId('dropdown-manage-trusted-btn')).not.toBeInTheDocument()
+    const emptyState = getByTestId('dropdown-no-trusted')
+    expect(emptyState).toHaveTextContent('No trusted accounts')
+    expect(emptyState).toHaveTextContent('Manage your trusted list to add or remove accounts.')
+    expect(getByTestId('dropdown-manage-list-btn')).toBeInTheDocument()
+  })
+
+  it('shows the Connect wallet empty state on the Local tab when no wallet is connected', () => {
+    mockUseSpaceSafeSelectorItems.mockReturnValue({
+      workspaceItems: [],
+      localItems: [],
+      selectedItemId: '',
+      handleItemSelect: jest.fn(),
+      isError: false,
+      refetch: jest.fn(),
+      isInSpaceContext: false,
+      hasWallet: false,
+    })
+
+    const { getByTestId, queryByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('safe-selector-dropdown').getAttribute('data-has-footer')).toBe('false')
+    const emptyState = getByTestId('dropdown-connect-cta')
+    expect(emptyState).toHaveTextContent('Connect your wallet to access existing accounts or add new ones.')
+    expect(getByTestId('dropdown-connect-wallet-body-btn')).toBeInTheDocument()
+    expect(queryByTestId('dropdown-no-trusted')).not.toBeInTheDocument()
+  })
+
+  it('opens wallet onboarding from the Connect wallet empty state (dropdown closes first)', () => {
+    mockUseSpaceSafeSelectorItems.mockReturnValue({
+      workspaceItems: [],
+      localItems: [],
+      selectedItemId: '',
+      handleItemSelect: jest.fn(),
+      isError: false,
+      refetch: jest.fn(),
+      isInSpaceContext: false,
+      hasWallet: false,
+    })
+    // The empty state is rendered via the function form of emptyStateOverride, so its button runs
+    // close() before connect() — this is what keeps the wallet modal from opening behind the popup.
+    const connect = useConnectWallet()
+
+    const { getByTestId } = render(<SpaceSafeBar />)
+    fireEvent.click(getByTestId('dropdown-connect-wallet-body-btn'))
+
+    expect(connect).toHaveBeenCalledTimes(1)
   })
 
   it('does not render a footer on the Workspace tab (default in a space context)', () => {

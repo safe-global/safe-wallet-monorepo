@@ -158,6 +158,27 @@ describe('SafeDropdownContainer', () => {
       expect(screen.getByTestId('custom-empty')).toBeInTheDocument()
       expect(screen.queryByTestId('dropdown-empty')).not.toBeInTheDocument()
     })
+
+    it('renders a function-form emptyStateOverride and passes closeDropdown to it', () => {
+      const closeDropdown = jest.fn()
+      render(
+        <SafeDropdownContainer
+          items={[]}
+          onItemSelect={jest.fn()}
+          closeDropdown={closeDropdown}
+          emptyStateOverride={(close) => (
+            <button data-testid="custom-empty-action" onClick={close}>
+              Manage list
+            </button>
+          )}
+        />,
+      )
+
+      const action = screen.getByTestId('custom-empty-action')
+      expect(action).toBeInTheDocument()
+      action.click()
+      expect(closeDropdown).toHaveBeenCalledTimes(1)
+    })
   })
 
   describe('footer', () => {

@@ -46,8 +46,11 @@ export interface SafeSelectorDropdownProps {
   onRetry?: () => void
   header?: React.ReactNode
   footer?: React.ReactNode | ((close: () => void) => React.ReactNode)
-  /** Replaces the default "no safes" empty state — e.g. a "Sign in to a workspace" CTA on the Workspace tab. */
-  emptyStateOverride?: React.ReactNode
+  /**
+   * Replaces the default "no safes" empty state — e.g. a "Sign in to a workspace" CTA on the Workspace
+   * tab. Pass a function to receive a `close` callback (dismisses the dropdown before running an action).
+   */
+  emptyStateOverride?: React.ReactNode | ((close: () => void) => React.ReactNode)
   /** Controlled search query. When provided the owner filters/counts across tabs with the same query. */
   searchValue?: string
   onSearchValueChange?: (value: string) => void
