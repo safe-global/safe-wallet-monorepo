@@ -7,8 +7,7 @@ import type { NftTransferParams } from '.'
 import ImageFallback from '@/components/common/ImageFallback'
 import TxCard from '../../common/TxCard'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { useCallback, useContext, useMemo, useState } from 'react'
-import { AddressPoisoningGuard, GuardBlockedHint, type BlockedHint } from '@/features/address-poisoning'
+import { useContext, useMemo } from 'react'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
 
@@ -102,14 +101,6 @@ const SendNftBatch = () => {
   const recipientArray = useMemo(() => [recipient], [recipient])
   useSafeShieldForRecipients(recipientArray)
 
-  // Address-poisoning guard: warns + blocks (until verified) when the recipient resembles a trusted anchor.
-  const [poisoningBlocked, setPoisoningBlocked] = useState(false)
-  const [poisoningHint, setPoisoningHint] = useState<BlockedHint>()
-  const onPoisoningBlockedChange = useCallback((blocked: boolean, hint?: BlockedHint) => {
-    setPoisoningBlocked(blocked)
-    setPoisoningHint(hint)
-  }, [])
-
   const onFormSubmit = (data: FormData) => {
     onNext({
       recipient: data.recipient,
@@ -124,14 +115,6 @@ const SendNftBatch = () => {
           <FormControl fullWidth sx={{ mb: 3, mt: 1 }}>
             <AddressBookInput name={Field.recipient} canAdd={isAddressValid} />
           </FormControl>
-
-          <Box sx={{ mb: 3, mt: -1 }}>
-            <AddressPoisoningGuard
-              name={Field.recipient}
-              context="recipient"
-              onBlockedChange={onPoisoningBlockedChange}
-            />
-          </Box>
 
           <Typography
             data-testid="selected-nfts"
@@ -149,12 +132,9 @@ const SendNftBatch = () => {
           <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 
           <CardActions>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-              <GuardBlockedHint hint={poisoningHint} />
-              <Button variant="contained" type="submit" disabled={poisoningBlocked} sx={{ ml: 'auto' }}>
-                Next
-              </Button>
-            </Box>
+            <Button variant="contained" type="submit">
+              Next
+            </Button>
           </CardActions>
         </form>
       </FormProvider>

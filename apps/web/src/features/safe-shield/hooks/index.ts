@@ -1,4 +1,5 @@
 export { useRecipientAnalysis } from './useRecipientAnalysis'
 export { useCounterpartyAnalysis } from './useCounterpartyAnalysis'
+export { useAddressPoisoningOverlay } from './useAddressPoisoningAnalysis'
 export { useThreatAnalysis } from './useThreatAnalysis'
 export { useReportFalseResult } from './useReportFalseResult'

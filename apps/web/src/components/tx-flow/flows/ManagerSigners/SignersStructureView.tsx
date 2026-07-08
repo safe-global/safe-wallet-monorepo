@@ -11,7 +11,7 @@ import {
   Typography,
 } from '@mui/material'
 import { Controller, FormProvider } from 'react-hook-form'
-import { useContext } from 'react'
+import { useContext, useMemo } from 'react'
 import type { ReactElement } from 'react'
 
 import AddIcon from '@/public/images/common/add.svg'
@@ -19,6 +19,7 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import TxCard from '../../common/TxCard'
 import OwnerRow from '@/components/new-safe/OwnerRow'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { ManageSignersFormFields } from '.'
 import { TxFlowContext } from '../../TxFlowProvider'
@@ -39,6 +40,15 @@ type Props = {
 
 export function SignersStructureView(props: Props): ReactElement {
   const { onNext } = useContext<TxFlowContextType<ManageSignersForm>>(TxFlowContext)
+
+  // Copilot address-poisoning check for the configured signers.
+  // RHF's watch() mutates arrays in place (stable reference), so key the memo by value.
+  const poisoningKey = props.newOwners
+    .map((owner) => owner.address)
+    .filter(Boolean)
+    .join(',')
+  const poisoningCheckAddresses = useMemo(() => (poisoningKey ? poisoningKey.split(',') : []), [poisoningKey])
+  useSafeShieldForAddressPoisoning(poisoningCheckAddresses)
 
   return (
     <TxCard>

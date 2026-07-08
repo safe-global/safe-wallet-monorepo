@@ -12,7 +12,7 @@ import {
   Alert,
 } from '@mui/material'
 import { useForm, FormProvider, useFieldArray, Controller } from 'react-hook-form'
-import { Fragment } from 'react'
+import { Fragment, useMemo } from 'react'
 import type { ReactElement } from 'react'
 
 import TxCard from '../../common/TxCard'
@@ -20,6 +20,7 @@ import AddIcon from '@/public/images/common/add.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { RecoverAccountFlowFields } from '.'
 import AddressBookInput from '@/components/common/AddressBookInput'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import { TOOLTIP_TITLES } from '../../common/constants'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -69,6 +70,15 @@ export function RecoverAccountFlowSetup({
   })
 
   const newOwners = formMethods.watch(RecoverAccountFlowFields.owners)
+
+  // Copilot address-poisoning check for the recovery signers.
+  // RHF's watch() mutates arrays in place (stable reference), so key the memo by value.
+  const poisoningKey = newOwners
+    .map((owner) => owner.value)
+    .filter(Boolean)
+    .join(',')
+  const poisoningCheckAddresses = useMemo(() => (poisoningKey ? poisoningKey.split(',') : []), [poisoningKey])
+  useSafeShieldForAddressPoisoning(poisoningCheckAddresses)
   const newThreshold = formMethods.watch(RecoverAccountFlowFields.threshold)
 
   const { fields, append, remove } = useFieldArray({

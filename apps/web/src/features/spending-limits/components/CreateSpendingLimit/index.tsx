@@ -5,6 +5,7 @@ import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
 import { parseUnits, AbiCoder } from 'ethers'
 
 import AddressBookInput from '@/components/common/AddressBookInput'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import useChainId from '@/hooks/useChainId'
 import { getResetTimeOptions } from '../../constants'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
@@ -40,6 +41,11 @@ const CreateSpendingLimit = () => {
   const { handleSubmit, watch, control } = formMethods
 
   const tokenAddress = watch(SpendingLimitFields.tokenAddress)
+  const beneficiary = watch(SpendingLimitFields.beneficiary)
+
+  // Copilot address-poisoning check for the beneficiary
+  const poisoningCheckAddresses = useMemo(() => (beneficiary ? [beneficiary] : []), [beneficiary])
+  useSafeShieldForAddressPoisoning(poisoningCheckAddresses)
   const selectedToken = tokenAddress
     ? balances.items.find((item) => item.tokenInfo.address === tokenAddress)
     : undefined
