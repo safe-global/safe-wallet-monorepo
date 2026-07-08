@@ -24,7 +24,7 @@ export const Removable: Story = {
 }
 
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
       <Chip variant="default">Default</Chip>

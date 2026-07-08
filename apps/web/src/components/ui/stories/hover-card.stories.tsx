@@ -38,7 +38,7 @@ export const Open: Story = {
 }
 
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div style={{ display: 'block' }}>
       <div style={{ marginBottom: '2rem' }}>

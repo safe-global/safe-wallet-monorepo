@@ -6,6 +6,7 @@ import LaunchScreen from './index'
 const meta = {
   title: 'Components/LaunchScreen',
   component: LaunchScreen,
+  tags: ['skip-visual-test'],
   parameters: {
     layout: 'fullscreen',
     // Animated, time-driven splash — a pixel snapshot would flake on the logo pulse / caption steps.

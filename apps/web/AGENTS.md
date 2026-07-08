@@ -358,20 +358,19 @@ export const Empty: Story = (() => {
 })()
 ```
 
-### Chromatic Visual Regression Testing
+### Argos visual regression testing (Storybook)
 
-Chromatic is integrated for visual regression testing. It automatically captures snapshots of all stories in both light and dark themes.
+Storybook visual regression runs on Argos (the same service as the Cypress visual E2E suite), via
+`.github/workflows/web-argos-storybook.yml`: it builds the static Storybook, screenshots every story
+in **light and dark** with the render-sweep harness, and uploads to Argos. Requires the
+`ARGOS_TOKEN_STORYBOOK` repo secret.
 
-- **Workflow**: Runs automatically on PRs affecting `apps/web/**` or `packages/**`
-- **TurboSnap**: Only stories affected by code changes are re-snapshotted
-- **Theme modes**: Both light and dark themes are captured automatically
-- **PR checks**: Chromatic posts status checks with links to visual diffs
-
-To run locally (set `CHROMATIC_PROJECT_TOKEN` in `.env.local`):
-
-```bash
-yarn workspace @safe-global/web chromatic
-```
+- **Opting a story out of snapshots**: add `tags: ['skip-visual-test']` (story- or meta-level) for
+  flaky/animated/interactive-only stories. The story is still render-checked (errors fail CI) —
+  only the pixel snapshot is skipped. This replaces the Chromatic-era `!chromatic` tag and
+  `chromatic: { disableSnapshot: true }` parameter.
+- **Local run**: `yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>` produces the
+  same screenshots; add `--filter=<substr>` to scope.
 
 ## Web-specific common pitfalls
 

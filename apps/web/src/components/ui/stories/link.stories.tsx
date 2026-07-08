@@ -25,7 +25,7 @@ export const Muted: Story = {
 }
 
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div style={{ display: 'flex', gap: '1.5rem' }}>
       <Link href="#" variant="default">

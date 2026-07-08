@@ -42,7 +42,7 @@ const MultipleDemo = () => {
 }
 
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div className="flex flex-wrap items-start gap-8">
       <div>

@@ -29,7 +29,7 @@ import { Calendar, Home, Inbox, Search, Settings, User2 } from 'lucide-react'
 const meta = {
   title: 'UI/Sidebar',
   component: Sidebar,
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   parameters: {
     layout: 'fullscreen',
   },

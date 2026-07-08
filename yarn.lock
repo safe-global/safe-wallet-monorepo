@@ -3761,21 +3761,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chromatic-com/storybook@npm:^4.1.2":
-  version: 4.1.2
-  resolution: "@chromatic-com/storybook@npm:4.1.2"
-  dependencies:
-    "@neoconfetti/react": "npm:^1.0.0"
-    chromatic: "npm:^12.0.0"
-    filesize: "npm:^10.0.12"
-    jsonfile: "npm:^6.1.0"
-    strip-ansi: "npm:^7.1.0"
-  peerDependencies:
-    storybook: ^0.0.0-0 || ^9.0.0 || ^9.1.0-0 || ^9.2.0-0 || ^10.0.0-0 || ^10.1.0-0 || ^10.2.0-0 || ^10.3.0-0
-  checksum: 10/00d3113a87c825ba4310a787adde4284731727a929ea47c75a792bc4c4d6f41ec8d21817bb518abba120e9322fec7d0acb8dcd477b9f1eb09268a1a3e684bcc9
-  languageName: node
-  linkType: hard
-
 "@coinbase/wallet-sdk@npm:4.3.0":
   version: 4.3.0
   resolution: "@coinbase/wallet-sdk@npm:4.3.0"
@@ -10458,13 +10443,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@neoconfetti/react@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@neoconfetti/react@npm:1.0.0"
-  checksum: 10/71a623f2df79c773b6693fab3a252ee2d7bb1da4a8986c2d15b5ef25493835c1de64f2e44637faf823970d43d63f32227b09a6605ad23f39bc82c14d810e45cd
-  languageName: node
-  linkType: hard
-
 "@next/bundle-analyzer@npm:^15.0.4":
   version: 15.1.1
   resolution: "@next/bundle-analyzer@npm:15.1.1"
@@ -13892,7 +13870,6 @@ __metadata:
   dependencies:
     "@argos-ci/cypress": "npm:6.2.11"
     "@base-ui/react": "npm:^1.1.0"
-    "@chromatic-com/storybook": "npm:^4.1.2"
     "@cowprotocol/app-data": "npm:^3.1.0"
     "@cowprotocol/widget-react": "npm:1.3.5"
     "@datadog/browser-rum": "npm:^6.24.1"
@@ -13966,7 +13943,6 @@ __metadata:
     "@web3-onboard/walletconnect": "npm:2.6.2"
     blo: "npm:^1.1.1"
     cheerio: "npm:^1.0.0"
-    chromatic: "npm:^13.3.5"
     class-variance-authority: "npm:^0.7.1"
     classnames: "npm:^2.5.1"
     clsx: "npm:^2.1.1"
@@ -23713,44 +23689,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@npm:^12.0.0":
-  version: 12.2.0
-  resolution: "chromatic@npm:12.2.0"
-  peerDependencies:
-    "@chromatic-com/cypress": ^0.*.* || ^1.0.0
-    "@chromatic-com/playwright": ^0.*.* || ^1.0.0
-  peerDependenciesMeta:
-    "@chromatic-com/cypress":
-      optional: true
-    "@chromatic-com/playwright":
-      optional: true
-  bin:
-    chroma: dist/bin.js
-    chromatic: dist/bin.js
-    chromatic-cli: dist/bin.js
-  checksum: 10/e5d8787b72f1f6bcc6133848eab8ae850d247b8ae4804112e402e7294701b8291cbd6e45b29c477ac4fe41250dd2a607958e5031c207b69b6c07881dd34dc171
-  languageName: node
-  linkType: hard
-
-"chromatic@npm:^13.3.5":
-  version: 13.3.5
-  resolution: "chromatic@npm:13.3.5"
-  peerDependencies:
-    "@chromatic-com/cypress": ^0.*.* || ^1.0.0
-    "@chromatic-com/playwright": ^0.*.* || ^1.0.0
-  peerDependenciesMeta:
-    "@chromatic-com/cypress":
-      optional: true
-    "@chromatic-com/playwright":
-      optional: true
-  bin:
-    chroma: dist/bin.js
-    chromatic: dist/bin.js
-    chromatic-cli: dist/bin.js
-  checksum: 10/d660e926e2763158eb216c12fd443ac909235b62e0855d6485c5ec270cbde8ce6d5467fc9792a988f2cd4c32722efb9899982b26d4bd8265381846c7d7006c21
-  languageName: node
-  linkType: hard
-
 "chrome-launcher@npm:^0.15.2":
   version: 0.15.2
   resolution: "chrome-launcher@npm:0.15.2"
@@ -28802,13 +28740,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"filesize@npm:^10.0.12":
-  version: 10.1.6
-  resolution: "filesize@npm:10.1.6"
-  checksum: 10/e800837c4fc02303f1944d5a4c7b706df1c5cd95d745181852604fb00a1c2d55d2d3921252722bd2f0c86b59c94edaba23fa224776bbf977455d4034e7be1f45
-  languageName: node
-  linkType: hard
-
 "fill-range@npm:^7.1.1":
   version: 7.1.1
   resolution: "fill-range@npm:7.1.1"
@@ -33409,7 +33340,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsonfile@npm:^6.0.1, jsonfile@npm:^6.1.0":
+"jsonfile@npm:^6.0.1":
   version: 6.1.0
   resolution: "jsonfile@npm:6.1.0"
   dependencies:

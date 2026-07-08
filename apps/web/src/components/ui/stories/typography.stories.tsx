@@ -49,7 +49,7 @@ type Story = StoryObj<typeof meta>
  * All Figma typography variants. Default view.
  */
 export const Default: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     align: 'left',
   },
@@ -136,7 +136,7 @@ export const Default: Story = {
  * The `color` variant group. `default` inherits the surrounding text color; `muted` de-emphasizes.
  */
 export const Colors: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div className="space-y-8">
       <div>
@@ -153,7 +153,7 @@ export const Colors: Story = {
  * The `align` variant group. `center` and `right` render as block-level to occupy the full width.
  */
 export const Alignment: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div className="space-y-8">
       <div>

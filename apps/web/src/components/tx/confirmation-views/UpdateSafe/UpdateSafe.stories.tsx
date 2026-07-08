@@ -10,6 +10,7 @@ faker.seed(123)
 const meta = {
   title: 'Components/TxFlow/ConfirmationViews/UpdateSafe',
   component: _UpdateSafe,
+  tags: ['autodocs', 'skip-visual-test'],
   parameters: {
     // Stories use faker for addresses which causes non-deterministic visual tests
     visualTest: { disable: true },
@@ -25,7 +26,6 @@ const meta = {
       )
     },
   ],
-  tags: ['autodocs'],
 } satisfies Meta<typeof _UpdateSafe>
 
 export default meta

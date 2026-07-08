@@ -32,7 +32,7 @@ export const Default: Story = {
  * Mirrors the trigger and content the component renders internally.
  */
 export const TooltipOpen: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div style={{ display: 'flex', alignItems: 'center', padding: '3rem' }}>
       <Tooltip open>

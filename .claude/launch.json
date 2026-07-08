@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["workspace", "@safe-global/web", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "storybook",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["workspace", "@safe-global/web", "storybook"],
+      "port": 6006
+    },
+    {
+      "name": "mobile",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["workspace", "@safe-global/mobile", "start"],
+      "port": 8081
+    }
+  ]
+}

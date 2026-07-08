@@ -143,6 +143,22 @@ export default [
           ],
         },
       ],
+
+      // Design-system consistency: on <Button>, `className` is for LAYOUT only
+      // (w-full, margins, grid placement). Height/padding/font-size/radius/background
+      // are owned by the `size`/`variant` props — overriding them via className is what
+      // makes buttons drift out of sync. If no size/variant fits a recurring need, add one
+      // to components/ui/button.tsx. See the UI/Button story + .storybook/AGENTS.md
+      // ("Component variants over custom styling").
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "JSXOpeningElement[name.name='Button'] > JSXAttribute[name.name='className'] Literal[value=/(?:^|\\s)(h-|px-|py-|text-(xs|sm|base|lg)|rounded-|bg-)/]",
+          message:
+            "Don't set size/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*) on <Button> — use a `size`/`variant` prop instead. See the UI/Button story and .storybook/AGENTS.md. Add a variant/size to components/ui/button.tsx if none fits.",
+        },
+      ],
     },
   },
   // Override for story files: allow type-only imports from @storybook/react

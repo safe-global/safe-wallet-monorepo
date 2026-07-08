@@ -53,8 +53,7 @@
     "generate:storybook-tests": "node scripts/generate-storybook-tests.cjs",
     "integrity": "node scripts/integrity-hashes.cjs",
     "storybook:generate-coverage": "npx tsx ../../scripts/storybook/generate-storybook-coverage.ts && prettier -w .storybook/COVERAGE.md",
-    "storybook:sweep": "npx tsx ../../scripts/storybook/render-sweep.ts",
-    "chromatic": "chromatic --project-token=$CHROMATIC_PROJECT_TOKEN"
+    "storybook:sweep": "npx tsx ../../scripts/storybook/render-sweep.ts"
   },
   "engines": {
     "node": ">=18"
@@ -131,7 +130,6 @@
   },
   "devDependencies": {
     "@argos-ci/cypress": "6.2.11",
-    "@chromatic-com/storybook": "^4.1.2",
     "@cowprotocol/app-data": "^3.1.0",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.18.0",
@@ -177,7 +175,6 @@
     "@typescript-eslint/eslint-plugin": "^7.6.0",
     "@typescript-eslint/parser": "^8.18.1",
     "cheerio": "^1.0.0",
-    "chromatic": "^13.3.5",
     "cross-env": "^7.0.3",
     "cypress": "^15.9.0",
     "eslint": "^9.29.0",

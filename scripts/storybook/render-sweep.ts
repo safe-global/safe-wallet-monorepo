@@ -35,6 +35,7 @@ interface StoryEntry {
   title: string
   name: string
   type: string
+  tags?: string[]
 }
 
 interface Finding {
@@ -126,7 +127,11 @@ async function checkStory(context: BrowserContext, base: string, story: StoryEnt
     result.textSample = state.textSample
 
     const args = parseArgs()
-    if (typeof args.shots === 'string') {
+    // 'skip-visual-test' marks flaky/animated/interactive-only stories that must not be
+    // pixel-snapshotted (successor of the Chromatic-era '!chromatic' negation tag, which
+    // never reached index.json). They are still render-checked — only the screenshot is skipped.
+    const skipSnapshot = story.tags?.includes('skip-visual-test')
+    if (typeof args.shots === 'string' && !skipSnapshot) {
       fs.mkdirSync(args.shots, { recursive: true })
       await page.screenshot({ path: path.join(args.shots, `${story.id}--${mode}.png`), fullPage: true })
     }

@@ -18,7 +18,7 @@ type Story = StoryObj<typeof meta>
 const tags = Array.from({ length: 50 }).map((_, i) => `v1.2.0-beta.${50 - i}`)
 
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div>
       <div style={{ marginBottom: '2rem' }}>

@@ -40,7 +40,7 @@ const ManageTokensButton = forwardRef<ManageTokensButtonHandle, ManageTokensButt
       <DropdownMenu open={open} onOpenChange={handleOpenChange}>
         <DropdownMenuTrigger
           render={
-            <Button variant="outline" size="sm" data-testid="manage-tokens-button" className="px-3">
+            <Button variant="outline" size="sm" data-testid="manage-tokens-button">
               <SettingsIcon className="size-4 sm:mr-2" />
               <span className="hidden sm:inline">Manage tokens</span>
             </Button>

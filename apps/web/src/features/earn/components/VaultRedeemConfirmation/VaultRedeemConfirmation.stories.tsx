@@ -17,10 +17,10 @@ const meta = {
       )
     },
   ],
+  tags: ['autodocs', 'skip-visual-test'],
   parameters: {
     visualTest: { disable: true },
   },
-  tags: ['autodocs'],
 } satisfies Meta<typeof VaultRedeemConfirmation>
 
 export default meta

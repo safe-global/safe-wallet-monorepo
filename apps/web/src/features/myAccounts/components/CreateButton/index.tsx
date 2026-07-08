@@ -9,9 +9,9 @@ const CreateButton = ({ isPrimary, className }: { isPrimary: boolean; className?
   return (
     <Button
       data-testid="create-safe-btn"
-      size="sm"
+      size="action"
       variant={isPrimary ? 'default' : 'outline'}
-      className={cn('h-9 rounded-lg px-4 font-medium max-[599px]:w-full', className)}
+      className={cn('max-[599px]:w-full', className)}
       render={<NextLink href={{ pathname: AppRoutes.newSafe.create, query: { next } }} />}
     >
       Create account

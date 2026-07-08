@@ -21,14 +21,14 @@ export const NotStaked: Story = {
 }
 
 export const Activating: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     status: NativeStakingStatus.ACTIVATING,
   },
 }
 
 export const DepositInProgress: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     status: NativeStakingStatus.DEPOSIT_IN_PROGRESS,
   },
@@ -41,28 +41,28 @@ export const Active: Story = {
 }
 
 export const ExitRequested: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     status: NativeStakingStatus.EXIT_REQUESTED,
   },
 }
 
 export const Exiting: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     status: NativeStakingStatus.EXITING,
   },
 }
 
 export const Exited: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     status: NativeStakingStatus.EXITED,
   },
 }
 
 export const Slashed: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     status: NativeStakingStatus.SLASHED,
   },

@@ -34,7 +34,7 @@ const Disclaimer = ({
           <Separator />
         </div>
         <div className="flex justify-center pt-6 pb-4">
-          <Button size="sm" className="px-4" onClick={onAccept}>
+          <Button size="sm" onClick={onAccept}>
             {buttonText || 'Got it'}
           </Button>
         </div>

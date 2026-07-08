@@ -35,7 +35,7 @@ const FRUIT_ITEMS = { apple: 'Apple', banana: 'Banana', orange: 'Orange', carrot
 const OPTION_ITEMS_DISABLED = { 'option-1': 'Option 1', 'option-2': 'Option 2', 'option-3': 'Disabled option' }
 
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div style={{ display: 'block' }}>
       <div style={{ marginBottom: '2rem' }}>

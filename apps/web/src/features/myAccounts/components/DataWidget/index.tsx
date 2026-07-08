@@ -57,20 +57,14 @@ export const DataWidget = (): ReactElement => {
         <div className="mx-auto flex max-w-[240px] justify-center gap-4">
           {hasData && (
             <Track {...OVERVIEW_EVENTS.EXPORT_DATA} label={trackingLabel}>
-              <Button variant="outline" size="sm" onClick={exportAppData} className="mt-2 w-full px-4 py-0.5">
+              <Button variant="outline" size="sm" onClick={exportAppData} className="mt-2 w-full">
                 <ExportIcon className="size-4" />
                 Export
               </Button>
             </Track>
           )}
           <Track {...OVERVIEW_EVENTS.IMPORT_DATA} label={trackingLabel}>
-            <Button
-              data-testid="import-btn"
-              variant="outline"
-              size="sm"
-              onClick={onImport}
-              className="mt-2 w-full px-4 py-0.5"
-            >
+            <Button data-testid="import-btn" variant="outline" size="sm" onClick={onImport} className="mt-2 w-full">
               <ImportIcon className="size-4" />
               Import
             </Button>

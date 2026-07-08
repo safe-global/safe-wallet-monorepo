@@ -371,7 +371,7 @@ const AddAccounts = ({
         <AdminOnlyWorkspaceTooltip isAdmin={isAdmin} side="bottom">
           <Button
             size="lg"
-            className="font-normal px-4 py-0"
+            className="font-normal"
             variant={buttonVariant}
             disabled={!isAdmin}
             onClick={() => {

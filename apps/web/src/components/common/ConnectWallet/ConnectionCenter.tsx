@@ -5,7 +5,7 @@ import css from '@/components/common/ConnectWallet/styles.module.css'
 const ConnectionCenter = (): ReactElement => {
   return (
     <div className={css.buttonContainer}>
-      <ConnectWalletButton small={true} />
+      <ConnectWalletButton size="sm" />
     </div>
   )
 }

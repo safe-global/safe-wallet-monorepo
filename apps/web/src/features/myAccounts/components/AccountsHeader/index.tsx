@@ -23,9 +23,9 @@ const AddSafeButton = ({ trackingLabel, onLinkClick }: { trackingLabel: string; 
       <Button
         data-testid="add-safe-button"
         variant="outline"
-        size="sm"
+        size="action"
         onClick={onLinkClick}
-        className="h-9 w-full rounded-lg px-4 font-medium max-[599px]:w-full"
+        className="max-[599px]:w-full"
         render={<NextLink href={{ pathname: AppRoutes.newSafe.load, query: { next } }} />}
       >
         <AddIcon color="currentColor" className="size-5 fill-primary" />
@@ -62,10 +62,10 @@ const AccountsHeader = ({ isSidebar, onLinkClick }: { isSidebar: boolean; onLink
 
         {wallet ? (
           <Track {...OVERVIEW_EVENTS.CREATE_NEW_SAFE} label={trackingLabel}>
-            <CreateButton isPrimary className="h-full text-base" />
+            <CreateButton isPrimary />
           </Track>
         ) : (
-          <ConnectWalletButton small={true} className="h-full rounded-lg text-base" />
+          <ConnectWalletButton size="action" />
         )}
       </div>
     </div>

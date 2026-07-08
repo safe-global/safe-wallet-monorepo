@@ -67,7 +67,7 @@ function AddressBookHeader({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-2">
         <div className="flex shrink-0 flex-wrap gap-2">
           <Track {...ADDRESS_BOOK_EVENTS.CREATE_ENTRY}>
-            <Button size="lg" className="px-4 py-0" onClick={handleOpenModal(ModalType.ENTRY)}>
+            <Button size="lg" onClick={handleOpenModal(ModalType.ENTRY)}>
               <Plus className="mr-1 size-4 text-green-500" />
               New entry
             </Button>

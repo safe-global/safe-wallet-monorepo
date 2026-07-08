@@ -17,11 +17,9 @@ import { TxEvent, txDispatch } from '@/services/tx/txEvents'
 const meta = {
   title: 'Features/Batching/BatchTooltip',
   component: BatchTooltip,
-  parameters: {
-    // The popover position depends on the anchor's on-screen coordinates, which
-    // are not stable in the Chromatic snapshot environment.
-    chromatic: { disable: true },
-  },
+  // The popover position depends on the anchor's on-screen coordinates, which
+  // are not stable in a snapshot environment.
+  tags: ['skip-visual-test'],
 } satisfies Meta<typeof BatchTooltip>
 
 export default meta
