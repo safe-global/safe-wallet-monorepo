@@ -3,6 +3,7 @@ import { continueSignBtn, clickOnConfirmTransactionBtn } from './create_tx.pages
 import * as main from './main.page'
 import * as walletUtils from '../../support/utils/wallet.js'
 import safes from '../../fixtures/safes/static.js'
+import * as ls from '../../support/localstorage_data.js'
 
 // Safe Shield Page Object
 
@@ -335,22 +336,20 @@ export function navigateToTransactionAndSetupCopilot(
   addressBookData = null,
   safeAddress = null,
 ) {
-  // Clear localStorage to ensure clean state
   cy.clearLocalStorage()
 
-  // Use provided safeAddress or default to MATIC_STATIC_SAFE_30
   const safe = safeAddress || safes.MATIC_STATIC_SAFE_30
 
-  // Set up localStorage before navigation if address book data is provided
-  if (addressBookData) {
-    cy.visit(constants.transactionUrl + safe + transactionId, {
-      onBeforeLoad: (win) => {
+  // clearLocalStorage above wipes the cookie consent seeded in the global beforeEach,
+  // so re-seed it before load to keep the cookies popup from covering the widget
+  cy.visit(constants.transactionUrl + safe + transactionId, {
+    onBeforeLoad: (win) => {
+      win.localStorage.setItem(constants.localStorageKeys.SAFE_v2_cookies, ls.cookies.acceptedCookies)
+      if (addressBookData) {
         win.localStorage.setItem(constants.localStorageKeys.SAFE_v2__addressBook, JSON.stringify(addressBookData))
-      },
-    })
-  } else {
-    cy.visit(constants.transactionUrl + safe + transactionId)
-  }
+      }
+    },
+  })
 
   walletUtils.connectSigner(signer)
 

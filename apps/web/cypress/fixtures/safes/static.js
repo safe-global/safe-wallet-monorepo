@@ -32,7 +32,7 @@ export default {
   SEP_STATIC_SAFE_9_SHORT: '0x9870...fec0',
   /** Messages (onchain/offchain) testing - Used in: messages_offchain.cy.js, messages_onchain.cy.js, messages_popup.cy.js, create_tx.cy.js */
   SEP_STATIC_SAFE_10: 'sep:0xc2F3645bfd395516d1a18CA6ad9298299d328C01',
-  /** Sidebar non-owner testing - Used in: sidebar.cy.js (prodhealthcheck) */
+  /** Sidebar non-owner testing */
   SEP_STATIC_SAFE_11: 'sep:0x10B45a24640E2170B6AA63ea3A289D723a0C9cba',
   /** Dashboard testing - Used in: dashboard.cy.js */
   SEP_STATIC_SAFE_12: 'sep:0xFFfaC243A24EecE6553f0Da278322aCF1Fb6CeF1',
@@ -42,17 +42,17 @@ export default {
   SEP_STATIC_SAFE_14: 'sep:0xe41D568F5040FD9adeE8B64200c6B7C363C68c41',
 
   // Ethereum Safes
-  /** Recovery and balances testing - Used in: recovery.cy.js, prodhealthcheck/recovery.cy.js, balances_endpoints.cy.js */
+  /** Recovery and balances testing - Used in: recovery.cy.js, balances_endpoints.cy.js */
   ETH_STATIC_SAFE_15: 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7',
   /** Case #1 – Outdated official mastercopy (Info, "Update" CTA). Used in: dashboard.cy.js. Repro from requirements: app.safe.global/home?safe=eth:0x1230... */
   ETH_STATIC_SAFE_OUTDATED_MASTERCOPY: 'eth:0x1230B3d59858296A31053C1b8562Ecf89A2f888b',
 
   // Gnosis Chain Safes
-  /** Recovery testing - Used in: recovery.cy.js, prodhealthcheck/recovery.cy.js */
+  /** Recovery testing - Used in: recovery.cy.js */
   GNO_STATIC_SAFE_16: 'gno:0xB8d760a90a5ed54D3c2b3EFC231277e99188642A',
 
   // Polygon (Matic) Safes
-  /** Recovery module testing - Used in: recovery.cy.js, prodhealthcheck/recovery.cy.js */
+  /** Recovery module testing - Used in: recovery.cy.js */
   MATIC_STATIC_SAFE_17: 'matic:0x6D04edC44F7C88faa670683036edC2F6FC10b86e',
 
   // BNB Chain Safes
@@ -125,7 +125,7 @@ export default {
   SEP_STATIC_SAFE_42: 'sep:0x7AaE77F475E718AdD032C7665427C6d4e6104D3c',
   /** Transaction builder testing - Used in: tx-builder_3.cy.js */
   SEP_STATIC_SAFE_43: 'sep:0xC5AaBf061f2412F9D84585755dc517EF040becF9',
-  /** Sidebar testing - Used in: sidebar_3.cy.js (prodhealthcheck) */
+  /** Sidebar testing */
   SEP_STATIC_SAFE_44: 'sep:0x8A3faB996b721d68357B42eD0D6328eBE6113e00',
   /** Nested safes review and fund asset testing - Used in: nested_safes_review.cy.js, nested_safes_fund_asset.cy.js */
   SEP_STATIC_SAFE_45: 'sep:0x5958B92f412408bF12Bbc8638d524ebe5878E795',

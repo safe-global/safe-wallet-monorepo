@@ -254,7 +254,7 @@ export const addressBookErrrMsg = {
   ownSafe: 'Cannot use Safe account itself as signer',
   alreadyAdded: 'Address already added',
   ownerAdded: 'Signer is already added',
-  failedResolve: 'Failed to resolve the address',
+  failedResolve: 'ENS name not available on Sepolia',
   emptyAddress: 'Owner',
   safeAlreadyAdded: 'Safe account is already added',
   prefixMismatch: "doesn't match the current chain",
@@ -323,4 +323,8 @@ export const localStorageKeys = {
   SAFE_v2__pendingCfDeletes: 'SAFE_v2__pendingCfDeletes',
   SAFE_v2__visitedSafes: 'SAFE_v2__visitedSafes',
   SAFE_v2__auth: 'SAFE_v2__auth',
+}
+
+export const sessionStorageKeys = {
+  SAFE_v2__classicViewEnabled: 'SAFE_v2__classicViewEnabled',
 }

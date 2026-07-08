@@ -4,6 +4,7 @@ import PendingRequestsTable from '../PendingRequestsTable'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Builder } from '@/tests/Builder'
 
+jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => false }))
 jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
@@ -37,6 +38,10 @@ jest.mock('@/components/common/EthHashInfo', () => {
   )
   return EthHashInfo
 })
+jest.mock('@/components/common/Identicon', () => {
+  const Identicon = ({ address }: { address: string }) => <span data-testid="identicon" data-address={address} />
+  return Identicon
+})
 jest.mock('@/features/multichain', () => ({
   NetworkLogosList: ({ networks }: { networks: { chainId: string }[] }) => (
     <span data-testid="network-logos" data-count={networks.length} />
@@ -66,12 +71,11 @@ describe('PendingRequestsTable', () => {
     expect(requestedByCell).toHaveAttribute('data-only-name', 'false')
   })
 
-  it('renders the name/email variant in the "Requested by" cell when requestedBy is an email', () => {
+  it('renders the full email as plain text in the "Requested by" cell when requestedBy is an email', () => {
     const requestedBy = faker.internet.email()
     render(<PendingRequestsTable requests={[requestBuilder().with({ requestedBy }).build()]} />)
 
-    const requestedByCell = screen.getAllByTestId('eth-hash-info').find((el) => el.textContent === requestedBy)
-    expect(requestedByCell).toHaveAttribute('data-only-name', 'true')
-    expect(requestedByCell).toHaveAttribute('data-highlight', 'false')
+    expect(screen.getByText(requestedBy)).toBeInTheDocument()
+    expect(screen.getAllByTestId('eth-hash-info').some((el) => el.textContent === requestedBy)).toBe(false)
   })
 })
