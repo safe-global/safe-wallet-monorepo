@@ -1,5 +1,14 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Decorator, Meta, StoryObj } from '@storybook/react'
+import { StoreDecorator } from '@/stories/storeDecorator'
 import QRCode from './index'
+
+const withStore: Decorator = (Story, context) => (
+  <StoreDecorator initialState={{}} context={context}>
+    <div className="rounded-lg bg-card p-4">
+      <Story />
+    </div>
+  </StoreDecorator>
+)
 
 const meta = {
   title: 'Components/Common/QRCode',
@@ -7,13 +16,7 @@ const meta = {
   parameters: {
     layout: 'centered',
   },
-  decorators: [
-    (Story) => (
-      <div className="rounded-lg bg-card p-4">
-        <Story />
-      </div>
-    ),
-  ],
+  decorators: [withStore],
   tags: ['autodocs'],
 } satisfies Meta<typeof QRCode>
 

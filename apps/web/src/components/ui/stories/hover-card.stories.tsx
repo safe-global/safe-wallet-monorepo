@@ -20,6 +20,23 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+export const Open: Story = {
+  render: () => (
+    <div className="flex min-h-48 items-start justify-center pt-4">
+      <HoverCard defaultOpen>
+        <HoverCardTrigger render={<Button variant="link">@username</Button>} />
+        <HoverCardContent side="bottom">
+          <div>
+            <h4 className="text-sm font-semibold mb-1">User Profile</h4>
+            <p className="text-sm text-muted-foreground mb-2">@username</p>
+            <p className="text-sm">User description and details go here.</p>
+          </div>
+        </HoverCardContent>
+      </HoverCard>
+    </div>
+  ),
+}
+
 export const AllVariants: Story = {
   tags: ['!chromatic'],
   render: () => (

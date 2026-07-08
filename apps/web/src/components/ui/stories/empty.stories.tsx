@@ -111,8 +111,8 @@ export const AllVariants: Story = {
                 <button
                   style={{
                     padding: '0.5rem 1rem',
-                    background: 'var(--color-primary)',
-                    color: 'var(--color-primary-foreground)',
+                    background: 'var(--primary)',
+                    color: 'var(--primary-foreground)',
                     border: 'none',
                     borderRadius: '0.375rem',
                     cursor: 'pointer',

@@ -28,6 +28,12 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+// Base UI's SelectValue renders the raw value unless the Root receives an `items`
+// value→label map (labels live in the popup, which is unmounted while closed).
+const OPTION_ITEMS = { 'option-1': 'Option 1', 'option-2': 'Option 2', 'option-3': 'Option 3' }
+const FRUIT_ITEMS = { apple: 'Apple', banana: 'Banana', orange: 'Orange', carrot: 'Carrot', broccoli: 'Broccoli' }
+const OPTION_ITEMS_DISABLED = { 'option-1': 'Option 1', 'option-2': 'Option 2', 'option-3': 'Disabled option' }
+
 export const AllVariants: Story = {
   tags: ['!chromatic'],
   render: () => (
@@ -42,7 +48,7 @@ export const AllVariants: Story = {
             justifyItems: 'start',
           }}
         >
-          <Select defaultValue="option-1">
+          <Select defaultValue="option-1" items={OPTION_ITEMS}>
             <SelectTrigger size="sm">
               <SelectValue placeholder="Small" />
             </SelectTrigger>
@@ -52,7 +58,7 @@ export const AllVariants: Story = {
               <SelectItem value="option-3">Option 3</SelectItem>
             </SelectContent>
           </Select>
-          <Select defaultValue="option-1">
+          <Select defaultValue="option-1" items={OPTION_ITEMS}>
             <SelectTrigger size="default">
               <SelectValue placeholder="Default" />
             </SelectTrigger>
@@ -75,7 +81,7 @@ export const AllVariants: Story = {
             justifyItems: 'start',
           }}
         >
-          <Select defaultValue="option-1">
+          <Select defaultValue="option-1" items={OPTION_ITEMS}>
             <SelectTrigger>
               <SelectValue placeholder="Select option" />
             </SelectTrigger>
@@ -84,7 +90,7 @@ export const AllVariants: Story = {
               <SelectItem value="option-2">Option 2</SelectItem>
             </SelectContent>
           </Select>
-          <Select>
+          <Select items={OPTION_ITEMS}>
             <SelectTrigger>
               <SelectValue placeholder="Placeholder" />
             </SelectTrigger>
@@ -93,7 +99,7 @@ export const AllVariants: Story = {
               <SelectItem value="option-2">Option 2</SelectItem>
             </SelectContent>
           </Select>
-          <Select disabled>
+          <Select disabled items={OPTION_ITEMS}>
             <SelectTrigger>
               <SelectValue placeholder="Disabled" />
             </SelectTrigger>
@@ -102,7 +108,7 @@ export const AllVariants: Story = {
               <SelectItem value="option-2">Option 2</SelectItem>
             </SelectContent>
           </Select>
-          <Select defaultValue="option-1">
+          <Select defaultValue="option-1" items={OPTION_ITEMS}>
             <SelectTrigger aria-invalid>
               <SelectValue placeholder="Error state" />
             </SelectTrigger>
@@ -124,7 +130,7 @@ export const AllVariants: Story = {
             justifyItems: 'start',
           }}
         >
-          <Select defaultValue="apple">
+          <Select defaultValue="apple" items={FRUIT_ITEMS}>
             <SelectTrigger>
               <SelectValue placeholder="Select fruit" />
             </SelectTrigger>
@@ -155,7 +161,7 @@ export const AllVariants: Story = {
             justifyItems: 'start',
           }}
         >
-          <Select defaultValue="option-1">
+          <Select defaultValue="option-1" items={OPTION_ITEMS_DISABLED}>
             <SelectTrigger>
               <SelectValue placeholder="Select option" />
             </SelectTrigger>

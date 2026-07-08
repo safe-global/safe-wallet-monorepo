@@ -20,6 +20,20 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+export const Open: Story = {
+  render: () => (
+    <Sheet defaultOpen>
+      <SheetTrigger render={<Button>Right</Button>} />
+      <SheetContent side="right">
+        <SheetHeader>
+          <SheetTitle>Sheet title</SheetTitle>
+          <SheetDescription>Sheet description and content area.</SheetDescription>
+        </SheetHeader>
+      </SheetContent>
+    </Sheet>
+  ),
+}
+
 export const AllVariants: Story = {
   tags: ['!chromatic'],
   render: () => (

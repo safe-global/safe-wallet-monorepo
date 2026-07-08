@@ -11,6 +11,9 @@ import UserSettings from '@/pages/user-settings'
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'connected',
+  pathname: '/user-settings',
+  // Authenticates the mock session (isAuthenticated) so the page renders instead of the sign-in gate
+  features: { spaces: true },
 })
 
 const meta = {

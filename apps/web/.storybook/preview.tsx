@@ -15,7 +15,9 @@ initialize({
 // These are not applied globally but can be imported and used per-story
 export { withMockProvider } from './decorators'
 
-const BACKGROUND_COLORS: Record<string, string> = { light: '#ffffff', dark: '#121312' }
+// Canvas colors mirror the shadcn --background token per mode so bg-background elements
+// never render as visible patches against the canvas.
+const BACKGROUND_COLORS: Record<string, string> = { light: '#ffffff', dark: '#000000' }
 
 // Syncs data-theme attribute and background color with the theme switcher
 const ThemeSyncDecorator = (

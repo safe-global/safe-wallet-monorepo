@@ -83,7 +83,7 @@ export const AllVariants: Story = {
             style={{
               width: '300px',
               padding: '1rem',
-              border: '1px solid var(--color-border)',
+              border: '1px solid var(--border)',
               borderRadius: '0.5rem',
               display: 'flex',
               flexDirection: 'column',

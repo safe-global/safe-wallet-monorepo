@@ -30,6 +30,24 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+export const Open: Story = {
+  render: () => (
+    <Dialog defaultOpen>
+      <DialogTrigger render={<Button>Edit profile</Button>} />
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit profile</DialogTitle>
+          <DialogDescription>Make changes to your profile. Save when done.</DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <DialogClose render={<Button variant="outline">Cancel</Button>} />
+          <DialogClose render={<Button>Save changes</Button>} />
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  ),
+}
+
 export const AllVariants: Story = {
   tags: ['!chromatic'],
   render: () => (

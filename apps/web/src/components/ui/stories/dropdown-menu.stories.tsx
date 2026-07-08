@@ -36,6 +36,39 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+export const Open: Story = {
+  render: () => (
+    <div className="flex min-h-64 items-start pt-2">
+      <DropdownMenu defaultOpen>
+        <DropdownMenuTrigger render={<Button>Open Menu</Button>} />
+        <DropdownMenuContent>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>My account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <User />
+              Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <CreditCard />
+              Billing
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Settings />
+              Settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive">
+              <LogOut />
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  ),
+}
+
 export const AllVariants: Story = {
   tags: ['!chromatic'],
   render: () => (

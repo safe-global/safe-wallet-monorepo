@@ -101,3 +101,18 @@ export function createChainsPageData(chainData: Chain) {
     results: [chainData],
   }
 }
+
+/**
+ * Full chains page response with the story chain swapped in.
+ *
+ * Used for the `/v2/chains` bootstrap endpoint: it must include the default
+ * testnet chain (Sepolia) or `useIsRequireLoginEnabled` never resolves and
+ * PageLayout's auth gate renders nothing.
+ */
+export function createChainsPageDataV2(chainData: Chain) {
+  const otherChains = chainFixtures.all.results.filter((chain) => chain.chainId !== chainData.chainId)
+  return {
+    ...chainFixtures.all,
+    results: [chainData, ...otherChains],
+  }
+}

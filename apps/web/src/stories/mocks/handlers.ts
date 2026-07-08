@@ -1,6 +1,8 @@
 import { http, HttpResponse, type RequestHandler } from 'msw'
-import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import type { Chain, IndexingStatus } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { SafeOverview, SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import type { CollectiblePage } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
+import type { DelegatePage } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
@@ -13,16 +15,31 @@ import {
   safeAppsFixtures,
   type FixtureScenario,
 } from '../../../../../config/test/msw/fixtures'
-import { createChainData, createChainsPageData } from './chains'
+import { createChainData, createChainsPageData, createChainsPageDataV2 } from './chains'
 import type { FeatureFlags, MockStoryConfig } from './types'
 
 /**
  * Core chain configuration handlers
  */
 export function coreHandlers(chainData: Chain): RequestHandler[] {
+  const indexingStatus: IndexingStatus = {
+    currentBlockNumber: 20000000,
+    currentBlockTimestamp: new Date().toISOString(),
+    erc20BlockNumber: 20000000,
+    erc20BlockTimestamp: new Date().toISOString(),
+    erc20Synced: true,
+    masterCopiesBlockNumber: 20000000,
+    masterCopiesBlockTimestamp: new Date().toISOString(),
+    masterCopiesSynced: true,
+    synced: true,
+    lastSync: Date.now(),
+  }
+
   return [
+    http.get(/\/v1\/chains\/\d+\/about\/indexing$/, () => HttpResponse.json(indexingStatus)),
     http.get(/\/v1\/chains\/\d+$/, () => HttpResponse.json(chainData)),
     http.get(/\/v1\/chains$/, () => HttpResponse.json(createChainsPageData(chainData))),
+    http.get(/\/v2\/chains$/, () => HttpResponse.json(createChainsPageDataV2(chainData))),
   ]
 }
 
@@ -245,9 +262,129 @@ export function masterCopiesHandlers(): RequestHandler[] {
  */
 export function targetedMessagingHandlers(): RequestHandler[] {
   return [
+    // Targeted safe lookup for a specific outreach - 404 means the Safe is not targeted
+    http.get(/\/v1\/targeted-messaging\/outreaches\/\d+\/chains\/\d+\/safes\/0x[a-fA-F0-9]+$/, () =>
+      HttpResponse.json({ message: 'Safe not targeted' }, { status: 404 }),
+    ),
     http.get(/\/v1\/targeted-messaging\/safes\/0x[a-fA-F0-9]+\/outreaches/, () =>
       HttpResponse.json({ outreaches: [] }),
     ),
+  ]
+}
+
+/**
+ * Supported fiat codes handler (currency selector on Balances page)
+ */
+export function fiatCodesHandlers(): RequestHandler[] {
+  return [
+    http.get(/\/v1\/balances\/supported-fiat-codes$/, () =>
+      HttpResponse.json(['USD', 'EUR', 'GBP', 'CHF', 'JPY', 'AUD', 'CAD']),
+    ),
+  ]
+}
+
+/**
+ * Delegates handlers (proposers) - empty list by default
+ */
+export function delegatesHandlers(): RequestHandler[] {
+  const emptyDelegatePage: DelegatePage = { count: 0, next: null, previous: null, results: [] }
+  return [http.get(/\/v[12]\/chains\/\d+\/delegates$/, () => HttpResponse.json(emptyDelegatePage))]
+}
+
+/**
+ * Collectibles (NFTs) handlers
+ */
+export function collectiblesHandlers(): RequestHandler[] {
+  const collectiblesPage: CollectiblePage = {
+    count: 3,
+    next: null,
+    previous: null,
+    results: [
+      {
+        address: '0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D',
+        tokenName: 'Bored Ape Yacht Club',
+        tokenSymbol: 'BAYC',
+        logoUri: '',
+        id: '1234',
+        uri: null,
+        name: 'Bored Ape #1234',
+        description: 'A bored ape',
+        imageUri: null,
+        metadata: null,
+      },
+      {
+        address: '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB',
+        tokenName: 'CryptoPunks',
+        tokenSymbol: 'PUNK',
+        logoUri: '',
+        id: '5678',
+        uri: null,
+        name: 'CryptoPunk #5678',
+        description: 'A crypto punk',
+        imageUri: null,
+        metadata: null,
+      },
+      {
+        address: '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85',
+        tokenName: 'ENS: Ethereum Name Service',
+        tokenSymbol: 'ENS',
+        logoUri: '',
+        id: '9012',
+        uri: null,
+        name: 'safe-wallet.eth',
+        description: 'An ENS name',
+        imageUri: null,
+        metadata: null,
+      },
+    ],
+  }
+  return [
+    http.get(/\/v2\/chains\/\d+\/safes\/0x[a-fA-F0-9]+\/collectibles$/, () => HttpResponse.json(collectiblesPage)),
+  ]
+}
+
+/**
+ * Owned safes handlers (sidebar "My accounts", watchlist prompts)
+ */
+export function ownedSafesHandlers(): RequestHandler[] {
+  return [
+    http.get(/\/v1\/chains\/\d+\/owners\/0x[a-fA-F0-9]+\/safes$/, () =>
+      HttpResponse.json({ safes: mockOwnedSafes['1'] }),
+    ),
+    http.get(/\/v2\/owners\/0x[a-fA-F0-9]+\/safes$/, () => HttpResponse.json(mockOwnedSafes)),
+  ]
+}
+
+/**
+ * Safe overview handlers (batch endpoint powering safe list cards / header totals).
+ * Returns an overview for the current scenario Safe plus the mock owned safes.
+ */
+export function safeOverviewHandlers(safeData: SafeState): RequestHandler[] {
+  const scenarioOverview: SafeOverview = {
+    address: safeData.address,
+    chainId: safeData.chainId,
+    threshold: safeData.threshold,
+    owners: safeData.owners,
+    fiatTotal: '48250.75',
+    queued: 3,
+    awaitingConfirmation: 2,
+  }
+  const overviews = [scenarioOverview, ...mockSafeOverviews]
+  return [
+    http.get(/\/v1\/safes$/, () => HttpResponse.json(overviews)),
+    http.get(/\/v2\/safes$/, () => HttpResponse.json(overviews)),
+  ]
+}
+
+/**
+ * External (non-CGW) services that pages call on load:
+ * - Zodiac security-check (vulnerable modules banner) - report "safe"
+ * - WalletConnect telemetry - accept and discard
+ */
+export function externalServicesHandlers(): RequestHandler[] {
+  return [
+    http.get(/zodiac-check\.safe\.global\/public\/api\/security-check/, () => HttpResponse.json({ status: 'safe' })),
+    http.post(/pulse\.walletconnect\.org/, () => HttpResponse.json({})),
   ]
 }
 
@@ -366,17 +503,32 @@ export function spacesHandlers(): RequestHandler[] {
     http.post(/\/v1\/spaces\/[^/]+\/safes$/, () => HttpResponse.json({ success: true })),
     // Invite members to space (mutation)
     http.post(/\/v1\/spaces\/[^/]+\/members\/invite$/, () => HttpResponse.json({ success: true })),
-    // Get space members
+    // Get space members — the gateway wraps the list in a MembersDto object
     http.get(/\/v1\/spaces\/[^/]+\/members$/, () =>
-      HttpResponse.json([
-        {
-          id: 1,
-          role: 'ADMIN',
-          name: 'Admin User',
-          status: 'ACTIVE',
-          user: { id: mockUser.id, status: 'ACTIVE' },
-        },
-      ]),
+      HttpResponse.json({
+        members: [
+          {
+            id: 1,
+            role: 'ADMIN',
+            name: 'Admin User',
+            invitedBy: null,
+            status: 'ACTIVE',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            user: { id: mockUser.id, status: 'ACTIVE' },
+          },
+          {
+            id: 2,
+            role: 'MEMBER',
+            name: 'Jane Member',
+            invitedBy: null,
+            status: 'ACTIVE',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            user: { id: 2, status: 'ACTIVE' },
+          },
+        ],
+      }),
     ),
   ]
 }
@@ -546,74 +698,6 @@ export function createMockPendingTransactions(safeData: SafeState) {
       {
         type: 'TRANSACTION' as const,
         transaction: {
-          id: 'multisig_0x123_0xabc1',
-          txHash: null,
-          timestamp: Date.now() - 1000 * 60 * 5,
-          txStatus: 'AWAITING_CONFIRMATIONS' as const,
-          txInfo: {
-            type: 'Transfer' as const,
-            sender: { value: safeData.address.value, name: null, logoUri: null },
-            recipient: {
-              value: '0x1234567890123456789012345678901234567890',
-              name: 'vitalik.eth',
-              logoUri: null,
-            },
-            direction: 'OUTGOING' as const,
-            transferInfo: {
-              type: 'ERC20' as const,
-              tokenAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-              tokenName: 'USD Coin',
-              tokenSymbol: 'USDC',
-              logoUri:
-                'https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
-              decimals: 6,
-              value: '4018860000',
-            },
-          },
-          executionInfo: {
-            type: 'MULTISIG' as const,
-            nonce: 42,
-            confirmationsRequired: 2,
-            confirmationsSubmitted: 1,
-            missingSigners: [{ value: safeData.owners[1]?.value ?? '', name: null, logoUri: null }],
-          },
-        },
-        conflictType: 'None' as const,
-      },
-      {
-        type: 'TRANSACTION' as const,
-        transaction: {
-          id: 'multisig_0x123_0xabc2',
-          txHash: null,
-          timestamp: Date.now() - 1000 * 60 * 60 * 2,
-          txStatus: 'AWAITING_CONFIRMATIONS' as const,
-          txInfo: {
-            type: 'Transfer' as const,
-            sender: { value: safeData.address.value, name: null, logoUri: null },
-            recipient: {
-              value: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
-              name: null,
-              logoUri: null,
-            },
-            direction: 'OUTGOING' as const,
-            transferInfo: {
-              type: 'NATIVE_COIN' as const,
-              value: '1000000000000000',
-            },
-          },
-          executionInfo: {
-            type: 'MULTISIG' as const,
-            nonce: 43,
-            confirmationsRequired: 2,
-            confirmationsSubmitted: 1,
-            missingSigners: [{ value: safeData.owners[1]?.value ?? '', name: null, logoUri: null }],
-          },
-        },
-        conflictType: 'None' as const,
-      },
-      {
-        type: 'TRANSACTION' as const,
-        transaction: {
           id: 'multisig_0x123_0xabc3',
           txHash: null,
           timestamp: Date.now() - 1000 * 60 * 60 * 24,
@@ -643,10 +727,78 @@ export function createMockPendingTransactions(safeData: SafeState) {
           },
           executionInfo: {
             type: 'MULTISIG' as const,
-            nonce: 44,
+            nonce: safeData.nonce ?? 0,
             confirmationsRequired: 2,
             confirmationsSubmitted: 2,
             missingSigners: null,
+          },
+        },
+        conflictType: 'None' as const,
+      },
+      {
+        type: 'TRANSACTION' as const,
+        transaction: {
+          id: 'multisig_0x123_0xabc1',
+          txHash: null,
+          timestamp: Date.now() - 1000 * 60 * 5,
+          txStatus: 'AWAITING_CONFIRMATIONS' as const,
+          txInfo: {
+            type: 'Transfer' as const,
+            sender: { value: safeData.address.value, name: null, logoUri: null },
+            recipient: {
+              value: '0x1234567890123456789012345678901234567890',
+              name: 'vitalik.eth',
+              logoUri: null,
+            },
+            direction: 'OUTGOING' as const,
+            transferInfo: {
+              type: 'ERC20' as const,
+              tokenAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+              tokenName: 'USD Coin',
+              tokenSymbol: 'USDC',
+              logoUri:
+                'https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+              decimals: 6,
+              value: '4018860000',
+            },
+          },
+          executionInfo: {
+            type: 'MULTISIG' as const,
+            nonce: (safeData.nonce ?? 0) + 1,
+            confirmationsRequired: 2,
+            confirmationsSubmitted: 1,
+            missingSigners: [{ value: safeData.owners[0]?.value ?? '', name: null, logoUri: null }],
+          },
+        },
+        conflictType: 'None' as const,
+      },
+      {
+        type: 'TRANSACTION' as const,
+        transaction: {
+          id: 'multisig_0x123_0xabc2',
+          txHash: null,
+          timestamp: Date.now() - 1000 * 60 * 60 * 2,
+          txStatus: 'AWAITING_CONFIRMATIONS' as const,
+          txInfo: {
+            type: 'Transfer' as const,
+            sender: { value: safeData.address.value, name: null, logoUri: null },
+            recipient: {
+              value: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+              name: null,
+              logoUri: null,
+            },
+            direction: 'OUTGOING' as const,
+            transferInfo: {
+              type: 'NATIVE_COIN' as const,
+              value: '1000000000000000',
+            },
+          },
+          executionInfo: {
+            type: 'MULTISIG' as const,
+            nonce: (safeData.nonce ?? 0) + 2,
+            confirmationsRequired: 2,
+            confirmationsSubmitted: 1,
+            missingSigners: [{ value: safeData.owners[0]?.value ?? '', name: null, logoUri: null }],
           },
         },
         conflictType: 'None' as const,
@@ -740,6 +892,16 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
   if (mergedFeatures.spaces) {
     allHandlers.push(...spacesHandlers())
   }
+
+  // Fallback handlers registered after spaces so spaces-specific mocks win when enabled
+  allHandlers.push(
+    ...fiatCodesHandlers(),
+    ...delegatesHandlers(),
+    ...collectiblesHandlers(),
+    ...ownedSafesHandlers(),
+    ...safeOverviewHandlers(safeData),
+    ...externalServicesHandlers(),
+  )
 
   // Add custom handlers last (can override defaults)
   allHandlers.push(...customHandlers)

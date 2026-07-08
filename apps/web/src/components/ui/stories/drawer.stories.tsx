@@ -29,6 +29,31 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+export const Open: Story = {
+  render: () => (
+    <Drawer defaultOpen>
+      <DrawerTrigger>
+        <Button>Open Drawer</Button>
+      </DrawerTrigger>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>Drawer Title</DrawerTitle>
+          <DrawerDescription>Drawer description goes here.</DrawerDescription>
+        </DrawerHeader>
+        <div style={{ padding: '1rem' }}>
+          <p className="text-sm">Drawer content area.</p>
+        </div>
+        <DrawerFooter>
+          <Button>Save</Button>
+          <DrawerClose>
+            <Button variant="outline">Cancel</Button>
+          </DrawerClose>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  ),
+}
+
 export const AllVariants: Story = {
   tags: ['!chromatic'],
   render: () => (

@@ -20,6 +20,22 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+export const Open: Story = {
+  render: () => (
+    <div className="flex min-h-56 items-start justify-center pt-2">
+      <Popover defaultOpen>
+        <PopoverTrigger render={<Button>Open popover</Button>} />
+        <PopoverContent side="bottom">
+          <PopoverHeader>
+            <PopoverTitle>Popover title</PopoverTitle>
+            <PopoverDescription>Popover body content appears below the trigger.</PopoverDescription>
+          </PopoverHeader>
+        </PopoverContent>
+      </Popover>
+    </div>
+  ),
+}
+
 export const AllVariants: Story = {
   tags: ['!chromatic'],
   render: () => (

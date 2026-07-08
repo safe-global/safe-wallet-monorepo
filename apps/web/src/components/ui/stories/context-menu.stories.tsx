@@ -35,6 +35,43 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+export const Open: Story = {
+  render: () => (
+    <div className="flex min-h-72 items-start p-4">
+      <ContextMenu>
+        <ContextMenuTrigger>
+          <div
+            data-testid="context-menu-zone"
+            style={{ padding: '2rem', background: 'var(--muted)', borderRadius: '0.375rem' }}
+          >
+            Right-click here
+          </div>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <ContextMenuItem>
+            <Copy />
+            Copy
+          </ContextMenuItem>
+          <ContextMenuItem>
+            <Scissors />
+            Cut
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem variant="destructive">
+            <Trash2 />
+            Delete
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const { userEvent, within } = await import('storybook/test')
+    const zone = within(canvasElement).getByTestId('context-menu-zone')
+    await userEvent.pointer({ keys: '[MouseRight]', target: zone })
+  },
+}
+
 export const AllVariants: Story = {
   tags: ['!chromatic'],
   render: () => (
@@ -53,14 +90,14 @@ export const AllVariants: Story = {
             style={{
               width: '300px',
               padding: '2rem',
-              border: '1px solid var(--color-border)',
+              border: '1px solid var(--border)',
               borderRadius: '0.375rem',
               textAlign: 'center',
             }}
           >
             <ContextMenu>
               <ContextMenuTrigger>
-                <div style={{ padding: '1rem', background: 'var(--color-muted)', borderRadius: '0.375rem' }}>
+                <div style={{ padding: '1rem', background: 'var(--muted)', borderRadius: '0.375rem' }}>
                   Right-click here
                 </div>
               </ContextMenuTrigger>
@@ -99,14 +136,14 @@ export const AllVariants: Story = {
             style={{
               width: '300px',
               padding: '2rem',
-              border: '1px solid var(--color-border)',
+              border: '1px solid var(--border)',
               borderRadius: '0.375rem',
               textAlign: 'center',
             }}
           >
             <ContextMenu>
               <ContextMenuTrigger>
-                <div style={{ padding: '1rem', background: 'var(--color-muted)', borderRadius: '0.375rem' }}>
+                <div style={{ padding: '1rem', background: 'var(--muted)', borderRadius: '0.375rem' }}>
                   Right-click for groups
                 </div>
               </ContextMenuTrigger>
@@ -149,14 +186,14 @@ export const AllVariants: Story = {
             style={{
               width: '300px',
               padding: '2rem',
-              border: '1px solid var(--color-border)',
+              border: '1px solid var(--border)',
               borderRadius: '0.375rem',
               textAlign: 'center',
             }}
           >
             <ContextMenu>
               <ContextMenuTrigger>
-                <div style={{ padding: '1rem', background: 'var(--color-muted)', borderRadius: '0.375rem' }}>
+                <div style={{ padding: '1rem', background: 'var(--muted)', borderRadius: '0.375rem' }}>
                   Right-click for variants
                 </div>
               </ContextMenuTrigger>
@@ -197,14 +234,14 @@ export const AllVariants: Story = {
             style={{
               width: '300px',
               padding: '2rem',
-              border: '1px solid var(--color-border)',
+              border: '1px solid var(--border)',
               borderRadius: '0.375rem',
               textAlign: 'center',
             }}
           >
             <ContextMenu>
               <ContextMenuTrigger>
-                <div style={{ padding: '1rem', background: 'var(--color-muted)', borderRadius: '0.375rem' }}>
+                <div style={{ padding: '1rem', background: 'var(--muted)', borderRadius: '0.375rem' }}>
                   Right-click for selection
                 </div>
               </ContextMenuTrigger>
@@ -239,14 +276,14 @@ export const AllVariants: Story = {
             style={{
               width: '300px',
               padding: '2rem',
-              border: '1px solid var(--color-border)',
+              border: '1px solid var(--border)',
               borderRadius: '0.375rem',
               textAlign: 'center',
             }}
           >
             <ContextMenu>
               <ContextMenuTrigger>
-                <div style={{ padding: '1rem', background: 'var(--color-muted)', borderRadius: '0.375rem' }}>
+                <div style={{ padding: '1rem', background: 'var(--muted)', borderRadius: '0.375rem' }}>
                   Right-click for submenu
                 </div>
               </ContextMenuTrigger>
