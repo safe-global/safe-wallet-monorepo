@@ -162,6 +162,7 @@ const NetworkMultiSelectorInput = ({
           aria-controls={`${name}-listbox`}
           aria-invalid={error || undefined}
           className={css.multiSelectInput}
+          placeholder={value.length === 0 ? 'Select networks' : undefined}
           value={inputValue}
           onChange={(e) => {
             setInputValue(e.target.value)

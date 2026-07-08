@@ -138,7 +138,7 @@ exports[`HexEncodedData should render the default component markup 1`] = `
           </span>
         </span>
         <button
-          class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 text-primary showMore"
+          class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 text-primary underline decoration-primary/40 hover:decoration-current showMore"
           data-slot="link"
           data-testid="show-more"
           data-variant="default"

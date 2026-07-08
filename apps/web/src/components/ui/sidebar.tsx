@@ -318,7 +318,7 @@ function Sidebar({
         data-variant={variant}
         className={cn(
           'bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col',
-          variant === 'floating' && 'rounded-lg',
+          variant === 'floating' && 'rounded-lg ring-1 ring-sidebar-border',
           className,
         )}
         {...props}
@@ -401,7 +401,10 @@ function Sidebar({
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className={cn('bg-sidebar group-data-[variant=floating]:rounded-lg flex size-full flex-col', innerClassName)}
+          className={cn(
+            'bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border flex size-full flex-col',
+            innerClassName,
+          )}
         >
           {children}
         </div>
@@ -624,7 +627,7 @@ const sidebarMenuButtonVariants = cva(
       variant: {
         default: 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
         outline:
-          'bg-background hover:bg-sidebar-accent hover:text-sidebar-accent-foreground shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]',
+          'bg-background hover:bg-sidebar-accent hover:text-sidebar-accent-foreground shadow-[0_0_0_1px_var(--sidebar-border)] hover:shadow-[0_0_0_1px_var(--sidebar-accent)]',
       },
       size: {
         default: 'h-8 text-sm',

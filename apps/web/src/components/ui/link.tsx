@@ -26,7 +26,9 @@ const linkVariants = cva(
   {
     variants: {
       variant: {
-        default: 'text-primary',
+        // Rest-state underline: in light mode `text-primary` is the body-text color, so
+        // without it links have zero affordance (dark mode gets the green for free).
+        default: 'text-primary underline decoration-primary/40 hover:decoration-current',
         muted: 'text-muted-foreground hover:text-foreground',
         inherit: 'text-inherit',
       },

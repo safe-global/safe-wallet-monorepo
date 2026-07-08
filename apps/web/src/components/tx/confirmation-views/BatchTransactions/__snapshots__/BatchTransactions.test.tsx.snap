@@ -47,7 +47,7 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                 <div
                   aria-disabled="false"
                   aria-expanded="false"
-                  class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex-1 justify-between border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 flex min-h-12 items-center px-4 py-3 hover:no-underline outlinedTrigger"
+                  class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex-1 justify-between border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 flex min-h-12 items-center px-4 py-3 hover:no-underline outlinedTrigger"
                   data-orientation="vertical"
                   data-slot="accordion-trigger"
                   data-testid="action-item"

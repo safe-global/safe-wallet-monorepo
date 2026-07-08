@@ -16,7 +16,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: R
       showOutsideDays={showOutsideDays}
       className={cn('p-3', className)}
       classNames={{
-        months: 'flex flex-col sm:flex-row gap-2',
+        months: 'relative flex flex-col sm:flex-row gap-2',
         month: 'flex flex-col gap-4',
         month_caption: 'flex justify-center pt-1 relative items-center w-full h-8',
         caption_label: 'text-sm font-medium',
@@ -37,6 +37,10 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: R
         day_button: cn(buttonVariants({ variant: 'ghost' }), 'size-8 p-0 font-normal aria-selected:opacity-100'),
         selected:
           'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground',
+        range_start: 'rounded-l-md rounded-r-none',
+        range_middle:
+          'rounded-none bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
+        range_end: 'rounded-r-md rounded-l-none',
         today: 'bg-accent text-accent-foreground',
         outside: 'text-muted-foreground opacity-50',
         disabled: 'text-muted-foreground opacity-50',

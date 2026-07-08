@@ -101,6 +101,16 @@ function SetNameStep({
     setValue(SetNameStepFields.safeVersion, getLatestSafeVersion(currentChain))
   }, [currentChain, setValue])
 
+  // The form's default networks are computed once on mount; if the chain configs weren't
+  // loaded yet at that point, seed the wallet's chain when it becomes available.
+  useEffect(() => {
+    if (!networks.length && walletChain) {
+      setValue(SetNameStepFields.networks, [walletChain], { shouldValidate: true })
+    }
+    // Only a late-arriving walletChain should trigger the seed, not the user clearing the field
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [walletChain, setValue])
+
   const isDisabled = !isValid
 
   return (
@@ -135,7 +145,7 @@ function SetNameStep({
 
             <div className="col-span-12">
               <Typography variant="h4" className="mt-4 inline-flex items-center gap-2">
-                Select Networks
+                Select networks
               </Typography>
               <Typography variant="paragraph-small" className="mb-4 block">
                 Choose which networks you want your account to be active on. You can add more networks later.{' '}

@@ -183,7 +183,7 @@ const CreateSafe = () => {
 
   return (
     <div className="mx-auto w-full max-w-[1200px] px-4">
-      <div className="grid grid-cols-12 justify-center gap-x-6">
+      <div className="mt-4 grid grid-cols-12 justify-center gap-x-6 md:mt-14">
         <div className="col-span-12">
           <Typography variant="h2" className="pb-4">
             Create new Safe account

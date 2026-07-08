@@ -108,6 +108,10 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 4px;
+  /* long unbreakable method names (e.g. addOwnerWithThreshold) must break instead of
+     overflowing the grid cell under the confirmations chip */
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 .txDescription img {

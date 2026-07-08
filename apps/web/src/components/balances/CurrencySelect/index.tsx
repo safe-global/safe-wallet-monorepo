@@ -41,7 +41,7 @@ const CurrencySelect = (): ReactElement => {
         side="bottom"
         sideOffset={8}
         alignItemWithTrigger={false}
-        className="max-h-80 min-w-[140px] rounded-xl border border-border bg-popover shadow-md ring-0"
+        className="max-h-80 min-w-[140px]"
       >
         {fiatCurrencies.map((item) => (
           <SelectItem

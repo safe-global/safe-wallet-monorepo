@@ -111,7 +111,7 @@ const SecuritySafesTable = ({
           {COLUMNS.map((c, i) => (
             <div
               key={c.label || `col-${i}`}
-              className={cn('text-[0.65rem] font-bold uppercase tracking-[0.5px] text-zinc-400', c.hideClass, {
+              className={cn('text-[0.65rem] font-bold uppercase tracking-[0.5px] text-muted-foreground', c.hideClass, {
                 'justify-end': c.align === 'right',
               })}
             >

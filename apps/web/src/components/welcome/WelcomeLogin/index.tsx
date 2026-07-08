@@ -23,7 +23,7 @@ const WelcomeLogin = () => {
   })
 
   return (
-    <div className={css.loginCard} data-testid="welcome-login" style={{ background: '#fff' }}>
+    <div className={css.loginCard} data-testid="welcome-login">
       <div className={css.loginContent}>
         <Typography variant="h2" className="mt-12">
           Get started

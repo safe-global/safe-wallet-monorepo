@@ -6,7 +6,7 @@ import SafeLogo from '@/components/common/SafeLogo'
 
 const Custom403: NextPage = () => {
   return (
-    <main>
+    <main className="px-6 pt-[calc(var(--header-height)+1rem)]">
       <div className="fixed top-0 left-0 z-[1300] flex items-center px-6" style={{ height: 'var(--header-height)' }}>
         <SafeLogo />
       </div>

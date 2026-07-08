@@ -30,7 +30,9 @@ const chipVariants = cva(
       variant: {
         default: 'bg-secondary text-secondary-foreground',
         outline: 'border border-border text-foreground',
-        primary: 'bg-primary/10 text-primary',
+        // Solid fill: the tinted `bg-primary/10 text-primary` version was indistinguishable
+        // from `default` in light mode (10% black on near-black text).
+        primary: 'bg-primary text-primary-foreground',
       },
     },
     defaultVariants: {

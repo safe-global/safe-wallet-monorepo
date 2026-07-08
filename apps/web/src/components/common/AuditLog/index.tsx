@@ -104,7 +104,7 @@ export const AuditRow = ({ label, actionType, address, name, timestamp, isLast }
 
       {/* Column 2: Action label + actor/origin */}
       <div className={css.infoCol}>
-        <Typography variant="paragraph-small" className="font-semibold leading-[1.4]">
+        <Typography variant="paragraph-small" className="truncate font-semibold leading-[1.4]">
           {label}
         </Typography>
         {(showActor || showDash) && (

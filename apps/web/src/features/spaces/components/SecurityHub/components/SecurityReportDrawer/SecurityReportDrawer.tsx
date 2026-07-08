@@ -71,7 +71,7 @@ const SecurityReportDrawer = ({
           aria-label="Security report"
           // Float the sheet with a margin from the viewport, round its corners and use a #fafafa
           // surface in light mode / `bg-card` in dark mode so the white cards inside stand out.
-          className="inset-y-3! right-3! h-auto! w-[440px]! max-w-[calc(100vw-24px)]! gap-0 overflow-hidden rounded-3xl border-0! bg-zinc-50 p-0 shadow-xl dark:bg-card"
+          className="inset-y-3! right-3! h-auto! w-[440px]! max-w-[calc(100vw-24px)]! gap-0 overflow-hidden rounded-3xl border-0! bg-card p-0 shadow-xl"
         >
           {selectedSafe && (
             <div className="flex min-h-0 gap-3 flex-1 flex-col overflow-hidden">
