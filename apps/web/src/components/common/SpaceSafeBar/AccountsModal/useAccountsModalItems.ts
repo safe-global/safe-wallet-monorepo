@@ -3,7 +3,7 @@ import {
   useAllSafes,
   useAllSafesGrouped,
   flattenSafeItems,
-  getComparator,
+  useSafeOrderComparator,
   type AllSafeItems,
   type MultiChainSafeItem,
   type SafeItem,
@@ -12,8 +12,8 @@ import {
 import { useIsQualifiedSafe, useSpaceSafes } from '@/features/spaces'
 import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useAppDispatch, useAppSelector } from '@/store'
-import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
+import { useAppDispatch } from '@/store'
+import { TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { trackEvent } from '@/services/analytics'
@@ -66,8 +66,10 @@ const EMPTY_SAFES: SafeItems = []
 export function useAccountsModalItems({ search, open }: { search: string; open: boolean }) {
   const dispatch = useAppDispatch()
   const allSafes = useAllSafes()
-  const { orderBy } = useAppSelector(selectOrderByPreference)
-  const comparator = useMemo(() => getComparator(orderBy), [orderBy])
+  // Trusted section follows the trusted custom order; "Other Safes" has no custom order,
+  // so under Manual it falls back to A→Z (a scopeless comparator).
+  const trustedComparator = useSafeOrderComparator(TRUSTED_ORDER_SCOPE)
+  const otherComparator = useSafeOrderComparator()
   const { address: walletAddress = '' } = useWallet() || {}
   const { error: ownedSafesError, refetch: refetchOwnedSafes } = useOwnersGetAllSafesByOwnerV2Query(
     { ownerAddress: walletAddress },
@@ -107,17 +109,20 @@ export function useAccountsModalItems({ search, open }: { search: string; open: 
     otherSafes ?? EMPTY_SAFES,
   )
 
-  const groupedToItems = (multi: MultiChainSafeItem[] | undefined, single: SafeItems | undefined): AllSafeItems =>
-    [...(multi ?? []), ...(single ?? [])].sort(comparator)
+  const groupedToItems = (
+    multi: MultiChainSafeItem[] | undefined,
+    single: SafeItems | undefined,
+    comparator: (a: SafeItem | MultiChainSafeItem, b: SafeItem | MultiChainSafeItem) => number,
+  ): AllSafeItems => [...(multi ?? []), ...(single ?? [])].sort(comparator)
 
   const allItems = useMemo<AllSafeItems>(
-    () => groupedToItems(allMultiChainSafes, allSingleSafes),
-    [allMultiChainSafes, allSingleSafes, comparator],
+    () => groupedToItems(allMultiChainSafes, allSingleSafes, trustedComparator),
+    [allMultiChainSafes, allSingleSafes, trustedComparator],
   )
 
   const otherSafeItems = useMemo<AllSafeItems>(
-    () => groupedToItems(otherMultiChainSafes, otherSingleSafes),
-    [otherMultiChainSafes, otherSingleSafes, comparator],
+    () => groupedToItems(otherMultiChainSafes, otherSingleSafes, otherComparator),
+    [otherMultiChainSafes, otherSingleSafes, otherComparator],
   )
 
   const similarAddresses = useMemo(() => getFlaggedSimilarAddressSet(allItems.map((item) => item.address)), [allItems])

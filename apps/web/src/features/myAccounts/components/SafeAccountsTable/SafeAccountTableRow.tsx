@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
+import type { DraggableProvidedDraggableProps, DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
 import NextLink from 'next/link'
 import TableCell from '@mui/material/TableCell'
 import TableRow from '@mui/material/TableRow'
 import { Badge } from '@/components/ui/badge'
-import { TriangleAlert } from 'lucide-react'
+import { GripVertical, TriangleAlert } from 'lucide-react'
 import Identicon from '@/components/common/Identicon'
 import AddressWithCopy from '@/components/common/AddressWithCopy'
 import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
@@ -50,6 +51,11 @@ type SafeAccountTableRowProps = {
   showAddressActions?: boolean
   onToggle?: () => void
   onLinkClick?: () => void
+  /** Drag-and-drop wiring from @hello-pangea/dnd — set only in reorder mode. */
+  dragHandleProps?: DraggableProvidedDragHandleProps | null
+  rowRef?: (element: HTMLElement | null) => void
+  rowDraggableProps?: DraggableProvidedDraggableProps
+  isDragging?: boolean
 }
 
 // Fixed identicon column so the name always starts at the same x position (as in the design).
@@ -177,6 +183,26 @@ const NameCell = ({
   return content
 }
 
+const ReorderHandle = ({
+  dragHandleProps,
+  className,
+}: {
+  dragHandleProps?: DraggableProvidedDragHandleProps | null
+  className?: string
+}) => (
+  <span
+    {...dragHandleProps}
+    data-testid="account-drag-handle"
+    aria-label="Drag to reorder"
+    className={cn(
+      'text-muted-foreground hover:text-foreground flex cursor-grab items-center justify-center active:cursor-grabbing',
+      className,
+    )}
+  >
+    <GripVertical className="size-4" />
+  </span>
+)
+
 const SelectCell = ({
   checkbox,
   onSelectToggle,
@@ -258,13 +284,36 @@ const SafeAccountTableRow = ({
   showAddressActions,
   onToggle,
   onLinkClick,
+  dragHandleProps,
+  rowRef,
+  rowDraggableProps,
+  isDragging,
 }: SafeAccountTableRowProps) => {
   // In selection mode a leaf row is one big checkbox — clicking anywhere on it toggles selection
   // (except affordances that stop propagation: the checkbox, actions, copy and explorer link).
   const rowSelectable = Boolean(checkbox) && !line.expandable && !checkbox?.disabled
 
+  // In reorder mode the row can be lifted to `position: fixed`, detaching it from the table's
+  // fixed layout — pin each cell's width so the floating row keeps its column alignment.
+  const reorderable = Boolean(rowDraggableProps)
+
+  const nameCell = (
+    <NameCell
+      line={line}
+      expanded={expanded}
+      isFlagged={isFlagged}
+      plainCells={plainCells}
+      showAddressActions={showAddressActions}
+      disableLink={Boolean(checkbox)}
+      onToggle={onToggle}
+      onLinkClick={onLinkClick}
+    />
+  )
+
   const rowEl = (
     <TableRow
+      ref={rowRef}
+      {...rowDraggableProps}
       data-testid="account-table-row"
       data-variant={line.variant}
       tabIndex={-1}
@@ -272,6 +321,7 @@ const SafeAccountTableRow = ({
       sx={{
         ...(checkbox?.disabledReason ? { opacity: 0.55 } : {}),
         ...(rowSelectable ? { cursor: 'pointer', '&:hover': { backgroundColor: 'action.hover' } } : {}),
+        ...(isDragging ? { backgroundColor: 'background.paper', boxShadow: 3, borderRadius: '12px' } : {}),
       }}
     >
       {columns.map((column) => (
@@ -288,22 +338,25 @@ const SafeAccountTableRow = ({
             '&:last-of-type': { pr: 2 },
             borderBottom: showDivider ? '1px solid' : 'none',
             borderColor: 'divider',
+            ...(reorderable && column.width
+              ? { width: column.width, minWidth: column.width, maxWidth: column.width }
+              : {}),
           }}
           onClick={column.id === 'actions' || column.id === 'select' ? (e) => e.stopPropagation() : undefined}
         >
           {column.id === 'select' ? (
             <SelectCell checkbox={checkbox} onSelectToggle={onSelectToggle} />
           ) : column.id === 'name' ? (
-            <NameCell
-              line={line}
-              expanded={expanded}
-              isFlagged={isFlagged}
-              plainCells={plainCells}
-              showAddressActions={showAddressActions}
-              disableLink={Boolean(checkbox)}
-              onToggle={onToggle}
-              onLinkClick={onLinkClick}
-            />
+            // Reorder mode: the grip shares the Name cell's left gutter and pushes the row content
+            // right a little, so no extra column is added and the table keeps its width (no scrollbar).
+            reorderable ? (
+              <div className="flex min-w-0 items-center gap-2">
+                <ReorderHandle dragHandleProps={dragHandleProps} className="relative z-10 shrink-0" />
+                <div className="min-w-0 flex-1">{nameCell}</div>
+              </div>
+            ) : (
+              nameCell
+            )
           ) : (
             <div
               className={cn(

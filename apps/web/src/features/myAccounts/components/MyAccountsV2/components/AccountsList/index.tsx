@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useMemo } from 'react'
-import { type AllSafeItems, type AllSafeItemsGrouped, getComparator, useSafesSearch } from '@/hooks/safes'
+import { type AllSafeItems, type AllSafeItemsGrouped, useSafeOrderComparator, useSafesSearch } from '@/hooks/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useAddressBook from '@/hooks/useAddressBook'
-import { useAppSelector } from '@/store'
-import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
+import { useAppDispatch, useAppSelector } from '@/store'
+import {
+  OrderByOption,
+  selectOrderByPreference,
+  setManualOrder,
+  TRUSTED_ORDER_SCOPE,
+} from '@/store/orderByPreferenceSlice'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
 import { Typography } from '@/components/ui/typography'
@@ -24,8 +29,10 @@ type AccountsListProps = {
 }
 
 const AccountsList = ({ searchQuery, safes, modal, migration, onLinkClick }: AccountsListProps) => {
+  const dispatch = useAppDispatch()
   const { orderBy } = useAppSelector(selectOrderByPreference)
-  const sortComparator = getComparator(orderBy)
+  const sortComparator = useSafeOrderComparator(TRUSTED_ORDER_SCOPE)
+  const isManualOrder = orderBy === OrderByOption.MANUAL
 
   const { safe: currentSafe, safeAddress } = useSafeInfo()
   const addressBook = useAddressBook()
@@ -96,7 +103,20 @@ const AccountsList = ({ searchQuery, safes, modal, migration, onLinkClick }: Acc
 
       {pinnedSafes.length > 0 && (
         <section data-testid="pinned-accounts" className="mb-4">
-          <SafeAccountsTable items={pinnedSafes} onLinkClick={onLinkClick} />
+          {isManualOrder && (
+            <Typography variant="paragraph-small" color="muted" className="mb-2">
+              Drag the handle on any row to arrange accounts your way — your order is saved automatically.
+            </Typography>
+          )}
+          <SafeAccountsTable
+            items={pinnedSafes}
+            onLinkClick={onLinkClick}
+            reorder={
+              isManualOrder
+                ? { onReorder: (order) => dispatch(setManualOrder({ scope: TRUSTED_ORDER_SCOPE, order })) }
+                : undefined
+            }
+          />
         </section>
       )}
 

@@ -23,7 +23,8 @@ export { useSafesSearch } from './useSafesSearch'
 export { useGetHref } from './useGetHref'
 
 // Comparators/utilities
-export { getComparator, nameComparator, lastVisitedComparator } from './comparators'
+export { getComparator, nameComparator, lastVisitedComparator, manualComparator } from './comparators'
+export { useSafeOrderComparator } from './useSafeOrderComparator'
 
 // Types
 export type { SafeItem, SafeItems } from './useAllSafes'

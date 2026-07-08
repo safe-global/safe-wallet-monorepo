@@ -48,8 +48,10 @@ const MultiChainSafeItemRow = ({ item, onRename, isSelected = false }: MultiChai
   return (
     <Collapsible className="my-0.5 rounded-lg">
       <CollapsibleTrigger
+        // Scroll anchor for the open-to-current-safe behaviour (see SafeDropdownContainer).
+        data-current-safe={isSelected ? 'true' : undefined}
         className={cn(
-          'group/row flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left outline-none hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-ring cursor-pointer',
+          'group/row flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring cursor-pointer',
           isSelected && 'bg-muted',
         )}
       >
@@ -87,7 +89,7 @@ const MultiChainSafeItemRow = ({ item, onRename, isSelected = false }: MultiChai
                 key={`${chain.chainId}:${item.address}`}
                 value={`${chain.chainId}:${item.address}`}
                 // [&>span.absolute]:hidden suppresses the built-in checkmark span (see SelectItem in ui/select.tsx) — this row uses its own right-aligned StatusBadge / queued count / balance instead, and the checkmark would overlap them.
-                className="flex items-center gap-3 rounded-md px-3 py-2 cursor-pointer data-[state=checked]:bg-muted hover:bg-muted/30 [&>span.absolute]:hidden"
+                className="flex items-center gap-3 rounded-md px-3 py-2 cursor-pointer focus:bg-muted data-[selected]:bg-muted [&>span.absolute]:hidden"
               >
                 <ChainLogo chainId={chain.chainId} />
                 <Typography variant="paragraph-small-medium" className="min-w-0 flex-1 truncate">

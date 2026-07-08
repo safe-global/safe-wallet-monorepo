@@ -18,6 +18,7 @@ import {
   type SafeSortColumn,
 } from './useSafeAccountRows'
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
+import ReorderableBody from './ReorderableBody'
 
 type SortState = { orderBy: SafeSortColumn | null; order: 'asc' | 'desc' }
 
@@ -67,6 +68,12 @@ const getRowCheckbox = (group: AccountGroup, line: AccountLine, selection: SafeA
   }
 }
 
+/** Enables drag-and-drop reordering of the top-level accounts. */
+export type SafeAccountsReorder = {
+  /** Fired on drop with the reordered top-level account addresses, in display order. */
+  onReorder: (orderedAddresses: string[]) => void
+}
+
 export type SafeAccountsTableProps = {
   items: AllSafeItems
   /** Columns to show, in the canonical order. Defaults to the full set. */
@@ -79,6 +86,8 @@ export type SafeAccountsTableProps = {
   flaggedAddresses?: Set<string>
   /** Enables a leading checkbox column and makes rows selectable. */
   selection?: SafeAccountsSelection
+  /** Enables a leading drag-handle column and makes top-level accounts reorderable. */
+  reorder?: SafeAccountsReorder
   /** Drop per-row name/address hover tooltips and the copy icon — for modals that show the full text. */
   plainCells?: boolean
   /** Show a copy button and block-explorer link next to each address (as in account rows elsewhere). */
@@ -114,6 +123,7 @@ const SafeAccountsTable = ({
   renderActions,
   flaggedAddresses,
   selection,
+  reorder,
   plainCells,
   showAddressActions,
   onLinkClick,
@@ -123,10 +133,17 @@ const SafeAccountsTable = ({
   const [sort, setSort] = useState<SortState>({ orderBy: null, order: 'asc' })
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
 
+  // While reordering, the incoming (manual) order is authoritative: column-header sorting is
+  // suppressed and multi-chain groups collapse so each row is a single draggable account.
+  const reorderActive = Boolean(reorder)
+
   const visibleColumns = useMemo(() => {
     const base = columns ? SAFE_ACCOUNT_COLUMNS.filter((c) => columns.includes(c.id)) : SAFE_ACCOUNT_COLUMNS
     const withActions = actionsWidth ? base.map((c) => (c.id === 'actions' ? { ...c, width: actionsWidth } : c)) : base
-    return selection ? [SELECT_COLUMN, ...withActions] : withActions
+    // Reorder mode adds no column: the drag handle floats in the Name cell's left gutter, so the
+    // table keeps the same width as the other sort modes (no differential horizontal scrollbar).
+    if (selection) return [SELECT_COLUMN, ...withActions]
+    return withActions
   }, [columns, actionsWidth, selection])
 
   const minWidth = useMemo(
@@ -135,10 +152,10 @@ const SafeAccountsTable = ({
   )
 
   const sortedGroups = useMemo(() => {
-    if (!sort.orderBy) return groups
+    if (reorderActive || !sort.orderBy) return groups
     const orderBy = sort.orderBy
     return [...groups].sort((a, b) => compareGroups(a, b, orderBy, sort.order))
-  }, [groups, sort])
+  }, [groups, sort, reorderActive])
 
   const lines = useMemo<Array<{ line: AccountLine; groupKey: string; group: AccountGroup }>>(() => {
     const result: Array<{ line: AccountLine; groupKey: string; group: AccountGroup }> = []
@@ -198,7 +215,7 @@ const SafeAccountsTable = ({
                   )}
                   sx={{ ...headerSx, width: column.width, textAlign: column.align ?? 'left' }}
                 >
-                  {column.sortable && column.sortKey ? (
+                  {column.sortable && column.sortKey && !reorderActive ? (
                     <TableSortLabel
                       active={sort.orderBy === column.sortKey}
                       direction={sort.orderBy === column.sortKey ? sort.order : 'asc'}
@@ -215,25 +232,38 @@ const SafeAccountsTable = ({
             </TableRow>
           </TableHead>
 
-          <TableBody>
-            {lines.map(({ line, groupKey, group }, index) => (
-              <SafeAccountTableRow
-                key={line.key}
-                line={line}
-                columns={visibleColumns}
-                expanded={line.expandable ? expanded.has(groupKey) : undefined}
-                isFlagged={flaggedAddresses?.has(line.address.toLowerCase())}
-                renderActions={renderActions}
-                checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
-                onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
-                plainCells={plainCells}
-                showAddressActions={showAddressActions}
-                onToggle={line.expandable ? () => toggle(groupKey) : undefined}
-                onLinkClick={onLinkClick}
-                showDivider={index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}
-              />
-            ))}
-          </TableBody>
+          {reorder ? (
+            <ReorderableBody
+              groups={sortedGroups}
+              columns={visibleColumns}
+              flaggedAddresses={flaggedAddresses}
+              renderActions={renderActions}
+              plainCells={plainCells}
+              showAddressActions={showAddressActions}
+              onLinkClick={onLinkClick}
+              onReorder={reorder.onReorder}
+            />
+          ) : (
+            <TableBody>
+              {lines.map(({ line, groupKey, group }, index) => (
+                <SafeAccountTableRow
+                  key={line.key}
+                  line={line}
+                  columns={visibleColumns}
+                  expanded={line.expandable ? expanded.has(groupKey) : undefined}
+                  isFlagged={flaggedAddresses?.has(line.address.toLowerCase())}
+                  renderActions={renderActions}
+                  checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
+                  onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
+                  plainCells={plainCells}
+                  showAddressActions={showAddressActions}
+                  onToggle={line.expandable ? () => toggle(groupKey) : undefined}
+                  onLinkClick={onLinkClick}
+                  showDivider={index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}
+                />
+              ))}
+            </TableBody>
+          )}
         </Table>
       </TableContainer>
     </Box>

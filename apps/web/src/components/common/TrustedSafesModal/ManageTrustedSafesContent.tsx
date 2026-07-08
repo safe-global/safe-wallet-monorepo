@@ -8,6 +8,9 @@ import { Spinner } from '@/components/ui/spinner'
 import { useIsQualifiedSafe } from '@/features/spaces'
 import { SafeAccountsTable, type AccountLine, type SafeAccountColumnId } from '@/features/myAccounts'
 import type { AllSafeItems } from '@/hooks/safes'
+import SafeListSortToggle from '@/components/common/SafeListSortToggle'
+import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import SecurityBanner from './SecurityBanner'
 import SimilarityConfirmDialog from './SimilarityConfirmDialog'
 import SelectAllConfirmDialog from './SelectAllConfirmDialog'
@@ -58,6 +61,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
   } = modal
 
   const isInSpace = useIsQualifiedSafe()
+  const isDarkMode = useDarkMode()
 
   const pendingItem = pendingConfirmation
     ? availableItems.find((s) => s.address.toLowerCase() === pendingConfirmation)
@@ -119,19 +123,24 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
               <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} tabIndex={-1} aria-hidden />
               Select all · {selectedCount} of {totalSafesCount} selected
             </button>
-            <InputGroup className="ml-auto max-w-sm flex-1 rounded-md bg-card">
-              <InputGroupAddon>
-                <Search className="size-4" />
-              </InputGroupAddon>
-              <InputGroupInput
-                placeholder="by name, address or network"
-                aria-label="Search Safes by name, address or network"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoComplete="off"
-                data-testid="manage-trusted-search-input"
-              />
-            </InputGroup>
+            <div className="flex flex-1 items-center justify-end gap-3">
+              <InputGroup className="max-w-sm flex-1 rounded-md bg-card">
+                <InputGroupAddon>
+                  <Search className="size-4" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  placeholder="by name, address or network"
+                  aria-label="Search Safes by name, address or network"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoComplete="off"
+                  data-testid="manage-trusted-search-input"
+                />
+              </InputGroup>
+              <ShadcnProvider dark={isDarkMode} className="flex shrink-0 items-center">
+                <SafeListSortToggle />
+              </ShadcnProvider>
+            </div>
           </div>
         </div>
 

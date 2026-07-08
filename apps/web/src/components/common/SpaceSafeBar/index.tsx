@@ -222,7 +222,7 @@ function SpaceSafeBar() {
     <div data-testid="safe-level-navigation" className="flex max-[899px]:justify-end">
       {/* One pill: safe selector + nested safes + network selector render as muted chips
           sharing a single white card (see Figma topbar). */}
-      <div className="flex flex-wrap items-stretch gap-2 rounded-lg bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+      <div className="flex flex-wrap items-stretch gap-2 rounded-xl bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
         {/* Under 430px the safe selector drops to its own full-width row below the nested/network controls. */}
         <div className="contents max-[429px]:block max-[429px]:order-[10000] max-[429px]:min-w-0 max-[429px]:basis-full">
           <SafeSelectorDropdown

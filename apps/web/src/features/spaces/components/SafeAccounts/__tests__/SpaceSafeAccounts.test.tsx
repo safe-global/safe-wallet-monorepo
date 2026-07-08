@@ -22,6 +22,7 @@ jest.mock('@/components/common/Track', () => {
 jest.mock('@/features/spaces', () => ({
   useSpaceSafes: () => mockUseSpaceSafes(),
   useIsInvited: () => false,
+  useCurrentSpaceId: () => 'space-1',
 }))
 
 jest.mock('@/hooks/wallets/useWallet', () => ({
@@ -29,9 +30,16 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   default: () => null,
 }))
 
+jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
+
+jest.mock('@/components/common/SafeListSortToggle', () => ({
+  __esModule: true,
+  default: () => <div data-testid="safe-list-sort-toggle" />,
+}))
+
 jest.mock('@/hooks/safes', () => ({
   useAllOwnedSafes: () => [{}, undefined, false],
-  getComparator: () => () => 0,
+  useSafeOrderComparator: () => () => 0,
   useSafeItemBuilder: () => ({
     buildSafeItem: (chainId: string, address: string) => ({ chainId, address, name: address }),
     walletAddress: '',
@@ -53,9 +61,15 @@ jest.mock('@safe-global/utils/hooks/useDebounce', () => ({
 
 jest.mock('@/store', () => ({
   useAppSelector: () => ({}),
+  useAppDispatch: () => jest.fn(),
 }))
 
-jest.mock('@/store/orderByPreferenceSlice', () => ({ selectOrderByPreference: jest.fn() }))
+jest.mock('@/store/orderByPreferenceSlice', () => ({
+  selectOrderByPreference: jest.fn(),
+  setManualOrder: jest.fn(),
+  getSpaceOrderScope: (id: string) => `space:${id}`,
+  OrderByOption: { NAME: 'name', LAST_VISITED: 'lastVisited', MANUAL: 'manual' },
+}))
 jest.mock('@/store/addedSafesSlice', () => ({ selectAllAddedSafes: jest.fn() }))
 jest.mock('@/store/slices', () => ({
   selectAllAddressBooks: jest.fn(),

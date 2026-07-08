@@ -4,21 +4,29 @@ import { Stack } from '@mui/material'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Typography } from '@/components/ui/typography'
 import { useMemo, useState } from 'react'
-import { useAppSelector } from '@/store'
-import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
+import { useAppDispatch, useAppSelector } from '@/store'
+import {
+  getSpaceOrderScope,
+  OrderByOption,
+  selectOrderByPreference,
+  setManualOrder,
+} from '@/store/orderByPreferenceSlice'
 import {
   type AllSafeItems,
   type SafeItem,
   _getMultiChainAccounts,
   _getSingleChainAccounts,
-  getComparator,
   useSafeItemBuilder,
+  useSafeOrderComparator,
   useSafesSearch,
 } from '@/hooks/safes'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
-import { useSpaceSafes, useIsInvited } from '@/features/spaces'
+import { useSpaceSafes, useIsInvited, useCurrentSpaceId } from '@/features/spaces'
 import { SafeAccountsTable } from '@/features/myAccounts'
+import SafeListSortToggle from '@/components/common/SafeListSortToggle'
+import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { TriangleAlert, RotateCw, Search } from 'lucide-react'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
@@ -39,10 +47,15 @@ const _groupAndSort = (
 const SpaceSafeAccounts = () => {
   const { allSafes, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()
   const isInvited = useIsInvited()
+  const dispatch = useAppDispatch()
+  const isDarkMode = useDarkMode()
+  const spaceId = useCurrentSpaceId()
+  const orderScope = spaceId ? getSpaceOrderScope(spaceId) : undefined
 
   // Use same organization logic as onboarding
   const { orderBy } = useAppSelector(selectOrderByPreference)
-  const sortComparator = getComparator(orderBy)
+  const sortComparator = useSafeOrderComparator(orderScope)
+  const isManualOrder = orderBy === OrderByOption.MANUAL
   const { buildSafeItem } = useSafeItemBuilder()
 
   const spaceSafeItems = useMemo(() => {
@@ -82,19 +95,24 @@ const SpaceSafeAccounts = () => {
           <AddAccountsChooser buttonVariant="default" buttonLabel="Add accounts" entryPoint="safe_accounts" />
         </Track>
         {!isSpaceEmpty && !isSpaceSafesError && (
-          <InputGroup className="flex-1 rounded-md bg-card">
-            <InputGroupAddon>
-              <Search className="size-4" />
-            </InputGroupAddon>
-            <InputGroupInput
-              placeholder="by name, address or network"
-              aria-label="Search Safe accounts by name, address or network"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              autoComplete="off"
-              data-testid="space-safe-accounts-search-input"
-            />
-          </InputGroup>
+          <>
+            <InputGroup className="flex-1 rounded-md bg-card">
+              <InputGroupAddon>
+                <Search className="size-4" />
+              </InputGroupAddon>
+              <InputGroupInput
+                placeholder="by name, address or network"
+                aria-label="Search Safe accounts by name, address or network"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoComplete="off"
+                data-testid="space-safe-accounts-search-input"
+              />
+            </InputGroup>
+            <ShadcnProvider dark={isDarkMode} className="flex items-center">
+              <SafeListSortToggle />
+            </ShadcnProvider>
+          </>
         )}
       </Stack>
 
@@ -125,11 +143,21 @@ const SpaceSafeAccounts = () => {
       ) : (
         <>
           {similarAddresses.size > 0 && <SimilarAddressAlert />}
+          {isManualOrder && !debouncedSearchQuery && (
+            <Typography variant="paragraph-small" color="muted" className="mb-2">
+              Drag the handle on any row to arrange accounts your way — your order is saved automatically.
+            </Typography>
+          )}
           <SafeAccountsTable
             items={visibleSafes}
             flaggedAddresses={similarAddresses}
             renderActions={(line) =>
               line.variant === 'child' ? null : <SpaceSafeContextMenu safeItem={line.source} />
+            }
+            reorder={
+              isManualOrder && !debouncedSearchQuery && orderScope
+                ? { onReorder: (order) => dispatch(setManualOrder({ scope: orderScope, order })) }
+                : undefined
             }
           />
         </>

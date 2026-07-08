@@ -6,6 +6,8 @@ import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { OVERVIEW_EVENTS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
 import { useAllSafesGrouped } from '@/hooks/safes/useAllSafesGrouped'
 import useAllSafes from '@/hooks/safes/useAllSafes'
+import { useSafeOrderComparator } from '@/hooks/safes'
+import { TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
 import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
 import type { SelectableSafe, SelectableMultiChainSafe, SelectableItem } from './useTrustedSafesModal.types'
 import { isSelectableMultiChainSafe } from './useTrustedSafesModal.types'
@@ -98,6 +100,8 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
   const allSafes = useAllSafes()
   const { allMultiChainSafes, allSingleSafes } = useAllSafesGrouped()
   const addedSafes = useAppSelector(selectAllAddedSafes)
+  // Same global Name / Last visited / Manual preference used across the trusted-safes lists.
+  const sortComparator = useSafeOrderComparator(TRUSTED_ORDER_SCOPE)
 
   const addresses = useMemo(() => {
     return allSafes?.map((safe) => safe.address) ?? []
@@ -158,8 +162,8 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
       } as SelectableSafe)
     }
 
-    return items
-  }, [allMultiChainSafes, allSingleSafes, addedSafes, similarityResult, searchQuery])
+    return items.sort(sortComparator)
+  }, [allMultiChainSafes, allSingleSafes, addedSafes, similarityResult, searchQuery, sortComparator])
 
   // Thin overlay injecting selection state over the structural list
   const availableItems = useMemo<SelectableItem[]>(() => {

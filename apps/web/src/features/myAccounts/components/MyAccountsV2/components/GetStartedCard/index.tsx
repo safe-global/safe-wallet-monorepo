@@ -41,7 +41,7 @@ const GetStartedCard = () => {
         <div className="mt-5 flex flex-col gap-2.5">
           <Button
             size="lg"
-            className="h-12 w-full rounded-xl text-[15px]"
+            className="h-12 w-full text-[15px]"
             onClick={connectWallet}
             data-testid="connect-wallet-button"
           >
@@ -59,7 +59,7 @@ const GetStartedCard = () => {
             <Button
               variant="ghost"
               size="lg"
-              className="h-12 w-full rounded-xl text-[15px]"
+              className="h-12 w-full text-[15px]"
               data-testid="watch-account-button"
               render={<NextLink href={{ pathname: AppRoutes.newSafe.load, query: { next } }} />}
             >

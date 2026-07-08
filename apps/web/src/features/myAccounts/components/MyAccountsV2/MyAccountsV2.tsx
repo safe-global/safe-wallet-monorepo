@@ -4,6 +4,9 @@ import AccountsList from './components/AccountsList'
 import AccountsSearch from './components/AccountsSearch'
 import GetStartedCard from './components/GetStartedCard'
 import TrustedAccountsActions from './components/TrustedAccountsActions'
+import SafeListSortToggle from '@/components/common/SafeListSortToggle'
+import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import madProps from '@/utils/mad-props'
 import css from '../../styles.module.css'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -21,6 +24,7 @@ type MyAccountsProps = {
 
 const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
   const wallet = useWallet()
+  const isDarkMode = useDarkMode()
   const [searchQuery, setSearchQuery] = useState('')
   const modal = useTrustedSafesModal()
   const migration = useMigrationPrompt()
@@ -43,6 +47,9 @@ const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
               <div className="flex-1">
                 <AccountsSearch setSearchQuery={setSearchQuery} />
               </div>
+              <ShadcnProvider dark={isDarkMode} className="flex items-center">
+                <SafeListSortToggle className="border-border shadow-xs" />
+              </ShadcnProvider>
               <TrustedAccountsActions onManage={modal.open} onLinkClick={onLinkClick} />
             </div>
 

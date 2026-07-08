@@ -3,7 +3,6 @@ import { MyAccountsFeature } from '@/features/myAccounts'
 import SpaceRow from './SpaceRow'
 import SignInOptions from '../SignInOptions'
 import WorkspaceBanner from '../WorkspaceBanner'
-import LocalSafesAlert from './LocalSafesAlert'
 import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import SafeMarkIcon from '@/public/images/logo-no-text.svg'
 import { useAppSelector } from '@/store'
@@ -98,8 +97,6 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
               <ShadcnTypography variant="h3" className="mb-6 text-center">
                 Sign in to your workspace
               </ShadcnTypography>
-
-              <LocalSafesAlert />
 
               <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
             </div>

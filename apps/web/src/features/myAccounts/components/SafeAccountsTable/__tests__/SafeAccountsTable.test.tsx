@@ -19,14 +19,23 @@ jest.mock('../SafeAccountTableRow', () => ({
     onToggle,
     checkbox,
     onSelectToggle,
+    dragHandleProps,
+    rowRef,
+    rowDraggableProps,
   }: {
     line: { key: string; displayName: string }
     onToggle?: () => void
     checkbox?: RowCheckbox
     onSelectToggle?: (next: boolean) => void
+    dragHandleProps?: object | null
+    rowRef?: (el: HTMLElement | null) => void
+    rowDraggableProps?: object
   }) => (
-    <tr data-testid="row" data-key={line.key}>
+    <tr data-testid="row" data-key={line.key} ref={rowRef} {...rowDraggableProps}>
       <td>
+        {dragHandleProps !== undefined && (
+          <button data-testid={`drag-${line.key}`} {...dragHandleProps} type="button" aria-label="drag" />
+        )}
         {checkbox && (
           <button
             data-testid={`select-${line.key}`}
@@ -144,6 +153,32 @@ describe('SafeAccountsTable', () => {
   it('does not render checkboxes without a selection prop', () => {
     render(<SafeAccountsTable items={items} />)
     expect(screen.queryByTestId('select-0xB')).not.toBeInTheDocument()
+  })
+})
+
+describe('SafeAccountsTable — reorder mode', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockUseSafeAccountRows.mockReturnValue({ groups, isLoading: false })
+  })
+
+  it('renders a drag handle for every top-level account, in the provided order', () => {
+    render(<SafeAccountsTable items={items} reorder={{ onReorder: jest.fn() }} />)
+    expect(screen.getByTestId('drag-0xB')).toBeInTheDocument()
+    expect(screen.getByTestId('drag-0xA')).toBeInTheDocument()
+    expect(screen.getByTestId('drag-0xG')).toBeInTheDocument()
+    expect(rowNames()).toEqual(['Bravo', 'Alpha', 'Group'])
+  })
+
+  it('suppresses column-header sorting while reordering', () => {
+    render(<SafeAccountsTable items={items} reorder={{ onReorder: jest.fn() }} />)
+    expect(screen.queryByTestId('account-sort-name')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('account-sort-threshold')).not.toBeInTheDocument()
+  })
+
+  it('does not render drag handles without a reorder prop', () => {
+    render(<SafeAccountsTable items={items} />)
+    expect(screen.queryByTestId('drag-0xB')).not.toBeInTheDocument()
   })
 })
 

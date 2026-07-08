@@ -151,6 +151,8 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
       nextState[slices.orderByPreferenceSlice.name] = {
         orderBy: slices.OrderByOption.NAME,
         resetVersion: slices.ORDER_BY_RESET_VERSION,
+        // Only the default sort direction is reset — the user's custom drag order is preserved.
+        manualOrder: orderByState.manualOrder ?? {},
       }
     }
 

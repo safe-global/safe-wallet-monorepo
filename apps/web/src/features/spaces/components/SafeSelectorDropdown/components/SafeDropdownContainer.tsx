@@ -1,5 +1,5 @@
 import { RotateCw, Search } from 'lucide-react'
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { SelectContent, SelectItem } from '@/components/ui/select'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -108,6 +108,23 @@ const SafeDropdownContainer = ({
   // Bottom-fade scroll hint, shown only while more rows lie below the fold.
   const { setScrollNode, showFade: showScrollHint } = useBottomScrollFade([filteredItems.length, isLoading, isError])
 
+  // Keep our own handle on the scroll area (shared with the fade hint) so we can scroll the
+  // current safe into view on open — under Name / Manual order it can sit mid-list.
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null)
+  const attachScrollArea = useCallback(
+    (node: HTMLDivElement | null) => {
+      scrollAreaRef.current = node
+      setScrollNode(node)
+    },
+    [setScrollNode],
+  )
+
+  useEffect(() => {
+    if (!selectedItemId || isLoading || query) return
+    const current = scrollAreaRef.current?.querySelector<HTMLElement>('[data-current-safe="true"]')
+    current?.scrollIntoView?.({ block: 'center' })
+  }, [selectedItemId, isLoading, query, items.length])
+
   const renderContent = () => {
     if (isError) {
       return <DropdownContentError onRetry={onRetry} />
@@ -149,15 +166,16 @@ const SafeDropdownContainer = ({
         <SelectItem
           key={item.id}
           value={item.id}
+          // Scroll anchor for the open-to-current-safe behaviour (see the scrollIntoView effect).
+          data-current-safe={item.id === selectedItemId ? 'true' : undefined}
           // [&>div]:min-w-0/shrink relax the built-in ItemText wrapper (shrink-0, min-width:auto in
           // ui/select.tsx) so the name column can truncate instead of overflowing the popup.
-          // focus:bg-transparent: base-ui moves focus to the hovered option and never clears it when
-          // the pointer moves onto a non-option row (the multi-chain Collapsible), which would leave
-          // a stuck highlight — the pointer highlight is `hover:` only; keyboard nav keeps
-          // focus-visible:bg-muted.
+          // base-ui moves DOM focus to the hovered/keyboard-active row, so `focus:bg-muted` is the
+          // hover highlight (it also overrides ui/select's base `focus:bg-accent`); `data-selected`
+          // marks the open safe with the same muted highlight, persistent while it isn't focused.
           // [&>span.absolute]:hidden suppresses the built-in checkmark on the selected row (it
-          // overlaps the balance column); the bg-muted highlight marks the current safe instead.
-          className="group/row h-auto py-2 px-3 rounded-lg my-0.5 focus:bg-transparent focus-visible:bg-muted data-[state=checked]:bg-muted hover:bg-muted/30 cursor-pointer [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden"
+          // overlaps the balance column); the muted highlight marks the current safe instead.
+          className="group/row h-auto py-2 px-3 rounded-lg my-0.5 cursor-pointer focus:bg-muted data-[selected]:bg-muted [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden"
         >
           <SafeItem {...item} onRename={handleRename} />
         </SelectItem>
@@ -209,7 +227,7 @@ const SafeDropdownContainer = ({
         )}
 
         <div
-          ref={setScrollNode}
+          ref={attachScrollArea}
           data-testid="dropdown-scroll-area"
           className="min-h-0 flex-1 overflow-y-auto overscroll-y-none px-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
         >

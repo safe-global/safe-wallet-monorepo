@@ -158,6 +158,25 @@ describe('store', () => {
       expect(mergedState.orderByPreference).toEqual({
         orderBy: OrderByOption.NAME,
         resetVersion: ORDER_BY_RESET_VERSION,
+        manualOrder: {},
+      })
+    })
+
+    it('preserves the custom manual order when the one-time A→Z reset fires', () => {
+      const persistedState = {
+        orderByPreference: { orderBy: OrderByOption.LAST_VISITED, manualOrder: { trusted: ['0x1', '0x2'] } },
+      }
+      const initialState = { orderByPreference: { orderBy: OrderByOption.NAME } }
+
+      const mergedState = _hydrationReducer(initialState, {
+        type: '@@HYDRATE',
+        payload: persistedState,
+      })
+
+      expect(mergedState.orderByPreference).toEqual({
+        orderBy: OrderByOption.NAME,
+        resetVersion: ORDER_BY_RESET_VERSION,
+        manualOrder: { trusted: ['0x1', '0x2'] },
       })
     })
 
