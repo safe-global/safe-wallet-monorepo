@@ -1,38 +1,26 @@
 /**
- * Type definitions for address similarity detection algorithm
+ * Type definitions for address similarity detection.
  *
- * Used to detect potential address poisoning attacks by identifying
- * addresses that share similar prefixes and suffixes.
- *
- * NOTE: this file hosts TWO generations of types:
- *  - LEGACY (prefix+suffix AND bucketing, dead Hamming) — `SimilarityConfig`,
+ * Two complementary detectors (a mixed model — both load-bearing), see the header of
+ * `addressSimilarity.ts`:
+ *  - INTRA-LIST (prefix+suffix bucketing between listed candidates) — `SimilarityConfig`,
  *    `SimilarityGroup`, `SimilarityDetectionResult`, `DEFAULT_SIMILARITY_CONFIG`.
- *    Still consumed by web own-Safes lists and mobile Send. Marked @deprecated.
- *  - CURRENT (anchor-based, front-OR-back, two-tier severity) —
+ *  - ANCHOR (front-OR-back vs a trusted anchor, two-tier severity) —
  *    `AnchorSimilarityConfig`, `SimilarityMatch`, `SimilarityIndex`,
- *    `ListAnnotation`, `DEFAULT_ANCHOR_SIMILARITY_CONFIG`. Prefer these.
- * See the migration checklist at the top of `addressSimilarity.ts`.
+ *    `ListAnnotation`, `DEFAULT_ANCHOR_SIMILARITY_CONFIG`.
  */
 
 import { Severity } from '../features/safe-shield/types'
 
-/**
- * @deprecated Legacy config (prefix/suffix lengths + a no-op Hamming threshold).
- * Replaced by {@link AnchorSimilarityConfig}. Do not use in new code.
- */
+/** Prefix/suffix lengths for the intra-list detector ({@link detectSimilarAddresses}). */
 export interface SimilarityConfig {
   /** Number of characters from the start (after 0x) to match. Default: 4 */
   prefixLength: number
   /** Number of characters from the end to match. Default: 4 */
   suffixLength: number
-  /** Maximum Hamming distance in middle section to consider similar. Default: 10 */
-  hammingThreshold: number
 }
 
-/**
- * @deprecated Legacy group shape. Replaced by {@link SimilarityMatch} /
- * {@link ListAnnotation}. Do not use in new code.
- */
+/** A group of listed addresses that share a prefix+suffix bucket (intra-list detector). */
 export interface SimilarityGroup {
   /** The bucket key identifying this group (prefix + suffix) */
   bucketKey: string
@@ -40,10 +28,7 @@ export interface SimilarityGroup {
   addresses: string[]
 }
 
-/**
- * @deprecated Legacy detection result. Replaced by {@link SimilarityIndex}
- * (Mode A) and {@link ListAnnotation} (Mode B). Do not use in new code.
- */
+/** Result of the intra-list detector ({@link detectSimilarAddresses}). */
 export interface SimilarityDetectionResult {
   /** Groups of similar addresses detected */
   groups: SimilarityGroup[]
@@ -55,16 +40,10 @@ export interface SimilarityDetectionResult {
   getGroup: (address: string) => SimilarityGroup | undefined
 }
 
-/**
- * @deprecated Legacy default config. Replaced by
- * {@link DEFAULT_ANCHOR_SIMILARITY_CONFIG}. Do not use in new code.
- */
+/** Default prefix/suffix lengths for the intra-list detector. */
 export const DEFAULT_SIMILARITY_CONFIG: SimilarityConfig = {
   prefixLength: 4,
   suffixLength: 4,
-  // High threshold to catch address poisoning attacks - middle section differences are expected
-  // since attackers generate addresses matching prefix/suffix but can't control the middle
-  hammingThreshold: 32,
 }
 
 // ────────────────────────────────────────────────────────────────────────────
