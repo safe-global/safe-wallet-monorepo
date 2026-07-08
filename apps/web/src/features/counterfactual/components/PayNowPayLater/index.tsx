@@ -171,6 +171,7 @@ const PayNowPayLater = ({
           <Box mt={1}>
             <ErrorMessage level="info">
               <Typography
+                data-testid="sign-in-to-workspace-btn"
                 variant="body2"
                 component="span"
                 onClick={signInAndSelectPayLater}
