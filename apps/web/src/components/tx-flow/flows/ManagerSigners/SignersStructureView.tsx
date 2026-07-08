@@ -11,7 +11,7 @@ import {
   Typography,
 } from '@mui/material'
 import { Controller, FormProvider } from 'react-hook-form'
-import { useCallback, useContext, useState } from 'react'
+import { useContext } from 'react'
 import type { ReactElement } from 'react'
 
 import AddIcon from '@/public/images/common/add.svg'
@@ -19,7 +19,6 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import TxCard from '../../common/TxCard'
 import OwnerRow from '@/components/new-safe/OwnerRow'
-import { GuardBlockedHint, type BlockedHint } from '@/features/address-poisoning'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { ManageSignersFormFields } from '.'
 import { TxFlowContext } from '../../TxFlowProvider'
@@ -41,18 +40,11 @@ type Props = {
 export function SignersStructureView(props: Props): ReactElement {
   const { onNext } = useContext<TxFlowContextType<ManageSignersForm>>(TxFlowContext)
 
-  // Aggregate each signer row's poisoning hint (keyed by stable field id) to show next to Next.
-  const [poisoningHints, setPoisoningHints] = useState<Record<string, BlockedHint | undefined>>({})
-  const onPoisoningChange = useCallback((id: string, hint?: BlockedHint) => {
-    setPoisoningHints((prev) => (prev[id] === hint ? prev : { ...prev, [id]: hint }))
-  }, [])
-  const poisoningHint = props.fieldArray.fields.map((field) => poisoningHints[field.id]).find(Boolean)
-
   return (
     <TxCard>
       <FormProvider {...props.formMethods}>
         <form onSubmit={props.formMethods.handleSubmit(onNext)} className={commonCss.form}>
-          <Signers {...props} onPoisoningChange={onPoisoningChange} />
+          <Signers {...props} />
 
           <Divider className={commonCss.nestedDivider} />
 
@@ -61,18 +53,14 @@ export function SignersStructureView(props: Props): ReactElement {
           <Divider className={commonCss.nestedDivider} />
 
           <CardActions>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-              <GuardBlockedHint hint={poisoningHint} />
-              <Button
-                data-testId="submit-next"
-                variant="contained"
-                type="submit"
-                disabled={props.isSameSetup || !props.formMethods.formState.isValid}
-                sx={{ ml: 'auto' }}
-              >
-                Next
-              </Button>
-            </Box>
+            <Button
+              data-testId="submit-next"
+              variant="contained"
+              type="submit"
+              disabled={props.isSameSetup || !props.formMethods.formState.isValid}
+            >
+              Next
+            </Button>
           </CardActions>
         </form>
       </FormProvider>
@@ -84,10 +72,7 @@ function Signers({
   fieldArray,
   onRemove: _onRemove,
   onAdd,
-  onPoisoningChange,
-}: Pick<Props, 'fieldArray' | 'onAdd' | 'onRemove'> & {
-  onPoisoningChange: (id: string, hint?: BlockedHint) => void
-}): ReactElement {
+}: Pick<Props, 'fieldArray' | 'onAdd' | 'onRemove'>): ReactElement {
   const onRemove = (index: number) => {
     _onRemove(index)
     trackEvent({ ...SETTINGS_EVENTS.SETUP.REMOVE_OWNER, label: SETTINGS_LABELS.manage_signers })
@@ -98,8 +83,6 @@ function Signers({
       {fieldArray.fields.map((field, index) => (
         <OwnerRow
           key={field.id}
-          rowId={field.id}
-          onPoisoningChange={onPoisoningChange}
           index={index}
           groupName={ManageSignersFormFields.owners}
           removable={fieldArray.fields.length > 1}

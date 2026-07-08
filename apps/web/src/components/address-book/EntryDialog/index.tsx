@@ -1,6 +1,5 @@
 import type { ReactElement, BaseSyntheticEvent } from 'react'
-import { useCallback, useState } from 'react'
-import { Button, DialogActions, DialogContent, Box, type SxProps, type Theme } from '@mui/material'
+import { Box, Button, DialogActions, DialogContent, type SxProps, type Theme } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 
 import AddressInput from '@/components/common/AddressInput'
@@ -10,7 +9,6 @@ import useChainId from '@/hooks/useChainId'
 import { useAppDispatch } from '@/store'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { useChain } from '@/hooks/useChains'
-import { AddressPoisoningGuard, GuardBlockedHint, type BlockedHint } from '@/features/address-poisoning'
 
 export type AddressEntry = {
   name: string
@@ -46,14 +44,6 @@ function EntryDialog({
   })
 
   const { handleSubmit, formState } = methods
-
-  // Address-poisoning guard: warns + blocks (until verified) when the contact address resembles a trusted anchor.
-  const [poisoningBlocked, setPoisoningBlocked] = useState(false)
-  const [poisoningHint, setPoisoningHint] = useState<BlockedHint>()
-  const onPoisoningBlockedChange = useCallback((blocked: boolean, hint?: BlockedHint) => {
-    setPoisoningBlocked(blocked)
-    setPoisoningHint(hint)
-  }, [])
 
   const submitCallback = handleSubmit((data: AddressEntry) => {
     dispatch(upsertAddressBookEntries({ ...data, chainIds: chainIds ?? [actualChainId] }))
@@ -94,22 +84,17 @@ function EntryDialog({
                 showPrefix={!!currentChainId}
               />
             </Box>
-
-            {!disableAddressInput && (
-              <AddressPoisoningGuard name="address" context="add-entity" onBlockedChange={onPoisoningBlockedChange} />
-            )}
           </DialogContent>
 
           <DialogActions>
             <Button data-testid="cancel-btn" onClick={handleClose}>
               Cancel
             </Button>
-            <GuardBlockedHint hint={poisoningHint} />
             <Button
               data-testid="save-btn"
               type="submit"
               variant="contained"
-              disabled={!formState.isValid || poisoningBlocked}
+              disabled={!formState.isValid}
               disableElevation
             >
               Save

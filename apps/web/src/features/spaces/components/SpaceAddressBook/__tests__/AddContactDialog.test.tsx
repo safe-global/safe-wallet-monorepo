@@ -27,11 +27,6 @@ jest.mock('@/hooks/useChains', () => ({
   }),
 }))
 
-jest.mock('@/features/address-poisoning', () => ({
-  AddressPoisoningGuard: () => null,
-  GuardBlockedHint: () => null,
-}))
-
 jest.mock('@/components/common/ModalDialog', () => ({
   __esModule: true,
   default: ({ children, open, dialogTitle }: { children: React.ReactNode; open: boolean; dialogTitle: string }) =>

@@ -10,10 +10,9 @@ import {
   IconButton,
   Tooltip,
   Alert,
-  Box,
 } from '@mui/material'
-import { useForm, FormProvider, useFieldArray, useFormContext, useWatch, Controller } from 'react-hook-form'
-import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
+import { useForm, FormProvider, useFieldArray, Controller } from 'react-hook-form'
+import { Fragment } from 'react'
 import type { ReactElement } from 'react'
 
 import TxCard from '../../common/TxCard'
@@ -21,7 +20,6 @@ import AddIcon from '@/public/images/common/add.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { RecoverAccountFlowFields } from '.'
 import AddressBookInput from '@/components/common/AddressBookInput'
-import { AddressPoisoningGuard, GuardBlockedHint, type BlockedHint } from '@/features/address-poisoning'
 import { TOOLTIP_TITLES } from '../../common/constants'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -56,83 +54,6 @@ export function _isSameSetup({
   })
 }
 
-/**
- * One new-signer row. After recovery executes these addresses become full owners, so each
- * row runs Mode A: it warns when the entered address resembles a trusted anchor, blocks a
- * CRITICAL match until acknowledged, and reports its blocked state up so the parent can gate Next.
- */
-function NewSignerRow({
-  index,
-  fieldId,
-  canRemove,
-  onRemove,
-  onBlockedChange,
-}: {
-  index: number
-  fieldId: string
-  canRemove: boolean
-  onRemove: () => void
-  onBlockedChange: (fieldId: string, hint?: BlockedHint) => void
-}): ReactElement {
-  const { control, trigger } = useFormContext<RecoverAccountFlowProps>()
-  const { safeAddress } = useSafeInfo()
-  const fieldName = `${RecoverAccountFlowFields.owners}.${index}.value` as const
-  const newOwners = useWatch({ control, name: RecoverAccountFlowFields.owners })
-  const [blocked, setBlocked] = useState(false)
-  const [hint, setHint] = useState<BlockedHint>()
-  const blockedRef = useRef(blocked)
-  blockedRef.current = blocked
-  const onGuardBlockedChange = useCallback((isBlocked: boolean, blockedHint?: BlockedHint) => {
-    setBlocked(isBlocked)
-    setHint(blockedHint)
-  }, [])
-
-  // Report the hint up so the parent can gate Next + show it there; re-validate on block change.
-  useEffect(() => {
-    onBlockedChange(fieldId, hint)
-  }, [fieldId, hint, onBlockedChange])
-  useEffect(() => {
-    void trigger(fieldName)
-  }, [blocked, trigger, fieldName])
-
-  const validate = (val: string) => {
-    if (sameAddress(val, safeAddress)) {
-      return 'The Safe account cannot own itself'
-    }
-    if (newOwners.filter((owner) => owner.value === val).length > 1) {
-      return 'Already designated to be a signer'
-    }
-    if (blockedRef.current) {
-      return false
-    }
-  }
-
-  return (
-    <Fragment>
-      <Grid item xs={11}>
-        <AddressBookInput label={`Signer ${index + 1}`} name={fieldName} required fullWidth validate={validate} />
-        <AddressPoisoningGuard name={fieldName} context="add-entity" onBlockedChange={onGuardBlockedChange} />
-      </Grid>
-
-      <Grid
-        item
-        xs={1}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        {canRemove && (
-          <IconButton onClick={onRemove}>
-            <SvgIcon component={DeleteIcon} inheritViewBox />
-          </IconButton>
-        )}
-      </Grid>
-    </Fragment>
-  )
-}
-
 export function RecoverAccountFlowSetup({
   params,
   onSubmit,
@@ -140,7 +61,7 @@ export function RecoverAccountFlowSetup({
   params: RecoverAccountFlowProps
   onSubmit: (formData: RecoverAccountFlowProps) => void
 }): ReactElement {
-  const { safe } = useSafeInfo()
+  const { safeAddress, safe } = useSafeInfo()
 
   const formMethods = useForm<RecoverAccountFlowProps>({
     defaultValues: params,
@@ -154,15 +75,6 @@ export function RecoverAccountFlowSetup({
     control: formMethods.control,
     name: RecoverAccountFlowFields.owners,
   })
-
-  // Mode A: aggregate each signer row's poisoning hint (keyed by stable field id) to gate Next
-  // and show the "verify to continue" cue next to it.
-  const [blockedSigners, setBlockedSigners] = useState<Record<string, BlockedHint | undefined>>({})
-  const handleBlockedChange = useCallback((fieldId: string, hint?: BlockedHint) => {
-    setBlockedSigners((prev) => (prev[fieldId] === hint ? prev : { ...prev, [fieldId]: hint }))
-  }, [])
-  const poisoningHint = fields.map((field) => blockedSigners[field.id]).find(Boolean)
-  const hasBlockedSigner = !!poisoningHint
 
   const isSameSetup = _isSameSetup({
     oldOwners: safe.owners,
@@ -199,14 +111,43 @@ export function RecoverAccountFlowSetup({
 
           <Grid container spacing={3} direction="row">
             {fields.map((field, index) => (
-              <NewSignerRow
-                key={field.id}
-                index={index}
-                fieldId={field.id}
-                canRemove={index > 0}
-                onRemove={() => remove(index)}
-                onBlockedChange={handleBlockedChange}
-              />
+              <Fragment key={index}>
+                <Grid item xs={11}>
+                  <AddressBookInput
+                    label={`Signer ${index + 1}`}
+                    name={`${RecoverAccountFlowFields.owners}.${index}.value`}
+                    required
+                    fullWidth
+                    key={field.id}
+                    validate={(value) => {
+                      if (sameAddress(value, safeAddress)) {
+                        return 'The Safe account cannot own itself'
+                      }
+
+                      const isDuplicate = newOwners.filter((owner) => owner.value === value).length > 1
+                      if (isDuplicate) {
+                        return 'Already designated to be a signer'
+                      }
+                    }}
+                  />
+                </Grid>
+
+                <Grid
+                  item
+                  xs={1}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {index > 0 && (
+                    <IconButton onClick={() => remove(index)}>
+                      <SvgIcon component={DeleteIcon} inheritViewBox />
+                    </IconButton>
+                  )}
+                </Grid>
+              </Fragment>
             ))}
           </Grid>
 
@@ -300,18 +241,9 @@ export function RecoverAccountFlowSetup({
           <Divider className={commonCss.nestedDivider} />
 
           <CardActions sx={{ mt: '0 !important' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-              <GuardBlockedHint hint={poisoningHint} />
-              <Button
-                data-testid="next-btn"
-                variant="contained"
-                type="submit"
-                sx={{ mt: 1, ml: 'auto' }}
-                disabled={isSameSetup || hasBlockedSigner}
-              >
-                Next
-              </Button>
-            </Box>
+            <Button data-testid="next-btn" variant="contained" type="submit" sx={{ mt: 1 }} disabled={isSameSetup}>
+              Next
+            </Button>
           </CardActions>
         </TxCard>
       </form>

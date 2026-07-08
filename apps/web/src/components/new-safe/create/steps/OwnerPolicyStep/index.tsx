@@ -2,8 +2,7 @@ import useAddressBook from '@/hooks/useAddressBook'
 import useWallet from '@/hooks/wallets/useWallet'
 import { Button, SvgIcon, MenuItem, Tooltip, Typography, Divider, Box, Grid, TextField } from '@mui/material'
 import { Controller, FormProvider, useFieldArray, useForm } from 'react-hook-form'
-import { type ReactElement, useCallback, useState } from 'react'
-import { GuardBlockedHint, type BlockedHint } from '@/features/address-poisoning'
+import type { ReactElement } from 'react'
 
 import AddIcon from '@/public/images/common/add.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -76,13 +75,6 @@ const OwnerPolicyStep = ({
 
   const isDisabled = !formState.isValid
 
-  // Aggregate each signer row's poisoning hint (keyed by stable field id) to show next to Next.
-  const [poisoningHints, setPoisoningHints] = useState<Record<string, BlockedHint | undefined>>({})
-  const onPoisoningChange = useCallback((id: string, hint?: BlockedHint) => {
-    setPoisoningHints((prev) => (prev[id] === hint ? prev : { ...prev, [id]: hint }))
-  }, [])
-  const poisoningHint = ownerFields.map((field) => poisoningHints[field.id]).find(Boolean)
-
   useSafeSetupHints(setDynamicHint, threshold, ownerFields.length)
 
   const handleBack = () => {
@@ -111,8 +103,6 @@ const OwnerPolicyStep = ({
           {ownerFields.map((field, i) => (
             <OwnerRow
               key={field.id}
-              rowId={field.id}
-              onPoisoningChange={onPoisoningChange}
               index={i}
               removable={i > 0}
               groupName={OwnerPolicyStepFields.owners}
@@ -201,18 +191,15 @@ const OwnerPolicyStep = ({
               gap: 3,
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Button
-                data-testid="back-btn"
-                variant="outlined"
-                size="large"
-                onClick={handleBack}
-                startIcon={<ArrowBackIcon fontSize="small" />}
-              >
-                Back
-              </Button>
-              <GuardBlockedHint hint={poisoningHint} />
-            </Box>
+            <Button
+              data-testid="back-btn"
+              variant="outlined"
+              size="large"
+              onClick={handleBack}
+              startIcon={<ArrowBackIcon fontSize="small" />}
+            >
+              Back
+            </Button>
             <Button data-testid="next-btn" type="submit" variant="contained" size="large" disabled={isDisabled}>
               Next
             </Button>

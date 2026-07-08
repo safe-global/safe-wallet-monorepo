@@ -31,6 +31,14 @@ export const MULTI_RESULT_DESCRIPTION: Record<
     `You are interacting with ${formatCount(number, 'address', totalNumber, 'addresses')} for the first time.`,
   [RecipientStatus.RECURRING_RECIPIENT]: (number, totalNumber) =>
     `You have interacted with ${formatCount(number, 'address', totalNumber, 'addresses')} before.`,
+  [RecipientStatus.RESEMBLES_TRUSTED_ADDRESS]: (number, totalNumber) =>
+    `${capitalise(formatCount(number, 'address', totalNumber, 'addresses'))} closely ${
+      number === 1 ? 'resembles' : 'resemble'
+    } an address you trust. Verify before you continue.`,
+  [RecipientStatus.PARTLY_MATCHES_TRUSTED_ADDRESS]: (number, totalNumber) =>
+    `${capitalise(formatCount(number, 'address', totalNumber, 'addresses'))} partly ${
+      number === 1 ? 'matches' : 'match'
+    } an address you trust. Verify before you continue.`,
   [BridgeStatus.INCOMPATIBLE_SAFE]: (number, totalNumber) =>
     `${capitalise(
       formatCount(number, 'Safe account', totalNumber),

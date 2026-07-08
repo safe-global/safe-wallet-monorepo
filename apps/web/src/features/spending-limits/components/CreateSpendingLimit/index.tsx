@@ -1,11 +1,10 @@
-import { useCallback, useContext, useMemo, useState } from 'react'
+import { useCallback, useContext, useMemo } from 'react'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
-import { Box, Button, CardActions, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material'
+import { Button, CardActions, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material'
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
 import { parseUnits, AbiCoder } from 'ethers'
 
 import AddressBookInput from '@/components/common/AddressBookInput'
-import { AddressPoisoningGuard, GuardBlockedHint, type BlockedHint } from '@/features/address-poisoning'
 import useChainId from '@/hooks/useChainId'
 import { getResetTimeOptions } from '../../constants'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
@@ -45,14 +44,6 @@ const CreateSpendingLimit = () => {
     ? balances.items.find((item) => item.tokenInfo.address === tokenAddress)
     : undefined
 
-  // Address-poisoning guard: warns + blocks (until verified) when the beneficiary resembles a trusted anchor.
-  const [poisoningBlocked, setPoisoningBlocked] = useState(false)
-  const [poisoningHint, setPoisoningHint] = useState<BlockedHint>()
-  const onPoisoningBlockedChange = useCallback((blocked: boolean, hint?: BlockedHint) => {
-    setPoisoningBlocked(blocked)
-    setPoisoningHint(hint)
-  }, [])
-
   const validateSpendingLimit = useCallback(
     (value: string) => {
       return (
@@ -75,12 +66,6 @@ const CreateSpendingLimit = () => {
               label="Beneficiary"
             />
           </FormControl>
-
-          <AddressPoisoningGuard
-            name={SpendingLimitFields.beneficiary}
-            context="recipient"
-            onBlockedChange={onPoisoningBlockedChange}
-          />
 
           <TokenAmountInput balances={balances.items} selectedToken={selectedToken} validate={validateSpendingLimit} />
 
@@ -119,18 +104,9 @@ const CreateSpendingLimit = () => {
           </FormControl>
 
           <CardActions>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-              <GuardBlockedHint hint={poisoningHint} />
-              <Button
-                data-testid="next-btn"
-                variant="contained"
-                type="submit"
-                disabled={poisoningBlocked}
-                sx={{ ml: 'auto' }}
-              >
-                Next
-              </Button>
-            </Box>
+            <Button data-testid="next-btn" variant="contained" type="submit">
+              Next
+            </Button>
           </CardActions>
         </form>
       </FormProvider>
