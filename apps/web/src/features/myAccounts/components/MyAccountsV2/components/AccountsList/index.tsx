@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { type AllSafeItems, type AllSafeItemsGrouped, useSafeOrderComparator, useSafesSearch } from '@/hooks/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -14,21 +14,15 @@ import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
 import { Typography } from '@/components/ui/typography'
 
-import MigrationPrompt from '../../../MigrationPrompt'
-import AddTrustedSafesCard from '@/components/common/AddTrustedSafesCard'
-import type { UseTrustedSafesModalReturn } from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
-import type { UseMigrationPromptReturn } from '../../../../hooks/useMigrationPrompt'
 import SafeAccountsTable from '../../../SafeAccountsTable'
 
 type AccountsListProps = {
   searchQuery: string
   safes: AllSafeItemsGrouped
-  modal: UseTrustedSafesModalReturn
-  migration: UseMigrationPromptReturn
   onLinkClick?: () => void
 }
 
-const AccountsList = ({ searchQuery, safes, modal, migration, onLinkClick }: AccountsListProps) => {
+const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) => {
   const dispatch = useAppDispatch()
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = useSafeOrderComparator(TRUSTED_ORDER_SCOPE)
@@ -66,8 +60,6 @@ const AccountsList = ({ searchQuery, safes, modal, migration, onLinkClick }: Acc
     [currentSafe.chainId, safeAddress, currentSafeInList, addressBook],
   )
 
-  const handleMigrationProceed = useCallback(() => modal.open(), [modal])
-
   useEffect(() => {
     if (searchQuery) {
       trackEvent({ category: OVERVIEW_EVENTS.SEARCH.category, action: OVERVIEW_EVENTS.SEARCH.action })
@@ -86,12 +78,9 @@ const AccountsList = ({ searchQuery, safes, modal, migration, onLinkClick }: Acc
   }
 
   const showCurrentSafe = safeAddress && currentSafeItem && !currentSafeInList?.isPinned
-  const showEmptyState = !migration.hasPinnedSafes && !migration.shouldShowPrompt
 
   return (
     <>
-      {migration.shouldShowPrompt && <MigrationPrompt onProceed={handleMigrationProceed} />}
-
       {showCurrentSafe && (
         <section data-testid="current-safe-section" className="mb-6">
           <Typography variant="paragraph-small-bold" className="mb-2">
@@ -119,8 +108,6 @@ const AccountsList = ({ searchQuery, safes, modal, migration, onLinkClick }: Acc
           />
         </section>
       )}
-
-      {showEmptyState && <AddTrustedSafesCard onAdd={modal.open} />}
     </>
   )
 }

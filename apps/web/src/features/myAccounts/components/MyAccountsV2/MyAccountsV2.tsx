@@ -5,6 +5,7 @@ import AccountsSearch from './components/AccountsSearch'
 import GetStartedCard from './components/GetStartedCard'
 import TrustedAccountsActions from './components/TrustedAccountsActions'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
+import AddTrustedSafesCard from '@/components/common/AddTrustedSafesCard'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import madProps from '@/utils/mad-props'
@@ -31,6 +32,8 @@ const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
   useTrackSafesCount(safes, wallet)
 
   const showGetStarted = !wallet && !migration.hasPinnedSafes
+  const showEmptyState = !showGetStarted && !migration.isLoading && !migration.hasPinnedSafes
+  const showList = !showGetStarted && !showEmptyState
 
   return (
     <div data-testid="sidebar-safe-container" className={css.container}>
@@ -39,9 +42,11 @@ const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
           <AccountsNavigation />
         </div>
 
-        {showGetStarted ? (
-          <GetStartedCard />
-        ) : (
+        {showGetStarted && <GetStartedCard />}
+
+        {showEmptyState && <AddTrustedSafesCard onAdd={modal.open} />}
+
+        {showList && (
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <div className="flex-1">
@@ -53,19 +58,13 @@ const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
               <TrustedAccountsActions onManage={modal.open} onLinkClick={onLinkClick} />
             </div>
 
-            <AccountsList
-              searchQuery={searchQuery}
-              safes={safes}
-              modal={modal}
-              migration={migration}
-              onLinkClick={onLinkClick}
-            />
+            <AccountsList searchQuery={searchQuery} safes={safes} onLinkClick={onLinkClick} />
           </div>
         )}
 
         <TrustedSafesModal modal={modal} />
 
-        <DataWidget />
+        {!showEmptyState && <DataWidget />}
       </div>
     </div>
   )
