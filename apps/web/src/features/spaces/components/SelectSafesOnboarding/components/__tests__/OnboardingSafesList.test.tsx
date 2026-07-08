@@ -1,149 +1,124 @@
-import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@/hooks/safes'
 import { render } from '@/tests/test-utils'
 
 import OnboardingSafesList from '../OnboardingSafesList'
 
-// Mock child components to keep tests focused on list rendering logic
-jest.mock('../SafeCard', () => ({
+// Stub the (MUI) accounts table so these tests stay focused on section/flag wiring.
+// The barrel is replaced wholesale (not spread) to avoid a circular-init crash when required.
+jest.mock('@/features/myAccounts', () => ({
   __esModule: true,
-  default: ({
-    safe,
-    isSimilar,
-    isAtLimit,
+  SafeAccountsTable: ({
+    items,
+    flaggedAddresses,
+    selection,
+    'data-testid': testId,
   }: {
-    safe: SafeItem | MultiChainSafeItem
-    isSimilar?: boolean
-    isAtLimit?: boolean
+    items: Array<{ address: string }>
+    flaggedAddresses?: Set<string>
+    selection?: { isAtLimit?: boolean }
+    'data-testid'?: string
   }) => (
-    <div data-testid={`safe-card-${safe.address}`} data-similar={isSimilar} data-at-limit={isAtLimit}>
-      {safe.address}
+    <div
+      data-testid={testId}
+      data-flagged={[...(flaggedAddresses ?? [])].join(',')}
+      data-at-limit={String(Boolean(selection?.isAtLimit))}
+    >
+      {items.map((item) => (
+        <span key={item.address}>{item.address}</span>
+      ))}
     </div>
   ),
 }))
 
-jest.mock('@/components/common/SimilarAddressAlert', () => ({
+jest.mock('@/components/common/TrustedSafesModal/SecurityBanner', () => ({
   __esModule: true,
-  default: () => <div data-testid="similar-address-alert">Similar addresses detected</div>,
+  default: () => <div data-testid="security-banner">Verify before you trust</div>,
 }))
 
 const buildSafeItem = (address: string, chainId = '1'): SafeItem =>
-  ({
-    address,
-    chainId,
-    isPinned: false,
-    isReadOnly: false,
-    lastVisited: 0,
-    name: undefined,
-  }) as SafeItem
+  ({ address, chainId, isPinned: false, isReadOnly: false, lastVisited: 0, name: undefined }) as SafeItem
+
+const noop = () => {}
+
+const baseProps = {
+  flaggedOwnedAddresses: new Set<string>(),
+  selectedKeys: new Set<string>(),
+  onToggle: noop,
+  isAtLimit: false,
+}
 
 describe('OnboardingSafesList', () => {
-  it('renders nothing when both lists are empty', () => {
-    const { queryByText } = render(
-      <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} similarAddresses={new Set()} />,
+  it('renders no sections when both lists are empty', () => {
+    const { queryByText, queryByTestId } = render(
+      <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} {...baseProps} />,
     )
 
-    expect(queryByText('Trusted safes')).not.toBeInTheDocument()
-    expect(queryByText('Owned safes')).not.toBeInTheDocument()
+    expect(queryByText('Trusted safe accounts')).not.toBeInTheDocument()
+    expect(queryByText('Owned safe accounts')).not.toBeInTheDocument()
+    expect(queryByTestId('onboarding-trusted-table')).not.toBeInTheDocument()
+    expect(queryByTestId('onboarding-owned-table')).not.toBeInTheDocument()
   })
 
-  it('renders trusted safes section when trustedSafes is non-empty', () => {
-    const trusted = [buildSafeItem('0xTrusted')]
-
+  it('renders the trusted section with its table', () => {
     const { getByText, getByTestId } = render(
-      <OnboardingSafesList trustedSafes={trusted} ownedSafes={[]} similarAddresses={new Set()} />,
+      <OnboardingSafesList trustedSafes={[buildSafeItem('0xTrusted')]} ownedSafes={[]} {...baseProps} />,
     )
 
-    expect(getByText('Trusted safes')).toBeInTheDocument()
-    expect(getByTestId('safe-card-0xTrusted')).toBeInTheDocument()
+    expect(getByText('Trusted safe accounts')).toBeInTheDocument()
+    expect(getByTestId('onboarding-trusted-table')).toHaveTextContent('0xTrusted')
   })
 
-  it('renders owned safes section when ownedSafes is non-empty', () => {
-    const owned = [buildSafeItem('0xOwned')]
-
+  it('renders the owned section with its table', () => {
     const { getByText, getByTestId } = render(
-      <OnboardingSafesList trustedSafes={[]} ownedSafes={owned} similarAddresses={new Set()} />,
+      <OnboardingSafesList trustedSafes={[]} ownedSafes={[buildSafeItem('0xOwned')]} {...baseProps} />,
     )
 
-    expect(getByText('Owned safes')).toBeInTheDocument()
-    expect(getByTestId('safe-card-0xOwned')).toBeInTheDocument()
+    expect(getByText('Owned safe accounts')).toBeInTheDocument()
+    expect(getByTestId('onboarding-owned-table')).toHaveTextContent('0xOwned')
   })
 
-  it('renders both sections when both lists have safes', () => {
-    const trusted = [buildSafeItem('0xTrusted')]
-    const owned = [buildSafeItem('0xOwned')]
-
-    const { getByText } = render(
-      <OnboardingSafesList trustedSafes={trusted} ownedSafes={owned} similarAddresses={new Set()} />,
-    )
-
-    expect(getByText('Trusted safes')).toBeInTheDocument()
-    expect(getByText('Owned safes')).toBeInTheDocument()
-  })
-
-  it('shows similar address alert when similarAddresses is non-empty', () => {
+  it('flags only the owned table, never the trusted table', () => {
     const { getByTestId } = render(
-      <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} similarAddresses={new Set(['0xflagged'])} />,
+      <OnboardingSafesList
+        trustedSafes={[buildSafeItem('0xTrusted')]}
+        ownedSafes={[buildSafeItem('0xOwned')]}
+        {...baseProps}
+        flaggedOwnedAddresses={new Set(['0xowned'])}
+      />,
     )
 
-    expect(getByTestId('similar-address-alert')).toBeInTheDocument()
+    expect(getByTestId('onboarding-trusted-table').dataset.flagged).toBe('')
+    expect(getByTestId('onboarding-owned-table').dataset.flagged).toBe('0xowned')
   })
 
-  it('does not show similar address alert when similarAddresses is empty', () => {
-    const { queryByTestId } = render(
-      <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} similarAddresses={new Set()} />,
+  it('shows the security banner only when an owned safe is flagged', () => {
+    const { queryByTestId, rerender } = render(
+      <OnboardingSafesList trustedSafes={[]} ownedSafes={[buildSafeItem('0xOwned')]} {...baseProps} />,
     )
+    expect(queryByTestId('security-banner')).not.toBeInTheDocument()
 
-    expect(queryByTestId('similar-address-alert')).not.toBeInTheDocument()
+    rerender(
+      <OnboardingSafesList
+        trustedSafes={[]}
+        ownedSafes={[buildSafeItem('0xOwned')]}
+        {...baseProps}
+        flaggedOwnedAddresses={new Set(['0xowned'])}
+      />,
+    )
+    expect(queryByTestId('security-banner')).toBeInTheDocument()
   })
 
-  it('passes isAtLimit down to safe cards in both sections', () => {
-    const trusted = [buildSafeItem('0xTrusted')]
-    const owned = [buildSafeItem('0xOwned')]
-
+  it('passes isAtLimit down to both tables', () => {
     const { getByTestId } = render(
-      <OnboardingSafesList trustedSafes={trusted} ownedSafes={owned} similarAddresses={new Set()} isAtLimit />,
+      <OnboardingSafesList
+        trustedSafes={[buildSafeItem('0xTrusted')]}
+        ownedSafes={[buildSafeItem('0xOwned')]}
+        {...baseProps}
+        isAtLimit
+      />,
     )
 
-    expect(getByTestId('safe-card-0xTrusted').dataset.atLimit).toBe('true')
-    expect(getByTestId('safe-card-0xOwned').dataset.atLimit).toBe('true')
-  })
-
-  it('defaults isAtLimit to false on safe cards when not provided', () => {
-    const trusted = [buildSafeItem('0xTrusted')]
-
-    const { getByTestId } = render(
-      <OnboardingSafesList trustedSafes={trusted} ownedSafes={[]} similarAddresses={new Set()} />,
-    )
-
-    expect(getByTestId('safe-card-0xTrusted').dataset.atLimit).toBe('false')
-  })
-
-  it('shows the limit-reached notice when isAtLimit', () => {
-    const { getByText } = render(
-      <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} similarAddresses={new Set()} isAtLimit />,
-    )
-
-    expect(getByText(/maximum of \d+ Safe accounts per workspace/i)).toBeInTheDocument()
-  })
-
-  it('hides the limit-reached notice when below the limit', () => {
-    const { queryByText } = render(
-      <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} similarAddresses={new Set()} />,
-    )
-
-    expect(queryByText(/maximum of \d+ Safe accounts per workspace/i)).not.toBeInTheDocument()
-  })
-
-  it('passes isSimilar=true to SafeCard for flagged addresses', () => {
-    const trusted = [buildSafeItem('0xflagged')]
-    const owned = [buildSafeItem('0xnormal')]
-    const similar = new Set(['0xflagged'])
-
-    const { getByTestId } = render(
-      <OnboardingSafesList trustedSafes={trusted} ownedSafes={owned} similarAddresses={similar} />,
-    )
-
-    expect(getByTestId('safe-card-0xflagged').dataset.similar).toBe('true')
-    expect(getByTestId('safe-card-0xnormal').dataset.similar).toBe('false')
+    expect(getByTestId('onboarding-trusted-table').dataset.atLimit).toBe('true')
+    expect(getByTestId('onboarding-owned-table').dataset.atLimit).toBe('true')
   })
 })

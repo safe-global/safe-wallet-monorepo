@@ -24,7 +24,7 @@ describe('useOnboardingSafes', () => {
 
     expect(result.current.trustedSafes).toEqual([])
     expect(result.current.ownedSafes).toEqual([])
-    expect(result.current.similarAddresses.size).toBe(0)
+    expect(result.current.flaggedOwnedAddresses.size).toBe(0)
   })
 
   it('returns trusted safes from addedSafes', () => {
@@ -125,14 +125,14 @@ describe('useOnboardingSafes', () => {
     expect('safes' in result.current.ownedSafes[0]).toBe(true)
   })
 
-  describe('similar address detection', () => {
+  describe('similar address detection (owned safes only)', () => {
     it('returns empty set when fewer than 2 unique addresses', () => {
       const mockOwned = { '1': ['0xSingle'] }
       jest.spyOn(allOwnedSafes, 'default').mockReturnValue([mockOwned, undefined, false])
 
       const { result } = renderHook(() => useOnboardingSafes())
 
-      expect(result.current.similarAddresses.size).toBe(0)
+      expect(result.current.flaggedOwnedAddresses.size).toBe(0)
     })
 
     it('returns empty set when addresses are not similar', () => {
@@ -143,13 +143,13 @@ describe('useOnboardingSafes', () => {
 
       const { result } = renderHook(() => useOnboardingSafes())
 
-      expect(result.current.similarAddresses.size).toBe(0)
+      expect(result.current.flaggedOwnedAddresses.size).toBe(0)
     })
 
-    it('detects similar addresses across trusted and owned safes', () => {
+    it('flags an owned safe that is similar to a trusted one, but never the trusted safe itself', () => {
       // Same 6-char prefix and 4-char suffix, differ only in middle
-      const addr1 = '0x1234567890abcdef1234567890abcdef12345678'
-      const addr2 = '0x123456eeeeeeeeee1234567890abcdef12345678'
+      const addr1 = '0x1234567890abcdef1234567890abcdef12345678' // trusted
+      const addr2 = '0x123456eeeeeeeeee1234567890abcdef12345678' // owned look-alike
 
       const mockOwned = { '1': [addr2] }
       jest.spyOn(allOwnedSafes, 'default').mockReturnValue([mockOwned, undefined, false])
@@ -164,9 +164,9 @@ describe('useOnboardingSafes', () => {
         },
       })
 
-      // Both should be flagged
-      expect(result.current.similarAddresses.has(addr1.toLowerCase())).toBe(true)
-      expect(result.current.similarAddresses.has(addr2.toLowerCase())).toBe(true)
+      // A safe the user trusted at some point is treated as vetted — only the owned look-alike is flagged.
+      expect(result.current.flaggedOwnedAddresses.has(addr2.toLowerCase())).toBe(true)
+      expect(result.current.flaggedOwnedAddresses.has(addr1.toLowerCase())).toBe(false)
     })
   })
 })

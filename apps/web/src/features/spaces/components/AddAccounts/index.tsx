@@ -14,7 +14,7 @@ import {
   useAllOwnedSafes,
 } from '@/hooks/safes'
 import AddManually, { type AddManuallyFormValues } from './AddManually'
-import { getSafeId } from './SafesList'
+import { getSafeId } from '../SelectSafesOnboarding/utils/safeIds'
 import ConnectWalletHint from '../ConnectWalletHint'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

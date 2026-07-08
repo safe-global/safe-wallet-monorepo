@@ -14,9 +14,12 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import useChains from '@/hooks/useChains'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { addOrUpdateSafe, selectAllAddedSafes } from '@/store/addedSafesSlice'
+import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { useSpaceSafes } from '../../../hooks/useSpaceSafes'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
-import { getSafeId, getMultiChainSafeId } from '../components/SafeCard'
+import { getSafeId, getMultiChainSafeId } from '../utils/safeIds'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
 
 // URL safe-param prefix can be either numeric chainId or shortName ("1:" or "eth:").
@@ -51,9 +54,11 @@ const useOnboardingSubmit = (
   allSafes: AllSafeItems = EMPTY_ALL_SAFES,
 ) => {
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const { configs: chains } = useChains()
   const safeFromUrl = useSafeQueryParam() || undefined
   const { allSafes: spaceSafes } = useSpaceSafes()
+  const addedSafes = useAppSelector(selectAllAddedSafes)
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
 
@@ -127,10 +132,10 @@ const useOnboardingSubmit = (
     ([key, isSelected]) => isSelected && !key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX),
   ).length
 
-  const addNewSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdStr: string) => {
+  const getSafesToAdd = (selectedSafes: AddAccountsFormValues['selectedSafes']) => {
     const flatSpaceSafes = flattenSafeItems(spaceSafes)
 
-    const safesToAdd = Object.entries(selectedSafes)
+    return Object.entries(selectedSafes)
       .filter(
         ([key, isSelected]) =>
           isSelected &&
@@ -141,7 +146,9 @@ const useOnboardingSubmit = (
           }),
       )
       .map(([key]) => parseSafeKey(key))
+  }
 
+  const addNewSafes = async (safesToAdd: Array<{ chainId: string; address: string }>, spaceIdStr: string) => {
     if (safesToAdd.length === 0) return
 
     const result = await addSafesToSpace({
@@ -150,6 +157,25 @@ const useOnboardingSubmit = (
     })
     if (result.error) {
       throw new Error(getRtkQueryErrorMessage(result.error))
+    }
+  }
+
+  // Newly added Safes are added to the user's global Trusted list too, so a Safe the user
+  // discovered as "owned" and chose to add is trusted going forward. Already-trusted Safes are skipped.
+  const trustAddedSafes = (safesToAdd: Array<{ chainId: string; address: string }>) => {
+    for (const { chainId, address } of safesToAdd) {
+      if (addedSafes[chainId]?.[address]) continue
+      dispatch(
+        addOrUpdateSafe({
+          safe: {
+            ...defaultSafeInfo,
+            chainId,
+            address: { value: address },
+            owners: defaultSafeInfo.owners,
+            threshold: defaultSafeInfo.threshold,
+          },
+        }),
+      )
     }
   }
 
@@ -175,8 +201,10 @@ const useOnboardingSubmit = (
   }
 
   const processSelectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdStr: string) => {
-    await addNewSafes(selectedSafes, spaceIdStr)
+    const safesToAdd = getSafesToAdd(selectedSafes)
+    await addNewSafes(safesToAdd, spaceIdStr)
     await removeUnselectedSafes(selectedSafes, spaceIdStr)
+    trustAddedSafes(safesToAdd)
   }
 
   const onSubmit = handleSubmit(async (data) => {
