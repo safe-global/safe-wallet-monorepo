@@ -4,7 +4,7 @@ exports[`ChangeThreshold should display the ChangeThreshold component with the n
 <div>
   <div>
     <span
-      class="m-0 text-sm leading-5 font-normal text-muted-foreground mb-1"
+      class="m-0 text-sm leading-5 font-normal block text-muted-foreground mb-1"
       data-slot="typography"
       data-variant="paragraph-small"
     >

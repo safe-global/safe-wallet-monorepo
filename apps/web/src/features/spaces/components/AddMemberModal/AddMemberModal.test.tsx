@@ -81,9 +81,9 @@ jest.mock('@/components/common/ModalDialog', () => ({
   default: ({ children, open }: { children: React.ReactNode; open: boolean }) => (open ? <div>{children}</div> : null),
 }))
 
-jest.mock('@/config/routes', () => ({
-  AppRoutes: { spaces: { members: '/spaces/members' } },
-}))
+// Keep the real route map — transitive imports (e.g. utils/chains.ts) read other
+// AppRoutes entries at module scope and crash on a narrow mock.
+jest.mock('@/config/routes', () => jest.requireActual('@/config/routes'))
 
 jest.mock('@/components/common/EthHashInfo', () => ({
   __esModule: true,
@@ -240,6 +240,9 @@ describe('AddMemberModal tracking', () => {
     fireEvent.change(screen.getByTestId('member-invitee-identifier-input'), {
       target: { value: 'Ali' },
     })
+    // The Base UI combobox popup does not open on a synthetic change event — open it
+    // via the suggestions toggle, as a pointer user would.
+    fireEvent.click(await screen.findByLabelText('Toggle suggestions'))
     fireEvent.click(await screen.findByRole('option', { name }))
 
     expect(screen.getByTestId('member-invitee-identifier-input')).toHaveValue(address)

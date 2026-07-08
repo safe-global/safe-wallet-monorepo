@@ -31,6 +31,8 @@ describe('ActionRequiredPanel defaultExpanded', () => {
   it('stays hidden when defaultExpanded is true but there are no warnings', () => {
     render(<ActionRequiredPanel defaultExpanded>{null}</ActionRequiredPanel>)
     const panel = screen.getByTestId('action-required-panel')
-    expect(panel).not.toBeVisible()
+    // The panel hides itself via the Tailwind `hidden` utility; jsdom does not apply
+    // Tailwind styles, so assert on the class instead of computed visibility.
+    expect(panel).toHaveClass('hidden')
   })
 })

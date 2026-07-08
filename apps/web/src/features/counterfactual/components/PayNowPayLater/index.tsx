@@ -105,24 +105,35 @@ const PayNowPayLater = ({
           <Typography variant="paragraph-small">Safe doesn&apos;t profit from the fees.</Typography>
         </div>
       </div>
-      {!isMultiChain && (
-        <div className="w-full">
-          <RadioGroup
-            value={payMethod}
-            onValueChange={onChoosePayMethod}
-            className={classnames(css.radioGroup, 'flex flex-row')}
+      <div className="w-full">
+        <RadioGroup
+          value={payMethod}
+          onValueChange={onChoosePayMethod}
+          className={classnames(css.radioGroup, 'flex flex-row')}
+        >
+          <Label
+            htmlFor="pay-now-execution-method"
+            data-testid="pay-now-execution-method"
+            className={classnames(css.radioContainer, 'flex-1 items-center', {
+              [css.active]: payMethod === PayMethod.PayNow,
+              'cursor-pointer': !isMultiChain,
+              'cursor-not-allowed opacity-60': isMultiChain,
+            })}
           >
-            <Label
-              htmlFor="pay-now-execution-method"
-              data-testid="pay-now-execution-method"
-              className={classnames(css.radioContainer, 'flex-1 cursor-pointer items-center', {
-                [css.active]: payMethod === PayMethod.PayNow,
-              })}
-            >
-              <RadioGroupItem id="pay-now-execution-method" value={PayMethod.PayNow} aria-label="Pay now" />
-              <span>
-                <Typography className={css.radioTitle}>Pay now</Typography>
-                {showGasFeeEstimation && (
+            <RadioGroupItem
+              id="pay-now-execution-method"
+              value={PayMethod.PayNow}
+              aria-label="Pay now"
+              disabled={isMultiChain}
+            />
+            <span>
+              <Typography className={css.radioTitle}>Pay now</Typography>
+              {isMultiChain ? (
+                <Typography className={css.radioSubtitle} variant="paragraph-small" color="muted">
+                  Not available for multiple networks
+                </Typography>
+              ) : (
+                showGasFeeEstimation && (
                   <Typography className={css.radioSubtitle} variant="paragraph-small" color="muted">
                     {canRelay ? (
                       'Sponsored free transaction'
@@ -132,52 +143,52 @@ const PayNowPayLater = ({
                       </>
                     )}
                   </Typography>
-                )}
-              </span>
-            </Label>
+                )
+              )}
+            </span>
+          </Label>
 
-            <Label
-              htmlFor="connected-wallet-execution-method"
-              data-testid="connected-wallet-execution-method"
-              className={classnames(css.radioContainer, 'flex-1 cursor-pointer items-center', {
-                [css.active]: payMethod === PayMethod.PayLater,
-              })}
-            >
-              <RadioGroupItem
-                id="connected-wallet-execution-method"
-                value={PayMethod.PayLater}
-                disabled={signingIn}
-                aria-label="Pay later"
-              />
-              <span>
-                <Typography className={classnames(css.radioTitle, 'inline-flex items-center')}>
-                  Pay later {signingIn && <Spinner className="ml-1 size-3.5" />}
-                </Typography>
-                <Typography className={css.radioSubtitle} variant="paragraph-small" color="muted">
-                  {isUserAuthenticated ? 'with the first transaction' : 'Sign in to enable'}
-                </Typography>
-              </span>
-            </Label>
-          </RadioGroup>
-          {!isUserAuthenticated && (
-            <div className="mt-2">
-              <ErrorMessage level="info">
-                <Typography
-                  variant="paragraph-small"
-                  onClick={signInAndSelectPayLater}
-                  className={classnames('font-bold text-[var(--color-primary-main)] underline', {
-                    'cursor-default opacity-60': signingIn,
-                    'cursor-pointer': !signingIn,
-                  })}
-                >
-                  Sign in
-                </Typography>{' '}
-                to create a Safe without immediate deployment.
-              </ErrorMessage>
-            </div>
-          )}
-        </div>
-      )}
+          <Label
+            htmlFor="connected-wallet-execution-method"
+            data-testid="connected-wallet-execution-method"
+            className={classnames(css.radioContainer, 'flex-1 cursor-pointer items-center', {
+              [css.active]: payMethod === PayMethod.PayLater,
+            })}
+          >
+            <RadioGroupItem
+              id="connected-wallet-execution-method"
+              value={PayMethod.PayLater}
+              disabled={signingIn}
+              aria-label="Pay later"
+            />
+            <span>
+              <Typography className={classnames(css.radioTitle, 'inline-flex items-center')}>
+                Pay later {signingIn && <Spinner className="ml-1 size-3.5" />}
+              </Typography>
+              <Typography className={css.radioSubtitle} variant="paragraph-small" color="muted">
+                {isUserAuthenticated ? 'with the first transaction' : 'Sign in to enable'}
+              </Typography>
+            </span>
+          </Label>
+        </RadioGroup>
+        {!isUserAuthenticated && (
+          <div className="mt-2">
+            <ErrorMessage level="info">
+              <Typography
+                variant="paragraph-small"
+                onClick={signInAndSelectPayLater}
+                className={classnames('font-bold text-[var(--color-primary-main)] underline', {
+                  'cursor-default opacity-60': signingIn,
+                  'cursor-pointer': !signingIn,
+                })}
+              >
+                Sign in
+              </Typography>{' '}
+              to create a Safe without immediate deployment.
+            </ErrorMessage>
+          </div>
+        )}
+      </div>
     </>
   )
 }
