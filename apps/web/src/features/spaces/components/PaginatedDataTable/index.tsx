@@ -55,7 +55,7 @@ export type DataTableColumn<T> = {
   priority?: 'essential' | 'secondary'
   /** Pins the column to the left while horizontally scrolling on mobile */
   sticky?: boolean
-  /** Minimum column width in px — a floor for the content-based auto layout */
+  /** Minimum column width in px, applied on desktop (md+) only; mobile auto-sizes to content */
   minWidth?: number
   /** When provided, the column header becomes sortable using this comparable value */
   sortValue?: (row: T) => string | number | null | undefined
@@ -83,6 +83,12 @@ const hideClass = <T,>(column: DataTableColumn<T>) =>
 // Sticky only kicks in on mobile, where the table can scroll horizontally
 const stickyClass = <T,>(column: DataTableColumn<T>) =>
   column.sticky ? 'max-[767px]:bg-card max-[767px]:sticky max-[767px]:left-0 max-[767px]:z-10' : ''
+
+// minWidth is a desktop-only floor; mobile auto-sizes to content
+const minWidthClass = <T,>(column: DataTableColumn<T>) => (column.minWidth ? 'md:min-w-[var(--col-min-w)]' : '')
+
+const minWidthStyle = <T,>(column: DataTableColumn<T>): Record<string, string> | undefined =>
+  column.minWidth ? { '--col-min-w': `${column.minWidth}px` } : undefined
 
 const compareNullable = (
   a: string | number | null | undefined,
@@ -176,11 +182,12 @@ function PaginatedDataTable<T>({
                 <TableHead
                   key={column.id}
                   aria-sort={column.sortValue ? ariaSortValue(direction) : undefined}
-                  style={column.minWidth ? { minWidth: column.minWidth } : undefined}
+                  style={minWidthStyle(column)}
                   className={cn(
                     tableHeadVariants({ align: column.align }),
                     hideClass(column),
                     stickyClass(column),
+                    minWidthClass(column),
                     column.width && COLUMN_WIDTHS[column.width],
                   )}
                 >
@@ -216,11 +223,12 @@ function PaginatedDataTable<T>({
                     <TableCell
                       key={column.id}
                       data-testid={column.cellTestId}
-                      style={column.minWidth ? { minWidth: column.minWidth } : undefined}
+                      style={minWidthStyle(column)}
                       className={cn(
                         tableCellVariants({ align: column.align, emphasis: column.emphasis }),
                         hideClass(column),
                         stickyClass(column),
+                        minWidthClass(column),
                       )}
                     >
                       {column.cell(row)}

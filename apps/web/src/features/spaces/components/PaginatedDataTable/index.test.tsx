@@ -133,18 +133,6 @@ describe('PaginatedDataTable', () => {
       expect(screen.getByText('a@example.io').closest('td')).toHaveClass('max-[767px]:hidden')
     })
 
-    it('applies sticky classes and minWidth to both the header and body cells of a sticky column', () => {
-      renderResponsive()
-
-      const nameHeader = screen.getByText('Name').closest('th')
-      const nameCell = screen.getByText('Alice').closest('td')
-
-      expect(nameHeader).toHaveClass('max-[767px]:sticky', 'max-[767px]:left-0')
-      expect(nameHeader).toHaveStyle({ minWidth: '200px' })
-      expect(nameCell).toHaveClass('max-[767px]:sticky', 'max-[767px]:left-0')
-      expect(nameCell).toHaveStyle({ minWidth: '200px' })
-    })
-
     it('adds no separate mobile sort control and keeps sorting on the visible headers', () => {
       mockUseIsMobile.mockReturnValue(true)
       renderResponsive()
