@@ -70,13 +70,24 @@ _Last updated: 2026-07-08._
   `.storybook/AGENTS.md` rule. `SpaceNestedSafesButton`'s intentional mockup was re-synced with the
   real markup.
 
-## Remaining roadmap (not applied — needs owners)
+## Follow-up wave (done 2026-07-08)
 
-- **11 mockup story files remain** (walletconnect, recovery, counterfactual, nfts, proposers,
-  notification-center, speedup, bridge, tx-notes, targeted-outreach, no-fee-campaign). They are
-  allowed by convention while no real-component stories exist, **but their copy is invented** (not
-  even stale — never existed in source), so treat them as layout sketches, not design references.
-  Replace with real-component stories feature by feature.
+- **All 11 remaining mockup story files replaced** with real-component stories (19 new story
+  files across walletconnect, recovery, counterfactual, nfts, proposers, notification-center,
+  speedup, bridge, tx-notes, targeted-outreach, no-fee-campaign), each verified rendering in
+  light + dark via `yarn storybook:sweep` before its mockup was deleted. Zero invented-copy
+  stories remain.
+- **Branch tests fully green** (713/713 suites): the 17 pre-existing failing suites were triaged —
+  root cause was mostly dev logic not yet re-ported to shadcn. Re-ported: GTF max-send fee banner
+  (RecipientRow), SpacesList require-login/AccountInfo header, AddMemberModal invite logic,
+  PayNowPayLater multichain pay-method group, CreateButton `?next` param. Remaining failures were
+  stale copy/DOM expectations — tests updated to current behavior.
+- **Render-sweep harness promoted** to `scripts/storybook/render-sweep.ts`
+  (`yarn workspace @safe-global/web storybook:sweep`).
+
+## Remaining roadmap (needs owners)
+
 - **MSW handler coverage** for the remaining non-hermetic Components/Features stories (the Pages
-  group was made hermetic in this pass — see `stories/mocks/handlers.ts`).
-- **Chromatic in CI** — still the highest-leverage guard (see DESIGN_SYSTEM_CONSISTENCY.md #5).
+  group is hermetic — see `stories/mocks/handlers.ts`).
+- **Chromatic in CI** — still the highest-leverage guard (see DESIGN_SYSTEM_CONSISTENCY.md #5);
+  needs a project token.
