@@ -113,7 +113,7 @@ function NoTrustedAccountsBody({ onManage }: { onManage: () => void }) {
         </Typography>
       </div>
       <Button variant="outline" size="sm" onClick={onManage} data-testid="dropdown-manage-list-btn">
-        <Settings2 className="size-4" /> Manage list
+        <Settings2 className="size-4" /> Manage trusted Safes
       </Button>
     </div>
   )
@@ -214,8 +214,8 @@ function SpaceSafeBar() {
     />
   )
 
-  // The empty Local tab surfaces "Manage list" inside its empty state, so the footer row is dropped
-  // there to avoid a redundant second entry point.
+  // The empty Local tab surfaces the manage-trusted CTA inside its empty state, so the footer row is
+  // dropped there to avoid a redundant second entry point.
   const dropdownFooter =
     activeTab === 'local' && localItems.length > 0
       ? (close: () => void) => (
