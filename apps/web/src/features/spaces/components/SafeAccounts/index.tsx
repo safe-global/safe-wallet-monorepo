@@ -13,9 +13,7 @@ import {
 } from '@/store/orderByPreferenceSlice'
 import {
   type AllSafeItems,
-  type SafeItem,
-  _getMultiChainAccounts,
-  _getSingleChainAccounts,
+  _groupAndSort,
   useSafeItemBuilder,
   useSafeOrderComparator,
   useSafesSearch,
@@ -34,15 +32,6 @@ import { SPACE_LABELS, SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
 import SpaceSafeContextMenu from './SpaceSafeContextMenu'
-
-const _groupAndSort = (
-  items: SafeItem[],
-  sortComparator: (a: AllSafeItems[number], b: AllSafeItems[number]) => number,
-): AllSafeItems => {
-  const multi = _getMultiChainAccounts(items)
-  const single = _getSingleChainAccounts(items, multi)
-  return [...multi, ...single].sort(sortComparator)
-}
 
 const SpaceSafeAccounts = () => {
   const { allSafes, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()

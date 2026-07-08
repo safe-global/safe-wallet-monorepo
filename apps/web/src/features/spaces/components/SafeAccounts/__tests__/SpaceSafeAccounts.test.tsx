@@ -48,8 +48,7 @@ jest.mock('@/hooks/safes', () => ({
     ownedError: undefined,
     ownedLoading: false,
   }),
-  _getMultiChainAccounts: () => [],
-  _getSingleChainAccounts: (items: SafeItem[]) => items,
+  _groupAndSort: (items: SafeItem[], cmp: (a: SafeItem, b: SafeItem) => number) => [...items].sort(cmp),
   useSafesSearch: (safes: Array<{ name?: string }>, query: string) =>
     query ? safes.filter((safe) => safe.name?.toLowerCase().includes(query.toLowerCase())) : [],
 }))

@@ -2,10 +2,8 @@ import { useCallback, useMemo, useState } from 'react'
 import debounce from 'lodash/debounce'
 import {
   type AllSafeItems,
-  type SafeItem,
   _buildSafeItem,
-  _getMultiChainAccounts,
-  _getSingleChainAccounts,
+  _groupAndSort,
   getComparator,
   useAllOwnedSafes,
   useSafesSearch,
@@ -18,15 +16,6 @@ import useWallet from '@/hooks/wallets/useWallet'
 import useChains from '@/hooks/useChains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
-
-const _groupAndSort = (
-  items: SafeItem[],
-  sortComparator: (a: AllSafeItems[number], b: AllSafeItems[number]) => number,
-): AllSafeItems => {
-  const multi = _getMultiChainAccounts(items)
-  const single = _getSingleChainAccounts(items, multi)
-  return [...multi, ...single].sort(sortComparator)
-}
 
 const useOnboardingSafes = () => {
   const [searchQuery, setSearchQuery] = useState('')

@@ -8,8 +8,7 @@ import {
   isMultiChainSafeItem,
   useSafesSearch,
   getComparator,
-  _getMultiChainAccounts,
-  _getSingleChainAccounts,
+  _groupAndSort,
   _buildSafeItem,
   useAllOwnedSafes,
 } from '@/hooks/safes'
@@ -77,15 +76,6 @@ function getRemovedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSaf
     const safeId = `${spaceSafe.chainId}:${spaceSafe.address}`
     return !safes[safeId]
   })
-}
-
-const _groupAndSort = (
-  items: SafeItem[],
-  sortComparator: (a: AllSafeItems[number], b: AllSafeItems[number]) => number,
-): AllSafeItems => {
-  const multi = _getMultiChainAccounts(items)
-  const single = _getSingleChainAccounts(items, multi)
-  return [...multi, ...single].sort(sortComparator)
 }
 
 interface AddAccountsProps {
@@ -325,8 +315,8 @@ const AddAccounts = ({
       )
 
       handleClose()
-    } catch (e) {
-      console.log(e)
+    } catch {
+      setError('Something went wrong updating Safe accounts. Please try again.')
     }
   })
 
