@@ -4,31 +4,23 @@
  * Detects potential address poisoning attacks by identifying addresses that
  * resemble addresses the user trusts (UIs show `0x1234…5678`, hiding the middle).
  *
- * ─── MIGRATION CHECKLIST ────────────────────────────────────────────────────
- * This module hosts TWO generations:
+ * ─── TWO COMPLEMENTARY DETECTORS (a mixed model — both are load-bearing) ─────
  *
- *   CURRENT (preferred) — anchor-based, front-OR-back, two-tier severity:
+ *   ANCHOR — front-OR-back match against a TRUSTED anchor, two severity tiers:
  *     normalizeAddress · longestCommonPrefixLen · longestCommonSuffixLen ·
  *     buildSimilarityIndex · detectListSimilarities
+ *   Use where a trusted reference exists: a candidate that resembles a Safe/contact
+ *   you already trust is the impostor (front+back → CRITICAL, one end → WARN).
  *
- *   LEGACY (@deprecated — prefix+suffix AND bucketing + a no-op Hamming pass):
+ *   INTRA-LIST — front-AND-back match BETWEEN candidates in the same list:
  *     detectSimilarAddresses · getFlaggedSimilarAddressSet · getBucketKey ·
- *     hammingDistance · getMiddleSection · DEFAULT_SIMILARITY_CONFIG (types)
+ *     DEFAULT_SIMILARITY_CONFIG (types)
+ *   Use where nothing is trusted yet (e.g. choosing which owned Safes to add): two
+ *   listed addresses that look alike are flagged even without a trusted reference.
  *
- *   Remaining LEGACY consumers to migrate before the legacy API can be deleted:
- *     web:    features/myAccounts/hooks/useSimilarAddressDetection.ts
- *             components/sidebar/NestedSafesList/useManageNestedSafes.ts
- *             components/common/TrustedSafesModal/useTrustedSafesModal.ts
- *             components/common/SpaceSafeBar/AccountsModal/useAccountsModalItems.ts
- *             features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts
- *             features/spaces/components/AddAccounts/{index,SafesList}.tsx
- *             features/spaces/components/SafeAccounts/index.tsx
- *     mobile: features/Send/hooks/useSuspiciousAddressDetection.ts
- *             features/Send/components/SuspiciousAddressComparison.tsx
- *
- *   Deletion of the legacy API + its dead Hamming code is intentionally deferred
- *   to a later, cross-platform-verified PR (it is still imported by mobile).
- * ────────────────────────────────────────────────────────────────────────────
+ * Surfaces combine the two (anchor + intra-list). Neither is deprecated; intra-list
+ * is also consumed by mobile Send. Consumers: web nested-safes / trusted-safes modal /
+ * accounts modal / space onboarding + safe-accounts; mobile Send suspicious-address.
  */
 
 import { Severity } from '../features/safe-shield/types'
@@ -54,68 +46,14 @@ export const getBucketKey = (address: string, prefixLength: number, suffixLength
 }
 
 /**
- * Calculate Hamming distance between two strings (middle sections)
- * Returns the number of positions at which the corresponding characters differ
- */
-export const hammingDistance = (str1: string, str2: string): number => {
-  if (str1.length !== str2.length) {
-    return Math.max(str1.length, str2.length)
-  }
-
-  let distance = 0
-  for (let i = 0; i < str1.length; i++) {
-    if (str1[i] !== str2[i]) {
-      distance++
-    }
-  }
-  return distance
-}
-
-/**
- * Get the middle section of an address (between prefix and suffix)
- */
-export const getMiddleSection = (address: string, prefixLength: number, suffixLength: number): string => {
-  const hex = address.toLowerCase().slice(2) // Remove '0x' prefix
-  return hex.slice(prefixLength, -suffixLength)
-}
-
-/**
- * Filter addresses in a bucket to only include those within Hamming threshold
- */
-const filterByHammingDistance = (addresses: string[], config: SimilarityConfig): string[] => {
-  if (addresses.length < 2) return []
-
-  const result: Set<string> = new Set()
-
-  for (let i = 0; i < addresses.length; i++) {
-    for (let j = i + 1; j < addresses.length; j++) {
-      const middle1 = getMiddleSection(addresses[i], config.prefixLength, config.suffixLength)
-      const middle2 = getMiddleSection(addresses[j], config.prefixLength, config.suffixLength)
-      const distance = hammingDistance(middle1, middle2)
-
-      if (distance <= config.hammingThreshold) {
-        result.add(addresses[i])
-        result.add(addresses[j])
-      }
-    }
-  }
-
-  return Array.from(result)
-}
-
-/**
- * Detect addresses that are similar to each other
+ * Detect addresses that resemble each other within a single list (intra-list).
  *
- * Flags ALL addresses that share similar prefix+suffix patterns with other addresses.
- * This helps users identify potential address poisoning attacks where an attacker
- * creates addresses that look visually similar to legitimate ones.
- *
- * @deprecated Legacy intra-list detector (prefix+suffix AND, dead Hamming). Prefer the
- * anchor-based engine ({@link buildSimilarityIndex} / {@link detectListSimilarities}).
- * Kept only for existing own-Safes lists + mobile Send; see migration checklist above.
+ * Buckets by prefix+suffix (front AND back must match) and flags every address in a
+ * bucket of 2+. Used where no trusted reference exists yet (e.g. choosing which owned
+ * Safes to add) — the anchor detector handles the "resembles something you trust" case.
  *
  * @param addresses - All addresses to analyze
- * @param config - Configuration for similarity detection algorithm
+ * @param config - Prefix/suffix lengths to bucket on
  * @returns Detection result with groups of similar addresses
  */
 export const detectSimilarAddresses = (
@@ -139,11 +77,8 @@ export const detectSimilarAddresses = (
   const addressToGroups = new Map<string, string[]>()
 
   for (const [bucketKey, addrs] of buckets) {
-    // Skip buckets with less than 2 addresses - no similarity issue
-    if (addrs.length < 2) continue
-
-    // Filter by Hamming distance threshold
-    const similarAddresses = filterByHammingDistance(addrs, config)
+    // A shared prefix+suffix bucket IS the similarity signal; dedupe case-insensitively.
+    const similarAddresses = Array.from(new Set(addrs))
     if (similarAddresses.length < 2) continue
 
     // Create similarity group - flag ALL similar addresses
@@ -178,12 +113,8 @@ export const detectSimilarAddresses = (
 }
 
 /**
- * Lowercase address set for every address that {@link detectSimilarAddresses} flags.
+ * Lowercase address set for every address that {@link detectSimilarAddresses} flags (intra-list).
  * Dedupes case-insensitively; returns an empty set when there are fewer than two distinct addresses.
- *
- * @deprecated Legacy intra-list helper. Prefer the anchor-based engine
- * ({@link buildSimilarityIndex} / {@link detectListSimilarities}). Kept only for the
- * existing own-Safes lists; see migration checklist above.
  */
 export const getFlaggedSimilarAddressSet = (addresses: string[]): Set<string> => {
   const unique = [...new Set(addresses.map((a) => a.toLowerCase()))]

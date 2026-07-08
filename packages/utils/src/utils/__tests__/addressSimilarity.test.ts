@@ -2,8 +2,6 @@ import {
   detectSimilarAddresses,
   getBucketKey,
   getFlaggedSimilarAddressSet,
-  hammingDistance,
-  getMiddleSection,
   normalizeAddress,
   longestCommonPrefixLen,
   longestCommonSuffixLen,
@@ -24,33 +22,6 @@ describe('addressSimilarity', () => {
       const address = '0xABCDEF1234567890ABCDEF1234567890ABCDEF12'
       const key = getBucketKey(address, 6, 4)
       expect(key).toBe('abcdef_ef12')
-    })
-  })
-
-  describe('hammingDistance', () => {
-    it('should return 0 for identical strings', () => {
-      expect(hammingDistance('abcdef', 'abcdef')).toBe(0)
-    })
-
-    it('should count character differences', () => {
-      expect(hammingDistance('abcdef', 'aXcdeX')).toBe(2)
-    })
-
-    it('should handle completely different strings', () => {
-      expect(hammingDistance('aaaaaa', 'bbbbbb')).toBe(6)
-    })
-
-    it('should handle different length strings', () => {
-      expect(hammingDistance('abc', 'abcdef')).toBe(6)
-    })
-  })
-
-  describe('getMiddleSection', () => {
-    it('should extract middle section correctly', () => {
-      const address = '0x1234567890abcdef1234567890abcdef12345678'
-      const middle = getMiddleSection(address, 6, 4)
-      // Total hex = 40 chars, prefix = 6, suffix = 4, middle = 30
-      expect(middle).toBe('7890abcdef1234567890abcdef1234')
     })
   })
 
@@ -113,17 +84,6 @@ describe('addressSimilarity', () => {
 
       expect(result.isFlagged(addresses[0])).toBe(true)
       expect(result.isFlagged(addresses[1])).toBe(true)
-    })
-
-    it('should exclude addresses beyond Hamming threshold', () => {
-      const addresses = [
-        '0x123456aaaaaaaaaaaaaaaaaaaaaaaa12345678',
-        '0x123456bbbbbbbbbbbbbbbbbbbbbbbb12345678', // 26 char difference in middle, beyond default threshold of 10
-      ]
-
-      const result = detectSimilarAddresses(addresses, { prefixLength: 6, suffixLength: 8, hammingThreshold: 10 })
-
-      expect(result.groups.length).toBe(0)
     })
 
     it('should return correct group info via getGroup', () => {
