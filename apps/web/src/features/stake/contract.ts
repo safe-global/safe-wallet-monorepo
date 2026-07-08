@@ -15,7 +15,6 @@ import type StakingWidget from './components/StakingWidget'
 import type StakePage from './components/StakePage'
 import type StakeButton from './components/StakeButton'
 import type StakingConfirmationTx from './components/StakingConfirmationTx'
-import type StakingPromoBanner from './components/StakingPromoBanner'
 import type { getStakeTitle } from './helpers/utils'
 
 export interface StakeContract {
@@ -26,7 +25,6 @@ export interface StakeContract {
   // UI Components
   StakeButton: typeof StakeButton
   StakingConfirmationTx: typeof StakingConfirmationTx
-  StakingPromoBanner: typeof StakingPromoBanner
 
   // Services (camelCase → undefined when not ready)
   getStakeTitle: typeof getStakeTitle

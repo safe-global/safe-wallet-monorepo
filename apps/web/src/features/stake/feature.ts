@@ -15,7 +15,6 @@ import StakingWidget from './components/StakingWidget'
 import StakePage from './components/StakePage'
 import StakeButton from './components/StakeButton'
 import StakingConfirmationTx from './components/StakingConfirmationTx'
-import StakingPromoBanner from './components/StakingPromoBanner'
 
 // Service imports
 import { getStakeTitle } from './helpers/utils'
@@ -29,7 +28,6 @@ const feature: StakeContract = {
   // UI Components
   StakeButton,
   StakingConfirmationTx,
-  StakingPromoBanner,
 
   // Services
   getStakeTitle,
