@@ -25,6 +25,8 @@ import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
 import { useIsPositionsFeatureEnabled } from '@/features/positions'
 import { useBannerVisibility, BannerType, HnBannerForCarousel, HypernativeFeature } from '@/features/hypernative'
 import { useLoadFeature } from '@/features/__core__'
+import { StakeFeature, useIsStakingPromoBannerVisible, STAKING_PROMO_BANNER_HIDE_KEY } from '@/features/stake'
+import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
@@ -44,6 +46,9 @@ const Dashboard = (): ReactElement => {
 
   const isPositionsFeatureEnabled = useIsPositionsFeatureEnabled()
   const { showBanner: showHnBanner } = useBannerVisibility(BannerType.Promo)
+  const { StakingPromoBanner } = useLoadFeature(StakeFeature)
+  const isStakingPromoBannerVisible = useIsStakingPromoBannerVisible()
+  const [, setHideStakingPromoBanner] = useLocalStorage<boolean>(STAKING_PROMO_BANNER_HIDE_KEY)
 
   const noAssets = balancesLoaded && items.length === 0
 
@@ -52,6 +57,8 @@ const Dashboard = (): ReactElement => {
       <div className={css.dashboardGrid}>
         <div className={css.leftCol}>
           <Overview />
+
+          {isStakingPromoBannerVisible && <StakingPromoBanner onDismiss={() => setHideStakingPromoBanner(true)} />}
 
           {noAssets && (
             <Stack spacing={1}>
