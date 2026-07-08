@@ -78,6 +78,25 @@ export const hasFeature = (chain: Pick<Chain, 'features'>, feature: FEATURES): b
   return (chain.features as string[]).includes(feature)
 }
 
+type RelayerChain = Pick<Chain, 'relayer'>
+
+/**
+ * Whether Safe creation is sponsored on this chain, derived from the config
+ * service's structured `relayer` object.
+ */
+export const isSafeCreationSponsored = (chain?: RelayerChain): boolean => {
+  return chain?.relayer?.type != null && !!chain.relayer.safeCreationSponsored
+}
+
+/**
+ * Whether the relay model is gated by a per-address daily quota (the
+ * `/relay/{address}` remaining count). DAILY_LIMIT and NO_FEE_CAMPAIGN use it;
+ * RELAY_FEE and GTF do not.
+ */
+export const isDailyRelayQuota = (chain?: RelayerChain): boolean => {
+  return chain?.relayer?.type === 'DAILY_LIMIT' || chain?.relayer?.type === 'NO_FEE_CAMPAIGN'
+}
+
 export type NativeTokenDisplay = {
   showNativeInBalances: boolean
   showGasFeeEstimation: boolean

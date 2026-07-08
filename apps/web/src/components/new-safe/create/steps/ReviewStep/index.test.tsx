@@ -157,6 +157,16 @@ describe('ReviewStep', () => {
     }
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
     jest.spyOn(relay, 'hasRemainingRelays').mockReturnValue(true)
+    const currentChainSpy = jest.spyOn(useChains, 'useCurrentChain').mockReturnValue({
+      ...mockChain,
+      features: [],
+      relayer: {
+        type: 'RELAY_FEE',
+        safeCreationSponsored: true,
+        safeTransactionSponsored: true,
+        enableTenderlySimulationBeforeRelay: false,
+      },
+    } as Chain)
 
     const { getByText } = render(
       <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
@@ -169,7 +179,83 @@ describe('ReviewStep', () => {
     })
 
     expect(getByText(/Who will pay gas fees:/)).toBeInTheDocument()
+
+    currentChainSpy.mockRestore()
   })
+
+  it('shows sponsored creation on a RELAY_FEE chain', () => {
+    const mockData: NewSafeFormData = {
+      name: 'Test',
+      networks: [mockChain],
+      threshold: 1,
+      owners: [{ name: '', address: '0x1' }],
+      saltNonce: 0,
+      safeVersion: LATEST_SAFE_VERSION as SafeVersion,
+    }
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    // RELAY_FEE chains report remaining: 0 from the legacy quota endpoint; it must not gate sponsorship.
+    jest.spyOn(relay, 'hasRemainingRelays').mockReturnValue(false)
+    const currentChainSpy = jest.spyOn(useChains, 'useCurrentChain').mockReturnValue({
+      ...mockChain,
+      features: [],
+      relayer: {
+        type: 'RELAY_FEE',
+        safeCreationSponsored: true,
+        safeTransactionSponsored: true,
+        enableTenderlySimulationBeforeRelay: false,
+      },
+    } as Chain)
+
+    const { getByText } = render(
+      <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+    )
+
+    act(() => {
+      fireEvent.click(getByText('Pay now'))
+    })
+
+    expect(getByText('Sponsored free transaction')).toBeInTheDocument()
+
+    currentChainSpy.mockRestore()
+  })
+
+  it.each(['DAILY_LIMIT', 'NO_FEE_CAMPAIGN'] as const)(
+    'does not show sponsored creation on a %s chain when the quota is exhausted',
+    (relayerType) => {
+      const mockData: NewSafeFormData = {
+        name: 'Test',
+        networks: [mockChain],
+        threshold: 1,
+        owners: [{ name: '', address: '0x1' }],
+        saltNonce: 0,
+        safeVersion: LATEST_SAFE_VERSION as SafeVersion,
+      }
+      jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+      jest.spyOn(relay, 'hasRemainingRelays').mockReturnValue(false)
+      const currentChainSpy = jest.spyOn(useChains, 'useCurrentChain').mockReturnValue({
+        ...mockChain,
+        features: [],
+        relayer: {
+          type: relayerType,
+          safeCreationSponsored: true,
+          safeTransactionSponsored: true,
+          enableTenderlySimulationBeforeRelay: false,
+        },
+      } as Chain)
+
+      const { getByText, queryByText } = render(
+        <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+      )
+
+      act(() => {
+        fireEvent.click(getByText('Pay now'))
+      })
+
+      expect(queryByText('Sponsored free transaction')).not.toBeInTheDocument()
+
+      currentChainSpy.mockRestore()
+    },
+  )
 
   const authReduxState = {
     auth: {
