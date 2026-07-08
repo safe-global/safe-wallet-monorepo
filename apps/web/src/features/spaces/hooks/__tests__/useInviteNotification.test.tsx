@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import { createElement, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { Provider } from 'react-redux'
 import * as spacesQueries from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import * as usersQueries from '@safe-global/store/gateway/AUTO_GENERATED/users'
@@ -8,7 +8,7 @@ import type { UserWithWallets } from '@safe-global/store/gateway/AUTO_GENERATED/
 import { makeStore } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { AppRoutes } from '@/config/routes'
-import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
+import { MemberStatus } from '../useSpaceMembers'
 import { useInviteNotification } from '../useInviteNotification'
 
 jest.mock('@/store/authSlice', () => ({
@@ -48,7 +48,7 @@ const mockSpaces = (spaces: GetSpaceResponse[] | undefined) => {
 
 const renderWithStore = () => {
   const store = makeStore(undefined, { skipBroadcast: true })
-  const wrapper = ({ children }: { children: ReactNode }) => createElement(Provider, { store, children })
+  const wrapper = ({ children }: { children: ReactNode }) => <Provider store={store}>{children}</Provider>
   const utils = renderHook(() => useInviteNotification(), { wrapper })
   return { store, ...utils }
 }

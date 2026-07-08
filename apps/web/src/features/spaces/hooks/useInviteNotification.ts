@@ -7,7 +7,7 @@ import { isAuthenticated } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { AppRoutes } from '@/config/routes'
 import { filterSpacesByStatus } from '@/features/spaces/utils'
-import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
+import { MemberStatus } from './useSpaceMembers'
 
 export const useInviteNotification = (): void => {
   const dispatch = useAppDispatch()
