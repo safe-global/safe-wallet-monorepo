@@ -170,7 +170,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     {
       id: 'address',
       header: 'Address',
-      width: '40%',
+      width: '30%',
       minWidth: 360,
       cell: (req) => (
         <div className="text-[0.8em] font-mono">
@@ -198,9 +198,9 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     {
       id: 'requestedBy',
       header: 'Requested by',
-      width: '20%',
+      width: '30%',
       priority: 'secondary',
-      minWidth: 140,
+      minWidth: 300,
       cell: (req) => (req.requestedBy ? <RequestedBy requestedBy={req.requestedBy} /> : null),
     },
     {
