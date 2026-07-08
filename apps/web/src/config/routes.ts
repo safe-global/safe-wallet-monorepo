@@ -7,6 +7,7 @@ export const AppRoutes = {
   swap: '/swap',
   stake: '/stake',
   privacy: '/privacy',
+  oidcSignin: '/oidc-signin',
   licenses: '/licenses',
   index: '/',
   imprint: '/imprint',
