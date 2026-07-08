@@ -42,10 +42,6 @@ export type { StakeContract } from './contract'
 // Feature flag hooks
 export { default as useIsStakingFeatureEnabled } from './hooks/useIsStakingFeatureEnabled'
 export { default as useIsStakingBannerEnabled } from './hooks/useIsStakingBannerEnabled'
-export {
-  default as useIsStakingPromoBannerVisible,
-  STAKING_PROMO_BANNER_HIDE_KEY,
-} from './hooks/useIsStakingPromoBannerVisible'
 
 // Stake widget URL hook
 export { useGetStakeWidgetUrl } from './hooks/useGetStakeWidgetUrl'

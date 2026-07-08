@@ -170,10 +170,6 @@ export const OVERVIEW_EVENTS = {
     action: 'Proceed with transaction',
     category: OVERVIEW_CATEGORY,
   },
-  SHOW_STAKING_BANNER: {
-    action: 'Show staking banner',
-    category: OVERVIEW_CATEGORY,
-  },
   OPEN_STAKING_WIDGET: {
     action: 'Open staking widget from banner',
     category: OVERVIEW_CATEGORY,

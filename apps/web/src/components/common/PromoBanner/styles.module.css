@@ -3,7 +3,7 @@
   padding: var(--space-2) var(--space-8) var(--space-2) var(--space-2);
   background: linear-gradient(90deg, #b0ffc9, #d7f6ff);
   border: 0;
-  border-radius: var(--promo-banner-radius, 24px) !important;
+  border-radius: 24px !important;
   min-height: 131px;
   cursor: default;
 }
