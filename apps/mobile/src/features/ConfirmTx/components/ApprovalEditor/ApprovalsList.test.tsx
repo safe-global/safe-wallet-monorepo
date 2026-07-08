@@ -45,12 +45,12 @@ describe('ApprovalsList', () => {
     const { getByText } = renderList(<ApprovalsList approvals={[approval]} />)
 
     expect(getByText('Allow access to tokens?')).toBeTruthy()
-    expect(getByText('This allows the spender to spend the specified amount of your tokens.')).toBeTruthy()
+    expect(getByText('This approval lets the spender use your tokens, limited to this amount.')).toBeTruthy()
     expect(getByText('1500 USDC')).toBeTruthy()
   })
 
   it('highlights unlimited approvals', () => {
-    const approval = buildApproval({ amountFormatted: PSEUDO_APPROVAL_VALUES.UNLIMITED })
+    const approval = buildApproval({ amountFormatted: PSEUDO_APPROVAL_VALUES.UNLIMITED, isHighValue: true })
     const { getByText } = renderList(<ApprovalsList approvals={[approval]} />)
 
     expect(getByText('Unlimited')).toBeTruthy()

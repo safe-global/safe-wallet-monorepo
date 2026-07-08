@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, View, XStack, YStack } from 'tamagui'
+import { Text, Theme, XStack, YStack } from 'tamagui'
 import { TokenType } from '@safe-global/store/gateway/types'
 import {
   PSEUDO_APPROVAL_VALUES,
@@ -7,6 +7,7 @@ import {
 } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { TokenIcon } from '@/src/components/TokenIcon/TokenIcon'
 import { Badge } from '@/src/components/Badge/Badge'
+import { backdropOverlayBackground } from '@/src/components/Badge/theme'
 import { HashDisplay } from '@/src/components/HashDisplay'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
@@ -23,21 +24,25 @@ const getAmountLabel = (approval: ApprovalInfo): string => {
   return `${approval.amountFormatted} ${symbol}`.trim()
 }
 
-const ApprovalItem = ({ approval, onEdit }: { approval: ApprovalInfo; onEdit?: (approval: ApprovalInfo) => void }) => {
-  const isUnlimited = approval.amountFormatted === PSEUDO_APPROVAL_VALUES.UNLIMITED
-
+const ApprovalItem = ({
+  approval,
+  onEdit,
+}: {
+  approval: ApprovalListItem
+  onEdit?: (approval: ApprovalInfo) => void
+}) => {
   return (
-    <YStack gap="$3" testID="approval-item">
+    <YStack gap="$4" testID="approval-item">
       <XStack justifyContent="space-between" alignItems="center" gap="$2">
-        <Text color="$textSecondaryLight" fontSize="$4">
+        <Text color="$color" fontSize="$4">
           Amount
         </Text>
         <XStack gap="$2" alignItems="center" flexShrink={1}>
           <TokenIcon logoUri={approval.tokenInfo?.logoUri} size="$6" />
           <Badge
             circular={false}
-            themeName={isUnlimited ? 'badge_warning_variant2' : 'badge_background'}
-            textContentProps={{ fontWeight: 600 }}
+            themeName={approval.isHighValue ? 'badge_warning_variant3' : 'badge_overlay'}
+            textContentProps={{ fontWeight: 500 }}
             testID="approval-amount-pill"
             content={getAmountLabel(approval)}
           />
@@ -45,14 +50,21 @@ const ApprovalItem = ({ approval, onEdit }: { approval: ApprovalInfo; onEdit?: (
       </XStack>
 
       <XStack justifyContent="space-between" alignItems="center" gap="$2">
-        <Text color="$textSecondaryLight" fontSize="$4">
+        <Text color="$color" fontSize="$4">
           Spender
         </Text>
-        <HashDisplay value={approval.spender} />
+        <HashDisplay value={approval.spender} showExternalLink={false} textProps={{ color: '$textSecondaryLight' }} />
       </XStack>
 
       {onEdit && (
-        <SafeButton secondary size="$sm" testID="edit-approval-button" onPress={() => onEdit(approval)}>
+        <SafeButton
+          secondary
+          size="$sm"
+          backgroundColor={backdropOverlayBackground}
+          textColor="$staticPrimaryLight"
+          testID="edit-approval-button"
+          onPress={() => onEdit(approval)}
+        >
           Edit amount
         </SafeButton>
       )}
@@ -77,42 +89,44 @@ export const ApprovalsList = ({ approvals, onEdit }: ApprovalsListProps) => {
   const isReadOnly = !onEdit || isErc721Approval
   const subtitle = isErc721Approval
     ? 'This allows the spender to transfer the specified token.'
-    : 'This allows the spender to spend the specified amount of your tokens.'
+    : 'This approval lets the spender use your tokens, limited to this amount.'
   const hasHighValueApproval = approvals.some((approval) => approval.isHighValue)
 
   return (
-    <YStack
-      backgroundColor={hasHighValueApproval ? '$backgroundWarning' : '$infoBackground'}
-      borderRadius="$4"
-      padding="$4"
-      gap="$4"
-      marginTop="$4"
-      testID="approval-editor"
-    >
-      <YStack gap="$2">
-        <XStack gap="$2" alignItems="center">
-          <View backgroundColor={hasHighValueApproval ? '$warning' : '$info'} borderRadius="$10" padding="$1">
+    <Theme name={hasHighValueApproval ? 'approval_warning' : 'approval_info'}>
+      <YStack
+        backgroundColor="$background"
+        borderRadius="$4"
+        padding="$4"
+        gap="$4"
+        marginTop="$4"
+        testID="approval-editor"
+      >
+        <YStack gap="$1">
+          <XStack gap="$2" alignItems="center">
             <SafeFontIcon
               name={hasHighValueApproval ? 'alert' : 'info'}
               testID={hasHighValueApproval ? 'approval-editor-warning-icon' : 'approval-editor-info-icon'}
-              color="$colorContrast"
-              size={16}
+              color="$accent"
+              size={24}
             />
-          </View>
-          <Text fontSize="$4" fontWeight={700}>
-            Allow access to tokens?
+            <Text fontSize="$5" fontWeight={700} color="$color">
+              Allow access to tokens?
+            </Text>
+          </XStack>
+          <Text fontSize="$4" color="$color" lineHeight={20}>
+            {subtitle}
           </Text>
-        </XStack>
-        <Text fontSize="$3">{subtitle}</Text>
-      </YStack>
+        </YStack>
 
-      {approvals.map((approval, index) => (
-        <ApprovalItem
-          key={`${approval.tokenAddress}-${approval.transactionIndex}-${index}`}
-          approval={approval}
-          onEdit={isReadOnly ? undefined : onEdit}
-        />
-      ))}
-    </YStack>
+        {approvals.map((approval, index) => (
+          <ApprovalItem
+            key={`${approval.tokenAddress}-${approval.transactionIndex}-${index}`}
+            approval={approval}
+            onEdit={isReadOnly ? undefined : onEdit}
+          />
+        ))}
+      </YStack>
+    </Theme>
   )
 }
