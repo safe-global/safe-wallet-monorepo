@@ -1,6 +1,10 @@
 import { render, screen } from '@testing-library/react'
 import SpaceSafeAccounts from '../index'
 
+jest.mock('@/features/address-poisoning', () => ({
+  useListSimilarities: () => new Map(),
+}))
+
 jest.mock('../../AddAccountsChooser', () => ({
   __esModule: true,
   default: ({ buttonLabel, entryPoint }: { buttonLabel?: string; entryPoint?: string }) => (

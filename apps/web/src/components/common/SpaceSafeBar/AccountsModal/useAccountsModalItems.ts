@@ -15,7 +15,8 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { showNotification } from '@/store/notificationsSlice'
-import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
+import { getFlaggedSimilarAddressSet, normalizeAddress } from '@safe-global/utils/utils/addressSimilarity'
+import { useListSimilarities } from '@/features/address-poisoning'
 import { trackEvent } from '@/services/analytics'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 
@@ -120,7 +121,26 @@ export function useAccountsModalItems({ search, open }: { search: string; open: 
     [otherMultiChainSafes, otherSingleSafes, comparator],
   )
 
-  const similarAddresses = useMemo(() => getFlaggedSimilarAddressSet(allItems.map((item) => item.address)), [allItems])
+  const addresses = useMemo(() => allItems.map((item) => item.address), [allItems])
+
+  // Legacy intra-list flags (front AND back), plus anchor detection (front OR back vs a trusted
+  // anchor) layered on top — flag-gated by ADDRESS_POISONING_PROTECTION (empty map when off).
+  // Both the impostor and an in-list imitated anchor are marked so the pair reads side-by-side.
+  const anchorAnnotations = useListSimilarities(addresses)
+  const similarAddresses = useMemo(() => {
+    const flagged = getFlaggedSimilarAddressSet(addresses)
+    const imitated = new Set<string>()
+    anchorAnnotations.forEach((annotation) => {
+      if (annotation.match) {
+        flagged.add(annotation.address.toLowerCase())
+        imitated.add(annotation.match.anchor)
+      }
+    })
+    for (const address of addresses) {
+      if (imitated.has(normalizeAddress(address))) flagged.add(address.toLowerCase())
+    }
+    return flagged
+  }, [addresses, anchorAnnotations])
 
   const matchesSearch = (item: SafeItem | MultiChainSafeItem, query: string): boolean => {
     const name = item.name?.toLowerCase() ?? ''

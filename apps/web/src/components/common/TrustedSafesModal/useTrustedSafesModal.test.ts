@@ -16,6 +16,12 @@ jest.mock('@/hooks/safes/useAllSafes', () => ({
 
 jest.mock('@safe-global/utils/utils/addressSimilarity', () => ({
   detectSimilarAddresses: jest.fn(),
+  normalizeAddress: (address: string) => address.trim().toLowerCase().replace(/^0x/, ''),
+}))
+
+const mockUseListSimilarities = jest.fn()
+jest.mock('@/features/address-poisoning', () => ({
+  useListSimilarities: (addresses: string[]) => mockUseListSimilarities(addresses),
 }))
 
 describe('useTrustedSafesModal', () => {
@@ -30,6 +36,7 @@ describe('useTrustedSafesModal', () => {
     ;(store.useAppDispatch as jest.Mock).mockReturnValue(mockDispatch)
     ;(store.useAppSelector as jest.Mock).mockReturnValue({})
     ;(useAllSafes.default as jest.Mock).mockReturnValue(mockSafes)
+    mockUseListSimilarities.mockReturnValue(new Map())
     ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
       groups: [],
       addressToGroups: new Map(),
@@ -487,6 +494,81 @@ describe('useTrustedSafesModal', () => {
       expect(pinDispatches).toHaveLength(2)
       const pinnedChainIds = pinDispatches.map(([action]) => action.payload.safe.chainId).sort()
       expect(pinnedChainIds).toEqual(['1', '137'])
+    })
+  })
+
+  describe('anchor detection (layered on intra-list)', () => {
+    const IMPOSTOR = mockSafes[0].address
+    const ANCHOR = mockSafes[1].address
+    const anchorNorm = ANCHOR.toLowerCase().slice(2)
+
+    beforeEach(() => {
+      const map = new Map()
+      map.set(IMPOSTOR, {
+        address: IMPOSTOR,
+        match: { anchor: anchorNorm, prefixLen: 1, suffixLen: 5, severity: 'WARN' },
+      })
+      map.set(ANCHOR, { address: ANCHOR })
+      mockUseListSimilarities.mockReturnValue(map)
+    })
+
+    it('groups the impostor and the in-list imitated anchor under one key', () => {
+      const { result } = renderHook(() => useTrustedSafesModal())
+
+      const byAddress = new Map(result.current.availableItems.map((item) => [item.address, item]))
+      const impostorGroup = byAddress.get(IMPOSTOR)?.similarityGroup
+      // union-find: impostor and the in-list imitated anchor share one group key
+      expect(impostorGroup).toBeTruthy()
+      expect(byAddress.get(ANCHOR)?.similarityGroup).toBe(impostorGroup)
+    })
+
+    it('collapses an intra-list pair and an anchor-only match into ONE group (union-find)', () => {
+      // REAL (in list) is imitated by CRIT (front+back → also an intra sibling of REAL) and by
+      // WARN (back only → anchor edge). All three must land in a single group.
+      const REAL = mockSafes[1].address
+      const realNorm = REAL.toLowerCase().slice(2)
+      const CRIT = '0x' + REAL.slice(2, 6) + '1'.repeat(31) + REAL.slice(-5)
+      const WARN = '0x' + '9999' + '2'.repeat(31) + REAL.slice(-5)
+      ;(useAllSafes.default as jest.Mock).mockReturnValue([
+        { chainId: '1', address: REAL, name: 'Real' },
+        { chainId: '1', address: CRIT, name: 'Crit' },
+        { chainId: '1', address: WARN, name: 'Warn' },
+      ])
+      ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
+        groups: [],
+        addressToGroups: new Map(),
+        isFlagged: (a: string) => [REAL, CRIT].some((x) => x.toLowerCase() === a.toLowerCase()),
+        getGroup: (a: string) =>
+          [REAL, CRIT].some((x) => x.toLowerCase() === a.toLowerCase())
+            ? { bucketKey: 'bkt', addresses: [REAL, CRIT], hasKnownAddress: false, riskLevel: 'high' }
+            : undefined,
+      })
+      const map = new Map()
+      map.set(CRIT, { address: CRIT, match: { anchor: realNorm, prefixLen: 4, suffixLen: 5, severity: 'CRITICAL' } })
+      map.set(WARN, { address: WARN, match: { anchor: realNorm, prefixLen: 1, suffixLen: 5, severity: 'WARN' } })
+      map.set(REAL, { address: REAL })
+      mockUseListSimilarities.mockReturnValue(map)
+
+      const { result } = renderHook(() => useTrustedSafesModal())
+      const keys = result.current.availableItems.map((i) => i.similarityGroup)
+      expect(new Set(keys).size).toBe(1)
+      expect(keys.every(Boolean)).toBe(true)
+    })
+
+    it('gates selecting the impostor but not the trusted original', () => {
+      const { result } = renderHook(() => useTrustedSafesModal())
+
+      act(() => {
+        result.current.toggleSelection(IMPOSTOR)
+      })
+      expect(result.current.pendingConfirmation).toBe(IMPOSTOR.toLowerCase())
+
+      act(() => {
+        result.current.cancelSimilarAddress()
+        result.current.toggleSelection(ANCHOR)
+      })
+      expect(result.current.pendingConfirmation).toBe(null)
+      expect(result.current.selectedAddresses.has(ANCHOR.toLowerCase())).toBe(true)
     })
   })
 })

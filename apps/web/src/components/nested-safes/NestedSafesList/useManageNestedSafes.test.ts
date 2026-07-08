@@ -112,13 +112,6 @@ describe('useManageNestedSafes — anchor layered onto intra-list', () => {
       expect(group?.safes.map((s) => s.address)).toEqual(expect.arrayContaining([IMPOSTOR, ANCHOR]))
       expect(result.current.groupedSafes.ungrouped).toHaveLength(0)
     })
-
-    it('exposes the real matched affix lengths for both rows (not a fixed 4)', () => {
-      const { result } = renderHook(() => useManageNestedSafes([safe(IMPOSTOR), safe(ANCHOR)]))
-
-      expect(result.current.getSimilarity(IMPOSTOR)?.suffixLen).toBe(5)
-      expect(result.current.getSimilarity(ANCHOR)?.suffixLen).toBe(5) // anchor row highlighted vs the impostor
-    })
   })
 
   describe('three or more mutually similar safes', () => {
@@ -157,21 +150,14 @@ describe('useManageNestedSafes — anchor layered onto intra-list', () => {
       expect(result.current.groupedSafes.groups[0].safes).toHaveLength(3)
       expect(result.current.groupedSafes.ungrouped.map((s) => s.address)).toEqual([CLEAN])
     })
-
-    it('marks the group critical when it contains a both-ends look-alike', () => {
-      const { result } = renderHook(() => useManageNestedSafes([safe(REAL), safe(MAL1), safe(MAL2)]))
-
-      // MAL2 shares front AND back with REAL → both-ends → the whole group is critical (red).
-      expect(result.current.groupedSafes.groups[0].isCritical).toBe(true)
-    })
   })
 
-  describe('group severity (box tone)', () => {
-    // Suffix-only look-alike of an in-list anchor → one-end → the group stays a warning (amber), not red.
+  describe('one-ended (suffix only) anchor match', () => {
+    // Suffix-only look-alike of an in-list anchor still clusters into a group with it.
     const SUF_ANCHOR = '0x' + '1234' + '0'.repeat(31) + 'abcde'
     const SUF_IMPOSTOR = '0x' + '9999' + '1'.repeat(31) + 'abcde'
 
-    it('is not critical when every match is one-ended (suffix only)', () => {
+    it('groups the impostor with the anchor it resembles', () => {
       const map = new Map<string, ListAnnotation>()
       map.set(SUF_IMPOSTOR, {
         address: SUF_IMPOSTOR,
@@ -183,7 +169,9 @@ describe('useManageNestedSafes — anchor layered onto intra-list', () => {
       const { result } = renderHook(() => useManageNestedSafes([safe(SUF_IMPOSTOR), safe(SUF_ANCHOR)]))
 
       expect(result.current.groupedSafes.groups).toHaveLength(1)
-      expect(result.current.groupedSafes.groups[0].isCritical).toBe(false)
+      expect(result.current.groupedSafes.groups[0].safes.map((s) => s.address)).toEqual(
+        expect.arrayContaining([SUF_IMPOSTOR, SUF_ANCHOR]),
+      )
     })
   })
 })

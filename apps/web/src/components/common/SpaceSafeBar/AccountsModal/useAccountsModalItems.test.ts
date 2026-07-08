@@ -6,6 +6,11 @@ import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/A
 import { useAppDispatch } from '@/store'
 import { useAccountsModalItems } from './useAccountsModalItems'
 
+const mockUseListSimilarities = jest.fn<Map<string, unknown>, [string[]]>(() => new Map())
+jest.mock('@/features/address-poisoning', () => ({
+  useListSimilarities: (addresses: string[]) => mockUseListSimilarities(addresses),
+}))
+
 jest.mock('@/features/spaces', () => ({
   useIsQualifiedSafe: jest.fn(),
   useSpaceSafes: jest.fn(),
@@ -62,6 +67,7 @@ const ADDR_B = '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
 describe('useAccountsModalItems', () => {
   beforeEach(() => {
     jest.resetAllMocks()
+    mockUseListSimilarities.mockReturnValue(new Map())
     mockOrderBy = 'name'
     mockUseSpaceSafes.mockReturnValue({ allSafes: [] })
     mockUseIsQualifiedSafe.mockReturnValue(false)

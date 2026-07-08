@@ -5,9 +5,8 @@ import { useAppDispatch } from '@/store'
 import { setCuratedNestedSafes } from '@/store/settingsSlice'
 import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
 import { useCuratedNestedSafes } from '@/hooks/useCuratedNestedSafes'
-import { detectSimilarAddresses, buildSimilarityIndex } from '@safe-global/utils/utils/addressSimilarity'
+import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
 import type { SimilarityDetectionResult, SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
-import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { useListSimilarities } from '@/features/address-poisoning'
 
 const toggleAddress = (prev: Set<string>, normalizedAddress: string): Set<string> => {
@@ -170,31 +169,6 @@ export const useManageNestedSafes = (allSafesWithStatus: NestedSafeWithStatus[])
     [similarityResult, anchorMatches],
   )
 
-  // The exact match (real prefix/suffix lengths) to highlight on a row. Covers three cases:
-  // the anchor-flagged impostor, an intra-list sibling, and the in-list anchor an impostor resembles
-  // (so the trusted look-alike is highlighted for side-by-side comparison too).
-  const getSimilarity = useCallback(
-    (address: string): SimilarityMatch | undefined => {
-      const lower = address.toLowerCase()
-
-      const direct = anchorMatches.get(lower)
-      if (direct) return direct
-
-      const group = similarityResult.getGroup(address)
-      if (group) {
-        const sibling = group.addresses.find((a) => a.toLowerCase() !== lower)
-        if (sibling) return buildSimilarityIndex([sibling]).query(address) ?? undefined
-      }
-
-      for (const [impostor, match] of anchorMatches) {
-        if (match.anchor === lower.slice(2)) return buildSimilarityIndex([impostor]).query(address) ?? undefined
-      }
-
-      return undefined
-    },
-    [similarityResult, anchorMatches],
-  )
-
   const groupedSafes = useMemo(() => {
     const lower = (address: string) => address.toLowerCase()
     const inList = new Map(allSafesWithStatus.map((safe) => [lower(safe.address), safe]))
@@ -259,23 +233,13 @@ export const useManageNestedSafes = (allSafesWithStatus: NestedSafeWithStatus[])
       components.set(root, members)
     }
 
-    // A group is critical (red) if any member is a both-ends look-alike: intra-list membership always
-    // means front AND back matched, or an anchor match is flagged CRITICAL. Otherwise it's a one-end
-    // warning (amber).
-    const isCriticalGroup = (safes: NestedSafeWithStatus[]): boolean =>
-      safes.some(
-        (safe) =>
-          similarityResult.isFlagged(safe.address) ||
-          anchorMatches.get(lower(safe.address))?.severity === Severity.CRITICAL,
-      )
-
-    const groups: { key: string; safes: NestedSafeWithStatus[]; isCritical: boolean }[] = []
+    const groups: { key: string; safes: NestedSafeWithStatus[] }[] = []
     const ungrouped: NestedSafeWithStatus[] = []
     for (const [root, safes] of components) {
       // A component of 2+ is a real similarity cluster; a lone safe is boxed only if it is flagged
       // (an impostor whose anchor isn't in the list).
       if (safes.length >= 2 || flagged.has(lower(safes[0].address))) {
-        groups.push({ key: `sim:${root}`, safes, isCritical: isCriticalGroup(safes) })
+        groups.push({ key: `sim:${root}`, safes })
       } else {
         ungrouped.push(...safes)
       }
@@ -298,7 +262,6 @@ export const useManageNestedSafes = (allSafesWithStatus: NestedSafeWithStatus[])
     // Similarity detection
     isFlagged,
     getSimilarAddresses,
-    getSimilarity,
     pendingConfirmation,
     confirmSimilarAddress,
     cancelSimilarAddress,

@@ -13,7 +13,8 @@ import {
   getComparator,
   useSafeItemBuilder,
 } from '@/hooks/safes'
-import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
+import { getFlaggedSimilarAddressSet, normalizeAddress } from '@safe-global/utils/utils/addressSimilarity'
+import { useListSimilarities } from '@/features/address-poisoning'
 import { useSpaceSafes, useIsInvited } from '@/features/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { TriangleAlert, RotateCw } from 'lucide-react'
@@ -47,10 +48,26 @@ const SpaceSafeAccounts = () => {
     return spaceSafes.map((safe) => buildSafeItem(safe.chainId, safe.address))
   }, [buildSafeItem, allSafes])
 
-  const similarAddresses = useMemo<Set<string>>(
-    () => getFlaggedSimilarAddressSet(spaceSafeItems.map((s) => s.address)),
-    [spaceSafeItems],
-  )
+  const spaceSafeAddresses = useMemo(() => spaceSafeItems.map((s) => s.address), [spaceSafeItems])
+
+  // Legacy intra-list flags plus anchor detection (front OR back vs a trusted anchor) layered on
+  // top — flag-gated by ADDRESS_POISONING_PROTECTION (empty map when off). Both the impostor and
+  // an in-list imitated anchor are marked so the pair reads side-by-side.
+  const anchorAnnotations = useListSimilarities(spaceSafeAddresses)
+  const similarAddresses = useMemo<Set<string>>(() => {
+    const flagged = getFlaggedSimilarAddressSet(spaceSafeAddresses)
+    const imitated = new Set<string>()
+    anchorAnnotations.forEach((annotation) => {
+      if (annotation.match) {
+        flagged.add(annotation.address.toLowerCase())
+        imitated.add(annotation.match.anchor)
+      }
+    })
+    for (const address of spaceSafeAddresses) {
+      if (imitated.has(normalizeAddress(address))) flagged.add(address.toLowerCase())
+    }
+    return flagged
+  }, [spaceSafeAddresses, anchorAnnotations])
 
   // Group and sort
   const displaySafes = useMemo<AllSafeItems>(

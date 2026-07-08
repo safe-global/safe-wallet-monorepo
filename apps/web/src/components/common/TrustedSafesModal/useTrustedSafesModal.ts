@@ -6,7 +6,9 @@ import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { OVERVIEW_EVENTS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
 import { useAllSafesGrouped } from '@/hooks/safes/useAllSafesGrouped'
 import useAllSafes from '@/hooks/safes/useAllSafes'
-import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
+import { detectSimilarAddresses, normalizeAddress } from '@safe-global/utils/utils/addressSimilarity'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
+import { useListSimilarities } from '@/features/address-poisoning'
 import type { SelectableSafe, SelectableMultiChainSafe, SelectableItem } from './useTrustedSafesModal.types'
 import { isSelectableMultiChainSafe } from './useTrustedSafesModal.types'
 
@@ -105,6 +107,110 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
 
   const similarityResult = useMemo(() => detectSimilarAddresses(addresses), [addresses])
 
+  // Anchor detection (front OR back vs a trusted anchor) layered on top of the legacy intra-list
+  // check. Flag-gated by ADDRESS_POISONING_PROTECTION (empty map when off → intra-list only).
+  const anchorAnnotations = useListSimilarities(addresses)
+  const { anchorMatches, imitatedInList } = useMemo(() => {
+    const anchorMatches = new Map<string, SimilarityMatch>()
+    const imitated = new Set<string>()
+    anchorAnnotations.forEach((annotation) => {
+      if (annotation.match) {
+        anchorMatches.set(annotation.address.toLowerCase(), annotation.match)
+        imitated.add(annotation.match.anchor)
+      }
+    })
+    // Trusted originals that are themselves in this list: share the impostor's group so the existing
+    // grouping UI boxes them together for side-by-side comparison.
+    const imitatedInList = new Set<string>()
+    for (const address of addresses) {
+      if (imitated.has(normalizeAddress(address))) imitatedInList.add(address.toLowerCase())
+    }
+    return { anchorMatches, imitatedInList }
+  }, [anchorAnnotations, addresses])
+
+  // Canonical group id per address via union-find, so ANY set of mutually or transitively similar
+  // safes collapses into ONE box — not disjoint pairs. Edges: intra-list buckets (front AND back)
+  // and anchor matches (impostor ↔ its in-list anchor, and impostors sharing one anchor). A lone,
+  // unflagged safe gets no group.
+  const groupKeyByAddress = useMemo(() => {
+    const parent = new Map<string, string>()
+    const ensure = (x: string) => {
+      if (!parent.has(x)) parent.set(x, x)
+    }
+    const find = (x: string): string => {
+      let root = x
+      while (parent.get(root) !== root) root = parent.get(root) as string
+      return root
+    }
+    const union = (a: string, b: string) => {
+      ensure(a)
+      ensure(b)
+      const ra = find(a)
+      const rb = find(b)
+      if (ra !== rb) parent.set(ra, rb)
+    }
+
+    const flagged = new Set<string>()
+
+    // intra-list: union everything in the same bucket
+    const buckets = new Map<string, string[]>()
+    for (const address of addresses) {
+      ensure(address.toLowerCase())
+      const group = similarityResult.getGroup(address)
+      if (!group) continue
+      flagged.add(address.toLowerCase())
+      const members = buckets.get(group.bucketKey) ?? []
+      members.push(address.toLowerCase())
+      buckets.set(group.bucketKey, members)
+    }
+    for (const members of buckets.values()) {
+      for (let i = 1; i < members.length; i++) union(members[0], members[i])
+    }
+
+    // anchor: union each impostor with its in-list anchor and with peers sharing the same anchor
+    const byAnchor = new Map<string, string[]>()
+    for (const [impostor, match] of anchorMatches) {
+      flagged.add(impostor)
+      const anchorLower = '0x' + match.anchor
+      ensure(anchorLower)
+      if (imitatedInList.has(anchorLower)) union(impostor, anchorLower)
+      const peers = byAnchor.get(match.anchor) ?? []
+      peers.push(impostor)
+      byAnchor.set(match.anchor, peers)
+    }
+    for (const peers of byAnchor.values()) {
+      for (let i = 1; i < peers.length; i++) union(peers[0], peers[i])
+    }
+
+    // Component sizes → only expose a group key for members of a real cluster (size ≥ 2) or a
+    // flagged singleton (an impostor whose anchor isn't in the list).
+    const sizeByRoot = new Map<string, number>()
+    for (const address of addresses) {
+      const root = find(address.toLowerCase())
+      sizeByRoot.set(root, (sizeByRoot.get(root) ?? 0) + 1)
+    }
+
+    const keyByAddress = new Map<string, string>()
+    for (const address of addresses) {
+      const lower = address.toLowerCase()
+      const root = find(lower)
+      if ((sizeByRoot.get(root) ?? 0) >= 2 || flagged.has(lower)) keyByAddress.set(lower, `sim:${root}`)
+    }
+    return keyByAddress
+  }, [addresses, similarityResult, anchorMatches, imitatedInList])
+
+  const getSimilarityGroup = useCallback(
+    (address: string): string | undefined => groupKeyByAddress.get(address.toLowerCase()),
+    [groupKeyByAddress],
+  )
+
+  // Selecting a look-alike (intra-list or anchor impostor) needs explicit confirmation. The imitated
+  // trusted original is grouped for display but never gated.
+  const isFlaggedAddress = useCallback(
+    (address: string): boolean => similarityResult.isFlagged(address) || anchorMatches.has(address.toLowerCase()),
+    [similarityResult, anchorMatches],
+  )
+
   // Structural list (no selection state) — rebuilds only when the underlying safes, pins,
   // similarity, or search change, not on every checkbox click.
   const structuralItems = useMemo<SelectableItem[]>(() => {
@@ -121,13 +227,13 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     for (const multiSafe of allMultiChainSafes) {
       if (!matchesSearch(multiSafe.address, multiSafe.name)) continue
 
-      const group = similarityResult.getGroup(multiSafe.address)
+      const similarityGroup = getSimilarityGroup(multiSafe.address)
 
       const selectableSafes: SelectableSafe[] = multiSafe.safes.map((safe) => ({
         ...safe,
         isPinned: Boolean(addedSafes[safe.chainId]?.[safe.address]),
         isSelected: false,
-        similarityGroup: group?.bucketKey,
+        similarityGroup,
       }))
 
       const isPinned = selectableSafes.some((s) => s.isPinned)
@@ -140,26 +246,25 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
         name: multiSafe.name,
         isSelected: false,
         isPartiallySelected: false, // All chains share same selection
-        similarityGroup: group?.bucketKey,
+        similarityGroup,
       } as SelectableMultiChainSafe)
     }
 
     for (const safe of allSingleSafes) {
       if (!matchesSearch(safe.address, safe.name)) continue
 
-      const group = similarityResult.getGroup(safe.address)
       const isPinned = Boolean(addedSafes[safe.chainId]?.[safe.address])
 
       items.push({
         ...safe,
         isPinned,
         isSelected: false,
-        similarityGroup: group?.bucketKey,
+        similarityGroup: getSimilarityGroup(safe.address),
       } as SelectableSafe)
     }
 
     return items
-  }, [allMultiChainSafes, allSingleSafes, addedSafes, similarityResult, searchQuery])
+  }, [allMultiChainSafes, allSingleSafes, addedSafes, getSimilarityGroup, searchQuery])
 
   // Thin overlay injecting selection state over the structural list
   const availableItems = useMemo<SelectableItem[]>(() => {
@@ -208,7 +313,7 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
   const toggleSelection = useCallback(
     (address: string) => {
       const normalizedAddress = address.toLowerCase()
-      const isFlagged = similarityResult.isFlagged(address)
+      const isFlagged = isFlaggedAddress(address)
 
       // Functional update so the callback doesn't depend on selectedAddresses
       setSelectedAddresses((prev) => {
@@ -229,7 +334,7 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
         return next
       })
     },
-    [similarityResult],
+    [isFlaggedAddress],
   )
 
   const confirmSimilarAddress = useCallback(() => {
@@ -267,12 +372,12 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     setSelectedAddresses((prev) => {
       const next = new Set(prev)
       for (const item of availableItems) {
-        if (!similarityResult.isFlagged(item.address)) next.add(item.address.toLowerCase())
+        if (!isFlaggedAddress(item.address)) next.add(item.address.toLowerCase())
       }
       return next
     })
     setPendingSelectAllConfirmation(false)
-  }, [availableItems, similarityResult])
+  }, [availableItems, isFlaggedAddress])
 
   // X / overlay dismissal — abort Select All without changing the selection
   const cancelSelectAll = useCallback(() => {

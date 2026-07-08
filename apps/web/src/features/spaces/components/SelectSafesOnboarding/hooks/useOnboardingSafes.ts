@@ -17,7 +17,8 @@ import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } f
 import useWallet from '@/hooks/wallets/useWallet'
 import useChains from '@/hooks/useChains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
+import { getFlaggedSimilarAddressSet, normalizeAddress } from '@safe-global/utils/utils/addressSimilarity'
+import { useListSimilarities } from '@/features/address-poisoning'
 
 const _groupAndSort = (
   items: SafeItem[],
@@ -64,10 +65,29 @@ const useOnboardingSafes = () => {
     return { trustedSafeItems: trusted, ownedSafeItems: owned }
   }, [allChainIds, allAdded, allOwned, allUndeployed, walletAddress, allVisitedSafes, allSafeNames])
 
+  const allAddresses = useMemo(
+    () => [...trustedSafeItems, ...ownedSafeItems].map((s) => s.address),
+    [trustedSafeItems, ownedSafeItems],
+  )
+
+  // Legacy intra-list flags plus anchor detection (front OR back vs a trusted anchor) layered on
+  // top — flag-gated by ADDRESS_POISONING_PROTECTION (empty map when off). Both the impostor and
+  // an in-list imitated anchor are marked so the pair reads side-by-side.
+  const anchorAnnotations = useListSimilarities(allAddresses)
   const similarAddresses = useMemo<Set<string>>(() => {
-    const allItems = [...trustedSafeItems, ...ownedSafeItems]
-    return getFlaggedSimilarAddressSet(allItems.map((s) => s.address))
-  }, [trustedSafeItems, ownedSafeItems])
+    const flagged = getFlaggedSimilarAddressSet(allAddresses)
+    const imitated = new Set<string>()
+    anchorAnnotations.forEach((annotation) => {
+      if (annotation.match) {
+        flagged.add(annotation.address.toLowerCase())
+        imitated.add(annotation.match.anchor)
+      }
+    })
+    for (const address of allAddresses) {
+      if (imitated.has(normalizeAddress(address))) flagged.add(address.toLowerCase())
+    }
+    return flagged
+  }, [allAddresses, anchorAnnotations])
 
   // Group into multi-chain / single-chain and sort
   const trustedGrouped = useMemo<AllSafeItems>(
