@@ -32,16 +32,6 @@ jest.mock('@/components/balances/CurrencySelect', () => ({
   default: () => <button data-testid="currency-select">Currency</button>,
 }))
 
-jest.mock('@/components/dashboard/StakingBanner', () => ({
-  __esModule: true,
-  default: () => <div data-testid="staking-banner" />,
-}))
-
-jest.mock('@/components/dashboard/StakingBanner/useIsStakingBannerVisible', () => ({
-  __esModule: true,
-  default: () => false,
-}))
-
 jest.mock('@/services/local-storage/useLocalStorage', () => ({
   __esModule: true,
   default: () => [false, jest.fn()],
@@ -56,9 +46,16 @@ jest.mock('@/features/portfolio', () => ({
   PortfolioFeature: {},
 }))
 
+jest.mock('@/features/stake', () => ({
+  StakeFeature: {},
+  useIsStakingPromoBannerVisible: () => false,
+  STAKING_PROMO_BANNER_HIDE_KEY: 'hideStakingPromoBanner',
+}))
+
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: () => ({
     NoFeeCampaignBanner: () => <div data-testid="no-fee-campaign-banner" />,
+    StakingPromoBanner: () => <div data-testid="staking-promo-banner" />,
     PortfolioRefreshHint: () => <div data-testid="portfolio-refresh-hint" />,
   }),
 }))
