@@ -69,6 +69,17 @@ export const AllVariants: Story = {
               <TabsContent value="tab3">Content for tab 3</TabsContent>
             </Tabs>
           </div>
+          <div style={{ width: '400px' }}>
+            {/* segmented: large pill toggle on a paper track — the welcome Accounts/Workspaces switch */}
+            <Tabs defaultValue="tab1">
+              <TabsList variant="segmented">
+                <TabsTrigger value="tab1">Accounts</TabsTrigger>
+                <TabsTrigger value="tab2">Workspaces</TabsTrigger>
+              </TabsList>
+              <TabsContent value="tab1">Content for tab 1</TabsContent>
+              <TabsContent value="tab2">Content for tab 2</TabsContent>
+            </Tabs>
+          </div>
         </div>
       </div>
 
