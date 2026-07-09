@@ -4,6 +4,19 @@
 
 Primitives: `apps/web/src/components/ui/badge.tsx`, `chip.tsx` · MUI shim: `components/common/Chip/index.tsx` · Stories: `stories/badge.stories.tsx`, `chip.stories.tsx` · Test: `ui/chip.test.tsx` · Tokens: `styles/shadcn.css` (bridge), `styles/vars.css` (source)
 
+> **Status — part 1 DONE (commit `7002ceb07`), part 2 pending.** The `size`/`shape` axes, `info`/`positive`/`negative`
+> on Badge, Chip semantic-colour parity, the `--color-info-*` bridge, and story docs have all landed
+> (non-breaking, defaults byte-identical, verified in Storybook). **Not yet done:** the §3 call-site migration
+> and the §4 ESLint guard. They are held for a **design nod**, because several sites don't map cleanly to the
+> new variants without a visible shift, and there's no Argos gate yet to review the deltas:
+>
+> - **`FiatChange`** uses `--color-{success,error}-main` for text; `positive`/`negative` use `-strong`/`-dark` (deeper).
+> - **`TxStatusChip`** maps a `color` prop → inline `style` (`--color-{color}-{shade}`) with a `backgroundColor`
+>   override; a variant map would drop the dynamic bg. Candidate to delete in favour of `<Badge variant=…>`.
+> - **`Warning`** would shift `text-xs → text-sm` (the `lg` size); **`SafeGradeChip`** needs a `review` variant or
+>   grandfather; **`UnreadBadge`** dot needs a `shape="dot"` or grandfather.
+>   Once design signs off (and/or Argos is on), execute §3 + §4 as one commit.
+
 ## Current state
 
 - **Badge** base bakes geometry: `h-5 gap-1 rounded-4xl border border-transparent px-2 py-0.5 text-xs font-medium …`. `variant`: default/secondary/destructive/outline/warning/success/ghost/link. **No `size`.** Base UI `useRender`.
