@@ -4,7 +4,6 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { selectCurrency, setCurrency } from '@/store/settingsSlice'
 import useCurrencies from './useCurrencies'
 import { trackEvent, ASSETS_EVENTS } from '@/services/analytics'
-import { cn } from '@/utils/cn'
 
 const CurrencySelect = (): ReactElement => {
   const currency = useAppSelector(selectCurrency)
@@ -29,10 +28,8 @@ const CurrencySelect = (): ReactElement => {
         data-testid="currency-selector"
         id="currency"
         size="sm"
-        className={cn(
-          'min-w-[72px] border-border bg-background px-3 font-medium shadow-none',
-          'focus-visible:border-ring focus-visible:ring-ring/50',
-        )}
+        // eslint-disable-next-line no-restricted-syntax -- bg-background is a deliberate flat/outline look (not the card surface); no variant matches
+        className="min-w-[72px] bg-background font-medium shadow-none"
       >
         <SelectValue />
       </SelectTrigger>

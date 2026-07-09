@@ -101,7 +101,8 @@ const AddManually = ({
                       if (value) setValue('chainId', value, { shouldValidate: true })
                     }}
                   >
-                    <SelectTrigger className="h-full w-full border-0 bg-transparent px-0 shadow-none">
+                    {/* eslint-disable-next-line no-restricted-syntax -- h-full/w-full fill the row cell (layout); skin is variant="ghost" */}
+                    <SelectTrigger variant="ghost" className="h-full w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

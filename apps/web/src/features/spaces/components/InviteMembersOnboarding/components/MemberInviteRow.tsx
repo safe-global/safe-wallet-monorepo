@@ -164,7 +164,7 @@ const MemberInviteRow = ({
         name={`members.${index}.role`}
         render={({ field }) => (
           <Select value={field.value} onValueChange={field.onChange}>
-            <SelectTrigger className="min-w-[120px] cursor-pointer rounded-lg bg-card data-[size=default]:h-11">
+            <SelectTrigger variant="surface" className="min-w-[120px] cursor-pointer data-[size=default]:h-11">
               <SelectValue placeholder="Role">{ROLE_LABELS[field.value]}</SelectValue>
             </SelectTrigger>
             <SelectContent alignItemWithTrigger={false} align="start">

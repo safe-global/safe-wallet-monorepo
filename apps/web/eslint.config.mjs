@@ -172,6 +172,10 @@ export default [
           'ActionButton',
           'ActionButton is a closed preset and takes no styling className — use `fullWidth` for layout, or the primitive <Button> for a genuine one-off.',
         ),
+        dsButtonClassnameRule(
+          'SelectTrigger',
+          "Don't set size/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*) on <SelectTrigger> — use `size` ('sm'|'default'|'lg') / `variant` ('default'|'surface'|'ghost'). See the UI/Select story; add a variant to components/ui/select.tsx if none fits. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.",
+        ),
       ],
     },
   },
