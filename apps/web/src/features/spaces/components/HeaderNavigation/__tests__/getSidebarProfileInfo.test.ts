@@ -1,4 +1,4 @@
-import { getSidebarProfileInfo } from '../SidebarProfileSection'
+import { getSidebarProfileInfo } from '../getSidebarProfileInfo'
 import { memberBuilder } from '@/tests/builders/member'
 
 jest.mock('@safe-global/utils/utils/formatters', () => ({

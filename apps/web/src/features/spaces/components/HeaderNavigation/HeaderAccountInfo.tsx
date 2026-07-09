@@ -1,6 +1,6 @@
 import { useIsSignedIn } from '@/hooks/useIsSignedIn'
 import { useCurrentMemberProfile } from '../../hooks/useSpaceMembers'
-import { getSidebarProfileInfo } from '../Sidebar/SidebarProfileSection'
+import { getSidebarProfileInfo } from './getSidebarProfileInfo'
 import { AccountInfo } from '../SpacesList/AccountInfo'
 
 /**

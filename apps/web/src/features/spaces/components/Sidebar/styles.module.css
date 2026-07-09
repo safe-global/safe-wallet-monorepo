@@ -366,9 +366,9 @@
   gap: 12px !important;
   padding: 16px !important;
   width: 13.5rem !important;
-  background-color: var(--secondary) !important;
-  box-shadow: none !important;
-  --ring-width: 0px;
+  background-color: var(--popover) !important;
+  /* Match the notifications popover radius (overrides the base popover's rounded-md). */
+  border-radius: 24px !important;
 }
 
 .profileHeader {

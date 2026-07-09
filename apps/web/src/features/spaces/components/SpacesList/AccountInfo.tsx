@@ -28,12 +28,7 @@ export const AccountInfo = ({ profileName = '', displayName = '' }: MembershipPr
         <User className="size-5 text-muted-foreground" aria-hidden="true" />
       </PopoverTrigger>
 
-      <ProfilePopoverContent
-        avatarName={profileName}
-        displayName={displayName}
-        onSignOut={handleSignOut}
-        className="border"
-      />
+      <ProfilePopoverContent avatarName={profileName} displayName={displayName} onSignOut={handleSignOut} />
     </Popover>
   )
 }

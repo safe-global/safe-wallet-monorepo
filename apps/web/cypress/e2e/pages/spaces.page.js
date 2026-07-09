@@ -103,8 +103,8 @@ const acceptInviteBtn = '[data-testid="accept-invite-button"]'
 const inviteNameInput = '[data-testid="invite-name-input"]'
 const confirmAcceptInviteBtn = '[data-testid="confirm-accept-invite-button"]'
 
-// -- Sidebar profile (sign-out) --
-const sidebarProfileTrigger = '[data-testid="sidebar-profile-trigger"]'
+// -- Header account menu (sign-out) --
+const headerAccountMenuTrigger = '[data-testid="header-account-info"] button'
 const sidebarProfilePopover = '[data-testid="sidebar-profile-popover"]'
 const sidebarProfileSignOutBtn = '[data-testid="sidebar-profile-sign-out"]'
 const continueWithWalletBtn = '[data-testid="continue-with-wallet-btn"]'
@@ -217,8 +217,8 @@ export function interceptSpacesList() {
   cy.intercept('GET', constants.spacesEndpoint).as('spacesList')
 }
 
-export function signOutViaSidebarProfile() {
-  cy.get(sidebarProfileTrigger, { timeout: 30000 }).should('be.visible').click()
+export function signOutViaAccountMenu() {
+  cy.get(headerAccountMenuTrigger, { timeout: 30000 }).should('be.visible').click()
   cy.get(sidebarProfilePopover).should('be.visible')
   cy.get(sidebarProfileSignOutBtn).should('be.visible').click()
   cy.url({ timeout: 60000 }).should('include', constants.spacesUrl)
