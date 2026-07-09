@@ -20,7 +20,7 @@ import {
 } from '@/hooks/safes'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
-import { useSpaceSafes, useIsInvited, useCurrentSpaceId } from '@/features/spaces'
+import { useSpaceSafes, useIsInvited, useIsAdmin, useCurrentSpaceId } from '@/features/spaces'
 import { SafeAccountsTable } from '@/features/myAccounts'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
@@ -36,6 +36,7 @@ import SpaceSafeContextMenu from './SpaceSafeContextMenu'
 const SpaceSafeAccounts = () => {
   const { allSafes, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()
   const isInvited = useIsInvited()
+  const isAdmin = useIsAdmin()
   const dispatch = useAppDispatch()
   const isDarkMode = useDarkMode()
   const spaceId = useCurrentSpaceId()
@@ -80,9 +81,11 @@ const SpaceSafeAccounts = () => {
       </Typography>
 
       <Stack direction="row" alignItems="center" gap={2} sx={{ mb: 3 }}>
-        <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
-          <AddAccountsChooser buttonVariant="default" buttonLabel="Add accounts" entryPoint="safe_accounts" />
-        </Track>
+        {isAdmin && (
+          <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
+            <AddAccountsChooser buttonVariant="default" buttonLabel="Add accounts" entryPoint="safe_accounts" />
+          </Track>
+        )}
         {!isSpaceEmpty && !isSpaceSafesError && (
           <>
             <InputGroup className="flex-1 rounded-md bg-card">

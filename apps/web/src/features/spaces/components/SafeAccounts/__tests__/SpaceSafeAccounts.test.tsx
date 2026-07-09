@@ -3,6 +3,7 @@ import SpaceSafeAccounts from '../index'
 import type { SafeItem } from '@/hooks/safes'
 
 const mockUseSpaceSafes = jest.fn()
+const mockUseIsAdmin = jest.fn()
 
 jest.mock('../../AddAccountsChooser', () => ({
   __esModule: true,
@@ -22,6 +23,7 @@ jest.mock('@/components/common/Track', () => {
 jest.mock('@/features/spaces', () => ({
   useSpaceSafes: () => mockUseSpaceSafes(),
   useIsInvited: () => false,
+  useIsAdmin: () => mockUseIsAdmin(),
   useCurrentSpaceId: () => 'space-1',
 }))
 
@@ -106,6 +108,7 @@ const spaceSafes = [
 describe('SpaceSafeAccounts', () => {
   beforeEach(() => {
     mockUseSpaceSafes.mockReturnValue({ allSafes: spaceSafes, isError: false, error: null, refetch: jest.fn() })
+    mockUseIsAdmin.mockReturnValue(true)
   })
 
   it('renders the AddAccountsChooser with the "Add accounts" label', () => {
@@ -118,6 +121,17 @@ describe('SpaceSafeAccounts', () => {
     render(<SpaceSafeAccounts />)
 
     expect(screen.getByTestId('add-accounts-chooser')).toHaveAttribute('data-entry-point', 'safe_accounts')
+  })
+
+  it('hides the AddAccountsChooser for members (non-admins)', () => {
+    mockUseIsAdmin.mockReturnValue(false)
+
+    render(<SpaceSafeAccounts />)
+
+    expect(screen.queryByTestId('add-accounts-chooser')).not.toBeInTheDocument()
+    // The rest of the page still renders for members
+    expect(screen.getByTestId('space-safe-accounts-search-input')).toBeInTheDocument()
+    expect(screen.getByText('Treasury')).toBeInTheDocument()
   })
 
   it('does not render the Workspace/Trusted tabs', () => {
