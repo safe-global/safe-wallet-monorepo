@@ -272,6 +272,30 @@ describe('addressSimilarity (anchor engine)', () => {
       const idx = buildSimilarityIndex([TRUSTED, TRUSTED.toUpperCase(), normalizeAddress(TRUSTED)])
       expect(idx.size).toBe(1)
     })
+
+    it('prefers the stronger match (more matched characters) when two anchors tie on severity', () => {
+      const candidate = '0x1234' + 'a'.repeat(32) + '5678'
+      const longer = '0x1234a' + 'f'.repeat(31) + 'eeee' // shares front 5 (WARN)
+      const shorter = '0x1234' + 'b'.repeat(32) + 'dddd' // shares front 4 (WARN)
+      const idx = buildSimilarityIndex([shorter, longer])
+
+      const match = idx.query(candidate)
+      expect(match?.severity).toBe(Severity.WARN)
+      expect(match?.anchor).toBe(normalizeAddress(longer))
+    })
+
+    it('clamps a zero threshold so it does not flag every address', () => {
+      const unrelated = '0x7f3e9a01bc4d2e8f00112233445566778899aabb'
+      const idx = buildSimilarityIndex([TRUSTED], { prefixThreshold: 0, suffixThreshold: 0 })
+
+      // Without the clamp, threshold 0 would match every non-identical address as CRITICAL.
+      expect(idx.query(unrelated)).toBeNull()
+    })
+
+    it('does not index malformed (non-hex / wrong-length) anchors', () => {
+      const idx = buildSimilarityIndex([TRUSTED, 'not-an-address', '0x1234'])
+      expect(idx.size).toBe(1)
+    })
   })
 
   describe('detectListSimilarities (Mode B)', () => {
@@ -284,6 +308,15 @@ describe('addressSimilarity (anchor engine)', () => {
       expect(result.get(TRUSTED)?.match).toBeUndefined() // an anchor is never an impostor
       expect(result.get(impostor)?.match?.severity).toBe(Severity.CRITICAL)
       expect(result.get(unrelated)?.match).toBeUndefined()
+    })
+
+    it('keys annotations by lowercased address while preserving the original on .address', () => {
+      const idx = buildSimilarityIndex([TRUSTED])
+      const impostorMixed = '0xA1B2FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5678'
+      const result = detectListSimilarities([impostorMixed], idx)
+
+      expect(result.get(impostorMixed.toLowerCase())?.match?.severity).toBe(Severity.CRITICAL)
+      expect(result.get(impostorMixed.toLowerCase())?.address).toBe(impostorMixed)
     })
   })
 })
