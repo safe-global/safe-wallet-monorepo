@@ -125,6 +125,32 @@ describe('useOnboardingSafes', () => {
     expect('safes' in result.current.ownedSafes[0]).toBe(true)
   })
 
+  it('treats trust as address-level: a Safe pinned on one chain but owned on another stays whole in trusted', () => {
+    // Option C: pinned on chain 1, owned on chain 137. Address-level trust must keep both
+    // instances together in the trusted section (grouped), not split one into owned.
+    jest.spyOn(useChains, 'default').mockImplementation(() => ({
+      configs: [{ chainId: '1' } as Chain, { chainId: '137' } as Chain],
+    }))
+
+    const mockOwned = { '137': ['0xMulti'] }
+    jest.spyOn(allOwnedSafes, 'default').mockReturnValue([mockOwned, undefined, false])
+
+    const { result } = renderHook(() => useOnboardingSafes(), {
+      initialReduxState: {
+        addedSafes: {
+          '1': {
+            '0xMulti': { owners: [], threshold: 1 },
+          },
+        },
+      },
+    })
+
+    expect(result.current.trustedSafes).toHaveLength(1)
+    expect(result.current.trustedSafes[0].address).toBe('0xMulti')
+    expect('safes' in result.current.trustedSafes[0]).toBe(true)
+    expect(result.current.ownedSafes).toEqual([])
+  })
+
   describe('similar address detection', () => {
     it('returns empty set when fewer than 2 unique addresses', () => {
       const mockOwned = { '1': ['0xSingle'] }

@@ -1,4 +1,6 @@
 import { act, fireEvent, render, screen } from '@/tests/test-utils'
+import { normalizeAddress } from '@safe-global/utils/utils/addressSimilarity'
+import type { ListAnnotation } from '@safe-global/utils/utils/addressSimilarity.types'
 import AddAccounts from '../index'
 
 // jsdom doesn't implement ResizeObserver; the list region uses one to detect
@@ -30,11 +32,12 @@ jest.mock('@/features/spaces/constants', () => ({
 
 jest.mock('../../SelectSafesOnboarding/components/OnboardingSafesList', () => ({
   __esModule: true,
-  default: (props: { trustedSafes: unknown[]; ownedSafes: unknown[] }) => (
+  default: (props: { trustedSafes: unknown[]; ownedSafes: unknown[]; similarAddresses?: Set<string> }) => (
     <div
       data-testid="onboarding-safes-list"
       data-trusted-count={props.trustedSafes.length}
       data-owned-count={props.ownedSafes.length}
+      data-similar={[...(props.similarAddresses ?? [])].sort().join(',')}
     />
   ),
 }))
@@ -65,9 +68,10 @@ jest.mock('@/hooks/useDarkMode', () => ({
   useDarkMode: () => false,
 }))
 
+let mockChainIds = ['1']
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
-  default: () => ({ configs: [{ chainId: '1' }] }),
+  default: () => ({ configs: mockChainIds.map((chainId) => ({ chainId })) }),
 }))
 
 let mockAllOwned: Record<string, string[]> = {}
@@ -88,8 +92,9 @@ jest.mock('@/features/spaces', () => ({
   useSpaceSafes: () => ({ allSafes: mockSpaceSafes }),
 }))
 
+let mockListSimilarities = new Map<string, ListAnnotation>()
 jest.mock('@/features/address-poisoning', () => ({
-  useListSimilarities: () => new Map(),
+  useListSimilarities: () => mockListSimilarities,
 }))
 
 const mockAddSafesToSpace = jest.fn()
@@ -188,12 +193,78 @@ describe('AddAccounts — wallet connection state', () => {
   })
 })
 
+describe('AddAccounts — address-poisoning (Mode B)', () => {
+  const anchor = '0x1111111111111111111111111111111111111111'
+  const impostor = '0x2222222222222222222222222222222222222222'
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockWalletValue = { address: '0xWallet' }
+    mockIsAdmin = true
+    mockSpaceSafes = []
+    mockChainIds = ['1']
+    mockListSimilarities = new Map()
+  })
+
+  it('flags both the impostor and the trusted anchor it imitates', () => {
+    // anchor is pinned (trusted); impostor is owned. useListSimilarities reports the
+    // impostor resembling the anchor — both must end up in similarAddresses so the pair
+    // reads side by side.
+    mockAllOwned = { '1': [impostor] }
+    mockListSimilarities = new Map([
+      [impostor.toLowerCase(), { address: impostor, match: { anchor: normalizeAddress(anchor) } as never }],
+    ])
+
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, {
+      initialReduxState: {
+        addedSafes: { '1': { [anchor]: { owners: [], threshold: 1 } } },
+      },
+    })
+
+    const flagged = screen.getByTestId('onboarding-safes-list').getAttribute('data-similar')?.split(',') ?? []
+    expect(flagged).toContain(impostor.toLowerCase())
+    expect(flagged).toContain(anchor.toLowerCase())
+  })
+
+  it('does not flag anything when useListSimilarities reports no matches', () => {
+    mockAllOwned = { '1': [impostor] }
+    mockListSimilarities = new Map()
+
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, {
+      initialReduxState: {
+        addedSafes: { '1': { [anchor]: { owners: [], threshold: 1 } } },
+      },
+    })
+
+    expect(screen.getByTestId('onboarding-safes-list')).toHaveAttribute('data-similar', '')
+  })
+
+  it('keeps a multichain Safe (pinned on one chain, owned on another) whole in trusted', () => {
+    // Option C: address-level trust. The same address pinned on chain 1 and owned on chain 137
+    // must appear once in trusted (grouped), never split into the owned section.
+    mockChainIds = ['1', '137']
+    mockAllOwned = { '137': [anchor] }
+
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, {
+      initialReduxState: {
+        addedSafes: { '1': { [anchor]: { owners: [], threshold: 1 } } },
+      },
+    })
+
+    const list = screen.getByTestId('onboarding-safes-list')
+    expect(list).toHaveAttribute('data-trusted-count', '1')
+    expect(list).toHaveAttribute('data-owned-count', '0')
+  })
+})
+
 describe('AddAccounts — admin guard on submit', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockWalletValue = { address: '0xWallet' }
     mockAllOwned = {}
     mockIsAdmin = true
+    mockChainIds = ['1']
+    mockListSimilarities = new Map()
   })
 
   it('blocks submission and shows an error when the user is not an admin', async () => {
@@ -250,6 +321,8 @@ describe('AddAccounts — list fade gradient', () => {
     mockWalletValue = { address: '0xWallet' }
     mockIsAdmin = true
     mockSpaceSafes = []
+    mockChainIds = ['1']
+    mockListSimilarities = new Map()
   })
 
   it('hides the fade when the list does not overflow', () => {
