@@ -177,12 +177,12 @@ const SafeDropdownContainer = ({
           data-current-safe={item.id === selectedItemId ? 'true' : undefined}
           // [&>div]:min-w-0/shrink relax the built-in ItemText wrapper (shrink-0, min-width:auto in
           // ui/select.tsx) so the name column can truncate instead of overflowing the popup.
-          // base-ui moves DOM focus to the hovered/keyboard-active row, so `focus:bg-muted` is the
+          // base-ui moves DOM focus to the hovered/keyboard-active row, so `focus:bg-muted` is the grey
           // hover highlight (it also overrides ui/select's base `focus:bg-accent`); `data-selected`
-          // marks the open safe with the same muted highlight, persistent while it isn't focused.
+          // marks the open safe with a subtle green highlight, persistent while it isn't focused.
           // [&>span.absolute]:hidden suppresses the built-in checkmark on the selected row (it
-          // overlaps the balance column); the muted highlight marks the current safe instead.
-          className="group/row h-auto py-2 px-3 rounded-lg my-0.5 cursor-pointer focus:bg-muted data-[selected]:bg-muted [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden"
+          // overlaps the balance column); the green highlight marks the current safe instead.
+          className="group/row h-auto py-2 px-3 rounded-lg my-0.5 cursor-pointer focus:bg-muted data-[selected]:bg-[var(--color-background-light)] [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden"
         >
           <SafeItem {...item} onRename={handleRename} />
         </SelectItem>

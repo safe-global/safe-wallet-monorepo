@@ -333,8 +333,10 @@ const SafeAccountTableRow = ({
       tabIndex={-1}
       onClick={rowSelectable ? () => onSelectToggle?.(!checkbox?.checked) : undefined}
       sx={{
-        ...(checkbox?.disabledReason ? { opacity: 0.55 } : {}),
-        ...(rowSelectable ? { cursor: 'pointer', '&:hover': { backgroundColor: 'action.hover' } } : {}),
+        // Disabled rows stay dimmed with no hover; every other row gets the grey hover that reveals
+        // the identity cell's copy/explorer/rename icons.
+        ...(checkbox?.disabledReason ? { opacity: 0.55 } : { '&:hover': { backgroundColor: 'action.hover' } }),
+        ...(rowSelectable ? { cursor: 'pointer' } : {}),
         ...(isDragging ? { backgroundColor: 'background.paper', boxShadow: 3, borderRadius: '12px' } : {}),
       }}
     >
