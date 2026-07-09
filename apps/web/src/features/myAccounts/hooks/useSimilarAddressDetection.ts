@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
 import useAllSafes from '@/hooks/safes/useAllSafes'
+import { selectAllAddressBooks } from '@/store/addressBookSlice'
 import { selectAnchorIndex } from '@/features/address-poisoning/store'
 import type { SimilarAddressInfo } from './useNonPinnedSafeWarning.types'
 
@@ -21,6 +22,7 @@ type SimilarAddressResult = {
 const useSimilarAddressDetection = (safeAddress: string | undefined): SimilarAddressResult => {
   const anchorIndex = useAppSelector(selectAnchorIndex)
   const allSafes = useAllSafes()
+  const addressBooks = useAppSelector(selectAllAddressBooks)
 
   return useMemo(() => {
     const emptyResult: SimilarAddressResult = { hasSimilarAddress: false, similarAddresses: [] }
@@ -35,13 +37,19 @@ const useSimilarAddressDetection = (safeAddress: string | undefined): SimilarAdd
     }
 
     const matchedAddress = `0x${match.anchor}`
-    const matchedSafe = allSafes?.find((safe) => safe.address.toLowerCase() === matchedAddress.toLowerCase())
+    const lower = matchedAddress.toLowerCase()
+    const matchedSafe = allSafes?.find((safe) => safe.address.toLowerCase() === lower)
+    // The anchor set also includes address-book contacts that aren't in useAllSafes(); fall back to
+    // the address-book name (any chain) so a lookalike of a contact still shows the trusted name.
+    const addressBookName = Object.values(addressBooks)
+      .flatMap((entries) => Object.entries(entries))
+      .find(([addr]) => addr.toLowerCase() === lower)?.[1]
 
     return {
       hasSimilarAddress: true,
-      similarAddresses: [{ address: matchedAddress, name: matchedSafe?.name }],
+      similarAddresses: [{ address: matchedAddress, name: matchedSafe?.name ?? addressBookName }],
     }
-  }, [safeAddress, anchorIndex, allSafes])
+  }, [safeAddress, anchorIndex, allSafes, addressBooks])
 }
 
 export default useSimilarAddressDetection

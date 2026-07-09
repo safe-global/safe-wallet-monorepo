@@ -123,6 +123,9 @@ export const normalizeAddress = (address: string): string => {
 /** True for an empty string or an all-zero (zero/burn) address. */
 const isBlankOrZeroAddress = (normalized: string): boolean => normalized.length === 0 || /^0+$/.test(normalized)
 
+/** A well-formed 20-byte address in normalized form (no `0x`, lowercase hex). */
+const NORMALIZED_ADDRESS = /^[0-9a-f]{40}$/
+
 /** Number of leading characters two strings share before the first difference. */
 export const longestCommonPrefixLen = (a: string, b: string): number => {
   const max = Math.min(a.length, b.length)
@@ -166,11 +169,18 @@ export const buildSimilarityIndex = (
   anchors: string[],
   config: AnchorSimilarityConfig = DEFAULT_ANCHOR_SIMILARITY_CONFIG,
 ): SimilarityIndex => {
+  // Clamp thresholds to >= 1. A 0 threshold makes `longestCommon*Len >= 0` trivially true, so every
+  // non-identical address would match on that end (and the buckets collapse) → everything flagged.
+  // Not reachable via the default config, but protects callers that tune thresholds.
+  const safeConfig: AnchorSimilarityConfig = {
+    prefixThreshold: Math.max(1, config.prefixThreshold),
+    suffixThreshold: Math.max(1, config.suffixThreshold),
+  }
   // Bucket on the shorter of the two thresholds so every OR-qualifying pair shares
   // at least one bucket: a prefix match (>= prefixThreshold >= keyLen) lands in the
   // same prefix bucket, a suffix match (>= suffixThreshold >= keyLen) in the same
   // suffix bucket. Thus the bucket lookup never misses a real match.
-  const keyLen = Math.min(config.prefixThreshold, config.suffixThreshold)
+  const keyLen = Math.min(safeConfig.prefixThreshold, safeConfig.suffixThreshold)
   const anchorSet = new Set<string>()
   const prefixBuckets = new Map<string, string[]>()
   const suffixBuckets = new Map<string, string[]>()
@@ -183,7 +193,9 @@ export const buildSimilarityIndex = (
 
   for (const raw of anchors) {
     const normalized = normalizeAddress(raw)
-    if (isBlankOrZeroAddress(normalized) || anchorSet.has(normalized)) continue
+    // Only index well-formed, non-zero 20-byte addresses — a corrupted persisted value must not seed
+    // the index (a short/non-hex anchor could yield surprising cross-length matches).
+    if (!NORMALIZED_ADDRESS.test(normalized) || isBlankOrZeroAddress(normalized) || anchorSet.has(normalized)) continue
     anchorSet.add(normalized)
     pushTo(prefixBuckets, normalized.slice(0, keyLen), normalized)
     pushTo(suffixBuckets, normalized.slice(-keyLen), normalized)
@@ -193,8 +205,9 @@ export const buildSimilarityIndex = (
 
   const query = (address: string): SimilarityMatch | null => {
     const normalized = normalizeAddress(address)
-    // Exact anchor (incl. cross-chain replica) is identity, not a lookalike.
-    if (isBlankOrZeroAddress(normalized) || anchorSet.has(normalized)) return null
+    // Skip blank/zero, malformed, or exact-anchor (incl. cross-chain replica = identity) candidates.
+    if (isBlankOrZeroAddress(normalized) || !NORMALIZED_ADDRESS.test(normalized) || anchorSet.has(normalized))
+      return null
 
     const candidates = new Set<string>()
     for (const anchor of prefixBuckets.get(normalized.slice(0, keyLen)) ?? []) candidates.add(anchor)
@@ -202,7 +215,7 @@ export const buildSimilarityIndex = (
 
     let best: SimilarityMatch | null = null
     for (const anchor of candidates) {
-      const match = buildMatch(normalized, anchor, config)
+      const match = buildMatch(normalized, anchor, safeConfig)
       if (match && (best === null || isStrongerMatch(match, best))) best = match
     }
     return best
@@ -214,12 +227,15 @@ export const buildSimilarityIndex = (
 /**
  * Annotate each address in a list with its strongest anchor match (Mode B).
  * An address that is itself an anchor is never marked (it is the trusted original).
+ *
+ * Keyed by the lowercased address (the original, case-preserved value is kept on
+ * `ListAnnotation.address`); query the result with `addr.toLowerCase()`.
  */
 export const detectListSimilarities = (addresses: string[], index: SimilarityIndex): Map<string, ListAnnotation> => {
   const annotations = new Map<string, ListAnnotation>()
   for (const address of addresses) {
     const match = index.isAnchor(address) ? undefined : (index.query(address) ?? undefined)
-    annotations.set(address, { address, match })
+    annotations.set(address.toLowerCase(), { address, match })
   }
   return annotations
 }
