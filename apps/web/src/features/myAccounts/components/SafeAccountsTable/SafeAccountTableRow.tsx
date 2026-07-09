@@ -253,8 +253,10 @@ const RowCell = ({
       overflow: 'hidden',
       // Slimmer than MUI's default 16px so the fixed column budget matches the design.
       px: 1,
-      '&:first-of-type': { pl: 2 },
-      '&:last-of-type': { pr: 2 },
+      // The 4px transparent side borders on the outer cells (with background-clip below) inset the
+      // hover pill from the panel edges — the same trick the header bar uses, so columns stay aligned.
+      '&:first-of-type': { pl: 2, borderLeft: '4px solid transparent', backgroundClip: 'padding-box' },
+      '&:last-of-type': { pr: 2, borderRight: '4px solid transparent', backgroundClip: 'padding-box' },
       borderBottom: showDivider ? '1px solid' : 'none',
       borderColor: 'divider',
       ...(reorderable && column.width ? { width: column.width, minWidth: column.width, maxWidth: column.width } : {}),
