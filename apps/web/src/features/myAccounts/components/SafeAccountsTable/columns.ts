@@ -30,7 +30,7 @@ export const SAFE_ACCOUNT_COLUMNS: SafeAccountColumn[] = [
   { id: 'name', label: 'Name', sortable: true, sortKey: 'name', width: '404px' },
   { id: 'threshold', label: 'Threshold', sortable: true, sortKey: 'threshold', align: 'center', width: '96px' },
   { id: 'networks', label: 'Networks', sortable: true, sortKey: 'networks', align: 'center', width: '96px' },
-  { id: 'workspaces', label: 'Workspaces', sortable: true, sortKey: 'workspaces', align: 'center', width: '116px' },
+  { id: 'workspaces', label: 'Workspaces', sortable: true, sortKey: 'workspaces', align: 'center', width: '96px' },
   { id: 'pending', label: 'Pending', sortable: false, align: 'center', width: '100px' },
   { id: 'balance', label: 'Balance', sortable: false, align: 'right', width: '96px' },
   { id: 'actions', label: '', sortable: false, align: 'right', width: '50px' },

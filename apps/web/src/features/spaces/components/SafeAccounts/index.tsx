@@ -139,6 +139,8 @@ const SpaceSafeAccounts = () => {
           )}
           <SafeAccountsTable
             items={visibleSafes}
+            // Inside a workspace every Safe belongs to it, so the Workspaces column adds no information.
+            columns={['name', 'threshold', 'networks', 'pending', 'balance', 'actions']}
             flaggedAddresses={similarAddresses}
             renderActions={(line) =>
               line.variant === 'child' ? null : <SpaceSafeContextMenu safeItem={line.source} />
