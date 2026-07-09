@@ -1,12 +1,11 @@
-import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import type { ReactElement } from 'react'
 
 import ModalDialog from '@/components/common/ModalDialog'
+import DialogActions from '@/components/common/DialogActions'
 import { useAppDispatch } from '@/store'
 import useAddressBook from '@/hooks/useAddressBook'
-import Track from '@/components/common/Track'
-import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
+import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
 import router from 'next/router'
 import { removeAddressBookEntry } from '@/store/addressBookSlice'
@@ -33,6 +32,7 @@ const SafeListRemoveDialog = ({
   const safe = addressBook?.[address] || address
 
   const handleConfirm = async () => {
+    trackEvent({ ...OVERVIEW_EVENTS.DELETED_FROM_WATCHLIST, label: trackingLabel })
     // When removing the current counterfactual safe, redirect to the accounts page
     if (safeAddress === address && safeChainId === chainId) {
       await router.push(AppRoutes.welcome.accounts)
@@ -51,16 +51,15 @@ const SafeListRemoveDialog = ({
         </Typography>
       </div>
 
-      <div className="flex justify-end gap-2 p-4 pt-2">
-        <Button variant="ghost" data-testid="cancel-btn" onClick={handleClose}>
-          Cancel
-        </Button>
-        <Track {...OVERVIEW_EVENTS.DELETED_FROM_WATCHLIST} label={trackingLabel}>
-          <Button data-testid="delete-btn" onClick={handleConfirm} variant="destructive">
-            Delete
-          </Button>
-        </Track>
-      </div>
+      <DialogActions
+        className="p-4 pt-2"
+        onCancel={handleClose}
+        cancelTestId="cancel-btn"
+        confirmLabel="Delete"
+        confirmTestId="delete-btn"
+        confirmDestructive
+        onConfirm={handleConfirm}
+      />
     </ModalDialog>
   )
 }

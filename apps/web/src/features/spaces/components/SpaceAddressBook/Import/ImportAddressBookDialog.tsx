@@ -3,11 +3,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { debounce } from 'lodash'
 
 import { Alert } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Input } from '@/components/ui/input'
-import { Spinner } from '@/components/ui/spinner'
+import DialogActions from '@/components/common/DialogActions'
 
 import ContactsList from './ContactsList'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
@@ -151,19 +149,15 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
             <DialogFooter className="flex-col items-stretch gap-2 p-4 border-t">
               {error && <Alert variant="destructive">{error}</Alert>}
 
-              <div className="flex flex-row justify-end gap-2">
-                <Button variant="ghost" data-testid="cancel-btn" onClick={handleClose}>
-                  Cancel
-                </Button>
-                <Tooltip>
-                  <TooltipTrigger render={<div className="inline-flex" />}>
-                    <Button type="submit" disabled={selectedCount === 0 || isSubmitting || isSuccess}>
-                      {isSubmitting ? <Spinner className="size-4" /> : `Import contacts (${selectedCount})`}
-                    </Button>
-                  </TooltipTrigger>
-                  {hasNoImportableContacts && <TooltipContent>You have no new contacts to import.</TooltipContent>}
-                </Tooltip>
-              </div>
+              <DialogActions
+                onCancel={handleClose}
+                cancelTestId="cancel-btn"
+                confirmLabel={`Import contacts (${selectedCount})`}
+                confirmType="submit"
+                confirmLoading={isSubmitting}
+                confirmDisabled={selectedCount === 0 || isSuccess}
+                confirmTooltip={hasNoImportableContacts ? 'You have no new contacts to import.' : undefined}
+              />
             </DialogFooter>
           </form>
         </FormProvider>

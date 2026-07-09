@@ -1,5 +1,5 @@
 import AddressBookInput from '@/components/common/AddressBookInput'
-import CheckWallet from '@/components/common/CheckWallet'
+import DialogActions from '@/components/common/DialogActions'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import NameInput from '@/components/common/NameInput'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
@@ -27,7 +27,6 @@ import { XIcon } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
@@ -228,8 +227,8 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
           <Separator />
 
-          <DialogFooter className="flex-row p-6">
-            <Button onClick={onClose}>Done</Button>
+          <DialogFooter className="p-6">
+            <DialogActions confirmLabel="Done" onConfirm={onClose} />
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -333,24 +332,16 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
             <Separator />
 
-            <DialogFooter className="flex-row justify-between p-6">
-              <Button size="sm" variant="ghost" onClick={onCancel}>
-                Cancel
-              </Button>
-
-              <CheckWallet checkNetwork={!isLoading} allowProposer={false}>
-                {(isOk) => (
-                  <Button
-                    data-testid="submit-proposer-btn"
-                    size="sm"
-                    type="submit"
-                    disabled={!isOk || isLoading || isParentLoading || (isEditing && !canEdit) || !formState.isValid}
-                    className="min-h-9 min-w-[122px]"
-                  >
-                    {isLoading ? <Spinner className="size-5" /> : 'Continue'}
-                  </Button>
-                )}
-              </CheckWallet>
+            <DialogFooter className="p-6">
+              <DialogActions
+                onCancel={onCancel}
+                confirmLabel="Continue"
+                confirmTestId="submit-proposer-btn"
+                confirmType="submit"
+                confirmLoading={isLoading}
+                confirmDisabled={isParentLoading || (isEditing && !canEdit) || !formState.isValid}
+                confirmCheckWallet={{ checkNetwork: !isLoading, allowProposer: false }}
+              />
             </DialogFooter>
           </form>
         </FormProvider>

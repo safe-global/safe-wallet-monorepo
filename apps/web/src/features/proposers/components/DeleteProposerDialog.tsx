@@ -28,7 +28,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Typography } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
+import DialogActions from '@/components/common/DialogActions'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { XIcon } from 'lucide-react'
@@ -277,30 +277,22 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
 
           <Separator />
 
-          <DialogFooter className="flex-row justify-between p-6">
+          <DialogFooter className="p-6">
             {multiSigInitiated ? (
-              <Button onClick={onCancel}>Done</Button>
+              <DialogActions confirmLabel="Done" onConfirm={onCancel} />
             ) : (
-              <>
-                <Button data-testid="reject-delete-proposer-btn" size="sm" variant="ghost" onClick={onCancel}>
-                  No, keep it
-                </Button>
-
-                <CheckWallet checkNetwork={!isLoading}>
-                  {(isOk) => (
-                    <Button
-                      data-testid="confirm-delete-proposer-btn"
-                      size="sm"
-                      variant="destructive"
-                      onClick={onConfirm}
-                      disabled={!isOk || isLoading || isParentLoading || !canDelete}
-                      className="min-h-9 min-w-[122px]"
-                    >
-                      {isLoading ? <Spinner className="size-5" /> : 'Yes, delete'}
-                    </Button>
-                  )}
-                </CheckWallet>
-              </>
+              <DialogActions
+                onCancel={onCancel}
+                cancelLabel="No, keep it"
+                cancelTestId="reject-delete-proposer-btn"
+                confirmLabel="Yes, delete"
+                confirmTestId="confirm-delete-proposer-btn"
+                confirmDestructive
+                confirmLoading={isLoading}
+                confirmDisabled={isParentLoading || !canDelete}
+                confirmCheckWallet={{ checkNetwork: !isLoading }}
+                onConfirm={onConfirm}
+              />
             )}
           </DialogFooter>
         </DialogContent>
