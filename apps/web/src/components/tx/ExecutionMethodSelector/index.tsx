@@ -20,6 +20,7 @@ import css from './styles.module.css'
 import BalanceInfo from '@/components/tx/BalanceInfo'
 import madProps from '@/utils/mad-props'
 import { useCurrentChain } from '@/hooks/useChains'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 
@@ -61,6 +62,8 @@ const _ExecutionMethodSelector = ({
   gasTooHigh?: boolean
 }): ReactElement | null => {
   const shouldRelay = executionMethod === ExecutionMethod.RELAY || executionMethod === ExecutionMethod.NO_FEE_CAMPAIGN
+  // On unlimited-relay (GTF) chains the finite "N free transactions left" counter is meaningless, so hide it.
+  const isUnlimitedRelay = !!chain && hasFeature(chain, FEATURES.GTF)
 
   const onChooseExecutionMethod = (newExecutionMethod: unknown) => {
     setExecutionMethod(newExecutionMethod as ExecutionMethod)
@@ -192,7 +195,9 @@ const _ExecutionMethodSelector = ({
           <span className={css.counterNumber}>{noFeeCampaign.remaining}</span> free transactions left
         </Typography>
       ) : shouldRelay && relays ? (
-        <RemainingRelays relays={relays} tooltip={tooltip} />
+        isUnlimitedRelay ? null : (
+          <RemainingRelays relays={relays} tooltip={tooltip} />
+        )
       ) : wallet ? (
         <BalanceInfo />
       ) : null}

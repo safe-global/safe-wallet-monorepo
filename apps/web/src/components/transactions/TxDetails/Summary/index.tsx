@@ -1,6 +1,6 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { memo, type ReactElement } from 'react'
-import { TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
+import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { isCustomTxInfo, isMultiSendTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import type { SafeTransactionData } from '@safe-global/types-kit'
 import { dateString } from '@safe-global/utils/utils/formatters'
@@ -14,6 +14,8 @@ import DecoderLinks from './DecoderLinks'
 import isEqual from 'lodash/isEqual'
 import Multisend from '../TxData/DecodedData/Multisend'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
+import { useLoadFeature } from '@/features/__core__'
+import { GTFFeature, useHistoryFeesBreakdown } from '@/features/gtf'
 
 interface Props {
   safeTxData?: SafeTransactionData
@@ -25,6 +27,17 @@ interface Props {
   showAuditLogFields?: boolean
 }
 
+// GTF (gas-token) fee breakdown for executed txs; the hook returns null when the
+// GTF feature is off, so this renders nothing on non-GTF chains.
+const HistoryFees = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement | null => {
+  const { HistoryFeesAccordion } = useLoadFeature(GTFFeature)
+  const feesData = useHistoryFeesBreakdown(txDetails)
+
+  if (!feesData) return null
+
+  return <HistoryFeesAccordion data={feesData} txInfo={txDetails.txInfo} />
+}
+
 const Summary = ({
   safeTxData,
   txData,
@@ -34,7 +47,7 @@ const Summary = ({
   showDecodedData = true,
   showAuditLogFields = true,
 }: Props): ReactElement => {
-  const { executedAt } = txDetails ?? {}
+  const { txHash, executedAt } = txDetails ?? {}
   const customTxInfo = txInfo && isCustomTxInfo(txInfo) ? txInfo : undefined
   const toInfo = customTxInfo?.to || txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
   const showDetails = Boolean(txInfo && txData)
@@ -78,6 +91,14 @@ const Summary = ({
           <div className="text-sm">{dateString(executedAt)}</div>
         </TxDataRow>
       )}
+
+      {showAuditLogFields && txHash && (
+        <TxDataRow datatestid="tx-hash" title="Transaction hash">
+          {generateDataRowValue(txHash, 'hash', true)}{' '}
+        </TxDataRow>
+      )}
+
+      {txDetails?.executedAt && <HistoryFees txDetails={txDetails} />}
 
       {showDetails && (
         <div className="mt-4">
