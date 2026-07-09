@@ -1,10 +1,9 @@
 import { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
+import DialogActions from '@/components/common/DialogActions'
 import memberIcon from '@/public/images/spaces/member.svg'
 import adminIcon from '@/public/images/spaces/admin.svg'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
 import { Typography } from '@/components/ui/typography'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { cn } from '@/utils/cn'
@@ -202,14 +201,16 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
               )}
             </div>
 
-            <div className="flex justify-end gap-2 px-6 pb-6">
-              <Button variant="ghost" data-testid="cancel-btn" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button data-testid="add-member-modal-button" type="submit" disabled={!formState.isValid || isSubmitting}>
-                {isSubmitting ? <Spinner className="size-5" /> : 'Add member'}
-              </Button>
-            </div>
+            <DialogActions
+              className="px-6 pb-6"
+              onCancel={onClose}
+              cancelTestId="cancel-btn"
+              confirmType="submit"
+              confirmLabel="Add member"
+              confirmTestId="add-member-modal-button"
+              confirmDisabled={!formState.isValid}
+              confirmLoading={isSubmitting}
+            />
           </form>
         </FormProvider>
       </div>

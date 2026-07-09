@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import ModalDialog from '@/components/common/ModalDialog'
+import DialogActions from '@/components/common/DialogActions'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
@@ -57,14 +57,15 @@ const DeclineInviteDialog = ({ space, onClose }: DeclineInviteDialogProps) => {
           {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
         </div>
 
-        <div className="flex justify-end gap-2 px-6 pb-6">
-          <Button variant="ghost" data-testid="cancel-btn" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button data-testid="decline-btn" onClick={handleConfirm} variant="destructive">
-            Decline
-          </Button>
-        </div>
+        <DialogActions
+          className="px-6 pb-6"
+          onCancel={onClose}
+          cancelTestId="cancel-btn"
+          confirmLabel="Decline"
+          onConfirm={handleConfirm}
+          confirmDestructive
+          confirmTestId="decline-btn"
+        />
       </div>
     </ModalDialog>
   )

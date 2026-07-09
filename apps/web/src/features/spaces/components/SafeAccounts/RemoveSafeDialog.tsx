@@ -3,7 +3,7 @@ import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/
 import { useCurrentSpaceId } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { Button } from '@/components/ui/button'
+import DialogActions from '@/components/common/DialogActions'
 import { Typography } from '@/components/ui/typography'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { cn } from '@/utils/cn'
@@ -82,14 +82,15 @@ const RemoveSafeDialog = ({
           )}
         </div>
 
-        <div className="flex justify-end gap-2 px-6 pb-6">
-          <Button variant="ghost" data-testid="cancel-btn" onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button data-testid="delete-btn" onClick={handleConfirm} variant="destructive">
-            Remove
-          </Button>
-        </div>
+        <DialogActions
+          className="px-6 pb-6"
+          onCancel={handleClose}
+          cancelTestId="cancel-btn"
+          confirmLabel="Remove"
+          onConfirm={handleConfirm}
+          confirmTestId="delete-btn"
+          confirmDestructive
+        />
       </div>
     </ModalDialog>
   )

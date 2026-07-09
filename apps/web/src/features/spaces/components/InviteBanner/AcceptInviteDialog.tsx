@@ -7,8 +7,7 @@ import { type ReactElement, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
+import DialogActions from '@/components/common/DialogActions'
 import { Typography } from '@/components/ui/typography'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { cn } from '@/utils/cn'
@@ -98,14 +97,16 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
               )}
             </div>
 
-            <div className="flex justify-end gap-2 px-6 pb-6">
-              <Button variant="ghost" data-testid="cancel-btn" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button data-testid="confirm-accept-invite-button" type="submit" disabled={!formState.isValid}>
-                {isSubmitting ? <Spinner className="size-5" /> : 'Accept invite'}
-              </Button>
-            </div>
+            <DialogActions
+              className="px-6 pb-6"
+              onCancel={onClose}
+              cancelTestId="cancel-btn"
+              confirmType="submit"
+              confirmLabel="Accept invite"
+              confirmTestId="confirm-accept-invite-button"
+              confirmDisabled={!formState.isValid}
+              confirmLoading={isSubmitting}
+            />
           </form>
         </FormProvider>
       </div>

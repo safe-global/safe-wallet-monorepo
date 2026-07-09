@@ -1,11 +1,11 @@
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
 import { Plus } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
+import DialogActions from '@/components/common/DialogActions'
 import { useState, type ReactNode } from 'react'
 import AddressInput from '@/components/common/AddressInput'
 import NameInput from '@/components/common/NameInput'
@@ -180,14 +180,15 @@ const AddContactDialog = ({
                 )}
               </div>
 
-              <div className="flex justify-end gap-2 p-4 pt-0">
-                <Button data-testid="cancel-btn" variant="ghost" onClick={handleClose}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={!formState.isValid || isSubmitting}>
-                  {isSubmitting ? <Spinner className="size-5" /> : submitLabel}
-                </Button>
-              </div>
+              <DialogActions
+                className="p-4 pt-0"
+                onCancel={handleClose}
+                cancelTestId="cancel-btn"
+                confirmType="submit"
+                confirmLabel={submitLabel}
+                confirmDisabled={!formState.isValid || isSubmitting}
+                confirmLoading={isSubmitting}
+              />
             </form>
           </FormProvider>
         </div>

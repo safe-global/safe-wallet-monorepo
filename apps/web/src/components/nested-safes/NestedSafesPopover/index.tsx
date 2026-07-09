@@ -20,6 +20,7 @@ import {
 import AddIcon from '@/public/images/common/add.svg'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import { ModalDialogTitle } from '@/components/common/ModalDialog'
+import DialogActions from '@/components/common/DialogActions'
 import { CreateNestedSafeFlow } from '@/components/tx-flow/flows'
 import { TxModalContext } from '@/components/tx-flow'
 import { NestedSafesList } from '@/components/nested-safes/NestedSafesList'
@@ -220,18 +221,15 @@ function ManageModeFooter({
   onCancel: () => void
 }): ReactElement {
   return (
-    <div className="flex shrink-0 items-center justify-between border-t border-[var(--color-border-light)] px-6 py-4">
-      <Button variant="ghost" onClick={onCancel} data-testid="cancel-manage-nested-safes">
-        Cancel
-      </Button>
-      <Button
-        onClick={onSave}
-        disabled={isFirstTimeCuration ? selectedCount === 0 : !hasChanges}
-        data-testid="save-manage-nested-safes"
-      >
-        {isFirstTimeCuration ? 'Confirm selection' : 'Save'}
-      </Button>
-    </div>
+    <DialogActions
+      className="shrink-0 border-t border-[var(--color-border-light)] px-6 py-4"
+      onCancel={onCancel}
+      cancelTestId="cancel-manage-nested-safes"
+      confirmLabel={isFirstTimeCuration ? 'Confirm selection' : 'Save'}
+      onConfirm={onSave}
+      confirmDisabled={isFirstTimeCuration ? selectedCount === 0 : !hasChanges}
+      confirmTestId="save-manage-nested-safes"
+    />
   )
 }
 

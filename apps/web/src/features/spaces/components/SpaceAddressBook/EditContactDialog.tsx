@@ -1,9 +1,8 @@
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
 import { Typography } from '@/components/ui/typography'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
+import DialogActions from '@/components/common/DialogActions'
 import { useState, useMemo } from 'react'
 import AddressInputReadOnly from '@/components/common/AddressInputReadOnly'
 import NameInput from '@/components/common/NameInput'
@@ -165,14 +164,15 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
               )}
             </div>
 
-            <div className="flex justify-end gap-2 p-4 pt-0">
-              <Button data-testid="cancel-btn" variant="ghost" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={!formState.isValid || !hasChanges || isSubmitting}>
-                {isSubmitting ? <Spinner className="size-5" /> : 'Save'}
-              </Button>
-            </div>
+            <DialogActions
+              className="p-4 pt-0"
+              onCancel={handleClose}
+              cancelTestId="cancel-btn"
+              confirmLabel="Save"
+              confirmType="submit"
+              confirmDisabled={!formState.isValid || !hasChanges}
+              confirmLoading={isSubmitting}
+            />
           </form>
         </FormProvider>
       </div>

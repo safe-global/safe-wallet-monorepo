@@ -3,14 +3,12 @@ import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
 import { useContext } from 'react'
 import type { ReactElement } from 'react'
 
-import css from './styles.module.css'
-
 import ReplaceTxIcon from '@/public/images/transactions/replace-tx.svg'
 import { TxModalContext } from '../..'
 import TxCard from '../../common/TxCard'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
+import DialogActions from '@/components/common/DialogActions'
 
 export function CancelRecoveryOverview(): ReactElement {
   const { setTxFlow } = useContext(TxModalContext)
@@ -36,15 +34,13 @@ export function CancelRecoveryOverview(): ReactElement {
           time.
         </Typography>
 
-        <div className="flex flex-wrap gap-x-6 gap-y-2">
-          <Button variant="outline" onClick={onClose} className={css.button} size="sm">
-            Go back
-          </Button>
-
-          <Button size="sm" data-testid="cancel-proposal-btn" variant="default" onClick={onNext} className={css.button}>
-            Yes, cancel proposal
-          </Button>
-        </div>
+        <DialogActions
+          onCancel={onClose}
+          cancelLabel="Go back"
+          onConfirm={onNext}
+          confirmLabel="Yes, cancel proposal"
+          confirmTestId="cancel-proposal-btn"
+        />
       </div>
     </TxCard>
   )

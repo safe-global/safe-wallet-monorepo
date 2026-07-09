@@ -4,7 +4,7 @@ import DeleteIcon from '@/public/images/common/delete.svg'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import ModalDialog from '@/components/common/ModalDialog'
 import { Button } from '@/components/ui/button'
-import { DialogFooter } from '@/components/ui/dialog'
+import DialogActions from '@/components/common/DialogActions'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
 import { removeAddressBookEntry } from '@/store/addressBookSlice'
@@ -87,14 +87,15 @@ const LocalContactActions = ({ entry }: { entry: AddressBookEntry }) => {
               This removes <b>{entry.name}</b> from the address book in this browser on all its networks.
             </Typography>
           </div>
-          <DialogFooter className="px-6 pt-0 pb-6 sm:flex-row sm:justify-end">
-            <Button data-testid="cancel-btn" type="button" variant="outline" onClick={handleCloseModal}>
-              Cancel
-            </Button>
-            <Button data-testid="delete-btn" type="button" variant="destructive" onClick={handleRemove}>
-              Delete
-            </Button>
-          </DialogFooter>
+          <DialogActions
+            className="px-6 pt-0 pb-6"
+            onCancel={handleCloseModal}
+            cancelTestId="cancel-btn"
+            confirmLabel="Delete"
+            onConfirm={handleRemove}
+            confirmDestructive
+            confirmTestId="delete-btn"
+          />
         </ModalDialog>
       )}
     </>

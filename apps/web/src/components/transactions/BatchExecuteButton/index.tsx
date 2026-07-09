@@ -10,6 +10,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
 } from '@/components/ui/alert-dialog'
+import DialogActions from '@/components/common/DialogActions'
 import { BatchExecuteHoverContext } from '@/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
 import { useAppSelector } from '@/store'
 import { selectPendingTxs } from '@/store/pendingTxsSlice'
@@ -151,12 +152,11 @@ const BatchExecuteButton = () => {
             </AlertDialogHeader>
 
             <AlertDialogFooter>
-              <Button variant="ghost" size="sm" onClick={() => setShowMixedWarning(false)}>
-                Cancel
-              </Button>
-              <Button variant="default" size="sm" onClick={handleConfirmMixed}>
-                Execute anyway
-              </Button>
+              <DialogActions
+                onCancel={() => setShowMixedWarning(false)}
+                confirmLabel="Execute anyway"
+                onConfirm={handleConfirmMixed}
+              />
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

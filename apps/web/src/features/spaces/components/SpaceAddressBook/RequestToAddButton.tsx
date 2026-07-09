@@ -2,10 +2,9 @@ import { useState } from 'react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { DialogFooter } from '@/components/ui/dialog'
-import { Spinner } from '@/components/ui/spinner'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
+import DialogActions from '@/components/common/DialogActions'
 import ModalDialog from '@/components/common/ModalDialog'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ChainIndicator from '@/components/common/ChainIndicator'
@@ -155,19 +154,16 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
           </div>
         </div>
 
-        <DialogFooter className="px-6 pt-0 pb-6 sm:flex-row sm:justify-end">
-          <Button data-testid="cancel-btn" type="button" variant="outline" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            data-testid="confirm-request-btn"
-            type="submit"
-            onClick={handleConfirm}
-            disabled={!!nameError || isSubmitting}
-          >
-            {isSubmitting ? <Spinner className="size-5" /> : 'Request to add'}
-          </Button>
-        </DialogFooter>
+        <DialogActions
+          className="px-6 pt-0 pb-6"
+          onCancel={() => setOpen(false)}
+          cancelTestId="cancel-btn"
+          confirmLabel="Request to add"
+          onConfirm={handleConfirm}
+          confirmTestId="confirm-request-btn"
+          confirmDisabled={!!nameError || isSubmitting}
+          confirmLoading={isSubmitting}
+        />
       </ModalDialog>
     </>
   )

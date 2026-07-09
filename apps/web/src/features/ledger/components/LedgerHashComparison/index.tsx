@@ -1,9 +1,10 @@
 import { XIcon, InfoIcon } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import CopyButton from '@/components/common/CopyButton'
+import DialogActions from '@/components/common/DialogActions'
 import ledgerHashStore from '../../store/ledgerHashStore'
 import {
   DIALOG_TITLE,
@@ -58,11 +59,7 @@ const LedgerHashComparison = () => {
           </div>
         </div>
 
-        <DialogFooter>
-          <Button onClick={handleClose} variant="default">
-            {CLOSE_BUTTON_TEXT}
-          </Button>
-        </DialogFooter>
+        <DialogActions confirmLabel={CLOSE_BUTTON_TEXT} onConfirm={handleClose} className="p-4" />
       </DialogContent>
     </Dialog>
   )

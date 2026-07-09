@@ -1,10 +1,10 @@
 import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
 import { useCSVReader, formatFileSize } from 'react-papaparse'
 import type { ParseResult } from 'papaparse'
 import { type ReactElement, useState, type MouseEvent, useMemo } from 'react'
 
 import ModalDialog from '@/components/common/ModalDialog'
+import DialogActions from '@/components/common/DialogActions'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { useAppDispatch } from '@/store'
 
@@ -161,14 +161,15 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
           </ExternalLink>
         </Typography>
       </div>
-      <div className="flex items-center justify-end gap-2 p-2">
-        <Button variant="ghost" data-testid="cancel-btn" onClick={handleClose}>
-          Cancel
-        </Button>
-        <Button data-testid="import-btn" onClick={handleImport} disabled={!csvData || !!error}>
-          Import
-        </Button>
-      </div>
+      <DialogActions
+        className="p-2"
+        onCancel={handleClose}
+        cancelTestId="cancel-btn"
+        confirmLabel="Import"
+        onConfirm={handleImport}
+        confirmDisabled={!csvData || !!error}
+        confirmTestId="import-btn"
+      />
     </ModalDialog>
   )
 }

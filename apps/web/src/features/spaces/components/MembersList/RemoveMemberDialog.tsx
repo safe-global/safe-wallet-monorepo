@@ -2,7 +2,7 @@ import ModalDialog from '@/components/common/ModalDialog'
 import { useMembersRemoveUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import { Button } from '@/components/ui/button'
+import DialogActions from '@/components/common/DialogActions'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
@@ -77,14 +77,15 @@ const RemoveMemberDialog = ({
           {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
         </div>
 
-        <div className="flex justify-end gap-2 px-6 pb-6">
-          <Button variant="ghost" data-testid="cancel-btn" onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button data-testid="delete-btn" onClick={handleConfirm} variant="destructive">
-            Remove
-          </Button>
-        </div>
+        <DialogActions
+          className="px-6 pb-6"
+          onCancel={handleClose}
+          cancelTestId="cancel-btn"
+          confirmLabel="Remove"
+          onConfirm={handleConfirm}
+          confirmDestructive
+          confirmTestId="delete-btn"
+        />
       </div>
     </ModalDialog>
   )

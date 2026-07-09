@@ -1,5 +1,5 @@
 import ModalDialog from '@/components/common/ModalDialog'
-import { Button } from '@/components/ui/button'
+import DialogActions from '@/components/common/DialogActions'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
@@ -100,14 +100,15 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
               {error && <ErrorMessage>{error}</ErrorMessage>}
             </div>
 
-            <div className="flex justify-end gap-2 px-6 pb-6">
-              <Button variant="ghost" data-testid="cancel-btn" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button type="submit" data-testid="delete-btn" disabled={!formState.isDirty}>
-                Update
-              </Button>
-            </div>
+            <DialogActions
+              className="px-6 pb-6"
+              onCancel={handleClose}
+              cancelTestId="cancel-btn"
+              confirmLabel="Update"
+              confirmType="submit"
+              confirmDisabled={!formState.isDirty}
+              confirmTestId="delete-btn"
+            />
           </form>
         </FormProvider>
       </div>

@@ -43,7 +43,7 @@ const SpaceMembers = () => {
         </div>
 
         <Tabs defaultValue="members">
-          <TabsList variant="line" className="flex-wrap h-auto mb-4 sm:mb-0">
+          <TabsList variant="line" className="flex-wrap mb-4 sm:mb-0">
             <TabsTrigger value="members" className="cursor-pointer" data-testid="members-tab">
               Members ({activeMembers.length})
             </TabsTrigger>

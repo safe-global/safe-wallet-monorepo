@@ -26,12 +26,8 @@ const SecurityDrawerContent = ({
 }: SecurityDrawerContentProps): ReactElement => (
   <Tabs defaultValue="checks" className="flex min-h-0 flex-1 flex-col gap-4 px-6 pb-6">
     <TabsList className="w-fit gap-2">
-      <TabsTrigger value="checks" className="cursor-pointer px-4">
-        Checks
-      </TabsTrigger>
-      <TabsTrigger value="details" className="cursor-pointer px-4">
-        Details
-      </TabsTrigger>
+      <TabsTrigger value="checks">Checks</TabsTrigger>
+      <TabsTrigger value="details">Details</TabsTrigger>
     </TabsList>
 
     <div className="min-h-0 flex-1 overflow-y-auto">

@@ -1,8 +1,8 @@
 import type { ComponentProps, ReactElement, BaseSyntheticEvent } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
-import { Button } from '@/components/ui/button'
 import AddressInput from '@/components/common/AddressInput'
+import DialogActions from '@/components/common/DialogActions'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
 import useChainId from '@/hooks/useChainId'
@@ -86,14 +86,15 @@ function EntryDialog({
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2 p-2">
-            <Button variant="ghost" data-testid="cancel-btn" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button data-testid="save-btn" type="submit" disabled={!formState.isValid}>
-              Save
-            </Button>
-          </div>
+          <DialogActions
+            onCancel={handleClose}
+            cancelTestId="cancel-btn"
+            confirmLabel="Save"
+            confirmType="submit"
+            confirmTestId="save-btn"
+            confirmDisabled={!formState.isValid}
+            className="p-2"
+          />
         </form>
       </FormProvider>
     </ModalDialog>
