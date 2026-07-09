@@ -166,6 +166,11 @@ describe('contractVersionScanner', () => {
     expect(result.status).toBe('issue')
     expect(result.severity).toBe('High')
     expect(result.score).toBe(30)
+    // Full address so EvidenceList shortens it and adds a copy button (WA-2371).
+    expect(result.evidence).toContainEqual({
+      label: 'Implementation',
+      value: '0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF',
+    })
   })
 
   it('returns clear for known L2 singleton address', async () => {
@@ -193,6 +198,10 @@ describe('contractVersionScanner', () => {
     expect(result.status).toBe('partial')
     expect(result.severity).toBe('Medium')
     expect(result.score).toBe(60)
+    expect(result.evidence).toContainEqual({
+      label: 'Original implementation',
+      value: '0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF',
+    })
   })
 
   it('returns clear when creation master copy is a known deployment', async () => {
