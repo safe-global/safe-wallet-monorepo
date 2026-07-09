@@ -8,6 +8,7 @@ import { ThresholdBadge } from '@/components/common/AccountBadges'
 import CopyAddressButton from './CopyAddressButton'
 import ExplorerLinkButton from './ExplorerLinkButton'
 import FullAddress from './FullAddress'
+import TruncatedText from './TruncatedText'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import type { SafeItemData } from '../types'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
@@ -48,13 +49,12 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId, isMultiChai
       </div>
       <div className="flex flex-col items-start flex-1 min-w-0" data-testid="safe-selector-trigger-details">
         <div className="flex items-center gap-1 min-w-0 max-w-full">
-          <Typography
+          <TruncatedText
             data-testid="safe-selector-trigger-name"
             variant="paragraph-small-medium"
-            className="block truncate min-w-0"
-          >
-            {displayName}
-          </Typography>
+            className="block min-w-0"
+            text={displayName}
+          />
           {isHypernativeGuard && <SafeHeaderHnTooltip />}
         </div>
         <div className="relative flex items-center gap-1 min-w-0 max-w-full">

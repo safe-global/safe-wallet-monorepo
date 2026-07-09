@@ -1,6 +1,6 @@
+import { useRef, useState } from 'react'
 import { blo } from 'blo'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Typography } from '@/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/utils/cn'
 import { getInitials, getSafeDisplayInfo, TOOLTIP_DELAY_MS } from '../utils'
@@ -8,6 +8,7 @@ import CopyAddressButton from './CopyAddressButton'
 import ExplorerLinkButton from './ExplorerLinkButton'
 import FullAddress from './FullAddress'
 import RenameButton from './RenameButton'
+import TruncatedText, { shouldOpenTooltip } from './TruncatedText'
 
 // Revealed on row hover (rows carry `group/row`) and on keyboard focus. group-focus-visible (not
 // group-focus): base-ui parks focus on the last hovered option without ever clearing it, so plain
@@ -27,6 +28,8 @@ export interface SafeInfoDisplayProps {
 
 const SafeInfoDisplay = ({ name, address, className, explorerLink, onRename }: SafeInfoDisplayProps) => {
   const { displayName } = getSafeDisplayInfo(name, address)
+  const addressMiddleRef = useRef<HTMLSpanElement>(null)
+  const [addressTooltipOpen, setAddressTooltipOpen] = useState(false)
 
   return (
     <div className={cn('flex items-center gap-3', className)}>
@@ -38,20 +41,20 @@ const SafeInfoDisplay = ({ name, address, className, explorerLink, onRename }: S
       </div>
       <div className="flex flex-col items-start flex-1 min-w-0">
         <div className="flex items-center gap-1 min-w-0 max-w-full">
-          <Tooltip delay={TOOLTIP_DELAY_MS} disableHoverablePopup>
-            <TooltipTrigger render={<span />} className="block min-w-0">
-              <Typography variant="paragraph-small-medium" className="block truncate">
-                {displayName}
-              </Typography>
-            </TooltipTrigger>
-            <TooltipContent className="pointer-events-none select-none">{displayName}</TooltipContent>
-          </Tooltip>
+          <TruncatedText variant="paragraph-small-medium" className="block min-w-0" text={displayName} />
           {onRename && <RenameButton onRename={onRename} className={HOVER_ACTION_CLASS} />}
         </div>
         <div className="flex items-center gap-1 min-w-0 max-w-full">
-          <Tooltip delay={TOOLTIP_DELAY_MS} disableHoverablePopup>
+          <Tooltip
+            delay={TOOLTIP_DELAY_MS}
+            disableHoverablePopup
+            open={addressTooltipOpen}
+            onOpenChange={(nextOpen, details) =>
+              setAddressTooltipOpen(shouldOpenTooltip(nextOpen, details.reason, addressMiddleRef.current))
+            }
+          >
             <TooltipTrigger render={<span />} className="flex min-w-0">
-              <FullAddress address={address} data-testid="safe-item-address" />
+              <FullAddress address={address} middleRef={addressMiddleRef} data-testid="safe-item-address" />
             </TooltipTrigger>
             <TooltipContent className="pointer-events-none select-none">{address}</TooltipContent>
           </Tooltip>

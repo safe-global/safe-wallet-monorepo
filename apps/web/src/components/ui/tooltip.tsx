@@ -29,9 +29,16 @@ function TooltipProvider({ delay = 0, ...props }: TooltipPrimitive.Provider.Prop
   return <TooltipPrimitive.Provider data-slot="tooltip-provider" delay={delay} {...props} />
 }
 
-function Tooltip({ delay, ...props }: TooltipPrimitive.Root.Props & { delay?: number }) {
+type TooltipDelayProps = {
+  /** Hover open delay in ms (forwarded to the provider). Defaults to 0. */
+  delay?: number
+  /** Close delay in ms (forwarded to the provider). */
+  closeDelay?: number
+}
+
+function Tooltip({ delay, closeDelay, ...props }: TooltipPrimitive.Root.Props & TooltipDelayProps) {
   return (
-    <TooltipProvider delay={delay}>
+    <TooltipProvider delay={delay} closeDelay={closeDelay}>
       <TooltipPrimitive.Root data-slot="tooltip" {...props} />
     </TooltipProvider>
   )
