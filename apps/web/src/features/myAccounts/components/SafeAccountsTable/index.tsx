@@ -88,10 +88,6 @@ export type SafeAccountsTableProps = {
   selection?: SafeAccountsSelection
   /** Enables a leading drag-handle column and makes top-level accounts reorderable. */
   reorder?: SafeAccountsReorder
-  /** Drop per-row name/address hover tooltips and the copy icon — for modals that show the full text. */
-  plainCells?: boolean
-  /** Show a copy button and block-explorer link next to each address (as in account rows elsewhere). */
-  showAddressActions?: boolean
   onLinkClick?: () => void
   'data-testid'?: string
 }
@@ -124,8 +120,6 @@ const SafeAccountsTable = ({
   flaggedAddresses,
   selection,
   reorder,
-  plainCells,
-  showAddressActions,
   onLinkClick,
   'data-testid': testId = 'safe-accounts-table',
 }: SafeAccountsTableProps) => {
@@ -238,8 +232,6 @@ const SafeAccountsTable = ({
               columns={visibleColumns}
               flaggedAddresses={flaggedAddresses}
               renderActions={renderActions}
-              plainCells={plainCells}
-              showAddressActions={showAddressActions}
               onLinkClick={onLinkClick}
               onReorder={reorder.onReorder}
             />
@@ -255,8 +247,6 @@ const SafeAccountsTable = ({
                   renderActions={renderActions}
                   checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
                   onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
-                  plainCells={plainCells}
-                  showAddressActions={showAddressActions}
                   onToggle={line.expandable ? () => toggle(groupKey) : undefined}
                   onLinkClick={onLinkClick}
                   showDivider={index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}

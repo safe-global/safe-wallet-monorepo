@@ -1,14 +1,17 @@
 import { blo } from 'blo'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Typography } from '@/components/ui/typography'
-import { getInitials, getSafeDisplayInfo } from '../utils'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeBalanceBlock from './SafeBalanceBlock'
 import { ThresholdBadge } from '@/components/common/AccountBadges'
-import CopyAddressButton from './CopyAddressButton'
-import ExplorerLinkButton from './ExplorerLinkButton'
-import FullAddress from './FullAddress'
-import TruncatedText from './TruncatedText'
+import {
+  CopyAddressButton,
+  ExplorerLinkButton,
+  FullAddress,
+  TruncatedText,
+  getInitials,
+  getSafeDisplayInfo,
+} from '@/components/common/AccountRow'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import type { SafeItemData } from '../types'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'

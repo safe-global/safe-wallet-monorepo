@@ -6,11 +6,10 @@ import TableRow from '@mui/material/TableRow'
 import { Badge } from '@/components/ui/badge'
 import { GripVertical, TriangleAlert } from 'lucide-react'
 import Identicon from '@/components/common/Identicon'
-import AddressWithCopy from '@/components/common/AddressWithCopy'
+import { SafeInfoDisplay } from '@/components/common/AccountRow'
 import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
 import { FiatBalance } from '@/features/spaces'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
@@ -45,10 +44,6 @@ type SafeAccountTableRowProps = {
   /** When set, a leading checkbox cell is rendered in selection mode. */
   checkbox?: RowCheckbox
   onSelectToggle?: (nextChecked: boolean) => void
-  /** Drop the name/address hover tooltips and copy affordance (for surfaces that show the full text). */
-  plainCells?: boolean
-  /** Show a copy button and block-explorer link next to the address (as in account rows elsewhere). */
-  showAddressActions?: boolean
   onToggle?: () => void
   onLinkClick?: () => void
   /** Drag-and-drop wiring from @hello-pangea/dnd — set only in reorder mode. */
@@ -58,74 +53,43 @@ type SafeAccountTableRowProps = {
   isDragging?: boolean
 }
 
-// Fixed identicon column so the name always starts at the same x position (as in the design).
-const NameCellContent = ({
-  line,
-  isFlagged,
-  plainCells,
-  showAddressActions,
-}: {
-  line: AccountLine
-  isFlagged?: boolean
-  /** Drop the name/address hover tooltips and the copy affordance — for surfaces with room for the full text. */
-  plainCells?: boolean
-  /** Show a copy button and block-explorer link next to the address. */
-  showAddressActions?: boolean
-}) => {
-  // Only single-chain rows resolve to one explorer link; multi-chain parents show the address alone.
+const HighSimilarityBadge = () => (
+  <Badge variant="warning" className="-ml-px self-start">
+    <TriangleAlert data-icon="inline-start" />
+    High similarity
+  </Badge>
+)
+
+// Shares the dropdown's row identity cell: clip-gated name/address tooltips and copy/explorer icons
+// revealed on row hover. The leading avatar keeps the table's per-variant icon (multi-chain children
+// show the chain icon; everything else the blockie identicon).
+const NameCellContent = ({ line, isFlagged }: { line: AccountLine; isFlagged?: boolean }) => {
   const chainConfig = useChain(line.chainId)
-  const explorerLink =
-    showAddressActions && line.variant !== 'group' && chainConfig
-      ? getBlockExplorerLink(chainConfig, line.address)
-      : undefined
+  const explorerLink = line.showAddress && chainConfig ? getBlockExplorerLink(chainConfig, line.address) : undefined
+
+  const leading =
+    line.variant === 'child' ? (
+      <BaseAccountItem.Icon
+        address={line.address}
+        chainId={line.chainId}
+        threshold={line.threshold}
+        owners={line.owners}
+        isMultiChainItem
+      />
+    ) : (
+      <Identicon address={line.address} />
+    )
 
   return (
-    <div className={cn('flex min-w-0 items-center gap-3', line.indent && 'pl-9')}>
-      <span className="flex w-10 shrink-0 items-center">
-        {line.variant === 'child' ? (
-          <BaseAccountItem.Icon
-            address={line.address}
-            chainId={line.chainId}
-            threshold={line.threshold}
-            owners={line.owners}
-            isMultiChainItem
-          />
-        ) : (
-          <Identicon address={line.address} />
-        )}
-      </span>
-
-      <div className="flex min-w-0 flex-col gap-0.5">
-        {isFlagged && (
-          <Badge variant="warning" className="-ml-px self-start">
-            <TriangleAlert data-icon="inline-start" />
-            High similarity
-          </Badge>
-        )}
-        {plainCells ? (
-          <Typography variant="paragraph-medium" className="text-foreground block truncate">
-            {line.displayName}
-          </Typography>
-        ) : (
-          <Tooltip>
-            <TooltipTrigger render={<span />} className="block min-w-0 max-w-full">
-              <Typography variant="paragraph-medium" className="text-foreground block truncate">
-                {line.displayName}
-              </Typography>
-            </TooltipTrigger>
-            <TooltipContent>{line.displayName}</TooltipContent>
-          </Tooltip>
-        )}
-        {line.showAddress && (
-          <AddressWithCopy
-            address={line.address}
-            full
-            showCopy={showAddressActions || !plainCells}
-            explorerLink={explorerLink}
-          />
-        )}
-      </div>
-    </div>
+    <SafeInfoDisplay
+      name={line.displayName}
+      address={line.address}
+      leading={<span className="flex w-10 items-center">{leading}</span>}
+      hideAddress={!line.showAddress}
+      explorerLink={explorerLink}
+      badge={isFlagged ? <HighSimilarityBadge /> : undefined}
+      className={cn('min-w-0', line.indent && 'pl-9')}
+    />
   )
 }
 
@@ -133,8 +97,6 @@ const NameCell = ({
   line,
   expanded,
   isFlagged,
-  plainCells,
-  showAddressActions,
   disableLink,
   onToggle,
   onLinkClick,
@@ -142,21 +104,12 @@ const NameCell = ({
   line: AccountLine
   expanded?: boolean
   isFlagged?: boolean
-  plainCells?: boolean
-  showAddressActions?: boolean
   /** In selection mode the row itself toggles the checkbox, so the name never navigates. */
   disableLink?: boolean
   onToggle?: () => void
   onLinkClick?: () => void
 }) => {
-  const content = (
-    <NameCellContent
-      line={line}
-      isFlagged={isFlagged}
-      plainCells={plainCells}
-      showAddressActions={showAddressActions}
-    />
-  )
+  const content = <NameCellContent line={line} isFlagged={isFlagged} />
 
   if (line.expandable) {
     return (
@@ -343,8 +296,6 @@ const SafeAccountTableRow = ({
   renderActions,
   checkbox,
   onSelectToggle,
-  plainCells,
-  showAddressActions,
   onToggle,
   onLinkClick,
   dragHandleProps,
@@ -365,8 +316,6 @@ const SafeAccountTableRow = ({
       line={line}
       expanded={expanded}
       isFlagged={isFlagged}
-      plainCells={plainCells}
-      showAddressActions={showAddressActions}
       disableLink={Boolean(checkbox)}
       onToggle={onToggle}
       onLinkClick={onLinkClick}
@@ -379,6 +328,8 @@ const SafeAccountTableRow = ({
       {...rowDraggableProps}
       data-testid="account-table-row"
       data-variant={line.variant}
+      // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover.
+      className="group/row"
       tabIndex={-1}
       onClick={rowSelectable ? () => onSelectToggle?.(!checkbox?.checked) : undefined}
       sx={{

@@ -157,8 +157,6 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
             <SafeAccountsTable
               items={items}
               columns={MANAGE_COLUMNS}
-              plainCells
-              showAddressActions
               flaggedAddresses={flaggedAddresses}
               selection={{
                 selectedKeys,

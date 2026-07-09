@@ -514,7 +514,6 @@ const AddAccounts = ({
                       <SafeAccountsTable
                         items={visibleTrusted}
                         columns={PICKER_COLUMNS}
-                        plainCells
                         flaggedAddresses={similarAddresses}
                         selection={{
                           selectedKeys,

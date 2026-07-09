@@ -37,8 +37,6 @@ const OnboardingSafesList = ({
           <SafeAccountsTable
             items={trustedSafes}
             columns={COLUMNS}
-            plainCells
-            showAddressActions
             selection={selection}
             data-testid="onboarding-trusted-table"
           />
@@ -52,8 +50,6 @@ const OnboardingSafesList = ({
           <SafeAccountsTable
             items={ownedSafes}
             columns={COLUMNS}
-            plainCells
-            showAddressActions
             flaggedAddresses={flaggedOwnedAddresses}
             selection={selection}
             data-testid="onboarding-owned-table"

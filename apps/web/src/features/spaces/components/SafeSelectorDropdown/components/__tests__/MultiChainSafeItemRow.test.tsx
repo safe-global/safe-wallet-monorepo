@@ -12,7 +12,7 @@ jest.mock('@/hooks/useChains', () => ({
   useChain: () => undefined,
 }))
 
-jest.mock('../SafeInfoDisplay', () => {
+jest.mock('@/components/common/AccountRow/SafeInfoDisplay', () => {
   const Mock = () => <div data-testid="safe-info-display" />
   Mock.displayName = 'SafeInfoDisplay'
   return { __esModule: true, default: Mock }

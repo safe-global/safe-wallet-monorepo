@@ -22,8 +22,8 @@ jest.mock('@/hooks/useSafeDisplayName', () => ({
 }))
 
 jest.mock('../components/SafeBalanceBlock', () => ({ __esModule: true, default: () => null }))
-jest.mock('../components/CopyAddressButton', () => ({ __esModule: true, default: () => null }))
-jest.mock('../components/ExplorerLinkButton', () => ({ __esModule: true, default: () => null }))
+jest.mock('@/components/common/AccountRow/CopyAddressButton', () => ({ __esModule: true, default: () => null }))
+jest.mock('@/components/common/AccountRow/ExplorerLinkButton', () => ({ __esModule: true, default: () => null }))
 jest.mock('@/components/settings/EnvironmentVariables/EnvHintButton', () => ({ __esModule: true, default: () => null }))
 
 const mockUseLoadFeature = coreFeatures.useLoadFeature as jest.Mock

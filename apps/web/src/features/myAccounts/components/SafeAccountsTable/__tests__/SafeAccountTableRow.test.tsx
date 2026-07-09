@@ -102,17 +102,20 @@ describe('SafeAccountTableRow', () => {
     expect(onSelectToggle).not.toHaveBeenCalled()
   })
 
-  it('shows a copy button and explorer link when showAddressActions is set', () => {
-    renderRow({ checkbox: checkbox(), onSelectToggle: jest.fn(), plainCells: true, showAddressActions: true })
+  it('reveals a copy button and explorer link on the address line', () => {
+    renderRow({ checkbox: checkbox(), onSelectToggle: jest.fn() })
 
     expect(screen.getByRole('button', { name: 'Copy address' })).toBeInTheDocument()
-    expect(screen.getByTestId('address-explorer-link')).toHaveAttribute('href', 'https://etherscan.io/address/0xabc')
+    expect(screen.getByTestId('safe-item-row-explorer-link')).toHaveAttribute(
+      'href',
+      'https://etherscan.io/address/0xabc',
+    )
   })
 
-  it('omits the copy/explorer affordances without showAddressActions (plain picker rows)', () => {
-    renderRow({ checkbox: checkbox(), onSelectToggle: jest.fn(), plainCells: true })
+  it('hides the address and its affordances on multi-chain child rows', () => {
+    renderRow({ line: leaf({ variant: 'child', showAddress: false, displayName: 'Ethereum' }) })
 
+    expect(screen.queryByTestId('safe-item-address')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Copy address' })).not.toBeInTheDocument()
-    expect(screen.queryByTestId('address-explorer-link')).not.toBeInTheDocument()
   })
 })
