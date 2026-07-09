@@ -54,7 +54,7 @@ const TrustedSafesModal = ({ modal }: TrustedSafesModalProps) => {
           </DialogHeader>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-6 pt-4">
-            <SecurityBanner title="Verify before you trust" />
+            {similarAddressesForSelectAll.length > 0 && <SecurityBanner title="Verify before you trust" />}
 
             {isInSpace && (
               <Alert className="mb-4 border-transparent bg-[var(--color-info-background)]" data-testid="space-notice">

@@ -88,6 +88,10 @@ jest.mock('@/features/spaces', () => ({
   useSpaceSafes: () => ({ allSafes: mockSpaceSafes }),
 }))
 
+jest.mock('@/features/address-poisoning', () => ({
+  useListSimilarities: () => new Map(),
+}))
+
 const mockAddSafesToSpace = jest.fn()
 const mockRemoveSafesFromSpace = jest.fn()
 

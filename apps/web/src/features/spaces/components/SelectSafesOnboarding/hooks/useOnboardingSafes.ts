@@ -16,7 +16,6 @@ import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
 import useWallet from '@/hooks/wallets/useWallet'
 import useChains from '@/hooks/useChains'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getFlaggedSimilarAddressSet, normalizeAddress } from '@safe-global/utils/utils/addressSimilarity'
 import { useListSimilarities } from '@/features/address-poisoning'
 
@@ -49,18 +48,26 @@ const useOnboardingSafes = () => {
     const buildItem = (chainId: string, address: string) =>
       _buildSafeItem(chainId, address, walletAddress, allAdded, allOwned, allUndeployed, allVisitedSafes, allSafeNames)
 
-    // Trusted safes: from addedSafes (user-pinned, stored in localStorage)
-    const trusted = allChainIds.flatMap((chainId) =>
-      Object.keys(allAdded[chainId] || {}).map((address) => buildItem(chainId, address)),
+    // Trust is address-level (consistent with the main app's `some`-of-chains pin state): if a Safe
+    // address is pinned on ANY chain, every chain of that address is trusted. This avoids the same
+    // multichain Safe being split across the trusted + owned sections (which also mis-triggered a
+    // look-alike flag on its own other-chain instances).
+    const trustedAddresses = new Set(
+      allChainIds.flatMap((chainId) => Object.keys(allAdded[chainId] || {}).map((a) => a.toLowerCase())),
     )
 
-    // Owned safes: from CGW API + undeployed, excluding safes already in trusted list
-    const owned = allChainIds.flatMap((chainId) => {
-      const combined = [...new Set([...(allOwned[chainId] || []), ...Object.keys(allUndeployed[chainId] || {})])]
-      return combined
-        .filter((address) => !trusted.some((t) => t.chainId === chainId && sameAddress(t.address, address)))
-        .map((address) => buildItem(chainId, address))
+    // Every Safe instance the user has, across chains (added ∪ owned ∪ undeployed).
+    const allInstances = allChainIds.flatMap((chainId) => {
+      const addresses = new Set([
+        ...Object.keys(allAdded[chainId] || {}),
+        ...(allOwned[chainId] || []),
+        ...Object.keys(allUndeployed[chainId] || {}),
+      ])
+      return [...addresses].map((address) => buildItem(chainId, address))
     })
+
+    const trusted = allInstances.filter((item) => trustedAddresses.has(item.address.toLowerCase()))
+    const owned = allInstances.filter((item) => !trustedAddresses.has(item.address.toLowerCase()))
 
     return { trustedSafeItems: trusted, ownedSafeItems: owned }
   }, [allChainIds, allAdded, allOwned, allUndeployed, walletAddress, allVisitedSafes, allSafeNames])

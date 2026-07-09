@@ -152,15 +152,19 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
 
     const flagged = new Set<string>()
 
+    // Dedupe by address (chain-agnostic): the same Safe on multiple chains is ONE address, not a
+    // cluster — counting per-chain duplicates would falsely size a multichain safe as a group.
+    const uniqueAddresses = [...new Set(addresses.map((a) => a.toLowerCase()))]
+
     // intra-list: union everything in the same bucket
     const buckets = new Map<string, string[]>()
-    for (const address of addresses) {
-      ensure(address.toLowerCase())
-      const group = similarityResult.getGroup(address)
+    for (const lower of uniqueAddresses) {
+      ensure(lower)
+      const group = similarityResult.getGroup(lower)
       if (!group) continue
-      flagged.add(address.toLowerCase())
+      flagged.add(lower)
       const members = buckets.get(group.bucketKey) ?? []
-      members.push(address.toLowerCase())
+      members.push(lower)
       buckets.set(group.bucketKey, members)
     }
     for (const members of buckets.values()) {
@@ -182,17 +186,16 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
       for (let i = 1; i < peers.length; i++) union(peers[0], peers[i])
     }
 
-    // Component sizes → only expose a group key for members of a real cluster (size ≥ 2) or a
-    // flagged singleton (an impostor whose anchor isn't in the list).
+    // Component sizes over UNIQUE addresses → a real cluster (size ≥ 2) or a flagged singleton
+    // (an impostor whose anchor isn't in the list) gets a group key; a lone safe does not.
     const sizeByRoot = new Map<string, number>()
-    for (const address of addresses) {
-      const root = find(address.toLowerCase())
+    for (const lower of uniqueAddresses) {
+      const root = find(lower)
       sizeByRoot.set(root, (sizeByRoot.get(root) ?? 0) + 1)
     }
 
     const keyByAddress = new Map<string, string>()
-    for (const address of addresses) {
-      const lower = address.toLowerCase()
+    for (const lower of uniqueAddresses) {
       const root = find(lower)
       if ((sizeByRoot.get(root) ?? 0) >= 2 || flagged.has(lower)) keyByAddress.set(lower, `sim:${root}`)
     }

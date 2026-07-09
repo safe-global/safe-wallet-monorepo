@@ -100,6 +100,19 @@ describe('TrustedSafesModal', () => {
     render(<TrustedSafesModal modal={mockModal} />)
 
     expect(screen.getByText('Manage trusted Safes')).toBeInTheDocument()
+  })
+
+  it('hides the "Verify before you trust" banner when no safe is flagged', () => {
+    render(<TrustedSafesModal modal={{ ...mockModal, similarAddressesForSelectAll: [] }} />)
+
+    expect(screen.queryByText('Verify before you trust')).not.toBeInTheDocument()
+  })
+
+  it('shows the "Verify before you trust" banner when a safe is flagged', () => {
+    render(
+      <TrustedSafesModal modal={{ ...mockModal, similarAddressesForSelectAll: [{ address: '0xabc' } as never] }} />,
+    )
+
     expect(screen.getByText('Verify before you trust')).toBeInTheDocument()
   })
 

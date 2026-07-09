@@ -497,6 +497,28 @@ describe('useTrustedSafesModal', () => {
     })
   })
 
+  it('does NOT flag a multichain safe (same address on several chains) as a similarity group', () => {
+    const ADDR = '0x7b45f456d8ba33fa6e8ab38320542f4489970d16'
+    // Same address on 3 chains — a normal multichain safe, not a look-alike cluster.
+    ;(useAllSafes.default as jest.Mock).mockReturnValue([
+      { chainId: '1', address: ADDR, name: 'S', isPinned: false },
+      { chainId: '137', address: ADDR, name: 'S', isPinned: false },
+      { chainId: '11155111', address: ADDR, name: 'S', isPinned: false },
+    ])
+    ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
+      groups: [],
+      addressToGroups: new Map(),
+      isFlagged: () => false,
+      getGroup: () => undefined,
+    })
+    mockUseListSimilarities.mockReturnValue(new Map()) // no anchor matches
+
+    const { result } = renderHook(() => useTrustedSafesModal())
+
+    const flaggedGroups = result.current.availableItems.filter((i) => i.similarityGroup)
+    expect(flaggedGroups).toHaveLength(0)
+  })
+
   describe('anchor detection (layered on intra-list)', () => {
     const IMPOSTOR = mockSafes[0].address
     const ANCHOR = mockSafes[1].address

@@ -15,15 +15,15 @@ import AddManually, { type AddManuallyFormValues } from './AddManually'
 import { getSafeId } from './SafesList'
 import OnboardingSafesList from '../SelectSafesOnboarding/components/OnboardingSafesList'
 import ConnectWalletHint from '../ConnectWalletHint'
-import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
+import { getFlaggedSimilarAddressSet, normalizeAddress } from '@safe-global/utils/utils/addressSimilarity'
 import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
+import { useListSimilarities } from '@/features/address-poisoning'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import {
   useSpaceSafesCreateV1Mutation,
   useSpaceSafesDeleteV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import useChains from '@/hooks/useChains'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
@@ -132,22 +132,28 @@ const AddAccounts = ({
     // Get safes already in the space
     const spaceSafeIds = new Set(flattenSafeItems(spaceSafes || []).map((safe) => `${safe.chainId}:${safe.address}`))
 
-    // Trusted safes: from addedSafes (user-pinned), excluding space safes
-    const trusted = allChainIds
-      .flatMap((chainId) => Object.keys(allAdded[chainId] || {}).map((address) => buildItem(chainId, address)))
-      .filter((safe) => !spaceSafeIds.has(`${safe.chainId}:${safe.address}`))
+    // Trust is address-level (consistent with the main app's `some`-of-chains pin state): a Safe
+    // address pinned on ANY chain is trusted on every chain. This keeps a multichain Safe whole
+    // instead of splitting it across the trusted + owned sections (which also mis-flagged its own
+    // other-chain instances as look-alikes).
+    const trustedAddresses = new Set(
+      allChainIds.flatMap((chainId) => Object.keys(allAdded[chainId] || {}).map((a) => a.toLowerCase())),
+    )
 
-    // Owned safes: from CGW API + undeployed, excluding space safes
-    const owned = allChainIds.flatMap((chainId) => {
-      const combined = [...new Set([...(allOwned[chainId] || []), ...Object.keys(allUndeployed[chainId] || {})])]
-      return combined
-        .filter(
-          (address) =>
-            !trusted.some((t) => t.chainId === chainId && sameAddress(t.address, address)) &&
-            !spaceSafeIds.has(`${chainId}:${address}`),
-        )
+    // Every Safe instance the user has, across chains, minus safes already in the space.
+    const allInstances = allChainIds.flatMap((chainId) => {
+      const addresses = new Set([
+        ...Object.keys(allAdded[chainId] || {}),
+        ...(allOwned[chainId] || []),
+        ...Object.keys(allUndeployed[chainId] || {}),
+      ])
+      return [...addresses]
+        .filter((address) => !spaceSafeIds.has(`${chainId}:${address}`))
         .map((address) => buildItem(chainId, address))
     })
+
+    const trusted = allInstances.filter((safe) => trustedAddresses.has(safe.address.toLowerCase()))
+    const owned = allInstances.filter((safe) => !trustedAddresses.has(safe.address.toLowerCase()))
 
     // Add manually added safes to owned
     const allOwned_ = [...owned, ...manualSafes]
@@ -169,10 +175,26 @@ const AddAccounts = ({
     spaceSafes,
   ])
 
+  const allAddresses = useMemo(() => [...trustedSafes, ...ownedSafes].map((s) => s.address), [trustedSafes, ownedSafes])
+
+  // Legacy intra-list flags plus anchor detection (front OR back vs a trusted anchor) layered on
+  // top — flag-gated by ADDRESS_POISONING_PROTECTION (empty map when off → intra-list only). Both
+  // the impostor and an in-list imitated anchor are marked so the pair reads side-by-side.
+  const anchorAnnotations = useListSimilarities(allAddresses)
   const similarAddresses = useMemo<Set<string>>(() => {
-    const allItems = [...trustedSafes, ...ownedSafes]
-    return getFlaggedSimilarAddressSet(allItems.map((s) => s.address))
-  }, [trustedSafes, ownedSafes])
+    const flagged = getFlaggedSimilarAddressSet(allAddresses)
+    const imitated = new Set<string>()
+    anchorAnnotations.forEach((annotation) => {
+      if (annotation.match) {
+        flagged.add(annotation.address.toLowerCase())
+        imitated.add(annotation.match.anchor)
+      }
+    })
+    for (const address of allAddresses) {
+      if (imitated.has(normalizeAddress(address))) flagged.add(address.toLowerCase())
+    }
+    return flagged
+  }, [allAddresses, anchorAnnotations])
 
   const [rawSearchQuery, setRawSearchQuery] = useState('')
   const debouncedSearchQuery = useDebounce(rawSearchQuery, 300)
