@@ -1,3 +1,4 @@
+import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import SafeAccountTableRow, { type RowCheckbox } from '../SafeAccountTableRow'
 import { SELECT_COLUMN, type SafeAccountColumn } from '../columns'
@@ -130,5 +131,28 @@ describe('SafeAccountTableRow', () => {
   it('omits the rename pencil without onRename (e.g. inside modals)', () => {
     renderRow({})
     expect(screen.queryByTestId('safe-item-rename-btn')).not.toBeInTheDocument()
+  })
+
+  describe('reorder layout', () => {
+    it('shows a grip on a draggable row while keeping the name navigable', () => {
+      renderRow({
+        rowDraggableProps: {} as never,
+        dragHandleProps: {} as DraggableProvidedDragHandleProps,
+      })
+
+      expect(screen.getByTestId('account-drag-handle')).toBeInTheDocument()
+      expect(screen.getByTestId('account-row-link')).toHaveAttribute('href', '/home?safe=eth:0xabc')
+    })
+
+    it('gives a child row an aligned spacer instead of a grip, still navigable', () => {
+      renderRow({
+        line: leaf({ variant: 'child', showAddress: false, displayName: 'Ethereum' }),
+        reorderLayout: true,
+      })
+
+      // Only the parent carries the handle — the child reserves the gutter but has no grip.
+      expect(screen.queryByTestId('account-drag-handle')).not.toBeInTheDocument()
+      expect(screen.getByTestId('account-row-link')).toHaveAttribute('href', '/home?safe=eth:0xabc')
+    })
   })
 })

@@ -18,7 +18,7 @@ import {
   type SafeSortColumn,
 } from './useSafeAccountRows'
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
-import ReorderableBody from './ReorderableBody'
+import ReorderableBody, { toggleExpanded } from './ReorderableBody'
 import EntryDialog from '@/components/address-book/EntryDialog'
 
 /** Renaming a safe = editing its address-book entry across every chain it lives on. */
@@ -192,16 +192,7 @@ const SafeAccountsTable = ({
       order: prev.orderBy === column && prev.order === 'asc' ? 'desc' : 'asc',
     }))
 
-  const toggle = (key: string) =>
-    setExpanded((prev) => {
-      const next = new Set(prev)
-      if (next.has(key)) {
-        next.delete(key)
-      } else {
-        next.add(key)
-      }
-      return next
-    })
+  const toggle = (key: string) => setExpanded((prev) => toggleExpanded(prev, key))
 
   if (items.length === 0) return null
 
@@ -315,6 +306,8 @@ const SafeAccountsTable = ({
               groups={sortedGroups}
               columns={visibleColumns}
               flaggedAddresses={flaggedAddresses}
+              expanded={expanded}
+              setExpanded={setExpanded}
               renderActions={renderActions}
               onRename={onRename}
               onLinkClick={onLinkClick}

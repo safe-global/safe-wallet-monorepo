@@ -190,6 +190,26 @@ describe('SafeAccountsTable — reorder mode', () => {
     render(<SafeAccountsTable items={items} />)
     expect(screen.queryByTestId('drag-0xB')).not.toBeInTheDocument()
   })
+
+  it('lets a multi-chain group expand to reveal its per-chain children while reordering', async () => {
+    render(<SafeAccountsTable items={items} reorder={{ onReorder: jest.fn() }} />)
+    expect(screen.queryByText('Ethereum')).not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByTestId('toggle-0xG'))
+    expect(screen.getByText('Ethereum')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByTestId('toggle-0xG'))
+    expect(screen.queryByText('Ethereum')).not.toBeInTheDocument()
+  })
+
+  it('keeps the drag handle on the parent only — expanded children are not draggable', async () => {
+    render(<SafeAccountsTable items={items} reorder={{ onReorder: jest.fn() }} />)
+    await userEvent.click(screen.getByTestId('toggle-0xG'))
+
+    expect(screen.getByText('Ethereum')).toBeInTheDocument()
+    expect(screen.getByTestId('drag-0xG')).toBeInTheDocument()
+    expect(screen.queryByTestId('drag-0xG:1')).not.toBeInTheDocument()
+  })
 })
 
 describe('SafeAccountsTable — selection mode', () => {

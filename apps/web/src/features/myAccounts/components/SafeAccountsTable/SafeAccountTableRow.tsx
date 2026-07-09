@@ -48,11 +48,14 @@ type SafeAccountTableRowProps = {
   onSelectToggle?: (nextChecked: boolean) => void
   onToggle?: () => void
   onLinkClick?: (line: AccountLine) => void
-  /** Drag-and-drop wiring from @hello-pangea/dnd — set only in reorder mode. */
+  /** Drag-and-drop wiring from @hello-pangea/dnd — set only on the draggable parent row. */
   dragHandleProps?: DraggableProvidedDragHandleProps | null
   rowRef?: (element: HTMLElement | null) => void
   rowDraggableProps?: DraggableProvidedDraggableProps
   isDragging?: boolean
+  /** Forces the reorder-mode Name gutter on a non-draggable row (a group's child) so it lines up
+   *  under its draggable parent. Renders a grip-sized spacer instead of a handle. */
+  reorderLayout?: boolean
 }
 
 const HighSimilarityBadge = () => (
@@ -278,9 +281,14 @@ const RowCell = ({
     ) : column.id === 'name' ? (
       // Reorder mode: the grip shares the Name cell's left gutter and pushes the row content
       // right a little, so no extra column is added and the table keeps its width (no scrollbar).
+      // Child rows have no handle of their own — a spacer keeps them aligned under their parent.
       reorderable ? (
         <div className="flex min-w-0 items-center gap-2">
-          <ReorderHandle dragHandleProps={dragHandleProps} className="relative z-10 shrink-0" />
+          {dragHandleProps !== undefined ? (
+            <ReorderHandle dragHandleProps={dragHandleProps} className="relative z-10 shrink-0" />
+          ) : (
+            <span className="size-4 shrink-0" aria-hidden />
+          )}
           <div className="min-w-0 flex-1">{nameCell}</div>
         </div>
       ) : (
@@ -315,14 +323,16 @@ const SafeAccountTableRow = ({
   rowRef,
   rowDraggableProps,
   isDragging,
+  reorderLayout,
 }: SafeAccountTableRowProps) => {
   // In selection mode a leaf row is one big checkbox — clicking anywhere on it toggles selection
   // (except affordances that stop propagation: the checkbox, actions, copy and explorer link).
   const rowSelectable = Boolean(checkbox) && !line.expandable && !checkbox?.disabled
 
   // In reorder mode the row can be lifted to `position: fixed`, detaching it from the table's
-  // fixed layout — pin each cell's width so the floating row keeps its column alignment.
-  const reorderable = Boolean(rowDraggableProps)
+  // fixed layout — pin each cell's width so the floating row keeps its column alignment. Child
+  // rows aren't draggable but opt into the same gutter (reorderLayout) to stay aligned.
+  const reorderable = Boolean(rowDraggableProps) || Boolean(reorderLayout)
 
   const nameCell = (
     <NameCell
