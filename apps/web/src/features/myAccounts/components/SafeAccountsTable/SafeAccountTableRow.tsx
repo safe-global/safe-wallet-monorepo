@@ -251,12 +251,8 @@ const RowCell = ({
       overflow: 'hidden',
       // Slimmer than MUI's default 16px so the fixed column budget matches the design.
       px: 1,
-      // Transparent borders + background-clip inset the hover pill from the row edges so it floats clear
-      // of the separators (the header bar uses the same trick). Vertical on every cell, horizontal on
-      // the outer cells; always present, so column widths stay put.
-      borderTop: '6px solid transparent',
-      borderBottom: '6px solid transparent',
-      backgroundClip: 'padding-box',
+      // Horizontal inset for the hover pill on the outer cells (vertical inset + background-clip are set
+      // at the Table level, where they can beat the theme's cell-border override).
       '&:first-of-type': { pl: 2, borderLeft: '4px solid transparent' },
       '&:last-of-type': { pr: 2, borderRight: '4px solid transparent' },
       ...(reorderable && column.width ? { width: column.width, minWidth: column.width, maxWidth: column.width } : {}),

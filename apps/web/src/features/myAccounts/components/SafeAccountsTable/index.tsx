@@ -220,6 +220,15 @@ const SafeAccountsTable = ({
               borderTopRightRadius: '8px',
               borderBottomRightRadius: '8px',
             },
+            // Transparent top/bottom borders (with background-clip) inset the hover pill vertically so it
+            // floats clear of the separators. Set here — not per-cell — because the base theme forces
+            // cell borderBottom to `none` at a specificity a per-cell sx can't beat (which is why only
+            // the bottom touched). The outer cells' horizontal inset borders live in the cell sx.
+            '& .MuiTableBody-root .MuiTableCell-root': {
+              borderTop: '6px solid transparent',
+              borderBottom: '6px solid transparent',
+              backgroundClip: 'padding-box',
+            },
             // Row separator, drawn as a 1px line at the bottom of the <tr> (keyed off data-divider,
             // absent on the last row). It lives on the row — not the cells — so the cells' transparent
             // top/bottom borders can inset the hover pill clear of the separator. Inset 4px each side to
