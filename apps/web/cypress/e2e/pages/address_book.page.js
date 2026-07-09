@@ -1,6 +1,5 @@
 import * as constants from '../../support/constants.js'
 import * as main from './main.page.js'
-import staticSafes from '../../fixtures/safes/static.js'
 
 // Re-export common selectors from main.page.js for backward compatibility
 export const tableContainer = main.tableContainer
@@ -118,7 +117,7 @@ export function addEntryByENS(name, ens) {
   typeInName(name)
   typeInAddress(ens)
   clickOnSaveEntryBtn()
-  verifyNewEntryAdded(name, staticSafes.SEP_STATIC_SAFE_6)
+  verifyNewEntryAdded(name, constants.ENS_TEST_SEPOLIA_ADDRESS)
 }
 
 export function verifyModalSummaryMessage(entryCount, chainCount) {

@@ -29,8 +29,9 @@ export const SEPOLIA_OWNER_2 = '0x96D4c6fFC338912322813a77655fCC926b9A5aC5'
 export const SEPOLIA_OWNER_2_SHORT = '0x96D4...5aC5'
 export const TEST_SAFE_2 = 'gor:0xE96C43C54B08eC528e9e815fC3D02Ea94A320505'
 export const SIDEBAR_ADDRESS = '0x04f8...1a91'
-//ENS_TEST_SEPOLIA resolves to 0xBf30F749FC027a5d79c4710D988F0D3C8e217A4F
-export const ENS_TEST_SEPOLIA = 'e2etestsafe.eth'
+// ENS_TEST_SEPOLIA resolves to ENS_TEST_SEPOLIA_ADDRESS on Sepolia
+export const ENS_TEST_SEPOLIA = 'ur.integration-tests.eth'
+export const ENS_TEST_SEPOLIA_ADDRESS = 'sep:0x2222222222222222222222222222222222222222'
 export const ENS_TEST_GOERLI = 'goerli-safe-test.eth'
 export const ENS_TEST_SEPOLIA_INVALID = 'ivladitestenssepolia.eth'
 export const ENS_TEST_SEPOLIA_VALID = 'testenssepolia.eth'

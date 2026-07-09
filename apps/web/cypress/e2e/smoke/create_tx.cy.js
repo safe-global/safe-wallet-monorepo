@@ -35,7 +35,7 @@ describe('[SMOKE] Create transactions tests', () => {
 
   it('[SMOKE] Verify address input resolves a valid ENS name', () => {
     createtx.typeRecipientAddress(constants.ENS_TEST_SEPOLIA)
-    createtx.verifyENSResolves(staticSafes.SEP_STATIC_SAFE_6)
+    createtx.verifyENSResolves(constants.ENS_TEST_SEPOLIA_ADDRESS)
   })
 
   it('[SMOKE] Verify error message for invalid amount input', () => {

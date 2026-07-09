@@ -24,7 +24,7 @@ describe('[SMOKE] Spending limits tests', () => {
 
   it('Verify A valid ENS name is resolved successfully', () => {
     spendinglimit.enterBeneficiaryAddress(constants.ENS_TEST_SEPOLIA)
-    spendinglimit.checkBeneficiaryENS(staticSafes.SEP_STATIC_SAFE_6)
+    spendinglimit.checkBeneficiaryENS(constants.ENS_TEST_SEPOLIA_ADDRESS)
   })
 
   it('Verify writing a valid address shows no errors', () => {
