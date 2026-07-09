@@ -19,12 +19,14 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - `variant` ('default' | 'outline' | 'primary')
+ * - `variant` ('default' | 'outline' | 'primary' | 'warning' | 'success' | 'destructive' | 'info' | 'positive' | 'negative')
+ * - `size` ('sm' | 'default' | 'lg' | 'auto') — `default` is content-height (no fixed height)
+ * - `shape` ('pill' | 'tag')
  * - `onDelete` (renders a remove button when provided)
  * - `className`
  */
 const chipVariants = cva(
-  'inline-flex w-fit items-center gap-1 whitespace-nowrap rounded-4xl px-2.5 py-0.5 text-xs font-medium [&>svg]:size-3 [&>svg]:pointer-events-none',
+  'inline-flex w-fit items-center gap-1 whitespace-nowrap font-medium [&>svg]:size-3 [&>svg]:pointer-events-none',
   {
     variants: {
       variant: {
@@ -33,19 +35,40 @@ const chipVariants = cva(
         // Solid fill: the tinted `bg-primary/10 text-primary` version was indistinguishable
         // from `default` in light mode (10% black on near-black text).
         primary: 'bg-primary text-primary-foreground',
+        // Semantic colour tints, kept at parity with Badge's variants.
+        warning: 'bg-warning-subtle text-warning-strong',
+        success:
+          'bg-accent-secondary text-accent-secondary-foreground dark:bg-accent-secondary/20 dark:text-accent-success',
+        destructive: 'bg-destructive/10 text-destructive dark:bg-destructive/20',
+        info: 'bg-info-subtle text-info-strong',
+        positive: 'bg-success-subtle text-success-strong',
+        negative: 'bg-destructive/10 text-destructive dark:bg-destructive/20',
+      },
+      // Geometry lives on `size`/`shape`, never on a call-site className.
+      size: {
+        sm: 'h-5 px-1.5 py-0 text-[10px] leading-none',
+        default: 'px-2.5 py-0.5 text-xs',
+        lg: 'h-6 px-2.5 py-0 text-sm',
+        auto: 'h-auto px-2.5 py-1 text-xs',
+      },
+      shape: {
+        pill: 'rounded-4xl',
+        tag: 'rounded-sm',
       },
     },
     defaultVariants: {
       variant: 'default',
+      size: 'default',
+      shape: 'pill',
     },
   },
 )
 
 type ChipProps = ComponentProps<'span'> & VariantProps<typeof chipVariants> & { onDelete?: () => void }
 
-function Chip({ className, variant, onDelete, children, ...props }: ChipProps) {
+function Chip({ className, variant, size, shape, onDelete, children, ...props }: ChipProps) {
   return (
-    <span className={cn(chipVariants({ variant, className }))} data-slot="chip" {...props}>
+    <span className={cn(chipVariants({ variant, size, shape, className }))} data-slot="chip" {...props}>
       {children}
       {onDelete && (
         <button

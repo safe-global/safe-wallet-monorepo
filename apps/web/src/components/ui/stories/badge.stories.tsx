@@ -12,7 +12,27 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'secondary', 'destructive', 'outline', 'warning', 'success', 'ghost', 'link'],
+      options: [
+        'default',
+        'secondary',
+        'destructive',
+        'outline',
+        'warning',
+        'success',
+        'info',
+        'positive',
+        'negative',
+        'ghost',
+        'link',
+      ],
+    },
+    size: {
+      control: 'select',
+      options: ['sm', 'default', 'lg', 'auto'],
+    },
+    shape: {
+      control: 'select',
+      options: ['pill', 'tag'],
     },
   },
 } satisfies Meta<typeof Badge>
@@ -40,8 +60,32 @@ export const AllVariants: Story = {
           <Badge variant="outline">Outline</Badge>
           <Badge variant="warning">Warning</Badge>
           <Badge variant="success">Success</Badge>
+          <Badge variant="info">Info</Badge>
+          <Badge variant="positive">+4.31%</Badge>
+          <Badge variant="negative">-2.10%</Badge>
           <Badge variant="ghost">Ghost</Badge>
           <Badge variant="link">Link</Badge>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Sizes</h3>
+        <p className="text-muted-foreground mb-4 text-sm">
+          Geometry lives on <code>size</code>/<code>shape</code>, never on a call-site <code>className</code>.
+        </p>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <Badge size="sm">sm</Badge>
+          <Badge size="default">default</Badge>
+          <Badge size="lg">lg</Badge>
+          <Badge size="auto">auto (multi&#8209;line content)</Badge>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Shapes</h3>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <Badge shape="pill">pill</Badge>
+          <Badge shape="tag">tag</Badge>
         </div>
       </div>
 
