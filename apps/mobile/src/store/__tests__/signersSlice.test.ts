@@ -1,16 +1,21 @@
-import signersReducer, { addSigner, selectSigners, selectTotalSignerCount } from '../signersSlice'
+import signersReducer, { addSigner, selectSafeSigners, selectSigners, selectTotalSignerCount } from '../signersSlice'
+import { addSafe } from '../safesSlice'
 import { addSignerWithEffects, computeSignerChainIds } from '../signerThunks'
 import { selectActiveSigner } from '../activeSignerSlice'
 import { selectAllContacts, selectContactByAddress } from '../addressBookSlice'
 import type { RootState } from '../index'
 import { faker } from '@faker-js/faker'
+import { getAddress } from 'ethers'
 import { SignerInfo } from '@/src/types/address'
 import { createTestStore, type TestStoreState } from '@/src/tests/test-utils'
+import { generateSafeOverview } from '@/src/tests/factories/safe'
 
 // Helper function to generate a valid Ethereum address
 const generateEthereumAddress = (): `0x${string}` => {
   return faker.finance.ethereumAddress() as `0x${string}`
 }
+
+const makeOverview = (chainId: string, owners: string[]) => generateSafeOverview({ chainId, owners })
 
 // Helper function to generate private key signer
 const generatePrivateKeySigner = (overrides?: Partial<Omit<SignerInfo, 'type' | 'derivationPath'>>): SignerInfo => ({
@@ -303,15 +308,6 @@ describe('signersSlice', () => {
   describe('computeSignerChainIds', () => {
     const signerAddress = '0xABCDef1234567890abcdef1234567890ABCDEF12'
 
-    const makeOverview = (chainId: string, owners: string[]) => ({
-      address: { value: generateEthereumAddress() },
-      chainId,
-      threshold: 1,
-      owners: owners.map((value) => ({ value })),
-      fiatTotal: '0',
-      queued: 0,
-    })
-
     it('should return all chain IDs where signer is an owner', () => {
       const safeAddress = generateEthereumAddress()
       const initialState: TestStoreState = {
@@ -457,6 +453,100 @@ describe('signersSlice', () => {
       const signer2 = generateSignerInfo()
       state = signersReducer(state, addSigner(signer2))
       expect(selectTotalSignerCount({ signers: state } as RootState)).toBe(2)
+    })
+  })
+
+  describe('selectSafeSigners', () => {
+    it('returns the owners that have an imported signer', () => {
+      const owner = generateEthereumAddress()
+      const otherOwner = generateEthereumAddress()
+      const safeAddress = generateEthereumAddress()
+      const store = createTestStore()
+
+      store.dispatch(addSafe({ address: safeAddress, info: { '1': makeOverview('1', [owner, otherOwner]) } }))
+      store.dispatch(addSigner(generateSignerInfo({ value: owner })))
+
+      expect(selectSafeSigners(store.getState(), { address: safeAddress, chainId: '1' })).toEqual([owner])
+    })
+
+    it('returns empty when the imported signer is not an owner', () => {
+      const safeAddress = generateEthereumAddress()
+      const store = createTestStore()
+
+      store.dispatch(addSafe({ address: safeAddress, info: { '1': makeOverview('1', [generateEthereumAddress()]) } }))
+      store.dispatch(addSigner(generateSignerInfo()))
+
+      expect(selectSafeSigners(store.getState(), { address: safeAddress, chainId: '1' })).toEqual([])
+    })
+
+    it('returns empty when the Safe overview for the chain is not loaded', () => {
+      const owner = generateEthereumAddress()
+      const safeAddress = generateEthereumAddress()
+      const store = createTestStore()
+
+      store.dispatch(addSafe({ address: safeAddress, info: { '1': makeOverview('1', [owner]) } }))
+      store.dispatch(addSigner(generateSignerInfo({ value: owner })))
+
+      expect(selectSafeSigners(store.getState(), { address: safeAddress, chainId: '137' })).toEqual([])
+    })
+
+    it('returns all owners that have an imported signer', () => {
+      const owner1 = generateEthereumAddress()
+      const owner2 = generateEthereumAddress()
+      const ownerWithoutSigner = generateEthereumAddress()
+      const safeAddress = generateEthereumAddress()
+      const store = createTestStore()
+
+      store.dispatch(
+        addSafe({ address: safeAddress, info: { '1': makeOverview('1', [owner1, owner2, ownerWithoutSigner]) } }),
+      )
+      store.dispatch(addSigner(generateSignerInfo({ value: owner1 })))
+      store.dispatch(addSigner(generateSignerInfo({ value: owner2 })))
+
+      expect(selectSafeSigners(store.getState(), { address: safeAddress, chainId: '1' })).toEqual([owner1, owner2])
+    })
+
+    it('is scoped per chain', () => {
+      const owner = generateEthereumAddress()
+      const otherChainOwner = generateEthereumAddress()
+      const safeAddress = generateEthereumAddress()
+      const store = createTestStore()
+
+      store.dispatch(
+        addSafe({
+          address: safeAddress,
+          info: { '1': makeOverview('1', [owner]), '137': makeOverview('137', [otherChainOwner]) },
+        }),
+      )
+      store.dispatch(addSigner(generateSignerInfo({ value: owner })))
+
+      expect(selectSafeSigners(store.getState(), { address: safeAddress, chainId: '1' })).toEqual([owner])
+      expect(selectSafeSigners(store.getState(), { address: safeAddress, chainId: '137' })).toEqual([])
+    })
+
+    it('matches owners and signers case-insensitively', () => {
+      const owner = getAddress(generateEthereumAddress()) // EIP-55 checksummed, as returned by CGW
+      const safeAddress = generateEthereumAddress()
+      const store = createTestStore()
+
+      store.dispatch(addSafe({ address: safeAddress, info: { '1': makeOverview('1', [owner]) } }))
+      store.dispatch(addSigner(generateSignerInfo({ value: owner.toLowerCase() as `0x${string}` })))
+
+      expect(selectSafeSigners(store.getState(), { address: safeAddress, chainId: '1' })).toEqual([owner])
+    })
+
+    it('returns a stable reference for unchanged state', () => {
+      const owner = generateEthereumAddress()
+      const safeAddress = generateEthereumAddress()
+      const store = createTestStore()
+
+      store.dispatch(addSafe({ address: safeAddress, info: { '1': makeOverview('1', [owner]) } }))
+      store.dispatch(addSigner(generateSignerInfo({ value: owner })))
+
+      const first = selectSafeSigners(store.getState(), { address: safeAddress, chainId: '1' })
+      const second = selectSafeSigners(store.getState(), { address: safeAddress, chainId: '1' })
+
+      expect(second).toBe(first)
     })
   })
 })
