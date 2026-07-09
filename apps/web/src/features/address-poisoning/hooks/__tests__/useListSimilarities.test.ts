@@ -30,30 +30,30 @@ describe('useListSimilarities', () => {
 
   it('does not flag the anchor itself', () => {
     const { result } = renderHook(() => useListSimilarities([ANCHOR]))
-    expect(result.current.get(ANCHOR)?.match).toBeUndefined()
+    expect(result.current.get(ANCHOR.toLowerCase())?.match).toBeUndefined()
   })
 
   it('does not flag a clean address', () => {
     const { result } = renderHook(() => useListSimilarities([CLEAN]))
-    expect(result.current.get(CLEAN)?.match).toBeUndefined()
+    expect(result.current.get(CLEAN.toLowerCase())?.match).toBeUndefined()
   })
 
   it('flags a both-ends look-alike as CRITICAL', () => {
     const { result } = renderHook(() => useListSimilarities([CRITICAL]))
-    const match = result.current.get(CRITICAL)?.match
+    const match = result.current.get(CRITICAL.toLowerCase())?.match
     expect(match?.severity).toBe(Severity.CRITICAL)
     expect(getAddress('0x' + match!.anchor)).toBe(ANCHOR)
   })
 
   it('flags a one-end look-alike as WARN', () => {
     const { result } = renderHook(() => useListSimilarities([WARN]))
-    expect(result.current.get(WARN)?.match?.severity).toBe(Severity.WARN)
+    expect(result.current.get(WARN.toLowerCase())?.match?.severity).toBe(Severity.WARN)
   })
 
   it('annotates the real anchor and the impostor together in one list', () => {
     const { result } = renderHook(() => useListSimilarities([ANCHOR, CRITICAL]))
-    expect(result.current.get(ANCHOR)?.match).toBeUndefined() // the trusted original
-    expect(result.current.get(CRITICAL)?.match?.severity).toBe(Severity.CRITICAL) // the impostor
+    expect(result.current.get(ANCHOR.toLowerCase())?.match).toBeUndefined() // the trusted original
+    expect(result.current.get(CRITICAL.toLowerCase())?.match?.severity).toBe(Severity.CRITICAL) // the impostor
   })
 
   it('returns an empty map when the ADDRESS_POISONING_PROTECTION flag is off', () => {
