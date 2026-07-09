@@ -98,7 +98,13 @@ export type SafeAccountsTableProps = {
   selection?: SafeAccountsSelection
   /** Enables a leading drag-handle column and makes top-level accounts reorderable. */
   reorder?: SafeAccountsReorder
-  onLinkClick?: () => void
+  /** Fired when a row's link is clicked; receives the clicked line so callers can track the safe. */
+  onLinkClick?: (line: AccountLine) => void
+  /**
+   * Renders the table flush inside a card: no column header, no bordered container, and the Name
+   * column flexes to fill the available width instead of being fixed. Used by the dashboard widget.
+   */
+  embedded?: boolean
   'data-testid'?: string
 }
 
@@ -131,6 +137,7 @@ const SafeAccountsTable = ({
   selection,
   reorder,
   onLinkClick,
+  embedded = false,
   'data-testid': testId = 'safe-accounts-table',
 }: SafeAccountsTableProps) => {
   const { groups } = useSafeAccountRows(items)
@@ -201,21 +208,25 @@ const SafeAccountsTable = ({
   return (
     <Box data-testid={testId} sx={{ width: '100%' }}>
       <TableContainer
-        sx={{
-          width: '100%',
-          overflowX: 'auto',
-          borderRadius: '16px',
-          backgroundColor: 'background.paper',
-          border: '1px solid',
-          borderColor: 'border.light',
-          // Keep the last row off the rounded bottom edge (the header already insets from the top).
-          pb: 1,
-        }}
+        sx={
+          embedded
+            ? { width: '100%', overflowX: 'visible' }
+            : {
+                width: '100%',
+                overflowX: 'auto',
+                borderRadius: '16px',
+                backgroundColor: 'background.paper',
+                border: '1px solid',
+                borderColor: 'border.light',
+                // Keep the last row off the rounded bottom edge (the header already insets from the top).
+                pb: 1,
+              }
+        }
       >
         <Table
           sx={{
             tableLayout: 'fixed',
-            minWidth,
+            minWidth: embedded ? undefined : minWidth,
             borderCollapse: 'separate',
             borderSpacing: 0,
             // The base theme tints every MuiTableRow green on hover; suppress it on the <tr> (otherwise
@@ -257,35 +268,47 @@ const SafeAccountsTable = ({
             },
           }}
         >
-          <TableHead>
-            <TableRow>
-              {visibleColumns.map((column, index) => (
-                <TableCell
-                  key={column.id}
-                  sortDirection={sort.orderBy === column.sortKey ? sort.order : false}
-                  className={cn(
-                    'bg-muted',
-                    index === 0 && 'rounded-l-lg',
-                    index === visibleColumns.length - 1 && 'rounded-r-lg',
-                  )}
-                  sx={{ ...headerSx, width: column.width, textAlign: column.align ?? 'left' }}
-                >
-                  {column.sortable && column.sortKey && !reorderActive ? (
-                    <TableSortLabel
-                      active={sort.orderBy === column.sortKey}
-                      direction={sort.orderBy === column.sortKey ? sort.order : 'asc'}
-                      onClick={() => handleSort(column.sortKey as SafeSortColumn)}
-                      data-testid={`account-sort-${column.id}`}
-                    >
-                      {column.label}
-                    </TableSortLabel>
-                  ) : (
-                    column.label
-                  )}
-                </TableCell>
+          {/* Embedded (headerless) tables need a colgroup to keep fixed-layout column widths; the Name
+              column is left unsized so it flexes to fill the card, while the stat columns stay fixed. */}
+          {embedded && (
+            <colgroup>
+              {visibleColumns.map((column) => (
+                <col key={column.id} style={column.id === 'name' ? undefined : { width: column.width }} />
               ))}
-            </TableRow>
-          </TableHead>
+            </colgroup>
+          )}
+
+          {!embedded && (
+            <TableHead>
+              <TableRow>
+                {visibleColumns.map((column, index) => (
+                  <TableCell
+                    key={column.id}
+                    sortDirection={sort.orderBy === column.sortKey ? sort.order : false}
+                    className={cn(
+                      'bg-muted',
+                      index === 0 && 'rounded-l-lg',
+                      index === visibleColumns.length - 1 && 'rounded-r-lg',
+                    )}
+                    sx={{ ...headerSx, width: column.width, textAlign: column.align ?? 'left' }}
+                  >
+                    {column.sortable && column.sortKey && !reorderActive ? (
+                      <TableSortLabel
+                        active={sort.orderBy === column.sortKey}
+                        direction={sort.orderBy === column.sortKey ? sort.order : 'asc'}
+                        onClick={() => handleSort(column.sortKey as SafeSortColumn)}
+                        data-testid={`account-sort-${column.id}`}
+                      >
+                        {column.label}
+                      </TableSortLabel>
+                    ) : (
+                      column.label
+                    )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+          )}
 
           {reorder ? (
             <ReorderableBody

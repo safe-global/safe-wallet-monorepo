@@ -12,7 +12,7 @@ type ReorderableBodyProps = {
   flaggedAddresses?: Set<string>
   renderActions?: (line: AccountLine) => ReactNode
   onRename?: (line: AccountLine) => void
-  onLinkClick?: () => void
+  onLinkClick?: (line: AccountLine) => void
   /** Fired on drop with the reordered top-level account addresses, in display order. */
   onReorder: (orderedAddresses: string[]) => void
 }

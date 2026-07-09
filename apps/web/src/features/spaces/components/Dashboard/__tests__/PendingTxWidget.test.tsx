@@ -138,22 +138,11 @@ describe('PendingTxWidget – onItemClick callback', () => {
     expect(screen.queryByText('No pending transactions')).not.toBeInTheDocument()
     expect(getTxRows()).toHaveLength(0)
   })
-})
 
-describe('PendingTxWidget – View all header link', () => {
-  it('renders a "View all" link and calls onViewAll when clicked', () => {
-    const onViewAll = jest.fn()
+  it('never renders a "View all" action', () => {
     const tx = createMockTx('tx-1', MOCK_SAFE_ADDRESS, MOCK_CHAIN_ID)
 
-    render(<PendingTxWidget transactions={[tx]} onViewAll={onViewAll} />)
-
-    fireEvent.click(screen.getByText('View all'))
-
-    expect(onViewAll).toHaveBeenCalledTimes(1)
-  })
-
-  it('does not render a "View all" link when there are no transactions', () => {
-    render(<PendingTxWidget transactions={[]} onViewAll={jest.fn()} />)
+    render(<PendingTxWidget transactions={[tx]} />)
 
     expect(screen.queryByText('View all')).not.toBeInTheDocument()
   })

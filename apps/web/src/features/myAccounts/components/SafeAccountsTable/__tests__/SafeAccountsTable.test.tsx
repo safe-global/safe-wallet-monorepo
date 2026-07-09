@@ -154,6 +154,16 @@ describe('SafeAccountsTable', () => {
     render(<SafeAccountsTable items={items} />)
     expect(screen.queryByTestId('select-0xB')).not.toBeInTheDocument()
   })
+
+  it('renders rows without a column header in embedded mode', () => {
+    render(<SafeAccountsTable items={items} embedded columns={['name', 'threshold', 'networks', 'balance']} />)
+
+    // Rows still render...
+    expect(rowNames()).toEqual(['Bravo', 'Alpha', 'Group'])
+    // ...but the sortable column header is gone (no header row to click).
+    expect(screen.queryByTestId('account-sort-name')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('account-sort-threshold')).not.toBeInTheDocument()
+  })
 })
 
 describe('SafeAccountsTable — reorder mode', () => {

@@ -20,7 +20,6 @@ interface PendingTxWidgetProps {
   transactions: SpacePendingTxItem[]
   loading?: boolean
   error?: string
-  onViewAll?: () => void
   onRefresh?: () => void
   onItemClick?: (safeAddress: string, txId: string) => void
 }
@@ -37,7 +36,6 @@ const PendingTxWidget = ({
   transactions,
   loading = false,
   error,
-  onViewAll,
   onRefresh,
   onItemClick,
 }: PendingTxWidgetProps): ReactElement => {
@@ -61,11 +59,7 @@ const PendingTxWidget = ({
   }
 
   return (
-    <SafeWidget
-      title="Pending"
-      action={onViewAll && <SafeWidget.ViewAll onClick={onViewAll} />}
-      testId="space-dashboard-pending-widget"
-    >
+    <SafeWidget title="Pending" testId="space-dashboard-pending-widget">
       {loading ? (
         Array.from({ length: SKELETON_COUNT }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
       ) : transactions.length === 0 ? (

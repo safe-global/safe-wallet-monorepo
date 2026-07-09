@@ -30,26 +30,22 @@ const contectMenuRemoveBtn = '[data-testid="remove-button"]'
 
 // -- Dashboard widgets --
 const spaceDashboardAccountsWidget = '[data-testid="space-dashboard-accounts-widget"]'
-const spaceDashboardAccountsRowSelector = '[data-testid^="space-dashboard-accounts-row-"]'
+// The Accounts widget reuses the shared SafeAccountsTable, so rows carry the same testids as the
+// trusted/welcome account tables: one `account-table-row` per line (data-variant single|group|child).
+const spaceDashboardAccountsRowSelector = '[data-testid="account-table-row"]'
 const spaceDashboardTotalValue = '[data-testid="space-dashboard-total-value"]'
 const pendingTxWidget = '[data-testid="space-dashboard-pending-widget"]'
 const widgetItem = '[data-slot="widget-item"]'
 export const dashboardSafeList = '[data-testid="dashboard-safe-list"]'
 
-// -- Single-chain account row (AccountWidgetItem) --
-const singleAccountName = '[data-testid="single-account-name"]'
-const singleAccountAddress = '[data-testid="single-account-address"]'
-const singleAccountIdenticon = '[data-testid="single-account-identicon"]'
-const singleAccountChainLogos = '[data-testid="single-account-chain-logos"]'
-const singleAccountBalance = '[data-testid="single-account-balance"]'
-const singleAccountThreshold = '[data-testid="single-account-threshold"]'
-
-// -- Multichain account row (ExpandableAccountItem / AccountItemContent) --
-const multichainAccountName = '[data-testid="multichain-account-name"]'
-const multichainAccountAddress = '[data-testid="multichain-account-address"]'
-const multichainAccountIdenticon = '[data-testid="multichain-account-identicon"]'
-const multichainAccountChainLogos = '[data-testid="multichain-account-chain-logos"]'
-const subAccountRow = '[data-testid="sub-account-row"]'
+// -- Shared account row (SafeAccountTableRow — used by every account table, incl. the dashboard widget) --
+const accountRowLink = '[data-testid="account-row-link"]'
+const accountName = '[data-testid="account-cell-name"]'
+const accountAddress = '[data-testid="safe-item-address"]'
+const accountChainLogos = '[data-testid="account-cell-networks"]'
+const accountBalance = '[data-testid="account-cell-balance"]'
+const accountThreshold = '[data-testid="account-threshold"]'
+const subAccountRow = `${spaceDashboardAccountsRowSelector}[data-variant="child"]`
 
 // -- Shared --
 const chainIndicatorNetworkLogoImg = '[data-testid="chain-indicator-network-logo-img"]'
@@ -153,13 +149,16 @@ export const acceptInviteConfirmationMsg = (spaceName) => `Accepted invite to ${
 // ===========================================
 
 function getAccountItem(index) {
-  return `${spaceDashboardAccountsWidget} [data-testid="space-dashboard-accounts-row-${index}"]`
+  return `${spaceDashboardAccountsWidget} ${spaceDashboardAccountsRowSelector}:eq(${index})`
 }
 
-const singleChainAccountRow = `${spaceDashboardAccountsWidget} [data-testid^="space-dashboard-accounts-row-"]:has(${singleAccountName})`
+// A single-chain (non-group) account row navigates via its name link.
+const singleChainAccountRow = `${spaceDashboardAccountsWidget} ${spaceDashboardAccountsRowSelector}[data-variant="single"] ${accountRowLink}`
 
-function getAccountExpandedPanel(rowIndex) {
-  return `${spaceDashboardAccountsWidget} [data-testid="space-dashboard-accounts-expanded-${rowIndex}"]`
+// Multi-chain groups expand inline: their per-chain safes render as sibling `child` rows in the same
+// table body, so the "expanded panel" is just the widget scoped to those child rows.
+function getAccountExpandedPanel() {
+  return spaceDashboardAccountsWidget
 }
 
 export function getPendingTxItem(index) {
@@ -335,57 +334,40 @@ export function verifyPendingTxWidgetItemCount(expectedCount) {
   main.verifyElementsCount(`${pendingTxWidget} ${widgetItem}`, expectedCount)
 }
 
-const accountRowSelectors = {
-  single: {
-    identicon: singleAccountIdenticon,
-    name: singleAccountName,
-    address: singleAccountAddress,
-    chainLogos: singleAccountChainLogos,
-    balance: singleAccountBalance,
-    threshold: singleAccountThreshold,
-  },
-  multichain: {
-    identicon: multichainAccountIdenticon,
-    name: multichainAccountName,
-    address: multichainAccountAddress,
-    chainLogos: multichainAccountChainLogos,
-  },
-}
-
+// Single- and multi-chain rows now render through the same shared component, so `type` is kept only
+// for call-site readability — both resolve to the same row/cell testids.
 export function verifyAccountRowDetails(
   type,
   rowIndex,
   { name, address, balanceRegex, ownersThreshold, chainLogosCount },
 ) {
-  const sel = accountRowSelectors[type]
   const row = getAccountItem(rowIndex)
   cy.get(row)
     .should('be.visible')
     .within(() => {
-      cy.get(sel.identicon).should('be.visible')
-      cy.get(sel.name).should('be.visible').and('contain.text', name)
-      cy.get(sel.address).should('be.visible').and('contain.text', main.shortenAddress(address))
-      if (sel.chainLogos) {
-        cy.get(sel.chainLogos).find(chainIndicatorNetworkLogoImg).should('be.visible')
+      cy.get(accountName).should('be.visible').and('contain.text', name)
+      // FullAddress renders the whole address in the DOM (the middle is only clipped visually).
+      cy.get(accountAddress).should('be.visible').and('contain.text', address)
+      if (chainLogosCount !== undefined) {
+        cy.get(accountChainLogos).find(chainIndicatorNetworkLogoImg).should('have.length', chainLogosCount)
+      } else {
+        cy.get(accountChainLogos).find(chainIndicatorNetworkLogoImg).should('be.visible')
       }
-      if (balanceRegex !== undefined && sel.balance) {
-        cy.get(sel.balance).invoke('text').should('match', balanceRegex)
+      if (balanceRegex !== undefined) {
+        cy.get(accountBalance).invoke('text').should('match', balanceRegex)
       }
-      if (ownersThreshold !== undefined && sel.threshold) {
-        cy.get(sel.threshold).should('be.visible').and('contain.text', ownersThreshold)
-      }
-      if (chainLogosCount !== undefined && sel.chainLogos) {
-        cy.get(sel.chainLogos).find(chainIndicatorNetworkLogoImg).should('have.length', chainLogosCount)
+      if (ownersThreshold !== undefined) {
+        cy.get(accountThreshold).should('be.visible').and('contain.text', ownersThreshold)
       }
     })
 }
 
-export function verifyExpandedPanelSubAccountRowsCount(rowIndex, expectedCount) {
-  cy.get(getAccountExpandedPanel(rowIndex)).find(subAccountRow).should('have.length', expectedCount)
+export function verifyExpandedPanelSubAccountRowsCount(expectedCount) {
+  cy.get(getAccountExpandedPanel()).find(subAccountRow).should('have.length', expectedCount)
 }
 
-export function verifyAccountExpandedPanelVisible(rowIndex) {
-  cy.get(getAccountExpandedPanel(rowIndex)).should('be.visible')
+export function verifyAccountExpandedPanelVisible() {
+  cy.get(getAccountExpandedPanel()).should('be.visible')
 }
 
 // ===========================================

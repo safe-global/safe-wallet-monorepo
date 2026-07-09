@@ -1,14 +1,14 @@
 import type { ReactElement, ReactNode } from 'react'
 import { WalletCards } from 'lucide-react'
 import { SafeWidget } from '@/features/spaces'
-import { AccountWidgetItem } from './AccountWidgetItem'
-import { ExpandableAccountItem } from './ExpandableAccountItem'
-import type { Account } from './types'
+import type { AllSafeItems } from '@/hooks/safes'
+import SafeAccountsTable from '../SafeAccountsTable'
 
 interface AccountsWidgetProps {
-  accounts: Account[]
+  /** Safe accounts to show — already sliced to the widget's display limit by the caller. */
+  items: AllSafeItems
   loading?: boolean
-  /** Total number of Safe accounts in the space — shown as a badge next to "View all". */
+  /** Total number of Safe accounts in the space. The overflow (total − displayed) is shown as a `+N` badge next to "View all". */
   totalCount?: number
   onViewAll?: () => void
   onItemClick?: (safeAddress: string) => void
@@ -17,10 +17,14 @@ interface AccountsWidgetProps {
   onRefresh?: () => void
 }
 
-const SKELETON_COUNT = 3
+const SKELETON_COUNT = 5
+
+// The widget mirrors the trusted/welcome account tables — the same columns minus the ones that add no
+// value in a compact dashboard card (workspaces, pending, per-row actions).
+const WIDGET_COLUMNS = ['name', 'threshold', 'networks', 'balance'] as const
 
 const AccountsWidget = ({
-  accounts,
+  items,
   loading = false,
   totalCount,
   onViewAll,
@@ -29,8 +33,9 @@ const AccountsWidget = ({
   error,
   onRefresh,
 }: AccountsWidgetProps): ReactElement => {
-  const isEmpty = accounts.length === 0 && !loading
+  const isEmpty = items.length === 0 && !loading
   const hasError = !!error && !loading
+  const overflowCount = totalCount !== undefined ? Math.max(0, totalCount - items.length) : undefined
 
   if (hasError) {
     return (
@@ -57,30 +62,19 @@ const AccountsWidget = ({
   return (
     <SafeWidget
       title="Accounts"
-      action={onViewAll && <SafeWidget.ViewAll count={totalCount} onClick={onViewAll} />}
+      action={onViewAll && <SafeWidget.ViewAll count={overflowCount} onClick={onViewAll} />}
       testId="space-dashboard-accounts-widget"
     >
-      {loading
-        ? Array.from({ length: SKELETON_COUNT }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
-        : accounts.map((account, rowIndex) =>
-            account.safes.length > 1 ? (
-              <ExpandableAccountItem
-                key={account.address}
-                account={account}
-                rowIndex={rowIndex}
-                loading={loading}
-                onItemClick={onItemClick}
-              />
-            ) : (
-              <AccountWidgetItem
-                key={account.address}
-                account={account}
-                rowIndex={rowIndex}
-                loading={loading}
-                onItemClick={onItemClick}
-              />
-            ),
-          )}
+      {loading && items.length === 0 ? (
+        Array.from({ length: SKELETON_COUNT }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
+      ) : (
+        <SafeAccountsTable
+          items={items}
+          columns={[...WIDGET_COLUMNS]}
+          embedded
+          onLinkClick={onItemClick ? (line) => onItemClick(line.address) : undefined}
+        />
+      )}
     </SafeWidget>
   )
 }

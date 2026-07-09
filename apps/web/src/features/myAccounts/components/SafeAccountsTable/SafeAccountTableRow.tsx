@@ -47,7 +47,7 @@ type SafeAccountTableRowProps = {
   checkbox?: RowCheckbox
   onSelectToggle?: (nextChecked: boolean) => void
   onToggle?: () => void
-  onLinkClick?: () => void
+  onLinkClick?: (line: AccountLine) => void
   /** Drag-and-drop wiring from @hello-pangea/dnd — set only in reorder mode. */
   dragHandleProps?: DraggableProvidedDragHandleProps | null
   rowRef?: (element: HTMLElement | null) => void
@@ -333,7 +333,7 @@ const SafeAccountTableRow = ({
       onRename={onRename && line.variant !== 'child' ? () => onRename(line) : undefined}
       disableLink={Boolean(checkbox)}
       onToggle={onToggle}
-      onLinkClick={onLinkClick}
+      onLinkClick={onLinkClick ? () => onLinkClick(line) : undefined}
     />
   )
 
