@@ -19,7 +19,7 @@ jest.mock('@/components/common/Identicon', () => ({
   default: ({ address }: { address: string }) => <div data-testid="identicon">{address}</div>,
 }))
 
-jest.mock('@/features/spaces/components/SelectSafesOnboarding/components/FiatBalance', () => ({
+jest.mock('@/components/common/FiatBalance', () => ({
   __esModule: true,
   default: ({ value }: { value?: string }) => <div data-testid="fiat-balance">{value ?? ''}</div>,
 }))

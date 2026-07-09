@@ -10,7 +10,7 @@ jest.mock('../../AccountItem', () => ({
   AccountItem: { Icon: () => null, ChainBadge: () => null, ContextMenu: () => null },
 }))
 jest.mock('@/components/common/AccountBadges', () => ({ PendingBadge: () => null, ThresholdBadge: () => null }))
-jest.mock('@/features/spaces', () => ({ FiatBalance: () => null }))
+jest.mock('@/components/common/FiatBalance', () => ({ __esModule: true, default: () => null }))
 jest.mock('../cells', () => ({ WorkspaceAvatars: () => null }))
 jest.mock('@/components/common/SafeListContextMenu/MultiAccountContextMenu', () => ({
   __esModule: true,

@@ -17,6 +17,10 @@ export type SafeSpacesMap = Record<string, GetSpaceResponse[]>
  * spaces and each space's safes, then indexes them by lowercased address (deduping
  * a space that lists the same address on several chains). Signed-out users belong to
  * no space, so the map is empty and the "Workspaces" column simply renders nothing.
+ *
+ * Lives in shared hooks (not the spaces feature) so cross-feature consumers like the
+ * accounts table can use it without importing the heavy `@/features/spaces` barrel,
+ * which would form a circular dependency.
  */
 export const useSafeSpaces = (): { safeSpaces: SafeSpacesMap; isLoading: boolean } => {
   const isSignedIn = useAppSelector(isAuthenticated)

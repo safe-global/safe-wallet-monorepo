@@ -89,10 +89,6 @@ export {
 // Hooks from useSpaceSafes.tsx
 export { useSpaceSafes } from './hooks/useSpaceSafes'
 
-// Reverse lookup: Safe address -> Spaces it belongs to
-export { useSafeSpaces } from './hooks/useSafeSpaces'
-export type { SafeSpacesMap } from './hooks/useSafeSpaces'
-
 // Hooks from useSpacePendingTransactions.ts
 export { useSpacePendingTransactions } from './hooks/useSpacePendingTransactions'
 
@@ -121,6 +117,5 @@ export { matchesSafeSearch } from './components/SafeSelectorDropdown/utils'
 export { default as SafeSelectorDropdown } from './components/SafeSelectorDropdown'
 export { default as SafeWidget, WidgetItem } from './components/SafeWidget'
 export { default as SafeCardReadOnly } from './components/SafeAccounts/SafeCardReadOnly'
-export { default as FiatBalance } from './components/SelectSafesOnboarding/components/FiatBalance'
 export { DashboardHeader } from './components/Dashboard/DashboardHeader'
 export { default as SpacesLogin } from './components/SpacesLogin'
