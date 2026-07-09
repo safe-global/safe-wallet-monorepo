@@ -30,6 +30,7 @@ import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSi
 import AddIcon from '@/public/images/common/add.svg'
 import { SPACES_LIMIT } from '@/features/spaces/constants'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import WelcomeContentCard from '@/components/common/WelcomeContentCard'
 
 const AddSpaceButton = ({
   onClick,
@@ -179,7 +180,6 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
 const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
-  const isDarkMode = useDarkMode()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const {
@@ -217,6 +217,17 @@ const SpacesList = () => {
   const onAddSpaceBtnClick = () =>
     trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
 
+  const pendingInviteBanners =
+    isUserSignedIn && pendingInvites.length > 0
+      ? pendingInvites.map((invitingSpace: GetSpaceResponse) => (
+          <SpaceListInvite
+            key={invitingSpace.uuid}
+            space={invitingSpace}
+            invitedByName={getInvitedByName(invitingSpace, currentUser?.id)}
+          />
+        ))
+      : null
+
   return (
     <Box className={css.container}>
       <Box className={css.mySpaces}>
@@ -224,33 +235,23 @@ const SpacesList = () => {
           <AccountsNavigation />
         </Box>
 
-        {isUserSignedIn && activeSpaces.length > 0 && (
-          <div className={cn('shadcn-scope mb-4 flex justify-end', isDarkMode && 'dark')}>
-            <AddSpaceButton
-              size="default"
-              variant="outline"
-              label="Create"
-              disabled={isAtSpacesLimit}
-              onClick={onAddSpaceBtnClick}
-            />
-          </div>
-        )}
-
-        {isUserSignedIn &&
-          pendingInvites.length > 0 &&
-          pendingInvites.map((invitingSpace: GetSpaceResponse) => (
-            <SpaceListInvite
-              key={invitingSpace.uuid}
-              space={invitingSpace}
-              invitedByName={getInvitedByName(invitingSpace, currentUser?.id)}
-            />
-          ))}
-
         {!isUserSignedIn ? (
           <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
         ) : activeSpaces.length > 0 ? (
-          <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-            <div className="rounded-3xl bg-card px-4 py-1" data-testid="org-list">
+          <WelcomeContentCard className="flex flex-col gap-4">
+            <div className="flex justify-end">
+              <AddSpaceButton
+                size="default"
+                variant="outline"
+                label="Create"
+                disabled={isAtSpacesLimit}
+                onClick={onAddSpaceBtnClick}
+              />
+            </div>
+
+            {pendingInviteBanners}
+
+            <div className="rounded-2xl border border-border bg-card px-4 py-1" data-testid="org-list">
               {activeSpaces.map((space, index) => (
                 <SpaceRow
                   key={space.uuid}
@@ -260,9 +261,12 @@ const SpacesList = () => {
                 />
               ))}
             </div>
-          </div>
+          </WelcomeContentCard>
         ) : (
-          <NoSpacesState isAtLimit={isAtSpacesLimit} />
+          <>
+            {pendingInviteBanners}
+            <NoSpacesState isAtLimit={isAtSpacesLimit} />
+          </>
         )}
       </Box>
     </Box>

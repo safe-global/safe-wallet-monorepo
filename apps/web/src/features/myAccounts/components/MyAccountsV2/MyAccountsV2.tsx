@@ -16,6 +16,7 @@ import useTrackSafesCount from '../../hooks/useTrackedSafesCount'
 import useMigrationPrompt from '../../hooks/useMigrationPrompt'
 import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import TrustedSafesModal from '@/components/common/TrustedSafesModal'
+import WelcomeContentCard from '@/components/common/WelcomeContentCard'
 import { DataWidget } from '../DataWidget'
 
 type MyAccountsProps = {
@@ -47,7 +48,7 @@ const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
         {showEmptyState && <AddTrustedSafesCard onAdd={modal.open} />}
 
         {showList && (
-          <div className="flex flex-col gap-4">
+          <WelcomeContentCard className="flex flex-col gap-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <div className="flex-1">
                 <AccountsSearch setSearchQuery={setSearchQuery} />
@@ -59,7 +60,7 @@ const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
             </div>
 
             <AccountsList searchQuery={searchQuery} safes={safes} onLinkClick={onLinkClick} />
-          </div>
+          </WelcomeContentCard>
         )}
 
         <TrustedSafesModal modal={modal} />

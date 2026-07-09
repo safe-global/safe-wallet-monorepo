@@ -13,14 +13,14 @@ const AccountsSearch = ({ setSearchQuery }: AccountsSearchProps) => {
 
   return (
     <div className="w-full">
-      <InputGroup className="bg-card px-3 rounded-lg">
+      <InputGroup className="border-border bg-card px-3 rounded-lg">
         <InputGroupAddon align="inline-start">
           <Search />
         </InputGroupAddon>
         <InputGroupInput
           id="search-by-name"
-          placeholder="Search for Safe accounts"
-          aria-label="Search Safe list by name"
+          placeholder="by name, address or network"
+          aria-label="Search Safe accounts by name, address or network"
           onChange={(e) => handleSearch(e.target.value)}
         />
       </InputGroup>

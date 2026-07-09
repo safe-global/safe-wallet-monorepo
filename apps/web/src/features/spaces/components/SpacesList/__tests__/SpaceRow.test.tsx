@@ -51,7 +51,7 @@ describe('SpaceRow', () => {
     )
   })
 
-  it('shows the context menu only for active admins of the workspace', () => {
+  it('gives active admins a working context menu and members a disabled one', () => {
     const adminSpace = {
       ...space,
       members: [{ user: { id: 7 }, role: 'ADMIN', status: 'ACTIVE' }],
@@ -59,9 +59,11 @@ describe('SpaceRow', () => {
 
     const { rerender } = render(<SpaceRow space={adminSpace} currentUserId={7} />)
     expect(screen.getByTestId('space-card-context-menu-button')).toBeInTheDocument()
+    expect(screen.queryByTestId('space-row-locked-actions')).not.toBeInTheDocument()
 
-    // A non-member (or non-admin) gets no menu.
+    // A non-member (or non-admin) gets a disabled menu — the tooltip explains they need admin access.
     rerender(<SpaceRow space={adminSpace} currentUserId={8} />)
     expect(screen.queryByTestId('space-card-context-menu-button')).not.toBeInTheDocument()
+    expect(screen.getByTestId('space-row-locked-actions')).toBeDisabled()
   })
 })
