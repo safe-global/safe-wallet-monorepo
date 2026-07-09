@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Button } from '@/components/ui/button'
+import SubmitButton from '@/components/common/SubmitButton'
 import { Typography } from '@/components/ui/typography'
 import ArrowIcon from '@/public/images/common/arrow-up-right.svg'
 import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
@@ -33,14 +33,9 @@ const NftSendForm = ({ selectedNfts }: NftSendFormProps): ReactElement => {
         <div>
           <CheckWallet>
             {(isOk) => (
-              <Button
-                data-testid={`nft-send-btn-${!isOk || noSelected}`}
-                type="submit"
-                size="submit"
-                disabled={!isOk || noSelected}
-              >
+              <SubmitButton data-testid={`nft-send-btn-${!isOk || noSelected}`} disabled={!isOk || noSelected}>
                 {noSelected ? 'Send' : `Send ${selectedNfts.length} ${nftsText}`}
-              </Button>
+              </SubmitButton>
             )}
           </CheckWallet>
         </div>

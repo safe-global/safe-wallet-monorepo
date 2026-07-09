@@ -22,12 +22,7 @@ const AcceptButton = ({ space }: AcceptButtonProps) => {
 
   return (
     <>
-      <Button
-        data-testid="accept-invite-button"
-        onClick={handleAcceptInvite}
-        aria-label="Accept invitation"
-        className="min-h-8 px-4 py-1"
-      >
+      <Button data-testid="accept-invite-button" onClick={handleAcceptInvite} aria-label="Accept invitation" size="sm">
         Accept
       </Button>
       {inviteOpen && <AcceptInviteDialog space={space} onClose={handleCloseInviteDialog} />}

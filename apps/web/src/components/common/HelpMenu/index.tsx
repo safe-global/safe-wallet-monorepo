@@ -48,6 +48,7 @@ const HelpMenu = ({ anchorEl, onClose }: HelpMenuProps): ReactElement | null => 
           <Button
             variant="ghost"
             onClick={handleHelpCenterClick}
+            // eslint-disable-next-line no-restricted-syntax -- menu-item button: auto height + row padding; pending a menu-item size
             className="h-auto w-full justify-start gap-2 px-3 py-2 font-normal"
           >
             <HelpCircle className="size-4" />
@@ -59,6 +60,7 @@ const HelpMenu = ({ anchorEl, onClose }: HelpMenuProps): ReactElement | null => 
             <Button
               variant="ghost"
               onClick={handleContactSupportClick}
+              // eslint-disable-next-line no-restricted-syntax -- menu-item button: auto height + row padding; pending a menu-item size
               className="h-auto w-full justify-start gap-2 px-3 py-2 font-normal"
             >
               <MessageCircle className="size-4" />

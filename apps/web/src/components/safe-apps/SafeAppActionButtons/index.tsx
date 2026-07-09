@@ -72,6 +72,7 @@ const SafeAppActionButtons = ({
                 variant="ghost"
                 size="icon-sm"
                 aria-label={`${isBookmarked ? 'Unpin' : 'Pin'} ${safeApp.name}`}
+                // eslint-disable-next-line no-restricted-syntax -- active/pinned state indicator
                 className={cn(actionButtonClassName, isBookmarked && 'bg-muted hover:bg-muted/80')}
                 onClick={(event) => {
                   event.preventDefault()

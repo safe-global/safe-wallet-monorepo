@@ -401,7 +401,7 @@ const AddAccounts = ({
                 <form onSubmit={onSubmit} className="flex min-h-0 w-full flex-1 flex-col gap-6">
                   <div className="flex shrink-0 flex-col gap-4">
                     <div className="flex items-center justify-between">
-                      <Button type="button" variant="ghost" size="icon" onClick={handleClose} className="rounded-md">
+                      <Button type="button" variant="ghost" size="icon" onClick={handleClose}>
                         <X className="size-5" />
                       </Button>
                       <Typography variant="h2" align="center" className="flex-1">

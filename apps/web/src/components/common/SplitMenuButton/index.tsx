@@ -67,6 +67,7 @@ export default function SplitMenuButton({
               onClick={handleClick}
               type="submit"
               disabled={disabled}
+              // eslint-disable-next-line no-restricted-syntax -- split-button halves flatten inner corners at the join and fill the button-group row height
               className="h-full w-full rounded-r-none"
               style={{ minWidth: `${maxCharLen}ch` }}
             />
@@ -85,6 +86,7 @@ export default function SplitMenuButton({
                 aria-label="select action"
                 disabled={loading}
                 data-testid="combo-submit-dropdown"
+                // eslint-disable-next-line no-restricted-syntax -- split-button halves flatten inner corners at the join and fill the button-group row height
                 className="h-full max-w-12 rounded-l-none border-l border-l-[var(--color-border-light)] px-3"
               />
             }

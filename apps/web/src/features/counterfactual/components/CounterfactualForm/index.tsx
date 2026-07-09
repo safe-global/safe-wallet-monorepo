@@ -9,8 +9,7 @@ import { OVERVIEW_EVENTS, trackEvent, WALLET_EVENTS, MixpanelEventParams } from 
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import madProps from '@/utils/mad-props'
 import React, { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
-import { Spinner } from '@/components/ui/spinner'
-import { Button } from '@/components/ui/button'
+import SubmitButton from '@/components/common/SubmitButton'
 import { Separator } from '@/components/ui/separator'
 import { Alert } from '@/components/ui/alert'
 import classNames from 'classnames'
@@ -177,9 +176,9 @@ export const CounterfactualForm = ({
           {/* Submit button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
             {(isOk) => (
-              <Button type="submit" size="submit" disabled={!isOk || submitDisabled}>
-                {!isSubmittable ? <Spinner className="size-5" /> : 'Execute'}
-              </Button>
+              <SubmitButton loading={!isSubmittable} disabled={!isOk || submitDisabled}>
+                Execute
+              </SubmitButton>
             )}
           </CheckWallet>
         </div>

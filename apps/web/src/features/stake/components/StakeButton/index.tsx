@@ -70,10 +70,10 @@ const StakeButton = ({
             </Tooltip>
           ) : (
             <Button
-              className={classnames(compact ? css.button : 'bg-card', { [css.buttonDisabled]: !isOk })}
+              className={classnames({ [css.button]: compact, [css.buttonDisabled]: !isOk })}
               data-testid="stake-btn"
               aria-label="Stake"
-              variant={compact ? 'ghost' : 'outline'}
+              variant={compact ? 'ghost' : 'surface'}
               size="sm"
               onClick={handleClick}
               disabled={!isOk}

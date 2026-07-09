@@ -18,8 +18,8 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'destructive-outline' | 'link')
- * - `size` ('default' | 'xs' | 'sm' | 'lg' | 'action' | 'submit' | 'icon' | 'icon-xs' | 'icon-sm' | 'icon-lg')
+ * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'destructive-outline' | 'surface' | 'link')
+ * - `size` ('default' | 'xs' | 'sm' | 'lg' | 'action' | 'submit' | 'xl' | 'icon' | 'icon-xs' | 'icon-sm' | 'icon-lg')
  * - `render`
  * - `className`
  */
@@ -45,6 +45,10 @@ const buttonVariants = cva(
         // (e.g. "Leave workspace"). Replaces hand-rolled `outline` + `className="text-destructive"`.
         'destructive-outline':
           'border-border bg-background text-destructive hover:bg-destructive/10 hover:text-destructive dark:bg-input/30 dark:border-border shadow-xs',
+        // Card-surface CTA: reads as a raised card on a coloured/promo surface (Earn/Stake/
+        // Add-funds style). Same border+shadow as outline, filled with the `card` token
+        // instead of the page background. Replaces per-call `bg-card`/`bg-[--color-background-paper]`.
+        surface: 'border-border bg-card text-card-foreground hover:bg-muted hover:text-foreground shadow-xs',
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {
@@ -63,6 +67,10 @@ const buttonVariants = cva(
         // per-call magic min-w-[82/112/114/122px]. Pair with a `w-full lg:w-auto` wrapper for the
         // full-width-on-mobile flow submit pattern.
         submit: "h-10 gap-2 px-6 min-w-[7rem] [&_svg:not([class*='size-'])]:size-5",
+        // Full-screen onboarding / flow footer CTA: the taller 48px scale used by the Spaces
+        // onboarding Back/Continue buttons. Use via the OnboardingFooter preset; pair with a
+        // `w-full xl:flex-1` wrapper for the stacked-mobile → row-on-xl layout.
+        xl: 'h-12 gap-2 px-6',
         icon: 'size-9',
         'icon-xs': "size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3",
         'icon-sm': 'size-8 in-data-[slot=button-group]:rounded-sm',

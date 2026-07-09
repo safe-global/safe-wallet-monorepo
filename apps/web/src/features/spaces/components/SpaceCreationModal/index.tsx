@@ -13,8 +13,7 @@ import { setLastUsedSpace } from '@/store/authSlice'
 import { useAppDispatch } from '@/store'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
+import DialogActions from '@/components/common/DialogActions'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
@@ -94,19 +93,16 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
               )}
             </div>
 
-            <div className="flex justify-end gap-2 p-4 pt-0">
-              <Button data-testid="cancel-btn" variant="ghost" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button
-                data-testid="create-space-modal-button"
-                type="submit"
-                size="submit"
-                disabled={!formState.isValid || isSubmitting}
-              >
-                {isSubmitting ? <Spinner className="size-5" /> : 'Create workspace'}
-              </Button>
-            </div>
+            <DialogActions
+              className="p-4 pt-0"
+              onCancel={onClose}
+              cancelTestId="cancel-btn"
+              confirmLabel="Create workspace"
+              confirmType="submit"
+              confirmDisabled={!formState.isValid || isSubmitting}
+              confirmLoading={isSubmitting}
+              confirmTestId="create-space-modal-button"
+            />
           </form>
         </FormProvider>
       </div>

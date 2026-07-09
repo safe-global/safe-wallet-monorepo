@@ -13,11 +13,11 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'secondary', 'outline', 'ghost', 'destructive', 'destructive-outline', 'link'],
+      options: ['default', 'secondary', 'outline', 'ghost', 'destructive', 'destructive-outline', 'surface', 'link'],
     },
     size: {
       control: 'select',
-      options: ['default', 'sm', 'xs', 'lg', 'action', 'submit', 'icon', 'icon-sm', 'icon-xs', 'icon-lg'],
+      options: ['default', 'sm', 'xs', 'lg', 'action', 'submit', 'xl', 'icon', 'icon-sm', 'icon-xs', 'icon-lg'],
     },
     disabled: {
       control: 'boolean',
@@ -258,6 +258,13 @@ export const Guidelines: Story = {
                     </Button>,
                   ],
                   [
+                    'surface',
+                    'Card-surface CTA on a coloured / promo surface (Earn, Stake, Add funds)',
+                    <Button key="v-surface" variant="surface">
+                      Surface
+                    </Button>,
+                  ],
+                  [
                     'link',
                     'Inline text / navigational action',
                     <Button key="v-link" variant="link">
@@ -313,6 +320,14 @@ export const Guidelines: Story = {
                     'Modal / flow / settings submit (label can swap to a spinner without resizing)',
                     <Button key="s-submit" size="submit">
                       Submit
+                    </Button>,
+                  ],
+                  [
+                    'xl',
+                    'h-12',
+                    'Full-screen onboarding / flow footer CTA (use via the OnboardingFooter preset)',
+                    <Button key="s-xl" size="xl">
+                      XL
                     </Button>,
                   ],
                   [

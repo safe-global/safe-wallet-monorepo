@@ -36,6 +36,7 @@ const AddFundsToGetStarted = () => {
         <CopyTooltip text={addressCopyText}>
           <Button
             size="sm"
+            // eslint-disable-next-line no-restricted-syntax -- on-banner CTA needs a paper background; pending an on-color button variant
             className="bg-[var(--color-background-paper)] text-foreground hover:bg-[var(--color-background-paper)]/80"
           >
             <CopyIcon className="size-5" />

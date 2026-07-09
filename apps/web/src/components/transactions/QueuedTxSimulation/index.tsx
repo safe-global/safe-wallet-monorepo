@@ -58,7 +58,8 @@ const CompactSimulationButton = ({
       variant="ghost"
       disabled={disabled}
       // visibility is required as the icon otherwise disappears when the first tx accordion is closed
-      className="flex flex-row items-center gap-1 rounded-lg !visible h-auto bg-[var(--color-background-main)] px-4 py-1 hover:bg-[var(--color-background-main)]"
+      // eslint-disable-next-line no-restricted-syntax -- inline simulation toggle: custom size + surface bg; pending a variant
+      className="flex flex-row items-center gap-1 rounded-lg !visible h-auto bg-[var(--color-background-main)] py-1 hover:bg-[var(--color-background-main)]"
       onClick={onClick}
     >
       {iconComponent}

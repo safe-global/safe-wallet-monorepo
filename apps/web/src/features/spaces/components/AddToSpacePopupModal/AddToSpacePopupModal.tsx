@@ -57,10 +57,7 @@ export const AddToSpacePopupModal = (): ReactElement => {
           ))}
         </div>
 
-        <DialogClose
-          render={<Button className="w-full gap-2 rounded-xl" />}
-          onClick={() => void router.push(createSpaceHref)}
-        >
+        <DialogClose render={<Button className="w-full gap-2" />} onClick={() => void router.push(createSpaceHref)}>
           <Plus className="size-5" />
           Create a workspace
         </DialogClose>

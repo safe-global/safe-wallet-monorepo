@@ -32,6 +32,97 @@ _Last updated: 2026-07-04._
   `apps/web/AGENTS.md` has a one-line pointer (and its stale "use MUI" principle was replaced). `CLAUDE.md`
   just delegates to AGENTS.md — don't duplicate there.
 
+## Button call-site sweep + machine enforcement (this pass)
+
+The Button variants already existed, but call sites bypassed them with one-off `className` overrides (the
+welcome/Accounts header was the trigger: three sibling buttons, all `size="sm"`, each overriding
+height/font/radius). This pass fixed the drift AND added a machine guard so it can't come back silently.
+
+- **Reference screen** — `AccountsHeader` (Add/Create/Connect now share `size="action"`; hierarchy via
+  variant), `CreateButton`, `DataWidget`, and `ConnectWalletButton` (its `small` boolean + `text-xs` hack
+  replaced with a real `size` prop, so its 3 divergent call-site renders now pass an explicit `size`).
+- **App-wide sweep** — 44 flagged `<Button>` call sites across 30 files normalized: redundant/no-op utils
+  stripped, height/skin remapped to `size`/`variant`. Genuinely structural or not-yet-expressible cases carry a
+  justified `// eslint-disable-next-line no-restricted-syntax -- <reason>` (split-button corner joins; the
+  documented `h-12` onboarding scale; on-colour/"paper" CTAs; menu-item / link-reset / card-toggle buttons).
+  **Those disables ARE the design backlog** — each is a variant the DS should eventually absorb (see pipeline).
+- **Docs** — the `UI/Button` story gained a **Guidelines** tab (variant/size decision matrix + a Do/Don't built
+  from the real Accounts anti-pattern); `.storybook/AGENTS.md` now states the "className is layout-only" rule.
+
+### The enforcement layer (repeatable for every primitive)
+
+1. **ESLint** — `no-restricted-syntax` in `apps/web/eslint.config.mjs` errors when a `<Button>` `className`
+   sets a property the `size`/`variant` props own (`h-*`, `px-*`/`py-*`, `text-xs|sm|base|lg`, `rounded-*`,
+   `bg-*`). It runs on every PR through `web-checks.yml` (no workflow change needed) and doubles as the audit
+   tool. Generalize to the next family by adding a sibling selector for its element name (`Input`, `Card`, …).
+2. **Argos visual regression** — `.github/workflows/web-argos-storybook.yml` screenshots every story light+dark
+   via `scripts/storybook/render-sweep.ts` and diffs in Argos. Currently `workflow_dispatch`-only; enabling it
+   on PRs (needs the `ARGOS_TOKEN_STORYBOOK` secret + a nod on CI cost) is the highest-leverage guard for
+   catching visual drift the lint rule can't see. (This is the org's visual-regression tool — not Chromatic.)
+3. **Story + AGENTS.md** — each primitive's story documents "when to use which variant/size" (the Button
+   Guidelines tab is the template); `.storybook/AGENTS.md` holds the authoring-time rule.
+
+### Per-family pipeline (do this for the next primitive)
+
+recon the cva → audit call sites (extend the ESLint selector; it enumerates the offenders) → add variants for
+recurring patterns → document the decision matrix in the family's story → apply safe-fixes + grandfather the
+rest with justified disables → let Argos + the ESLint rule guard it. The disables logged in this pass are the
+first backlog items: an **on-colour/"paper" button variant**, a **menu-item size**, a **link-variant
+height/padding reset**, a **taller onboarding CTA size**, and a **selectable card/toggle pattern**.
+
+### Preset "factory" layer (a guarantee, not just a guardrail)
+
+Docs + the ESLint rule stop the _wrong_ thing; purpose-built preset components make the _right_ thing the only
+thing a product dev types (the "pit of success"). Rule: **one preset per recurring semantic intent, favouring
+composites that also own layout** — not one per prop combo (that re-explodes what variants collapsed). The
+primitive `<Button>` + variants remain the substrate (what presets are built from, plus genuine one-offs) and
+the ESLint rule keeps guarding it. Shipped (in `components/common/`, with stories):
+
+- **`SubmitButton`** — owns `size="submit"` + the loading → spinner swap (stable width). Migrated:
+  `CounterfactualForm`, `NftSendForm`. Reach for it instead of `<Button size="submit">` + a hand-rolled spinner.
+- **`ActionBar` + `ActionButton`** — the CTA row: `ActionBar` owns gap/wrap, `ActionButton` locks `size="action"`;
+  variant carries emphasis. Migrated: dashboard `HeaderActions`.
+- **`DialogActions`** — canonical Cancel(outline)+Confirm(default/destructive) footer; owns order, sizes,
+  spinner, and responsive layout. Migrated: `SpaceCreationModal`, `DeleteSpaceDialog`. Resolves the Cancel
+  `ghost`-vs-`outline` split. (Named `DialogActions`, not `DialogFooter` — that's the shadcn layout slot.)
+- **`OnboardingFooter`** — Back/Continue footer for the full-screen onboarding flows; owns the new `size="xl"`
+  (48px) scale, chevrons, spinner, and stacked-mobile → row-on-xl layout. Migrated: all 4 flows
+  (`CreateSpace`, `InviteMembers`, `SelectSafes`, `Survey`) — **deleted the 8 `h-12` `eslint-disable`s**. The
+  `h-12` scale became a real `xl` Button size (documented in the Button story), so no disable is needed.
+- **`IconAction`** — the compact top-bar icon button (locks `variant="ghost"` + `size="icon-sm"` + margin).
+  Migrated: `HeaderNavigation` (search/notifications/batch), `WcIcon`.
+- **`surface` variant** (on `button.tsx`) — card-surface CTA for coloured/promo surfaces. Migrated `StakeButton`
+  (zero visual change: it already used `bg-card`). `EarnButton`/`AddFundsBanner` use `--color-background-paper`
+  (identical in light, `#1c1c1c` vs card `#171717` in dark) and `AccountHeader` is a transparent-on-colour
+  outline — those stay grandfathered pending a design nod (a small dark-mode shift + a border), reviewable in
+  the `UI/Button` story + Argos.
+
+The button-level presets are **closed**: `size` and `className` are Omitted from their prop types, so
+`<SubmitButton className="h-9">` / `<ActionButton className="rounded-lg">` are **compile errors** — a stronger
+guard than lint (a human or AI cannot drift them). Layout is a semantic prop (`fullWidth`). Layout composites
+(`ActionBar`, `DialogActions`) still take a `className`, but for layout only. The ESLint rule now also flags
+size/skin `className` on `SubmitButton`/`ActionButton` as defense-in-depth (behind the type close, in case of an
+`as any` bypass). The **only** sanctioned raw-styling escape is the primitive `<Button>` +
+`// eslint-disable-next-line no-restricted-syntax -- <reason>`.
+
+Remaining grandfathered `eslint-disable`s (11 files) are the backlog: the on-colour CTAs not yet migrated
+(`EarnButton`, `AddFundsBanner`, `AccountHeader` — need a design nod, see `surface` above), the structural
+`SplitMenuButton` split-join, and one-offs (`SafeAppActionButtons` pinned state, `QueuedTxSimulation`,
+`SafeAccounts` filled-icon, `SidebarActionButton`, `AppearanceSection` theme cards, `WorkspaceBanner` link,
+`HelpMenu` menu items, `SecurityChecks` inline toggle). Each maps to a future preset/variant (a menu-item size,
+a link-reset, a card/toggle pattern) — adding it deletes its disable.
+
+### Why this shape (industry consensus)
+
+Researched across design-system practice; the approach converges on: **semantic props over style props**
+(components own their look; don't forward arbitrary `className`), **variants/recipes not ad-hoc strings** with a
+**rule of three**, **`className` for layout only, never semantic colour/skin**, **keep shadcn primitives in
+`components/ui/*` separate from composites in `components/*`**, **closed components with a single visible escape
+hatch**, and — for AI — **one tool-agnostic source of truth** (our `.storybook/AGENTS.md`), small and scoped,
+that every AI tool points at rather than duplicating. Sources: shadcn customization discussion
+(github.com/shadcn-ui/ui/discussions/9754), Infinum React/Tailwind/shadcn handbook, "React className
+antipattern" (Kirichuk), and AI-rules guidance (ivanmorgillo.com, arxiv 2512.18925).
+
 ## Gotchas (these bit us — don't relearn them)
 
 - **`--input` is `#fff` in light mode** (`styles/shadcn.css`) → `border-input` is an invisible white border

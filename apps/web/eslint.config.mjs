@@ -15,6 +15,14 @@ const compat = new FlatCompat({
   allConfig: js.configs.all,
 })
 
+// Design-system button-styling guard: flags size/skin utilities (owned by the
+// `size`/`variant` props) set via `className` on a <Button> or a closed button
+// preset. Matches the literal even inside cn(...). See .storybook/AGENTS.md.
+const dsButtonClassnameRule = (element, message) => ({
+  selector: `JSXOpeningElement[name.name='${element}'] > JSXAttribute[name.name='className'] Literal[value=/(?:^|\\s)(h-|px-|py-|text-(xs|sm|base|lg)|rounded-|bg-)/]`,
+  message,
+})
+
 export default [
   {
     ignores: [
@@ -152,12 +160,18 @@ export default [
       // ("Component variants over custom styling").
       'no-restricted-syntax': [
         'error',
-        {
-          selector:
-            "JSXOpeningElement[name.name='Button'] > JSXAttribute[name.name='className'] Literal[value=/(?:^|\\s)(h-|px-|py-|text-(xs|sm|base|lg)|rounded-|bg-)/]",
-          message:
-            "Don't set size/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*) on <Button> — use a `size`/`variant` prop instead. See the UI/Button story and .storybook/AGENTS.md. Add a variant/size to components/ui/button.tsx if none fits.",
-        },
+        dsButtonClassnameRule(
+          'Button',
+          "Don't set size/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*) on <Button> — use a `size`/`variant` prop. See the UI/Button story and .storybook/AGENTS.md; add a variant/size to components/ui/button.tsx if none fits. The only sanctioned raw-styling escape is `// eslint-disable-next-line no-restricted-syntax -- <reason>`.",
+        ),
+        dsButtonClassnameRule(
+          'SubmitButton',
+          'SubmitButton is a closed preset and takes no styling className — use `fullWidth` for layout, or the primitive <Button> for a genuine one-off.',
+        ),
+        dsButtonClassnameRule(
+          'ActionButton',
+          'ActionButton is a closed preset and takes no styling className — use `fullWidth` for layout, or the primitive <Button> for a genuine one-off.',
+        ),
       ],
     },
   },

@@ -122,7 +122,7 @@ const AddAccountsChooser = ({
       <Button
         size="lg"
         variant={buttonVariant}
-        className="font-normal px-4 py-0"
+        className="font-normal"
         onClick={() => setChooserOpen(true)}
         data-testid="open-add-accounts-chooser-button"
       >

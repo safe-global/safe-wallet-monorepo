@@ -1,10 +1,9 @@
 import { useMemo, type ReactElement } from 'react'
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { Button } from '@/components/ui/button'
+import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Typography } from '@/components/ui/typography'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Spinner } from '@/components/ui/spinner'
 import {
   OnboardingLayout,
   StepCounter,
@@ -88,34 +87,16 @@ const InviteMembersOnboarding = (): ReactElement => {
 
   const footer = (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col-reverse gap-3 xl:flex-row xl:items-center">
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={goBack}
-          disabled={isSubmitting}
-          className="w-full h-12 rounded-lg bg-muted hover:bg-border xl:flex-1"
-        >
-          <ChevronLeft className="size-4 mr-1" />
-          Back
-        </Button>
-        <Button
-          data-testid="invite-members-continue-button"
-          type="submit"
-          form={FORM_ID}
-          disabled={!formState.isValid || isSubmitting}
-          className="w-full h-12 rounded-lg text-base xl:flex-1"
-        >
-          {isSubmitting ? (
-            <Spinner />
-          ) : (
-            <>
-              Next
-              <ChevronRight className="size-4 ml-1" />
-            </>
-          )}
-        </Button>
-      </div>
+      <OnboardingFooter
+        onBack={goBack}
+        backDisabled={isSubmitting}
+        continueLabel="Next"
+        continueType="submit"
+        continueForm={FORM_ID}
+        continueDisabled={!formState.isValid || isSubmitting}
+        continueLoading={isSubmitting}
+        continueTestId="invite-members-continue-button"
+      />
       <button
         data-testid="invite-members-skip-button"
         type="button"

@@ -334,6 +334,7 @@ export const useSecurityChecks = (
                     e.stopPropagation()
                     setModulesExpanded(true)
                   }}
+                  // eslint-disable-next-line no-restricted-syntax -- inline text toggle: auto-height, no padding
                   className="h-auto min-w-0 p-0 text-[0.7rem] font-semibold normal-case"
                 >
                   View all

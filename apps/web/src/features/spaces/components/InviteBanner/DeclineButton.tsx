@@ -22,12 +22,7 @@ const DeclineButton = ({ space }: DeclineButtonProps) => {
 
   return (
     <>
-      <Button
-        variant="outline"
-        onClick={handleDeclineInvite}
-        aria-label="Decline invitation"
-        className="min-h-8 px-4 py-1"
-      >
+      <Button variant="outline" size="sm" onClick={handleDeclineInvite} aria-label="Decline invitation">
         Decline
       </Button>
       {declineOpen && <DeclineInviteDialog space={space} onClose={handleCloseDeclineDialog} />}

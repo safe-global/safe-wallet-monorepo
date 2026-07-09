@@ -206,7 +206,6 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
               <Button
                 variant={secondaryVariant}
                 size="icon-lg"
-                className="rounded-lg"
                 disabled={!isOk}
                 render={isOk ? <Link href={txBuilderLink} /> : undefined}
                 aria-label="Transaction builder"

@@ -29,6 +29,7 @@ const WorkspaceBanner = ({ className }: { className?: string }) => {
         <Button
           variant="link"
           size="sm"
+          // eslint-disable-next-line no-restricted-syntax -- link-variant inline button sheds button height/padding; pending link-variant reset
           className="group h-auto shrink-0 gap-1 px-0 text-xs font-medium"
           render={
             <a

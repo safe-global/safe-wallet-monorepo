@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
+import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Input } from '@/components/ui/input'
 import { Typography } from '@/components/ui/typography'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Spinner } from '@/components/ui/spinner'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import {
   OnboardingLayout,
   StepCounter,
@@ -130,34 +129,16 @@ const CreateSpaceOnboarding = (): ReactElement => {
   )
 
   const footer = (
-    <div className="flex flex-col-reverse gap-3 xl:flex-row xl:items-center">
-      <Button
-        type="button"
-        variant="secondary"
-        onClick={onExit}
-        disabled={isSubmitting}
-        className="h-12 w-full rounded-lg xl:flex-1"
-      >
-        <ChevronLeft className="size-4 mr-1" />
-        Back
-      </Button>
-      <Button
-        data-testid="create-space-onboarding-continue-button"
-        type="submit"
-        form={FORM_ID}
-        disabled={!isValid || isSubmitting || isCheckingAccess || isSpaceLoading}
-        className="w-full h-12 rounded-lg text-base xl:flex-1"
-      >
-        {isSubmitting ? (
-          <Spinner />
-        ) : (
-          <>
-            Next
-            <ChevronRight className="size-4 ml-1" />
-          </>
-        )}
-      </Button>
-    </div>
+    <OnboardingFooter
+      onBack={onExit}
+      backDisabled={isSubmitting}
+      continueLabel="Next"
+      continueType="submit"
+      continueForm={FORM_ID}
+      continueDisabled={!isValid || isSubmitting || isCheckingAccess || isSpaceLoading}
+      continueLoading={isSubmitting}
+      continueTestId="create-space-onboarding-continue-button"
+    />
   )
 
   return (

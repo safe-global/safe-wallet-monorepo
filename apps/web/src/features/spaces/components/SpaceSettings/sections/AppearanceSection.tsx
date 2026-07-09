@@ -54,10 +54,12 @@ const AppearanceSection = () => {
                 onClick={() => handleChange(opt.value)}
                 data-testid={`theme-card-${opt.value}`}
                 className={cn(
+                  /* eslint-disable no-restricted-syntax -- theme option cards rendered as buttons; card sizing + selected-state bg pending a toggle/card pattern */
                   'flex h-auto flex-1 justify-start gap-3 whitespace-normal rounded-lg px-4 py-3 text-left font-normal',
                   isSelected
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent dark:bg-accent dark:text-primary dark:hover:bg-accent'
                     : 'bg-muted hover:bg-muted/70',
+                  /* eslint-enable no-restricted-syntax */
                 )}
               >
                 <span

@@ -64,6 +64,7 @@ const SendTransactionButton = ({ safe }: { safe: SafeOverview }) => {
           onClick={onNewTxClick}
           disabled={!canSend}
           aria-label="Send tokens"
+          // eslint-disable-next-line no-restricted-syntax -- filled icon action on space-account row; pending a variant
           className="mx-1 rounded-sm bg-[var(--color-background-main)] [&_svg_path]:fill-foreground disabled:[&_svg_path]:fill-[var(--color-border-main)]"
         >
           <ArrowOutwardIcon />

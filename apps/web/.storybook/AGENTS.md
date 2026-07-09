@@ -35,11 +35,53 @@ Rules:
 Reach for a component's **variant/size prop before a one-off `className`**. If you're hand-rolling
 padding/height/border/hover on a primitive, a variant probably exists; if the pattern recurs, add one.
 The **`UI/Button` and `UI/Input` stories are the canonical reference** — don't restate the full list here.
+
+**On `<Button>`, `className` is LAYOUT-ONLY** (`w-full`, margins, grid placement). Height, padding,
+font-size, radius and background are owned by the `size`/`variant` props — never re-declare them via
+`className`. This is **enforced by ESLint** (`no-restricted-syntax` in `apps/web/eslint.config.mjs` flags
+`h-*`, `px-*`/`py-*`, `text-xs|sm|base|lg`, `rounded-*`, `bg-*` on `<Button>`). Genuine exceptions
+(split-button corner joins, on-colour CTAs, the documented onboarding `h-12` scale) carry a justified
+`// eslint-disable-next-line no-restricted-syntax -- <reason>`. When a pattern recurs, add a size/variant to
+`components/ui/button.tsx` rather than disabling — that's the whole point.
+
+**Prefer a closed preset over the primitive.** For recurring intents there are "factory" presets in
+`components/common/` — reach for these first. They take **semantic props, own their styling, and accept no
+styling `className`** (it's Omitted from their types, so `<SubmitButton className="h-9">` is a _compile error_ —
+a stronger guard than lint, which is why humans and AI can't drift them):
+
+- **`SubmitButton`** — modal/flow/settings submit (`size="submit"` + loading→spinner swap). Props: `loading`,
+  `fullWidth`, `variant`, `type`, `form`, `disabled`.
+- **`ActionBar` + `ActionButton`** — CTA row; `ActionBar` owns gap/wrap, `ActionButton` locks `size="action"`,
+  `variant` carries emphasis, `fullWidth` for stacked-mobile.
+- **`DialogActions`** — the Cancel(outline)+Confirm(default/destructive) dialog footer (order, sizes, spinner,
+  responsive layout). Named `DialogActions`, not `DialogFooter` (that's the shadcn layout slot).
+- **`OnboardingFooter`** — the Back/Continue footer for full-screen onboarding flows (`size="xl"` 48px scale,
+  chevrons, loading→spinner, stacked-mobile → row-on-xl). Props: `onBack`, `continueLabel`, `onContinue`,
+  `continueType`/`continueForm`, `continueDisabled`/`continueLoading`, testids.
+- **`IconAction`** — the compact top-bar / header icon button (locks `variant="ghost"` + `size="icon-sm"` + margin).
+
+**Rule of three:** if the same variant+size(+layout) combo appears in ~3 places, promote it to a variant on
+`button.tsx` or a preset in `components/common/` — don't paste the classes a fourth time.
+
+**The only sanctioned raw-styling escape** is the primitive `<Button>` + `// eslint-disable-next-line
+no-restricted-syntax -- <reason>` (greppable, review-visible). Closed presets have no className escape by design —
+if you think you need one, add a prop/variant/preset instead. Layout composites (`ActionBar`, `DialogActions`)
+do take a `className`, but for **layout only** (padding/margins/alignment), never button skin.
+
+**AI note:** this section is the single, tool-agnostic source of truth for the rule (Claude Code reads it). Point
+any other AI tool (Cursor `.mdc`, Copilot instructions) here rather than duplicating it — duplicated rules drift.
+
 Highlights so agents don't rediscover them:
 
-- **Button** — `size`: `action` (h-10 px-6 toolbar/action-bar pill: Send/Receive/Swap, Filter/Export,
-  Confirm/Execute), `submit` (action + stable min-width for modal/flow submit buttons — replaces magic
-  `min-w-[…]`); `variant`: `destructive-outline` (bordered destructive). Primary = `default`.
+- **Button** — pick **variant by emphasis**: `default` (the one filled primary per surface/row), `secondary`
+  (filled — white/card surfaces only), `outline` (secondary on page/toolbar backgrounds + dialog Cancel),
+  `ghost` (low-emphasis/icon/toolbar/menu), `destructive` / `destructive-outline` (filled vs bordered
+  destructive), `surface` (card-surface CTA on a coloured/promo surface — Earn/Stake/Add-funds), `link`
+  (inline). Pick **size by box**: `action` (h-10 px-6 CTA/action-bar pill: Send/Receive/Swap, Confirm/Execute,
+  Filter/Export, page-header primary actions), `submit` (action + stable min-width for modal/flow submits —
+  replaces magic `min-w-[…]`), `lg` (h-10 form-step buttons), `default` (h-9), `sm` (h-8 compact/toolbar/cards),
+  `xs` (h-6), `xl` (h-12 full-screen onboarding footer — via `OnboardingFooter`). Full decision matrix +
+  Do/Don't: the **`UI/Button` → Guidelines** story.
 - **Input** — `inputSize` `sm`/`default`/`lg` mirrors `SelectTrigger` so a field and a select on one row line up (named `inputSize`, not `size`, to dodge the native numeric `size` attr).
 - **Surface & token rules (bit you) :** filled `secondary` only reads on white/card surfaces — on the muted
   page background use `variant="outline"`. `--input` is `#fff` in light mode, so a **visible field/button

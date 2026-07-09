@@ -74,20 +74,14 @@ function AddressBookHeader({
           </Track>
 
           <Track {...ADDRESS_BOOK_EVENTS.IMPORT_BUTTON}>
-            <Button variant="outline" size="lg" className="px-4 py-0" onClick={handleOpenModal(ModalType.IMPORT)}>
+            <Button variant="outline" size="lg" onClick={handleOpenModal(ModalType.IMPORT)}>
               <ImportIcon className="size-4" />
               Import
             </Button>
           </Track>
 
           <Track {...ADDRESS_BOOK_EVENTS.DOWNLOAD_BUTTON}>
-            <Button
-              variant="outline"
-              size="lg"
-              className="px-4 py-0"
-              onClick={handleOpenModal(ModalType.EXPORT)}
-              disabled={!canExport}
-            >
+            <Button variant="outline" size="lg" onClick={handleOpenModal(ModalType.EXPORT)} disabled={!canExport}>
               <ExportIcon className="size-4" />
               Export
             </Button>

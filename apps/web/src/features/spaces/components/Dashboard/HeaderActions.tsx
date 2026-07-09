@@ -1,6 +1,6 @@
 import { ArrowDownLeft, Repeat, ArrowUpRight, SquareDashedBottomCode } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
+import { ActionBar, ActionButton } from '@/components/common/ActionBar'
 
 /**
  * HeaderActions
@@ -22,24 +22,24 @@ interface HeaderActionsProps {
 const HeaderActions = ({ onSend, onReceive, onSwap, onBuildTransaction, otherActions }: HeaderActionsProps) => {
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
-      <div className="flex flex-wrap items-center gap-2">
-        <Button variant="default" size="action" onClick={onSend}>
+      <ActionBar>
+        <ActionButton variant="default" onClick={onSend}>
           <ArrowUpRight className="size-5 text-green-400" />
           Send
-        </Button>
-        <Button variant="outline" size="action" onClick={onReceive}>
+        </ActionButton>
+        <ActionButton variant="outline" onClick={onReceive}>
           <ArrowDownLeft className="size-5" />
           Receive
-        </Button>
-        <Button variant="outline" size="action" onClick={onSwap}>
+        </ActionButton>
+        <ActionButton variant="outline" onClick={onSwap}>
           <Repeat className="size-5" />
           Swap
-        </Button>
-        <Button variant="outline" size="action" onClick={onBuildTransaction}>
+        </ActionButton>
+        <ActionButton variant="outline" onClick={onBuildTransaction}>
           <SquareDashedBottomCode className="size-5" />
           Build transaction
-        </Button>
-      </div>
+        </ActionButton>
+      </ActionBar>
       {otherActions}
     </div>
   )

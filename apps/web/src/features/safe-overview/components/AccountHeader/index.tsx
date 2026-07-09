@@ -81,6 +81,7 @@ const AccountHeader = (): ReactElement => {
           <Button
             variant="outline"
             size="action"
+            // eslint-disable-next-line no-restricted-syntax -- outline CTA on a colored header surface needs a transparent bg; pending an on-surface variant
             className="!border-[var(--color-border-light)] bg-transparent"
             onClick={handleManageSafe}
           >
