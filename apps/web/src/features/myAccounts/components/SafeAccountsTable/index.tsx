@@ -220,11 +220,16 @@ const SafeAccountsTable = ({
               borderTopRightRadius: '8px',
               borderBottomRightRadius: '8px',
             },
-            // Row separator. The base theme sets cell borderBottom to none with a specificity the
-            // per-cell sx can't beat, so draw it here (keyed off data-divider, absent on the last row).
-            '& .MuiTableBody-root .MuiTableRow-root[data-divider] .MuiTableCell-root': {
-              borderBottom: '1px solid',
-              borderBottomColor: 'border.light',
+            // Row separator, drawn as a 1px line at the bottom of the <tr> (keyed off data-divider,
+            // absent on the last row). It lives on the row — not the cells — so the cells' transparent
+            // top/bottom borders can inset the hover pill clear of the separator. Inset 4px each side to
+            // line up with the pill.
+            '& .MuiTableBody-root .MuiTableRow-root[data-divider]': {
+              backgroundImage:
+                'linear-gradient(to right, transparent 4px, var(--color-border-light) 4px, var(--color-border-light) calc(100% - 4px), transparent calc(100% - 4px))',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'bottom',
+              backgroundSize: '100% 1px',
             },
           }}
         >
