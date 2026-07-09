@@ -328,14 +328,14 @@ const SafeAccountTableRow = ({
       {...rowDraggableProps}
       data-testid="account-table-row"
       data-variant={line.variant}
+      // Locked rows opt out of the table's grey row hover (see the Table sx override).
+      data-disabled={checkbox?.disabledReason ? '' : undefined}
       // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover.
       className="group/row"
       tabIndex={-1}
       onClick={rowSelectable ? () => onSelectToggle?.(!checkbox?.checked) : undefined}
       sx={{
-        // Disabled rows stay dimmed with no hover; every other row gets the grey hover that reveals
-        // the identity cell's copy/explorer/rename icons.
-        ...(checkbox?.disabledReason ? { opacity: 0.55 } : { '&:hover': { backgroundColor: 'action.hover' } }),
+        ...(checkbox?.disabledReason ? { opacity: 0.55 } : {}),
         ...(rowSelectable ? { cursor: 'pointer' } : {}),
         ...(isDragging ? { backgroundColor: 'background.paper', boxShadow: 3, borderRadius: '12px' } : {}),
       }}

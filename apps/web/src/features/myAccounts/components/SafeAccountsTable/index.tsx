@@ -195,7 +195,17 @@ const SafeAccountsTable = ({
           borderColor: 'border.light',
         }}
       >
-        <Table sx={{ tableLayout: 'fixed', minWidth, borderCollapse: 'separate', borderSpacing: 0 }}>
+        <Table
+          sx={{
+            tableLayout: 'fixed',
+            minWidth,
+            borderCollapse: 'separate',
+            borderSpacing: 0,
+            // The base theme tints every MuiTableRow green on hover; the account tables use the same
+            // grey as the safe-selector dropdown instead (locked rows stay un-hovered).
+            '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover': { backgroundColor: 'var(--muted)' },
+          }}
+        >
           <TableHead>
             <TableRow>
               {visibleColumns.map((column, index) => (
