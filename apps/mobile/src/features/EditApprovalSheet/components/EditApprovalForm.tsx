@@ -125,7 +125,7 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
   return (
     <View width="100%" paddingHorizontal="$2" gap="$4">
       <YStack marginBottom="$2">
-        <Text fontSize={12} color="$textSecondaryLight" marginBottom="$1">
+        <Text fontSize="$3" color="$textSecondaryLight" marginBottom="$1">
           Only approve what's needed for this transaction
         </Text>
 
@@ -172,7 +172,7 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
           )}
         />
         {approval.balance !== undefined && errorMessage == null && (
-          <Text fontSize={12} color="$textSecondaryLight" testID="approval-token-balance" paddingBottom="2">
+          <Text fontSize="$3" color="$textSecondaryLight" testID="approval-token-balance" paddingBottom="$0.5">
             Balance: {formatVisualAmount(approval.balance, approval.tokenInfo?.decimals)} {symbol}
           </Text>
         )}
@@ -193,7 +193,7 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
             <Text fontSize="$4" fontWeight={500} color="$color">
               Unlimited approval
             </Text>
-            <Text fontSize={12} color="$textSecondaryLight">
+            <Text fontSize="$2" color="$textSecondaryLight">
               Allows permanent access to your tokens
             </Text>
           </YStack>
