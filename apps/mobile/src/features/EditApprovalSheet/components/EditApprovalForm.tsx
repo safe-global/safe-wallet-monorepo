@@ -19,6 +19,7 @@ import { SafeInput } from '@/src/components/SafeInput'
 import { TokenIcon } from '@/src/components/TokenIcon/TokenIcon'
 import { SafeButton } from '@/src/components/SafeButton'
 import { LoadableSwitch } from '@/src/components/LoadableSwitch'
+import { backdropOverlayBackground } from '@/src/components/Badge/theme'
 import { HashDisplay } from '@/src/components/HashDisplay'
 import { sanitizeDecimalInput } from '@/src/utils/formatters'
 import Logger from '@/src/utils/logger'
@@ -110,23 +111,24 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
   const {
     control,
     setValue,
-    getValues,
     formState: { errors },
   } = useFormContext<EditApprovalFormData>()
   const unlimited = useWatch({ control, name: 'unlimited' })
+  const symbol = approval.tokenInfo?.symbol ?? ''
   // Register the focused input as the sheet's keyboard target, else keyboardBehavior="extend" ignores it
   const bottomSheetInternal = useBottomSheetInternal(true)
   const setKeyboardTarget = (target: number | undefined) => {
     bottomSheetInternal?.animatedKeyboardState.set((state) => ({ ...state, target }))
   }
+  const errorMessage = errors.amount?.message
 
   return (
-    <View width="100%" gap="$4">
-      <Text color="$colorSecondary" fontSize="$4">
-        Only approve what this transaction needs.
-      </Text>
+    <View width="100%" paddingHorizontal="$2" gap="$4">
+      <YStack marginBottom="$2">
+        <Text fontSize={12} color="$textSecondaryLight" marginBottom="$1">
+          Only approve what's needed for this transaction
+        </Text>
 
-      <View>
         <Controller
           control={control}
           name="amount"
@@ -135,7 +137,7 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
               if (formValues.unlimited) {
                 return undefined
               }
-              return validateAmount(value, true) || validateDecimalLength(value, approval.tokenInfo?.decimals)
+              return validateAmount(value) || validateDecimalLength(value, approval.tokenInfo?.decimals)
             },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
@@ -144,7 +146,7 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
               onFocus={(event) => {
                 const target = event.nativeEvent.target
                 setKeyboardTarget(typeof target === 'number' ? target : undefined)
-                if (getValues('unlimited')) {
+                if (unlimited) {
                   setValue('unlimited', false, { shouldDirty: true, shouldValidate: true })
                 }
               }}
@@ -155,38 +157,44 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
               onChangeText={(text) => onChange(sanitizeDecimalInput(text))}
               keyboardType="decimal-pad"
               placeholder={unlimited ? 'Unlimited' : 'Amount'}
-              height={64}
-              fontSize={22}
               fontWeight="600"
               testID="input-approval-amount"
-              error={!unlimited ? errors.amount?.message : undefined}
+              error={!unlimited ? errorMessage : undefined}
               right={
                 <XStack gap="$2" alignItems="center">
                   <TokenIcon logoUri={approval.tokenInfo?.logoUri} size="$6" />
-                  <Text fontWeight={600} color="$colorSecondary">
-                    {approval.tokenInfo?.symbol}
+                  <Text fontWeight={500} color="$textSecondaryLight">
+                    {symbol}
                   </Text>
                 </XStack>
               }
             />
           )}
         />
-        {approval.balance !== undefined && (
-          <Text fontSize="$3" color="$textSecondaryLight" marginTop="$2" testID="approval-token-balance">
-            Balance: {formatVisualAmount(approval.balance, approval.tokenInfo?.decimals)}{' '}
-            {approval.tokenInfo?.symbol ?? ''}
+        {approval.balance !== undefined && errorMessage == null && (
+          <Text fontSize={12} color="$textSecondaryLight" testID="approval-token-balance" paddingBottom="2">
+            Balance: {formatVisualAmount(approval.balance, approval.tokenInfo?.decimals)} {symbol}
           </Text>
         )}
-      </View>
+      </YStack>
 
-      <View gap="$6">
-        <XStack justifyContent="space-between" alignItems="center" gap="$3">
+      <YStack gap="$3" marginBottom="$2">
+        <XStack
+          backgroundColor="$backgroundSkeleton"
+          borderRadius="$4"
+          paddingHorizontal="$3"
+          paddingVertical="$2"
+          alignItems="center"
+          justifyContent="space-between"
+          gap="$3"
+          padding="$3"
+        >
           <YStack flexShrink={1}>
-            <Text fontSize="$5" fontWeight={600}>
+            <Text fontSize="$4" fontWeight={500} color="$color">
               Unlimited approval
             </Text>
-            <Text fontSize="$3" color="$textSecondaryLight">
-              The spender gets permanent access to all your {approval.tokenInfo?.symbol ?? 'tokens'}
+            <Text fontSize={12} color="$textSecondaryLight">
+              Allows permanent access to your tokens
             </Text>
           </YStack>
           <Controller
@@ -208,13 +216,21 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
           />
         </XStack>
 
-        <XStack justifyContent="space-between" alignItems="center">
-          <Text color="$colorSecondary" fontSize="$5">
+        <XStack
+          backgroundColor="$backgroundSkeleton"
+          borderRadius="$4"
+          padding="$3"
+          minHeight={56}
+          alignItems="center"
+          justifyContent="space-between"
+          gap="$2"
+        >
+          <Text fontSize="$4" fontWeight={500} color="$color">
             Spender
           </Text>
-          <HashDisplay value={approval.spender} />
+          <HashDisplay value={approval.spender} showExternalLink={false} textProps={{ color: '$color' }} />
         </XStack>
-      </View>
+      </YStack>
     </View>
   )
 }
@@ -229,8 +245,14 @@ interface EditApprovalFooterProps {
 /** Save / Cancel row, pinned above the keyboard via SafeBottomSheet's FooterComponent */
 export const EditApprovalFooter = ({ submitting, saveDisabled, onSave, onCancel }: EditApprovalFooterProps) => {
   return (
-    <XStack backgroundColor="$backgroundSheet" paddingHorizontal="$4" paddingVertical="$3" gap="$2">
-      <SafeButton outlined flex={1} onPress={onCancel} disabled={submitting}>
+    <XStack backgroundColor="$backgroundSheet" paddingHorizontal="$4" paddingVertical="$3" gap="$4">
+      <SafeButton
+        flex={1}
+        backgroundColor={backdropOverlayBackground}
+        textColor="$staticPrimaryLight"
+        onPress={onCancel}
+        disabled={submitting}
+      >
         Cancel
       </SafeButton>
       <SafeButton

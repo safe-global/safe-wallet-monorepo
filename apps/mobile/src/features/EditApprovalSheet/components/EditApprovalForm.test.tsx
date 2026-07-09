@@ -129,7 +129,7 @@ describe('EditApprovalForm', () => {
     expect(state.walletKit.outstandingRequests['0xnewhash']).toBeDefined()
   })
 
-  it('resets the amount when unlimited is switched on', () => {
+  it('clears the amount and shows the Unlimited placeholder when the toggle is switched on', () => {
     const store = setupStore()
     const { getByTestId } = renderWithStore(<EditApprovalForm draft={draft} approval={approval} safe={safe} />, store)
 
@@ -137,9 +137,8 @@ describe('EditApprovalForm', () => {
     fireEvent(getByTestId('switch-unlimited-approval'), 'onValueChange', true)
 
     expect(getByTestId('input-approval-amount').props.value).toEqual('')
-
-    fireEvent(getByTestId('input-approval-amount'), 'focus', { nativeEvent: { target: 1 } })
-    expect(getByTestId('input-approval-amount').props.value).toEqual('')
+    expect(getByTestId('input-approval-amount').props.placeholder).toEqual('Unlimited')
+    expect(getByTestId('switch-unlimited-approval').props.value).toBe(true)
   })
 
   it('switches unlimited off when the amount input is focused', () => {
@@ -150,11 +149,10 @@ describe('EditApprovalForm', () => {
     expect(getByTestId('switch-unlimited-approval').props.value).toBe(true)
 
     fireEvent(getByTestId('input-approval-amount'), 'focus', { nativeEvent: { target: 1 } })
-
     expect(getByTestId('switch-unlimited-approval').props.value).toBe(false)
   })
 
-  it('surfaces the empty-amount error when focusing switches unlimited off', async () => {
+  it('does not save an invalid amount', async () => {
     const store = setupStore()
     const { getByTestId, getByText } = renderWithStore(
       <EditApprovalForm draft={draft} approval={approval} safe={safe} />,
@@ -162,10 +160,26 @@ describe('EditApprovalForm', () => {
     )
 
     fireEvent.changeText(getByTestId('input-approval-amount'), '')
-    fireEvent(getByTestId('switch-unlimited-approval'), 'onValueChange', true)
-    fireEvent(getByTestId('input-approval-amount'), 'focus', { nativeEvent: { target: 1 } })
 
     await waitFor(() => expect(getByText('The value must be a number')).toBeTruthy())
+
+    fireEvent.press(getByTestId('save-approval-button'))
+    expect(mockRebuild).not.toHaveBeenCalled()
+  })
+
+  it('does not save a zero amount', async () => {
+    const store = setupStore()
+    const { getByTestId, getByText } = renderWithStore(
+      <EditApprovalForm draft={draft} approval={approval} safe={safe} />,
+      store,
+    )
+
+    fireEvent.changeText(getByTestId('input-approval-amount'), '0')
+
+    await waitFor(() => expect(getByText('The value must be greater than 0')).toBeTruthy())
+
+    fireEvent.press(getByTestId('save-approval-button'))
+    expect(mockRebuild).not.toHaveBeenCalled()
   })
 
   it('submits the unlimited pseudo value when the toggle is on', async () => {
