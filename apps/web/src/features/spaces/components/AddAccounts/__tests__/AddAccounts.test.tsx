@@ -93,8 +93,11 @@ jest.mock('@/features/spaces', () => ({
 }))
 
 let mockListSimilarities = new Map<string, ListAnnotation>()
-jest.mock('@/features/address-poisoning', () => ({
-  useListSimilarities: () => mockListSimilarities,
+// Mock the low-level anchor detector; the real useFlaggedSimilarAddresses folds it with the
+// intra-list check, so these tests exercise the real fold.
+jest.mock('@/features/address-poisoning/hooks/useListSimilarities', () => ({
+  __esModule: true,
+  default: () => mockListSimilarities,
 }))
 
 const mockAddSafesToSpace = jest.fn()

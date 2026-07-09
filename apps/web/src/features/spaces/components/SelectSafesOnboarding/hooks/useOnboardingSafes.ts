@@ -2,10 +2,8 @@ import { useCallback, useMemo, useState } from 'react'
 import debounce from 'lodash/debounce'
 import {
   type AllSafeItems,
-  type SafeItem,
   _buildSafeItem,
-  _getMultiChainAccounts,
-  _getSingleChainAccounts,
+  _groupAndSort,
   getComparator,
   useAllOwnedSafes,
   useSafesSearch,
@@ -16,17 +14,7 @@ import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
 import useWallet from '@/hooks/wallets/useWallet'
 import useChains from '@/hooks/useChains'
-import { getFlaggedSimilarAddressSet, normalizeAddress } from '@safe-global/utils/utils/addressSimilarity'
-import { useListSimilarities } from '@/features/address-poisoning'
-
-const _groupAndSort = (
-  items: SafeItem[],
-  sortComparator: (a: AllSafeItems[number], b: AllSafeItems[number]) => number,
-): AllSafeItems => {
-  const multi = _getMultiChainAccounts(items)
-  const single = _getSingleChainAccounts(items, multi)
-  return [...multi, ...single].sort(sortComparator)
-}
+import { useFlaggedSimilarAddresses } from '@/features/address-poisoning'
 
 const useOnboardingSafes = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -77,24 +65,7 @@ const useOnboardingSafes = () => {
     [trustedSafeItems, ownedSafeItems],
   )
 
-  // Legacy intra-list flags plus anchor detection (front OR back vs a trusted anchor) layered on
-  // top — flag-gated by ADDRESS_POISONING_PROTECTION (empty map when off). Both the impostor and
-  // an in-list imitated anchor are marked so the pair reads side-by-side.
-  const anchorAnnotations = useListSimilarities(allAddresses)
-  const similarAddresses = useMemo<Set<string>>(() => {
-    const flagged = getFlaggedSimilarAddressSet(allAddresses)
-    const imitated = new Set<string>()
-    anchorAnnotations.forEach((annotation) => {
-      if (annotation.match) {
-        flagged.add(annotation.address.toLowerCase())
-        imitated.add(annotation.match.anchor)
-      }
-    })
-    for (const address of allAddresses) {
-      if (imitated.has(normalizeAddress(address))) flagged.add(address.toLowerCase())
-    }
-    return flagged
-  }, [allAddresses, anchorAnnotations])
+  const similarAddresses = useFlaggedSimilarAddresses(allAddresses)
 
   // Group into multi-chain / single-chain and sort
   const trustedGrouped = useMemo<AllSafeItems>(

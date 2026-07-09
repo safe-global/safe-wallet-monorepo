@@ -6,8 +6,8 @@ import { setCuratedNestedSafes } from '@/store/settingsSlice'
 import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
 import { useCuratedNestedSafes } from '@/hooks/useCuratedNestedSafes'
 import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
-import type { SimilarityDetectionResult, SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
-import { useListSimilarities } from '@/features/address-poisoning'
+import type { SimilarityDetectionResult } from '@safe-global/utils/utils/addressSimilarity.types'
+import { useAnchorMatches } from '@/features/address-poisoning'
 
 const toggleAddress = (prev: Set<string>, normalizedAddress: string): Set<string> => {
   const next = new Set(prev)
@@ -47,14 +47,7 @@ export const useManageNestedSafes = (allSafesWithStatus: NestedSafeWithStatus[])
 
   // Anchor detection (front OR back match against a trusted anchor) layered on top. Flag-gated by
   // ADDRESS_POISONING_PROTECTION (empty map when off, so behaviour falls back to intra-list only).
-  const anchorAnnotations = useListSimilarities(addresses)
-  const anchorMatches = useMemo(() => {
-    const byLower = new Map<string, SimilarityMatch>()
-    anchorAnnotations.forEach((annotation) => {
-      if (annotation.match) byLower.set(annotation.address.toLowerCase(), annotation.match)
-    })
-    return byLower
-  }, [anchorAnnotations])
+  const { anchorMatches } = useAnchorMatches(addresses)
 
   // Reset selection when curatedAddresses changes (e.g., on safe switch)
   useEffect(() => {

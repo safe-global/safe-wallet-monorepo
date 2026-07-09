@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import SpaceSafeAccounts from '../index'
 
-jest.mock('@/features/address-poisoning', () => ({
-  useListSimilarities: () => new Map(),
+jest.mock('@/features/address-poisoning/hooks/useListSimilarities', () => ({
+  __esModule: true,
+  default: () => new Map(),
 }))
 
 jest.mock('../../AddAccountsChooser', () => ({
@@ -41,8 +42,7 @@ jest.mock('@/hooks/safes', () => ({
     ownedError: undefined,
     ownedLoading: false,
   }),
-  _getMultiChainAccounts: () => [],
-  _getSingleChainAccounts: () => [],
+  _groupAndSort: () => [],
 }))
 
 jest.mock('@/store', () => ({

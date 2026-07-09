@@ -6,9 +6,8 @@ import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { OVERVIEW_EVENTS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
 import { useAllSafesGrouped } from '@/hooks/safes/useAllSafesGrouped'
 import useAllSafes from '@/hooks/safes/useAllSafes'
-import { detectSimilarAddresses, normalizeAddress } from '@safe-global/utils/utils/addressSimilarity'
-import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
-import { useListSimilarities } from '@/features/address-poisoning'
+import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
+import { useAnchorMatches } from '@/features/address-poisoning'
 import type { SelectableSafe, SelectableMultiChainSafe, SelectableItem } from './useTrustedSafesModal.types'
 import { isSelectableMultiChainSafe } from './useTrustedSafesModal.types'
 
@@ -109,24 +108,9 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
 
   // Anchor detection (front OR back vs a trusted anchor) layered on top of the legacy intra-list
   // check. Flag-gated by ADDRESS_POISONING_PROTECTION (empty map when off → intra-list only).
-  const anchorAnnotations = useListSimilarities(addresses)
-  const { anchorMatches, imitatedInList } = useMemo(() => {
-    const anchorMatches = new Map<string, SimilarityMatch>()
-    const imitated = new Set<string>()
-    anchorAnnotations.forEach((annotation) => {
-      if (annotation.match) {
-        anchorMatches.set(annotation.address.toLowerCase(), annotation.match)
-        imitated.add(annotation.match.anchor)
-      }
-    })
-    // Trusted originals that are themselves in this list: share the impostor's group so the existing
-    // grouping UI boxes them together for side-by-side comparison.
-    const imitatedInList = new Set<string>()
-    for (const address of addresses) {
-      if (imitated.has(normalizeAddress(address))) imitatedInList.add(address.toLowerCase())
-    }
-    return { anchorMatches, imitatedInList }
-  }, [anchorAnnotations, addresses])
+  // `anchorMatches` = impostor → the anchor it resembles; `imitatedInList` = in-list originals being
+  // imitated (so the union-find below boxes each impostor next to its original for comparison).
+  const { anchorMatches, imitatedInList } = useAnchorMatches(addresses)
 
   // Canonical group id per address via union-find, so ANY set of mutually or transitively similar
   // safes collapses into ONE box — not disjoint pairs. Edges: intra-list buckets (front AND back)

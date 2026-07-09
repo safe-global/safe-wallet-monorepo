@@ -7,8 +7,9 @@ import { useAppDispatch } from '@/store'
 import { useAccountsModalItems } from './useAccountsModalItems'
 
 const mockUseListSimilarities = jest.fn<Map<string, unknown>, [string[]]>(() => new Map())
-jest.mock('@/features/address-poisoning', () => ({
-  useListSimilarities: (addresses: string[]) => mockUseListSimilarities(addresses),
+jest.mock('@/features/address-poisoning/hooks/useListSimilarities', () => ({
+  __esModule: true,
+  default: (addresses: string[]) => mockUseListSimilarities(addresses),
 }))
 
 jest.mock('@/features/spaces', () => ({

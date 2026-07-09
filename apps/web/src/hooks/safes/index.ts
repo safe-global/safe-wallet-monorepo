@@ -17,6 +17,7 @@ export {
   _buildMultiChainSafeItem,
   _getMultiChainAccounts,
   _getSingleChainAccounts,
+  _groupAndSort,
   flattenSafeItems,
 } from './useAllSafesGrouped'
 export { useSafesSearch } from './useSafesSearch'

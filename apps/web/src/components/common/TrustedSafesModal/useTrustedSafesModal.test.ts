@@ -20,8 +20,9 @@ jest.mock('@safe-global/utils/utils/addressSimilarity', () => ({
 }))
 
 const mockUseListSimilarities = jest.fn()
-jest.mock('@/features/address-poisoning', () => ({
-  useListSimilarities: (addresses: string[]) => mockUseListSimilarities(addresses),
+jest.mock('@/features/address-poisoning/hooks/useListSimilarities', () => ({
+  __esModule: true,
+  default: (addresses: string[]) => mockUseListSimilarities(addresses),
 }))
 
 describe('useTrustedSafesModal', () => {

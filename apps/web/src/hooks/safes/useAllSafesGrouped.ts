@@ -92,6 +92,19 @@ export const _getSingleChainAccounts = (safes: SafeItems, allMultiChainSafes: Mu
   return safes.filter((safe) => !allMultiChainSafes.some((multiSafe) => sameAddress(multiSafe.address, safe.address)))
 }
 
+/**
+ * Group a flat list of safe items into multi-chain + single-chain accounts and sort.
+ * Shared by the space onboarding / add-accounts / safe-accounts surfaces.
+ */
+export const _groupAndSort = (
+  items: SafeItem[],
+  sortComparator: (a: AllSafeItems[number], b: AllSafeItems[number]) => number,
+): AllSafeItems => {
+  const multi = _getMultiChainAccounts(items)
+  const single = _getSingleChainAccounts(items, multi)
+  return [...multi, ...single].sort(sortComparator)
+}
+
 export const useAllSafesGrouped = (customSafes?: SafeItems) => {
   const safes = useAllSafes()
   const allSafes = customSafes ?? safes

@@ -6,8 +6,7 @@ import {
   flattenSafeItems,
   useSafesSearch,
   getComparator,
-  _getMultiChainAccounts,
-  _getSingleChainAccounts,
+  _groupAndSort,
   _buildSafeItem,
   useAllOwnedSafes,
 } from '@/hooks/safes'
@@ -15,9 +14,8 @@ import AddManually, { type AddManuallyFormValues } from './AddManually'
 import { getSafeId } from './SafesList'
 import OnboardingSafesList from '../SelectSafesOnboarding/components/OnboardingSafesList'
 import ConnectWalletHint from '../ConnectWalletHint'
-import { getFlaggedSimilarAddressSet, normalizeAddress } from '@safe-global/utils/utils/addressSimilarity'
 import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
-import { useListSimilarities } from '@/features/address-poisoning'
+import { useFlaggedSimilarAddresses } from '@/features/address-poisoning'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import {
   useSpaceSafesCreateV1Mutation,
@@ -71,15 +69,6 @@ function getRemovedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSaf
     const safeId = `${spaceSafe.chainId}:${spaceSafe.address}`
     return !safes[safeId]
   })
-}
-
-const _groupAndSort = (
-  items: SafeItem[],
-  sortComparator: (a: AllSafeItems[number], b: AllSafeItems[number]) => number,
-): AllSafeItems => {
-  const multi = _getMultiChainAccounts(items)
-  const single = _getSingleChainAccounts(items, multi)
-  return [...multi, ...single].sort(sortComparator)
 }
 
 interface AddAccountsProps {
@@ -177,24 +166,7 @@ const AddAccounts = ({
 
   const allAddresses = useMemo(() => [...trustedSafes, ...ownedSafes].map((s) => s.address), [trustedSafes, ownedSafes])
 
-  // Legacy intra-list flags plus anchor detection (front OR back vs a trusted anchor) layered on
-  // top — flag-gated by ADDRESS_POISONING_PROTECTION (empty map when off → intra-list only). Both
-  // the impostor and an in-list imitated anchor are marked so the pair reads side-by-side.
-  const anchorAnnotations = useListSimilarities(allAddresses)
-  const similarAddresses = useMemo<Set<string>>(() => {
-    const flagged = getFlaggedSimilarAddressSet(allAddresses)
-    const imitated = new Set<string>()
-    anchorAnnotations.forEach((annotation) => {
-      if (annotation.match) {
-        flagged.add(annotation.address.toLowerCase())
-        imitated.add(annotation.match.anchor)
-      }
-    })
-    for (const address of allAddresses) {
-      if (imitated.has(normalizeAddress(address))) flagged.add(address.toLowerCase())
-    }
-    return flagged
-  }, [allAddresses, anchorAnnotations])
+  const similarAddresses = useFlaggedSimilarAddresses(allAddresses)
 
   const [rawSearchQuery, setRawSearchQuery] = useState('')
   const debouncedSearchQuery = useDebounce(rawSearchQuery, 300)

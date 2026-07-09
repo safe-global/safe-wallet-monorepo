@@ -5,16 +5,8 @@ import { Typography } from '@/components/ui/typography'
 import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
-import {
-  type AllSafeItems,
-  type SafeItem,
-  _getMultiChainAccounts,
-  _getSingleChainAccounts,
-  getComparator,
-  useSafeItemBuilder,
-} from '@/hooks/safes'
-import { getFlaggedSimilarAddressSet, normalizeAddress } from '@safe-global/utils/utils/addressSimilarity'
-import { useListSimilarities } from '@/features/address-poisoning'
+import { type AllSafeItems, _groupAndSort, getComparator, useSafeItemBuilder } from '@/hooks/safes'
+import { useFlaggedSimilarAddresses } from '@/features/address-poisoning'
 import { useSpaceSafes, useIsInvited } from '@/features/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { TriangleAlert, RotateCw } from 'lucide-react'
@@ -22,15 +14,6 @@ import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_LABELS, SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import AccountsSafesList from './AccountsSafesList'
-
-const _groupAndSort = (
-  items: SafeItem[],
-  sortComparator: (a: AllSafeItems[number], b: AllSafeItems[number]) => number,
-): AllSafeItems => {
-  const multi = _getMultiChainAccounts(items)
-  const single = _getSingleChainAccounts(items, multi)
-  return [...multi, ...single].sort(sortComparator)
-}
 
 const SpaceSafeAccounts = () => {
   const { allSafes, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()
@@ -50,24 +33,7 @@ const SpaceSafeAccounts = () => {
 
   const spaceSafeAddresses = useMemo(() => spaceSafeItems.map((s) => s.address), [spaceSafeItems])
 
-  // Legacy intra-list flags plus anchor detection (front OR back vs a trusted anchor) layered on
-  // top — flag-gated by ADDRESS_POISONING_PROTECTION (empty map when off). Both the impostor and
-  // an in-list imitated anchor are marked so the pair reads side-by-side.
-  const anchorAnnotations = useListSimilarities(spaceSafeAddresses)
-  const similarAddresses = useMemo<Set<string>>(() => {
-    const flagged = getFlaggedSimilarAddressSet(spaceSafeAddresses)
-    const imitated = new Set<string>()
-    anchorAnnotations.forEach((annotation) => {
-      if (annotation.match) {
-        flagged.add(annotation.address.toLowerCase())
-        imitated.add(annotation.match.anchor)
-      }
-    })
-    for (const address of spaceSafeAddresses) {
-      if (imitated.has(normalizeAddress(address))) flagged.add(address.toLowerCase())
-    }
-    return flagged
-  }, [spaceSafeAddresses, anchorAnnotations])
+  const similarAddresses = useFlaggedSimilarAddresses(spaceSafeAddresses)
 
   // Group and sort
   const displaySafes = useMemo<AllSafeItems>(

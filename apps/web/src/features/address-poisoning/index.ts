@@ -11,6 +11,8 @@ export { selectAnchorIndex, selectAnchorAddresses } from './store'
 
 // Mode B — list detection for account/list surfaces (existing dev UIs consume these)
 export { default as useListSimilarities } from './hooks/useListSimilarities'
-export { default as useSelectionSimilarities, INTRA_LIST_MATCH } from './hooks/useSelectionSimilarities'
-export type { SelectionSimilarity } from './hooks/useSelectionSimilarities'
-export { default as useSimilarityGroups } from './hooks/useSimilarityGroups'
+// Flat flagged-address set for display lists (intra-list always on + anchor flag-gated)
+export { default as useFlaggedSimilarAddresses } from './hooks/useFlaggedSimilarAddresses'
+// Anchor match/imitated split for the union-find grouping surfaces (trusted-safes modal, nested curation)
+export { default as useAnchorMatches } from './hooks/useAnchorMatches'
+export type { AnchorMatches } from './hooks/useAnchorMatches'
