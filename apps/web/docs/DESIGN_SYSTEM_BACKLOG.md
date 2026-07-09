@@ -47,23 +47,28 @@ spot-check the story in Storybook light+dark.
   SafeListRemoveDialog).
 - **tx re-ports** — `ExecutionMethodSelector` (GTF relay-counter gate) + `TxDetails/Summary` (tx-hash row + GTF
   history-fees). Money-movement tx files audited vs `dev`: **money logic byte-identical**; only display deltas.
+- **Select (C5)** — `SelectTrigger` `variant` axis (default/surface/ghost) + `lg` size (cva; `default`
+  byte-identical, height still on `data-size`). Migrated ActivityLogFilters ×2 + MemberInviteRow → surface,
+  AddManually → ghost; CurrencySelect/SafeSelectorDropdown grandfathered. ESLint extended to `<SelectTrigger>`;
+  `UI/Select` story documents the variants. (CSS-module drift — SafeAppsFilters/NetworkSelector/SignerSelector —
+  left as a follow-up per the spec; the rule doesn't see css-module classes.)
 
 ---
 
 ## 3. Remaining work (each item is independent — parallelize freely)
 
-| #     | Item                                                                                        | Effort | Blocked by         | Kind        |
-| ----- | ------------------------------------------------------------------------------------------- | ------ | ------------------ | ----------- |
-| ~~A~~ | ~~Finish `DialogActions` + skipped footers~~ — **DONE** (item A)                            | —      | —                  | code        |
-| B     | On-colour CTA decision (Earn/AddFunds/AccountHeader)                                        | S      | **design nod**     | design→code |
-| C1    | **Card** family (biggest drift) — [spec](./design-system/card-family-spec.md)               | M      | —                  | code        |
-| C2    | **Dialog/Drawer/Sheet** family — [spec](./design-system/dialog-drawer-sheet-family-spec.md) | M      | —                  | code        |
-| C3    | **Badge/Chip** family — [spec](./design-system/badge-chip-family-spec.md)                   | M      | —                  | code        |
-| C4    | **Input/InputGroup** family — [spec](./design-system/input-inputgroup-family-spec.md)       | M      | —                  | code        |
-| C5    | **Select** family — [spec](./design-system/select-family-spec.md)                           | M      | —                  | code        |
-| D     | Sweep up the 11 grandfathered button disables (via new presets)                             | M      | some need B/design | code        |
-| E     | Turn on the Argos visual gate on PRs                                                        | S      | **repo secret**    | infra       |
-| F     | Migration PR's own un-draft items (not the DS thread)                                       | —      | —                  | QA          |
+| #      | Item                                                                                        | Effort | Blocked by         | Kind        |
+| ------ | ------------------------------------------------------------------------------------------- | ------ | ------------------ | ----------- |
+| ~~A~~  | ~~Finish `DialogActions` + skipped footers~~ — **DONE** (item A)                            | —      | —                  | code        |
+| B      | On-colour CTA decision (Earn/AddFunds/AccountHeader)                                        | S      | **design nod**     | design→code |
+| C1     | **Card** family (biggest drift) — [spec](./design-system/card-family-spec.md)               | M      | —                  | code        |
+| C2     | **Dialog/Drawer/Sheet** family — [spec](./design-system/dialog-drawer-sheet-family-spec.md) | M      | —                  | code        |
+| C3     | **Badge/Chip** family — [spec](./design-system/badge-chip-family-spec.md)                   | M      | —                  | code        |
+| C4     | **Input/InputGroup** family — [spec](./design-system/input-inputgroup-family-spec.md)       | M      | —                  | code        |
+| ~~C5~~ | ~~**Select** family~~ — **DONE** (literal-className sites; css-module sites follow-up)      | —      | —                  | code        |
+| D      | Sweep up the 11 grandfathered button disables (via new presets)                             | M      | some need B/design | code        |
+| E      | Turn on the Argos visual gate on PRs                                                        | S      | **repo secret**    | infra       |
+| F      | Migration PR's own un-draft items (not the DS thread)                                       | —      | —                  | QA          |
 
 Items **C1–C5** are fully independent and can run concurrently (disjoint files, except each extends the one
 shared `eslint.config.mjs` — do the ESLint edit last, or have the worker report the element name for a single
