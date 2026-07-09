@@ -220,6 +220,12 @@ const SafeAccountsTable = ({
               borderTopRightRadius: '8px',
               borderBottomRightRadius: '8px',
             },
+            // Row separator. The base theme sets cell borderBottom to none with a specificity the
+            // per-cell sx can't beat, so draw it here (keyed off data-divider, absent on the last row).
+            '& .MuiTableBody-root .MuiTableRow-root[data-divider] .MuiTableCell-root': {
+              borderBottom: '1px solid',
+              borderBottomColor: 'border.light',
+            },
           }}
         >
           <TableHead>

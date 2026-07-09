@@ -227,7 +227,6 @@ const CellContent = ({ column, line }: { column: SafeAccountColumn; line: Accoun
 const RowCell = ({
   column,
   line,
-  showDivider,
   reorderable,
   nameCell,
   checkbox,
@@ -237,7 +236,6 @@ const RowCell = ({
 }: {
   column: SafeAccountColumn
   line: AccountLine
-  showDivider?: boolean
   reorderable: boolean
   nameCell: ReactNode
   checkbox?: RowCheckbox
@@ -257,8 +255,6 @@ const RowCell = ({
       // hover pill from the panel edges — the same trick the header bar uses, so columns stay aligned.
       '&:first-of-type': { pl: 2, borderLeft: '4px solid transparent', backgroundClip: 'padding-box' },
       '&:last-of-type': { pr: 2, borderRight: '4px solid transparent', backgroundClip: 'padding-box' },
-      borderBottom: showDivider ? '1px solid' : 'none',
-      borderColor: 'divider',
       ...(reorderable && column.width ? { width: column.width, minWidth: column.width, maxWidth: column.width } : {}),
     }}
     onClick={column.id === 'actions' || column.id === 'select' ? (e) => e.stopPropagation() : undefined}
@@ -332,6 +328,8 @@ const SafeAccountTableRow = ({
       data-variant={line.variant}
       // Locked rows opt out of the table's grey row hover (see the Table sx override).
       data-disabled={checkbox?.disabledReason ? '' : undefined}
+      // Draws the row separator (via the Table sx override); false only at the last row of a group/list.
+      data-divider={showDivider ? '' : undefined}
       // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover.
       className="group/row"
       tabIndex={-1}
@@ -347,7 +345,6 @@ const SafeAccountTableRow = ({
           key={column.id}
           column={column}
           line={line}
-          showDivider={showDivider}
           reorderable={reorderable}
           nameCell={nameCell}
           checkbox={checkbox}
