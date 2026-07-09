@@ -133,24 +133,22 @@ describe('SafeAccountTableRow', () => {
     expect(screen.queryByTestId('safe-item-rename-btn')).not.toBeInTheDocument()
   })
 
-  describe('reorder layout', () => {
-    it('shows a grip on a draggable row while keeping the name navigable', () => {
+  describe('reorder handle', () => {
+    it('renders the grip on a draggable row while keeping the name navigable', () => {
       renderRow({
         rowDraggableProps: {} as never,
         dragHandleProps: {} as DraggableProvidedDragHandleProps,
       })
 
       expect(screen.getByTestId('account-drag-handle')).toBeInTheDocument()
+      // The grip floats in the gutter, so the name is still a plain navigation link (no reflow).
       expect(screen.getByTestId('account-row-link')).toHaveAttribute('href', '/home?safe=eth:0xabc')
     })
 
-    it('gives a child row an aligned spacer instead of a grip, still navigable', () => {
-      renderRow({
-        line: leaf({ variant: 'child', showAddress: false, displayName: 'Ethereum' }),
-        reorderLayout: true,
-      })
+    it('renders no grip on a non-draggable child row, which stays navigable', () => {
+      renderRow({ line: leaf({ variant: 'child', showAddress: false, displayName: 'Ethereum' }) })
 
-      // Only the parent carries the handle — the child reserves the gutter but has no grip.
+      // Only the parent carries the handle — children move with it, so they get none.
       expect(screen.queryByTestId('account-drag-handle')).not.toBeInTheDocument()
       expect(screen.getByTestId('account-row-link')).toHaveAttribute('href', '/home?safe=eth:0xabc')
     })

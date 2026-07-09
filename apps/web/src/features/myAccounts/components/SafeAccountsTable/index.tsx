@@ -204,7 +204,9 @@ const SafeAccountsTable = ({
             ? { width: '100%', overflowX: 'visible' }
             : {
                 width: '100%',
-                overflowX: 'auto',
+                // Reorder mode floats the drag grip in the left gutter, outside the card — clipping it
+                // would hide the handle, so drop the horizontal scroll container while reordering.
+                overflowX: reorderActive ? 'visible' : 'auto',
                 borderRadius: '16px',
                 backgroundColor: 'background.paper',
                 border: '1px solid',

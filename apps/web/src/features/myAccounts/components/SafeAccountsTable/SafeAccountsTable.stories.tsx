@@ -69,3 +69,11 @@ export const NameAndBalanceOnly: Story = {
     columns: ['name', 'balance', 'actions'],
   },
 }
+
+/** Manual-sort mode: hover a row to reveal the drag grip in the left gutter, outside the table. */
+export const Reorder: Story = {
+  args: {
+    items: singleAndMulti,
+    reorder: { onReorder: () => {} },
+  },
+}

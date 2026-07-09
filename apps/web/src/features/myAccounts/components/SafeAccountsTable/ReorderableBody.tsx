@@ -114,7 +114,6 @@ const ReorderableBody = ({
                         renderActions={renderActions}
                         onLinkClick={onLinkClick}
                         showDivider={groupHasDivider && childIndex === group.children.length - 1}
-                        reorderLayout
                       />
                     ))}
                 </Fragment>

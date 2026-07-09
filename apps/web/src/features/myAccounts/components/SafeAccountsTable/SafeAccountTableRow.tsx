@@ -53,9 +53,6 @@ type SafeAccountTableRowProps = {
   rowRef?: (element: HTMLElement | null) => void
   rowDraggableProps?: DraggableProvidedDraggableProps
   isDragging?: boolean
-  /** Forces the reorder-mode Name gutter on a non-draggable row (a group's child) so it lines up
-   *  under its draggable parent. Renders a grip-sized spacer instead of a handle. */
-  reorderLayout?: boolean
 }
 
 const HighSimilarityBadge = () => (
@@ -153,20 +150,23 @@ const NameCell = ({
   return content
 }
 
+// Floats in the empty gutter to the left of the table (never in a column), so entering sort mode
+// doesn't shift the row content. Hidden until the row is hovered/focused, or while it's dragging.
+// Its box reaches back to the row's left edge, so moving the pointer onto it keeps the row hovered.
 const ReorderHandle = ({
   dragHandleProps,
-  className,
+  isDragging,
 }: {
   dragHandleProps?: DraggableProvidedDragHandleProps | null
-  className?: string
+  isDragging?: boolean
 }) => (
   <span
     {...dragHandleProps}
     data-testid="account-drag-handle"
     aria-label="Drag to reorder"
     className={cn(
-      'text-muted-foreground hover:text-foreground flex cursor-grab items-center justify-center active:cursor-grabbing',
-      className,
+      'text-muted-foreground hover:text-foreground absolute inset-y-0 -left-8 flex w-8 cursor-grab items-center justify-center transition-opacity active:cursor-grabbing',
+      isDragging ? 'opacity-100' : 'opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100',
     )}
   >
     <GripVertical className="size-4" />
@@ -250,6 +250,7 @@ const RowCell = ({
   onSelectToggle,
   renderActions,
   dragHandleProps,
+  isDragging,
 }: {
   column: SafeAccountColumn
   line: AccountLine
@@ -259,53 +260,48 @@ const RowCell = ({
   onSelectToggle?: (next: boolean) => void
   renderActions?: (line: AccountLine) => ReactNode
   dragHandleProps?: DraggableProvidedDragHandleProps | null
-}) => (
-  <TableCell
-    data-testid={`account-cell-${column.id}`}
-    sx={{
-      textAlign: column.align ?? 'left',
-      verticalAlign: 'middle',
-      overflow: 'hidden',
-      // Slimmer than MUI's default 16px so the fixed column budget matches the design.
-      px: 1,
-      // Horizontal inset for the hover pill on the outer cells (vertical inset + background-clip are set
-      // at the Table level, where they can beat the theme's cell-border override).
-      '&:first-of-type': { pl: 2, borderLeft: '4px solid transparent' },
-      '&:last-of-type': { pr: 2, borderRight: '4px solid transparent' },
-      ...(reorderable && column.width ? { width: column.width, minWidth: column.width, maxWidth: column.width } : {}),
-    }}
-    onClick={column.id === 'actions' || column.id === 'select' ? (e) => e.stopPropagation() : undefined}
-  >
-    {column.id === 'select' ? (
-      <SelectCell checkbox={checkbox} onSelectToggle={onSelectToggle} />
-    ) : column.id === 'name' ? (
-      // Reorder mode: the grip shares the Name cell's left gutter and pushes the row content
-      // right a little, so no extra column is added and the table keeps its width (no scrollbar).
-      // Child rows have no handle of their own — a spacer keeps them aligned under their parent.
-      reorderable ? (
-        <div className="flex min-w-0 items-center gap-2">
-          {dragHandleProps !== undefined ? (
-            <ReorderHandle dragHandleProps={dragHandleProps} className="relative z-10 shrink-0" />
-          ) : (
-            <span className="size-4 shrink-0" aria-hidden />
-          )}
-          <div className="min-w-0 flex-1">{nameCell}</div>
-        </div>
-      ) : (
+  isDragging?: boolean
+}) => {
+  // Only the draggable parent's Name cell hosts the (absolutely-positioned) grip; it anchors to the
+  // cell, so the cell must allow the grip to overflow into the left gutter without being clipped.
+  const hostsHandle = column.id === 'name' && dragHandleProps != null
+
+  return (
+    <TableCell
+      data-testid={`account-cell-${column.id}`}
+      sx={{
+        textAlign: column.align ?? 'left',
+        verticalAlign: 'middle',
+        overflow: hostsHandle ? 'visible' : 'hidden',
+        ...(hostsHandle ? { position: 'relative' } : {}),
+        // Slimmer than MUI's default 16px so the fixed column budget matches the design.
+        px: 1,
+        // Horizontal inset for the hover pill on the outer cells (vertical inset + background-clip are set
+        // at the Table level, where they can beat the theme's cell-border override).
+        '&:first-of-type': { pl: 2, borderLeft: '4px solid transparent' },
+        '&:last-of-type': { pr: 2, borderRight: '4px solid transparent' },
+        ...(reorderable && column.width ? { width: column.width, minWidth: column.width, maxWidth: column.width } : {}),
+      }}
+      onClick={column.id === 'actions' || column.id === 'select' ? (e) => e.stopPropagation() : undefined}
+    >
+      {hostsHandle && <ReorderHandle dragHandleProps={dragHandleProps} isDragging={isDragging} />}
+      {column.id === 'select' ? (
+        <SelectCell checkbox={checkbox} onSelectToggle={onSelectToggle} />
+      ) : column.id === 'name' ? (
         nameCell
-      )
-    ) : (
-      <div
-        className={cn(
-          'flex items-center',
-          column.align === 'right' ? 'justify-end' : column.align === 'center' ? 'justify-center' : 'justify-start',
-        )}
-      >
-        {column.id === 'actions' && renderActions ? renderActions(line) : <CellContent column={column} line={line} />}
-      </div>
-    )}
-  </TableCell>
-)
+      ) : (
+        <div
+          className={cn(
+            'flex items-center',
+            column.align === 'right' ? 'justify-end' : column.align === 'center' ? 'justify-center' : 'justify-start',
+          )}
+        >
+          {column.id === 'actions' && renderActions ? renderActions(line) : <CellContent column={column} line={line} />}
+        </div>
+      )}
+    </TableCell>
+  )
+}
 
 const SafeAccountTableRow = ({
   line,
@@ -323,16 +319,14 @@ const SafeAccountTableRow = ({
   rowRef,
   rowDraggableProps,
   isDragging,
-  reorderLayout,
 }: SafeAccountTableRowProps) => {
   // In selection mode a leaf row is one big checkbox — clicking anywhere on it toggles selection
   // (except affordances that stop propagation: the checkbox, actions, copy and explorer link).
   const rowSelectable = Boolean(checkbox) && !line.expandable && !checkbox?.disabled
 
   // In reorder mode the row can be lifted to `position: fixed`, detaching it from the table's
-  // fixed layout — pin each cell's width so the floating row keeps its column alignment. Child
-  // rows aren't draggable but opt into the same gutter (reorderLayout) to stay aligned.
-  const reorderable = Boolean(rowDraggableProps) || Boolean(reorderLayout)
+  // fixed layout — pin each cell's width so the floating row keeps its column alignment.
+  const reorderable = Boolean(rowDraggableProps)
 
   const nameCell = (
     <NameCell
@@ -378,6 +372,7 @@ const SafeAccountTableRow = ({
           onSelectToggle={onSelectToggle}
           renderActions={renderActions}
           dragHandleProps={dragHandleProps}
+          isDragging={isDragging}
         />
       ))}
     </TableRow>
