@@ -25,21 +25,8 @@ jest.mock('@/components/common/Identicon', () => {
   return Identicon
 })
 jest.mock('@/features/multichain', () => ({
-  NetworkLogosList: ({
-    networks,
-    showHasMore,
-    maxVisible,
-  }: {
-    networks: { chainId: string }[]
-    showHasMore?: boolean
-    maxVisible?: number
-  }) => (
-    <span
-      data-testid="network-logos"
-      data-show-has-more={showHasMore}
-      data-max-visible={maxVisible}
-      data-count={networks.length}
-    />
+  NetworkLogosTooltip: ({ networks, maxVisible }: { networks: { chainId: string }[]; maxVisible?: number }) => (
+    <span data-testid="network-logos" data-max-visible={maxVisible} data-count={networks.length} />
   ),
 }))
 jest.mock('@/components/common/ChainIndicator', () => {
@@ -105,17 +92,16 @@ describe('SpaceAddressBookTable', () => {
     expect(screen.getByTestId('local-actions')).toBeInTheDocument()
   })
 
-  it('renders NetworkLogosList with showHasMore and maxVisible=3 for chain logos', () => {
+  it('renders the network logos tooltip with maxVisible=3 for chain logos', () => {
     const chainIds = ['1', '137', '10', '42161', '8453']
     render(<SpaceAddressBookTable entries={[entryBuilder().with({ chainIds }).build()]} />)
 
     const logosList = screen.getByTestId('network-logos')
-    expect(logosList).toHaveAttribute('data-show-has-more', 'true')
     expect(logosList).toHaveAttribute('data-max-visible', '3')
     expect(logosList).toHaveAttribute('data-count', '5')
   })
 
-  it('renders NetworkLogosList even when entry covers all chains', () => {
+  it('renders the network logos tooltip even when entry covers all chains', () => {
     render(
       <SpaceAddressBookTable
         entries={[

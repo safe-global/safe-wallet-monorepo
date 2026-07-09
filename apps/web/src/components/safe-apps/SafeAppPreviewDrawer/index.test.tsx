@@ -2,22 +2,23 @@ import { SafeAppFeatures, SafeAppAccessPolicyTypes } from '@safe-global/store/ga
 import { type SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 import SafeAppPreviewDrawer from '@/components/safe-apps/SafeAppPreviewDrawer'
-import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import { render, screen, waitFor } from '@/tests/test-utils'
 
 jest.mock('@/features/multichain', () => ({
-  NetworkLogosList: ({ networks, maxVisible, showHasMore }: any) => (
-    <div
-      data-testid="network-logos-list"
-      data-networks={networks.map((n: { chainId: string }) => n.chainId).join(',')}
-      data-max-visible={maxVisible}
-      data-show-has-more={String(showHasMore)}
-    />
+  NetworkLogosTooltip: ({ networks, maxVisible }: { networks: { chainId: string }[]; maxVisible?: number }) => (
+    <div>
+      <div
+        data-testid="network-logos-list"
+        data-networks={networks.map((n) => n.chainId).join(',')}
+        data-max-visible={maxVisible}
+      />
+      {networks.map((n) => (
+        <div key={n.chainId} data-testid="chain-indicator">
+          {n.chainId}
+        </div>
+      ))}
+    </div>
   ),
-}))
-
-jest.mock('@/components/common/ChainIndicator', () => ({
-  __esModule: true,
-  default: ({ chainId }: { chainId: string }) => <div data-testid="chain-indicator">{chainId}</div>,
 }))
 
 const mockUseChains = jest.fn()
@@ -65,7 +66,6 @@ describe('SafeAppPreviewDrawer', () => {
     const logos = screen.getByTestId('network-logos-list')
     expect(logos).toHaveAttribute('data-networks', safeAppMock.chainIds.join(','))
     expect(logos).toHaveAttribute('data-max-visible', '3')
-    expect(logos).toHaveAttribute('data-show-has-more', 'true')
   })
 
   it('passes every chain to the cluster so overflow collapses beyond the visible limit', async () => {
@@ -75,11 +75,8 @@ describe('SafeAppPreviewDrawer', () => {
     expect(logos.getAttribute('data-networks')?.split(',')).toHaveLength(safeAppMock.chainIds.length)
   })
 
-  it('lists all chains in the hover tooltip content', async () => {
-    const { user } = renderWithUserEvent(<SafeAppPreviewDrawer isOpen safeApp={safeAppMock} onClose={jest.fn()} />)
-
-    const trigger = await screen.findByTestId('network-logos-list')
-    await user.hover(trigger)
+  it('lists all chains in the tooltip content', async () => {
+    render(<SafeAppPreviewDrawer isOpen safeApp={safeAppMock} onClose={jest.fn()} />)
 
     await waitFor(() => {
       expect(screen.getAllByTestId('chain-indicator')).toHaveLength(safeAppMock.chainIds.length)
