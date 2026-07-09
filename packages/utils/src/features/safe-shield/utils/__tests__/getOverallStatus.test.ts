@@ -1,5 +1,5 @@
 import { getOverallStatus } from '../getOverallStatus'
-import { Severity, StatusGroup } from '../../types'
+import { RecipientStatus, Severity, StatusGroup } from '../../types'
 import type { RecipientAnalysisResults, ContractAnalysisResults, ThreatAnalysisResults } from '../../types'
 import { RecipientAnalysisResultBuilder } from '../../builders/recipient-analysis-result.builder'
 import { ContractAnalysisResultBuilder } from '../../builders/contract-analysis-result.builder'
@@ -109,6 +109,28 @@ describe('getOverallStatus', () => {
       expect(result).toBeDefined()
       expect(result!.severity).toBe(Severity.WARN)
       expect(result!.title).toBe('Issues found')
+    })
+
+    it('lets a CRITICAL address-poisoning result win the overall severity (always-visible contract)', () => {
+      const recipientResults: RecipientAnalysisResults = {
+        '0xImpostor': {
+          [StatusGroup.ADDRESS_POISONING]: [
+            {
+              severity: Severity.CRITICAL,
+              type: RecipientStatus.RESEMBLES_TRUSTED_ADDRESS,
+              title: 'Resembles a trusted address',
+              description: 'Looks like an address you trust.',
+            },
+          ],
+        },
+        '0xOther': {
+          [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
+        },
+      }
+
+      const result = getOverallStatus(recipientResults)
+
+      expect(result!.severity).toBe(Severity.CRITICAL)
     })
   })
 

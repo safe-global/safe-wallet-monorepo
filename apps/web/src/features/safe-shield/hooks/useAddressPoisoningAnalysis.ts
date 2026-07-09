@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { isAddress } from 'ethers'
 import { useAppSelector } from '@/store'
-import { selectAllAddressBooks, type AddressBookState } from '@/store/addressBookSlice'
+import { selectAllAddressBooks } from '@/store/addressBookSlice'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { selectAnchorIndex } from '@/features/address-poisoning'
@@ -11,22 +11,6 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { getAddressPoisoningResult } from '@safe-global/utils/features/safe-shield/utils'
 import { StatusGroup, type RecipientAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-
-/**
- * Resolves a display name for a trusted anchor from the local address book (any chain).
- */
-const resolveAnchorName = (allAddressBooks: AddressBookState, anchor: string): string | undefined => {
-  // The similarity index returns anchors in normalized form (lowercase, no 0x prefix).
-  const target = normalizeAddress(anchor)
-
-  for (const chainAddressBook of Object.values(allAddressBooks)) {
-    for (const [address, name] of Object.entries(chainAddressBook ?? {})) {
-      if (name && normalizeAddress(address) === target) {
-        return name
-      }
-    }
-  }
-}
 
 /**
  * Overlays the client-side address-poisoning check onto recipient analysis results.
@@ -49,6 +33,19 @@ export const useAddressPoisoningOverlay = (
   const anchorIndex = useAppSelector(selectAnchorIndex)
   const allAddressBooks = useAppSelector(selectAllAddressBooks)
 
+  // Normalized anchor address → contact name, built once per address-book change so resolving a
+  // name is O(1) per match instead of an O(chains × entries) scan for every look-alike.
+  const anchorNameByAddress = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const chainAddressBook of Object.values(allAddressBooks)) {
+      for (const [address, name] of Object.entries(chainAddressBook ?? {})) {
+        const normalized = normalizeAddress(address)
+        if (name && !map.has(normalized)) map.set(normalized, name)
+      }
+    }
+    return map
+  }, [allAddressBooks])
+
   const overlaid = useMemo(() => {
     if (!isEnabled) {
       return data
@@ -58,7 +55,7 @@ export const useAddressPoisoningOverlay = (
     const next: RecipientAnalysisResults = {}
 
     const poisoningGroup = (address: string, match: SimilarityMatch) => {
-      const anchorName = resolveAnchorName(allAddressBooks, match.anchor)
+      const anchorName = anchorNameByAddress.get(normalizeAddress(match.anchor))
       return [getAddressPoisoningResult({ address, match, anchorName })]
     }
 
@@ -82,18 +79,20 @@ export const useAddressPoisoningOverlay = (
     for (const address of extraAddresses ?? []) {
       if (!isAddress(address)) continue
 
-      const key = checksumAddress(address)
-      if (key in next) continue
+      // data-path keys are lowercased (useRecipientAnalysis), so dedupe case-insensitively — a
+      // checksummed key would never match a lowercase one and could double-add the same address.
+      const lowerKey = address.toLowerCase()
+      if (Object.keys(next).some((k) => k.toLowerCase() === lowerKey)) continue
 
       const match = anchorIndex.query(address)
       if (!match) continue
 
-      next[key] = { [StatusGroup.ADDRESS_POISONING]: poisoningGroup(address, match) }
+      next[checksumAddress(address)] = { [StatusGroup.ADDRESS_POISONING]: poisoningGroup(address, match) }
       changed = true
     }
 
     return changed ? next : data
-  }, [isEnabled, data, extraAddresses, anchorIndex, allAddressBooks])
+  }, [isEnabled, data, extraAddresses, anchorIndex, anchorNameByAddress])
 
   return [overlaid, error, loading]
 }

@@ -179,6 +179,16 @@ export const useSafeShieldForAddressPoisoning = (addresses: string[]) => {
     setPoisoningAddresses(addresses.length > 0 ? addresses : undefined)
   }, [addresses, setPoisoningAddresses])
 
+  // Clear the registration when the owning flow unmounts, so a stale look-alike card can't linger
+  // against addresses no current flow cares about if the provider outlives the flow.
+  useEffect(
+    () => () => {
+      lastKeyRef.current = undefined
+      setPoisoningAddresses(undefined)
+    },
+    [setPoisoningAddresses],
+  )
+
   return recipient
 }
 

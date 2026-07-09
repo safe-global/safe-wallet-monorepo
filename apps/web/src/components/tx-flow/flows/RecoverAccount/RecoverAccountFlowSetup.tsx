@@ -12,8 +12,9 @@ import {
   Alert,
 } from '@mui/material'
 import { useForm, FormProvider, useFieldArray, Controller } from 'react-hook-form'
-import { Fragment, useMemo } from 'react'
+import { Fragment } from 'react'
 import type { ReactElement } from 'react'
+import { useMemoDeepCompare } from '@safe-global/utils/features/safe-shield/hooks/util-hooks/useMemoDeepCompare'
 
 import TxCard from '../../common/TxCard'
 import AddIcon from '@/public/images/common/add.svg'
@@ -71,13 +72,12 @@ export function RecoverAccountFlowSetup({
 
   const newOwners = formMethods.watch(RecoverAccountFlowFields.owners)
 
-  // Copilot address-poisoning check for the recovery signers.
-  // RHF's watch() mutates arrays in place (stable reference), so key the memo by value.
-  const poisoningKey = newOwners
-    .map((owner) => owner.value)
-    .filter(Boolean)
-    .join(',')
-  const poisoningCheckAddresses = useMemo(() => (poisoningKey ? poisoningKey.split(',') : []), [poisoningKey])
+  // Copilot address-poisoning check for the recovery signers. RHF's watch() mutates arrays in
+  // place (stable reference), so deep-compare the values instead of relying on array identity.
+  const poisoningCheckAddresses = useMemoDeepCompare(
+    () => newOwners.map((owner) => owner.value).filter(Boolean),
+    [newOwners],
+  )
   useSafeShieldForAddressPoisoning(poisoningCheckAddresses)
   const newThreshold = formMethods.watch(RecoverAccountFlowFields.threshold)
 

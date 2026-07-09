@@ -11,8 +11,9 @@ import {
   Typography,
 } from '@mui/material'
 import { Controller, FormProvider } from 'react-hook-form'
-import { useContext, useMemo } from 'react'
+import { useContext } from 'react'
 import type { ReactElement } from 'react'
+import { useMemoDeepCompare } from '@safe-global/utils/features/safe-shield/hooks/util-hooks/useMemoDeepCompare'
 
 import AddIcon from '@/public/images/common/add.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -41,13 +42,12 @@ type Props = {
 export function SignersStructureView(props: Props): ReactElement {
   const { onNext } = useContext<TxFlowContextType<ManageSignersForm>>(TxFlowContext)
 
-  // Copilot address-poisoning check for the configured signers.
-  // RHF's watch() mutates arrays in place (stable reference), so key the memo by value.
-  const poisoningKey = props.newOwners
-    .map((owner) => owner.address)
-    .filter(Boolean)
-    .join(',')
-  const poisoningCheckAddresses = useMemo(() => (poisoningKey ? poisoningKey.split(',') : []), [poisoningKey])
+  // Copilot address-poisoning check for the configured signers. RHF's watch() mutates arrays in
+  // place (stable reference), so deep-compare the values instead of relying on array identity.
+  const poisoningCheckAddresses = useMemoDeepCompare(
+    () => props.newOwners.map((owner) => owner.address).filter(Boolean),
+    [props.newOwners],
+  )
   useSafeShieldForAddressPoisoning(poisoningCheckAddresses)
 
   return (
