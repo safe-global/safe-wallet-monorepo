@@ -193,6 +193,8 @@ const SafeAccountsTable = ({
           backgroundColor: 'background.paper',
           border: '1px solid',
           borderColor: 'border.light',
+          // Keep the last row off the rounded bottom edge (the header already insets from the top).
+          pb: 1,
         }}
       >
         <Table
@@ -201,10 +203,12 @@ const SafeAccountsTable = ({
             minWidth,
             borderCollapse: 'separate',
             borderSpacing: 0,
-            // The base theme tints every MuiTableRow green on hover; instead paint a grey pill (the same
-            // --muted as the safe-selector dropdown) on the row's cells — inset and rounded like the
-            // dropdown rows. Painting the cells (not the <tr>) lets the first/last cells' transparent
-            // side borders inset the fill from the panel edges. Locked rows stay un-hovered.
+            // The base theme tints every MuiTableRow green on hover; suppress it on the <tr> (otherwise
+            // it bleeds green into the inset corners) and instead paint a grey pill (the same --muted as
+            // the safe-selector dropdown) on the row's cells — inset and rounded like the dropdown rows.
+            // Painting the cells (not the <tr>) lets the first/last cells' transparent side borders inset
+            // the fill from the panel edges. Locked rows stay un-hovered.
+            '& .MuiTableBody-root .MuiTableRow-root:hover': { backgroundColor: 'transparent' },
             '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root': {
               backgroundColor: 'var(--muted)',
             },
