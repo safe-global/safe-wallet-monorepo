@@ -39,6 +39,10 @@ const NO_HEADER_ROUTES = [
   ...STATIC_PAGE_ROUTES,
 ]
 
+// The two tabbed welcome landing pages (Workspaces + Trusted accounts) share a
+// soft brand-green glow behind their content.
+const WELCOME_LIST_ROUTES = [AppRoutes.welcome.accounts, AppRoutes.welcome.spaces]
+
 const PageLayout = ({ pathname, children }: { pathname: string; children: ReactElement }): ReactElement => {
   const [isSidebarRoute, isAnimated] = useIsSidebarRoute(pathname)
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(true)
@@ -50,6 +54,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const isStaticPage = STATIC_PAGE_ROUTES.includes(pathname)
   const hideHeader = NO_HEADER_ROUTES.includes(pathname)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
+  const isWelcomeListRoute = WELCOME_LIST_ROUTES.includes(pathname)
   const isSpaceRoute = useIsSpaceRoute()
   const parentSafe = useParentSafe()
   const menuToggleHandler = isSidebarRoute ? setSidebarOpen : undefined
@@ -100,7 +105,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
           </div>
         )}
 
-        <div className={css.content}>
+        <div className={classnames(css.content, { [css.welcomeGlow]: isWelcomeListRoute })}>
           <SafeLoadingError>
             {!hideHeader && parentSafe && <Breadcrumbs />}
 

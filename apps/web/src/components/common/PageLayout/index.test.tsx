@@ -160,4 +160,19 @@ describe('PageLayout', () => {
       },
     )
   })
+
+  describe('welcome background glow', () => {
+    it.each([[AppRoutes.welcome.accounts], [AppRoutes.welcome.spaces]])(
+      'applies the brand-green glow behind the content on %s',
+      (pathname) => {
+        const { container } = renderLayout(pathname)
+        expect(container.querySelector('.welcomeGlow')).toBeInTheDocument()
+      },
+    )
+
+    it.each([['/home'], ['/balances'], [AppRoutes.welcome.index]])('does not apply the glow on %s', (pathname) => {
+      const { container } = renderLayout(pathname)
+      expect(container.querySelector('.welcomeGlow')).not.toBeInTheDocument()
+    })
+  })
 })
