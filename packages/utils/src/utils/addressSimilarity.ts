@@ -1,26 +1,13 @@
 /**
  * Address Similarity Detection Service
  *
- * Detects potential address poisoning attacks by identifying addresses that
- * resemble addresses the user trusts (UIs show `0x1234…5678`, hiding the middle).
+ * Detects address-poisoning look-alikes — addresses that resemble ones the user
+ * trusts (UIs show `0x1234…5678`, hiding the middle). Two detectors work together:
  *
- * ─── TWO COMPLEMENTARY DETECTORS (a mixed model — both are load-bearing) ─────
- *
- *   ANCHOR — front-OR-back match against a TRUSTED anchor, two severity tiers:
- *     normalizeAddress · longestCommonPrefixLen · longestCommonSuffixLen ·
- *     buildSimilarityIndex · detectListSimilarities
- *   Use where a trusted reference exists: a candidate that resembles a Safe/contact
- *   you already trust is the impostor (front+back → CRITICAL, one end → WARN).
- *
- *   INTRA-LIST — front-AND-back match BETWEEN candidates in the same list:
- *     detectSimilarAddresses · getFlaggedSimilarAddressSet · getBucketKey ·
- *     DEFAULT_SIMILARITY_CONFIG (types)
- *   Use where nothing is trusted yet (e.g. choosing which owned Safes to add): two
- *   listed addresses that look alike are flagged even without a trusted reference.
- *
- * Surfaces combine the two (anchor + intra-list). Neither is deprecated; intra-list
- * is also consumed by mobile Send. Consumers: web nested-safes / trusted-safes modal /
- * accounts modal / space onboarding + safe-accounts; mobile Send suspicious-address.
+ *  - ANCHOR: a candidate matches a TRUSTED anchor on the front OR back
+ *    (both ends → CRITICAL, one end → WARN). Used where a trusted reference exists.
+ *  - INTRA-LIST: two candidates in the same list match on front AND back. Used
+ *    where nothing is trusted yet (e.g. choosing which owned Safes to add).
  */
 
 import { Severity } from '../features/safe-shield/types'
@@ -125,10 +112,7 @@ export const getFlaggedSimilarAddressSet = (addresses: string[]): Set<string> =>
   return new Set(unique.filter((addr) => result.isFlagged(addr)))
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// CURRENT engine — anchor-based, front-OR-back, two severity tiers.
-// Build the index once over the user's trusted anchors, then query each candidate.
-// ─────────────────────────────────────────────────────────────────────────────
+// Anchor detector — build the index once over the user's trusted anchors, then query each candidate.
 
 /** Strip a leading `0x` (any case) and lowercase. Pure & synchronous. */
 export const normalizeAddress = (address: string): string => {
