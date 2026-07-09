@@ -9,14 +9,8 @@ import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
-import {
-  Tooltip as NetworksTooltip,
-  TooltipTrigger as NetworksTooltipTrigger,
-  TooltipContent as NetworksTooltipContent,
-} from '@/components/ui/tooltip'
-import { NetworkLogosList } from '@/features/multichain'
+import { NetworkLogosTooltip } from '@/features/multichain'
 import { getSafeAppUrl } from '@/components/safe-apps/SafeAppCard'
-import ChainIndicator from '@/components/common/ChainIndicator'
 import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
 import SafeAppActionButtons from '@/components/safe-apps/SafeAppActionButtons'
 import SafeAppTags from '@/components/safe-apps/SafeAppTags'
@@ -96,18 +90,7 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
         </Typography>
 
         <Box sx={{ display: 'flex', mt: 2 }}>
-          <NetworksTooltip>
-            <NetworksTooltipTrigger render={<span className="inline-flex origin-left scale-85" />}>
-              <NetworkLogosList networks={knownChainIds.map((chainId) => ({ chainId }))} showHasMore maxVisible={3} />
-            </NetworksTooltipTrigger>
-            <NetworksTooltipContent>
-              <div className="flex flex-col gap-1">
-                {knownChainIds.map((chainId) => (
-                  <ChainIndicator key={chainId} chainId={chainId} />
-                ))}
-              </div>
-            </NetworksTooltipContent>
-          </NetworksTooltip>
+          <NetworkLogosTooltip networks={knownChainIds.map((chainId) => ({ chainId }))} maxVisible={3} />
         </Box>
 
         {/* Open Safe App button */}
