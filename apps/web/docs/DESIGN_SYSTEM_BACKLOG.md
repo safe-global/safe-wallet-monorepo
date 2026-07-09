@@ -41,7 +41,10 @@ spot-check the story in Storybook light+dark.
   `OnboardingFooter`, `IconAction`** (`components/common/`); ESLint guard; `UI/Button → Guidelines` story.
 - **Tabs** — `segmented` variant + `cursor-pointer` baked into base; the welcome **Accounts/Workspaces toggle**
   converted onto the primitive (`AccountsNavigation`), CSS module deleted.
-- **DialogActions rollout** — 19 dialog footers migrated.
+- **DialogActions rollout** — 19 dialog footers migrated; then (**item A**) extended with
+  `confirmCheckWallet` + `confirmTooltip` props and Cancel pinned to `type="button"`, and 4 more
+  footers routed through it (DeleteProposerDialog, UpsertProposer ×2, ImportAddressBookDialog,
+  SafeListRemoveDialog).
 - **tx re-ports** — `ExecutionMethodSelector` (GTF relay-counter gate) + `TxDetails/Summary` (tx-hash row + GTF
   history-fees). Money-movement tx files audited vs `dev`: **money logic byte-identical**; only display deltas.
 
@@ -49,36 +52,35 @@ spot-check the story in Storybook light+dark.
 
 ## 3. Remaining work (each item is independent — parallelize freely)
 
-| #   | Item                                                             | Effort | Blocked by         | Kind        |
-| --- | ---------------------------------------------------------------- | ------ | ------------------ | ----------- |
-| A   | Finish `DialogActions` (2 props) + migrate the 8 skipped footers | S–M    | —                  | code        |
-| B   | On-colour CTA decision (Earn/AddFunds/AccountHeader)             | S      | **design nod**     | design→code |
-| C1  | **Card** family (biggest drift)                                  | M      | —                  | code        |
-| C2  | **Dialog/Drawer/Sheet** family                                   | M      | —                  | code        |
-| C3  | **Badge/Chip** family                                            | M      | —                  | code        |
-| C4  | **Input/InputGroup** family                                      | M      | —                  | code        |
-| C5  | **Select** family                                                | M      | —                  | code        |
-| D   | Sweep up the 11 grandfathered button disables (via new presets)  | M      | some need B/design | code        |
-| E   | Turn on the Argos visual gate on PRs                             | S      | **repo secret**    | infra       |
-| F   | Migration PR's own un-draft items (not the DS thread)            | —      | —                  | QA          |
+| #     | Item                                                                                        | Effort | Blocked by         | Kind        |
+| ----- | ------------------------------------------------------------------------------------------- | ------ | ------------------ | ----------- |
+| ~~A~~ | ~~Finish `DialogActions` + skipped footers~~ — **DONE** (item A)                            | —      | —                  | code        |
+| B     | On-colour CTA decision (Earn/AddFunds/AccountHeader)                                        | S      | **design nod**     | design→code |
+| C1    | **Card** family (biggest drift) — [spec](./design-system/card-family-spec.md)               | M      | —                  | code        |
+| C2    | **Dialog/Drawer/Sheet** family — [spec](./design-system/dialog-drawer-sheet-family-spec.md) | M      | —                  | code        |
+| C3    | **Badge/Chip** family — [spec](./design-system/badge-chip-family-spec.md)                   | M      | —                  | code        |
+| C4    | **Input/InputGroup** family — [spec](./design-system/input-inputgroup-family-spec.md)       | M      | —                  | code        |
+| C5    | **Select** family — [spec](./design-system/select-family-spec.md)                           | M      | —                  | code        |
+| D     | Sweep up the 11 grandfathered button disables (via new presets)                             | M      | some need B/design | code        |
+| E     | Turn on the Argos visual gate on PRs                                                        | S      | **repo secret**    | infra       |
+| F     | Migration PR's own un-draft items (not the DS thread)                                       | —      | —                  | QA          |
 
-Items **A, C1–C5** are fully independent and can run concurrently (disjoint files). **B** and the design-y parts
-of **D** need a design decision first. **E** needs a secret. Do **not** run two workers on the same family.
+Items **C1–C5** are fully independent and can run concurrently (disjoint files, except each extends the one
+shared `eslint.config.mjs` — do the ESLint edit last, or have the worker report the element name for a single
+consolidated edit). **B** and the design-y parts of **D** need a design decision first. **E** needs a secret. Do
+**not** run two workers on the same family.
 
-### A. Finish DialogActions + the 8 skipped footers
+### A. Finish DialogActions + the skipped footers — DONE
 
-`DialogActions` (`components/common/DialogActions/index.tsx`) skipped 8 footers because it lacks two things:
-
-1. **A wallet-gated confirm** — add a `confirmWalletGated?: boolean` (+ needed check props) that wraps the confirm
-   in `<CheckWallet>`. Unlocks: `proposers/DeleteProposerDialog`, `proposers/UpsertProposer`,
-   `recovery/CancelRecoveryButton`.
-2. **A confirm tooltip** — add `confirmTooltip?: ReactNode` (disabled-confirm explainer). Unlocks:
-   `SpaceAddressBook/Import/ImportAddressBookDialog`, `common/SafeListRemoveDialog` (also uses a `Track` wrapper
-   on confirm — add an `onConfirm` that fires before close, or a `confirmTrack` prop).
-   Then migrate those 5. **Leave** `SpaceSafeBar/AccountsModal` (dual-nav, not cancel/confirm),
-   `TrustedSafesModal/SelectAllConfirmDialog` (needs a tertiary "skip" slot), `new-safe/.../SetNameStep` (wizard nav).
-   Verify: run the affected dialogs' tests. Note DialogActions shows a **spinner** while `confirmLoading` (not a
-   text label) — update any test asserting a "…ing" label (see `LeaveSpaceDialog.test`).
+`DialogActions` gained **`confirmCheckWallet`** (`boolean | CheckWallet options`; wraps the confirm in
+`<CheckWallet>` and ORs `!isOk` into disabled) and **`confirmTooltip`** (business-logic explainer, independent of
+wallet state), and its Cancel button is now `type="button"` (never submits a surrounding form). Migrated:
+`proposers/DeleteProposerDialog` (both branches), `proposers/UpsertProposer` (both branches),
+`SpaceAddressBook/Import/ImportAddressBookDialog` (tooltip case), `common/SafeListRemoveDialog` (Track → inline
+`trackEvent`). **`recovery/CancelRecoveryButton` was mislisted** — it is a standalone single button, not a
+cancel/confirm footer; left as-is. **Still left** (genuinely not a cancel/confirm pair): `SpaceSafeBar/AccountsModal`
+(two equal primary CTAs), `TrustedSafesModal/SelectAllConfirmDialog` (skip/confirm), `new-safe/.../SetNameStep`
+(wizard nav).
 
 ### B. On-colour CTA (needs a design nod, then trivial)
 
@@ -90,6 +92,10 @@ in light, `#1c1c1c` vs card `#171717` in dark) and some add a border. Confirm wi
 disables. `StakeButton` is already migrated (zero-change reference).
 
 ### C. Per-primitive family sweeps
+
+> **Each family now has a full executable spec** in [`design-system/`](./design-system/) — exact cva additions,
+> a per-file drift table (`file:line | classify | replacement`), ESLint element names + the regex-extension
+> caveat, story additions, and the design decisions to confirm. Start there; the table below is just the index.
 
 For each: **recon** the primitive's cva, **add the missing variants/sizes** (below), **document** them in the
 family's `components/ui/stories/*.stories.tsx`, **migrate** the drifting call sites, **extend the ESLint rule** to
