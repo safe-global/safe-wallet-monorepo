@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen } from '@/tests/test-utils'
 import SafeAccountTableRow, { type RowCheckbox } from '../SafeAccountTableRow'
 import { SELECT_COLUMN, type SafeAccountColumn } from '../columns'
 import type { AccountLine } from '../useSafeAccountRows'
@@ -117,5 +117,18 @@ describe('SafeAccountTableRow', () => {
 
     expect(screen.queryByTestId('safe-item-address')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Copy address' })).not.toBeInTheDocument()
+  })
+
+  it('shows the rename pencil and calls onRename with the row when provided', () => {
+    const onRename = jest.fn()
+    renderRow({ onRename })
+
+    fireEvent.click(screen.getByTestId('safe-item-rename-btn'))
+    expect(onRename).toHaveBeenCalledWith(expect.objectContaining({ address: '0xabc' }))
+  })
+
+  it('omits the rename pencil without onRename (e.g. inside modals)', () => {
+    renderRow({})
+    expect(screen.queryByTestId('safe-item-rename-btn')).not.toBeInTheDocument()
   })
 })

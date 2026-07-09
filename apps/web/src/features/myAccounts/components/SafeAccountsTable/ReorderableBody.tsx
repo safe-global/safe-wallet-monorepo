@@ -11,6 +11,7 @@ type ReorderableBodyProps = {
   columns: SafeAccountColumn[]
   flaggedAddresses?: Set<string>
   renderActions?: (line: AccountLine) => ReactNode
+  onRename?: (line: AccountLine) => void
   onLinkClick?: () => void
   /** Fired on drop with the reordered top-level account addresses, in display order. */
   onReorder: (orderedAddresses: string[]) => void
@@ -34,6 +35,7 @@ const ReorderableBody = ({
   columns,
   flaggedAddresses,
   renderActions,
+  onRename,
   onLinkClick,
   onReorder,
 }: ReorderableBodyProps) => {
@@ -56,6 +58,7 @@ const ReorderableBody = ({
                     columns={columns}
                     isFlagged={flaggedAddresses?.has(group.parent.address.toLowerCase())}
                     renderActions={renderActions}
+                    onRename={onRename}
                     onLinkClick={onLinkClick}
                     showDivider={index < groups.length - 1}
                     rowRef={dragProvided.innerRef}

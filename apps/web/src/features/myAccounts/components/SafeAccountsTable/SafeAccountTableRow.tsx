@@ -41,6 +41,8 @@ type SafeAccountTableRowProps = {
   isFlagged?: boolean
   /** Replaces the default context-menu actions cell (e.g. an "Add to workspace" button). */
   renderActions?: (line: AccountLine) => ReactNode
+  /** When set, adds the hover rename pencil to the identity cell (non-modal surfaces). */
+  onRename?: (line: AccountLine) => void
   /** When set, a leading checkbox cell is rendered in selection mode. */
   checkbox?: RowCheckbox
   onSelectToggle?: (nextChecked: boolean) => void
@@ -62,8 +64,17 @@ const HighSimilarityBadge = () => (
 
 // Shares the dropdown's row identity cell: clip-gated name/address tooltips and copy/explorer icons
 // revealed on row hover. The leading avatar keeps the table's per-variant icon (multi-chain children
-// show the chain icon; everything else the blockie identicon).
-const NameCellContent = ({ line, isFlagged }: { line: AccountLine; isFlagged?: boolean }) => {
+// show the chain icon; everything else the blockie identicon). `onRename`, when set, adds the hover
+// rename pencil (non-modal surfaces only).
+const NameCellContent = ({
+  line,
+  isFlagged,
+  onRename,
+}: {
+  line: AccountLine
+  isFlagged?: boolean
+  onRename?: () => void
+}) => {
   const chainConfig = useChain(line.chainId)
   const explorerLink = line.showAddress && chainConfig ? getBlockExplorerLink(chainConfig, line.address) : undefined
 
@@ -87,6 +98,7 @@ const NameCellContent = ({ line, isFlagged }: { line: AccountLine; isFlagged?: b
       leading={<span className="flex w-10 items-center">{leading}</span>}
       hideAddress={!line.showAddress}
       explorerLink={explorerLink}
+      onRename={onRename}
       badge={isFlagged ? <HighSimilarityBadge /> : undefined}
       className={cn('min-w-0', line.indent && 'pl-9')}
     />
@@ -100,6 +112,7 @@ const NameCell = ({
   disableLink,
   onToggle,
   onLinkClick,
+  onRename,
 }: {
   line: AccountLine
   expanded?: boolean
@@ -108,8 +121,9 @@ const NameCell = ({
   disableLink?: boolean
   onToggle?: () => void
   onLinkClick?: () => void
+  onRename?: () => void
 }) => {
-  const content = <NameCellContent line={line} isFlagged={isFlagged} />
+  const content = <NameCellContent line={line} isFlagged={isFlagged} onRename={onRename} />
 
   if (line.expandable) {
     return (
@@ -292,6 +306,7 @@ const SafeAccountTableRow = ({
   showDivider,
   isFlagged,
   renderActions,
+  onRename,
   checkbox,
   onSelectToggle,
   onToggle,
@@ -314,6 +329,8 @@ const SafeAccountTableRow = ({
       line={line}
       expanded={expanded}
       isFlagged={isFlagged}
+      // Per-chain child rows can't be renamed on their own — only the whole safe (single/group).
+      onRename={onRename && line.variant !== 'child' ? () => onRename(line) : undefined}
       disableLink={Boolean(checkbox)}
       onToggle={onToggle}
       onLinkClick={onLinkClick}

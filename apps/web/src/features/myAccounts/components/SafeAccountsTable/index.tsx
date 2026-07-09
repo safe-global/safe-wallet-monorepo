@@ -19,6 +19,16 @@ import {
 } from './useSafeAccountRows'
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
 import ReorderableBody from './ReorderableBody'
+import EntryDialog from '@/components/address-book/EntryDialog'
+
+/** Renaming a safe = editing its address-book entry across every chain it lives on. */
+type RenameTarget = { name: string; address: string; chainIds: string[] }
+
+const toRenameTarget = (line: AccountLine): RenameTarget => ({
+  name: line.contextMenu.name,
+  address: line.contextMenu.address,
+  chainIds: line.contextMenu.type === 'multi' ? line.contextMenu.chainIds : [line.contextMenu.chainId],
+})
 
 type SortState = { orderBy: SafeSortColumn | null; order: 'asc' | 'desc' }
 
@@ -126,6 +136,11 @@ const SafeAccountsTable = ({
   const { groups } = useSafeAccountRows(items)
   const [sort, setSort] = useState<SortState>({ orderBy: null, order: 'asc' })
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [renameTarget, setRenameTarget] = useState<RenameTarget | null>(null)
+
+  // Selection surfaces are modals (trusted picker, manage, onboarding) where rename isn't offered; the
+  // hover rename pencil is only for the navigable welcome/workspace tables.
+  const onRename = selection ? undefined : (line: AccountLine) => setRenameTarget(toRenameTarget(line))
 
   // While reordering, the incoming (manual) order is authoritative: column-header sorting is
   // suppressed and multi-chain groups collapse so each row is a single draggable account.
@@ -278,6 +293,7 @@ const SafeAccountsTable = ({
               columns={visibleColumns}
               flaggedAddresses={flaggedAddresses}
               renderActions={renderActions}
+              onRename={onRename}
               onLinkClick={onLinkClick}
               onReorder={reorder.onReorder}
             />
@@ -291,6 +307,7 @@ const SafeAccountsTable = ({
                   expanded={line.expandable ? expanded.has(groupKey) : undefined}
                   isFlagged={flaggedAddresses?.has(line.address.toLowerCase())}
                   renderActions={renderActions}
+                  onRename={onRename}
                   checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
                   onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
                   onToggle={line.expandable ? () => toggle(groupKey) : undefined}
@@ -302,6 +319,14 @@ const SafeAccountsTable = ({
           )}
         </Table>
       </TableContainer>
+
+      {renameTarget && (
+        <EntryDialog
+          handleClose={() => setRenameTarget(null)}
+          defaultValues={{ name: renameTarget.name, address: renameTarget.address }}
+          chainIds={renameTarget.chainIds}
+        />
+      )}
     </Box>
   )
 }
