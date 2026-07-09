@@ -1,13 +1,7 @@
 /**
- * Type definitions for address similarity detection.
- *
- * Two complementary detectors (a mixed model — both load-bearing), see the header of
- * `addressSimilarity.ts`:
- *  - INTRA-LIST (prefix+suffix bucketing between listed candidates) — `SimilarityConfig`,
- *    `SimilarityGroup`, `SimilarityDetectionResult`, `DEFAULT_SIMILARITY_CONFIG`.
- *  - ANCHOR (front-OR-back vs a trusted anchor, two-tier severity) —
- *    `AnchorSimilarityConfig`, `SimilarityMatch`, `SimilarityIndex`,
- *    `ListAnnotation`, `DEFAULT_ANCHOR_SIMILARITY_CONFIG`.
+ * Type definitions for address similarity detection — see `addressSimilarity.ts`
+ * for how the intra-list and anchor detectors work. Intra-list types come first,
+ * anchor types below.
  */
 
 import { Severity } from '../features/safe-shield/types'
@@ -46,9 +40,7 @@ export const DEFAULT_SIMILARITY_CONFIG: SimilarityConfig = {
   suffixLength: 4,
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// CURRENT engine — anchor-based, front-OR-back, two severity tiers.
-// ────────────────────────────────────────────────────────────────────────────
+// Anchor detector — front-OR-back match against a trusted anchor, two severity tiers.
 
 /** Configuration for the anchor-based similarity engine. */
 export interface AnchorSimilarityConfig {
