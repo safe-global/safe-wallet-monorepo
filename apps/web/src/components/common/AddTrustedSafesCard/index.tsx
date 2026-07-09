@@ -14,7 +14,7 @@ const AddTrustedSafesCard = ({ onAdd }: { onAdd: () => void }) => {
   const isDarkMode = useDarkMode()
 
   return (
-    <div className={cn('shadcn-scope flex justify-center py-10', isDarkMode && 'dark')}>
+    <div className={cn('shadcn-scope flex justify-center pt-10', isDarkMode && 'dark')}>
       <div
         data-testid="add-trusted-safes-card"
         className="flex w-full max-w-[440px] flex-col items-center gap-5 rounded-3xl bg-card px-4 py-20"

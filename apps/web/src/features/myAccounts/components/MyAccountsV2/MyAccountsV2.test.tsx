@@ -79,17 +79,17 @@ describe('MyAccountsV2', () => {
     expect(screen.queryByTestId('accounts-search')).not.toBeInTheDocument()
   })
 
-  it('shows only the empty-state card (no toolbar, no data widget) when a wallet has no trusted Safes', () => {
+  it('shows the empty-state card and data widget (but no toolbar) when a wallet has no trusted Safes', () => {
     mockWallet.mockReturnValue({ address: '0x123' })
     mockMigration.mockReturnValue(migrationState({ hasPinnedSafes: false }))
 
     render(<MyAccountsV2 />)
 
     expect(screen.getByTestId('add-trusted-safes-card')).toBeInTheDocument()
+    expect(screen.getByTestId('data-widget')).toBeInTheDocument()
     expect(screen.queryByTestId('accounts-search')).not.toBeInTheDocument()
     expect(screen.queryByTestId('trusted-actions')).not.toBeInTheDocument()
     expect(screen.queryByTestId('accounts-list')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('data-widget')).not.toBeInTheDocument()
   })
 
   it('shows the toolbar, list and data widget when the user has trusted Safes', () => {

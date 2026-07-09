@@ -65,7 +65,7 @@ const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
 
         <TrustedSafesModal modal={modal} />
 
-        {!showEmptyState && <DataWidget />}
+        <DataWidget />
       </div>
     </div>
   )

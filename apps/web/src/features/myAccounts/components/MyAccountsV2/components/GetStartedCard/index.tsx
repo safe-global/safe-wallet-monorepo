@@ -21,7 +21,7 @@ const GetStartedCard = () => {
   const next = useNewSafeNextParam()
 
   return (
-    <div className={cn('shadcn-scope flex justify-center py-10', isDarkMode && 'dark')}>
+    <div className={cn('shadcn-scope flex justify-center pt-10', isDarkMode && 'dark')}>
       <div
         data-testid="get-started-card"
         className="w-full max-w-[440px] rounded-2xl bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]"
