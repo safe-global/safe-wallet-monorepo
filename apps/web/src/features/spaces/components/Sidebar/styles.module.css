@@ -23,26 +23,25 @@
   gap: 12px;
   width: 100%;
   min-height: 40px;
-  padding: 32px 8px;
+  /* 12px inset aligns the avatar with the back-arrow pill in the top bar; !important beats the
+     base menu-button's p-2 (equal specificity). Collapsed mode still wins via its own p-0!. */
+  padding: 8px 12px !important;
   border-radius: 8px;
   cursor: pointer;
+  /* Persistent grey "active" background (per Figma) for the workspace switcher and the
+     back-to-workspace button, instead of the sidebar's green accent. */
+  background-color: var(--secondary);
+}
+
+/* Subtly darker grey on hover so the switcher still gives feedback; !important beats the base
+   menu-button's green hover (equal specificity). */
+.spaceSelector:hover {
+  background-color: var(--secondary-hover) !important;
 }
 
 /* Match dropdown panel width to sidebar when open (same as expanded sidebar) */
 .spaceSelectorDropdownContent {
   min-width: var(--sidebar-width, 230px) !important;
-}
-
-.backToSpace {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  min-height: 40px;
-  padding: 8px 12px;
-  padding-left: 4px;
-  border-radius: 8px;
-  cursor: pointer;
 }
 
 /* "Add Safe to space" (opens space selector) */
@@ -169,16 +168,6 @@
 :global(.group[data-collapsible='icon']) .spaceSelectorText,
 :global(.group[data-collapsible='icon']) .spaceSelector > div:last-of-type {
   display: none !important;
-}
-
-:global(.group[data-collapsible='icon']) .backToSpace {
-  justify-content: center;
-  gap: 0;
-  padding: 0;
-}
-
-:global(.group[data-collapsible='icon']) .backToSpaceChevron {
-  display: none;
 }
 
 :global(.group[data-collapsible='icon']) .addSafeToWorkspaceTrigger {

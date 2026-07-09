@@ -34,7 +34,7 @@ export const SidebarTopBar = (): ReactElement => {
         href={logoHref}
         showBackArrow={showBackArrow}
         data-testid="logo-container"
-        className={showBackArrow ? 'absolute left-2 top-1/2 z-10 -translate-y-1/2' : 'absolute left-3 top-3 z-10'}
+        className={showBackArrow ? 'absolute left-0 top-1/2 z-10 -translate-y-1/2' : 'absolute left-3 top-3 z-10'}
       />
       <SidebarTrigger
         className={cn(
