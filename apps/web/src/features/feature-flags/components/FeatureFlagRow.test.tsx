@@ -23,23 +23,26 @@ describe('FeatureFlagRow', () => {
     expect(getByRole('switch')).toBeChecked()
   })
 
-  it('shows a revert button only for overridden rows', () => {
-    const { queryByLabelText, rerender } = render(<FeatureFlagRow row={baseRow} />)
-    expect(queryByLabelText('Revert override')).not.toBeInTheDocument()
+  // The revert button and match indicator stay in the DOM for stable column
+  // alignment and are hidden via `visibility` — so we assert visibility, not presence.
+  it('shows the revert button only for overridden rows', () => {
+    const { getByLabelText, rerender } = render(<FeatureFlagRow row={baseRow} />)
+    expect(getByLabelText('Revert override')).not.toBeVisible()
     rerender(<FeatureFlagRow row={{ ...baseRow, override: true, effective: true }} />)
-    expect(queryByLabelText('Revert override')).toBeInTheDocument()
+    expect(getByLabelText('Revert override')).toBeVisible()
   })
 
   it('shows the match indicator only when the override matches the current chain config', () => {
-    const { queryByLabelText, rerender } = render(
+    const label = 'Matches config service setting for the current chain'
+    const { getByLabelText, rerender } = render(
       <FeatureFlagRow row={{ ...baseRow, override: true, effective: true }} />,
     )
-    expect(queryByLabelText('Matches config service setting for the current chain')).not.toBeInTheDocument()
+    expect(getByLabelText(label)).not.toBeVisible()
     rerender(
       <FeatureFlagRow
         row={{ ...baseRow, override: true, configValue: true, effective: true, matchesCurrentChain: true }}
       />,
     )
-    expect(queryByLabelText('Matches config service setting for the current chain')).toBeInTheDocument()
+    expect(getByLabelText(label)).toBeVisible()
   })
 })
