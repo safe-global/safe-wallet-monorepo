@@ -15,9 +15,9 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 /**
  * Overlays the client-side address-poisoning check onto recipient analysis results.
  *
- * Every analyzed recipient is compared against the user's trusted anchors; a look-alike
- * gains an ADDRESS_POISONING status group ("Resembles a trusted address" — CRITICAL, or
- * "Partly matches a trusted address" — WARN) rendered by the regular Copilot recipient card.
+ * Every analyzed recipient is compared against the user's trusted anchors; any resemblance
+ * (front or back) gains a single CRITICAL ADDRESS_POISONING status group ("Potential address
+ * poisoning") rendered by the Copilot recipient card.
  *
  * `extraAddresses` covers tx-flows without recipient analysis (add owner, recovery,
  * spending limit, …): a matched extra address gets a poisoning-only entry so the card

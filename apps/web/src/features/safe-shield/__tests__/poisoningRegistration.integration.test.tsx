@@ -38,7 +38,7 @@ describe('integration: poisoning-only registration through the real provider', (
 
     await waitFor(() => {
       const [data] = result.current
-      expect(data?.[LOOKALIKE]?.[StatusGroup.ADDRESS_POISONING]?.[0]?.title).toBe('Resembles a trusted address')
+      expect(data?.[LOOKALIKE]?.[StatusGroup.ADDRESS_POISONING]?.[0]?.title).toBe('Potential address poisoning')
     })
   })
 })

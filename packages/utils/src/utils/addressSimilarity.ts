@@ -142,6 +142,16 @@ export const longestCommonSuffixLen = (a: string, b: string): number => {
   return i
 }
 
+/**
+ * Length (in hex chars, ignoring `0x` and case) of the matching front and back that two addresses
+ * share — the "look-alike" overlap. Reusable for highlighting the matching ends of an address pair.
+ */
+export const getCommonAffixLengths = (a: string, b: string): { prefixLen: number; suffixLen: number } => {
+  const na = normalizeAddress(a)
+  const nb = normalizeAddress(b)
+  return { prefixLen: longestCommonPrefixLen(na, nb), suffixLen: longestCommonSuffixLen(na, nb) }
+}
+
 /** Build a match for a candidate against one anchor, or null if not similar / identical. */
 const buildMatch = (candidate: string, anchor: string, config: AnchorSimilarityConfig): SimilarityMatch | null => {
   if (candidate === anchor) return null // identity, not poisoning

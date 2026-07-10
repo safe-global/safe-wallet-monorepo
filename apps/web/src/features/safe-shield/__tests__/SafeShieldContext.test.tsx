@@ -310,7 +310,7 @@ describe('SafeShieldContext', () => {
             {
               severity: Severity.CRITICAL,
               type: RecipientStatus.RESEMBLES_TRUSTED_ADDRESS,
-              title: 'Resembles a trusted address',
+              title: 'Potential address poisoning',
               description: 'test',
             },
           ],
@@ -332,41 +332,6 @@ describe('SafeShieldContext', () => {
       () => {
         expect(result.current.needsRiskConfirmation).toBe(true)
         expect(result.current.isRiskConfirmed).toBe(false)
-      },
-      { timeout: 3000 },
-    )
-  })
-
-  it('should not require risk confirmation for a WARN address-poisoning match', async () => {
-    mockUseThreatAnalysis.mockReturnValue([undefined, undefined, false])
-    mockUseAddressPoisoningOverlay.mockImplementation(() => [
-      {
-        '0x00000000000000000000000000000000000000cc': {
-          [StatusGroup.ADDRESS_POISONING]: [
-            {
-              severity: Severity.WARN,
-              type: RecipientStatus.PARTLY_MATCHES_TRUSTED_ADDRESS,
-              title: 'Partly matches a trusted address',
-              description: 'test',
-            },
-          ],
-        },
-      },
-      undefined,
-      false,
-    ])
-
-    const wrapper = ({ children }: { children: ReactNode }) => (
-      <SafeTxContext.Provider value={mockSafeTxContextValue}>
-        <SafeShieldProvider>{children}</SafeShieldProvider>
-      </SafeTxContext.Provider>
-    )
-
-    const { result } = renderHook(() => useSafeShield(), { wrapper })
-
-    await waitFor(
-      () => {
-        expect(result.current.needsRiskConfirmation).toBe(false)
       },
       { timeout: 3000 },
     )

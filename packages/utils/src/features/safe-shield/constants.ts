@@ -35,10 +35,6 @@ export const MULTI_RESULT_DESCRIPTION: Record<
     `${capitalise(formatCount(number, 'address', totalNumber, 'addresses'))} closely ${
       number === 1 ? 'resembles' : 'resemble'
     } an address you trust. Verify before you continue.`,
-  [RecipientStatus.PARTLY_MATCHES_TRUSTED_ADDRESS]: (number, totalNumber) =>
-    `${capitalise(formatCount(number, 'address', totalNumber, 'addresses'))} partly ${
-      number === 1 ? 'matches' : 'match'
-    } an address you trust. Verify before you continue.`,
   [BridgeStatus.INCOMPATIBLE_SAFE]: (number, totalNumber) =>
     `${capitalise(
       formatCount(number, 'Safe account', totalNumber),

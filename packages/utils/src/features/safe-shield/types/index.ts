@@ -67,9 +67,7 @@ export type StatusGroupType<T extends StatusGroup> = {
     | DeadlockStatus.DEADLOCK_DETECTED
     | DeadlockStatus.NESTED_SAFE_WARNING
     | CommonSharedStatus.FAILED
-  [StatusGroup.ADDRESS_POISONING]:
-    | RecipientStatus.RESEMBLES_TRUSTED_ADDRESS
-    | RecipientStatus.PARTLY_MATCHES_TRUSTED_ADDRESS
+  [StatusGroup.ADDRESS_POISONING]: RecipientStatus.RESEMBLES_TRUSTED_ADDRESS
 }[T]
 
 export enum RecipientStatus {
@@ -78,9 +76,9 @@ export enum RecipientStatus {
   LOW_ACTIVITY = 'LOW_ACTIVITY', // 2
   NEW_RECIPIENT = 'NEW_RECIPIENT', // 3A
   RECURRING_RECIPIENT = 'RECURRING_RECIPIENT', // 3B
-  // Client-side address-poisoning check against trusted anchors (no backend counterpart)
-  RESEMBLES_TRUSTED_ADDRESS = 'RESEMBLES_TRUSTED_ADDRESS', // both ends match a trusted anchor — CRITICAL
-  PARTLY_MATCHES_TRUSTED_ADDRESS = 'PARTLY_MATCHES_TRUSTED_ADDRESS', // one end matches a trusted anchor — WARN
+  // Client-side address-poisoning check against trusted anchors (no backend counterpart).
+  // Any front- or back-end resemblance is treated as a single CRITICAL state.
+  RESEMBLES_TRUSTED_ADDRESS = 'RESEMBLES_TRUSTED_ADDRESS',
 }
 
 export enum BridgeStatus {

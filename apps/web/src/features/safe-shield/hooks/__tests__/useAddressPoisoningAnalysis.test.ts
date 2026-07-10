@@ -59,7 +59,7 @@ describe('useAddressPoisoningOverlay', () => {
       }),
     ])
     // the CRITICAL poisoning copy is intact
-    expect(overlaid?.[BOTH_ENDS]?.[StatusGroup.ADDRESS_POISONING]?.[0].title).toBe('Resembles a trusted address')
+    expect(overlaid?.[BOTH_ENDS]?.[StatusGroup.ADDRESS_POISONING]?.[0].title).toBe('Potential address poisoning')
     // existing groups are preserved
     expect(overlaid?.[BOTH_ENDS]?.[StatusGroup.RECIPIENT_INTERACTION]).toEqual([interactionResult])
   })
@@ -98,7 +98,7 @@ describe('useAddressPoisoningOverlay', () => {
     expect(result.current).toEqual([undefined, error, true])
   })
 
-  it('renders the poisoning warning before an equal-severity LOW_ACTIVITY (insertion order wins ties)', () => {
+  it('renders the poisoning warning before a lower-severity LOW_ACTIVITY', () => {
     const lowActivity = {
       severity: Severity.WARN,
       type: RecipientStatus.LOW_ACTIVITY,
@@ -114,10 +114,10 @@ describe('useAddressPoisoningOverlay', () => {
     const { result } = renderOverlay([data, undefined, false])
     const [overlaid] = result.current
 
-    // The card colors/titles only the FIRST visible result; stable sort breaks severity ties
-    // by insertion order, so the poisoning group must be inserted before the existing groups.
+    // The card colors/titles only the FIRST visible result; the CRITICAL poisoning group is
+    // inserted first and outranks the WARN activity group.
     const visible = mapVisibleAnalysisResults(overlaid ?? {})
-    expect(visible[0].type).toBe(RecipientStatus.PARTLY_MATCHES_TRUSTED_ADDRESS)
+    expect(visible[0].type).toBe(RecipientStatus.RESEMBLES_TRUSTED_ADDRESS)
     expect(visible[1].type).toBe(RecipientStatus.LOW_ACTIVITY)
   })
 
