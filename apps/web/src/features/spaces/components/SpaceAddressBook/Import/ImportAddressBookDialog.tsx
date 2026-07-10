@@ -125,8 +125,8 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
-      <DialogContent className="p-0">
-        <DialogHeader className="border-b">
+      <DialogContent padding="none">
+        <DialogHeader divided>
           <DialogTitle className="font-bold text-xl">Import address book</DialogTitle>
         </DialogHeader>
 
@@ -143,7 +143,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
 
             <ContactsList contactItems={searchQuery ? filteredEntries : allContactItems} />
 
-            <DialogFooter className="flex-col items-stretch gap-2 p-4 border-t">
+            <DialogFooter divided className="items-stretch">
               {error && <Alert variant="destructive">{error}</Alert>}
 
               <DialogActions

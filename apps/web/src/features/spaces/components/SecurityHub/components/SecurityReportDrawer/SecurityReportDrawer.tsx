@@ -69,9 +69,13 @@ const SecurityReportDrawer = ({
           side="right"
           showCloseButton={false}
           aria-label="Security report"
-          // Float the sheet with a margin from the viewport, round its corners and use a #fafafa
-          // surface in light mode / `bg-card` in dark mode so the white cards inside stand out.
-          className="inset-y-3! right-3! h-auto! w-[440px]! max-w-[calc(100vw-24px)]! gap-0 overflow-hidden rounded-3xl border-0! bg-card p-0 shadow-xl"
+          variant="floating"
+          surface="card"
+          padding="none"
+          // Floats with a viewport margin, rounded corners and a #fafafa (light) / bg-card (dark) surface
+          // via variant="floating" + surface="card". Keep the explicit 440px width and kill the base gap.
+          // eslint-disable-next-line no-restricted-syntax -- w-[440px]! beats base data-[side]:w-3/4 specificity; gap-0 removes base gap-4
+          className="w-[440px]! gap-0"
         >
           {selectedSafe && (
             <div className="flex min-h-0 gap-3 flex-1 flex-col overflow-hidden">

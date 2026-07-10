@@ -1,5 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '../sheet'
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '../sheet'
 import { Button } from '../button'
 
 /**
@@ -29,6 +38,53 @@ export const Open: Story = {
           <SheetTitle>Sheet title</SheetTitle>
           <SheetDescription>Sheet description and content area.</SheetDescription>
         </SheetHeader>
+      </SheetContent>
+    </Sheet>
+  ),
+}
+
+export const Floating: Story = {
+  tags: ['skip-visual-test'],
+  render: () => (
+    <Sheet defaultOpen>
+      <SheetTrigger render={<Button>Open floating</Button>} />
+      <SheetContent side="right" variant="floating" surface="card">
+        <SheetHeader divided>
+          <SheetTitle>Floating sheet</SheetTitle>
+          <SheetDescription>
+            Detached from the edge with a margin, rounded corners and a card surface (variant=&quot;floating&quot;
+            surface=&quot;card&quot;).
+          </SheetDescription>
+        </SheetHeader>
+        <SheetFooter divided>
+          <SheetClose render={<Button variant="outline">Close</Button>} />
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  ),
+}
+
+export const DividedHeaderFooter: Story = {
+  tags: ['skip-visual-test'],
+  render: () => (
+    <Sheet defaultOpen>
+      <SheetTrigger render={<Button>Open</Button>} />
+      <SheetContent side="right">
+        <SheetHeader divided>
+          <SheetTitle>Divided header</SheetTitle>
+          <SheetDescription>Header and footer keep their borders while the body scrolls.</SheetDescription>
+        </SheetHeader>
+        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <p key={i} className="text-sm">
+              Scrollable content row {i + 1}
+            </p>
+          ))}
+        </div>
+        <SheetFooter divided="subtle">
+          <SheetClose render={<Button variant="outline">Cancel</Button>} />
+          <SheetClose render={<Button>Confirm</Button>} />
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   ),

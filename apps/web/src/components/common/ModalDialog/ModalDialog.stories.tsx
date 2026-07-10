@@ -58,6 +58,7 @@ export const Default: Story = {
         <div className="p-6">
           <Typography>Are you sure you want to proceed with this transaction?</Typography>
         </div>
+        {/* eslint-disable-next-line no-restricted-syntax -- story-only: demonstrates a custom-padded footer row */}
         <DialogFooter className="p-6 pt-0 sm:flex-row sm:justify-end">
           <Button variant="outline">Cancel</Button>
           <Button>Confirm</Button>

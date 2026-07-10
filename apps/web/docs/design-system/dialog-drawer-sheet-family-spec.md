@@ -4,6 +4,26 @@
 
 Primitives: `apps/web/src/components/ui/{dialog,sheet,drawer}.tsx` · Stories: `stories/{dialog,drawer,sheet}.stories.tsx`
 
+## Status — DONE (2026-07-10)
+
+- **Dialog**: `DialogContent` gained cva `size` (default=`max-w-[500px]`, xs/sm/md/lg/xl = MAX_WIDTH_MAP),
+  `padding` (none/md — **no default padding**), `surface` (default/card/paper); `DialogHeader`/`DialogFooter`
+  gained `divided` (true / `subtle`=`border-border/50`). Defaults are byte-identical (default Content still
+  renders `max-w-[500px]` with no body padding).
+- **ModalDialog** now passes token widths via `size=` (class-based); only non-token/arbitrary widths and
+  `fullScreen` keep the inline `style` + the CSS-module `min-width`/`border-radius` overrides.
+- **Sheet**: `SheetContent` gained `variant="floating"`, `size`, `surface`, `padding`; Header/Footer `divided`.
+  **Caveat:** the base `data-[side]` widths win on specificity, so `size` is effectively a no-op for left/right
+  sheets — the 3 real sheets (SecurityReportDrawer, BatchSidebar, SideDrawer) render at their existing widths
+  (zero regression); SecurityReportDrawer keeps `w-[440px]!` grandfathered (floating without `!` measured
+  1050px). Making `size` functional (fold base widths into `size="sm"` default) is a design-nod follow-up.
+- **Drawer**: unchanged; the one radius outlier (SafeAppPreviewDrawer) is grandfathered.
+- Call sites migrated to `size`/`padding`/`surface`/`divided`; odd non-token widths (420/440/560/700/960/423)
+  and bespoke paddings grandfathered with justified disables; redundant `max-w-[500px]` deleted.
+- **Dialog/Sheet/Drawer ESLint guard is live** (`dsDialogClassnameRule`).
+
+Below is the original executable spec (kept for reference).
+
 **None use cva today** — all inline `cn('...base...', className)`. No `size`/`variant`/`padding` props on Content. Sheet has a hand-rolled `side`; Drawer keys off `data-[vaul-drawer-direction]`. Every width/padding/surface need reaches into `className` — that is the drift.
 
 ## Current state (key facts)
@@ -108,11 +128,12 @@ Clean (leave): `nested-safes/.../SimilarityConfirmDialog:34`, `tx-flow/.../Delet
 
 `ui/sidebar.tsx:348` `sr-only` → grandfather (a11y).
 
-## ESLint
+## ESLint — LIVE (`dsDialogClassnameRule` in `eslint.config.mjs`)
 
-Add: `DialogContent, DialogHeader, DialogFooter, SheetContent, SheetHeader, SheetFooter, DrawerContent, DrawerHeader, DrawerFooter`. Message → new `size`/`padding`/`surface`/`divided` props.
-
-**Regex gap:** current selector misses `p-` (bare), `w-`, `max-w-`, `gap-`, `border`. Extend or most dialog drift won't be caught (only `rounded-`/`bg-` cases flag).
+Applied to `DialogContent, DialogHeader, DialogFooter, SheetContent, SheetHeader, SheetFooter, DrawerContent,
+DrawerHeader, DrawerFooter`. Regex: `(?:^|\s)(p-|px-|py-|pt-|pb-|gap-|max-w-|w-\[|rounded-|bg-|border|shadow-)`
+— catches padding, `max-w-*`, arbitrary `w-[…]`, gap, surface. Deliberately does NOT flag `max-h-*`, `w-full`,
+`w-3/4`, flex/grid, or overflow (legit layout). `hover:`/`dark:`-prefixed utilities aren't caught either.
 
 ## Stories
 

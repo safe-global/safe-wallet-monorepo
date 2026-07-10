@@ -15,7 +15,13 @@ const HnModal = ({ open, onClose, children }: HnModalProps) => {
         if (!isOpen) onClose()
       }}
     >
-      <DialogContent className="max-w-[900px] overflow-auto rounded-2xl bg-[var(--color-background-paper)] p-0">
+      <DialogContent
+        size="md"
+        surface="paper"
+        padding="none"
+        // eslint-disable-next-line no-restricted-syntax -- rounded-2xl: bespoke 16px radius, no dialog radius token
+        className="overflow-auto rounded-2xl"
+      >
         {children}
       </DialogContent>
     </Dialog>

@@ -215,7 +215,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
       </CheckWallet>
 
       <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
-        <DialogContent className="p-0" showCloseButton={false}>
+        <DialogContent padding="none" showCloseButton={false}>
           <DialogHeader className="flex-row items-center justify-between">
             <DialogTitle>{multiSigInitiated ? 'Signature collection initiated' : 'Delete this proposer?'}</DialogTitle>
 
@@ -277,6 +277,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
 
           <Separator />
 
+          {/* eslint-disable-next-line no-restricted-syntax -- p-6: bespoke footer padding around DialogActions (item A), no token */}
           <DialogFooter className="p-6">
             {multiSigInitiated ? (
               <DialogActions confirmLabel="Done" onConfirm={onCancel} />

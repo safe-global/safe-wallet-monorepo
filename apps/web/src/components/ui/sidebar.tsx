@@ -337,6 +337,7 @@ function Sidebar({
           data-mobile="true"
           // Sit on the overlay layer (not the desktop --z-sidebar layer) so the open mobile
           // sidebar renders above its own backdrop, like every other Sheet.
+          // eslint-disable-next-line no-restricted-syntax -- internal sidebar primitive: bespoke sidebar surface/width/border (grandfathered)
           className="bg-sidebar text-sidebar-foreground z-[var(--z-overlay)] w-(--sidebar-width) !border-r-0 p-0 [&>button]:hidden"
           style={
             {

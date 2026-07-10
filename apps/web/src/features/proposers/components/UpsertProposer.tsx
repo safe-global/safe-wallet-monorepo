@@ -199,7 +199,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
   if (multiSigInitiated) {
     return (
       <Dialog open onOpenChange={(isOpen) => !isOpen && onClose()}>
-        <DialogContent className="p-0" showCloseButton={false}>
+        <DialogContent padding="none" showCloseButton={false}>
           <DialogHeader className="flex-row items-center justify-between">
             <DialogTitle>Signature collection initiated</DialogTitle>
             <Button variant="ghost" size="icon-sm" aria-label="close" onClick={onClose}>
@@ -227,6 +227,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
           <Separator />
 
+          {/* eslint-disable-next-line no-restricted-syntax -- p-6: bespoke footer padding around DialogActions (item A), no token */}
           <DialogFooter className="p-6">
             <DialogActions confirmLabel="Done" onConfirm={onClose} />
           </DialogFooter>
@@ -237,7 +238,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && onCancel()}>
-      <DialogContent className="p-0" showCloseButton={false}>
+      <DialogContent padding="none" showCloseButton={false}>
         <FormProvider {...methods}>
           <form onSubmit={onSubmit}>
             <DialogHeader className="flex-row items-center justify-between">
@@ -332,6 +333,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
             <Separator />
 
+            {/* eslint-disable-next-line no-restricted-syntax -- p-6: bespoke footer padding around DialogActions (item A), no token */}
             <DialogFooter className="p-6">
               <DialogActions
                 onCancel={onCancel}

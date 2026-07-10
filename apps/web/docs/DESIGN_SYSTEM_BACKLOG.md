@@ -66,6 +66,13 @@ spot-check the story in Storybook light+dark.
   grandfathered — no one-off variants), and the **Input ESLint guard is live** (`dsInputClassnameRule` for
   `Input`/`InputGroup*` + presets `SearchField`/`SearchInput`/`NumberField`/`NameInput`). Follow-up: fully
   retire `SearchField` onto `<SearchInput>`; `AddressInput` MUI holdover out of scope.
+- **Dialog/Drawer/Sheet (C2) — DONE:** `DialogContent` gained cva `size` (MAX_WIDTH_MAP), `padding`, `surface`;
+  `SheetContent` gained `variant="floating"`/`size`/`surface`/`padding`; Header/Footer gained `divided`
+  (+`subtle`). Defaults byte-identical. `ModalDialog` passes token widths via `size=` (arbitrary widths + full
+  screen keep inline style). Call sites migrated; odd widths + bespoke paddings grandfathered; Dialog/Sheet/Drawer
+  ESLint guard (`dsDialogClassnameRule`) live. **Caveat:** Sheet `size` is a no-op for left/right sheets (base
+  `data-[side]` specificity wins) — 3 real sheets unchanged (zero regression); making it functional is a design
+  follow-up. Drawer unchanged (SafeAppPreviewDrawer radius grandfathered).
 - **Card (C1) — DONE:** part 1 added cva `variant` (`default`/`outlined`/`muted`), `size` (`sm`/`default`/`lg`/`none`),
   and `radius` (`lg`/`xl`/`none`). Part 2 (this pass) took the **design calls**: added `size="lg"` (32px, replaces the
   `p-8` cluster via `size="lg"`+`CardContent`), **flipped the default radius `xl`→`lg`** app-wide (8px, MUI parity),
@@ -85,7 +92,7 @@ spot-check the story in Storybook light+dark.
 | ~~A~~  | ~~Finish `DialogActions` + skipped footers~~ — **DONE** (item A)                                                                 | —      | —                                     | code        |
 | B      | On-colour CTA decision (Earn/AddFunds/AccountHeader)                                                                             | S      | **design nod**                        | design→code |
 | ~~C1~~ | ~~**Card** family tail + ESLint~~ — **DONE** (design calls taken: `size="lg"`, radius default `xl`→`lg`, gap unify; ESLint live) | —      | Argos to confirm the radius flip      | code        |
-| C2     | **Dialog/Drawer/Sheet** family — [spec](./design-system/dialog-drawer-sheet-family-spec.md)                                      | M      | —                                     | code        |
+| ~~C2~~ | ~~**Dialog/Drawer/Sheet** family~~ — **DONE** (cva size/padding/surface/divided; ESLint live)                                    | —      | Argos; Sheet `size` design follow-up  | code        |
 | ~~C3~~ | ~~**Badge/Chip** migration + ESLint~~ — **DONE** (design calls taken; ~24 sites migrated; ESLint live)                           | —      | Argos to confirm shade/size shifts    | code        |
 | ~~C4~~ | ~~**Input/InputGroup** tail + ESLint~~ — **DONE** (outliers → `surface`/grandfather; ESLint live)                                | —      | Argos; retire `SearchField` follow-up | code        |
 | ~~C5~~ | ~~**Select** family~~ — **DONE** (literal-className sites; css-module sites follow-up)                                           | —      | —                                     | code        |

@@ -48,6 +48,94 @@ export const Open: Story = {
   ),
 }
 
+export const Sizes: Story = {
+  tags: ['skip-visual-test'],
+  render: () => (
+    <div className="flex flex-wrap items-start gap-4">
+      {(['xs', 'sm', 'default', 'md', 'lg', 'xl'] as const).map((size) => (
+        <Dialog key={size}>
+          <DialogTrigger render={<Button variant="outline">{size}</Button>} />
+          <DialogContent size={size}>
+            <DialogHeader>
+              <DialogTitle>size=&quot;{size}&quot;</DialogTitle>
+              <DialogDescription>Popup max-width follows the {size} token (mirrors MAX_WIDTH_MAP).</DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      ))}
+    </div>
+  ),
+}
+
+export const Padding: Story = {
+  tags: ['skip-visual-test'],
+  render: () => (
+    <div className="flex flex-wrap items-start gap-4">
+      <Dialog>
+        <DialogTrigger render={<Button variant="outline">padding=none</Button>} />
+        <DialogContent padding="none">
+          <DialogHeader>
+            <DialogTitle>padding=&quot;none&quot;</DialogTitle>
+            <DialogDescription>Content has no body padding; sections own their own spacing.</DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+      <Dialog>
+        <DialogTrigger render={<Button variant="outline">padding=md</Button>} />
+        <DialogContent padding="md">
+          <DialogTitle>padding=&quot;md&quot;</DialogTitle>
+          <DialogDescription>Content applies p-6 to the whole popup.</DialogDescription>
+        </DialogContent>
+      </Dialog>
+    </div>
+  ),
+}
+
+export const Surface: Story = {
+  tags: ['skip-visual-test'],
+  render: () => (
+    <div className="flex flex-wrap items-start gap-4">
+      {(['default', 'card', 'paper'] as const).map((surface) => (
+        <Dialog key={surface}>
+          <DialogTrigger render={<Button variant="outline">{surface}</Button>} />
+          <DialogContent surface={surface} padding="md">
+            <DialogHeader>
+              <DialogTitle>surface=&quot;{surface}&quot;</DialogTitle>
+              <DialogDescription>Swaps the popup background token.</DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      ))}
+    </div>
+  ),
+}
+
+export const DividedHeaderFooter: Story = {
+  tags: ['skip-visual-test'],
+  render: () => (
+    <Dialog defaultOpen>
+      <DialogTrigger render={<Button>Open</Button>} />
+      <DialogContent padding="none" className="max-h-[400px]">
+        <DialogHeader divided>
+          <DialogTitle>Divided header &amp; footer</DialogTitle>
+          <DialogDescription>Header and footer keep their borders while the body scrolls.</DialogDescription>
+        </DialogHeader>
+        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <p key={i} className="text-sm">
+              Scrollable content row {i + 1}
+            </p>
+          ))}
+        </div>
+        <DialogFooter divided>
+          <DialogClose render={<Button variant="outline">Cancel</Button>} />
+          <DialogClose render={<Button>Confirm</Button>} />
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  ),
+}
+
 export const AllVariants: Story = {
   tags: ['skip-visual-test'],
   render: () => (

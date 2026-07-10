@@ -19,7 +19,7 @@ interface SimilarityConfirmDialogProps {
 const SimilarityConfirmDialog = ({ open, safe, onConfirm, onCancel }: SimilarityConfirmDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
-      <DialogContent className="max-w-[500px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Similar address detected</DialogTitle>
         </DialogHeader>

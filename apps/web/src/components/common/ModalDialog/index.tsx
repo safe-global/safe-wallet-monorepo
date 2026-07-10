@@ -8,14 +8,11 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 
 import css from './styles.module.css'
 
-/** MUI Dialog `maxWidth` breakpoint keys, mapped to pixel widths for the shadcn popup. */
-const MAX_WIDTH_MAP: Record<string, number> = {
-  xs: 444,
-  sm: 600,
-  md: 900,
-  lg: 1200,
-  xl: 1536,
-}
+/** MUI Dialog `maxWidth` breakpoint keys that map 1:1 onto the DialogContent `size` scale. */
+const SIZE_KEYS = ['xs', 'sm', 'md', 'lg', 'xl'] as const
+type SizeKey = (typeof SIZE_KEYS)[number]
+const isSizeKey = (value: unknown): value is SizeKey =>
+  typeof value === 'string' && (SIZE_KEYS as readonly string[]).includes(value)
 
 interface ModalDialogProps {
   open?: boolean
@@ -102,8 +99,11 @@ const ModalDialog = ({
   const isSmallScreen = useIsMobile()
   const isFullScreen = fullScreen || isSmallScreen
 
-  const maxWidthValue = typeof maxWidth === 'string' ? (MAX_WIDTH_MAP[maxWidth] ?? maxWidth) : maxWidth
-  const popupMaxWidth = PaperProps?.sx?.maxWidth ?? (maxWidthValue === false ? undefined : maxWidthValue)
+  // Breakpoint keys map onto the DialogContent `size` scale (class-based); arbitrary
+  // numeric/CSS widths (and PaperProps overrides) still need an inline max-width.
+  const size = isSizeKey(maxWidth) ? maxWidth : undefined
+  const inlineMaxWidth =
+    PaperProps?.sx?.maxWidth ?? (size == null && maxWidth !== false && maxWidth != null ? maxWidth : undefined)
 
   // fullScreen positioning must beat DialogContent's centered base classes, so apply it inline.
   const fullScreenStyle = isFullScreen
@@ -121,8 +121,9 @@ const ModalDialog = ({
         data-testid={dataTestid}
         showCloseButton={false}
         keepMounted={keepMounted}
+        size={size}
         className={cn(css.dialog, { [css.fullScreen]: isFullScreen }, className)}
-        style={{ ...(popupMaxWidth != null ? { maxWidth: popupMaxWidth } : {}), ...fullScreenStyle }}
+        style={{ ...(inlineMaxWidth != null ? { maxWidth: inlineMaxWidth } : {}), ...fullScreenStyle }}
         onClick={(e) => e.stopPropagation()}
       >
         {dialogTitle && (

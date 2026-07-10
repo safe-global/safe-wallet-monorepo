@@ -29,7 +29,7 @@ const LedgerHashComparison = () => {
         if (!isOpen) handleClose()
       }}
     >
-      <DialogContent showCloseButton={false} className="max-w-[600px]">
+      <DialogContent showCloseButton={false} size="sm">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>{DIALOG_TITLE}</DialogTitle>

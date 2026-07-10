@@ -49,8 +49,16 @@ const TrustedSafesModal = ({ modal }: TrustedSafesModalProps) => {
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
-        <DialogContent className="flex max-h-[90vh] w-full max-w-[min(900px,calc(100vw-2rem))] flex-col gap-0 p-0">
-          <DialogHeader className="shrink-0 border-b border-border px-6 pb-4 pt-6">
+        <DialogContent
+          padding="none"
+          // eslint-disable-next-line no-restricted-syntax -- responsive max-w-[min(900px,calc(100vw-2rem))]: not a size token (needs design)
+          className="flex max-h-[90vh] max-w-[min(900px,calc(100vw-2rem))] flex-col"
+        >
+          <DialogHeader
+            divided
+            // eslint-disable-next-line no-restricted-syntax -- bespoke header padding px-6 pb-4 pt-6, no token
+            className="shrink-0 px-6 pb-4 pt-6"
+          >
             <DialogTitle className="font-bold">Manage trusted Safes</DialogTitle>
           </DialogHeader>
 
@@ -89,7 +97,11 @@ const TrustedSafesModal = ({ modal }: TrustedSafesModalProps) => {
             />
           </div>
 
-          <DialogFooter className="shrink-0 border-t border-border px-6 pb-6 pt-4">
+          <DialogFooter
+            divided
+            // eslint-disable-next-line no-restricted-syntax -- bespoke footer padding px-6 pb-6 pt-4, no token
+            className="shrink-0 px-6 pb-6 pt-4"
+          >
             <DialogActions
               onCancel={close}
               confirmLabel="Save"

@@ -134,8 +134,17 @@ const AccountsModal = ({
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent showCloseButton className="flex max-h-[90vh] w-full max-w-[560px] flex-col gap-0 p-0">
-        <DialogHeader className="shrink-0 border-b border-border/50 px-4 pb-3 pt-4">
+      <DialogContent
+        showCloseButton
+        padding="none"
+        // eslint-disable-next-line no-restricted-syntax -- max-w-[560px]: bespoke width, not a size token (needs design)
+        className="flex max-h-[90vh] max-w-[560px] flex-col"
+      >
+        <DialogHeader
+          divided="subtle"
+          // eslint-disable-next-line no-restricted-syntax -- bespoke header padding px-4 pb-3 pt-4, no token
+          className="shrink-0 px-4 pb-3 pt-4"
+        >
           <DialogTitle>{isQualifiedSafe ? 'Explore other Safes' : 'All Accounts'}</DialogTitle>
         </DialogHeader>
 
@@ -221,7 +230,11 @@ const AccountsModal = ({
           )}
         </div>
 
-        <DialogFooter className="relative shrink-0 flex-row gap-2 border-t border-border/50 px-4 py-3">
+        <DialogFooter
+          divided="subtle"
+          // eslint-disable-next-line no-restricted-syntax -- bespoke footer padding px-4 py-3, no token
+          className="relative shrink-0 flex-row px-4 py-3"
+        >
           {showFade && (
             <div
               data-testid="scroll-hint"

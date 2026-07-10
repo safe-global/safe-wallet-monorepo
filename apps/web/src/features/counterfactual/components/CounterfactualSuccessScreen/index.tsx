@@ -59,7 +59,11 @@ const CounterfactualSuccessScreen = () => {
 
   return (
     <Dialog open={open}>
-      <DialogContent showCloseButton={false} className="flex flex-col items-center justify-center gap-6 px-12 py-20">
+      <DialogContent
+        showCloseButton={false}
+        // eslint-disable-next-line no-restricted-syntax -- bespoke centered success screen (px-12 py-20 gap-6), no token fit
+        className="flex flex-col items-center justify-center gap-6 px-12 py-20"
+      >
         <div className="inline-flex rounded-full bg-[var(--color-success-background)] p-6">
           <Check className="size-[50px] text-[var(--color-success-main)]" />
         </div>

@@ -27,7 +27,7 @@ const PermissionsPrompt = ({
 }: PermissionsPromptProps): ReactElement => {
   return (
     <Dialog open={isOpen}>
-      <DialogContent showCloseButton={false} className="p-0">
+      <DialogContent showCloseButton={false} padding="none">
         <ModalDialogTitle onClose={() => onReject()}>
           <Typography variant="paragraph-bold">Permissions Request</Typography>
         </ModalDialogTitle>

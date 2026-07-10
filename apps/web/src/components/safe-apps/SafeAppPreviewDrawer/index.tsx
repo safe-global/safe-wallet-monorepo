@@ -41,6 +41,7 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
 
   return (
     <Drawer direction="right" open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      {/* eslint-disable-next-line no-restricted-syntax -- rounded-l-xl/rounded-tr-none: bespoke preview drawer radius, no drawer radius token */}
       <DrawerContent className="rounded-l-xl rounded-tr-none">
         <DrawerTitle className="sr-only">{safeApp?.name} preview</DrawerTitle>
         <div className={`${css.drawerContainer} !pt-5`}>

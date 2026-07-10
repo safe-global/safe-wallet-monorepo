@@ -52,6 +52,17 @@ const dsBadgeClassnameRule = (element, message) => ({
   message,
 })
 
+// Design-system Dialog/Sheet/Drawer-styling guard. Content owns width (`size`), body
+// `padding`, and `surface` (bg/border/shadow); Header/Footer own `divided`. So this flags
+// `max-w-`, arbitrary `w-[…]`, `p-`/`px-`/`py-`/`pt-`/`pb-`, `gap-`, `rounded-`, `bg-`,
+// `border`, `shadow-`. It deliberately does NOT flag `max-h-`, `w-full`, `w-3/4`, flex/grid
+// or overflow — those stay layout-only. Matches literals inside cn(...). Escape hatch:
+// `// eslint-disable-next-line no-restricted-syntax -- <reason>`.
+const dsDialogClassnameRule = (element, message) => ({
+  selector: `JSXOpeningElement[name.name='${element}'] > JSXAttribute[name.name='className'] Literal[value=/(?:^|\\s)(p-|px-|py-|pt-|pb-|gap-|max-w-|w-\\[|rounded-|bg-|border|shadow-)/]`,
+  message,
+})
+
 export default [
   {
     ignores: [
@@ -258,6 +269,22 @@ export default [
           dsBadgeClassnameRule(
             element,
             `Don't set geometry/colour utilities (h-*, px-*/py-*, text-xs|sm|base|lg, text-[…], rounded-*, bg-*, border) on <${element}> — use the \`variant\`, \`size\` ('sm'|'default'|'lg'|'auto'), and \`shape\` ('pill'|'tag') props. \`className\` is layout-only (w-*, margins, flex/grid). See the UI/${element} story; add a variant to components/ui/${element.toLowerCase()}.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
+          ),
+        ),
+        ...[
+          'DialogContent',
+          'DialogHeader',
+          'DialogFooter',
+          'SheetContent',
+          'SheetHeader',
+          'SheetFooter',
+          'DrawerContent',
+          'DrawerHeader',
+          'DrawerFooter',
+        ].map((element) =>
+          dsDialogClassnameRule(
+            element,
+            `Don't set width/padding/surface utilities (max-w-*, w-[…], p-*/px-*/py-*, gap-*, rounded-*, bg-*, border, shadow-*) on <${element}> — use the \`size\`, \`padding\`, \`surface\`, and (Header/Footer) \`divided\` props. Layout-only className (max-h-*, w-full, flex/grid, overflow) is fine. See the UI/Dialog|Sheet|Drawer story; add a variant to the primitive if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
           ),
         ),
       ],

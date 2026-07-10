@@ -71,9 +71,13 @@ const SideDrawer = ({ isOpen, onToggle, onSidebarOpenChange }: SideDrawerProps):
           <SheetContent
             side="left"
             showCloseButton={false}
+            size="auto"
+            padding="none"
             className={classnames(
-              'w-auto max-w-none border-0 p-0',
+              // eslint-disable-next-line no-restricted-syntax -- border-0 removes base data-[side]:border-r; no borderless-sheet token
+              'border-0',
               isTabletDrawer &&
+                // eslint-disable-next-line no-restricted-syntax -- tablet drawer is a bespoke transparent full-height overlay
                 'flex h-dvh max-h-dvh overflow-visible bg-transparent bg-none shadow-none [&]:bg-transparent',
             )}
           >
