@@ -390,5 +390,23 @@ describe('SafeSidebarContent', () => {
       const featureFlagsItem = developerGroupConfig?.items.find((item) => item.href === AppRoutes.featureFlags)
       expect(featureFlagsItem?.badge).toBe(3)
     })
+
+    it('hides the Feature flags item in production', () => {
+      const originalIsProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      mockUseResolvedSidebarNav.mockImplementation((main, setup, options, developerGroupConfig) => ({
+        mainNavItems: [],
+        setupGroup: { label: 'Defi', items: [] },
+        developerGroup: developerGroupConfig,
+      }))
+
+      try {
+        const { queryByText } = render(<SafeSidebarContent {...defaultProps} />)
+
+        expect(queryByText('Feature flags')).not.toBeInTheDocument()
+      } finally {
+        process.env.NEXT_PUBLIC_IS_PRODUCTION = originalIsProduction
+      }
+    })
   })
 })
