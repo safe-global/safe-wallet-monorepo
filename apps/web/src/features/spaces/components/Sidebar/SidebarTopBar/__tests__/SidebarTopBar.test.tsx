@@ -32,13 +32,13 @@ jest.mock('@/components/ui/sidebar', () => ({
 jest.mock('@/components/common/SafeLogo', () => {
   const MockSafeLogo = ({
     href,
-    showBackArrow,
+    showHomeLabel,
     'data-testid': testId,
   }: {
     href?: string
-    showBackArrow?: boolean
+    showHomeLabel?: boolean
     'data-testid'?: string
-  }) => <a data-testid={testId} href={href} data-back-arrow={String(Boolean(showBackArrow))} />
+  }) => <a data-testid={testId} href={href} data-home-label={String(Boolean(showHomeLabel))} />
   MockSafeLogo.displayName = 'SafeLogo'
   return { __esModule: true, default: MockSafeLogo }
 })
@@ -99,29 +99,29 @@ describe('SidebarTopBar', () => {
     expect(screen.getByTestId('logo-container')).toHaveAttribute('href', AppRoutes.welcome.accounts)
   })
 
-  it('shows the back-arrow pill linking to /welcome/accounts on an individual safe', () => {
+  it('shows the Home label pill linking to /welcome/accounts on an individual safe', () => {
     mockUseRouter.mockReturnValue({ pathname: AppRoutes.home })
     mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
 
     render(<SidebarTopBar />)
 
     const logo = screen.getByTestId('logo-container')
-    expect(logo).toHaveAttribute('data-back-arrow', 'true')
+    expect(logo).toHaveAttribute('data-home-label', 'true')
     expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
   })
 
-  it('shows the back-arrow pill inside a space route', () => {
+  it('shows the Home label pill inside a space route', () => {
     mockUseRouter.mockReturnValue({ pathname: AppRoutes.spaces.index })
     mockUseIsSpaceRoute.mockReturnValue(true)
 
     render(<SidebarTopBar />)
 
     const logo = screen.getByTestId('logo-container')
-    expect(logo).toHaveAttribute('data-back-arrow', 'true')
+    expect(logo).toHaveAttribute('data-home-label', 'true')
     expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
   })
 
-  it('does not show the back-arrow pill when the sidebar is collapsed', () => {
+  it('does not show the Home label pill when the sidebar is collapsed', () => {
     const { useSidebar } = require('@/components/ui/sidebar')
     useSidebar.mockReturnValue({ state: 'collapsed' })
     mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
@@ -130,7 +130,7 @@ describe('SidebarTopBar', () => {
 
     // Still links home, but as the plain logo (no room for the pill when collapsed).
     const logo = screen.getByTestId('logo-container')
-    expect(logo).toHaveAttribute('data-back-arrow', 'false')
+    expect(logo).toHaveAttribute('data-home-label', 'false')
     expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
   })
 
@@ -139,6 +139,6 @@ describe('SidebarTopBar', () => {
 
     render(<SidebarTopBar />)
 
-    expect(screen.getByTestId('logo-container')).toHaveAttribute('data-back-arrow', 'false')
+    expect(screen.getByTestId('logo-container')).toHaveAttribute('data-home-label', 'false')
   })
 })

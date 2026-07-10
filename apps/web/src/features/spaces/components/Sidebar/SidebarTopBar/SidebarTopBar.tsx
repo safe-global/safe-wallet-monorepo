@@ -14,10 +14,10 @@ export const SidebarTopBar = (): ReactElement => {
   const safeAddress = useSafeAddressFromUrl()
   const isSpaceRoute = useIsSpaceRoute()
 
-  // Inside a space or an individual safe the logo turns into a back-arrow pill that returns to the
+  // Inside a space or an individual safe the logo turns into a "Home" label pill that returns to the
   // top-level accounts view. Elsewhere it stays a plain logo toggling between the welcome routes.
   const isInSafeOrSpace = Boolean(safeAddress) || isSpaceRoute
-  const showBackArrow = isInSafeOrSpace && !isCollapsed
+  const showHomeLabel = isInSafeOrSpace && !isCollapsed
   const logoHref = isInSafeOrSpace
     ? AppRoutes.welcome.accounts
     : router.pathname === AppRoutes.welcome.accounts
@@ -32,9 +32,9 @@ export const SidebarTopBar = (): ReactElement => {
     >
       <SafeLogo
         href={logoHref}
-        showBackArrow={showBackArrow}
+        showHomeLabel={showHomeLabel}
         data-testid="logo-container"
-        className={showBackArrow ? 'absolute left-0 top-1/2 z-10 -translate-y-1/2' : 'absolute left-3 top-3 z-10'}
+        className={showHomeLabel ? 'absolute left-0 top-1/2 z-10 -translate-y-1/2' : 'absolute left-3 top-3 z-10'}
       />
       <SidebarTrigger
         className={cn(

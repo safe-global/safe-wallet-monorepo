@@ -29,11 +29,11 @@ describe('SafeLogo', () => {
     expect(img).toHaveAttribute('alt', 'Safe')
   })
 
-  it('renders the back-arrow pill variant with an accessible label', () => {
-    render(<SafeLogo href={AppRoutes.welcome.accounts} showBackArrow />)
+  it('renders the Home label pill variant with the logo', () => {
+    render(<SafeLogo href={AppRoutes.welcome.accounts} showHomeLabel />)
     const link = screen.getByRole('link')
     expect(link).toHaveAttribute('href', AppRoutes.welcome.accounts)
-    expect(link).toHaveAttribute('aria-label', 'Back to your accounts')
+    expect(link).toHaveTextContent('Home')
     expect(screen.getByTestId('logo-image')).toBeInTheDocument()
   })
 })

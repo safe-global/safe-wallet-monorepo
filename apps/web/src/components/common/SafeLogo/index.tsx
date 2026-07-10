@@ -1,6 +1,5 @@
 import type { ReactElement } from 'react'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { cn } from '@/utils/cn'
 import css from './SafeLogo.module.css'
@@ -22,28 +21,27 @@ const LogoMark = (): ReactElement => (
 const SafeLogo = ({
   href = AppRoutes.welcome.spaces,
   className,
-  showBackArrow = false,
+  showHomeLabel = false,
   'data-testid': testId,
 }: {
   href?: string
   className?: string
-  /** Renders a back-arrow + logo pill (Safe/space context) instead of the bare logo. */
-  showBackArrow?: boolean
+  /** Renders a logo + "Home" label pill (Safe/space context) instead of the bare logo. */
+  showHomeLabel?: boolean
   'data-testid'?: string
 }): ReactElement => {
-  if (showBackArrow) {
+  if (showHomeLabel) {
     return (
       <Link
         href={href}
         data-testid={testId}
-        aria-label="Back to your accounts"
         className={cn(
           'flex items-center gap-2 rounded-2xl bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground transition-opacity hover:opacity-80',
           className,
         )}
       >
-        <ArrowLeft className="size-4 shrink-0" />
         <LogoMark />
+        <span className="text-sm font-semibold">Home</span>
       </Link>
     )
   }
