@@ -401,6 +401,34 @@ describe('useSignInRedirect', () => {
       expect(result.current.redirectLoading).toBe(true)
     })
 
+    it('does not redirect to the single space when there is a pending invite', async () => {
+      setupMocks()
+
+      const { result } = renderHook(() =>
+        useSignInRedirect({ ...defaultProps, spacesAmount: 1, inviteAmount: 1, singleSpaceId: 'space-42' }),
+      )
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).not.toHaveBeenCalled()
+    })
+
+    it('still redirects to the single space when there are no invites', async () => {
+      setupMocks()
+
+      const { result } = renderHook(() =>
+        useSignInRedirect({ ...defaultProps, spacesAmount: 1, inviteAmount: 0, singleSpaceId: 'space-42' }),
+      )
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: 'space-42' } })
+    })
+
     it('does not redirect when there are multiple spaces (no singleSpaceId)', async () => {
       setupMocks()
 
