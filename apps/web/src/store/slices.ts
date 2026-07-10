@@ -38,6 +38,7 @@ export * from './orderByPreferenceSlice'
 export * from './authSlice'
 export * from '@/features/hypernative/store'
 export * from '@/features/gtf/store'
+export * from '@/features/feature-flags/store'
 export {
   globalSearchSlice,
   openGlobalSearch,
