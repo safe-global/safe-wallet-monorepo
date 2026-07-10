@@ -12,10 +12,11 @@
 import { execSync } from 'child_process'
 import { existsSync, readdirSync, readFileSync } from 'fs'
 import path from 'path'
+import { EDITOR_BUNDLE_SENTINEL } from '../components/FeatureFlagEditor'
 
-// Dev-only banner copy from FeatureFlagEditor.tsx — distinctive and unlikely
-// to appear anywhere else in the bundle.
-const MARKER = 'local feature-flag overrides'
+// A dedicated, editor-only sentinel (not user-facing copy), imported so it can
+// never drift from what the editor actually renders.
+const MARKER = EDITOR_BUNDLE_SENTINEL
 const WEB_ROOT = path.resolve(__dirname, '../../../..')
 const CHUNKS_DIR = path.join(WEB_ROOT, '.next', 'static', 'chunks')
 

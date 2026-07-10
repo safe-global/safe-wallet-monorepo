@@ -27,6 +27,20 @@ describe('applyFeatureOverrides', () => {
     expect(result.features).toContain(FEATURES.BRIDGE)
   })
 
+  it('applies simultaneous force-on and force-off overrides', () => {
+    const chain = makeChain([FEATURES.EARN])
+    const result = applyFeatureOverrides(chain, { [FEATURES.EARN]: false, [FEATURES.BRIDGE]: true })
+    expect(result.features).not.toContain(FEATURES.EARN)
+    expect(result.features).toContain(FEATURES.BRIDGE)
+  })
+
+  it('handles an override key that is not a known feature (string cast)', () => {
+    const chain = makeChain([])
+    const overrides = { CUSTOM_UNKNOWN_FLAG: true } as unknown as Parameters<typeof applyFeatureOverrides>[1]
+    const result = applyFeatureOverrides(chain, overrides)
+    expect(result.features).toContain('CUSTOM_UNKNOWN_FLAG')
+  })
+
   it('is a no-op in production', () => {
     const prev = process.env.NEXT_PUBLIC_IS_PRODUCTION
     process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'

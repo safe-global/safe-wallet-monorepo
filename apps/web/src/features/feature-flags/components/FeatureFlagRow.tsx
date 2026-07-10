@@ -55,6 +55,8 @@ export const FeatureFlagRow = ({ row }: { row: FeatureFlagRowData }): ReactEleme
       </div>
 
       <div className="flex items-center justify-end gap-2">
+        {/* Reserves the width of the match indicator + revert button (only rendered
+            for overridden rows) so the switch stays aligned across all rows. */}
         {!isOverridden && <span className="w-12"></span>}
         <Switch
           checked={row.effective}
@@ -68,6 +70,7 @@ export const FeatureFlagRow = ({ row }: { row: FeatureFlagRowData }): ReactEleme
               <TooltipTrigger
                 render={
                   <Check
+                    role="img"
                     className="text-success-strong size-4 shrink-0"
                     style={row.matchesCurrentChain ? undefined : HIDDEN}
                     aria-label={MATCH_LABEL}
@@ -82,7 +85,6 @@ export const FeatureFlagRow = ({ row }: { row: FeatureFlagRowData }): ReactEleme
               size="icon-xs"
               aria-label="Revert override"
               onClick={() => dispatch(clearOverride(row.feature))}
-              tabIndex={isOverridden ? undefined : -1}
             >
               <RotateCcw />
             </Button>
