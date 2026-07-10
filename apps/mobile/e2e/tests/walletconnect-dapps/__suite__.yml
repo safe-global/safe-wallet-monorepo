@@ -27,3 +27,21 @@ tags:
 
 - runFlow:
     file: ./pair-proposal-scam.yml
+
+- runFlow:
+    file: ./manage-entry-hidden-when-empty.yml
+
+- runFlow:
+    file: ./manage-entry-visible.yml
+
+- runFlow:
+    file: ./manage-disconnect-via-menu.yml
+
+- runFlow:
+    file: ./manage-disconnect-via-swipe.yml
+
+- runFlow:
+    file: ./manage-disconnect-cancel.yml
+
+- runFlow:
+    file: ./manage-disconnect-from-dapp.yml

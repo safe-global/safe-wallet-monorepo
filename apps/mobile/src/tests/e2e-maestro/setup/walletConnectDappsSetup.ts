@@ -3,7 +3,8 @@ import type { Router } from 'expo-router'
 import type { WalletKitTypes } from '@reown/walletkit'
 import { getEip155ChainId } from '@safe-global/utils/features/walletconnect/utils'
 import { store } from '@/src/store'
-import { pushPending, removeSession } from '@/src/features/WalletConnect/Wallet/store/walletKitSlice'
+import { addSession, pushPending, removeSession } from '@/src/features/WalletConnect/Wallet/store/walletKitSlice'
+import { APPROVED_SESSION } from '@/src/features/WalletConnect/Wallet/walletKit.e2e'
 import {
   walletKitE2eState,
   E2E_SESSION_TOPIC,
@@ -93,6 +94,14 @@ export const synthSessionProposalUnverified = () => synthProposal({ validation: 
 
 /** Synthesise a scam-flagged session_proposal. */
 export const synthSessionProposalScam = () => synthProposal({ validation: 'VALID', isScam: true })
+
+/** Seed one approved session (slice + fake's session store) so management flows skip pairing. */
+export const seedWcSession = () => {
+  store.dispatch(addSession({ session: APPROVED_SESSION, verifyVariant: 'verified' }))
+  walletKitE2eState.set({
+    sessions: { ...walletKitE2eState.get().sessions, [APPROVED_SESSION.topic]: APPROVED_SESSION },
+  })
+}
 
 /** Synthesise a session_delete for the fixture session topic (slice + fake's session store). */
 export const synthSessionDelete = () => {
