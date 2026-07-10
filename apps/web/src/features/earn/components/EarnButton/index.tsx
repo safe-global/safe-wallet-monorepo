@@ -67,12 +67,10 @@ const EarnButton = (props: EarnButtonProps): ReactElement => {
               className={classnames('gap-1', {
                 [css.button]: compact,
                 [css.buttonDisabled]: !isOk,
-                // eslint-disable-next-line no-restricted-syntax -- on-surface Earn CTA needs a paper bg; pending an on-color variant
-                'bg-[var(--color-background-paper)]': !compact,
               })}
               data-testid="earn-btn"
               aria-label="Earn"
-              variant={compact ? 'ghost' : 'default'}
+              variant={compact ? 'ghost' : 'surface'}
               size="sm"
               onClick={onEarnClick}
               disabled={!isOk}

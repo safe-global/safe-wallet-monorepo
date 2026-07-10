@@ -78,13 +78,7 @@ const AccountHeader = (): ReactElement => {
         onReceive={safe.deployed ? handleReceive : undefined}
         onBuildTransaction={safe.deployed ? handleBuildTransaction : undefined}
         otherActions={
-          <Button
-            variant="outline"
-            size="action"
-            // eslint-disable-next-line no-restricted-syntax -- outline CTA on a colored header surface needs a transparent bg; pending an on-surface variant
-            className="!border-[var(--color-border-light)] bg-transparent"
-            onClick={handleManageSafe}
-          >
+          <Button variant="surface" size="action" onClick={handleManageSafe}>
             <Settings className="size-4" />
             Manage Safe
           </Button>
