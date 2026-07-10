@@ -42,7 +42,9 @@ export function SignersStructureView(props: Props): ReactElement {
   const { onNext } = useContext<TxFlowContextType<ManageSignersForm>>(TxFlowContext)
 
   // Copilot address-poisoning check for the configured signers.
-  // RHF's watch() mutates arrays in place (stable reference), so key the memo by value.
+  // RHF's watch() mutates arrays in place (stable reference), so key the memo by a joined-string
+  // VALUE. Do NOT switch to useMemoDeepCompare — it stores deps by reference, so the in-place
+  // mutation defeats its deep compare and the Copilot check stops re-triggering as you type.
   const poisoningKey = props.newOwners
     .map((owner) => owner.address)
     .filter(Boolean)
