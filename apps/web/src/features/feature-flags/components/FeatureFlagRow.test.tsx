@@ -49,10 +49,10 @@ describe('FeatureFlagRow', () => {
 
   // The revert button and match indicator only render for overridden rows.
   it('shows the revert button only for overridden rows', () => {
-    const { queryByLabelText, rerender } = render(<FeatureFlagRow row={baseRow} />)
-    expect(queryByLabelText('Revert override')).not.toBeInTheDocument()
+    const { queryByTestId, rerender } = render(<FeatureFlagRow row={baseRow} />)
+    expect(queryByTestId('ff-revert-override')).not.toBeInTheDocument()
     rerender(<FeatureFlagRow row={{ ...baseRow, override: true, effective: true }} />)
-    expect(queryByLabelText('Revert override')).toBeInTheDocument()
+    expect(queryByTestId('ff-revert-override')).toBeInTheDocument()
   })
 
   // Within an overridden row the match indicator stays in the DOM and is toggled
@@ -75,10 +75,10 @@ describe('FeatureFlagRow', () => {
   })
 
   it('dispatches clearOverride when the revert button is clicked', () => {
-    const { getByLabelText } = render(<FeatureFlagRow row={{ ...baseRow, override: true, effective: true }} />, {
+    const { getByTestId } = render(<FeatureFlagRow row={{ ...baseRow, override: true, effective: true }} />, {
       initialReduxState: { featureFlagOverrides: { [FEATURES.EARN]: true } },
     })
-    fireEvent.click(getByLabelText('Revert override'))
+    fireEvent.click(getByTestId('ff-revert-override'))
     expect(getStoreInstance().getState().featureFlagOverrides).toEqual({})
   })
 })

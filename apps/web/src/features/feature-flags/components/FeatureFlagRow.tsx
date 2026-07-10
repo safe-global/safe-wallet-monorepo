@@ -15,6 +15,8 @@ const HIDDEN: CSSProperties = { visibility: 'hidden' }
 
 const MATCH_LABEL = 'Matches config service setting for the current chain'
 
+const REVERT_LABEL = 'Revert override'
+
 // Shared so the section column header lines up with the rows.
 export const GRID = 'grid grid-cols-[minmax(200px,1fr)_minmax(140px,240px)_minmax(60px,140px)] items-center gap-3'
 
@@ -79,14 +81,21 @@ export const FeatureFlagRow = ({ row }: { row: FeatureFlagRowData }): ReactEleme
               <TooltipContent>{MATCH_LABEL}</TooltipContent>
             </Tooltip>
 
-            <Button
-              variant="outline"
-              size="icon-xs"
-              aria-label="Revert override"
-              onClick={() => dispatch(clearOverride(row.feature))}
-            >
-              <RotateCcw />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    size="icon-xs"
+                    data-testid="ff-revert-override"
+                    onClick={() => dispatch(clearOverride(row.feature))}
+                  >
+                    <RotateCcw />
+                  </Button>
+                }
+              />
+              <TooltipContent>{REVERT_LABEL}</TooltipContent>
+            </Tooltip>
           </>
         )}
       </div>
