@@ -63,7 +63,7 @@ describe('Spaces dashboard tests', () => {
       space.verifySidebarItemNavigates(space.sidebarItemAddressBook, '/spaces/address-book')
       space.verifySidebarItemNavigates(space.sidebarItemTeam, '/spaces/members')
       space.verifySidebarItemNavigates(space.sidebarItemSettings, '/spaces/settings')
-      space.verifySidebarItemNavigates(space.sidebarItemHome, '/spaces')
+      space.verifySidebarItemNavigates(space.sidebarItemDashboard, '/spaces')
     })
 
     it('Verify that the sidebar correctly switches from Space-level to Safe-level navigation when entering a Safe', () => {

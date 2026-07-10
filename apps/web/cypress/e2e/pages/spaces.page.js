@@ -65,7 +65,7 @@ const spaceChainNavigationButton = '[data-testid="space-chain-navigation-button"
 export const backToSpaceBtn = '[data-testid="back-to-space-button"]'
 
 // -- Space sidebar items --
-export const sidebarItemHome = '[data-testid="sidebar-item-home"]'
+export const sidebarItemDashboard = '[data-testid="sidebar-item-dashboard"]'
 export const sidebarItemAccounts = '[data-testid="sidebar-item-safe-accounts"]'
 export const sidebarItemAddressBook = '[data-testid="sidebar-item-address-book"]'
 export const sidebarItemTeam = '[data-testid="sidebar-item-team"]'

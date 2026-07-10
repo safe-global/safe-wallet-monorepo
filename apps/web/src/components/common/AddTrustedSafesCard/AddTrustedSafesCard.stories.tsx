@@ -17,6 +17,6 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    onAdd: () => alert('Manage trusted Safes'),
+    onAdd: () => alert('Manage list'),
   },
 }

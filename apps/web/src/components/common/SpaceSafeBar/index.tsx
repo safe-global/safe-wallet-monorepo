@@ -107,13 +107,13 @@ function NoTrustedAccountsBody({ onManage }: { onManage: () => void }) {
   return (
     <div className="flex flex-col items-center gap-4 px-4 py-6 text-center" data-testid="dropdown-no-trusted">
       <div className="flex flex-col items-center gap-1">
-        <Typography variant="paragraph-small-medium">No trusted accounts</Typography>
+        <Typography variant="paragraph-small-medium">No accounts yet</Typography>
         <Typography variant="paragraph-mini" color="muted" className="max-w-[336px]">
-          Manage your trusted list to add or remove accounts.
+          Manage your list to add or remove accounts.
         </Typography>
       </div>
       <Button variant="outline" size="sm" onClick={onManage} data-testid="dropdown-manage-list-btn">
-        <Settings2 className="size-4" /> Manage trusted Safes
+        <Settings2 className="size-4" /> Manage list
       </Button>
     </div>
   )
@@ -129,7 +129,7 @@ function ManageTrustedFooter({ onManage }: { onManage: () => void }) {
     >
       <UserRoundPlus className="size-4 shrink-0 text-muted-foreground" />
       <span className="flex min-w-0 flex-1 flex-col">
-        <Typography variant="paragraph-small-medium">Manage trusted Safes</Typography>
+        <Typography variant="paragraph-small-medium">Manage list</Typography>
         <Typography variant="paragraph-mini" color="muted">
           Add or remove accounts from this list
         </Typography>
@@ -203,7 +203,7 @@ function SpaceSafeBar() {
 
   const workspaceName = space?.name ?? 'Workspace'
   const workspaceLabel = isInSpaceContext ? `${workspaceName} (${countMatches(workspaceItems)})` : workspaceName
-  const localLabel = `Trusted accounts (${countMatches(localItems)})`
+  const localLabel = `My accounts (${countMatches(localItems)})`
 
   const dropdownHeader = (
     <DropdownTabs

@@ -20,7 +20,7 @@ const navItems: Item[] = [
     trackEvent: { ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.accounts_page },
   },
   {
-    label: 'Trusted accounts',
+    label: 'My accounts',
     url: AppRoutes.welcome.accounts,
   },
 ]

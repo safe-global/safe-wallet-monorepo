@@ -131,7 +131,7 @@ const MultiSafeItemCard = ({
                 className={`size-4 ${isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`}
               />
             </TooltipTrigger>
-            <TooltipContent>{isPinned ? 'Remove from trusted Safes' : 'Add to trusted Safes'}</TooltipContent>
+            <TooltipContent>{isPinned ? 'Remove from my accounts' : 'Add to my accounts'}</TooltipContent>
           </Tooltip>
 
           {/* Context menu — outside trigger for the same reason */}

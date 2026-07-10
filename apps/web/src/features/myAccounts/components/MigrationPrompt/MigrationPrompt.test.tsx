@@ -11,8 +11,8 @@ describe('MigrationPrompt', () => {
   it('should render the migration prompt', () => {
     render(<MigrationPrompt onProceed={mockOnProceed} />)
 
-    expect(screen.getByText(/Add trusted Safes/i)).toBeInTheDocument()
-    expect(screen.getByText(/Only Safes you trust will appear in your account list/i)).toBeInTheDocument()
+    expect(screen.getByText(/Add to my accounts/i)).toBeInTheDocument()
+    expect(screen.getByText(/Only Safes you add will appear in your account list/i)).toBeInTheDocument()
   })
 
   it('should call onProceed when "Add" button is clicked', () => {

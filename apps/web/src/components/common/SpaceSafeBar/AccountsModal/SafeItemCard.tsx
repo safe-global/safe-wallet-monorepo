@@ -68,7 +68,7 @@ const SafeItemCard = ({
       dispatch(pinSafe({ chainId: safeItem.chainId, address: safeItem.address }))
       dispatch(
         showNotification({
-          title: 'Safe trusted',
+          title: 'Added to my accounts',
           message: displayName,
           groupKey: `pin-safe-${safeItem.address}`,
           variant: 'success',
@@ -166,7 +166,7 @@ const SafeItemCard = ({
             className={`size-4 ${safeItem.isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`}
           />
         </TooltipTrigger>
-        <TooltipContent>{safeItem.isPinned ? 'Remove from trusted Safes' : 'Add to trusted Safes'}</TooltipContent>
+        <TooltipContent>{safeItem.isPinned ? 'Remove from my accounts' : 'Add to my accounts'}</TooltipContent>
       </Tooltip>
 
       {/* Context menu */}

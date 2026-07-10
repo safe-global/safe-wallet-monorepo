@@ -183,15 +183,15 @@ const AccountsModal = ({
                   <SimilarAddressAlert />
                 </div>
               )}
-              {renderSection('Trusted Safes', trustedItems, {
+              {renderSection('My accounts', trustedItems, {
                 similarAddresses,
                 onClose,
                 headerPaddingTopClass: 'pt-1',
                 openSafeTrackingLabel: trackingLabel,
                 sectionTestId: 'pinned-accounts',
-                // The Trusted Safes section (with its Manage action) stays visible even with no trusted safes.
+                // The My accounts section (with its Manage action) stays visible even with no accounts.
                 alwaysShow: Boolean(onManageTrustedSafes),
-                emptyHint: search.trim() ? undefined : 'No trusted Safes yet',
+                emptyHint: search.trim() ? undefined : 'No accounts yet',
                 headerAction: onManageTrustedSafes && (
                   <Tooltip>
                     <TooltipTrigger
@@ -207,10 +207,10 @@ const AccountsModal = ({
                         />
                       }
                     >
-                      Manage trusted Safes
+                      Manage list
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-[260px]">
-                      Trusted Safes aren&apos;t added to this workspace automatically — add them separately.
+                      Accounts aren&apos;t added to this workspace automatically — add them separately.
                     </TooltipContent>
                   </Tooltip>
                 ),

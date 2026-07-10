@@ -238,16 +238,16 @@ describe('SpaceSafeBar', () => {
     expect(dropdown.getAttribute('data-has-on-retry')).toBe('true')
   })
 
-  it('renders the Manage trusted Safes footer on the default Local tab', () => {
+  it('renders the Manage list footer on the default Local tab', () => {
     // Off the Spaces level the default tab is Local, which carries the manage-trusted footer.
     const { getByTestId } = render(<SpaceSafeBar />)
     expect(getByTestId('safe-selector-dropdown').getAttribute('data-has-footer')).toBe('true')
     const manageBtn = getByTestId('dropdown-manage-trusted-btn')
-    expect(manageBtn).toHaveTextContent('Manage trusted Safes')
+    expect(manageBtn).toHaveTextContent('Manage list')
     expect(manageBtn).toHaveTextContent('Add or remove accounts from this list')
   })
 
-  it('drops the footer and shows the No trusted accounts empty state when connected with no trusted safes', () => {
+  it('drops the footer and shows the No accounts empty state when connected with no trusted safes', () => {
     mockUseSpaceSafeSelectorItems.mockReturnValue({
       workspaceItems: [],
       localItems: [],
@@ -263,8 +263,8 @@ describe('SpaceSafeBar', () => {
     expect(getByTestId('safe-selector-dropdown').getAttribute('data-has-footer')).toBe('false')
     expect(queryByTestId('dropdown-manage-trusted-btn')).not.toBeInTheDocument()
     const emptyState = getByTestId('dropdown-no-trusted')
-    expect(emptyState).toHaveTextContent('No trusted accounts')
-    expect(emptyState).toHaveTextContent('Manage your trusted list to add or remove accounts.')
+    expect(emptyState).toHaveTextContent('No accounts yet')
+    expect(emptyState).toHaveTextContent('Manage your list to add or remove accounts.')
     expect(getByTestId('dropdown-manage-list-btn')).toBeInTheDocument()
   })
 
@@ -356,9 +356,9 @@ describe('SpaceSafeBar', () => {
     expect(getByTestId('dropdown-tab-workspace').textContent).toBe('Test Space (1)')
   })
 
-  it('labels the Local tab with the trusted accounts count', () => {
+  it('labels the Local tab with the my accounts count', () => {
     const { getByTestId } = render(<SpaceSafeBar />)
-    expect(getByTestId('dropdown-tab-local').textContent).toBe('Trusted accounts (1)')
+    expect(getByTestId('dropdown-tab-local').textContent).toBe('My accounts (1)')
   })
 
   it('updates the tab counts while searching across both lists', () => {
@@ -388,12 +388,12 @@ describe('SpaceSafeBar', () => {
 
     const { getByTestId } = render(<SpaceSafeBar />)
     expect(getByTestId('dropdown-tab-workspace').textContent).toBe('Test Space (1)')
-    expect(getByTestId('dropdown-tab-local').textContent).toBe('Trusted accounts (2)')
+    expect(getByTestId('dropdown-tab-local').textContent).toBe('My accounts (2)')
 
     fireEvent.change(getByTestId('mock-search-input'), { target: { value: 'Other' } })
 
     expect(getByTestId('dropdown-tab-workspace').textContent).toBe('Test Space (0)')
-    expect(getByTestId('dropdown-tab-local').textContent).toBe('Trusted accounts (1)')
+    expect(getByTestId('dropdown-tab-local').textContent).toBe('My accounts (1)')
   })
 
   it('opens the rename dialog with the safe details when a row rename is requested', () => {

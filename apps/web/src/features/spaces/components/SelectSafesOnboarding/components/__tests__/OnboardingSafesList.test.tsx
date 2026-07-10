@@ -53,7 +53,7 @@ describe('OnboardingSafesList', () => {
       <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} {...baseProps} />,
     )
 
-    expect(queryByText('Trusted safe accounts')).not.toBeInTheDocument()
+    expect(queryByText('My accounts')).not.toBeInTheDocument()
     expect(queryByText('Owned safe accounts')).not.toBeInTheDocument()
     expect(queryByTestId('onboarding-trusted-table')).not.toBeInTheDocument()
     expect(queryByTestId('onboarding-owned-table')).not.toBeInTheDocument()
@@ -64,7 +64,7 @@ describe('OnboardingSafesList', () => {
       <OnboardingSafesList trustedSafes={[buildSafeItem('0xTrusted')]} ownedSafes={[]} {...baseProps} />,
     )
 
-    expect(getByText('Trusted safe accounts')).toBeInTheDocument()
+    expect(getByText('My accounts')).toBeInTheDocument()
     expect(getByTestId('onboarding-trusted-table')).toHaveTextContent('0xTrusted')
   })
 

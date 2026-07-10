@@ -31,7 +31,7 @@ const TrustedAccountsActions = ({ onManage, onLinkClick }: { onManage: () => voi
       </Track>
 
       <Button variant="outline" onClick={onManage} data-testid="add-more-safes-button">
-        Manage trusted Safes
+        Manage list
       </Button>
     </div>
   )

@@ -57,7 +57,7 @@ export function useSingleChainPinActions({
         )
         dispatch(
           showNotification({
-            title: 'Safe trusted',
+            title: 'Added to my accounts',
             message: name ?? shortenAddress(address),
             groupKey: `pin-safe-success-${address}`,
             variant: 'success',

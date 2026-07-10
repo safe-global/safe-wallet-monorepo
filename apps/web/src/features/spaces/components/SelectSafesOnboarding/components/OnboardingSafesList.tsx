@@ -33,7 +33,7 @@ const OnboardingSafesList = ({
     <div className="flex w-full min-w-0 flex-col gap-4">
       {trustedSafes.length > 0 && (
         <div className="flex flex-col gap-2">
-          <SectionLabel>Trusted safe accounts</SectionLabel>
+          <SectionLabel>My accounts</SectionLabel>
           <SafeAccountsTable
             items={trustedSafes}
             columns={COLUMNS}

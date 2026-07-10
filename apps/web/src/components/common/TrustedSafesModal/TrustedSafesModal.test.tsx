@@ -99,7 +99,7 @@ describe('TrustedSafesModal', () => {
 
   it('should render modal when open', () => {
     render(<TrustedSafesModal modal={mockModal} />)
-    expect(screen.getByText('Manage trusted Safes')).toBeInTheDocument()
+    expect(screen.getByText('Manage my account list')).toBeInTheDocument()
     expect(screen.getByText('Verify before you trust')).toBeInTheDocument()
   })
 

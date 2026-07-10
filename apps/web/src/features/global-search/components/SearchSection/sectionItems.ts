@@ -41,7 +41,7 @@ export const sectionItems: SectionItem[] = [
     renderItem: AccountsSection,
   },
   {
-    label: 'Trusted safes',
+    label: 'My accounts',
     useActivate: useNotInSpace,
     renderItem: TrustedSafesSection,
   },

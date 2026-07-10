@@ -6,9 +6,10 @@ describe('AddTrustedSafesCard', () => {
   it('renders the empty-state CTA', () => {
     render(<AddTrustedSafesCard onAdd={jest.fn()} />)
 
-    expect(screen.getByText('No trusted accounts')).toBeInTheDocument()
-    expect(screen.getByText('Manage your trusted list to add or remove accounts.')).toBeInTheDocument()
-    expect(screen.getByTestId('add-trusted-safes-button')).toHaveTextContent('Manage trusted Safes')
+    expect(screen.getByText('What are My accounts?')).toBeInTheDocument()
+    expect(screen.getByText(/curated list of Safe accounts you trust/i)).toBeInTheDocument()
+    expect(screen.getByText('Learn more')).toBeInTheDocument()
+    expect(screen.getByTestId('add-trusted-safes-button')).toHaveTextContent('Manage list')
   })
 
   it('calls onAdd when the button is clicked', async () => {

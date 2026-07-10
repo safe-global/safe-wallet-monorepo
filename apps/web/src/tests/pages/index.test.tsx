@@ -56,7 +56,7 @@ describe('IndexPage', () => {
     )
   })
 
-  it('lands on the Trusted accounts tab when safes are added', async () => {
+  it('lands on the My accounts tab when safes are added', async () => {
     setup({ addedSafes: { '1': { '0x123': {} } } })
 
     render(<IndexPage />)

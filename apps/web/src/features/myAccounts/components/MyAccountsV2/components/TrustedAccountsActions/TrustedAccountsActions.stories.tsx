@@ -14,5 +14,5 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  args: { onManage: () => alert('Manage trusted Safes') },
+  args: { onManage: () => alert('Manage list') },
 }

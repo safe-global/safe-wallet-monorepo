@@ -23,7 +23,7 @@ interface AddAccountsChooserProps {
 interface ChooserRowProps {
   icon: ReactNode
   title: string
-  subtitle: string
+  subtitle?: string
   onClick: () => void
   disabled?: boolean
   disabledTooltip?: string
@@ -58,9 +58,11 @@ const ChooserRow = ({
       <span className="shrink-0">{icon}</span>
       <span className="flex-1 min-w-0">
         <span className="block font-semibold">{title}</span>
-        <span className="block text-xs text-muted-foreground mt-1 group-hover:text-sidebar-accent-foreground/70">
-          {subtitle}
-        </span>
+        {subtitle && (
+          <span className="block text-xs text-muted-foreground mt-1 group-hover:text-sidebar-accent-foreground/70">
+            {subtitle}
+          </span>
+        )}
         {warning && <span className="block text-xs text-destructive mt-1">{warning}</span>}
       </span>
       <ChevronRight className="size-3.5 shrink-0" />
@@ -135,8 +137,7 @@ const AddAccountsChooser = ({
           <div className="flex flex-col gap-2">
             <ChooserRow
               icon={<Plus className="size-4" />}
-              title="Add Safe accounts"
-              subtitle="Add your owned and trusted Safes"
+              title="Select from my accounts"
               onClick={handleAdd}
               disabled={!isAdmin}
               disabledTooltip="You need to be an Admin to add accounts"
@@ -145,7 +146,6 @@ const AddAccountsChooser = ({
             <ChooserRow
               icon={<CirclePlus className="size-4" />}
               title="Create new Safe"
-              subtitle="Create a new Safe account"
               onClick={handleCreate}
               warning={
                 isSpaceAtSafeLimit && isAdmin

@@ -70,7 +70,7 @@ function AccountItemPinButton(props: AccountItemPinButtonProps) {
   }
 
   return (
-    <Tooltip title={isPinned ? 'Remove from trusted Safes' : 'Add to trusted Safes'}>
+    <Tooltip title={isPinned ? 'Remove from my accounts' : 'Add to my accounts'}>
       <IconButton data-testid="bookmark-icon" edge="end" size="medium" onClick={handleClick}>
         <SvgIcon
           component={isPinned ? BookmarkedIcon : BookmarkIcon}

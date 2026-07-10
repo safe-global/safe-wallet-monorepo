@@ -126,7 +126,7 @@ describe('AddAccounts — wallet connection state', () => {
   it('renders the "What are trusted Safe accounts?" info banner with a Manage list action', () => {
     render(<AddAccounts externalOpen onExternalClose={() => {}} />)
 
-    expect(screen.getByText('What are trusted Safe accounts?')).toBeInTheDocument()
+    expect(screen.getByText('What are my accounts?')).toBeInTheDocument()
     expect(screen.getByText(/This list protects you from impersonation\./)).toBeInTheDocument()
     expect(screen.getByTestId('open-manage-trusted-safes')).toHaveTextContent('Manage list')
   })
@@ -157,14 +157,14 @@ describe('AddAccounts — manage trusted safes view switch', () => {
     render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
 
     // Starts on the picker
-    expect(screen.getByText('Trusted Safe accounts')).toBeInTheDocument()
+    expect(screen.getByText('My accounts')).toBeInTheDocument()
     expect(screen.queryByTestId('manage-trusted-content')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByTestId('open-manage-trusted-safes'))
 
     expect(mockTrustedOpen).toHaveBeenCalled()
     expect(screen.getByTestId('manage-trusted-content')).toBeInTheDocument()
-    expect(screen.getByText('Manage trusted Safes')).toBeInTheDocument()
+    expect(screen.getByText('Manage my account list')).toBeInTheDocument()
 
     // Header back returns to the picker without saving
     fireEvent.click(screen.getByTestId('manage-trusted-back'))

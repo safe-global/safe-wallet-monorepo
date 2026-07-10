@@ -9,7 +9,7 @@ describe('TrustedAccountsActions', () => {
     })
 
     expect(getByTestId('add-safe-button')).toBeInTheDocument()
-    expect(getByTestId('add-more-safes-button')).toHaveTextContent('Manage trusted Safes')
+    expect(getByTestId('add-more-safes-button')).toHaveTextContent('Manage list')
   })
 
   it('calls onManage when the manage button is clicked', async () => {

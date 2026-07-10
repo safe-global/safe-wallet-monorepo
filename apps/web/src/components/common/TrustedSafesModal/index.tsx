@@ -11,7 +11,7 @@ const TrustedSafesModal = ({ modal }: TrustedSafesModalProps) => {
     <Dialog open={modal.isOpen} onOpenChange={(open) => !open && modal.close()}>
       <DialogContent className="flex max-h-[90vh] w-full max-w-[min(900px,calc(100vw-2rem))] flex-col gap-0 p-0">
         <DialogHeader className="shrink-0 border-b border-border px-6 pb-4 pt-6">
-          <DialogTitle className="font-bold">Manage trusted Safes</DialogTitle>
+          <DialogTitle className="font-bold">Manage my account list</DialogTitle>
         </DialogHeader>
 
         <div className="flex min-h-0 flex-1 flex-col px-6 pb-6 pt-4">

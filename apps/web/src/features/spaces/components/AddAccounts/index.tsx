@@ -372,7 +372,7 @@ const AddAccounts = ({
   const isListEmpty = trustedSafes.length === 0 && !debouncedSearchQuery
   const hasNoSearchMatch = visibleTrusted.length === 0 && Boolean(debouncedSearchQuery)
   const emptyStateMessage = wallet
-    ? 'No trusted Safe accounts yet — trust some via "Manage trusted Safes", or add one by address below.'
+    ? 'No accounts yet — add some via "Manage list", or add one by address below.'
     : 'No saved Safe accounts yet — add one by address below.'
 
   return (
@@ -417,7 +417,7 @@ const AddAccounts = ({
                 >
                   <ArrowLeft className="size-5" />
                 </button>
-                <DialogTitle className="font-bold">Manage trusted Safes</DialogTitle>
+                <DialogTitle className="font-bold">Manage my account list</DialogTitle>
               </DialogHeader>
 
               <div className="flex min-h-0 flex-1 flex-col px-6 pb-6 pt-4">
@@ -432,7 +432,7 @@ const AddAccounts = ({
           ) : (
             <>
               <DialogHeader className="shrink-0 border-b border-border px-6 pb-4 pt-6">
-                <DialogTitle className="font-bold">Trusted Safe accounts</DialogTitle>
+                <DialogTitle className="font-bold">My accounts</DialogTitle>
               </DialogHeader>
 
               <FormProvider {...formMethods}>
@@ -440,7 +440,7 @@ const AddAccounts = ({
                   <div className="mb-4 flex shrink-0 items-center gap-3 rounded-2xl bg-muted p-4">
                     <Info className="size-5 shrink-0 text-muted-foreground" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-foreground">What are trusted Safe accounts?</p>
+                      <p className="text-sm font-semibold text-foreground">What are my accounts?</p>
                       <p className="text-sm text-muted-foreground">
                         This list protects you from impersonation. Anyone can create a Safe account listing your address
                         as a signer, so only accounts you&apos;ve confirmed appear here.{' '}

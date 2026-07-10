@@ -120,7 +120,7 @@ describe('AccountsModal', () => {
     expect(screen.getByTestId('empty-pinned-list')).toBeInTheDocument()
   })
 
-  it('renders the Manage trusted Safes action in the Trusted Safes section', () => {
+  it('renders the Manage list action in the My accounts section', () => {
     mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ trustedItems: [safeItem('1', ADDR_A)] }))
 
     render(<AccountsModal open onClose={jest.fn()} onManageTrustedSafes={jest.fn()} />)
@@ -128,14 +128,14 @@ describe('AccountsModal', () => {
     expect(screen.getByTestId('manage-trusted-safes-link')).toBeInTheDocument()
   })
 
-  it('keeps the Trusted Safes section and action visible when there are no trusted safes', () => {
+  it('keeps the My accounts section and action visible when there are no accounts', () => {
     mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ trustedItems: [], otherItems: [] }))
 
     render(<AccountsModal open onClose={jest.fn()} onManageTrustedSafes={jest.fn()} />)
 
     expect(screen.getByTestId('pinned-accounts')).toBeInTheDocument()
     expect(screen.getByTestId('manage-trusted-safes-link')).toBeInTheDocument()
-    expect(screen.getByText('No trusted Safes yet')).toBeInTheDocument()
+    expect(screen.getByText('No accounts yet')).toBeInTheDocument()
     expect(screen.queryByTestId('empty-pinned-list')).not.toBeInTheDocument()
   })
 
