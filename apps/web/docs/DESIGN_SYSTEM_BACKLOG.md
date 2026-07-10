@@ -87,18 +87,18 @@ spot-check the story in Storybook light+dark.
 
 ## 3. Remaining work (each item is independent — parallelize freely)
 
-| #      | Item                                                                                                                             | Effort | Blocked by                            | Kind        |
-| ------ | -------------------------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------- | ----------- |
-| ~~A~~  | ~~Finish `DialogActions` + skipped footers~~ — **DONE** (item A)                                                                 | —      | —                                     | code        |
-| B      | On-colour CTA decision (Earn/AddFunds/AccountHeader)                                                                             | S      | **design nod**                        | design→code |
-| ~~C1~~ | ~~**Card** family tail + ESLint~~ — **DONE** (design calls taken: `size="lg"`, radius default `xl`→`lg`, gap unify; ESLint live) | —      | Argos to confirm the radius flip      | code        |
-| ~~C2~~ | ~~**Dialog/Drawer/Sheet** family~~ — **DONE** (cva size/padding/surface/divided; ESLint live)                                    | —      | Argos; Sheet `size` design follow-up  | code        |
-| ~~C3~~ | ~~**Badge/Chip** migration + ESLint~~ — **DONE** (design calls taken; ~24 sites migrated; ESLint live)                           | —      | Argos to confirm shade/size shifts    | code        |
-| ~~C4~~ | ~~**Input/InputGroup** tail + ESLint~~ — **DONE** (outliers → `surface`/grandfather; ESLint live)                                | —      | Argos; retire `SearchField` follow-up | code        |
-| ~~C5~~ | ~~**Select** family~~ — **DONE** (literal-className sites; css-module sites follow-up)                                           | —      | —                                     | code        |
-| D      | Sweep up the 11 grandfathered button disables (via new presets)                                                                  | M      | some need B/design                    | code        |
-| E      | Turn on the Argos visual gate on PRs                                                                                             | S      | **repo secret**                       | infra       |
-| F      | Migration PR's own un-draft items (not the DS thread)                                                                            | —      | —                                     | QA          |
+| #      | Item                                                                                                                             | Effort | Blocked by                            | Kind  |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------- | ----- |
+| ~~A~~  | ~~Finish `DialogActions` + skipped footers~~ — **DONE** (item A)                                                                 | —      | —                                     | code  |
+| ~~B~~  | ~~On-colour CTA decision~~ — **DONE** (Earn/AddFunds/AccountHeader → `variant="surface"`, disables removed)                      | —      | Argos to confirm AccountHeader shift  | code  |
+| ~~C1~~ | ~~**Card** family tail + ESLint~~ — **DONE** (design calls taken: `size="lg"`, radius default `xl`→`lg`, gap unify; ESLint live) | —      | Argos to confirm the radius flip      | code  |
+| ~~C2~~ | ~~**Dialog/Drawer/Sheet** family~~ — **DONE** (cva size/padding/surface/divided; ESLint live)                                    | —      | Argos; Sheet `size` design follow-up  | code  |
+| ~~C3~~ | ~~**Badge/Chip** migration + ESLint~~ — **DONE** (design calls taken; ~24 sites migrated; ESLint live)                           | —      | Argos to confirm shade/size shifts    | code  |
+| ~~C4~~ | ~~**Input/InputGroup** tail + ESLint~~ — **DONE** (outliers → `surface`/grandfather; ESLint live)                                | —      | Argos; retire `SearchField` follow-up | code  |
+| ~~C5~~ | ~~**Select** family~~ — **DONE** (literal-className sites; css-module sites follow-up)                                           | —      | —                                     | code  |
+| ~~D~~  | ~~Sweep up the grandfathered button disables~~ — **CLOSED** (CTA trio removed via B; rest kept as sanctioned exceptions)         | —      | ButtonGroup primitive = future work   | code  |
+| E      | Turn on the Argos visual gate on PRs                                                                                             | S      | **repo secret**                       | infra |
+| F      | Migration PR's own un-draft items (not the DS thread)                                                                            | —      | —                                     | QA    |
 
 Items **C1–C5** are fully independent and can run concurrently (disjoint files, except each extends the one
 shared `eslint.config.mjs` — do the ESLint edit last, or have the worker report the element name for a single
@@ -149,19 +149,31 @@ Pattern to copy: the **Button** sweep + `UI/Button → Guidelines` story, and th
 (a 1:1 value port of a bespoke component onto a new variant). Fan-out shape: one agent per call-site file, each
 migrating or skipping+justifying, self-verifying with `eslint`.
 
-### D. Grandfathered button disables (11 files) → future presets
+### D. Grandfathered button disables — AUDITED & CLOSED (2026-07-10)
 
-Each remaining `// eslint-disable-next-line no-restricted-syntax` maps to a preset/variant to build; adding it
-deletes the disable:
+**Resolved:** the **on-colour CTA** trio (`AddFundsBanner`, `EarnButton`, `AccountHeader`) was migrated onto
+`variant="surface"` and its three disables deleted — see **B** (DONE).
 
-- **on-colour CTA** → see **B** (`AddFundsBanner`, `EarnButton`, `AccountHeader`).
-- **menu-item size** (`h-auto` + row padding) → `common/HelpMenu`.
-- **link-variant reset** (link buttons shed height/padding) → `spaces/.../WorkspaceBanner`, `SecurityChecks` inline toggle.
-- **card/toggle pattern** (selectable cards as buttons) → `SpaceSettings/sections/AppearanceSection`.
-- **filled-icon action** → `spaces/.../SafeAccounts/SendTransactionButton`.
-- **sidebar action** (tight radius + collapsible) → `spaces/.../Sidebar/NewTransactionButton/SidebarActionButton`.
-- **split-button join** (structural — likely stays disabled or needs a real `ButtonGroup` primitive) → `common/SplitMenuButton`.
-- **pinned/active state** + **inline simulation toggle** → `SafeAppActionButtons`, `transactions/QueuedTxSimulation`.
+**Kept as sanctioned escape hatches (decision):** the remaining button disables are each genuinely one-off,
+structural, or stateful, and building a Button variant/size for each would (a) be a one-to-two-use addition and
+(b) mix geometry with justify/font-weight/state concerns — contradicting the "no one-use variant" principle
+applied across C1–C5 (e.g. we declined one-use `ghost`/`muted` on Input). The `eslint-disable` escape hatch
+exists precisely for these. Audited and confirmed valid:
+
+- **menu-item** (`h-auto` + row padding, `common/HelpMenu` ×2) — a single component; the real fix is
+  `DropdownMenuItem`, not a Button size. Left grandfathered.
+- **link/inline-text** (`WorkspaceBanner`, `SecurityChecks` toggle) — even a `size="inline"` (h-auto/p-0) wouldn't
+  clear these: WorkspaceBanner keeps a flagged `text-xs`, and the security toggle isn't a `link` variant.
+- **filled-icon action** (`SendTransactionButton`) & **pinned/active state** (`SafeAppActionButtons`) — stateful
+  icon backgrounds/`svg` fills, not a fixed variant.
+- **sidebar action** (`SidebarActionButton`) — collapsible `group-data-[collapsible=icon]` sizing, sidebar-only.
+- **inline simulation toggle** (`QueuedTxSimulation`) — bespoke inline surface toggle.
+- **split-button join** (`SplitMenuButton` ×2) — structural; would need a real `ButtonGroup` primitive (the button
+  base already hints `in-data-[slot=button-group]:rounded-*`). Deferred as a **future primitive**, not a variant.
+- `AppearanceSection` — no such disable exists (stale backlog note).
+
+Net: 3 disables removed (via B); the rest are correct, documented exceptions. Re-open only if a pattern recurs
+enough to earn a real variant, or when a `ButtonGroup` primitive is built for split buttons.
 
 ### E. Turn on the Argos visual gate (highest-leverage guard)
 
