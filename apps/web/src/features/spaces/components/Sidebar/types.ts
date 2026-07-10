@@ -69,5 +69,6 @@ export interface SafeSidebarVariantProps {
   workspaceHeader: SafeWorkspaceHeaderProps
   mainNavItems: ResolvedSidebarItem[] | null
   defiGroup: ResolvedSidebarGroup | null
+  developerGroup?: ResolvedSidebarGroup | null
   isLoading?: boolean
 }

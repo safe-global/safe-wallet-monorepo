@@ -21,7 +21,12 @@ export const useResolvedSidebarNav = (
   mainNavConfig: SidebarItemConfig[],
   setupGroupConfig: SidebarGroupConfig,
   options: NavResolverOptions,
-): { mainNavItems: ResolvedSidebarItem[]; setupGroup: ResolvedSidebarGroup } => {
+  developerGroupConfig?: SidebarGroupConfig,
+): {
+  mainNavItems: ResolvedSidebarItem[]
+  setupGroup: ResolvedSidebarGroup
+  developerGroup?: ResolvedSidebarGroup
+} => {
   const { pathname } = useRouter()
 
   return {
@@ -29,6 +34,10 @@ export const useResolvedSidebarNav = (
     setupGroup: {
       label: setupGroupConfig.label,
       items: setupGroupConfig.items.map((item) => resolveItem(item, pathname, options)),
+    },
+    developerGroup: developerGroupConfig && {
+      label: developerGroupConfig.label,
+      items: developerGroupConfig.items.map((item) => resolveItem(item, pathname, options)),
     },
   }
 }
