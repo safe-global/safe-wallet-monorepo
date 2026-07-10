@@ -22,6 +22,11 @@ describe('guardScanner', () => {
       const result = await guardScanner.scan(ctx)
       expect(result.status).toBe('issue')
       expect(result.severity).toBe('High')
+      // No name → full address so EvidenceList shortens it and adds a copy button (WA-2371).
+      expect(result.evidence).toContainEqual({
+        label: 'Guard',
+        value: '0xabcdef1234567890abcdef1234567890abcdef12',
+      })
     })
   })
 

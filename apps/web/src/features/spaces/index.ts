@@ -65,6 +65,7 @@ export { default as useGetAddressBookRequests } from './hooks/useGetAddressBookR
 export { useAdminCount, useIsLastActiveAdmin } from './hooks/useIsLastActiveAdmin'
 export { default as useIsQualifiedSafe } from './hooks/useIsQualifiedSafe'
 export { useMembersSearch } from './hooks/useMembersSearch'
+export { useInviteNotification } from './hooks/useInviteNotification'
 export { default as useTrackSpace } from './hooks/useTrackSpace'
 
 // Hooks from useSpaceMembers.tsx

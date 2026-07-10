@@ -6,7 +6,6 @@ import {
   DialogActions,
   DialogContent,
   Stack,
-  Tooltip,
   Typography,
 } from '@mui/material'
 import { Button } from '@/components/ui/button'
@@ -14,8 +13,7 @@ import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { Badge } from '@/components/ui/badge'
 import ModalDialog from '@/components/common/ModalDialog'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import ChainIndicator from '@/components/common/ChainIndicator'
-import { NetworkLogosList } from '@/features/multichain'
+import { NetworkLogosTooltip } from '@/features/multichain'
 import { useAddressBookRequestsCreateRequestV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
@@ -143,21 +141,11 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
               {chains.configs.length === chainIds.length ? (
                 <Typography variant="body1">All networks</Typography>
               ) : (
-                <Tooltip
-                  title={
-                    <Stack spacing={0.5}>
-                      {chainIds.map((chainId) => (
-                        <ChainIndicator key={chainId} chainId={chainId} />
-                      ))}
-                    </Stack>
-                  }
-                  placement="top"
-                  arrow
-                >
-                  <Box display="inline-flex">
-                    <NetworkLogosList networks={chainIds.map((chainId) => ({ chainId }))} showHasMore maxVisible={6} />
-                  </Box>
-                </Tooltip>
+                <NetworkLogosTooltip
+                  networks={chainIds.map((chainId) => ({ chainId }))}
+                  maxVisible={6}
+                  triggerRender={<span className="inline-flex" />}
+                />
               )}
             </Box>
           </Stack>

@@ -28,6 +28,8 @@ const CreateSafeOnSpecificChain = dynamic(() =>
 
 const NetworkLogosList = dynamic(() => import('./components/NetworkLogosList'))
 
+const NetworkLogosTooltip = dynamic(() => import('./components/NetworkLogosTooltip'))
+
 const SafeCreationNetworkInput = dynamic(() => import('./components/SafeCreationNetworkInput'))
 
 const ChangeSignerSetupWarning = dynamic(() =>
@@ -64,6 +66,7 @@ export {
   CreateSafeOnNewChain,
   CreateSafeOnSpecificChain,
   NetworkLogosList,
+  NetworkLogosTooltip,
   SafeCreationNetworkInput,
   ChangeSignerSetupWarning,
   InconsistentSignerSetupWarning,

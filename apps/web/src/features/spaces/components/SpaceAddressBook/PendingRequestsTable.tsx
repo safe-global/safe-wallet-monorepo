@@ -6,7 +6,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import Identicon from '@/components/common/Identicon'
-import { NetworkLogosList } from '@/features/multichain'
+import { NetworkLogosTooltip } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import {
@@ -127,24 +127,11 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
   }
 
   const renderChains = (req: AddressBookRequestItemDto) => (
-    <Tooltip>
-      <TooltipTrigger>
-        <span className="inline-flex origin-left scale-85">
-          {chains.configs.length === req.chainIds.length ? (
-            <Badge variant="secondary">All</Badge>
-          ) : (
-            <NetworkLogosList networks={req.chainIds.map((chainId) => ({ chainId }))} showHasMore maxVisible={3} />
-          )}
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>
-        <div className="flex flex-col gap-1">
-          {req.chainIds.map((chainId) => (
-            <ChainIndicator key={chainId} chainId={chainId} />
-          ))}
-        </div>
-      </TooltipContent>
-    </Tooltip>
+    <NetworkLogosTooltip
+      networks={req.chainIds.map((chainId) => ({ chainId }))}
+      maxVisible={3}
+      trigger={chains.configs.length === req.chainIds.length ? <Badge variant="secondary">All</Badge> : undefined}
+    />
   )
 
   const columns: DataTableColumn<AddressBookRequestItemDto>[] = [
