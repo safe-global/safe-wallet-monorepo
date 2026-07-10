@@ -41,7 +41,11 @@ const readAllChunks = (dir: string): string => {
         stdio: 'inherit',
       })
       expect(existsSync(CHUNKS_DIR)).toBe(true)
-      expect(readAllChunks(CHUNKS_DIR)).not.toContain(MARKER)
+      const chunks = readAllChunks(CHUNKS_DIR)
+      // Guard against a vacuous pass: an empty chunks dir would also satisfy the
+      // marker-absence check below without ever having scanned real output.
+      expect(chunks.length).toBeGreaterThan(0)
+      expect(chunks).not.toContain(MARKER)
     })
   },
 )
