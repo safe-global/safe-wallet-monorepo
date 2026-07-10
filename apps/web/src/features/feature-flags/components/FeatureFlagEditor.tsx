@@ -21,10 +21,10 @@ export const FeatureFlagEditor = (): ReactElement => {
   const filteredRest = useMemo(() => rest.filter((row) => matchesSearch(row, search)), [rest, search])
 
   return (
-    <div className="mx-auto flex max-w-[1060px] flex-col">
+    <div className="mx-auto flex max-w-4xl flex-col gap-2">
       <div className="mb-2">
         <h1 className="text-2xl font-bold tracking-tight">Feature flags</h1>
-        <p className="text-muted-foreground mt-1 max-w-[62ch] text-sm">
+        <p className="text-muted-foreground mt-1 text-sm">
           Override the feature flags delivered by the config service. Changes apply instantly across all chains — no
           reload needed.
         </p>
@@ -53,8 +53,8 @@ export const FeatureFlagEditor = (): ReactElement => {
         </div>
 
         <Button
-          variant="outline"
-          size="sm"
+          variant="destructive"
+          size="lg"
           onClick={() => dispatch(clearAllOverrides())}
           disabled={overridden.length === 0}
         >

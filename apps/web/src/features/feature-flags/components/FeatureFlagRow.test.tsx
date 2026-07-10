@@ -23,15 +23,16 @@ describe('FeatureFlagRow', () => {
     expect(getByRole('switch')).toBeChecked()
   })
 
-  // The revert button and match indicator stay in the DOM for stable column
-  // alignment and are hidden via `visibility` — so we assert visibility, not presence.
+  // The revert button and match indicator only render for overridden rows.
   it('shows the revert button only for overridden rows', () => {
-    const { getByLabelText, rerender } = render(<FeatureFlagRow row={baseRow} />)
-    expect(getByLabelText('Revert override')).not.toBeVisible()
+    const { queryByLabelText, rerender } = render(<FeatureFlagRow row={baseRow} />)
+    expect(queryByLabelText('Revert override')).not.toBeInTheDocument()
     rerender(<FeatureFlagRow row={{ ...baseRow, override: true, effective: true }} />)
-    expect(getByLabelText('Revert override')).toBeVisible()
+    expect(queryByLabelText('Revert override')).toBeInTheDocument()
   })
 
+  // Within an overridden row the match indicator stays in the DOM and is toggled
+  // via `visibility`, so this case asserts visibility rather than presence.
   it('shows the match indicator only when the override matches the current chain config', () => {
     const label = 'Matches config service setting for the current chain'
     const { getByLabelText, rerender } = render(
