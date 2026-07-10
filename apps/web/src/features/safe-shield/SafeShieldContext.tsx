@@ -9,7 +9,12 @@ import {
   type Dispatch,
   type SetStateAction,
 } from 'react'
-import { useAddressPoisoningOverlay, useCounterpartyAnalysis, useRecipientAnalysis, useThreatAnalysis } from './hooks'
+import {
+  useRecipientAnalysisWithPoisoning,
+  useCounterpartyAnalysis,
+  useRecipientAnalysis,
+  useThreatAnalysis,
+} from './hooks'
 import useUntrustedSafeAnalysis from './hooks/useUntrustedSafeAnalysis'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
@@ -65,7 +70,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   // Client-side address-poisoning check: overlays an ADDRESS_POISONING group onto both
   // the create-step (registered recipients) and review-step (counterparty) analysis,
   // plus poisoning-only entries for registered non-recipient addresses.
-  const recipient = useAddressPoisoningOverlay(
+  const recipient = useRecipientAnalysisWithPoisoning(
     recipientOnlyAnalysis || counterpartyAnalysis.recipient,
     poisoningAddresses,
   )

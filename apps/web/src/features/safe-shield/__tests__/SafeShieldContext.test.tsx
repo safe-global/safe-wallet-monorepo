@@ -18,7 +18,7 @@ jest.mock('../hooks', () => ({
   })),
   useThreatAnalysis: jest.fn(),
   // Pass-through by default (set in beforeEach); the overlay is covered by its own suite
-  useAddressPoisoningOverlay: jest.fn(),
+  useRecipientAnalysisWithPoisoning: jest.fn(),
 }))
 
 // Mock new dependencies for untrusted Safe check
@@ -59,7 +59,7 @@ const mockSafeTxContextValue = {
 
 const mockUseThreatAnalysis = jest.requireMock('../hooks').useThreatAnalysis
 const mockUseCounterpartyAnalysis = jest.requireMock('../hooks').useCounterpartyAnalysis
-const mockUseAddressPoisoningOverlay = jest.requireMock('../hooks').useAddressPoisoningOverlay
+const mockUseRecipientAnalysisWithPoisoning = jest.requireMock('../hooks').useRecipientAnalysisWithPoisoning
 
 const buildSafeTransaction = (data: string): SafeTransaction => ({
   addSignature: jest.fn(),
@@ -98,7 +98,7 @@ const buildThreatResult = (severity: Severity) => [
 describe('SafeShieldContext', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseAddressPoisoningOverlay.mockImplementation((recipient: unknown) => recipient)
+    mockUseRecipientAnalysisWithPoisoning.mockImplementation((recipient: unknown) => recipient)
   })
 
   it('should require risk confirmation for critical threats', async () => {
@@ -297,13 +297,13 @@ describe('SafeShieldContext', () => {
     renderHook(() => useSafeShieldForAddressPoisoning(addresses), { wrapper })
 
     await waitFor(() => {
-      expect(mockUseAddressPoisoningOverlay).toHaveBeenLastCalledWith(expect.anything(), addresses)
+      expect(mockUseRecipientAnalysisWithPoisoning).toHaveBeenLastCalledWith(expect.anything(), addresses)
     })
   })
 
   it('should require risk confirmation for a CRITICAL address-poisoning match', async () => {
     mockUseThreatAnalysis.mockReturnValue([undefined, undefined, false])
-    mockUseAddressPoisoningOverlay.mockImplementation(() => [
+    mockUseRecipientAnalysisWithPoisoning.mockImplementation(() => [
       {
         '0x00000000000000000000000000000000000000cc': {
           [StatusGroup.ADDRESS_POISONING]: [
