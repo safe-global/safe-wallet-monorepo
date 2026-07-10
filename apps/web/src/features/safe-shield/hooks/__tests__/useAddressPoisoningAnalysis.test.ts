@@ -1,5 +1,5 @@
 import { renderHook } from '@/tests/test-utils'
-import { useAddressPoisoningOverlay } from '../useAddressPoisoningAnalysis'
+import { useRecipientAnalysisWithPoisoning } from '../useAddressPoisoningAnalysis'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { getAddressPoisoningResult, mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
 import {
@@ -39,9 +39,9 @@ const buildData = (): RecipientAnalysisResults => ({
 })
 
 const renderOverlay = (recipient: AsyncResult<RecipientAnalysisResults>) =>
-  renderHook(() => useAddressPoisoningOverlay(recipient), { initialReduxState })
+  renderHook(() => useRecipientAnalysisWithPoisoning(recipient), { initialReduxState })
 
-describe('useAddressPoisoningOverlay', () => {
+describe('useRecipientAnalysisWithPoisoning', () => {
   beforeEach(() => {
     mockUseHasFeature.mockReturnValue(true)
   })
@@ -123,9 +123,12 @@ describe('useAddressPoisoningOverlay', () => {
 
   describe('poisoning-only addresses (flows without recipient analysis)', () => {
     it('creates a poisoning-only entry for a matched extra address, even without backend data', () => {
-      const { result } = renderHook(() => useAddressPoisoningOverlay([undefined, undefined, false], [BOTH_ENDS]), {
-        initialReduxState,
-      })
+      const { result } = renderHook(
+        () => useRecipientAnalysisWithPoisoning([undefined, undefined, false], [BOTH_ENDS]),
+        {
+          initialReduxState,
+        },
+      )
       const [overlaid] = result.current
 
       expect(overlaid?.[BOTH_ENDS]).toEqual({
@@ -141,7 +144,7 @@ describe('useAddressPoisoningOverlay', () => {
 
     it('ignores partially-typed (invalid) extra addresses', () => {
       const { result } = renderHook(
-        () => useAddressPoisoningOverlay([undefined, undefined, false], ['0xa1b2', BOTH_ENDS.slice(0, 20)]),
+        () => useRecipientAnalysisWithPoisoning([undefined, undefined, false], ['0xa1b2', BOTH_ENDS.slice(0, 20)]),
         { initialReduxState },
       )
 
@@ -149,16 +152,19 @@ describe('useAddressPoisoningOverlay', () => {
     })
 
     it('stays empty when extra addresses are clean or anchors themselves', () => {
-      const { result } = renderHook(() => useAddressPoisoningOverlay([undefined, undefined, false], [CLEAN, ANCHOR]), {
-        initialReduxState,
-      })
+      const { result } = renderHook(
+        () => useRecipientAnalysisWithPoisoning([undefined, undefined, false], [CLEAN, ANCHOR]),
+        {
+          initialReduxState,
+        },
+      )
 
       expect(result.current[0]).toBeUndefined()
     })
 
     it('does not duplicate an entry already covered by the analysis data', () => {
       const data = buildData()
-      const { result } = renderHook(() => useAddressPoisoningOverlay([data, undefined, false], [BOTH_ENDS]), {
+      const { result } = renderHook(() => useRecipientAnalysisWithPoisoning([data, undefined, false], [BOTH_ENDS]), {
         initialReduxState,
       })
       const [overlaid] = result.current

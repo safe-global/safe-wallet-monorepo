@@ -24,7 +24,7 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
  * shows just this check. Gated by the ADDRESS_POISONING_PROTECTION chain flag; a
  * pass-through when nothing matches.
  */
-export const useAddressPoisoningOverlay = (
+export const useRecipientAnalysisWithPoisoning = (
   recipient: AsyncResult<RecipientAnalysisResults>,
   extraAddresses?: string[],
 ): AsyncResult<RecipientAnalysisResults> => {
