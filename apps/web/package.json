@@ -37,7 +37,7 @@
     "cypress:open": "cross-env TZ=UTC NODE_ENV=cypress cypress open --e2e",
     "cypress:canary": "cross-env TZ=UTC NODE_ENV=cypress cypress open --e2e -b chrome:canary",
     "cypress:run": "cross-env NODE_ENV=cypress cypress run",
-    "cypress:ci": "cross-env NODE_ENV=cypress yarn cypress:run --config baseUrl=http://localhost:8080 --spec cypress/e2e/smoke/*.cy.js",
+    "cypress:ci": "cross-env NODE_ENV=cypress yarn cypress:run --config baseUrl=http://localhost:4003 --spec cypress/e2e/smoke/*.cy.js",
     "serve": "sh -c 'npx -y serve out -p ${REVERSE_PROXY_UI_PORT:=8080}'",
     "static-serve": "yarn build && yarn serve",
     "storybook": "storybook dev -p 6006",

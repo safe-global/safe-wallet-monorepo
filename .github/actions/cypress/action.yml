@@ -71,14 +71,18 @@ runs:
         browser: ${{ steps.setup-chrome.outputs.chrome-path }}
         record: ${{ inputs.record == 'true' }}
         tag: ${{ inputs.record == 'true' && inputs.tag || '' }}
-        config: baseUrl=http://localhost:8080
+        # Serve Cypress on 4003 (not the shared 8080 default): the CoW swap
+        # widget iframe only fully loads when the parent app's origin is on its
+        # allowlist, which includes localhost:4003. Playwright keeps 8080.
+        config: baseUrl=http://localhost:4003
         install: false
         start: yarn workspace @safe-global/web serve
-        wait-on: 'http://localhost:8080'
+        wait-on: 'http://localhost:4003'
         wait-on-timeout: 120
         working-directory: apps/web
       env:
         NODE_ENV: cypress
+        REVERSE_PROXY_UI_PORT: '4003'
         CYPRESS_RECORD_KEY: ${{ inputs.record_key || fromJSON(inputs.secrets).CYPRESS_RECORD_KEY }}
         GITHUB_TOKEN: ${{ fromJSON(inputs.secrets).GITHUB_TOKEN }}
         CYPRESS_PROJECT_ID: ${{ inputs.project_id }}
