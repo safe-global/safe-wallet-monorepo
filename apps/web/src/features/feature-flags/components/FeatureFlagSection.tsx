@@ -24,7 +24,7 @@ export const FeatureFlagSection = ({
         <div
           className={cn(
             GRID,
-            'text-muted-foreground border-b px-4 py-2 text-[10.5px] font-semibold tracking-wide uppercase [&>:last-child]:text-right',
+            'text-muted-foreground border-b px-5 py-2 text-[10.5px] font-semibold tracking-wide uppercase [&>:last-child]:text-right',
           )}
         >
           <span>Feature flag</span>
