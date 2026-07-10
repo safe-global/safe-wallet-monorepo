@@ -3,6 +3,7 @@ import { Check, Globe, RotateCcw } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { NetworkLogosList } from '@/features/multichain'
 import { cn } from '@/utils/cn'
 import { useAppDispatch } from '@/store'
@@ -11,6 +12,8 @@ import type { FeatureFlagRowData } from '../hooks/useFeatureFlagEditorData'
 
 // Kept in the DOM but hidden so the controls column stays aligned across rows.
 const HIDDEN: CSSProperties = { visibility: 'hidden' }
+
+const MATCH_LABEL = 'Matches config service setting for the current chain'
 
 // Shared so the section column header lines up with the rows.
 export const GRID = 'grid grid-cols-[minmax(200px,1fr)_minmax(140px,240px)_auto] items-center gap-3'
@@ -58,11 +61,18 @@ export const FeatureFlagRow = ({ row }: { row: FeatureFlagRowData }): ReactEleme
           aria-label={`Toggle ${row.feature}`}
         />
 
-        <Check
-          className="text-success-strong size-4 shrink-0"
-          style={row.matchesCurrentChain ? undefined : HIDDEN}
-          aria-label="Matches config service setting for the current chain"
-        />
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Check
+                className="text-success-strong size-4 shrink-0"
+                style={row.matchesCurrentChain ? undefined : HIDDEN}
+                aria-label={MATCH_LABEL}
+              />
+            }
+          />
+          <TooltipContent>{MATCH_LABEL}</TooltipContent>
+        </Tooltip>
 
         <Button
           variant="outline"
