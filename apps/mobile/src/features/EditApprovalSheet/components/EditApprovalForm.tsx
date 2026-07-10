@@ -172,7 +172,7 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
           )}
         />
         {approval.balance !== undefined && errorMessage == null && (
-          <Text fontSize="$3" color="$textSecondaryLight" testID="approval-token-balance" paddingBottom="$0.5">
+          <Text fontSize="$3" color="$textSecondaryLight" testID="approval-token-balance" marginBottom={1}>
             Balance: {formatVisualAmount(approval.balance, approval.tokenInfo?.decimals)} {symbol}
           </Text>
         )}
@@ -182,12 +182,10 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
         <XStack
           backgroundColor="$backgroundSkeleton"
           borderRadius="$4"
-          paddingHorizontal="$3"
-          paddingVertical="$2"
+          padding="$3"
           alignItems="center"
           justifyContent="space-between"
           gap="$3"
-          padding="$3"
         >
           <YStack flexShrink={1}>
             <Text fontSize="$4" fontWeight={500} color="$color">
