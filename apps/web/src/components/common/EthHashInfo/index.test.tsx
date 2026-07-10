@@ -88,9 +88,7 @@ describe('EthHashInfo', () => {
       jest.spyOn(useChains, 'useChain').mockReturnValue({ chainId: '4', shortName: 'rin' } as Chain)
 
       jest.spyOn(store, 'useAppSelector').mockReturnValue({
-        shortName: {
-          copy: true,
-        },
+        shortName: {},
       })
 
       const { queryByText } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} />)
@@ -102,9 +100,7 @@ describe('EthHashInfo', () => {
       jest.spyOn(useChains, 'useChain').mockReturnValue({ chainId: '100', shortName: 'gno' } as Chain)
 
       jest.spyOn(store, 'useAppSelector').mockReturnValue({
-        shortName: {
-          copy: true,
-        },
+        shortName: {},
       })
 
       const { queryByText } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} chainId="100" />)
@@ -114,9 +110,7 @@ describe('EthHashInfo', () => {
 
     it('renders a custom prefix', () => {
       jest.spyOn(store, 'useAppSelector').mockReturnValue({
-        shortName: {
-          copy: true,
-        },
+        shortName: {},
       })
 
       const { queryByText } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} prefix="test" />)
@@ -130,9 +124,7 @@ describe('EthHashInfo', () => {
       jest.spyOn(useChains, 'useChain').mockReturnValue({ chainId: '4', shortName: 'rin' } as Chain)
 
       jest.spyOn(store, 'useAppSelector').mockReturnValue({
-        shortName: {
-          copy: true,
-        },
+        shortName: {},
       })
 
       const result1 = render(
@@ -246,108 +238,9 @@ describe('EthHashInfo', () => {
       expect(container.querySelector('button')).toBeInTheDocument()
     })
 
-    it("doesn't copy the prefix with non-addresses", async () => {
+    it('copies the bare address for a valid chain', async () => {
       jest.spyOn(useChainId, 'default').mockReturnValue('4')
-
       jest.spyOn(useChains, 'useChain').mockReturnValue({ chainId: '4', shortName: 'rin' } as Chain)
-
-      jest.spyOn(store, 'useAppSelector').mockReturnValue({
-        shortName: {
-          copy: true,
-        },
-      })
-
-      const { container } = render(
-        <EthHashInfo address="0xe26920604f9a02c5a877d449faa71b7504f0c2508dcc7c0384078a024b8e592f" showCopyButton />,
-      )
-
-      const button = container.querySelector('button')
-
-      act(() => {
-        fireEvent.click(button!)
-      })
-
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-        '0xe26920604f9a02c5a877d449faa71b7504f0c2508dcc7c0384078a024b8e592f',
-      )
-    })
-
-    it('copies the default prefixed address', async () => {
-      jest.spyOn(useChainId, 'default').mockReturnValue('4')
-
-      jest.spyOn(useChains, 'useChain').mockReturnValue({ chainId: '4', shortName: 'rin' } as Chain)
-
-      jest.spyOn(store, 'useAppSelector').mockReturnValue({
-        shortName: {
-          copy: true,
-        },
-      })
-
-      const { container } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} showCopyButton />)
-
-      const button = container.querySelector('button')
-
-      act(() => {
-        fireEvent.click(button!)
-      })
-
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(`rin:${MOCK_SAFE_ADDRESS}`)
-    })
-
-    it('copies the prefix even if it is hidden', async () => {
-      jest.spyOn(useChainId, 'default').mockReturnValue('4')
-
-      jest.spyOn(useChains, 'useChain').mockReturnValue({ chainId: '4', shortName: 'rin' } as Chain)
-
-      jest.spyOn(store, 'useAppSelector').mockReturnValue({
-        shortName: {
-          copy: true,
-        },
-      })
-
-      const { container, queryByText } = render(
-        <EthHashInfo address={MOCK_SAFE_ADDRESS} showCopyButton showPrefix={false} />,
-      )
-
-      expect(queryByText('rin:')).not.toBeInTheDocument()
-
-      const button = container.querySelector('button')
-
-      act(() => {
-        fireEvent.click(button!)
-      })
-
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(`rin:${MOCK_SAFE_ADDRESS}`)
-    })
-
-    it('copies the selected chainId prefix', async () => {
-      jest.spyOn(useChains, 'useChain').mockReturnValue({ chainId: '100', shortName: 'gno' } as Chain)
-
-      jest.spyOn(store, 'useAppSelector').mockReturnValue({
-        shortName: {
-          copy: true,
-        },
-      })
-
-      const { container } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} showCopyButton chainId="100" />)
-
-      const button = container.querySelector('button')
-
-      act(() => {
-        fireEvent.click(button!)
-      })
-
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(`gno:${MOCK_SAFE_ADDRESS}`)
-    })
-
-    it('copies the raw address', async () => {
-      jest.spyOn(useChains, 'useChain').mockReturnValue(undefined)
-
-      jest.spyOn(store, 'useAppSelector').mockReturnValue({
-        shortName: {
-          copy: false,
-        },
-      })
 
       const { container } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} showCopyButton />)
 
@@ -358,6 +251,39 @@ describe('EthHashInfo', () => {
       })
 
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith(MOCK_SAFE_ADDRESS)
+    })
+
+    it('copies the bare address even when the prefix is displayed', async () => {
+      jest.spyOn(useChainId, 'default').mockReturnValue('4')
+      jest.spyOn(useChains, 'useChain').mockReturnValue({ chainId: '4', shortName: 'rin' } as Chain)
+
+      const { container, queryByText } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} showCopyButton />)
+
+      expect(queryByText('rin:')).toBeInTheDocument()
+
+      const button = container.querySelector('button')
+
+      act(() => {
+        fireEvent.click(button!)
+      })
+
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(MOCK_SAFE_ADDRESS)
+    })
+
+    it('copies the bare address for a non-address value', async () => {
+      jest.spyOn(useChainId, 'default').mockReturnValue('4')
+      jest.spyOn(useChains, 'useChain').mockReturnValue({ chainId: '4', shortName: 'rin' } as Chain)
+
+      const nonAddress = '0xe26920604f9a02c5a877d449faa71b7504f0c2508dcc7c0384078a024b8e592f'
+      const { container } = render(<EthHashInfo address={nonAddress} showCopyButton />)
+
+      const button = container.querySelector('button')
+
+      act(() => {
+        fireEvent.click(button!)
+      })
+
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(nonAddress)
     })
   })
 

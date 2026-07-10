@@ -5,20 +5,14 @@ import CopyButton from '../CopyButton'
 import EthHashInfo from '../EthHashInfo'
 
 const CopyAddressButton = ({
-  prefix,
   address,
-  copyPrefix,
   children,
   trusted = true,
 }: {
-  prefix?: string
   address: string
-  copyPrefix?: boolean
   children?: ReactNode
   trusted?: boolean
 }): ReactElement => {
-  const addressText = copyPrefix && prefix ? `${prefix}:${address}` : address
-
   const checksummedAddress = checksumAddress(address)
 
   const dialogContent = trusted ? undefined : (
@@ -38,7 +32,7 @@ const CopyAddressButton = ({
   )
 
   return (
-    <CopyButton text={addressText} dialogContent={dialogContent}>
+    <CopyButton text={address} dialogContent={dialogContent}>
       {children}
     </CopyButton>
   )

@@ -156,7 +156,6 @@ describe('useLoadBalances', () => {
           currency: 'USD',
           hiddenTokens: {},
           shortName: {
-            copy: true,
             qr: true,
           },
           theme: {},
@@ -275,7 +274,6 @@ describe('useLoadBalances', () => {
             currency: 'USD',
             hiddenTokens: {},
             shortName: {
-              copy: true,
               qr: true,
             },
             theme: {},
@@ -452,7 +450,6 @@ describe('useLoadBalances', () => {
             currency: 'USD',
             hiddenTokens: {},
             shortName: {
-              copy: true,
               qr: true,
             },
             theme: {},
@@ -538,7 +535,6 @@ describe('useLoadBalances', () => {
             currency: 'USD',
             hiddenTokens: {},
             shortName: {
-              copy: true,
               qr: true,
             },
             theme: {},
