@@ -124,4 +124,38 @@ describe('useResolvedSidebarNav', () => {
       expect(result.current.setupGroup.items[1]?.disabled).toBe(true)
     })
   })
+
+  describe('developerGroup', () => {
+    const mockDeveloperGroupConfig: SidebarGroupConfig = {
+      label: 'Developer',
+      items: [{ icon: mockIcon, label: 'Feature flags', href: '/feature-flags' }],
+    }
+
+    it('resolves developer group with label when config is provided', () => {
+      const { result } = renderHook(() =>
+        useResolvedSidebarNav(mockMainNav, mockSetupGroup, mockOptions, mockDeveloperGroupConfig),
+      )
+
+      expect(result.current.developerGroup?.label).toBe('Developer')
+    })
+
+    it('resolves developer group items via the same resolver used for other groups', () => {
+      const { result } = renderHook(() =>
+        useResolvedSidebarNav(mockMainNav, mockSetupGroup, mockOptions, mockDeveloperGroupConfig),
+      )
+
+      const item = result.current.developerGroup?.items[0]
+      expect(item?.label).toBe('Feature flags')
+      expect(item?.href).toBe('/feature-flags')
+      expect(item?.link).toEqual({ pathname: '/feature-flags', query: { spaceId: '123' } })
+      expect(item?.isActive).toBe(false)
+      expect(item?.disabled).toBe(false)
+    })
+
+    it('leaves developerGroup undefined when the 4th arg is omitted', () => {
+      const { result } = renderHook(() => useResolvedSidebarNav(mockMainNav, mockSetupGroup, mockOptions))
+
+      expect(result.current.developerGroup).toBeUndefined()
+    })
+  })
 })

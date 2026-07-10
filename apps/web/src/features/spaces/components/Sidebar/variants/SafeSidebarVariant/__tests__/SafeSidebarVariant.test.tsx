@@ -214,6 +214,17 @@ describe('SafeSidebarVariant', () => {
     items: [createMockNavItem({ label: 'Swap', href: '/swap', link: { pathname: '/swap', query: {} } })],
   }
 
+  const mockDeveloperGroup: ResolvedSidebarGroup = {
+    label: 'Developer',
+    items: [
+      createMockNavItem({
+        label: 'Feature flags',
+        href: '/feature-flags',
+        link: { pathname: '/feature-flags', query: {} },
+      }),
+    ],
+  }
+
   beforeEach(() => {
     jest.clearAllMocks()
     const mockUseRouter = jest.requireMock('next/router').useRouter as jest.Mock
@@ -688,6 +699,60 @@ describe('SafeSidebarVariant', () => {
       )
 
       expect(screen.getByTestId('new-tx-btn')).toBeInTheDocument()
+    })
+  })
+
+  describe('Developer group', () => {
+    it('renders the Developer group label and its items when provided', () => {
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+          developerGroup={mockDeveloperGroup}
+        />,
+      )
+
+      expect(screen.getByText('Developer')).toBeInTheDocument()
+      expect(screen.getByText('Feature flags')).toBeInTheDocument()
+    })
+
+    it('renders nothing for the Developer group when not provided', () => {
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.queryByText('Developer')).not.toBeInTheDocument()
+    })
+
+    it('renders nothing for the Developer group when null', () => {
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+          developerGroup={null}
+        />,
+      )
+
+      expect(screen.queryByText('Developer')).not.toBeInTheDocument()
+    })
+
+    it('renders nothing for the Developer group when items array is empty', () => {
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+          developerGroup={{ label: 'Developer', items: [] }}
+        />,
+      )
+
+      expect(screen.queryByText('Developer')).not.toBeInTheDocument()
     })
   })
 })
