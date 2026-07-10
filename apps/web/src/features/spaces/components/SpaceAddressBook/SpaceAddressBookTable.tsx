@@ -2,7 +2,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import EmailInfo from '@/components/common/EmailInfo'
-import { NetworkLogosList } from '@/features/multichain'
+import { NetworkLogosTooltip } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { HardDrive } from 'lucide-react'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -59,20 +59,7 @@ function SpaceAddressBookTable({
 
   // Chain logo cluster — used in the desktop "Chains" cell
   const renderChains = (entry: AddressBookEntry) => (
-    <Tooltip>
-      <TooltipTrigger>
-        <span className="inline-flex origin-left scale-85">
-          <NetworkLogosList networks={entry.chainIds.map((chainId) => ({ chainId }))} showHasMore maxVisible={3} />
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>
-        <div className="flex flex-col gap-1">
-          {entry.chainIds.map((chainId) => (
-            <ChainIndicator key={chainId} chainId={chainId} />
-          ))}
-        </div>
-      </TooltipContent>
-    </Tooltip>
+    <NetworkLogosTooltip networks={entry.chainIds.map((chainId) => ({ chainId }))} maxVisible={3} />
   )
 
   // Added-by / Last-updated content — used in the desktop column and the mobile detail row.
