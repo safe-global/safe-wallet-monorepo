@@ -1,7 +1,31 @@
-import { render } from '@/tests/test-utils'
+import { render, fireEvent } from '@/tests/test-utils'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { getStoreInstance } from '@/store'
 import { FeatureFlagRow } from './FeatureFlagRow'
 import type { FeatureFlagRowData } from '../hooks/useFeatureFlagEditorData'
+
+// The base-ui Switch doesn't toggle reliably in jsdom, so mock it with a plain
+// checkbox that forwards onCheckedChange — this pins our dispatch wiring, which
+// is the point of these tests (the real Switch is covered by its own tests).
+jest.mock('@/components/ui/switch', () => ({
+  Switch: ({
+    checked,
+    onCheckedChange,
+    'aria-label': ariaLabel,
+  }: {
+    checked: boolean
+    onCheckedChange: (value: boolean) => void
+    'aria-label'?: string
+  }) => (
+    <input
+      role="switch"
+      type="checkbox"
+      aria-label={ariaLabel}
+      checked={checked}
+      onChange={(event) => onCheckedChange(event.target.checked)}
+    />
+  ),
+}))
 
 const baseRow: FeatureFlagRowData = {
   feature: FEATURES.EARN,
@@ -34,16 +58,27 @@ describe('FeatureFlagRow', () => {
   // Within an overridden row the match indicator stays in the DOM and is toggled
   // via `visibility`, so this case asserts visibility rather than presence.
   it('shows the match indicator only when the override matches the current chain config', () => {
-    const label = 'Matches config service setting for the current chain'
-    const { getByLabelText, rerender } = render(
-      <FeatureFlagRow row={{ ...baseRow, override: true, effective: true }} />,
-    )
-    expect(getByLabelText(label)).not.toBeVisible()
+    const { getByTestId, rerender } = render(<FeatureFlagRow row={{ ...baseRow, override: true, effective: true }} />)
+    expect(getByTestId('ff-match-indicator')).not.toBeVisible()
     rerender(
       <FeatureFlagRow
         row={{ ...baseRow, override: true, configValue: true, effective: true, matchesCurrentChain: true }}
       />,
     )
-    expect(getByLabelText(label)).toBeVisible()
+    expect(getByTestId('ff-match-indicator')).toBeVisible()
+  })
+
+  it('dispatches setOverride when the switch is toggled', () => {
+    const { getByRole } = render(<FeatureFlagRow row={baseRow} />)
+    fireEvent.click(getByRole('switch'))
+    expect(getStoreInstance().getState().featureFlagOverrides).toEqual({ [FEATURES.EARN]: true })
+  })
+
+  it('dispatches clearOverride when the revert button is clicked', () => {
+    const { getByLabelText } = render(<FeatureFlagRow row={{ ...baseRow, override: true, effective: true }} />, {
+      initialReduxState: { featureFlagOverrides: { [FEATURES.EARN]: true } },
+    })
+    fireEvent.click(getByLabelText('Revert override'))
+    expect(getStoreInstance().getState().featureFlagOverrides).toEqual({})
   })
 })
