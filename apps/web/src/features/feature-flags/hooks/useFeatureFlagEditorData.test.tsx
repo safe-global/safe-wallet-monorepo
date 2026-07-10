@@ -53,4 +53,28 @@ describe('useFeatureFlagEditorData', () => {
     expect(row?.effective).toBe(true)
     expect(row?.matchesCurrentChain).toBe(true)
   })
+
+  it('forces a config-on flag off via override', () => {
+    mockChains([chain('1', [FEATURES.EARN])])
+    jest.spyOn(store, 'useAppSelector').mockReturnValue({ [FEATURES.EARN]: false })
+    const { result } = renderHook(() => useFeatureFlagEditorData())
+    const row = result.current.overridden.find((r) => r.feature === FEATURES.EARN)
+
+    expect(row?.configValue).toBe(true)
+    expect(row?.override).toBe(false)
+    expect(row?.effective).toBe(false)
+    expect(row?.matchesCurrentChain).toBe(false)
+  })
+
+  it('forces a config-off flag on via override', () => {
+    mockChains([chain('1', [])])
+    jest.spyOn(store, 'useAppSelector').mockReturnValue({ [FEATURES.EARN]: true })
+    const { result } = renderHook(() => useFeatureFlagEditorData())
+    const row = result.current.overridden.find((r) => r.feature === FEATURES.EARN)
+
+    expect(row?.configValue).toBe(false)
+    expect(row?.override).toBe(true)
+    expect(row?.effective).toBe(true)
+    expect(row?.matchesCurrentChain).toBe(false)
+  })
 })
