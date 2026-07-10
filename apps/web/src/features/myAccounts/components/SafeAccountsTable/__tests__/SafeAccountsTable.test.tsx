@@ -66,7 +66,6 @@ const line = (over: Partial<AccountLine> & Pick<AccountLine, 'key' | 'displayNam
   address: '0x0',
   chainId: '1',
   showAddress: true,
-  indent: false,
   expandable: false,
   thresholdMixed: false,
   workspaces: [],
@@ -89,7 +88,7 @@ const groups: AccountGroup[] = [
   },
   {
     parent: line({ key: '0xG', displayName: 'Group', expandable: true, variant: 'group' }),
-    children: [line({ key: '0xG:1', displayName: 'Ethereum', variant: 'child', indent: true })],
+    children: [line({ key: '0xG:1', displayName: 'Ethereum', variant: 'child' })],
     sort: { name: 'group', threshold: 3, networks: 3, workspaces: 1 },
   },
 ]
@@ -222,8 +221,8 @@ describe('SafeAccountsTable — selection mode', () => {
     {
       parent: line({ key: '0xG', displayName: 'Group', expandable: true, variant: 'group' }),
       children: [
-        line({ key: '1:0xG', displayName: 'Ethereum', variant: 'child', indent: true }),
-        line({ key: '2:0xG', displayName: 'Base', variant: 'child', indent: true }),
+        line({ key: '1:0xG', displayName: 'Ethereum', variant: 'child' }),
+        line({ key: '2:0xG', displayName: 'Base', variant: 'child' }),
       ],
       sort: { name: 'group', threshold: 3, networks: 2, workspaces: 0 },
     },

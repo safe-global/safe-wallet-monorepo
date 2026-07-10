@@ -6,6 +6,12 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
  */
 export const TOOLTIP_DELAY_MS = 400
 
+// Revealed on row hover (rows carry `group/row`) and on keyboard focus. group-focus-visible (not
+// group-focus): base-ui parks focus on the last hovered option without ever clearing it, so plain
+// focus would keep the actions visible after the pointer has moved on.
+export const HOVER_ACTION_CLASS =
+  'opacity-0 transition-opacity group-hover/row:opacity-100 group-focus-visible/row:opacity-100 focus-within:opacity-100 focus-visible:opacity-100'
+
 export const getInitials = (name: string): string => {
   return name
     .split(' ')

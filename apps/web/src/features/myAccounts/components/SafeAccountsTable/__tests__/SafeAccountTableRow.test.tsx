@@ -37,7 +37,6 @@ const leaf = (over: Partial<AccountLine> = {}): AccountLine => ({
   chainId: '1',
   displayName: 'My Safe',
   showAddress: true,
-  indent: false,
   expandable: false,
   thresholdMixed: false,
   workspaces: [],
@@ -113,11 +112,26 @@ describe('SafeAccountTableRow', () => {
     )
   })
 
-  it('hides the address and its affordances on multi-chain child rows', () => {
+  it('hides the address and copy button on multi-chain child rows', () => {
     renderRow({ line: leaf({ variant: 'child', showAddress: false, displayName: 'Ethereum' }) })
 
     expect(screen.queryByTestId('safe-item-address')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Copy address' })).not.toBeInTheDocument()
+  })
+
+  it('keeps the per-chain explorer link on a multi-chain child row (next to the chain name)', () => {
+    renderRow({ line: leaf({ variant: 'child', showAddress: false, displayName: 'Ethereum' }) })
+
+    expect(screen.getByTestId('safe-item-row-explorer-link')).toHaveAttribute(
+      'href',
+      'https://etherscan.io/address/0xabc',
+    )
+  })
+
+  it('omits the explorer link on a multi-chain parent row — its chain would be arbitrary', () => {
+    renderRow({ line: leaf({ variant: 'group', expandable: true }) })
+
+    expect(screen.queryByTestId('safe-item-row-explorer-link')).not.toBeInTheDocument()
   })
 
   it('shows the rename pencil and calls onRename with the row when provided', () => {

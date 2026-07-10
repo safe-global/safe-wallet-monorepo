@@ -63,9 +63,9 @@ const HighSimilarityBadge = () => (
 )
 
 // Shares the dropdown's row identity cell: clip-gated name/address tooltips and copy/explorer icons
-// revealed on row hover. The leading avatar keeps the table's per-variant icon (multi-chain children
-// show the chain icon; everything else the blockie identicon). `onRename`, when set, adds the hover
-// rename pencil (non-modal surfaces only).
+// revealed on row hover. Single/parent rows lead with the blockie identicon; per-chain child rows
+// carry no icon (the chain is already named beside them) — a blank icon-width spacer keeps their name
+// aligned under the parent's. `onRename`, when set, adds the hover rename pencil (non-modal surfaces).
 const NameCellContent = ({
   line,
   isFlagged,
@@ -76,20 +76,15 @@ const NameCellContent = ({
   onRename?: () => void
 }) => {
   const chainConfig = useChain(line.chainId)
-  const explorerLink = line.showAddress && chainConfig ? getBlockExplorerLink(chainConfig, line.address) : undefined
+  // Explorer links are per-chain, so only single safes and per-chain child rows get one — never the
+  // multi-chain parent, whose chainId is just the first network's. On child rows (address hidden) the
+  // link rides next to the chain name; SafeInfoDisplay places it there.
+  const explorerLink =
+    line.variant !== 'group' && chainConfig ? getBlockExplorerLink(chainConfig, line.address) : undefined
 
-  const leading =
-    line.variant === 'child' ? (
-      <BaseAccountItem.Icon
-        address={line.address}
-        chainId={line.chainId}
-        threshold={line.threshold}
-        owners={line.owners}
-        isMultiChainItem
-      />
-    ) : (
-      <Identicon address={line.address} />
-    )
+  // Empty spacer for child rows keeps their name aligned under the parent's (which fills it with the
+  // blockie identicon).
+  const leading = line.variant === 'child' ? null : <Identicon address={line.address} />
 
   return (
     <SafeInfoDisplay
@@ -100,7 +95,8 @@ const NameCellContent = ({
       explorerLink={explorerLink}
       onRename={onRename}
       badge={isFlagged ? <HighSimilarityBadge /> : undefined}
-      className={cn('min-w-0', line.indent && 'pl-9')}
+      nameVariant="paragraph-bold"
+      className="min-w-0"
     />
   )
 }

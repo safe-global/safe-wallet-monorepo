@@ -55,4 +55,29 @@ describe('SafeInfoDisplay', () => {
     render(<SafeInfoDisplay {...baseProps} />)
     expect(screen.queryByTestId('safe-item-row-explorer-link')).not.toBeInTheDocument()
   })
+
+  it('renders the name in medium weight by default and bold when nameVariant is set', () => {
+    const { rerender } = render(<SafeInfoDisplay {...baseProps} />)
+    expect(screen.getByText('My Safe').className).toContain('font-medium')
+
+    rerender(<SafeInfoDisplay {...baseProps} nameVariant="paragraph-bold" />)
+    expect(screen.getByText('My Safe').className).toContain('font-semibold')
+  })
+
+  it('moves the explorer link next to the name when the address is hidden (and drops the copy button)', () => {
+    render(
+      <SafeInfoDisplay
+        {...baseProps}
+        hideAddress
+        explorerLink={{ href: 'https://etherscan.io/address/0xaaa', title: 'View on Etherscan' }}
+      />,
+    )
+
+    expect(screen.queryByTestId('safe-item-address')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('safe-item-copy-address')).not.toBeInTheDocument()
+    expect(screen.getByTestId('safe-item-row-explorer-link')).toHaveAttribute(
+      'href',
+      'https://etherscan.io/address/0xaaa',
+    )
+  })
 })

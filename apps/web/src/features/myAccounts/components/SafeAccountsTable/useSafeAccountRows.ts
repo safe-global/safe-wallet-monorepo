@@ -40,7 +40,6 @@ export type AccountLine = {
   chainId: string
   displayName: string
   showAddress: boolean
-  indent: boolean
   expandable: boolean
   /** When set, the Networks cell renders a logo stack for these safes; otherwise a single chain logo. */
   networks?: SafeItem[]
@@ -89,7 +88,6 @@ const buildSafeLine = (safe: SafeItem, deps: BuildDeps, variant: 'single' | 'chi
     chainId,
     displayName: variant === 'child' ? (chain?.chainName ?? shortenAddress(address)) : name || shortenAddress(address),
     showAddress: variant === 'single',
-    indent: variant === 'child',
     expandable: false,
     threshold: setup?.threshold,
     owners: setup?.owners.length,
@@ -153,7 +151,6 @@ const buildMultiGroup = (item: MultiChainSafeItem, deps: BuildDeps): AccountGrou
     chainId: safes[0]?.chainId ?? '',
     displayName: name || shortenAddress(address),
     showAddress: true,
-    indent: false,
     expandable: true,
     networks: safes,
     threshold: shared?.threshold,

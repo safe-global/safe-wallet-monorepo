@@ -6,12 +6,12 @@ import { Typography } from '@/components/ui/typography'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import { SafeInfoDisplay } from '@/components/common/AccountRow'
+import { ExplorerLinkButton, HOVER_ACTION_CLASS, SafeInfoDisplay } from '@/components/common/AccountRow'
 import BalanceDisplay from './BalanceDisplay'
 import RowEndColumn from './RowEndColumn'
 import SafeRowStats from './SafeRowStats'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
-import type { SafeItemData, SafeRenameTarget } from '../types'
+import type { SafeItemData, SafeItemDataChain, SafeRenameTarget } from '../types'
 
 interface MultiChainSafeItemRowProps {
   item: SafeItemData
@@ -33,12 +33,71 @@ function ReadOnlyBadge() {
   )
 }
 
+/**
+ * One selectable network under a multi-chain safe. Carries the per-chain explorer link (the summary
+ * row above spans several chains, so its explorer would be arbitrary — it lives here instead).
+ */
+function NetworkRow({
+  chain,
+  address,
+  threshold,
+  owners,
+}: {
+  chain: SafeItemDataChain
+  address: string
+  threshold: number
+  owners: number
+}) {
+  const chainConfig = useChain(chain.chainId)
+  const explorerLink = chainConfig ? getBlockExplorerLink(chainConfig, address) : undefined
+
+  return (
+    <SelectItem
+      value={`${chain.chainId}:${address}`}
+      // pl-11 (avatar 32px + gap-3 12px) aligns the chain name under the parent safe name — the
+      // per-chain rows carry no identicon but keep the same threshold / network / pending / balance
+      // columns as the summary row. [&>span.absolute]:hidden drops the built-in checkmark span.
+      className="group/row flex items-center gap-2 rounded-md px-3 py-2 cursor-pointer focus:bg-muted data-[selected]:bg-[var(--color-background-light)] [&>span.absolute]:hidden"
+    >
+      <div className="flex min-w-0 flex-1 items-center gap-2 pl-11">
+        <Typography variant="paragraph-small-medium" className="min-w-0 truncate">
+          {chain.chainName}
+        </Typography>
+        {chain.isReadOnly && <ReadOnlyBadge />}
+        {explorerLink && (
+          <span className={HOVER_ACTION_CLASS}>
+            <ExplorerLinkButton
+              href={explorerLink.href}
+              title={explorerLink.title}
+              testId="safe-item-row-explorer-link"
+            />
+          </span>
+        )}
+      </div>
+      <SafeRowStats
+        threshold={threshold}
+        owners={owners}
+        chains={[chain]}
+        pending={chain.isUndeployed ? 0 : (chain.queued ?? 0)}
+      />
+      {chain.isUndeployed ? (
+        <RowEndColumn>
+          <NotActivatedBadge isActivating={chain.isActivating} />
+        </RowEndColumn>
+      ) : (
+        <BalanceDisplay
+          balance={chain.balance !== undefined ? <FiatValue value={chain.balance} /> : undefined}
+          isLoading={chain.isLoading}
+        />
+      )}
+    </SelectItem>
+  )
+}
+
 const MultiChainSafeItemRow = ({ item, onRename, isSelected = false }: MultiChainSafeItemRowProps) => {
   const chainId = item.chains[0]?.chainId ?? ''
   const resolvedName = useSafeDisplayName(item.address, chainId, item.name)
   const pending = item.chains.reduce((sum, chain) => sum + (chain.queued ?? 0), 0)
-  const chainConfig = useChain(chainId)
-  const explorerLink = chainConfig ? getBlockExplorerLink(chainConfig, item.address) : undefined
 
   return (
     // Open by default when this group holds the active chain, so the current network is revealed
@@ -53,7 +112,6 @@ const MultiChainSafeItemRow = ({ item, onRename, isSelected = false }: MultiChai
           name={resolvedName}
           address={item.address}
           className="flex-1 min-w-0"
-          explorerLink={explorerLink}
           onRename={
             onRename &&
             (() =>
@@ -77,37 +135,13 @@ const MultiChainSafeItemRow = ({ item, onRename, isSelected = false }: MultiChai
       <CollapsibleContent>
         <div className="flex flex-col gap-0.5 pb-1">
           {item.chains.map((chain) => (
-            <SelectItem
+            <NetworkRow
               key={`${chain.chainId}:${item.address}`}
-              value={`${chain.chainId}:${item.address}`}
-              // pl-11 (avatar 32px + gap-3 12px) aligns the chain name under the parent safe name — the
-              // per-chain rows carry no identicon but keep the same threshold / network / pending / balance
-              // columns as the summary row. [&>span.absolute]:hidden drops the built-in checkmark span.
-              className="flex items-center gap-2 rounded-md px-3 py-2 cursor-pointer focus:bg-muted data-[selected]:bg-[var(--color-background-light)] [&>span.absolute]:hidden"
-            >
-              <div className="flex min-w-0 flex-1 items-center gap-2 pl-11">
-                <Typography variant="paragraph-small-medium" className="min-w-0 truncate">
-                  {chain.chainName}
-                </Typography>
-                {chain.isReadOnly && <ReadOnlyBadge />}
-              </div>
-              <SafeRowStats
-                threshold={item.threshold}
-                owners={item.owners}
-                chains={[chain]}
-                pending={chain.isUndeployed ? 0 : (chain.queued ?? 0)}
-              />
-              {chain.isUndeployed ? (
-                <RowEndColumn>
-                  <NotActivatedBadge isActivating={chain.isActivating} />
-                </RowEndColumn>
-              ) : (
-                <BalanceDisplay
-                  balance={chain.balance !== undefined ? <FiatValue value={chain.balance} /> : undefined}
-                  isLoading={chain.isLoading}
-                />
-              )}
-            </SelectItem>
+              chain={chain}
+              address={item.address}
+              threshold={item.threshold}
+              owners={item.owners}
+            />
           ))}
         </div>
       </CollapsibleContent>

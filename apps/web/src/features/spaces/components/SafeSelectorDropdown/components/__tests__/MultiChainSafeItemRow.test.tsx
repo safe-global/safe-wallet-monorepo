@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { useChain } from '@/hooks/useChains'
 import MultiChainSafeItemRow from '../MultiChainSafeItemRow'
 import type { SafeItemData, SafeItemDataChain } from '../../types'
 
@@ -7,13 +8,19 @@ jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: () => 'Test Safe',
 }))
 
-// The explorer-link lookup goes through RTK Query; the row explorer action is covered in SafeInfoDisplay tests.
+// Per-chain rows resolve their own chain config; default to none so the icon/badge suites stay light.
 jest.mock('@/hooks/useChains', () => ({
-  useChain: () => undefined,
+  useChain: jest.fn(() => undefined),
 }))
 
+// Surface the explorerLink the summary row is (or isn't) given — the multi-chain summary must never
+// receive one, since its chain would be arbitrary.
 jest.mock('@/components/common/AccountRow/SafeInfoDisplay', () => {
-  const Mock = () => <div data-testid="safe-info-display" />
+  const Mock = ({ explorerLink }: { explorerLink?: { href: string } }) => (
+    <div data-testid="safe-info-display">
+      {explorerLink && <a data-testid="summary-explorer-link" href={explorerLink.href} />}
+    </div>
+  )
   Mock.displayName = 'SafeInfoDisplay'
   return { __esModule: true, default: Mock }
 })
@@ -221,5 +228,27 @@ describe('MultiChainSafeItemRow undeployed status badge', () => {
     await expandRow()
 
     expect(screen.queryByTestId('not-activated-badge')).not.toBeInTheDocument()
+  })
+})
+
+describe('MultiChainSafeItemRow per-chain explorer links', () => {
+  beforeEach(() => {
+    jest.mocked(useChain).mockReturnValue({
+      blockExplorerUriTemplate: { address: 'https://etherscan.io/address/{{address}}' },
+    } as unknown as ReturnType<typeof useChain>)
+  })
+
+  afterEach(() => {
+    jest.mocked(useChain).mockReturnValue(undefined)
+  })
+
+  it('renders a per-chain explorer link on each network row and none on the summary', () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} isSelected />)
+
+    // One link per chain — the summary row (stubbed) never receives an explorerLink.
+    expect(screen.queryByTestId('summary-explorer-link')).not.toBeInTheDocument()
+    const links = screen.getAllByTestId('safe-item-row-explorer-link')
+    expect(links).toHaveLength(2)
+    expect(links[0]).toHaveAttribute('href', 'https://etherscan.io/address/0xaaa')
   })
 })
