@@ -118,7 +118,7 @@ describe('getOverallStatus', () => {
             {
               severity: Severity.CRITICAL,
               type: RecipientStatus.RESEMBLES_TRUSTED_ADDRESS,
-              title: 'Resembles a trusted address',
+              title: 'Potential address poisoning',
               description: 'Looks like an address you trust.',
             },
           ],

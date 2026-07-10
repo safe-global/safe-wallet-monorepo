@@ -3,6 +3,7 @@ import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import {
   ContractStatus,
+  RecipientStatus,
   type GroupedAnalysisResults,
   type Severity,
   type StatusGroup,
@@ -11,6 +12,7 @@ import { mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shie
 import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'
 import { SeverityIcon } from '../SeverityIcon'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
+import { AddressPoisoningCardItem } from './AddressPoisoningCardItem'
 import { DelegateCallCardItem } from './DelegateCallCardItem'
 import { FallbackHandlerCardItem } from './FallbackHandlerCardItem'
 import { type AnalyticsEvent, MixpanelEventParams, trackEvent } from '@/services/analytics'
@@ -130,6 +132,10 @@ export const AnalysisGroupCard = ({
 
               if (result.type === ContractStatus.UNOFFICIAL_FALLBACK_HANDLER) {
                 return <FallbackHandlerCardItem key={index} result={result} isPrimary={isPrimary} />
+              }
+
+              if (result.type === RecipientStatus.RESEMBLES_TRUSTED_ADDRESS) {
+                return <AddressPoisoningCardItem key={index} result={result} />
               }
 
               return (

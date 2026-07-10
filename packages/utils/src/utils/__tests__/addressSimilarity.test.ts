@@ -7,6 +7,7 @@ import {
   longestCommonSuffixLen,
   buildSimilarityIndex,
   detectListSimilarities,
+  getCommonAffixLengths,
 } from '../addressSimilarity'
 import { Severity } from '../../features/safe-shield/types'
 
@@ -317,6 +318,21 @@ describe('addressSimilarity (anchor engine)', () => {
 
       expect(result.get(impostorMixed.toLowerCase())?.match?.severity).toBe(Severity.CRITICAL)
       expect(result.get(impostorMixed.toLowerCase())?.address).toBe(impostorMixed)
+    })
+  })
+
+  describe('getCommonAffixLengths', () => {
+    it('returns the shared front and back length (ignoring 0x and case)', () => {
+      const a = '0xA1B2c3d4e5f60718293a4b5c6d7e8f9012345678'
+      const b = '0xa1b2ffffffffffffffffffffffffffffffff5678'
+      // share 'a1b2' front (4) and '5678' back (4)
+      expect(getCommonAffixLengths(a, b)).toEqual({ prefixLen: 4, suffixLen: 4 })
+    })
+
+    it('returns 0/0 for wholly dissimilar addresses', () => {
+      const a = '0x1111111111111111111111111111111111111111'
+      const b = '0x2222222222222222222222222222222222222222'
+      expect(getCommonAffixLengths(a, b)).toEqual({ prefixLen: 0, suffixLen: 0 })
     })
   })
 })
