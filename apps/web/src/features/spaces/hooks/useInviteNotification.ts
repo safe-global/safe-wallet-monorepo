@@ -10,6 +10,12 @@ import { AppRoutes } from '@/config/routes'
 import { filterSpacesByStatus } from '@/features/spaces/utils'
 import { MemberStatus } from './useSpaceMembers'
 
+// Key on expiry so a resend re-notifies
+const inviteKey = (space: GetSpaceResponse, userId?: number): string => {
+  const member = space.members.find((member) => member.user.id === userId)
+  return `${space.uuid}:${member?.inviteExpiresAt ?? ''}`
+}
+
 export const useInviteNotification = (): void => {
   const dispatch = useAppDispatch()
   const router = useRouter()
@@ -25,12 +31,7 @@ export const useInviteNotification = (): void => {
     if (router.pathname === AppRoutes.welcome.spaces) return
 
     const pendingInvites = filterSpacesByStatus(currentUser, spaces ?? [], MemberStatus.INVITED)
-    // Key on expiry too so a resend (status stays INVITED, expiry extends) re-notifies
-    const inviteKey = (space: GetSpaceResponse) => {
-      const member = space.members.find((member) => member.user.id === currentUser?.id)
-      return `${space.uuid}:${member?.inviteExpiresAt ?? ''}`
-    }
-    const pendingKeys = new Set(pendingInvites.map(inviteKey))
+    const pendingKeys = new Set(pendingInvites.map((space) => inviteKey(space, currentUser?.id)))
     const pendingUuids = new Set(pendingInvites.map((space) => space.uuid))
 
     // Forget resolved invites and dismiss their now-stale toast once no longer INVITED
@@ -45,7 +46,7 @@ export const useInviteNotification = (): void => {
     }
 
     for (const space of pendingInvites) {
-      const key = inviteKey(space)
+      const key = inviteKey(space, currentUser?.id)
       if (notifiedInvites.current.has(key)) continue
 
       notifiedInvites.current.add(key)
