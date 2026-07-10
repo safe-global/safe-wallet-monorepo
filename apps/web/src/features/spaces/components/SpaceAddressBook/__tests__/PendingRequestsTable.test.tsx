@@ -4,6 +4,7 @@ import PendingRequestsTable from '../PendingRequestsTable'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Builder } from '@/tests/Builder'
 
+jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => false }))
 jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
@@ -42,8 +43,10 @@ jest.mock('@/components/common/Identicon', () => {
   return Identicon
 })
 jest.mock('@/features/multichain', () => ({
-  NetworkLogosList: ({ networks }: { networks: { chainId: string }[] }) => (
-    <span data-testid="network-logos" data-count={networks.length} />
+  NetworkLogosTooltip: ({ networks, trigger }: { networks: { chainId: string }[]; trigger?: React.ReactNode }) => (
+    <span data-testid="network-logos" data-count={networks.length}>
+      {trigger}
+    </span>
   ),
 }))
 jest.mock('@/components/common/ChainIndicator', () => {

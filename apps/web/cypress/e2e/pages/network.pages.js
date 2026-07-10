@@ -6,6 +6,7 @@ const addedNetwork = '[data-testid="added-network"]'
 const modalAddNetworkBtn = '[data-testid="modal-add-network-btn"]'
 const allNetworksAccordion = '[data-testid="all-networks-accordion"]'
 const chainNavigationButton = '[data-testid="space-chain-navigation-button"]'
+const chainSelectorLoading = '[data-testid="chain-selector-loading"]'
 
 export const createSafeMsg = (network) => `Successfully added your account on ${network}`
 
@@ -17,6 +18,7 @@ export function clickChainNavigationButton() {
 
 export function clickAllNetworksAccordion() {
   cy.get(allNetworksAccordion).should('be.visible').click()
+  cy.get(chainSelectorLoading).should('not.exist')
   cy.get(addNetworkBtn).should('be.visible')
 }
 
