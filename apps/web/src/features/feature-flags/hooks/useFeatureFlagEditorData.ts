@@ -28,6 +28,18 @@ const getChainScope = (chains: Chain[], feature: FEATURES): FeatureFlagRowData['
   return withFeature
 }
 
+// The flag list is a fixed enum, so sort it once at module scope rather than on every render.
+const SORTED_FEATURES: FEATURES[] = [...Object.values(FEATURES)].sort((a, b) => a.localeCompare(b))
+
+/**
+ * Derives the editor's per-flag display data.
+ *
+ * Deliberately reads the **raw** config-service chains (via
+ * `useGetChainsConfigV2Query` directly, not `useChains`, which applies
+ * overrides). The editor shows what the config service delivered
+ * (`configValue` / `chainScope`) alongside the local `override`, so this data
+ * must stay un-overridden — unlike `useHasFeature`, which reflects overrides.
+ */
 export const useFeatureFlagEditorData = (): FeatureFlagEditorData => {
   const { data } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
   const overrides = useAppSelector(selectFeatureFlagOverrides)
@@ -37,7 +49,8 @@ export const useFeatureFlagEditorData = (): FeatureFlagEditorData => {
     const chains = data ? data.ids.map((id) => data.entities[id]!) : []
     const currentChain = data?.entities[currentChainId]
 
-    const rows: FeatureFlagRowData[] = Object.values(FEATURES).map((feature) => {
+    // Built in sorted order, so the filtered partitions below stay sorted without re-sorting.
+    const rows: FeatureFlagRowData[] = SORTED_FEATURES.map((feature) => {
       const configValue = currentChain ? hasFeature(currentChain, feature) : false
       const override = overrides[feature]
       return {
@@ -50,11 +63,9 @@ export const useFeatureFlagEditorData = (): FeatureFlagEditorData => {
       }
     })
 
-    const byName = (a: FeatureFlagRowData, b: FeatureFlagRowData) => a.feature.localeCompare(b.feature)
-
     return {
-      overridden: rows.filter((r) => r.override !== undefined).sort(byName),
-      rest: rows.filter((r) => r.override === undefined).sort(byName),
+      overridden: rows.filter((r) => r.override !== undefined),
+      rest: rows.filter((r) => r.override === undefined),
     }
   }, [data, overrides, currentChainId])
 }
