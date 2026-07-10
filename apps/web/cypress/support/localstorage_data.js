@@ -455,7 +455,6 @@ export const safeSettings = {
     hiddenTokens: {},
     shortName: {
       show: false,
-      copy: false,
       qr: false,
     },
     theme: {
@@ -480,7 +479,6 @@ export const safeSettings = {
     hideDust: false,
     shortName: {
       show: true,
-      copy: true,
       qr: true,
     },
     theme: {},
