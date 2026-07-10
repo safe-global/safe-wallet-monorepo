@@ -70,10 +70,9 @@ export const FeatureFlagRow = ({ row }: { row: FeatureFlagRowData }): ReactEleme
               <TooltipTrigger
                 render={
                   <Check
-                    role="img"
+                    data-testid="ff-match-indicator"
                     className="text-success-strong size-4 shrink-0"
                     style={row.matchesCurrentChain ? undefined : HIDDEN}
-                    aria-label={MATCH_LABEL}
                   />
                 }
               />
