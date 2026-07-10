@@ -54,7 +54,8 @@ const SecurityDrawerChecks = ({
   return (
     <div className="flex flex-col gap-6">
       {header.status === 'ready' && (
-        <Card className="h-[88px] flex-row items-center gap-3 px-4 py-0 dark:bg-secondary">
+        // eslint-disable-next-line no-restricted-syntax -- fixed 88px score-summary row: horizontal layout, tight gap-3/px-4 and a dark surface tint; bespoke, no matching variant
+        <Card size="none" className="h-[88px] flex-row items-center gap-3 px-4 dark:bg-secondary">
           <ScoreGauge scorePct={header.score} color={header.band.color} size="small" />
 
           <div className="flex min-w-0 flex-col gap-1">

@@ -158,10 +158,7 @@ export const SafeAppCardContainer = ({
 
   return (
     <Link href={safeAppUrl} passHref rel="noreferrer" onClick={handleClickSafeApp}>
-      <Card
-        className={classNames('gap-0 border-0 py-0 shadow-none', css.safeAppContainer, className)}
-        style={{ height }}
-      >
+      <Card size="none" className={classNames(css.safeAppContainer, className)} style={{ height }}>
         {children}
       </Card>
     </Link>

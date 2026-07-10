@@ -8,7 +8,10 @@ describe('HnActivatedSettingsBanner', () => {
 
     const title = screen.getByText(hnActivatedSettingsBannerConfig.title)
 
-    expect(title.closest('[data-slot="card"]')).toHaveClass('p-8')
+    const card = title.closest('[data-slot="card"]')
+    expect(card).toHaveAttribute('data-size', 'lg')
+    expect(card).toHaveClass('py-8')
+    expect(title.closest('[data-slot="card-content"]')).toBeInTheDocument()
     expect(screen.getByText(hnActivatedSettingsBannerConfig.description)).toBeInTheDocument()
     expect(screen.getByText(hnActivatedSettingsBannerConfig.statusLabel)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: hnActivatedSettingsBannerConfig.buttonLabel })).toHaveAttribute(

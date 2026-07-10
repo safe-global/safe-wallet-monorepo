@@ -9,7 +9,6 @@ import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { useIsSwapFeatureEnabled } from '@/features/swap'
-import { cn } from '@/utils/cn'
 
 const SWAPS_APP_CARD_STORAGE_KEY = 'showSwapsAppCard'
 
@@ -20,7 +19,8 @@ const NativeSwapsCard = () => {
   if (!isSwapFeatureEnabled || !isSwapsCardVisible) return null
 
   return (
-    <Card className={cn('h-full gap-0 border-0 py-0 shadow-none transition-colors hover:bg-muted')}>
+    // eslint-disable-next-line no-restricted-syntax -- h-full fills the dashboard grid cell (layout); the hover tint is a bespoke affordance with no variant
+    <Card size="none" className="h-full transition-colors hover:bg-muted">
       <div className="flex items-start justify-between px-4 pt-4 pb-2">
         <div className="rounded-full bg-[var(--color-secondary-light)] p-2">
           <SafeAppIconCard src="/images/common/swap.svg" alt="Swap Icon" width={24} height={24} />

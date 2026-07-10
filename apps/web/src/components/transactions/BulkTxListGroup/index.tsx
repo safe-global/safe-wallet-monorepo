@@ -41,7 +41,8 @@ const GroupedTxListItems = ({
     title = getSettlementOrderTitle(groupedListItems[0].transaction.txInfo as OrderTransactionInfo)
   }
   return (
-    <Card data-testid="grouped-items" className={cn(css.container, 'gap-0 border-0 py-2 shadow-none')}>
+    // eslint-disable-next-line no-restricted-syntax -- py-2 tightens the grouped-tx list row; css.container owns the grid layout
+    <Card data-testid="grouped-items" size="none" className={cn(css.container, 'py-2')}>
       <div style={{ gridArea: 'icon' }}>
         <BatchIcon className="size-6" />
       </div>

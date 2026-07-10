@@ -18,7 +18,8 @@ const SettingsCard = ({
   ...props
 }: SettingsCardProps) => {
   return (
-    <Card className={cn('gap-0 rounded-lg p-8', className)} {...props}>
+    // eslint-disable-next-line no-restricted-syntax -- SettingsCard preset owns its 32px padding; no p-8 Card size variant exists
+    <Card size="none" radius="lg" className={cn('p-8', className)} {...props}>
       <div
         data-slot="settings-card-content"
         className={cn('grid grid-cols-1 justify-between gap-6 lg:grid-cols-[1fr_2fr]', contentClassName)}

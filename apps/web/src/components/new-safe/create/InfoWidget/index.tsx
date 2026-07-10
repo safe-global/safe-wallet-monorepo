@@ -43,7 +43,7 @@ const InfoWidget = ({ title, steps, variant, startExpanded = false }: InfoWidget
   const styles = variantStyles[variant]
 
   return (
-    <Card className={`border ${styles.card}`}>
+    <Card variant="outlined" className={styles.card}>
       <div className={css.cardHeader}>
         <div className={`${css.title} ${styles.pill}`}>
           <LightbulbIcon className={css.titleIcon} />

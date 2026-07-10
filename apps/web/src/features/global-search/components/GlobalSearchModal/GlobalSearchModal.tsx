@@ -37,7 +37,7 @@ const GlobalSearchModal = () => {
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
       <DialogContent showCloseButton={false} className="max-h-[480px] p-0">
-        <Card className="flex flex-col max-h-[480px] py-4 gap-2 shadow-none border-0" onKeyDown={onKeyDown}>
+        <Card size="sm" className="max-h-[480px]" onKeyDown={onKeyDown}>
           <div className="px-4 shrink-0">
             <GlobalSearch value={query} onChange={setQuery} />
           </div>

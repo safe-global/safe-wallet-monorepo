@@ -5,7 +5,30 @@
 
 Primitive: `apps/web/src/components/ui/card.tsx` · Story: `apps/web/src/components/ui/stories/card.stories.tsx`
 
-## Current state (NOT cva)
+## Status — DONE (2026-07-10)
+
+**Complete.** Part 1 added cva `variant` (`default`/`outlined`/`muted`), `size` (`sm`/`default`/`none`), and
+`radius` (`lg`/`xl`/`none`). Part 2 took the deferred **design calls** and closed the family:
+
+- **`size="lg"`** added (`gap-8 py-8` + `group-data-[size=lg]/card:px-8` on the slots). The `p-8` cluster
+  (`EarnInfo` ×2, `UserSettings`, `HnActivatedSettingsBanner`) now uses `size="lg"` + a `CardContent` wrapper
+  (and the `p-4` eligible-asset card → `size="sm"` + `CardContent`) — no grandfather needed.
+- **Default `radius` flipped `xl`→`lg`** (8px, MUI parity). Redundant `rounded-lg` at call sites dropped;
+  `TxCard`'s stale `rounded-b-xl` removed (it was redundant under the old `xl` default and would otherwise
+  desync corners); `TxDetails` non-contrast branch moved `xl`→`lg`. **Needs Argos** — any site that must stay
+  12px should set `radius="xl"`.
+- **GlobalSearch** `gap-2`→`gap-4` via `size="sm"` (dead `shadow-none`/`border-0` deleted).
+- Every remaining literal drift site is migrated or carries a justified
+  `// eslint-disable-next-line no-restricted-syntax` grandfather (`p-10`/`p-12` empty/hero pads, Security score
+  row, WorkspaceHealth gauge rows, SpaceCardNew grid, Recovery `gap-8`, nested-surface tokens on
+  `NestedTransaction`/`RiskConfirmation`, banner/preset paddings).
+- **Card-family ESLint guard is live** (`dsCardClassnameRule`) — see below.
+- Story documents all axes (incl. `size="lg"`) + a layout-only guidance block.
+
+Remaining follow-up (not blocking): the **CSS-module Card usages** below (the literal ESLint rule can't see
+`className={css.x}`), and Argos sign-off on the app-wide radius flip.
+
+## Original state before part 1
 
 Hand-rolled `cn()` strings; `size` (`'default' | 'sm'`) is a `data-size` attr on the root + `group-data-[size=sm]/card:*` selectors on slots. **No `variant` prop.** Exports: `Card, CardHeader, CardFooter, CardTitle, CardAction, CardDescription, CardContent`.
 
@@ -86,11 +109,14 @@ Story/test files (lower priority): `ManageTokensButton/index.stories.tsx:41,90` 
 
 **CSS-module Card usages** (ESLint literal rule won't see these — separate pass): `ColorCodedTxAccordion:77` (css.item), `SafeAppSocialLinksCard:33`, `dashboard/FirstSteps:47,273`, `new-safe/CardStepper:17` (no-op), `new-safe/create/OverviewWidget:32` (→outlined), `myAccounts/.../DataWidget:42,43`, `SecurityEmptyState:25`, RecoveryCards, `TxDetails/index.tsx:270`.
 
-## ESLint (`dsButtonClassnameRule` in `eslint.config.mjs`)
+## ESLint — LIVE (`dsCardClassnameRule` in `eslint.config.mjs`)
 
-Add: `Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription, CardAction` + presets `SettingsCard, SpaceSettingsSection, TxCard`.
-
-**Regex caveat:** current selector matches only `h-|px-|py-|text-(xs|sm|base|lg)|rounded-|bg-`. Card's dominant drift is `gap-`, `border`, `shadow-`, full-side `p-`. Extend to e.g. `(?:^|\s)(h-|p-|px-|py-|pt-|pb-|gap-|text-(xs|sm|base|lg)|rounded-|bg-|border(?![-\w])|border-|shadow-)` (keep `w-*`/margins/flex-grid allowed). `border-0`/`shadow-none`/`bg-card` will then correctly flag as removable no-ops.
+Card gets its **own** rule factory (not the button one) because it must flag a wider set without touching the
+Button/Select selectors. Applied to `Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription,
+CardAction` + presets `SettingsCard, SpaceSettingsSection, TxCard`. Regex:
+`(?:^|\s)(h-|p-|px-|py-|pt-|pb-|pl-|pr-|gap-|text-(xs|sm|base|lg)|rounded-|bg-|border|shadow-)` — `w-*`,
+margins, and flex/grid stay allowed. Matches literals inside `cn(...)`/`classNames(...)`. `hover:`/`dark:`
+prefixed utilities are **not** flagged (require `^`/whitespace before the token), matching the button rule.
 
 ## Story updates
 

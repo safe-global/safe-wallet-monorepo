@@ -20,54 +20,56 @@ const DecodedTxs = ({ txs }: { txs: TransactionDetails[] | undefined }) => {
     <>
       <MultisendActionsHeader title="Batched transactions" setOpen={setOpenMap} amount={txs.length} compact />
 
-      <Card className="mt-2 overflow-hidden bg-muted py-0 shadow-none">
-        <CardContent className="flex flex-col divide-y divide-border p-2">
-          {txs.map((transaction, idx) => {
-            if (!transaction.txData) return null
+      <Card variant="muted" size="none" className="mt-2">
+        <CardContent>
+          <div className="flex flex-col divide-y divide-border p-2">
+            {txs.map((transaction, idx) => {
+              if (!transaction.txData) return null
 
-            const onChange = (_: SyntheticEvent, expanded: boolean) => {
-              setOpenMap((prev) => ({
-                ...prev,
-                [idx]: expanded,
-              }))
-            }
+              const onChange = (_: SyntheticEvent, expanded: boolean) => {
+                setOpenMap((prev) => ({
+                  ...prev,
+                  [idx]: expanded,
+                }))
+              }
 
-            const { txParams } = extractTxInfo(transaction)
+              const { txParams } = extractTxInfo(transaction)
 
-            let decodedDataParams: DataDecoded = {
-              method: '',
-              parameters: undefined,
-            }
+              let decodedDataParams: DataDecoded = {
+                method: '',
+                parameters: undefined,
+              }
 
-            if (isCustomTxInfo(transaction.txInfo) && transaction.txInfo.isCancellation) {
-              decodedDataParams.method = 'On-chain rejection'
-            }
+              if (isCustomTxInfo(transaction.txInfo) && transaction.txInfo.isCancellation) {
+                decodedDataParams.method = 'On-chain rejection'
+              }
 
-            if (isTransferTxInfo(transaction.txInfo) && isNativeTokenTransfer(transaction.txInfo.transferInfo)) {
-              decodedDataParams.method = 'transfer'
-            }
+              if (isTransferTxInfo(transaction.txInfo) && isNativeTokenTransfer(transaction.txInfo.transferInfo)) {
+                decodedDataParams.method = 'transfer'
+              }
 
-            const dataDecoded = transaction.txData.dataDecoded || decodedDataParams
+              const dataDecoded = transaction.txData.dataDecoded || decodedDataParams
 
-            return (
-              <SingleTxDecoded
-                key={transaction.txId}
-                tx={{
-                  dataDecoded: dataDecoded as unknown as BaseDataDecoded,
-                  data: txParams.data,
-                  value: txParams.value,
-                  to: txParams.to,
-                  operation: 0,
-                }}
-                txData={transaction.txData}
-                actionTitle={`${idx + 1}`}
-                variant="outlined"
-                expanded={openMap?.[idx] ?? false}
-                onChange={onChange}
-                isExecuted={!!transaction.executedAt}
-              />
-            )
-          })}
+              return (
+                <SingleTxDecoded
+                  key={transaction.txId}
+                  tx={{
+                    dataDecoded: dataDecoded as unknown as BaseDataDecoded,
+                    data: txParams.data,
+                    value: txParams.value,
+                    to: txParams.to,
+                    operation: 0,
+                  }}
+                  txData={transaction.txData}
+                  actionTitle={`${idx + 1}`}
+                  variant="outlined"
+                  expanded={openMap?.[idx] ?? false}
+                  onChange={onChange}
+                  isExecuted={!!transaction.executedAt}
+                />
+              )
+            })}
+          </div>
         </CardContent>
       </Card>
     </>

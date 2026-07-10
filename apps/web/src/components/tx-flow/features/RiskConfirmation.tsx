@@ -26,7 +26,8 @@ export const RiskConfirmation = () => {
   }
 
   return (
-    <Card className="bg-[var(--color-background-main)] px-2 py-0">
+    // eslint-disable-next-line no-restricted-syntax -- inset risk banner on the page (main) surface with tight px-2; nested-surface token, pending a `surface` variant
+    <Card size="none" className="bg-[var(--color-background-main)] px-2">
       <Track {...MODALS_EVENTS.ACCEPT_RISK}>
         <Label
           htmlFor="risk-confirmation"

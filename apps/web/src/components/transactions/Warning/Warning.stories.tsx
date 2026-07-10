@@ -8,9 +8,11 @@ const meta: Meta = {
   parameters: { layout: 'padded' },
   decorators: [
     (Story) => (
-      <Card className="max-w-xl py-0 shadow-none">
-        <CardContent className="px-6 py-6">
-          <Story />
+      <Card size="none" className="max-w-xl">
+        <CardContent>
+          <div className="p-6">
+            <Story />
+          </div>
         </CardContent>
       </Card>
     ),

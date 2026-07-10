@@ -7,7 +7,7 @@ import css from './styles.module.css'
 import InfoBox from '@/components/safe-messages/InfoBox'
 import SignedOutState from '../SignedOutState'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/utils/cn'
@@ -28,52 +28,54 @@ const UserSettings = () => {
             Manage Wallets
           </Typography>
 
-          <Card className="p-8">
-            <div className="flex flex-col gap-4">
-              <Typography variant="h3" className="font-bold">
-                Linked wallets
-              </Typography>
-              <Typography>
-                A linked wallet allows you to sign in to your Safe Spaces while keeping all your data, such as account
-                names and team members, consistent across all linked wallets.
-              </Typography>
+          <Card size="lg">
+            <CardContent>
+              <div className="flex flex-col gap-4">
+                <Typography variant="h3" className="font-bold">
+                  Linked wallets
+                </Typography>
+                <Typography>
+                  A linked wallet allows you to sign in to your Safe Spaces while keeping all your data, such as account
+                  names and team members, consistent across all linked wallets.
+                </Typography>
 
-              <div>
-                {user?.wallets.map((wallet) => (
-                  <div className="flex items-center justify-between gap-4" key={wallet.address}>
-                    <EthHashInfo shortAddress={false} address={wallet.address} showCopyButton hasExplorer />
-                  </div>
-                ))}
-              </div>
-              <Tooltip>
-                <TooltipTrigger render={<span className="self-start" />}>
-                  <Button variant="ghost" className="p-2" disabled>
-                    <LinkIcon className={cn('text-primary', css.linkIcon)} />
-                    Link another wallet
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Coming soon</TooltipContent>
-              </Tooltip>
-              <InfoBox
-                title="How to link a wallet?"
-                message={
-                  <>
-                    <div className="flex flex-col gap-2">
-                      {[
-                        'Add an address to your profile and confirm with a signature.',
-                        'Sign in with the new address and confirm again',
-                        'Your wallet now shares the same profile data!',
-                      ].map((stepText, index) => (
-                        <Typography key={index} className={cn('flex gap-2', css.step)}>
-                          <span className={css.stepNumber}>{index + 1}</span>
-                          {stepText}
-                        </Typography>
-                      ))}
+                <div>
+                  {user?.wallets.map((wallet) => (
+                    <div className="flex items-center justify-between gap-4" key={wallet.address}>
+                      <EthHashInfo shortAddress={false} address={wallet.address} showCopyButton hasExplorer />
                     </div>
-                  </>
-                }
-              ></InfoBox>
-            </div>
+                  ))}
+                </div>
+                <Tooltip>
+                  <TooltipTrigger render={<span className="self-start" />}>
+                    <Button variant="ghost" className="p-2" disabled>
+                      <LinkIcon className={cn('text-primary', css.linkIcon)} />
+                      Link another wallet
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Coming soon</TooltipContent>
+                </Tooltip>
+                <InfoBox
+                  title="How to link a wallet?"
+                  message={
+                    <>
+                      <div className="flex flex-col gap-2">
+                        {[
+                          'Add an address to your profile and confirm with a signature.',
+                          'Sign in with the new address and confirm again',
+                          'Your wallet now shares the same profile data!',
+                        ].map((stepText, index) => (
+                          <Typography key={index} className={cn('flex gap-2', css.step)}>
+                            <span className={css.stepNumber}>{index + 1}</span>
+                            {stepText}
+                          </Typography>
+                        ))}
+                      </div>
+                    </>
+                  }
+                ></InfoBox>
+              </div>
+            </CardContent>
           </Card>
         </div>
       </div>

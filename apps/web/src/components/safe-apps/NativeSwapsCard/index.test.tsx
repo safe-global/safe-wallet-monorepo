@@ -25,6 +25,7 @@ describe('NativeSwapsCard', () => {
     expect(screen.getByRole('button', { name: "Don't show" })).toBeInTheDocument()
 
     const card = screen.getByText('Native swaps are here!').closest('[data-slot="card"]')
-    expect(card).toHaveClass('border-0')
+    expect(card).toHaveAttribute('data-size', 'none')
+    expect(card).toHaveClass('h-full', 'hover:bg-muted')
   })
 })

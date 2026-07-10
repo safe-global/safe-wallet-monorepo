@@ -115,7 +115,7 @@ const SingleTxDecoded = ({
   return (
     <Accordion data-testid="action-accordion" {...accordionProps}>
       <AccordionItem value="action" className={cn(isGrouped ? 'border-0' : 'border-b border-border last:border-b-0')}>
-        {isGrouped ? accordionBody : <Card className="gap-0 overflow-hidden py-0 shadow-none">{accordionBody}</Card>}
+        {isGrouped ? accordionBody : <Card size="none">{accordionBody}</Card>}
       </AccordionItem>
     </Accordion>
   )

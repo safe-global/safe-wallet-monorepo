@@ -120,8 +120,10 @@ const Multisend = ({
       />
 
       {compact ? (
-        <Card className="mt-2 overflow-hidden bg-muted py-0 shadow-none">
-          <CardContent className="flex flex-col divide-y divide-border p-2">{actionItems}</CardContent>
+        <Card variant="muted" size="none" className="mt-2">
+          <CardContent>
+            <div className="flex flex-col divide-y divide-border p-2">{actionItems}</div>
+          </CardContent>
         </Card>
       ) : (
         <div className="mt-3 flex flex-col gap-2">{actionItems}</div>

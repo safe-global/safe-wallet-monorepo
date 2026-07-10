@@ -246,7 +246,8 @@ const AssetsTable = ({
       {hasNoAssets ? (
         <AddFundsCTA />
       ) : isMobile ? (
-        <Card className="mb-4 gap-0 border-4 border-transparent py-0">
+        // eslint-disable-next-line no-restricted-syntax -- transparent 4px border reserves space for the row hover outline; not a card surface
+        <Card size="none" className="mb-4 border-4 border-transparent">
           <div className={css.mobileContainer}>
             <div className={css.mobileHeader}>
               <Typography variant="paragraph-small" color="muted">
@@ -287,7 +288,8 @@ const AssetsTable = ({
           </div>
         </Card>
       ) : (
-        <Card className="mb-4 gap-0 border-4 border-transparent py-0">
+        // eslint-disable-next-line no-restricted-syntax -- transparent 4px border reserves space for the row hover outline; not a card surface
+        <Card size="none" className="mb-4 border-4 border-transparent">
           <div className={classNames(css.container, { [css.containerWideActions]: showHiddenAssets })}>
             <EnhancedTable
               rows={rows}

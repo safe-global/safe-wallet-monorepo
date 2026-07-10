@@ -60,6 +60,7 @@ const SafeAppLanding = ({ appUrl, chain }: Props) => {
   return (
     <div className="grid grid-cols-12">
       <div className="col-span-12 lg:col-span-8 lg:col-start-3 xl:col-span-6 xl:col-start-4">
+        {/* eslint-disable-next-line no-restricted-syntax -- 48px landing-page hero padding; no p-12 Card size variant */}
         <Card className="p-12">
           <SafeAppDetails app={backendApp || safeApp} showDefaultListWarning={!backendApp} />
           <div className="mt-8 grid grid-cols-12 gap-4">

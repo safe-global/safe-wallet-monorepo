@@ -23,6 +23,16 @@ const dsButtonClassnameRule = (element, message) => ({
   message,
 })
 
+// Design-system Card-styling guard. Card owns spacing (gap/padding), radius, and
+// surface (bg/border/shadow) via its `size`/`variant`/`radius` props — so this rule
+// flags a wider set than the button rule: `gap-`, full-side `p-`/`pt-`/`pb-`, `border`,
+// and `shadow-`. `className` stays layout-only (w-*, margins, flex/grid). Matches the
+// literal even inside cn(...). Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.
+const dsCardClassnameRule = (element, message) => ({
+  selector: `JSXOpeningElement[name.name='${element}'] > JSXAttribute[name.name='className'] Literal[value=/(?:^|\\s)(h-|p-|px-|py-|pt-|pb-|pl-|pr-|gap-|text-(xs|sm|base|lg)|rounded-|bg-|border|shadow-)/]`,
+  message,
+})
+
 export default [
   {
     ignores: [
@@ -175,6 +185,25 @@ export default [
         dsButtonClassnameRule(
           'SelectTrigger',
           "Don't set size/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*) on <SelectTrigger> — use `size` ('sm'|'default'|'lg') / `variant` ('default'|'surface'|'ghost'). See the UI/Select story; add a variant to components/ui/select.tsx if none fits. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.",
+        ),
+        ...['Card', 'CardHeader', 'CardContent', 'CardFooter', 'CardTitle', 'CardDescription', 'CardAction'].map(
+          (element) =>
+            dsCardClassnameRule(
+              element,
+              `Don't set spacing/surface/radius utilities (gap-*, p-*/px-*/py-*, rounded-*, bg-*, border, shadow-*, text-xs|sm|base|lg) on <${element}> — use the \`size\` ('sm'|'default'|'lg'|'none'), \`variant\` ('outlined'|'muted'), and \`radius\` props. \`className\` is layout-only (w-*, margins, flex/grid). See the UI/Card story; add a variant/size to components/ui/card.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
+            ),
+        ),
+        dsCardClassnameRule(
+          'SettingsCard',
+          'SettingsCard is a Card preset — pass layout-only `className` (w-*, margins, flex/grid), not spacing/surface/radius utilities. Use `contentClassName` for the body or the primitive <Card> for a one-off. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
+        ),
+        dsCardClassnameRule(
+          'SpaceSettingsSection',
+          'SpaceSettingsSection is a Card preset — pass layout-only `className`, not spacing/surface/radius utilities. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
+        ),
+        dsCardClassnameRule(
+          'TxCard',
+          'TxCard is a Card preset — pass layout-only `className`, not spacing/surface/radius utilities. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
         ),
       ],
     },

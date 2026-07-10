@@ -79,7 +79,8 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
   }
 
   return (
-    <Card data-testid="recovery-proposal" className={[css.card, 'flex flex-col gap-8 rounded-lg'].join(' ')}>
+    // eslint-disable-next-line no-restricted-syntax -- gap-8 spaces the recovery card sections; css.card owns padding/margin, radius comes from the Card default (lg)
+    <Card data-testid="recovery-proposal" className={[css.card, 'flex flex-col gap-8'].join(' ')}>
       <div className="flex justify-between">
         {icon}
 

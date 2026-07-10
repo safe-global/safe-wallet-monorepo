@@ -13,7 +13,7 @@ const AddCustomSafeAppCard = ({ onSave, safeAppList }: Props) => {
 
   return (
     <>
-      <Card className="border-0 py-0 shadow-none">
+      <Card size="none">
         <div className="flex flex-col items-center px-3 py-12">
           {/* Add Custom Safe App Icon */}
           <AddCustomAppIcon alt="Add Custom Safe App card" />

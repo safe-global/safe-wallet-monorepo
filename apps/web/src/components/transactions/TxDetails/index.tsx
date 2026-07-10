@@ -268,7 +268,10 @@ const TxDetails = ({
 
   return (
     <Card
-      className={classNames(css.container, contrastSurface && 'rounded-none bg-transparent py-0 shadow-none', {
+      size={contrastSurface ? 'none' : 'default'}
+      radius={contrastSurface ? 'none' : 'lg'}
+      // eslint-disable-next-line no-restricted-syntax -- contrast variant clears the surface (bg-transparent) so css.containerContrast can paint it; nested-surface token
+      className={classNames(css.container, contrastSurface && 'bg-transparent', {
         [css.containerContrast]: contrastSurface,
       })}
     >

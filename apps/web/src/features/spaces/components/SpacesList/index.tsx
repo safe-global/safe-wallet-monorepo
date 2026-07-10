@@ -143,6 +143,7 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
   return (
     <>
+      {/* eslint-disable-next-line no-restricted-syntax -- 40px empty-state padding; no p-10 Card size variant */}
       <Card className="w-full p-10 text-center">
         <div className="flex justify-center">
           <SpacesIcon />

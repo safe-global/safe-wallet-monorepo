@@ -4,7 +4,8 @@ import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 
 const SpaceSettingsSection = ({ className, ...props }: ComponentProps<'section'>) => {
-  return <Card as="section" className={cn('mb-3 gap-0 rounded-2xl p-6', className)} {...props} />
+  // eslint-disable-next-line no-restricted-syntax -- SpaceSettingsSection preset owns its 24px padding + 16px radius (rounded-2xl); no matching Card variants
+  return <Card as="section" size="none" className={cn('mb-3 rounded-2xl p-6', className)} {...props} />
 }
 
 type SpaceSettingsSectionTitleProps = Omit<ComponentProps<typeof Typography>, 'variant'>

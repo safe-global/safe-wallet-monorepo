@@ -34,9 +34,11 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
             data-slot="accordion-item"
           >
             <div
-              class="bg-card text-card-foreground rounded-xl text-sm has-[>img:first-child]:pt-0 data-[size=sm]:gap-4 data-[size=sm]:py-4 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col gap-0 overflow-hidden py-0 shadow-none"
-              data-size="default"
+              class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col gap-0 py-0 rounded-lg"
+              data-radius="lg"
+              data-size="none"
               data-slot="card"
+              data-variant="default"
             >
               <h3
                 class="flex"

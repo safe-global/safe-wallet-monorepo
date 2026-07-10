@@ -38,9 +38,11 @@ ManageTokensButton opens a menu with token management options:
           settings: { ...baseSettings, hiddenTokens: {} },
         }}
       >
-        <Card className="py-0 shadow-none">
-          <CardContent className="px-6 py-6">
-            <Story />
+        <Card size="none">
+          <CardContent>
+            <div className="p-6">
+              <Story />
+            </div>
           </CardContent>
         </Card>
       </StoreDecorator>
@@ -87,9 +89,11 @@ export const WithHiddenTokens: Story = {
           },
         }}
       >
-        <Card className="py-0 shadow-none">
-          <CardContent className="px-6 py-6">
-            <Story />
+        <Card size="none">
+          <CardContent>
+            <div className="p-6">
+              <Story />
+            </div>
           </CardContent>
         </Card>
       </StoreDecorator>
