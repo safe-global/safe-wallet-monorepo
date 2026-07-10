@@ -69,7 +69,11 @@ function ChainSelectorBlock({
           </span>
         }
       />
-      <DropdownMenuContent align="end" sideOffset={8} className="w-[196px] bg-card text-foreground ring-0 p-1">
+      <DropdownMenuContent
+        align="end"
+        sideOffset={12}
+        className="w-[196px] bg-card text-foreground ring-0 p-1 rounded-2xl"
+      >
         <div className="flex flex-col">
           {deployedChains.map((chainItem) => (
             <button
