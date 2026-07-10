@@ -10,9 +10,11 @@ export const SEVERITY_TO_TITLE: Record<Severity, string> = {
   ERROR: 'Checks unavailable',
 }
 
-// Description for each recipient status with a multi-recipient analysis
+// Description for each recipient status with a multi-recipient analysis.
+// RESEMBLES_TRUSTED_ADDRESS is excluded: address-poisoning is rendered per-address (each look-alike
+// keeps its own entered/anchor pair), so it is never consolidated into a plural summary.
 export const MULTI_RESULT_DESCRIPTION: Record<
-  RecipientStatus | BridgeStatus | ContractStatus,
+  Exclude<RecipientStatus, RecipientStatus.RESEMBLES_TRUSTED_ADDRESS> | BridgeStatus | ContractStatus,
   ((number: number, totalNumber?: number) => string) | undefined
 > = {
   [RecipientStatus.KNOWN_RECIPIENT]: (number, totalNumber) =>
@@ -31,10 +33,6 @@ export const MULTI_RESULT_DESCRIPTION: Record<
     `You are interacting with ${formatCount(number, 'address', totalNumber, 'addresses')} for the first time.`,
   [RecipientStatus.RECURRING_RECIPIENT]: (number, totalNumber) =>
     `You have interacted with ${formatCount(number, 'address', totalNumber, 'addresses')} before.`,
-  [RecipientStatus.RESEMBLES_TRUSTED_ADDRESS]: (number, totalNumber) =>
-    `${capitalise(formatCount(number, 'address', totalNumber, 'addresses'))} closely ${
-      number === 1 ? 'resembles' : 'resemble'
-    } an address you trust. Verify before you continue.`,
   [BridgeStatus.INCOMPATIBLE_SAFE]: (number, totalNumber) =>
     `${capitalise(
       formatCount(number, 'Safe account', totalNumber),

@@ -43,6 +43,9 @@ export const AnalysisGroupCard = ({
 }: AnalysisGroupCardProps): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+  // The reveal animation caps max-height (can't animate to `auto`); once it finishes we drop the cap
+  // so tall content (many warnings) isn't clipped behind the widget footer.
+  const [revealed, setRevealed] = useState(false)
 
   const visibleResults = useMemo(() => mapVisibleAnalysisResults(data, expandedGroups), [data, expandedGroups])
   const primaryResult = useMemo(() => getPrimaryAnalysisResult(data), [data])
@@ -53,6 +56,7 @@ export const AnalysisGroupCard = ({
   useEffect(() => {
     if (!primaryResult || isDataEmpty) {
       setIsVisible(false)
+      setRevealed(false)
       return
     }
 
@@ -81,10 +85,16 @@ export const AnalysisGroupCard = ({
   return (
     <Box
       data-testid={dataTestId}
+      onTransitionEnd={(e) => {
+        // Only the reveal's own max-height transition (ignore opacity + bubbling Collapse height).
+        if (e.target === e.currentTarget && e.propertyName === 'max-height' && isVisible) setRevealed(true)
+      }}
       sx={{
-        overflow: 'hidden',
+        // While revealing, cap max-height so it can animate (0 → 1000). Once revealed, drop the cap
+        // to fit-content so long content isn't clipped.
+        overflow: revealed ? 'visible' : 'hidden',
         opacity: isVisible ? 1 : 0,
-        maxHeight: isVisible ? 1000 : 0, // Replace 'fit-content' with a large px value for animatable maxHeight
+        maxHeight: revealed ? 'none' : isVisible ? 1000 : 0,
         transition: `opacity 0.6s ease-in-out, max-height 0.6s ease-in-out`,
         transitionDelay: `${delay}ms`,
       }}
