@@ -217,7 +217,7 @@ const AboutPage = () => {
           className="inline-flex items-center gap-2 no-underline"
           aria-label={`View release notes for v${APP_VERSION}`}
         >
-          <Badge variant="secondary" className="h-6 px-2.5 text-sm font-mono">
+          <Badge variant="secondary" size="lg" className="font-mono">
             v{APP_VERSION}
           </Badge>
           <span className="inline-flex items-center gap-1 text-muted-foreground text-xs font-semibold">

@@ -23,4 +23,24 @@ describe('Chip', () => {
     render(<Chip variant="outline">Outline</Chip>)
     expect(screen.getByText('Outline').className).toContain('border')
   })
+
+  it('applies a semantic variant tint', () => {
+    render(<Chip variant="warning">Warning</Chip>)
+    expect(screen.getByText('Warning').className).toContain('bg-warning-subtle')
+  })
+
+  it('applies size classes', () => {
+    render(<Chip size="sm">Small</Chip>)
+    expect(screen.getByText('Small').className).toContain('h-5')
+  })
+
+  it('applies the tag shape', () => {
+    render(<Chip shape="tag">Tag</Chip>)
+    expect(screen.getByText('Tag').className).toContain('rounded-sm')
+  })
+
+  it('defaults to the pill shape', () => {
+    render(<Chip>Pill</Chip>)
+    expect(screen.getByText('Pill').className).toContain('rounded-4xl')
+  })
 })

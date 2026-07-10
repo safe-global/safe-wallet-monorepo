@@ -4,18 +4,24 @@
 
 Primitives: `apps/web/src/components/ui/badge.tsx`, `chip.tsx` · MUI shim: `components/common/Chip/index.tsx` · Stories: `stories/badge.stories.tsx`, `chip.stories.tsx` · Test: `ui/chip.test.tsx` · Tokens: `styles/shadcn.css` (bridge), `styles/vars.css` (source)
 
-> **Status — part 1 DONE (commit `7002ceb07`), part 2 pending.** The `size`/`shape` axes, `info`/`positive`/`negative`
-> on Badge, Chip semantic-colour parity, the `--color-info-*` bridge, and story docs have all landed
-> (non-breaking, defaults byte-identical, verified in Storybook). **Not yet done:** the §3 call-site migration
-> and the §4 ESLint guard. They are held for a **design nod**, because several sites don't map cleanly to the
-> new variants without a visible shift, and there's no Argos gate yet to review the deltas:
+> **Status — DONE.** Part 1 (commit `7002ceb07`) landed the `size`/`shape` axes, `info`/`positive`/`negative` on
+> Badge, Chip semantic-colour parity, the `--color-info-*` bridge, and story docs. Part 2 (2026-07-10) took the
+> deferred **design calls** and completed the family:
 >
-> - **`FiatChange`** uses `--color-{success,error}-main` for text; `positive`/`negative` use `-strong`/`-dark` (deeper).
-> - **`TxStatusChip`** maps a `color` prop → inline `style` (`--color-{color}-{shade}`) with a `backgroundColor`
->   override; a variant map would drop the dynamic bg. Candidate to delete in favour of `<Badge variant=…>`.
-> - **`Warning`** would shift `text-xs → text-sm` (the `lg` size); **`SafeGradeChip`** needs a `review` variant or
->   grandfather; **`UnreadBadge`** dot needs a `shape="dot"` or grandfather.
->   Once design signs off (and/or Argos is on), execute §3 + §4 as one commit.
+> - Every §3 drift site is migrated onto `variant`/`size`/`shape` props, accepting the `*-strong` shade shift
+>   (FiatChange/status chips) and `TxStatusChip`/`Warning` moving to a `variant` map + `size="lg"` (text-sm).
+>   `TxConfirmations` followed (its `backgroundColor` prop went away → `color="secondary"`).
+> - Grandfathered (justified `// eslint-disable-next-line no-restricted-syntax`): `SafeGradeChip` `needs_attention`
+>   (no `review` variant), `UnreadBadge` dot (no `shape="dot"`), `FiatChange` inline `px-0`. The MUI `Chip` shim
+>   (inline `style`) and `ColorCodedTxAccordion` (css-module + runtime color-mix) carry plain explanatory comments
+>   (the literal ESLint rule doesn't see `style`/`css.x`).
+> - Dead css-module classes deleted: `AccountItem .chip`, `BalanceChanges .categoryChip`, `SafeAppTags
+.safeAppTagLabel`, `ExecutionMethodSelector .notAvailableChip`.
+> - The **Badge/Chip ESLint guard is live** (`dsBadgeClassnameRule`; regex adds `text-[…]` + `border`).
+>
+> Follow-up (not blocking): retire the MUI `Chip` shim once `SpaceSidebarNavigation`/`CsvTxExportButton` move to
+> `<Badge>`/`<Chip>`; regenerate the stale `TxStatusChip`/`StakingStatus` Storybook snapshots
+> (`yarn generate:storybook-tests`) — they're outside the `yarn test` gate.
 
 ## Current state
 
@@ -99,9 +105,14 @@ shape: { pill:'rounded-4xl', tag:'rounded-sm' } // default pill
 
 No-drift Badge sites (leave): SafeCardLayout:77, SafeCardReadOnly:111, ThresholdBadge:5, WorkspaceBanner:21, AccountWidgetItem:60, PendingTxWidget:92, MembersList:135/136/169, RequestToAddButton:97, SpaceAddressBook:173, PendingRequestsTable:118/144/189, PendingTxList:92.
 
-## ESLint
+## ESLint — LIVE (`dsBadgeClassnameRule` in `eslint.config.mjs`)
 
-Add `Badge`, `Chip`. **Regex will miss** `border-*` colour utils (SimilarityWarning, AccountItemStatusChip) and `text-[var(--…)]`/`text-[10px|11px]` (FiatChange, PendingDelegationsList, TxProposalChip) — extend regex with `text-\[`, `border-` (+ optionally `bg-\[`) or ~half the inventory passes lint.
+Applied to `Badge`, `Chip`. Regex is the button set plus `text-[` and `border`:
+`(?:^|\s)(h-|px-|py-|text-(xs|sm|base|lg)|text-\[|rounded-|bg-|border)` — so it catches `text-[10px]`,
+`text-[var(--…)]`, and `border-*` colour utils that the plain button regex missed. `w-*`, margins, flex/grid,
+and `hover:`/`dark:`-prefixed utilities stay allowed. Note the rule only sees `className` string literals — the
+MUI `Chip` shim (inline `style`) and `ColorCodedTxAccordion` (`className={css.x}`) aren't caught, so they carry
+plain explanatory comments instead of a disable directive.
 
 ## Stories
 

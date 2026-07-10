@@ -15,11 +15,7 @@ const SimilarityWarning = () => {
     <Tooltip>
       <TooltipTrigger
         render={
-          <Badge
-            variant="outline"
-            data-testid="similarity-warning"
-            className="cursor-help gap-1 border-yellow-300 text-yellow-800 dark:border-[var(--color-warning-main)] dark:text-[var(--color-warning1-contrast-text)]"
-          >
+          <Badge variant="warning" data-testid="similarity-warning" className="cursor-help">
             <TriangleAlert className="size-4" />
             High similarity
           </Badge>

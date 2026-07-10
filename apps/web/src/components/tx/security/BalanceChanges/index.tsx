@@ -50,7 +50,9 @@ const FungibleBalanceChange = ({
         {asset.symbol}
       </Typography>
       <span style={{ margin: 'auto' }} />
-      <Chip className={`${css.categoryChip} h-auto rounded-sm`}>{asset.type}</Chip>
+      <Chip size="auto" shape="tag">
+        {asset.type}
+      </Chip>
     </>
   )
 }
@@ -83,7 +85,9 @@ const NFTBalanceChange = ({ change, asset }: { asset: TokenAssetDetailsDto; chan
         #{Number(change.token_id)}
       </Typography>
       <span style={{ margin: 'auto' }} />
-      <Chip className={`${css.categoryChip} h-auto rounded-sm`}>NFT</Chip>
+      <Chip size="auto" shape="tag">
+        NFT
+      </Chip>
     </>
   )
 }

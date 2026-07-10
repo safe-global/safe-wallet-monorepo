@@ -77,11 +77,7 @@ const MultiChainSafeItemRow = ({ item }: MultiChainSafeItemRowProps) => {
                   {chain.chainName}
                 </Typography>
                 <StatusBadge chain={chain} />
-                {hasQueued && (
-                  <Badge variant="secondary" className="text-xs whitespace-nowrap">
-                    {chain.queued} pending
-                  </Badge>
-                )}
+                {hasQueued && <Badge variant="secondary">{chain.queued} pending</Badge>}
                 {chain.isLoading ? (
                   <Skeleton className="h-3 w-14 rounded" />
                 ) : chain.balance !== undefined ? (

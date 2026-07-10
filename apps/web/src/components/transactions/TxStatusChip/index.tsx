@@ -1,24 +1,27 @@
-import type { CSSProperties, ReactElement, ReactNode } from 'react'
-import { Badge } from '@/components/ui/badge'
+import type { ReactElement, ReactNode } from 'react'
+import type { VariantProps } from 'class-variance-authority'
+import { Badge, type badgeVariants } from '@/components/ui/badge'
 
 export type TxStatusChipProps = {
   children: ReactNode
   color?: 'primary' | 'secondary' | 'info' | 'warning' | 'success' | 'error'
-  backgroundColor?: string
 }
 
-const toCssVar = (path: string): string => `var(--color-${path.replace('.', '-')})`
+const colorToVariant: Record<
+  NonNullable<TxStatusChipProps['color']>,
+  NonNullable<VariantProps<typeof badgeVariants>['variant']>
+> = {
+  primary: 'default',
+  secondary: 'secondary',
+  info: 'info',
+  warning: 'warning',
+  success: 'success',
+  error: 'destructive',
+}
 
-const TxStatusChip = ({ children, color = 'primary', backgroundColor }: TxStatusChipProps): ReactElement => {
-  const textShade = color === 'success' ? 'dark' : color === 'primary' ? 'light' : 'main'
-
-  const style: CSSProperties = {
-    backgroundColor: backgroundColor ? toCssVar(backgroundColor) : toCssVar(`${color}.background`),
-    color: toCssVar(`${color}.${textShade}`),
-  }
-
+const TxStatusChip = ({ children, color = 'primary' }: TxStatusChipProps): ReactElement => {
   return (
-    <Badge className="h-6 rounded-2xl px-3 text-xs font-bold" style={style}>
+    <Badge variant={colorToVariant[color]} size="lg" className="font-bold">
       {children}
     </Badge>
   )

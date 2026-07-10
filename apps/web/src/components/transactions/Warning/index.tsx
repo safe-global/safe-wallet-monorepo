@@ -8,12 +8,11 @@ import { UntrustedFallbackHandlerTxText } from '@/components/tx/confirmation-vie
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Operation } from '@safe-global/store/gateway/types'
-import { cn } from '@/utils/cn'
 
 type WarningSeverity = 'info' | 'success' | 'warning' | 'error'
 
 const severityBadgeVariant: Record<WarningSeverity, NonNullable<VariantProps<typeof badgeVariants>['variant']>> = {
-  info: 'secondary',
+  info: 'info',
   success: 'success',
   warning: 'warning',
   error: 'destructive',
@@ -37,7 +36,8 @@ const Warning = ({
           <Badge
             data-testid={datatestid}
             variant={severityBadgeVariant[severity]}
-            className={cn('mb-2 h-6 cursor-default gap-1.5 px-2.5 py-0 text-xs font-medium')}
+            size="lg"
+            className="mb-2 gap-1.5 cursor-default"
           >
             <Info className="size-3.5 shrink-0" />
             {text}

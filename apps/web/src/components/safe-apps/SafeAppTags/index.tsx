@@ -15,7 +15,7 @@ const SafeAppTags = ({ tags = [], compact }: SafeAppTagsProps) => {
   return (
     <div className={classnames('flex flex-row flex-wrap gap-2', css.safeAppTagContainer, { [css.compact]: compact })}>
       {displayedTags.map((tag) => (
-        <Chip className={css.safeAppTagLabel} key={tag}>
+        <Chip size="lg" shape="tag" key={tag}>
           {tag}
         </Chip>
       ))}

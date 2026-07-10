@@ -5,7 +5,6 @@ import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import ArrowDown from '@/public/images/balances/change-down.svg'
 import ArrowUp from '@/public/images/balances/change-up.svg'
-import { cn } from '@/utils/cn'
 
 interface FiatChangeProps {
   balanceItem?: Balance
@@ -34,31 +33,15 @@ export const FiatChange = ({ balanceItem, change, inline = false }: FiatChangePr
   const changeLabel = formatPercentage(changeAsNumber)
   const direction = changeAsNumber < 0 ? 'down' : changeAsNumber > 0 ? 'up' : 'none'
 
-  const colorClass =
-    direction === 'down'
-      ? 'text-[var(--color-error-main)]'
-      : direction === 'up'
-        ? 'text-[var(--color-success-main)]'
-        : ''
-  const backgroundClass = inline
-    ? 'bg-transparent'
-    : direction === 'down'
-      ? 'bg-[var(--color-error-background)]'
-      : direction === 'up'
-        ? 'bg-[var(--color-success-background)]'
-        : ''
-
   return (
     <Tooltip>
       <TooltipTrigger
         render={
           <Chip
-            className={cn(
-              colorClass,
-              backgroundClass,
-              inline ? 'h-5 px-0' : 'h-auto px-2 py-0.5',
-              inline ? 'pr-0' : 'pr-1',
-            )}
+            variant={direction === 'up' ? 'positive' : direction === 'down' ? 'negative' : 'default'}
+            size={inline ? 'default' : 'auto'}
+            // eslint-disable-next-line no-restricted-syntax -- inline table-cell variant drops chip padding (px-0) so the % change sits flush in the column
+            className={inline ? 'px-0 pr-0' : 'pr-1'}
           >
             {direction === 'down' ? (
               <ArrowDown className="h-[6px] w-[9px] text-[var(--color-error-main)]" />

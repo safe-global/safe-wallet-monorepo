@@ -23,7 +23,7 @@ function PendingDelegationsList(): ReactElement | null {
             <AccordionTrigger className="px-4">
               <div className="flex items-center gap-2">
                 <Typography variant="paragraph-small-bold">Pending confirmations</Typography>
-                <Chip className="h-5 px-1 text-[11px] font-bold tracking-[1px] bg-[var(--color-warning-light)] text-[var(--color-text-primary)]">
+                <Chip variant="warning" size="sm" className="font-bold tracking-[1px]">
                   {pendingDelegations.length > 19 ? '19+' : pendingDelegations.length}
                 </Chip>
               </div>

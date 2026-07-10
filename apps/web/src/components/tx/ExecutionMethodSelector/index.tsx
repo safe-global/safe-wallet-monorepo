@@ -104,7 +104,7 @@ const _ExecutionMethodSelector = ({
                         <RadioGroupItem value={relayValue} disabled />
                         {noFeeCampaign?.isEligible ? (
                           <div className={css.noFeeCampaignLabel}>
-                            <Chip className={css.notAvailableChip}>
+                            <Chip size="sm" shape="tag">
                               {isLimitReached ? availabilityLabel : 'Not available'}
                             </Chip>
                             <Typography className={css.notAvailableTitle}>Sponsored gas</Typography>

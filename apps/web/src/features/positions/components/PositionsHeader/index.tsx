@@ -27,7 +27,7 @@ const PositionsHeader = ({ protocol, fiatTotal }: { protocol: Protocol; fiatTota
       {shareOfFiatTotal && (
         <Tooltip>
           <TooltipTrigger render={<span className="inline-flex" />}>
-            <Chip className="rounded-md bg-[var(--color-background-secondary)] text-[var(--color-text-primary)]">
+            <Chip variant="default" shape="tag">
               {shareOfFiatTotal}
             </Chip>
           </TooltipTrigger>

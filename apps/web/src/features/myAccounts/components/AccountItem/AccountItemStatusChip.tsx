@@ -11,13 +11,7 @@ export interface AccountItemStatusChipProps {
 }
 
 const ActivationChip = ({ isActivating }: { isActivating: boolean }) => (
-  <Chip
-    data-testid="pending-activation-chip"
-    className={css.chip}
-    style={{
-      backgroundColor: isActivating ? 'var(--color-info-light)' : 'var(--color-warning-background)',
-    }}
-  >
+  <Chip data-testid="pending-activation-chip" variant={isActivating ? 'info' : 'warning'} size="sm">
     {isActivating ? (
       <LoopIcon className={`${css.pendingLoopIcon} ml-1 -mr-1 size-4`} />
     ) : (
@@ -28,11 +22,7 @@ const ActivationChip = ({ isActivating }: { isActivating: boolean }) => (
 )
 
 const ReadOnlyChip = () => (
-  <Chip
-    data-testid="read-only-chip"
-    variant="outline"
-    className={cn(css.chip, 'text-[var(--color-primary-light)] border-[var(--color-border-light)]')}
-  >
+  <Chip data-testid="read-only-chip" variant="outline" size="sm">
     <EyeIcon className={cn('size-4', css.visibilityIcon)} />
     Read-only
   </Chip>

@@ -5,10 +5,10 @@ import { txDataBuilder } from '@/tests/builders/safeTx'
 import { render, screen } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 
-// Error variant is applied via Tailwind utility classes referencing CSS vars.
-// jsdom cannot resolve var() to a computed colour, so we assert on the classes.
-const ERROR_BG_CLASS = 'bg-[var(--color-error-background)]'
-const ERROR_TEXT_CLASS = 'text-[var(--color-error-main)]'
+// Untrusted contracts render the Chip's `negative` variant. jsdom cannot resolve the
+// design-token colours to computed values, so we assert on the variant's utility classes.
+const ERROR_BG_CLASS = 'bg-destructive/10'
+const ERROR_TEXT_CLASS = 'text-destructive'
 
 // Mock the hooks
 jest.mock('@/hooks/useAddressBook')

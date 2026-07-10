@@ -47,7 +47,7 @@ export const ApiCtaSidebar = (): ReactElement => {
           className={cn(css.footerHelpStatus, !isIconCollapsed && 'cursor-pointer')}
           onClick={!isIconCollapsed ? () => setIsCollapsed(false) : undefined}
         >
-          <Badge className="px-1 py-0 text-[10px] leading-none tabular-nums group-data-[collapsible=icon]:hidden">
+          <Badge size="sm" className="tabular-nums group-data-[collapsible=icon]:hidden">
             New
           </Badge>
         </div>

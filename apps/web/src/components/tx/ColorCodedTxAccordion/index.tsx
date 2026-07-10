@@ -85,6 +85,7 @@ const ColorCodedTxAccordion = ({ txInfo, txData, children, defaultExpanded }: De
               </Typography>
 
               {methodLabel && (
+                // runtime color-mix per tx level (css.methodChip + inline style); not a fixed Badge variant
                 <Badge
                   variant="outline"
                   className={css.methodChip}

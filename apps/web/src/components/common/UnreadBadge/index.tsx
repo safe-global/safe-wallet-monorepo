@@ -28,13 +28,15 @@ const UnreadBadge = ({
       {!invisible && (
         <Badge
           variant="secondary"
-          className={classNames('pointer-events-none absolute z-10 px-1', {
+          size="sm"
+          className={classNames('pointer-events-none absolute z-10', {
             'top-0 -translate-y-1/2': anchorOrigin.vertical === 'top',
             'bottom-0 translate-y-1/2': anchorOrigin.vertical === 'bottom',
             'right-0 translate-x-1/2': anchorOrigin.horizontal === 'right',
             'left-0 -translate-x-1/2': anchorOrigin.horizontal === 'left',
+            // eslint-disable-next-line no-restricted-syntax -- notification dot indicator, not a sized badge
             'size-2 min-w-0 rounded-full bg-[var(--color-success-main)] p-0': isDot,
-            'h-5 min-w-5': !isDot,
+            'min-w-5': !isDot,
           })}
         >
           {!isDot && count}

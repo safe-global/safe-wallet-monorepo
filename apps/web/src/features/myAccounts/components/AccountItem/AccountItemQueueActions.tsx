@@ -15,8 +15,8 @@ export interface AccountItemQueueActionsProps {
   awaitingConfirmation: number
 }
 
-const ChipLink = ({ children, color }: { children: ReactNode; color?: string }) => (
-  <Chip style={color ? { backgroundColor: `var(--color-${color}-background)` } : undefined}>
+const ChipLink = ({ children, variant = 'default' }: { children: ReactNode; variant?: 'default' | 'warning' }) => (
+  <Chip variant={variant}>
     <span className="flex items-center gap-1">{children}</span>
   </Chip>
 )
@@ -60,7 +60,7 @@ function AccountItemQueueActions({
         )}
 
         {awaitingConfirmation > 0 && (
-          <ChipLink color="warning">
+          <ChipLink variant="warning">
             <CheckIcon className="size-4 text-[var(--color-warning-main)]" />
             {awaitingConfirmation} to confirm
           </ChipLink>

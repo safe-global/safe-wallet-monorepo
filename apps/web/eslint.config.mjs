@@ -42,6 +42,16 @@ const dsInputClassnameRule = (element, message) => ({
   message,
 })
 
+// Design-system Badge/Chip-styling guard. Badge/Chip own geometry (`size`/`shape`) and
+// colour (`variant`) — so this flags `h-`, `px-`/`py-`, font sizes (incl. arbitrary
+// `text-[10px]`/`text-[var(--…)]`), `rounded-`, `bg-`, and `border`. `w-*`, margins, and
+// flex/grid stay layout-only. Matches literals inside cn(...). Escape hatch:
+// `// eslint-disable-next-line no-restricted-syntax -- <reason>`.
+const dsBadgeClassnameRule = (element, message) => ({
+  selector: `JSXOpeningElement[name.name='${element}'] > JSXAttribute[name.name='className'] Literal[value=/(?:^|\\s)(h-|px-|py-|text-(xs|sm|base|lg)|text-\\[|rounded-|bg-|border)/]`,
+  message,
+})
+
 export default [
   {
     ignores: [
@@ -243,6 +253,12 @@ export default [
         dsInputClassnameRule(
           'NameInput',
           'NameInput forwards styling to its Input — pass `inputSize`/`variant`, not height/skin utilities via `className`. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
+        ),
+        ...['Badge', 'Chip'].map((element) =>
+          dsBadgeClassnameRule(
+            element,
+            `Don't set geometry/colour utilities (h-*, px-*/py-*, text-xs|sm|base|lg, text-[…], rounded-*, bg-*, border) on <${element}> — use the \`variant\`, \`size\` ('sm'|'default'|'lg'|'auto'), and \`shape\` ('pill'|'tag') props. \`className\` is layout-only (w-*, margins, flex/grid). See the UI/${element} story; add a variant to components/ui/${element.toLowerCase()}.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
+          ),
         ),
       ],
     },

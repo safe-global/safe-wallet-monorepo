@@ -24,5 +24,6 @@ export function Chip({ sx, label = 'New', fontWeight = 'bold' }: Props) {
     ...(sx?.borderRadius !== undefined ? { borderRadius: sx.borderRadius * 4 } : {}),
   }
 
+  // MUI compat shim: inline style bridges the legacy `sx` prop; migrate call sites then delete
   return <ShadcnChip style={style}>{label}</ShadcnChip>
 }

@@ -45,11 +45,7 @@ export function PinnedSafeSubItem({ safeItem, onNavigate }: PinnedSafeItemProps)
           {!undeployedSafe && safeItem.isReadOnly && <ReadOnlyBadge />}
         </div>
 
-        {queuedCount > 0 && (
-          <Badge variant="secondary" className="text-xs whitespace-nowrap">
-            {queuedCount} pending
-          </Badge>
-        )}
+        {queuedCount > 0 && <Badge variant="secondary">{queuedCount} pending</Badge>}
 
         {undeployedSafe ? (
           <NotActivatedBadge isActivating={isActivating} />

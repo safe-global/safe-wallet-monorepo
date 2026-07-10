@@ -13,7 +13,7 @@ const TxConfirmations = ({
   const isConfirmed = submittedConfirmations >= requiredConfirmations
 
   return (
-    <TxStatusChip color="primary" backgroundColor="background.main">
+    <TxStatusChip color="secondary">
       {isConfirmed ? <Check className="size-5" /> : <OwnersIcon className="size-5" />}
 
       <span className="text-xs font-bold tracking-[1px]">
