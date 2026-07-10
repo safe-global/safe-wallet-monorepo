@@ -1,8 +1,7 @@
 import { useMemo } from 'react'
 import { Spinner } from '@/components/ui/spinner'
 import { Typography } from '@/components/ui/typography'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import { Search } from 'lucide-react'
+import { SearchInput } from '@/components/ui/search-input'
 import TrustedSafesItem from './TrustedSafesItem'
 import MultiChainSelectionItem from './MultiChainSelectionItem'
 import type { SelectableSafe, SelectableItem } from './useTrustedSafesModal.types'
@@ -117,17 +116,13 @@ const TrustedSafesList = ({ items, isLoading, searchQuery, onSearchChange, onTog
   return (
     <div>
       {showSearch && (
-        <InputGroup className="mb-4">
-          <InputGroupAddon align="inline-start">
-            <Search />
-          </InputGroupAddon>
-          <InputGroupInput
-            placeholder="Search by name or full address"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            autoComplete="off"
-          />
-        </InputGroup>
+        <SearchInput
+          className="mb-4"
+          placeholder="Search by name or full address"
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          autoComplete="off"
+        />
       )}
 
       <div>

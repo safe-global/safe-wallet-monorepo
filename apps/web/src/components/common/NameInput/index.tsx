@@ -1,4 +1,4 @@
-import { type ReactNode, useId } from 'react'
+import { type ComponentProps, type ReactNode, useId } from 'react'
 import get from 'lodash/get'
 import { Controller, type FieldError, useFormContext } from 'react-hook-form'
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
@@ -15,6 +15,8 @@ type NameInputProps = {
   className?: string
   helperText?: ReactNode
   'data-testid'?: string
+  inputSize?: ComponentProps<typeof Input>['inputSize']
+  variant?: ComponentProps<typeof Input>['variant']
   InputProps?: {
     endAdornment?: ReactNode
     startAdornment?: ReactNode
@@ -34,6 +36,8 @@ const NameInput = ({
   autoFocus,
   className,
   helperText,
+  inputSize,
+  variant,
   InputProps,
   InputLabelProps,
   ...props
@@ -90,13 +94,13 @@ const NameInput = ({
             )}
 
             {hasAdornment ? (
-              <InputGroup className={InputProps?.className}>
+              <InputGroup inputSize={inputSize} variant={variant} className={InputProps?.className}>
                 {startAdornment && <InputGroupAddon align="inline-start">{startAdornment}</InputGroupAddon>}
                 <InputGroupInput {...inputProps} />
                 {endAdornment && <InputGroupAddon align="inline-end">{endAdornment}</InputGroupAddon>}
               </InputGroup>
             ) : (
-              <Input className={InputProps?.className} {...inputProps} />
+              <Input inputSize={inputSize} variant={variant} className={InputProps?.className} {...inputProps} />
             )}
 
             {helperText ? <FieldDescription>{helperText}</FieldDescription> : null}

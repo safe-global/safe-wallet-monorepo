@@ -14,7 +14,7 @@ import NetworkSelector from '@/components/common/NetworkSelector'
 import { useMnemonicSafeName } from '@/hooks/useMnemonicName'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import AddressInput from '@/components/common/AddressInput'
-import { largeFormFieldSurfaceClassName, largeFormInputGroupClassName } from '@/components/common/formFieldStyles'
+import { largeFormFieldSurfaceClassName } from '@/components/common/formFieldStyles'
 import React from 'react'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useChainId from '@/hooks/useChainId'
@@ -33,8 +33,6 @@ type FormData = {
   [Field.name]: string
   [Field.address]: string
 }
-
-const nameInputGroupClassName = largeFormInputGroupClassName
 
 const networkSelectTriggerClassName = `${largeFormFieldSurfaceClassName} w-full`
 
@@ -110,8 +108,9 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
                   label={errors?.[Field.name]?.message || 'Name'}
                   placeholder={fallbackName}
                   InputLabelProps={{ shrink: true }}
+                  inputSize="xl"
+                  variant="surface"
                   InputProps={{
-                    className: nameInputGroupClassName,
                     endAdornment: resolving ? (
                       <div className="flex items-center">
                         <Spinner className="size-5" />

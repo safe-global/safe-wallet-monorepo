@@ -4,12 +4,11 @@ import { debounce } from 'lodash'
 
 import { Alert } from '@/components/ui/alert'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
+import { SearchInput } from '@/components/ui/search-input'
 import DialogActions from '@/components/common/DialogActions'
 
 import ContactsList from './ContactsList'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
-import SearchIcon from '@/public/images/common/search.svg'
 import { useContactSearch } from '../useContactSearch'
 import { createContactItems, flattenAddressBook } from '../utils'
 import useChains from '@/hooks/useChains'
@@ -133,14 +132,12 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
 
         <FormProvider {...formMethods}>
           <form onSubmit={onSubmit}>
-            <div className="relative px-4 pt-4 mb-2">
-              <SearchIcon className="absolute left-6 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
-              <Input
+            <div className="px-4 pt-4 mb-2">
+              <SearchInput
                 id="search-by-name"
                 placeholder="Search"
                 aria-label="Search contact list by name or address"
                 onChange={(e) => handleSearch(e.target.value)}
-                className="pl-9"
               />
             </div>
 

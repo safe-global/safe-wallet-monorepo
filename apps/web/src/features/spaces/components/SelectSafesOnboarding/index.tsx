@@ -3,9 +3,8 @@ import { FormProvider, useWatch } from 'react-hook-form'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Typography } from '@/components/ui/typography'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { SearchInput } from '@/components/ui/search-input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Search } from 'lucide-react'
 import { OnboardingLayout, StepCounter, SafeAppMockup, deriveSidePanelAccountsFromSpace } from '../OnboardingLayout'
 import useWallet from '@/hooks/wallets/useWallet'
 import { type AllSafeItems } from '@/hooks/safes'
@@ -90,17 +89,13 @@ const SelectSafesOnboarding = (): ReactElement => {
           </Alert>
         ) : (
           <>
-            <InputGroup className="bg-card px-2 shrink-0">
-              <InputGroupAddon>
-                <Search className="size-4" />
-              </InputGroupAddon>
-              <InputGroupInput
-                placeholder="Search for safes"
-                aria-label="Search Safe list"
-                autoComplete="off"
-                onChange={(e) => handleSearch(e.target.value)}
-              />
-            </InputGroup>
+            <SearchInput
+              className="shrink-0"
+              placeholder="Search for safes"
+              aria-label="Search Safe list"
+              autoComplete="off"
+              onChange={(e) => handleSearch(e.target.value)}
+            />
 
             <div className="relative min-w-0" data-testid="onboarding-safes-list-region">
               <OnboardingSafesList

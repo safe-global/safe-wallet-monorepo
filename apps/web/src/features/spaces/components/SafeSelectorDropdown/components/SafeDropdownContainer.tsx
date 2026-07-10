@@ -1,7 +1,7 @@
-import { RotateCw, Search } from 'lucide-react'
+import { RotateCw } from 'lucide-react'
 import { useState } from 'react'
 import { SelectContent, SelectItem } from '@/components/ui/select'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { SearchInput } from '@/components/ui/search-input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
@@ -153,23 +153,19 @@ const SafeDropdownContainer = ({
             {header}
             {showSearch && (
               <div className="flex items-center gap-2 px-3 pb-2 pt-1">
-                <InputGroup className="flex-1 shadow-none">
-                  <InputGroupAddon>
-                    <Search className="size-4" />
-                  </InputGroupAddon>
-                  <InputGroupInput
-                    placeholder="by name, address or network"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    // Stop keystrokes reaching base-ui Select's typeahead, which would hijack typing.
-                    // Trade-off: arrows/Enter stay in the input (no list nav); Escape still closes.
-                    onKeyDown={(e) => {
-                      if (e.key !== 'Escape') e.stopPropagation()
-                    }}
-                    autoComplete="off"
-                    data-testid="safe-dropdown-search-input"
-                  />
-                </InputGroup>
+                <SearchInput
+                  className="flex-1"
+                  placeholder="by name, address or network"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  // Stop keystrokes reaching base-ui Select's typeahead, which would hijack typing.
+                  // Trade-off: arrows/Enter stay in the input (no list nav); Escape still closes.
+                  onKeyDown={(e) => {
+                    if (e.key !== 'Escape') e.stopPropagation()
+                  }}
+                  autoComplete="off"
+                  data-testid="safe-dropdown-search-input"
+                />
                 <SafeListSortToggle />
               </div>
             )}

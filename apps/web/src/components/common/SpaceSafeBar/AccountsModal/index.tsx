@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { Search, CircleFadingPlus, Plus } from 'lucide-react'
+import { CircleFadingPlus, Plus } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { SearchInput } from '@/components/ui/search-input'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { AppRoutes } from '@/config/routes'
@@ -140,18 +140,14 @@ const AccountsModal = ({
         </DialogHeader>
 
         <div className="flex shrink-0 items-center gap-2 px-4 py-3">
-          <InputGroup className="flex-1 shadow-none">
-            <InputGroupAddon>
-              <Search className="size-4" />
-            </InputGroupAddon>
-            <InputGroupInput
-              placeholder="Search by name or address"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              autoComplete="off"
-              data-testid="accounts-search-input"
-            />
-          </InputGroup>
+          <SearchInput
+            className="flex-1"
+            placeholder="Search by name or address"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            autoComplete="off"
+            data-testid="accounts-search-input"
+          />
           <SafeListSortToggle />
         </div>
 

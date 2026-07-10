@@ -34,13 +34,13 @@ describe('GlobalSearchModal', () => {
   it('does not render content when closed', () => {
     render(<GlobalSearchModal />)
 
-    expect(screen.queryByRole('textbox', { name: 'Search' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('searchbox', { name: 'Search' })).not.toBeInTheDocument()
   })
 
   it('renders the search input when open', () => {
     renderWithOpenSearch()
 
-    expect(screen.getByRole('textbox', { name: 'Search' })).toBeInTheDocument()
+    expect(screen.getByRole('searchbox', { name: 'Search' })).toBeInTheDocument()
   })
 
   it('renders the navigate to section with page links', () => {
@@ -56,7 +56,7 @@ describe('GlobalSearchModal', () => {
     const user = userEvent.setup()
     renderWithOpenSearch()
 
-    const input = screen.getByRole('textbox', { name: 'Search' })
+    const input = screen.getByRole('searchbox', { name: 'Search' })
     await user.type(input, 'test query')
 
     expect(input).toHaveValue('test query')

@@ -47,7 +47,7 @@ type NumberFieldProps = Omit<ComponentProps<'input'>, 'onChange'> & {
   startAdornment?: ReactNode
   endAdornment?: ReactNode
   onChange?: ChangeEventHandler<HTMLInputElement>
-}
+} & Pick<ComponentProps<typeof Input>, 'inputSize' | 'variant'>
 
 const NumberField = ({
   label,
@@ -58,6 +58,8 @@ const NumberField = ({
   endAdornment,
   onChange,
   className,
+  inputSize,
+  variant,
   id,
   ref,
   ...props
@@ -89,7 +91,7 @@ const NumberField = ({
   const hasAdornment = Boolean(startAdornment || endAdornment)
 
   const control = hasAdornment ? (
-    <InputGroup className={cn(fullWidth && 'w-full')}>
+    <InputGroup inputSize={inputSize} variant={variant} className={cn(fullWidth && 'w-full')}>
       {startAdornment && <InputGroupAddon align="inline-start">{startAdornment}</InputGroupAddon>}
       <InputGroupInput
         id={inputId}
@@ -106,6 +108,8 @@ const NumberField = ({
     <Input
       id={inputId}
       ref={setRef}
+      inputSize={inputSize}
+      variant={variant}
       autoComplete="off"
       aria-invalid={error || undefined}
       className={cn(fullWidth && 'w-full', className)}

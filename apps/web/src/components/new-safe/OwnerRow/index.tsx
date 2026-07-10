@@ -2,11 +2,7 @@ import { useCallback, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import NameInput from '@/components/common/NameInput'
-import {
-  largeFormFieldRowClassName,
-  largeFormFieldSurfaceClassName,
-  largeFormInputGroupClassName,
-} from '@/components/common/formFieldStyles'
+import { largeFormFieldRowClassName } from '@/components/common/formFieldStyles'
 import AddressBookInput from '@/components/common/AddressBookInput'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { useFormContext, useWatch } from 'react-hook-form'
@@ -77,8 +73,6 @@ const OwnerRow = ({
   }, [ens, setValue, fieldName])
 
   const walletIsOwner = owner.address === wallet?.address
-  const nameInputClassName = resolving ? largeFormInputGroupClassName : largeFormFieldSurfaceClassName
-
   return (
     <div
       className={classNames('mb-6 grid grid-cols-12 items-end gap-6 max-md:flex-wrap', {
@@ -92,10 +86,11 @@ const OwnerRow = ({
             name={`${fieldName}.name`}
             label="Signer name"
             InputLabelProps={{ shrink: true }}
+            inputSize="xl"
+            variant="surface"
             placeholder={ens || `Signer ${index + 1}`}
             helperText={walletIsOwner && 'Your connected wallet'}
             InputProps={{
-              className: nameInputClassName,
               endAdornment: resolving ? (
                 <div className="flex items-center">
                   <Spinner className="size-5" />

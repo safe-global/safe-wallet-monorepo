@@ -12,20 +12,26 @@ import { cn } from '@/utils/cn'
  * light mode (invisible), so a visible field border must use `border-border`, like AddressInput.
  */
 const inputVariants = cva(
-  'dark:bg-input/30 border-border border shadow-none focus-visible:ring-0 focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md bg-transparent px-3 py-1.5 text-base transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+  'border-border border shadow-none focus-visible:ring-0 focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md py-1.5 text-base transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       // Named `inputSize` (not `size`) so it doesn't collide with the native numeric `size` attr
       // that callers spread through via `ComponentProps<'input'>`. SelectTrigger uses `size` freely
       // because its props have no native `size`.
       inputSize: {
-        sm: 'h-8',
-        default: 'h-9',
-        lg: 'h-10',
+        sm: 'h-8 px-3',
+        default: 'h-9 px-3',
+        lg: 'h-10 px-3',
+        xl: 'h-[66px] min-h-[66px] rounded-[calc(var(--radius)-2px)] px-4',
+      },
+      variant: {
+        default: 'bg-transparent dark:bg-input/30',
+        surface: 'bg-card dark:bg-card',
       },
     },
     defaultVariants: {
       inputSize: 'default',
+      variant: 'default',
     },
   },
 )
@@ -80,6 +86,7 @@ function Input({
   className,
   type,
   inputSize,
+  variant,
   onChange,
   onPaste,
   error,
@@ -125,7 +132,7 @@ function Input({
         type={type}
         data-slot="input"
         aria-invalid={hasScriptInjection || !!error || props['aria-invalid'] || undefined}
-        className={cn(inputVariants({ inputSize }), className)}
+        className={cn(inputVariants({ inputSize, variant }), className)}
         {...props}
         onChange={handleChange}
         onPaste={handlePaste}

@@ -4,6 +4,14 @@
 
 Primitives: `apps/web/src/components/ui/input.tsx`, `input-group.tsx` · Stories: `stories/input.stories.tsx`, `input-group.stories.tsx`
 
+## Status
+
+**2026-07-09:** Part 1 landed. `Input`/`InputGroup` now expose the `xl` 66px tier and `surface` variant,
+`SearchInput` is the shared search preset, `NumberField`/`NameInput` pass `inputSize`/`variant`, and the safe
+search + 66px call sites below were migrated. The ESLint guard is intentionally deferred until the remaining
+design-sensitive outliers are resolved: NftGrid's borderless table filter, SidebarInput's `bg-background`,
+CreateSpaceOnboarding's 44px field, and ActivityLogFilters' rounded/color-scheme field.
+
 ## Current state
 
 - **input.tsx** `inputVariants`: single axis `inputSize` (`sm h-8` / `default h-9` / `lg h-10`). Named `inputSize` (not `size`) to avoid the native numeric `size` attr. **No `variant`/skin axis** — bg/border/radius/padding/font hard-coded in the base string.

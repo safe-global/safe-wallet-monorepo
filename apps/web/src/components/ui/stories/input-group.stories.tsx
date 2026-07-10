@@ -8,6 +8,7 @@ import {
   InputGroupTextarea,
 } from '../input-group'
 import { Search, Mail, Send } from 'lucide-react'
+import { SearchInput } from '../search-input'
 
 /**
  * InputGroup Component Stories
@@ -17,6 +18,16 @@ import { Search, Mail, Send } from 'lucide-react'
 const meta = {
   title: 'UI/InputGroup',
   component: InputGroup,
+  argTypes: {
+    inputSize: {
+      control: 'select',
+      options: ['sm', 'default', 'lg', 'xl'],
+    },
+    variant: {
+      control: 'select',
+      options: ['default', 'surface'],
+    },
+  },
 } satisfies Meta<typeof InputGroup>
 
 export default meta
@@ -26,6 +37,56 @@ export const AllVariants: Story = {
   tags: ['skip-visual-test'],
   render: () => (
     <div style={{ display: 'block' }}>
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Group Sizes</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+            alignItems: 'end',
+          }}
+        >
+          <div style={{ width: '300px' }}>
+            <InputGroup inputSize="sm">
+              <InputGroupInput placeholder="sm (h-8)" />
+            </InputGroup>
+          </div>
+          <div style={{ width: '300px' }}>
+            <InputGroup>
+              <InputGroupInput placeholder="default (h-9)" />
+            </InputGroup>
+          </div>
+          <div style={{ width: '300px' }}>
+            <InputGroup inputSize="lg">
+              <InputGroupInput placeholder="lg (h-10)" />
+            </InputGroup>
+          </div>
+          <div style={{ width: '300px' }}>
+            <InputGroup inputSize="xl" variant="surface">
+              <InputGroupInput placeholder="xl surface (h-66)" />
+            </InputGroup>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Surface Search Preset</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <div style={{ width: '300px' }}>
+            <SearchInput placeholder="Search..." />
+          </div>
+        </div>
+      </div>
+
       <div style={{ marginBottom: '2rem' }}>
         <h3 className="mb-4 text-lg font-semibold">With Addon (Start)</h3>
         <div

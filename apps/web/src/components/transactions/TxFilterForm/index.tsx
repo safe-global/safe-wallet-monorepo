@@ -194,7 +194,8 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                           render={({ field, fieldState }) => (
                             <NumberField
                               data-testid="amount-input"
-                              className="h-[66px]"
+                              inputSize="xl"
+                              variant="surface"
                               label={
                                 fieldState.error?.message ||
                                 (isIncomingFilter ? 'Amount' : `Amount (only ${chain?.nativeCurrency.symbol || 'ETH'})`)
@@ -248,7 +249,8 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                           render={({ field, fieldState }) => (
                             <NumberField
                               data-testid="nonce-input"
-                              className="h-[66px]"
+                              inputSize="xl"
+                              variant="surface"
                               label={fieldState.error?.message || 'Nonce'}
                               error={!!fieldState.error}
                               {...field}

@@ -7,8 +7,6 @@ import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
-import { cn } from '@/utils/cn'
-import { largeFormInputGroupClassName } from '@/components/common/formFieldStyles'
 
 const DATE_FORMAT = 'dd/MM/yyyy'
 
@@ -111,7 +109,7 @@ const DatePickerField = ({
       </FieldLabel>
 
       <Popover>
-        <InputGroup className={cn(largeFormInputGroupClassName, hasError && 'border-destructive')}>
+        <InputGroup inputSize="xl" variant="surface" aria-invalid={hasError}>
           <InputGroupInput
             id={inputId}
             name={field.name}

@@ -15,7 +15,7 @@ describe('SearchInput', () => {
 
     const input = screen.getByPlaceholderText('Search')
     expect(input).toBeInTheDocument()
-    expect(input).toHaveRole('textbox')
+    expect(input).toHaveRole('searchbox')
     const searchIcon = screen.getByTestId('search-icon')
     expect(searchIcon).toBeInTheDocument()
   })
