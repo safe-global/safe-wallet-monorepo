@@ -22,27 +22,6 @@ body {
   background-color: var(--color-background-paper);
 }
 
-/* Always reserve the vertical scrollbar's space so content doesn't shift
-   horizontally when switching between a scrollable and a non-scrollable page.
-   A transparent track means the reserved gutter shows the page background
-   through it (whether or not a scrollbar is present), so there's no visible
-   strip; only the thumb is drawn when the page actually scrolls. */
-html {
-  scrollbar-gutter: stable;
-  background-color: var(--color-background-main);
-  scrollbar-color: var(--color-border-main) transparent;
-}
-
-/* Match the native scrollbar to the active theme so it doesn't render as a
-   light strip in the reserved gutter in dark mode. */
-html[data-theme='dark'] {
-  color-scheme: dark;
-}
-
-html[data-theme='light'] {
-  color-scheme: light;
-}
-
 main {
   width: 100%;
 }
