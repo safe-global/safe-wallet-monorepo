@@ -3,7 +3,7 @@ import { ArrowUpRight } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import { SafeSidebarContent } from '../SafeSidebarContent'
-import type { SidebarGroupConfig, SidebarItemConfig } from '../../../types'
+import type { SidebarGroupConfig, SidebarItemConfig, SafeSidebarVariantProps } from '../../../types'
 
 const mockUseResolvedSidebarNav = jest.fn()
 const mockIsRouteEnabled = jest.fn()
@@ -39,8 +39,16 @@ jest.mock('@/hooks/useSafeInfo', () => ({
   default: () => mockUseSafeInfo(),
 }))
 
+const mockUseAppSelector = jest.fn()
+
+jest.mock('@/store', () => ({
+  useAppSelector: (...args: unknown[]) => mockUseAppSelector(...args),
+}))
+
 jest.mock('../../../hooks/useResolvedSidebarNav', () => ({
-  useResolvedSidebarNav: jest.fn((main, setup, options) => mockUseResolvedSidebarNav(main, setup, options)),
+  useResolvedSidebarNav: jest.fn((main, setup, options, developerGroupConfig) =>
+    mockUseResolvedSidebarNav(main, setup, options, developerGroupConfig),
+  ),
 }))
 
 jest.mock('../../../config', () => {
@@ -57,15 +65,26 @@ jest.mock('../../../config', () => {
         { icon: Icon, label: 'Stake', href: AppRoutes.stake },
       ],
     },
+    safeDeveloperGroup: {
+      label: 'Developer',
+      items: [{ icon: Icon, label: 'Feature flags', href: AppRoutes.featureFlags }],
+    },
   }
 })
 
 const mockSafeSidebarVariant = jest.fn()
 
 jest.mock('../../SafeSidebarVariant', () => ({
-  SafeSidebarVariant: (props: unknown) => {
+  SafeSidebarVariant: (props: SafeSidebarVariantProps) => {
     mockSafeSidebarVariant(props)
-    return <div>Safe sidebar</div>
+    return (
+      <div>
+        Safe sidebar
+        {props.developerGroup?.items.map((item) => (
+          <span key={item.href}>{item.label}</span>
+        ))}
+      </div>
+    )
   },
 }))
 
@@ -79,6 +98,7 @@ type CallArgs = [
     isItemActive: (item: SidebarItemConfig, pathname: string) => boolean
     isItemDisabled: (item: SidebarItemConfig) => boolean
   },
+  SidebarGroupConfig | undefined,
 ]
 
 const getCallArgs = () => mockUseResolvedSidebarNav.mock.calls[0] as CallArgs
@@ -96,6 +116,7 @@ describe('SafeSidebarContent', () => {
     mockIsRouteEnabled.mockReturnValue(true)
     mockUseQueuedTxsLength.mockReturnValue(2)
     mockUseSafeInfo.mockReturnValue({ safe: { deployed: true } })
+    mockUseAppSelector.mockReturnValue(0)
     mockRouterPathname.current = AppRoutes.home
     mockUseResolvedSidebarNav.mockReturnValue({
       mainNavItems: [],
@@ -338,6 +359,36 @@ describe('SafeSidebarContent', () => {
 
       const [mainNav] = getCallArgs()
       expect(findTxItem(mainNav)?.badge).toBe('')
+    })
+  })
+
+  describe('developer group', () => {
+    it('renders the dev-only Feature flags item', () => {
+      // NEXT_PUBLIC_IS_PRODUCTION is not 'true' in the test env
+      mockUseResolvedSidebarNav.mockImplementation((main, setup, options, developerGroupConfig) => ({
+        mainNavItems: [],
+        setupGroup: { label: 'Defi', items: [] },
+        developerGroup: developerGroupConfig,
+      }))
+
+      const { getByText } = render(<SafeSidebarContent {...defaultProps} />)
+
+      expect(getByText('Feature flags')).toBeInTheDocument()
+    })
+
+    it('passes the override count as a badge on the Feature flags item', () => {
+      mockUseAppSelector.mockReturnValue(3)
+      mockUseResolvedSidebarNav.mockImplementation((main, setup, options, developerGroupConfig) => ({
+        mainNavItems: [],
+        setupGroup: { label: 'Defi', items: [] },
+        developerGroup: developerGroupConfig,
+      }))
+
+      render(<SafeSidebarContent {...defaultProps} />)
+
+      const [, , , developerGroupConfig] = getCallArgs()
+      const featureFlagsItem = developerGroupConfig?.items.find((item) => item.href === AppRoutes.featureFlags)
+      expect(featureFlagsItem?.badge).toBe(3)
     })
   })
 })

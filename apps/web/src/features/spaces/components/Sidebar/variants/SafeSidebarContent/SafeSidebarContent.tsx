@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { useCallback, useContext, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { safeMainNavigation, safeDefiGroup } from '../../config'
+import { safeMainNavigation, safeDefiGroup, safeDeveloperGroup } from '../../config'
 import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
 import { SafeSidebarVariant } from '../SafeSidebarVariant'
 import { useQueuedTxsLength } from '@/hooks/useTxQueue'
@@ -13,6 +13,8 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import type { SafeWorkspaceHeaderProps, SidebarItemConfig, SpaceItem, SidebarVariantContentProps } from '../../types'
 import { getQuerySpaceId } from '../../utils'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
+import { useAppSelector } from '@/store'
+import { selectOverrideCount } from '@/features/feature-flags/store'
 
 const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.earn]
 
@@ -107,11 +109,29 @@ export const SafeSidebarContent = ({
     })
   }, [visibleMainNavigation, queueSize])
 
-  const { mainNavItems, setupGroup } = useResolvedSidebarNav(mainNavWithBadges, visibleDefiGroup, {
-    getLink,
-    isItemDisabled,
-    isItemActive,
-  })
+  // The Developer group is dev-only and carries a live override-count badge. The selector is
+  // called unconditionally to respect the rules of hooks; it's trivial in production.
+  const overrideCount = useAppSelector(selectOverrideCount)
+  const developerGroupConfig = useMemo(() => {
+    if (process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true') return undefined
+    return {
+      ...safeDeveloperGroup,
+      items: safeDeveloperGroup.items.map((item) =>
+        item.href === AppRoutes.featureFlags && overrideCount > 0 ? { ...item, badge: overrideCount } : item,
+      ),
+    }
+  }, [overrideCount])
+
+  const { mainNavItems, setupGroup, developerGroup } = useResolvedSidebarNav(
+    mainNavWithBadges,
+    visibleDefiGroup,
+    {
+      getLink,
+      isItemDisabled,
+      isItemActive,
+    },
+    developerGroupConfig,
+  )
 
   const workspaceHeader = buildWorkspaceHeader(selectedSpace, spaceInitial, spaces, onSpaceAdded)
 
@@ -120,6 +140,7 @@ export const SafeSidebarContent = ({
       workspaceHeader={workspaceHeader}
       mainNavItems={mainNavItems}
       defiGroup={setupGroup}
+      developerGroup={developerGroup}
       isLoading={isLoading}
     />
   )
