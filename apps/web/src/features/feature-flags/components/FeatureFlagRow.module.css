@@ -1,0 +1,31 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.feature {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.scope {
+  min-width: 120px;
+}
+
+.matchIndicator {
+  display: inline-flex;
+  color: var(--color-success-main);
+}
+
+.revertButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
