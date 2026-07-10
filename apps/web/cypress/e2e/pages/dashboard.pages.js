@@ -242,3 +242,12 @@ const differentSignersAcrossChainsMsg = 'different signers across different netw
 export function checkInconsistentSignersMsgDisplayed() {
   cy.contains(differentSignersAcrossChainsMsg, { timeout: 30000 }).should('be.visible')
 }
+
+/**
+ * Verifies the Safe is present in the current URL, i.e. the router query has hydrated.
+ * Use as a precondition before clicking actions that navigate using the `safe` query param.
+ * @param {string} safe - Prefixed safe address expected in the URL
+ */
+export function verifySafeInUrl(safe) {
+  cy.url().should('include', safe)
+}
