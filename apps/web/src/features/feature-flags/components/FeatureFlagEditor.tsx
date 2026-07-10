@@ -1,11 +1,13 @@
 import { useMemo, useState, type ReactElement } from 'react'
 import { RotateCcw, Search, TriangleAlert } from 'lucide-react'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { useAppDispatch } from '@/store'
 import { clearAllOverrides } from '@/features/feature-flags/store'
 import { useFeatureFlagEditorData } from '../hooks/useFeatureFlagEditorData'
 import { FeatureFlagSection } from './FeatureFlagSection'
 import type { FeatureFlagRowData } from '../hooks/useFeatureFlagEditorData'
-import css from './FeatureFlagEditor.module.css'
 
 const matchesSearch = (row: FeatureFlagRowData, search: string): boolean =>
   row.feature.toLowerCase().includes(search.toLowerCase())
@@ -19,28 +21,29 @@ export const FeatureFlagEditor = (): ReactElement => {
   const filteredRest = useMemo(() => rest.filter((row) => matchesSearch(row, search)), [rest, search])
 
   return (
-    <div className={css.editor}>
-      <div className={css.head}>
-        <h1 className={css.h1}>Feature flags</h1>
-        <p className={css.sub}>
+    <div className="mx-auto flex max-w-[1060px] flex-col">
+      <div className="mb-2">
+        <h1 className="text-2xl font-bold tracking-tight">Feature flags</h1>
+        <p className="text-muted-foreground mt-1 max-w-[62ch] text-sm">
           Override the feature flags delivered by the config service. Changes apply instantly across all chains — no
           reload needed.
         </p>
       </div>
 
-      <div className={css.banner} role="note">
-        <TriangleAlert className={css.bannerIcon} size={18} />
-        <div>
-          <b>Development tool.</b> These are local feature-flag overrides — they live only in this browser and never
-          affect production, the config service, or other users. Available in dev &amp; staging builds only.
-        </div>
-      </div>
+      <Alert variant="warning" className="my-3">
+        <TriangleAlert />
+        <AlertTitle>Development tool.</AlertTitle>
+        <AlertDescription>
+          These are local feature-flag overrides — they live only in this browser and never affect production, the
+          config service, or other users. Available in dev &amp; staging builds only.
+        </AlertDescription>
+      </Alert>
 
-      <div className={css.toolbar}>
-        <div className={css.search}>
-          <Search className={css.searchIcon} size={16} />
-          <input
-            className={css.searchInput}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[220px] flex-1">
+          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+          <Input
+            className="pl-9"
             type="search"
             placeholder="Search feature flags"
             value={search}
@@ -49,15 +52,15 @@ export const FeatureFlagEditor = (): ReactElement => {
           />
         </div>
 
-        <button
-          className={css.resetButton}
-          type="button"
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => dispatch(clearAllOverrides())}
           disabled={overridden.length === 0}
         >
-          <RotateCcw size={15} />
+          <RotateCcw />
           Reset all overrides
-        </button>
+        </Button>
       </div>
 
       <FeatureFlagSection title="Local overrides" rows={filteredOverridden} />
