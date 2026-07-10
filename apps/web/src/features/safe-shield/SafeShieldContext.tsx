@@ -76,12 +76,9 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   )
   const [recipientData] = recipient
 
-  // Any address-poisoning look-alike is CRITICAL and requires explicit risk confirmation
-  const hasCriticalPoisoning = useMemo(
-    () =>
-      Object.values(recipientData ?? {}).some((groups) =>
-        (groups[StatusGroup.ADDRESS_POISONING] ?? []).some((result) => result.severity === Severity.CRITICAL),
-      ),
+  // Any address-poisoning look-alike requires explicit risk confirmation
+  const hasPoisoning = useMemo(
+    () => Object.values(recipientData ?? {}).some((groups) => (groups[StatusGroup.ADDRESS_POISONING] ?? []).length > 0),
     [recipientData],
   )
   const contract = counterpartyAnalysis.contract
@@ -106,17 +103,17 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
 
     // Include Safe-level analysis, deadlock and address-poisoning in risk confirmation
     const needsRiskConfirmation =
-      hasCriticalThreat || hasCriticalDeadlock || hasCriticalPoisoning || safeAnalysis?.severity === Severity.CRITICAL
+      hasCriticalThreat || hasCriticalDeadlock || hasPoisoning || safeAnalysis?.severity === Severity.CRITICAL
 
     return {
       needsRiskConfirmation,
       primaryThreatSeverity: severity,
     }
-  }, [threatAnalysisResult, deadlockResults, safeAnalysis, hasCriticalPoisoning])
+  }, [threatAnalysisResult, deadlockResults, safeAnalysis, hasPoisoning])
 
   useEffect(() => {
     setIsRiskConfirmed(false)
-  }, [primaryThreatSeverity, safeShieldTx, safeAnalysis, deadlockResults, hasCriticalPoisoning])
+  }, [primaryThreatSeverity, safeShieldTx, safeAnalysis, deadlockResults, hasPoisoning])
 
   return (
     <SafeShieldContext.Provider
