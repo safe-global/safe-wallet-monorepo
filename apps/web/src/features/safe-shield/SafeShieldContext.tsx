@@ -71,7 +71,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   )
   const [recipientData] = recipient
 
-  // CRITICAL look-alike (both ends match a trusted anchor) requires explicit risk confirmation
+  // Any address-poisoning look-alike is CRITICAL and requires explicit risk confirmation
   const hasCriticalPoisoning = useMemo(
     () =>
       Object.values(recipientData ?? {}).some((groups) =>

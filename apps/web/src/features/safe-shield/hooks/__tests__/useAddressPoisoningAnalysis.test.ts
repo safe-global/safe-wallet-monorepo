@@ -54,7 +54,7 @@ describe('useAddressPoisoningOverlay', () => {
     expect(overlaid?.[BOTH_ENDS]?.[StatusGroup.ADDRESS_POISONING]).toEqual([
       getAddressPoisoningResult({
         address: BOTH_ENDS,
-        match: { anchor: ANCHOR.toLowerCase(), prefixLen: 4, suffixLen: 4, severity: Severity.CRITICAL },
+        anchor: ANCHOR.toLowerCase(),
         anchorName: 'Alice',
       }),
     ])
@@ -132,7 +132,7 @@ describe('useAddressPoisoningOverlay', () => {
         [StatusGroup.ADDRESS_POISONING]: [
           getAddressPoisoningResult({
             address: BOTH_ENDS,
-            match: { anchor: ANCHOR.toLowerCase(), prefixLen: 4, suffixLen: 4, severity: Severity.CRITICAL },
+            anchor: ANCHOR.toLowerCase(),
             anchorName: 'Alice',
           }),
         ],

@@ -56,7 +56,7 @@ export const useAddressPoisoningOverlay = (
 
     const poisoningGroup = (address: string, match: SimilarityMatch) => {
       const anchorName = anchorNameByAddress.get(normalizeAddress(match.anchor))
-      return [getAddressPoisoningResult({ address, match, anchorName })]
+      return [getAddressPoisoningResult({ address, anchor: match.anchor, anchorName })]
     }
 
     for (const [address, groups] of Object.entries(data ?? {})) {
@@ -67,9 +67,9 @@ export const useAddressPoisoningOverlay = (
         continue
       }
 
-      // Insert the poisoning group FIRST: the card colors/titles only the top visible result,
-      // and its stable severity sort breaks ties by insertion order. A look-alike warning must
-      // win a WARN tie against generic states like LOW_ACTIVITY.
+      // Insert the poisoning group FIRST: the card colors/titles only the top visible result, and
+      // the stable severity sort breaks ties by insertion order — so the CRITICAL poisoning group
+      // leads and also wins any same-severity tie.
       next[address] = { [StatusGroup.ADDRESS_POISONING]: poisoningGroup(address, match), ...groups }
       changed = true
     }
