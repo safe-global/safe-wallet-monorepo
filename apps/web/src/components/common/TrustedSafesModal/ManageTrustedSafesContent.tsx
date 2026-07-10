@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Info, Search } from 'lucide-react'
+import { ChevronLeft, Info, Search } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -167,11 +167,18 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
         )}
       </div>
 
-      <div className="mt-4 flex shrink-0 flex-row justify-end gap-2 border-t border-border pt-4">
-        <Button onClick={onSecondary} variant="ghost">
+      <div className="mt-4 flex shrink-0 flex-row items-center gap-3 border-t border-border pt-4">
+        <Button onClick={onSecondary} variant="secondary" size="lg" className="flex-1">
+          {secondaryLabel === 'Back' && <ChevronLeft className="size-4" />}
           {secondaryLabel}
         </Button>
-        <Button onClick={handleSave} disabled={!hasChanges} data-testid="manage-trusted-save">
+        <Button
+          onClick={handleSave}
+          disabled={!hasChanges}
+          size="lg"
+          className="flex-1"
+          data-testid="manage-trusted-save"
+        >
           Save
         </Button>
       </div>

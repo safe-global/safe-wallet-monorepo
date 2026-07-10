@@ -123,6 +123,14 @@ describe('AddAccounts — wallet connection state', () => {
     expect(screen.getByTestId('safe-accounts-table')).toHaveAttribute('data-count', '1')
   })
 
+  it('renders the "What are trusted Safe accounts?" info banner with a Manage list action', () => {
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />)
+
+    expect(screen.getByText('What are trusted Safe accounts?')).toBeInTheDocument()
+    expect(screen.getByText(/This list protects you from impersonation\./)).toBeInTheDocument()
+    expect(screen.getByTestId('open-manage-trusted-safes')).toHaveTextContent('Manage list')
+  })
+
   it('keeps trusted safes that are already in the workspace in the list (shown pre-checked)', () => {
     // The trusted safe is also already part of the current space — it must still appear (not filtered out).
     mockSpaceSafes = [{ chainId: '1', address: TRUSTED_ADDRESS }]

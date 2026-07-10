@@ -440,10 +440,10 @@ const AddAccounts = ({
                   <div className="mb-4 flex shrink-0 items-center gap-3 rounded-2xl bg-muted p-4">
                     <Info className="size-5 shrink-0 text-muted-foreground" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-foreground">Only trusted Safe accounts appear here</p>
+                      <p className="text-sm font-semibold text-foreground">What are trusted Safe accounts?</p>
                       <p className="text-sm text-muted-foreground">
-                        This is a curated list of Safe accounts you trust. Manage your trusted list to add or remove
-                        accounts.{' '}
+                        This list protects you from impersonation. Anyone can create a Safe account listing your address
+                        as a signer, so only accounts you&apos;ve confirmed appear here.{' '}
                         <ExternalLink href={HELP_CENTER_URL} noIcon sx={{ textDecoration: 'underline' }}>
                           Learn more
                         </ExternalLink>
@@ -458,7 +458,7 @@ const AddAccounts = ({
                       className="shrink-0"
                     >
                       <Settings2 className="size-4" />
-                      Manage trusted Safes
+                      Manage list
                     </Button>
                   </div>
 
@@ -533,17 +533,19 @@ const AddAccounts = ({
                     </Alert>
                   )}
 
-                  <div className="mt-4 flex shrink-0 flex-col gap-2">
-                    <Track {...SPACE_EVENTS.ADD_ACCOUNT_MANUALLY_MODAL}>
-                      <AddManually handleAddSafe={handleAddSafe} disabled={isAtLimit} />
-                    </Track>
+                  <div className="mt-4 flex shrink-0 flex-row items-center gap-3">
+                    <div className="flex-1">
+                      <Track {...SPACE_EVENTS.ADD_ACCOUNT_MANUALLY_MODAL}>
+                        <AddManually handleAddSafe={handleAddSafe} disabled={isAtLimit} />
+                      </Track>
+                    </div>
 
                     <Button
                       data-testid="add-accounts-button"
                       type="submit"
                       size="lg"
                       disabled={!isFormDirty || isSubmitting}
-                      className="w-full"
+                      className="flex-1"
                     >
                       {isSubmitting ? (
                         <Loader2 className="size-4 animate-spin" />
