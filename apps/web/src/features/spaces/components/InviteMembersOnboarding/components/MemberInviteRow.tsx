@@ -145,7 +145,9 @@ const MemberInviteRow = ({
               },
             })}
             placeholder="Email, wallet address or ENS name"
-            className={cn('h-11 rounded-lg bg-card px-4', resolving && 'pr-10')}
+            variant="surface"
+            // eslint-disable-next-line no-restricted-syntax -- bespoke 44px invite field (h-11, rounded-lg, px-4); between the lg/xl tiers, no size fits
+            className={cn('h-11 rounded-lg px-4', resolving && 'pr-10')}
             error={displayError}
             data-testid={`invite-identifier-input-${index}`}
           />

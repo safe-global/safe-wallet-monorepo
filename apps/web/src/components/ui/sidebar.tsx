@@ -479,7 +479,8 @@ function SidebarInput({ className, ...props }: ComponentProps<typeof Input>) {
       data-slot="sidebar-input"
       data-sidebar="input"
       inputSize="sm"
-      className={cn('bg-background w-full shadow-none', className)}
+      // eslint-disable-next-line no-restricted-syntax -- sidebar search sits on the page (background) surface, not card; distinct skin with no matching variant
+      className={cn('bg-background w-full', className)}
       {...props}
     />
   )

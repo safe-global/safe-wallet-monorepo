@@ -56,11 +56,13 @@ spot-check the story in Storybook light+dark.
   primitives (defaults byte-identical), `info`/`positive`/`negative` on Badge, full semantic-colour parity on
   Chip, `--color-info-*` bridge in `shadcn.css`, stories updated. Verified in Storybook. **Non-breaking.**
   Call-site migration + ESLint guard are **NOT** done yet — see C3 in §3.
-- **Input/InputGroup (C4) — part 1:** `Input` gained `variant` (`default`/`surface`) + `inputSize="xl"`
-  (66px); `InputGroup` gained matching `inputSize` (`sm`/`default`/`lg`/`xl`) + `variant`
-  (`default`/`surface`); shared `SearchInput` preset added; `NumberField`/`NameInput` pass through
-  `inputSize`/`variant`; safe search call sites and 66px form/filter sites migrated; stories/tests updated.
-  ESLint guard + design-sensitive outliers are **NOT** done yet — see C4 in §3.
+- **Input/InputGroup (C4) — DONE:** part 1 added `variant` (`default`/`surface`) + `inputSize="xl"` (66px) on
+  `Input`/`InputGroup`, the shared `SearchInput` preset, `NumberField`/`NameInput` pass-through, and safe
+  search + 66px migrations. Part 2 (this pass) closed the tail: outliers resolved (`ActivityLogFilters`,
+  `CreateSpaceOnboarding`, `MemberInviteRow` → `variant="surface"`; `NftGrid`/`SidebarInput`/`InputGroupInput`
+  grandfathered — no one-off variants), and the **Input ESLint guard is live** (`dsInputClassnameRule` for
+  `Input`/`InputGroup*` + presets `SearchField`/`SearchInput`/`NumberField`/`NameInput`). Follow-up: fully
+  retire `SearchField` onto `<SearchInput>`; `AddressInput` MUI holdover out of scope.
 - **Card (C1) — DONE:** part 1 added cva `variant` (`default`/`outlined`/`muted`), `size` (`sm`/`default`/`lg`/`none`),
   and `radius` (`lg`/`xl`/`none`). Part 2 (this pass) took the **design calls**: added `size="lg"` (32px, replaces the
   `p-8` cluster via `size="lg"`+`CardContent`), **flipped the default radius `xl`→`lg`** app-wide (8px, MUI parity),
@@ -82,7 +84,7 @@ spot-check the story in Storybook light+dark.
 | ~~C1~~ | ~~**Card** family tail + ESLint~~ — **DONE** (design calls taken: `size="lg"`, radius default `xl`→`lg`, gap unify; ESLint live) | —      | Argos to confirm the radius flip                  | code        |
 | C2     | **Dialog/Drawer/Sheet** family — [spec](./design-system/dialog-drawer-sheet-family-spec.md)                                      | M      | —                                                 | code        |
 | C3\*   | **Badge/Chip** migration + ESLint — [spec](./design-system/badge-chip-family-spec.md) (primitive **done**)                       | M      | **design nod** (value-chip/status shades) + Argos | code        |
-| C4\*   | **Input/InputGroup** tail + ESLint — [spec](./design-system/input-inputgroup-family-spec.md)                                     | S      | design nod for remaining outliers + Argos         | code        |
+| ~~C4~~ | ~~**Input/InputGroup** tail + ESLint~~ — **DONE** (outliers → `surface`/grandfather; ESLint live)                                | —      | Argos; retire `SearchField` follow-up             | code        |
 | ~~C5~~ | ~~**Select** family~~ — **DONE** (literal-className sites; css-module sites follow-up)                                           | —      | —                                                 | code        |
 | D      | Sweep up the 11 grandfathered button disables (via new presets)                                                                  | M      | some need B/design                                | code        |
 | E      | Turn on the Argos visual gate on PRs                                                                                             | S      | **repo secret**                                   | infra       |
@@ -129,7 +131,7 @@ the primitive, **verify**. Drift counts + starting files from the audit:
 | ~~**C1 Card**~~ (DONE)              | Complete. `size="lg"` added, radius default flipped `xl`→`lg`, GlobalSearch gap unified; all drift migrated or grandfathered; ESLint guard live. Only follow-ups: Argos confirmation of the flip + the CSS-module Card pass (see spec).                            | Final axes: `variant="outlined"/"muted"`, `size="sm"/"lg"/"none"`, `radius="lg"/"xl"/"none"`.                                         | — (done)         |
 | **C2 Dialog/Drawer/Sheet** (33/50)  | Content `padding` prop (`none` clears ~16 sites), Header/Footer `divided` (border), Content `size` width scale (map the `MAX_WIDTH_MAP` in `ModalDialog`), Sheet `variant="floating"`, Content `surface` (card/paper). Footer rows → route through `DialogActions` | `SecurityReportDrawer`, `TrustedSafesModal`, `proposers/UpsertProposer`, `hypernative/HnModal`, `batching/BatchSidebar`               |
 | **C3 Badge/Chip** (26/43)           | shared `size` (sm/default/lg + auto-height); bring `Chip` to Badge variant parity (`warning`/`success`/`destructive`/`info`); `positive`/`negative` value chips; squared `tag` shape                                                                               | `proposers/PendingDelegationsList`, `TxStatusChip`, `AssetsTable/FiatChange`, `transactions/Warning`, `SpaceSettings/pages/AboutPage` |
-| **C4 Input/InputGroup** (tail)      | Primitive API + safe migrations are done. Remaining tail: decide/migrate outliers (`NftGrid` ghost/table filter, `SidebarInput` background, `CreateSpaceOnboarding` 44px, `ActivityLogFilters` rounded/color-scheme), then enable the Input-family ESLint guard.   | `NftGrid`, `ui/sidebar`, `CreateSpaceOnboarding`, `SpaceActivityLog/ActivityLogFilters`, `eslint.config.mjs`                          |
+| ~~**C4 Input/InputGroup**~~ (DONE)  | Complete. Outliers migrated to `variant="surface"` or grandfathered (no one-off variants); Input ESLint guard live. Follow-up: retire `SearchField` onto `<SearchInput>`.                                                                                          | — (done)                                                                                                                              |
 | **C5 Select** (11/52)               | `SelectTrigger` `variant="surface"` (bg-card + rounded-lg — absorbs ~7 filter selects), `size="lg"` (h-10), `variant="ghost"/"embedded"` (reset border/shadow/bg). `SelectContent` is already clean                                                                | `SpaceActivityLog/ActivityLogFilters`, `MemberInviteRow`, `CurrencySelect`, `NetworkSelector`, `SafeSelectorDropdown`                 |
 | Checkbox/Switch/Radio/Toggle (1/52) | **essentially done** — 1 redundant class; skip or trivial                                                                                                                                                                                                          | `common/ToggleButtonGroup`                                                                                                            |
 

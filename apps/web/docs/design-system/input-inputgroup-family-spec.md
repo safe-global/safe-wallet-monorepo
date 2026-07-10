@@ -4,13 +4,25 @@
 
 Primitives: `apps/web/src/components/ui/input.tsx`, `input-group.tsx` · Stories: `stories/input.stories.tsx`, `input-group.stories.tsx`
 
-## Status
+## Status — DONE
 
-**2026-07-09:** Part 1 landed. `Input`/`InputGroup` now expose the `xl` 66px tier and `surface` variant,
-`SearchInput` is the shared search preset, `NumberField`/`NameInput` pass `inputSize`/`variant`, and the safe
-search + 66px call sites below were migrated. The ESLint guard is intentionally deferred until the remaining
-design-sensitive outliers are resolved: NftGrid's borderless table filter, SidebarInput's `bg-background`,
-CreateSpaceOnboarding's 44px field, and ActivityLogFilters' rounded/color-scheme field.
+**2026-07-09 (part 1):** `Input`/`InputGroup` gained the `xl` 66px tier + `surface` variant, `SearchInput`
+became the shared search preset, `NumberField`/`NameInput` pass `inputSize`/`variant`, and the safe search +
+66px call sites were migrated.
+
+**2026-07-10 (part 2 — tail closed):** the deferred outliers are resolved and the **Input ESLint guard is
+live** (`dsInputClassnameRule` for `Input`/`InputGroup*` + presets `SearchField`/`SearchInput`/`NumberField`/
+`NameInput`; button regex + `border`). No new variants were added — `surface` already covered the recurring
+bg-card cases:
+
+- **ActivityLogFilters** + **CreateSpaceOnboarding** → `variant="surface"` (radius/44px height grandfathered).
+- **MemberInviteRow** (another 44px surface field surfaced by the guard) → `variant="surface"` + grandfather.
+- **NftGrid** borderless table-header filter and **SidebarInput** `bg-background` → grandfathered (single-use,
+  bespoke; a one-off `ghost`/`muted` variant wasn't worth the API surface).
+- **InputGroupInput** primitive-internal border/bg stripping → grandfathered (it's the primitive doing its job).
+
+Follow-up (not blocking): retire `SearchField` fully onto `<SearchInput>` (several consumers still import it),
+and the `AddressInput` MUI holdover (out of scope — see Risk).
 
 ## Current state
 
@@ -109,9 +121,12 @@ Clean: TxNoteInput:47, RpcProviderSection:39, TenderlySection:58,91, AddMemberIn
 
 Clean NameInput sites (just need wrapper props): SetNameStep:122, SetupNestedSafe:72, AddOwner/ChooseOwner:92, AddTrustedSafeDialog:95, UpsertProposer:293, SpaceCreationModal:83, MemberInfoForm:12, AcceptInviteDialog:87, AddContactDialog:151, EditContactDialog:136, EditOwnerDialog:73, EntryDialog:72.
 
-## ESLint
+## ESLint — LIVE (`dsInputClassnameRule` in `eslint.config.mjs`)
 
-Add: `Input, InputGroup, InputGroupInput, InputGroupAddon, InputGroupText, InputGroupTextarea, InputGroupButton` + presets `SearchField`(until retired)/`SearchInput`, `NumberField`, `NameInput`. `Input` message → `inputSize`/`variant` on `input.tsx` (not button). Extend regex with `border(?![-\w])|border-` to catch `border-border` overrides.
+Applied to `Input, InputGroup, InputGroupInput, InputGroupAddon, InputGroupText, InputGroupTextarea,
+InputGroupButton` + presets `SearchField` (until retired), `SearchInput`, `NumberField`, `NameInput`. Regex is
+the button set plus `border`: `(?:^|\s)(h-|px-|py-|text-(xs|sm|base|lg)|rounded-|bg-|border)` — `w-*`, margins,
+and flex/grid stay layout-only; `hover:`/`dark:`-prefixed and arbitrary `[…]` utilities aren't flagged.
 
 ## Stories
 

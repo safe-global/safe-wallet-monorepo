@@ -168,6 +168,7 @@ const NftGrid = ({
                       <Input
                         placeholder="Collection"
                         onChange={onFilterChange}
+                        // eslint-disable-next-line no-restricted-syntax -- inline borderless table-header filter: no border/bg/height so it sits flush in the column head; bespoke, no variant
                         className="h-auto border-none bg-transparent py-0 pl-6 pr-0 shadow-none focus-visible:border-none"
                       />
                     </div>

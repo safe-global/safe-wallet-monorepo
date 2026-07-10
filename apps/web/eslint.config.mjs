@@ -33,6 +33,15 @@ const dsCardClassnameRule = (element, message) => ({
   message,
 })
 
+// Design-system Input-styling guard. Input/InputGroup own height (`inputSize`) and skin
+// (`variant`: bg/border) — so this flags `h-`, `px-`/`py-`, `rounded-`, `bg-`, `border`, and
+// font sizes on className. `w-*`, margins, and flex/grid stay layout-only. Matches literals
+// inside cn(...). Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.
+const dsInputClassnameRule = (element, message) => ({
+  selector: `JSXOpeningElement[name.name='${element}'] > JSXAttribute[name.name='className'] Literal[value=/(?:^|\\s)(h-|px-|py-|text-(xs|sm|base|lg)|rounded-|bg-|border)/]`,
+  message,
+})
+
 export default [
   {
     ignores: [
@@ -204,6 +213,36 @@ export default [
         dsCardClassnameRule(
           'TxCard',
           'TxCard is a Card preset — pass layout-only `className`, not spacing/surface/radius utilities. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
+        ),
+        ...[
+          'Input',
+          'InputGroup',
+          'InputGroupInput',
+          'InputGroupAddon',
+          'InputGroupText',
+          'InputGroupTextarea',
+          'InputGroupButton',
+        ].map((element) =>
+          dsInputClassnameRule(
+            element,
+            `Don't set height/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*, border) on <${element}> — use \`inputSize\` ('sm'|'default'|'lg'|'xl') / \`variant\` ('default'|'surface'). \`className\` is layout-only (w-*, margins, flex/grid). See the UI/Input story; add a variant to components/ui/input.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
+          ),
+        ),
+        dsInputClassnameRule(
+          'SearchInput',
+          'SearchInput is the shared search preset — pass layout-only `className` (w-*, margins), not height/skin utilities. Use `inputSize`/`variant`, or the primitive <InputGroup> for a one-off. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
+        ),
+        dsInputClassnameRule(
+          'SearchField',
+          'SearchField is a search preset (being retired for <SearchInput>) — pass layout-only `className`, not height/skin utilities. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
+        ),
+        dsInputClassnameRule(
+          'NumberField',
+          'NumberField forwards styling to its Input — pass `inputSize`/`variant`, not height/skin utilities via `className`. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
+        ),
+        dsInputClassnameRule(
+          'NameInput',
+          'NameInput forwards styling to its Input — pass `inputSize`/`variant`, not height/skin utilities via `className`. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
         ),
       ],
     },

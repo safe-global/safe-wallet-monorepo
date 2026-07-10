@@ -58,7 +58,9 @@ function DateFilter({
       <Input
         id={id}
         type="date"
-        className="bg-card dark:bg-card border-border w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark] [&~p]:w-40 [&~p]:text-xs"
+        variant="surface"
+        // eslint-disable-next-line no-restricted-syntax -- date filter keeps its 8px radius (rounded-lg) to match the adjacent selects; w-40/color-scheme/[&~p] are layout
+        className="w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark] [&~p]:w-40 [&~p]:text-xs"
         value={value}
         min={min}
         max={max}

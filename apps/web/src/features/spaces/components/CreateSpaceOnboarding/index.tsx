@@ -100,7 +100,9 @@ const CreateSpaceOnboarding = (): ReactElement => {
             placeholder="e.g. Treasury Ops, DeFi Team"
             autoComplete="off"
             disabled={isInputDisabled}
-            className="mt-2 h-11 rounded-sm bg-card px-4"
+            variant="surface"
+            // eslint-disable-next-line no-restricted-syntax -- bespoke 44px onboarding field (h-11, rounded-sm, px-4); between the lg/xl tiers, no size fits
+            className="mt-2 h-11 rounded-sm px-4"
             {...nameReg}
             onChange={(e) => {
               setHasUserEdited(true)

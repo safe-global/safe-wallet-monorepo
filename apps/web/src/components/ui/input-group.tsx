@@ -162,6 +162,7 @@ function InputGroupInput({ className, ...props }: React.ComponentProps<'input'>)
     <Input
       data-slot="input-group-control"
       className={cn(
+        // eslint-disable-next-line no-restricted-syntax -- primitive internal: strips the Input's own border/bg/radius/ring so it blends seamlessly into the InputGroup shell
         'rounded-none border-0 bg-transparent shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent flex-1',
         className,
       )}
