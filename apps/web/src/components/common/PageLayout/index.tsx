@@ -2,7 +2,6 @@ import { useContext, useEffect, useState, type ReactElement } from 'react'
 import classnames from 'classnames'
 import Topbar from '@/components/common/Header/Topbar'
 import SafeLogo from '@/components/common/SafeLogo'
-import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import css from './styles.module.css'
 import SafeLoadingError from '../SafeLoadingError'
 import Footer from '../Footer'
@@ -46,7 +45,7 @@ const WELCOME_LIST_ROUTES = [AppRoutes.welcome.accounts, AppRoutes.welcome.space
 const PageLayout = ({ pathname, children }: { pathname: string; children: ReactElement }): ReactElement => {
   const [isSidebarRoute, isAnimated] = useIsSidebarRoute(pathname)
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(true)
-  const [isSpacesSidebarExpanded, setSpacesSidebarExpanded] = useState<boolean>(true)
+  const [isSidebarExpanded, setSidebarExpanded] = useState<boolean>(true)
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
   const { txFlow, setFullWidth } = useContext(TxModalContext)
   const { BatchSidebar } = useLoadFeature(BatchingFeature)
@@ -55,7 +54,6 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const hideHeader = NO_HEADER_ROUTES.includes(pathname)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
   const isWelcomeListRoute = WELCOME_LIST_ROUTES.includes(pathname)
-  const isSpaceRoute = useIsSpaceRoute()
   const parentSafe = useParentSafe()
   const menuToggleHandler = isSidebarRoute ? setSidebarOpen : undefined
 
@@ -79,11 +77,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       )}
 
       {isSidebarRoute ? (
-        <SideDrawer
-          isOpen={isSidebarVisible}
-          onToggle={setSidebarOpen}
-          onSidebarOpenChange={isSpaceRoute ? setSpacesSidebarExpanded : undefined}
-        />
+        <SideDrawer isOpen={isSidebarVisible} onToggle={setSidebarOpen} onSidebarOpenChange={setSidebarExpanded} />
       ) : null}
 
       <div
@@ -92,7 +86,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
           [css.mainAnimated]: isSidebarRoute && isAnimated,
           [css.mainNoHeader]: hideHeader,
           [css.mainSpace]: !hideHeader,
-          [css.mainSpaceCollapsed]: isSpaceRoute && !isSpacesSidebarExpanded,
+          [css.mainSidebarCollapsed]: isSidebarRoute && isSidebarVisible && !isSidebarExpanded,
         })}
       >
         {!hideHeader && (

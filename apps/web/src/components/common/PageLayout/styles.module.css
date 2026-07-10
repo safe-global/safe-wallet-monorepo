@@ -46,8 +46,10 @@
   background-color: var(--background);
 }
 
-/* Spaces: reduce left padding when the sidebar is collapsed to icon mode */
-.mainSpaceCollapsed {
+/* Reduce left padding when the sidebar is collapsed to icon mode so the content
+   reclaims the freed space. 4rem matches the floating sidebar's collapsed width
+   (--sidebar-width-icon 3rem + 1rem padding). */
+.mainSidebarCollapsed {
   padding-left: 4rem;
 }
 
