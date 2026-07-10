@@ -42,14 +42,10 @@ jest.mock('@/components/common/SafeListSortToggle', () => ({
 jest.mock('@/hooks/safes', () => ({
   useAllOwnedSafes: () => [{}, undefined, false],
   useSafeOrderComparator: () => () => 0,
-  useSafeItemBuilder: () => ({
-    buildSafeItem: (chainId: string, address: string) => ({ chainId, address, name: address }),
-    walletAddress: '',
-    isWalletConnected: false,
-    allOwned: {},
-    ownedError: undefined,
-    ownedLoading: false,
-  }),
+  // Mirrors the real helper: unwraps multi-chain groups, otherwise passes the item through. The page
+  // relies on this to keep the names useSpaceSafes already resolved instead of rebuilding them.
+  flattenSafeItems: (items: Array<SafeItem & { safes?: SafeItem[] }>): SafeItem[] =>
+    items.flatMap((item) => (item.safes ? item.safes : [item])),
   _groupAndSort: (items: SafeItem[], cmp: (a: SafeItem, b: SafeItem) => number) => [...items].sort(cmp),
   useSafesSearch: (safes: Array<{ name?: string }>, query: string) =>
     query ? safes.filter((safe) => safe.name?.toLowerCase().includes(query.toLowerCase())) : [],
@@ -101,8 +97,8 @@ jest.mock('../EmptySafeAccounts', () => ({
 jest.mock('../../InviteBanner/PreviewInvite', () => ({ __esModule: true, default: () => null }))
 
 const spaceSafes = [
-  { chainId: '1', address: 'Treasury' },
-  { chainId: '100', address: 'Marketing' },
+  { chainId: '1', address: '0xTreasury', name: 'Treasury' },
+  { chainId: '100', address: '0xMarketing', name: 'Marketing' },
 ]
 
 describe('SpaceSafeAccounts', () => {
@@ -146,6 +142,22 @@ describe('SpaceSafeAccounts', () => {
 
     expect(screen.getByText('Treasury')).toBeInTheDocument()
     expect(screen.getByText('Marketing')).toBeInTheDocument()
+  })
+
+  // Regression: the page must render the name useSpaceSafes already resolved (workspace-priority),
+  // not re-derive it from the local address book — which would fall back to the address here.
+  it('renders the workspace-resolved name rather than rebuilding from the local address book', () => {
+    mockUseSpaceSafes.mockReturnValue({
+      allSafes: [{ chainId: '1', address: '0xWHYY', name: 'whyy in the space' }],
+      isError: false,
+      error: null,
+      refetch: jest.fn(),
+    })
+
+    render(<SpaceSafeAccounts />)
+
+    expect(screen.getByText('whyy in the space')).toBeInTheDocument()
+    expect(screen.queryByText('0xWHYY')).not.toBeInTheDocument()
   })
 
   it('filters accounts by the search query', () => {

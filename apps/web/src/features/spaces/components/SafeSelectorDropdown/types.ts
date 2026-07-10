@@ -56,4 +56,9 @@ export interface SafeSelectorDropdownProps {
   onSearchValueChange?: (value: string) => void
   /** Enables the rename pencil on list rows; the dropdown closes before the callback fires. */
   onItemRename?: (target: SafeRenameTarget) => void
+  /**
+   * Enables drag-to-reorder for the list (only passed under Manual sort). Fired on drop with the
+   * reordered top-level addresses, in display order.
+   */
+  onReorder?: (orderedAddresses: string[]) => void
 }

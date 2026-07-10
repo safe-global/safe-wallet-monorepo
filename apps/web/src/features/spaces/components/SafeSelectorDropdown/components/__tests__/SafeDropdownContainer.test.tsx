@@ -432,6 +432,68 @@ describe('SafeDropdownContainer', () => {
     })
   })
 
+  describe('reorder (Manual sort)', () => {
+    const itemA = createItem({ id: '1:0xaaaa', name: 'Alpha', address: '0xaaaa' })
+    const itemB = createItem({ id: '137:0xbbbb', name: 'Beta', address: '0xbbbb' })
+
+    it('renders the drag-to-reorder list when onReorder is provided', () => {
+      render(
+        <SafeDropdownContainer
+          items={[itemA, itemB]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          onReorder={jest.fn()}
+        />,
+      )
+
+      expect(screen.getByTestId('safe-selector-reorder-list')).toBeInTheDocument()
+      expect(screen.getAllByTestId('safe-drag-handle')).toHaveLength(2)
+      // The Select-item rows are replaced by the reorder rows in this mode.
+      expect(screen.queryByTestId('select-item')).not.toBeInTheDocument()
+    })
+
+    it('renders the normal Select list when onReorder is absent', () => {
+      render(<SafeDropdownContainer items={[itemA, itemB]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
+
+      expect(screen.queryByTestId('safe-selector-reorder-list')).not.toBeInTheDocument()
+      expect(screen.getAllByTestId('select-item')).toHaveLength(2)
+    })
+
+    it('falls back to the normal list while a search is active (never persists a partial order)', () => {
+      render(
+        <SafeDropdownContainer
+          items={[itemA, itemB]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          onReorder={jest.fn()}
+          searchValue="alpha"
+          onSearchValueChange={jest.fn()}
+        />,
+      )
+
+      expect(screen.queryByTestId('safe-selector-reorder-list')).not.toBeInTheDocument()
+      expect(screen.getByTestId('select-item')).toBeInTheDocument()
+    })
+
+    it('navigates and closes the dropdown when a reorder row is clicked', () => {
+      const onItemSelect = jest.fn()
+      const closeDropdown = jest.fn()
+      render(
+        <SafeDropdownContainer
+          items={[itemA, itemB]}
+          onItemSelect={onItemSelect}
+          closeDropdown={closeDropdown}
+          onReorder={jest.fn()}
+        />,
+      )
+
+      fireEvent.click(screen.getAllByTestId('reorder-safe-row')[0])
+
+      expect(onItemSelect).toHaveBeenCalledWith('1:0xaaaa')
+      expect(closeDropdown).toHaveBeenCalledTimes(1)
+    })
+  })
+
   describe('scroll hint', () => {
     it('hides the hint when content does not overflow', () => {
       render(

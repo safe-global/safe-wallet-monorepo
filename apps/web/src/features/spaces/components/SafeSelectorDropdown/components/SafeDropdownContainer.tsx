@@ -9,6 +9,7 @@ import { useBottomScrollFade } from '@/hooks/useBottomScrollFade'
 import useWallet from '@/hooks/wallets/useWallet'
 import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
+import ReorderableSafeList from './ReorderableSafeList'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import { matchesSafeSearch } from '../utils'
 import type { SafeItemData, SafeRenameTarget } from '../types'
@@ -33,6 +34,11 @@ export interface SafeDropdownContainerProps {
   onSearchValueChange?: (value: string) => void
   /** Enables the rename pencil on rows. The dropdown closes before the callback fires. */
   onItemRename?: (target: SafeRenameTarget) => void
+  /**
+   * Enables drag-to-reorder for the list (only passed under Manual sort). Fired on drop with the
+   * reordered top-level addresses, in display order.
+   */
+  onReorder?: (orderedAddresses: string[]) => void
 }
 
 function SafeItemSkeleton() {
@@ -72,6 +78,7 @@ const SKELETON_COUNT = 4
 const SafeDropdownContainer = ({
   items,
   selectedItemId,
+  onItemSelect,
   isLoading,
   isError,
   onRetry,
@@ -82,6 +89,7 @@ const SafeDropdownContainer = ({
   searchValue,
   onSearchValueChange,
   onItemRename,
+  onReorder,
 }: SafeDropdownContainerProps) => {
   const [internalSearch, setInternalSearch] = useState('')
   const search = searchValue ?? internalSearch
@@ -155,6 +163,23 @@ const SafeDropdownContainer = ({
               ? 'No safes yet'
               : 'Connect a wallet to find your Safe accounts'}
         </p>
+      )
+    }
+
+    // Manual sort turns the list into a drag-to-reorder list (never while searching — a drop would
+    // persist a partial order). Selecting a row navigates and closes, mirroring the Select rows.
+    if (onReorder && !query) {
+      return (
+        <ReorderableSafeList
+          items={filteredItems}
+          selectedItemId={selectedItemId}
+          onSelect={(itemId) => {
+            onItemSelect?.(itemId)
+            closeDropdown()
+          }}
+          onRename={handleRename}
+          onReorder={onReorder}
+        />
       )
     }
 

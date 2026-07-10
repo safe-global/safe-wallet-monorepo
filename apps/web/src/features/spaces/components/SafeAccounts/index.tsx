@@ -13,8 +13,9 @@ import {
 } from '@/store/orderByPreferenceSlice'
 import {
   type AllSafeItems,
+  type SafeItem,
   _groupAndSort,
-  useSafeItemBuilder,
+  flattenSafeItems,
   useSafeOrderComparator,
   useSafesSearch,
 } from '@/hooks/safes'
@@ -46,14 +47,11 @@ const SpaceSafeAccounts = () => {
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = useSafeOrderComparator(orderScope)
   const isManualOrder = orderBy === OrderByOption.MANUAL
-  const { buildSafeItem } = useSafeItemBuilder()
 
-  const spaceSafeItems = useMemo(() => {
-    // Only include safes that are part of the current space
-    const spaceSafes = allSafes?.flatMap((item) => ('safes' in item ? item.safes : [item])) || []
-
-    return spaceSafes.map((safe) => buildSafeItem(safe.chainId, safe.address))
-  }, [buildSafeItem, allSafes])
+  // useSpaceSafes already resolves names via the merged (workspace-priority, local fallback) address
+  // book, so flatten those items rather than rebuilding them — rebuilding via buildSafeItem would
+  // re-derive the name from the local address book only and drop the workspace name.
+  const spaceSafeItems = useMemo<SafeItem[]>(() => flattenSafeItems(allSafes ?? []), [allSafes])
 
   const similarAddresses = useMemo<Set<string>>(
     () => getFlaggedSimilarAddressSet(spaceSafeItems.map((s) => s.address)),
@@ -102,7 +100,7 @@ const SpaceSafeAccounts = () => {
               />
             </InputGroup>
             <ShadcnProvider dark={isDarkMode} className="flex items-center">
-              <SafeListSortToggle />
+              <SafeListSortToggle className="border-border shadow-xs" />
             </ShadcnProvider>
           </>
         )}

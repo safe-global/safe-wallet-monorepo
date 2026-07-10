@@ -69,6 +69,7 @@ function SafeSelectorDropdown({
   searchValue,
   onSearchValueChange,
   onItemRename,
+  onReorder,
 }: SafeSelectorDropdownProps) {
   const hasDropdownContent = Boolean(header) || Boolean(footer) || isLoading || isError
   // Force-openable so `isSingleSafe` can't hide the chevron when only one other safe exists.
@@ -176,6 +177,7 @@ function SafeSelectorDropdown({
         searchValue={searchValue}
         onSearchValueChange={onSearchValueChange}
         onItemRename={onItemRename}
+        onReorder={onReorder}
       />
     </Select>
   )

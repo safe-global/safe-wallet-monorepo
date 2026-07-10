@@ -23,6 +23,7 @@ jest.mock('next/router', () => ({
 
 jest.mock('@/features/spaces', () => ({
   useIsQualifiedSafe: jest.fn(() => false),
+  useCurrentSpaceId: () => undefined,
   matchesSafeSearch: jest.requireActual('@/features/spaces/components/SafeSelectorDropdown/utils').matchesSafeSearch,
   get SafeSelectorDropdown() {
     return jest.requireMock('@/features/spaces/components/SafeSelectorDropdown').default

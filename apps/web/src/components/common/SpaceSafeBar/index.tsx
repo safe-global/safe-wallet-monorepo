@@ -3,9 +3,17 @@ import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
 import { ChevronRight, Settings2, UserRoundPlus, Wallet } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
-import { SafeSelectorDropdown } from '@/features/spaces'
+import { SafeSelectorDropdown, useCurrentSpaceId } from '@/features/spaces'
 import type { SafeItemData, SafeRenameTarget } from '@/features/spaces'
 import { matchesSafeSearch } from '@/features/spaces'
+import { useAppDispatch, useAppSelector } from '@/store'
+import {
+  getSpaceOrderScope,
+  OrderByOption,
+  selectOrderByPreference,
+  setManualOrder,
+  TRUSTED_ORDER_SCOPE,
+} from '@/store/orderByPreferenceSlice'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import TrustedSafesModal from '@/components/common/TrustedSafesModal'
 import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
@@ -162,6 +170,9 @@ function SpaceSafeBar() {
   const connectWallet = useConnectWallet()
   const trustedSafesModal = useTrustedSafesModal()
   const resolveName = useSafeNameResolver()
+  const dispatch = useAppDispatch()
+  const { orderBy } = useAppSelector(selectOrderByPreference)
+  const spaceId = useCurrentSpaceId()
 
   // Union feeds the trigger (which always shows the current safe, present in both lists).
   // The same safe can appear in both lists under one id at different depth — e.g. a chain-scoped
@@ -200,6 +211,16 @@ function SpaceSafeBar() {
   // The Workspace tab lists the space's safes only when the current safe is part of a space;
   // otherwise it shows the sign-in CTA. The Local tab always lists the trusted safes.
   const listItems = activeTab === 'workspace' ? (isInSpaceContext ? workspaceItems : []) : localItems
+
+  // Manual sort turns the active tab's list into a drag-to-reorder list. The order persists to the
+  // same scope the welcome/workspace tables use — trusted for My accounts, this space for the
+  // workspace tab — so every surface stays in sync. Disabled while searching (a drop would persist a
+  // partial order). The Workspace tab has no scope outside a space, so it isn't reorderable there.
+  const reorderScope = activeTab === 'local' ? TRUSTED_ORDER_SCOPE : spaceId ? getSpaceOrderScope(spaceId) : undefined
+  const handleReorder =
+    orderBy === OrderByOption.MANUAL && !search.trim() && reorderScope
+      ? (order: string[]) => dispatch(setManualOrder({ scope: reorderScope, order }))
+      : undefined
 
   const workspaceName = space?.name ?? 'Workspace'
   const workspaceLabel = isInSpaceContext ? `${workspaceName} (${countMatches(workspaceItems)})` : workspaceName
@@ -277,6 +298,7 @@ function SpaceSafeBar() {
             searchValue={search}
             onSearchValueChange={setSearch}
             onItemRename={setRenameTarget}
+            onReorder={handleReorder}
           />
         </div>
         <SpaceNestedSafesButton />
