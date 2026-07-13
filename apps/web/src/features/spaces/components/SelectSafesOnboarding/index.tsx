@@ -106,7 +106,7 @@ const SelectSafesOnboarding = (): ReactElement => {
                 <TooltipContent>You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts per workspace</TooltipContent>
               </Tooltip>
             </div>
-            <InputGroup className="flex-1 rounded-md bg-card">
+            <InputGroup className="flex-1 rounded-md border-border bg-card">
               <InputGroupAddon>
                 <Search className="size-4" />
               </InputGroupAddon>

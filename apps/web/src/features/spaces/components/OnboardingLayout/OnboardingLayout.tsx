@@ -37,7 +37,9 @@ const OnboardingLayout = ({ main, footer, sidePanel, className, onLogoClick }: O
                 <SafeLogo alt="Safe" width={22} height={22} />
               </Link>
             )}
-            <div className="flex-1 min-h-0 flex flex-col gap-6 overflow-y-auto">{main}</div>
+            <div className="flex-1 min-h-0 flex flex-col gap-6 overflow-y-auto overscroll-y-none pr-2 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border">
+              {main}
+            </div>
             {footer && <div className="mt-auto pt-8 shrink-0">{footer}</div>}
           </div>
         </main>
