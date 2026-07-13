@@ -43,7 +43,7 @@ export interface SafeDropdownContainerProps {
 
 function SafeItemSkeleton() {
   return (
-    <div className="flex items-center gap-3 px-3 py-2">
+    <div className="flex items-center gap-3 px-3 py-3">
       <Skeleton className="size-8 shrink-0 rounded-full" />
       <div className="flex flex-1 flex-col gap-1.5">
         <Skeleton className="h-3.5 w-24 rounded" />
@@ -207,7 +207,7 @@ const SafeDropdownContainer = ({
           // marks the open safe with a subtle green highlight, persistent while it isn't focused.
           // [&>span.absolute]:hidden suppresses the built-in checkmark on the selected row (it
           // overlaps the balance column); the green highlight marks the current safe instead.
-          className="group/row h-auto py-2 px-3 rounded-lg my-0.5 cursor-pointer focus:bg-muted data-[selected]:bg-[var(--color-background-light)] [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden"
+          className="group/row h-auto py-3 px-3 rounded-lg my-0.5 cursor-pointer focus:bg-muted data-[selected]:bg-[var(--color-background-light)] [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden"
         >
           <SafeItem {...item} onRename={handleRename} />
         </SelectItem>
@@ -227,9 +227,9 @@ const SafeDropdownContainer = ({
       alignOffset={9}
       collisionAvoidance={{ side: 'none', align: 'shift' }}
     >
-      {/* Fallback to 34rem: until base-ui sets --available-height the clamp must still apply, else the
+      {/* Fallback to 44rem: until base-ui sets --available-height the clamp must still apply, else the
           list expands to full height, measures as non-overflowing, and the scroll-hint fade is missed. */}
-      <div className="flex max-h-[min(34rem,var(--available-height,34rem))] flex-col">
+      <div className="flex max-h-[min(44rem,var(--available-height,44rem))] flex-col">
         {(header || showSearch) && (
           <div className="shrink-0 bg-card">
             {showSearch && (
