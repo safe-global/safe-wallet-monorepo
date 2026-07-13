@@ -1,6 +1,9 @@
 import React, { useCallback, useRef } from 'react'
 import { Pressable } from 'react-native'
-import ReanimatedSwipeable, { type SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable'
+import ReanimatedSwipeable, {
+  SwipeDirection,
+  type SwipeableMethods,
+} from 'react-native-gesture-handler/ReanimatedSwipeable'
 import { Text, View, XStack } from 'tamagui'
 import type { SessionTypes } from '@walletconnect/types'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -28,11 +31,16 @@ export const ConnectedDappRow: React.FC<Props> = ({ session, variant, onRequestD
     onRequestDisconnect(session)
   }, [onRequestDisconnect, session])
 
-  const handleOpenStartDrag = useCallback(() => {
-    if (swipeRef.current) {
-      onSwipeOpenStart?.(swipeRef.current)
-    }
-  }, [onSwipeOpenStart])
+  const handleOpenStartDrag = useCallback(
+    (direction: SwipeDirection) => {
+      // Only a left drag reveals the trash (the sole, right-side action); the ref is always set
+      // once the swipeable has mounted — the guard just narrows the type.
+      if (direction === SwipeDirection.LEFT && swipeRef.current) {
+        onSwipeOpenStart?.(swipeRef.current)
+      }
+    },
+    [onSwipeOpenStart],
+  )
 
   const renderTrash = useCallback(
     () => (
