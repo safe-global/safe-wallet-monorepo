@@ -5,12 +5,13 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Spinner } from '@/components/ui/spinner'
-import { useIsQualifiedSafe } from '@/features/spaces'
+import { ConnectWalletHint, useIsQualifiedSafe } from '@/features/spaces'
 import { SafeAccountsTable, type AccountLine, type SafeAccountColumnId } from '@/features/myAccounts'
 import type { AllSafeItems } from '@/hooks/safes'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import useWallet from '@/hooks/wallets/useWallet'
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
   OrderByOption,
@@ -68,6 +69,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
   } = modal
 
   const isInSpace = useIsQualifiedSafe()
+  const wallet = useWallet()
   const isDarkMode = useDarkMode()
   const dispatch = useAppDispatch()
   const { orderBy } = useAppSelector(selectOrderByPreference)
@@ -121,6 +123,12 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
                 Trusted Safes aren&apos;t added to this workspace automatically — add them separately.
               </AlertDescription>
             </Alert>
+          )}
+
+          {!wallet && (
+            <div className="mb-4">
+              <ConnectWalletHint testId="manage-trusted-connect-wallet-button" />
+            </div>
           )}
 
           <div className="mb-3 flex items-center gap-3">

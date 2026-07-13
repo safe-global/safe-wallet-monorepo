@@ -14,7 +14,6 @@ import {
 } from '@/hooks/safes'
 import AddManually, { type AddManuallyFormValues } from './AddManually'
 import { getSafeId } from '../SelectSafesOnboarding/utils/safeIds'
-import ConnectWalletHint from '../ConnectWalletHint'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
@@ -495,8 +494,6 @@ const AddAccounts = ({
                       </InputGroup>
                     </div>
                   )}
-
-                  {!wallet && <ConnectWalletHint testId="add-accounts-connect-wallet-button" />}
 
                   <div
                     className="min-h-0 flex-1 overflow-y-auto overscroll-y-none pr-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"

@@ -44,6 +44,18 @@ jest.mock('@/features/myAccounts', () => ({
   ),
 }))
 
+let mockWalletValue: { address: string } | null = null
+jest.mock('@/hooks/wallets/useWallet', () => ({
+  __esModule: true,
+  default: () => mockWalletValue,
+}))
+
+const mockConnectWallet = jest.fn()
+jest.mock('@/components/common/ConnectWallet/useConnectWallet', () => ({
+  __esModule: true,
+  default: () => mockConnectWallet,
+}))
+
 const mockRouter = {
   query: { safe: 'eth:0x1234567890abcdef1234567890abcdef12345678' },
   pathname: '/home',
@@ -103,6 +115,7 @@ describe('TrustedSafesModal', () => {
     jest.clearAllMocks()
     ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
     mockUseIsQualifiedSafe.mockReturnValue(false)
+    mockWalletValue = null
   })
 
   it('should render modal when open', () => {
@@ -121,6 +134,25 @@ describe('TrustedSafesModal', () => {
     mockUseIsQualifiedSafe.mockReturnValue(false)
     render(<TrustedSafesModal modal={mockModal} />)
     expect(screen.queryByTestId('space-notice')).not.toBeInTheDocument()
+  })
+
+  it('renders the connect-wallet hint when no wallet is connected', () => {
+    mockWalletValue = null
+    render(<TrustedSafesModal modal={mockModal} />)
+    expect(screen.getByTestId('manage-trusted-connect-wallet-button')).toBeInTheDocument()
+  })
+
+  it('hides the connect-wallet hint when a wallet is connected', () => {
+    mockWalletValue = { address: '0xWallet' }
+    render(<TrustedSafesModal modal={mockModal} />)
+    expect(screen.queryByTestId('manage-trusted-connect-wallet-button')).not.toBeInTheDocument()
+  })
+
+  it('triggers wallet connection when the connect-wallet hint is clicked', () => {
+    mockWalletValue = null
+    render(<TrustedSafesModal modal={mockModal} />)
+    fireEvent.click(screen.getByTestId('manage-trusted-connect-wallet-button'))
+    expect(mockConnectWallet).toHaveBeenCalled()
   })
 
   it('should render safe items', () => {

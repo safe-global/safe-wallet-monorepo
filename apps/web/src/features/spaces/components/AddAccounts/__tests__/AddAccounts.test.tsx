@@ -78,12 +78,6 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpaceSafesDeleteV1Mutation: () => [mockRemoveSafesFromSpace, {}],
 }))
 
-const mockConnectWallet = jest.fn()
-jest.mock('@/components/common/ConnectWallet/useConnectWallet', () => ({
-  __esModule: true,
-  default: () => mockConnectWallet,
-}))
-
 const TRUSTED_ADDRESS = '0x0000000000000000000000000000000000001234'
 const withTrusted = {
   initialReduxState: {
@@ -98,24 +92,6 @@ describe('AddAccounts — wallet connection state', () => {
     mockAllOwned = {}
     mockIsAdmin = true
     mockSpaceSafes = []
-  })
-
-  it('does not render the connect-wallet hint when a wallet is connected', () => {
-    render(<AddAccounts externalOpen onExternalClose={() => {}} />)
-    expect(screen.queryByTestId('add-accounts-connect-wallet-button')).not.toBeInTheDocument()
-  })
-
-  it('renders an inline connect-wallet hint when no wallet is connected', () => {
-    mockWalletValue = null
-    render(<AddAccounts externalOpen onExternalClose={() => {}} />)
-    expect(screen.getByTestId('add-accounts-connect-wallet-button')).toBeInTheDocument()
-  })
-
-  it('clicking the connect-wallet hint triggers wallet connection', () => {
-    mockWalletValue = null
-    render(<AddAccounts externalOpen onExternalClose={() => {}} />)
-    fireEvent.click(screen.getByTestId('add-accounts-connect-wallet-button'))
-    expect(mockConnectWallet).toHaveBeenCalled()
   })
 
   it('shows trusted safes in the list', () => {
