@@ -34,6 +34,18 @@ describe('Card', () => {
     expect(screen.getByTestId('lg-content')).toHaveClass('group-data-[size=lg]/card:px-8')
   })
 
+  it('applies the sm size padding scale', () => {
+    render(
+      <Card data-testid="sm-card" size="sm">
+        <CardContent data-testid="sm-content">Compact content</CardContent>
+      </Card>,
+    )
+
+    expect(screen.getByTestId('sm-card')).toHaveAttribute('data-size', 'sm')
+    expect(screen.getByTestId('sm-card')).toHaveClass('gap-4', 'py-4')
+    expect(screen.getByTestId('sm-content')).toHaveClass('group-data-[size=sm]/card:px-4')
+  })
+
   it('renders outlined and muted variants through props', () => {
     render(
       <>
@@ -80,5 +92,16 @@ describe('Card', () => {
     expect(screen.getByTestId('lg-card')).toHaveClass('rounded-lg')
     expect(screen.getByTestId('square-card')).toHaveAttribute('data-radius', 'none')
     expect(screen.getByTestId('square-card')).toHaveClass('rounded-none')
+  })
+
+  it('supports the xl radius choice', () => {
+    render(
+      <Card data-testid="xl-card" radius="xl">
+        Extra large radius card
+      </Card>,
+    )
+
+    expect(screen.getByTestId('xl-card')).toHaveAttribute('data-radius', 'xl')
+    expect(screen.getByTestId('xl-card')).toHaveClass('rounded-xl')
   })
 })
