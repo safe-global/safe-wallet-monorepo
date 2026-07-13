@@ -222,8 +222,12 @@ function SpaceSafeBar() {
       ? (order: string[]) => dispatch(setManualOrder({ scope: reorderScope, order }))
       : undefined
 
-  const workspaceName = space?.name ?? 'Workspace'
-  const workspaceLabel = isInSpaceContext ? `${workspaceName} (${countMatches(workspaceItems)})` : workspaceName
+  // Only surface the space name when the current safe actually belongs to it. Off a space context
+  // `useCurrentSpaceId` still resolves a fallback space (last-used / first in the list), so `space`
+  // is populated even for a safe in no workspace — labelling the tab with it would be misleading.
+  const workspaceLabel = isInSpaceContext
+    ? `${space?.name ?? 'Workspace'} (${countMatches(workspaceItems)})`
+    : 'Workspace'
   const localLabel = `My accounts (${countMatches(localItems)})`
 
   const dropdownHeader = (

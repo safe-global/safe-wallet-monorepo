@@ -339,6 +339,15 @@ describe('SpaceSafeBar', () => {
     expect(getByTestId('dropdown-tab-workspace').textContent).toBe('Workspace')
   })
 
+  it('labels the Workspace tab "Workspace" when a fallback space is loaded but the safe is not part of it', () => {
+    // `useCurrentSpaceId` resolves a fallback space (last-used / first in the list) even when the
+    // current safe belongs to no workspace, so `space` is populated while isInSpaceContext is false.
+    mockUseSpaceBackLink.mockReturnValue({ space: { id: 1, name: 'Daniel Test space' }, handleBackToSpace: jest.fn() })
+
+    const { getByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('dropdown-tab-workspace').textContent).toBe('Workspace')
+  })
+
   it('labels the Workspace tab with the space name in a space context', () => {
     mockUseIsQualifiedSafe.mockReturnValue(true)
     mockUseSpaceSafeSelectorItems.mockReturnValue({
