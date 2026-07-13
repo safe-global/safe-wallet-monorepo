@@ -21,6 +21,17 @@ export const E2E_PAIRING_TOPIC = 'e2e-pairing-topic'
 /** What the fake `getWalletKit().pair()` should do for the next scan/deep-link. */
 export type PairBehavior = 'resolve' | 'hang' | 'reject'
 
+/** What the e2e fetch interceptor should do with the CGW /propose call. */
+export type ProposeBehavior = 'live' | 'fail500'
+
+/** The last JSON-RPC response the fake respondSessionRequest() delivered to the "dApp". */
+export type RecordedRequestResponse = {
+  topic: string
+  id: number
+  result?: unknown
+  error?: { code: number; message: string }
+}
+
 export interface WalletKitE2eState {
   /**
    * Force the NATIVE_WALLETCONNECT feature on regardless of the remote chains
@@ -50,6 +61,20 @@ export interface WalletKitE2eState {
    * `e2e-wc-reject-called` test-id so the reject flow can assert it.
    */
   rejectSessionCalled: boolean
+
+  /**
+   * Recorded by the fake `respondSessionRequest()`. Side-channel surfaced by
+   * WcResponseIndicator (error-code / safeTxHash-match test-ids) so tx-request
+   * flows can assert exactly what was delivered back to the dApp.
+   */
+  lastRequestResponse: RecordedRequestResponse | null
+
+  /**
+   * Drives the e2e fetch interceptor for CGW's /propose endpoint:
+   *  - 'live'    → passthrough to the real (staging) gateway
+   *  - 'fail500' → synthetic 500, for the CGW-failure flow
+   */
+  proposeBehavior: ProposeBehavior
 }
 
 const initialState: WalletKitE2eState = {
@@ -57,6 +82,8 @@ const initialState: WalletKitE2eState = {
   pairBehavior: 'resolve',
   sessions: {},
   rejectSessionCalled: false,
+  lastRequestResponse: null,
+  proposeBehavior: 'live',
 }
 
 export const walletKitE2eState = createE2eStore('walletKitE2eState', initialState)
