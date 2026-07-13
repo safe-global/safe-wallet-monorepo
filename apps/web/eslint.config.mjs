@@ -42,6 +42,15 @@ const dsInputClassnameRule = (element, message) => ({
   message,
 })
 
+// Design-system Tabs-styling guard. TabsList owns bg/padding/height/radius/gap via its
+// `variant` (default/line/nav/segmented) and TabsTrigger owns its per-variant styling — so
+// call sites pass only `variant` + layout-only className (w-*, margins, flex/grid). Same wide
+// regex as Card. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.
+const dsTabsClassnameRule = (element, message) => ({
+  selector: `JSXOpeningElement[name.name='${element}'] > JSXAttribute[name.name='className'] Literal[value=/(?:^|\\s)(h-|p-|px-|py-|pt-|pb-|pl-|pr-|gap-|text-(xs|sm|base|lg)|rounded-|bg-|border|shadow-)/]`,
+  message,
+})
+
 // Design-system Badge/Chip-styling guard. Badge/Chip own geometry (`size`/`shape`) and
 // colour (`variant`) — so this flags `h-`, `px-`/`py-`, font sizes (incl. arbitrary
 // `text-[10px]`/`text-[var(--…)]`), `rounded-`, `bg-`, and `border`. `w-*`, margins, and
@@ -264,6 +273,12 @@ export default [
         dsInputClassnameRule(
           'NameInput',
           'NameInput forwards styling to its Input — pass `inputSize`/`variant`, not height/skin utilities via `className`. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
+        ),
+        ...['TabsList', 'TabsTrigger'].map((element) =>
+          dsTabsClassnameRule(
+            element,
+            `Don't set spacing/surface/radius utilities (gap-*, p-*/px-*/py-*, rounded-*, bg-*, border, shadow-*, text-xs|sm|base|lg) on <${element}> — use the TabsList \`variant\` ('default'|'line'|'nav'|'segmented'). \`className\` is layout-only (w-*, margins, flex/grid). See the UI/Tabs story; add a variant to components/ui/tabs.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
+          ),
         ),
         ...['Badge', 'Chip'].map((element) =>
           dsBadgeClassnameRule(

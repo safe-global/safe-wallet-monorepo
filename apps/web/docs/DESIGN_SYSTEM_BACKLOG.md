@@ -210,6 +210,55 @@ Full visual QA (light/dark/mobile) · SecurityHub visual eyeball (already shadcn
 - Primitives: `apps/web/src/components/ui/{button,tabs,card,dialog,drawer,sheet,badge,chip,input,input-group,select,checkbox,switch,radio,toggle}.tsx`
 - Closed presets: `apps/web/src/components/common/{SubmitButton,ActionBar,DialogActions,OnboardingFooter,IconAction}/`
 - Stories: `apps/web/src/components/ui/stories/*.stories.tsx` (`UI/*`); preset stories in `components/common/*/`
-- ESLint guard: `apps/web/eslint.config.mjs` (`dsButtonClassnameRule`)
+- ESLint guards: `apps/web/eslint.config.mjs` — `dsButtonClassnameRule` (Button/SubmitButton/ActionButton/SelectTrigger),
+  `dsCardClassnameRule` (Card + slots + presets), `dsInputClassnameRule` (Input/InputGroup\* + presets),
+  `dsBadgeClassnameRule` (Badge/Chip), `dsTabsClassnameRule` (TabsList/TabsTrigger), `dsDialogClassnameRule`
+  (Dialog/Sheet/Drawer content+header+footer). All six live; `npx eslint src` is 0 errors.
 - Docs: this file · `DESIGN_SYSTEM_CONSISTENCY.md` (method) · `.storybook/AGENTS.md` (authoring rules) · `DESIGN_SYSTEM_PROPOSALS.md` (decision log)
 - Branch/PR: `feat/shadcn-migration` / #8040
+
+## 6. Post-migration completeness audit (2026-07-13)
+
+An adversarial per-family audit (variants present · test+story coverage · drift the literal ESLint guard can't
+see) ran after all families landed. Results:
+
+**Confirmed done:** every new cva variant/size/shape/radius is really defined and shown in a story; all six ESLint
+guards are live with `eslint src` at 0 errors; the test suite is green.
+
+**Closed by the audit:**
+
+- **Variant test coverage** — was the biggest real gap (most new variants had zero assertions). Now **DONE**:
+  +81 unit/render tests across Button/Select/Tabs (+ the 5 presets), Card (`sm`/`radius=xl`), Input
+  (`inputSize` sm/default + `variant` default), Badge/Chip (`info`/`success`/`destructive`/`lg`), Dialog/Sheet
+  (size/padding/surface/divided/floating). Two real test **bugs** fixed: `FiatChange.test` had vacuous MUI
+  `toHaveStyle({'success.main'})` leftovers (replaced with real class assertions); the stale `TxStatusChip`
+  MuiChip storybook snapshot was deleted and a proper unit test added.
+- **Tabs ESLint guard** — Tabs got the `segmented` variant but no guard; `dsTabsClassnameRule` now added
+  (one bespoke `gap-2` in `SecurityDrawerContent` grandfathered).
+
+**Remaining follow-ups (out of the literal-guard scope — need Argos before de-drifting):** these call sites are
+still on props-or-grandfather for _literal_ className, but hand-roll height/padding/radius/bg/border through
+channels the regex guard structurally can't see (`className={css.module}`, `sx`, inline `style`, custom
+`inputClassName`/`triggerClassName` props). Not regressions — a separate, disclosed cleanup:
+
+- **Button (~20 sites)** — `AssetActionButton` icon buttons (`SendButton`, incl. an `h-8` hidden in a template
+  literal), `StakeButton`/`EarnButton` **compact** branches (item B only migrated the non-compact CTA),
+  `CounterfactualStatusButton`, `SafeAppsSDKLink`, `HnDashboardBanner`, `SpaceSidebarSelector`, `TokenMenu`,
+  WalletConnect buttons, `BatchSidebar`, `RecoveryProposalCard`. (Button was declared "sweep done" for _literal_
+  overrides; the css-module skins are this follow-up.)
+- **Input** — `AddressBookSearchInput` `inputClassName="dark:bg-white/10 …"` (via a custom prop); the
+  `largeFormFieldSurfaceClassName` constant still lives on a `NetworkSelector` trigger (spec said to delete once
+  `xl`/`surface` landed).
+- **Card (~10 sites)** — `ColorCodedTxAccordion`, `OverviewWidget`, `DataWidget`, `SafeAppSocialLinksCard`,
+  `SecurityEmptyState`, `RecoveryCards`, `TxCard` css.cardContent, plus `SafeAppCard` inline `style={{height}}`.
+- **Select** — `SafeAppsFilters`/`NetworkSelector`/`SignerSelector` css-module triggers (already the C5 follow-up).
+- **Badge/Chip** — MUI `Chip` compat shim + `ColorCodedTxAccordion` runtime color-mix (intentional grandfathers).
+- **Dialog** — `ModalDialog` keeps its css-module `min-width:600px`/`border-radius:24px` + inline width (linchpin).
+
+**Known non-blocking limitations:** Sheet `size` (sm/md/lg/auto) is a no-op for left/right sheets (base
+`data-[side]` widths win on specificity); real sheets keep grandfathered `w-[…]!` widths. Sheet stories omit
+`size`/`padding`/`surface="paper"`; Dialog stories omit `divided="subtle"`.
+
+**Genuinely blocked (not code):** **E** Argos visual gate (needs `ARGOS_TOKEN_STORYBOOK` secret) — the only way
+to pixel-confirm the intentional shifts (Card radius flip, AccountHeader/on-colour CTAs, Badge/Chip shade+size,
+Warning text size). **F** manual visual QA + the `Receipt` gas-token redesign (design call).
