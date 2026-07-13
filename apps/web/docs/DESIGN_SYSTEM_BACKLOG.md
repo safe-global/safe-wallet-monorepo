@@ -237,24 +237,27 @@ guards are live with `eslint src` at 0 errors; the test suite is green.
 - **Tabs ESLint guard** — Tabs got the `segmented` variant but no guard; `dsTabsClassnameRule` now added
   (one bespoke `gap-2` in `SecurityDrawerContent` grandfathered).
 
-**Remaining follow-ups (out of the literal-guard scope — need Argos before de-drifting):** these call sites are
-still on props-or-grandfather for _literal_ className, but hand-roll height/padding/radius/bg/border through
-channels the regex guard structurally can't see (`className={css.module}`, `sx`, inline `style`, custom
-`inputClassName`/`triggerClassName` props). Not regressions — a separate, disclosed cleanup:
+**css-module de-drift — largely DONE (2026-07-13).** ~22 element-level css-module skins were ported onto the
+primitive className as **pixel-identical arbitrary-value Tailwind** (each with a justified `eslint-disable`, so the
+drift is now guard-visible), and the dead css was deleted (incl. two whole modules: `CounterfactualStatusButton`,
+`SpaceSidebarSelector`). Converted: Card (`OverviewWidget`, `SafeAppSocialLinksCard`, `CardStepper` no-op), Button
+(`SendButton` `h-8` un-hidden from a template literal, `CounterfactualStatusButton`, `SafeAppsSDKLink`,
+`HnDashboardBanner`, `SpaceSidebarSelector`, `TokenMenu`, `DataManagement`, `HnSignupIntro`, `BatchSidebar`,
+WalletConnect ×3), Select triggers (`NetworkSelector`, `SafeAppsFilters`, `SignerSelector`).
 
-- **Button (~20 sites)** — `AssetActionButton` icon buttons (`SendButton`, incl. an `h-8` hidden in a template
-  literal), `StakeButton`/`EarnButton` **compact** branches (item B only migrated the non-compact CTA),
-  `CounterfactualStatusButton`, `SafeAppsSDKLink`, `HnDashboardBanner`, `SpaceSidebarSelector`, `TokenMenu`,
-  WalletConnect buttons, `BatchSidebar`, `RecoveryProposalCard`. (Button was declared "sweep done" for _literal_
-  overrides; the css-module skins are this follow-up.)
-- **Input** — `AddressBookSearchInput` `inputClassName="dark:bg-white/10 …"` (via a custom prop); the
-  `largeFormFieldSurfaceClassName` constant still lives on a `NetworkSelector` trigger (spec said to delete once
-  `xl`/`surface` landed).
-- **Card (~10 sites)** — `ColorCodedTxAccordion`, `OverviewWidget`, `DataWidget`, `SafeAppSocialLinksCard`,
-  `SecurityEmptyState`, `RecoveryCards`, `TxCard` css.cardContent, plus `SafeAppCard` inline `style={{height}}`.
-- **Select** — `SafeAppsFilters`/`NetworkSelector`/`SignerSelector` css-module triggers (already the C5 follow-up).
-- **Badge/Chip** — MUI `Chip` compat shim + `ColorCodedTxAccordion` runtime color-mix (intentional grandfathers).
-- **Dialog** — `ModalDialog` keeps its css-module `min-width:600px`/`border-radius:24px` + inline width (linchpin).
+**Genuinely can't convert without a value change (still css-module/inline — leave until Argos):** these have
+`:global`/child selectors, runtime `color-mix()`, responsive `@media`, inline dynamic `style`, or are shared
+encapsulated components:
+
+- **Button** — the shared `AssetActionButton` `.assetActionIconButton` icon skin (DRY, used by
+  Stake/Earn/Swap/Send; child `svg` selectors), `StakeButton`/`EarnButton` `.button` compact pills (MUI `:global`
+  start-icon rules), `RecoveryProposalCard` (responsive `@media`).
+- **Card** — `DataWidget` (MUI `:global` overrides), `SecurityEmptyState` (`@apply`/responsive), `TxDetails`/
+  `BulkTxListGroup`/`RecoveryCards` (responsive `@media`), `ColorCodedTxAccordion` (runtime `color-mix`),
+  `WorkspaceBanner` (`color-mix` gradient+border), `SafeAppCard` (inline dynamic `style={{height}}`).
+- **Badge/Chip** — MUI `Chip` compat shim (inline style) + `ColorCodedTxAccordion` (`color-mix`).
+- **Dialog** — `ModalDialog` css-module `min-width:600px`/`border-radius:24px` + inline width (the linchpin).
+- **Input** — `AddressBookSearchInput` `dark:bg-white/10` (via a custom `inputClassName` prop, not `className`).
 
 **Resolved since the audit:** Sheet `size` no-op — **fixed** (widths now `data-[side]`-scoped; corrected
 BatchSidebar/SideDrawer); a Sheet `Sizes` story was added and `sheet.test.tsx` updated. Remaining minor story
