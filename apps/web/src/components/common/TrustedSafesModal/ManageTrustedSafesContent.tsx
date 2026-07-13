@@ -116,15 +116,6 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
         <div className="shrink-0">
           <SecurityBanner title="Verify before you trust" />
 
-          {isInSpace && (
-            <Alert className="mb-4 border-transparent bg-[var(--color-info-background)]" data-testid="space-notice">
-              <Info />
-              <AlertDescription className="text-current">
-                Trusted Safes aren&apos;t added to this workspace automatically — add them separately.
-              </AlertDescription>
-            </Alert>
-          )}
-
           {!wallet && (
             <div className="mb-4">
               <ConnectWalletHint testId="manage-trusted-connect-wallet-button" />
