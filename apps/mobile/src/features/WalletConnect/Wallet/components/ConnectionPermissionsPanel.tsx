@@ -39,12 +39,12 @@ export const ConnectionPermissionsPanel: React.FC<Props> = ({ variant }) => {
   const isVerified = variant === 'verified'
 
   return (
-    <YStack paddingHorizontal="$4" paddingTop="$2">
+    <YStack>
       <Text fontSize={20} fontWeight="600" letterSpacing={-0.2} marginBottom="$6" textAlign="center">
         Connection request
       </Text>
 
-      <YStack gap="$6" marginBottom="$6">
+      <YStack gap="$6">
         <XStack
           gap="$3"
           paddingHorizontal="$3"
