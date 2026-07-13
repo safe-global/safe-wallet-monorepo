@@ -70,6 +70,7 @@ function SafeSelectorDropdown({
   onSearchValueChange,
   onItemRename,
   onReorder,
+  keepOpen,
 }: SafeSelectorDropdownProps) {
   const hasDropdownContent = Boolean(header) || Boolean(footer) || isLoading || isError
   // Force-openable so `isSingleSafe` can't hide the chevron when only one other safe exists.
@@ -114,6 +115,9 @@ function SafeSelectorDropdown({
 
   // A lifted search query would otherwise persist across open/close (local state resets with the popup).
   const handleOpenChangeWithReset = (open: boolean) => {
+    // Ignore close requests while a modal is layered on top (e.g. renaming): base-ui tries to close
+    // the popup when focus/pointer moves into the dialog, but we want the user to keep their place.
+    if (!open && keepOpen) return
     if (!open) onSearchValueChange?.('')
     handleOpenChange(open)
   }

@@ -54,8 +54,13 @@ export interface SafeSelectorDropdownProps {
   /** Controlled search query. When provided the owner filters/counts across tabs with the same query. */
   searchValue?: string
   onSearchValueChange?: (value: string) => void
-  /** Enables the rename pencil on list rows; the dropdown closes before the callback fires. */
+  /** Enables the rename pencil on list rows; the dropdown stays open behind the rename dialog. */
   onItemRename?: (target: SafeRenameTarget) => void
+  /**
+   * Keeps the dropdown open while a modal is layered on top of it (e.g. the rename dialog), so the
+   * user doesn't lose their place. Suppresses base-ui's close-on-outside-interaction.
+   */
+  keepOpen?: boolean
   /**
    * Enables drag-to-reorder for the list (only passed under Manual sort). Fired on drop with the
    * reordered top-level addresses, in display order.

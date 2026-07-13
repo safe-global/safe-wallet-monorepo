@@ -79,6 +79,7 @@ jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
         data-has-on-item-select={String(typeof props.onItemSelect === 'function')}
         data-has-on-retry={String(typeof props.onRetry === 'function')}
         data-has-footer={String(typeof props.footer === 'function')}
+        data-keep-open={String(props.keepOpen)}
       >
         {props.header as React.ReactNode}
         {emptyStateOverride != null && (
@@ -416,6 +417,15 @@ describe('SpaceSafeBar', () => {
     expect(dialog.getAttribute('data-name')).toBe('My Safe')
     expect(dialog.getAttribute('data-address')).toBe('0xSafe1')
     expect(dialog.getAttribute('data-chain-ids')).toBe('["1"]')
+  })
+
+  it('keeps the dropdown open while the rename dialog is showing', () => {
+    const { getByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('safe-selector-dropdown').getAttribute('data-keep-open')).toBe('false')
+
+    fireEvent.click(getByTestId('mock-rename-btn'))
+
+    expect(getByTestId('safe-selector-dropdown').getAttribute('data-keep-open')).toBe('true')
   })
 
   it.each([['/welcome/accounts'], ['/welcome/spaces'], ['/new-safe/create'], ['/new-safe/load']])(

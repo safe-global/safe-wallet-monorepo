@@ -32,7 +32,7 @@ export interface SafeDropdownContainerProps {
   /** Controlled search query; falls back to local state when omitted. */
   searchValue?: string
   onSearchValueChange?: (value: string) => void
-  /** Enables the rename pencil on rows. The dropdown closes before the callback fires. */
+  /** Enables the rename pencil on rows. The dropdown stays open behind the rename dialog. */
   onItemRename?: (target: SafeRenameTarget) => void
   /**
    * Enables drag-to-reorder for the list (only passed under Manual sort). Fired on drop with the
@@ -98,12 +98,9 @@ const SafeDropdownContainer = ({
   const resolveName = useSafeNameResolver()
   const wallet = useWallet()
 
+  // The dropdown stays open behind the rename dialog (layered above it via z-index), so the user
+  // keeps their place in the list. See SafeSelectorDropdown's `keepOpen`.
   const handleRename = onItemRename
-    ? (target: SafeRenameTarget) => {
-        closeDropdown()
-        onItemRename(target)
-      }
-    : undefined
 
   // The currently-open safe stays in the list (highlighted via its checked/selected state) so the
   // user can locate it among the others.

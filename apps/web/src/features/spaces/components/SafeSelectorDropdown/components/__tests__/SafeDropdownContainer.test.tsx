@@ -409,7 +409,7 @@ describe('SafeDropdownContainer', () => {
       expect(screen.queryByTestId('safe-item-rename-trigger')).not.toBeInTheDocument()
     })
 
-    it('closes the dropdown before forwarding the rename target', () => {
+    it('forwards the rename target without closing the dropdown', () => {
       const closeDropdown = jest.fn()
       const onItemRename = jest.fn()
       render(
@@ -423,7 +423,8 @@ describe('SafeDropdownContainer', () => {
 
       fireEvent.click(screen.getByTestId('safe-item-rename-trigger'))
 
-      expect(closeDropdown).toHaveBeenCalledTimes(1)
+      // The dropdown stays open — the rename dialog layers above it (see keepOpen).
+      expect(closeDropdown).not.toHaveBeenCalled()
       expect(onItemRename).toHaveBeenCalledWith({
         address: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
         name: 'Safe A',

@@ -303,6 +303,7 @@ function SpaceSafeBar() {
             onSearchValueChange={setSearch}
             onItemRename={setRenameTarget}
             onReorder={handleReorder}
+            keepOpen={renameTarget !== null}
           />
         </div>
         <SpaceNestedSafesButton />
@@ -315,6 +316,9 @@ function SpaceSafeBar() {
           defaultValues={{ name: renameTarget.name, address: renameTarget.address }}
           chainIds={renameTarget.chainIds}
           disableAddressInput
+          // Above the safe-selector popup (shadcn --z-overlay: 1400) so the rename dialog layers on
+          // top of the open dropdown instead of behind it.
+          sx={{ zIndex: 1450 }}
         />
       )}
     </div>
