@@ -55,7 +55,7 @@ tags:
 # The request is retained for retry: closing the (modal) error screen lands back
 # on review-and-confirm with the Confirm button still live. A direct "no response
 # yet" marker assert is impossible here — markers are hidden under modals/pushed
-# screens (see README) — so retryability is the observable contract, and the
+# screens — so retryability is the observable contract, and the
 # no-response-until-abandon ordering is covered by walletKitListeners unit tests.
 - tapOn: 'Close'
 - extendedWaitUntil:
