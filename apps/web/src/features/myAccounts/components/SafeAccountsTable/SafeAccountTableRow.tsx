@@ -1,6 +1,7 @@
-import type { ReactNode } from 'react'
+import { type MouseEvent, type ReactNode } from 'react'
 import type { DraggableProvidedDraggableProps, DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
 import NextLink from 'next/link'
+import { useRouter } from 'next/router'
 import TableCell from '@mui/material/TableCell'
 import TableRow from '@mui/material/TableRow'
 import { Badge } from '@/components/ui/badge'
@@ -327,9 +328,26 @@ const SafeAccountTableRow = ({
   rowDraggableProps,
   isDragging,
 }: SafeAccountTableRowProps) => {
+  const router = useRouter()
+
   // In selection mode a leaf row is one big checkbox — clicking anywhere on it toggles selection
   // (except affordances that stop propagation: the checkbox, actions, copy and explorer link).
   const rowSelectable = Boolean(checkbox) && !line.expandable && !checkbox?.disabled
+
+  // Outside selection mode the whole row is a click target: leaf rows navigate to the safe, group rows
+  // toggle their per-chain children. The name keeps its real <a> (for keyboard focus and modifier-clicks
+  // that open a new tab) and the other affordances — copy, explorer, rename, the actions menu — keep
+  // their own behaviour, so the row handler bails when the click lands on any of them.
+  const rowNavigable = !checkbox && (line.expandable || line.href != null)
+
+  const handleRowClick = (event: MouseEvent<HTMLElement>) => {
+    if ((event.target as HTMLElement).closest('a, button, [role="button"]')) return
+    if (line.expandable) onToggle?.()
+    else if (line.href != null) {
+      onLinkClick?.(line)
+      router.push(line.href)
+    }
+  }
 
   // In reorder mode the row can be lifted to `position: fixed`, detaching it from the table's
   // fixed layout — pin each cell's width so the floating row keeps its column alignment.
@@ -361,10 +379,10 @@ const SafeAccountTableRow = ({
       // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover.
       className="group/row"
       tabIndex={-1}
-      onClick={rowSelectable ? () => onSelectToggle?.(!checkbox?.checked) : undefined}
+      onClick={rowSelectable ? () => onSelectToggle?.(!checkbox?.checked) : rowNavigable ? handleRowClick : undefined}
       sx={{
         ...(checkbox?.disabledReason ? { opacity: 0.55 } : {}),
-        ...(rowSelectable ? { cursor: 'pointer' } : {}),
+        ...(rowSelectable || rowNavigable ? { cursor: 'pointer' } : {}),
         ...(isDragging ? { backgroundColor: 'background.paper', boxShadow: 3, borderRadius: '12px' } : {}),
       }}
     >

@@ -102,6 +102,68 @@ describe('SafeAccountTableRow', () => {
     expect(onSelectToggle).not.toHaveBeenCalled()
   })
 
+  describe('whole-row navigation (non-selection surfaces)', () => {
+    // Include a stat cell so a click can land somewhere other than the name link.
+    const navColumns: SafeAccountColumn[] = [
+      { id: 'name', label: 'Name', sortable: false },
+      { id: 'balance', label: 'Balance', sortable: false },
+    ]
+
+    const renderNavRow = (props: Partial<Parameters<typeof SafeAccountTableRow>[0]>, push = jest.fn()) => {
+      render(
+        <table>
+          <tbody>
+            <SafeAccountTableRow line={leaf()} columns={navColumns} {...props} />
+          </tbody>
+        </table>,
+        { routerProps: { push } },
+      )
+      return push
+    }
+
+    it('navigates to the safe and tracks the click when a non-interactive cell is clicked', () => {
+      const onLinkClick = jest.fn()
+      const push = renderNavRow({ onLinkClick })
+
+      fireEvent.click(screen.getByTestId('account-cell-balance'))
+
+      expect(push).toHaveBeenCalledWith('/home?safe=eth:0xabc')
+      expect(onLinkClick).toHaveBeenCalledWith(expect.objectContaining({ address: '0xabc' }))
+    })
+
+    it('does not navigate when an in-row affordance (explorer link) is clicked', () => {
+      const onLinkClick = jest.fn()
+      const push = renderNavRow({ onLinkClick })
+
+      fireEvent.click(screen.getByTestId('safe-item-row-explorer-link'))
+
+      expect(push).not.toHaveBeenCalled()
+      expect(onLinkClick).not.toHaveBeenCalled()
+    })
+
+    it('toggles a group row instead of navigating when its body is clicked', () => {
+      const onToggle = jest.fn()
+      const push = jest.fn()
+      render(
+        <table>
+          <tbody>
+            <SafeAccountTableRow
+              line={leaf({ variant: 'group', expandable: true, href: undefined })}
+              columns={navColumns}
+              onToggle={onToggle}
+            />
+          </tbody>
+        </table>,
+        { routerProps: { push } },
+      )
+
+      fireEvent.click(screen.getByTestId('account-cell-balance'))
+
+      expect(onToggle).toHaveBeenCalled()
+      expect(push).not.toHaveBeenCalled()
+    })
+  })
+
   it('reveals a copy button and explorer link on the address line', () => {
     renderRow({ checkbox: checkbox(), onSelectToggle: jest.fn() })
 
