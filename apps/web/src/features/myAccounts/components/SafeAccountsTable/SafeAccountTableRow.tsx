@@ -146,22 +146,28 @@ const NameCell = ({
   return content
 }
 
-// Floats in the empty gutter to the left of the table (never in a column), so entering sort mode
-// doesn't shift the row content. Hidden until the row is hovered/focused, or while it's dragging.
-// Its box reaches back to the row's left edge, so moving the pointer onto it keeps the row hovered.
+// Absolutely positioned so entering sort mode never shifts the row content — hidden until the row is
+// hovered/focused, or while it's dragging. Two placements, both reserving no layout space:
+//  • gutter (default): floats in the empty gutter left of the table, used by the page lists where the
+//    Name cell leads and there's room outside the table.
+//  • inline: sits in the leading checkbox cell's own left padding (selection surfaces like the Manage
+//    list, whose table is inside a horizontally-clipping scroll container with no outer gutter).
 const ReorderHandle = ({
   dragHandleProps,
   isDragging,
+  inline,
 }: {
   dragHandleProps?: DraggableProvidedDragHandleProps | null
   isDragging?: boolean
+  inline?: boolean
 }) => (
   <span
     {...dragHandleProps}
     data-testid="account-drag-handle"
     aria-label="Drag to reorder"
     className={cn(
-      'text-muted-foreground hover:text-foreground absolute inset-y-0 -left-8 flex w-8 cursor-grab items-center justify-center transition-opacity active:cursor-grabbing',
+      'text-muted-foreground hover:text-foreground absolute inset-y-0 flex cursor-grab items-center justify-center transition-opacity active:cursor-grabbing',
+      inline ? 'left-0 w-4' : '-left-8 w-8',
       isDragging ? 'opacity-100' : 'opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100',
     )}
   >
@@ -240,6 +246,7 @@ const CellContent = ({ column, line }: { column: SafeAccountColumn; line: Accoun
 const RowCell = ({
   column,
   line,
+  isFirstCell,
   reorderable,
   nameCell,
   checkbox,
@@ -250,6 +257,7 @@ const RowCell = ({
 }: {
   column: SafeAccountColumn
   line: AccountLine
+  isFirstCell: boolean
   reorderable: boolean
   nameCell: ReactNode
   checkbox?: RowCheckbox
@@ -258,9 +266,10 @@ const RowCell = ({
   dragHandleProps?: DraggableProvidedDragHandleProps | null
   isDragging?: boolean
 }) => {
-  // Only the draggable parent's Name cell hosts the (absolutely-positioned) grip; it anchors to the
-  // cell, so the cell must allow the grip to overflow into the left gutter without being clipped.
-  const hostsHandle = column.id === 'name' && dragHandleProps != null
+  // The draggable parent's first cell hosts the (absolutely-positioned) grip — the Name cell normally,
+  // or the leading checkbox cell in selection mode, so the grip sits left of the checkbox instead of
+  // over it. It anchors to the cell, which must let the grip overflow into the left gutter without clipping.
+  const hostsHandle = isFirstCell && dragHandleProps != null
 
   return (
     <TableCell
@@ -280,7 +289,9 @@ const RowCell = ({
       }}
       onClick={column.id === 'actions' || column.id === 'select' ? (e) => e.stopPropagation() : undefined}
     >
-      {hostsHandle && <ReorderHandle dragHandleProps={dragHandleProps} isDragging={isDragging} />}
+      {hostsHandle && (
+        <ReorderHandle dragHandleProps={dragHandleProps} isDragging={isDragging} inline={column.id === 'select'} />
+      )}
       {column.id === 'select' ? (
         <SelectCell checkbox={checkbox} onSelectToggle={onSelectToggle} />
       ) : column.id === 'name' ? (
@@ -357,11 +368,12 @@ const SafeAccountTableRow = ({
         ...(isDragging ? { backgroundColor: 'background.paper', boxShadow: 3, borderRadius: '12px' } : {}),
       }}
     >
-      {columns.map((column) => (
+      {columns.map((column, index) => (
         <RowCell
           key={column.id}
           column={column}
           line={line}
+          isFirstCell={index === 0}
           reorderable={reorderable}
           nameCell={nameCell}
           checkbox={checkbox}

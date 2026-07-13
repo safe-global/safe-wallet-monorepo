@@ -77,3 +77,16 @@ export const Reorder: Story = {
     reorder: { onReorder: () => {} },
   },
 }
+
+/**
+ * Selection + reorder together (the "Manage my account list" modal in Manual sort): each row keeps
+ * its checkbox and gains a drag grip, hosted on the leading checkbox cell so it sits left of the box.
+ */
+export const SelectionAndReorder: Story = {
+  args: {
+    items: singleAndMulti,
+    columns: ['select', 'name', 'threshold', 'networks', 'balance'],
+    selection: { selectedKeys: new Set(['1:0x1234567890abcdef1234567890abcdef12345678']), onToggle: () => {} },
+    reorder: { onReorder: () => {} },
+  },
+}

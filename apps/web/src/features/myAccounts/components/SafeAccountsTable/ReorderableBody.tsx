@@ -1,9 +1,11 @@
-import { Fragment, useRef, type Dispatch, type ReactNode, type SetStateAction } from 'react'
+import { Fragment, useMemo, useRef, type Dispatch, type ReactNode, type SetStateAction } from 'react'
+import { createPortal } from 'react-dom'
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd'
+import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import type { SafeAccountColumn } from './columns'
 import type { AccountGroup, AccountLine } from './useSafeAccountRows'
-import SafeAccountTableRow from './SafeAccountTableRow'
+import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
 
 type ReorderableBodyProps = {
   /** Top-level accounts in their current display order — each renders as one draggable row. */
@@ -16,6 +18,10 @@ type ReorderableBodyProps = {
   renderActions?: (line: AccountLine) => ReactNode
   onRename?: (line: AccountLine) => void
   onLinkClick?: (line: AccountLine) => void
+  /** Selection mode: resolves a row's checkbox state — set only when the table is selectable. */
+  getCheckbox?: (group: AccountGroup, line: AccountLine) => RowCheckbox
+  /** Selection mode: fired when a row's checkbox (or the row itself) toggles. */
+  onSelectToggle?: (line: AccountLine, nextChecked: boolean) => void
   /** Fired on drop with the reordered top-level account addresses, in display order. */
   onReorder: (orderedAddresses: string[]) => void
 }
@@ -52,10 +58,19 @@ const ReorderableBody = ({
   renderActions,
   onRename,
   onLinkClick,
+  getCheckbox,
+  onSelectToggle,
   onReorder,
 }: ReorderableBodyProps) => {
   // Remembers what was open across a drag: collapsing must happen before dnd measures the rows.
   const expandedBeforeDrag = useRef<Set<string>>(new Set())
+
+  // Width of the floating drag clone's wrapper table — the sum of the fixed column widths, which the
+  // cells keep pinned while dragging, so the lifted row stays column-aligned outside the main table.
+  const draggedRowWidth = useMemo(
+    () => columns.reduce((sum, column) => sum + parseInt(column.width ?? '0', 10), 0),
+    [columns],
+  )
 
   const handleBeforeCapture = () => {
     expandedBeforeDrag.current = expanded
@@ -83,25 +98,52 @@ const ReorderableBody = ({
               return (
                 <Fragment key={parent.key}>
                   <Draggable draggableId={parent.key} index={index}>
-                    {(dragProvided, snapshot) => (
-                      <SafeAccountTableRow
-                        line={parent}
-                        columns={columns}
-                        isFlagged={flaggedAddresses?.has(parent.address.toLowerCase())}
-                        expanded={parent.expandable ? isExpanded : undefined}
-                        onToggle={
-                          parent.expandable ? () => setExpanded((prev) => toggleExpanded(prev, parent.key)) : undefined
-                        }
-                        renderActions={renderActions}
-                        onRename={onRename}
-                        onLinkClick={onLinkClick}
-                        showDivider={groupHasDivider && !isExpanded}
-                        rowRef={dragProvided.innerRef}
-                        rowDraggableProps={dragProvided.draggableProps}
-                        dragHandleProps={dragProvided.dragHandleProps}
-                        isDragging={snapshot.isDragging}
-                      />
-                    )}
+                    {(dragProvided, snapshot) => {
+                      const row = (
+                        <SafeAccountTableRow
+                          line={parent}
+                          columns={columns}
+                          isFlagged={flaggedAddresses?.has(parent.address.toLowerCase())}
+                          expanded={parent.expandable ? isExpanded : undefined}
+                          onToggle={
+                            parent.expandable
+                              ? () => setExpanded((prev) => toggleExpanded(prev, parent.key))
+                              : undefined
+                          }
+                          renderActions={renderActions}
+                          onRename={onRename}
+                          onLinkClick={onLinkClick}
+                          checkbox={getCheckbox?.(group, parent)}
+                          onSelectToggle={onSelectToggle ? (next) => onSelectToggle(parent, next) : undefined}
+                          showDivider={groupHasDivider && !isExpanded}
+                          rowRef={dragProvided.innerRef}
+                          rowDraggableProps={dragProvided.draggableProps}
+                          dragHandleProps={dragProvided.dragHandleProps}
+                          isDragging={snapshot.isDragging}
+                        />
+                      )
+
+                      // While dragging, dnd pins the row to `position: fixed` in viewport coordinates.
+                      // A transformed ancestor (e.g. the centered modal dialog's translate) would become
+                      // its containing block and shove it sideways, so portal the lifted row to <body>,
+                      // which never carries a transform. The wrapper table restores the table context the
+                      // detached <tr> needs to render its cells at the pinned column widths.
+                      return snapshot.isDragging
+                        ? createPortal(
+                            <Table
+                              sx={{
+                                width: draggedRowWidth,
+                                borderCollapse: 'separate',
+                                borderSpacing: 0,
+                                margin: 0,
+                              }}
+                            >
+                              <TableBody>{row}</TableBody>
+                            </Table>,
+                            document.body,
+                          )
+                        : row
+                    }}
                   </Draggable>
 
                   {isExpanded &&
@@ -113,6 +155,8 @@ const ReorderableBody = ({
                         isFlagged={flaggedAddresses?.has(child.address.toLowerCase())}
                         renderActions={renderActions}
                         onLinkClick={onLinkClick}
+                        checkbox={getCheckbox?.(group, child)}
+                        onSelectToggle={onSelectToggle ? (next) => onSelectToggle(child, next) : undefined}
                         showDivider={groupHasDivider && childIndex === group.children.length - 1}
                       />
                     ))}

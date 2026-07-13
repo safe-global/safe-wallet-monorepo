@@ -166,5 +166,18 @@ describe('SafeAccountTableRow', () => {
       expect(screen.queryByTestId('account-drag-handle')).not.toBeInTheDocument()
       expect(screen.getByTestId('account-row-link')).toHaveAttribute('href', '/home?safe=eth:0xabc')
     })
+
+    it('renders the grip alongside the checkbox in selection mode (Manage list)', () => {
+      renderRow({
+        checkbox: checkbox(),
+        onSelectToggle: jest.fn(),
+        rowDraggableProps: {} as never,
+        dragHandleProps: {} as DraggableProvidedDragHandleProps,
+      })
+
+      // Both affordances render: the grip hosts on the leading checkbox cell, left of the checkbox.
+      expect(screen.getByTestId('account-drag-handle')).toBeInTheDocument()
+      expect(screen.getByTestId('account-select-checkbox')).toBeInTheDocument()
+    })
   })
 })

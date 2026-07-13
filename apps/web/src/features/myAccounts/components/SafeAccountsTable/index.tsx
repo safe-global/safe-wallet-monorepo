@@ -313,6 +313,8 @@ const SafeAccountsTable = ({
               renderActions={renderActions}
               onRename={onRename}
               onLinkClick={onLinkClick}
+              getCheckbox={selection ? (group, line) => getRowCheckbox(group, line, selection) : undefined}
+              onSelectToggle={selection ? (line, next) => selection.onToggle(line, next) : undefined}
               onReorder={reorder.onReorder}
             />
           ) : (

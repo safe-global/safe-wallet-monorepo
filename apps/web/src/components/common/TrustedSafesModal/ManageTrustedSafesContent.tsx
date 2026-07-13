@@ -11,6 +11,13 @@ import type { AllSafeItems } from '@/hooks/safes'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import { useAppDispatch, useAppSelector } from '@/store'
+import {
+  OrderByOption,
+  selectOrderByPreference,
+  setManualOrder,
+  TRUSTED_ORDER_SCOPE,
+} from '@/store/orderByPreferenceSlice'
 import SecurityBanner from './SecurityBanner'
 import SimilarityConfirmDialog from './SimilarityConfirmDialog'
 import SelectAllConfirmDialog from './SelectAllConfirmDialog'
@@ -62,6 +69,13 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
 
   const isInSpace = useIsQualifiedSafe()
   const isDarkMode = useDarkMode()
+  const dispatch = useAppDispatch()
+  const { orderBy } = useAppSelector(selectOrderByPreference)
+
+  // Reordering shares the trusted list's Manual order (same scope as the workspace accounts list).
+  // Suppressed while searching: a drop then would persist only the filtered subset, dropping the
+  // hidden addresses from the saved order.
+  const canReorder = orderBy === OrderByOption.MANUAL && !searchQuery
 
   const pendingItem = pendingConfirmation
     ? availableItems.find((s) => s.address.toLowerCase() === pendingConfirmation)
@@ -124,7 +138,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
               Select all · {selectedCount} of {totalSafesCount} selected
             </button>
             <div className="flex flex-1 items-center justify-end gap-3">
-              <InputGroup className="max-w-sm flex-1 rounded-md bg-card">
+              <InputGroup className="max-w-sm flex-1 rounded-md border-gray-100 bg-card shadow-none">
                 <InputGroupAddon>
                   <Search className="size-4" />
                 </InputGroupAddon>
@@ -162,6 +176,11 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
                 selectedKeys,
                 onToggle: (line: AccountLine) => toggleSelection(line.address),
               }}
+              reorder={
+                canReorder
+                  ? { onReorder: (order) => dispatch(setManualOrder({ scope: TRUSTED_ORDER_SCOPE, order })) }
+                  : undefined
+              }
             />
           </div>
         )}
