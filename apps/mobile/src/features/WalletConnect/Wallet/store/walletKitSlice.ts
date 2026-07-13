@@ -119,6 +119,16 @@ const walletKitSlice = createSlice({
       const { [action.payload]: _removed, ...rest } = state.outstandingRequests
       state.outstandingRequests = rest
     },
+    // The draft was rebuilt under a new safeTxHash — move the entry so propose/abandon listeners keep finding it
+    rekeyOutstandingRequest(state, action: PayloadAction<{ fromSafeTxHash: string; toSafeTxHash: string }>) {
+      const { fromSafeTxHash, toSafeTxHash } = action.payload
+      const req = state.outstandingRequests[fromSafeTxHash]
+      if (!req || fromSafeTxHash === toSafeTxHash) {
+        return
+      }
+      const { [fromSafeTxHash]: _removed, ...rest } = state.outstandingRequests
+      state.outstandingRequests = { ...rest, [toSafeTxHash]: req }
+    },
     rejectPending(_state, _action: PayloadAction<PendingItem>) {
       // Signal only: the walletKit listener sends the dApp response and removePending.
     },
@@ -142,6 +152,7 @@ export const {
   markOutstandingProposing,
   markReviewAbandoned,
   clearOutstandingRequest,
+  rekeyOutstandingRequest,
   rejectPending,
   sessionRequestReceived,
   clear: clearWalletKitState,

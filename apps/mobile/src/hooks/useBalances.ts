@@ -5,18 +5,18 @@ import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectCurrency } from '@/src/store/settingsSlice'
 import { POLLING_INTERVAL } from '@/src/config/constants'
 
-export const useBalances = (poll = false, pollingInterval = POLLING_INTERVAL) => {
+export const useBalances = (poll = false, pollingInterval = POLLING_INTERVAL, trusted = true, skip = false) => {
   const activeSafe = useSelector(selectActiveSafe)
   const currency = useSelector(selectCurrency)
 
   const { data, error, isLoading } = useBalancesGetBalancesV1Query(
-    !activeSafe
+    !activeSafe || skip
       ? skipToken
       : {
           chainId: activeSafe.chainId,
           fiatCode: currency.toUpperCase(),
           safeAddress: activeSafe.address,
-          trusted: true,
+          trusted,
         },
     {
       pollingInterval: poll ? pollingInterval : undefined,

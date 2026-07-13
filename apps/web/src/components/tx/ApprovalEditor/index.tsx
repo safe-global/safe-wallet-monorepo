@@ -10,7 +10,7 @@ import { useContext } from 'react'
 import { ApprovalEditorForm } from './ApprovalEditorForm'
 import { useApprovalInfos } from './hooks/useApprovalInfos'
 import css from './styles.module.css'
-import { updateApprovalTxs } from './utils/approvals'
+import { updateApprovalTxs } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 
 const Title = ({ isErc721 }: { isErc721: boolean }) => {
   const title = 'Allow access to tokens?'
