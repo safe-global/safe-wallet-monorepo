@@ -114,7 +114,7 @@ describe('walletConnectDappsSetup synthesis', () => {
   })
 })
 
-describe('walletConnectDappsSetup tx requests (WA-2326)', () => {
+describe('walletConnectDappsSetup tx requests', () => {
   const findSessionRequest = (dispatchSpy: jest.SpyInstance): WalletKitTypes.SessionRequest => {
     const action = dispatchSpy.mock.calls.map(([a]) => a).find((a) => sessionRequestReceived.match(a))
     if (!action) {

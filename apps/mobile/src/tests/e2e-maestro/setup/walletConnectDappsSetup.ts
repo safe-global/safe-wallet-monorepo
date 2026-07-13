@@ -183,7 +183,7 @@ export const synthSessionDelete = () => {
 /** Arm the fake pair() to hang so the scanner's 10s timeout overlay fires. */
 export const setWcPairHang = () => walletKitE2eState.set({ pairBehavior: 'hang' })
 
-// ── Transaction requests (WA-2326) ──────────────────────────────────────────
+// ── Transaction requests ─────────────────────────────────────────────────────
 
 /**
  * Build a session_request envelope for the seeded session. Dispatched through
