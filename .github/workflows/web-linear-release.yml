@@ -1,0 +1,115 @@
+name: Linear Release (Web)
+
+# Syncs web releases to the "Wallet" scheduled release pipeline in Linear.
+# Runs automatically when a `web-v*` GitHub release is published (see
+# web-tag-release.yml) and can also be triggered manually for backfills or to
+# move a release between stages.
+#
+# Setup: add the Wallet pipeline access key as the `LINEAR_ACCESS_KEY_WEB`
+# repository secret (Settings -> Secrets and variables -> Actions). This must be
+# a pipeline access key generated from the pipeline settings in Linear, not a
+# personal API key.
+#
+# Cadence: the Linear pipeline is "scheduled", which fits a batched, dated
+# release (freeze -> QA -> ship) at a weekly or daily cadence - no change needed
+# as the cadence tightens. If you ever move to true per-merge continuous
+# deployment, switch the Linear pipeline to "continuous" and replace the
+# `release` trigger below with `push: branches: [main]` running a single `sync`
+# step (the action then creates and completes the release in one go).
+
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 1.92.0) - defaults to apps/web/package.json'
+        required: false
+        type: string
+      command:
+        description: 'Linear release command'
+        required: true
+        type: choice
+        default: sync
+        options:
+          - sync
+          - update
+          - complete
+      stage:
+        description: 'Deployment stage (required for the "update" command, e.g. Code Freeze)'
+        required: false
+        type: string
+      dry_run:
+        description: 'Preview the action without modifying Linear'
+        required: false
+        type: boolean
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: linear-release-web-${{ github.event.release.tag_name || inputs.version || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  linear-release:
+    # On release events only handle web-v* tags (ignore mobile or other releases)
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.event.release.tag_name, 'web-v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
+        with:
+          fetch-depth: 0 # Full history required to scan commits for Linear issue IDs
+
+      - name: Resolve release version
+        id: version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ -n "$INPUT_VERSION" ]; then
+            VERSION="$INPUT_VERSION"
+          elif [ -n "$RELEASE_TAG" ]; then
+            # Strip the web-v prefix (web-v1.92.0 -> 1.92.0)
+            VERSION="${RELEASE_TAG#web-v}"
+          else
+            VERSION=$(node -p "require('./apps/web/package.json').version")
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Linear release version: $VERSION"
+
+      - name: Sync release to Linear
+        if: github.event_name == 'release' || inputs.command == 'sync'
+        uses: linear/linear-release-action@c0cb8354a362c24c6d3e0948f37fd66d07588e3f # v0.14.5
+        with:
+          access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
+          command: sync
+          version: ${{ steps.version.outputs.version }}
+          include_paths: apps/web/**,packages/**
+          links: ${{ github.event.release.html_url }}
+          dry_run: ${{ inputs.dry_run || false }}
+
+      - name: Complete Linear release
+        if: github.event_name == 'release' || inputs.command == 'complete'
+        uses: linear/linear-release-action@c0cb8354a362c24c6d3e0948f37fd66d07588e3f # v0.14.5
+        with:
+          access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
+          command: complete
+          version: ${{ steps.version.outputs.version }}
+          dry_run: ${{ inputs.dry_run || false }}
+
+      - name: Update Linear release stage
+        if: github.event_name == 'workflow_dispatch' && inputs.command == 'update'
+        uses: linear/linear-release-action@c0cb8354a362c24c6d3e0948f37fd66d07588e3f # v0.14.5
+        with:
+          access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
+          command: update
+          version: ${{ steps.version.outputs.version }}
+          stage: ${{ inputs.stage }}
+          dry_run: ${{ inputs.dry_run || false }}
