@@ -1,0 +1,83 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# CGW /propose failure: the e2e fetch interceptor 500s the propose call. By
+# design the app does NOT answer the dApp with -32603 (see methodRouter's
+# reserved-code note): the signing-error screen shows, the request stays
+# outstanding (retryable), and only backing out of review settles it with
+# USER_REJECTED (5000). This flow asserts that actual contract.
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eWcDappsTx'
+- assertVisible:
+    id: 'home-tab'
+
+# Arm the propose interceptor, then request.
+- tapOn:
+    id: 'e2eWcArmProposeFailure'
+- tapOn:
+    id: 'e2eWcSynthTxRequest'
+
+- extendedWaitUntil:
+    visible:
+      text: 'Transaction request'
+    timeout: 10000
+- extendedWaitUntil:
+    visible:
+      id: 'wc-tx-review'
+    timeout: 10000
+- tapOn:
+    id: 'wc-tx-review'
+
+- extendedWaitUntil:
+    visible:
+      text: 'Confirm transaction'
+    timeout: 30000
+- tapOn:
+    id: 'sign-transaction-continue-button'
+- extendedWaitUntil:
+    visible:
+      text: '.*Review this transaction data.*'
+    timeout: 10000
+- tapOn:
+    id: 'review-and-confirm-button'
+
+# Signing succeeds locally; /propose 500s → error screen.
+- extendedWaitUntil:
+    visible:
+      text: "Couldn't sign the transaction"
+    timeout: 30000
+
+# The request is retained for retry: closing the (modal) error screen lands back
+# on review-and-confirm with the Confirm button still live. A direct "no response
+# yet" marker assert is impossible here — markers are hidden under modals/pushed
+# screens (see README) — so retryability is the observable contract, and the
+# no-response-until-abandon ordering is covered by walletKitListeners unit tests.
+- tapOn: 'Close'
+- extendedWaitUntil:
+    visible:
+      id: 'review-and-confirm-button'
+    timeout: 10000
+
+# Back out of the review flow entirely; abandoning settles the dApp with USER_REJECTED.
+- tapOn:
+    id: 'go-back'
+- extendedWaitUntil:
+    visible:
+      id: 'sign-transaction-continue-button'
+    timeout: 10000
+- tapOn:
+    id: 'go-back'
+- extendedWaitUntil:
+    visible:
+      id: 'home-tab'
+    timeout: 10000
+
+- extendedWaitUntil:
+    visible:
+      id: 'e2e-wc-response-error-5000'
+    timeout: 10000
