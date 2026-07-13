@@ -286,6 +286,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
+      # Mark the Linear "Wallet" release as Released (auto-generates release
+      # notes). Guarded so a Linear outage never fails a shipped release.
+      - name: Complete Linear release
+        if: needs.tag.outputs.version && success()
+        id: linear_complete
+        continue-on-error: true
+        uses: linear/linear-release-action@c0cb8354a362c24c6d3e0948f37fd66d07588e3f # v0.14.5
+        with:
+          access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
+          command: complete
+          version: ${{ needs.tag.outputs.version_number }}
+
       - name: Notify on Slack
         continue-on-error: true
         env:
@@ -300,6 +312,11 @@ jobs:
           RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${{ needs.tag.outputs.version }}"
           BACKMERGE_PR_URL="${{ steps.backmerge.outputs.pr_url }}"
           HAS_CONFLICTS="${{ steps.backmerge.outputs.has_conflicts }}"
+          LINEAR_LINK=""
+          LINEAR_URL="${{ steps.linear_complete.outputs['release-url'] }}"
+          if [ -n "$LINEAR_URL" ]; then
+            LINEAR_LINK="<$LINEAR_URL|View release in Linear>"
+          fi
 
           if [ -n "$BACKMERGE_PR_URL" ]; then
             if [ "$HAS_CONFLICTS" = "true" ]; then
@@ -315,6 +332,7 @@ jobs:
             --arg version "$VERSION" \
             --arg url "$RELEASE_URL" \
             --arg backmerge "$BACKMERGE_MSG" \
+            --arg linear "$LINEAR_LINK" \
             '{
               channel: "#topic-wallet-releases",
               text: ("✅ Safe Wallet " + $version + " ready for going live"),
@@ -323,7 +341,7 @@ jobs:
                   type: "section",
                   text: {
                     type: "mrkdwn",
-                    text: ("*Safe Wallet " + $version + " is ready for going live* ✅\n\n<" + $url + "|View Release on GitHub>\n\n" + $backmerge)
+                    text: ("*Safe Wallet " + $version + " is ready for going live* ✅\n\n<" + $url + "|View Release on GitHub>" + (if $linear != "" then "\n" + $linear else "" end) + "\n\n" + $backmerge)
                   }
                 }
               ]

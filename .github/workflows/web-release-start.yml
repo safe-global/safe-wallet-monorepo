@@ -251,6 +251,28 @@ jobs:
           echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
           echo "✅ Pull Request created: $PR_URL"
 
+      # Create/sync the release in the Linear "Wallet" pipeline and move it to
+      # Code Freeze. Guarded so a Linear outage never blocks cutting a release.
+      - name: Sync release to Linear
+        id: linear_sync
+        continue-on-error: true
+        uses: linear/linear-release-action@c0cb8354a362c24c6d3e0948f37fd66d07588e3f # v0.14.5
+        with:
+          access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
+          command: sync
+          version: ${{ steps.version.outputs.version }}
+          include_paths: apps/web/**,packages/**
+          links: ${{ steps.create_pr.outputs.pr_url }}
+
+      - name: Move Linear release to Code Freeze
+        continue-on-error: true
+        uses: linear/linear-release-action@c0cb8354a362c24c6d3e0948f37fd66d07588e3f # v0.14.5
+        with:
+          access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
+          command: update
+          version: ${{ steps.version.outputs.version }}
+          stage: Code Freeze
+
       - name: Notify on Slack
         if: vars.SLACK_WEBHOOK_URL
         continue-on-error: true
@@ -261,12 +283,18 @@ jobs:
           RELEASE_TYPE="$INPUT_RELEASE_TYPE"
           BASE_BRANCH="${{ steps.base.outputs.branch }}"
           PR_URL="${{ steps.create_pr.outputs.pr_url }}"
+          LINEAR_LINK=""
+          LINEAR_URL="${{ steps.linear_sync.outputs['release-url'] }}"
+          if [ -n "$LINEAR_URL" ]; then
+            LINEAR_LINK="<$LINEAR_URL|View release in Linear>"
+          fi
 
           jq -n \
             --arg version "$VERSION" \
             --arg release_type "$RELEASE_TYPE" \
             --arg base "$BASE_BRANCH" \
             --arg pr_url "$PR_URL" \
+            --arg linear "$LINEAR_LINK" \
             '{
               text: ("🚀 *Release web-v" + $version + " Started*"),
               blocks: [
@@ -274,7 +302,7 @@ jobs:
                   type: "section",
                   text: {
                     type: "mrkdwn",
-                    text: ("*Release web-v" + $version + " has been initiated* ✅\n\n*Type:* " + $release_type + "\n*Base:* " + $base + "\n*PR:* " + $pr_url + "\n\n_QA team: Please review and test_ 🧪")
+                    text: ("*Release web-v" + $version + " has been initiated* ✅\n\n*Type:* " + $release_type + "\n*Base:* " + $base + "\n*PR:* " + $pr_url + (if $linear != "" then "\n*Linear:* " + $linear else "" end) + "\n\n_QA team: Please review and test_ 🧪")
                   }
                 }
               ]

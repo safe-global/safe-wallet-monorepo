@@ -1,25 +1,17 @@
 name: Linear Release (Web)
 
-# Syncs web releases to the "Wallet" scheduled release pipeline in Linear.
-# Runs automatically when a `web-v*` GitHub release is published (see
-# web-tag-release.yml) and can also be triggered manually for backfills or to
-# move a release between stages.
+# Manual backfill / repair tool for the "Wallet" scheduled release pipeline in
+# Linear. The normal flow is automated inside the release workflows:
+#   - web-release-start.yml -> `sync` + stage "Code Freeze" when a release is cut
+#   - web-tag-release.yml    -> `complete` when the release is published
+# Use this workflow to re-sync a release, fix a stage, or preview with dry_run.
 #
 # Setup: add the Wallet pipeline access key as the `LINEAR_ACCESS_KEY_WEB`
 # repository secret (Settings -> Secrets and variables -> Actions). This must be
 # a pipeline access key generated from the pipeline settings in Linear, not a
 # personal API key.
-#
-# Cadence: the Linear pipeline is "scheduled", which fits a batched, dated
-# release (freeze -> QA -> ship) at a weekly or daily cadence - no change needed
-# as the cadence tightens. If you ever move to true per-merge continuous
-# deployment, switch the Linear pipeline to "continuous" and replace the
-# `release` trigger below with `push: branches: [main]` running a single `sync`
-# step (the action then creates and completes the release in one go).
 
 on:
-  release:
-    types: [released]
   workflow_dispatch:
     inputs:
       version:
@@ -48,15 +40,11 @@ on:
 permissions: {}
 
 concurrency:
-  group: linear-release-web-${{ github.event.release.tag_name || inputs.version || github.ref }}
+  group: linear-release-web-${{ inputs.version || github.ref }}
   cancel-in-progress: false
 
 jobs:
   linear-release:
-    # On release events only handle web-v* tags (ignore mobile or other releases)
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      startsWith(github.event.release.tag_name, 'web-v')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -70,46 +58,22 @@ jobs:
       - name: Resolve release version
         id: version
         env:
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
           INPUT_VERSION: ${{ inputs.version }}
         run: |
           if [ -n "$INPUT_VERSION" ]; then
             VERSION="$INPUT_VERSION"
-          elif [ -n "$RELEASE_TAG" ]; then
-            # Strip the web-v prefix (web-v1.92.0 -> 1.92.0)
-            VERSION="${RELEASE_TAG#web-v}"
           else
             VERSION=$(node -p "require('./apps/web/package.json').version")
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Linear release version: $VERSION"
 
-      - name: Sync release to Linear
-        if: github.event_name == 'release' || inputs.command == 'sync'
+      - name: Run Linear release (${{ inputs.command }})
         uses: linear/linear-release-action@c0cb8354a362c24c6d3e0948f37fd66d07588e3f # v0.14.5
         with:
           access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
-          command: sync
-          version: ${{ steps.version.outputs.version }}
-          include_paths: apps/web/**,packages/**
-          links: ${{ github.event.release.html_url }}
-          dry_run: ${{ inputs.dry_run || false }}
-
-      - name: Complete Linear release
-        if: github.event_name == 'release' || inputs.command == 'complete'
-        uses: linear/linear-release-action@c0cb8354a362c24c6d3e0948f37fd66d07588e3f # v0.14.5
-        with:
-          access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
-          command: complete
-          version: ${{ steps.version.outputs.version }}
-          dry_run: ${{ inputs.dry_run || false }}
-
-      - name: Update Linear release stage
-        if: github.event_name == 'workflow_dispatch' && inputs.command == 'update'
-        uses: linear/linear-release-action@c0cb8354a362c24c6d3e0948f37fd66d07588e3f # v0.14.5
-        with:
-          access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
-          command: update
+          command: ${{ inputs.command }}
           version: ${{ steps.version.outputs.version }}
           stage: ${{ inputs.stage }}
-          dry_run: ${{ inputs.dry_run || false }}
+          include_paths: apps/web/**,packages/**
+          dry_run: ${{ inputs.dry_run }}
