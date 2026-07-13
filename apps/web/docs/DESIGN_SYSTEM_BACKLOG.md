@@ -70,9 +70,10 @@ spot-check the story in Storybook light+dark.
   `SheetContent` gained `variant="floating"`/`size`/`surface`/`padding`; Header/Footer gained `divided`
   (+`subtle`). Defaults byte-identical. `ModalDialog` passes token widths via `size=` (arbitrary widths + full
   screen keep inline style). Call sites migrated; odd widths + bespoke paddings grandfathered; Dialog/Sheet/Drawer
-  ESLint guard (`dsDialogClassnameRule`) live. **Caveat:** Sheet `size` is a no-op for left/right sheets (base
-  `data-[side]` specificity wins) — 3 real sheets unchanged (zero regression); making it functional is a design
-  follow-up. Drawer unchanged (SafeAppPreviewDrawer radius grandfathered).
+  ESLint guard (`dsDialogClassnameRule`) live. Sheet `size` was later made functional (2026-07-13): widths are now
+  `data-[side]`-scoped so they win for left/right sheets, with `defaultVariants.size='sm'` preserving the old
+  default — this **corrected** `BatchSidebar` (now 700px) and `SideDrawer` (now auto), which the no-op had capped.
+  Drawer unchanged (SafeAppPreviewDrawer radius grandfathered).
 - **Card (C1) — DONE:** part 1 added cva `variant` (`default`/`outlined`/`muted`), `size` (`sm`/`default`/`lg`/`none`),
   and `radius` (`lg`/`xl`/`none`). Part 2 (this pass) took the **design calls**: added `size="lg"` (32px, replaces the
   `p-8` cluster via `size="lg"`+`CardContent`), **flipped the default radius `xl`→`lg`** app-wide (8px, MUI parity),
@@ -92,7 +93,7 @@ spot-check the story in Storybook light+dark.
 | ~~A~~  | ~~Finish `DialogActions` + skipped footers~~ — **DONE** (item A)                                                                 | —      | —                                     | code  |
 | ~~B~~  | ~~On-colour CTA decision~~ — **DONE** (Earn/AddFunds/AccountHeader → `variant="surface"`, disables removed)                      | —      | Argos to confirm AccountHeader shift  | code  |
 | ~~C1~~ | ~~**Card** family tail + ESLint~~ — **DONE** (design calls taken: `size="lg"`, radius default `xl`→`lg`, gap unify; ESLint live) | —      | Argos to confirm the radius flip      | code  |
-| ~~C2~~ | ~~**Dialog/Drawer/Sheet** family~~ — **DONE** (cva size/padding/surface/divided; ESLint live)                                    | —      | Argos; Sheet `size` design follow-up  | code  |
+| ~~C2~~ | ~~**Dialog/Drawer/Sheet** family~~ — **DONE** (cva size/padding/surface/divided; ESLint live; Sheet `size` fixed)                | —      | Argos                                 | code  |
 | ~~C3~~ | ~~**Badge/Chip** migration + ESLint~~ — **DONE** (design calls taken; ~24 sites migrated; ESLint live)                           | —      | Argos to confirm shade/size shifts    | code  |
 | ~~C4~~ | ~~**Input/InputGroup** tail + ESLint~~ — **DONE** (outliers → `surface`/grandfather; ESLint live)                                | —      | Argos; retire `SearchField` follow-up | code  |
 | ~~C5~~ | ~~**Select** family~~ — **DONE** (literal-className sites; css-module sites follow-up)                                           | —      | —                                     | code  |
@@ -255,9 +256,9 @@ channels the regex guard structurally can't see (`className={css.module}`, `sx`,
 - **Badge/Chip** — MUI `Chip` compat shim + `ColorCodedTxAccordion` runtime color-mix (intentional grandfathers).
 - **Dialog** — `ModalDialog` keeps its css-module `min-width:600px`/`border-radius:24px` + inline width (linchpin).
 
-**Known non-blocking limitations:** Sheet `size` (sm/md/lg/auto) is a no-op for left/right sheets (base
-`data-[side]` widths win on specificity); real sheets keep grandfathered `w-[…]!` widths. Sheet stories omit
-`size`/`padding`/`surface="paper"`; Dialog stories omit `divided="subtle"`.
+**Resolved since the audit:** Sheet `size` no-op — **fixed** (widths now `data-[side]`-scoped; corrected
+BatchSidebar/SideDrawer); a Sheet `Sizes` story was added and `sheet.test.tsx` updated. Remaining minor story
+gaps: Sheet `padding`/`surface="paper"` and Dialog `divided="subtle"` demo rows.
 
 **Genuinely blocked (not code):** **E** Argos visual gate (needs `ARGOS_TOKEN_STORYBOOK` secret) — the only way
 to pixel-confirm the intentional shifts (Card radius flip, AccountHeader/on-colour CTAs, Badge/Chip shade+size,

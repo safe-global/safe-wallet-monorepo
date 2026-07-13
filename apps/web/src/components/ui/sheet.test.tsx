@@ -72,32 +72,19 @@ describe('SheetContent', () => {
   })
 
   /**
-   * AUDIT — SheetContent `size` is a NO-OP for left/right sheets.
-   *
-   * The base string carries side-scoped widths `data-[side=right]:w-3/4` /
-   * `data-[side=left]:w-3/4` (plus `data-[side=*]:sm:max-w-sm`). Those compile to
-   * attribute-qualified selectors (e.g. `...[data-side="right"]`) whose specificity
-   * (class + attribute) beats the plain, unmodified `w-[440px]` utility emitted by
-   * `size`. `cn`/twMerge keeps BOTH classes on the element (different variants never
-   * merge), so at runtime the higher-specificity base width wins and the `size` width
-   * never takes effect on right/left sheets.
-   *
-   * `data-[side=bottom]` / `data-[side=top]` have NO side-scoped width class, so for
-   * those sides the `size` width utility is the only width class present and is not
-   * outranked.
-   *
-   * The tests below assert only what is real: the `size` class string is emitted, and
-   * the competing base width class is / isn't present per side. We deliberately do NOT
-   * assert an effective computed width — that would falsely imply `size` works for
-   * right/left when it does not.
+   * SheetContent `size` — widths are data-[side]-scoped so they match the base positioning
+   * specificity and actually win for left/right sheets (a plain `w-*` would be outranked by
+   * the base `data-[side]:*` selectors). Top/bottom sheets take full width via
+   * `data-[side]:inset-x-0`, so `size` intentionally only sets left/right widths. The base
+   * no longer hard-codes a side width; the default `size="sm"` supplies the original w-3/4.
    */
   describe('size', () => {
     it.each([
-      ['sm', 'w-3/4'],
-      ['md', 'w-[440px]'],
-      ['lg', 'w-[700px]'],
-      ['auto', 'w-auto'],
-    ] as const)('emits the %s size width utility onto the class string', (size, expectedClass) => {
+      ['sm', 'data-[side=right]:w-3/4'],
+      ['md', 'data-[side=right]:w-[440px]'],
+      ['lg', 'data-[side=right]:w-[700px]'],
+      ['auto', 'data-[side=right]:w-auto'],
+    ] as const)('applies the side-scoped %s width for side="right"', (size, expectedClass) => {
       render(
         <Sheet open>
           <SheetContent data-testid="content" side="right" size={size} showCloseButton={false}>
@@ -106,26 +93,14 @@ describe('SheetContent', () => {
         </Sheet>,
       )
 
-      expect(screen.getByTestId('content')).toHaveClass(expectedClass)
-    })
-
-    it('does NOT change width for side="right": the base w-3/4 outranks the size width (no-op)', () => {
-      render(
-        <Sheet open>
-          <SheetContent data-testid="content" side="right" size="md" showCloseButton={false}>
-            Body
-          </SheetContent>
-        </Sheet>,
-      )
-
       const content = screen.getByTestId('content')
-      // The size token is emitted...
-      expect(content).toHaveClass('w-[440px]')
-      // ...but this higher-specificity base class coexists and wins, so size is a no-op.
-      expect(content).toHaveClass('data-[side=right]:w-3/4')
+      expect(content).toHaveClass(expectedClass)
+      // No unscoped width leaks, and no competing base width remains to outrank size.
+      expect(content).not.toHaveClass('w-3/4')
+      expect(content).not.toHaveClass('w-[440px]')
     })
 
-    it('does NOT change width for side="left": the base w-3/4 outranks the size width (no-op)', () => {
+    it('scopes the width to side="left" too', () => {
       render(
         <Sheet open>
           <SheetContent data-testid="content" side="left" size="lg" showCloseButton={false}>
@@ -134,12 +109,22 @@ describe('SheetContent', () => {
         </Sheet>,
       )
 
-      const content = screen.getByTestId('content')
-      expect(content).toHaveClass('w-[700px]')
-      expect(content).toHaveClass('data-[side=left]:w-3/4')
+      expect(screen.getByTestId('content')).toHaveClass('data-[side=left]:w-[700px]')
     })
 
-    it('has no competing base width class for side="bottom", so the size width is not overridden', () => {
+    it('defaults to sm (w-3/4) when no size is set', () => {
+      render(
+        <Sheet open>
+          <SheetContent data-testid="content" side="right" showCloseButton={false}>
+            Body
+          </SheetContent>
+        </Sheet>,
+      )
+
+      expect(screen.getByTestId('content')).toHaveClass('data-[side=right]:w-3/4')
+    })
+
+    it('does not set a side width for bottom sheets (full width via inset-x-0)', () => {
       render(
         <Sheet open>
           <SheetContent data-testid="content" side="bottom" size="md" showCloseButton={false}>
@@ -149,8 +134,8 @@ describe('SheetContent', () => {
       )
 
       const content = screen.getByTestId('content')
-      expect(content).toHaveClass('w-[440px]')
-      // No `data-[side=bottom]:w-*` base class exists, so nothing outranks the size width.
+      expect(content).toHaveClass('data-[side=bottom]:inset-x-0')
+      // size only scopes left/right widths, so no bottom width class is emitted
       expect(content.className).not.toMatch(/data-\[side=bottom\]:w-/)
     })
   })

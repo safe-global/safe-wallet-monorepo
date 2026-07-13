@@ -43,6 +43,25 @@ export const Open: Story = {
   ),
 }
 
+export const Sizes: Story = {
+  tags: ['skip-visual-test'],
+  render: () => (
+    <Sheet defaultOpen>
+      <SheetTrigger render={<Button>Open md</Button>} />
+      {/* size is data-[side]-scoped so it actually applies to left/right sheets: sm=w-3/4, md=440px, lg=700px, auto=content */}
+      <SheetContent side="right" size="md">
+        <SheetHeader>
+          <SheetTitle>Sized sheet (md = 440px)</SheetTitle>
+          <SheetDescription>
+            Use `size` (sm/md/lg/auto) instead of a hand-rolled width. Widths apply to left/right sheets; top/bottom
+            sheets span the full width.
+          </SheetDescription>
+        </SheetHeader>
+      </SheetContent>
+    </Sheet>
+  ),
+}
+
 export const Floating: Story = {
   tags: ['skip-visual-test'],
   render: () => (
