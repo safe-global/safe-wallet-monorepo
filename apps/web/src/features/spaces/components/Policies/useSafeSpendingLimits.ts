@@ -3,6 +3,7 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { getAllowanceModuleDeployment } from '@safe-global/safe-modules-deployments'
+// eslint-disable-next-line no-restricted-imports -- loadSpendingLimits is excluded from the services barrel to avoid an import cycle via the tx-sender/store graph
 import { loadSpendingLimits } from '@/features/spending-limits/services/spendingLimitLoader'
 import type { SpendingLimitState } from '@/features/spending-limits/types'
 import useChains from '@/hooks/useChains'

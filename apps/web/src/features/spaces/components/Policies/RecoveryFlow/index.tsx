@@ -16,7 +16,7 @@ import { useAppDispatch } from '@/store'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { TxModalContext } from '@/components/tx-flow'
 import PolicyBatchFlow from '@/components/tx-flow/flows/PolicyBatch'
-import { getRecoveryUpsertTransactions } from '@/features/recovery/services/setup'
+import { getRecoveryUpsertTransactions } from '@/features/recovery/services'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import {
   ApplyToStep,

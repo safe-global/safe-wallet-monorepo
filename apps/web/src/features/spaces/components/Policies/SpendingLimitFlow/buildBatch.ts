@@ -2,11 +2,13 @@ import { Interface, parseUnits } from 'ethers'
 import type { MetaTransactionData } from '@safe-global/types-kit'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+// eslint-disable-next-line no-restricted-imports -- these param helpers are excluded from the services barrel to avoid an import cycle via the tx-sender/store graph
 import {
   createAddDelegateTx,
   createEnableModuleTx,
   createSetAllowanceTx,
 } from '@/features/spending-limits/services/spendingLimitParams'
+// eslint-disable-next-line no-restricted-imports -- excluded from the services barrel to avoid an import cycle via the tx-sender/store graph
 import {
   getDeployedSpendingLimitModuleAddress,
   getLatestSpendingLimitAddress,

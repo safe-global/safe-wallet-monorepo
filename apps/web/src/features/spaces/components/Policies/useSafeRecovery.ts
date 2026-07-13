@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { getRecoveryDelayModifiers } from '@/features/recovery/services/delay-modifier'
+import { getRecoveryDelayModifiers } from '@/features/recovery/services'
 import { multicall } from '@safe-global/utils/utils/multicall'
 import { SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
 import useChains from '@/hooks/useChains'

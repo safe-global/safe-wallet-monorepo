@@ -10,3 +10,4 @@ export {
 export { getRecoveryProposalTransactions, getRecoverySkipTransaction } from './transaction'
 export { dispatchRecoveryProposal, dispatchRecoveryExecution, dispatchRecoverySkipExpired } from './recovery-sender'
 export { _getRecoverySetupTransactions, _getEditRecoveryTransactions, getRecoveryUpsertTransactions } from './setup'
+export { getRecoveryDelayModifiers } from './delay-modifier'
