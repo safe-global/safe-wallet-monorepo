@@ -1,4 +1,5 @@
 import { Eye } from 'lucide-react'
+import type { ReactNode } from 'react'
 import FiatValue from '@/components/common/FiatValue'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import { SelectItem } from '@/components/ui/select'
@@ -7,6 +8,7 @@ import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { ExplorerLinkButton, HOVER_ACTION_CLASS, SafeInfoDisplay } from '@/components/common/AccountRow'
+import { cn } from '@/utils/cn'
 import BalanceDisplay from './BalanceDisplay'
 import RowEndColumn from './RowEndColumn'
 import SafeRowStats from './SafeRowStats'
@@ -22,6 +24,12 @@ interface MultiChainSafeItemRowProps {
    * (the highlight belongs to the specific network, not the whole multi-chain safe).
    */
   isSelected?: boolean
+  /**
+   * Element rendered at the start of the summary row — used in Manual sort to host the drag grip so
+   * dragging reorders the whole group while clicking the summary still expands it. When set, the row's
+   * outer margin is dropped so the reorderable wrapper controls spacing.
+   */
+  leading?: ReactNode
 }
 
 function ReadOnlyBadge() {
@@ -57,7 +65,7 @@ function NetworkRow({
       // pl-11 (avatar 32px + gap-3 12px) aligns the chain name under the parent safe name — the
       // per-chain rows carry no identicon but keep the same threshold / network / pending / balance
       // columns as the summary row. [&>span.absolute]:hidden drops the built-in checkmark span.
-      className="group/row flex items-center gap-2 rounded-md px-3 py-2 cursor-pointer focus:bg-muted data-[selected]:bg-[var(--color-background-light)] [&>span.absolute]:hidden"
+      className="group/row flex items-center gap-2 rounded-md px-3 py-3 cursor-pointer focus:bg-muted data-[selected]:bg-[var(--color-background-light)] [&>span.absolute]:hidden"
     >
       <div className="flex min-w-0 flex-1 items-center gap-2 pl-11">
         <Typography variant="paragraph-small-medium" className="min-w-0 truncate">
@@ -94,7 +102,7 @@ function NetworkRow({
   )
 }
 
-const MultiChainSafeItemRow = ({ item, onRename, isSelected = false }: MultiChainSafeItemRowProps) => {
+const MultiChainSafeItemRow = ({ item, onRename, isSelected = false, leading }: MultiChainSafeItemRowProps) => {
   const chainId = item.chains[0]?.chainId ?? ''
   const resolvedName = useSafeDisplayName(item.address, chainId, item.name)
   const pending = item.chains.reduce((sum, chain) => sum + (chain.queued ?? 0), 0)
@@ -102,12 +110,17 @@ const MultiChainSafeItemRow = ({ item, onRename, isSelected = false }: MultiChai
   return (
     // Open by default when this group holds the active chain, so the current network is revealed
     // (and highlighted) without the user expanding it — the summary row itself is never highlighted.
-    <Collapsible defaultOpen={isSelected} className="my-0.5 rounded-lg">
+    <Collapsible defaultOpen={isSelected} className={cn('rounded-lg', !leading && 'my-0.5')}>
       <CollapsibleTrigger
         // Scroll anchor for the open-to-current-safe behaviour (see SafeDropdownContainer).
         data-current-safe={isSelected ? 'true' : undefined}
-        className="group/row flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
+        className={cn(
+          'group/row flex w-full items-center gap-2 rounded-lg py-3 text-left outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring cursor-pointer',
+          // A leading grip takes the place of some left padding so its column lines up with single-chain rows.
+          leading ? 'pl-2 pr-3' : 'px-3',
+        )}
       >
+        {leading}
         <SafeInfoDisplay
           name={resolvedName}
           address={item.address}
