@@ -108,6 +108,9 @@ const AddManually = ({
         onClose={onClose}
         hideChainIndicator
         PaperProps={{ sx: { maxWidth: '760px' } }}
+        // Sit above the "My accounts" shadcn dialog (--z-overlay: 1400) so this nested
+        // modal layers on top instead of behind it.
+        sx={{ zIndex: 1450 }}
       >
         <FormProvider {...formMethods}>
           <form
@@ -139,6 +142,8 @@ const AddManually = ({
                     MenuProps={{
                       transitionDuration: 0,
                       slotProps: { paper: { sx: { overflow: 'auto' } } },
+                      // Above this dialog's own z-index (1450) so the network dropdown isn't hidden behind it.
+                      sx: { zIndex: 1451 },
                     }}
                   >
                     {configs.map((chain) => renderMenuItem(chain.chainId, false))}
