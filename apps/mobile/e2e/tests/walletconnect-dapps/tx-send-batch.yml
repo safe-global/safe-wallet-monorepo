@@ -71,7 +71,8 @@ tags:
       text: 'You successfully signed this transaction.'
     timeout: 30000
 
-# Markers are invisible while the success modal is up (see README); assert from home.
+# The native success modal hides the root accessibility tree (and with it the
+# TestCtrls markers), so the delivery assert runs from the home tab.
 - tapOn: 'Done'
 - extendedWaitUntil:
     visible:
