@@ -6,10 +6,10 @@ import type { PropsWithChildren, ReactElement } from 'react'
 
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { getRecoverySkipTransaction } from '@/features/recovery/services/transaction'
+import { getRecoverySkipTransaction } from '../../services/transaction'
 import { createTx } from '@/services/tx/tx-sender'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
@@ -41,7 +41,7 @@ function CancelRecoveryReview({
     <ReviewTransaction onSubmit={handleSubmit}>
       <Typography mb={1}>
         All actions initiated by the Recoverer will be cancelled. The current signers will remain the signers of the
-        Safe Account.
+        Safe account.
       </Typography>
 
       <ErrorMessage level="info">

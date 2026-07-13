@@ -18,7 +18,13 @@ export type AddManuallyFormValues = {
   chainId: string
 }
 
-const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormValues) => void }) => {
+const AddManually = ({
+  handleAddSafe,
+  disabled = false,
+}: {
+  handleAddSafe: (data: AddManuallyFormValues) => void
+  disabled?: boolean
+}) => {
   const [addManuallyOpen, setAddManuallyOpen] = useState(false)
   const { configs } = useChains()
   const [triggerGetSafe] = useLazySafesGetSafeV1Query()
@@ -51,10 +57,10 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
     try {
       const result = await triggerGetSafe({ chainId, safeAddress: address }).unwrap()
       if (!result) {
-        return 'Address given is not a valid Safe Account address'
+        return 'Address given is not a valid Safe account address'
       }
     } catch (error) {
-      return 'Address given is not a valid Safe Account address'
+      return 'Address given is not a valid Safe account address'
     }
   }
 
@@ -82,11 +88,16 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
 
   return (
     <>
-      <div className="flex justify-center">
-        <Button data-testid="add-manually-button" size="medium" onClick={() => setAddManuallyOpen(true)}>
-          + Add manually
-        </Button>
-      </div>
+      <Button
+        data-testid="add-manually-button"
+        size="medium"
+        fullWidth
+        disabled={disabled}
+        onClick={() => setAddManuallyOpen(true)}
+        sx={{ borderRadius: 'var(--radius-md)' }}
+      >
+        + Add manually
+      </Button>
       <ModalDialog
         open={addManuallyOpen}
         dialogTitle="Add safe account"
@@ -105,7 +116,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
               <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
                 <AddressInput
                   data-testid="add-address-input"
-                  label="Safe Account"
+                  label="Safe account"
                   chain={selectedChain}
                   validate={validateSafeAddress}
                   name="address"

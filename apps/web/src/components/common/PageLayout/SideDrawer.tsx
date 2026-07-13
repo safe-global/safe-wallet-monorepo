@@ -1,4 +1,4 @@
-import { SpacesEnhancedSidebar } from '@/features/spaces/components/Sidebar/SpacesEnhancedSidebar'
+import { SpacesEnhancedSidebar } from '@/features/spaces'
 import { useRouter } from 'next/router'
 import { useEffect, type ReactElement } from 'react'
 import { IconButton, Drawer, useMediaQuery } from '@mui/material'
@@ -12,6 +12,7 @@ import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import { useIsTablet } from '@/hooks/use-tablet'
 
 type SideDrawerProps = {
   isOpen: boolean
@@ -22,7 +23,7 @@ type SideDrawerProps = {
 const SideDrawer = ({ isOpen, onToggle, onSidebarOpenChange }: SideDrawerProps): ReactElement => {
   const { breakpoints } = useTheme()
   const isSmallScreen = useMediaQuery(breakpoints.down('md'))
-  const isTabletDrawer = useMediaQuery('(min-width:768px) and (max-width:899.95px)')
+  const isTabletDrawer = useIsTablet()
   const [, isSafeAppRoute] = useIsSidebarRoute()
   const isDarkMode = useDarkMode()
 
@@ -59,7 +60,7 @@ const SideDrawer = ({ isOpen, onToggle, onSidebarOpenChange }: SideDrawerProps):
           // but it steals all the events from the rest of the page
           position: 'relative',
           '& .MuiPaper-root': {
-            zIndex: 1250,
+            zIndex: 1150,
             ...(isTabletDrawer && {
               height: '100dvh',
               maxHeight: '100dvh',

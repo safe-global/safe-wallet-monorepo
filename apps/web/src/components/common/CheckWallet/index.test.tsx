@@ -106,7 +106,7 @@ describe('CheckWallet', () => {
     const { getByText, getByLabelText } = renderButton()
 
     expect(getByText('Continue')).toBeDisabled()
-    expect(getByLabelText('Your connected wallet is not a signer of this Safe Account')).toBeInTheDocument()
+    expect(getByLabelText('Your connected wallet is not a signer of this Safe account')).toBeInTheDocument()
   })
 
   it('should be disabled when connected to the wrong network', () => {

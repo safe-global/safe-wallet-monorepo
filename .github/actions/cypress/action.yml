@@ -58,6 +58,10 @@ runs:
         secrets: ${{ inputs.secrets }}
       env:
         NODE_ENV: cypress
+        # `next build` overrides NODE_ENV to 'production' in client bundles, so
+        # APP_ENV-based IS_TEST_E2E doesn't survive. Forward an explicit
+        # NEXT_PUBLIC_ flag that does survive the build.
+        NEXT_PUBLIC_IS_TEST_E2E: 'true'
 
     - uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6.10.9
       with:

@@ -807,26 +807,6 @@ export const addedSafes = {
       },
     },
   },
-  // sidebar_6.cy.js - single safes for sorting tests
-  sidebarTrustedSafesForSorting: {
-    11155111: {
-      '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-      '0xBb26E3717172d5000F87DeFd391994f789D80aEB': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-      '0x905934aA8758c06B2422F0C90D97d2fbb6677811': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-    },
-  },
   /** Trusted safes in sidebar-sidebar3.cy.js, sidebar5.cy.js */
   sidebarTrustedSafe1Safe2: {
     11155111: {
@@ -973,6 +953,15 @@ export const cookies = {
 
 export const safeLabsTerms = {
   acceptedTerms: 'true',
+}
+
+export const pendingCfDeletes = {
+  // Two ghost entries pointing at already-deleted CGW records. Used to reproduce
+  // the "[CF Sync] Failed to flush pending CF delete" 404 spam regression.
+  twoGhostEntries: [
+    { chainId: '11155111', address: '0x111111111111111111111111111111111111aaaa' },
+    { chainId: '11155111', address: '0x222222222222222222222222222222222222bbbb' },
+  ],
 }
 
 export const undeployedSafe = {

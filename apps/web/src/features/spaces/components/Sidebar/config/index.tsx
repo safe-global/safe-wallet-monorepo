@@ -18,6 +18,7 @@ import {
   EllipsisVertical,
   Scale,
   Shield,
+  History,
 } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
@@ -36,7 +37,7 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
   // },
   {
     icon: WalletCards,
-    label: 'Accounts',
+    label: 'Safe accounts',
     href: AppRoutes.spaces.safeAccounts,
   },
   {
@@ -48,6 +49,12 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
     icon: Scale,
     label: 'Policies',
     href: AppRoutes.spaces.policies,
+  },
+  {
+    icon: History,
+    label: 'Activity',
+    href: AppRoutes.spaces.activity,
+    activeMemberOnly: true,
   },
 ]
 
@@ -61,7 +68,7 @@ export const spacesSetupGroup: SidebarGroupConfig = {
     },
     {
       icon: Shield,
-      label: 'Security',
+      label: 'Security hub',
       href: AppRoutes.spaces.security,
       activeMemberOnly: true,
     },

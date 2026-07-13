@@ -1,7 +1,7 @@
 import { FormProvider, useForm } from 'react-hook-form'
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
-import type { AddAccountsFormValues } from '@/features/spaces/hooks/useSelectAll.types'
+import type { AddAccountsFormValues } from '../../../../hooks/useSelectAll.types'
 import SafeCard from '../SafeCard'
 
 // Mock heavy child dependencies
@@ -135,11 +135,9 @@ describe('SafeCard', () => {
       </FormWrapper>,
     )
 
-    const checkboxes = screen.getAllByRole('checkbox')
-    const cardButton = checkboxes.find((el) => el.tagName === 'BUTTON')!
-    fireEvent.click(cardButton)
+    fireEvent.click(screen.getByTestId('safe-card'))
 
-    expect(cardButton).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('checkbox')).toHaveAttribute('aria-checked', 'true')
   })
 
   it('renders multi-chain safe with chain badge', () => {
@@ -159,10 +157,97 @@ describe('SafeCard', () => {
       </FormWrapper>,
     )
 
-    const checkboxes = screen.getAllByRole('checkbox')
-    const cardButton = checkboxes.find((el) => el.tagName === 'BUTTON')!
-    fireEvent.click(cardButton)
+    fireEvent.click(screen.getByTestId('safe-card'))
 
-    expect(cardButton).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('checkbox')).toHaveAttribute('aria-checked', 'true')
+  })
+
+  const getCard = () => screen.getByTestId('safe-card')
+  const getCheckbox = () => screen.getByRole('checkbox')
+
+  it('disables an unselected single-chain safe when at limit', () => {
+    render(
+      <FormWrapper>
+        <SafeCard safe={buildSafe('0xabc123')} isAtLimit />
+      </FormWrapper>,
+    )
+
+    expect(getCheckbox()).toHaveAttribute('data-disabled')
+  })
+
+  it('keeps a selected single-chain safe enabled when at limit so it can be deselected', () => {
+    render(
+      <FormWrapper defaultValues={{ selectedSafes: { '1:0xabc123': true } }}>
+        <SafeCard safe={buildSafe('0xabc123')} isAtLimit />
+      </FormWrapper>,
+    )
+
+    expect(getCheckbox()).not.toHaveAttribute('data-disabled')
+    fireEvent.click(getCard())
+    expect(getCheckbox()).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('does not disable single-chain safes when not at limit', () => {
+    render(
+      <FormWrapper>
+        <SafeCard safe={buildSafe('0xabc123')} isAtLimit={false} />
+      </FormWrapper>,
+    )
+
+    expect(getCheckbox()).not.toHaveAttribute('data-disabled')
+  })
+
+  it('disables an unselected multi-chain safe when at limit', () => {
+    render(
+      <FormWrapper>
+        <SafeCard safe={buildMultiChain('0xmulti', ['1', '137'])} isAtLimit />
+      </FormWrapper>,
+    )
+
+    expect(getCheckbox()).toHaveAttribute('data-disabled')
+  })
+
+  it('keeps a fully-selected multi-chain safe enabled when at limit', () => {
+    render(
+      <FormWrapper defaultValues={{ selectedSafes: { '1:0xmulti': true, '137:0xmulti': true } }}>
+        <SafeCard safe={buildMultiChain('0xmulti', ['1', '137'])} isAtLimit />
+      </FormWrapper>,
+    )
+
+    expect(getCheckbox()).not.toHaveAttribute('data-disabled')
+  })
+
+  it('keeps a partially-selected multi-chain safe enabled when at limit so it can be deselected', () => {
+    render(
+      <FormWrapper defaultValues={{ selectedSafes: { '1:0xmulti': true } }}>
+        <SafeCard safe={buildMultiChain('0xmulti', ['1', '137'])} isAtLimit />
+      </FormWrapper>,
+    )
+
+    expect(getCheckbox()).not.toHaveAttribute('data-disabled')
+  })
+
+  it('clicking a disabled single-chain safe does not select it', () => {
+    render(
+      <FormWrapper>
+        <SafeCard safe={buildSafe('0xabc123')} isAtLimit />
+      </FormWrapper>,
+    )
+
+    expect(getCheckbox()).toHaveAttribute('aria-checked', 'false')
+    fireEvent.click(getCard())
+    expect(getCheckbox()).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('clicking a disabled multi-chain safe does not select it', () => {
+    render(
+      <FormWrapper>
+        <SafeCard safe={buildMultiChain('0xmulti', ['1', '137'])} isAtLimit />
+      </FormWrapper>,
+    )
+
+    expect(getCheckbox()).toHaveAttribute('aria-checked', 'false')
+    fireEvent.click(getCard())
+    expect(getCheckbox()).toHaveAttribute('aria-checked', 'false')
   })
 })

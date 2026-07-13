@@ -6,15 +6,15 @@
     },
     "sideActions": {
       "created": "Created",
-      "rejectionCreated": "On-chain rejection created",
-      "confirmations": "Confirmations",
+      "signedOneOfTwo": "Signed (1/2)",
+      "signedTwoOfTwo": "Signed (2/2)",
       "executedBy": "Executed"
     },
     "accountCreation": {
       "actionsSummary": "Created by 0xC16D...6fED",
       "transactionSafehash": {},
       "summaryTime": "10:30 AM",
-      "title": "Safe Account created",
+      "title": "Safe account created",
       "creator": {
         "actionTitle": "Creator",
         "address": "sep:0xC16Db0251654C0a72E91B190d81eAD367d2C6fED"
@@ -30,7 +30,7 @@
         "address": "sep:0xfb1bffC9d739B8D520DaF37dF666da4C687191EA"
       },
       "transactionHash": "0x05d4...7979",
-      "altTmage": "Safe Account created"
+      "altTmage": "Safe account created"
     },
     "receive": {
       "title": "Receive",
@@ -42,9 +42,9 @@
       "summaryTxInfoNFT": "1 FLOWER #6188",
       "summaryTxInfo": "1,000 QTRUST",
       "summaryTime": "11:00 AM",
-      "receivedFrom": "Received 1,000 QTRUST from",
-      "senderAddress": "sep:0x96D4c6fFC338912322813a77655fCC926b9A5aC5",
-      "senderAddressEth": "eth:0x5c4378Be60a8Af15d7d1Eeb61Dbc637aD56f2D23",
+      "receivedFrom": "1,000 QTRUST",
+      "senderAddress": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5",
+      "senderAddressEth": "0x5c4378Be60a8Af15d7d1Eeb61Dbc637aD56f2D23",
       "transactionHash": "0xd89d...9136",
       "transactionHashCopied": "0x415977f4e4912e22a5cabc4116f7e8f8984996e00a641dcccf8cbe1eb3db3e7d",
       "altImage": "Received",
@@ -53,12 +53,15 @@
       "altTokenNFT": "FLOWER #6188",
       "altTokenETH35": "$ ETH35.com",
       "GPv2Settlement": "GPv2Settlement",
-      "GPv2SettlementAddress": "eth:0x9008D19f58AAbD9eD0D60971565",
+      "GPv2SettlementAddress": "0x9008D19f58AAbD9eD0D60971565",
       "Proxy": "Proxy",
-      "ProxyAddress": "eth:0xeF6d82f75E0429fC9261583108542B87089CC47B",
+      "ProxyAddress": "0xeF6d82f75E0429fC9261583108542B87089CC47B",
       "txHashDAI": "0x7156...3e47",
+      "txHashDAIFull": "0x715646c00d8c513b16de213dbdcfea16f58aa1294306fdd5866a4d1fab643e47",
       "nftHash": "0x3873...6d0b",
+      "nftHashFull": "0x3873b1a1310fd4acd00249456b9700ea7fbe1e61261c3efd08a288abf8756d0b",
       "txHashEth": "0xdc6b...f250",
+      "txHashEthFull": "0xdc6b8280a40b5979908bc7a116b38ac6b7ae22feea09fbc1dc1373421ff4f250",
       "executionDateDAI": "10/30/2023",
       "executionDateNFT": "9/28/2023",
       "executionDateEth": "8/19/2020"
@@ -68,13 +71,11 @@
       "summaryTxInfo": "-< 0.00001 ETH",
       "summaryTxInfo2": "-0.0001 ETH",
       "summaryTime": "11:02 AM",
-      "sentTo": "Sent 0.000000000001 ETH to",
-      "recipientAddress": "sep:0x06373d5e45AD31BD354CeBfA8dB4eD2c75B8708e",
+      "sentTo": "0.000000000001 ETH",
+      "recipientAddress": "0x06373d5e45AD31BD354CeBfA8dB4eD2c75B8708e",
       "transactionHash": "0x6a59...6a98",
       "altImage": "Sent",
-      "altToken": "ETH",
-      "txBuilderTitle": "Transaction Builder",
-      "txBuilderAltImage": "Transaction Builder"
+      "altToken": "ETH"
     },
     "onchainRejection": {
       "title": "On-chain rejection",

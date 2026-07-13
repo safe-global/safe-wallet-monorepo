@@ -17,22 +17,25 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   lint:
     permissions:
+      contents: read
       checks: write
       pull-requests: read
       statuses: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
       - uses: ./.github/actions/yarn
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
       - name: Run ESLint with suggestions (PR only)
         if: github.event_name == 'pull_request'
-        uses: CatChen/eslint-suggestion-action@e35948b6ccddf7371e0f11d4569dc3cb67eb7af8 # v4.1.31
+        uses: CatChen/eslint-suggestion-action@e3b70610472590e36e3749cc651eb7805d6040f7 # v4.1.32
         with:
           request-changes: true
           fail-check: true
@@ -46,12 +49,13 @@ jobs:
 
   prettier:
     permissions:
+      contents: read
       checks: write
       pull-requests: read
       statuses: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
       - uses: ./.github/actions/yarn
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
@@ -61,12 +65,13 @@ jobs:
 
   type-check:
     permissions:
+      contents: read
       checks: write
       pull-requests: read
       statuses: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
       - uses: ./.github/actions/yarn
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
@@ -76,12 +81,13 @@ jobs:
 
   knip-exports:
     permissions:
+      contents: read
       checks: write
       pull-requests: read
       statuses: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
       - uses: ./.github/actions/yarn
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}

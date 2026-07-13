@@ -1,17 +1,14 @@
-import { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
-import { Box, Drawer, IconButton, Stack, Tooltip, Typography } from '@mui/material'
-import { motion, AnimatePresence } from 'framer-motion'
-import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
-import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
+import { type ReactElement, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import type { ScanContext, ScanResult } from '@/features/security/types'
-import Identicon from '@/components/common/Identicon'
 import { useSecurityScan } from '@/features/security'
 import { useChain } from '@/hooks/useChains'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import SecurityPanelView from '../SecurityPanelView/SecurityPanelView'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { TxModalContext } from '@/components/tx-flow'
+import { RemoveModuleFlow } from '@/components/tx-flow/flows'
+import { HnSignupFlow } from '@/features/hypernative'
+import SecurityDrawerHeader from './SecurityDrawerHeader'
+import SecurityDrawerContent from './SecurityDrawerContent'
 import type { SelectedSafe, SpaceSafeEntry } from '../../types'
-
-const MotionBox = motion.create(Box)
 
 type SecurityReportDrawerProps = {
   selectedSafe: SelectedSafe | null
@@ -28,17 +25,29 @@ const SecurityReportDrawer = ({
   onClose,
   onScanComplete,
 }: SecurityReportDrawerProps): ReactElement => {
-  const { results, isComplete, lastScannedAt, rescan } = useSecurityScan(scanContext)
+  const { results, isComplete, lastScannedAt } = useSecurityScan(scanContext)
   const chain = useChain(selectedSafe?.chainId ?? '')
+  const { setTxFlow } = useContext(TxModalContext)
+  const [isHnSignupOpen, setIsHnSignupOpen] = useState(false)
   const scanContextRef = useRef(scanContext)
   scanContextRef.current = scanContext
 
-  // Bump animationKey to replay the entrance animation on rescan.
-  const [animationKey, setAnimationKey] = useState(0)
-  const handleRescan = useCallback(() => {
-    rescan()
-    setAnimationKey((k) => k + 1)
-  }, [rescan])
+  // Close the drawer before opening the Hypernative signup flow so the MUI dialog owns focus
+  // and isn't dimmed behind the sheet's overlay — mirroring the remove-module action below.
+  const handleHnSignupClick = useCallback(() => {
+    onClose()
+    setIsHnSignupOpen(true)
+  }, [onClose])
+
+  // Close the report drawer before launching the remove-module tx flow so the tx modal
+  // isn't fighting the sheet for focus, mirroring the Settings → Modules remove action.
+  const handleRemoveModule = useCallback(
+    (address: string) => {
+      onClose()
+      setTxFlow(<RemoveModuleFlow address={address} />)
+    },
+    [onClose, setTxFlow],
+  )
 
   // Forward scan completion to parent
   useEffect(() => {
@@ -49,135 +58,41 @@ const SecurityReportDrawer = ({
   }, [isComplete, lastScannedAt])
 
   return (
-    <Drawer
-      anchor="right"
-      open={!!selectedSafe}
-      onClose={onClose}
-      variant="temporary"
-      transitionDuration={250}
-      sx={{ zIndex: (theme) => theme.zIndex.modal }}
-      PaperProps={{
-        sx: {
-          width: 520,
-          maxWidth: '100vw',
-          borderRadius: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-        },
-      }}
-    >
-      <AnimatePresence mode="wait">
-        {selectedSafe && (
-          <MotionBox
-            key={`${selectedSafe.address}:${selectedSafe.chainId}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}
-          >
-            {/* Docked header */}
-            <MotionBox
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30, delay: 0.05 }}
-              sx={{
-                px: 3,
-                py: 2,
-                borderBottom: 1,
-                borderColor: 'border.light',
-                backgroundColor: 'background.paper',
-                flexShrink: 0,
-              }}
-            >
-              <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1.5} spacing={1}>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}
-                >
-                  Security report
-                </Typography>
-                <Stack direction="row" spacing={0.5}>
-                  <Tooltip title="Re-scan this Safe">
-                    <span>
-                      <IconButton onClick={handleRescan} size="small" disabled={!isComplete} aria-label="Re-scan">
-                        <RefreshRoundedIcon fontSize="small" />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                  <IconButton onClick={onClose} size="small" aria-label="Close security report">
-                    <CloseRoundedIcon fontSize="small" />
-                  </IconButton>
-                </Stack>
-              </Stack>
+    <>
+      <Sheet
+        open={!!selectedSafe}
+        onOpenChange={(open) => {
+          if (!open) onClose()
+        }}
+      >
+        <SheetContent
+          side="right"
+          showCloseButton={false}
+          aria-label="Security report"
+          // Float the sheet with a margin from the viewport, round its corners and use a #fafafa
+          // surface in light mode / `bg-card` in dark mode so the white cards inside stand out.
+          className="inset-y-3! right-3! h-auto! w-[440px]! max-w-[calc(100vw-24px)]! gap-0 overflow-hidden rounded-3xl border-0! bg-zinc-50 p-0 shadow-xl dark:bg-card"
+        >
+          {selectedSafe && (
+            <div className="flex min-h-0 gap-3 flex-1 flex-col overflow-hidden">
+              <SecurityDrawerHeader address={selectedSafe.address} name={selectedEntry?.name} onClose={onClose} />
 
-              <Stack direction="row" alignItems="center" spacing={1.25} sx={{ minWidth: 0 }}>
-                <Identicon address={selectedSafe.address} size={24} />
-                <Box sx={{ minWidth: 0, flex: 1 }}>
-                  <Typography
-                    variant="caption"
-                    fontWeight={600}
-                    noWrap
-                    sx={{ display: 'block', lineHeight: 1.2 }}
-                    title={selectedEntry?.name || selectedSafe.address}
-                  >
-                    {selectedEntry?.name || shortenAddress(selectedSafe.address)}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    noWrap
-                    sx={{ display: 'block', lineHeight: 1.2 }}
-                  >
-                    {chain?.shortName ? `${chain.shortName}:` : ''}
-                    {shortenAddress(selectedSafe.address)}
-                  </Typography>
-                </Box>
-                {lastScannedAt && (
-                  <Box sx={{ flexShrink: 0, textAlign: 'right' }}>
-                    <Typography
-                      variant="caption"
-                      fontWeight={600}
-                      sx={{ display: 'block', lineHeight: 1.2, whiteSpace: 'nowrap' }}
-                      title={new Date(lastScannedAt).toLocaleString()}
-                    >
-                      {new Date(lastScannedAt).toLocaleString(undefined, {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                      })}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.2 }}>
-                      Last scanned
-                    </Typography>
-                  </Box>
-                )}
-              </Stack>
-            </MotionBox>
-
-            {/* Scrollable content — animationKey replays entrance on rescan */}
-            <MotionBox
-              key={animationKey}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.15 }}
-              sx={{ flex: 1, overflowY: 'auto', px: 3, pt: 2, pb: 3 }}
-            >
-              <SecurityPanelView
-                key={`${selectedSafe.address}:${selectedSafe.chainId}`}
+              <SecurityDrawerContent
                 scanContext={scanContext}
                 results={results}
                 isComplete={isComplete}
+                lastScannedAt={lastScannedAt}
                 safeQueryParam={chain?.shortName ? `${chain.shortName}:${selectedSafe.address}` : undefined}
+                onRemoveModule={handleRemoveModule}
+                onHnSignupClick={handleHnSignupClick}
               />
-            </MotionBox>
-          </MotionBox>
-        )}
-      </AnimatePresence>
-    </Drawer>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
+
+      <HnSignupFlow open={isHnSignupOpen} onClose={() => setIsHnSignupOpen(false)} />
+    </>
   )
 }
 

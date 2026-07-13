@@ -1,9 +1,9 @@
 import { AppRoutes } from '@/config/routes'
 import Link from 'next/link'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { MemberStatus, useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { useIsAdmin } from '../../hooks/useSpaceMembers'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import { getDeterministicColor } from '@/features/spaces/components/InitialsAvatar'
+import { getDeterministicColor } from '@/utils/colors'
 import { Card } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -38,10 +38,8 @@ export const SpaceSummaryNew = ({
 }
 
 const SpaceCardNew = ({ space, isLink = true }: { space: GetSpaceResponse; isLink?: boolean }) => {
-  const { id, name, members, safeCount } = space
-  const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
-  const numberOfAccounts = safeCount
-  const isAdmin = useIsAdmin(id)
+  const { uuid, name, safeCount, memberCount } = space
+  const isAdmin = useIsAdmin(uuid)
 
   const logoColor = getDeterministicColor(name)
   const logoLetter = name.slice(0, 1).toUpperCase()
@@ -55,7 +53,7 @@ const SpaceCardNew = ({ space, isLink = true }: { space: GetSpaceResponse; isLin
       {isLink && (
         <Link
           className="absolute left-0 top-0 size-full"
-          href={{ pathname: AppRoutes.spaces.index, query: { spaceId: id } }}
+          href={{ pathname: AppRoutes.spaces.index, query: { spaceId: uuid } }}
           aria-label={`Go to ${name}`}
         />
       )}
@@ -66,7 +64,7 @@ const SpaceCardNew = ({ space, isLink = true }: { space: GetSpaceResponse; isLin
         </AvatarFallback>
       </Avatar>
 
-      <SpaceSummaryNew name={name} numberOfAccounts={numberOfAccounts} numberOfMembers={numberOfMembers} />
+      <SpaceSummaryNew name={name} numberOfAccounts={safeCount} numberOfMembers={memberCount} />
 
       {isAdmin && (
         <div className="relative z-10 col-start-3 flex items-start">

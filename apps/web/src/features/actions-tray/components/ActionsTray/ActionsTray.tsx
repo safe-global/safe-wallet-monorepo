@@ -1,11 +1,11 @@
 import { type ReactElement, type ReactNode, Fragment, useCallback, useContext } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { ArrowUpRight, ArrowDownLeft, Repeat, SquareDashedBottomCode } from 'lucide-react'
+import { ArrowUpRight, QrCode, Repeat, SquareDashedBottomCode } from 'lucide-react'
 import { Tooltip } from '@mui/material'
 import { Button } from '@/components/ui/button'
 import Track from '@/components/common/Track'
-import QrCodeButton from '@/components/sidebar/QrCodeButton'
+import QrCodeButton from '@/components/common/QrCodeButton'
 import CheckWallet from '@/components/common/CheckWallet'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import { AppRoutes } from '@/config/routes'
@@ -130,17 +130,17 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
           {isSpace ? (
             <Button
               variant={secondaryVariant}
-              className={cn('px-6 hover:bg-border')}
+              className={cn('px-6 hover:bg-secondary-hover dark:border-border')}
               onClick={handleOnReceive}
               disabled={noAssets}
             >
-              <ArrowDownLeft className="size-5" />
+              <QrCode className="size-4" />
               Receive
             </Button>
           ) : (
             <QrCodeButton>
-              <Button variant={secondaryVariant} className={cn('px-6 hover:bg-border')}>
-                <ArrowDownLeft className="size-5" />
+              <Button variant={secondaryVariant} className={cn('px-6 hover:bg-secondary-hover dark:border-border')}>
+                <QrCode className="size-4" />
                 Receive
               </Button>
             </QrCodeButton>
@@ -158,7 +158,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
                       {isSpace ? (
                         <Button
                           variant={secondaryVariant}
-                          className={cn('px-6 hover:bg-border')}
+                          className={cn('px-6 hover:bg-secondary-hover dark:border-border')}
                           data-testid="overview-swap-btn"
                           disabled={swapDisabled}
                           onClick={handleOnSwap}
@@ -169,7 +169,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
                       ) : (
                         <Button
                           variant={secondaryVariant}
-                          className={cn('px-6 hover:bg-border')}
+                          className={cn('px-6 hover:bg-secondary-hover dark:border-border')}
                           data-testid="overview-swap-btn"
                           disabled={swapDisabled}
                           render={
@@ -195,7 +195,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
             const buildTxButton = isSpace ? (
               <Button
                 variant={secondaryVariant}
-                className="px-6 hover:bg-border"
+                className="px-6 hover:bg-secondary-hover dark:border-border"
                 disabled={!isOk || noAssets}
                 onClick={handleOnBuildTx}
                 aria-label="Transaction builder"
@@ -207,7 +207,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
               <Button
                 variant={secondaryVariant}
                 size="icon"
-                className="rounded-lg hover:bg-border"
+                className="rounded-lg hover:bg-secondary-hover dark:border-border"
                 disabled={!isOk}
                 render={isOk ? <Link href={txBuilderLink} /> : undefined}
                 aria-label="Transaction builder"

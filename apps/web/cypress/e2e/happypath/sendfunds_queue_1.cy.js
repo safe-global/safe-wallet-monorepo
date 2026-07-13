@@ -122,45 +122,6 @@ describe('Send funds from queue happy path tests 1', () => {
       })
   })
 
-  it.skip('Verify confirmation and execution of native token queued tx by second signer with relayer', () => {
-    function executeTransactionFlow(fromSafe) {
-      visit(constants.transactionQueueUrl + fromSafe)
-      wallet.connectSigner(signer)
-      createTx.clickOnConfirmBtn(0)
-      tx.executeFlow_2()
-      cy.wait(5000)
-    }
-    cy.wrap(null)
-      .then(() => {
-        return main.fetchCurrentNonce(network_pref + existingSafeAddress2)
-      })
-      .then(async (currentNonce) => {
-        const amount = ethers.parseUnits(tokenAmount, unit_eth).toString()
-        const safeTransactionData = {
-          to: receiver,
-          data: '0x',
-          value: amount.toString(),
-        }
-
-        const safeTransaction = await protocolKitOwnerS2.createTransaction({ transactions: [safeTransactionData] })
-        const safeTxHash = await protocolKitOwnerS2.getTransactionHash(safeTransaction)
-        const senderSignature = await protocolKitOwnerS2.signHash(safeTxHash)
-        const safeAddress = existingSafeAddress2
-
-        await apiKit.proposeTransaction({
-          safeAddress,
-          safeTransactionData: safeTransaction.data,
-          safeTxHash,
-          senderAddress: await owner1Signer.getAddress(),
-          senderSignature: senderSignature.data,
-        })
-
-        executeTransactionFlow(safeAddress)
-        cy.wait(5000)
-        main.verifyNonceChange(network_pref + safeAddress, currentNonce + 1)
-      })
-  })
-
   it('Verify 1 signer can execute a tx confirmed by 2 signers', { defaultCommandTimeout: 300000 }, () => {
     function executeTransaction(fromSafe) {
       visit(constants.transactionQueueUrl + fromSafe)

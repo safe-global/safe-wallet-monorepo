@@ -5,7 +5,7 @@ import { type ReactElement, useContext, useMemo } from 'react'
 
 import ExternalLink from '@/components/common/ExternalLink'
 import { DelayModifierRow } from './DelayModifierRow'
-import useRecovery from '@/features/recovery/hooks/useRecovery'
+import useRecovery from '../../hooks/useRecovery'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -124,8 +124,8 @@ function RecoverySettings(): ReactElement {
         <Grid item xs>
           <Typography mb={2}>
             {isRecoveryEnabled
-              ? 'The trusted Recoverer will be able to recover your Safe Account if you ever lose access. You can change Recoverers or alter your recovery setup at any time.'
-              : 'Choose a trusted Recoverer to recover your Safe Account if you ever lose access. Enabling the Account recovery module will require a transaction.'}{' '}
+              ? 'The trusted Recoverer will be able to recover your Safe account if you ever lose access. You can change Recoverers or alter your recovery setup at any time.'
+              : 'Choose a trusted Recoverer to recover your Safe account if you ever lose access. Enabling the Account recovery module will require a transaction.'}{' '}
             <Track {...RECOVERY_EVENTS.LEARN_MORE} label="settings">
               <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
                 Learn more

@@ -58,13 +58,6 @@ describe('Multichain header network switch tests', { defaultCommandTimeout: 3000
     network.verifyAddNetworkBtnExists(constants.networks.ethereum)
   })
 
-  // TODO clarify if we need this split which is absent in the new design
-  it.skip('Verify that test networks and main networks are splitted', () => {
-    create_wallet.openNetworkSelector()
-    sideBar.checkNetworksInRange(constants.networks.sepolia, 1, 'below')
-    sideBar.checkNetworksInRange(constants.networks.polygon, 1, 'above')
-  })
-
   it('Verify that CF safe is created if other available network is selected from the "Show all networks"', () => {
     let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
     cy.visit(constants.BALANCE_URL + safe)

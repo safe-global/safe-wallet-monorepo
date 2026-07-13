@@ -1,8 +1,24 @@
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
+import { isMultisigDetailedExecutionInfo } from '@/src/utils/transaction-guards'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { FeeParams } from '@/src/hooks/useFeeParams/useFeeParams'
 import { Signer } from '@/src/store/signersSlice'
+import { BIOMETRY_ROTATION_DESCRIPTION, BiometryInvalidationError } from '@/src/services/key-storage'
+
+export const txRequiresRelay = (txDetails?: TransactionDetails): boolean => {
+  const info = txDetails?.detailedExecutionInfo
+  if (!info || !isMultisigDetailedExecutionInfo(info)) {
+    return false
+  }
+  return isGtfSafePaid({
+    gasPrice: info.gasPrice,
+    baseGas: info.baseGas,
+    refundReceiver: info.refundReceiver?.value,
+  })
+}
 
 /**
  * Execution path types for the confirm flow
@@ -17,9 +33,18 @@ export const getExecutionMethod = (
   isRelayAvailable: boolean,
   chain: Chain,
   signer?: Signer,
+  requiresRelay = false,
 ): ExecutionMethod => {
-  // Relay takes priority if requested and available
   const isRelayEnabled = !!chain && hasFeature(chain, FEATURES.RELAYING)
+
+  // GTF Safe-pays txs MUST relay, the Safe reimburses the relayer regardless of who executes, so a
+  // signer-EOA route would double-pay. Force relay (bypassing the daily quota) whenever the chain
+  // supports relaying. The "relay not available" case is handled by the caller as a terminal state.
+  if (requiresRelay && isRelayEnabled) {
+    return ExecutionMethod.WITH_RELAY
+  }
+
+  // Relay takes priority if requested and available
   if (requestedMethod === ExecutionMethod.WITH_RELAY && isRelayAvailable && isRelayEnabled) {
     return ExecutionMethod.WITH_RELAY
   }
@@ -93,11 +118,16 @@ export const determineExecutionPath = (
 }
 
 /**
- * Extracts error message from unknown error
+ * Extracts a user-facing message from an unknown error, mapping biometry
+ * invalidation to the shared re-import copy and falling back to `fallback`
+ * for non-Error throwables.
  */
-export const getErrorMessage = (error: unknown): string => {
+export const getErrorMessage = (error: unknown, fallback = 'Failed to execute transaction'): string => {
+  if (error instanceof BiometryInvalidationError) {
+    return BIOMETRY_ROTATION_DESCRIPTION
+  }
   if (error instanceof Error) {
     return error.message
   }
-  return 'Failed to execute transaction'
+  return fallback
 }

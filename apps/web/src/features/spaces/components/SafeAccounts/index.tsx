@@ -1,24 +1,20 @@
-import AddAccounts from '../AddAccounts'
+import AddAccountsChooser from '../AddAccountsChooser'
 import EmptySafeAccounts from './EmptySafeAccounts'
 import { Stack } from '@mui/material'
 import { Typography } from '@/components/ui/typography'
 import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
-import { selectAllAddedSafes } from '@/store/addedSafesSlice'
-import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
 import {
   type AllSafeItems,
   type SafeItem,
-  _buildSafeItem,
   _getMultiChainAccounts,
   _getSingleChainAccounts,
   getComparator,
-  useAllOwnedSafes,
+  useSafeItemBuilder,
 } from '@/hooks/safes'
-import useWallet from '@/hooks/wallets/useWallet'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
-import { useSpaceSafes, useIsAdmin, useIsInvited } from '@/features/spaces'
+import { useSpaceSafes, useIsInvited } from '@/features/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { TriangleAlert, RotateCw } from 'lucide-react'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
@@ -37,28 +33,19 @@ const _groupAndSort = (
 
 const SpaceSafeAccounts = () => {
   const { allSafes, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()
-  const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
 
   // Use same organization logic as onboarding
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = getComparator(orderBy)
-  const { address: walletAddress = '' } = useWallet() || {}
-  const [allOwned = {}] = useAllOwnedSafes(walletAddress)
-  const allAdded = useAppSelector(selectAllAddedSafes)
-  const allUndeployed = useAppSelector(selectUndeployedSafes)
-  const allVisitedSafes = useAppSelector(selectAllVisitedSafes)
-  const allSafeNames = useAppSelector(selectAllAddressBooks)
+  const { buildSafeItem } = useSafeItemBuilder()
 
   const spaceSafeItems = useMemo(() => {
-    const buildItem = (chainId: string, address: string) =>
-      _buildSafeItem(chainId, address, walletAddress, allAdded, allOwned, allUndeployed, allVisitedSafes, allSafeNames)
-
     // Only include safes that are part of the current space
     const spaceSafes = allSafes?.flatMap((item) => ('safes' in item ? item.safes : [item])) || []
 
-    return spaceSafes.map((safe) => buildItem(safe.chainId, safe.address))
-  }, [allAdded, allOwned, allUndeployed, walletAddress, allVisitedSafes, allSafeNames, allSafes])
+    return spaceSafes.map((safe) => buildSafeItem(safe.chainId, safe.address))
+  }, [buildSafeItem, allSafes])
 
   const similarAddresses = useMemo<Set<string>>(
     () => getFlaggedSimilarAddressSet(spaceSafeItems.map((s) => s.address)),
@@ -78,15 +65,13 @@ const SpaceSafeAccounts = () => {
       {isInvited && <PreviewInvite />}
       <div className="mb-6 flex flex-col gap-6">
         <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
-          Safe Accounts
+          Safe accounts
         </Typography>
-        {isAdmin && (
-          <Stack direction="row" justifyContent="flex-start">
-            <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
-              <AddAccounts buttonVariant="default" />
-            </Track>
-          </Stack>
-        )}
+        <Stack direction="row" justifyContent="flex-start">
+          <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
+            <AddAccountsChooser buttonVariant="default" buttonLabel="Manage accounts" entryPoint="safe_accounts" />
+          </Track>
+        </Stack>
       </div>
 
       {isSpaceSafesError ? (

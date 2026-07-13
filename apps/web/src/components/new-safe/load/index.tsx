@@ -7,7 +7,7 @@ import { CardStepper } from '@/components/new-safe/CardStepper'
 import type { TxStepperProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import SetAddressStep from '@/components/new-safe/load/steps/SetAddressStep'
-import { AppRoutes } from '@/config/routes'
+import { getNewSafeReturnUrl } from '@/components/new-safe/getReturnUrl'
 import SafeOwnerStep from '@/components/new-safe/load/steps/SafeOwnerStep'
 import SafeReviewStep from '@/components/new-safe/load/steps/SafeReviewStep'
 
@@ -19,7 +19,7 @@ export type LoadSafeFormData = NamedAddress & {
 export const LoadSafeSteps: TxStepperProps<LoadSafeFormData>['steps'] = [
   {
     title: 'Choose address, network and a name',
-    subtitle: 'Paste the address of the Safe Account you want to add, select the network and choose a name.',
+    subtitle: 'Paste the address of the Safe account you want to add, select the network and choose a name.',
     render: (data, onSubmit, onBack, setStep) => (
       <SetAddressStep onSubmit={onSubmit} onBack={onBack} data={data} setStep={setStep} />
     ),
@@ -33,7 +33,7 @@ export const LoadSafeSteps: TxStepperProps<LoadSafeFormData>['steps'] = [
   },
   {
     title: 'Review',
-    subtitle: 'Confirm adding Safe Account to your Watchlist',
+    subtitle: 'Confirm adding Safe account to your Watchlist',
     render: (data, onSubmit, onBack, setStep) => (
       <SafeReviewStep onSubmit={onSubmit} onBack={onBack} data={data} setStep={setStep} />
     ),
@@ -46,7 +46,7 @@ const LoadSafe = ({ initialData }: { initialData?: TxStepperProps<LoadSafeFormDa
   const router = useRouter()
 
   const onClose = () => {
-    router.push(AppRoutes.welcome.index)
+    router.push(getNewSafeReturnUrl(router.query.next))
   }
 
   const initialSafe = initialData ?? loadSafeDefaultData
@@ -67,7 +67,7 @@ const LoadSafe = ({ initialData }: { initialData?: TxStepperProps<LoadSafeFormDa
               pb: 2,
             }}
           >
-            Add existing Safe Account
+            Add existing Safe account
           </Typography>
         </Grid>
         <Grid

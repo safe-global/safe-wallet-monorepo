@@ -3,11 +3,12 @@ import { UserRound } from 'lucide-react'
 import { Typography } from '@/components/ui/typography'
 import { Badge } from '@/components/ui/badge'
 import { Avatar } from '@/components/ui/avatar'
-import { WidgetItem } from '@/features/spaces/components/SafeWidget'
+import { WidgetItem } from '@/features/spaces'
 import { AccountItem } from '../AccountItem'
 import type { Account } from './types'
 import Identicon from '@/components/common/Identicon'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import AddressWithCopy from '@/components/common/AddressWithCopy'
+import { NotActivatedBadge } from '@/components/common/SpaceSafeBar/AccountsModal/shared'
 
 interface AccountWidgetItemProps {
   account: Account
@@ -32,11 +33,7 @@ const AccountWidgetItem = ({
           {account.name}
         </Typography>
       }
-      info={
-        <Typography data-testid="single-account-address" variant="paragraph-mini" color="muted">
-          {shortenAddress(account.address, 4)}
-        </Typography>
-      }
+      info={<AddressWithCopy address={account.address} data-testid="single-account-address" />}
       startNode={
         <Avatar data-testid="single-account-identicon">
           <Identicon address={account.address} size={40} />
@@ -48,13 +45,17 @@ const AccountWidgetItem = ({
         </div>
       }
       actionNode={
-        <div className="flex flex-col items-end gap-2">
-          <AccountItem.Balance
-            className="w-full"
-            data-testid="single-account-balance"
-            fiatTotal={account.fiatTotal}
-            isLoading={!account.fiatTotal && loading}
-          />
+        <div className="flex w-20 flex-col items-end gap-2">
+          {account.isUndeployed ? (
+            <NotActivatedBadge isActivating={!!account.isActivating} />
+          ) : (
+            <AccountItem.Balance
+              className="w-full"
+              data-testid="single-account-balance"
+              fiatTotal={account.fiatTotal}
+              isLoading={!account.fiatTotal && loading}
+            />
+          )}
           {!account.subAccounts && (
             <Badge variant="secondary" data-testid="single-account-threshold">
               <UserRound className="size-3" />

@@ -6,8 +6,7 @@ import css from './styles.module.css'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import classNames from 'classnames'
 import { isUserActiveAdmin } from '@/features/spaces/utils'
-import { MemberStatus } from '@/features/spaces'
-import InitialsAvatar from '../InitialsAvatar'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
 import SpaceContextMenu from './SpaceContextMenu'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { trackEvent } from '@/services/analytics'
@@ -56,16 +55,15 @@ const SpaceCard = ({
   isLink?: boolean
   currentUserId?: number
 }) => {
-  const { id, name, members, safeCount } = space
-  const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
+  const { uuid, name, members, safeCount, memberCount } = space
   const isAdmin = isUserActiveAdmin(members, currentUserId)
 
   const handleClick = () => {
     trackEvent(
-      { ...SPACE_EVENTS.WORKSPACE_SWITCHED, label: String(id) },
+      { ...SPACE_EVENTS.WORKSPACE_SWITCHED, label: uuid },
       {
         from_workspace_id: undefined,
-        to_workspace_id: String(id),
+        to_workspace_id: uuid,
         source: 'space_selector',
         safe_count: safeCount,
       },
@@ -78,11 +76,13 @@ const SpaceCard = ({
       className={classNames(css.card, { [css.compact]: isCompact })}
       onClick={isLink ? handleClick : undefined}
     >
-      {isLink && <Link className={css.cardLink} href={{ pathname: AppRoutes.spaces.index, query: { spaceId: id } }} />}
+      {isLink && (
+        <Link className={css.cardLink} href={{ pathname: AppRoutes.spaces.index, query: { spaceId: uuid } }} />
+      )}
 
       <InitialsAvatar name={name} size={isCompact ? 'medium' : 'large'} />
 
-      <SpaceSummary name={name} numberOfAccounts={safeCount} numberOfMembers={numberOfMembers} isCompact={isCompact} />
+      <SpaceSummary name={name} numberOfAccounts={safeCount} numberOfMembers={memberCount} isCompact={isCompact} />
 
       {isAdmin && <SpaceContextMenu space={space} />}
     </Card>

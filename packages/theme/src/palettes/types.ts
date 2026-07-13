@@ -58,6 +58,15 @@ export interface ColorPalette {
     text: string
     contrastText: string
   }
+  /**
+   * "Needs review" tier — yellow-amber chip + per-check accent colour. Used by the Security
+   * Hub `needs_attention` SafeGrade. `main` is the vivid fill (icon/dot/text); `background`
+   * is the soft tint behind chip pills.
+   */
+  review: {
+    main: string
+    background: string
+  }
   background: {
     default: string
     main: string

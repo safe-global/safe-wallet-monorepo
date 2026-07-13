@@ -28,18 +28,21 @@ concurrency:
 env:
   WORKING_DIRECTORY: apps/tx-builder
 
+permissions: {}
+
 jobs:
   pr-preview:
     name: PR Preview
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     permissions:
+      contents: read
       pull-requests: write
       id-token: write
 
     steps:
       - name: Post building comment
-        uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11.0
+        uses: mshick/add-pr-comment@ec328af66588ab8f77cdeb2c264f14aba45bbf59 # v3.12.0
         with:
           message-id: tx-builder-preview
           message: |
@@ -47,7 +50,7 @@ jobs:
             ⏳ Building preview deployment...
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
@@ -65,7 +68,7 @@ jobs:
         uses: ./.github/actions/branch-slug
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
+        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -78,7 +81,7 @@ jobs:
 
       - name: Post deployment link
         if: always()
-        uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11.0
+        uses: mshick/add-pr-comment@ec328af66588ab8f77cdeb2c264f14aba45bbf59 # v3.12.0
         with:
           message-id: tx-builder-preview
           message: |
@@ -97,10 +100,11 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     permissions:
+      contents: read
       id-token: write
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
 
       - uses: ./.github/actions/yarn
 
@@ -112,7 +116,7 @@ jobs:
           VITE_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ secrets.NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
+        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
         with:
           role-to-assume: ${{ secrets.TX_BUILDER_AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -134,7 +138,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
         with:
           fetch-depth: 0
 
@@ -204,7 +208,7 @@ jobs:
           git push origin ${{ steps.version.outputs.version }}
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         with:
           name: ${{ steps.version.outputs.version }}
           tag_name: ${{ steps.version.outputs.version }}

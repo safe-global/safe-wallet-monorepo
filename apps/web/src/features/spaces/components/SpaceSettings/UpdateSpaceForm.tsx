@@ -1,13 +1,16 @@
-import { Controller, FormProvider, useForm } from 'react-hook-form'
+import { FormProvider, useForm } from 'react-hook-form'
 import { useUpdateSpace, type UpdateSpaceFormData } from './useUpdateSpace'
 import ErrorAlert from './ErrorAlert'
-import { Button, TextField } from '@mui/material'
+import { Button } from '@mui/material'
 import { type GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useIsAdmin } from '@/features/spaces'
+import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
+import NameInput from '@/components/common/NameInput'
+import { NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 
 const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const { handleUpdate, error } = useUpdateSpace(space)
-  const isAdmin = useIsAdmin(space?.id)
+  const isAdmin = useIsAdmin(space?.uuid)
 
   const formMethods = useForm<UpdateSpaceFormData>({
     mode: 'onChange',
@@ -16,30 +19,25 @@ const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => 
     },
   })
 
-  const { control, handleSubmit, watch, formState } = formMethods
+  const { handleSubmit, watch, formState } = formMethods
 
   const formName = watch('name')
-  const isNameChanged = formName !== space?.name
-  const canSubmit = isNameChanged && isAdmin && !formState.isSubmitting
+  const isNameChanged = sanitizeName(formName ?? '') !== (space?.name ?? '')
+  const hasNameError = Boolean(formState.errors.name)
+  const canSubmit = isNameChanged && isAdmin && !hasNameError && !formState.isSubmitting
 
   const onSubmit = handleSubmit(handleUpdate)
 
   return (
     <FormProvider {...formMethods}>
       <form onSubmit={onSubmit}>
-        <Controller
+        <NameInput
           name="name"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              label="Space name"
-              fullWidth
-              value={field.value || ''}
-              slotProps={{ inputLabel: { shrink: true } }}
-              onKeyDown={(e) => e.stopPropagation()}
-            />
-          )}
+          label="Workspace name"
+          required
+          validateCharset
+          minLength={NAME_MIN_LENGTH}
+          maxLength={SPACE_NAME_MAX_LENGTH}
         />
 
         <ErrorAlert error={error} />

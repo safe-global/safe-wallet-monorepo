@@ -7,7 +7,7 @@ import {
   SidebarListItemButton,
   SidebarListItemIcon,
   SidebarListItemText,
-} from '@/components/sidebar/SidebarList'
+} from '@/components/common/SidebarList'
 import { useCurrentSpaceId, useIsActiveMember } from '@/features/spaces'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -19,13 +19,16 @@ const Navigation = (): ReactElement => {
   const spaceId = useCurrentSpaceId()
   const isActiveMember = useIsActiveMember()
   const isSecurityHubEnabled = useHasFeature(FEATURES.SECURITY_HUB)
+  const isAuditLogEnabled = useHasFeature(FEATURES.SPACE_AUDIT_LOG)
 
   return (
     <SidebarList>
       {navItems.map((item) => {
-        // Hide the Security entry when the chain feature flag is explicitly off. While the
+        // Hide flag-gated entries when their chain feature flag is explicitly off. While the
         // chain config is still loading (`undefined`) we keep the item to avoid flicker.
-        const hideForFeatureFlag = item.href === AppRoutes.spaces.security && isSecurityHubEnabled === false
+        const hideForFeatureFlag =
+          (item.href === AppRoutes.spaces.security && isSecurityHubEnabled === false) ||
+          (item.href === AppRoutes.spaces.activity && isAuditLogEnabled === false)
         const hideItem = (item.activeMemberOnly && !isActiveMember) || hideForFeatureFlag
         const isSelected = router.pathname === item.href
 

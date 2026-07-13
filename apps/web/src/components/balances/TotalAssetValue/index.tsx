@@ -1,4 +1,5 @@
 import { Box, Skeleton, Typography, Stack } from '@mui/material'
+import type { SvgIconProps } from '@mui/material'
 import type { ReactNode } from 'react'
 import FiatValue from '@/components/common/FiatValue'
 import TokenAmount from '@/components/common/TokenAmount'
@@ -12,12 +13,14 @@ const TotalAssetValue = ({
   fiatTotal,
   title = 'Total value',
   tooltipTitle,
+  tooltipColor,
   size = 'md',
   action,
 }: {
   fiatTotal: string | number | undefined
   title?: string
   tooltipTitle?: string
+  tooltipColor?: SvgIconProps['color']
   size?: 'md' | 'lg'
   action?: ReactNode
 }) => {
@@ -32,10 +35,10 @@ const TotalAssetValue = ({
 
   return (
     <Box>
-      <Typography fontWeight={700} mb={0.5}>
-        {title}
-        {tooltipTitle && <InfoTooltip title={tooltipTitle} />}
-      </Typography>
+      <Stack direction="row" alignItems="center" mb={0.5}>
+        <Typography fontWeight={700}>{title}</Typography>
+        {tooltipTitle && <InfoTooltip title={tooltipTitle} color={tooltipColor} />}
+      </Stack>
       <Stack direction="row" alignItems="flex-end" justifyContent="space-between">
         <Typography component="div" variant="h1" fontSize={fontSizeValue} lineHeight="1.2" letterSpacing="-0.5px">
           {safe.deployed ? (

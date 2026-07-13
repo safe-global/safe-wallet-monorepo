@@ -36,9 +36,11 @@
   --color-warning1-main: #ffecc2;
   --color-warning1-text: #6c2d19;
   --color-warning1-contrast-text: #ff8c00;
-  --color-background-default: #f5f5f5;
-  --color-background-main: #f5f5f5;
-  --color-background-sheet: #f5f5f5;
+  --color-review-main: #d6a100;
+  --color-review-background: #fff8cc;
+  --color-background-default: #f4f4f4;
+  --color-background-main: #f4f4f4;
+  --color-background-sheet: #f4f4f4;
   --color-background-paper: #ffffff;
   --color-background-light: #effff4;
   --color-background-secondary: #dddee0;
@@ -69,7 +71,7 @@
 [data-theme='dark'] {
   --color-text-primary: #ffffff;
   --color-text-secondary: #636669;
-  --color-text-disabled: #636669;
+  --color-text-disabled: rgba(255, 255, 255, 0.3);
   --color-text-contrast: #000000;
   --color-primary-dark: #0cb259;
   --color-primary-main: #12ff80;
@@ -102,6 +104,8 @@
   --color-warning1-main: #4a3621;
   --color-warning1-text: #ffe4cb;
   --color-warning1-contrast-text: #ff8c00;
+  --color-review-main: #d6a100;
+  --color-review-background: #2f2a18;
   --color-background-default: #121312;
   --color-background-main: #121312;
   --color-background-sheet: #121312;
@@ -125,7 +129,7 @@
   :root:not([data-theme='light']) {
     --color-text-primary: #ffffff;
     --color-text-secondary: #636669;
-    --color-text-disabled: #636669;
+    --color-text-disabled: rgba(255, 255, 255, 0.3);
     --color-text-contrast: #000000;
     --color-primary-dark: #0cb259;
     --color-primary-main: #12ff80;
@@ -158,6 +162,8 @@
     --color-warning1-main: #4a3621;
     --color-warning1-text: #ffe4cb;
     --color-warning1-contrast-text: #ff8c00;
+    --color-review-main: #d6a100;
+    --color-review-background: #2f2a18;
     --color-background-default: #121312;
     --color-background-main: #121312;
     --color-background-sheet: #121312;

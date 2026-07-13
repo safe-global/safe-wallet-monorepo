@@ -10,6 +10,12 @@ import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { act, fireEvent, screen } from '@testing-library/react'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import { type SafeVersion } from '@safe-global/types-kit'
+import * as cfServices from '@/features/counterfactual/services'
+import * as multichain from '@/features/multichain'
+import * as createLogic from '@/components/new-safe/create/logic'
+import * as web3 from '@/hooks/wallets/web3'
+import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
+import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 
 const mockChain = {
   chainId: '100',
@@ -64,7 +70,17 @@ describe('ReviewStep', () => {
     }
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
-    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />)
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+      initialReduxState: {
+        auth: {
+          sessionExpiresAt: Date.now() + 60000,
+          lastUsedSpace: null,
+          isStoreHydrated: true,
+          cfSafeSynced: false,
+          isOidcLoginPending: false,
+        },
+      },
+    })
 
     const payLaterOption = screen.getByRole('radio', { name: /Pay later/i })
     expect(payLaterOption).toBeChecked()
@@ -155,40 +171,92 @@ describe('ReviewStep', () => {
     expect(getByText(/Who will pay gas fees:/)).toBeInTheDocument()
   })
 
-  it('should display the execution method for counterfactual safes if the user selects pay now and there is relaying', async () => {
-    const mockMultiChain = [
-      {
-        chainId: '100',
-        chainName: 'Gnosis Chain',
-        l2: false,
-        nativeCurrency: {
-          symbol: 'ETH',
-        },
-      },
-      {
-        chainId: '1',
-        chainName: 'Ethereum',
-        l2: false,
-        nativeCurrency: {
-          symbol: 'ETH',
-        },
-      },
-    ] as Chain[]
-    const mockData: NewSafeFormData = {
+  const authReduxState = {
+    auth: {
+      sessionExpiresAt: Date.now() + 60000,
+      lastUsedSpace: null,
+      isStoreHydrated: true,
+      cfSafeSynced: false,
+      isOidcLoginPending: false,
+    },
+  }
+
+  const buildMultiChainData = (): NewSafeFormData => {
+    const chainWithFeatures = { ...mockChain, features: [] } as Chain
+    return {
       name: 'Test',
-      networks: mockMultiChain,
+      networks: [chainWithFeatures, { ...chainWithFeatures, chainId: '1', chainName: 'Ethereum' } as Chain],
       threshold: 1,
       owners: [{ name: '', address: '0x1' }],
       saltNonce: 0,
       safeVersion: LATEST_SAFE_VERSION as SafeVersion,
     }
-    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
-    jest.spyOn(relay, 'hasRemainingRelays').mockReturnValue(true)
+  }
 
-    const { getByText } = render(
-      <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+  it('shows the selector with Pay now disabled for multichain creation', () => {
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+
+    const { getByTestId, getByText } = render(
+      <ReviewStep data={buildMultiChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+      { initialReduxState: authReduxState },
     )
 
+    expect(getByTestId('pay-now-later-message-box')).toBeInTheDocument()
     expect(getByText(/activate your account/)).toBeInTheDocument()
+    expect(getByText(/Start exploring the accounts now/)).toBeInTheDocument()
+    expect(getByText('Not available for multiple networks')).toBeInTheDocument()
+    expect(getByTestId('pay-now-execution-method').querySelector('input')).toBeDisabled()
+    expect(screen.getByRole('radio', { name: /Pay later/i })).toBeChecked()
+  })
+
+  it('disables creation for multichain until the user signs in (Pay later writes to the backend)', () => {
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+
+    // No auth state provided -> the user is not authenticated.
+    const { getByTestId } = render(
+      <ReviewStep data={buildMultiChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+    )
+
+    expect(getByTestId('review-step-next-btn')).toBeDisabled()
+  })
+
+  it('does not block multichain creation when counterfactual is disabled', () => {
+    // Counterfactual off -> no PayLater forcing, no sign-in gate (direct deployment path).
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
+
+    const { getByTestId } = render(
+      <ReviewStep data={buildMultiChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+    )
+
+    expect(getByTestId('review-step-next-btn')).not.toBeDisabled()
+  })
+
+  it('creates counterfactual safes on each network for multichain when authenticated', async () => {
+    const mockData = buildMultiChainData()
+
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockData.networks[0])
+    jest.spyOn(useWallet, 'default').mockReturnValue({ provider: {} } as unknown as ConnectedWallet)
+    jest
+      .spyOn(createLogic, 'createNewUndeployedSafeWithoutSalt')
+      .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
+    jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
+    jest
+      .spyOn(multichain, 'predictAddressBasedOnReplayData')
+      .mockResolvedValue('0x0000000000000000000000000000000000000001')
+    const persistSpy = jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
+
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+      initialReduxState: authReduxState,
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('review-step-next-btn'))
+    })
+
+    expect(persistSpy).toHaveBeenCalledTimes(mockData.networks.length)
+    expect(persistSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ payMethod: PayMethod.PayLater, isUserAuthenticated: true }),
+    )
   })
 })

@@ -1,4 +1,3 @@
-import { formatPrefixedAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
 export const getInitials = (name: string): string => {
@@ -15,13 +14,8 @@ const MAX_NAME_LENGTH = 20
 export const truncateName = (name: string, maxLength = MAX_NAME_LENGTH): string =>
   name.length > maxLength ? `${name.slice(0, maxLength)}...` : name
 
-export const getSafeDisplayInfo = (
-  name: string,
-  address: string,
-  chainShortName?: string,
-): { addressWithPrefix: string; displayName: string; showAddressLine: boolean } => {
-  const addressWithPrefix = formatPrefixedAddress(shortenAddress(address), chainShortName || undefined)
-  const displayName = name ? truncateName(name) : addressWithPrefix
-  const showAddressLine = Boolean(name)
-  return { addressWithPrefix, displayName, showAddressLine }
+export const getSafeDisplayInfo = (name: string, address: string): { shortAddress: string; displayName: string } => {
+  const shortAddress = shortenAddress(address)
+  const displayName = name ? truncateName(name) : shortAddress
+  return { shortAddress, displayName }
 }

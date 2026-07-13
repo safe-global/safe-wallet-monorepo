@@ -21,14 +21,16 @@ function convertNullable(obj: Record<string, unknown>): void {
 
   if (obj.nullable === true) {
     delete obj.nullable
-    if (typeof obj.type === 'string') {
-      obj.type = [obj.type, 'null']
-    } else if (!obj.type && (obj.$ref || obj.oneOf || obj.anyOf || obj.allOf)) {
-      // nullable ref or composed type — wrap in anyOf with null
-      const { nullable: _, ...existing } = obj
+    if (obj.$ref || obj.oneOf || obj.anyOf || obj.allOf) {
+      // nullable ref or composed type — wrap in anyOf with null. A bare
+      // `type: [..., "null"]` is not enough here: the composition keyword
+      // (e.g. allOf -> $ref) would still be applied to `null` and reject it.
+      const { ...existing } = obj
       Object.keys(obj).forEach((k) => delete obj[k])
       obj.anyOf = [existing, { type: 'null' }]
       return
+    } else if (typeof obj.type === 'string') {
+      obj.type = [obj.type, 'null']
     }
   }
 
@@ -216,14 +218,14 @@ describe('Fixture-schema validation', () => {
         const valid = validate!(item)
         if (!valid) {
           const fields = validate!.errors?.map((e) => `  ${e.instancePath || '/'}: ${e.message}`).join('\n')
-          fail(`Item [${index}] in ${fixture} failed ${schemaRef} validation:\n${fields}`)
+          throw new Error(`Item [${index}] in ${fixture} failed ${schemaRef} validation:\n${fields}`)
         }
       })
     } else {
       const valid = validate!(data)
       if (!valid) {
         const fields = validate!.errors?.map((e) => `  ${e.instancePath || '/'}: ${e.message}`).join('\n')
-        fail(`${fixture} failed ${schemaRef} validation:\n${fields}`)
+        throw new Error(`${fixture} failed ${schemaRef} validation:\n${fields}`)
       }
     }
   })

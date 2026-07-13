@@ -1,12 +1,23 @@
 import { useCallback, useMemo } from 'react'
 import { useWatch, type Control, type UseFormSetValue } from 'react-hook-form'
 import { type AllSafeItems } from '@/hooks/safes'
-import { SAFE_ACCOUNTS_LIMIT } from '../components/Sidebar/constants'
+import { SAFE_ACCOUNTS_LIMIT } from '../constants'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../components/SelectSafesOnboarding/constants'
 import { collectSafeKeys, collectParentKeys, getSelectionState } from './selectAllHelpers'
 import type { AddAccountsFormValues } from './useSelectAll.types'
 
 type Scope = 'all' | 'trusted' | 'owned'
+
+// When the global cap is reached, a section with selections can't grow, so it
+// behaves as fully selected: show it checked and let the next click deselect.
+// A section with nothing selected can't grow either, so its toggle is disabled
+// to avoid dead clicks that look like no-ops.
+const applyCap = (selection: ReturnType<typeof getSelectionState>, isAtLimit: boolean) => {
+  const disabled = isAtLimit && selection.selectedCount === 0
+  return selection.state === 'all' || (isAtLimit && selection.selectedCount > 0)
+    ? { ...selection, state: 'all' as const, disabled }
+    : { ...selection, disabled }
+}
 
 interface Args {
   visibleTrusted: AllSafeItems
@@ -17,16 +28,20 @@ interface Args {
 
 export function useSelectAll({ visibleTrusted, visibleOwned, control, setValue }: Args) {
   const selectedSafes = useWatch({ control, name: 'selectedSafes' }) ?? {}
-  const trustedSelection = useMemo(
-    () => getSelectionState(visibleTrusted, selectedSafes),
-    [visibleTrusted, selectedSafes],
-  )
-  const ownedSelection = useMemo(() => getSelectionState(visibleOwned, selectedSafes), [visibleOwned, selectedSafes])
   const isAtLimit = useMemo(
     () =>
       Object.entries(selectedSafes).filter(([k, v]) => v && !k.startsWith(MULTICHAIN_SAFE_KEY_PREFIX)).length >=
       SAFE_ACCOUNTS_LIMIT,
     [selectedSafes],
+  )
+
+  const trustedSelection = useMemo(
+    () => applyCap(getSelectionState(visibleTrusted, selectedSafes), isAtLimit),
+    [visibleTrusted, selectedSafes, isAtLimit],
+  )
+  const ownedSelection = useMemo(
+    () => applyCap(getSelectionState(visibleOwned, selectedSafes), isAtLimit),
+    [visibleOwned, selectedSafes, isAtLimit],
   )
 
   const handleSelectAll = useCallback(

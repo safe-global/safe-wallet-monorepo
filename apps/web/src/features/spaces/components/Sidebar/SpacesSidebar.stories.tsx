@@ -32,7 +32,7 @@ const mockMainNavItems: ResolvedSidebarItem[] = [
   },
   {
     icon: WalletCards,
-    label: 'Accounts',
+    label: 'Safe accounts',
     href: AppRoutes.spaces.safeAccounts,
     isActive: false,
     disabled: false,
@@ -40,7 +40,7 @@ const mockMainNavItems: ResolvedSidebarItem[] = [
   },
   {
     icon: BookUser,
-    label: 'Address book',
+    label: 'Address Book',
     href: AppRoutes.spaces.addressBook,
     isActive: false,
     disabled: false,
@@ -88,8 +88,8 @@ const mockDisabledSetupGroup: ResolvedSidebarGroup = {
 }
 
 const mockSpaces: SpaceItem[] = [
-  { id: 1, name: 'Company Space', safeCount: 0 },
-  { id: 2, name: 'Personal Space', safeCount: 0 },
+  { uuid: 'uuid-1', name: 'Company Space', safeCount: 0 },
+  { uuid: 'uuid-2', name: 'Personal Space', safeCount: 0 },
 ]
 
 const selectedSpace = mockSpaces[0]

@@ -3,14 +3,16 @@ import { AppRoutes } from '@/config/routes'
 import { useAppSelector } from '@/store'
 import { lastUsedSpace } from '@/store/authSlice'
 
-const SPACES_ROUTES = [
-  AppRoutes.spaces.index,
+const SPACES_EXACT_ROUTES = [AppRoutes.spaces.index]
+
+const SPACES_PREFIX_ROUTES = [
   AppRoutes.spaces.settings,
   AppRoutes.spaces.members,
   AppRoutes.spaces.safeAccounts,
   AppRoutes.spaces.addressBook,
   AppRoutes.spaces.policies,
   AppRoutes.spaces.security,
+  AppRoutes.spaces.activity,
 ]
 
 export const useIsSpaceRoute = (): boolean => {
@@ -18,5 +20,8 @@ export const useIsSpaceRoute = (): boolean => {
   const route = clientPathname || ''
   const spaceId = useAppSelector(lastUsedSpace)
 
-  return SPACES_ROUTES.includes(route) && !!spaceId
+  const isMatch =
+    SPACES_EXACT_ROUTES.includes(route) || SPACES_PREFIX_ROUTES.some((r) => route === r || route.startsWith(r + '/'))
+
+  return isMatch && !!spaceId
 }

@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
         with:
           ref: main
           fetch-depth: 0
@@ -44,8 +44,8 @@ jobs:
           git_user_signingkey: true
           git_tag_gpgsign: true
           git_config_global: true
-          git_committer_name: 'github-actions[bot]'
-          git_committer_email: 'github-actions[bot]@users.noreply.github.com'
+          git_committer_name: 'GH Signer Bot'
+          git_committer_email: 'gh-signer-bot@safe.global'
 
       - name: Verify PR commits are in main
         if: github.event.pull_request.merged != true
@@ -106,14 +106,26 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
         with:
           ref: main
           fetch-depth: 0
+          token: ${{ secrets.RELEASE_BOT_TOKEN }}
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+          git_config_global: true
+          git_committer_name: 'GH Signer Bot'
+          git_committer_email: 'gh-signer-bot@safe.global'
 
       - name: Create GitHub release (draft)
         if: needs.tag.outputs.version
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         id: create_release
         with:
           draft: true
@@ -165,7 +177,7 @@ jobs:
           asset_path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}-sha256-checksum.txt
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
+        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -178,13 +190,26 @@ jobs:
         run: bash ./scripts/github/s3_upload.sh
         working-directory: apps/web
 
+      # Fail-open like the hook it replaced: a promotion-dispatch problem must not block
+      # the release publish and back-merge steps below.
+      - name: Generate production promotion token
+        id: promotions_token
+        continue-on-error: true
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.PROMOTIONS_APP_ID }}
+          private-key: ${{ secrets.PROMOTIONS_APP_PRIVATE_KEY }}
+          repositories: ${{ secrets.PROMOTIONS_REPO }}
+          permission-actions: write
+
       # Script to prepare production deployments
       - name: Prepare deployment
+        continue-on-error: true
         run: bash ./scripts/github/prepare_production_deployment.sh
         working-directory: apps/web
         env:
-          PROD_DEPLOYMENT_HOOK_TOKEN: ${{ secrets.PROD_DEPLOYMENT_HOOK_TOKEN }}
-          PROD_DEPLOYMENT_HOOK_URL: ${{ secrets.PROD_DEPLOYMENT_HOOK_URL }}
+          GH_TOKEN: ${{ steps.promotions_token.outputs.token }}
+          PROMOTIONS_REPO: ${{ github.repository_owner }}/${{ secrets.PROMOTIONS_REPO }}
           VERSION_TAG: ${{ needs.tag.outputs.version }}
 
       - name: Create back-merge PR
@@ -196,8 +221,8 @@ jobs:
           REPO: ${{ github.repository }}
           RUN_ID: ${{ github.run_id }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "GH Signer Bot"
+          git config user.email "gh-signer-bot@safe.global"
 
           # Fetch latest changes
           git fetch origin main dev
@@ -207,7 +232,7 @@ jobs:
           git checkout -B "$BRANCH_NAME" origin/dev
 
           # Attempt to merge main into the branch
-          if git merge origin/main -m "chore: back-merge main to dev after release ${VERSION}"; then
+          if git merge -S origin/main -m "chore: back-merge main to dev after release ${VERSION}"; then
             git push origin "$BRANCH_NAME"
 
             # Create PR body file to avoid shell interpolation issues

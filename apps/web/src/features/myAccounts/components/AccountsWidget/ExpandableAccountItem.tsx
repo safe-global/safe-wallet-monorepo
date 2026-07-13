@@ -5,6 +5,7 @@ import { AccountItem } from '../AccountItem'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { cn } from '@/utils/cn'
 import { AccountItemContent } from './AccountItemContent'
+import { NotActivatedBadge } from '@/components/common/SpaceSafeBar/AccountsModal/shared'
 import type { Account } from './types'
 
 interface ExpandableAccountItemProps {
@@ -28,13 +29,17 @@ const ExpandableAccountItem = ({
       <CollapsibleTrigger
         data-testid={`space-dashboard-accounts-row-${rowIndex}`}
         className={cn(
-          'flex w-full flex-wrap items-center gap-x-4 gap-y-2 rounded-sm py-4 pl-4 pr-6 cursor-pointer transition-colors hover:bg-muted/50',
+          'flex w-full flex-end items-center gap-x-4 gap-y-2 rounded-sm py-4 pl-4 pr-6 cursor-pointer transition-colors hover:bg-muted/50',
           account.highlighted && 'bg-background',
         )}
       >
         <AccountItemContent account={account}>
-          <div className="flex items-center gap-2">
-            <AccountItem.Balance fiatTotal={account.fiatTotal} isLoading={!account.fiatTotal && loading} />
+          <div className="flex w-20 flex-col items-end gap-2">
+            {account.isUndeployed ? (
+              <NotActivatedBadge isActivating={!!account.isActivating} />
+            ) : (
+              <AccountItem.Balance fiatTotal={account.fiatTotal} isLoading={!account.fiatTotal && loading} />
+            )}
           </div>
         </AccountItemContent>
       </CollapsibleTrigger>

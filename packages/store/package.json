@@ -12,9 +12,10 @@
     "prettier:fix": "prettier --write . --config ../../.prettierrc --ignore-path ../../.prettierignore",
     "fetch-schema": "ts-node ./scripts/fetch-schema.ts > scripts/api-schema/schema.json",
     "generate-api": "npx @rtk-query/codegen-openapi scripts/openapi-config.ts",
-    "build": "yarn fetch-schema && yarn generate-api",
-    "build:dev": "NODE_ENV=dev yarn fetch-schema && yarn generate-api",
-    "build:local": "NODE_ENV=local yarn fetch-schema && yarn generate-api",
+    "write-schema-hash": "ts-node scripts/write-schema-hash.ts",
+    "build": "yarn fetch-schema && yarn generate-api && yarn write-schema-hash",
+    "build:dev": "NODE_ENV=dev yarn fetch-schema && yarn generate-api && yarn write-schema-hash",
+    "build:local": "NODE_ENV=local yarn fetch-schema && yarn generate-api && yarn write-schema-hash",
     "check-sync": "ts-node scripts/check-auto-generated-sync.ts"
   },
   "devDependencies": {

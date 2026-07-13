@@ -7,7 +7,7 @@ import { HeaderBackButton } from '@react-navigation/elements'
 import { NameSignerContainer } from '@/src/features/ImportSigner/components/NameSigner'
 import { CloseButton } from '@/src/components/CloseButton'
 import { HeaderLeft } from '@/src/navigation/hooks/utils'
-import { useWalletConnectContext } from '@/src/features/WalletConnect/context/WalletConnectContext'
+import { useWalletConnectContext } from '@/src/features/WalletConnect/Signer/context/WalletConnectContext'
 
 function NameSigner() {
   const { bottom } = useSafeAreaInsets()

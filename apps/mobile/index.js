@@ -1,4 +1,7 @@
-// Initialize all background notification handlers FIRST - must be self-contained, no app dependencies
+// Must stay the first import — see the ordering constraints in polyfills.ts.
+import '@/src/platform/polyfills'
+
+// Initialize all background notification handlers early - must be self-contained, no app dependencies
 import '@/src/services/notifications/backgroundHandlers'
 
 // changed to the below syntax, because on my machine I was failing to build

@@ -16,6 +16,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/auth', () => ({
 jest.mock('@/store/authSlice', () => ({
   setAuthenticated: (val: number) => ({ type: 'auth/setAuthenticated', payload: val }),
   setUnauthenticated: () => ({ type: 'auth/setUnauthenticated' }),
+  SESSION_LIFETIME_MS: 24 * 60 * 60 * 1000,
 }))
 
 describe('reconcileAuth', () => {

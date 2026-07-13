@@ -1,18 +1,18 @@
-import { render, screen, fireEvent } from '@/tests/test-utils'
+import { render, screen, fireEvent, mockClipboard } from '@/tests/test-utils'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 import type { MultiChainSafeItem, SafeItem } from '@/hooks/safes'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import MultiAccountItem from '../MultiAccountItem'
-import { useMultiAccountItemData } from '@/features/myAccounts/hooks/useMultiAccountItemData'
-import { useSafeItemData } from '@/features/myAccounts/hooks/useSafeItemData'
+import { useMultiAccountItemData } from '../../../../../hooks/useMultiAccountItemData'
+import { useSafeItemData } from '../../../../../hooks/useSafeItemData'
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),
 }))
 
-jest.mock('@/features/myAccounts/hooks/useMultiAccountItemData')
-jest.mock('@/features/myAccounts/hooks/useSafeItemData')
+jest.mock('../../../../../hooks/useMultiAccountItemData')
+jest.mock('../../../../../hooks/useSafeItemData')
 
 jest.mock('@/components/common/Identicon', () => ({
   __esModule: true,
@@ -24,7 +24,7 @@ jest.mock('@/features/spaces/components/SelectSafesOnboarding/components/FiatBal
   default: ({ value }: { value?: string }) => <div data-testid="fiat-balance">{value ?? ''}</div>,
 }))
 
-jest.mock('@/components/sidebar/SafeListContextMenu/MultiAccountContextMenu', () => ({
+jest.mock('@/components/common/SafeListContextMenu/MultiAccountContextMenu', () => ({
   __esModule: true,
   default: ({ name, address }: { name: string; address: string }) => (
     <div data-testid="multi-account-context-menu" data-name={name} data-address={address} />
@@ -132,10 +132,36 @@ const buildSafeItemHookReturn = (overrides: Partial<SafeItemHookReturn> = {}): S
   }) as SafeItemHookReturn
 
 describe('MultiAccountItem (MyAccountsV2)', () => {
+  let writeText: jest.Mock
+
   beforeEach(() => {
     jest.clearAllMocks()
+    writeText = mockClipboard()
     mockedUseMultiAccountItemData.mockReturnValue(buildMultiAccountHookReturn())
     mockedUseSafeItemData.mockReturnValue(buildSafeItemHookReturn())
+  })
+
+  describe('copy address', () => {
+    it('renders a copy address button in the group header', () => {
+      mockedUseMultiAccountItemData.mockReturnValue(buildMultiAccountHookReturn({ isCurrentSafe: false }))
+
+      render(<MultiAccountItem multiSafeAccountItem={buildMultiChainSafeItem()} />)
+
+      expect(screen.getByRole('button', { name: 'Copy address' })).toBeInTheDocument()
+    })
+
+    it('copies the group address without toggling expansion', () => {
+      const address = '0x1234567890abcdef1234567890abcdef12345678'
+      mockedUseMultiAccountItemData.mockReturnValue(buildMultiAccountHookReturn({ address, isCurrentSafe: false }))
+
+      render(<MultiAccountItem multiSafeAccountItem={buildMultiChainSafeItem({ address })} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Copy address' }))
+
+      expect(writeText).toHaveBeenCalledWith(address)
+      // Clicking copy must not expand the collapsible
+      expect(screen.queryByTestId('subacounts-container')).not.toBeInTheDocument()
+    })
   })
 
   describe('display name', () => {

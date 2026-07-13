@@ -16,7 +16,7 @@ jobs:
   screenshot:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
         with:
           fetch-depth: 0
 
@@ -136,7 +136,7 @@ jobs:
 
       - name: Upload screenshots
         if: steps.changed-stories.outputs.has_changes == 'true' && steps.build-storybook.outputs.build_failed != 'true'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: mobile-storybook-screenshots
           path: mobile-screenshots/

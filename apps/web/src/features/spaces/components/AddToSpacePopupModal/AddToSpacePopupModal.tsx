@@ -23,7 +23,7 @@ export const AddToSpacePopupModal = (): ReactElement => {
     <div className="flex flex-col w-full">
       <div className="flex items-center justify-between px-5 py-5">
         <DialogTitle>
-          <Typography variant="h4">Add to Space</Typography>
+          <Typography variant="h4">Add to workspace</Typography>
         </DialogTitle>
         <DialogClose aria-label="Close" className="text-muted-foreground hover:text-foreground transition-colors">
           <X className="size-4" />
@@ -38,7 +38,7 @@ export const AddToSpacePopupModal = (): ReactElement => {
         <div className="relative h-[140px] sm:h-[200px] w-full rounded-3xl bg-secondary overflow-hidden flex items-center justify-center shrink-0">
           <Image
             src="/images/spaces/empty_dashboard.png"
-            alt="Add to Space illustration"
+            alt="Add to workspace illustration"
             fill
             className="object-contain"
           />
@@ -62,7 +62,7 @@ export const AddToSpacePopupModal = (): ReactElement => {
           onClick={() => void router.push(createSpaceHref)}
         >
           <Plus className="size-5" />
-          Create a Space
+          Create a workspace
         </DialogClose>
       </div>
     </div>

@@ -56,18 +56,19 @@
 }
 
 .walletBtnSecondary {
-  background-color: var(--color-background-main);
-  color: var(--color-text-primary);
-  border-radius: 16px;
-  padding: 10px 28px;
+  background-color: var(--sidebar-primary);
+  color: var(--sidebar-primary-foreground);
+  border-radius: 12px;
+  padding: 12px 16px;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 15px;
   text-transform: none;
-  min-height: 36px;
+  min-height: 48px;
+  gap: var(--space-1);
 }
 
 .walletBtnSecondary:hover {
-  background-color: var(--color-border-light);
+  background-color: color-mix(in oklab, var(--sidebar-primary) 90%, transparent);
 }
 
 .walletBtnStatic {

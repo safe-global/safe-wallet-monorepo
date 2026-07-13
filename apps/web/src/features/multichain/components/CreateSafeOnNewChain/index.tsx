@@ -9,8 +9,6 @@ import { showNotification } from '@/store/notificationsSlice'
 import { Box, Button, CircularProgress, DialogActions, DialogContent, Stack, Typography } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useSafeCreationData } from '../../hooks/useSafeCreationData'
-import { CounterfactualFeature } from '@/features/counterfactual'
-import { useLoadFeature } from '@/features/__core__'
 import useChains from '@/hooks/useChains'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
@@ -27,6 +25,10 @@ import { MULTICHAIN_HELP_ARTICLE } from '@/config/constants'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
 import type { CreateSafeOnNewChainForm, ReplaySafeDialogProps } from '../../types'
+import { persistCounterfactualSafe } from '@/features/counterfactual/services'
+import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
+import { useIsAdmin, useSpaceSafeCount } from '@/features/spaces'
+import { normalizeSpaceId } from '@/utils/spaces'
 
 const ReplaySafeDialog = ({
   safeAddress,
@@ -49,8 +51,11 @@ const ReplaySafeDialog = ({
   const addressBook = useAddressBook()
 
   const customRpc = useAppSelector(selectRpc)
+  const isUserAuthenticated = useAppSelector(isAuthenticated)
+  const spaceId = useAppSelector(lastUsedSpace)
+  const isAdminOfActiveSpace = useIsAdmin(normalizeSpaceId(spaceId) ?? undefined)
+  const spaceSafeCount = useSpaceSafeCount(spaceId)
   const dispatch = useAppDispatch()
-  const { replayCounterfactualSafeDeployment } = useLoadFeature(CounterfactualFeature)
   const [creationError, setCreationError] = useState<Error>()
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
@@ -70,6 +75,9 @@ const ReplaySafeDialog = ({
 
   const onFormSubmit = handleSubmit(async (data) => {
     setIsSubmitting(true)
+    setCreationError(undefined)
+
+    let hasError = false
 
     try {
       const selectedChain = chain ?? replayableChains?.find((config) => config.chainId === data.chainId)
@@ -88,6 +96,7 @@ const ReplaySafeDialog = ({
       const predictedAddress = await predictAddressBasedOnReplayData(safeCreationData, provider)
       if (!sameAddress(safeAddress, predictedAddress)) {
         setCreationError(new Error('The replayed Safe leads to an unexpected address'))
+        hasError = true
         return
       }
 
@@ -95,15 +104,33 @@ const ReplaySafeDialog = ({
 
       trackEvent({ ...OVERVIEW_EVENTS.SUBMIT_ADD_NEW_NETWORK, label: selectedChain.chainId })
 
-      // 2. Replay Safe creation and add it to the counterfactual Safes
-      replayCounterfactualSafeDeployment?.(
-        selectedChain.chainId,
+      // 2. Persist to backend (if authenticated) + add to Redux. Shared code
+      //    path with the initial create-safe flow so any future backend write
+      //    added to one path is automatically covered for the other.
+      const persistResult = await persistCounterfactualSafe({
+        chainId: selectedChain.chainId,
         safeAddress,
-        safeCreationData,
-        currentName || '',
+        props: safeCreationData,
+        name: currentName || '',
+        payMethod: PayMethod.PayLater,
+        spaceId,
+        isUserAuthenticated,
+        isAdminOfActiveSpace,
+        spaceSafeCount,
         dispatch,
-        PayMethod.PayLater,
-      )
+      })
+      if (!persistResult.ok) {
+        setCreationError(persistResult.error)
+        hasError = true
+        dispatch(
+          showNotification({
+            variant: 'error',
+            groupKey: 'replay-safe-error',
+            message: persistResult.error.message,
+          }),
+        )
+        return
+      }
 
       trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
       trackEvent({ ...CREATE_SAFE_EVENTS.CREATED_SAFE, label: 'counterfactual' })
@@ -139,11 +166,15 @@ const ReplaySafeDialog = ({
       )
     } catch (err) {
       console.error(err)
+      setCreationError(err instanceof Error ? err : new Error('Failed to add the account on the selected network'))
+      hasError = true
     } finally {
       setIsSubmitting(false)
 
-      // Close modal
-      onClose()
+      // Keep the dialog open on error so the inline message stays visible
+      if (!hasError) {
+        onClose()
+      }
     }
   })
 
@@ -218,7 +249,7 @@ const ReplaySafeDialog = ({
 
               {creationError && (
                 <ErrorMessage error={creationError} level="error">
-                  The Safe could not be created with the same address.
+                  {creationError.message || 'The Safe could not be created with the same address.'}
                 </ErrorMessage>
               )}
             </Stack>

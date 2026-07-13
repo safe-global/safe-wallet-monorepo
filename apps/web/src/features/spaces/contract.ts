@@ -32,8 +32,10 @@ import type SpacePoliciesPage from './components/Policies/Page'
 import type CreateSpaceOnboarding from './components/CreateSpaceOnboarding'
 import type SelectSafesOnboarding from './components/SelectSafesOnboarding'
 import type InviteMembersOnboarding from './components/InviteMembersOnboarding'
+import type SurveyOnboarding from './components/SurveyOnboarding'
 import type SelectSafeModal from './components/SelectSafeModal'
 import type SecurityHubPage from './components/SecurityHub/Page'
+import type SpaceActivityLogPage from './components/SpaceActivityLog/Page'
 
 // Utility services
 import type { isUnauthorized, filterSpacesByStatus, getNonDeclinedSpaces } from './utils'
@@ -67,6 +69,7 @@ export interface SpacesContract {
   SpaceSettingsPage: typeof SpaceSettingsPage
   SpacePoliciesPage: typeof SpacePoliciesPage
   SecurityHubPage: typeof SecurityHubPage
+  SpaceActivityLogPage: typeof SpaceActivityLogPage
 
   // Modal components (PascalCase) - stub renders null
   SelectSafeModal: typeof SelectSafeModal
@@ -75,6 +78,7 @@ export interface SpacesContract {
   CreateSpaceOnboarding: typeof CreateSpaceOnboarding
   SelectSafesOnboarding: typeof SelectSafesOnboarding
   InviteMembersOnboarding: typeof InviteMembersOnboarding
+  SurveyOnboarding: typeof SurveyOnboarding
 
   // Services (camelCase) - undefined when not ready
   isUnauthorized: typeof isUnauthorized

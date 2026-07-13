@@ -1,3 +1,9 @@
+/* Sit above shadcn's overlay layer (--z-overlay: 1400) so the menu shows when opened from
+   inside a shadcn Dialog (e.g. the Trusted Safes modal). */
+.menu {
+  z-index: 1500;
+}
+
 .menu :global .MuiPaper-root {
   border-radius: 8px !important;
   outline: none;

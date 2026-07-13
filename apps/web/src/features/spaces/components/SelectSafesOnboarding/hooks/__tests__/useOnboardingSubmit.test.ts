@@ -4,6 +4,7 @@ import useOnboardingSubmit from '../useOnboardingSubmit'
 import type { SafeItem } from '@/hooks/safes'
 import type { MultiChainSafeItem } from '@/hooks/safes'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../../constants'
+import { getGenericErrorWithStatus } from '@/utils/rtkQuery'
 
 const mockChains: Chain[] = []
 
@@ -14,7 +15,6 @@ jest.mock('@/hooks/useChains', () => ({
 
 const mockAddSafesToSpace = jest.fn().mockResolvedValue({ data: {} })
 const mockRemoveSafesFromSpace = jest.fn().mockResolvedValue({ data: {} })
-const mockDispatch = jest.fn()
 const mockTrackEvent = jest.fn()
 
 let mockSpaceSafes: Array<SafeItem | MultiChainSafeItem> = []
@@ -31,25 +31,22 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   },
 }))
 
-jest.mock('@/store', () => ({
-  useAppDispatch: () => mockDispatch,
-}))
-
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpaceSafesCreateV1Mutation: () => [mockAddSafesToSpace],
   useSpaceSafesDeleteV1Mutation: () => [mockRemoveSafesFromSpace],
 }))
 
-jest.mock('@/store/notificationsSlice', () => ({
-  showNotification: jest.fn((payload) => ({ type: 'showNotification', payload })),
-}))
-
 jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
 }))
 
 jest.mock('@/services/analytics/events/spaces', () => ({
-  SPACE_EVENTS: { ADD_ACCOUNTS: { action: 'add_accounts', category: 'spaces' } },
+  ...jest.requireActual('@/services/analytics/events/spaces'),
+  SPACE_EVENTS: {
+    ...jest.requireActual('@/services/analytics/events/spaces').SPACE_EVENTS,
+    ADD_ACCOUNTS: { action: 'add_accounts', category: 'spaces' },
+  },
 }))
 
 jest.mock('@/features/spaces/hooks/useSpaceSafes', () => ({
@@ -132,7 +129,7 @@ describe('useOnboardingSubmit', () => {
     })
 
     expect(mockAddSafesToSpace).toHaveBeenCalledWith({
-      spaceId: 42,
+      spaceId: '42',
       createSpaceSafesDto: { safes: [{ chainId: '1', address: '0xnew' }] },
     })
     expect(onSuccess).toHaveBeenCalled()
@@ -156,7 +153,7 @@ describe('useOnboardingSubmit', () => {
     })
 
     expect(mockRemoveSafesFromSpace).toHaveBeenCalledWith({
-      spaceId: 42,
+      spaceId: '42',
       deleteSpaceSafesDto: { safes: [{ chainId: '1', address: '0xexisting' }] },
     })
     expect(onSuccess).toHaveBeenCalled()
@@ -183,7 +180,7 @@ describe('useOnboardingSubmit', () => {
     })
 
     expect(mockAddSafesToSpace).toHaveBeenCalledWith({
-      spaceId: 42,
+      spaceId: '42',
       createSpaceSafesDto: { safes: [{ chainId: '5', address: '0xnewone' }] },
     })
   })
@@ -278,7 +275,7 @@ describe('useOnboardingSubmit', () => {
       await result.current.onSubmit()
     })
 
-    expect(result.current.error).toBe('Error: 400')
+    expect(result.current.error).toBe(getGenericErrorWithStatus(400))
   })
 
   it('should track analytics event on submit', async () => {
@@ -292,17 +289,6 @@ describe('useOnboardingSubmit', () => {
       action: 'add_accounts',
       category: 'spaces',
     })
-  })
-
-  it('should dispatch success notification on successful submit', async () => {
-    const { result } = renderHook(() => useOnboardingSubmit('1', onSuccess))
-
-    await act(async () => {
-      await result.current.onSubmit()
-    })
-
-    expect(mockDispatch).toHaveBeenCalled()
-    expect(onSuccess).toHaveBeenCalled()
   })
 
   it('should preselect safe from URL when space has no existing safes', async () => {

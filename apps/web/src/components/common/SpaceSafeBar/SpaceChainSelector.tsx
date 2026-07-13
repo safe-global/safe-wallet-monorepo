@@ -1,15 +1,15 @@
-import { useContext, useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import ChainSelectorBlock from '@/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock'
+import { ChainSelectorBlock } from '@/features/spaces'
 import { CreateSafeOnNewChain } from '@/features/multichain'
-import { TxModalContext } from '@/components/tx-flow'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'
+import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 
 function SpaceChainSelectorSkeleton() {
   return (
-    <div className="self-stretch sm:order-last flex items-center rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)] px-4">
+    <div className="self-stretch order-last flex items-center rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)] px-4">
       <Skeleton className="size-6 rounded-full" />
     </div>
   )
@@ -18,8 +18,7 @@ function SpaceChainSelectorSkeleton() {
 function SpaceChainSelector({ isLoading }: { isLoading?: boolean }) {
   const { deployedChains, selectedChainId, deployedChainIds, safeAddress, safeName, handleChainChange } =
     useSpaceChainSelector()
-  const { txFlow } = useContext(TxModalContext)
-  const isDisabled = !!txFlow
+  const isDisabled = useIsSafeBarControlDisabled()
 
   const [addNetworkChainId, setAddNetworkChainId] = useState<string>()
   const [isHydrated, setIsHydrated] = useState(false)
@@ -54,7 +53,7 @@ function SpaceChainSelector({ isLoading }: { isLoading?: boolean }) {
 
   return (
     <div
-      className="self-stretch sm:order-last flex items-stretch shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)] rounded-lg bg-card"
+      className="self-stretch order-last flex items-stretch shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)] rounded-lg bg-card"
       data-testid="space-chain-selector"
     >
       {isDisabled ? (

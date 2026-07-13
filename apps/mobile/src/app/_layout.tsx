@@ -1,6 +1,4 @@
-import '@/src/platform/fetch'
-import '@/src/platform/crypto-shims'
-import '@/src/platform/intl-polyfills'
+// Platform polyfills live in src/platform/polyfills.ts, imported first in index.js.
 import { Stack } from 'expo-router'
 import 'react-native-reanimated'
 import { SafeThemeProvider } from '@/src/theme/provider/safeTheme'
@@ -35,9 +33,11 @@ import { useNotificationHandler } from '@/src/hooks/useNotificationHandler'
 import { usePendingTxsMonitor } from '../hooks/usePendingTxsMonitor'
 import { SigningMonitor } from '@/src/components/SigningMonitor'
 import { ExecutingMonitor } from '@/src/components/ExecutingMonitor'
+import { ToastMonitor } from '@/src/components/ToastMonitor'
 import { useDatadogConsent } from '@/src/hooks/useDatadogConsent'
 import { DatadogWrapper } from '@/src/providers/DatadogWrapper'
-import { AppKitInitializer } from '@/src/features/WalletConnect/components/AppKitInitializer'
+import { AppKitInitializer } from '@/src/features/WalletConnect/Signer/components/AppKitInitializer'
+import { WalletKitController } from '@/src/features/WalletConnect/Wallet/WalletKitController'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers
@@ -108,15 +108,20 @@ function NavigationStack() {
       <Stack.Screen name="signers" options={{ headerShown: false }} />
       <Stack.Screen name="import-signers" options={{ headerShown: false }} />
       <Stack.Screen name="(send)" options={{ headerShown: false }} />
+      <Stack.Screen name="wallet-connect-scan" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="wallet-connect-manual" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen name="connected-apps" options={{ headerShown: true, title: '' }} />
       <Stack.Screen name="safe-shield-details-sheet" options={transparentModalOptions} />
       <Stack.Screen name="import-data" options={{ headerShown: false }} />
       <Stack.Screen name="app-settings" options={{ headerShown: true, title: '' }} />
       <Stack.Screen name="conflict-transaction-sheet" options={transparentModalOptions} />
       <Stack.Screen name="accounts-sheet" options={transparentModalOptions} />
       <Stack.Screen name="networks-sheet" options={transparentModalOptions} />
+      <Stack.Screen name="supported-networks" options={transparentModalOptions} />
       <Stack.Screen name="confirmations-sheet" options={transparentModalOptions} />
       <Stack.Screen name="change-signer-sheet" options={transparentModalOptions} />
       <Stack.Screen name="change-estimated-fee-sheet" options={transparentModalOptions} />
+      <Stack.Screen name="edit-approval-sheet" options={transparentModalOptions} />
       <Stack.Screen name="how-to-execute-sheet" options={transparentModalOptions} />
       <Stack.Screen name="notifications-opt-in" options={hiddenHeaderModalOptions} />
       <Stack.Screen name="biometrics-opt-in" options={hiddenHeaderModalOptions} />
@@ -157,9 +162,11 @@ function RootLayout() {
                               <HooksInitializer />
                               <SigningMonitor />
                               <ExecutingMonitor />
+                              <ToastMonitor />
                               <TestCtrls />
                               <NavigationStack />
                               <SafeStatusBar />
+                              <WalletKitController />
                             </NavigationGuardHOC>
                           </SafeToastProvider>
                         </BottomSheetModalProvider>

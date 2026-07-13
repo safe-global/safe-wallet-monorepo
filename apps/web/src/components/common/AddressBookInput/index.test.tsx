@@ -1,7 +1,8 @@
 import { act } from 'react'
-import { fireEvent, render, waitFor } from '@/tests/test-utils'
+import { fireEvent, render, waitFor, within } from '@/tests/test-utils'
 import { FormProvider, useForm } from 'react-hook-form'
 import AddressBookInput from '.'
+import { AddressBookSourceProvider } from '../AddressBookSourceProvider'
 import type { AddressInputProps } from '../AddressInput'
 import * as useChains from '@/hooks/useChains'
 import { faker } from '@faker-js/faker'
@@ -9,6 +10,28 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { FEATURES } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { AddressBook } from '@/store/addressBookSlice'
+import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useGetSpaceAddressBook } from '@/features/spaces'
+
+jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
+  __esModule: true,
+  default: jest.fn((): SpaceAddressBookItemDto[] => []),
+}))
+
+const mockUseGetSpaceAddressBook = useGetSpaceAddressBook as jest.MockedFunction<typeof useGetSpaceAddressBook>
+
+const spaceContactBuilder = (overrides: Partial<SpaceAddressBookItemDto> = {}): SpaceAddressBookItemDto => ({
+  name: 'Server Contact',
+  address: checksumAddress(faker.finance.ethereumAddress()),
+  chainIds: ['4'],
+  createdBy: '',
+  createdByUserId: 0,
+  lastUpdatedBy: '',
+  lastUpdatedByUserId: 0,
+  createdAt: '',
+  updatedAt: '',
+  ...overrides,
+})
 
 // We use Rinkeby and chainId 4 here as this is our default url chain (see jest.setup.js)
 const mockChain = chainBuilder()
@@ -96,6 +119,7 @@ describe('AddressBookInput', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseGetSpaceAddressBook.mockReturnValue([])
     jest.spyOn(useChains, 'default').mockImplementation(() => ({
       configs: [mockChain],
       error: undefined,
@@ -271,5 +295,66 @@ describe('AddressBookInput', () => {
     })
 
     await waitFor(() => expect(utils.queryByText('add it to your address book', { exact: false })).toBeNull())
+  })
+
+  it('should group a server-stored (space) contact under the workspace header with the workspace icon', async () => {
+    const spaceContact = spaceContactBuilder({ name: 'Server Contact' })
+    mockUseGetSpaceAddressBook.mockReturnValue([spaceContact])
+
+    const name = 'recipient'
+    const SpaceForm = () => {
+      const methods = useForm<{ [name]: string }>({ defaultValues: { [name]: '' }, mode: 'all' })
+      return (
+        <FormProvider {...methods}>
+          <AddressBookSourceProvider source="spaceOnly">
+            <AddressBookInput data-testid={testId} name={name} label="Recipient address" />
+          </AddressBookSourceProvider>
+        </FormProvider>
+      )
+    }
+
+    const utils = render(<SpaceForm />, {
+      initialReduxState: { addressBook: { [mockChain.chainId]: {} } },
+    })
+    const input = utils.getByLabelText('Recipient address', { exact: false }) as HTMLInputElement
+
+    act(() => {
+      fireEvent.mouseDown(input)
+      fireEvent.mouseUp(input)
+    })
+
+    // Scope to the space contact's own group. Persisted local contacts from other
+    // tests can leak into the listbox via localStorage, so assert on this group.
+    const option = await waitFor(() => utils.getByText('Server Contact', { exact: false }))
+    const groupEl = option.closest('.groupList')!.closest('li') as HTMLElement
+    const group = within(groupEl)
+
+    // Workspace source: "Contacts of …" header with the building (workspace) icon,
+    // not the local hard-drive icon.
+    expect(group.getByText('Contacts of', { exact: false })).toBeInTheDocument()
+    expect(groupEl.querySelector('.lucide-building-2')).toBeInTheDocument()
+    expect(groupEl.querySelector('.lucide-hard-drive')).not.toBeInTheDocument()
+  })
+
+  it('should group a local contact under the local contacts header with the local icon', async () => {
+    const { input, utils } = setup('', {
+      [checksumAddress(faker.finance.ethereumAddress())]: 'Local Contact',
+    })
+
+    act(() => {
+      fireEvent.mouseDown(input)
+      fireEvent.mouseUp(input)
+    })
+
+    // Scope to the contact's own group (see note above).
+    const option = await waitFor(() => utils.getByText('Local Contact', { exact: true }))
+    const groupEl = option.closest('.groupList')!.closest('li') as HTMLElement
+    const group = within(groupEl)
+
+    // Local source: "Local contacts" header with the hard-drive icon, not the
+    // building (workspace) icon.
+    expect(group.getByText('Local contacts')).toBeInTheDocument()
+    expect(groupEl.querySelector('.lucide-hard-drive')).toBeInTheDocument()
+    expect(groupEl.querySelector('.lucide-building-2')).not.toBeInTheDocument()
   })
 })

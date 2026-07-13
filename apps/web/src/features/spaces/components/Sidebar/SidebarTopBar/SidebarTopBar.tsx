@@ -4,13 +4,21 @@ import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import { cn } from '@/utils/cn'
 import { AppRoutes } from '@/config/routes'
 import SafeLogo from '@/components/common/SafeLogo'
+import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 
 export const SidebarTopBar = (): ReactElement => {
   const { state } = useSidebar()
   const isCollapsed = state === 'collapsed'
   const router = useRouter()
+  const isRequireLoginEnabled = useIsRequireLoginEnabled() === true
 
-  const logoHref = router.pathname === AppRoutes.welcome.accounts ? AppRoutes.welcome.index : AppRoutes.welcome.accounts
+  // Under the require-login gate, /welcome/spaces is the canonical landing page.
+  // Pointing at /welcome/accounts would round-trip through the route guard.
+  const logoHref = isRequireLoginEnabled
+    ? AppRoutes.welcome.spaces
+    : router.pathname === AppRoutes.welcome.accounts
+      ? AppRoutes.welcome.index
+      : AppRoutes.welcome.accounts
 
   return (
     <div

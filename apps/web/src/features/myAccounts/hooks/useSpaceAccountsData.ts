@@ -20,6 +20,9 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { AppRoutes } from '@/config/routes'
 import type { Account, SubAccount } from '../components/AccountsWidget/types'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { selectUndeployedSafes } from '@/features/counterfactual/store'
+import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
+import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
 
 const getLocalName = (address: string, safes: SafeItem[], localAddressBooks: AddressBookState): string => {
   for (const safe of safes) {
@@ -34,11 +37,34 @@ const getSafeHref = (chain: Chain | undefined, address: string): string => {
   return `${AppRoutes.home}?safe=${shortName}:${address}`
 }
 
+const getCfOwners = (address: string, chainId: string, undeployedSafes: UndeployedSafesState): string | undefined => {
+  const cfSafe = undeployedSafes[chainId]?.[address]
+  if (!cfSafe) return undefined
+  const { threshold, owners } = cfSafe.props.safeAccountConfig
+  return `${threshold}/${owners.length}`
+}
+
+// An account is "not activated" only when none of its chains are deployed yet.
+const getActivationStatus = (
+  safes: SafeItem[],
+  undeployedSafes: UndeployedSafesState,
+): { isUndeployed: boolean; isActivating: boolean } => {
+  const isUndeployed = safes.length > 0 && safes.every((s) => Boolean(undeployedSafes[s.chainId]?.[s.address]))
+  const isActivating =
+    isUndeployed &&
+    safes.some((s) => {
+      const undeployed = undeployedSafes[s.chainId]?.[s.address]
+      return Boolean(undeployed && undeployed.status.status !== PendingSafeStatus.AWAITING_EXECUTION)
+    })
+  return { isUndeployed, isActivating }
+}
+
 const formatMultichainAccount = (
   safe: MultiChainSafeItem,
   chainMap: Map<string, Chain>,
   overviews: SafeOverview[] | undefined,
   localAddressBooks: AddressBookState,
+  undeployedSafes: UndeployedSafesState,
 ): Account => {
   const safeOverviews =
     overviews?.filter(
@@ -60,14 +86,23 @@ const formatMultichainAccount = (
     }
   })
 
+  // CF entries are per-chain; pick the first chain in the group that has one
+  // rather than assuming index 0 — chain ordering in `safe.safes` isn't tied
+  // to which chain the user created the CF safe on.
+  const cfChainId = safe.safes.find((s) => undeployedSafes[s.chainId]?.[safe.address])?.chainId
+  const owners = firstOverview
+    ? `${firstOverview.threshold}/${firstOverview.owners.length}`
+    : ((cfChainId && getCfOwners(safe.address, cfChainId, undeployedSafes)) ?? '')
+
   return {
     name,
     address: safe.address,
     href: getSafeHref(firstChain, safe.address),
     safes: safe.safes,
     fiatTotal: safeOverviews.length > 0 ? totalFiat.toString() : undefined,
-    owners: firstOverview ? `${firstOverview.threshold}/${firstOverview.owners.length}` : '',
+    owners,
     subAccounts,
+    ...getActivationStatus(safe.safes, undeployedSafes),
   }
 }
 
@@ -76,11 +111,16 @@ const formatSingleSafe = (
   chainMap: Map<string, Chain>,
   overviews: SafeOverview[] | undefined,
   localAddressBooks: AddressBookState,
+  undeployedSafes: UndeployedSafesState,
 ): Account => {
   const chain = chainMap.get(safe.chainId)
   const overview = overviews?.find((o) => sameAddress(o.address.value, safe.address) && o.chainId === safe.chainId)
 
   const name = safe.name || localAddressBooks[safe.chainId]?.[safe.address] || shortenAddress(safe.address)
+
+  const owners = overview
+    ? `${overview.threshold}/${overview.owners.length}`
+    : (getCfOwners(safe.address, safe.chainId, undeployedSafes) ?? '')
 
   return {
     name,
@@ -88,7 +128,8 @@ const formatSingleSafe = (
     href: getSafeHref(chain, safe.address),
     safes: [safe],
     fiatTotal: overview?.fiatTotal,
-    owners: overview ? `${overview.threshold}/${overview.owners.length}` : '',
+    owners,
+    ...getActivationStatus([safe], undeployedSafes),
   }
 }
 
@@ -97,6 +138,7 @@ const useSpaceAccountsData = (safes: AllSafeItems) => {
   const currency = useAppSelector(selectCurrency)
   const wallet = useWallet()
   const localAddressBooks = useAppSelector(selectAllAddressBooks)
+  const undeployedSafes = useAppSelector(selectUndeployedSafes)
 
   const flatSafes = useMemo(() => flattenSafeItems(safes), [safes])
 
@@ -114,12 +156,12 @@ const useSpaceAccountsData = (safes: AllSafeItems) => {
 
     return safes.map((safe): Account => {
       if (isMultiChainSafeItem(safe)) {
-        return formatMultichainAccount(safe, chainMap, overviews, localAddressBooks)
+        return formatMultichainAccount(safe, chainMap, overviews, localAddressBooks, undeployedSafes)
       }
 
-      return formatSingleSafe(safe, chainMap, overviews, localAddressBooks)
+      return formatSingleSafe(safe, chainMap, overviews, localAddressBooks, undeployedSafes)
     })
-  }, [safes, overviews, chains, localAddressBooks])
+  }, [safes, overviews, chains, localAddressBooks, undeployedSafes])
 
   return { accounts, isLoading: isFetching, error: error ? getRtkQueryErrorMessage(error) : undefined, refetch }
 }

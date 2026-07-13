@@ -20,7 +20,7 @@ export interface TrustSafeParams {
  *
  * Used by:
  * - SafeShieldContext (for untrusted Safe warning)
- * - useSafeSelectionModal (for single additions)
+ * - useTrustedSafesModal (for single additions)
  *
  * @returns trustSafe - function to add a Safe to the trusted list
  */

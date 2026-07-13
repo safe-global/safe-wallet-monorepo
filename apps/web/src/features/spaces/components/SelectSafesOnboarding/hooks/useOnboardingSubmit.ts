@@ -5,28 +5,21 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { type AllSafeItems, flattenSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
-import type { AddAccountsFormValues } from '@/features/spaces/hooks/useSelectAll.types'
+import type { AddAccountsFormValues } from '../../../hooks/useSelectAll.types'
 import {
   useSpaceSafesCreateV1Mutation,
   useSpaceSafesDeleteV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useAppDispatch } from '@/store'
-import { showNotification } from '@/store/notificationsSlice'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import useChains from '@/hooks/useChains'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import { useSpaceSafes } from '../../../hooks/useSpaceSafes'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { getSafeId, getMultiChainSafeId } from '../components/SafeCard'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
 
-/**
- * Converts safe query parameter (`prefix:address`) to form key (`chainId:address`).
- * Supports numeric chainId or chain shortName as prefix. Returns undefined if invalid.
- * @param safeParam - Safe parameter from URL (e.g., "1:0xabc..." or "eth:0xabc...")
- * @param chains - Array of chains for resolving shortName to chainId
- */
+// URL safe-param prefix can be either numeric chainId or shortName ("1:" or "eth:").
 const safeParamToFormKey = (safeParam: string, chains: Chain[]): string | undefined => {
   const { prefix, address } = parsePrefixedAddress(safeParam)
   if (!address || !prefix || !isValidAddress(address)) {
@@ -60,7 +53,6 @@ const useOnboardingSubmit = (
   const router = useRouter()
   const { configs: chains } = useChains()
   const safeFromUrl = useSafeQueryParam() || undefined
-  const dispatch = useAppDispatch()
   const { allSafes: spaceSafes } = useSpaceSafes()
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
@@ -135,7 +127,7 @@ const useOnboardingSubmit = (
     ([key, isSelected]) => isSelected && !key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX),
   ).length
 
-  const addNewSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdNum: number) => {
+  const addNewSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdStr: string) => {
     const flatSpaceSafes = flattenSafeItems(spaceSafes)
 
     const safesToAdd = Object.entries(selectedSafes)
@@ -153,7 +145,7 @@ const useOnboardingSubmit = (
     if (safesToAdd.length === 0) return
 
     const result = await addSafesToSpace({
-      spaceId: spaceIdNum,
+      spaceId: spaceIdStr,
       createSpaceSafesDto: { safes: safesToAdd },
     })
     if (result.error) {
@@ -161,7 +153,7 @@ const useOnboardingSubmit = (
     }
   }
 
-  const removeUnselectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdNum: number) => {
+  const removeUnselectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdStr: string) => {
     const flatSpaceSafes = flattenSafeItems(spaceSafes)
 
     const safesToRemove = flatSpaceSafes
@@ -174,7 +166,7 @@ const useOnboardingSubmit = (
     if (safesToRemove.length === 0) return
 
     const result = await removeSafesFromSpace({
-      spaceId: spaceIdNum,
+      spaceId: spaceIdStr,
       deleteSpaceSafesDto: { safes: safesToRemove },
     })
     if (result.error) {
@@ -182,9 +174,9 @@ const useOnboardingSubmit = (
     }
   }
 
-  const processSelectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdNum: number) => {
-    await addNewSafes(selectedSafes, spaceIdNum)
-    await removeUnselectedSafes(selectedSafes, spaceIdNum)
+  const processSelectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdStr: string) => {
+    await addNewSafes(selectedSafes, spaceIdStr)
+    await removeUnselectedSafes(selectedSafes, spaceIdStr)
   }
 
   const onSubmit = handleSubmit(async (data) => {
@@ -195,19 +187,11 @@ const useOnboardingSubmit = (
 
     try {
       trackEvent({ ...SPACE_EVENTS.ADD_ACCOUNTS })
-      await processSelectedSafes(data.selectedSafes, Number(spaceId))
-
-      dispatch(
-        showNotification({
-          message: 'Updated Safe Account(s) in space',
-          variant: 'success',
-          groupKey: 'update-safe-accounts-success',
-        }),
-      )
+      await processSelectedSafes(data.selectedSafes, spaceId)
 
       onSuccess()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Something went wrong updating Safe Accounts. Please try again.')
+      setError(e instanceof Error ? e.message : 'Something went wrong updating Safe accounts. Please try again.')
       setIsSubmitting(false)
     }
   })

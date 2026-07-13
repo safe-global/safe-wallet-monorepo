@@ -32,7 +32,7 @@ tags:
 # Tap "Add Signer" button (Import signer button)
 - tapOn:
     id: 'import-signer-button'
-- assertVisible: 'Import a signer'
+- assertVisible: 'Add signer'
 - tapOn:
     id: 'seed'
 
@@ -89,7 +89,7 @@ tags:
 # ============================================
 # Verify address selection screen appears
 - assertVisible: 'Select address to import'
-- assertVisible: 'Select one or more addresses derived from your seed phrase. Make sure they are signers of the selected Safe Account.'
+- assertVisible: 'Select one or more addresses derived from your seed phrase. Make sure they are signers of the selected Safe account.'
 
 # Verify "Default address:" section appears
 - assertVisible: 'Default address:'
@@ -164,4 +164,7 @@ tags:
 # Verify we're back on signers screen
 - assertVisible:
     id: 'signers-screen'
-- assertVisible: 'My signers'
+- assertVisible: 'Your signers'
+# Verify the imported signer shows the "Imported" badge
+- assertVisible: '.*0xaE03...1154.*'
+- assertVisible: '.*Imported.*'

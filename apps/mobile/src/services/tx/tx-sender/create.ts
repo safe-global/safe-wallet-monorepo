@@ -20,7 +20,7 @@ export const createTx = async (txParams: SafeTransactionDataPartial, nonce?: num
   if (!safeSDK) {
     console.log('failed to init sdk')
     throw new Error(
-      'The Safe SDK could not be initialized. Please be aware that we only support v1.0.0 Safe Accounts and up.',
+      'The Safe SDK could not be initialized. Please be aware that we only support v1.0.0 Safe accounts and up.',
     )
   }
   if (nonce !== undefined) {

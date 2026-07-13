@@ -4,7 +4,7 @@ import { AppRoutes } from '@/config/routes'
 import css from './SafeLogo.module.css'
 
 const SafeLogo = ({
-  href = AppRoutes.welcome.accounts,
+  href = AppRoutes.welcome.spaces,
   className,
   'data-testid': testId,
 }: {

@@ -16,11 +16,20 @@ export const useSiwe = () => {
   const [verifyAuthMutation] = useAuthVerifyV1Mutation()
 
   const signIn = useCallback(async () => {
-    if (!provider || !wallet) return
+    if (!wallet) return
 
     setLoading(true)
 
     try {
+      // Prefer the chain-matched provider, but fall back to one built from the
+      // wallet so sign-in works even when the wallet is connected to a chain
+      // other than the current one — SIWE only needs a message signature.
+      let signingProvider = provider
+      if (!signingProvider) {
+        const { createWeb3 } = await import('@/hooks/wallets/web3')
+        signingProvider = createWeb3(wallet.provider)
+      }
+
       const { data } = await fetchNonce()
 
       if (!data) {
@@ -28,13 +37,13 @@ export const useSiwe = () => {
         return
       }
 
-      const [network, signer] = await Promise.all([provider.getNetwork(), provider.getSigner()])
+      const [network, signer] = await Promise.all([signingProvider.getNetwork(), signingProvider.getSigner()])
       const signableMessage = getSignableMessage(signer.address, network.chainId, data.nonce)
 
       let signature
       // Using the signer.signMessage hexlifies the message which doesn't work with the personal_sign of the PK module
       if (isPKWallet(wallet)) {
-        signature = await provider.send('personal_sign', [signableMessage, signer.address.toLowerCase()])
+        signature = await signingProvider.send('personal_sign', [signableMessage, signer.address.toLowerCase()])
       } else {
         signature = await signer.signMessage(signableMessage)
       }

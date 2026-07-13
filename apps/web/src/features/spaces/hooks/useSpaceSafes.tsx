@@ -2,9 +2,12 @@ import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERAT
 import { _buildSafeItems, type AllSafeItems, useAllSafesGrouped, useAllOwnedSafes, getComparator } from '@/hooks/safes'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import useGetSpaceAddressBook from './useGetSpaceAddressBook'
+import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 import { mapSpaceContactsToAddressBookState } from '../utils'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
+import { selectAllAddressBooks, selectAllVisitedSafes } from '@/store/slices'
+import merge from 'lodash/merge'
 import { useMemo } from 'react'
 import { isAuthenticated } from '@/store/authSlice'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -18,15 +21,26 @@ export const useSpaceSafes = () => {
     isError: isSpaceSafesError,
     error: spaceSafesError,
     refetch: refetchSpaceSafes,
-  } = useSpaceSafesGetV1Query({ spaceId: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
+  } = useSpaceSafesGetV1Query(
+    { spaceId: spaceId ?? '' },
+    { skip: !isUserSignedIn || !spaceId, ...SPACE_REFRESH_OPTIONS },
+  )
   const spaceContacts = useGetSpaceAddressBook()
+  const localAddressBook = useAppSelector(selectAllAddressBooks)
 
-  // We are doing this in order to reuse the _buildSafeItems function but only take space contacts into account
-  const addressBooks = mapSpaceContactsToAddressBookState(spaceContacts)
+  // Space contacts take priority but fall back to the user's address book, so the name used for
+  // sorting matches the name actually displayed (the row resolves via the address book too — see
+  // useSafeDisplayName). Without the fallback, address-book-named safes have an empty `name` here
+  // and "Name" sorting silently no-ops on them.
+  const addressBooks = useMemo(
+    () => merge({}, localAddressBook, mapSpaceContactsToAddressBookState(spaceContacts)),
+    [localAddressBook, spaceContacts],
+  )
 
   const { address: walletAddress = '' } = useWallet() || {}
   const [allOwned = {}] = useAllOwnedSafes(walletAddress)
-  const safeItems = currentData ? _buildSafeItems(currentData.safes, addressBooks, allOwned) : []
+  const allVisitedSafes = useAppSelector(selectAllVisitedSafes)
+  const safeItems = currentData ? _buildSafeItems(currentData.safes, addressBooks, allOwned, allVisitedSafes) : []
   const safes = useAllSafesGrouped(safeItems)
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = getComparator(orderBy)

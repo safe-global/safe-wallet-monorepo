@@ -1,6 +1,7 @@
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { Typography } from '@/components/ui/typography'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import AddMemberModal from 'src/features/spaces/components/AddMemberModal'
 import { useState } from 'react'
 import MembersList from '../MembersList'
@@ -19,44 +20,54 @@ const SpaceMembers = () => {
   return (
     <>
       {isInvited && <PreviewInvite />}
-      <div className="mb-6 flex flex-col gap-6">
-        <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
-          Members
-        </Typography>
-        {isAdmin && (
-          <Track {...SPACE_EVENTS.ADD_MEMBER_MODAL} label={SPACE_LABELS.members_page}>
-            <ShadcnButton
-              data-testid="add-member-button"
-              size="lg"
-              className="font-bold px-4 py-0"
-              onClick={() => setOpenAddMembersModal(true)}
-            >
-              <Plus className="size-4 mr-1 text-green-500" />
-              Add member
-            </ShadcnButton>
-          </Track>
-        )}
-      </div>
-      <>
-        {invitedMembers.length > 0 && (
-          <>
-            <Typography variant="paragraph-bold" className="font-bold mb-4">
-              Pending invitations ({invitedMembers.length})
-            </Typography>
-            <MembersList members={invitedMembers} />
-          </>
-        )}
-        {activeMembers.length > 0 && (
-          <>
-            <Typography variant="paragraph-bold" className="font-bold mt-2 mb-4">
-              All members ({activeMembers.length})
-            </Typography>
-            <MembersList members={activeMembers} />
-          </>
-        )}
-      </>
 
-      {openAddMembersModal && <AddMemberModal onClose={() => setOpenAddMembersModal(false)} />}
+      <div>
+        <div className="mb-6 flex flex-col gap-6">
+          <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
+            Team
+          </Typography>
+          {isAdmin && (
+            <Track {...SPACE_EVENTS.ADD_MEMBER_MODAL} label={SPACE_LABELS.members_page}>
+              <ShadcnButton
+                data-testid="add-member-button"
+                size="lg"
+                className="px-4 py-0"
+                onClick={() => setOpenAddMembersModal(true)}
+              >
+                <Plus className="size-4 mr-1 text-green-500" />
+                Add member
+              </ShadcnButton>
+            </Track>
+          )}
+        </div>
+
+        <Tabs defaultValue="members">
+          <TabsList variant="line" className="flex-wrap h-auto mb-4 sm:mb-0">
+            <TabsTrigger value="members" className="cursor-pointer" data-testid="members-tab">
+              Members ({activeMembers.length})
+            </TabsTrigger>
+            <TabsTrigger value="pending" className="cursor-pointer" data-testid="pending-members-tab">
+              Pending ({invitedMembers.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <div className="bg-card mt-6 rounded-lg p-4">
+            <TabsContent value="members">
+              <MembersList members={activeMembers} />
+            </TabsContent>
+
+            <TabsContent value="pending">
+              {invitedMembers.length === 0 ? (
+                <p className="text-muted-foreground text-sm">No pending members.</p>
+              ) : (
+                <MembersList members={invitedMembers} />
+              )}
+            </TabsContent>
+          </div>
+        </Tabs>
+
+        {openAddMembersModal && <AddMemberModal onClose={() => setOpenAddMembersModal(false)} />}
+      </div>
     </>
   )
 }

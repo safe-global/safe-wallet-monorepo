@@ -79,6 +79,10 @@ export const SPACE_EVENTS = {
     action: 'Workspace member invite sent',
     category: SPACE_CATEGORY,
   },
+  WORKSPACE_MEMBER_INVITE_RENEWED: {
+    action: 'Workspace member invite renewed',
+    category: SPACE_CATEGORY,
+  },
   ADD_ACCOUNTS_MODAL: {
     action: 'Open add accounts modal',
     category: SPACE_CATEGORY,
@@ -261,11 +265,14 @@ export const SPACE_EVENTS = {
     action: 'Wallet disconnected in space',
     category: SPACE_CATEGORY,
   },
+  USE_OLD_UI: {
+    action: 'Use the old UI',
+    category: SPACE_CATEGORY,
+  },
 }
 
 export enum SPACE_LABELS {
   space_list_page = 'space_list_page',
-  safe_dashboard_banner = 'safe_dashboard_banner',
   space_selector = 'space_selector',
   accounts_page = 'accounts_page',
   preview_banner = 'preview_banner',
@@ -277,4 +284,5 @@ export enum SPACE_LABELS {
   space_settings = 'space_settings',
   space_context_menu = 'space_context_menu',
   space_breadcrumbs = 'space_breadcrumbs',
+  security_page = 'security_page',
 }

@@ -1,0 +1,58 @@
+name: Web TanStack Checks
+
+on:
+  pull_request:
+    paths:
+      - apps/web-tanstack/**
+      - apps/web/**
+      - packages/**
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - apps/web-tanstack/**
+      - apps/web/**
+      - packages/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
+      - uses: ./.github/actions/yarn
+        with:
+          turbo-token: ${{ secrets.TURBO_TOKEN }}
+          turbo-team: ${{ vars.TURBO_TEAM }}
+      - run: yarn workspace @safe-global/web-tanstack build
+      # Assert every emitted JS/CSS chunk matches its recorded sha384 integrity
+      # (re-hash after build; fails on tamper or gaps).
+      - run: yarn workspace @safe-global/web-tanstack assert:sri
+      # The build must ship our generated worker, not the stale publicDir copies.
+      - name: Assert service worker output
+        working-directory: apps/web-tanstack
+        run: |
+          test -f dist/sw.js || { echo "::error::dist/sw.js missing"; exit 1; }
+          grep -q "addToCacheList\|precache" dist/sw.js || { echo "::error::sw.js has no precache manifest"; exit 1; }
+          test ! -e dist/firebase-messaging-sw.js || { echo "::error::stale firebase-messaging-sw.js shipped"; exit 1; }
+          ! ls dist/workbox-*.js >/dev/null 2>&1 || { echo "::error::stale workbox-*.js shipped"; exit 1; }
+          test -f dist/offline.html || { echo "::error::offline.html missing from precache"; exit 1; }
+
+  verify-changed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/yarn
+        with:
+          turbo-token: ${{ secrets.TURBO_TOKEN }}
+          turbo-team: ${{ vars.TURBO_TEAM }}
+      - run: node scripts/verify.mjs --changed --workspace=web-tanstack
