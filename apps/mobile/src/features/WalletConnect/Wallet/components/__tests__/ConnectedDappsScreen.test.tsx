@@ -1,6 +1,7 @@
 import React from 'react'
 import type { SessionTypes } from '@walletconnect/types'
 import { renderWithStore, createTestStore, fireEvent, act } from '@/src/tests/test-utils'
+import { removeSession } from '../../store/walletKitSlice'
 import { ConnectedDappsScreen } from '../ConnectedDappsScreen'
 
 const mockDisconnect = jest.fn()
@@ -9,28 +10,46 @@ jest.mock('../../hooks/useDisconnectSession', () => ({
   useDisconnectSession: () => ({ disconnect: mockDisconnect, busyTopic: mockBusyTopic }),
 }))
 
-// Stub the row: expose a menu-disconnect trigger and a swipe trigger, so the screen's selection
-// wiring is observable without the native menu / swipe gesture internals. Both route through
-// onRequestDisconnect, mirroring the real row.
+// One fake swipeable handle per row (keyed by topic) so tests can assert which row got closed
+// when another one swipes open.
+const mockSwipeHandles: Record<string, { close: jest.Mock }> = {}
+
+// Stub the row: expose a menu-disconnect trigger, a swipe trigger, and a swipe-open-drag trigger,
+// so the screen's selection + single-open-swipe wiring is observable without the native menu /
+// swipe gesture internals. The first two route through onRequestDisconnect, mirroring the real
+// row; onSwipeCleanup fires on unmount with the row's handle, also mirroring the real row.
 jest.mock('../ConnectedDappRow', () => {
+  const react = jest.requireActual('react')
   const { Text } = jest.requireActual('react-native')
   return {
     ConnectedDappRow: ({
       session,
       onRequestDisconnect,
+      onSwipeOpenStart,
+      onSwipeCleanup,
     }: {
       session: { topic: string; peer: { metadata: { name: string } } }
       onRequestDisconnect: (s: unknown) => void
-    }) => (
-      <>
-        <Text testID={`row-menu-${session.topic}`} onPress={() => onRequestDisconnect(session)}>
-          {session.peer.metadata.name}
-        </Text>
-        <Text testID={`row-swipe-${session.topic}`} onPress={() => onRequestDisconnect(session)}>
-          swipe
-        </Text>
-      </>
-    ),
+      onSwipeOpenStart?: (methods: { close: () => void }) => void
+      onSwipeCleanup?: (methods: { close: () => void }) => void
+    }) => {
+      mockSwipeHandles[session.topic] ??= { close: jest.fn() }
+      const handle = mockSwipeHandles[session.topic]
+      react.useEffect(() => () => onSwipeCleanup?.(handle), [onSwipeCleanup, handle])
+      return (
+        <>
+          <Text testID={`row-menu-${session.topic}`} onPress={() => onRequestDisconnect(session)}>
+            {session.peer.metadata.name}
+          </Text>
+          <Text testID={`row-swipe-${session.topic}`} onPress={() => onRequestDisconnect(session)}>
+            swipe
+          </Text>
+          <Text testID={`row-open-${session.topic}`} onPress={() => onSwipeOpenStart?.(handle)}>
+            open
+          </Text>
+        </>
+      )
+    },
   }
 })
 
@@ -67,6 +86,7 @@ describe('ConnectedDappsScreen', () => {
   beforeEach(() => {
     mockDisconnect.mockReset().mockResolvedValue(true)
     mockBusyTopic = null
+    Object.values(mockSwipeHandles).forEach((handle) => handle.close.mockClear())
   })
 
   it('renders the title and the empty state when there are no sessions', () => {
@@ -123,5 +143,39 @@ describe('ConnectedDappsScreen', () => {
 
     fireEvent.press(getByTestId('row-swipe-t1'))
     expect(getByText('confirm:Uniswap')).toBeTruthy()
+  })
+
+  it('closes the previously swiped row when another row starts to swipe open', () => {
+    const { getByTestId } = renderWithStore(
+      <ConnectedDappsScreen />,
+      storeWith([session('t1', 'Uniswap'), session('t2', 'Aave')]),
+    )
+
+    fireEvent.press(getByTestId('row-open-t1'))
+    expect(mockSwipeHandles['t1'].close).not.toHaveBeenCalled()
+
+    // A second drag on the same row must not close it.
+    fireEvent.press(getByTestId('row-open-t1'))
+    expect(mockSwipeHandles['t1'].close).not.toHaveBeenCalled()
+
+    // Swiping another row closes the first, leaving a single open row.
+    fireEvent.press(getByTestId('row-open-t2'))
+    expect(mockSwipeHandles['t1'].close).toHaveBeenCalledTimes(1)
+    expect(mockSwipeHandles['t2'].close).not.toHaveBeenCalled()
+  })
+
+  it('drops the tracked swipeable when its row unmounts, so a stale handle is never closed', () => {
+    const store = storeWith([session('t1', 'Uniswap'), session('t2', 'Aave')])
+    const { getByTestId } = renderWithStore(<ConnectedDappsScreen />, store)
+
+    // Swipe t1 open, then remove its session (e.g. the dApp disconnected) so the row unmounts.
+    fireEvent.press(getByTestId('row-open-t1'))
+    act(() => {
+      store.dispatch(removeSession('t1'))
+    })
+
+    // Swiping t2 open must not close the unmounted t1 swipeable.
+    fireEvent.press(getByTestId('row-open-t2'))
+    expect(mockSwipeHandles['t1'].close).not.toHaveBeenCalled()
   })
 })
