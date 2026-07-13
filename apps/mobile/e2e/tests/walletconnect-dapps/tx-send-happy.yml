@@ -1,0 +1,97 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# eth_sendTransaction happy path: synthesise a request from the seeded session,
+# review, drive the sign tail (real key in the simulator keychain, real staging
+# CGW /propose), and assert the safeTxHash was delivered back to the dApp.
+# `e2e-wc-response-hash-match` renders only when the delivered JSON-RPC result
+# strictly equals the safeTxHash handed off to the confirm flow — this is the
+# end-to-end delivery check, not just "the sheet closed".
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+# Seeded session + owner signer (key in keychain) + biometrics enabled.
+- tapOn:
+    id: 'e2eWcDappsTx'
+- assertVisible:
+    id: 'home-tab'
+
+# The dApp sends eth_sendTransaction (0.001 ETH transfer fixture).
+- tapOn:
+    id: 'e2eWcSynthTxRequest'
+
+# Identity-only request sheet (decoded payload comes after Review, by design).
+- extendedWaitUntil:
+    visible:
+      text: 'Transaction request'
+    timeout: 10000
+- assertVisible:
+    id: 'wc-tx-domain'
+- assertVisible: 'Uniswap'
+
+# Review composes the draft (CGW Safe fetch + RPC → allow a generous window).
+- extendedWaitUntil:
+    visible:
+      id: 'wc-tx-review'
+    timeout: 10000
+- tapOn:
+    id: 'wc-tx-review'
+
+# Confirm screen renders the decoded transfer.
+- extendedWaitUntil:
+    visible:
+      text: 'Confirm transaction'
+    timeout: 30000
+- assertVisible:
+    text: '.*0\.001.*'
+
+# Sign tail: Continue → review data → Confirm.
+- tapOn:
+    id: 'sign-transaction-continue-button'
+- extendedWaitUntil:
+    visible:
+      text: '.*Review this transaction data.*'
+    timeout: 10000
+- tapOn:
+    id: 'review-and-confirm-button'
+
+# Signing + staging /propose round-trip.
+- extendedWaitUntil:
+    visible:
+      text: 'You successfully signed this transaction.'
+    timeout: 30000
+
+# Back out to home: signing-success is a native modal and iOS hides everything
+# beneath it (including the TestCtrls markers), so the delivery assert must run
+# from the home tab.
+- tapOn: 'Done'
+- extendedWaitUntil:
+    visible:
+      text: 'Confirm transaction'
+    timeout: 10000
+- tapOn:
+    id: 'go-back'
+- extendedWaitUntil:
+    visible:
+      id: 'home-tab'
+    timeout: 10000
+
+# safeTxHash delivered to the dApp (bare hash for eth_sendTransaction).
+- assertVisible:
+    id: 'e2e-wc-response-hash-match'
+
+# The proposed tx shows up in the queue UI (backed by staging CGW).
+- extendedWaitUntil:
+    visible:
+      id: 'pending-transactions'
+    timeout: 30000
+- tapOn:
+    id: 'pending-transactions'
+- extendedWaitUntil:
+    visible:
+      id: 'pending-tx-list'
+    timeout: 10000
+- assertVisible:
+    text: 'Send'

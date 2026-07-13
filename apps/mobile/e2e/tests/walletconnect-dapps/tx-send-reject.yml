@@ -1,0 +1,33 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# Reject path: the user declines the request on the sheet. The listener answers
+# the dApp with formatJsonRpcError(USER_REJECTED) — code 5000 — which the fake
+# respondSessionRequest records and WcResponseIndicator surfaces as a marker.
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eWcDappsTx'
+- assertVisible:
+    id: 'home-tab'
+
+- tapOn:
+    id: 'e2eWcSynthTxRequest'
+- extendedWaitUntil:
+    visible:
+      text: 'Transaction request'
+    timeout: 10000
+
+- tapOn:
+    id: 'wc-tx-reject'
+
+# USER_REJECTED delivered to the dApp; sheet gone.
+- extendedWaitUntil:
+    visible:
+      id: 'e2e-wc-response-error-5000'
+    timeout: 10000
+- assertNotVisible:
+    text: 'Transaction request'
