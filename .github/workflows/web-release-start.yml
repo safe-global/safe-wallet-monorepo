@@ -278,13 +278,13 @@ jobs:
         continue-on-error: true
         env:
           INPUT_RELEASE_TYPE: ${{ inputs.release_type }}
+          LINEAR_URL: ${{ steps.linear_sync.outputs['release-url'] }}
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           RELEASE_TYPE="$INPUT_RELEASE_TYPE"
           BASE_BRANCH="${{ steps.base.outputs.branch }}"
           PR_URL="${{ steps.create_pr.outputs.pr_url }}"
           LINEAR_LINK=""
-          LINEAR_URL="${{ steps.linear_sync.outputs['release-url'] }}"
           if [ -n "$LINEAR_URL" ]; then
             LINEAR_LINK="<$LINEAR_URL|View release in Linear>"
           fi

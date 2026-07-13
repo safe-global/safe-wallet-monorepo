@@ -302,6 +302,7 @@ jobs:
         continue-on-error: true
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          LINEAR_URL: ${{ steps.linear_complete.outputs['release-url'] }}
         run: |
           if [ -z "$SLACK_WEBHOOK_URL" ]; then
             echo "No Slack webhook configured, skipping notification"
@@ -313,7 +314,6 @@ jobs:
           BACKMERGE_PR_URL="${{ steps.backmerge.outputs.pr_url }}"
           HAS_CONFLICTS="${{ steps.backmerge.outputs.has_conflicts }}"
           LINEAR_LINK=""
-          LINEAR_URL="${{ steps.linear_complete.outputs['release-url'] }}"
           if [ -n "$LINEAR_URL" ]; then
             LINEAR_LINK="<$LINEAR_URL|View release in Linear>"
           fi
