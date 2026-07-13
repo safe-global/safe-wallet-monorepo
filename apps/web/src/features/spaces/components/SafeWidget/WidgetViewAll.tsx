@@ -21,7 +21,7 @@ const WidgetViewAll = ({ count, onClick, className }: WidgetViewAllProps): React
       variant="ghost"
       size="sm"
       onClick={onClick}
-      className="gap-1 px-2 font-normal text-muted-foreground"
+      className="gap-1 px-2 mx-[-15px] font-normal text-muted-foreground"
       data-testid="widget-view-all"
     >
       View all
