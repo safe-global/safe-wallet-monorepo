@@ -92,11 +92,6 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
 
       {pinnedSafes.length > 0 && (
         <section data-testid="pinned-accounts" className="mb-4">
-          {isManualOrder && (
-            <Typography variant="paragraph-small" color="muted" className="mb-2">
-              Drag the handle on any row to arrange accounts your way — your order is saved automatically.
-            </Typography>
-          )}
           <SafeAccountsTable
             items={pinnedSafes}
             onLinkClick={onLinkClick}
