@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import ReorderableSafeList, { reorderAddresses } from '../ReorderableSafeList'
+import ReorderableSafeList from '../ReorderableSafeList'
 import type { SafeItemData } from '../../types'
 
 jest.mock('../SafeItem', () => ({
@@ -19,7 +19,6 @@ jest.mock('../MultiChainSafeItemRow', () => ({
 
 const ADDR_A = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 const ADDR_B = '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
-const ADDR_C = '0xcccccccccccccccccccccccccccccccccccccccc'
 
 const item = (address: string, name: string): SafeItemData => ({
   id: `1:${address}`,
@@ -29,28 +28,6 @@ const item = (address: string, name: string): SafeItemData => ({
   owners: 2,
   balance: '100',
   chains: [{ chainId: '1', chainName: 'Ethereum', chainLogoUri: null, shortName: 'eth' }],
-})
-
-describe('reorderAddresses', () => {
-  const items = [item(ADDR_A, 'A'), item(ADDR_B, 'B'), item(ADDR_C, 'C')]
-
-  it('moves an item down', () => {
-    expect(reorderAddresses(items, 0, 2)).toEqual([ADDR_B, ADDR_C, ADDR_A])
-  })
-
-  it('moves an item up', () => {
-    expect(reorderAddresses(items, 2, 0)).toEqual([ADDR_C, ADDR_A, ADDR_B])
-  })
-
-  it('is a no-op when source and destination match', () => {
-    expect(reorderAddresses(items, 1, 1)).toEqual([ADDR_A, ADDR_B, ADDR_C])
-  })
-
-  it('does not mutate the input', () => {
-    const input = [item(ADDR_A, 'A'), item(ADDR_B, 'B')]
-    reorderAddresses(input, 0, 1)
-    expect(input.map((i) => i.address)).toEqual([ADDR_A, ADDR_B])
-  })
 })
 
 describe('ReorderableSafeList', () => {
@@ -90,6 +67,16 @@ describe('ReorderableSafeList', () => {
     const onSelect = renderList()
     fireEvent.click(screen.getAllByTestId('safe-drag-handle')[0])
     expect(onSelect).not.toHaveBeenCalled()
+  })
+
+  it('takes focus on hover so base-ui does not strand the highlight on the previous network row', () => {
+    renderList()
+    const row = screen.getAllByTestId('reorder-safe-row')[0]
+    expect(row).not.toHaveFocus()
+
+    fireEvent.mouseEnter(row)
+
+    expect(row).toHaveFocus()
   })
 })
 

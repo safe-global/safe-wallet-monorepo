@@ -3,9 +3,7 @@ import {
   type SafeItem,
   type SafeItems,
   type AllSafeItems,
-  type MultiChainSafeItem,
   flattenSafeItems,
-  isMultiChainSafeItem,
   useSafesSearch,
   getComparator,
   _groupAndSort,
@@ -14,6 +12,7 @@ import {
 } from '@/hooks/safes'
 import AddManually, { type AddManuallyFormValues } from './AddManually'
 import { getSafeId } from '../SelectSafesOnboarding/utils/safeIds'
+import { applySafeSelectionToggle, getSelectedLeafKeys } from '../SelectSafesOnboarding/utils/selection'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
@@ -183,11 +182,7 @@ const AddAccounts = ({
   // Computed inline (not memoised): react-hook-form's watch() mutates and returns the same object
   // reference, so a useMemo keyed on `selectedSafes` would keep a stale Set and the checkboxes would
   // never re-render even though the form value (and the footer counter) changed.
-  const selectedKeys = new Set(
-    Object.entries(selectedSafes || {})
-      .filter(([key, value]) => value && !key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX))
-      .map(([key]) => key),
-  )
+  const selectedKeys = getSelectedLeafKeys(selectedSafes || {})
 
   // Total checked safes (workspace safes are pre-checked and count toward the per-workspace cap).
   const isAtLimit = selectedKeys.size >= SAFE_ACCOUNTS_LIMIT
@@ -198,31 +193,8 @@ const AddAccounts = ({
     [spaceSafes],
   )
 
-  const handleTableToggle = (line: AccountLine, nextChecked: boolean) => {
-    if (line.variant === 'group') {
-      const group = line.source as MultiChainSafeItem
-      setValue(`selectedSafes.${MULTICHAIN_SAFE_KEY_PREFIX}${group.address}`, nextChecked, { shouldValidate: true })
-      group.safes.forEach((safe) =>
-        setValue(`selectedSafes.${safe.chainId}:${safe.address}`, nextChecked, { shouldValidate: true }),
-      )
-      return
-    }
-
-    setValue(`selectedSafes.${line.key}`, nextChecked, { shouldValidate: true })
-
-    // Reconcile the multi-chain parent key when a child leaf is toggled individually.
-    const parent = visibleTrusted.find(
-      (item): item is MultiChainSafeItem =>
-        isMultiChainSafeItem(item) && item.safes.some((safe) => `${safe.chainId}:${safe.address}` === line.key),
-    )
-    if (parent) {
-      const allChecked = parent.safes.every((safe) => {
-        const key = `${safe.chainId}:${safe.address}`
-        return key === line.key ? nextChecked : Boolean(selectedSafes?.[key])
-      })
-      setValue(`selectedSafes.${MULTICHAIN_SAFE_KEY_PREFIX}${parent.address}`, allChecked, { shouldValidate: true })
-    }
-  }
+  const handleTableToggle = (line: AccountLine, nextChecked: boolean) =>
+    applySafeSelectionToggle(setValue, visibleTrusted, selectedSafes || {}, line, nextChecked)
 
   // Reset form when modal opens
   useEffect(() => {

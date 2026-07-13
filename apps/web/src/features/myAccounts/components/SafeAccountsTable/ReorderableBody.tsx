@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
+import { reorderByKey } from '@/utils/reorder'
 import type { SafeAccountColumn } from './columns'
 import type { AccountGroup, AccountLine } from './useSafeAccountRows'
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
@@ -32,14 +33,6 @@ export const toggleExpanded = (set: Set<string>, key: string): Set<string> => {
   if (next.has(key)) next.delete(key)
   else next.add(key)
   return next
-}
-
-/** Moves the account at `sourceIndex` to `destIndex` and returns the resulting address order. */
-export const reorderAddresses = (groups: AccountGroup[], sourceIndex: number, destIndex: number): string[] => {
-  const next = Array.from(groups)
-  const [moved] = next.splice(sourceIndex, 1)
-  next.splice(destIndex, 0, moved)
-  return next.map((group) => group.parent.address)
 }
 
 /**
@@ -81,7 +74,7 @@ const ReorderableBody = ({
     setExpanded(expandedBeforeDrag.current)
     const { source, destination } = result
     if (!destination || destination.index === source.index) return
-    onReorder(reorderAddresses(groups, source.index, destination.index))
+    onReorder(reorderByKey(groups, source.index, destination.index, (group) => group.parent.address))
   }
 
   return (

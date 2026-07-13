@@ -1,18 +1,12 @@
 import { createPortal } from 'react-dom'
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd'
 import { cn } from '@/utils/cn'
+import { reorderByKey } from '@/utils/reorder'
 import DragHandle from './DragHandle'
 import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
+import { focusRowOnHover } from './focusRowOnHover'
 import type { SafeItemData, SafeRenameTarget } from '../types'
-
-/** Moves the item at `from` to `to` and returns the resulting top-level address order. */
-export const reorderAddresses = (items: SafeItemData[], from: number, to: number): string[] => {
-  const next = Array.from(items)
-  const [moved] = next.splice(from, 1)
-  next.splice(to, 0, moved)
-  return next.map((item) => item.address)
-}
 
 interface ReorderableSafeListProps {
   items: SafeItemData[]
@@ -37,7 +31,7 @@ interface ReorderableSafeListProps {
 const ReorderableSafeList = ({ items, selectedItemId, onSelect, onRename, onReorder }: ReorderableSafeListProps) => {
   const handleDragEnd = ({ source, destination }: DropResult) => {
     if (!destination || destination.index === source.index) return
-    onReorder(reorderAddresses(items, source.index, destination.index))
+    onReorder(reorderByKey(items, source.index, destination.index, (item) => item.address))
   }
 
   return (
@@ -75,6 +69,9 @@ const ReorderableSafeList = ({ items, selectedItemId, onSelect, onRename, onReor
                           data-current-safe={isCurrent ? 'true' : undefined}
                           data-testid="reorder-safe-row"
                           onClick={() => onSelect(item.id)}
+                          // Take focus on hover so base-ui's stale grey highlight leaves the
+                          // previous network row (network sub-rows are base-ui SelectItems).
+                          onMouseEnter={focusRowOnHover}
                           className={cn(
                             'group/row flex cursor-pointer items-center gap-2 rounded-lg py-3 pl-2 pr-3 hover:bg-muted',
                             isCurrent && 'bg-[var(--color-background-light)]',

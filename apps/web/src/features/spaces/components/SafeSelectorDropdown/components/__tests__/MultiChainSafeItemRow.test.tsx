@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useChain } from '@/hooks/useChains'
 import MultiChainSafeItemRow from '../MultiChainSafeItemRow'
@@ -228,6 +228,19 @@ describe('MultiChainSafeItemRow undeployed status badge', () => {
     await expandRow()
 
     expect(screen.queryByTestId('not-activated-badge')).not.toBeInTheDocument()
+  })
+})
+
+describe('MultiChainSafeItemRow hover highlight', () => {
+  it('takes focus when the summary is hovered so base-ui does not strand the highlight on the previous row', () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} />)
+
+    const trigger = screen.getByRole('button')
+    expect(trigger).not.toHaveFocus()
+
+    fireEvent.mouseEnter(trigger)
+
+    expect(trigger).toHaveFocus()
   })
 })
 

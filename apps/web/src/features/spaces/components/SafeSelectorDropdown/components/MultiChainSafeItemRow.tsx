@@ -12,6 +12,7 @@ import { cn } from '@/utils/cn'
 import BalanceDisplay from './BalanceDisplay'
 import RowEndColumn from './RowEndColumn'
 import SafeRowStats from './SafeRowStats'
+import { focusRowOnHover } from './focusRowOnHover'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import type { SafeItemData, SafeItemDataChain, SafeRenameTarget } from '../types'
 
@@ -114,6 +115,8 @@ const MultiChainSafeItemRow = ({ item, onRename, isSelected = false, leading }: 
       <CollapsibleTrigger
         // Scroll anchor for the open-to-current-safe behaviour (see SafeDropdownContainer).
         data-current-safe={isSelected ? 'true' : undefined}
+        // Take focus on hover so base-ui's stale grey highlight leaves the previous network row.
+        onMouseEnter={focusRowOnHover}
         className={cn(
           'group/row flex w-full items-center gap-2 rounded-lg py-3 text-left outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring cursor-pointer',
           // A leading grip takes the place of some left padding so its column lines up with single-chain rows.
