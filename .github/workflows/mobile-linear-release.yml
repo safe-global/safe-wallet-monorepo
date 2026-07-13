@@ -74,5 +74,6 @@ jobs:
           command: ${{ inputs.command }}
           version: ${{ steps.version.outputs.version }}
           stage: ${{ inputs.stage }}
-          include_paths: apps/mobile/**,packages/**,expo-plugins/**
+          # include_paths is only valid for `sync`; omit it for update/complete
+          include_paths: ${{ inputs.command == 'sync' && 'apps/mobile/**,packages/**,expo-plugins/**' || '' }}
           dry_run: ${{ inputs.dry_run }}
