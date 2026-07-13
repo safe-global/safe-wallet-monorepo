@@ -180,6 +180,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
               items={items}
               columns={MANAGE_COLUMNS}
               flaggedAddresses={flaggedAddresses}
+              allowRenameInDialog
               selection={{
                 selectedKeys,
                 onToggle: (line: AccountLine) => toggleSelection(line.address),

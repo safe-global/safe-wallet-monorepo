@@ -96,6 +96,12 @@ export type SafeAccountsTableProps = {
   flaggedAddresses?: Set<string>
   /** Enables a leading checkbox column and makes rows selectable. */
   selection?: SafeAccountsSelection
+  /**
+   * Re-enables the hover rename pencil on a selection surface (selection normally suppresses it) and
+   * floats the rename dialog above a shadcn Dialog (--z-overlay: 1400). Used by the "Manage my account
+   * list" modal, whose table is both selectable and rendered inside a shadcn Dialog.
+   */
+  allowRenameInDialog?: boolean
   /** Enables a leading drag-handle column and makes top-level accounts reorderable. */
   reorder?: SafeAccountsReorder
   /** Fired when a row's link is clicked; receives the clicked line so callers can track the safe. */
@@ -135,6 +141,7 @@ const SafeAccountsTable = ({
   renderActions,
   flaggedAddresses,
   selection,
+  allowRenameInDialog = false,
   reorder,
   onLinkClick,
   embedded = false,
@@ -145,9 +152,11 @@ const SafeAccountsTable = ({
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [renameTarget, setRenameTarget] = useState<RenameTarget | null>(null)
 
-  // Selection surfaces are modals (trusted picker, manage, onboarding) where rename isn't offered; the
-  // hover rename pencil is only for the navigable welcome/workspace tables.
-  const onRename = selection ? undefined : (line: AccountLine) => setRenameTarget(toRenameTarget(line))
+  // Selection surfaces are modals (trusted picker, manage, onboarding) where rename isn't offered by
+  // default; the hover rename pencil is otherwise only for the navigable welcome/workspace tables. The
+  // "Manage my account list" modal opts back in via `allowRenameInDialog`.
+  const canRename = allowRenameInDialog || !selection
+  const onRename = canRename ? (line: AccountLine) => setRenameTarget(toRenameTarget(line)) : undefined
 
   // While reordering, the incoming (manual) order is authoritative: column-header sorting is
   // suppressed and multi-chain groups collapse so each row is a single draggable account.
@@ -345,6 +354,8 @@ const SafeAccountsTable = ({
           handleClose={() => setRenameTarget(null)}
           defaultValues={{ name: renameTarget.name, address: renameTarget.address }}
           chainIds={renameTarget.chainIds}
+          // In a modal surface, sit above the shadcn Dialog (--z-overlay: 1400) instead of behind it.
+          sx={allowRenameInDialog ? { zIndex: 1450 } : undefined}
         />
       )}
     </Box>

@@ -17,6 +17,7 @@ jest.mock('../SafeAccountTableRow', () => ({
   default: ({
     line,
     onToggle,
+    onRename,
     checkbox,
     onSelectToggle,
     dragHandleProps,
@@ -25,6 +26,7 @@ jest.mock('../SafeAccountTableRow', () => ({
   }: {
     line: { key: string; displayName: string }
     onToggle?: () => void
+    onRename?: (line: { key: string }) => void
     checkbox?: RowCheckbox
     onSelectToggle?: (next: boolean) => void
     dragHandleProps?: object | null
@@ -52,6 +54,9 @@ jest.mock('../SafeAccountTableRow', () => ({
           <button data-testid={`toggle-${line.key}`} onClick={onToggle} type="button">
             toggle
           </button>
+        )}
+        {onRename && (
+          <button data-testid={`rename-${line.key}`} onClick={() => onRename(line)} type="button" aria-label="rename" />
         )}
       </td>
     </tr>
@@ -309,5 +314,33 @@ describe('SafeAccountsTable — selection mode', () => {
     const group = screen.getByTestId('select-0xG')
     expect(group).toHaveAttribute('data-disabled', 'true')
     expect(group).toHaveAttribute('data-reason', 'Already in workspace')
+  })
+
+  it('suppresses the rename action on a selection surface by default', () => {
+    render(<SafeAccountsTable items={items} selection={{ selectedKeys: new Set(), onToggle: jest.fn() }} />)
+    expect(screen.queryByTestId('rename-0xB')).not.toBeInTheDocument()
+  })
+
+  it('re-enables the rename action when allowRenameInDialog is set', () => {
+    render(
+      <SafeAccountsTable
+        items={items}
+        allowRenameInDialog
+        selection={{ selectedKeys: new Set(), onToggle: jest.fn() }}
+      />,
+    )
+    expect(screen.getByTestId('rename-0xB')).toBeInTheDocument()
+  })
+
+  it('opens the rename dialog when the rename action is clicked', () => {
+    render(
+      <SafeAccountsTable
+        items={items}
+        allowRenameInDialog
+        selection={{ selectedKeys: new Set(), onToggle: jest.fn() }}
+      />,
+    )
+    fireEvent.click(screen.getByTestId('rename-0xB'))
+    expect(screen.getByTestId('entry-dialog')).toBeInTheDocument()
   })
 })
