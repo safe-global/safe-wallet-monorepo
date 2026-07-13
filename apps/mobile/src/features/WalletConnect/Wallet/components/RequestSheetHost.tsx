@@ -1,5 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { BottomSheetModal, BottomSheetView, BottomSheetFooter, type BottomSheetFooterProps } from '@gorhom/bottom-sheet'
+import {
+  BottomSheetModal,
+  BottomSheetScrollView,
+  BottomSheetFooter,
+  type BottomSheetFooterProps,
+} from '@gorhom/bottom-sheet'
 import type { IWalletKit } from '@reown/walletkit'
 import { useStore } from 'react-redux'
 import { getVariable, useTheme, YStack, XStack } from 'tamagui'
@@ -170,13 +175,20 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
       footerComponent={renderFooter}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
     >
-      <BottomSheetView style={{ paddingBottom: insets.bottom + FOOTER_CLEARANCE }}>
+      {/* Dynamic sizing fits the sheet to its content, so this never scrolls in practice — it only
+          kicks in when the content is clamped at max height (e.g. large accessibility font scales),
+          where it prevents clipping. */}
+      <BottomSheetScrollView
+        bounces={false}
+        overScrollMode="never"
+        contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_CLEARANCE }}
+      >
         {proposal && !permissionsOpen && (
           <SessionProposalSheet pending={proposal} onOpenPermissions={openPermissions} />
         )}
         {request && !permissionsOpen && <SendTransactionSheet pending={request} onOpenPermissions={openPermissions} />}
         {(proposal || request) && permissionsOpen && <ConnectionPermissionsPanel variant={variant} />}
-      </BottomSheetView>
+      </BottomSheetScrollView>
     </BottomSheetModal>
   )
 }

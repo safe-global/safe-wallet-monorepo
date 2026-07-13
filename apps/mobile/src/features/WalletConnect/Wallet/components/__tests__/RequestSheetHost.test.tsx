@@ -14,6 +14,8 @@ const mockDismiss = jest.fn()
 let mockOnDismiss: (() => void | Promise<void>) | undefined
 // Captures the latest modal props so tests can assert sizing configuration.
 let mockModalProps: Record<string, unknown> | undefined
+// Captures the latest scroll-container props so tests can assert the clipping fallback.
+let mockScrollProps: Record<string, unknown> | undefined
 
 // Local mock to capture imperative present/dismiss + render the footer (overrides the global mock).
 jest.mock('@gorhom/bottom-sheet', () => {
@@ -39,13 +41,17 @@ jest.mock('@gorhom/bottom-sheet', () => {
       )
     },
   )
+  const BottomSheetScrollView = ({ children, ...props }: { children?: React.ReactNode }) => {
+    mockScrollProps = props
+    return <View>{children}</View>
+  }
   return {
     __esModule: true,
     default: View,
     BottomSheetModal,
     BottomSheetModalProvider: View,
     BottomSheetView: View,
-    BottomSheetScrollView: View,
+    BottomSheetScrollView,
     BottomSheetFooter: View,
   }
 })
@@ -90,6 +96,7 @@ describe('RequestSheetHost', () => {
     mockDismiss.mockClear()
     mockOnDismiss = undefined
     mockModalProps = undefined
+    mockScrollProps = undefined
   })
 
   it('sizes the sheet dynamically to its content instead of fixed snap points', () => {
@@ -98,6 +105,14 @@ describe('RequestSheetHost', () => {
 
     expect(mockModalProps?.enableDynamicSizing).toBe(true)
     expect(mockModalProps?.snapPoints).toBeUndefined()
+  })
+
+  it('keeps a bounce-free scroll fallback so clamped content (large font scales) cannot clip', () => {
+    const store = proposalStore(9)
+    renderWithStore(<RequestSheetHost walletKit={fakeWalletKit} />, store)
+
+    expect(mockScrollProps?.bounces).toBe(false)
+    expect(mockScrollProps?.overScrollMode).toBe('never')
   })
 
   it('never presents while pending is empty', () => {
