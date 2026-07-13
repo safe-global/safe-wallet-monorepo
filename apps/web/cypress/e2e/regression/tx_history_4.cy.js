@@ -31,12 +31,8 @@ describe('Incoming tx history details tests', () => {
       typeReceive.altImage,
       typeReceive.altImageDAI,
     )
-    createTx.verifyExpandedDetails([
-      typeReceive.GPv2Settlement,
-      typeReceive.GPv2SettlementAddress,
-      typeReceive.txHashDAI,
-      typeReceive.executionDateDAI,
-    ])
+    createTx.verifyExpandedDetails([typeReceive.GPv2Settlement, typeReceive.GPv2SettlementAddress])
+    createTx.verifyTxHashCopied(typeReceive.txHashDAIFull)
     createTx.verifyNumberOfExternalLinks(2)
   })
 
@@ -52,9 +48,8 @@ describe('Incoming tx history details tests', () => {
     createTx.verifyExpandedDetails([
       //typeReceive.Proxy, - the check for contract name is hidden for
       typeReceive.ProxyAddress,
-      typeReceive.nftHash,
-      typeReceive.executionDateNFT,
     ])
+    createTx.verifyTxHashCopied(typeReceive.nftHashFull)
     createTx.verifyNumberOfExternalLinks(2)
   })
 
@@ -67,7 +62,8 @@ describe('Incoming tx history details tests', () => {
       typeReceive.altImage,
       typeReceive.altToken,
     )
-    createTx.verifyExpandedDetails([typeReceive.senderAddressEth, typeReceive.txHashEth, typeReceive.executionDateEth])
+    createTx.verifyExpandedDetails([typeReceive.senderAddressEth])
+    createTx.verifyTxHashCopied(typeReceive.txHashEthFull)
     createTx.verifyNumberOfExternalLinks(2)
   })
 

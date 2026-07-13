@@ -12,7 +12,7 @@ let mockIsAuthenticated = true
 let mockIsOidcLoginPending = false
 
 jest.mock('next/router', () => ({
-  useRouter: () => ({ replace: mockReplace }),
+  useRouter: () => ({ replace: mockReplace, pathname: '/spaces/security' }),
 }))
 
 jest.mock('@/store', () => ({
@@ -28,6 +28,13 @@ jest.mock('@/store/authSlice', () => ({
   isAuthenticated: 'isAuthenticated',
   selectIsOidcLoginPending: 'selectIsOidcLoginPending',
   setLastUsedSpace: (id: string) => ({ type: 'setLastUsedSpace', payload: id }),
+}))
+
+jest.mock('@/features/spaces/store', () => ({
+  setLastUsedSpaceOrigin: (origin: { path: string; spaceId: string } | null) => ({
+    type: 'setLastUsedSpaceOrigin',
+    payload: origin,
+  }),
 }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
@@ -138,6 +145,23 @@ describe('AuthState', () => {
       { id: '11111111-1111-1111-1111-111111111111' },
       { skip: false, ...SPACE_REFRESH_OPTIONS },
     )
+  })
+
+  it('records the current space id and sub-page path for back-navigation', () => {
+    render(
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
+        <div />
+      </AuthState>,
+    )
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'setLastUsedSpace',
+      payload: '11111111-1111-1111-1111-111111111111',
+    })
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'setLastUsedSpaceOrigin',
+      payload: { path: '/spaces/security', spaceId: '11111111-1111-1111-1111-111111111111' },
+    })
   })
 
   it('renders the children for an active member', () => {

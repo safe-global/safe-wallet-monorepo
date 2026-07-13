@@ -1,6 +1,7 @@
 import { type ComponentProps, type ReactNode, useId } from 'react'
 import get from 'lodash/get'
 import { Controller, type FieldError, useFormContext } from 'react-hook-form'
+import { getNameValidationDisplay, sanitizeName, validateName } from '@safe-global/utils/validation/names'
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
@@ -15,6 +16,11 @@ type NameInputProps = {
   className?: string
   helperText?: ReactNode
   'data-testid'?: string
+  // Charset validation (from the shared name rules): sanitizes + validates the allowed
+  // character set and surfaces a focus tooltip explaining rejected characters.
+  validateCharset?: boolean
+  minLength?: number
+  maxLength?: number
   inputSize?: ComponentProps<typeof Input>['inputSize']
   variant?: ComponentProps<typeof Input>['variant']
   InputProps?: {
@@ -27,6 +33,8 @@ type NameInputProps = {
   InputLabelProps?: { shrink?: boolean }
 }
 
+const DEFAULT_MAX_LENGTH = 50
+
 const NameInput = ({
   name,
   required = false,
@@ -36,6 +44,9 @@ const NameInput = ({
   autoFocus,
   className,
   helperText,
+  validateCharset = false,
+  minLength = 0,
+  maxLength,
   inputSize,
   variant,
   InputProps,
@@ -47,7 +58,12 @@ const NameInput = ({
   // the name can be a path: e.g. "owner.3.name"
   const fieldError = get(formState.errors, name) as FieldError | undefined
 
-  const labelText = fieldError?.type === 'maxLength' ? 'Maximum 50 symbols' : fieldError?.message || label
+  const validationDisplay =
+    validateCharset && fieldError?.message ? getNameValidationDisplay(fieldError.message) : undefined
+  const legacyLabel = fieldError?.type === 'maxLength' ? 'Maximum 50 symbols' : fieldError?.message || label
+  const resolvedLabel = validateCharset ? label : legacyLabel
+  const tooltip = validationDisplay?.tooltip
+  const resolvedHelperText = validateCharset ? (validationDisplay?.label ?? helperText) : helperText
 
   const { endAdornment, startAdornment, readOnly } = InputProps ?? {}
   const hasAdornment = Boolean(endAdornment || startAdornment)
@@ -57,9 +73,14 @@ const NameInput = ({
       name={name}
       control={control}
       rules={{
-        maxLength: 50,
-        required,
+        maxLength: validateCharset ? undefined : DEFAULT_MAX_LENGTH,
+        required: validateCharset ? false : required,
         validate: (value) => {
+          if (validateCharset) {
+            const sanitized = sanitizeName(value ?? '')
+            if (sanitized === '') return required ? 'Required' : true
+            return validateName(sanitized, { minLength, maxLength }) ?? true
+          }
           if (value?.trim() === '' && required) return 'Required'
           return true
         },
@@ -76,34 +97,38 @@ const NameInput = ({
           readOnly,
           required,
           autoFocus,
+          // Full charset-validation explanation as a native tooltip (short label goes in the description below).
+          title: tooltip || undefined,
           'aria-invalid': Boolean(fieldError) || undefined,
           onChange: (e: React.ChangeEvent<HTMLInputElement>) => onChange(e),
           onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
             onBlur()
-            onChange(e.target.value.trim())
+            onChange(validateCharset ? sanitizeName(e.target.value) : e.target.value.trim())
           },
           onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => e.stopPropagation(),
         }
 
+        const inputControl = hasAdornment ? (
+          <InputGroup inputSize={inputSize} variant={variant} className={InputProps?.className}>
+            {startAdornment && <InputGroupAddon align="inline-start">{startAdornment}</InputGroupAddon>}
+            <InputGroupInput {...inputProps} />
+            {endAdornment && <InputGroupAddon align="inline-end">{endAdornment}</InputGroupAddon>}
+          </InputGroup>
+        ) : (
+          <Input inputSize={inputSize} variant={variant} className={InputProps?.className} {...inputProps} />
+        )
+
         return (
           <Field className={className}>
-            {labelText != null && labelText !== '' && (
+            {resolvedLabel != null && resolvedLabel !== '' && (
               <FieldLabel htmlFor={id} className={fieldError ? 'text-destructive' : undefined}>
-                {labelText}
+                {resolvedLabel}
               </FieldLabel>
             )}
 
-            {hasAdornment ? (
-              <InputGroup inputSize={inputSize} variant={variant} className={InputProps?.className}>
-                {startAdornment && <InputGroupAddon align="inline-start">{startAdornment}</InputGroupAddon>}
-                <InputGroupInput {...inputProps} />
-                {endAdornment && <InputGroupAddon align="inline-end">{endAdornment}</InputGroupAddon>}
-              </InputGroup>
-            ) : (
-              <Input inputSize={inputSize} variant={variant} className={InputProps?.className} {...inputProps} />
-            )}
+            {inputControl}
 
-            {helperText ? <FieldDescription>{helperText}</FieldDescription> : null}
+            {resolvedHelperText ? <FieldDescription>{resolvedHelperText}</FieldDescription> : null}
           </Field>
         )
       }}

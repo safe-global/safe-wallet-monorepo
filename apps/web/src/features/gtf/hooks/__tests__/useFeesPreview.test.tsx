@@ -107,12 +107,6 @@ const mockSuccessfulPreview = {
       numberSignatures: 2,
     },
     relayCost: { fiatCode: 'USD', fiatValue: '0.12410833692950203' },
-    pricingContextSnapshot: {
-      phase: 2,
-      priceSource: 'COINGECKO',
-      priceTimestamp: 1776428854,
-      gasPriceVolatilityBuffer: 1.3,
-    },
   },
   isLoading: false,
   isFetching: false,

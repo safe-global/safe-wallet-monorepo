@@ -64,7 +64,7 @@ export const fallbackHandlerScanner: SecurityScanner = {
       }
     }
 
-    const handlerLabel = fallbackHandler.name ?? `${fallbackHandler.value.slice(0, 10)}...`
+    const handlerLabel = fallbackHandler.name ?? fallbackHandler.value
     const match = identifyFallbackHandler(fallbackHandler.value, chainId)
 
     if (match) {

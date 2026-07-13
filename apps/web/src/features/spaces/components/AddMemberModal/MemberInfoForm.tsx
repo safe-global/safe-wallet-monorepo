@@ -1,4 +1,5 @@
 import NameInput from '@/components/common/NameInput'
+import { MEMBER_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@safe-global/utils/validation/names'
 import { Controller, useFormContext } from 'react-hook-form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { RoleMenuItem } from './index'
@@ -9,7 +10,16 @@ const MemberInfoForm = ({ isEdit = false }: { isEdit?: boolean }) => {
 
   return (
     <div className="flex flex-row items-center gap-4">
-      <NameInput data-testid="member-name-input" name="name" label="Name" required disabled={isEdit} />
+      <NameInput
+        data-testid="member-name-input"
+        name="name"
+        label="Name"
+        required
+        disabled={isEdit}
+        validateCharset
+        minLength={NAME_MIN_LENGTH}
+        maxLength={MEMBER_NAME_MAX_LENGTH}
+      />
 
       <Controller
         control={control}

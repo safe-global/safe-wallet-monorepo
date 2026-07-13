@@ -16,6 +16,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { AddressBookEntry } from './SpaceAddressBookTable'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { Badge } from '@/components/ui/badge'
 import AddressBookSearchInput from '@/components/common/AddressBookSearchInput'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
@@ -69,9 +70,9 @@ const SpaceAddressBook = () => {
     }))
   }, [allLocalAddressBooks, user?.wallets])
 
-  // My contacts = the local address book (no space contacts)
+  // Local contacts = the local address book (no space contacts)
   // Contacts that duplicate a space address are marked and sorted to the bottom
-  const myContacts: AddressBookEntry[] = useMemo(() => {
+  const sortedLocalContacts: AddressBookEntry[] = useMemo(() => {
     const spaceAddresses = new Set(addressBookItems.map((item) => item.address.toLowerCase()))
 
     const marked = localContacts.map((entry) => ({
@@ -86,7 +87,7 @@ const SpaceAddressBook = () => {
     () => filteredAllRaw.map((item) => ({ ...item, isLocal: false })),
     [filteredAllRaw],
   )
-  const filteredMine = useAddressBookSearch(myContacts, searchQuery) as AddressBookEntry[]
+  const filteredMine = useAddressBookSearch(sortedLocalContacts, searchQuery) as AddressBookEntry[]
 
   const pendingAddresses = useMemo(
     () => new Set(pendingRequests.map((r) => r.address.toLowerCase())),
@@ -113,15 +114,24 @@ const SpaceAddressBook = () => {
         >
           <TabsList variant="line" className="flex-wrap mb-4">
             <TabsTrigger value="workspace" className="cursor-pointer">
-              Workspace contacts ({addressBookItems.length})
+              <Tooltip>
+                <TooltipTrigger render={<span />}>Workspace contacts ({addressBookItems.length})</TooltipTrigger>
+                <TooltipContent>Shared contacts visible to everyone in this workspace</TooltipContent>
+              </Tooltip>
             </TabsTrigger>
             {isPrivateAddressBookEnabled && (
               <>
                 <TabsTrigger value="mine" className="cursor-pointer">
-                  My contacts ({myContacts.length})
+                  <Tooltip>
+                    <TooltipTrigger render={<span />}>Local contacts ({sortedLocalContacts.length})</TooltipTrigger>
+                    <TooltipContent>These contacts are in your local browser storage</TooltipContent>
+                  </Tooltip>
                 </TabsTrigger>
                 <TabsTrigger value="pending" className="cursor-pointer">
-                  Pending ({pendingRequests.length})
+                  <Tooltip>
+                    <TooltipTrigger render={<span />}>Pending ({pendingRequests.length})</TooltipTrigger>
+                    <TooltipContent>Contacts you proposed to add to the workspace</TooltipContent>
+                  </Tooltip>
                 </TabsTrigger>
               </>
             )}
@@ -140,7 +150,7 @@ const SpaceAddressBook = () => {
                 )}
                 {isPrivateAddressBookEnabled && activeTab === 'mine' && <AddLocalContact />}
               </div>
-              {(activeTab === 'workspace' ? addressBookItems.length > 0 : myContacts.length > 0) && (
+              {(activeTab === 'workspace' ? addressBookItems.length > 0 : sortedLocalContacts.length > 0) && (
                 <AddressBookSearchInput value={searchQuery} onChange={setSearchQuery} />
               )}
             </div>
@@ -170,7 +180,14 @@ const SpaceAddressBook = () => {
                       showAddedBy={false}
                       renderExtraAction={(entry) => {
                         if (entry.isDuplicate) {
-                          return <Badge variant="secondary">Already shared</Badge>
+                          return (
+                            <Tooltip>
+                              <TooltipTrigger render={<span className="inline-flex" />}>
+                                <Badge variant="secondary">Already shared</Badge>
+                              </TooltipTrigger>
+                              <TooltipContent>Already saved in your workspace address book</TooltipContent>
+                            </Tooltip>
+                          )
                         }
                         if (isAdmin) {
                           return (
@@ -194,7 +211,7 @@ const SpaceAddressBook = () => {
                   )}
                 </TabsContent>
 
-                <TabsContent value="pending">
+                <TabsContent value="pending" className="mt-4 sm:mt-0">
                   <PendingRequestsTable requests={pendingRequests} />
                 </TabsContent>
               </>

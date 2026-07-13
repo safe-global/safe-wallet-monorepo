@@ -114,4 +114,20 @@ describe('EditContactDialog', () => {
 
     expect(await screen.findByText(/Something went wrong \(500\)/)).toBeInTheDocument()
   })
+
+  it('treats a name that sanitizes back to the saved name as unchanged', async () => {
+    render(<EditContactDialog entry={entry} onClose={jest.fn()} />)
+
+    const nameInput = screen.getByLabelText('Name')
+    const submitButton = screen.getByRole('button', { name: 'Save' })
+
+    fireEvent.change(nameInput, { target: { value: 'Bob' } })
+    await waitFor(() => expect(submitButton).not.toBeDisabled())
+
+    fireEvent.change(nameInput, { target: { value: 'Alice ' } })
+    await waitFor(() => expect(submitButton).toBeDisabled())
+
+    fireEvent.click(submitButton)
+    expect(mockUpsertAddressBook).not.toHaveBeenCalled()
+  })
 })

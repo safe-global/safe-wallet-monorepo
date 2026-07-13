@@ -4,7 +4,7 @@ import { useLaunchScreen } from './useLaunchScreen'
 import css from './LaunchScreen.module.css'
 
 const LAUNCH_STEPS = [
-  { progress: 30, caption: 'Loading your workspace…' },
+  { progress: 30, caption: 'Loading Safe{Wallet}…' },
   { progress: 65, caption: 'Fetching your accounts…' },
   { progress: 90, caption: 'Almost there…' },
 ] as const

@@ -12,6 +12,7 @@ import { Typography } from '@/components/ui/typography'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import { MEMBER_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -44,7 +45,7 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
 
     try {
       setIsSubmitting(true)
-      const response = await acceptInvite({ spaceId: space.uuid, acceptInviteDto: { name: data.name } })
+      const response = await acceptInvite({ spaceId: space.uuid, acceptInviteDto: { name: sanitizeName(data.name) } })
 
       if (response.error) {
         setError(getRtkQueryErrorMessage(response.error as FetchBaseQueryError | SerializedError))
@@ -84,7 +85,16 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
           <form onSubmit={onSubmit}>
             <div className="px-6 py-4">
               <div className="mb-4">
-                <NameInput data-testid="invite-name-input" label="Name" autoFocus name="name" required />
+                <NameInput
+                  data-testid="invite-name-input"
+                  label="Name"
+                  autoFocus
+                  name="name"
+                  required
+                  validateCharset
+                  minLength={NAME_MIN_LENGTH}
+                  maxLength={MEMBER_NAME_MAX_LENGTH}
+                />
               </div>
               <Typography variant="paragraph-small" color="muted">
                 How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>

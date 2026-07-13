@@ -175,6 +175,7 @@ const PayNowPayLater = ({
           <div className="mt-2">
             <ErrorMessage level="info">
               <Typography
+                data-testid="sign-in-to-workspace-btn"
                 variant="paragraph-small"
                 onClick={signInAndSelectPayLater}
                 className={classnames('font-bold text-[var(--color-primary-main)] underline', {

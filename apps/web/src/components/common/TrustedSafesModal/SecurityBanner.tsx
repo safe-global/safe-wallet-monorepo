@@ -17,12 +17,9 @@ const SecurityBanner = ({ title, className }: SecurityBannerProps) => {
   return (
     <Alert
       variant="warning"
-      className={cn(
-        'mb-4 dark:bg-[var(--color-warning-background)] dark:text-[var(--color-warning1-contrast-text)]',
-        className,
-      )}
+      className={cn('mb-4 dark:bg-[var(--color-warning-background)] dark:text-[var(--color-text-primary)]', className)}
     >
-      <TriangleAlert />
+      <TriangleAlert className="dark:text-[var(--color-warning-main)]" />
       {title && <AlertTitle className="font-bold">{title}</AlertTitle>}
       <AlertDescription className="dark:text-current">
         Some Safes linked to your wallet may be malicious or impersonations (address poisoning). Only trust Safes you

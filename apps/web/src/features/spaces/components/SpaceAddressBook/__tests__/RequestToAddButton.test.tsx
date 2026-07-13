@@ -47,14 +47,47 @@ describe('RequestToAddButton', () => {
     await waitFor(() => expect(screen.getByText('Requested')).toBeInTheDocument())
   })
 
-  it('blocks names that the workspace address book would reject', async () => {
-    render(<RequestToAddButton address={address} name="José 🦄" chainIds={['1']} />)
+  it('submits the sanitized name so it matches the validated value', async () => {
+    mockCreateRequest.mockResolvedValue({ data: {} })
+    render(<RequestToAddButton address={address} name=" Alice‚Bob " chainIds={['1']} />, {
+      initialReduxState: { addressBook: { '1': { [address]: ' Alice‚Bob ' } } },
+    })
 
     await userEvent.click(screen.getByRole('button', { name: 'Request to add' }))
+    await userEvent.click(screen.getByTestId('confirm-request-btn'))
 
-    expect(screen.getByText(/Rename this contact to share it/)).toBeInTheDocument()
-    expect(screen.getByTestId('confirm-request-btn')).toBeDisabled()
+    await waitFor(() => {
+      expect(mockCreateRequest).toHaveBeenCalledWith({
+        spaceId: MOCK_SPACE_UUID,
+        createAddressBookRequestDto: { address, name: "Alice'Bob", chainIds: ['1'] },
+      })
+    })
+  })
+
+  it('disables the button and does not open the dialog when the name has invalid characters', async () => {
+    render(<RequestToAddButton address={address} name="José 🦄" chainIds={['1']} />)
+
+    const button = screen.getByRole('button', { name: 'Request to add' })
+    expect(button).toBeDisabled()
+
+    await userEvent.click(button)
+
+    expect(screen.queryByText('Request to add contact')).not.toBeInTheDocument()
     expect(mockCreateRequest).not.toHaveBeenCalled()
+  })
+
+  it('shows a tooltip explaining why an invalid-name contact cannot be requested', async () => {
+    render(<RequestToAddButton address={address} name="José 🦄" chainIds={['1']} />)
+
+    await userEvent.hover(screen.getByRole('button', { name: 'Request to add' }).parentElement as HTMLElement)
+
+    await waitFor(() => expect(screen.getByText(/Rename this contact to add it to the workspace/)).toBeInTheDocument())
+  })
+
+  it('keeps the button enabled for a valid name', () => {
+    render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} />)
+
+    expect(screen.getByRole('button', { name: 'Request to add' })).not.toBeDisabled()
   })
 
   it('treats an already-pending request (409) as requested', async () => {

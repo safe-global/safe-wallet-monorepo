@@ -46,6 +46,7 @@ export const AssetRowContent = ({
           <span className="inline-flex items-center gap-2">
             {explorerLink ? (
               <Link
+                data-testid="token-name"
                 href={explorerLink.href}
                 target="_blank"
                 rel="noreferrer"
@@ -56,7 +57,7 @@ export const AssetRowContent = ({
                 {item.tokenInfo.name}
               </Link>
             ) : (
-              <Typography variant="paragraph" className="font-bold">
+              <Typography data-testid="token-name" variant="paragraph" className="font-bold">
                 {item.tokenInfo.name}
               </Typography>
             )}

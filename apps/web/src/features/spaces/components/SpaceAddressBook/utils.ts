@@ -2,6 +2,12 @@ import type { AddressBookState } from '@/store/addressBookSlice'
 import type { ContactItem } from './Import/ContactsList'
 import type { ImportContactsFormValues } from './Import/ImportAddressBookDialog'
 import type { AddressBookItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import {
+  ADDRESS_BOOK_NAME_MAX_LENGTH,
+  NAME_MIN_LENGTH,
+  sanitizeName,
+  validateName,
+} from '@safe-global/utils/validation/names'
 
 export const flattenAddressBook = (allAddressBooks: AddressBookState): ContactItem[] => {
   return Object.entries(allAddressBooks).flatMap(([chainId, addressBook]) => {
@@ -22,7 +28,7 @@ export const createContactItems = (data: ImportContactsFormValues) => {
       return {
         chainIds: [chainId],
         address,
-        name,
+        name: sanitizeName(name),
       }
     })
     .filter(Boolean) as AddressBookItem[]
@@ -45,19 +51,10 @@ export const getContactId = (contact: ContactItem) => {
   return `${contact.chainId}:${contact.address}`
 }
 
-// Mirrors the CGW name schema for space address book entries (makeNameSchema,
-// ADDRESS_BOOK_NAME_MAX_LENGTH). Local contacts are unrestricted, so names are
-// validated before they are proposed to the workspace.
-const CONTACT_NAME_REGEX = /^[a-zA-Z0-9]+(?:[ ._-][a-zA-Z0-9]+)*$/
-const CONTACT_NAME_MIN_LENGTH = 3
-const CONTACT_NAME_MAX_LENGTH = 50
+// Local contacts are unrestricted, so names are validated against the shared workspace
+// name schema before they can be proposed to the workspace.
+export const validateContactName = (name: string): string | undefined =>
+  validateName(sanitizeName(name), { minLength: NAME_MIN_LENGTH, maxLength: ADDRESS_BOOK_NAME_MAX_LENGTH })
 
-export const validateContactName = (name: string): string | undefined => {
-  const trimmed = name.trim()
-  if (trimmed.length < CONTACT_NAME_MIN_LENGTH || trimmed.length > CONTACT_NAME_MAX_LENGTH) {
-    return `Names must be ${CONTACT_NAME_MIN_LENGTH} to ${CONTACT_NAME_MAX_LENGTH} characters long`
-  }
-  if (!CONTACT_NAME_REGEX.test(trimmed)) {
-    return 'Names must start with a letter or number and can contain alphanumeric characters, spaces, periods, underscores, or hyphens'
-  }
-}
+export const getRenameContactTooltip = (nameError: string): string =>
+  `Rename this contact to add it to the workspace. ${nameError}`

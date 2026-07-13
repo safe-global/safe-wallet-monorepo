@@ -20,6 +20,7 @@ import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'
 import useOnboardingExit from './hooks/useOnboardingExit'
 import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
+import { NAME_MIN_LENGTH, sanitizeName, validateName } from '@safe-global/utils/validation/names'
 
 const ONBOARDING_STEP = 1
 const FORM_ID = 'create-space-form'
@@ -50,12 +51,11 @@ const CreateSpaceOnboarding = (): ReactElement => {
   const [hasUserEdited, setHasUserEdited] = useState(false)
   const nameReg = register('name', {
     required: true,
-    maxLength: {
-      value: SPACE_NAME_MAX_LENGTH,
-      message: `Workspace name must be ${SPACE_NAME_MAX_LENGTH} characters or less`,
+    validate: (value) => {
+      const sanitized = sanitizeName(value ?? '')
+      if (sanitized === '') return 'Required'
+      return validateName(sanitized, { minLength: NAME_MIN_LENGTH, maxLength: SPACE_NAME_MAX_LENGTH }) ?? true
     },
-    pattern: { value: /^[a-zA-Z0-9 ]+$/, message: 'Workspace name must not contain special characters' },
-    validate: (value) => value?.trim() !== '',
   })
 
   const isInputDisabled = isCheckingAccess || isSpaceLoading
@@ -111,7 +111,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
             error={errors.name?.message}
             onBlur={(e) => {
               nameReg.onBlur(e)
-              setValue('name', e.target.value.trim(), { shouldValidate: true })
+              setValue('name', sanitizeName(e.target.value), { shouldValidate: true })
             }}
           />
           {isSpaceLoading && (

@@ -6,13 +6,14 @@ import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer'
 import { Typography } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { NetworkLogosTooltip } from '@/features/multichain'
 import { getSafeAppUrl } from '@/components/safe-apps/SafeAppCard'
-import ChainIndicator from '@/components/common/ChainIndicator'
 import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
 import SafeAppActionButtons from '@/components/safe-apps/SafeAppActionButtons'
 import SafeAppTags from '@/components/safe-apps/SafeAppTags'
 import SafeAppSocialLinksCard from '@/components/safe-apps/SafeAppSocialLinksCard'
 import CloseIcon from '@/public/images/common/close.svg'
+import useChains from '@/hooks/useChains'
 import { useOpenedSafeApps } from '@/hooks/safe-apps/useOpenedSafeApps'
 import css from './styles.module.css'
 import { SAFE_APPS_EVENTS, SAFE_APPS_LABELS, trackSafeAppEvent, SafeAppLaunchLocation } from '@/services/analytics'
@@ -29,6 +30,8 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
   const { markSafeAppOpened } = useOpenedSafeApps()
   const router = useRouter()
   const safeAppUrl = getSafeAppUrl(router, safeApp?.url || '')
+  const { configs } = useChains()
+  const knownChainIds = safeApp?.chainIds.filter((chainId) => configs.some((chain) => chain.chainId === chainId)) ?? []
 
   const onOpenSafe = () => {
     if (safeApp) {
@@ -89,10 +92,8 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
             Available networks
           </Typography>
 
-          <div className="mt-4 flex flex-wrap gap-4">
-            {safeApp?.chainIds.map((chainId) => (
-              <ChainIndicator key={chainId} chainId={chainId} inline showUnknown={false} />
-            ))}
+          <div className="mt-4 flex">
+            <NetworkLogosTooltip networks={knownChainIds.map((chainId) => ({ chainId }))} maxVisible={3} />
           </div>
 
           {/* Open Safe App button */}

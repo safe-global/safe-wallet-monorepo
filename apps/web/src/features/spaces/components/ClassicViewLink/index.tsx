@@ -4,6 +4,8 @@ import { History } from 'lucide-react'
 import { enableClassicView } from '@/hooks/useClassicView'
 import { AppRoutes } from '@/config/routes'
 import { parseNextUrlForRouter } from '@/utils/nextUrl'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
 /**
  * Escape-hatch link shown under the sign-in card on /welcome/spaces.
@@ -18,6 +20,7 @@ const ClassicViewLink = () => {
   const router = useRouter()
 
   const onClick = useCallback(() => {
+    trackEvent(SPACE_EVENTS.USE_OLD_UI)
     const next = parseNextUrlForRouter(router.query.next) ?? { pathname: AppRoutes.welcome.accounts }
     enableClassicView()
     router.replace(next)

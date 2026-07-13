@@ -62,7 +62,7 @@ export const spacesSetupGroup: SidebarGroupConfig = {
     },
     {
       icon: Shield,
-      label: 'Security',
+      label: 'Security hub',
       href: AppRoutes.spaces.security,
       activeMemberOnly: true,
     },

@@ -11,26 +11,27 @@ import PagePlaceholder from '@/components/common/PagePlaceholder'
 import NoAssetsIcon from '@/public/images/balances/no-assets.svg'
 import CurrencySelect from '@/components/balances/CurrencySelect'
 import ManageTokensButton from '@/components/balances/ManageTokensButton'
-import StakingBanner from '@/components/dashboard/StakingBanner'
-import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { BRAND_NAME } from '@/config/constants'
 import { NoFeeCampaignFeature, useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign'
 import { PortfolioFeature } from '@/features/portfolio'
+import { StakeFeature, useIsStakingPromoBannerVisible, STAKING_PROMO_BANNER_HIDE_KEY } from '@/features/stake'
 import { useLoadFeature } from '@/features/__core__'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 
 const Balances: NextPage = () => {
   const { NoFeeCampaignBanner } = useLoadFeature(NoFeeCampaignFeature)
+  const { StakingPromoBanner } = useLoadFeature(StakeFeature)
   const { balances, error } = useVisibleBalances()
   const [showHiddenAssets, setShowHiddenAssets] = useState(false)
   const toggleShowHiddenAssets = () => setShowHiddenAssets((prev) => !prev)
   const manageTokensButtonRef = useRef<ManageTokensButtonHandle>(null)
-  const isStakingBannerVisible = useIsStakingBannerVisible()
   const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
   const [hideNoFeeCampaignBanner, setHideNoFeeCampaignBanner] = useLocalStorage<boolean>(
     'hideNoFeeCampaignAssetsPageBanner',
   )
+  const isStakingPromoBannerVisible = useIsStakingPromoBannerVisible()
+  const [, setHideStakingPromoBanner] = useLocalStorage<boolean>(STAKING_PROMO_BANNER_HIDE_KEY)
   const portfolio = useLoadFeature(PortfolioFeature)
 
   const tokensFiatTotal = balances.tokensFiatTotal ? Number(balances.tokensFiatTotal) : undefined
@@ -48,9 +49,9 @@ const Balances: NextPage = () => {
       <AssetsHeader />
 
       <main>
-        {isStakingBannerVisible && (
+        {isStakingPromoBannerVisible && (
           <div className="mb-4 empty:hidden">
-            <StakingBanner />
+            <StakingPromoBanner onDismiss={() => setHideStakingPromoBanner(true)} />
           </div>
         )}
 

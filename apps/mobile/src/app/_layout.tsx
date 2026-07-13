@@ -1,7 +1,4 @@
-import '@/src/features/WalletConnect/shared/compat'
-import '@/src/platform/fetch'
-import '@/src/platform/crypto-shims'
-import '@/src/platform/intl-polyfills'
+// Platform polyfills live in src/platform/polyfills.ts, imported first in index.js.
 import { Stack } from 'expo-router'
 import 'react-native-reanimated'
 import { SafeThemeProvider } from '@/src/theme/provider/safeTheme'
@@ -124,6 +121,7 @@ function NavigationStack() {
       <Stack.Screen name="confirmations-sheet" options={transparentModalOptions} />
       <Stack.Screen name="change-signer-sheet" options={transparentModalOptions} />
       <Stack.Screen name="change-estimated-fee-sheet" options={transparentModalOptions} />
+      <Stack.Screen name="edit-approval-sheet" options={transparentModalOptions} />
       <Stack.Screen name="how-to-execute-sheet" options={transparentModalOptions} />
       <Stack.Screen name="notifications-opt-in" options={hiddenHeaderModalOptions} />
       <Stack.Screen name="biometrics-opt-in" options={hiddenHeaderModalOptions} />
