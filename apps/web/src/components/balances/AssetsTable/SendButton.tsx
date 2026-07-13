@@ -57,7 +57,8 @@ const SendButton = ({
               variant={light ? 'secondary' : 'default'}
               onClick={onSendClick}
               disabled={!isOk}
-              className={`h-8 ${css.sendButton}`}
+              // eslint-disable-next-line no-restricted-syntax -- faithful css-module port of .sendButton (h-8 + px:var(--space-2)), pixel-identical; bespoke value has no variant
+              className="h-8 px-[var(--space-2)]"
             >
               <ArrowIconNW />
               Send

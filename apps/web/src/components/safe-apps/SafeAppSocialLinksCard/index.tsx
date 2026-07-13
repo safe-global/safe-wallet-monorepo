@@ -30,7 +30,10 @@ const SafeAppSocialLinksCard = ({ safeApp }: SafeAppSocialLinksCardProps) => {
   const telegramSocialLink = getSocialProfile(socialProfiles, SafeAppSocialPlatforms.TELEGRAM)
 
   return (
-    <Card className={css.container}>
+    <Card
+      // eslint-disable-next-line no-restricted-syntax -- faithful css-module port, pixel-identical; bespoke value has no variant
+      className="mt-[var(--space-4)] bg-[var(--color-info-background)] p-[var(--space-3)]"
+    >
       <div className="flex items-center gap-2">
         {/* Team Link section */}
         <div className={css.questionMarkIcon}>

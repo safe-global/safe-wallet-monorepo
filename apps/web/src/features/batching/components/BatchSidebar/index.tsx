@@ -107,7 +107,11 @@ const BatchSidebar = ({ isOpen, onToggle }: { isOpen: boolean; onToggle: (open: 
               <CheckWallet>
                 {(isOk) => (
                   <Track {...BATCH_EVENTS.BATCH_CONFIRM} label={batchTxs.length}>
-                    <Button onClick={onConfirmClick} disabled={!batchTxs.length || !isOk} className={css.confirmButton}>
+                    <Button
+                      onClick={onConfirmClick}
+                      disabled={!batchTxs.length || !isOk}
+                      className="mt-[var(--space-1)]"
+                    >
                       Confirm batch
                     </Button>
                   </Track>
@@ -128,7 +132,13 @@ const BatchSidebar = ({ isOpen, onToggle }: { isOpen: boolean; onToggle: (open: 
             </EmptyBatch>
           )}
 
-          <Button variant="ghost" size="icon-sm" className={css.close} aria-label="close" onClick={closeSidebar}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="absolute right-[var(--space-2)] top-[var(--space-2)] z-[1] p-[var(--space-1)] text-[var(--color-border-main)]"
+            aria-label="close"
+            onClick={closeSidebar}
+          >
             <CloseIcon className="size-5" />
           </Button>
         </aside>

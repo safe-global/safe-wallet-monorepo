@@ -11,11 +11,6 @@
   border: 1px solid var(--color-text-primary);
 }
 
-.exportIcon {
-  min-width: unset;
-  padding: var(--space-1);
-}
-
 .header {
   border-bottom: 1px solid var(--color-border-light);
 }

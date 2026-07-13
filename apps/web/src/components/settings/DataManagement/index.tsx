@@ -91,7 +91,7 @@ const DataManagement = () => {
             title={<b>{exportFileName}</b>}
             action={
               <Track {...OVERVIEW_EVENTS.EXPORT_DATA} label={OVERVIEW_LABELS.settings}>
-                <Button className={css.exportIcon} onClick={exportAppData}>
+                <Button className="min-w-[unset] p-[var(--space-1)]" onClick={exportAppData}>
                   <ExportIcon className="size-4" />
                 </Button>
               </Track>

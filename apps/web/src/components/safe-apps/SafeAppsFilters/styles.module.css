@@ -18,19 +18,6 @@
   color: var(--color-text-primary);
 }
 
-.fieldControl {
-  /* Match the SearchField height (h-10 = 40px); override the shadcn trigger's
-     built-in data-[size=default]:h-9, which out-specifies a plain class. */
-  height: var(--space-5) !important;
-  border-color: var(--border);
-  background-color: var(--card);
-  box-shadow: none;
-}
-
-.fieldControl:focus-visible {
-  border-color: var(--ring);
-}
-
 .selectPlaceholder {
   color: var(--muted-foreground);
 }

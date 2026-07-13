@@ -67,11 +67,11 @@ const HnSignupIntro = ({ onGetStarted, onClose }: HnSignupIntroProps) => {
             // Mixpanel: The event name is automatically determined from the GA_TO_MIXPANEL_MAPPING based on the action
             {...HYPERNATIVE_EVENTS.GUARDIAN_FORM_STARTED}
           >
-            <Button onClick={onGetStarted} className={`w-full ${css.primaryButton}`}>
+            <Button onClick={onGetStarted} className="w-full">
               Get started
             </Button>
           </Track>
-          <Button variant="ghost" onClick={onClose} className={`w-full ${css.secondaryButton}`}>
+          <Button variant="ghost" onClick={onClose} className="w-full">
             Close
           </Button>
         </div>

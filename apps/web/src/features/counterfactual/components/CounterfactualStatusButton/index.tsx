@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/utils/cn'
 import { RotateCw } from 'lucide-react'
 import type { ComponentProps } from 'react'
-import css from './styles.module.css'
 
 export const LoopIcon = ({ className, ...props }: ComponentProps<'svg'>) => {
   return <RotateCw className={cn('animate-spin', className)} {...props} />
@@ -29,9 +28,13 @@ const CounterfactualStatusButton = () => {
             data-testid="pending-activation-icon"
             variant="ghost"
             size="icon-sm"
-            className={cn(css.statusButton, { [css.processing]: isActivating }, [
+            className={cn(
+              // eslint-disable-next-line no-restricted-syntax -- faithful css-module port of .statusButton (radius/padding/bg + layout), pixel-identical; bespoke values have no variant
+              'ml-auto [justify-self:flex-end] rounded-[4px] p-[6px] bg-[var(--color-warning-background)]',
+              // eslint-disable-next-line no-restricted-syntax -- faithful css-module port of .statusButton.processing (bg override), pixel-identical
+              isActivating && 'bg-[var(--color-info-background)]',
               isActivating ? 'text-[var(--color-info-main)]' : 'text-[var(--color-warning-main)]',
-            ])}
+            )}
           />
         }
       >

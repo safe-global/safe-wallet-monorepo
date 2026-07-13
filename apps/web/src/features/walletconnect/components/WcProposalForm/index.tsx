@@ -134,7 +134,13 @@ const WcProposalForm = ({ proposal, onApprove, onReject }: ProposalFormProps): R
 
       <div className={css.buttons}>
         {!isUnsupportedChain && (
-          <Button variant="default" onClick={onApprove} className={css.button} disabled={disabled}>
+          <Button
+            variant="default"
+            onClick={onApprove}
+            // eslint-disable-next-line no-restricted-syntax -- faithful css-module port, pixel-identical; bespoke values have no variant
+            className="py-[var(--space-1)] px-[var(--space-4)] min-w-[130px]"
+            disabled={disabled}
+          >
             {loading === WCLoadingState.APPROVE ? <Spinner className="size-5" /> : 'Approve'}
           </Button>
         )}
@@ -142,7 +148,8 @@ const WcProposalForm = ({ proposal, onApprove, onReject }: ProposalFormProps): R
         <Button
           variant={isUnsupportedChain ? 'ghost' : 'destructive'}
           onClick={onReject}
-          className={css.button}
+          // eslint-disable-next-line no-restricted-syntax -- faithful css-module port, pixel-identical; bespoke values have no variant
+          className="py-[var(--space-1)] px-[var(--space-4)] min-w-[130px]"
           disabled={!!loading}
         >
           {loading === WCLoadingState.REJECT ? <Spinner className="size-5" /> : isUnsupportedChain ? 'Close' : 'Reject'}

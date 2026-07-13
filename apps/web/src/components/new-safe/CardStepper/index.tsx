@@ -14,7 +14,7 @@ export function CardStepper<StepperData>(props: TxStepperProps<StepperData>) {
   const progress = ((activeStep + 1) / steps.length) * 100
 
   return (
-    <Card className={css.card}>
+    <Card>
       <div className="h-1 w-full overflow-hidden bg-[var(--color-background-main)]">
         <div
           className="h-full transition-all"

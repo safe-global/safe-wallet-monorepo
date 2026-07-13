@@ -354,7 +354,10 @@ const NetworkSelector = ({
   return configs.length ? (
     <Select open={open} onOpenChange={handleOpenChange} value={chainId}>
       <SelectTrigger
-        className={cn(triggerClassName ?? css.select)}
+        className={cn(
+          // eslint-disable-next-line no-restricted-syntax -- faithful css-module port of `.select`, pixel-identical; stripped-trigger values have no Select variant
+          triggerClassName ?? 'bg-transparent border-none shadow-none p-0 h-full',
+        )}
         iconWrapperClassName={compactButton ? 'text-base' : undefined}
         aria-label="Network"
       >

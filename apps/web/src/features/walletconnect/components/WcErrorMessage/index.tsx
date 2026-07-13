@@ -14,7 +14,12 @@ const WcErrorMessage = ({ error, onClose }: { error: Error; onClose: () => void 
 
       {details && <Typography className={`mt-1 ${css.details}`}>{details}</Typography>}
 
-      <Button variant="default" onClick={onClose} className={css.button}>
+      <Button
+        variant="default"
+        onClick={onClose}
+        // eslint-disable-next-line no-restricted-syntax -- faithful css-module port, pixel-identical; bespoke values have no variant
+        className="py-[var(--space-1)] px-[var(--space-4)] mt-[var(--space-3)]"
+      >
         OK
       </Button>
     </div>

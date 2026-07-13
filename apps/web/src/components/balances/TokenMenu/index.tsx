@@ -34,17 +34,35 @@ const TokenMenu = ({
         </div>
         <div className="flex flex-row gap-2">
           <Track {...ASSETS_EVENTS.CANCEL_HIDE_DIALOG}>
-            <Button onClick={cancel} className={css.cancelButton} size="sm" variant="outline">
+            <Button
+              onClick={cancel}
+              // eslint-disable-next-line no-restricted-syntax -- faithful css-module port, pixel-identical; bespoke value has no variant
+              className="py-[4px] px-[10px]"
+              size="sm"
+              variant="outline"
+            >
               Cancel
             </Button>
           </Track>
           <Track {...ASSETS_EVENTS.DESELECT_ALL_HIDE_DIALOG}>
-            <Button onClick={deselectAll} className={css.cancelButton} size="sm" variant="outline">
+            <Button
+              onClick={deselectAll}
+              // eslint-disable-next-line no-restricted-syntax -- faithful css-module port, pixel-identical; bespoke value has no variant
+              className="py-[4px] px-[10px]"
+              size="sm"
+              variant="outline"
+            >
               Deselect all
             </Button>
           </Track>
           <Track {...ASSETS_EVENTS.SAVE_HIDE_DIALOG}>
-            <Button onClick={saveChanges} className={css.applyButton} size="sm" variant="default">
+            <Button
+              onClick={saveChanges}
+              // eslint-disable-next-line no-restricted-syntax -- faithful css-module port, pixel-identical; bespoke value has no variant
+              className="py-[6px] px-[var(--space-3)]"
+              size="sm"
+              variant="default"
+            >
               Save
             </Button>
           </Track>

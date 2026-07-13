@@ -4,7 +4,6 @@ import { ChevronDown, Check } from 'lucide-react'
 import SpaceCard from '../SpaceCard'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 
-import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { useCurrentSpaceId } from '@/features/spaces'
@@ -63,7 +62,9 @@ const SpaceSidebarSelector = () => {
               data-testid="space-selector-button"
               id="space-selector-button"
               variant="ghost"
-              className={cn('w-full', css.spaceSelectorButton)}
+              className={cn(
+                'w-full justify-between text-left p-[var(--space-1)] m-[var(--space-1)] border border-[var(--color-border-light)] text-[14px] hover:border hover:border-[var(--color-border-light)]',
+              )}
             />
           }
         >

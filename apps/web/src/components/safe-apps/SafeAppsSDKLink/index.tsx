@@ -37,7 +37,13 @@ const SafeAppsSDKLink = () => {
         <span>Learn more about Safe Apps SDK</span>
       </ExternalLink>
 
-      <Button variant="secondary" size="sm" className={css.openButton} tabIndex={-1}>
+      <Button
+        variant="secondary"
+        size="sm"
+        // eslint-disable-next-line no-restricted-syntax -- faithful css-module port, pixel-identical; bespoke value has no variant
+        className={classnames(css.openButton, 'h-[20px] rounded-[0_0_8px_8px] bg-[var(--color-secondary-main)]')}
+        tabIndex={-1}
+      >
         <ChevronsUp className="size-4" />
       </Button>
     </div>

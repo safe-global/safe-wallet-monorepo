@@ -42,10 +42,6 @@
   height: calc(100% + 31px);
 }
 
-.confirmButton {
-  margin-top: var(--space-1);
-}
-
 .txs svg {
   color: var(--color-border-main);
   transition: color 0.1s ease-in;
@@ -67,15 +63,6 @@
   width: 24px;
   height: 24px;
   margin-top: var(--space-2);
-}
-
-.close {
-  position: absolute;
-  right: var(--space-2);
-  top: var(--space-2);
-  z-index: 1;
-  padding: var(--space-1);
-  color: var(--color-border-main);
 }
 
 .details {

@@ -29,7 +29,8 @@ const OverviewWidget = ({ safeName, networks }: { safeName: string; networks: Ch
 
   return (
     <div className="col-span-12">
-      <Card className={css.card}>
+      {/* eslint-disable-next-line no-restricted-syntax -- faithful css-module port, pixel-identical; bespoke value has no variant */}
+      <Card className="w-full border border-[var(--color-border-light)]">
         <div className={css.header}>
           <SafeLogo alt="Safe logo" width={LOGO_DIMENSIONS} height={LOGO_DIMENSIONS} />
           <Typography variant="h4">Your Safe account preview</Typography>

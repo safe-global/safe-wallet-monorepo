@@ -41,7 +41,12 @@ export const HnDashboardBanner = ({ onHnSignupClick }: HnDashboardBannerProps) =
             {description}
           </Typography>
 
-          <Button variant="outline" size="sm" className={css.ctaButton}>
+          <Button
+            variant="outline"
+            size="sm"
+            // eslint-disable-next-line no-restricted-syntax -- faithful css-module port, pixel-identical; bespoke values have no variant
+            className="mt-[var(--space-3)]! mb-[var(--space-1)]! border-[#12ff80]! text-[#12ff80]! rounded-[6px] py-[6px] px-[var(--space-1)] font-bold text-[14px] leading-[24px] tracking-[0.4px] normal-case self-start hover:border-[#12ff80]! hover:bg-[rgba(18,255,128,0.1)]! hover:max-w-full"
+          >
             {ctaLabel}
           </Button>
         </div>

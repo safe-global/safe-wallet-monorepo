@@ -61,7 +61,13 @@ const WcSessionListItem = ({ session }: { session: SessionTypes.Struct }) => {
       </span>
 
       <div className={css.sessionListSecondaryAction}>
-        <Button variant="destructive" onClick={onDisconnect} className={css.button} disabled={!!loading}>
+        <Button
+          variant="destructive"
+          onClick={onDisconnect}
+          // eslint-disable-next-line no-restricted-syntax -- faithful css-module port, pixel-identical; bespoke values have no variant
+          className="py-[var(--space-1)] px-[var(--space-2)]"
+          disabled={!!loading}
+        >
           {loading === WCLoadingState.DISCONNECT ? <Spinner className="size-5" /> : 'Disconnect'}
         </Button>
       </div>
