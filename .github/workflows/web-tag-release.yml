@@ -199,8 +199,7 @@ jobs:
         with:
           app-id: ${{ secrets.PROMOTIONS_APP_ID }}
           private-key: ${{ secrets.PROMOTIONS_APP_PRIVATE_KEY }}
-          owner: safe-global
-          repositories: safe-production-promotions
+          repositories: ${{ secrets.PROMOTIONS_REPO }}
           permission-actions: write
 
       # Script to prepare production deployments
@@ -210,6 +209,7 @@ jobs:
         working-directory: apps/web
         env:
           GH_TOKEN: ${{ steps.promotions_token.outputs.token }}
+          PROMOTIONS_REPO: ${{ github.repository_owner }}/${{ secrets.PROMOTIONS_REPO }}
           VERSION_TAG: ${{ needs.tag.outputs.version }}
 
       - name: Create back-merge PR
