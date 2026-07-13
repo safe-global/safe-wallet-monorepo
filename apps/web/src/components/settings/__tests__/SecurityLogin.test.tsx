@@ -80,6 +80,7 @@ describe('SecurityLogin', () => {
       $isDisabled: false,
       $isReady: true,
       HnActivatedSettingsBanner: MockHnActivatedSettingsBanner,
+      SwitchAuthenticator: () => null,
     })
 
     // Default mocks - feature enabled, wallet connected, owner, sufficient balance, not targeted

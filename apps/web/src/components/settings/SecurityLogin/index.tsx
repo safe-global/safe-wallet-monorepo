@@ -4,6 +4,7 @@ import { useIsRecoverySupported } from '@/features/recovery'
 import SecuritySettings from '../SecuritySettings'
 import { useRouter } from 'next/router'
 import { HnBannerForSettings, HypernativeFeature } from '@/features/hypernative'
+import { OidcAuthFeature } from '@/features/oidc-auth'
 import { useLoadFeature } from '@/features/__core__'
 import { HYPERNATIVE_SOURCE } from '@/services/analytics'
 
@@ -13,6 +14,7 @@ const SecurityLogin = () => {
   const isRecoverySupported = useIsRecoverySupported()
   const router = useRouter()
   const hn = useLoadFeature(HypernativeFeature)
+  const oidc = useLoadFeature(OidcAuthFeature)
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
@@ -23,6 +25,8 @@ const SecurityLogin = () => {
       <HnBannerForSettings isDismissable={false} label={HYPERNATIVE_SOURCE.Settings} />
 
       {isRecoverySupported && router.query.safe ? <RecoverySettings /> : null}
+
+      <oidc.SwitchAuthenticator />
 
       <SecuritySettings />
     </Box>

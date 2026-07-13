@@ -10,8 +10,10 @@
 
 import type EmailSignInButton from './components/EmailSignInButton'
 import type GoogleSignInButton from './components/GoogleSignInButton'
+import type SwitchAuthenticator from './components/SwitchAuthenticator'
 
 export interface OidcAuthContract {
   EmailSignInButton: typeof EmailSignInButton
   GoogleSignInButton: typeof GoogleSignInButton
+  SwitchAuthenticator: typeof SwitchAuthenticator
 }

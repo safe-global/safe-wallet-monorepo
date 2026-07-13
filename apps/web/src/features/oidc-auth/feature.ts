@@ -11,10 +11,12 @@
 import type { OidcAuthContract } from './contract'
 import EmailSignInButton from './components/EmailSignInButton'
 import GoogleSignInButton from './components/GoogleSignInButton'
+import SwitchAuthenticator from './components/SwitchAuthenticator'
 
 const feature: OidcAuthContract = {
   EmailSignInButton,
   GoogleSignInButton,
+  SwitchAuthenticator,
 }
 
 export default feature satisfies OidcAuthContract
