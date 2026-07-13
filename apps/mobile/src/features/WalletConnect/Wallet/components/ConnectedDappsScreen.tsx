@@ -28,6 +28,13 @@ export const ConnectedDappsScreen: React.FC = () => {
     openSwipeRef.current = methods
   }, [])
 
+  // Drop the tracked swipeable when its row unmounts (e.g. the session got disconnected).
+  const handleSwipeCleanup = useCallback((methods: SwipeableMethods) => {
+    if (openSwipeRef.current === methods) {
+      openSwipeRef.current = null
+    }
+  }, [])
+
   const handleConfirm = useCallback(async () => {
     if (!selected) {
       return
@@ -46,9 +53,10 @@ export const ConnectedDappsScreen: React.FC = () => {
         variant={verifyByTopic[item.topic]}
         onRequestDisconnect={setSelected}
         onSwipeOpenStart={handleSwipeOpenStart}
+        onSwipeCleanup={handleSwipeCleanup}
       />
     ),
-    [verifyByTopic, handleSwipeOpenStart],
+    [verifyByTopic, handleSwipeOpenStart, handleSwipeCleanup],
   )
 
   return (

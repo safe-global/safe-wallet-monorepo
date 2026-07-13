@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { Pressable } from 'react-native'
 import ReanimatedSwipeable, {
   SwipeDirection,
@@ -19,12 +19,32 @@ interface Props {
   onRequestDisconnect: (session: SessionTypes.Struct) => void
   /** Notifies the screen that this row starts to swipe open, so it can close the previous one. */
   onSwipeOpenStart?: (methods: SwipeableMethods) => void
+  /** Notifies the screen that this row unmounts, so it can drop a reference to its swipeable. */
+  onSwipeCleanup?: (methods: SwipeableMethods) => void
 }
 
 /** A connected-dApp card; the overflow menu and a left-swipe both route to a disconnect confirmation. */
-export const ConnectedDappRow: React.FC<Props> = ({ session, variant, onRequestDisconnect, onSwipeOpenStart }) => {
+export const ConnectedDappRow: React.FC<Props> = ({
+  session,
+  variant,
+  onRequestDisconnect,
+  onSwipeOpenStart,
+  onSwipeCleanup,
+}) => {
   const meta = session.peer.metadata
   const swipeRef = useRef<SwipeableMethods>(null)
+
+  // Capture the handle at mount: the swipeable's ref is already detached when the cleanup runs.
+  const onSwipeCleanupRef = useRef(onSwipeCleanup)
+  onSwipeCleanupRef.current = onSwipeCleanup
+  useEffect(() => {
+    const methods = swipeRef.current
+    return () => {
+      if (methods) {
+        onSwipeCleanupRef.current?.(methods)
+      }
+    }
+  }, [])
 
   const requestDisconnect = useCallback(() => {
     swipeRef.current?.close()

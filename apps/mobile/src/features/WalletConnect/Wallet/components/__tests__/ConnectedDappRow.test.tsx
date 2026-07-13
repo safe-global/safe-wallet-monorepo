@@ -117,4 +117,19 @@ describe('ConnectedDappRow', () => {
     fireEvent.press(getByTestId('swipe-open-drag-right'))
     expect(onSwipeOpenStart).not.toHaveBeenCalled()
   })
+
+  it('notifies onSwipeCleanup with its swipeable handle when the row unmounts', () => {
+    const onSwipeCleanup = jest.fn()
+    const { unmount } = render(
+      <ConnectedDappRow
+        session={session('t4', 'Balancer')}
+        onRequestDisconnect={jest.fn()}
+        onSwipeCleanup={onSwipeCleanup}
+      />,
+    )
+
+    expect(onSwipeCleanup).not.toHaveBeenCalled()
+    unmount()
+    expect(onSwipeCleanup).toHaveBeenCalledWith(expect.objectContaining({ close: expect.any(Function) }))
+  })
 })
