@@ -133,11 +133,6 @@ const SpaceSafeAccounts = () => {
       ) : (
         <>
           {similarAddresses.size > 0 && <SimilarAddressAlert />}
-          {isManualOrder && !debouncedSearchQuery && (
-            <Typography variant="paragraph-small" color="muted" className="mb-2">
-              Drag the handle on any row to arrange accounts your way — your order is saved automatically.
-            </Typography>
-          )}
           <SafeAccountsTable
             items={visibleSafes}
             // Inside a workspace every Safe belongs to it, so the Workspaces column adds no information.
