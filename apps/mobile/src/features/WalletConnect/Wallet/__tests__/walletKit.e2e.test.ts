@@ -40,6 +40,34 @@ describe('walletKit.e2e (fake WalletKit)', () => {
     expect(wk.getActiveSessions()).toEqual({})
   })
 
+  it('respondSessionRequest() records a delivered result in the side-channel', async () => {
+    const wk = await getWalletKit()
+    expect(walletKitE2eState.get().lastRequestResponse).toBeNull()
+
+    await wk.respondSessionRequest({
+      topic: 'e2e-session-topic',
+      response: { id: 7, jsonrpc: '2.0', result: '0xsafetxhash' },
+    })
+    expect(walletKitE2eState.get().lastRequestResponse).toEqual({
+      topic: 'e2e-session-topic',
+      id: 7,
+      result: '0xsafetxhash',
+    })
+  })
+
+  it('respondSessionRequest() records a delivered error in the side-channel', async () => {
+    const wk = await getWalletKit()
+    await wk.respondSessionRequest({
+      topic: 'e2e-session-topic',
+      response: { id: 8, jsonrpc: '2.0', error: { code: 4100, message: 'No signer attached to this Safe' } },
+    })
+    expect(walletKitE2eState.get().lastRequestResponse).toEqual({
+      topic: 'e2e-session-topic',
+      id: 8,
+      error: { code: 4100, message: 'No signer attached to this Safe' },
+    })
+  })
+
   it('rejectSession() flips the rejectSessionCalled side-channel', async () => {
     const wk = await getWalletKit()
     expect(walletKitE2eState.get().rejectSessionCalled).toBe(false)

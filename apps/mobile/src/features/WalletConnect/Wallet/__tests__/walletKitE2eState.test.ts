@@ -9,6 +9,8 @@ describe('walletKitE2eState', () => {
       pairBehavior: 'resolve',
       sessions: {},
       rejectSessionCalled: false,
+      lastRequestResponse: null,
+      proposeBehavior: 'live',
     })
   })
 
