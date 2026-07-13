@@ -4,6 +4,7 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { TxNotesFeature } from '@/features/tx-notes'
 import { useLoadFeature } from '@/features/__core__'
+import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { SlotName, withSlot } from '../slots'
 
 const TxNote = (): ReactElement => {
@@ -22,10 +23,12 @@ const TxNote = (): ReactElement => {
   return <TxNoteForm isCreation={isCreation} onChange={onNoteChange} txDetails={txDetails} />
 }
 
-const useShouldRegisterSlot = () => {
+export const useShouldRegisterSlot = () => {
   const { txDetails, isCreation } = useContext(TxFlowContext)
+  const isSafeOwner = useIsSafeOwner()
 
-  return isCreation || !!txDetails?.note
+  // Existing notes are only shown to signers; creation input stays available to proposers
+  return isCreation || (!!txDetails?.note && isSafeOwner)
 }
 
 const TxNoteSlot = withSlot({

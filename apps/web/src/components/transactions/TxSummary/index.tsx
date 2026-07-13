@@ -27,6 +27,7 @@ import {
 } from '@/features/hypernative'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 
 type TxSummaryProps = {
   isConflictGroup?: boolean
@@ -45,6 +46,7 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const isTrusted = !hasDefaultTokenlist || isTrustedTx(tx)
   const isImitationTransaction = isImitation(tx)
   const isPending = useIsPending(tx.id)
+  const isSafeOwner = useIsSafeOwner()
   const executionInfo = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo : undefined
   const expiredSwap = useIsExpiredSwap(tx.txInfo)
 
@@ -81,7 +83,7 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
       <Box data-testid="tx-type" gridArea="type">
         <TxType tx={tx} />
 
-        {tx.note && (
+        {tx.note && isSafeOwner && (
           <Typography variant="body2" component="span" color="text.secondary" title={tx.note}>
             {ellipsis(tx.note, 25)}
           </Typography>

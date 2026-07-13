@@ -12,6 +12,7 @@ import {
 
 import TxSummary from '@/components/transactions/TxSummary/index'
 import * as pending from '@/hooks/useIsPending'
+import * as useIsSafeOwnerHook from '@/hooks/useIsSafeOwner'
 import { render } from '@/tests/test-utils'
 
 const mockTransaction: MultisigTransaction = {
@@ -50,6 +51,11 @@ const mockTransactionInHistory = {
   ...mockTransaction,
   transaction: { ...mockTransaction.transaction, txStatus: TransactionStatus.SUCCESS },
 }
+
+const mockTransactionWithNote = {
+  ...mockTransaction,
+  transaction: { ...mockTransaction.transaction, note: 'Monthly payroll' },
+} as unknown as MultisigTransaction
 
 describe('TxSummary', () => {
   it('should display a nonce if transaction is not grouped', () => {
@@ -121,5 +127,19 @@ describe('TxSummary', () => {
     const { queryByTestId } = render(<TxSummary item={mockTransaction} isConflictGroup={false} />)
 
     expect(queryByTestId('tx-status-label')).not.toBeInTheDocument()
+  })
+
+  it('should display the note preview for a signer of the Safe', () => {
+    jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
+    const { getByText } = render(<TxSummary item={mockTransactionWithNote} isConflictGroup={false} />)
+
+    expect(getByText('Monthly payroll')).toBeInTheDocument()
+  })
+
+  it('should hide the note preview for a non-signer', () => {
+    jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(false)
+    const { queryByText } = render(<TxSummary item={mockTransactionWithNote} isConflictGroup={false} />)
+
+    expect(queryByText('Monthly payroll')).not.toBeInTheDocument()
   })
 })

@@ -3,10 +3,14 @@ import { Tooltip, Typography, Stack } from '@mui/material'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 
 export default function TxNote({ txDetails }: { txDetails: TransactionDetails | undefined }) {
+  const isSafeOwner = useIsSafeOwner()
   const note = txDetails?.note
-  if (!note) return null
+
+  // Transaction notes are only visible to signers of the Safe
+  if (!note || !isSafeOwner) return null
 
   const creator =
     isMultisigDetailedExecutionInfo(txDetails?.detailedExecutionInfo) && txDetails?.detailedExecutionInfo.proposer
