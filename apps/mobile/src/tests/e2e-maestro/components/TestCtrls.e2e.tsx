@@ -336,7 +336,7 @@ export function TestCtrls() {
         />
         <Pressable testID="e2eWcPairHang" onPress={() => setWcPairHang()} accessibilityRole="button" style={BTN} />
 
-        {/* WalletConnect dApp transaction-request scenarios (WA-2326) */}
+        {/* WalletConnect dApp transaction-request scenarios */}
         <Pressable
           testID="e2eWcDappsTx"
           onPress={() => {
