@@ -28,6 +28,7 @@ jest.mock('@/features/spending-limits/services/spendingLimitContracts', () => ({
   getLatestSpendingLimitAddress: jest.fn(),
 }))
 
+// eslint-disable-next-line no-restricted-imports -- test targets the source module directly so the jest.mock above intercepts the calls buildBatch makes
 import {
   getDeployedSpendingLimitModuleAddress,
   getLatestSpendingLimitAddress,
