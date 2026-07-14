@@ -19,7 +19,7 @@ import {
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useForm, FormProvider, Controller } from 'react-hook-form'
-import { useContext, useMemo, useState } from 'react'
+import { useContext, useState } from 'react'
 import type { ReactElement } from 'react'
 
 import TxCard from '../../common/TxCard'
@@ -84,8 +84,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
   const recoverer = formMethods.watch(UpsertRecoveryFlowFields.recoverer)
 
   // Copilot address-poisoning check for the recoverer
-  const poisoningCheckAddresses = useMemo(() => (recoverer ? [recoverer] : []), [recoverer])
-  useSafeShieldForAddressPoisoning(poisoningCheckAddresses)
+  useSafeShieldForAddressPoisoning([recoverer])
   const expiry = formMethods.watch(UpsertRecoveryFlowFields.expiry)
   const selectedDelay = formMethods.watch(UpsertRecoveryFlowFields.selectedDelay)
   const customDelay = formMethods.watch(UpsertRecoveryFlowFields.customDelay)

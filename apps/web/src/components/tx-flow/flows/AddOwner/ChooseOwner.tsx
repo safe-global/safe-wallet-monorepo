@@ -13,7 +13,6 @@ import {
   SvgIcon,
   Tooltip,
 } from '@mui/material'
-import { useMemo } from 'react'
 import { useForm, FormProvider, Controller } from 'react-hook-form'
 
 import AddressBookInput from '@/components/common/AddressBookInput'
@@ -63,8 +62,7 @@ export const ChooseOwner = ({
   const address = watch('newOwner.address')
 
   // Copilot address-poisoning check for the new owner (poisoning-only entry in the recipient card)
-  const poisoningCheckAddresses = useMemo(() => (address ? [address] : []), [address])
-  useSafeShieldForAddressPoisoning(poisoningCheckAddresses)
+  useSafeShieldForAddressPoisoning([address])
 
   const { name, ens, resolving } = useAddressResolver(address)
 

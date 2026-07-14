@@ -160,49 +160,30 @@ export const useSafeShieldForRecipients = (recipientAddresses: string[]) => {
 }
 
 /**
- * Hook to register addresses for the address-poisoning check only (no recipient analysis).
+ * Register addresses for the address-poisoning check only (no recipient analysis).
  *
  * For tx-flows whose address is not a transfer recipient (add owner, recovery setup,
- * spending-limit beneficiary, …): a matched address surfaces in the Copilot recipient
+ * spending-limit beneficiary, signers, …): a matched address surfaces in the Copilot recipient
  * card with just the ADDRESS_POISONING state.
- * @param addresses - Addresses to check against the user's trusted anchors
+ *
+ * Keys on the joined VALUE, not array identity — RHF's watch() mutates its array in place, so a
+ * value key is what makes the check re-trigger. (Do NOT key on the array reference / useMemoDeepCompare:
+ * they compare by reference and would miss the in-place mutation.)
+ * @param addresses - Addresses to check against the user's trusted anchors (undefined entries are dropped)
  */
-export const useSafeShieldForAddressPoisoning = (addresses: string[]) => {
+export const useSafeShieldForAddressPoisoning = (addresses: Array<string | undefined>) => {
   const { setPoisoningAddresses, recipient } = useSafeShield()
-
-  // Callers may pass a freshly-constructed array every render
-  const lastKeyRef = useRef<string | undefined>(undefined)
+  const key = addresses.filter(Boolean).join(',')
 
   useEffect(() => {
-    const key = addresses.join(',')
-    if (key === lastKeyRef.current) return
-    lastKeyRef.current = key
-    setPoisoningAddresses(addresses.length > 0 ? addresses : undefined)
-  }, [addresses, setPoisoningAddresses])
+    setPoisoningAddresses(key ? key.split(',') : undefined)
+  }, [key, setPoisoningAddresses])
 
   // Clear the registration when the owning flow unmounts, so a stale look-alike card can't linger
   // against addresses no current flow cares about if the provider outlives the flow.
-  useEffect(
-    () => () => {
-      lastKeyRef.current = undefined
-      setPoisoningAddresses(undefined)
-    },
-    [setPoisoningAddresses],
-  )
+  useEffect(() => () => setPoisoningAddresses(undefined), [setPoisoningAddresses])
 
   return recipient
-}
-
-/**
- * Register a tx-flow field (single address or a list) for the address-poisoning check.
- * Keys on the joined VALUE, not array identity — RHF's watch() mutates its array in place, so a
- * value key is what makes the check re-trigger. (Do NOT use useMemoDeepCompare: it compares by
- * reference and would miss the in-place mutation.)
- */
-export const useAddressPoisoningCheck = (addresses: Array<string | undefined>) => {
-  const key = addresses.filter(Boolean).join(',')
-  const stableAddresses = useMemo(() => (key ? key.split(',') : []), [key])
-  useSafeShieldForAddressPoisoning(stableAddresses)
 }
 
 /**

@@ -19,7 +19,7 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import TxCard from '../../common/TxCard'
 import OwnerRow from '@/components/new-safe/OwnerRow'
-import { useAddressPoisoningCheck } from '@/features/safe-shield/SafeShieldContext'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { ManageSignersFormFields } from '.'
 import { TxFlowContext } from '../../TxFlowProvider'
@@ -42,7 +42,7 @@ export function SignersStructureView(props: Props): ReactElement {
   const { onNext } = useContext<TxFlowContextType<ManageSignersForm>>(TxFlowContext)
 
   // Copilot address-poisoning check for the configured signers.
-  useAddressPoisoningCheck(props.newOwners.map((owner) => owner.address))
+  useSafeShieldForAddressPoisoning(props.newOwners.map((owner) => owner.address))
 
   return (
     <TxCard>

@@ -4,7 +4,6 @@ import {
   SafeShieldProvider,
   useSafeShield,
   useSafeShieldForAddressPoisoning,
-  useAddressPoisoningCheck,
 } from '@/features/safe-shield/SafeShieldContext'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { StatusGroup } from '@safe-global/utils/features/safe-shield/types'
@@ -50,11 +49,11 @@ describe('integration: poisoning-only registration through the real provider', (
   })
 })
 
-describe('useAddressPoisoningCheck', () => {
+describe('useSafeShieldForAddressPoisoning: falsy filtering & value-keying', () => {
   it('registers a look-alike (ignoring falsy entries) and re-checks when the value changes', async () => {
     const { result, rerender } = renderHook(
       ({ addrs }: { addrs: Array<string | undefined> }) => {
-        useAddressPoisoningCheck(addrs)
+        useSafeShieldForAddressPoisoning(addrs)
         return useSafeShield().recipient
       },
       { wrapper, initialProps: { addrs: [LOOKALIKE, undefined] }, initialReduxState: addressBookState },
