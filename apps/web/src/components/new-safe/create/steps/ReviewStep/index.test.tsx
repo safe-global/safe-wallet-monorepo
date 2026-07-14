@@ -259,4 +259,31 @@ describe('ReviewStep', () => {
       expect.objectContaining({ payMethod: PayMethod.PayLater, isUserAuthenticated: true }),
     )
   })
+
+  it('does not fire the awaiting-execution event for already-deployed safes', async () => {
+    const mockData = buildMultiChainData()
+
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockData.networks[0])
+    jest.spyOn(useWallet, 'default').mockReturnValue({ provider: {} } as unknown as ConnectedWallet)
+    jest
+      .spyOn(createLogic, 'createNewUndeployedSafeWithoutSalt')
+      .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
+    jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
+    jest
+      .spyOn(multichain, 'predictAddressBasedOnReplayData')
+      .mockResolvedValue('0x0000000000000000000000000000000000000001')
+    jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
+    const eventSpy = jest.spyOn(cfServices, 'safeCreationDispatch')
+
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+      initialReduxState: authReduxState,
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('review-step-next-btn'))
+    })
+
+    expect(eventSpy).not.toHaveBeenCalledWith(cfServices.SafeCreationEvent.AWAITING_EXECUTION, expect.anything())
+  })
 })

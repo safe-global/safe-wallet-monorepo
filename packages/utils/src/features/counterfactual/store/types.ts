@@ -55,4 +55,7 @@ export type CreateSafeResult = {
   chain: Chain
   safeAddress: string
   success: boolean
+  /** True when the Safe was already deployed on-chain, so it was navigated to
+   *  but not persisted as counterfactual (no activation is pending). */
+  alreadyDeployed?: boolean
 }

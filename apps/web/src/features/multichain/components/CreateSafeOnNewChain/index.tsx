@@ -133,8 +133,11 @@ const ReplaySafeDialog = ({
         return
       }
 
-      trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
-      trackEvent({ ...CREATE_SAFE_EVENTS.CREATED_SAFE, label: 'counterfactual' })
+      // Already-deployed Safes weren't created as counterfactual — don't report a creation.
+      if (persistResult.skipped !== 'already-deployed') {
+        trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
+        trackEvent({ ...CREATE_SAFE_EVENTS.CREATED_SAFE, label: 'counterfactual' })
+      }
 
       router.push({
         pathname: UNDEPLOYED_SAFE_BLOCKED_ROUTES.includes(router.pathname) ? AppRoutes.home : router.pathname,

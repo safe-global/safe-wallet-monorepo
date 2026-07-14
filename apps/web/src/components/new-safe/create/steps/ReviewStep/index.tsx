@@ -310,11 +310,17 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           pathname: AppRoutes.home,
           query: { safe: `${successfulChains[0].chain.shortName}:${safeAddress}` },
         })
-        safeCreationDispatch(SafeCreationEvent.AWAITING_EXECUTION, {
-          groupKey: CF_TX_GROUP_KEY,
-          safeAddress,
-          networks: successfulChains.map((r) => r.chain),
-        })
+
+        // Already-deployed Safes aren't awaiting activation — only fire the event
+        // for chains that were persisted as counterfactual.
+        const awaitingChains = successfulChains.filter((r) => !r.alreadyDeployed)
+        if (awaitingChains.length > 0) {
+          safeCreationDispatch(SafeCreationEvent.AWAITING_EXECUTION, {
+            groupKey: CF_TX_GROUP_KEY,
+            safeAddress,
+            networks: awaitingChains.map((r) => r.chain),
+          })
+        }
       }
     } catch (err) {
       console.error(err)
@@ -368,7 +374,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         })
         if (!result.ok) throw result.error
 
-        return { chain, safeAddress, success: true }
+        return { chain, safeAddress, success: true, alreadyDeployed: result.skipped === 'already-deployed' }
       }
 
       const options: TransactionOptions = buildTransactionOptions(
