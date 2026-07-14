@@ -1,95 +1,107 @@
 import * as constants from '../../support/constants.js'
 
-// AccountsModal (All Accounts popup)
-const allAccountsBtn = '[data-testid="all-accounts-btn"]'
-const searchInput = '[data-testid="accounts-search-input"]'
-const importBtn = '[data-testid="import-btn"]'
-const accountsList = '[data-testid="accounts-list"]'
+// Unified navigation: the old "All Accounts" modal is gone. Its list now lives inline in the
+// safe-selector dropdown (Workspace / My accounts tabs), trust management moved to the
+// "Manage list" modal (TrustedSafesModal), and renaming uses the shared EntryDialog.
+
+// Safe-selector dropdown
+const safeSelectorBlock = '[data-testid="space-safes-navigation-block"]'
+const openSafesIcon = '[data-testid="open-safes-icon"]'
+const dropdownContent = '[data-slot="select-content"]'
+const dropdownScrollArea = '[data-testid="dropdown-scroll-area"]'
+const dropdownRow = '[data-slot="select-item"]'
+const safeItemAddress = '[data-testid="safe-item-address"]'
+const searchInput = '[data-testid="safe-dropdown-search-input"]'
+const tabLocal = '[data-testid="dropdown-tab-local"]'
+const emptyList = '[data-testid="dropdown-empty"]'
+const renameIcon = '[data-testid="safe-item-rename-btn"]'
+const thresholdBadge = '[data-testid="account-threshold"]'
+const awaitingConfirmationDot = '[data-testid="account-awaiting-confirmation"]'
+const rowBalance = '[data-testid="row-end-column"]'
+
+// Rename dialog (EntryDialog)
 const nameInput = '[data-testid="name-input"]'
 const saveBtn = '[data-testid="save-btn"]'
-const pinnedAccounts = '[data-testid="pinned-accounts"]'
-const emptyPinnedList = '[data-testid="empty-pinned-list"]'
-const addSafeButton = '[data-testid="add-safe-button"]'
-const bookmarkIcon = '[data-testid="bookmark-icon"]'
-const missingSignatureInfo = '[data-testid="missing-signature-info"]'
-const readOnlyChip = '[data-testid="read-only-chip"]'
-const pendingActivationIcon = '[data-testid="pending-activation-icon"]'
-const safeItemCard = '[data-testid="safe-item-card"]'
-const safeOptionsBtn = '[data-testid="safe-options-btn"]'
-const renameBtn = '[data-testid="rename-btn"]'
-const dropdownContent = '[data-slot="select-content"]'
+
+// Manage list modal (TrustedSafesModal)
+const manageTrustedBtn = '[data-testid="dropdown-manage-trusted-btn"]'
+const manageListEmptyBtn = '[data-testid="dropdown-manage-list-btn"]'
+const manageSelectAll = '[data-testid="manage-trusted-select-all"]'
+const manageSave = '[data-testid="manage-trusted-save"]'
+const manageRow = '[data-testid="account-table-row"]'
+const manageRowCheckbox = '[data-testid="account-select-checkbox"]'
+
+// My accounts page — the "Add accounts" chooser replaced the old add-safe button
+const importBtn = '[data-testid="import-btn"]'
+const addAccountsBtn = '[data-testid="open-add-accounts-chooser-button"]'
+const chooserSelectExisting = '[data-testid="add-accounts-select-existing"]'
 
 export function openAccountsModal() {
-  cy.get('[data-testid="space-safes-navigation-block"]').should('be.visible')
-  cy.get('[data-testid="open-safes-icon"]').click()
+  cy.get(safeSelectorBlock).should('be.visible')
+  cy.get(openSafesIcon).click()
   cy.get(dropdownContent).should('be.visible')
-  cy.get(allAccountsBtn).scrollIntoView().should('be.visible').click()
-  cy.get(accountsList).should('be.visible')
+  cy.get(dropdownScrollArea).should('be.visible')
+}
+
+/** Switch the open dropdown to the "My accounts" (trusted/local) tab. */
+export function openMyAccountsTab() {
+  cy.get(tabLocal).click()
 }
 
 export function verifyAccountsListVisible() {
-  cy.get(accountsList).should('be.visible')
+  cy.get(dropdownScrollArea).should('be.visible')
 }
 
 export function verifyPinnedAccountsSectionVisible() {
-  cy.get(pinnedAccounts).scrollIntoView().should('be.visible')
+  cy.get(dropdownScrollArea).should('be.visible')
+  cy.get(dropdownScrollArea).find(safeItemAddress).should('exist')
 }
 
 export function verifyPinnedSafeExists(address) {
-  cy.get(pinnedAccounts).should('contain.text', address)
+  cy.get(dropdownScrollArea).should('contain.text', address)
 }
 
 export function verifyEmptyPinnedList() {
-  cy.get(emptyPinnedList).should('be.visible')
+  cy.get(emptyList).should('be.visible')
 }
 
-export function clickAddSafeButton() {
-  cy.get(addSafeButton).should('be.visible').click()
+/** Open the Manage list modal from the dropdown, whether the trusted list is empty or not. */
+export function openManageList() {
+  cy.get('body').then(($body) => {
+    if ($body.find(manageTrustedBtn).length > 0) {
+      cy.get(manageTrustedBtn).click()
+    } else {
+      cy.get(manageListEmptyBtn).click()
+    }
+  })
+  cy.get(manageSelectAll).should('be.visible')
 }
 
-export function clickBookmarkIconByIndex(index) {
-  cy.get(bookmarkIcon).eq(index).should('be.visible').click()
+function toggleTrustedSafeByName(name) {
+  cy.contains(manageRow, name).find(manageRowCheckbox).click()
+  cy.get(manageSave).click()
 }
 
 export function unpinSafeByName(name) {
-  cy.get(accountsList).contains(name).closest(safeItemCard).find(bookmarkIcon).click()
-}
-
-export function pinSafeByName(name) {
-  cy.get(accountsList).contains(name).closest(safeItemCard).find(bookmarkIcon).click()
-}
-
-export function verifyMissingSignatureInfo(threshold, owners) {
-  cy.get(missingSignatureInfo).should('be.visible').and('contain.text', `${threshold}/${owners}`)
+  openManageList()
+  toggleTrustedSafeByName(name)
 }
 
 export function verifyThresholdBadgeOnSafeCard(name) {
-  cy.get(accountsList).contains(name).closest(safeItemCard).find(missingSignatureInfo).should('be.visible')
+  cy.get(dropdownScrollArea).contains(dropdownRow, name).find(thresholdBadge).should('be.visible')
 }
 
 export function verifyMissingSignatureInfoExists() {
-  cy.get(missingSignatureInfo).should('exist')
-}
-
-export function verifyReadOnlyChipVisible() {
-  cy.get(readOnlyChip).should('be.visible')
-}
-
-export function verifyPendingActivationIconVisible() {
-  cy.get(pendingActivationIcon).should('be.visible')
+  cy.get(dropdownScrollArea).find(awaitingConfirmationDot).should('exist')
 }
 
 export function clickSafeOptionsBtn(index = 0) {
-  cy.get(safeOptionsBtn).eq(index).should('be.visible').click()
-  cy.get(renameBtn).should('be.visible')
-}
-
-export function clickRenameBtn() {
-  cy.get(renameBtn).should('be.visible').click()
+  cy.get(dropdownScrollArea).find(dropdownRow).eq(index).find(renameIcon).click({ force: true })
+  cy.get(nameInput).should('be.visible')
 }
 
 export function verifyAccountsListContains(name) {
-  cy.get(accountsList).should('contain.text', name)
+  cy.get(dropdownScrollArea).should('contain.text', name)
 }
 
 export function typeSafeName(name) {
@@ -101,8 +113,7 @@ export function clickSaveBtn() {
 }
 
 export function renameSafe(oldName, newName) {
-  cy.get(accountsList).contains(oldName).closest(safeItemCard).find(safeOptionsBtn).click()
-  clickRenameBtn()
+  cy.get(dropdownScrollArea).contains(dropdownRow, oldName).find(renameIcon).click({ force: true })
   typeSafeName(newName)
   clickSaveBtn()
 }
@@ -116,15 +127,16 @@ export function verifyImportBtnVisible() {
 }
 
 export function verifyFiatBalanceExists() {
-  cy.get(safeItemCard).first().contains(/\d/).should('exist')
+  cy.get(dropdownScrollArea).find(rowBalance).first().invoke('text').should('match', /\d/)
 }
 
-export function verifyAddSafeButtonVisible() {
-  cy.get(addSafeButton).should('be.visible')
+export function verifyAddAccountsButtonVisible() {
+  cy.get(addAccountsBtn).should('be.visible')
 }
 
-export function clickAddSafeButtonAndVerifyLoadFlow() {
-  cy.get(addSafeButton).should('be.visible').click()
+export function clickAddAccountsSelectExistingAndVerifyLoadFlow() {
+  cy.get(addAccountsBtn).should('be.visible').click()
+  cy.get(chooserSelectExisting).should('be.visible').click()
   cy.url().should('include', constants.loadNewSafeUrl)
 }
 
@@ -138,28 +150,24 @@ export function clearSearchInput() {
 
 export function verifySearchInputAbovePinnedSection() {
   cy.get(searchInput).then(($search) => {
-    cy.get(pinnedAccounts).then(($pinned) => {
-      const position = $search[0].compareDocumentPosition($pinned[0])
+    cy.get(dropdownScrollArea).then(($list) => {
+      const position = $search[0].compareDocumentPosition($list[0])
       expect(position & Node.DOCUMENT_POSITION_FOLLOWING).to.equal(Node.DOCUMENT_POSITION_FOLLOWING)
     })
   })
 }
 
 export function verifyAccountsListDoesNotContain(text) {
-  cy.get(accountsList).should('not.contain.text', text)
+  cy.get(dropdownScrollArea).should('not.contain.text', text)
 }
 
 export function verifyAccountsListItemCount(count) {
-  cy.get(accountsList).find('[data-testid="safe-item-card"]').should('have.length', count)
-}
-
-export function verifyPinnedSectionDoesNotExist() {
-  cy.get(pinnedAccounts).should('not.exist')
+  cy.get(dropdownScrollArea).find(safeItemAddress).should('have.length', count)
 }
 
 export function verifyPinnedSafeDoesNotExist(address) {
   cy.get('body').then(($body) => {
-    if ($body.find(`${pinnedAccounts} ${safeItemCard}`).length === 0) return
-    cy.get(pinnedAccounts).find(safeItemCard).should('not.contain.text', address)
+    if ($body.find(`${dropdownScrollArea} ${safeItemAddress}`).length === 0) return
+    cy.get(dropdownScrollArea).should('not.contain.text', address)
   })
 }

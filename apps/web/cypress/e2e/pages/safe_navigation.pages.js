@@ -1,13 +1,13 @@
 // SafeSelectorDropdown (main bar)
 const safeSelectorBlock = '[data-testid="space-safes-navigation-block"]'
 const openSafesIcon = '[data-testid="open-safes-icon"]'
-const connectWalletBtn = '[data-testid="safe-selector-connect-wallet-btn"]'
+const connectWalletBtn = '[data-testid="dropdown-connect-wallet-body-btn"]'
 const safeIcon = '[data-testid="safe-icon"]'
 const safeSelectorTriggerName = '[data-testid="safe-selector-trigger-name"]'
 const safeSelectorTriggerDetails = '[data-testid="safe-selector-trigger-details"]'
 const copyAddressBtn = '[data-testid="copy-address-btn"]'
 const currencySection = '[data-testid="safe-selector-balance"]'
-const safeSelectorThreshold = '[data-testid="safe-selector-threshold"]'
+const safeSelectorThreshold = '[data-testid="account-threshold"]'
 const nestedSafesButton = '[data-testid="nested-safes-button"]'
 
 // SafeSelectorDropdown dropdown list
@@ -69,7 +69,7 @@ export function verifyCurrencySection(text) {
 }
 
 export function verifySafeSelectorThreshold(threshold, owners) {
-  cy.get(safeSelectorThreshold).should('contain.text', `${threshold}/${owners}`)
+  cy.get(openSafesIcon).find(safeSelectorThreshold).should('contain.text', `${threshold}/${owners}`)
 }
 
 export function clickOnNestedSafesBtn() {
