@@ -1,7 +1,6 @@
 import React from 'react'
-import { View } from 'tamagui'
+import { Text, View } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
-import { Badge } from '@/src/components/Badge'
 import { Loader } from '@/src/components/Loader'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useAppSelector } from '@/src/store/hooks'
@@ -30,18 +29,14 @@ const DraftNonceRow = ({ draft }: { draft: DraftTx }) => {
         <SafeListItem
           label="Nonce"
           rightNode={
-            <View flexDirection="row" alignItems="center" gap="$2">
+            <View flexDirection="row" alignItems="center" gap="$4">
               {nonce.isRebuilding ? (
                 <Loader size={16} color="$color" />
               ) : (
                 <>
-                  <Badge
-                    themeName="badge_background_inverted"
-                    content={String(nonce.draftNonce)}
-                    circleSize="$6"
-                    circular={false}
-                    testID="nonce-row-value"
-                  />
+                  <Text fontSize="$4" lineHeight={20} color="$color" testID="nonce-row-value">
+                    {nonce.draftNonce}
+                  </Text>
                   <SafeFontIcon name="chevron-right" />
                 </>
               )}
