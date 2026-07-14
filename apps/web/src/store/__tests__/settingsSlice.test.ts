@@ -1,4 +1,3 @@
-import { toBeHex } from 'ethers'
 import { faker } from '@faker-js/faker'
 import {
   setHiddenTokensForChain,
@@ -27,9 +26,9 @@ const createCurationState = (
 
 describe('settingsSlice', () => {
   it('handle hiddenTokens', () => {
-    const token1 = toBeHex('0x1', 20)
-    const token2 = toBeHex('0x2', 20)
-    const token3 = toBeHex('0x3', 20)
+    const token1 = faker.finance.ethereumAddress()
+    const token2 = faker.finance.ethereumAddress()
+    const token3 = faker.finance.ethereumAddress()
 
     let state = settingsSlice.reducer(undefined, setHiddenTokensForChain({ chainId: '1', assets: [token1] }))
     expect(state.hiddenTokens).toEqual({
@@ -168,11 +167,11 @@ describe('settingsSlice', () => {
   })
 
   describe('setCuratedNestedSafes', () => {
-    const parentSafe1 = toBeHex('0x1', 20)
-    const parentSafe2 = toBeHex('0x2', 20)
-    const nestedSafe1 = toBeHex('0x10', 20)
-    const nestedSafe2 = toBeHex('0x20', 20)
-    const nestedSafe3 = toBeHex('0x30', 20)
+    const parentSafe1 = faker.finance.ethereumAddress()
+    const parentSafe2 = faker.finance.ethereumAddress()
+    const nestedSafe1 = faker.finance.ethereumAddress()
+    const nestedSafe2 = faker.finance.ethereumAddress()
+    const nestedSafe3 = faker.finance.ethereumAddress()
 
     it('should set curated nested safes for a parent safe', () => {
       const state = settingsSlice.reducer(
@@ -273,8 +272,8 @@ describe('settingsSlice', () => {
   })
 
   describe('clearCuratedNestedSafes', () => {
-    const parentSafe = toBeHex('0x1', 20)
-    const nestedSafe1 = toBeHex('0x10', 20)
+    const parentSafe = faker.finance.ethereumAddress()
+    const nestedSafe1 = faker.finance.ethereumAddress()
 
     it('should remove curation state for a parent safe', () => {
       let state = settingsSlice.reducer(
@@ -293,9 +292,9 @@ describe('settingsSlice', () => {
   })
 
   describe('selectCuratedNestedSafes', () => {
-    const parentSafe = toBeHex('0x1', 20)
-    const nestedSafe1 = toBeHex('0x10', 20)
-    const nestedSafe2 = toBeHex('0x20', 20)
+    const parentSafe = faker.finance.ethereumAddress()
+    const nestedSafe1 = faker.finance.ethereumAddress()
+    const nestedSafe2 = faker.finance.ethereumAddress()
 
     it('should return curated state for a parent safe', () => {
       const state = createCurationState({
@@ -321,7 +320,7 @@ describe('settingsSlice', () => {
   })
 
   describe('selectHasCompletedCuration', () => {
-    const parentSafe = toBeHex('0x1', 20)
+    const parentSafe = faker.finance.ethereumAddress()
 
     it('should return true when curation is complete', () => {
       const state = createCurationState({
@@ -355,9 +354,9 @@ describe('settingsSlice', () => {
   })
 
   describe('selectCuratedAddresses', () => {
-    const parentSafe = toBeHex('0x1', 20)
-    const nestedSafe1 = toBeHex('0x10', 20)
-    const nestedSafe2 = toBeHex('0x20', 20)
+    const parentSafe = faker.finance.ethereumAddress()
+    const nestedSafe1 = faker.finance.ethereumAddress()
+    const nestedSafe2 = faker.finance.ethereumAddress()
 
     it('should return curated addresses for a parent safe', () => {
       const state = createCurationState({
