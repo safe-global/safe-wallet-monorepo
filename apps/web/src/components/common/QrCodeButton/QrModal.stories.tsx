@@ -10,7 +10,7 @@ const defaultSetup = createMockStory({
   scenario: 'efSafe',
   store: {
     settings: {
-      shortName: { copy: true, qr: false },
+      shortName: { qr: false },
     },
   },
 })
@@ -52,7 +52,7 @@ export const WithChainPrefix: Story = (() => {
     scenario: 'efSafe',
     store: {
       settings: {
-        shortName: { copy: true, qr: true },
+        shortName: { qr: true },
       },
     },
   })
@@ -71,7 +71,7 @@ export const PolygonNetwork: Story = (() => {
     scenario: 'efSafe',
     store: {
       settings: {
-        shortName: { copy: true, qr: false },
+        shortName: { qr: false },
       },
       chains: {
         data: [
@@ -115,7 +115,7 @@ export const ArbitrumNetwork: Story = (() => {
     scenario: 'efSafe',
     store: {
       settings: {
-        shortName: { copy: true, qr: false },
+        shortName: { qr: false },
       },
       chains: {
         data: [
@@ -159,7 +159,7 @@ export const OptimismWithPrefix: Story = (() => {
     scenario: 'efSafe',
     store: {
       settings: {
-        shortName: { copy: true, qr: true },
+        shortName: { qr: true },
       },
       chains: {
         data: [
@@ -203,7 +203,7 @@ export const BaseNetwork: Story = (() => {
     scenario: 'efSafe',
     store: {
       settings: {
-        shortName: { copy: true, qr: false },
+        shortName: { qr: false },
       },
       chains: {
         data: [

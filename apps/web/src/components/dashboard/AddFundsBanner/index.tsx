@@ -1,8 +1,5 @@
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import { useAppSelector } from '@/store'
-import { selectSettings } from '@/store/settingsSlice'
-import { useCurrentChain } from '@/hooks/useChains'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import FiatIcon from '@/public/images/common/fiat2.svg'
@@ -12,10 +9,8 @@ import CopyIcon from '@/public/images/common/copy.svg'
 const AddFundsToGetStarted = () => {
   const { safe } = useSafeInfo()
   const safeAddress = useSafeAddress()
-  const settings = useAppSelector(selectSettings)
-  const chain = useCurrentChain()
 
-  const addressCopyText = settings.shortName.copy && chain ? `${chain.shortName}:${safeAddress}` : safeAddress
+  const addressCopyText = safeAddress
 
   if (!safe.deployed) return null
 

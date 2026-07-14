@@ -8,7 +8,6 @@ jest.mock('@/services/analytics', () => ({
   SETTINGS_EVENTS: {
     APPEARANCE: {
       DARK_MODE: { action: 'Dark mode', category: 'settings' },
-      COPY_PREFIXES: { action: 'Copy prefixes', category: 'settings' },
     },
   },
 }))

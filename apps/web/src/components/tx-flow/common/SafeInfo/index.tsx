@@ -9,8 +9,6 @@ import CopyAddressButton from '@/components/common/CopyAddressButton'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { useChain } from '@/hooks/useChains'
-import { useAppSelector } from '@/store'
-import { selectSettings } from '@/store/settingsSlice'
 
 const SafeInfo = (): ReactElement => {
   const safeAddress = useSafeAddress()
@@ -18,11 +16,9 @@ const SafeInfo = (): ReactElement => {
   const { ens } = useAddressResolver(safeAddress)
   const addressBookItem = useAddressBookItem(safeAddress, chainId)
   const chain = useChain(chainId)
-  const settings = useAppSelector(selectSettings)
 
   const name = addressBookItem?.name || ens
   const prefix = chain?.shortName
-  const copyPrefix = settings.shortName.copy
 
   return (
     <div data-testid="tx-flow-safe-info" className="flex flex-row items-center gap-2">
@@ -39,7 +35,7 @@ const SafeInfo = (): ReactElement => {
               </Typography>
             )}
             <Typography variant="paragraph-small">
-              <CopyAddressButton address={safeAddress} prefix={prefix} copyPrefix={copyPrefix}>
+              <CopyAddressButton address={safeAddress}>
                 {prefix && <b>{prefix}:</b>}
                 {shortenAddress(safeAddress)}
               </CopyAddressButton>

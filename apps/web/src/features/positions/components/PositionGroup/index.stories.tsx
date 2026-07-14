@@ -91,7 +91,7 @@ const meta: Meta<typeof PositionGroup> = {
           settings: {
             currency: 'usd',
             hiddenTokens: {},
-            shortName: { copy: true, qr: true },
+            shortName: { qr: true },
             theme: {},
             env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
             signing: { onChainSigning: false, blindSigning: false },

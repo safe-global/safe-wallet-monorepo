@@ -55,7 +55,6 @@ function AccountItemInfo({
             showAvatar={false}
             copyAddress={false}
             showPrefix={showPrefix}
-            copyPrefix={false}
             addressBookNameSource={addressBookNameSource}
             showCopyButton={showCopyButton}
             hasExplorer={hasExplorer}

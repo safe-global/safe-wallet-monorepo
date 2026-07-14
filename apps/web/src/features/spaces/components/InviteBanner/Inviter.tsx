@@ -18,13 +18,7 @@ const Inviter = ({ invitedByName, variant, avatarSize }: InviterProps) => {
       <Typography variant={variant}>by</Typography>
       <div className="flex items-center gap-1 font-bold text-primary">
         {isAddress(invitedByName) ? (
-          <EthHashInfo
-            address={invitedByName}
-            avatarSize={avatarSize}
-            showName={false}
-            showPrefix={false}
-            copyPrefix={false}
-          />
+          <EthHashInfo address={invitedByName} avatarSize={avatarSize} showName={false} showPrefix={false} />
         ) : (
           <EmailInfo email={invitedByName} size="small" />
         )}

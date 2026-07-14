@@ -30,14 +30,6 @@ export const Default: Story = {
   },
 }
 
-export const WithPrefix: Story = {
-  args: {
-    address: '0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552',
-    prefix: 'eth',
-    copyPrefix: true,
-  },
-}
-
 export const WithChildren: Story = {
   args: {
     address: '0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552',
