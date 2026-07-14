@@ -52,9 +52,8 @@ export const mapVisibleAnalysisResults = (
     return sortBySeverity(results.filter(Boolean))
   }
 
-  // ADDRESS_POISONING is per-address: every look-alike has its own "entered vs trusted" pair to
-  // compare, so we show one card per look-alike instead of merging them into a plural summary.
-  // Separate the poisoning results (kept as-is) from the other groups (consolidated as before).
+  // ADDRESS_POISONING is per-address (each look-alike has its own entered/anchor pair), so keep the
+  // poisoning results individual and consolidate only the other groups.
   const poisoningResults: AnalysisResult[] = []
   const otherGroupsPerAddress: GroupedAnalysisResults[] = []
 

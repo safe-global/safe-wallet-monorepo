@@ -9,9 +9,8 @@ interface HighlightedAddressProps {
 }
 
 /**
- * Renders an address with its matching front/back characters bolded — the address-poisoning
- * look-alike highlight. Lengths are in hex chars after `0x`; compute them with
- * `getCommonAffixLengths(entered, anchor)`. Front and back never overlap (the front wins).
+ * Renders an address with its matching front/back characters bolded (hex-char counts after `0x`,
+ * from getCommonAffixLengths). Front and back never overlap.
  */
 export const HighlightedAddress = ({ address, prefixLen, suffixLen }: HighlightedAddressProps) => {
   const has0x = address.toLowerCase().startsWith('0x')

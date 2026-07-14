@@ -1,10 +1,5 @@
 /**
- * Address-poisoning protection — public API.
- *
- * Detects when an address a user is about to use dangerously resembles an address
- * they explicitly trust (anchors: local address book, pinned/trusted Safes, curated
- * nested Safes, undeployed Safes). The check surfaces inside Copilot's recipient
- * card (see features/safe-shield/hooks/useRecipientAnalysisWithPoisoning).
- * Gated by the ADDRESS_POISONING_PROTECTION chain feature flag.
+ * Address-poisoning protection — public API. Flags addresses that resemble ones the user trusts
+ * (local anchors: address book, pinned/curated/undeployed Safes). Flag-gated by ADDRESS_POISONING_PROTECTION.
  */
 export { selectAnchorIndex, selectAnchorAddresses } from './store'
