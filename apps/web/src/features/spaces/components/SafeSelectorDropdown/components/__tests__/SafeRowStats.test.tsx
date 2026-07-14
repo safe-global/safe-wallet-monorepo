@@ -59,4 +59,24 @@ describe('SafeRowStats tooltips', () => {
     expect(screen.queryByTestId('account-pending')).not.toBeInTheDocument()
     expect(screen.getByTestId('row-pending-column')).toBeInTheDocument()
   })
+
+  it('flags pending txs awaiting the connected wallet with a dot and spells it out in the tooltip', async () => {
+    const { rerender } = render(
+      <SafeRowStats threshold={1} owners={2} chains={[chain('1', 'Ethereum')]} pending={3} awaitingConfirmation={2} />,
+    )
+
+    expect(screen.getByTestId('account-awaiting-confirmation')).toHaveAttribute(
+      'aria-label',
+      '2 awaiting your confirmation',
+    )
+
+    await userEvent.hover(tooltipTriggerOf(screen.getByTestId('account-pending')) as HTMLElement)
+    expect(await screen.findByText('3 pending transactions · 2 awaiting your confirmation')).toBeInTheDocument()
+
+    // No dot when nothing awaits the wallet, even with queued transactions present.
+    rerender(
+      <SafeRowStats threshold={1} owners={2} chains={[chain('1', 'Ethereum')]} pending={3} awaitingConfirmation={0} />,
+    )
+    expect(screen.queryByTestId('account-awaiting-confirmation')).not.toBeInTheDocument()
+  })
 })

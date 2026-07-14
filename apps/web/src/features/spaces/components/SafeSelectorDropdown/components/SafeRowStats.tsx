@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react'
-import { PendingBadge, ThresholdBadge } from '@/components/common/AccountBadges'
+import { PendingBadge, ThresholdBadge, formatPendingLabel } from '@/components/common/AccountBadges'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { TOOLTIP_DELAY_MS } from '@/components/common/AccountRow'
 import ChainLogo from './ChainLogo'
@@ -36,18 +36,22 @@ const SafeRowStats = ({
   owners,
   chains,
   pending,
+  awaitingConfirmation = 0,
   thresholdIconOnly = false,
 }: {
   threshold: number
   owners: number
   chains: SafeItemDataChain[]
   pending: number
+  /** Pending transactions awaiting the connected wallet's signature — flagged with an orange dot. */
+  awaitingConfirmation?: number
   /** Multi-chain rows show an icon-only badge — the setup can differ per chain. */
   thresholdIconOnly?: boolean
 }) => {
   const iconOnlyThreshold = thresholdIconOnly || !owners
   const thresholdLabel = iconOnlyThreshold ? 'Signer threshold' : `${threshold} out of ${owners} signers required`
   const overflowChains = chains.slice(MAX_CHAIN_LOGOS)
+  const pendingLabel = formatPendingLabel(pending, awaitingConfirmation)
 
   return (
     <>
@@ -81,11 +85,8 @@ const SafeRowStats = ({
       </span>
       <span className="flex w-12 shrink-0 justify-center" data-testid="row-pending-column">
         {pending > 0 ? (
-          <StatTooltip
-            label={pending === 1 ? '1 pending transaction' : `${pending} pending transactions`}
-            triggerClassName="inline-flex"
-          >
-            <PendingBadge count={pending} compact />
+          <StatTooltip label={pendingLabel} triggerClassName="inline-flex">
+            <PendingBadge count={pending} awaitingConfirmation={awaitingConfirmation} compact />
           </StatTooltip>
         ) : (
           <PendingBadge count={pending} compact />

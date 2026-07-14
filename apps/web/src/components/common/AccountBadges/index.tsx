@@ -31,18 +31,32 @@ export function ThresholdBadge({
   )
 }
 
-/** `N · Pending` badge for queued transactions. `compact` renders a clock icon + count instead. */
+/** Hover label for the pending badge: total queued, plus how many await the wallet's signature. */
+export const formatPendingLabel = (count: number, awaitingConfirmation = 0): string => {
+  const base = count === 1 ? '1 pending transaction' : `${count} pending transactions`
+  return awaitingConfirmation > 0 ? `${base} · ${awaitingConfirmation} awaiting your confirmation` : base
+}
+
+/**
+ * `N · Pending` badge for queued transactions. `compact` renders a clock icon + count instead.
+ * When `awaitingConfirmation > 0`, an orange dot flags that some of those pending transactions
+ * need the connected wallet's signature (the hover tooltip, owned by the caller, spells out how many).
+ */
 export function PendingBadge({
   count,
+  awaitingConfirmation = 0,
   loading = false,
   compact = false,
 }: {
   count: number
+  awaitingConfirmation?: number
   loading?: boolean
   compact?: boolean
 }) {
   if (loading) return <Skeleton className="h-5 w-16 rounded-full" />
   if (count <= 0) return null
+
+  const needsConfirmation = awaitingConfirmation > 0
 
   return (
     <span
@@ -50,6 +64,7 @@ export function PendingBadge({
       className={cn(
         'bg-muted text-muted-foreground inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-xs',
         compact && 'gap-1',
+        needsConfirmation && 'relative',
       )}
     >
       {compact ? (
@@ -59,6 +74,13 @@ export function PendingBadge({
         </>
       ) : (
         `${count} · Pending`
+      )}
+      {needsConfirmation && (
+        <span
+          data-testid="account-awaiting-confirmation"
+          aria-label={`${awaitingConfirmation} awaiting your confirmation`}
+          className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-[var(--color-warning-main)] ring-1 ring-card"
+        />
       )}
     </span>
   )

@@ -103,6 +103,7 @@ function NetworkRow({
         owners={owners}
         chains={[chain]}
         pending={chain.isUndeployed ? 0 : (chain.queued ?? 0)}
+        awaitingConfirmation={chain.isUndeployed ? 0 : (chain.awaitingConfirmation ?? 0)}
       />
       {chain.isUndeployed ? (
         <RowEndColumn>
@@ -122,6 +123,7 @@ const MultiChainSafeItemRow = ({ item, onRename, isSelected = false, leading }: 
   const chainId = item.chains[0]?.chainId ?? ''
   const resolvedName = useSafeDisplayName(item.address, chainId, item.name)
   const pending = item.chains.reduce((sum, chain) => sum + (chain.queued ?? 0), 0)
+  const awaitingConfirmation = item.chains.reduce((sum, chain) => sum + (chain.awaitingConfirmation ?? 0), 0)
 
   return (
     // Open by default when this group holds the active chain, so the current network is revealed
@@ -158,6 +160,7 @@ const MultiChainSafeItemRow = ({ item, onRename, isSelected = false, leading }: 
           owners={item.owners}
           chains={item.chains}
           pending={pending}
+          awaitingConfirmation={awaitingConfirmation}
           thresholdIconOnly
         />
         <BalanceDisplay balance={<FiatValue value={item.balance} />} isLoading={item.isLoading} />

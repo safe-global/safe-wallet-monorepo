@@ -26,6 +26,7 @@ const SafeItem = ({
   const isUndeployed = Boolean(chains[0]?.isUndeployed)
   const isActivating = Boolean(chains[0]?.isActivating)
   const pending = chains.reduce((sum, chain) => sum + (chain.queued ?? 0), 0)
+  const awaitingConfirmation = chains.reduce((sum, chain) => sum + (chain.awaitingConfirmation ?? 0), 0)
 
   const resolvedName = useSafeDisplayName(address, chainId, name)
   const chainConfig = useChain(chainId)
@@ -42,7 +43,13 @@ const SafeItem = ({
           onRename && (() => onRename({ address, name: resolvedName, chainIds: chains.map((chain) => chain.chainId) }))
         }
       />
-      <SafeRowStats threshold={threshold} owners={owners} chains={chains} pending={pending} />
+      <SafeRowStats
+        threshold={threshold}
+        owners={owners}
+        chains={chains}
+        pending={pending}
+        awaitingConfirmation={awaitingConfirmation}
+      />
       {isUndeployed ? (
         <RowEndColumn>
           <NotActivatedBadge isActivating={isActivating} />

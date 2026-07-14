@@ -41,6 +41,7 @@ const leaf = (over: Partial<AccountLine> = {}): AccountLine => ({
   thresholdMixed: false,
   workspaces: [],
   pending: 0,
+  awaitingConfirmation: 0,
   dataLoaded: true,
   undeployed: false,
   isActivating: false,

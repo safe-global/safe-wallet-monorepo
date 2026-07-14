@@ -49,6 +49,8 @@ export type AccountLine = {
   thresholdMixed: boolean
   workspaces: GetSpaceResponse[]
   pending: number
+  /** Of those pending, how many await the connected wallet's signature — flags the badge with a dot. */
+  awaitingConfirmation: number
   balance?: string
   href?: LinkProps['href']
   contextMenu: AccountContextMenu
@@ -99,6 +101,7 @@ const buildSafeLine = (safe: SafeItem, deps: BuildDeps, variant: 'single' | 'chi
     thresholdMixed: false,
     workspaces: variant === 'child' ? [] : (deps.safeSpaces[address.toLowerCase()] ?? []),
     pending: overview?.queued ?? 0,
+    awaitingConfirmation: overview?.awaitingConfirmation ?? 0,
     balance: overview?.fiatTotal,
     href: chain ? deps.getHref(chain, address) : undefined,
     contextMenu: {
@@ -137,6 +140,7 @@ const buildMultiGroup = (item: MultiChainSafeItem, deps: BuildDeps): AccountGrou
   const children = safes.map((s) => buildSafeLine(s, deps, 'child'))
 
   const pending = overviewsForItem.reduce((sum, o) => sum + (o?.queued ?? 0), 0)
+  const awaitingConfirmation = overviewsForItem.reduce((sum, o) => sum + (o?.awaitingConfirmation ?? 0), 0)
   const fiatValues = overviewsForItem.filter((o): o is SafeOverview => Boolean(o)).map((o) => Number(o.fiatTotal))
   const hasReplayableSafe = safes.some((s) => {
     const undeployed = deps.undeployedSafes[s.chainId]?.[s.address]
@@ -171,6 +175,7 @@ const buildMultiGroup = (item: MultiChainSafeItem, deps: BuildDeps): AccountGrou
     thresholdMixed: !shared,
     workspaces,
     pending,
+    awaitingConfirmation,
     balance: fiatValues.length ? String(fiatValues.reduce((a, b) => a + b, 0)) : undefined,
     contextMenu: {
       type: 'multi',

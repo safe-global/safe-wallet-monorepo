@@ -7,6 +7,8 @@ export interface SafeItemDataChain extends ChainInfo {
   isLoading?: boolean
   /** Number of queued/pending transactions on this chain. */
   queued?: number
+  /** Number of pending transactions awaiting the connected wallet's confirmation on this chain. */
+  awaitingConfirmation?: number
   /** True when the user cannot sign on this chain (not an owner / watch-only). */
   isReadOnly?: boolean
   /** True when the safe is counterfactual on this chain and has not been deployed yet. */

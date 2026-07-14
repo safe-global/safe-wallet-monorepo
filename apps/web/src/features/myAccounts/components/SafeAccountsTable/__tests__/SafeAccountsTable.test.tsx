@@ -75,6 +75,7 @@ const line = (over: Partial<AccountLine> & Pick<AccountLine, 'key' | 'displayNam
   thresholdMixed: false,
   workspaces: [],
   pending: 0,
+  awaitingConfirmation: 0,
   dataLoaded: true,
   undeployed: false,
   isActivating: false,

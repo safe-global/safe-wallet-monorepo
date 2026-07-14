@@ -19,7 +19,7 @@ import { cn } from '@/utils/cn'
 import { AccountItem as BaseAccountItem } from '../AccountItem'
 import type { AccountLine } from './useSafeAccountRows'
 import type { SafeAccountColumn } from './columns'
-import { PendingBadge, ThresholdBadge } from '@/components/common/AccountBadges'
+import { PendingBadge, ThresholdBadge, formatPendingLabel } from '@/components/common/AccountBadges'
 import { Checkbox } from '@/components/ui/checkbox'
 import { WorkspaceAvatars } from './cells'
 
@@ -217,8 +217,23 @@ const CellContent = ({ column, line }: { column: SafeAccountColumn; line: Accoun
       )
     case 'workspaces':
       return <WorkspaceAvatars spaces={line.workspaces} />
-    case 'pending':
-      return <PendingBadge count={line.pending} loading={!line.dataLoaded} />
+    case 'pending': {
+      const pendingBadge = (
+        <PendingBadge
+          count={line.pending}
+          awaitingConfirmation={line.awaitingConfirmation}
+          loading={!line.dataLoaded}
+        />
+      )
+      // Only a rendered badge (loaded and non-zero) gets the hover breakdown; a skeleton/empty cell has nothing to explain.
+      if (!line.dataLoaded || line.pending <= 0) return pendingBadge
+      return (
+        <Tooltip>
+          <TooltipTrigger render={<span className="inline-flex" />}>{pendingBadge}</TooltipTrigger>
+          <TooltipContent>{formatPendingLabel(line.pending, line.awaitingConfirmation)}</TooltipContent>
+        </Tooltip>
+      )
+    }
     case 'balance':
       if (line.undeployed) {
         return <NotActivatedBadge isActivating={line.isActivating} />

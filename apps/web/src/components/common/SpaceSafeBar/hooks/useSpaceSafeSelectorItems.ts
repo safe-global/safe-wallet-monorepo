@@ -70,6 +70,7 @@ const mapMultiChainItemChains = (
       balance: overview?.fiatTotal,
       isLoading: overviewsLoading && !overview,
       queued: overview?.queued,
+      awaitingConfirmation: overview?.awaitingConfirmation ?? undefined,
       isReadOnly: perChainSafe?.isReadOnly ?? false,
       isUndeployed: Boolean(undeployed),
       isActivating: Boolean(undeployed && undeployed.status.status !== PendingSafeStatus.AWAITING_EXECUTION),
@@ -125,6 +126,8 @@ function buildSingleChainItem(
     isLoading: overviewsLoading && !overview,
     chains: mapChainIds(chainConfigs, [item.chainId]).map((chain) => ({
       ...chain,
+      queued: overview?.queued,
+      awaitingConfirmation: overview?.awaitingConfirmation ?? undefined,
       isReadOnly: item.isReadOnly ?? false,
       isUndeployed: Boolean(undeployed),
       isActivating: Boolean(undeployed && undeployed.status.status !== PendingSafeStatus.AWAITING_EXECUTION),
