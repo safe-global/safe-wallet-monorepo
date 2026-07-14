@@ -90,8 +90,7 @@ export const AnalysisGroupCard = ({
         if (e.target === e.currentTarget && e.propertyName === 'max-height' && isVisible) setRevealed(true)
       }}
       sx={{
-        // While revealing, cap max-height so it can animate (0 → 1000). Once revealed, drop the cap
-        // to fit-content so long content isn't clipped.
+        // Capped during the reveal (animatable), uncapped after — see `revealed` above.
         overflow: revealed ? 'visible' : 'hidden',
         opacity: isVisible ? 1 : 0,
         maxHeight: revealed ? 'none' : isVisible ? 1000 : 0,

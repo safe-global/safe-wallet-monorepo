@@ -48,9 +48,8 @@ interface AddressPoisoningCardItemProps {
 }
 
 /**
- * Dedicated renderer for the ADDRESS_POISONING group: shows the entered address and the trusted
- * address it resembles side by side (no "Show all" dropdown), with the matching front/back
- * characters bolded. Scoped to poisoning results only — other Copilot cards are unaffected.
+ * Renders the ADDRESS_POISONING group: entered address vs the trusted address it resembles, matching
+ * ends bolded. Scoped to poisoning results — other Copilot cards are unaffected.
  */
 export const AddressPoisoningCardItem = ({ result }: AddressPoisoningCardItemProps) => {
   const chain = useCurrentChain()
