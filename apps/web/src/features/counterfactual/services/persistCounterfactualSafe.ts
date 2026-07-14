@@ -38,12 +38,14 @@ type PersistArgs = {
    *  soft toast-and-succeed behavior. */
   isMultiChainCreation?: boolean
   /** Read-only provider for `chainId`, used to check the Safe isn't already
-   *  deployed before saving it as counterfactual. */
+   *  deployed before saving it as counterfactual. Must target `chainId` — when
+   *  absent the deployment check is skipped rather than run against another
+   *  chain's provider. */
   provider?: JsonRpcProvider
   dispatch: AppDispatch
 }
 
-export type PersistResult = { ok: true } | { ok: false; error: Error }
+export type PersistResult = { ok: true; skipped?: 'already-deployed' } | { ok: false; error: Error }
 
 /**
  * Single code path for creating a counterfactual safe: persist to backend
@@ -71,13 +73,17 @@ export const persistCounterfactualSafe = async ({
   dispatch,
 }: PersistArgs): Promise<PersistResult> => {
   // 0. Never store an already-deployed Safe as counterfactual — it would surface
-  //    as "Not activated" for every space member. Fail open to match the backend.
-  try {
-    if (await isSmartContract(safeAddress, provider)) {
-      return { ok: true }
+  //    as "Not activated" for every space member. Skip the check without a
+  //    chain-specific provider (the global one may target a different chain) and
+  //    fail open on error to match the backend.
+  if (provider) {
+    try {
+      if (await isSmartContract(safeAddress, provider)) {
+        return { ok: true, skipped: 'already-deployed' }
+      }
+    } catch {
+      // Deployment check failed — fall through and save.
     }
-  } catch {
-    // Deployment check failed — fall through and save.
   }
 
   // 1. Save to backend (blocking). Unauth users fall back to local-only —
@@ -181,9 +187,10 @@ export const persistCounterfactualSafe = async ({
   return { ok: true }
 }
 
-// Shown on backend 409: the Safe is already deployed on-chain.
+// Shown on backend 409 (conflict). Most commonly the Safe already exists or is
+// deployed, so we point the user at adding it as a regular account.
 const CONFLICT_MESSAGE =
-  'This Safe is already deployed, so it cannot be created as a counterfactual account. Add it as a regular Safe account instead.'
+  "This Safe can't be created as a counterfactual account — it may already exist or be deployed. Try adding it as a regular Safe account instead."
 
 type BackendError = { status?: number; data?: { message?: string } }
 

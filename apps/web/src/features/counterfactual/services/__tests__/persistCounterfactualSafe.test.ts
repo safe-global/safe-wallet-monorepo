@@ -81,6 +81,8 @@ const props: ReplayedSafeProps = {
   },
 }
 
+const mockProvider = { getCode: jest.fn() } as unknown as Parameters<typeof persistCounterfactualSafe>[0]['provider']
+
 const baseArgs = {
   chainId: '100',
   safeAddress: '0xSafe',
@@ -88,6 +90,7 @@ const baseArgs = {
   name: 'MySafe',
   payMethod: PayMethod.PayLater,
   isAdminOfActiveSpace: true,
+  provider: mockProvider,
 }
 
 describe('persistCounterfactualSafe', () => {
@@ -157,7 +160,7 @@ describe('persistCounterfactualSafe', () => {
     if (!result.ok) expect(result.error.message).toMatch(/backend/i)
   })
 
-  it('returns an already-deployed conflict message when the backend responds 409', async () => {
+  it('returns a conflict message when the backend responds 409', async () => {
     const dispatch = jest.fn((action) => {
       if (action.type === 'user-create-thunk') return { error: { status: 409 } }
       return action
@@ -172,11 +175,11 @@ describe('persistCounterfactualSafe', () => {
 
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.message).toMatch(/already deployed/i)
+      expect(result.error.message).toMatch(/counterfactual account/i)
     }
   })
 
-  it('skips the POST and Redux add and returns ok when the Safe is already deployed', async () => {
+  it('skips the POST and Redux add and reports skipped when the Safe is already deployed', async () => {
     isSmartContractImpl.mockResolvedValue(true)
     const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
 
@@ -191,6 +194,26 @@ describe('persistCounterfactualSafe', () => {
     expect(spaceInitiate).not.toHaveBeenCalled()
     expect(replayImpl).not.toHaveBeenCalled()
     expect(result.ok).toBe(true)
+    if (result.ok) expect(result.skipped).toBe('already-deployed')
+  })
+
+  it('skips the deployment check and persists when no provider is passed', async () => {
+    isSmartContractImpl.mockResolvedValue(true)
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      provider: undefined,
+      spaceId: null,
+      isUserAuthenticated: true,
+      dispatch,
+    })
+
+    expect(isSmartContractImpl).not.toHaveBeenCalled()
+    expect(userInitiate).toHaveBeenCalledTimes(1)
+    expect(replayImpl).toHaveBeenCalled()
+    expect(result.ok).toBe(true)
+    if (result.ok) expect(result.skipped).toBeUndefined()
   })
 
   it('proceeds with the persist when the deployment check fails (fail-open)', async () => {

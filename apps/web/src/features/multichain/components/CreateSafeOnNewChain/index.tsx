@@ -162,7 +162,10 @@ const ReplaySafeDialog = ({
         showNotification({
           variant: 'success',
           groupKey: 'replay-safe-success',
-          message: `Successfully added your account on ${selectedChain.chainName}`,
+          message:
+            persistResult.skipped === 'already-deployed'
+              ? `This account is already deployed on ${selectedChain.chainName}`
+              : `Successfully added your account on ${selectedChain.chainName}`,
         }),
       )
     } catch (err) {
