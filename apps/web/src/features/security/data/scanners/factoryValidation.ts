@@ -48,7 +48,7 @@ export const factoryValidationScanner: SecurityScanner = {
         severity: getSeverityFromScore(score),
         score,
         evidence: [
-          { label: 'Factory', value: `${creationInfo.factoryAddress.slice(0, 10)}...` },
+          { label: 'Factory', value: creationInfo.factoryAddress },
           { label: 'Status', value: 'Official Safe factory' },
         ],
         remediation: '',
@@ -62,7 +62,7 @@ export const factoryValidationScanner: SecurityScanner = {
       severity: getSeverityFromScore(score),
       score,
       evidence: [
-        { label: 'Factory', value: `${creationInfo.factoryAddress.slice(0, 10)}...` },
+        { label: 'Factory', value: creationInfo.factoryAddress },
         { label: 'Status', value: 'Unrecognized factory' },
       ],
       remediation:

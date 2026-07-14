@@ -1,4 +1,5 @@
 import { toBeHex } from 'ethers'
+import { faker } from '@faker-js/faker'
 import {
   setHiddenTokensForChain,
   setCuratedNestedSafes,
@@ -378,11 +379,11 @@ describe('settingsSlice', () => {
   })
 
   describe('selectAllCuratedNestedSafes', () => {
-    const parentA = toBeHex('0x1', 20)
-    const parentB = toBeHex('0x2', 20)
-    const nested1 = toBeHex('0x10', 20)
-    const nested2 = toBeHex('0x20', 20)
-    const nested3 = toBeHex('0x30', 20)
+    const parentA = faker.finance.ethereumAddress()
+    const parentB = faker.finance.ethereumAddress()
+    const nested1 = faker.finance.ethereumAddress()
+    const nested2 = faker.finance.ethereumAddress()
+    const nested3 = faker.finance.ethereumAddress()
 
     it('flattens, lowercases and dedupes curated addresses across all parents', () => {
       const state = createCurationState({

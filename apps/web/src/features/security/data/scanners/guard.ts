@@ -65,7 +65,7 @@ export const guardScanner: SecurityScanner = {
     // Tier 1: Untrusted guard detected
     if (hasGuard && !isTrustedGuard(guard.name, chainId, guard.value)) {
       const score = 30
-      const guardLabel = guard.name || `${guard.value.slice(0, 10)}...`
+      const guardLabel = guard.name || guard.value
       return {
         status: 'issue',
         severity: getSeverityFromScore(score),

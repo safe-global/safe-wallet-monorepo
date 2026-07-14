@@ -2,13 +2,14 @@ import { render, screen } from '@/tests/test-utils'
 import AccountItemChainBadge from '../AccountItemChainBadge'
 import type { SafeItem } from '@/hooks/safes'
 
-jest.mock('@/components/ui/tooltip', () => ({
-  Tooltip: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  TooltipTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  TooltipContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}))
 jest.mock('@/features/multichain', () => ({
-  NetworkLogosList: () => <span data-testid="network-logos" />,
+  NetworkLogosTooltip: ({ networks, contentTestId }: { networks: { chainId: string }[]; contentTestId?: string }) => (
+    <div data-testid={contentTestId}>
+      {networks.map((network) => (
+        <span key={network.chainId} data-testid="chain-indicator" data-chain-id={network.chainId} />
+      ))}
+    </div>
+  ),
 }))
 jest.mock('@/components/common/ChainIndicator', () => {
   const ChainIndicator = ({ chainId }: { chainId: string }) => (

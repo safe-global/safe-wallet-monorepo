@@ -43,8 +43,10 @@ jest.mock('@/components/common/Identicon', () => {
   return Identicon
 })
 jest.mock('@/features/multichain', () => ({
-  NetworkLogosList: ({ networks }: { networks: { chainId: string }[] }) => (
-    <span data-testid="network-logos" data-count={networks.length} />
+  NetworkLogosTooltip: ({ networks, trigger }: { networks: { chainId: string }[]; trigger?: React.ReactNode }) => (
+    <span data-testid="network-logos" data-count={networks.length}>
+      {trigger}
+    </span>
   ),
 }))
 jest.mock('@/components/common/ChainIndicator', () => {

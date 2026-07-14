@@ -38,6 +38,12 @@ describe('fallbackHandlerScanner', () => {
     expect(result.status).toBe('issue')
     expect(result.severity).toBe('High')
     expect(result.score).toBe(20)
+    // With no CGW name, the handler evidence carries the full address so EvidenceList
+    // shortens it and adds a copy button — consistent with every other check (WA-2371).
+    expect(result.evidence).toContainEqual({
+      label: 'Handler',
+      value: '0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF',
+    })
   })
 
   it('includes handler name in evidence when available', async () => {
