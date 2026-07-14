@@ -44,8 +44,7 @@ const CreateSpendingLimit = () => {
   const beneficiary = watch(SpendingLimitFields.beneficiary)
 
   // Copilot address-poisoning check for the beneficiary
-  const poisoningCheckAddresses = useMemo(() => (beneficiary ? [beneficiary] : []), [beneficiary])
-  useSafeShieldForAddressPoisoning(poisoningCheckAddresses)
+  useSafeShieldForAddressPoisoning([beneficiary])
   const selectedToken = tokenAddress
     ? balances.items.find((item) => item.tokenInfo.address === tokenAddress)
     : undefined
