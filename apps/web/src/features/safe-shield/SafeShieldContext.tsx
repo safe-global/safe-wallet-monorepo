@@ -67,9 +67,8 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const deadlock = counterpartyAnalysis.deadlock
   const [deadlockResults] = deadlock
 
-  // Client-side address-poisoning check: overlays an ADDRESS_POISONING group onto both
-  // the create-step (registered recipients) and review-step (counterparty) analysis,
-  // plus poisoning-only entries for registered non-recipient addresses.
+  // Add the address-poisoning check to the recipient analysis (create-step recipients + review-step
+  // counterparty), plus poisoning-only entries for registered non-recipient addresses.
   const recipient = useRecipientAnalysisWithPoisoning(
     recipientOnlyAnalysis || counterpartyAnalysis.recipient,
     poisoningAddresses,
@@ -192,6 +191,18 @@ export const useSafeShieldForAddressPoisoning = (addresses: string[]) => {
   )
 
   return recipient
+}
+
+/**
+ * Register a tx-flow field (single address or a list) for the address-poisoning check.
+ * Keys on the joined VALUE, not array identity — RHF's watch() mutates its array in place, so a
+ * value key is what makes the check re-trigger. (Do NOT use useMemoDeepCompare: it compares by
+ * reference and would miss the in-place mutation.)
+ */
+export const useAddressPoisoningCheck = (addresses: Array<string | undefined>) => {
+  const key = addresses.filter(Boolean).join(',')
+  const stableAddresses = useMemo(() => (key ? key.split(',') : []), [key])
+  useSafeShieldForAddressPoisoning(stableAddresses)
 }
 
 /**

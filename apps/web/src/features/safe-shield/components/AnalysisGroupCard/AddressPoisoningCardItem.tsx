@@ -1,10 +1,10 @@
-import { useState } from 'react'
-import { Box, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import { Severity, type AnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import { getCommonAffixLengths } from '@safe-global/utils/utils/addressSimilarity'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { useCurrentChain } from '@/hooks/useChains'
 import ExplorerButton from '@/components/common/ExplorerButton'
+import CopyTooltip from '@/components/common/CopyTooltip'
 import { SEVERITY_COLORS } from '../../constants'
 import { HighlightedAddress } from '../HighlightedAddress'
 
@@ -16,47 +16,32 @@ interface AddressRowProps {
   explorerHref?: string
 }
 
-const AddressRow = ({ label, address, prefixLen, suffixLen, explorerHref }: AddressRowProps) => {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(address)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1000)
-    } catch {
-      // ignore clipboard errors
-    }
-  }
-
-  return (
-    <Box padding="8px" bgcolor="background.paper" borderRadius="4px">
-      <Stack spacing={0.5}>
-        <Typography variant="body2" color="text.secondary" fontSize={12}>
-          {label}
-        </Typography>
-        <Stack direction="row" alignItems="flex-start" gap={0.5}>
-          <Tooltip title={copied ? 'Copied to clipboard' : 'Copy address'} placement="top" arrow>
-            <Typography
-              variant="body2"
-              fontSize={12}
-              lineHeight="20px"
-              onClick={handleCopy}
-              sx={{ cursor: 'pointer', color: 'primary.light', flex: 1, '&:hover': { color: 'text.primary' } }}
-            >
-              <HighlightedAddress address={address} prefixLen={prefixLen} suffixLen={suffixLen} />
-            </Typography>
-          </Tooltip>
-          {explorerHref && (
-            <Box component="span" color="text.secondary">
-              <ExplorerButton href={explorerHref} />
-            </Box>
-          )}
-        </Stack>
+const AddressRow = ({ label, address, prefixLen, suffixLen, explorerHref }: AddressRowProps) => (
+  <Box padding="8px" bgcolor="background.paper" borderRadius="4px">
+    <Stack spacing={0.5}>
+      <Typography variant="body2" color="text.secondary" fontSize={12}>
+        {label}
+      </Typography>
+      <Stack direction="row" alignItems="flex-start" gap={0.5}>
+        <CopyTooltip text={address} initialToolTipText="Copy address">
+          <Typography
+            variant="body2"
+            fontSize={12}
+            lineHeight="20px"
+            sx={{ cursor: 'pointer', color: 'primary.light', flex: 1, '&:hover': { color: 'text.primary' } }}
+          >
+            <HighlightedAddress address={address} prefixLen={prefixLen} suffixLen={suffixLen} />
+          </Typography>
+        </CopyTooltip>
+        {explorerHref && (
+          <Box component="span" color="text.secondary">
+            <ExplorerButton href={explorerHref} />
+          </Box>
+        )}
       </Stack>
-    </Box>
-  )
-}
+    </Stack>
+  </Box>
+)
 
 interface AddressPoisoningCardItemProps {
   result: AnalysisResult

@@ -4,11 +4,8 @@ import { type AnalysisResult, RecipientStatus, Severity } from '../types'
 export type AddressPoisoningStatus = RecipientStatus.RESEMBLES_TRUSTED_ADDRESS
 
 /**
- * Maps an address-poisoning look-alike onto a Copilot (SafeShield) analysis result.
- *
- * Any resemblance to a trusted anchor (front and/or back) is surfaced as one CRITICAL "Potential
- * address poisoning" state. The card lists the entered address and the trusted address it resembles
- * so the user can compare them side by side.
+ * Maps a look-alike to a single CRITICAL "Potential address poisoning" result for the Copilot card
+ * (the entered address + the trusted address it resembles).
  */
 export function getAddressPoisoningResult({
   address,
