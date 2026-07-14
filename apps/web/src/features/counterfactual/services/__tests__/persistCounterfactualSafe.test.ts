@@ -2,6 +2,7 @@ import { persistCounterfactualSafe } from '../persistCounterfactualSafe'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import type { AppDispatch } from '@/store'
+import { addOrUpdateSafe } from '@/store/addedSafesSlice'
 import { removeUndeployedSafe } from '../../store/undeployedSafesSlice'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
@@ -198,7 +199,7 @@ describe('persistCounterfactualSafe', () => {
     if (result.ok) expect(result.skipped).toBe('already-deployed')
   })
 
-  it('clears any stale undeployed-slice entry for the already-deployed Safe', async () => {
+  it('adds the already-deployed Safe to My accounts and clears any stale undeployed entry', async () => {
     isSmartContractImpl.mockResolvedValue(true)
     const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
 
@@ -209,6 +210,16 @@ describe('persistCounterfactualSafe', () => {
       dispatch,
     })
 
+    expect(dispatch).toHaveBeenCalledWith(
+      addOrUpdateSafe({
+        safe: expect.objectContaining({
+          chainId: '100',
+          address: { value: '0xSafe', name: 'MySafe' },
+          threshold: 1,
+          owners: [{ value: '0xabc' }],
+        }),
+      }),
+    )
     expect(dispatch).toHaveBeenCalledWith(removeUndeployedSafe({ chainId: '100', address: '0xSafe' }))
   })
 

@@ -5,6 +5,8 @@ import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactu
 import { isSmartContract } from '@/utils/wallets'
 import { cgwApi as counterfactualSafesApi } from '@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes'
 import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { addOrUpdateSafe } from '@/store/addedSafesSlice'
+import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { toBackendDto } from './counterfactualSafeMapper'
 import { replayCounterfactualSafeDeployment } from './safeDeployment'
 import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
@@ -82,7 +84,19 @@ export const persistCounterfactualSafe = async ({
     }
 
     if (isDeployed) {
-      // Drop any stale undeployed entry; the caller re-adds it as a regular Safe.
+      // Add it to My accounts as a regular deployed Safe (not the undeployed
+      // slice, which shows "Not activated"), and drop any stale undeployed entry.
+      dispatch(
+        addOrUpdateSafe({
+          safe: {
+            ...defaultSafeInfo,
+            chainId,
+            address: { value: safeAddress, name },
+            threshold: Number(props.safeAccountConfig.threshold),
+            owners: props.safeAccountConfig.owners.map((owner) => ({ value: owner })),
+          },
+        }),
+      )
       dispatch(removeUndeployedSafe({ chainId, address: safeAddress }))
       return { ok: true, skipped: 'already-deployed' }
     }
