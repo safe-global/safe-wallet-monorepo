@@ -306,7 +306,7 @@ describe('useFlowActivationGuard', () => {
 
       expect(guardResult).toEqual({
         success: false,
-        redirectTo: `${AppRoutes.welcome.index}?safe=5%3A0xcafe`,
+        redirectTo: `${AppRoutes.welcome.spaces}?safe=5%3A0xcafe`,
       })
     })
 
@@ -493,7 +493,7 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.index })
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
     })
 
     it('should redirect to welcome when spaceId is a legacy numeric id (uuid-only matching)', async () => {
@@ -507,7 +507,7 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.index })
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
     })
   })
 
@@ -542,7 +542,7 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.index })
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
     })
   })
 

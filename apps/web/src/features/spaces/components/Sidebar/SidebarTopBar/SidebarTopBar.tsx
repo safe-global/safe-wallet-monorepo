@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react'
-import { useRouter } from 'next/router'
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import { cn } from '@/utils/cn'
 import { AppRoutes } from '@/config/routes'
@@ -10,19 +9,14 @@ import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 export const SidebarTopBar = (): ReactElement => {
   const { state } = useSidebar()
   const isCollapsed = state === 'collapsed'
-  const router = useRouter()
   const safeAddress = useSafeAddressFromUrl()
   const isSpaceRoute = useIsSpaceRoute()
 
   // Inside a space or an individual safe the logo turns into a "Home" label pill that returns to the
-  // top-level accounts view. Elsewhere it stays a plain logo toggling between the welcome routes.
+  // top-level accounts view; elsewhere it stays a plain logo linking to that same view.
   const isInSafeOrSpace = Boolean(safeAddress) || isSpaceRoute
   const showHomeLabel = isInSafeOrSpace && !isCollapsed
-  const logoHref = isInSafeOrSpace
-    ? AppRoutes.welcome.accounts
-    : router.pathname === AppRoutes.welcome.accounts
-      ? AppRoutes.welcome.index
-      : AppRoutes.welcome.accounts
+  const logoHref = AppRoutes.welcome.accounts
 
   return (
     <div

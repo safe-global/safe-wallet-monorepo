@@ -5,7 +5,6 @@ import * as constants from '../../support/constants'
 import * as wallet from '../../support/utils/wallet'
 import * as owner from './owners.pages'
 
-export const welcomeLoginScreen = '[data-testid="welcome-login"]'
 const ownerInput = 'input[name^="owners"][name$="name"]'
 const ownerAddress = 'input[name^="owners"][name$="address"]'
 const thresholdInput = 'input[name="threshold"]'
@@ -182,12 +181,6 @@ export function clickOnContinueWithWalletBtn() {
 export function verifyConnectWalletBtnDisplayed() {
   return cy.get(connectWalletBtn).should('be.visible')
 }
-export function clickOnConnectWalletBtn() {
-  cy.get(welcomeLoginScreen).within(() => {
-    verifyConnectWalletBtnDisplayed().should('be.enabled').click().wait(1000)
-  })
-}
-
 export function typeWalletName(name) {
   cy.get(main.nameInput).type(name).should('have.value', name)
 }

@@ -9,6 +9,7 @@ import { useLazySpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERAT
 import type { GuardRule } from '../types'
 import { allow, evaluateGuard, redirect } from '../utils'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
+import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
 
 // ---------------------------------------------------------------------------
 // Route classifications
@@ -41,7 +42,7 @@ const guardRules: GuardRule[] = [
       return !isSiweAuthenticated
     },
     action: ({ isSpacesPath, query }) => {
-      const target = isSpacesPath ? AppRoutes.welcome.spaces : AppRoutes.welcome.index
+      const target = isSpacesPath ? AppRoutes.welcome.spaces : getWelcomeRoute()
       const safe = typeof query.safe === 'string' ? query.safe : undefined
       return redirect(safe ? `${target}?safe=${encodeURIComponent(safe)}` : target)
     },
@@ -79,7 +80,7 @@ const guardRules: GuardRule[] = [
       const shouldRedirect = isWalletReady && !isPartOfSpaceUrl && !isOnboardingRoute && !isPublicRoute
       return shouldRedirect
     },
-    action: () => redirect(AppRoutes.welcome.index),
+    action: () => redirect(getWelcomeRoute()),
   },
 ]
 

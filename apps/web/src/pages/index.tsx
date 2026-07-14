@@ -2,9 +2,7 @@ import { useEffect } from 'react'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import isEmpty from 'lodash/isEmpty'
-import local from '@/services/local-storage/local'
-import { addedSafesSlice, type AddedSafesState } from '@/store/addedSafesSlice'
+import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
 
 const IndexPage: NextPage = () => {
   const router = useRouter()
@@ -15,15 +13,9 @@ const IndexPage: NextPage = () => {
       return
     }
 
-    // TODO: Replace with useLocalStorage. For now read directly from localstorage so we have value on first render
-    const addedSafes = local.getItem<AddedSafesState>(addedSafesSlice.name)
-    const hasAddedSafes = addedSafes !== null && !isEmpty(addedSafes)
-    // A user with local (trusted) safes lands on the Trusted accounts tab; everyone
-    // else lands on the Workspaces tab — both are the tabbed welcome, no login gate.
-    const pathname = hasAddedSafes ? AppRoutes.welcome.accounts : AppRoutes.welcome.spaces
-
+    // Both tabbed welcome landing pages are public — no login gate.
     router.replace({
-      pathname,
+      pathname: getWelcomeRoute(),
       query: chain ? { chain } : undefined,
     })
   }, [router, chain])

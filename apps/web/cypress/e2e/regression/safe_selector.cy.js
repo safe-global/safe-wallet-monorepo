@@ -53,19 +53,6 @@ describe('Safe selector tests - details and currency', () => {
   })
 })
 
-describe('Safe selector tests - welcome page redirect', () => {
-  it('Verify connected user is redirected from welcome page to accounts page', () => {
-    cy.visit(constants.welcomeUrl + '?chain=sep')
-    cy.get(create_wallet.welcomeLoginScreen).should('be.visible')
-    cy.get(create_wallet.connectWalletBtn).should('be.visible').click()
-    wallet.connectSigner(signer)
-    cy.location().should((loc) => {
-      expect(loc.pathname).to.eq('/welcome/accounts')
-    })
-    cy.get(create_wallet.accountInfoHeader).should('be.visible')
-  })
-})
-
 describe('Safe selector tests - trusted safes in accounts modal', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)

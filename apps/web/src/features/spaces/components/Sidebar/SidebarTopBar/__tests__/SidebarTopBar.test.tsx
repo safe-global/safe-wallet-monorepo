@@ -83,16 +83,8 @@ describe('SidebarTopBar', () => {
     expect(topBar).toHaveClass('min-h-16')
   })
 
-  it('passes /welcome href to SafeLogo when on /welcome/accounts', () => {
-    mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.accounts })
-
-    render(<SidebarTopBar />)
-
-    expect(screen.getByTestId('logo-container')).toHaveAttribute('href', AppRoutes.welcome.index)
-  })
-
-  it('passes /welcome/accounts href to SafeLogo when not on /welcome/accounts', () => {
-    mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.index })
+  it('links the logo to the accounts view outside a safe or space', () => {
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.spaces })
 
     render(<SidebarTopBar />)
 
