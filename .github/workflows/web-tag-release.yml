@@ -190,13 +190,26 @@ jobs:
         run: bash ./scripts/github/s3_upload.sh
         working-directory: apps/web
 
+      # Fail-open like the hook it replaced: a promotion-dispatch problem must not block
+      # the release publish and back-merge steps below.
+      - name: Generate production promotion token
+        id: promotions_token
+        continue-on-error: true
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.PROMOTIONS_APP_ID }}
+          private-key: ${{ secrets.PROMOTIONS_APP_PRIVATE_KEY }}
+          repositories: ${{ secrets.PROMOTIONS_REPO }}
+          permission-actions: write
+
       # Script to prepare production deployments
       - name: Prepare deployment
+        continue-on-error: true
         run: bash ./scripts/github/prepare_production_deployment.sh
         working-directory: apps/web
         env:
-          PROD_DEPLOYMENT_HOOK_TOKEN: ${{ secrets.PROD_DEPLOYMENT_HOOK_TOKEN }}
-          PROD_DEPLOYMENT_HOOK_URL: ${{ secrets.PROD_DEPLOYMENT_HOOK_URL }}
+          GH_TOKEN: ${{ steps.promotions_token.outputs.token }}
+          PROMOTIONS_REPO: ${{ github.repository_owner }}/${{ secrets.PROMOTIONS_REPO }}
           VERSION_TAG: ${{ needs.tag.outputs.version }}
 
       - name: Create back-merge PR

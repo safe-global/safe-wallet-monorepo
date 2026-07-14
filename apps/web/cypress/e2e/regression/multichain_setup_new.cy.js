@@ -76,6 +76,7 @@ describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
     cy.visit(constants.homeUrl + staticSafes.MATIC_STATIC_SAFE_28)
     dashboard.expandActionRequiredPanel()
     dashboard.checkInconsistentSignersMsgDisplayed()
+    dashboard.verifySafeInUrl(staticSafes.MATIC_STATIC_SAFE_28)
     dashboard.clickActionInPanel(dashboard.reviewSignersTestId)
     cy.url().should('include', '/settings/setup').and('include', staticSafes.MATIC_STATIC_SAFE_28)
   })

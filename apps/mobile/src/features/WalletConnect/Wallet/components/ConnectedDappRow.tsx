@@ -1,6 +1,9 @@
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { Pressable } from 'react-native'
-import ReanimatedSwipeable, { type SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable'
+import ReanimatedSwipeable, {
+  SwipeDirection,
+  type SwipeableMethods,
+} from 'react-native-gesture-handler/ReanimatedSwipeable'
 import { Text, View, XStack } from 'tamagui'
 import type { SessionTypes } from '@walletconnect/types'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -14,17 +17,50 @@ interface Props {
   variant?: VerifyVariant
   /** Asks the screen to open the disconnect confirmation for this session. */
   onRequestDisconnect: (session: SessionTypes.Struct) => void
+  /** Notifies the screen that this row starts to swipe open, so it can close the previous one. */
+  onSwipeOpenStart?: (methods: SwipeableMethods) => void
+  /** Notifies the screen that this row unmounts, so it can drop a reference to its swipeable. */
+  onSwipeCleanup?: (methods: SwipeableMethods) => void
 }
 
 /** A connected-dApp card; the overflow menu and a left-swipe both route to a disconnect confirmation. */
-export const ConnectedDappRow: React.FC<Props> = ({ session, variant, onRequestDisconnect }) => {
+export const ConnectedDappRow: React.FC<Props> = ({
+  session,
+  variant,
+  onRequestDisconnect,
+  onSwipeOpenStart,
+  onSwipeCleanup,
+}) => {
   const meta = session.peer.metadata
   const swipeRef = useRef<SwipeableMethods>(null)
+
+  // Capture the handle at mount: the swipeable's ref is already detached when the cleanup runs.
+  const onSwipeCleanupRef = useRef(onSwipeCleanup)
+  onSwipeCleanupRef.current = onSwipeCleanup
+  useEffect(() => {
+    const methods = swipeRef.current
+    return () => {
+      if (methods) {
+        onSwipeCleanupRef.current?.(methods)
+      }
+    }
+  }, [])
 
   const requestDisconnect = useCallback(() => {
     swipeRef.current?.close()
     onRequestDisconnect(session)
   }, [onRequestDisconnect, session])
+
+  const handleOpenStartDrag = useCallback(
+    (direction: SwipeDirection) => {
+      // Only a left drag reveals the trash (the sole, right-side action); the ref is always set
+      // once the swipeable has mounted — the guard just narrows the type.
+      if (direction === SwipeDirection.LEFT && swipeRef.current) {
+        onSwipeOpenStart?.(swipeRef.current)
+      }
+    },
+    [onSwipeOpenStart],
+  )
 
   const renderTrash = useCallback(
     () => (
@@ -51,7 +87,12 @@ export const ConnectedDappRow: React.FC<Props> = ({ session, variant, onRequestD
   )
 
   return (
-    <ReanimatedSwipeable ref={swipeRef} renderRightActions={renderTrash} overshootRight={false}>
+    <ReanimatedSwipeable
+      ref={swipeRef}
+      renderRightActions={renderTrash}
+      overshootRight={false}
+      onSwipeableOpenStartDrag={handleOpenStartDrag}
+    >
       <XStack
         backgroundColor="$backgroundPaper"
         borderRadius="$2"
