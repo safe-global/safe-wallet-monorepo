@@ -8,6 +8,7 @@ const mockUpdateAlias = jest.fn()
 const mockUpdateRole = jest.fn()
 const mockTrackEvent = jest.fn()
 const mockAdminCount = jest.fn(() => 2)
+const mockIsAdmin = jest.fn(() => true)
 const mockCurrentUser = jest.fn<{ id: number } | undefined, []>(() => ({ id: 1 }))
 
 jest.mock('@/store', () => ({
@@ -26,6 +27,7 @@ jest.mock('@/store/notificationsSlice', () => ({
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '42',
   useAdminCount: () => mockAdminCount(),
+  useIsAdmin: () => mockIsAdmin(),
   isActiveAdmin: (member: { role: string; status: string }) => member.role === 'ADMIN' && member.status === 'ACTIVE',
   getMemberDisplayName: (member: { alias?: string | null; name: string }) => member.alias || member.name,
   sanitizeMemberAlias: (value: string) => value.trim(),
@@ -110,6 +112,7 @@ describe('EditMemberDialog', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockAdminCount.mockReturnValue(2)
+    mockIsAdmin.mockReturnValue(true)
     mockCurrentUser.mockReturnValue({ id: 1 })
     mockUpdateAlias.mockResolvedValue({})
     mockUpdateRole.mockResolvedValue({})
@@ -153,6 +156,18 @@ describe('EditMemberDialog', () => {
     expect(screen.getByLabelText('Role')).toBeDisabled()
 
     await changeNameAndSubmit('Solo Admin')
+    await waitFor(() => expect(mockUpdateAlias).toHaveBeenCalled())
+    expect(mockUpdateRole).not.toHaveBeenCalled()
+  })
+
+  it('disables the role for non-admin users but still allows renaming themselves', async () => {
+    mockIsAdmin.mockReturnValue(false)
+
+    render(<EditMemberDialog member={member} handleClose={jest.fn()} />)
+
+    expect(screen.getByLabelText('Role')).toBeDisabled()
+
+    await changeNameAndSubmit('Alice Renamed')
     await waitFor(() => expect(mockUpdateAlias).toHaveBeenCalled())
     expect(mockUpdateRole).not.toHaveBeenCalled()
   })

@@ -9,6 +9,7 @@ import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_G
 import {
   useCurrentSpaceId,
   useAdminCount,
+  useIsAdmin,
   isActiveAdmin,
   getMemberDisplayName,
   sanitizeMemberAlias,
@@ -43,10 +44,12 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const adminCount = useAdminCount()
+  const isAdmin = useIsAdmin()
 
-  // A member may only rename themselves; the last active admin keeps their role locked to preserve ownership.
+  // A member may only rename themselves; only admins may change roles,
+  // and the last active admin keeps their role locked to preserve ownership.
   const canEditName = member.user.id === currentUser?.id
-  const disableRole = adminCount === 1 && isActiveAdmin(member)
+  const disableRole = !isAdmin || (adminCount === 1 && isActiveAdmin(member))
   const displayName = getMemberDisplayName(member)
 
   const methods = useForm<MemberField>({
