@@ -1,11 +1,14 @@
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { useContext, useMemo } from 'react'
-import { SvgIcon, Typography, Alert, AlertTitle, Skeleton, Button } from '@mui/material'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Typography } from '@/components/ui/typography'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { MasterCopy } from '@/hooks/useMasterCopies'
 import { MasterCopyDeployer, useMasterCopies } from '@/hooks/useMasterCopies'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import { CircleCheckIcon } from 'lucide-react'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { TxModalContext } from '@/components/tx-flow'
 import { UpdateSafeFlow } from '@/components/tx-flow/flows'
@@ -14,7 +17,6 @@ import CheckWallet from '@/components/common/CheckWallet'
 import { useCurrentChain } from '@/hooks/useChains'
 import { UnsupportedMastercopyWarning } from '@/features/multichain'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
-import { Box } from '@/components/common/Mui'
 
 /**
  * Generates a GitHub release URL for a specific Safe contract version.
@@ -48,59 +50,59 @@ export const ContractVersion = () => {
 
   return (
     <>
-      <Typography variant="h4" fontWeight={700} marginBottom={1}>
+      <Typography variant="h4" className="mb-2">
         Contract version
       </Typography>
 
-      <Typography variant="body1" fontWeight={400} display="flex" alignItems="center">
+      <Typography className="flex items-center">
         {safeLoaded ? (
           <>
             {safe.version ?? 'Unsupported contract'}
             {isLatestVersion && (
               <>
-                <CheckCircleIcon color="primary" sx={{ ml: 1, mr: 0.5 }} /> Latest version
+                <CircleCheckIcon className="ml-2 mr-1 size-5 text-primary" /> Latest version
               </>
             )}
           </>
         ) : (
-          <Skeleton width="60px" />
+          <Skeleton className="h-5 w-[60px]" />
         )}
       </Typography>
 
       {safeLoaded && releaseUrl && (
-        <Typography variant="body2" mt={0.5}>
+        <Typography variant="paragraph-small" className="block mt-1">
           <ExternalLink href={releaseUrl}>View release</ExternalLink>
         </Typography>
       )}
 
-      <Box mt={2}>
+      <div className="mt-4">
         {safeLoaded && safe.version && showUpdateDialog ? (
-          <Alert
-            sx={{ borderRadius: '2px', borderColor: '#B0FFC9' }}
-            icon={<SvgIcon component={InfoIcon} inheritViewBox color="secondary" />}
-          >
-            <AlertTitle sx={{ fontWeight: 700 }}>
+          <Alert>
+            <InfoIcon className="size-4 text-[var(--color-secondary-main)]" />
+            <AlertTitle>
               New version is available: {latestSafeVersion} (
               <ExternalLink href={safeMasterCopy?.deployerRepoUrl}>changelog</ExternalLink>)
             </AlertTitle>
 
-            <Typography mb={2}>
-              Update now to take advantage of new features and the highest security standards available. You will need
-              to confirm this update just like any other transaction.
-            </Typography>
+            <AlertDescription>
+              <p>
+                Update now to take advantage of new features and the highest security standards available. You will need
+                to confirm this update just like any other transaction.
+              </p>
 
-            <CheckWallet>
-              {(isOk) => (
-                <Button onClick={() => setTxFlow(<UpdateSafeFlow />)} variant="contained" disabled={!isOk}>
-                  Update
-                </Button>
-              )}
-            </CheckWallet>
+              <CheckWallet>
+                {(isOk) => (
+                  <Button onClick={() => setTxFlow(<UpdateSafeFlow />)} disabled={!isOk}>
+                    Update
+                  </Button>
+                )}
+              </CheckWallet>
+            </AlertDescription>
           </Alert>
         ) : (
           <UnsupportedMastercopyWarning />
         )}
-      </Box>
+      </div>
     </>
   )
 }

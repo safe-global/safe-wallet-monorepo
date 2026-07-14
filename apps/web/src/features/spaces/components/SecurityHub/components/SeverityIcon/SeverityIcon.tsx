@@ -1,35 +1,37 @@
 import type { ReactElement } from 'react'
-import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded'
-import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded'
-import ErrorRoundedIcon from '@mui/icons-material/ErrorRounded'
-import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded'
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
-import RemoveCircleOutlineRoundedIcon from '@mui/icons-material/RemoveCircleOutlineRounded'
-import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded'
-import type { SvgIconComponent } from '@mui/icons-material'
+import { CircleCheck, CircleMinus, CircleHelp, TriangleAlert, CircleAlert, OctagonAlert } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import type { SafeGrade, ScanResult, SecurityGrade } from '@/features/security/types'
 
 /**
- * A severity "tone" — the MUI icon glyph + theme color used wherever security severity
+ * A severity "tone" — the icon glyph + theme color used wherever security severity
  * is surfaced. Single source of truth so the drawer's per-check rows (StatusIcon) and the
  * SafeGrade chips render the exact same icons.
+ *
+ * `color` stays a theme token path (e.g. `'error.main'`); consumers such as `primitives.tsx`
+ * convert it to a CSS var themselves, so it must not be pre-converted here.
  */
-export type SeverityTone = { Icon: SvgIconComponent; color: string }
+export type SeverityTone = { Icon: LucideIcon; color: string }
+
+// Converts a theme palette token path (e.g. "success.main") to its theme CSS var (vars.css).
+// Plain colors (no dot) are returned untouched.
+const tokenToCssVar = (color: string): string =>
+  color.includes('.') ? `var(--color-${color.replace(/\./g, '-')})` : color
 
 /**
  * The most-severe tone — a filled rounded error circle (`!`) in the darker error shade.
  * Shared by the `critical` SafeGrade chip and any Critical-severity failing check in the
  * report drawer. The filled circle distinguishes Critical from At risk (outlined variant).
  */
-export const CRITICAL_TONE: SeverityTone = { Icon: ErrorRoundedIcon, color: 'error.main' }
+export const CRITICAL_TONE: SeverityTone = { Icon: OctagonAlert, color: 'error.dark' }
 
 /** Per-check status tones — drives the leading icon on each row inside the report drawer. */
 export const STATUS_TONE: Record<ScanResult['status'], SeverityTone> = {
-  clear: { Icon: CheckCircleOutlineRoundedIcon, color: 'success.main' },
-  not_applicable: { Icon: RemoveCircleOutlineRoundedIcon, color: 'text.secondary' },
-  inconclusive: { Icon: HelpOutlineRoundedIcon, color: 'text.disabled' },
-  partial: { Icon: WarningAmberRoundedIcon, color: 'warning.main' },
-  issue: { Icon: ErrorOutlineRoundedIcon, color: 'error.main' },
+  clear: { Icon: CircleCheck, color: 'success.main' },
+  not_applicable: { Icon: CircleMinus, color: 'text.secondary' },
+  inconclusive: { Icon: CircleHelp, color: 'text.disabled' },
+  partial: { Icon: TriangleAlert, color: 'warning.main' },
+  issue: { Icon: CircleAlert, color: 'error.main' },
 }
 
 /**
@@ -46,9 +48,9 @@ export const resolveStatusTone = (status: ScanResult['status'], severity?: Secur
  * shared `CRITICAL_TONE` "dangerous" glyph so it reads as the most severe.
  */
 export const GRADE_TONE: Record<SafeGrade, SeverityTone> = {
-  passing: { Icon: CheckCircleOutlineRoundedIcon, color: 'success.main' },
-  needs_attention: { Icon: InfoOutlinedIcon, color: 'review.main' },
-  at_risk: { Icon: ErrorOutlineRoundedIcon, color: 'warning.main' },
+  passing: { Icon: CircleCheck, color: 'success.main' },
+  needs_attention: { Icon: TriangleAlert, color: 'score.reviewText' },
+  at_risk: { Icon: CircleAlert, color: 'warning.main' },
   critical: CRITICAL_TONE,
 }
 
@@ -62,5 +64,13 @@ export type SeverityIconProps = {
 /** Renders a severity tone's icon at the shared size/color. */
 export const SeverityIcon = ({ tone, fontSize = 18, ariaLabel }: SeverityIconProps): ReactElement => {
   const { Icon, color } = tone
-  return <Icon sx={{ fontSize, color, flexShrink: 0 }} role="img" aria-label={ariaLabel} />
+  return (
+    <Icon
+      size={fontSize}
+      className="shrink-0"
+      style={{ color: tokenToCssVar(color) }}
+      role="img"
+      aria-label={ariaLabel}
+    />
+  )
 }

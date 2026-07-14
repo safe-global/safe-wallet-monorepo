@@ -1,4 +1,5 @@
-import { Box, Button, Grid, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import Track from '@/components/common/Track'
 import { SETTINGS_EVENTS } from '@/services/analytics'
 import { ChangeThresholdFlow } from '@/components/tx-flow/flows'
@@ -11,39 +12,16 @@ export const RequiredConfirmation = ({ threshold, owners }: { threshold: number;
   const { setTxFlow } = useContext(TxModalContext)
 
   return (
-    <Box
-      sx={{
-        marginTop: 6,
-      }}
-    >
-      <Grid container spacing={3}>
-        <Grid item lg={4} xs={12}>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-            }}
-          >
-            Required confirmations
-          </Typography>
-        </Grid>
+    <div className="mt-12">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_2fr]">
+        <div>
+          <Typography variant="h4">Required confirmations</Typography>
+        </div>
 
-        <Grid item xs>
-          <Typography
-            sx={{
-              pb: 2,
-            }}
-          >
-            Any transaction requires the confirmation of:
-          </Typography>
+        <div>
+          <Typography className="pb-4">Any transaction requires the confirmation of:</Typography>
 
-          <Typography
-            component="span"
-            sx={{
-              pt: 3,
-              pr: 2,
-            }}
-          >
+          <Typography className="inline pr-4">
             <b>{threshold}</b> out of <b>{owners}</b> signer{maybePlural(owners)}.
           </Typography>
 
@@ -51,20 +29,15 @@ export const RequiredConfirmation = ({ threshold, owners }: { threshold: number;
             <CheckWallet>
               {(isOk) => (
                 <Track {...SETTINGS_EVENTS.SETUP.CHANGE_THRESHOLD} as="span">
-                  <Button
-                    onClick={() => setTxFlow(<ChangeThresholdFlow />)}
-                    variant="contained"
-                    disabled={!isOk}
-                    size="small"
-                  >
+                  <Button onClick={() => setTxFlow(<ChangeThresholdFlow />)} disabled={!isOk} size="sm">
                     Change
                   </Button>
                 </Track>
               )}
             </CheckWallet>
           )}
-        </Grid>
-      </Grid>
-    </Box>
+        </div>
+      </div>
+    </div>
   )
 }

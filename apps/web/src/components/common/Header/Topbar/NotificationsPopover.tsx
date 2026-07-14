@@ -1,14 +1,13 @@
 import { forwardRef, useImperativeHandle, type MouseEvent, type ReactElement } from 'react'
-import Popover from '@mui/material/Popover'
-import Typography from '@mui/material/Typography'
-import IconButton from '@mui/material/IconButton'
-import MuiLink from '@mui/material/Link'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
-import SvgIcon from '@mui/material/SvgIcon'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
+import { Popover, PopoverContent } from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
+import { Link as ShadcnLink } from '@/components/ui/link'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
 import NotificationCenterList from '@/components/notification-center/NotificationCenterList'
 import UnreadBadge from '@/components/common/UnreadBadge'
 import notificationCss from '@/components/notification-center/NotificationCenter/styles.module.css'
@@ -44,7 +43,7 @@ const NotificationsPopover = forwardRef<NotificationsPopoverRef>((_props, ref): 
     handleClick,
   }))
 
-  const ExpandIcon = showAll ? ExpandLessIcon : ExpandMoreIcon
+  const ExpandIcon = showAll ? ChevronUp : ChevronDown
 
   const onSettingsClick = () => {
     setTimeout(handleClose, 300)
@@ -52,72 +51,75 @@ const NotificationsPopover = forwardRef<NotificationsPopoverRef>((_props, ref): 
 
   return (
     <Popover
-      key={Number(open)}
       open={open}
-      anchorEl={anchorEl}
-      onClose={handleClose}
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-      transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-      sx={{ mt: 1 }}
-      transitionDuration={0}
-      slotProps={{ paper: { className: notificationCss.popoverContainer } }}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) handleClose()
+      }}
     >
-      <div className={notificationCss.popoverHeader}>
-        <div>
-          <Typography data-testid="notifications-title" variant="h4" component="span" fontWeight={700}>
-            Notifications
-          </Typography>
-          {unreadCount > 0 && (
-            <Typography variant="caption" className={notificationCss.unreadCount}>
-              {unreadCount}
+      <PopoverContent
+        anchor={anchorEl}
+        side="bottom"
+        align="start"
+        sideOffset={8}
+        className={cn('w-auto gap-0 p-0', notificationCss.popoverContainer)}
+      >
+        <div className={notificationCss.popoverHeader}>
+          <div>
+            <Typography data-testid="notifications-title" variant="h4" className="font-bold">
+              Notifications
             </Typography>
+            {unreadCount > 0 && (
+              <Typography variant="paragraph-mini" className={notificationCss.unreadCount}>
+                {unreadCount}
+              </Typography>
+            )}
+          </div>
+          {notifications.length > 0 && (
+            <ShadcnLink render={<button type="button" />} onClick={handleClear} className="no-underline">
+              Clear all
+            </ShadcnLink>
           )}
         </div>
-        {notifications.length > 0 && (
-          <MuiLink onClick={handleClear} variant="body2" component="button" sx={{ textDecoration: 'unset' }}>
-            Clear all
-          </MuiLink>
-        )}
-      </div>
 
-      <div>
-        <NotificationCenterList notifications={notificationsToShow} handleClose={handleClose} />
-      </div>
+        <div>
+          <NotificationCenterList notifications={notificationsToShow} handleClose={handleClose} />
+        </div>
 
-      <div className={notificationCss.popoverFooter}>
-        {canExpand && (
-          <>
-            <IconButton
-              onClick={() => setShowAll((prev) => !prev)}
-              disableRipple
-              className={notificationCss.expandButton}
-            >
-              <UnreadBadge
-                invisible={showAll || unreadCount <= NOTIFICATION_CENTER_LIMIT}
-                anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+        <div className={notificationCss.popoverFooter}>
+          {canExpand && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={() => setShowAll((prev) => !prev)}
+                className={notificationCss.expandButton}
               >
-                <ExpandIcon color="border" />
-              </UnreadBadge>
-            </IconButton>
-            <Typography sx={{ color: ({ palette }) => palette.border.main }}>
-              {showAll ? 'Hide' : `${notifications.length - NOTIFICATION_CENTER_LIMIT} other notifications`}
-            </Typography>
-          </>
-        )}
+                <UnreadBadge
+                  invisible={showAll || unreadCount <= NOTIFICATION_CENTER_LIMIT}
+                  anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+                >
+                  <ExpandIcon className="size-4 text-[var(--color-border-main)]" />
+                </UnreadBadge>
+              </Button>
+              <Typography className="text-[var(--color-border-main)]">
+                {showAll ? 'Hide' : `${notifications.length - NOTIFICATION_CENTER_LIMIT} other notifications`}
+              </Typography>
+            </>
+          )}
 
-        {hasPushNotifications && (
-          <Link href={{ pathname: AppRoutes.settings.notifications, query: router.query }} passHref legacyBehavior>
-            <MuiLink
-              data-testid="notifications-button"
-              className={notificationCss.settingsLink}
-              variant="body2"
-              onClick={onSettingsClick}
-            >
-              <SvgIcon component={SettingsIcon} inheritViewBox fontSize="small" /> Push notifications settings
-            </MuiLink>
-          </Link>
-        )}
-      </div>
+          {hasPushNotifications && (
+            <Link href={{ pathname: AppRoutes.settings.notifications, query: router.query }} passHref legacyBehavior>
+              <ShadcnLink
+                data-testid="notifications-button"
+                className={notificationCss.settingsLink}
+                onClick={onSettingsClick}
+              >
+                <SettingsIcon className="size-4" /> Push notifications settings
+              </ShadcnLink>
+            </Link>
+          )}
+        </div>
+      </PopoverContent>
     </Popover>
   )
 })

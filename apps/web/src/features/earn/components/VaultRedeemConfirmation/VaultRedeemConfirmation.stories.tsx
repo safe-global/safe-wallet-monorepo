@@ -1,26 +1,26 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import VaultRedeemConfirmation from './index'
 import { mockVaultRedeemTxInfo, mockVaultRedeemTxInfoWithoutAdditionalRewards } from './mockData'
 
 const meta = {
+  title: 'Features/Earn/VaultRedeemConfirmation',
   component: VaultRedeemConfirmation,
   decorators: [
     (Story) => {
       return (
         <StoreDecorator initialState={{}}>
-          <Paper sx={{ padding: 2 }}>
+          <div className="rounded-lg bg-card p-4">
             <Story />
-          </Paper>
+          </div>
         </StoreDecorator>
       )
     },
   ],
+  tags: ['autodocs', 'skip-visual-test'],
   parameters: {
     visualTest: { disable: true },
   },
-  tags: ['autodocs'],
 } satisfies Meta<typeof VaultRedeemConfirmation>
 
 export default meta

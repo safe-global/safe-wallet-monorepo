@@ -12,7 +12,7 @@ const defaultSetup = createMockStory({
 })
 
 const meta = {
-  title: 'Dashboard/AssetsWidget',
+  title: 'Components/Dashboard/AssetsWidget',
   component: AssetsWidget,
   loaders: [mswLoader],
   parameters: {

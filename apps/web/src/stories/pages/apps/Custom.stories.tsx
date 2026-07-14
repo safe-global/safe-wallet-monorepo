@@ -16,7 +16,7 @@ const defaultSetup = createMockStory({
 })
 
 const meta = {
-  title: 'Pages/Features/Apps/Custom',
+  title: 'Pages/Apps/Custom',
   component: CustomApps,
   loaders: [mswLoader],
   parameters: {

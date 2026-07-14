@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import type { AlertColor } from '@mui/material'
 import type { WalletKitTypes } from '@reown/walletkit'
 import useChains from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -11,7 +10,9 @@ const NAME_FALLBACK = 'this dApp'
 const NAME_PLACEHOLDER = '%%name%%'
 const CHAIN_PLACEHOLDER = '%%chain%%'
 
-const Warnings: Record<string, { severity: AlertColor; message: string }> = {
+export type CompatibilityWarningSeverity = 'error' | 'warning' | 'info'
+
+const Warnings: Record<string, { severity: CompatibilityWarningSeverity; message: string }> = {
   BLOCKED_BRIDGE: {
     severity: 'error',
     message: `${NAME_PLACEHOLDER} is a bridge that is incompatible with ${BRAND_NAME} — the bridged funds will be lost. Consider using a different bridge.`,

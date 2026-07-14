@@ -21,7 +21,6 @@ import {
 import useAddressBook from './useAddressBook'
 import type { AddressBook } from '@/store/addressBookSlice'
 import { TWAP_ORDER_TITLE } from '@/features/swap/constants'
-import { SvgIcon } from '@mui/material'
 
 const getTxTo = ({ txInfo }: Pick<Transaction, 'txInfo'>): AddressInfo | undefined => {
   switch (txInfo.type) {
@@ -80,45 +79,45 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
       const altText = orderClass === 'limit' ? 'Limit order' : 'Swap order'
 
       return {
-        icon: <SvgIcon component={SwapIcon} inheritViewBox fontSize="small" alt={altText} />,
+        icon: <SwapIcon className="size-5" />,
         text: altText,
       }
     }
     case TransactionInfoType.TWAP_ORDER: {
       return {
-        icon: <SvgIcon component={SwapIcon} inheritViewBox fontSize="small" alt="Twap Order" />,
+        icon: <SwapIcon className="size-5" />,
         text: TWAP_ORDER_TITLE,
       }
     }
     case TransactionInfoType.NATIVE_STAKING_DEPOSIT: {
       return {
-        icon: <SvgIcon component={StakeIcon} inheritViewBox fontSize="small" alt="Stake" />,
+        icon: <StakeIcon className="size-5" />,
         text: 'Stake',
       }
     }
     case TransactionInfoType.NATIVE_STAKING_VALIDATORS_EXIT: {
       return {
-        icon: <SvgIcon component={StakeIcon} inheritViewBox fontSize="small" alt="Withdraw request" />,
+        icon: <StakeIcon className="size-5" />,
         text: 'Withdraw request',
       }
     }
     case TransactionInfoType.NATIVE_STAKING_WITHDRAW: {
       return {
-        icon: <SvgIcon component={StakeIcon} inheritViewBox fontSize="small" alt="Claim" />,
+        icon: <StakeIcon className="size-5" />,
         text: 'Claim',
       }
     }
     // @ts-ignore TODO: Add types to old SDK or switch to auto-generated
     case 'VaultDeposit': {
       return {
-        icon: <SvgIcon component={EarnIcon} inheritViewBox fontSize="small" alt="Deposit icon" />,
+        icon: <EarnIcon className="size-5" />,
         text: 'Deposit',
       }
     }
     // @ts-ignore TODO: Add types to old SDK or switch to auto-generated
     case 'VaultRedeem': {
       return {
-        icon: <SvgIcon component={EarnIcon} inheritViewBox fontSize="small" alt="Withdraw icon" />,
+        icon: <EarnIcon className="size-5" />,
         text: 'Withdraw',
       }
     }
@@ -126,7 +125,7 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
     // @ts-ignore TODO: Add types to old SDK or switch to auto-generated
     case 'SwapAndBridge': {
       return {
-        icon: <SvgIcon component={BridgeIcon} inheritViewBox fontSize="small" alt="Swap and Bridge" />,
+        icon: <BridgeIcon className="size-5" />,
         text: 'Bridge',
       }
     }
@@ -134,7 +133,7 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
     // @ts-ignore TODO: Add types to old SDK or switch to auto-generated
     case 'Swap': {
       return {
-        icon: <SvgIcon component={SwapIcon} inheritViewBox fontSize="small" alt="Swap" />,
+        icon: <SwapIcon className="size-5" />,
         text: 'Swap',
       }
     }
@@ -149,7 +148,7 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
 
       if (isMultiSendTxInfo(tx.txInfo)) {
         return {
-          icon: <SvgIcon component={BatchIcon} inheritViewBox fontSize="small" alt="Batch" />,
+          icon: <BatchIcon className="size-5" />,
           text: 'Batch',
         }
       }
@@ -170,7 +169,7 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
 
       if (isNestedConfirmationTxInfo(tx.txInfo)) {
         return {
-          icon: <SvgIcon component={NestedSafeIcon} inheritViewBox fontSize="small" alt="Nested Safe" />,
+          icon: <NestedSafeIcon className="size-5" />,
           text: `Nested Safe${addressBookName ? `: ${addressBookName}` : ''}`,
         }
       }

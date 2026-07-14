@@ -19,7 +19,17 @@ body {
   font-family:
     DM Sans,
     sans-serif;
+  /* Restores MUI CssBaseline's text rendering (removed in the shadcn migration) so fonts
+     render with the same antialiasing weight as before. Without this the browser falls back
+     to subpixel smoothing and all text looks heavier/larger. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-background-paper);
+  /* Restores MUI CssBaseline's default body text color (removed in the shadcn migration).
+     Typography's default color variant sets no class, so text without an explicit color
+     inherits this. Without it, dark mode fell back to the browser-default black → text
+     was invisible on dark backgrounds. */
+  color: var(--color-text-primary);
 }
 
 main {

@@ -103,7 +103,7 @@ const nextConfig = {
   ...(isProd || enableExperimentalOptimizations
     ? {
         experimental: {
-          optimizePackageImports: ['@mui/material', '@mui/icons-material', 'lodash', 'date-fns', '@gnosis.pm/zodiac'],
+          optimizePackageImports: ['lodash', 'date-fns', '@gnosis.pm/zodiac'],
         },
       }
     : {}),
@@ -137,7 +137,6 @@ const nextConfig = {
       ...config.resolve.alias,
       'bn.js': path.resolve('../../node_modules/bn.js/lib/bn.js'),
       'mainnet.json': path.resolve('../..node_modules/@ethereumjs/common/dist.browser/genesisStates/mainnet.json'),
-      '@mui/material$': path.resolve('./src/components/common/Mui'),
     }
 
     if (dev) {

@@ -1,5 +1,4 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Typography } from '@mui/material'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 
 type DataRowProps = {
@@ -13,9 +12,7 @@ export const DataRow = ({ datatestid, title, children }: DataRowProps): ReactEle
 
   return (
     <FieldsGrid testId={datatestid || ''} title={title}>
-      <Typography variant="body1" component="div">
-        {children}
-      </Typography>
+      <div className="text-base leading-6 font-normal">{children}</div>
     </FieldsGrid>
   )
 }

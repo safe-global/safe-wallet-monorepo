@@ -10,7 +10,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
 } from '@/components/ui/alert-dialog'
-import { Button } from '@/components/ui/button'
+import DialogActions from '@/components/common/DialogActions'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Typography } from '@/components/ui/typography'
@@ -116,17 +116,15 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
         )}
 
         <AlertDialogFooter>
-          <Button variant="ghost" onClick={onClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={onDelete}
-            disabled={!canConfirm}
-            data-testid="space-confirm-delete-button"
-          >
-            {isLoading ? 'Deleting…' : 'Delete workspace'}
-          </Button>
+          <DialogActions
+            onCancel={onClose}
+            confirmLabel="Delete workspace"
+            onConfirm={onDelete}
+            confirmDestructive
+            confirmDisabled={!canConfirm}
+            confirmLoading={isLoading}
+            confirmTestId="space-confirm-delete-button"
+          />
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

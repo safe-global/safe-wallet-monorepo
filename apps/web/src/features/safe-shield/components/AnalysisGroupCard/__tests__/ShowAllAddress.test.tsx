@@ -139,7 +139,7 @@ describe('ShowAllAddress', () => {
       })
 
       // Check that addresses are in separate boxes
-      const addressBoxes = container.querySelectorAll('.MuiBox-root')
+      const addressBoxes = container.querySelectorAll('.rounded-\\[4px\\]')
       expect(addressBoxes.length).toBeGreaterThanOrEqual(mockAddresses.length)
     })
 
@@ -195,9 +195,8 @@ describe('ShowAllAddress', () => {
       expect(screen.getByText('Hide all')).toBeInTheDocument()
 
       // No address boxes should be rendered
-      const addressText = container.querySelectorAll('.MuiTypography-body2')
-      // Only the "Hide all" text should be present
-      expect(addressText.length).toBeLessThanOrEqual(1)
+      const addressBoxes = container.querySelectorAll('.rounded-\\[4px\\]')
+      expect(addressBoxes.length).toBe(0)
     })
   })
 

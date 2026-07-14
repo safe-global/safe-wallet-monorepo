@@ -1,5 +1,8 @@
 import ModalDialog from '@/components/common/ModalDialog'
-import { DialogContent, DialogActions, Button, Typography } from '@mui/material'
+import DialogActions from '@/components/common/DialogActions'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import { type MemberDto, useMembersUpdateRoleV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -24,6 +27,7 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
   const dispatch = useAppDispatch()
   const [editMember] = useMembersUpdateRoleV1Mutation()
   const [error, setError] = useState<string>()
+  const isDarkMode = useDarkMode()
 
   const methods = useForm<MemberField>({
     mode: 'onChange',
@@ -84,33 +88,30 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
 
   return (
     <ModalDialog open onClose={handleClose} dialogTitle="Edit member" hideChainIndicator>
-      <FormProvider {...methods}>
-        <form onSubmit={onSubmit}>
-          <DialogContent sx={{ p: '24px !important' }}>
-            <Typography mb={2}>
-              Edit the role of <b>{`${member.name}`}</b> in this space.
-            </Typography>
+      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+        <FormProvider {...methods}>
+          <form onSubmit={onSubmit}>
+            <div className="p-6">
+              <Typography variant="paragraph" className="mb-4">
+                Edit the role of <b>{`${member.name}`}</b> in this space.
+              </Typography>
 
-            <MemberInfoForm isEdit />
-            {error && <ErrorMessage>{error}</ErrorMessage>}
-          </DialogContent>
+              <MemberInfoForm isEdit />
+              {error && <ErrorMessage>{error}</ErrorMessage>}
+            </div>
 
-          <DialogActions>
-            <Button data-testid="cancel-btn" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              data-testid="delete-btn"
-              variant="danger"
-              disableElevation
-              disabled={!formState.isDirty}
-            >
-              Update
-            </Button>
-          </DialogActions>
-        </form>
-      </FormProvider>
+            <DialogActions
+              className="px-6 pb-6"
+              onCancel={handleClose}
+              cancelTestId="cancel-btn"
+              confirmLabel="Update"
+              confirmType="submit"
+              confirmDisabled={!formState.isDirty}
+              confirmTestId="delete-btn"
+            />
+          </form>
+        </FormProvider>
+      </div>
     </ModalDialog>
   )
 }

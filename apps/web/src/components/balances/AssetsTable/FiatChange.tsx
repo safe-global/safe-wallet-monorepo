@@ -1,4 +1,6 @@
-import { Chip, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Chip } from '@/components/ui/chip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import ArrowDown from '@/public/images/balances/change-down.svg'
@@ -21,7 +23,7 @@ export const FiatChange = ({ balanceItem, change, inline = false }: FiatChangePr
 
   if (!fiatChange) {
     return (
-      <Typography variant="caption" color="text.secondary" paddingLeft={3} display="block">
+      <Typography variant="paragraph-mini" color="muted" className="block pl-6">
         n/a
       </Typography>
     )
@@ -31,32 +33,28 @@ export const FiatChange = ({ balanceItem, change, inline = false }: FiatChangePr
   const changeLabel = formatPercentage(changeAsNumber)
   const direction = changeAsNumber < 0 ? 'down' : changeAsNumber > 0 ? 'up' : 'none'
 
-  const backgroundColor =
-    direction === 'down' ? 'error.background' : direction === 'up' ? 'success.background' : 'default'
-  const color = direction === 'down' ? 'error.main' : direction === 'up' ? 'success.main' : 'default'
-
   return (
-    <Tooltip title="24h change">
-      <Chip
-        size="small"
-        sx={{
-          backgroundColor: inline ? 'transparent' : backgroundColor,
-          color,
-          padding: inline ? '0' : '2px 8px',
-          height: inline ? '20px' : 'inherit',
-          '& .MuiChip-label': { pr: inline ? 0 : 1, fontSize: '13px' },
-        }}
-        label={changeLabel}
-        icon={
-          direction === 'down' ? (
-            <SvgIcon color="error" inheritViewBox component={ArrowDown} sx={{ width: '9px', height: '6px' }} />
-          ) : direction === 'up' ? (
-            <SvgIcon color="success" inheritViewBox component={ArrowUp} sx={{ width: '9px', height: '6px' }} />
-          ) : (
-            <>-</>
-          )
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Chip
+            variant={direction === 'up' ? 'positive' : direction === 'down' ? 'negative' : 'default'}
+            size={inline ? 'default' : 'auto'}
+            // eslint-disable-next-line no-restricted-syntax -- inline table-cell variant drops chip padding (px-0) so the % change sits flush in the column
+            className={inline ? 'px-0 pr-0' : 'pr-1'}
+          >
+            {direction === 'down' ? (
+              <ArrowDown className="h-[6px] w-[9px] text-[var(--color-error-main)]" />
+            ) : direction === 'up' ? (
+              <ArrowUp className="h-[6px] w-[9px] text-[var(--color-success-main)]" />
+            ) : (
+              '-'
+            )}
+            <span className="text-[13px]">{changeLabel}</span>
+          </Chip>
         }
       />
+      <TooltipContent>24h change</TooltipContent>
     </Tooltip>
   )
 }

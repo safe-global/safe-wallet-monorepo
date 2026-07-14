@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Typography } from '@/components/ui/typography'
+import TableCard from '@/components/common/TableCard'
 import {
   useIsInvited,
   useIsAdmin,
@@ -16,9 +17,8 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { AddressBookEntry } from './SpaceAddressBookTable'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Input } from '@/components/ui/input'
-import { Search } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import AddressBookSearchInput from '@/components/common/AddressBookSearchInput'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -112,7 +112,7 @@ const SpaceAddressBook = () => {
             setActiveTab(val)
           }}
         >
-          <TabsList variant="line" className="flex-wrap h-auto mb-4 sm:mb-0">
+          <TabsList variant="line" className="flex-wrap mb-4">
             <TabsTrigger value="workspace" className="cursor-pointer">
               <Tooltip>
                 <TooltipTrigger render={<span />}>Workspace contacts ({addressBookItems.length})</TooltipTrigger>
@@ -151,21 +151,12 @@ const SpaceAddressBook = () => {
                 {isPrivateAddressBookEnabled && activeTab === 'mine' && <AddLocalContact />}
               </div>
               {(activeTab === 'workspace' ? addressBookItems.length > 0 : sortedLocalContacts.length > 0) && (
-                <div className="relative w-full sm:w-[320px]">
-                  <Search className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
-                  <Input
-                    placeholder="Search for contacts"
-                    aria-label="Search contacts by name or address"
-                    className="h-10 bg-white pl-8 dark:bg-white/10 hover:ring-1 hover:ring-ring"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
+                <AddressBookSearchInput value={searchQuery} onChange={setSearchQuery} />
               )}
             </div>
           )}
 
-          <div className="bg-card mt-6 rounded-lg p-4">
+          <TableCard>
             <TabsContent value="workspace">
               {searchQuery && filteredAll.length === 0 ? (
                 <p className="text-muted-foreground mb-2 text-sm">Found 0 results</p>
@@ -225,7 +216,7 @@ const SpaceAddressBook = () => {
                 </TabsContent>
               </>
             )}
-          </div>
+          </TableCard>
         </Tabs>
       </div>
     </>

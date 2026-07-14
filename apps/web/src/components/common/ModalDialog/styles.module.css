@@ -1,3 +1,18 @@
+.dialog {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.title {
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.title + :global(.MuiDialogContent-root) {
+  padding-top: var(--space-3);
+}
+
 .dialog :global .MuiDialogActions-root {
   border-top: 1px solid var(--color-border-light);
   padding: var(--space-2) var(--space-3);
@@ -13,18 +28,26 @@
   flex: 1;
 }
 
-.dialog :global .MuiDialogTitle-root {
-  border-bottom: 1px solid var(--color-border-light);
-}
-
-.dialog :global .MuiDialogTitle-root + .MuiDialogContent-root {
-  padding-top: var(--space-3);
+.fullScreen {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  border-radius: 0;
+  top: 0;
+  left: 0;
+  transform: none;
 }
 
 @media (min-width: 600px) {
-  .dialog :global .MuiDialog-paper {
+  .dialog {
     min-width: 600px;
     margin: 0;
     border-radius: 24px;
+  }
+
+  .fullScreen {
+    border-radius: 0;
   }
 }

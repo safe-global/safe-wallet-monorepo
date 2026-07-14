@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo } from 'react'
-import { CircularProgress, FormControl, Grid, IconButton, SvgIcon, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import NameInput from '@/components/common/NameInput'
-import InputAdornment from '@mui/material/InputAdornment'
+import { largeFormFieldRowClassName } from '@/components/common/formFieldStyles'
 import AddressBookInput from '@/components/common/AddressBookInput'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { useFormContext, useWatch } from 'react-hook-form'
@@ -72,44 +73,38 @@ const OwnerRow = ({
   }, [ens, setValue, fieldName])
 
   const walletIsOwner = owner.address === wallet?.address
-
   return (
-    <Grid
-      container
-      spacing={3}
-      className={classNames({ [css.helper]: walletIsOwner })}
-      sx={{
-        alignItems: 'center',
-        marginBottom: 3,
-        flexWrap: ['wrap', undefined, 'nowrap'],
-      }}
+    <div
+      className={classNames('mb-6 grid grid-cols-12 items-end gap-6 max-md:flex-wrap', {
+        [css.helper]: walletIsOwner,
+      })}
     >
-      <Grid item xs={12} md={readOnly ? 5 : 4}>
-        <FormControl fullWidth>
+      <div className={readOnly ? 'col-span-12 md:col-span-5' : 'col-span-12 md:col-span-4'}>
+        <div className="flex w-full flex-col">
           <NameInput
             data-testid="owner-name"
             name={`${fieldName}.name`}
             label="Signer name"
             InputLabelProps={{ shrink: true }}
+            inputSize="xl"
+            variant="surface"
             placeholder={ens || `Signer ${index + 1}`}
             helperText={walletIsOwner && 'Your connected wallet'}
             InputProps={{
               endAdornment: resolving ? (
-                <InputAdornment position="end">
-                  <CircularProgress size={20} />
-                </InputAdornment>
+                <div className="flex items-center">
+                  <Spinner className="size-5" />
+                </div>
               ) : null,
             }}
           />
-        </FormControl>
-      </Grid>
-      <Grid item xs={11} md={7}>
+        </div>
+      </div>
+      <div className={classNames('col-span-11 md:col-span-7', readOnly && largeFormFieldRowClassName)}>
         {readOnly ? (
-          <Typography variant="body2" component="div">
-            <EthHashInfo address={owner.address} shortAddress hasExplorer showCopyButton />
-          </Typography>
+          <EthHashInfo address={owner.address} shortAddress hasExplorer showCopyButton />
         ) : (
-          <FormControl fullWidth>
+          <div className="flex w-full flex-col">
             <AddressBookInput
               name={`${fieldName}.address`}
               label="Signer"
@@ -117,31 +112,25 @@ const OwnerRow = ({
               deps={deps}
               onReset={() => setValue(`${fieldName}.name`, '')}
             />
-          </FormControl>
+          </div>
         )}
-      </Grid>
+      </div>
       {!readOnly && (
-        <Grid
-          item
-          xs={1}
-          sx={{
-            ml: -2,
-            alignSelf: 'stretch',
-            display: 'flex',
-            alignItems: 'center',
-            flexShrink: 0,
-          }}
-        >
+        <div className="col-span-1 -ml-4 flex shrink-0 items-center self-stretch">
           {removable && (
-            <>
-              <IconButton data-testid="remove-owner-btn" onClick={() => remove?.(index)} aria-label="Remove signer">
-                <SvgIcon component={DeleteIcon} inheritViewBox />
-              </IconButton>
-            </>
+            <Button
+              variant="ghost"
+              size="icon"
+              data-testid="remove-owner-btn"
+              onClick={() => remove?.(index)}
+              aria-label="Remove signer"
+            >
+              <DeleteIcon />
+            </Button>
           )}
-        </Grid>
+        </div>
       )}
-    </Grid>
+    </div>
   )
 }
 

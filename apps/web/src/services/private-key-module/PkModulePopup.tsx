@@ -1,5 +1,8 @@
 import type { FormEvent } from 'react'
-import { Button, TextField, Typography, Box } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Field, FieldLabel } from '@/components/ui/field'
+import { Typography } from '@/components/ui/typography'
 import ModalDialog from '@/components/common/ModalDialog'
 import pkStore from './pk-popup-store'
 const { useStore, setStore } = pkStore
@@ -22,28 +25,23 @@ const PkModulePopup = () => {
   }
 
   return (
-    <ModalDialog dialogTitle="Connect with Private Key" onClose={onClose} open={isOpen} sx={{ zIndex: 1400 }}>
-      <Box p={2}>
-        <Typography variant="body1" gutterBottom mb={3}>
+    <ModalDialog dialogTitle="Connect with Private Key" onClose={onClose} open={isOpen}>
+      <div className="p-4">
+        <Typography className="mb-6">
           Enter your signer private key. The key will be saved for the duration of this browser session.
         </Typography>
 
         <form onSubmit={onSubmit} action="#" method="post">
-          <TextField
-            type="password"
-            label="Private key"
-            fullWidth
-            required
-            name="private-key"
-            sx={{ mb: 3 }}
-            data-testid="private-key-input"
-          />
+          <Field className="mb-6">
+            <FieldLabel htmlFor="private-key">Private key</FieldLabel>
+            <Input type="password" required id="private-key" name="private-key" data-testid="private-key-input" />
+          </Field>
 
-          <Button data-testid="pk-connect-btn" variant="contained" color="primary" fullWidth type="submit">
+          <Button data-testid="pk-connect-btn" type="submit" className="w-full">
             Connect
           </Button>
         </form>
-      </Box>
+      </div>
     </ModalDialog>
   )
 }

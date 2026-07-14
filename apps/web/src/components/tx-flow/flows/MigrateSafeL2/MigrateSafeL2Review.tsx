@@ -3,7 +3,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { createTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '../../SafeTxProvider'
 import { createMigrateToL2 } from '@/utils/safe-migrations'
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
@@ -21,7 +21,7 @@ export const MigrateSafeL2Review = ({ children, ...props }: ReviewTransactionPro
   }, [chain, setSafeTx, setSafeTxError, safeSDK])
 
   return (
-    <Box>
+    <div>
       <ReviewTransaction {...props}>
         <ErrorMessage level="warning" title="Migration transaction">
           <Typography>
@@ -34,6 +34,6 @@ export const MigrateSafeL2Review = ({ children, ...props }: ReviewTransactionPro
 
         {children}
       </ReviewTransaction>
-    </Box>
+    </div>
   )
 }

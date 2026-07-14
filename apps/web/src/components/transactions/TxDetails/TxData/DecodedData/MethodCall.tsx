@@ -1,5 +1,4 @@
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
-import { Typography } from '@mui/material'
 
 const MethodCall = ({
   method,
@@ -13,43 +12,23 @@ const MethodCall = ({
   contractLogo?: string | null
 }) => {
   return (
-    <>
-      <Typography
-        fontWeight="bold"
-        display="flex"
-        flexWrap={['wrap', 'wrap', 'nowrap']}
-        alignItems="center"
-        gap=".5em"
-        component="div"
-      >
-        Call
-        <Typography
-          component="code"
-          variant="body2"
-          sx={{
-            backgroundColor: 'background.main',
-            px: 1,
-            py: 0.5,
-            borderRadius: 0.5,
-            fontFamily: 'monospace',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {method}
-        </Typography>{' '}
-        on
-        <NamedAddressInfo
-          address={contractAddress}
-          name={contractName}
-          customAvatar={contractLogo}
-          showAvatar
-          onlyName
-          hasExplorer
-          showCopyButton
-          avatarSize={24}
-        />
-      </Typography>
-    </>
+    <div className="flex flex-wrap items-center gap-2 font-bold md:flex-nowrap">
+      Call
+      <code className="bg-[var(--color-background-main)] whitespace-nowrap rounded-sm px-2 py-1 font-mono text-sm font-normal">
+        {method}
+      </code>{' '}
+      on
+      <NamedAddressInfo
+        address={contractAddress}
+        name={contractName}
+        customAvatar={contractLogo}
+        showAvatar
+        onlyName
+        hasExplorer
+        showCopyButton
+        avatarSize={24}
+      />
+    </div>
   )
 }
 

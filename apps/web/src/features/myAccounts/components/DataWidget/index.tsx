@@ -1,4 +1,6 @@
-import { Button, SvgIcon, Card, CardHeader, CardContent, Tooltip, Box } from '@mui/material'
+import { Card, CardHeader, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useState } from 'react'
 import type { ReactElement } from 'react'
 
@@ -38,51 +40,36 @@ export const DataWidget = (): ReactElement => {
 
   return (
     <Card className={css.card}>
-      <CardHeader
-        className={css.cardHeader}
-        title={
-          <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
-            <b>{hasData ? 'Export or import your Safe data' : 'Import your Safe data'}</b>
-            <Tooltip
-              title="Download or upload your local data with your added Safe accounts, address book and settings."
-              placement="top"
-              arrow
-            >
-              <span>
-                <InfoIcon className={css.infoIcon} />
-              </span>
-            </Tooltip>
-          </Box>
-        }
-      />
+      <CardHeader className={css.cardHeader}>
+        <div className="flex items-center justify-center gap-1">
+          <b>{hasData ? 'Export or import your Safe data' : 'Import your Safe data'}</b>
+          <Tooltip>
+            <TooltipTrigger render={<span />}>
+              <InfoIcon className={css.infoIcon} />
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              Download or upload your local data with your added Safe accounts, address book and settings.
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </CardHeader>
       <CardContent>
-        <Box display="flex" gap={2} justifyContent="center" sx={{ maxWidth: 240, margin: 'auto' }}>
+        <div className="mx-auto flex max-w-[240px] justify-center gap-4">
           {hasData && (
             <Track {...OVERVIEW_EVENTS.EXPORT_DATA} label={trackingLabel}>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={exportAppData}
-                startIcon={<SvgIcon component={ExportIcon} inheritViewBox fontSize="small" />}
-                sx={{ width: '100%', py: 0.5, px: 2, mt: 2 }}
-              >
+              <Button variant="outline" size="sm" onClick={exportAppData} className="mt-2 w-full">
+                <ExportIcon className="size-4" />
                 Export
               </Button>
             </Track>
           )}
           <Track {...OVERVIEW_EVENTS.IMPORT_DATA} label={trackingLabel}>
-            <Button
-              data-testid="import-btn"
-              variant="outlined"
-              size="small"
-              onClick={onImport}
-              startIcon={<SvgIcon component={ImportIcon} inheritViewBox fontSize="small" />}
-              sx={{ width: '100%', py: 0.5, px: 2, mt: 2 }}
-            >
+            <Button data-testid="import-btn" variant="outline" size="sm" onClick={onImport} className="mt-2 w-full">
+              <ImportIcon className="size-4" />
               Import
             </Button>
           </Track>
-        </Box>
+        </div>
       </CardContent>
       {importModalOpen && (
         <ImportDialog

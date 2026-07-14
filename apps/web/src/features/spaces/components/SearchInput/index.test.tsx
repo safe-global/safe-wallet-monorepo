@@ -1,6 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import SearchInput from './index'
 
+jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
+
 describe('SearchInput', () => {
   const mockOnSearch = jest.fn()
 
@@ -13,7 +15,7 @@ describe('SearchInput', () => {
 
     const input = screen.getByPlaceholderText('Search')
     expect(input).toBeInTheDocument()
-    expect(input).toHaveAttribute('type', 'text')
+    expect(input).toHaveRole('searchbox')
     const searchIcon = screen.getByTestId('search-icon')
     expect(searchIcon).toBeInTheDocument()
   })

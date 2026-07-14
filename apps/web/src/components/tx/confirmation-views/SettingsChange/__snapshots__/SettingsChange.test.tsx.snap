@@ -3,19 +3,16 @@
 exports[`SettingsChange should display the SettingsChange component with newOwner details 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-3m5je5-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="rounded-lg bg-[var(--color-warning-background)] p-4"
   >
-    <p
-      class="MuiTypography-root MuiTypography-body1 css-qzqzle-MuiTypography-root"
+    <div
+      class="text-muted-foreground mb-4 flex items-center"
     >
       <mock-icon
-        aria-hidden=""
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-1hr8a3z-MuiSvgIcon-root"
-        focusable="false"
+        class="mr-2 size-4"
       />
       Previous signer
-    </p>
+    </div>
     <div
       class="container"
     >
@@ -29,14 +26,14 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
         />
       </div>
       <div
-        class="MuiBox-root css-1lchl8k"
+        class="gap-1 overflow-hidden"
       >
         <div
-          class="ethHashInfo-name MuiBox-root css-171onha"
+          class="ethHashInfo-name flex items-center gap-1"
           title="Bob"
         >
           <div
-            class="MuiBox-root css-1o4wo1x"
+            class="overflow-hidden text-ellipsis"
           >
             Bob
           </div>
@@ -45,13 +42,12 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
           class="addressContainer"
         >
           <div
-            class="MuiBox-root css-b5p5gz"
+            class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
           >
             <span
-              aria-label="Copy to clipboard"
-              class=""
-              data-mui-internal-clone-element="true"
-              style="cursor: pointer;"
+              class="inline-flex cursor-pointer"
+              data-slot="tooltip-trigger"
+              id="base-ui-_r_5_"
             >
               <span>
                 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
@@ -59,43 +55,38 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
             </span>
           </div>
           <span
-            aria-label="Copy to clipboard"
-            class=""
-            data-mui-internal-clone-element="true"
-            style="cursor: pointer;"
+            class="inline-flex cursor-pointer"
+            data-slot="tooltip-trigger"
+            id="base-ui-_r_7_"
           >
             <button
               aria-label="Copy to clipboard"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-uneijd-MuiButtonBase-root-MuiIconButton-root"
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm"
+              data-slot="button"
               tabindex="0"
               type="button"
             >
               <mock-icon
-                aria-hidden=""
-                class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                class="size-5 text-[var(--color-border-main)]"
                 data-testid="copy-btn-icon"
-                focusable="false"
               />
             </button>
           </span>
           <div
-            class="MuiBox-root css-yjghm1"
+            class="text-border"
           />
         </div>
       </div>
     </div>
   </div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 container css-1n5z6j7-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="container"
   >
     <p
-      class="MuiTypography-root MuiTypography-body1 css-1950vt0-MuiTypography-root"
+      class="flex items-center text-[length:inherit] text-muted-foreground"
     >
       <mock-icon
-        aria-hidden=""
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-1hr8a3z-MuiSvgIcon-root"
-        focusable="false"
+        class="mr-2 size-4"
       />
       Add owner
     </p>
@@ -106,20 +97,21 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
         class="avatarContainer"
         style="width: 32px; height: 32px;"
       >
-        <span
-          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse css-143xw5x-MuiSkeleton-root"
+        <div
+          class="bg-muted animate-pulse rounded-full"
+          data-slot="skeleton"
           style="width: 32px; height: 32px;"
         />
       </div>
       <div
-        class="MuiBox-root css-1lchl8k"
+        class="gap-1 overflow-hidden"
       >
         <div
-          class="ethHashInfo-name MuiBox-root css-171onha"
+          class="ethHashInfo-name flex items-center gap-1"
           title="Alice"
         >
           <div
-            class="MuiBox-root css-1o4wo1x"
+            class="overflow-hidden text-ellipsis"
           >
             Alice
           </div>
@@ -128,13 +120,12 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
           class="addressContainer"
         >
           <div
-            class="MuiBox-root css-b5p5gz"
+            class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
           >
             <span
-              aria-label="Copy to clipboard"
-              class=""
-              data-mui-internal-clone-element="true"
-              style="cursor: pointer;"
+              class="inline-flex cursor-pointer"
+              data-slot="tooltip-trigger"
+              id="base-ui-_r_9_"
             >
               <span>
                 0x0000000000000000
@@ -142,34 +133,36 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
             </span>
           </div>
           <span
-            aria-label="Copy to clipboard"
-            class=""
-            data-mui-internal-clone-element="true"
-            style="cursor: pointer;"
+            class="inline-flex cursor-pointer"
+            data-slot="tooltip-trigger"
+            id="base-ui-_r_b_"
           >
             <button
               aria-label="Copy to clipboard"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-uneijd-MuiButtonBase-root-MuiIconButton-root"
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm"
+              data-slot="button"
               tabindex="0"
               type="button"
             >
               <mock-icon
-                aria-hidden=""
-                class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                class="size-5 text-[var(--color-border-main)]"
                 data-testid="copy-btn-icon"
-                focusable="false"
               />
             </button>
           </span>
           <div
-            class="MuiBox-root css-yjghm1"
+            class="text-border"
           />
         </div>
       </div>
     </div>
   </div>
-  <hr
-    class="MuiDivider-root MuiDivider-fullWidth nestedDivider css-1facvfi-MuiDivider-root"
+  <div
+    aria-orientation="horizontal"
+    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch nestedDivider"
+    data-orientation="horizontal"
+    data-slot="separator"
+    role="separator"
   />
 </div>
 `;
@@ -177,16 +170,13 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
 exports[`SettingsChange should display the SettingsChange component with owner details 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 container css-1n5z6j7-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="container"
   >
     <p
-      class="MuiTypography-root MuiTypography-body1 css-1950vt0-MuiTypography-root"
+      class="flex items-center text-[length:inherit] text-muted-foreground"
     >
       <mock-icon
-        aria-hidden=""
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-1hr8a3z-MuiSvgIcon-root"
-        focusable="false"
+        class="mr-2 size-4"
       />
       Add owner
     </p>
@@ -203,14 +193,14 @@ exports[`SettingsChange should display the SettingsChange component with owner d
         />
       </div>
       <div
-        class="MuiBox-root css-1lchl8k"
+        class="gap-1 overflow-hidden"
       >
         <div
-          class="ethHashInfo-name MuiBox-root css-171onha"
+          class="ethHashInfo-name flex items-center gap-1"
           title="Nevinha"
         >
           <div
-            class="MuiBox-root css-1o4wo1x"
+            class="overflow-hidden text-ellipsis"
           >
             Nevinha
           </div>
@@ -219,13 +209,12 @@ exports[`SettingsChange should display the SettingsChange component with owner d
           class="addressContainer"
         >
           <div
-            class="MuiBox-root css-b5p5gz"
+            class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
           >
             <span
-              aria-label="Copy to clipboard"
-              class=""
-              data-mui-internal-clone-element="true"
-              style="cursor: pointer;"
+              class="inline-flex cursor-pointer"
+              data-slot="tooltip-trigger"
+              id="base-ui-_r_1_"
             >
               <span>
                 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
@@ -233,45 +222,49 @@ exports[`SettingsChange should display the SettingsChange component with owner d
             </span>
           </div>
           <span
-            aria-label="Copy to clipboard"
-            class=""
-            data-mui-internal-clone-element="true"
-            style="cursor: pointer;"
+            class="inline-flex cursor-pointer"
+            data-slot="tooltip-trigger"
+            id="base-ui-_r_3_"
           >
             <button
               aria-label="Copy to clipboard"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-uneijd-MuiButtonBase-root-MuiIconButton-root"
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm"
+              data-slot="button"
               tabindex="0"
               type="button"
             >
               <mock-icon
-                aria-hidden=""
-                class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                class="size-5 text-[var(--color-border-main)]"
                 data-testid="copy-btn-icon"
-                focusable="false"
               />
             </button>
           </span>
           <div
-            class="MuiBox-root css-yjghm1"
+            class="text-border"
           />
         </div>
       </div>
     </div>
   </div>
-  <hr
-    class="MuiDivider-root MuiDivider-fullWidth nestedDivider css-1facvfi-MuiDivider-root"
-  />
   <div
-    class="MuiBox-root css-0"
-  >
-    <p
-      class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+    aria-orientation="horizontal"
+    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch nestedDivider"
+    data-orientation="horizontal"
+    data-slot="separator"
+    role="separator"
+  />
+  <div>
+    <span
+      class="m-0 text-sm leading-5 font-normal"
+      data-slot="typography"
+      data-variant="paragraph-small"
     >
       Any transaction requires the confirmation of:
-    </p>
+    </span>
     <p
-      class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+      class="m-0 text-base leading-6 font-normal"
+      data-slot="typography"
+      data-variant="paragraph"
     >
       <b>
         1
@@ -284,8 +277,12 @@ exports[`SettingsChange should display the SettingsChange component with owner d
       </b>
     </p>
   </div>
-  <hr
-    class="MuiDivider-root MuiDivider-fullWidth nestedDivider css-1facvfi-MuiDivider-root"
+  <div
+    aria-orientation="horizontal"
+    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch nestedDivider"
+    data-orientation="horizontal"
+    data-slot="separator"
+    role="separator"
   />
 </div>
 `;

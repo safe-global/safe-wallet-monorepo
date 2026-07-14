@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Typography, Box } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import ImageFallback from './index'
 
 const meta = {
+  title: 'Components/Common/ImageFallback',
   component: ImageFallback,
   parameters: {
     layout: 'centered',
@@ -37,21 +38,11 @@ export const WithFallbackComponent: Story = {
   args: {
     src: 'https://invalid-url.com/broken-image.png',
     fallbackComponent: (
-      <Box
-        sx={{
-          width: 48,
-          height: 48,
-          borderRadius: '50%',
-          backgroundColor: 'primary.main',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Typography color="white" fontWeight="bold">
+      <div className="bg-primary flex size-12 items-center justify-center rounded-full">
+        <Typography variant="paragraph-bold" className="text-primary-foreground">
           ?
         </Typography>
-      </Box>
+      </div>
     ),
     alt: 'Unknown',
     width: 48,

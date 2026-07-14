@@ -1,7 +1,9 @@
 import EnhancedTable from '@/components/common/EnhancedTable'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
-import { Box, IconButton, Skeleton, SvgIcon, Typography } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
 import { relativeTime } from '@safe-global/utils/utils/date'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { useContext, useMemo } from 'react'
@@ -20,35 +22,35 @@ const SKELETON_ROWS = new Array(3).fill('').map(() => {
       beneficiary: {
         rawValue: '0x',
         content: (
-          <Box display="flex" flexDirection="row" gap={1} alignItems="center">
-            <Skeleton variant="circular" width={26} height={26} />
+          <div className="flex flex-row items-center gap-2">
+            <Skeleton className="size-[26px] rounded-full" />
             <div>
               <Typography>
-                <Skeleton width={75} />
+                <Skeleton className="h-4 w-[75px]" />
               </Typography>
               <Typography>
-                <Skeleton width={300} />
+                <Skeleton className="h-4 w-[300px]" />
               </Typography>
             </div>
-          </Box>
+          </div>
         ),
       },
       spent: {
         rawValue: '0',
         content: (
-          <Box display="flex" flexDirection="row" gap={1} alignItems="center">
-            <Skeleton variant="circular" width={26} height={26} />
+          <div className="flex flex-row items-center gap-2">
+            <Skeleton className="size-[26px] rounded-full" />
             <Typography>
-              <Skeleton width={100} />
+              <Skeleton className="h-4 w-[100px]" />
             </Typography>
-          </Box>
+          </div>
         ),
       },
       resetTime: {
         rawValue: '0',
         content: (
           <Typography>
-            <Skeleton />
+            <Skeleton className="h-4 w-full" />
           </Typography>
         ),
       },
@@ -97,10 +99,10 @@ export const SpendingLimitsTable = ({
                 spent: {
                   rawValue: spendingLimit.spent,
                   content: (
-                    <Box data-testid="spent-amount" display="flex" alignItems="center" gap={1}>
+                    <div data-testid="spent-amount" className="flex items-center gap-2">
                       <TokenIcon logoUri={spendingLimit.token.logoUri} tokenSymbol={spendingLimit.token.symbol} />
                       {`${formattedSpent} of ${formattedAmount} ${spendingLimit.token.symbol}`}
-                    </Box>
+                    </div>
                   ),
                 },
                 resetTime: {
@@ -120,15 +122,15 @@ export const SpendingLimitsTable = ({
                     <CheckWallet>
                       {(isOk) => (
                         <Track {...SETTINGS_EVENTS.SPENDING_LIMIT.REMOVE_LIMIT}>
-                          <IconButton
+                          <Button
                             data-testid="delete-btn"
                             onClick={() => setTxFlow(<RemoveSpendingLimitFlow spendingLimit={spendingLimit} />)}
-                            color="error"
-                            size="small"
+                            variant="ghost"
+                            size="icon-sm"
                             disabled={!isOk}
                           >
-                            <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
-                          </IconButton>
+                            <DeleteIcon className="size-4 text-destructive" />
+                          </Button>
                         </Track>
                       )}
                     </CheckWallet>

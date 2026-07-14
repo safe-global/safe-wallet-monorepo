@@ -3,9 +3,11 @@ import {
   useTargetedMessagingCreateSubmissionV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/targeted-messages'
 import { useEffect, type ReactElement } from 'react'
-import { Avatar, Box, Button, IconButton, Link, Paper, Stack, ThemeProvider, Typography } from '@mui/material'
-import { Close } from '@mui/icons-material'
-import type { Theme } from '@mui/material/styles'
+import { XIcon } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { Link } from '@/components/ui/link'
+import { Typography } from '@/components/ui/typography'
 import { useAppDispatch, useAppSelector } from '@/store'
 import css from './styles.module.css'
 import { closeOutreachBanner, openOutreachBanner, selectOutreachBanner } from '@/store/popupSlice'
@@ -14,7 +16,6 @@ import useShowOutreachPopup from '../../hooks/useShowOutreachPopup'
 import { ACTIVE_OUTREACH, OUTREACH_LS_KEY, OUTREACH_SS_KEY } from '@/features/targeted-outreach/constants'
 import Track from '@/components/common/Track'
 import { OUTREACH_EVENTS } from '@/services/analytics/events/outreach'
-import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -82,61 +83,59 @@ const OutreachPopup = (): ReactElement | null => {
   }
 
   return (
-    // Enforce light theme for the popup
-    <SafeThemeProvider mode="light">
-      {(safeTheme: Theme) => (
-        <ThemeProvider theme={safeTheme}>
-          <Box className={css.popup}>
-            <Paper className={css.container}>
-              <Stack gap={2}>
-                <Box display="flex" alignItems="center">
-                  <Avatar
-                    alt="Product marketing lead avatar"
-                    src="/images/common/outreach-popup-avatar.png"
-                    className={css.avatar}
-                  />
-                  <Box ml={1}>
-                    <Typography variant="body2">Danilo Pereira</Typography>
-                    <Typography variant="body2" color="primary.light">
-                      Product Marketing Lead
-                    </Typography>
-                  </Box>
-                </Box>
-                <Typography variant="h4" fontWeight={700}>
-                  Your voice matters!
-                  <br />
-                  Help us improve {'Safe{Wallet}'}.
-                </Typography>
-                <Typography>
-                  In 1 minute, tell us why you use {'Safe{Wallet}'}. Your input will help us create a better, smarter
-                  wallet experience for you!
-                </Typography>
-                <Track {...OUTREACH_EVENTS.OPEN_SURVEY}>
-                  <Link rel="noreferrer noopener" target="_blank" href={outreachUrl}>
-                    <Button fullWidth variant="contained" onClick={handleOpenSurvey}>
-                      Get Involved
-                    </Button>
-                  </Link>
-                </Track>
-                <Track {...OUTREACH_EVENTS.ASK_AGAIN_LATER}>
-                  <Button fullWidth variant="text" onClick={handleAskAgainLater}>
-                    Ask me later
-                  </Button>
-                </Track>
-                <Typography variant="body2" color="primary.light" mx="auto">
-                  It&apos;ll only take 1 minute.
-                </Typography>
-              </Stack>
-              <Track {...OUTREACH_EVENTS.CLOSE_POPUP}>
-                <IconButton className={css.close} aria-label="close outreach popup" onClick={handleClose}>
-                  <Close />
-                </IconButton>
-              </Track>
-            </Paper>
-          </Box>
-        </ThemeProvider>
-      )}
-    </SafeThemeProvider>
+    <div className={css.popup}>
+      <div className={css.container}>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center">
+            <Avatar size="sm">
+              <AvatarImage src="/images/common/outreach-popup-avatar.png" alt="Product marketing lead avatar" />
+              <AvatarFallback>DP</AvatarFallback>
+            </Avatar>
+            <div className="ml-2">
+              <Typography variant="paragraph-small">Danilo Pereira</Typography>
+              <Typography variant="paragraph-small" color="muted">
+                Product Marketing Lead
+              </Typography>
+            </div>
+          </div>
+          <Typography variant="h4">
+            Your voice matters!
+            <br />
+            Help us improve {'Safe{Wallet}'}.
+          </Typography>
+          <Typography>
+            In 1 minute, tell us why you use {'Safe{Wallet}'}. Your input will help us create a better, smarter wallet
+            experience for you!
+          </Typography>
+          <Track {...OUTREACH_EVENTS.OPEN_SURVEY}>
+            <Link rel="noreferrer noopener" target="_blank" href={outreachUrl}>
+              <Button className="w-full" variant="default" onClick={handleOpenSurvey}>
+                Get Involved
+              </Button>
+            </Link>
+          </Track>
+          <Track {...OUTREACH_EVENTS.ASK_AGAIN_LATER}>
+            <Button className="w-full" variant="ghost" onClick={handleAskAgainLater}>
+              Ask me later
+            </Button>
+          </Track>
+          <Typography variant="paragraph-small" color="muted" align="center">
+            It&apos;ll only take 1 minute.
+          </Typography>
+        </div>
+        <Track {...OUTREACH_EVENTS.CLOSE_POPUP}>
+          <Button
+            className={css.close}
+            variant="ghost"
+            size="icon-sm"
+            aria-label="close outreach popup"
+            onClick={handleClose}
+          >
+            <XIcon className="size-4" />
+          </Button>
+        </Track>
+      </div>
+    </div>
   )
 }
 export default OutreachPopup

@@ -7,11 +7,14 @@ import useChainId from '@/hooks/useChainId'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useSimulation } from '@/components/tx/security/tenderly/useSimulation'
 import TenderlyIcon from '@/public/images/transactions/tenderly-small.svg'
-import { ButtonBase, CircularProgress, Stack, SvgIcon, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@/components/ui/typography'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import ExternalLink from '@/components/common/ExternalLink'
 import CheckIcon from '@/public/images/common/check.svg'
 import CloseIcon from '@/public/images/common/close.svg'
+import WarningIcon from '@/public/images/notifications/warning.svg'
 import { getSimulationStatus, isTxSimulationEnabled } from '@safe-global/utils/components/tx/security/tenderly/utils'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
@@ -19,15 +22,21 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 
-const getSimulationIconProps = (isCallTraceError: boolean, isSuccess: boolean) => {
-  if (isSuccess && !isCallTraceError) {
-    return { color: 'success' as const, component: CheckIcon }
+const getSimulationIcon = (isCallTraceError: boolean, isSuccess: boolean) => {
+  if (isCallTraceError) {
+    return { color: 'var(--color-warning-main)', Component: WarningIcon }
   }
-  return { color: 'error' as const, component: CloseIcon }
+  if (isSuccess) {
+    return { color: 'var(--color-success-main)', Component: CheckIcon }
+  }
+  return { color: 'var(--color-error-main)', Component: CloseIcon }
 }
 
 const getSimulationStatusText = (isCallTraceError: boolean, isSuccess: boolean) => {
-  if (isSuccess && !isCallTraceError) {
+  if (isCallTraceError) {
+    return 'Can execute (with warnings)'
+  }
+  if (isSuccess) {
     return 'Simulation successful'
   }
   return 'Simulation failed'
@@ -45,26 +54,17 @@ const CompactSimulationButton = ({
   onClick?: () => void
 }) => {
   return (
-    <ButtonBase
+    <Button
+      variant="ghost"
       disabled={disabled}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 0.5,
-        flexDirection: 'row',
-        borderRadius: '8px',
-        backgroundColor: 'background.main',
-        padding: '4px 16px',
-        // This is required as the icon otherwise disappears when the first tx accordion is closed
-        visibility: 'visible !important',
-      }}
+      // visibility is required as the icon otherwise disappears when the first tx accordion is closed
+      // eslint-disable-next-line no-restricted-syntax -- inline simulation toggle: custom size + surface bg; pending a variant
+      className="flex flex-row items-center gap-1 rounded-lg !visible h-auto bg-[var(--color-background-main)] py-1 hover:bg-[var(--color-background-main)]"
       onClick={onClick}
     >
       {iconComponent}
-      <Typography variant="subtitle2" fontWeight={700}>
-        {label}
-      </Typography>
-    </ButtonBase>
+      <Typography variant="paragraph-small-bold">{label}</Typography>
+    </Button>
   )
 }
 
@@ -104,14 +104,14 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
   }
 
   if (status?.isLoading) {
-    return <CompactSimulationButton label="Simulating" iconComponent={<CircularProgress size={16} />} disabled={true} />
+    return <CompactSimulationButton label="Simulating" iconComponent={<Spinner className="size-4" />} disabled={true} />
   }
 
   if (!status?.isFinished) {
     return (
       <CompactSimulationButton
         label="Simulate"
-        iconComponent={<SvgIcon component={TenderlyIcon} inheritViewBox sx={{ height: '16px' }} />}
+        iconComponent={<TenderlyIcon className="h-4" />}
         disabled={!safeTransaction}
         onClick={handleSimulation}
       />
@@ -119,26 +119,23 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
   }
 
   if (status?.isFinished && !status.isError) {
+    const { color, Component } = getSimulationIcon(status.isCallTraceError, status.isSuccess)
     return (
       <ExternalLink href={simulationLink}>
-        <Stack direction="row" alignItems="center" gap={0.5}>
-          <SvgIcon
-            {...getSimulationIconProps(status.isCallTraceError, status.isSuccess)}
-            inheritViewBox
-            sx={{ height: '16px' }}
-          />
+        <div className="flex flex-row items-center gap-1">
+          <Component className="h-4" style={{ color }} />
           {getSimulationStatusText(status.isCallTraceError, status.isSuccess)}
-        </Stack>
+        </div>
       </ExternalLink>
     )
   }
 
   if (status?.isError) {
     return (
-      <Stack direction="row" alignItems="center" gap={0.5}>
-        <SvgIcon color="error" component={CloseIcon} inheritViewBox sx={{ height: '16px' }} />
+      <div className="flex flex-row items-center gap-1">
+        <CloseIcon className="h-4 text-[var(--color-error-main)]" />
         Error while simulating
-      </Stack>
+      </div>
     )
   }
 

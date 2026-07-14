@@ -3,7 +3,8 @@ import useChainId from '@/hooks/useChainId'
 import { type AddressBookItem, Methods } from '@safe-global/safe-apps-sdk'
 import type { ReactElement } from 'react'
 import { useCallback, useEffect } from 'react'
-import { Box, CircularProgress, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Spinner } from '@/components/ui/spinner'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import type { RequestId } from '@safe-global/safe-apps-sdk'
@@ -118,9 +119,9 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
         <Head>
           <title>{`Safe Apps - Viewer - ${remoteApp ? remoteApp.name : UNKNOWN_APP_NAME}`}</title>
         </Head>
-        <Box p={2}>
+        <div className="p-4">
           <BlockedAddress address={sanctionedAddress} featureTitle="Safe{Pass} Safe app" />
-        </Box>
+        </div>
       </>
     )
   }
@@ -139,11 +140,11 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
         {appIsLoading && (
           <div className={css.loadingContainer}>
             {isLoadingSlow && (
-              <Typography variant="h4" gutterBottom>
+              <Typography variant="h4" className="mb-2">
                 The Safe App is taking too long to load, consider refreshing.
               </Typography>
             )}
-            <CircularProgress size={48} color="primary" />
+            <Spinner className="size-12 text-[var(--color-primary-main)]" />
           </div>
         )}
 

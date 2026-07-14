@@ -1,5 +1,4 @@
 import { useMemo, type ReactElement } from 'react'
-import { Card, SvgIcon, Stack } from '@mui/material'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
 import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
@@ -20,28 +19,14 @@ import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
 import { useCheckSimulation } from '../hooks/useCheckSimulation'
 import type { HypernativeAuthStatus } from '@/features/hypernative'
 
-const shieldLogoOnHover = {
-  width: 78,
-  height: 18,
-  '&:hover': {
-    cursor: 'pointer',
-    '& .shield-bg': {
-      fill: 'var(--color-background-secondary)',
-    },
-    '& .shield-img': {
-      fill: 'var(--color-static-text-brand)',
-      transition: 'fill 0.2s ease',
-    },
-    '& .shield-lines': {
-      fill: '#121312', // consistent between dark/light modes
-      transition: 'fill 0.2s ease',
-    },
-    '& .shield-text': {
-      fill: 'var(--color-text-primary)',
-      transition: 'fill 0.2s ease',
-    },
-  },
-} as const
+const shieldLogoOnHover = [
+  'cursor-pointer',
+  '[&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill]',
+  'hover:[&_.shield-bg]:fill-[var(--color-background-secondary)]',
+  'hover:[&_.shield-img]:fill-[var(--color-static-text-brand)]',
+  'hover:[&_.shield-lines]:fill-[#121312]',
+  'hover:[&_.shield-text]:fill-[var(--color-text-primary)]',
+].join(' ')
 
 export const SafeShieldDisplay = ({
   recipient,
@@ -91,9 +76,11 @@ export const SafeShieldDisplay = ({
     [recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired, deadlockResults],
   )
 
+  const SafeShieldLogo = isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull
+
   return (
-    <Stack gap={1} data-testid="safe-shield-widget">
-      <Card sx={{ borderRadius: '6px', overflow: 'hidden' }}>
+    <div className="flex flex-col gap-2" data-testid="safe-shield-widget">
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
         <SafeShieldHeader
           recipient={recipient}
           contract={contract}
@@ -115,17 +102,13 @@ export const SafeShieldDisplay = ({
           safeAnalysis={safeAnalysis}
           onAddToTrustedList={onAddToTrustedList}
         />
-      </Card>
+      </div>
 
-      <Stack direction="row" alignItems="center" alignSelf="flex-end">
+      <div className="flex flex-row items-center self-end">
         <ExternalLink href={HelpCenterArticle.SAFE_SHIELD} noIcon>
-          <SvgIcon
-            component={isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull}
-            inheritViewBox
-            sx={shieldLogoOnHover}
-          />
+          <SafeShieldLogo width={78} height={18} className={shieldLogoOnHover} />
         </ExternalLink>
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   )
 }

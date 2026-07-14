@@ -4,7 +4,8 @@ import { useMemo } from 'react'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import dynamic from 'next/dynamic'
 import { getLatestTransactions } from '@/utils/tx-list'
-import { Box, Typography, Card, Stack, Paper, Skeleton } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Skeleton } from '@/components/ui/skeleton'
 import { ViewAllLink } from '../styled'
 import PendingTxListItem from './PendingTxListItem'
 import useTxQueue, { useQueuedTxsLength } from '@/hooks/useTxQueue'
@@ -23,22 +24,20 @@ const PendingRecoveryListItem = dynamic(() => import('./PendingRecoveryListItem'
 const MAX_TXS = 4
 
 const PendingTxsSkeleton = () => (
-  <Card sx={{ px: 1.5, py: 2.5, height: 1 }} component="section">
-    <Stack direction="row" sx={{ px: 1.5, mb: 1 }}>
-      <Typography fontWeight={700}>Pending transactions</Typography>
-    </Stack>
+  <section className="h-full overflow-hidden rounded-xl bg-[var(--color-background-paper)] px-3 py-5">
+    <div className="mb-2 flex flex-row px-3">
+      <Typography variant="paragraph-bold">Pending transactions</Typography>
+    </div>
 
-    <Skeleton height={66} variant="rounded" />
-  </Card>
+    <Skeleton className="h-[66px] w-full rounded-lg" />
+  </section>
 )
 
 const EmptyState = () => {
   return (
-    <Paper elevation={0} data-testid="no-tx-text" sx={{ p: 5, textAlign: 'center' }}>
-      <Typography mb={0.5} mt={3}>
-        No transactions to sign
-      </Typography>
-    </Paper>
+    <div data-testid="no-tx-text" className="rounded-xl bg-[var(--color-background-paper)] p-10 text-center">
+      <Typography className="mb-1 mt-6">No transactions to sign</Typography>
+    </div>
   )
 }
 
@@ -114,19 +113,18 @@ const PendingTxsList = (): ReactElement | null => {
   if (isLoading) return <PendingTxsSkeleton />
 
   return (
-    <Card
+    <section
       data-testid="pending-tx-widget"
-      sx={{ border: 0, px: { xs: 3, lg: 1.5 }, pt: 2.5, pb: 1.5, height: 1, width: 1 }}
-      component="section"
+      className="h-full w-full overflow-hidden rounded-xl bg-[var(--color-background-paper)] px-6 pb-3 pt-5 lg:px-3"
     >
-      <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
-        <Typography fontWeight={700} className={css.pendingTxHeader}>
+      <div className="mb-2 flex flex-row justify-between px-3">
+        <Typography variant="paragraph-bold" className={css.pendingTxHeader}>
           Pending transactions <SidebarListItemCounter count={queueSize} />
         </Typography>
         {totalTxs > 0 && <ViewAllLink url={queueUrl} />}
-      </Stack>
+      </div>
 
-      <Box>
+      <div>
         {totalTxs > 0 ? (
           <div className={css.list}>
             {recoveryTxs.map((tx) => (
@@ -140,8 +138,8 @@ const PendingTxsList = (): ReactElement | null => {
         ) : (
           <EmptyState />
         )}
-      </Box>
-    </Card>
+      </div>
+    </section>
   )
 }
 

@@ -4,7 +4,7 @@ import css from './styles.module.css'
 import ExternalLink from '@/components/common/ExternalLink'
 import { nftPlatforms } from '../../config'
 import useChainId from '@/hooks/useChainId'
-import { CircularProgress } from '@mui/material'
+import { Spinner } from '@/components/ui/spinner'
 
 const NftPreviewModal = ({ nft, onClose }: { nft?: Collectible; onClose: () => void }) => {
   const chainId = useChainId()
@@ -24,7 +24,7 @@ const NftPreviewModal = ({ nft, onClose }: { nft?: Collectible; onClose: () => v
           <div className={css.imageWrapper} onClick={onClose}>
             <img src={nft.imageUri ?? undefined} alt={nft.name ?? undefined} />
 
-            <CircularProgress className={css.loader} />
+            <Spinner className={`${css.loader} size-10`} />
           </div>
 
           {linkTemplate && <ExternalLink href={linkTemplate.getUrl(nft)}>View on {linkTemplate.title}</ExternalLink>}

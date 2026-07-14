@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import HnSecurityReportBtn from './HnSecurityReportBtn'
-import { Paper } from '@mui/material'
 
 const meta = {
   component: HnSecurityReportBtn,
@@ -12,9 +11,9 @@ const meta = {
   decorators: [
     (Story) => {
       return (
-        <Paper sx={{ padding: 2, maxWidth: 600, backgroundColor: 'transparent' }}>
+        <div className="max-w-[600px] p-4">
           <Story />
-        </Paper>
+        </div>
       )
     },
   ],

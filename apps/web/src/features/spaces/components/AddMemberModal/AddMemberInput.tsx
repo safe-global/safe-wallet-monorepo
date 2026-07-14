@@ -1,6 +1,4 @@
 import { type ReactElement, useEffect, useMemo, useState } from 'react'
-import { IconButton, InputAdornment, Skeleton, SvgIcon, TextField, Typography } from '@mui/material'
-import Autocomplete from '@mui/material/Autocomplete'
 import classnames from 'classnames'
 import type { UseFormRegisterReturn } from 'react-hook-form'
 import { isAddress } from 'ethers'
@@ -11,8 +9,12 @@ import { useAddressBookSearch } from '@/features/spaces'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import Identicon from '@/components/common/Identicon'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
+import { Combobox, ComboboxContent, ComboboxInput, ComboboxItem, ComboboxList } from '@/components/ui/combobox'
+import { InputGroupAddon, InputGroupButton } from '@/components/ui/input-group'
+import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import CaretDownIcon from '@/public/images/common/caret-down.svg'
-import inputCss from '@/styles/inputs.module.css'
+import { cn } from '@/utils/cn'
 import { EMAIL_MAX_LENGTH, isEmailAddress } from './utils'
 import css from './styles.module.css'
 
@@ -77,89 +79,79 @@ const AddMemberInput = ({ error, inputProps, onSelectAddress, value }: AddMember
     if (showInitials) {
       return <InitialsAvatar name={debouncedIdentifier} size="medium" rounded />
     }
-    return <Skeleton variant="circular" width={32} height={32} animation={false} />
+    return <Skeleton className="size-8 rounded-full" />
   }
 
-  const startAdornment = (
-    <InputAdornment position="start" sx={{ ml: 0, mr: 1 }}>
-      {renderAvatar()}
-    </InputAdornment>
-  )
-
-  const endAdornment =
-    options.length > 0 ? (
-      <InputAdornment position="end">
-        <IconButton
-          className={classnames(css.openButton, { [css.rotated]: isOpen })}
-          color="primary"
-          onClick={() => setIsOpen((open) => !open)}
-          tabIndex={-1}
-        >
-          <SvgIcon component={CaretDownIcon} inheritViewBox fontSize="small" />
-        </IconButton>
-      </InputAdornment>
-    ) : null
+  const showOptions = options.length > 0
 
   return (
-    <Autocomplete<InviteeIdentifierOption, false, true, true>
-      freeSolo
-      disableClearable
-      openOnFocus
-      open={isOpen && options.length > 0}
-      onOpen={() => setIsOpen(true)}
-      onClose={() => setIsOpen(false)}
-      className={inputCss.input}
-      options={options}
-      // Options are already searched/sliced via useAddressBookSearch.
-      filterOptions={(opts) => opts}
-      getOptionLabel={(option) => (typeof option === 'string' ? option : option.address)}
-      inputValue={value}
-      onInputChange={(_, newValue, reason) => {
-        if (reason === 'input') {
-          inputProps.onChange({ target: { name: inputProps.name, value: newValue } })
-        }
-      }}
-      onChange={(_, option) => {
-        if (option && typeof option !== 'string') {
-          onSelectAddress(option.address, option.name)
-          setIsOpen(false)
-        }
-      }}
-      componentsProps={{ paper: { elevation: 2 } }}
-      renderOption={(props, option) => {
-        const { key, ...rest } = props
-        return (
-          <Typography component="li" variant="body2" {...rest} key={key}>
-            <EthHashInfo address={option.address} name={option.name} shortAddress={false} copyAddress={false} />
-          </Typography>
-        )
-      }}
-      renderInput={(params) => (
-        <TextField
-          {...params}
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor="member-invitee-identifier-input" className={cn(error && 'text-destructive')}>
+        {error || 'Address, email or ENS'}
+        {!error && <span className="text-destructive"> *</span>}
+      </Label>
+
+      <Combobox<InviteeIdentifierOption>
+        items={options}
+        // Options are already searched/sliced via useAddressBookSearch.
+        filter={() => true}
+        itemToStringValue={(option) => option.address}
+        inputValue={value}
+        onInputValueChange={(newValue, details) => {
+          if (details.reason === 'input-change') {
+            inputProps.onChange({ target: { name: inputProps.name, value: newValue } })
+          }
+        }}
+        onValueChange={(option) => {
+          if (option) {
+            onSelectAddress(option.address, option.name)
+            setIsOpen(false)
+          }
+        }}
+        open={isOpen && showOptions}
+        onOpenChange={setIsOpen}
+        openOnInputClick
+        inputRef={inputProps.ref}
+      >
+        <ComboboxInput
+          id="member-invitee-identifier-input"
           name={inputProps.name}
-          inputRef={inputProps.ref}
-          onBlur={inputProps.onBlur}
-          label={error || 'Address, email or ENS'}
-          required={!error}
-          error={!!error}
-          fullWidth
+          aria-invalid={!!error}
           autoComplete="off"
           spellCheck={false}
-          inputProps={{
-            ...params.inputProps,
-            'data-testid': 'member-invitee-identifier-input',
-            maxLength: EMAIL_MAX_LENGTH,
-          }}
-          InputProps={{
-            ...params.InputProps,
-            startAdornment,
-            endAdornment,
-          }}
-          InputLabelProps={{ shrink: true }}
-        />
-      )}
-    />
+          maxLength={EMAIL_MAX_LENGTH}
+          showTrigger={false}
+          onBlur={inputProps.onBlur}
+          data-testid="member-invitee-identifier-input"
+        >
+          <InputGroupAddon align="inline-start">{renderAvatar()}</InputGroupAddon>
+          {showOptions && (
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton
+                variant="ghost"
+                size="icon-xs"
+                tabIndex={-1}
+                aria-label="Toggle suggestions"
+                className={classnames(css.openButton, { [css.rotated]: isOpen })}
+                onClick={() => setIsOpen((open) => !open)}
+              >
+                <CaretDownIcon className="size-4 text-[var(--color-primary-main)]" />
+              </InputGroupButton>
+            </InputGroupAddon>
+          )}
+        </ComboboxInput>
+
+        <ComboboxContent>
+          <ComboboxList>
+            {(option: InviteeIdentifierOption) => (
+              <ComboboxItem key={option.address} value={option}>
+                <EthHashInfo address={option.address} name={option.name} shortAddress={false} copyAddress={false} />
+              </ComboboxItem>
+            )}
+          </ComboboxList>
+        </ComboboxContent>
+      </Combobox>
+    </div>
   )
 }
 

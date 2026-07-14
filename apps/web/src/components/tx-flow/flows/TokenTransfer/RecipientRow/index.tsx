@@ -1,8 +1,7 @@
 import AddressBookInput from '@/components/common/AddressBookInput'
 import TokenAmountInput from '@/components/common/TokenAmountInput'
 import DeleteIcon from '@/public/images/common/delete.svg'
-import { Alert, Box, Button, FormControl, IconButton, Stack, SvgIcon } from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
+import { Button } from '@/components/ui/button'
 import { get, useFormContext } from 'react-hook-form'
 import type { FieldArrayPath, FieldPath } from 'react-hook-form'
 import type { MultiTokenTransferParams, TokenTransferParams } from '../types'
@@ -19,6 +18,8 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import SpendingLimitRow from '../SpendingLimitRow'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { X } from 'lucide-react'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useResolvedGasToken, type FeePreviewTx } from '@/features/gtf'
@@ -107,13 +108,13 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
   }, [setNonceNeeded, isSpendingLimitType, spendingLimitAmount])
 
   return (
-    <Stack spacing={1}>
-      <Stack spacing={2}>
-        <FormControl fullWidth>
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-4">
+        <div className="w-full">
           <AddressBookInput name={recipientFieldName} canAdd={isAddressValid} />
-        </FormControl>
+        </div>
 
-        <FormControl fullWidth>
+        <div className="w-full">
           <TokenAmountInput
             fieldArray={fieldArray}
             balances={isSpendingLimitType ? spendingLimitBalances : balancesItems}
@@ -123,47 +124,45 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
             defaultTokenAddress={tokenAddress}
             onMaxClick={() => setMaxPressed(true)}
           />
-        </FormControl>
+        </div>
 
         {showFeeBanner && (
-          <Alert
-            severity="info"
-            data-testid="gtf-fee-banner"
-            action={
-              <IconButton size="small" onClick={() => setMaxPressed(false)} aria-label="Dismiss fee banner">
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            }
-          >
-            Your max send amount accounts for fees paid in {selectedToken?.tokenInfo.symbol}. This updates if fees
-            change.
+          <Alert data-testid="gtf-fee-banner" className="items-center">
+            <AlertDescription className="flex w-full items-center justify-between gap-2">
+              <span>
+                Your max send amount accounts for fees paid in {selectedToken?.tokenInfo.symbol}. This updates if fees
+                change.
+              </span>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Dismiss fee banner"
+                onClick={() => setMaxPressed(false)}
+              >
+                <X className="size-4" />
+              </Button>
+            </AlertDescription>
           </Alert>
         )}
 
         {!disableSpendingLimit && canCreateSpendingLimitTxWithToken && (
-          <FormControl fullWidth>
+          <div className="w-full">
             <SpendingLimitRow availableAmount={spendingLimitAmount} selectedToken={selectedToken?.tokenInfo} />
-          </FormControl>
+          </div>
         )}
-      </Stack>
+      </div>
 
       {removable && (
-        <Box>
+        <div>
           <Track {...MODALS_EVENTS.REMOVE_RECIPIENT}>
-            <Button
-              data-testid="remove-recipient-btn"
-              onClick={onRemove}
-              aria-label="Remove recipient"
-              variant="text"
-              startIcon={<SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" />}
-              size="medium"
-            >
+            <Button data-testid="remove-recipient-btn" onClick={onRemove} aria-label="Remove recipient" variant="ghost">
+              <DeleteIcon className="size-4" />
               Remove recipient
             </Button>
           </Track>
-        </Box>
+        </div>
       )}
-    </Stack>
+    </div>
   )
 }
 

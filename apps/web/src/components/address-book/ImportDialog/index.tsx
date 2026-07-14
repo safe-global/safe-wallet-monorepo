@@ -1,12 +1,10 @@
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
+import { Typography } from '@/components/ui/typography'
 import { useCSVReader, formatFileSize } from 'react-papaparse'
 import type { ParseResult } from 'papaparse'
 import { type ReactElement, useState, type MouseEvent, useMemo } from 'react'
 
 import ModalDialog from '@/components/common/ModalDialog'
+import DialogActions from '@/components/common/DialogActions'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { useAppDispatch } from '@/store'
 
@@ -71,7 +69,7 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
 
   return (
     <ModalDialog open onClose={handleClose} dialogTitle="Import address book" hideChainIndicator>
-      <DialogContent>
+      <div className="px-6 py-5">
         <CSVReader
           accept="text/csv"
           multiple={false}
@@ -162,21 +160,16 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
             Learn about the address book import and export
           </ExternalLink>
         </Typography>
-      </DialogContent>
-      <DialogActions>
-        <Button data-testid="cancel-btn" onClick={handleClose}>
-          Cancel
-        </Button>
-        <Button
-          data-testid="import-btn"
-          onClick={handleImport}
-          variant="contained"
-          disableElevation
-          disabled={!csvData || !!error}
-        >
-          Import
-        </Button>
-      </DialogActions>
+      </div>
+      <DialogActions
+        className="p-2"
+        onCancel={handleClose}
+        cancelTestId="cancel-btn"
+        confirmLabel="Import"
+        onConfirm={handleImport}
+        confirmDisabled={!csvData || !!error}
+        confirmTestId="import-btn"
+      />
     </ModalDialog>
   )
 }

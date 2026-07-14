@@ -1,5 +1,6 @@
 import { type SyntheticEvent } from 'react'
-import { Button, DialogActions, FormControl, Grid, Typography, DialogContent } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import { FormProvider, useForm } from 'react-hook-form'
 import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { FLOAT_REGEX } from '@safe-global/utils/utils/validation'
@@ -71,81 +72,74 @@ const AdvancedParamsForm = ({ params, ...props }: AdvancedParamsFormProps) => {
     <ModalDialog open dialogTitle="Advanced parameters" hideChainIndicator>
       <FormProvider {...formMethods}>
         <form onSubmit={onFormSubmit}>
-          <DialogContent>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Typography variant="body1" fontWeight={700}>
-                  Execution parameters
-                </Typography>
-              </Grid>
+          <div className="p-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <Typography className="font-bold">Execution parameters</Typography>
+              </div>
 
               {/* User nonce */}
-              <Grid item xs={6}>
-                <FormControl fullWidth>
-                  <NumberField
-                    disabled={props.willRelay}
-                    label={errors.userNonce?.message || 'Wallet nonce'}
-                    error={!!errors.userNonce}
-                    {...register(AdvancedField.userNonce)}
-                  />
-                </FormControl>
-              </Grid>
+              <div className="w-full">
+                <NumberField
+                  fullWidth
+                  disabled={props.willRelay}
+                  label={errors.userNonce?.message || 'Wallet nonce'}
+                  error={!!errors.userNonce}
+                  {...register(AdvancedField.userNonce)}
+                />
+              </div>
 
               {/* Gas limit */}
-              <Grid item xs={6}>
+              <div>
                 <GasLimitInput recommendedGasLimit={props.recommendedGasLimit?.toString()} />
-              </Grid>
+              </div>
 
               {/* Gas price */}
               {props.isEIP1559 && (
-                <Grid item xs={6}>
-                  <FormControl fullWidth>
-                    <NumberField
-                      disabled={props.willRelay}
-                      label={errors.maxPriorityFeePerGas?.message || 'Max priority fee (Gwei)'}
-                      error={!!errors.maxPriorityFeePerGas}
-                      required
-                      {...register(AdvancedField.maxPriorityFeePerGas, {
-                        required: true,
-                        pattern: FLOAT_REGEX,
-                        min: 0,
-                      })}
-                    />
-                  </FormControl>
-                </Grid>
+                <div className="w-full">
+                  <NumberField
+                    fullWidth
+                    disabled={props.willRelay}
+                    label={errors.maxPriorityFeePerGas?.message || 'Max priority fee (Gwei)'}
+                    error={!!errors.maxPriorityFeePerGas}
+                    required
+                    {...register(AdvancedField.maxPriorityFeePerGas, {
+                      required: true,
+                      pattern: FLOAT_REGEX,
+                      min: 0,
+                    })}
+                  />
+                </div>
               )}
 
-              <Grid item xs={6}>
-                <FormControl fullWidth>
-                  <NumberField
-                    disabled={props.willRelay}
-                    label={errors.maxFeePerGas?.message || props.isEIP1559 ? 'Max fee (Gwei)' : 'Gas price (Gwei)'}
-                    error={!!errors.maxFeePerGas}
-                    required
-                    {...register(AdvancedField.maxFeePerGas, { required: true, pattern: FLOAT_REGEX, min: 0 })}
-                  />
-                </FormControl>
-              </Grid>
-            </Grid>
+              <div className="w-full">
+                <NumberField
+                  fullWidth
+                  disabled={props.willRelay}
+                  label={errors.maxFeePerGas?.message || props.isEIP1559 ? 'Max fee (Gwei)' : 'Gas price (Gwei)'}
+                  error={!!errors.maxFeePerGas}
+                  required
+                  {...register(AdvancedField.maxFeePerGas, { required: true, pattern: FLOAT_REGEX, min: 0 })}
+                />
+              </div>
+            </div>
 
             {/* Help link */}
-            <Typography mt={2}>
+            <Typography className="mt-4">
               <ExternalLink href={HelpCenterArticle.ADVANCED_PARAMS}>
                 How can I configure these parameters manually?
               </ExternalLink>
             </Typography>
-          </DialogContent>
+          </div>
 
           {/* Buttons */}
-          <DialogActions>
-            <Button color="inherit" onClick={onBack}>
+          <div className="flex justify-end gap-2 px-6 pb-6">
+            <Button variant="ghost" onClick={onBack}>
               Back
             </Button>
 
-            <Button variant="contained" type="submit">
-              Confirm
-            </Button>
-          </DialogActions>
+            <Button type="submit">Confirm</Button>
+          </div>
         </form>
       </FormProvider>
     </ModalDialog>

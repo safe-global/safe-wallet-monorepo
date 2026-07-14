@@ -1,6 +1,9 @@
 import { Controller, useFormContext } from 'react-hook-form'
-import { TextField, Typography, Grid, InputAdornment, Tooltip, IconButton, SvgIcon } from '@mui/material'
-import RotateLeftIcon from '@mui/icons-material/RotateLeft'
+import { Typography } from '@/components/ui/typography'
+import { Label } from '@/components/ui/label'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
+import { RotateCcwIcon } from 'lucide-react'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import ExternalLink from '@/components/common/ExternalLink'
 import { TENDERLY_SIMULATE_ENDPOINT_URL } from '@safe-global/utils/config/constants'
@@ -23,104 +26,89 @@ const TenderlySection = ({
 
   return (
     <>
-      <Typography
-        sx={{
-          fontWeight: 700,
-          mb: 2,
-          mt: 3,
-        }}
-      >
+      <Typography variant="paragraph-bold" className="mb-4 mt-6 flex items-center">
         Tenderly
-        <Tooltip
-          placement="top"
-          arrow
-          title={
-            <>
-              You can use your own Tenderly project to keep track of all your transaction simulations.{' '}
-              <ExternalLink
-                color="secondary"
-                href="https://docs.tenderly.co/simulations-and-forks/simulation-api/configuration-of-api-access"
-              >
-                Read more
-              </ExternalLink>
-            </>
-          }
-        >
-          <span>
-            <SvgIcon
-              component={InfoIcon}
-              inheritViewBox
-              fontSize="small"
-              color="border"
-              sx={{ verticalAlign: 'middle', ml: 0.5 }}
-            />
-          </span>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <span>
+                <InfoIcon className="ml-1 size-4 align-middle text-muted-foreground" />
+              </span>
+            }
+          />
+          <TooltipContent>
+            You can use your own Tenderly project to keep track of all your transaction simulations.{' '}
+            <ExternalLink
+              color="secondary"
+              href="https://docs.tenderly.co/simulations-and-forks/simulation-api/configuration-of-api-access"
+            >
+              Read more
+            </ExternalLink>
+          </TooltipContent>
         </Tooltip>
       </Typography>
 
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={6}>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor={EnvVariablesField.tenderlyURL}>Tenderly API URL</Label>
           <Controller
             name={EnvVariablesField.tenderlyURL}
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                value={field.value || ''}
-                type="url"
-                variant="outlined"
-                label="Tenderly API URL"
-                placeholder={TENDERLY_SIMULATE_ENDPOINT_URL}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                InputProps={{
-                  endAdornment: showResetUrlButton ? (
-                    <InputAdornment position="end">
-                      <Tooltip title="Reset to default value">
-                        <IconButton onClick={onResetUrl} size="small" color="primary">
-                          <RotateLeftIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </InputAdornment>
-                  ) : null,
-                }}
-                fullWidth
-              />
+              <InputGroup>
+                <InputGroupInput
+                  {...field}
+                  id={EnvVariablesField.tenderlyURL}
+                  value={field.value || ''}
+                  type="url"
+                  placeholder={TENDERLY_SIMULATE_ENDPOINT_URL}
+                />
+                {showResetUrlButton && (
+                  <InputGroupAddon align="inline-end">
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <InputGroupButton size="icon-sm" onClick={onResetUrl} aria-label="Reset to default value">
+                            <RotateCcwIcon />
+                          </InputGroupButton>
+                        }
+                      />
+                      <TooltipContent>Reset to default value</TooltipContent>
+                    </Tooltip>
+                  </InputGroupAddon>
+                )}
+              </InputGroup>
             )}
           />
-        </Grid>
+        </div>
 
-        <Grid item xs={12} md={6}>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor={EnvVariablesField.tenderlyToken}>Tenderly access token</Label>
           <Controller
             name={EnvVariablesField.tenderlyToken}
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                value={field.value || ''}
-                variant="outlined"
-                label="Tenderly access token"
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                InputProps={{
-                  endAdornment: showResetTokenButton ? (
-                    <InputAdornment position="end">
-                      <Tooltip title="Reset to default value">
-                        <IconButton onClick={onResetToken} size="small" color="primary">
-                          <RotateLeftIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </InputAdornment>
-                  ) : null,
-                }}
-                fullWidth
-              />
+              <InputGroup>
+                <InputGroupInput {...field} id={EnvVariablesField.tenderlyToken} value={field.value || ''} />
+                {showResetTokenButton && (
+                  <InputGroupAddon align="inline-end">
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <InputGroupButton size="icon-sm" onClick={onResetToken} aria-label="Reset to default value">
+                            <RotateCcwIcon />
+                          </InputGroupButton>
+                        }
+                      />
+                      <TooltipContent>Reset to default value</TooltipContent>
+                    </Tooltip>
+                  </InputGroupAddon>
+                )}
+              </InputGroup>
             )}
           />
-        </Grid>
-      </Grid>
+        </div>
+      </div>
     </>
   )
 }

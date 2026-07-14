@@ -122,7 +122,7 @@ const AddAccountsChooser = ({
       <Button
         size="lg"
         variant={buttonVariant}
-        className="font-normal px-4 py-0"
+        className="font-normal"
         onClick={() => setChooserOpen(true)}
         data-testid="open-add-accounts-chooser-button"
       >
@@ -135,8 +135,16 @@ const AddAccountsChooser = ({
       </Button>
 
       <Dialog open={chooserOpen} onOpenChange={setChooserOpen}>
-        <DialogContent showCloseButton className="max-w-[440px] p-6 dark:border dark:border-border">
-          <DialogHeader className="p-0 pb-3">
+        <DialogContent
+          showCloseButton
+          padding="md"
+          // eslint-disable-next-line no-restricted-syntax -- max-w-[440px] bespoke width + dark:border accent, no tokens (grandfathered)
+          className="max-w-[440px] dark:border dark:border-border"
+        >
+          <DialogHeader
+            // eslint-disable-next-line no-restricted-syntax -- p-0 pb-3: bespoke header padding, no token
+            className="p-0 pb-3"
+          >
             <DialogTitle className="font-bold">Manage Safe accounts</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-2">

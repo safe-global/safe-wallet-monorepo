@@ -4,11 +4,9 @@ import type { ReactElement } from 'react'
 
 import { formatWithSchema } from '@safe-global/utils/utils/date'
 
-import css from './styles.module.css'
-
 const TxDateLabel = ({ item }: { item: DateLabel | SafeMessageDateLabel }): ReactElement => {
   return (
-    <div className={css.container}>
+    <div className="mt-5 mb-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
       <span>{formatWithSchema(item.timestamp, 'MMM d, yyyy')}</span>
     </div>
   )

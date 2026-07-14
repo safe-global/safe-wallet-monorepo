@@ -1,4 +1,4 @@
-import { Alert, AlertTitle, Box } from '@mui/material'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import useWallet from '@/hooks/wallets/useWallet'
 import ConnectWalletButton from '@/components/common/ConnectWallet/ConnectWalletButton'
 
@@ -10,12 +10,14 @@ const NoWalletConnectedWarning = () => {
   }
 
   return (
-    <Alert severity="warning" sx={{ mt: 3 }}>
-      <AlertTitle sx={{ fontWeight: 700 }}>No wallet connected</AlertTitle>You need to connect a wallet to create a Safe
-      account.
-      <Box sx={{ mt: 2 }}>
-        <ConnectWalletButton fullWidth />
-      </Box>
+    <Alert variant="warning" className="mt-6">
+      <AlertTitle className="font-bold">No wallet connected</AlertTitle>
+      <AlertDescription>
+        You need to connect a wallet to create a Safe account.
+        <div className="mt-4">
+          <ConnectWalletButton fullWidth />
+        </div>
+      </AlertDescription>
     </Alert>
   )
 }

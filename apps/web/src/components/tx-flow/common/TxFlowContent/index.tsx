@@ -1,9 +1,10 @@
 import { TxFlowContext } from '../../TxFlowProvider'
 import { type ReactNode, useContext } from 'react'
-import { Box, Container, Grid2 as Grid, Typography, Button, Paper, useMediaQuery, Stack } from '@mui/material'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import { useTheme } from '@mui/material/styles'
+import { ArrowLeft } from 'lucide-react'
 import classnames from 'classnames'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { useIsBelowMd, useMediaQuery } from '@/hooks/useMediaQuery'
 import { ProgressBar } from '@/components/common/ProgressBar'
 import css from './styles.module.css'
 import TxStatusWidget from '@/components/tx-flow/common/TxStatusWidget'
@@ -37,61 +38,55 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
   } = useContext(TxFlowContext)
   const childrenArray = Array.isArray(children) ? children : [children]
 
-  const smallScreenBreakpoint = 'md'
-  const theme = useTheme()
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down(smallScreenBreakpoint))
-  const isDesktop = useMediaQuery(theme.breakpoints.up('lg'))
+  const isSmallScreen = useIsBelowMd()
+  const isDesktop = useMediaQuery('(min-width:1200px)')
 
   return (
-    <Grid container className={css.container}>
+    <div className={classnames('flex flex-wrap', css.container)}>
       {!isReplacement && !isSmallScreen && (
-        <Grid sx={{ width: 200 }} pt={5}>
+        <div className="w-[200px] pt-10">
           <aside>
-            <Stack gap={3} position="fixed">
+            <div className="fixed flex flex-col gap-6">
               <TxStatusWidget
                 isLastStep={step === childrenArray.length - 1}
                 txSummary={txSummary}
                 isBatch={isBatch}
                 isMessage={isMessage}
               />
-            </Stack>
+            </div>
           </aside>
-        </Grid>
+        </div>
       )}
 
-      <Grid size={{ xs: 12, [smallScreenBreakpoint]: 'grow' }} px={{ [smallScreenBreakpoint]: 5 }}>
-        <Container className={css.contentContainer}>
-          <Grid container spacing={3} justifyContent="center">
+      <div className="w-full flex-grow md:w-auto md:px-10">
+        <div className={classnames('mx-auto w-full max-w-[1200px]', css.contentContainer)}>
+          <div className="flex flex-wrap justify-center gap-6">
             {/* Main content */}
-            <Grid size="grow" sx={{ maxWidth: { [smallScreenBreakpoint]: 672 } }}>
+            <div className="min-w-0 flex-grow md:max-w-[672px]">
               <div className={css.titleWrapper}>
-                <Typography
-                  data-testid="modal-title"
-                  variant="h3"
-                  component="div"
-                  className={css.title}
-                  sx={{ fontWeight: '700' }}
-                >
+                <Typography data-testid="modal-title" variant="h3" className={classnames('font-bold', css.title)}>
                   {title}
                 </Typography>
               </div>
 
-              <Paper
+              <div
                 data-testid="modal-header"
-                className={css.header}
-                sx={{
-                  borderTopLeftRadius: !hideProgress ? '0' : '16px',
-                  borderTopRightRadius: !hideProgress ? '0' : '16px',
-                }}
+                className={classnames(
+                  'overflow-hidden rounded-t-xl border border-b-0 border-border bg-card',
+                  css.header,
+                  {
+                    'rounded-t-2xl': hideProgress,
+                  },
+                )}
               >
                 {!hideProgress && (
-                  <Box className={css.progressBar}>
+                  <div className={css.progressBar}>
                     <ProgressBar value={progress} />
-                  </Box>
+                  </div>
                 )}
 
                 <TxLayoutHeader subtitle={subtitle} icon={icon} hideNonce={hideNonce} fixedNonce={fixedNonce} />
-              </Paper>
+              </div>
 
               <div className={css.step}>
                 {childrenArray[step]}
@@ -99,36 +94,32 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
                 {onPrev && step > 0 && (
                   <Button
                     data-testid="modal-back-btn"
-                    variant={isDesktop ? 'outlined' : 'text'}
+                    variant={isDesktop ? 'outline' : 'ghost'}
                     onClick={onPrev}
                     className={css.backButton}
-                    startIcon={<ArrowBackIcon fontSize="small" />}
                   >
+                    <ArrowLeft className="size-4" />
                     Back
                   </Button>
                 )}
               </div>
-            </Grid>
+            </div>
 
             {/* Sidebar */}
             {!isReplacement && (
-              <Grid
-                size={{ xs: 12, [smallScreenBreakpoint]: 4.5 }}
-                sx={{ width: { lg: 320 } }}
-                className={classnames(css.widget)}
-              >
-                <Box className={css.sticky}>
+              <div className={classnames('w-full md:w-[37.5%] lg:w-[320px]', css.widget)}>
+                <div className={css.sticky}>
                   <SafeShieldWidget />
 
-                  <Box className={css.sidebarSlot}>
+                  <div className={css.sidebarSlot}>
                     <Slot name={SlotName.Sidebar} />
-                  </Box>
-                </Box>
-              </Grid>
+                  </div>
+                </div>
+              </div>
             )}
-          </Grid>
-        </Container>
-      </Grid>
-    </Grid>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

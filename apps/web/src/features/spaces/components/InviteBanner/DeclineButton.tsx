@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { Button } from '@mui/material'
+import { Button } from '@/components/ui/button'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import DeclineInviteDialog from './DeclineInviteDialog'
-import css from './styles.module.css'
 
 type DeclineButtonProps = {
   space: GetSpaceResponse
@@ -23,12 +22,7 @@ const DeclineButton = ({ space }: DeclineButtonProps) => {
 
   return (
     <>
-      <Button
-        className={css.inviteButton}
-        variant="outlined"
-        onClick={handleDeclineInvite}
-        aria-label="Decline invitation"
-      >
+      <Button variant="outline" size="sm" onClick={handleDeclineInvite} aria-label="Decline invitation">
         Decline
       </Button>
       {declineOpen && <DeclineInviteDialog space={space} onClose={handleCloseDeclineDialog} />}

@@ -1,10 +1,12 @@
 import { useEffect } from 'react'
-import { DialogContent, DialogActions, Button, Typography, Box } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
-import WarningAmberIcon from '@mui/icons-material/WarningAmber'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { TriangleAlertIcon } from 'lucide-react'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import NameInput from '@/components/common/NameInput'
+import { cn } from '@/utils/cn'
 import SimilarAddressAlert from './SimilarAddressAlert'
 import type { SimilarAddressInfo } from '../../hooks/useNonPinnedSafeWarning.types'
 
@@ -65,34 +67,31 @@ const AddTrustedSafeDialog = ({
     >
       <FormProvider {...methods}>
         <form onSubmit={onSubmit}>
-          <DialogContent>
+          <div className="p-6">
             {hasSimilarAddress && <SimilarAddressAlert similarAddresses={similarAddresses} />}
 
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
+            <div className="mb-4">
+              <Typography variant="paragraph-small" color="muted" className="mb-2 block">
                 Safe to add
               </Typography>
-              <Box
-                sx={{
-                  p: 2,
-                  bgcolor: 'background.paper',
-                  borderRadius: 1,
-                  border: hasSimilarAddress ? '2px solid' : '1px solid',
-                  borderColor: 'border.light',
-                }}
+              <div
+                className={cn(
+                  'bg-background border-border rounded-md',
+                  hasSimilarAddress ? 'border-2 p-4' : 'border p-4',
+                )}
               >
                 <EthHashInfo address={safeAddress} showCopyButton shortAddress={false} showAvatar avatarSize={32} />
-              </Box>
-            </Box>
+              </div>
+            </div>
 
             {!hasSimilarAddress && (
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              <Typography variant="paragraph-small" color="muted" className="mb-4 block">
                 Review the full address above. Continue only if you recognize this Safe and want to add it to your
                 trusted list.
               </Typography>
             )}
 
-            <Box sx={{ mb: 2 }}>
+            <div className="mb-4">
               <NameInput
                 data-testid="safe-name-input"
                 name="name"
@@ -100,23 +99,18 @@ const AddTrustedSafeDialog = ({
                 placeholder="Enter a name for this Safe"
                 autoFocus
               />
-            </Box>
-          </DialogContent>
+            </div>
+          </div>
 
-          <DialogActions>
-            <Button onClick={onCancel} variant="text">
+          <div className="flex justify-end gap-2 p-6 pt-0">
+            <Button onClick={onCancel} variant="outline">
               Cancel
             </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              data-testid="confirm-add-trusted-safe-button"
-              disabled={!formState.isValid}
-              startIcon={hasSimilarAddress ? <WarningAmberIcon color="warning" /> : undefined}
-            >
+            <Button type="submit" data-testid="confirm-add-trusted-safe-button" disabled={!formState.isValid}>
+              {hasSimilarAddress && <TriangleAlertIcon className="size-4" />}
               {hasSimilarAddress ? 'I understand, add anyway' : 'Confirm'}
             </Button>
-          </DialogActions>
+          </div>
         </form>
       </FormProvider>
     </ModalDialog>

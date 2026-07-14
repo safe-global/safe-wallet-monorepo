@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { useMediaQuery, useTheme } from '@mui/material'
+import { useIsMobile } from '@/hooks/use-mobile'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useRouter } from 'next/router'
 import Disclaimer from '@/components/common/Disclaimer'
@@ -14,8 +14,7 @@ const BlockedAddress = ({
   featureTitle: string
   onClose?: () => void
 }): ReactElement => {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useIsMobile()
   const displayAddress = address && isMobile ? shortenAddress(address) : address
   const router = useRouter()
 

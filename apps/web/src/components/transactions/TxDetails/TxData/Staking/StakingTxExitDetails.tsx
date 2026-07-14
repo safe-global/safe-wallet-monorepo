@@ -1,6 +1,6 @@
 import type { NativeStakingValidatorsExitTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { NativeStakingStatus } from '@safe-global/store/gateway/types'
-import { Box, Link } from '@mui/material'
+import { Link } from '@/components/ui/link'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import StakingStatus from './StakingStatus'
 import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'
@@ -14,7 +14,7 @@ const StakingTxExitDetails = ({ info }: { info: NativeStakingValidatorsExitTrans
   ])
 
   return (
-    <Box pr={5} display="flex" flexDirection="column" gap={1}>
+    <div className="flex flex-col gap-2 pr-10">
       <FieldsGrid title="Exit">
         {info.validators.map((validator: string, index: number) => {
           return (
@@ -30,14 +30,14 @@ const StakingTxExitDetails = ({ info }: { info: NativeStakingValidatorsExitTrans
       <FieldsGrid title="Validator status">
         <StakingStatus status={info.status} />
       </FieldsGrid>
-    </Box>
+    </div>
   )
 }
 
 export const BeaconChainLink = ({ validator, name }: { validator: string; name: string }) => {
   const chainId = useChainId()
   return (
-    <Link variant="body1" target="_blank" href={getBeaconChainLink(chainId, validator)}>
+    <Link target="_blank" rel="noreferrer noopener" href={getBeaconChainLink(chainId, validator)}>
       {name}
     </Link>
   )

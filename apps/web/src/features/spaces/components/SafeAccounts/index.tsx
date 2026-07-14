@@ -1,6 +1,5 @@
 import AddAccountsChooser from '../AddAccountsChooser'
 import EmptySafeAccounts from './EmptySafeAccounts'
-import { Stack } from '@mui/material'
 import { Typography } from '@/components/ui/typography'
 import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
@@ -67,11 +66,11 @@ const SpaceSafeAccounts = () => {
         <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
           Safe accounts
         </Typography>
-        <Stack direction="row" justifyContent="flex-start">
+        <div className="flex flex-row justify-start">
           <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
             <AddAccountsChooser buttonVariant="default" buttonLabel="Manage accounts" entryPoint="safe_accounts" />
           </Track>
-        </Stack>
+        </div>
       </div>
 
       {isSpaceSafesError ? (

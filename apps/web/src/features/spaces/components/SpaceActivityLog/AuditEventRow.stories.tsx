@@ -23,6 +23,7 @@ const buildEvent = (overrides: Partial<SpaceAuditLogEntryDto>): SpaceAuditLogEnt
 })
 
 const meta = {
+  title: 'Features/Spaces/AuditEventRow',
   component: AuditEventRow,
   loaders: [mswLoader],
   parameters: baseSetup.parameters,

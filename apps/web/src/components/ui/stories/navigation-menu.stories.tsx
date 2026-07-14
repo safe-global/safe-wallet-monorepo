@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { ArrowRightIcon } from 'lucide-react'
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -22,7 +23,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div style={{ display: 'block' }}>
       <div style={{ marginBottom: '2rem' }}>
@@ -102,6 +103,105 @@ export const AllVariants: Story = {
                   <NavigationMenuLink>
                     <div className="text-sm">Contact</div>
                   </NavigationMenuLink>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginTop: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Active Link</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(400px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <div style={{ width: '400px' }}>
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuLink active>
+                    <div className="text-sm">Dashboard</div>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationMenuLink>
+                    <div className="text-sm">Settings</div>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginTop: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Link with Icon</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(400px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <div style={{ width: '400px' }}>
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuLink>
+                    <div className="text-sm">Learn more</div>
+                    <ArrowRightIcon />
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginTop: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Disabled Trigger</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(400px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <div style={{ width: '400px' }}>
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger disabled>Products</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div style={{ padding: '1rem', width: '200px' }}>
+                      <NavigationMenuLink>
+                        <div>
+                          <div className="text-sm font-semibold mb-1">Product 1</div>
+                          <div className="text-xs text-muted-foreground">Description</div>
+                        </div>
+                      </NavigationMenuLink>
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>Solutions</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div style={{ padding: '1rem', width: '200px' }}>
+                      <NavigationMenuLink>
+                        <div>
+                          <div className="text-sm font-semibold mb-1">Solution 1</div>
+                          <div className="text-xs text-muted-foreground">Description</div>
+                        </div>
+                      </NavigationMenuLink>
+                    </div>
+                  </NavigationMenuContent>
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>

@@ -4,7 +4,7 @@ import { Value } from '@/components/transactions/TxDetails/TxData/DecodedData/Va
 import { isByte } from '@/utils/transaction-guards'
 import { normalizeTypedData } from '@safe-global/utils/utils/web3'
 import { type TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import classNames from 'classnames'
 import { isAddress } from 'ethers'
@@ -19,13 +19,8 @@ const DecodedTypedObject = ({ displayedType, eip712Msg }: { displayedType: strin
   const { types, message: msg, domain } = eip712Msg
   const findType = (paramName: string) => types[displayedType].find((paramType) => paramType.name === paramName)?.type
   return (
-    <Box>
-      <Typography
-        textTransform="uppercase"
-        fontWeight={700}
-        variant="caption"
-        sx={({ palette }) => ({ color: `${palette.border.main}` })}
-      >
+    <div>
+      <Typography variant="paragraph-mini-bold" className="uppercase text-[var(--color-border-main)]">
         {displayedType}
       </Typography>
 
@@ -40,14 +35,7 @@ const DecodedTypedObject = ({ displayedType, eip712Msg }: { displayedType: strin
         return (
           <TxDataRow key={`${displayedType}_param-${index}`} title={`${param[0]}(${type})`}>
             {isNested ? (
-              <Box
-                className={css.nestedMsg}
-                sx={{
-                  borderRadius: (theme) => `${theme.shape.borderRadius}px`,
-                }}
-              >
-                {paramValueAsString}
-              </Box>
+              <div className={classNames(css.nestedMsg, 'rounded')}>{paramValueAsString}</div>
             ) : isArrayValueParam ? (
               <Value method={displayedType} type={type} value={paramValueAsString} />
             ) : (
@@ -56,7 +44,7 @@ const DecodedTypedObject = ({ displayedType, eip712Msg }: { displayedType: strin
           </TxDataRow>
         )
       })}
-    </Box>
+    </div>
   )
 }
 
@@ -86,16 +74,11 @@ export const DecodedMsg = ({
   }
 
   return (
-    <Box
-      className={classNames(css.container, { [css.scrollable]: isInModal })}
-      sx={{
-        borderRadius: (theme) => `${theme.shape.borderRadius}px`,
-      }}
-    >
+    <div className={classNames(css.container, 'rounded', { [css.scrollable]: isInModal })}>
       <ObservabilityErrorBoundary fallback={<div>Error decoding message</div>}>
         <DecodedTypedObject eip712Msg={normalizedMsg} displayedType={EIP712_DOMAIN_TYPE} />
         <DecodedTypedObject eip712Msg={normalizedMsg} displayedType={normalizedMsg.primaryType} />
       </ObservabilityErrorBoundary>
-    </Box>
+    </div>
   )
 }

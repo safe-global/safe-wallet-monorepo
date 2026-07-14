@@ -1,21 +1,15 @@
-import type { ChangeEvent, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import React, { useState } from 'react'
-import Box from '@mui/material/Box'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import type { SortDirection } from '@mui/material/TableCell'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TablePagination from '@mui/material/TablePagination'
-import TableRow from '@mui/material/TableRow'
-import TableSortLabel from '@mui/material/TableSortLabel'
-import Paper from '@mui/material/Paper'
-import { visuallyHidden } from '@mui/utils'
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from 'lucide-react'
 import classNames from 'classnames'
 
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
+import { Typography } from '@/components/ui/typography'
 import css from './styles.module.css'
-import { Collapse, Typography } from '@mui/material'
+
+type SortDirection = 'asc' | 'desc'
 
 type EnhancedCell = {
   content: ReactNode
@@ -68,7 +62,7 @@ function getComparator(order: SortDirection, orderBy: string) {
 type EnhancedTableHeadProps = {
   headCells: EnhancedHeadCell[]
   onRequestSort: (property: string) => void
-  order: 'asc' | 'desc'
+  order: SortDirection
   orderBy: string
 }
 
@@ -79,49 +73,53 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
   }
 
   return (
-    <TableHead>
+    <TableHeader>
       <TableRow>
-        {headCells.map((headCell) => (
-          <TableCell
-            key={headCell.id}
-            align="left"
-            padding="normal"
-            sortDirection={orderBy === headCell.id ? order : false}
-            sx={{
-              width: headCell.width ? headCell.width : '',
-              textAlign: headCell.align ? headCell.align : '',
-            }}
-            className={classNames({ sticky: headCell.sticky })}
-          >
-            {headCell.disableSort ? (
-              <Box component="span" sx={{ fontSize: '14px' }}>
-                {headCell.label}
-              </Box>
-            ) : (
-              <>
-                <TableSortLabel
-                  active={orderBy === headCell.id}
-                  direction={orderBy === headCell.id ? order : 'asc'}
+        {headCells.map((headCell) => {
+          const isActive = orderBy === headCell.id
+          return (
+            <TableHead
+              key={headCell.id}
+              aria-sort={isActive ? (order === 'asc' ? 'ascending' : 'descending') : undefined}
+              style={{
+                width: headCell.width ? headCell.width : undefined,
+                textAlign: headCell.align ? (headCell.align as React.CSSProperties['textAlign']) : undefined,
+              }}
+              className={classNames('text-sm', { sticky: headCell.sticky })}
+            >
+              {headCell.disableSort ? (
+                <span className="text-sm">{headCell.label}</span>
+              ) : (
+                <span
+                  role="button"
+                  tabIndex={0}
                   onClick={createSortHandler(headCell.id)}
-                  sx={{
-                    mr: headCell.id === 'actions' || headCell.disableSort ? 0 : [0, '-26px'],
-                    textWrap: 'nowrap',
-                    fontSize: '14px',
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault()
+                      createSortHandler(headCell.id)()
+                    }
                   }}
+                  className="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
                 >
                   {headCell.label}
-                  {orderBy === headCell.id ? (
-                    <Box component="span" sx={{ ...visuallyHidden }}>
-                      {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                    </Box>
+                  {isActive ? (
+                    order === 'desc' ? (
+                      <ChevronDown className="size-4" aria-hidden />
+                    ) : (
+                      <ChevronUp className="size-4" aria-hidden />
+                    )
                   ) : null}
-                </TableSortLabel>
-              </>
-            )}
-          </TableCell>
-        ))}
+                  {isActive ? (
+                    <span className="sr-only">{order === 'desc' ? 'sorted descending' : 'sorted ascending'}</span>
+                  ) : null}
+                </span>
+              )}
+            </TableHead>
+          )
+        })}
       </TableRow>
-    </TableHead>
+    </TableHeader>
   )
 }
 
@@ -137,7 +135,7 @@ export type EnhancedTableProps = {
 const pageSizes = [10, 25, 100]
 
 function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, footer }: EnhancedTableProps) {
-  const [order, setOrder] = useState<'asc' | 'desc'>('asc')
+  const [order, setOrder] = useState<SortDirection>('asc')
   const [orderBy, setOrderBy] = useState<string>('')
   const [page, setPage] = useState<number>(0)
   const [rowsPerPage, setRowsPerPage] = useState<number>(pageSizes[1])
@@ -148,11 +146,11 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
     setOrderBy(property)
   }
 
-  const handleChangePage = (_: any, newPage: number) => {
+  const handleChangePage = (newPage: number) => {
     setPage(newPage)
   }
 
-  const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10))
     setPage(0)
   }
@@ -161,17 +159,19 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
   const pagedRows = orderedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
   const showPagination = rows.length > pageSizes[0] || rowsPerPage !== pageSizes[1]
 
+  const from = rows.length === 0 ? 0 : page * rowsPerPage + 1
+  const to = Math.min(rows.length, page * rowsPerPage + rowsPerPage)
+  const isFirstPage = page === 0
+  const isLastPage = to >= rows.length
+
   return (
-    <Box sx={{ width: '100%', mb: 2 }}>
-      <TableContainer
+    <div className="mb-4 w-full">
+      <div
         data-testid="table-container"
-        component={Paper}
-        sx={{
-          width: '100%',
-          overflowX: ['auto', 'hidden'],
-          borderBottomLeftRadius: showPagination ? 0 : '24px',
-          borderBottomRightRadius: showPagination ? 0 : '24px',
-        }}
+        className={classNames('w-full overflow-x-auto bg-[var(--color-background-paper)] md:overflow-x-hidden', {
+          'rounded-b-none': showPagination,
+          'rounded-b-3xl': !showPagination,
+        })}
       >
         <Table
           aria-labelledby="tableTitle"
@@ -192,7 +192,7 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
                     data-testid="table-row"
                     tabIndex={-1}
                     key={rowKey}
-                    selected={row.selected}
+                    data-state={row.selected ? 'selected' : undefined}
                     className={row.collapsed ? css.collapsedRow : undefined}
                   >
                     {Object.entries(row.cells).map(([key, cell]) => (
@@ -203,15 +203,15 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
                           [css.collapsedCell]: row.collapsed,
                         })}
                       >
-                        <Collapse in={!row.collapsed} enter={false}>
+                        <div className={classNames('overflow-hidden transition-all', { 'h-0': row.collapsed })}>
                           {cell.mobileLabel ? (
-                            <Typography variant="body2" color="text.secondary" className={css.mobileLabel}>
+                            <Typography variant="paragraph-small" color="muted" className={css.mobileLabel}>
                               {cell.mobileLabel}
                             </Typography>
                           ) : null}
 
                           {cell.content}
-                        </Collapse>
+                        </div>
                       </TableCell>
                     ))}
                   </TableRow>
@@ -225,71 +225,60 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
             )}
           </TableBody>
         </Table>
-      </TableContainer>
+      </div>
 
       {showPagination && (
-        <Box
-          component={Paper}
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderTopLeftRadius: 0,
-            borderTopRightRadius: 0,
-            borderTop: '1px solid',
-            borderColor: 'divider',
-          }}
-        >
-          {footer && (
-            <Box
-              sx={{
-                px: 2,
-                display: 'flex',
-                alignItems: 'center',
-                height: '52px',
-              }}
+        <div className="flex items-center justify-between rounded-b-3xl rounded-t-none border-t border-[var(--color-border-light)] bg-[var(--color-background-paper)]">
+          {footer && <div className="flex h-[52px] items-center px-4">{footer}</div>}
+          <div data-testid="table-pagination" className="flex h-[52px] flex-1 items-center justify-end gap-4 px-4">
+            <Typography variant="paragraph-small" color="muted">
+              Rows per page:
+            </Typography>
+            <NativeSelect
+              size="sm"
+              aria-label="Rows per page"
+              value={rowsPerPage}
+              onChange={handleChangeRowsPerPage}
+              className="text-sm"
             >
-              {footer}
-            </Box>
-          )}
-          <TablePagination
-            data-testid="table-pagination"
-            rowsPerPageOptions={pageSizes}
-            component="div"
-            count={rows.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            sx={{
-              borderTop: 'none',
-              height: '52px',
-              '& .MuiTablePagination-selectLabel': { color: 'text.secondary', fontSize: '14px' },
-              '& .MuiTablePagination-displayedRows': { color: 'primary.light', fontSize: '14px' },
-              '& .MuiTablePagination-select': { color: 'primary.light', fontSize: '14px' },
-              '& .MuiIconButton-root': { color: 'primary.light' },
-            }}
-          />
-        </Box>
+              {pageSizes.map((size) => (
+                <NativeSelectOption key={size} value={size}>
+                  {size}
+                </NativeSelectOption>
+              ))}
+            </NativeSelect>
+            <Typography variant="paragraph-small">
+              {from}–{to} of {rows.length}
+            </Typography>
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Go to previous page"
+                disabled={isFirstPage}
+                onClick={() => handleChangePage(page - 1)}
+              >
+                <ChevronLeft className="size-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Go to next page"
+                disabled={isLastPage}
+                onClick={() => handleChangePage(page + 1)}
+              >
+                <ChevronRight className="size-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
       {!showPagination && footer && (
-        <Box
-          component={Paper}
-          sx={{
-            px: 2,
-            display: 'flex',
-            alignItems: 'center',
-            height: '52px',
-            borderTop: '1px solid',
-            borderColor: 'var(--color-background-main)',
-            borderTopLeftRadius: 0,
-            borderTopRightRadius: 0,
-          }}
-        >
+        <div className="flex h-[52px] items-center rounded-b-3xl rounded-t-none border-t border-[var(--color-background-main)] bg-[var(--color-background-paper)] px-4">
           {footer}
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 

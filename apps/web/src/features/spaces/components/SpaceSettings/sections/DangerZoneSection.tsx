@@ -4,11 +4,11 @@ import { useIsAdmin, useIsActiveMember, useIsLastActiveAdmin } from '@/features/
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/utils/cn'
 import DeleteSpaceDialog from '../DeleteSpaceDialog'
 import LeaveSpaceDialog from '../LeaveSpaceDialog'
+import SpaceSettingsSection, { SpaceSettingsSectionTitle } from '../SpaceSettingsSection'
 
 const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -18,10 +18,8 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
   const isLastActiveAdmin = useIsLastActiveAdmin()
 
   return (
-    <section className="bg-card rounded-2xl p-6 mb-3">
-      <Typography variant="paragraph-bold" className="mb-5 block tracking-tight">
-        Manage workspace
-      </Typography>
+    <SpaceSettingsSection>
+      <SpaceSettingsSectionTitle>Manage workspace</SpaceSettingsSectionTitle>
 
       <div
         className={cn('flex items-center justify-start gap-6 py-4 first:pt-0', isAdmin && 'border-b border-border/60')}
@@ -31,13 +29,7 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
             <TooltipTrigger
               render={
                 <span tabIndex={0}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    data-testid="space-leave-button"
-                    disabled
-                    className="text-destructive"
-                  >
+                  <Button variant="destructive-outline" size="sm" data-testid="space-leave-button" disabled>
                     Leave workspace
                   </Button>
                 </span>
@@ -47,7 +39,7 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
           </Tooltip>
         ) : (
           <Button
-            variant="outline"
+            variant="destructive-outline"
             size="sm"
             data-testid="space-leave-button"
             disabled={!isActiveMember}
@@ -55,7 +47,6 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
               setLeaveOpen(true)
               trackEvent({ ...SPACE_EVENTS.LEAVE_SPACE_MODAL, label: SPACE_LABELS.space_settings })
             }}
-            className="text-destructive"
           >
             Leave workspace
           </Button>
@@ -80,7 +71,7 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
 
       {deleteOpen && <DeleteSpaceDialog space={space} onClose={() => setDeleteOpen(false)} />}
       {leaveOpen && <LeaveSpaceDialog space={space} onClose={() => setLeaveOpen(false)} />}
-    </section>
+    </SpaceSettingsSection>
   )
 }
 

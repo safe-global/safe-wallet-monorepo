@@ -1,6 +1,5 @@
 import type { ReactElement } from 'react'
-import { Grid, Button, Typography } from '@mui/material'
-import { styles } from './constants'
+import { Button } from '@/components/ui/button'
 
 const CookieBannerActions = ({
   onAccept,
@@ -10,21 +9,15 @@ const CookieBannerActions = ({
   onAcceptAll: () => void
 }): ReactElement => {
   return (
-    <Grid container sx={styles.buttonsGrid}>
-      <Grid item>
-        <Typography>
-          <Button onClick={onAccept} variant="text" size="small" color="inherit" disableElevation>
-            Save settings
-          </Button>
-        </Typography>
-      </Grid>
+    <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+      <Button onClick={onAccept} variant="secondary" size="action">
+        Save settings
+      </Button>
 
-      <Grid item>
-        <Button onClick={onAcceptAll} variant="contained" color="secondary" size="small" disableElevation>
-          Accept all
-        </Button>
-      </Grid>
-    </Grid>
+      <Button onClick={onAcceptAll} variant="default" size="action">
+        Accept all
+      </Button>
+    </div>
   )
 }
 

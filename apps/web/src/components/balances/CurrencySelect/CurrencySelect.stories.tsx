@@ -8,7 +8,7 @@ const defaultSetup = createMockStory({
 })
 
 const meta: Meta<typeof CurrencySelect> = {
-  title: 'Components/Base/CurrencySelect',
+  title: 'Components/Balances/CurrencySelect',
   component: CurrencySelect,
   parameters: { layout: 'centered', ...defaultSetup.parameters },
   decorators: [defaultSetup.decorator],

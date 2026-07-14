@@ -3,17 +3,14 @@
   border-bottom-right-radius: 0px;
 }
 
-.error :global .MuiAccordion-root.Mui-expanded {
-  border-color: var(--color-error-light);
+.error :global [data-slot='accordion-item'] {
+  border: 1px solid var(--color-error-light);
+  border-radius: var(--radius-lg);
 }
 
-.error :global .MuiAccordionSummary-root.Mui-expanded {
+.error :global [data-slot='accordion-trigger'][aria-expanded='true'] {
   background-color: var(--color-error-background);
   border-bottom: 1px solid var(--color-error-light);
-}
-
-.error :global .MuiAccordionSummary-expandIconWrapper {
-  margin-left: var(--space-1);
 }
 
 .feeContainer {

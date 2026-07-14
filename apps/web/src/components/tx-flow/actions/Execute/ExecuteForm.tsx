@@ -1,10 +1,12 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext, useState, useEffect } from 'react'
-import { Box, Button, CardActions, DialogActions, DialogContent, Divider, Tooltip } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Separator } from '@/components/ui/separator'
+import { Button } from '@/components/ui/button'
+import ModalDialog from '@/components/common/ModalDialog'
 import classNames from 'classnames'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import ModalDialog from '@/components/common/ModalDialog'
 import { trackError, Errors } from '@/services/exceptions'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -320,35 +322,49 @@ export const ExecuteForm = ({
           chainId={currentChain?.chainId}
           data-testid="relay-indeterminate-dialog"
         >
-          <DialogContent sx={{ mt: 1 }}>
+          <div className="px-6 pt-2 pb-4">
             We couldn&apos;t review this transaction. If you execute and it fails, you&apos;ll still pay the network
             fee. You can run the simulation yourself from the Safe Shield panel before deciding.
-          </DialogContent>
+          </div>
 
-          <DialogActions>
-            <Button data-testid="relay-go-back-btn" onClick={() => setRelaySimError(undefined)}>
+          <div className="flex justify-end gap-2 p-6 pt-2">
+            <Button data-testid="relay-go-back-btn" variant="ghost" onClick={() => setRelaySimError(undefined)}>
               Back
             </Button>
-            <Button
-              data-testid="relay-accept-unverified-btn"
-              variant="contained"
-              disableElevation
-              disabled={isSubmitLoading}
-              onClick={() => submitTx(true)}
-            >
+            <Button data-testid="relay-accept-unverified-btn" disabled={isSubmitLoading} onClick={() => submitTx(true)}>
               Execute anyway
             </Button>
-          </DialogActions>
+          </div>
         </ModalDialog>
 
-        <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
+        <div className="pt-6">
+          <Separator className={commonCss.nestedDivider} />
+        </div>
 
-        <CardActions>
+        <div className="txCardActions">
           {/* Submit button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
-            {(isOk) => (
-              <Tooltip title={tooltip} placement="top">
-                <Box sx={{ minWidth: '112px', width: ['100%', '100%', '100%', 'auto'] }}>
+            {(isOk) =>
+              tooltip ? (
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <div className="w-full lg:w-auto">
+                        <SplitMenuButton
+                          selected={slotId}
+                          onChange={({ id }) => onChange?.(id)}
+                          options={options}
+                          disabled={!isOk || submitDisabled}
+                          loading={isSubmitLoading}
+                          tooltip={tooltip}
+                        />
+                      </div>
+                    }
+                  />
+                  <TooltipContent side="top">{tooltip}</TooltipContent>
+                </Tooltip>
+              ) : (
+                <div className="w-full lg:w-auto">
                   <SplitMenuButton
                     selected={slotId}
                     onChange={({ id }) => onChange?.(id)}
@@ -357,11 +373,11 @@ export const ExecuteForm = ({
                     loading={isSubmitLoading}
                     tooltip={tooltip}
                   />
-                </Box>
-              </Tooltip>
-            )}
+                </div>
+              )
+            }
           </CheckWallet>
-        </CardActions>
+        </div>
       </form>
     </>
   )

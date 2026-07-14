@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react'
-import { IconButton, SvgIcon, Typography } from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
+import { XIcon } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/utils/cn'
 import WalletOutlinedIcon from '@/public/images/common/wallet-outlined.svg'
 import TokenIcon from '@/public/images/common/token.svg'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -25,35 +27,39 @@ const FeeInfoBanner = (): ReactElement | null => {
         <span className={css.newTag}>New</span>
 
         <div className={css.feeInfoBody}>
-          <Typography variant="subtitle2" fontWeight={700}>
-            Pay fees directly from your Safe wallet.
-          </Typography>
+          <Typography variant="paragraph-small-bold">Soon, fees will be paid from your Safe balance.</Typography>
 
           <div className={css.feeInfoBullet}>
             <span className={css.bulletIconWrapper}>
-              <SvgIcon component={WalletOutlinedIcon} inheritViewBox className={css.bulletIcon} />
+              <WalletOutlinedIcon className={css.bulletIcon} />
             </span>
-            <Typography variant="body2">No need to fund signing wallets</Typography>
+            <Typography variant="paragraph-small">No need to fund signing wallets</Typography>
           </div>
 
           <div className={css.feeInfoBullet}>
             <span className={css.bulletIconWrapper}>
-              <SvgIcon component={TokenIcon} inheritViewBox className={css.bulletIcon} />
+              <TokenIcon className={css.bulletIcon} />
             </span>
-            <Typography variant="body2">Pay fees in any supported token</Typography>
+            <Typography variant="paragraph-small">Pay fees in any supported token</Typography>
           </div>
         </div>
 
         <ExternalLink href={LEARN_MORE_URL} noIcon className={css.learnMoreLink}>
-          <Typography variant="body2" fontWeight={700} sx={{ textDecoration: 'underline' }}>
+          <Typography variant="paragraph-small-bold" className="underline">
             Learn more
           </Typography>
         </ExternalLink>
       </div>
 
-      <IconButton size="small" aria-label="close" onClick={() => setDismissed(true)} className={css.feeInfoClose}>
-        <CloseIcon className={css.closeIcon} />
-      </IconButton>
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label="close"
+        onClick={() => setDismissed(true)}
+        className={cn(css.feeInfoClose, 'size-7')}
+      >
+        <XIcon className={css.closeIcon} />
+      </Button>
     </div>
   )
 }

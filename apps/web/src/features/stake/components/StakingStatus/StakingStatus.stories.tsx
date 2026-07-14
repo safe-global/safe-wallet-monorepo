@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Stack } from '@mui/material'
 import { NativeStakingStatus } from '@safe-global/store/gateway/types'
 import StakingStatus from '@/components/transactions/TxDetails/TxData/Staking/StakingStatus'
 
 const meta: Meta<typeof StakingStatus> = {
+  title: 'Features/Stake/StakingStatus',
   component: StakingStatus,
   parameters: {
     layout: 'centered',
@@ -21,14 +21,14 @@ export const NotStaked: Story = {
 }
 
 export const Activating: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     status: NativeStakingStatus.ACTIVATING,
   },
 }
 
 export const DepositInProgress: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     status: NativeStakingStatus.DEPOSIT_IN_PROGRESS,
   },
@@ -41,28 +41,28 @@ export const Active: Story = {
 }
 
 export const ExitRequested: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     status: NativeStakingStatus.EXIT_REQUESTED,
   },
 }
 
 export const Exiting: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     status: NativeStakingStatus.EXITING,
   },
 }
 
 export const Exited: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     status: NativeStakingStatus.EXITED,
   },
 }
 
 export const Slashed: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     status: NativeStakingStatus.SLASHED,
   },
@@ -73,7 +73,7 @@ export const AllStatuses: Story = {
     status: NativeStakingStatus.NOT_STAKED,
   },
   render: () => (
-    <Stack spacing={2}>
+    <div className="flex flex-col gap-4">
       <StakingStatus status={NativeStakingStatus.NOT_STAKED} />
       <StakingStatus status={NativeStakingStatus.ACTIVATING} />
       <StakingStatus status={NativeStakingStatus.DEPOSIT_IN_PROGRESS} />
@@ -82,6 +82,6 @@ export const AllStatuses: Story = {
       <StakingStatus status={NativeStakingStatus.EXITING} />
       <StakingStatus status={NativeStakingStatus.EXITED} />
       <StakingStatus status={NativeStakingStatus.SLASHED} />
-    </Stack>
+    </div>
   ),
 }

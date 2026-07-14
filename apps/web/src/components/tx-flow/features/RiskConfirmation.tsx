@@ -1,7 +1,10 @@
 import { useContext } from 'react'
 import { SlotName, withSlot } from '../slots'
 import { FEATURES } from '@/utils/featureToggled'
-import { Card, Checkbox, FormControlLabel, Typography } from '@mui/material'
+import { Card } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
+import { Typography } from '@/components/ui/typography'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import { SafeTxContext } from '../SafeTxProvider'
@@ -23,17 +26,19 @@ export const RiskConfirmation = () => {
   }
 
   return (
-    <Card sx={{ px: 1 }}>
+    // eslint-disable-next-line no-restricted-syntax -- inset risk banner on the page (main) surface with tight px-2; nested-surface token, pending a `surface` variant
+    <Card size="none" className="bg-[var(--color-background-main)] px-2">
       <Track {...MODALS_EVENTS.ACCEPT_RISK}>
-        <FormControlLabel
+        <Label
+          htmlFor="risk-confirmation"
           data-testid="risk-confirmation-checkbox"
-          label={
-            <Typography variant="body2" data-testid="risk-confirmation-text">
-              I understand the risks and would like to proceed with this {isTransaction ? 'transaction' : 'message'}.
-            </Typography>
-          }
-          control={<Checkbox checked={isRiskConfirmed} onChange={toggleConfirmation} color="primary" />}
-        />
+          className="cursor-pointer gap-3 py-2"
+        >
+          <Checkbox id="risk-confirmation" checked={isRiskConfirmed} onCheckedChange={toggleConfirmation} />
+          <Typography variant="paragraph-small" data-testid="risk-confirmation-text">
+            I understand the risks and would like to proceed with this {isTransaction ? 'transaction' : 'message'}.
+          </Typography>
+        </Label>
       </Track>
     </Card>
   )

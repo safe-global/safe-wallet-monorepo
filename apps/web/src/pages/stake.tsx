@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { BRAND_NAME } from '@/config/constants'
 import { StakeFeature } from '@/features/stake'
 import { useLoadFeature } from '@/features/__core__'
@@ -18,7 +18,7 @@ const StakePage: NextPage = () => {
         <stake.StakePage />
       ) : stake.$isDisabled ? (
         <main>
-          <Typography textAlign="center" my={3}>
+          <Typography align="center" className="my-6">
             Staking is not available on this network.
           </Typography>
         </main>

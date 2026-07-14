@@ -1,9 +1,18 @@
 .container {
   display: flex;
   width: 100%;
+  flex-direction: row;
+  gap: 0;
   overflow-x: auto;
-  background-color: var(--color-background-paper);
-  border-radius: 6px;
+  border-radius: var(--radius-lg);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.containerContrast {
+  box-shadow: none;
+  border-radius: 0;
+  background-color: transparent;
 }
 
 .detailsWrapper {
@@ -37,7 +46,7 @@
 .txNote {
   margin: var(--space-1) 0;
   padding: 0 var(--space-2) var(--space-2);
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--border);
 }
 
 .txNote:empty {
@@ -54,7 +63,7 @@
 }
 
 .txData {
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--border);
 }
 
 .txData:empty {
@@ -71,7 +80,7 @@
   width: 33.3%;
   flex-direction: column;
   padding: var(--space-3);
-  border-left: 1px solid var(--color-border-light);
+  border-left: 1px solid var(--border);
   gap: var(--space-2);
   position: relative;
 }
@@ -82,7 +91,7 @@
 }
 
 .multiSend {
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--border);
 }
 
 .buttons {
@@ -113,7 +122,7 @@
   .txSigners {
     width: 100%;
     border-left: 0;
-    border-top: 1px solid var(--color-border-light);
+    border-top: 1px solid var(--border);
   }
 }
 

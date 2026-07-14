@@ -1,8 +1,8 @@
 import { type ReactElement, type ReactNode, Fragment, useCallback, useContext } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { ArrowUpRight, QrCode, Repeat, SquareDashedBottomCode } from 'lucide-react'
-import { Tooltip } from '@mui/material'
+import { ArrowUpRight, ArrowDownLeft, Repeat, SquareDashedBottomCode } from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
 import Track from '@/components/common/Track'
 import QrCodeButton from '@/components/common/QrCodeButton'
@@ -114,13 +114,14 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
           {(isOk) => {
             const sendDisabled = !isOk || isBlockedCountry || noAssets
             return (
-              <Tooltip title={sendTooltip} arrow placement="top">
-                <span className={cn('inline-flex', { 'cursor-not-allowed': sendDisabled })}>
-                  <Button variant="default" className="px-6" onClick={handleOnSend} disabled={sendDisabled}>
+              <Tooltip>
+                <TooltipTrigger render={<span className={cn('inline-flex', { 'cursor-not-allowed': sendDisabled })} />}>
+                  <Button variant="default" size="action" onClick={handleOnSend} disabled={sendDisabled}>
                     <ArrowUpRight className="size-5 text-green-400" />
                     Send
                   </Button>
-                </span>
+                </TooltipTrigger>
+                {sendTooltip ? <TooltipContent side="top">{sendTooltip}</TooltipContent> : null}
               </Tooltip>
             )
           }}
@@ -128,19 +129,14 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
 
         <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
           {isSpace ? (
-            <Button
-              variant={secondaryVariant}
-              className={cn('px-6 hover:bg-secondary-hover dark:border-border')}
-              onClick={handleOnReceive}
-              disabled={noAssets}
-            >
-              <QrCode className="size-4" />
+            <Button variant={secondaryVariant} size="action" onClick={handleOnReceive} disabled={noAssets}>
+              <ArrowDownLeft className="size-5" />
               Receive
             </Button>
           ) : (
             <QrCodeButton>
-              <Button variant={secondaryVariant} className={cn('px-6 hover:bg-secondary-hover dark:border-border')}>
-                <QrCode className="size-4" />
+              <Button variant={secondaryVariant} size="action">
+                <ArrowDownLeft className="size-5" />
                 Receive
               </Button>
             </QrCodeButton>
@@ -153,12 +149,14 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
               const swapDisabled = !isOk || isBlockedCountry || noAssets
               return (
                 <Track {...SWAP_EVENTS.OPEN_SWAPS} label={SWAP_LABELS.dashboard}>
-                  <Tooltip title={swapTooltip} arrow placement="top">
-                    <span className={cn('inline-flex', { 'cursor-not-allowed': swapDisabled })}>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={<span className={cn('inline-flex', { 'cursor-not-allowed': swapDisabled })} />}
+                    >
                       {isSpace ? (
                         <Button
                           variant={secondaryVariant}
-                          className={cn('px-6 hover:bg-secondary-hover dark:border-border')}
+                          size="action"
                           data-testid="overview-swap-btn"
                           disabled={swapDisabled}
                           onClick={handleOnSwap}
@@ -169,7 +167,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
                       ) : (
                         <Button
                           variant={secondaryVariant}
-                          className={cn('px-6 hover:bg-secondary-hover dark:border-border')}
+                          size="action"
                           data-testid="overview-swap-btn"
                           disabled={swapDisabled}
                           render={
@@ -182,7 +180,8 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
                           Swap
                         </Button>
                       )}
-                    </span>
+                    </TooltipTrigger>
+                    {swapTooltip ? <TooltipContent side="top">{swapTooltip}</TooltipContent> : null}
                   </Tooltip>
                 </Track>
               )
@@ -195,7 +194,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
             const buildTxButton = isSpace ? (
               <Button
                 variant={secondaryVariant}
-                className="px-6 hover:bg-secondary-hover dark:border-border"
+                size="action"
                 disabled={!isOk || noAssets}
                 onClick={handleOnBuildTx}
                 aria-label="Transaction builder"
@@ -206,8 +205,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
             ) : (
               <Button
                 variant={secondaryVariant}
-                size="icon"
-                className="rounded-lg hover:bg-secondary-hover dark:border-border"
+                size="icon-lg"
                 disabled={!isOk}
                 render={isOk ? <Link href={txBuilderLink} /> : undefined}
                 aria-label="Transaction builder"
@@ -221,8 +219,9 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
             }
 
             return (
-              <Tooltip title={TRANSACTION_BUILDER_TOOLTIP} arrow placement="top">
-                <span className="inline-flex">{buildTxButton}</span>
+              <Tooltip>
+                <TooltipTrigger render={<span className="inline-flex" />}>{buildTxButton}</TooltipTrigger>
+                <TooltipContent side="top">{TRANSACTION_BUILDER_TOOLTIP}</TooltipContent>
               </Tooltip>
             )
           }}

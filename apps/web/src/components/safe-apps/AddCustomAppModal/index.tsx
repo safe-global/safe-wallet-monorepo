@@ -1,20 +1,8 @@
 import { useCallback } from 'react'
 import type { SubmitHandler } from 'react-hook-form'
-import { useForm } from 'react-hook-form'
-import {
-  DialogActions,
-  DialogContent,
-  Typography,
-  Button,
-  TextField,
-  FormControlLabel,
-  Checkbox,
-  Box,
-  FormHelperText,
-} from '@mui/material'
-import CheckIcon from '@mui/icons-material/Check'
+import { Controller, useForm } from 'react-hook-form'
+import { Check, Info } from 'lucide-react'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import ModalDialog from '@/components/common/ModalDialog'
 import { isValidURL } from '@safe-global/utils/utils/validation'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -26,6 +14,13 @@ import { isSameUrl, trimTrailingSlash } from '@/utils/url'
 import CustomAppPlaceholder from './CustomAppPlaceholder'
 import CustomApp from './CustomApp'
 import { useShareSafeAppUrl } from '@/components/safe-apps/hooks/useShareSafeAppUrl'
+
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Field, FieldLabel } from '@/components/ui/field'
 
 import css from './styles.module.css'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -55,6 +50,7 @@ export const AddCustomAppModal = ({ open, onClose, onSave, safeAppsList }: Props
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors, isValid },
     watch,
@@ -96,65 +92,53 @@ export const AddCustomAppModal = ({ open, onClose, onSave, safeAppsList }: Props
   return (
     <ModalDialog open={open} onClose={handleClose} dialogTitle="Add custom Safe App">
       <form onSubmit={handleSubmit(onSubmit)}>
-        <DialogContent className={css.addCustomAppContainer}>
+        <div className={css.addCustomAppContainer}>
           <div className={css.addCustomAppFields}>
-            <TextField
-              required
-              label="Safe App URL"
-              error={errors?.appUrl?.type === 'validUrl'}
-              helperText={errors?.appUrl?.type === 'validUrl' && errors?.appUrl?.message}
-              autoComplete="off"
-              {...register('appUrl', {
-                required: true,
-                validate: {
-                  validUrl: (val: string) => (isValidURL(val) ? undefined : INVALID_URL_ERROR),
-                  alreadyExists: (val: string) =>
-                    isAppAlreadyInTheList(val) ? APP_ALREADY_IN_THE_LIST_ERROR : undefined,
-                },
-              })}
-            />
-            <Box
-              sx={{
-                mt: 2,
-              }}
-            >
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="appUrl">Safe App URL</Label>
+              <Input
+                id="appUrl"
+                error={errors?.appUrl?.type === 'validUrl' ? errors?.appUrl?.message : undefined}
+                autoComplete="off"
+                {...register('appUrl', {
+                  required: true,
+                  validate: {
+                    validUrl: (val: string) => (isValidURL(val) ? undefined : INVALID_URL_ERROR),
+                    alreadyExists: (val: string) =>
+                      isAppAlreadyInTheList(val) ? APP_ALREADY_IN_THE_LIST_ERROR : undefined,
+                  },
+                })}
+              />
+            </div>
+            <div className="mt-4">
               {safeApp ? (
                 <>
                   <CustomApp safeApp={safeApp} shareUrl={isCustomAppInTheDefaultList ? shareSafeAppUrl : ''} />
                   {isCustomAppInTheDefaultList ? (
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        mt: 2,
-                        alignItems: 'center',
-                      }}
-                    >
-                      <CheckIcon color="success" />
-                      <Typography
-                        sx={{
-                          ml: 1,
-                        }}
-                      >
-                        This Safe App is already registered
-                      </Typography>
-                    </Box>
+                    <div className="mt-4 flex items-center">
+                      <Check className="text-[var(--color-success-main)]" />
+                      <Typography className="ml-2">This Safe App is already registered</Typography>
+                    </div>
                   ) : (
                     <>
-                      <FormControlLabel
-                        aria-required
-                        control={
-                          <Checkbox
-                            {...register('riskAcknowledgement', {
-                              required: true,
-                            })}
-                          />
-                        }
-                        label={`This Safe App is not part of ${BRAND_NAME} and I agree to use it at my own risk.`}
-                        sx={{ mt: 2 }}
+                      <Controller
+                        control={control}
+                        name="riskAcknowledgement"
+                        rules={{ required: true }}
+                        render={({ field }) => (
+                          <Field orientation="horizontal" className="mt-4">
+                            <Checkbox id="riskAcknowledgement" checked={field.value} onCheckedChange={field.onChange} />
+                            <FieldLabel htmlFor="riskAcknowledgement" className="font-normal">
+                              {`This Safe App is not part of ${BRAND_NAME} and I agree to use it at my own risk.`}
+                            </FieldLabel>
+                          </Field>
+                        )}
                       />
 
                       {errors.riskAcknowledgement && (
-                        <FormHelperText error>Accepting the disclaimer is mandatory</FormHelperText>
+                        <p role="alert" className="mt-1 text-sm text-destructive">
+                          Accepting the disclaimer is mandatory
+                        </p>
                       )}
                     </>
                   )}
@@ -162,31 +146,27 @@ export const AddCustomAppModal = ({ open, onClose, onSave, safeAppsList }: Props
               ) : (
                 <CustomAppPlaceholder error={isValidURL(debouncedUrl) && manifestError ? MANIFEST_ERROR : ''} />
               )}
-            </Box>
+            </div>
           </div>
 
           <div className={css.addCustomAppHelp}>
-            <InfoOutlinedIcon className={css.addCustomAppHelpIcon} />
-            <Typography
-              sx={{
-                ml: 0.5,
-              }}
-            >
-              Learn more about building
-            </Typography>
-            <ExternalLink className={css.addCustomAppHelpLink} href={HELP_LINK} fontWeight={700}>
+            <Info className={css.addCustomAppHelpIcon} />
+            <Typography className="ml-0.5">Learn more about building</Typography>
+            <ExternalLink className={`${css.addCustomAppHelpLink} font-bold`} href={HELP_LINK}>
               Safe Apps
             </ExternalLink>
             .
           </div>
-        </DialogContent>
+        </div>
 
-        <DialogActions disableSpacing>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit" variant="contained" disabled={!isSafeAppValid}>
+        <div className="flex justify-end gap-2 p-6 pt-2">
+          <Button variant="ghost" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={!isSafeAppValid}>
             Add
           </Button>
-        </DialogActions>
+        </div>
       </form>
     </ModalDialog>
   )

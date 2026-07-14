@@ -1,39 +1,39 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { Typography, Table, TableBody, TableRow, TableCell, TableHead, TableContainer, Box } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '@/components/ui/table'
 import ExternalLink from '@/components/common/ExternalLink'
-import Paper from '@mui/material/Paper'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { BRAND_NAME } from '@/config/constants'
 
 const SafeLicenses = () => (
   <>
-    <Typography variant="h1" mb={2}>
+    <Typography variant="h1" className="mb-4">
       Licenses
     </Typography>
-    <Typography variant="h3" mb={2}>
+    <Typography variant="h3" className="mb-4">
       Libraries we use
     </Typography>
-    <Box mb={4}>
-      <Typography mb={3}>
+    <div className="mb-8">
+      <Typography className="mb-6">
         This page contains a list of attribution notices for third party software that may be contained in portions of
         the {BRAND_NAME}. We thank the open source community for all of their contributions.
       </Typography>
-      <Typography variant="h2" mb={2}>
+      <Typography variant="h2" className="mb-4">
         Android
       </Typography>
-      <TableContainer component={Paper}>
+      <div className="bg-card rounded-lg">
         <Table>
-          <TableHead>
+          <TableHeader>
             <TableRow>
-              <TableCell width="30%">
+              <TableHead className="w-[30%]">
                 <strong>Library</strong>
-              </TableCell>
-              <TableCell>
+              </TableHead>
+              <TableHead>
                 <strong>License</strong>
-              </TableCell>
+              </TableHead>
             </TableRow>
-          </TableHead>
+          </TableHeader>
           <TableBody>
             <TableRow>
               <TableCell>AndroidX</TableCell>
@@ -163,24 +163,24 @@ const SafeLicenses = () => (
             </TableRow>
           </TableBody>
         </Table>
-      </TableContainer>
-    </Box>
-    <Box mb={4}>
-      <Typography variant="h2" mb={2}>
+      </div>
+    </div>
+    <div className="mb-8">
+      <Typography variant="h2" className="mb-4">
         iOS
       </Typography>
-      <TableContainer component={Paper}>
+      <div className="bg-card rounded-lg">
         <Table>
-          <TableHead>
+          <TableHeader>
             <TableRow>
-              <TableCell width="30%">
+              <TableHead className="w-[30%]">
                 <strong>Library</strong>
-              </TableCell>
-              <TableCell>
+              </TableHead>
+              <TableHead>
                 <strong>License</strong>
-              </TableCell>
+              </TableHead>
             </TableRow>
-          </TableHead>
+          </TableHeader>
           <TableBody>
             <TableRow>
               <TableCell>BigInt</TableCell>
@@ -262,67 +262,25 @@ const SafeLicenses = () => (
             </TableRow>
           </TableBody>
         </Table>
-      </TableContainer>
-    </Box>
-    <Box>
-      <Typography variant="h2" mb={2}>
+      </div>
+    </div>
+    <div>
+      <Typography variant="h2" className="mb-4">
         Web
       </Typography>
-      <TableContainer component={Paper}>
+      <div className="bg-card rounded-lg">
         <Table>
-          <TableHead>
+          <TableHeader>
             <TableRow>
-              <TableCell width="30%">Library</TableCell>
-              <TableCell>License</TableCell>
+              <TableHead className="w-[30%]">Library</TableHead>
+              <TableHead>License</TableHead>
             </TableRow>
-          </TableHead>
+          </TableHeader>
           <TableBody>
-            <TableRow>
-              <TableCell>@emotion/cache</TableCell>
-              <TableCell>
-                <ExternalLink href="https://github.com/emotion-js/emotion/blob/main/LICENSE" />
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@emotion/react</TableCell>
-              <TableCell>
-                <ExternalLink href="https://github.com/emotion-js/emotion/blob/main/LICENSE" />
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@emotion/server</TableCell>
-              <TableCell>
-                <ExternalLink href="https://github.com/emotion-js/emotion/blob/main/LICENSE" />
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@emotion/styled</TableCell>
-              <TableCell>
-                <ExternalLink href="https://github.com/emotion-js/emotion/blob/main/LICENSE" />
-              </TableCell>
-            </TableRow>
             <TableRow>
               <TableCell>@safe-global/safe-modules-deployments</TableCell>
               <TableCell>
                 <ExternalLink href="https://github.com/safe-global/safe-modules-deployments/blob/main/LICENSE" />
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@mui/icons-material</TableCell>
-              <TableCell>
-                <ExternalLink href="https://github.com/mui/material-ui/blob/master/LICENSE" />
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@mui/material</TableCell>
-              <TableCell>
-                <ExternalLink href="https://github.com/mui/material-ui/blob/master/LICENSE" />
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@mui/x-date-pickers</TableCell>
-              <TableCell>
-                <ExternalLink href="https://github.com/mui/mui-x#mit-vs-commercial-licenses" />
               </TableCell>
             </TableRow>
             <TableRow>
@@ -513,8 +471,8 @@ const SafeLicenses = () => (
             </TableRow>
           </TableBody>
         </Table>
-      </TableContainer>
-    </Box>
+      </div>
+    </div>
   </>
 )
 

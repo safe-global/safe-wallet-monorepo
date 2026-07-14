@@ -1,7 +1,11 @@
 import { CounterfactualFeature } from '@/features/counterfactual'
 import { useLoadFeature } from '@/features/__core__'
 import React, { type ReactElement } from 'react'
-import { Box, Card, Skeleton, Stack, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Card } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
+import { useIsMobile } from '@/hooks/use-mobile'
 import classNames from 'classnames'
 import css from './styles.module.css'
 import EnhancedTable, { type EnhancedTableProps } from '@/components/common/EnhancedTable'
@@ -28,9 +32,9 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
     rawValue: '0x0',
     content: (
       <div className={css.token}>
-        <Skeleton variant="rounded" width="26px" height="26px" />
+        <Skeleton className="h-[26px] w-[26px] rounded-md" />
         <Typography>
-          <Skeleton width="80px" />
+          <Skeleton className="h-4 w-[80px]" />
         </Typography>
       </div>
     ),
@@ -39,7 +43,7 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
     rawValue: '0',
     content: (
       <Typography>
-        <Skeleton width="32px" />
+        <Skeleton className="h-4 w-[32px]" />
       </Typography>
     ),
   },
@@ -47,7 +51,7 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
     rawValue: '0',
     content: (
       <Typography>
-        <Skeleton width="32px" />
+        <Skeleton className="h-4 w-[32px]" />
       </Typography>
     ),
   },
@@ -55,7 +59,7 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
     rawValue: '0',
     content: (
       <Typography>
-        <Skeleton width="32px" />
+        <Skeleton className="h-4 w-[32px]" />
       </Typography>
     ),
   },
@@ -63,7 +67,7 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
     rawValue: '0',
     content: (
       <Typography>
-        <Skeleton width="32px" />
+        <Skeleton className="h-4 w-[32px]" />
       </Typography>
     ),
   },
@@ -71,11 +75,11 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
     rawValue: '',
     sticky: true,
     content: (
-      <Stack direction="row" gap={1} justifyContent="flex-end">
-        <Skeleton variant="rounded" width={28} height={28} />
-        <Skeleton variant="rounded" width={28} height={28} />
-        <Skeleton variant="rounded" width={24} height={24} />
-      </Stack>
+      <div className="flex flex-row justify-end gap-2">
+        <Skeleton className="h-[28px] w-[28px] rounded-md" />
+        <Skeleton className="h-[28px] w-[28px] rounded-md" />
+        <Skeleton className="h-[24px] w-[24px] rounded-md" />
+      </div>
     ),
   },
 }
@@ -107,8 +111,9 @@ const AssetsTable = ({
     {
       id: 'weight',
       label: (
-        <Tooltip title="Based on total portfolio value">
-          <span>Weight</span>
+        <Tooltip>
+          <TooltipTrigger render={<span>Weight</span>} />
+          <TooltipContent>Based on total portfolio value</TooltipContent>
         </Tooltip>
       ),
       width: '16%',
@@ -152,7 +157,7 @@ const AssetsTable = ({
             asset: {
               rawValue: item.tokenInfo.name,
               content: (
-                <Box>
+                <div>
                   <AssetRowContent
                     item={item}
                     chainId={chainId}
@@ -166,13 +171,13 @@ const AssetsTable = ({
                     isSwapFeatureEnabled={isSwapFeatureEnabled ?? false}
                     mobile
                   />
-                </Box>
+                </div>
               ),
             },
             price: {
               rawValue: rawPriceValue,
               content: (
-                <Typography textAlign="right">
+                <Typography className="text-right">
                   <FiatValue value={item.fiatConversion == '0' ? null : item.fiatConversion} />
                 </Typography>
               ),
@@ -188,7 +193,7 @@ const AssetsTable = ({
             weight: {
               rawValue: itemShareOfFiatTotal,
               content: itemShareOfFiatTotal ? (
-                <Typography textAlign="right">{formatPercentage(itemShareOfFiatTotal)}</Typography>
+                <Typography className="text-right">{formatPercentage(itemShareOfFiatTotal)}</Typography>
               ) : (
                 <></>
               ),
@@ -196,16 +201,16 @@ const AssetsTable = ({
             value: {
               rawValue: rawFiatValue,
               content: (
-                <Box textAlign="right">
-                  <Typography>
+                <div className="text-right">
+                  <Typography as="div">
                     <FiatBalance balanceItem={item} />
                   </Typography>
                   {item.fiatBalance24hChange && (
-                    <Typography variant="body2">
+                    <Typography variant="paragraph-small">
                       <FiatChange balanceItem={item} inline />
                     </Typography>
                   )}
-                </Box>
+                </div>
               ),
             },
             actions: {
@@ -226,8 +231,7 @@ const AssetsTable = ({
         }
       })
 
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useIsMobile()
 
   return (
     <>
@@ -242,26 +246,27 @@ const AssetsTable = ({
       {hasNoAssets ? (
         <AddFundsCTA />
       ) : isMobile ? (
-        <Card sx={{ mb: 2, border: '4px solid transparent' }}>
-          <Box className={css.mobileContainer}>
-            <Box className={css.mobileHeader}>
-              <Typography variant="body2" color="text.secondary">
+        // eslint-disable-next-line no-restricted-syntax -- transparent 4px border reserves space for the row hover outline; not a card surface
+        <Card size="none" className="mb-4 border-4 border-transparent">
+          <div className={css.mobileContainer}>
+            <div className={css.mobileHeader}>
+              <Typography variant="paragraph-small" color="muted">
                 Asset
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="paragraph-small" color="muted">
                 Value
               </Typography>
-            </Box>
+            </div>
             {loading
               ? Array(3)
                   .fill(null)
                   .map((_, index) => (
-                    <Box key={index} className={css.mobileRow}>
-                      <Skeleton variant="rounded" width="100%" height={80} />
-                    </Box>
+                    <div key={index} className={css.mobileRow}>
+                      <Skeleton className="h-[80px] w-full rounded-md" />
+                    </div>
                   ))
               : (visibleAssets || []).map((item) => (
-                  <Box key={item.tokenInfo.address} className={css.mobileRow}>
+                  <div key={item.tokenInfo.address} className={css.mobileRow}>
                     <AssetRowContent
                       item={item}
                       chainId={chainId}
@@ -275,15 +280,16 @@ const AssetsTable = ({
                       isSwapFeatureEnabled={isSwapFeatureEnabled ?? false}
                       mobile
                     />
-                  </Box>
+                  </div>
                 ))}
-          </Box>
-          <Box sx={{ pt: 2, pb: 2, px: '16px' }}>
+          </div>
+          <div className="px-4 pt-4 pb-4">
             <HiddenTokensInfo onOpenManageTokens={onOpenManageTokens} />
-          </Box>
+          </div>
         </Card>
       ) : (
-        <Card sx={{ mb: 2, border: '4px solid transparent' }}>
+        // eslint-disable-next-line no-restricted-syntax -- transparent 4px border reserves space for the row hover outline; not a card surface
+        <Card size="none" className="mb-4 border-4 border-transparent">
           <div className={classNames(css.container, { [css.containerWideActions]: showHiddenAssets })}>
             <EnhancedTable
               rows={rows}

@@ -1,10 +1,10 @@
 import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { Dispatch, ReactElement, SetStateAction } from 'react'
-import { Backdrop, Typography, Box, IconButton, Accordion, AccordionDetails, AccordionSummary } from '@mui/material'
-import { ClickAwayListener } from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
+import { X } from 'lucide-react'
 
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import useTxQueue from '@/hooks/useTxQueue'
 import PaginatedTxns from '@/components/common/PaginatedTxns'
 import styles from './styles.module.css'
@@ -38,59 +38,45 @@ const TransactionQueueBar = ({
   const barTitle = `(${queuedTxCount}) Transaction queue`
   return (
     <>
-      <Box className={styles.barWrapper}>
-        <ClickAwayListener onClickAway={() => setExpanded(false)} mouseEvent="onMouseDown" touchEvent="onTouchStart">
-          <Accordion
-            expanded={expanded}
-            onChange={() => setExpanded((prev) => !prev)}
-            TransitionProps={{
-              timeout: {
-                appear: 400,
-                enter: 0,
-                exit: 500,
-              },
-              unmountOnExit: false,
-              mountOnEnter: true,
-            }}
-            sx={{
-              // there are very specific rules for the border radius that we have to override
-              borderBottomLeftRadius: '0 !important',
-              borderBottomRightRadius: '0 !important',
-            }}
-          >
-            <AccordionSummary
-              sx={{ '.MuiAccordionSummary-content': { alignItems: 'center' }, height: TRANSACTION_BAR_HEIGHT }}
+      <div className={styles.barWrapper}>
+        <Accordion
+          value={expanded ? ['queue'] : []}
+          onValueChange={(value) => setExpanded(value.includes('queue'))}
+          className="rounded-bl-none rounded-br-none"
+        >
+          <AccordionItem value="queue" className="relative border-b-0">
+            <AccordionTrigger
+              aria-label="expand transaction queue bar"
+              className="pl-4 pr-12"
+              style={{ height: TRANSACTION_BAR_HEIGHT }}
             >
-              <Typography variant="body1" color="primary.main" fontWeight={700} sx={{ mr: 'auto' }}>
+              <Typography variant="paragraph-bold" className="mr-auto text-[var(--color-primary-main)]">
                 {barTitle}
               </Typography>
-
-              <IconButton
-                onClick={(event) => {
-                  event.stopPropagation()
-                  setExpanded((prev) => !prev)
-                }}
-                aria-label={`${expanded ? 'close' : 'expand'} transaction queue bar`}
-                sx={{ transform: expanded ? 'rotate(180deg)' : undefined }}
-              >
-                <ExpandLessIcon />
-              </IconButton>
-              <IconButton onClick={onDismiss} aria-label="dismiss transaction queue bar">
-                <CloseIcon />
-              </IconButton>
-            </AccordionSummary>
-            <AccordionDetails>
+            </AccordionTrigger>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={onDismiss}
+              aria-label="dismiss transaction queue bar"
+              className="absolute right-2 top-1/2 -translate-y-1/2"
+            >
+              <X />
+            </Button>
+            <AccordionContent keepMounted className="px-4">
               <BatchExecuteHoverProvider>
-                <Box display="flex" flexDirection="column" alignItems="flex-end">
+                <div className="flex flex-col items-end">
                   <BatchExecuteButton />
-                </Box>
+                </div>
                 <PaginatedTxns useTxns={useTxQueue} />
               </BatchExecuteHoverProvider>
-            </AccordionDetails>
-          </Accordion>
-        </ClickAwayListener>
-      </Box>
-      <Backdrop open={expanded} />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
+      {expanded && (
+        <div className="fixed inset-0 z-[var(--z-overlay)] bg-black/50" onClick={() => setExpanded(false)} />
+      )}
     </>
   )
 }

@@ -1,14 +1,5 @@
-import { type SxProps, type Theme } from '@mui/material'
-
-export const safeShieldSvgStyles: SxProps<Theme> = {
-  fontSize: 'medium',
-  '& .shield-img': {
-    fill: 'var(--color-static-text-brand)',
-    transition: 'fill 0.2s ease',
-  },
-  '& .shield-lines': {
-    fill: '#121312 !important', // consistent between dark/light modes
-    stroke: '#121312 !important',
-    transition: 'fill 0.2s ease',
-  },
-}
+export const safeShieldSvgClassName = [
+  'size-6',
+  '[&_.shield-img]:fill-[var(--color-static-text-brand)] [&_.shield-img]:transition-[fill] [&_.shield-img]:duration-200 [&_.shield-img]:ease-in-out',
+  '[&_.shield-lines]:!fill-[#121312] [&_.shield-lines]:!stroke-[#121312] [&_.shield-lines]:transition-[fill] [&_.shield-lines]:duration-200 [&_.shield-lines]:ease-in-out',
+].join(' ')

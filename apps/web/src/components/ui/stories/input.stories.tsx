@@ -20,6 +20,14 @@ const meta = {
     placeholder: {
       control: 'text',
     },
+    inputSize: {
+      control: 'select',
+      options: ['sm', 'default', 'lg', 'xl'],
+    },
+    variant: {
+      control: 'select',
+      options: ['default', 'surface'],
+    },
   },
 } satisfies Meta<typeof Input>
 
@@ -27,7 +35,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div style={{ display: 'block' }}>
       <div style={{ marginBottom: '2rem' }}>
@@ -83,6 +91,34 @@ export const AllVariants: Story = {
           <div style={{ width: '250px' }}>
             <Input type="tel" placeholder="Phone input" />
           </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="mb-1 text-lg font-semibold">Sizes</h3>
+        <p className="mb-4 text-sm text-muted-foreground">
+          Heights mirror <code>SelectTrigger</code> (<code>sm</code> h-8 / <code>default</code> h-9 / <code>lg</code>{' '}
+          h-10), with <code>xl</code> preserving the 66px Safe creation/filter field tier. Prefer <code>inputSize</code>{' '}
+          over a hand-rolled <code>className=&quot;h-…&quot;</code>. (Named <code>inputSize</code>, not{' '}
+          <code>size</code>, to avoid the native numeric <code>size</code> attr.)
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 250px)', gap: '1.5rem', alignItems: 'end' }}>
+          <Input inputSize="sm" placeholder="sm (h-8)" />
+          <Input inputSize="default" placeholder="default (h-9)" />
+          <Input inputSize="lg" placeholder="lg (h-10)" />
+          <Input inputSize="xl" variant="surface" placeholder="xl surface (h-66)" />
+        </div>
+      </div>
+
+      <div style={{ marginTop: '2rem' }}>
+        <h3 className="mb-1 text-lg font-semibold">Skins</h3>
+        <p className="mb-4 text-sm text-muted-foreground">
+          Use <code>variant=&quot;surface&quot;</code> for fields that sit on muted or coloured surfaces and previously
+          set <code>bg-card</code> by hand.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 250px)', gap: '1.5rem', alignItems: 'end' }}>
+          <Input placeholder="default" />
+          <Input variant="surface" placeholder="surface" />
         </div>
       </div>
     </div>

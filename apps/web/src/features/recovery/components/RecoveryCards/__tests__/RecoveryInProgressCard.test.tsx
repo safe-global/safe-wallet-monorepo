@@ -7,6 +7,11 @@ import type { RecoveryQueueItem } from '../../../services/recovery-state'
 
 jest.mock('../../../hooks/useRecoveryTxState')
 
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
+
 const mockUseRecoveryTxState = useRecoveryTxState as jest.MockedFunction<typeof useRecoveryTxState>
 
 describe('RecoveryInProgressCard', () => {
@@ -36,6 +41,7 @@ describe('RecoveryInProgressCard', () => {
       })
 
       expect(queryByText(/Account can be recovered/)).toBeTruthy()
+      expect(queryByText(/Account can be recovered/)?.closest('[data-slot="card"]')).toHaveClass('flex')
       expect(queryByText('Learn more')).toBeTruthy()
 
       const queueButton = queryByText('Go to queue')

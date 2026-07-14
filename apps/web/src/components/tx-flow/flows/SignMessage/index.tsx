@@ -3,7 +3,7 @@ import SignMessage, { type SignMessageProps } from '@/components/tx-flow/flows/S
 import { getSwapTitle } from '@/features/swap'
 import { selectSwapParams } from '@/features/swap/store'
 import { useAppSelector } from '@/store'
-import { Box, SvgIcon, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import { type BaseTransaction } from '@safe-global/safe-apps-sdk'
@@ -20,10 +20,10 @@ const APP_NAME_FALLBACK = 'Sign message'
 /** Inline SVG to support currentColor in dark mode */
 const InlineIcon = ({ name }: { name: string }) => {
   if (name === EARN_TITLE) {
-    return <SvgIcon component={EarnIcon} inheritViewBox sx={{ width: 32, height: 32 }} />
+    return <EarnIcon className="size-8" />
   }
   if (name === STAKE_TITLE) {
-    return <SvgIcon component={StakeIcon} inheritViewBox sx={{ width: 32, height: 32 }} />
+    return <StakeIcon className="size-8" />
   }
   return null
 }
@@ -53,16 +53,16 @@ export const AppTitle = ({
   }
 
   return (
-    <Box display="flex" alignItems="center">
+    <div className="flex items-center">
       {useInlineIcon && name ? (
         <InlineIcon name={name} />
       ) : (
         <SafeAppIconCard src={appLogo} alt={name || 'The icon of the application'} width={32} height={32} />
       )}
-      <Typography variant="h4" pl={2} fontWeight="bold">
+      <Typography variant="h4" className="pl-4 font-bold">
         {title}
       </Typography>
-    </Box>
+    </div>
   )
 }
 

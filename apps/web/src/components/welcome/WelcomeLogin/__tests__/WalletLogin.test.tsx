@@ -113,7 +113,7 @@ describe('WalletLogin', () => {
       const result = render(<WalletLogin onLogin={mockOnLogin} onContinue={mockOnContinue} fullWidth={true} />)
 
       const button = await result.findByRole('button')
-      expect(button).toHaveClass('MuiButton-fullWidth')
+      expect(button).toHaveClass('w-full')
     })
 
     it('should apply fullWidth to connect wallet button', async () => {
@@ -125,7 +125,7 @@ describe('WalletLogin', () => {
       const result = render(<WalletLogin onLogin={mockOnLogin} onContinue={mockOnContinue} fullWidth={true} />)
 
       const button = await result.findByRole('button')
-      expect(button).toHaveClass('MuiButton-fullWidth')
+      expect(button).toHaveClass('w-full')
     })
 
     it('should not apply fullWidth when prop is false', async () => {
@@ -137,7 +137,7 @@ describe('WalletLogin', () => {
       const result = render(<WalletLogin onLogin={mockOnLogin} onContinue={mockOnContinue} fullWidth={false} />)
 
       const button = await result.findByRole('button')
-      expect(button).not.toHaveClass('MuiButton-fullWidth')
+      expect(button).not.toHaveClass('w-full')
     })
 
     it('should not apply fullWidth when prop is not provided', async () => {
@@ -149,7 +149,7 @@ describe('WalletLogin', () => {
       const result = render(<WalletLogin onLogin={mockOnLogin} onContinue={mockOnContinue} />)
 
       const button = await result.findByRole('button')
-      expect(button).not.toHaveClass('MuiButton-fullWidth')
+      expect(button).not.toHaveClass('w-full')
     })
   })
 })

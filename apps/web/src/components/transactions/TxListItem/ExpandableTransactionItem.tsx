@@ -1,6 +1,6 @@
 import type { MultisigTransaction, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Skeleton } from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Skeleton } from '@/components/ui/skeleton'
 import TxSummary from '@/components/transactions/TxSummary'
 import TxDetails from '@/components/transactions/TxDetails'
 import CreateTxInfo from '@/components/transactions/SafeCreationTx'
@@ -10,6 +10,8 @@ import { BatchExecuteHoverContext } from '@/components/transactions/BatchExecute
 import css from './styles.module.css'
 import classNames from 'classnames'
 import { trackEvent, TX_LIST_EVENTS } from '@/services/analytics'
+
+const ITEM_VALUE = 'item'
 
 type ExpandableTransactionItemProps = {
   isConflictGroup?: boolean
@@ -28,65 +30,64 @@ const ExpandableTransactionItem = ({
   const hoverContext = useContext(BatchExecuteHoverContext)
 
   const isBatched = hoverContext.activeHover.includes(item.transaction.id)
+  const isNestedListItem = isBulkGroup || isConflictGroup
 
   return (
     <Accordion
-      disableGutters
-      TransitionProps={{
-        mountOnEnter: true,
-        unmountOnExit: false,
-      }}
-      elevation={0}
-      defaultExpanded={!!txDetails}
-      className={classNames(css.listItem, { [css.batched]: isBatched })}
-      data-testid={testId}
-      onChange={(_, expanded) => {
-        if (expanded) {
+      defaultValue={txDetails ? [ITEM_VALUE] : []}
+      onValueChange={(value) => {
+        if (value.includes(ITEM_VALUE)) {
           trackEvent(TX_LIST_EVENTS.EXPAND_TRANSACTION)
         }
       }}
     >
-      <AccordionSummary
-        expandIcon={<ExpandMoreIcon />}
-        sx={{
-          justifyContent: 'flex-start',
-          overflowX: 'auto',
-          ['.MuiAccordionSummary-content, .MuiAccordionSummary-content.Mui-expanded']: {
-            overflow: 'hidden',
-            margin: 0,
-            padding: '12px 0',
-          },
-        }}
-        component="div"
+      <AccordionItem
+        value={ITEM_VALUE}
+        className={classNames(css.listItem, {
+          [css.listItemNested]: isNestedListItem,
+          [css.batched]: isBatched,
+        })}
+        data-testid={testId}
       >
-        <TxSummary item={item} isConflictGroup={isConflictGroup} isBulkGroup={isBulkGroup} />
-      </AccordionSummary>
+        <AccordionTrigger
+          render={<div role="button" tabIndex={0} />}
+          className="cursor-pointer justify-start overflow-x-auto px-4 py-3 hover:no-underline sm:px-6"
+        >
+          <TxSummary item={item} isConflictGroup={isConflictGroup} isBulkGroup={isBulkGroup} />
+        </AccordionTrigger>
 
-      <AccordionDetails data-testid="accordion-details" sx={{ padding: 0 }}>
-        {isCreationTxInfo(item.transaction.txInfo) ? (
-          <CreateTxInfo txSummary={item.transaction} />
-        ) : (
-          <TxDetails txSummary={item.transaction} txDetails={txDetails} />
-        )}
-      </AccordionDetails>
+        <AccordionContent
+          data-testid="accordion-details"
+          className={classNames('px-4 pb-4 pt-0 sm:px-6', css.accordionContentSurface)}
+        >
+          {isCreationTxInfo(item.transaction.txInfo) ? (
+            <CreateTxInfo txSummary={item.transaction} />
+          ) : (
+            <TxDetails txSummary={item.transaction} txDetails={txDetails} contrastSurface />
+          )}
+        </AccordionContent>
+      </AccordionItem>
     </Accordion>
   )
 }
 
 export const TransactionSkeleton = () => (
   <>
-    <Box pt="20px" pb="4px">
-      <Skeleton variant="text" width="35px" />
-    </Box>
+    <Skeleton className="mt-5 mb-2 h-4 w-40 rounded-sm bg-[var(--color-background-skeleton)]" />
 
-    <Accordion disableGutters elevation={0} defaultExpanded>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ justifyContent: 'flex-start', overflowX: 'auto' }}>
-        <Skeleton width="100%" />
-      </AccordionSummary>
+    <Accordion defaultValue={[ITEM_VALUE]}>
+      <AccordionItem value={ITEM_VALUE} className={css.listItem}>
+        <AccordionTrigger
+          render={<div role="button" tabIndex={0} />}
+          className="cursor-pointer justify-start overflow-x-auto px-4 py-3 hover:no-underline sm:px-6"
+        >
+          <Skeleton className="h-5 w-full rounded-none bg-[var(--color-background-skeleton)]" />
+        </AccordionTrigger>
 
-      <AccordionDetails sx={{ padding: 0 }}>
-        <Skeleton variant="rounded" width="100%" height="325px" />
-      </AccordionDetails>
+        <AccordionContent className={classNames('px-4 pb-4 pt-0 sm:px-6', css.accordionContentSurface)}>
+          <Skeleton className="h-[325px] w-full rounded-md bg-[var(--color-background-skeleton)]" />
+        </AccordionContent>
+      </AccordionItem>
     </Accordion>
   </>
 )

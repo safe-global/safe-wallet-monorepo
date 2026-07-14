@@ -1,7 +1,5 @@
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
 import { useCSVDownloader } from 'react-papaparse'
 import type { SyntheticEvent } from 'react'
 import { useMemo, type ReactElement } from 'react'
@@ -62,7 +60,7 @@ function ExportDialog({
 
   return (
     <ModalDialog open onClose={handleClose} dialogTitle="Export address book" hideChainIndicator>
-      <DialogContent sx={{ p: '24px !important' }}>
+      <div className="p-6">
         <Typography data-testid="export-summary">
           You&apos;re about to export a CSV file with{' '}
           <b>
@@ -71,7 +69,7 @@ function ExportDialog({
           .
         </Typography>
 
-        <Typography mt={1}>
+        <Typography className="mt-2">
           <ExternalLink
             href={HelpCenterArticle.ADDRESS_BOOK_DATA}
             title="Learn about the address book import and export"
@@ -79,16 +77,18 @@ function ExportDialog({
             Learn about the address book import and export
           </ExternalLink>
         </Typography>
-      </DialogContent>
+      </div>
 
-      <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
+      <div className="flex items-center justify-end gap-2 p-2">
+        <Button variant="ghost" onClick={handleClose}>
+          Cancel
+        </Button>
         <CSVDownloader filename={filename} bom config={{ delimiter: ',' }} data={csvData} style={{ order: 2 }}>
-          <Button data-testid="export-modal-btn" variant="contained" disableElevation onClick={onSubmit}>
+          <Button data-testid="export-modal-btn" onClick={onSubmit}>
             Export
           </Button>
         </CSVDownloader>
-      </DialogActions>
+      </div>
     </ModalDialog>
   )
 }

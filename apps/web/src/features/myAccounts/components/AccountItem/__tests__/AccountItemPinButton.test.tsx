@@ -84,8 +84,8 @@ describe('AccountItemPinButton', () => {
       render(<AccountItemPinButton safeItems={safeItems} />)
 
       const iconButton = screen.getByTestId('bookmark-icon')
-      const svgIcon = iconButton.querySelector('.MuiSvgIcon-colorPrimary')
-      expect(svgIcon).toBeInTheDocument()
+      const pinnedIcon = iconButton.querySelector('.text-primary')
+      expect(pinnedIcon).toBeInTheDocument()
     })
 
     it('should stop event propagation when clicked', () => {

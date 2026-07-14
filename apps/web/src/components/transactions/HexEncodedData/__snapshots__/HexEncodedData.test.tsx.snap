@@ -3,40 +3,39 @@
 exports[`HexEncodedData should not cut the text in case the limit option is higher than the provided hexData 1`] = `
 <div>
   <div
-    class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+    class="flex flex-wrap gap-2 xl:flex-nowrap"
   >
     <div
-      class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+      class="break-words min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
       data-testid="tx-row-title"
-      style="word-break: break-word;"
     >
       <span
-        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+        class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)]"
+        data-slot="typography"
+        data-variant="paragraph-small"
       >
         Data (hex-encoded)
       </span>
     </div>
     <div
-      class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+      class="flex-1"
       data-testid="tx-data-row"
     >
       <div
-        class="encodedData MuiBox-root css-0"
+        class="encodedData"
         data-testid="tx-hexData"
       >
         <span
-          aria-label="Copy to clipboard"
-          class=""
-          data-mui-internal-clone-element="true"
-          style="cursor: pointer;"
+          class="inline-flex cursor-pointer"
+          data-slot="tooltip-trigger"
+          id="base-ui-_r_b_"
         >
           <span
             class="monospace"
           >
             <b
-              aria-label="The first 4 bytes determine the contract method that is being called"
-              class=""
-              data-mui-internal-clone-element="true"
+              data-slot="tooltip-trigger"
+              id="base-ui-_r_d_"
             >
               0xed2ad31e
             </b>
@@ -53,32 +52,32 @@ exports[`HexEncodedData should not cut the text in case the limit option is high
 exports[`HexEncodedData should not highlight the data if highlight option is false 1`] = `
 <div>
   <div
-    class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+    class="flex flex-wrap gap-2 xl:flex-nowrap"
   >
     <div
-      class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+      class="break-words min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
       data-testid="tx-row-title"
-      style="word-break: break-word;"
     >
       <span
-        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+        class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)]"
+        data-slot="typography"
+        data-variant="paragraph-small"
       >
         Some arbitrary data
       </span>
     </div>
     <div
-      class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+      class="flex-1"
       data-testid="tx-data-row"
     >
       <div
-        class="encodedData MuiBox-root css-0"
+        class="encodedData"
         data-testid="tx-hexData"
       >
         <span
-          aria-label="Copy to clipboard"
-          class=""
-          data-mui-internal-clone-element="true"
-          style="cursor: pointer;"
+          class="inline-flex cursor-pointer"
+          data-slot="tooltip-trigger"
+          id="base-ui-_r_9_"
         >
           <span
             class="monospace"
@@ -96,40 +95,41 @@ exports[`HexEncodedData should not highlight the data if highlight option is fal
 exports[`HexEncodedData should render the default component markup 1`] = `
 <div>
   <div
-    class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+    class="flex flex-wrap gap-2 xl:flex-nowrap"
   >
     <div
-      class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+      class="break-words min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
       data-testid="tx-row-title"
-      style="word-break: break-word;"
     >
       <span
-        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+        class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)]"
+        data-slot="typography"
+        data-variant="paragraph-small"
       >
         Data (hex-encoded)
       </span>
     </div>
     <div
-      class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+      class="flex-1"
       data-testid="tx-data-row"
     >
       <div
-        class="encodedData MuiBox-root css-0"
+        class="encodedData"
         data-testid="tx-hexData"
       >
         <span
-          aria-label="Copy to clipboard"
-          class=""
-          data-mui-internal-clone-element="true"
-          style="cursor: pointer;"
+          class="inline-flex cursor-pointer"
+          data-popup-open=""
+          data-slot="tooltip-trigger"
+          id="base-ui-_r_1_"
         >
           <span
             class="monospace"
           >
             <b
-              aria-label="The first 4 bytes determine the contract method that is being called"
-              class=""
-              data-mui-internal-clone-element="true"
+              data-popup-open=""
+              data-slot="tooltip-trigger"
+              id="base-ui-_r_3_"
             >
               0xed2ad31e
             </b>
@@ -138,8 +138,10 @@ exports[`HexEncodedData should render the default component markup 1`] = `
           </span>
         </span>
         <button
-          class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways MuiLink-button showMore css-izn2ge-MuiTypography-root-MuiLink-root"
+          class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 text-primary underline decoration-primary/40 hover:decoration-current showMore"
+          data-slot="link"
           data-testid="show-more"
+          data-variant="default"
           type="button"
         >
           Show more

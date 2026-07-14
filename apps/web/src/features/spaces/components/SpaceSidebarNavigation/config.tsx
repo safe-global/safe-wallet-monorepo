@@ -7,9 +7,7 @@ import HomeIcon from '@/public/images/sidebar/home.svg'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import MembersIcon from '@/public/images/sidebar/members.svg'
 import AccountsIcon from '@/public/images/sidebar/wallet.svg'
-import SecurityIcon from '@mui/icons-material/ShieldOutlined'
-import ActivityIcon from '@mui/icons-material/HistoryOutlined'
-import { SvgIcon } from '@mui/material'
+import { History, Shield } from 'lucide-react'
 
 export type DynamicNavItem = {
   label: string
@@ -23,46 +21,46 @@ export type DynamicNavItem = {
 export const navItems: DynamicNavItem[] = [
   {
     label: 'Home',
-    icon: <SvgIcon component={HomeIcon} inheritViewBox />,
+    icon: <HomeIcon />,
     href: AppRoutes.spaces.index,
   },
   {
     label: 'Safe accounts',
-    icon: <SvgIcon component={AccountsIcon} inheritViewBox />,
+    icon: <AccountsIcon />,
     href: AppRoutes.spaces.safeAccounts,
   },
   {
     label: 'Transactions',
-    icon: <SvgIcon component={TransactionIcon} inheritViewBox />,
+    icon: <TransactionIcon />,
     href: '', // TODO: Replace with empty page
     disabled: true,
     tag: <Chip label="Soon" sx={{ backgroundColor: 'background.main', color: 'primary.light' }} />,
   },
   {
     label: 'Members',
-    icon: <SvgIcon component={MembersIcon} inheritViewBox />,
+    icon: <MembersIcon />,
     href: AppRoutes.spaces.members,
   },
   {
     label: 'Address book',
-    icon: <SvgIcon component={ABIcon} inheritViewBox />,
+    icon: <ABIcon />,
     href: AppRoutes.spaces.addressBook,
   },
   {
     label: 'Activity',
-    icon: <ActivityIcon />,
+    icon: <History className="size-5" />,
     href: AppRoutes.spaces.activity,
     activeMemberOnly: true,
   },
   {
     label: 'Security',
-    icon: <SecurityIcon />,
+    icon: <Shield className="size-5" />,
     href: AppRoutes.spaces.security,
     activeMemberOnly: true,
   },
   {
     label: 'Settings',
-    icon: <SvgIcon component={SettingsIcon} inheritViewBox />,
+    icon: <SettingsIcon />,
     href: AppRoutes.spaces.settings,
     activeMemberOnly: true,
   },

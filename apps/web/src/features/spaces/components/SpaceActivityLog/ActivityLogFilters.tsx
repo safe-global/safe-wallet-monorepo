@@ -58,7 +58,9 @@ function DateFilter({
       <Input
         id={id}
         type="date"
-        className="bg-card dark:bg-card border-input w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark] [&~p]:w-40 [&~p]:text-xs"
+        variant="surface"
+        // eslint-disable-next-line no-restricted-syntax -- date filter keeps its 8px radius (rounded-lg) to match the adjacent selects; w-40/color-scheme/[&~p] are layout
+        className="w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark] [&~p]:w-40 [&~p]:text-xs"
         value={value}
         min={min}
         max={max}
@@ -103,7 +105,7 @@ function ActivityLogFilters({
             onFiltersChange({ ...filters, actorUserId: value === ALL_ACTORS ? undefined : Number(value) })
           }
         >
-          <SelectTrigger id="activity-actor-filter" className="bg-card dark:bg-card w-48 cursor-pointer rounded-lg">
+          <SelectTrigger id="activity-actor-filter" variant="surface" className="w-48 cursor-pointer">
             <SelectValue placeholder={ALL_ACTORS_LABEL}>
               <span className="truncate">
                 {selectedActor ? getActorLabel(selectedActor.actorUserId, selectedActor.actor) : ALL_ACTORS_LABEL}
@@ -145,7 +147,7 @@ function ActivityLogFilters({
           value={sortDirection}
           onValueChange={(value) => onFiltersChange({ ...filters, sortDirection: value === 'asc' ? 'asc' : undefined })}
         >
-          <SelectTrigger id="activity-sort-filter" className="bg-card dark:bg-card w-40 cursor-pointer rounded-lg">
+          <SelectTrigger id="activity-sort-filter" variant="surface" className="w-40 cursor-pointer">
             <SelectValue>{SORT_LABELS[sortDirection]}</SelectValue>
           </SelectTrigger>
           <SelectContent alignItemWithTrigger={false} align="start">

@@ -1,44 +1,36 @@
 import React from 'react'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { Skeleton, Stack, Typography, Box, Card, Accordion, AccordionSummary, AccordionDetails } from '@mui/material'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Skeleton } from '@/components/ui/skeleton'
 import EnhancedTable, { type EnhancedTableProps } from '@/components/common/EnhancedTable'
 
 const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   name: {
     rawValue: '0x0',
     content: (
-      <Stack direction="row" alignItems="center" gap={1}>
-        <Skeleton variant="rounded" width="32px" height="32px" />
-        <Box>
-          <Typography>
-            <Skeleton width="100px" />
-          </Typography>
-          <Typography variant="body2">
-            <Skeleton width="80px" />
-          </Typography>
-        </Box>
-      </Stack>
+      <div className="flex items-center gap-2">
+        <Skeleton className="size-8 rounded-md" />
+        <div>
+          <Skeleton className="h-6 w-[100px]" />
+          <Skeleton className="h-5 w-[80px]" />
+        </div>
+      </div>
     ),
   },
   balance: {
     rawValue: '0',
     content: (
-      <Typography textAlign="right">
-        <Skeleton width="60px" />
-      </Typography>
+      <div className="text-right">
+        <Skeleton className="ml-auto h-6 w-[60px]" />
+      </div>
     ),
   },
   value: {
     rawValue: '0',
     content: (
-      <Box textAlign="right">
-        <Typography>
-          <Skeleton width="50px" />
-        </Typography>
-        <Typography variant="caption">
-          <Skeleton width="40px" />
-        </Typography>
-      </Box>
+      <div className="text-right">
+        <Skeleton className="ml-auto h-6 w-[50px]" />
+        <Skeleton className="ml-auto h-4 w-[40px]" />
+      </div>
     ),
   },
 }
@@ -47,48 +39,37 @@ const skeletonRows: EnhancedTableProps['rows'] = Array(3).fill({ cells: skeleton
 
 const PositionsSkeleton = () => {
   return (
-    <Stack gap={2}>
-      <Card sx={{ border: 0 }}>
-        <Accordion disableGutters elevation={0} variant="elevation" defaultExpanded>
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon fontSize="small" />}
-            sx={{
-              justifyContent: 'center',
-              overflowX: 'auto',
-              backgroundColor: 'transparent !important',
-            }}
-          >
-            <Stack direction="row" alignItems="center" gap={2} width="100%">
-              <Skeleton variant="rounded" width="40px" height="40px" />
-              <Box flex={1}>
-                <Typography>
-                  <Skeleton width="120px" />
-                </Typography>
-                <Typography variant="body2">
-                  <Skeleton width="80px" />
-                </Typography>
-              </Box>
-              <Typography>
-                <Skeleton width="60px" />
-              </Typography>
-            </Stack>
-          </AccordionSummary>
-          <AccordionDetails sx={{ pt: 0 }}>
-            <Box>
-              <EnhancedTable
-                rows={skeletonRows}
-                headCells={[
-                  { id: 'name', label: 'Loading...', width: '25%', disableSort: true },
-                  { id: 'balance', label: 'Balance', width: '35%', align: 'right', disableSort: true },
-                  { id: 'value', label: 'Value', width: '40%', align: 'right', disableSort: true },
-                ]}
-                compact
-              />
-            </Box>
-          </AccordionDetails>
+    <div className="flex flex-col gap-4">
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
+        <Accordion defaultValue={['skeleton']}>
+          <AccordionItem value="skeleton" className="border-b-0">
+            <AccordionTrigger className="overflow-x-auto px-6 py-4">
+              <div className="flex w-full items-center gap-4">
+                <Skeleton className="size-10 rounded-md" />
+                <div className="flex-1">
+                  <Skeleton className="h-6 w-[120px]" />
+                  <Skeleton className="h-5 w-[80px]" />
+                </div>
+                <Skeleton className="h-6 w-[60px]" />
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-6 pb-4 pt-0">
+              <div>
+                <EnhancedTable
+                  rows={skeletonRows}
+                  headCells={[
+                    { id: 'name', label: 'Loading...', width: '25%', disableSort: true },
+                    { id: 'balance', label: 'Balance', width: '35%', align: 'right', disableSort: true },
+                    { id: 'value', label: 'Value', width: '40%', align: 'right', disableSort: true },
+                  ]}
+                  compact
+                />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
         </Accordion>
-      </Card>
-    </Stack>
+      </div>
+    </div>
   )
 }
 

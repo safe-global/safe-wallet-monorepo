@@ -1,5 +1,5 @@
-import React, { act } from 'react'
-import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
+import { act } from 'react'
+import { renderWithUserEvent, screen, fireEvent, waitFor } from '@/tests/test-utils'
 import { trackEvent } from '@/services/analytics'
 import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -15,6 +15,8 @@ jest.mock('@/services/analytics', () => ({
   },
 }))
 
+jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
+
 const mockLaunchFunction = jest.fn().mockImplementation(() => ({
   unwrap: jest.fn().mockResolvedValue({ id: 'test-job-id', status: 'SUBMITTED' }),
 }))
@@ -24,7 +26,12 @@ const onExport = jest.fn()
 
 describe('CsvTxExportModal', () => {
   const renderComponent = (hasActiveFilter: boolean = false) =>
-    render(<CsvTxExportModal onClose={onClose} onExport={onExport} hasActiveFilter={hasActiveFilter} />)
+    renderWithUserEvent(<CsvTxExportModal onClose={onClose} onExport={onExport} hasActiveFilter={hasActiveFilter} />)
+
+  const selectRange = async (user: ReturnType<typeof renderComponent>['user'], optionName: string) => {
+    await user.click(screen.getByLabelText('Date range'))
+    await user.click(await screen.findByRole('option', { name: optionName }))
+  }
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -51,20 +58,18 @@ describe('CsvTxExportModal', () => {
     expect(exportBtn).toBeDisabled()
   })
 
-  it('enables export after selecting a preset range', () => {
-    renderComponent()
+  it('enables export after selecting a preset range', async () => {
+    const { user } = renderComponent()
 
-    act(() => fireEvent.mouseDown(screen.getByLabelText('Date range')))
-    act(() => fireEvent.click(screen.getByRole('option', { name: 'Last 30 days' })))
+    await selectRange(user, 'Last 30 days')
 
     expect(screen.getByRole('button', { name: 'Export' })).toBeEnabled()
   })
 
   it('requires both custom dates before enabling export', async () => {
-    renderComponent()
+    const { user } = renderComponent()
 
-    act(() => fireEvent.mouseDown(screen.getByLabelText('Date range')))
-    act(() => fireEvent.click(screen.getByRole('option', { name: 'Custom' })))
+    await selectRange(user, 'Custom')
 
     const exportBtn = screen.getByRole('button', { name: 'Export' })
     expect(exportBtn).toBeDisabled()
@@ -79,10 +84,9 @@ describe('CsvTxExportModal', () => {
   })
 
   it('validates from/to date order', async () => {
-    renderComponent()
+    const { user } = renderComponent()
 
-    act(() => fireEvent.mouseDown(screen.getByLabelText('Date range')))
-    act(() => fireEvent.click(screen.getByRole('option', { name: 'Custom' })))
+    await selectRange(user, 'Custom')
 
     await act(async () => {
       fireEvent.change(screen.getByLabelText('From'), { target: { value: '02/02/2023' } })
@@ -90,17 +94,16 @@ describe('CsvTxExportModal', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByLabelText('Must be before "To" date')).toBeInTheDocument()
-      expect(screen.getByLabelText('Must be after "From" date')).toBeInTheDocument()
+      expect(screen.getByText('Must be before "To" date')).toBeInTheDocument()
+      expect(screen.getByText('Must be after "From" date')).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Export' })).toBeDisabled()
     })
   })
 
   it('limits custom date range to 12 months', async () => {
-    renderComponent()
+    const { user } = renderComponent()
 
-    act(() => fireEvent.mouseDown(screen.getByLabelText('Date range')))
-    act(() => fireEvent.click(screen.getByRole('option', { name: 'Custom' })))
+    await selectRange(user, 'Custom')
 
     expect(screen.getByText('You can select up to 12 months.')).toBeInTheDocument()
 
@@ -123,10 +126,9 @@ describe('CsvTxExportModal', () => {
   })
 
   it('should track CSV_EXPORT_SUBMITTED event with DATE_RANGE parameter when form is submitted', async () => {
-    renderComponent()
+    const { user } = renderComponent()
 
-    act(() => fireEvent.mouseDown(screen.getByLabelText('Date range')))
-    act(() => fireEvent.click(screen.getByRole('option', { name: 'Last 30 days' })))
+    await selectRange(user, 'Last 30 days')
 
     const exportBtn = screen.getByRole('button', { name: 'Export' })
     await act(async () => fireEvent.click(exportBtn))

@@ -3,6 +3,7 @@ import { screen, fireEvent } from '@testing-library/react'
 import { act, render } from '@/tests/test-utils'
 import '@testing-library/jest-dom'
 import TxFilterForm from './index'
+import { TxFilterType } from '@/utils/tx-history-filter'
 import { useRouter } from 'next/router'
 
 jest.mock('next/router', () => ({
@@ -29,6 +30,14 @@ describe('TxFilterForm Component Tests', () => {
 
   const renderComponent = () => render(<TxFilterForm onClose={onClose} />)
 
+  it('renders all transaction type options', () => {
+    renderComponent()
+
+    Object.values(TxFilterType).forEach((type) => {
+      expect(screen.getByLabelText(type)).toBeInTheDocument()
+    })
+  })
+
   it('Verify that when an end date is behind a start date, there are validation rules applied', async () => {
     renderComponent()
 
@@ -46,7 +55,7 @@ describe('TxFilterForm Component Tests', () => {
     expect(fromDateInput).toHaveValue(fromDate)
     expect(toDateInput).toHaveValue(toDate)
 
-    expect(await screen.findByText(errorMsgEndDate, { selector: 'label' })).toBeInTheDocument()
+    expect(await screen.findByText(errorMsgEndDate)).toBeInTheDocument()
 
     await act(async () => {
       fireEvent.change(fromDateInput, { target: { value: '' } })
@@ -58,7 +67,7 @@ describe('TxFilterForm Component Tests', () => {
     expect(toDateInput).toHaveValue(toDate)
     expect(fromDateInput).toHaveValue(fromDate)
 
-    expect(await screen.findByText(errorMsgStartDate, { selector: 'label' })).toBeInTheDocument()
+    expect(await screen.findByText(errorMsgStartDate)).toBeInTheDocument()
   })
 
   it('Verify there is error when start and end date contain far future dates', async () => {
@@ -75,14 +84,14 @@ describe('TxFilterForm Component Tests', () => {
       fireEvent.change(toDateInput, { target: { value: futureDate } })
     })
 
-    expect(await screen.findByText(errorMsgFutureDate, { selector: 'label' })).toBeInTheDocument()
+    expect(await screen.findByText(errorMsgFutureDate)).toBeInTheDocument()
 
     await act(async () => {
       fireEvent.change(fromDateInput, { target: { value: futureDate } })
       fireEvent.change(toDateInput, { target: { value: toDate } })
     })
 
-    expect(await screen.findByText(errorMsgFutureDate, { selector: 'label' })).toBeInTheDocument()
+    expect(await screen.findByText(errorMsgFutureDate)).toBeInTheDocument()
   })
 
   it('Verify that when entering invalid characters in token filed shows an error message', async () => {
@@ -90,7 +99,7 @@ describe('TxFilterForm Component Tests', () => {
 
     const token = '694urt5'
 
-    const tokenInput = screen.getByTestId('token-input').querySelector('input') as HTMLInputElement
+    const tokenInput = screen.getByTestId('token-input') as HTMLInputElement
 
     expect(tokenInput).toBeInTheDocument()
 
@@ -105,7 +114,7 @@ describe('TxFilterForm Component Tests', () => {
     renderComponent()
 
     const errorMsgZero = 'The value must be greater than 0'
-    const amountInput = screen.getByTestId('amount-input').querySelector('input') as HTMLInputElement
+    const amountInput = screen.getByTestId('amount-input') as HTMLInputElement
 
     expect(amountInput).toBeInTheDocument()
 
@@ -119,7 +128,7 @@ describe('TxFilterForm Component Tests', () => {
   it('Verify that entering negative numbers and a non-numeric value in the amount filter is not allowed', async () => {
     renderComponent()
 
-    const amountInput = screen.getByTestId('amount-input').querySelector('input') as HTMLInputElement
+    const amountInput = screen.getByTestId('amount-input') as HTMLInputElement
 
     expect(amountInput).toBeInTheDocument()
 
@@ -139,7 +148,7 @@ describe('TxFilterForm Component Tests', () => {
     const outgoingRadio = screen.getByLabelText('Outgoing')
     fireEvent.click(outgoingRadio)
 
-    const nonceInput = screen.getByTestId('nonce-input').querySelector('input') as HTMLInputElement
+    const nonceInput = screen.getByTestId('nonce-input') as HTMLInputElement
 
     expect(nonceInput).toBeInTheDocument()
 
@@ -159,7 +168,7 @@ describe('TxFilterForm Component Tests', () => {
     const outgoingRadio = screen.getByLabelText('Module-based')
     fireEvent.click(outgoingRadio)
 
-    const addressInput = screen.getByTestId('address-item').querySelector('input') as HTMLInputElement
+    const addressInput = screen.getByLabelText('Module') as HTMLInputElement
 
     expect(addressInput).toBeInTheDocument()
 

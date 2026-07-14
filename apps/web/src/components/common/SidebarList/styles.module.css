@@ -8,32 +8,35 @@
   margin-right: var(--space-2);
 }
 
+.icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.icon svg path {
+  fill: var(--color-logo-main);
+}
+
 .listItemButton {
   border-radius: 6px;
   padding-top: var(--space-1);
   padding-bottom: var(--space-1);
-}
-
-.listItemButton :global .MuiListItemText-root {
-  margin: 0;
-}
-
-.list :global .MuiListItemButton-root {
   color: var(--color-text-primary);
+  cursor: pointer;
 }
 
-[data-theme='dark'] .list :global .Mui-selected {
-  background-color: var(--color-border-light);
-}
-
-.list :global .MuiListItemButton-root:hover {
+.listItemButton:hover {
   border-radius: 6px;
   background-color: var(--color-background-light);
 }
 
-.list :global .Mui-selected {
+.listItemButton[data-selected] {
   border-radius: 6px;
   background-color: var(--color-background-main);
+}
+
+[data-theme='dark'] .listItemButton[data-selected] {
+  background-color: var(--color-border-light);
 }
 
 .listItemButton :global .beamer_icon.active {

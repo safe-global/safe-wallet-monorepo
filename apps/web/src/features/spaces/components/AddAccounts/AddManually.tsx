@@ -1,14 +1,13 @@
 import AddressInput from '@/components/common/AddressInput'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import ModalDialog from '@/components/common/ModalDialog'
-import networkSelectorCss from '@/components/common/NetworkSelector/styles.module.css'
 import chains from '@safe-global/utils/config/chains'
 import css from './styles.module.css'
 import useChains from '@/hooks/useChains'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { Button, DialogActions, DialogContent, MenuItem, Select, Stack, Box } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import React, { useCallback, useState } from 'react'
+import React, { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
@@ -20,7 +19,7 @@ export type AddManuallyFormValues = {
 
 const AddManually = ({
   handleAddSafe,
-  disabled = false,
+  disabled,
 }: {
   handleAddSafe: (data: AddManuallyFormValues) => void
   disabled?: boolean
@@ -37,7 +36,7 @@ const AddManually = ({
     },
   })
 
-  const { handleSubmit, watch, register, reset, formState } = formMethods
+  const { handleSubmit, watch, setValue, reset, formState } = formMethods
 
   const chainId = watch('chainId')
   const selectedChain = configs.find((chain) => chain.chainId === chainId)
@@ -64,40 +63,13 @@ const AddManually = ({
     }
   }
 
-  const renderMenuItem = useCallback(
-    (chainId: string, isSelected: boolean) => {
-      const chain = configs.find((chain) => chain.chainId === chainId)
-      if (!chain) return null
-
-      return (
-        <MenuItem
-          data-testid="network-item"
-          key={chainId}
-          value={chainId}
-          sx={{ '&:hover': { backgroundColor: isSelected ? 'transparent' : 'inherit' } }}
-          disableRipple={isSelected}
-        >
-          <ChainIndicator chainId={chainId} />
-        </MenuItem>
-      )
-    },
-    [configs],
-  )
-
-  const chainIdField = register('chainId')
-
   return (
     <>
-      <Button
-        data-testid="add-manually-button"
-        size="medium"
-        fullWidth
-        disabled={disabled}
-        onClick={() => setAddManuallyOpen(true)}
-        sx={{ borderRadius: 'var(--radius-md)' }}
-      >
-        + Add manually
-      </Button>
+      <div className="flex justify-center">
+        <Button data-testid="add-manually-button" disabled={disabled} onClick={() => setAddManuallyOpen(true)}>
+          + Add manually
+        </Button>
+      </div>
       <ModalDialog
         open={addManuallyOpen}
         dialogTitle="Add safe account"
@@ -112,8 +84,8 @@ const AddManually = ({
               return onSubmit(e)
             }}
           >
-            <DialogContent>
-              <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+            <div className="px-6 py-4">
+              <div className="flex flex-col gap-4 md:flex-row">
                 <AddressInput
                   data-testid="add-address-input"
                   label="Safe account"
@@ -122,37 +94,36 @@ const AddManually = ({
                   name="address"
                   deps={chainId}
                 />
-                <Box data-testid="network-selector" className={css.selectWrapper}>
+                <div data-testid="network-selector" className={css.selectWrapper}>
                   <Select
-                    {...chainIdField}
                     value={chainId}
-                    size="small"
-                    className={networkSelectorCss.select}
-                    variant="standard"
-                    sx={{ width: '100%' }}
-                    IconComponent={ExpandMoreIcon}
-                    renderValue={(value) => renderMenuItem(value, true)}
-                    MenuProps={{
-                      transitionDuration: 0,
-                      slotProps: { paper: { sx: { overflow: 'auto' } } },
+                    onValueChange={(value) => {
+                      if (value) setValue('chainId', value, { shouldValidate: true })
                     }}
                   >
-                    {configs.map((chain) => renderMenuItem(chain.chainId, false))}
+                    {/* eslint-disable-next-line no-restricted-syntax -- h-full/w-full fill the row cell (layout); skin is variant="ghost" */}
+                    <SelectTrigger variant="ghost" className="h-full w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {configs.map((chain) => (
+                        <SelectItem data-testid="network-item" key={chain.chainId} value={chain.chainId}>
+                          <ChainIndicator chainId={chain.chainId} />
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
-                </Box>
-              </Stack>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={onClose}>Cancel</Button>
-              <Button
-                data-testid="add-space-account-manually-button"
-                variant="contained"
-                disabled={!formState.isValid}
-                type="submit"
-              >
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 px-6 py-4">
+              <Button variant="ghost" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button data-testid="add-space-account-manually-button" disabled={!formState.isValid} type="submit">
                 Add
               </Button>
-            </DialogActions>
+            </div>
           </form>
         </FormProvider>
       </ModalDialog>

@@ -1,6 +1,7 @@
 import { type ReactElement, type ReactNode, useMemo, useState, useEffect, useRef } from 'react'
-import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import { ChevronDown } from 'lucide-react'
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
+import { Typography } from '@/components/ui/typography'
 import {
   ContractStatus,
   type GroupedAnalysisResults,
@@ -77,10 +78,11 @@ export const AnalysisGroupCard = ({
   }
 
   return (
-    <Box
+    <Collapsible
+      open={isOpen}
       data-testid={dataTestId}
-      sx={{
-        overflow: 'hidden',
+      className="overflow-hidden"
+      style={{
         opacity: isVisible ? 1 : 0,
         maxHeight: isVisible ? 1000 : 0, // Replace 'fit-content' with a large px value for animatable maxHeight
         transition: `opacity 0.6s ease-in-out, max-height 0.6s ease-in-out`,
@@ -88,38 +90,23 @@ export const AnalysisGroupCard = ({
       }}
     >
       {/* Card header - always visible */}
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{ padding: '12px', cursor: 'pointer' }}
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <Stack direction="row" alignItems="center" gap={1}>
+      <div className="flex cursor-pointer flex-row items-center justify-between p-3" onClick={() => setIsOpen(!isOpen)}>
+        <div className="flex flex-row items-center gap-2">
           <SeverityIcon severity={primaryResult.severity} muted={!isHighlighted} />
-          <Typography variant="body2" color="primary.light">
+          <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
             {primaryResult.title}
           </Typography>
-        </Stack>
+        </div>
 
-        <IconButton
-          size="small"
-          sx={{
-            width: 16,
-            height: 16,
-            padding: 0,
-            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s',
-          }}
-        >
-          <KeyboardArrowDownIcon sx={{ width: 16, height: 16, color: 'text.secondary' }} />
-        </IconButton>
-      </Stack>
+        <ChevronDown
+          className={`size-4 text-[var(--color-text-secondary)] transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        />
+      </div>
 
       {/* Expanded content */}
-      <Collapse in={isOpen}>
-        <Box sx={{ padding: '4px 12px 16px' }}>
-          <Stack gap={1}>
+      <CollapsibleContent keepMounted>
+        <div className="px-3 pt-1 pb-4">
+          <div className="flex flex-col gap-2">
             {visibleResults.map((result, index) => {
               const isPrimary = index === 0
               const shouldHighlight = isHighlighted && isPrimary && result.severity === primarySeverity
@@ -144,9 +131,9 @@ export const AnalysisGroupCard = ({
             })}
 
             {footer}
-          </Stack>
-        </Box>
-      </Collapse>
-    </Box>
+          </div>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   )
 }

@@ -8,7 +8,7 @@ import { useAllSafesGrouped } from '@/hooks/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
 import { getDeviatingSetups, getSafeSetups } from '../../utils'
-import { Typography, Box } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import ChainIndicator from '@/components/common/ChainIndicator'
@@ -26,13 +26,13 @@ export const ChainIndicatorList = ({ chainIds }: { chainIds: string[] }) => {
       {chainIds.map((chainId, index) => {
         const chain = configs.find((chain) => chain.chainId === chainId)
         return (
-          <Box key={chainId} display="inline-flex" flexWrap="wrap" position="relative" top={5}>
+          <div key={chainId} className="relative top-[5px] inline-flex flex-wrap">
             <ChainIndicator responsive key={chainId} chainId={chainId} showUnknown={false} onlyLogo={true} />
-            <Typography position="relative" mx={0.5} top={2}>
+            <Typography className="relative top-[2px] mx-1">
               {chain && chain.chainName}
               {index === chainIds.length - 1 ? '.' : ','}
             </Typography>
-          </Box>
+          </div>
         )
       })}
     </>

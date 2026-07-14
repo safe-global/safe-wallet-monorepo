@@ -56,6 +56,7 @@
   --accent-success: #16a34a;
   --z-sidebar: 1300;
   --z-overlay: 1400;
+  --z-picker: 1500;
 }
 
 .dark.shadcn-scope,
@@ -77,7 +78,9 @@
   --muted-foreground: #a3a3a3;
   --accent: #12ff8033;
   --accent-foreground: #f5f5f5;
-  --destructive: #9e4042;
+  /* Brand dark error.main (packages/theme dark palette) — the old #9e4042 was sub-AA as text
+     on dark surfaces (alert/badge/button destructive variants). */
+  --destructive: #ff5f72;
   --destructive-foreground: #ffffff;
   --border: #404040;
   --input: #ffffff0d;
@@ -91,13 +94,13 @@
   --sidebar-foreground: #d4d4d4;
   --sidebar-primary: #fafafa;
   --sidebar-primary-foreground: #171717;
-  --sidebar-accent: #171717;
+  --sidebar-accent: #262626;
   --sidebar-accent-foreground: #f5f5f5;
   --sidebar-border: #262626;
   --sidebar-ring: #404040;
   --accent-secondary: #c4fddd;
   --accent-secondary-foreground: #121312;
-  --accent-success: #16a34a;
+  --accent-success: #00b460; /* brand dark success.main */
 }
 
 @theme inline {
@@ -143,6 +146,12 @@
   --color-success-subtle: var(--color-success-background);
   --color-success-muted: var(--color-success-light);
   --color-success-strong: var(--color-success-dark);
+  --color-warning-subtle: var(--color-warning-background);
+  --color-warning-muted: var(--color-warning-light);
+  --color-warning-strong: var(--color-warning-dark);
+  --color-info-subtle: var(--color-info-background);
+  --color-info-muted: var(--color-info-light);
+  --color-info-strong: var(--color-info-dark);
   --radius-2xs: 0.25rem;
   --radius-xs: 0.5rem;
   --radius-sm: 0.5rem;

@@ -1,5 +1,3 @@
-import { List, ListItem, Stack } from '@mui/material'
-
 import { type ApprovalInfo } from '@/components/tx/ApprovalEditor/hooks/useApprovalInfos'
 import css from './styles.module.css'
 import ApprovalItem from '@/components/tx/ApprovalEditor/ApprovalItem'
@@ -11,23 +9,17 @@ const Approvals = ({ approvalInfos }: { approvalInfos: ApprovalInfo[] }) => {
   const groupedApprovals = useMemo(() => groupBy(approvalInfos, (approval) => approval.spender), [approvalInfos])
 
   return (
-    <List className={css.approvalsList}>
+    <ul className={css.approvalsList}>
       {Object.entries(groupedApprovals).map(([spender, approvals]) => (
-        <Stack
-          key={spender}
-          sx={{
-            gap: 2,
-          }}
-        >
+        <div key={spender} className="flex flex-col gap-4">
           <SpenderField address={spender} />
           {approvals.map((tx) => {
             if (!tx.tokenInfo) return <></>
 
             return (
-              <ListItem
+              <li
                 key={tx.tokenAddress + tx.spender}
-                className={BigInt(0) === BigInt(tx.amount) ? css.zeroValueApproval : undefined}
-                disablePadding
+                className={`flex w-full ${BigInt(0) === BigInt(tx.amount) ? css.zeroValueApproval : ''}`}
                 data-testid="approval-item"
               >
                 <ApprovalItem
@@ -37,12 +29,12 @@ const Approvals = ({ approvalInfos }: { approvalInfos: ApprovalInfo[] }) => {
                   rawAmount={tx.amount}
                   tokenInfo={tx.tokenInfo}
                 />
-              </ListItem>
+              </li>
             )
           })}
-        </Stack>
+        </div>
       ))}
-    </List>
+    </ul>
   )
 }
 

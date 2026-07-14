@@ -1,14 +1,11 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import Drawer from '@mui/material/Drawer'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
-import SvgIcon from '@mui/material/SvgIcon'
-import IconButton from '@mui/material/IconButton'
-import Tooltip from '@mui/material/Tooltip'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
+import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { NetworkLogosTooltip } from '@/features/multichain'
 import { getSafeAppUrl } from '@/components/safe-apps/SafeAppCard'
 import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
@@ -46,72 +43,73 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
   }
 
   return (
-    <Drawer anchor="right" open={isOpen} onClose={onClose} sx={{ '& .MuiDrawer-paper': { borderTopRightRadius: '0' } }}>
-      <Box className={css.drawerContainer} sx={{ paddingTop: '20px!important' }}>
-        {/* Toolbar */}
+    <Drawer direction="right" open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      {/* eslint-disable-next-line no-restricted-syntax -- rounded-l-xl/rounded-tr-none: bespoke preview drawer radius, no drawer radius token */}
+      <DrawerContent className="rounded-l-xl rounded-tr-none">
+        <DrawerTitle className="sr-only">{safeApp?.name} preview</DrawerTitle>
+        <div className={`${css.drawerContainer} !pt-5`}>
+          {/* Toolbar */}
 
-        {safeApp && (
-          <Box display="flex" justifyContent="right">
-            <SafeAppActionButtons safeApp={safeApp} isBookmarked={isBookmarked} onBookmarkSafeApp={onBookmark} />
-            <Tooltip title={`Close ${safeApp.name} preview`} placement="top">
-              <IconButton
-                onClick={onClose}
-                size="small"
-                sx={{
-                  color: 'border.main',
-                  ml: 1,
-                }}
-              >
-                <SvgIcon component={CloseIcon} inheritViewBox color="border" fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        )}
+          {safeApp && (
+            <div className="flex justify-end">
+              <SafeAppActionButtons safeApp={safeApp} isBookmarked={isBookmarked} onBookmarkSafeApp={onBookmark} />
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={onClose}
+                      className="ml-2 text-[var(--color-border-main)]"
+                    />
+                  }
+                >
+                  <CloseIcon className="size-4 text-[var(--color-border-main)]" />
+                </TooltipTrigger>
+                <TooltipContent>{`Close ${safeApp.name} preview`}</TooltipContent>
+              </Tooltip>
+            </div>
+          )}
 
-        {/* Safe App Info */}
-        <Box sx={{ px: 1 }}>
-          <SafeAppIconCard src={safeApp?.iconUrl} alt={`${safeApp?.name} logo`} width={90} height={90} />
-        </Box>
+          {/* Safe App Info */}
+          <div className="px-2">
+            <SafeAppIconCard src={safeApp?.iconUrl} alt={`${safeApp?.name} logo`} width={90} height={90} />
+          </div>
 
-        <Typography variant="h4" fontWeight={700} sx={{ mt: 2 }}>
-          {safeApp?.name}
-        </Typography>
+          <Typography variant="h4" className="mt-4">
+            {safeApp?.name}
+          </Typography>
 
-        <Typography variant="body2" color="primary.light" sx={{ mt: 2 }}>
-          {safeApp?.description}
-        </Typography>
+          <Typography variant="paragraph-small" className="block mt-4 text-[var(--color-primary-light)]">
+            {safeApp?.description}
+          </Typography>
 
-        {/* Tags */}
-        <SafeAppTags tags={safeApp?.tags || []} />
+          {/* Tags */}
+          <SafeAppTags tags={safeApp?.tags || []} />
 
-        {/* Networks */}
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-          Available networks
-        </Typography>
+          {/* Networks */}
+          <Typography variant="paragraph-small" className="block mt-4 text-[var(--color-text-secondary)]">
+            Available networks
+          </Typography>
 
-        <Box sx={{ display: 'flex', mt: 2 }}>
-          <NetworkLogosTooltip networks={knownChainIds.map((chainId) => ({ chainId }))} maxVisible={3} />
-        </Box>
+          <div className="mt-4 flex">
+            <NetworkLogosTooltip networks={knownChainIds.map((chainId) => ({ chainId }))} maxVisible={3} />
+          </div>
 
-        {/* Open Safe App button */}
-        <Link href={safeAppUrl} passHref legacyBehavior>
+          {/* Open Safe App button */}
           <Button
             data-testid="open-safe-app-btn"
-            fullWidth
-            variant="contained"
-            color="primary"
-            component="a"
-            href={safeApp?.url}
-            sx={{ mt: 3 }}
+            className="mt-6 w-full"
             onClick={onOpenSafe}
+            render={<Link href={safeAppUrl} />}
           >
             Open Safe App
           </Button>
-        </Link>
 
-        {/* Safe App Social Links */}
-        {safeApp && <SafeAppSocialLinksCard safeApp={safeApp} />}
-      </Box>
+          {/* Safe App Social Links */}
+          {safeApp && <SafeAppSocialLinksCard safeApp={safeApp} />}
+        </div>
+      </DrawerContent>
     </Drawer>
   )
 }

@@ -1,5 +1,5 @@
 import PromoBanner from '@/components/common/PromoBanner/PromoBanner'
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import { ArrowRight as ArrowForwardIcon } from 'lucide-react'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import type { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 import { HYPERNATIVE_EVENTS, HYPERNATIVE_CATEGORY } from '@/services/analytics/events/hypernative'
@@ -39,7 +39,7 @@ export const HnBanner = ({ onHnSignupClick, onDismiss, label }: HnBannerProps) =
       onBannerClick={onHnSignupClick}
       ctaVariant="text"
       onDismiss={onDismiss}
-      endIcon={<ArrowForwardIcon fontSize="small" />}
+      endIcon={<ArrowForwardIcon className="size-4" />}
       customBackground="linear-gradient(90deg, #1c5538 0%, #1c1c1c 54.327%, #1c1c1c 100%)"
       customTitleColor="var(--color-static-primary)"
       customFontColor="var(--color-static-text-secondary)"

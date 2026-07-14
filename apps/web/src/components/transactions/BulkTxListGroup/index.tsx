@@ -1,8 +1,10 @@
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import type { AnyTransactionItem } from '@/utils/tx-list'
 import type { ReactElement } from 'react'
-import { Box, Paper, SvgIcon, Typography } from '@mui/material'
 import { isMultisigExecutionInfo, isSwapTransferOrderTxInfo } from '@/utils/transaction-guards'
+import { Typography } from '@/components/ui/typography'
+import { Card } from '@/components/ui/card'
+import { cn } from '@/utils/cn'
 import ExpandableTransactionItem from '@/components/transactions/TxListItem/ExpandableTransactionItem'
 import BatchIcon from '@/public/images/common/batch.svg'
 import css from './styles.module.css'
@@ -39,32 +41,33 @@ const GroupedTxListItems = ({
     title = getSettlementOrderTitle(groupedListItems[0].transaction.txInfo as OrderTransactionInfo)
   }
   return (
-    <Paper data-testid="grouped-items" className={css.container}>
-      <Box gridArea="icon">
-        <SvgIcon className={css.icon} component={BatchIcon} inheritViewBox fontSize="medium" />
-      </Box>
-      <Box gridArea="info">
-        <Typography noWrap>{title}</Typography>
-      </Box>
-      <Box className={css.action}>{groupedListItems.length} transactions</Box>
-      <Box className={css.hash}>
+    // eslint-disable-next-line no-restricted-syntax -- py-2 tightens the grouped-tx list row; css.container owns the grid layout
+    <Card data-testid="grouped-items" size="none" className={cn(css.container, 'py-2')}>
+      <div style={{ gridArea: 'icon' }}>
+        <BatchIcon className="size-6" />
+      </div>
+      <div style={{ gridArea: 'info' }}>
+        <Typography className="truncate">{title}</Typography>
+      </div>
+      <div className={css.action}>{groupedListItems.length} transactions</div>
+      <div className={css.hash}>
         <ExplorerButton href={explorerLink} isCompact={false} />
-      </Box>
+      </div>
 
-      <Box gridArea="items" className={css.txItems}>
+      <div style={{ gridArea: 'items' }} className={css.txItems}>
         {groupedListItems.map((tx) => {
           const nonce = isMultisigExecutionInfo(tx.transaction.executionInfo) ? tx.transaction.executionInfo.nonce : ''
           return (
-            <Box position="relative" key={tx.transaction.id}>
-              <Box className={css.nonce}>
+            <div className="relative" key={tx.transaction.id}>
+              <div className={css.nonce}>
                 <Typography className={css.nonce}>{nonce}</Typography>
-              </Box>
+              </div>
               <ExpandableTransactionItem item={tx} isBulkGroup={true} />
-            </Box>
+            </div>
           )
         })}
-      </Box>
-    </Paper>
+      </div>
+    </Card>
   )
 }
 

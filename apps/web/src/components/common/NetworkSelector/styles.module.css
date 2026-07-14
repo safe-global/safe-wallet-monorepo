@@ -1,35 +1,24 @@
-.select {
-  height: 100%;
-}
-
-.select:after,
-.select:before {
-  display: none;
-}
-
-.select *:focus-visible {
-  outline: 5px auto Highlight;
-  outline: 5px auto -webkit-focus-ring-color;
-}
-
-.select :global .MuiSelect-select {
-  padding-right: 40px !important;
-  padding-left: 16px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.select :global .MuiSelect-icon {
-  margin-right: var(--space-2);
-}
-
-.select :global .Mui-disabled {
-  pointer-events: none;
-}
-
-.select :global .MuiMenuItem-root {
+.menuItem {
   padding: 0;
+}
+
+.menuItem a {
+  display: flex;
+  width: 100%;
+  padding: 6px 16px;
+}
+
+.undeployedItem {
+  display: flex;
+  width: 100%;
+  padding: 6px 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.undeployedItem:disabled {
+  pointer-events: none;
 }
 
 .listSubHeader {
@@ -42,6 +31,8 @@
   letter-spacing: 1px;
   width: 100%;
   margin-top: var(--space-1);
+  border: none;
+  cursor: pointer;
 }
 
 [data-theme='dark'] .undeployedNetworksHeader {
@@ -75,9 +66,101 @@
 }
 
 .multiChainChip {
-  padding: var(--space-2) 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 4px 8px;
   margin: 2px;
-  border-color: var(--color-border-main);
+  border: 1px solid var(--color-border-main);
+  border-radius: 6px;
+}
+
+.chipDelete {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: var(--color-text-secondary);
+}
+
+.multiSelectWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.multiSelectControl {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 56px;
+  padding: 8px var(--space-2);
+  background-color: var(--color-background-paper);
+  border: 1px solid var(--color-border-light);
+  border-radius: 6px;
+  cursor: text;
+}
+
+.multiSelectError {
+  border-color: var(--color-error-main);
+}
+
+.multiSelectInput {
+  flex: 1;
+  min-width: 60px;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+}
+
+.clearAll {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+  color: var(--color-text-secondary);
+}
+
+.multiSelectList {
+  position: absolute;
+  z-index: var(--z-overlay);
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 4px 0 0;
+  padding: 4px 0;
+  list-style: none;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: var(--color-background-paper);
+  border-radius: 6px;
+  box-shadow: var(--box-shadow-md, 0 2px 10px rgba(0, 0, 0, 0.1));
+}
+
+.multiSelectOption {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.multiSelectOption[aria-disabled='true'] {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.multiSelectOption:hover:not([aria-disabled='true']) {
+  background-color: var(--color-background-light);
 }
 
 .comingSoon {

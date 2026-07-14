@@ -1,4 +1,3 @@
-import { Stack } from '@mui/material'
 import { skipToken } from '@reduxjs/toolkit/query'
 import type { ReactElement } from 'react'
 
@@ -36,9 +35,9 @@ export function _SanctionWrapper({
 
   if (blockedAddress) {
     return (
-      <Stack direction="column" alignItems="center" justifyContent="center" flex={1}>
+      <div className="flex flex-1 flex-col items-center justify-center">
         <BlockedAddress address={blockedAddress} featureTitle={featureTitle} />
-      </Stack>
+      </div>
     )
   }
 

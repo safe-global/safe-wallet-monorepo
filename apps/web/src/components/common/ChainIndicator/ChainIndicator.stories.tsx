@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import ChainIndicator from './index'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
 const meta = {
+  title: 'Components/Common/ChainIndicator',
   component: ChainIndicator,
   parameters: {
     layout: 'centered',
@@ -11,9 +11,9 @@ const meta = {
   decorators: [
     (Story) => (
       <StoreDecorator initialState={{}}>
-        <Paper sx={{ padding: 2 }}>
+        <div className="rounded-lg bg-[var(--color-background-paper)] p-4">
           <Story />
-        </Paper>
+        </div>
       </StoreDecorator>
     ),
   ],
@@ -30,7 +30,7 @@ export const Default: Story = {
 }
 
 export const OnlyLogo: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     chainId: '1',
     onlyLogo: true,
@@ -38,7 +38,7 @@ export const OnlyLogo: Story = {
 }
 
 export const Inline: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     chainId: '1',
     inline: true,
@@ -46,7 +46,7 @@ export const Inline: Story = {
 }
 
 export const WithFiatValue: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     chainId: '1',
     fiatValue: '1234.56',
@@ -54,7 +54,7 @@ export const WithFiatValue: Story = {
 }
 
 export const Responsive: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     chainId: '1',
     responsive: true,
@@ -62,7 +62,7 @@ export const Responsive: Story = {
 }
 
 export const NoLogo: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     chainId: '1',
     showLogo: false,
@@ -77,7 +77,7 @@ export const UnknownChain: Story = {
 }
 
 export const HideUnknown: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     chainId: '999999',
     showUnknown: false,
@@ -85,7 +85,7 @@ export const HideUnknown: Story = {
 }
 
 export const SmallImage: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     chainId: '1',
     imageSize: 16,
@@ -93,7 +93,7 @@ export const SmallImage: Story = {
 }
 
 export const LargeImage: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     chainId: '1',
     imageSize: 36,

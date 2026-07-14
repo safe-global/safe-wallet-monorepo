@@ -1,14 +1,22 @@
 import type { ReactElement } from 'react'
-import { Alert, SvgIcon, Tooltip } from '@mui/material'
-import type { AlertColor } from '@mui/material'
-
-import InfoOutlinedIcon from '@/public/images/notifications/info.svg'
-import css from './styles.module.css'
+import { Info } from 'lucide-react'
+import { Badge, type badgeVariants } from '@/components/ui/badge'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import type { VariantProps } from 'class-variance-authority'
 import ExternalLink from '@/components/common/ExternalLink'
 import { UntrustedFallbackHandlerTxText } from '@/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Operation } from '@safe-global/store/gateway/types'
+
+type WarningSeverity = 'info' | 'success' | 'warning' | 'error'
+
+const severityBadgeVariant: Record<WarningSeverity, NonNullable<VariantProps<typeof badgeVariants>['variant']>> = {
+  info: 'info',
+  success: 'success',
+  warning: 'warning',
+  error: 'destructive',
+}
 
 const Warning = ({
   datatestid,
@@ -16,21 +24,29 @@ const Warning = ({
   text,
   severity,
 }: {
-  datatestid?: String
+  datatestid?: string
   title: string | ReactElement
   text: string
-  severity: AlertColor
+  severity: WarningSeverity
 }): ReactElement => {
   return (
-    <Tooltip data-testid={datatestid} title={title} placement="top-start" arrow>
-      <Alert
-        className={css.alert}
-        sx={{ borderLeft: ({ palette }) => `3px solid ${palette[severity].main} !important`, alignItems: 'center' }}
-        severity={severity}
-        icon={<SvgIcon component={InfoOutlinedIcon} inheritViewBox color={severity} />}
-      >
-        <b>{text}</b>
-      </Alert>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Badge
+            data-testid={datatestid}
+            variant={severityBadgeVariant[severity]}
+            size="lg"
+            className="mb-2 gap-1.5 cursor-default"
+          >
+            <Info className="size-3.5 shrink-0" />
+            {text}
+          </Badge>
+        }
+      />
+      <TooltipContent side="top" align="start">
+        {title}
+      </TooltipContent>
     </Tooltip>
   )
 }

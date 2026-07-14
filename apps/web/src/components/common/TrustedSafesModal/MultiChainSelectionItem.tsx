@@ -1,4 +1,6 @@
 import { useState, type MouseEvent } from 'react'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { useIsMobile } from '@/hooks/use-mobile'
 import classnames from 'classnames'
 import type { SelectableMultiChainSafe } from './useTrustedSafesModal.types'
 import { useMultiAccountItemData, useSafeItemData, AccountItem } from '@/features/myAccounts'
@@ -65,6 +67,7 @@ function MultiChainSubItem({
  * Shows a header with the address and multichain badge, with expandable sub-items for each chain
  */
 const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionItemProps) => {
+  const isMobile = useIsMobile()
   const [expanded, setExpanded] = useState(false)
 
   // Use multiSafe.safes directly as they're already SelectableSafe[]
@@ -78,8 +81,7 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
     onToggle(address)
   }
 
-  const toggleExpand = (e: MouseEvent) => {
-    e.stopPropagation()
+  const toggleExpand = () => {
     setExpanded((prev) => !prev)
   }
 
@@ -87,8 +89,8 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
 
   return (
     <div data-testid="safe-list-item" className={classnames(css.multiListItem, css.listItem, 'my-0.5')}>
-      <div data-testid="multichain-selection-item">
-        <div onClick={toggleExpand} className="flex items-center">
+      <Collapsible data-testid="multichain-selection-item" open={expanded} onOpenChange={toggleExpand}>
+        <CollapsibleTrigger render={<div className="flex w-full cursor-pointer items-center p-2" />}>
           <div className="min-w-0 flex-1" onClick={handleToggle}>
             <AccountItem.Content data-testid="multichain-selection-content">
               <AccountItem.Checkbox checked={multiSafe.isSelected} address={address} />
@@ -122,15 +124,16 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
               />
             </AccountItem.Content>
           </div>
-        </div>
-        {expanded && (
-          <div className="px-3" data-testid="multichain-subaccounts-container">
+        </CollapsibleTrigger>
+        <CollapsibleContent className="px-3">
+          <div data-testid="multichain-subaccounts-container">
             {safes.map((safeItem) => (
               <MultiChainSubItem key={`${safeItem.chainId}:${safeItem.address}`} safe={safeItem} onToggle={onToggle} />
             ))}
           </div>
-        )}
-      </div>
+        </CollapsibleContent>
+      </Collapsible>
+      {isMobile && <div className={css.accountItemChips}>{statusChips}</div>}
     </div>
   )
 }

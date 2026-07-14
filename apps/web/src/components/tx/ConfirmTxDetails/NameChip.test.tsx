@@ -5,12 +5,10 @@ import { txDataBuilder } from '@/tests/builders/safeTx'
 import { render, screen } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 
-// Theme color values (web-specific colors)
-const COLORS = {
-  ERROR_BACKGROUND: '#FFE6EA',
-  ERROR_MAIN: '#FF5F72',
-  BACKGROUND_MAIN: '#F4F4F4',
-} as const
+// Untrusted contracts render the Chip's `negative` variant. jsdom cannot resolve the
+// design-token colours to computed values, so we assert on the variant's utility classes.
+const ERROR_BG_CLASS = 'bg-destructive/10'
+const ERROR_TEXT_CLASS = 'text-destructive'
 
 // Mock the hooks
 jest.mock('@/hooks/useAddressBook')
@@ -58,8 +56,8 @@ describe('NameChip', () => {
 
     render(<NameChip txData={txData} />)
     const chip = screen.getByTestId('name-chip')
-    expect(chip).toHaveStyle({ backgroundColor: COLORS.ERROR_BACKGROUND })
-    expect(chip).toHaveStyle({ color: COLORS.ERROR_MAIN })
+    expect(chip).toHaveClass(ERROR_BG_CLASS)
+    expect(chip).toHaveClass(ERROR_TEXT_CLASS)
   })
 
   it('should not render with error color for verified contracts not in address book', () => {
@@ -75,8 +73,8 @@ describe('NameChip', () => {
 
     render(<NameChip txData={txData} />)
     const chip = screen.getByTestId('name-chip')
-    expect(chip).not.toHaveStyle({ backgroundColor: COLORS.ERROR_BACKGROUND })
-    expect(chip).not.toHaveStyle({ color: COLORS.ERROR_MAIN })
+    expect(chip).not.toHaveClass(ERROR_BG_CLASS)
+    expect(chip).not.toHaveClass(ERROR_TEXT_CLASS)
   })
 
   it('should not render with error color for unverified contracts in address book', () => {
@@ -92,8 +90,8 @@ describe('NameChip', () => {
 
     render(<NameChip txData={txData} />)
     const chip = screen.getByTestId('name-chip')
-    expect(chip).not.toHaveStyle({ backgroundColor: COLORS.ERROR_BACKGROUND })
-    expect(chip).not.toHaveStyle({ color: COLORS.ERROR_MAIN })
+    expect(chip).not.toHaveClass(ERROR_BG_CLASS)
+    expect(chip).not.toHaveClass(ERROR_TEXT_CLASS)
   })
 
   it('should prioritize address book name over txInfo name', () => {

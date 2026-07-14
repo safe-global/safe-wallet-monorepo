@@ -2,6 +2,14 @@ import { render, screen } from '@testing-library/react'
 import { FiatChange } from './FiatChange'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
+// The percentage label is rendered inside the migrated Chip; the Chip element that
+// carries the variant utility classes is its parent (the tooltip trigger span).
+const getChip = (label: string): HTMLElement => {
+  const element = screen.getByText(label).parentElement
+  if (!element) throw new Error(`Chip wrapper not found for "${label}"`)
+  return element
+}
+
 describe('FiatChange', () => {
   it('renders "n/a" when fiatBalance24hChange is not present', () => {
     const mockBalance: Balance = {
@@ -19,9 +27,8 @@ describe('FiatChange', () => {
 
     render(<FiatChange balanceItem={mockBalance} />)
 
-    const chip = screen.getByText('5.00%')
-    expect(chip).toBeInTheDocument()
-    expect(chip).toHaveStyle({ backgroundColor: 'success.background', color: 'success.main' })
+    expect(screen.getByText('5.00%')).toBeInTheDocument()
+    expect(getChip('5.00%')).toHaveClass('bg-success-subtle', 'text-success-strong')
   })
 
   it('renders negative change with red chip and down arrow', () => {
@@ -31,9 +38,8 @@ describe('FiatChange', () => {
 
     render(<FiatChange balanceItem={mockBalance} />)
 
-    const chip = screen.getByText('3.00%')
-    expect(chip).toBeInTheDocument()
-    expect(chip).toHaveStyle({ backgroundColor: 'error.background', color: 'error.main' })
+    expect(screen.getByText('3.00%')).toBeInTheDocument()
+    expect(getChip('3.00%')).toHaveClass('bg-destructive/10', 'text-destructive')
   })
 
   it('renders zero change with default styling', () => {
@@ -43,9 +49,8 @@ describe('FiatChange', () => {
 
     render(<FiatChange balanceItem={mockBalance} />)
 
-    const chip = screen.getByText('0.00%')
-    expect(chip).toBeInTheDocument()
-    expect(chip).toHaveStyle({ backgroundColor: 'default', color: 'default' })
+    expect(screen.getByText('0.00%')).toBeInTheDocument()
+    expect(getChip('0.00%')).toHaveClass('bg-secondary', 'text-secondary-foreground')
   })
 
   it('renders up to 2 decimal places', () => {
@@ -55,9 +60,8 @@ describe('FiatChange', () => {
 
     render(<FiatChange balanceItem={mockBalance} />)
 
-    const chip = screen.getByText('5.12%')
-    expect(chip).toBeInTheDocument()
-    expect(chip).toHaveStyle({ backgroundColor: 'success.background', color: 'success.main' })
+    expect(screen.getByText('5.12%')).toBeInTheDocument()
+    expect(getChip('5.12%')).toHaveClass('bg-success-subtle', 'text-success-strong')
   })
 
   it('rounds correctly', () => {
@@ -67,9 +71,8 @@ describe('FiatChange', () => {
 
     render(<FiatChange balanceItem={mockBalance} />)
 
-    const chip = screen.getByText('4.27%')
-    expect(chip).toBeInTheDocument()
-    expect(chip).toHaveStyle({ backgroundColor: 'success.background', color: 'success.main' })
+    expect(screen.getByText('4.27%')).toBeInTheDocument()
+    expect(getChip('4.27%')).toHaveClass('bg-success-subtle', 'text-success-strong')
   })
 
   it('uses change prop when provided instead of balanceItem', () => {

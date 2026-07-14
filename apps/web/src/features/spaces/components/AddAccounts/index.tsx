@@ -31,11 +31,11 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
-import { Search, Plus, X, Loader2 } from 'lucide-react'
+import { Plus, X, Loader2 } from 'lucide-react'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { SearchInput } from '@/components/ui/search-input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import Track from '@/components/common/Track'
 import { useEffect, useMemo, useState, useRef } from 'react'
@@ -371,7 +371,7 @@ const AddAccounts = ({
         <AdminOnlyWorkspaceTooltip isAdmin={isAdmin} side="bottom">
           <Button
             size="lg"
-            className="font-normal px-4 py-0"
+            className="font-normal"
             variant={buttonVariant}
             disabled={!isAdmin}
             onClick={() => {
@@ -401,7 +401,7 @@ const AddAccounts = ({
                 <form onSubmit={onSubmit} className="flex min-h-0 w-full flex-1 flex-col gap-6">
                   <div className="flex shrink-0 flex-col gap-4">
                     <div className="flex items-center justify-between">
-                      <Button type="button" variant="ghost" size="icon" onClick={handleClose} className="rounded-md">
+                      <Button type="button" variant="ghost" size="icon" onClick={handleClose}>
                         <X className="size-5" />
                       </Button>
                       <Typography variant="h2" align="center" className="flex-1">
@@ -414,17 +414,12 @@ const AddAccounts = ({
                       You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts
                     </Typography>
 
-                    <InputGroup className="bg-card px-2">
-                      <InputGroupAddon>
-                        <Search className="size-4" />
-                      </InputGroupAddon>
-                      <InputGroupInput
-                        placeholder="Search for safes"
-                        aria-label="Search Safe list"
-                        autoComplete="off"
-                        onChange={(e) => setRawSearchQuery(e.target.value)}
-                      />
-                    </InputGroup>
+                    <SearchInput
+                      placeholder="Search for safes"
+                      aria-label="Search Safe list"
+                      autoComplete="off"
+                      onChange={(e) => setRawSearchQuery(e.target.value)}
+                    />
                   </div>
 
                   {!wallet && <ConnectWalletHint testId="add-accounts-connect-wallet-button" />}

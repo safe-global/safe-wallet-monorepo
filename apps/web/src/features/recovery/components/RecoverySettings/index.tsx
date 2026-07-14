@@ -1,8 +1,10 @@
 import Track from '@/components/common/Track'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { Box, Button, Grid, Paper, SvgIcon, Tooltip, Typography } from '@mui/material'
 import { type ReactElement, useContext, useMemo } from 'react'
 
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import ExternalLink from '@/components/common/ExternalLink'
 import { DelayModifierRow } from './DelayModifierRow'
 import useRecovery from '../../hooks/useRecovery'
@@ -32,16 +34,11 @@ const headCells = [
     label: (
       <>
         Review window{' '}
-        <Tooltip title={TOOLTIP_TITLES.REVIEW_WINDOW}>
-          <span>
-            <SvgIcon
-              component={InfoIcon}
-              inheritViewBox
-              color="border"
-              fontSize="small"
-              sx={{ verticalAlign: 'middle', ml: 0.5 }}
-            />
-          </span>
+        <Tooltip>
+          <TooltipTrigger render={<span />}>
+            <InfoIcon className="ml-1 inline size-4 fill-current align-middle text-[var(--color-border-main)]" />
+          </TooltipTrigger>
+          <TooltipContent>{TOOLTIP_TITLES.REVIEW_WINDOW}</TooltipContent>
         </Tooltip>
       </>
     ),
@@ -51,16 +48,11 @@ const headCells = [
     label: (
       <>
         Proposal expiry{' '}
-        <Tooltip title={TOOLTIP_TITLES.PROPOSAL_EXPIRY}>
-          <span>
-            <SvgIcon
-              component={InfoIcon}
-              inheritViewBox
-              color="border"
-              fontSize="small"
-              sx={{ verticalAlign: 'middle', ml: 0.5 }}
-            />
-          </span>
+        <Tooltip>
+          <TooltipTrigger render={<span />}>
+            <InfoIcon className="ml-1 inline size-4 fill-current align-middle text-[var(--color-border-main)]" />
+          </TooltipTrigger>
+          <TooltipContent>{TOOLTIP_TITLES.PROPOSAL_EXPIRY}</TooltipContent>
         </Tooltip>
       </>
     ),
@@ -111,18 +103,16 @@ function RecoverySettings(): ReactElement {
   }, [recovery])
 
   return (
-    <Paper sx={{ p: 4 }}>
-      <Grid container spacing={3}>
-        <Grid item lg={4} xs={12}>
-          <Box display="flex" alignItems="center" gap={1} mb={1}>
-            <Typography variant="h4" fontWeight="bold">
-              Account recovery
-            </Typography>
-          </Box>
-        </Grid>
+    <div className="bg-card rounded-lg p-8">
+      <div className="grid grid-cols-12 gap-6">
+        <div className="col-span-12 lg:col-span-4">
+          <div className="mb-2 flex items-center gap-2">
+            <Typography variant="h4">Account recovery</Typography>
+          </div>
+        </div>
 
-        <Grid item xs>
-          <Typography mb={2}>
+        <div className="col-span-12 lg:col-span-8">
+          <Typography className="mb-4">
             {isRecoveryEnabled
               ? 'The trusted Recoverer will be able to recover your Safe account if you ever lose access. You can change Recoverers or alter your recovery setup at any time.'
               : 'Choose a trusted Recoverer to recover your Safe account if you ever lose access. Enabling the Account recovery module will require a transaction.'}{' '}
@@ -138,9 +128,9 @@ function RecoverySettings(): ReactElement {
           ) : rows ? (
             <EnhancedTable rows={rows} headCells={headCells} />
           ) : null}
-        </Grid>
-      </Grid>
-    </Paper>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -153,10 +143,10 @@ const SetupRecoveryButton = ({ eventLabel }: { eventLabel: string }) => {
           <Track {...RECOVERY_EVENTS.SETUP_RECOVERY} label={eventLabel}>
             <Button
               data-testid="setup-recovery-btn"
-              variant="contained"
+              variant="default"
               disabled={!isOk}
               onClick={() => setTxFlow(<UpsertRecoveryFlow />)}
-              sx={{ mt: 2 }}
+              className="mt-4"
             >
               Set up recovery
             </Button>

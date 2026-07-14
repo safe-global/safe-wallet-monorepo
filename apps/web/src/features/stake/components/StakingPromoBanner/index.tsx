@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { Link } from '@mui/material'
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import { ArrowRight } from 'lucide-react'
+import ExternalLink from '@/components/common/ExternalLink'
 import PromoBanner from '@/components/common/PromoBanner/PromoBanner'
 import { AppRoutes } from '@/config/routes'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
@@ -32,21 +32,20 @@ const StakingPromoBanner = ({ onDismiss }: { onDismiss: () => void }) => {
         description={
           <>
             Stake SAFE tokens now and get rewards on deposit.{' '}
-            <Link
+            <ExternalLink
               href={LEARN_MORE_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
+              noIcon
               onClick={onLearnMore}
-              sx={{ color: 'inherit', textDecoration: 'underline', fontWeight: 'bold' }}
+              className="font-bold text-inherit underline"
             >
               Learn more
-            </Link>
+            </ExternalLink>
           </>
         }
         ctaLabel="Stake now"
         onCtaClick={onStake}
         ctaVariant="text"
-        endIcon={<ArrowForwardIcon fontSize="small" />}
+        endIcon={<ArrowRight className="size-4" />}
         imageSrc="/images/common/staking-promo/safe-coin.svg"
         imageAlt="Safe token"
         trackingEvents={OVERVIEW_EVENTS.OPEN_STAKING_WIDGET}

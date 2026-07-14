@@ -1,27 +1,32 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react'
-import { Button, IconButton, Tooltip, type ButtonProps, type IconButtonProps, type SvgIconProps } from '@mui/material'
-import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
+import { RefreshCwIcon, type LucideProps } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { trackEvent } from '@/services/analytics'
 import { POSITIONS_EVENTS } from '@/services/analytics/events/positions'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { logError, Errors } from '@/services/exceptions'
 import { useRefetchBalances } from '@/hooks/useRefetchBalances'
+import { cn } from '@/utils/cn'
 import css from './styles.module.css'
 
 const COOLDOWN_MS = 30_000
 const MIN_LOADING_MS = 1_000
 
-const RefreshIcon = (props: SvgIconProps & { isLoading?: boolean }) => {
-  const { isLoading, ...iconProps } = props
+const RefreshIcon = (props: LucideProps & { isLoading?: boolean }) => {
+  const { isLoading, className, ...iconProps } = props
 
-  return <AutorenewRoundedIcon {...iconProps} className={isLoading ? css.spinning : undefined} sx={iconProps.sx} />
+  return <RefreshCwIcon {...iconProps} className={cn('size-4', isLoading && css.spinning, className)} />
 }
 
 type RefreshPositionsButtonProps = {
   entryPoint?: string
   tooltip?: string
   label?: string
-} & Omit<ButtonProps, 'onClick'>
+  size?: 'small' | 'medium' | 'large'
+  disabled?: boolean
+  className?: string
+}
 
 const RefreshPositionsButton = ({
   entryPoint = 'Positions',
@@ -29,7 +34,7 @@ const RefreshPositionsButton = ({
   size = 'small',
   label = '',
   disabled = false,
-  ...buttonProps
+  className,
 }: RefreshPositionsButtonProps) => {
   const { refetch, shouldUsePortfolioEndpoint } = useRefetchBalances()
   const [isLoading, setIsLoading] = useState(false)
@@ -91,17 +96,11 @@ const RefreshPositionsButton = ({
   const isDisabled = disabled || isLoading || isOnCooldown
 
   if (!label) {
-    const iconButtonSize = size === 'small' || size === 'medium' || size === 'large' ? size : 'small'
+    const iconButtonSize = size === 'large' ? 'icon' : size === 'medium' ? 'icon-sm' : 'icon-xs'
     const iconButton = (
-      <IconButton
-        onClick={handleRefresh}
-        disabled={isDisabled}
-        size={iconButtonSize}
-        {...(buttonProps as Omit<IconButtonProps, 'size' | 'onClick' | 'disabled'>)}
-        sx={buttonProps.sx}
-      >
-        <RefreshIcon fontSize={iconButtonSize === 'small' ? 'small' : 'medium'} isLoading={isLoading} />
-      </IconButton>
+      <Button variant="ghost" size={iconButtonSize} onClick={handleRefresh} disabled={isDisabled} className={className}>
+        <RefreshIcon isLoading={isLoading} />
+      </Button>
     )
 
     if (!displayTooltip) {
@@ -109,24 +108,17 @@ const RefreshPositionsButton = ({
     }
 
     return (
-      <Tooltip title={displayTooltip} arrow>
-        <span style={{ display: 'inline-flex' }}>{iconButton}</span>
+      <Tooltip>
+        <TooltipTrigger render={<span className="inline-flex" />}>{iconButton}</TooltipTrigger>
+        <TooltipContent>{displayTooltip}</TooltipContent>
       </Tooltip>
     )
   }
 
+  const buttonSize = size === 'large' ? 'lg' : size === 'medium' ? 'default' : 'sm'
   const button = (
-    <Button
-      onClick={handleRefresh}
-      disabled={isDisabled}
-      size={size}
-      startIcon={<RefreshIcon fontSize={size === 'small' ? 'small' : 'medium'} isLoading={isLoading} />}
-      {...buttonProps}
-      sx={{
-        ...buttonProps.sx,
-        textTransform: 'none',
-      }}
-    >
+    <Button variant="ghost" size={buttonSize} onClick={handleRefresh} disabled={isDisabled} className={className}>
+      <RefreshIcon isLoading={isLoading} />
       {label}
     </Button>
   )
@@ -136,8 +128,9 @@ const RefreshPositionsButton = ({
   }
 
   return (
-    <Tooltip title={displayTooltip} arrow>
-      <span style={{ display: 'inline-flex' }}>{button}</span>
+    <Tooltip>
+      <TooltipTrigger render={<span className="inline-flex" />}>{button}</TooltipTrigger>
+      <TooltipContent>{displayTooltip}</TooltipContent>
     </Tooltip>
   )
 }

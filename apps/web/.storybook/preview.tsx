@@ -1,18 +1,10 @@
 import type { Preview } from '@storybook/nextjs'
 import React, { useEffect } from 'react'
 
-import { ThemeProvider, CssBaseline } from '@mui/material'
-import { CacheProvider } from '@emotion/react'
-import createSafeTheme from '../src/components/theme/safeTheme'
-import createEmotionCache from '../src/utils/createEmotionCache'
 import { initialize, mswLoader } from 'msw-storybook-addon'
 
 import '../src/styles/globals.css'
 import { ShadcnProvider } from './shadcn'
-
-// Create emotion cache once for Storybook (same as real app)
-// This ensures MUI styles are injected first, allowing CSS modules to override them
-const emotionCache = createEmotionCache()
 
 // Initialize MSW for API mocking in Storybook
 initialize({
@@ -23,7 +15,9 @@ initialize({
 // These are not applied globally but can be imported and used per-story
 export { withMockProvider } from './decorators'
 
-const BACKGROUND_COLORS: Record<string, string> = { light: '#ffffff', dark: '#121312' }
+// Canvas colors mirror the shadcn --background token per mode so bg-background elements
+// never render as visible patches against the canvas.
+const BACKGROUND_COLORS: Record<string, string> = { light: '#ffffff', dark: '#000000' }
 
 // Syncs data-theme attribute and background color with the theme switcher
 const ThemeSyncDecorator = (
@@ -45,8 +39,6 @@ const ThemeSyncDecorator = (
     </div>
   )
 }
-
-const isShadcnStory = (title: string | undefined) => title?.startsWith('UI/')
 
 /** Safe{Wallet} viewport presets for responsive testing */
 const SAFE_VIEWPORTS = {
@@ -105,22 +97,25 @@ const preview: Preview = {
   parameters: {
     options: {
       storySort: {
+        // Alphabetical within groups; explicit `order` entries below keep their curated order.
+        method: 'alphabetical',
         order: [
           'Pages',
           [
             'Core',
             ['Home', 'Balances', 'Transactions', 'AddressBook', 'Settings'],
-            'Features',
-            ['Apps', 'Swap', 'Stake', 'Earn', 'Bridge'],
+            'DeFi',
+            ['Swap', 'Bridge', 'Stake', 'Earn'],
+            'Apps',
             'Onboarding',
             ['Welcome', 'NewSafe', 'MyAccounts', 'UserSettings', 'SpacesList'],
             'Spaces',
             'Static',
             ['Error', 'Legal', 'Handlers'],
           ],
+          'UI',
           'Components',
           'Features',
-          'UI',
         ],
       },
     },
@@ -135,40 +130,19 @@ const preview: Preview = {
       viewports: SAFE_VIEWPORTS,
       defaultViewport: 'desktop',
     },
-    chromatic: {
-      modes: {
-        light: { theme: 'light' },
-        dark: { theme: 'dark' },
-      },
-    },
   },
 
   // MSW loader for API mocking
   loaders: [mswLoader],
 
   decorators: [
-    // UI/ stories get ShadcnProvider only (no MUI). All other stories get MUI only.
-    // Stories that need shadcn opt in via `shadcn: true` on withMockProvider/createMockStory.
+    // All components are shadcn now — wrap every story in the shadcn provider.
     (Story, context) => {
       const themeMode = (context.globals?.theme as 'light' | 'dark') || 'light'
-
-      if (isShadcnStory(context.title)) {
-        return (
-          <ShadcnProvider dark={themeMode === 'dark'}>
-            <Story />
-          </ShadcnProvider>
-        )
-      }
-
-      const theme = createSafeTheme(themeMode)
-
       return (
-        <CacheProvider value={emotionCache}>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <Story />
-          </ThemeProvider>
-        </CacheProvider>
+        <ShadcnProvider dark={themeMode === 'dark'}>
+          <Story />
+        </ShadcnProvider>
       )
     },
     ThemeSyncDecorator,

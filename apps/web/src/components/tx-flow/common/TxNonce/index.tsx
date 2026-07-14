@@ -1,26 +1,22 @@
-import { memo, type ReactElement, useContext, useMemo, useState, useEffect } from 'react'
-import {
-  Autocomplete,
-  Box,
-  IconButton,
-  InputAdornment,
-  Skeleton,
-  Tooltip,
-  Popper,
-  type PopperProps,
-  type MenuItemProps,
-  MenuItem,
-  Typography,
-  ListSubheader,
-  type ListSubheaderProps,
-} from '@mui/material'
-import { createFilterOptions } from '@mui/material/Autocomplete'
+import { Fragment, memo, type ReactElement, useContext, useMemo, useState, useEffect } from 'react'
+import { RotateCcw } from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
 
+import { Skeleton } from '@/components/ui/skeleton'
+import { Typography } from '@/components/ui/typography'
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxLabel,
+  ComboboxList,
+} from '@/components/ui/combobox'
+import { InputGroupAddon, InputGroupButton } from '@/components/ui/input-group'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import RotateLeftIcon from '@mui/icons-material/RotateLeft'
-import NumberField from '@/components/common/NumberField'
+import { _formatNumber } from '@/components/common/NumberField'
 import { useQueuedTxByNonce } from '@/hooks/useTxQueue'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useAddressBook from '@/hooks/useAddressBook'
@@ -31,31 +27,7 @@ import usePreviousNonces from '@/hooks/usePreviousNonces'
 import css from './styles.module.css'
 import classNames from 'classnames'
 
-const CustomPopper = function ({
-  // Don't set width of Popper to that of the field
-  className,
-  ...props
-}: PopperProps) {
-  return <Popper {...props} className={classNames(className, css.popper)} style={undefined} placement="bottom-start" />
-}
-
-const NonceFormHeader = memo(function NonceFormSubheader({ children, ...props }: ListSubheaderProps) {
-  return (
-    <ListSubheader {...props} disableSticky>
-      <Typography variant="caption" fontWeight={700} color="text.secondary">
-        {children}
-      </Typography>
-    </ListSubheader>
-  )
-})
-
-const NonceFormOption = memo(function NonceFormOption({
-  nonce,
-  menuItemProps,
-}: {
-  nonce: string
-  menuItemProps: MenuItemProps
-}): ReactElement {
+const NonceFormOption = memo(function NonceFormOption({ nonce }: { nonce: string }): ReactElement {
   const addressBook = useAddressBook()
   const transactions = useQueuedTxByNonce(Number(nonce))
 
@@ -73,11 +45,9 @@ const NonceFormOption = memo(function NonceFormOption({
   const label = txLabel || 'New transaction'
 
   return (
-    <MenuItem {...menuItemProps}>
-      <Typography variant="body2">
-        <b>{nonce}</b>&nbsp;- {label}
-      </Typography>
-    </MenuItem>
+    <Typography variant="paragraph-small">
+      <b>{nonce}</b>&nbsp;- {label}
+    </Typography>
   )
 })
 
@@ -87,8 +57,6 @@ const getFieldMinWidth = (value: string): string => {
   const clamped = `clamp(calc(${MIN_CHARS}ch + 6px), calc(${Math.max(MIN_CHARS, value.length)}ch + 6px), ${MAX_WIDTH})`
   return clamped
 }
-
-const filter = createFilterOptions<string>()
 
 enum TxNonceFormFieldNames {
   NONCE = 'nonce',
@@ -144,6 +112,8 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
     setWarning(message)
   }, [nonce, recommendedNonce, safe.nonce])
 
+  const options = [recommendedNonce, ...previousNonces]
+
   return (
     <Controller
       name={TxNonceFormFieldNames.NONCE}
@@ -180,114 +150,73 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
       render={({ field, fieldState }) => {
         if (readOnly) {
           return (
-            <Typography variant="body2" fontWeight={700} ml={-1}>
+            <Typography variant="paragraph-small-bold" className="-ml-2">
               {nonce}
             </Typography>
           )
         }
 
+        const message = fieldState.error?.message || warning
+
         return (
-          <Autocomplete
-            value={field.value}
-            freeSolo
-            onChange={(_, value) => field.onChange(value)}
-            onInputChange={(_, value) => field.onChange(value)}
-            onBlur={() => {
-              field.onBlur()
+          <Combobox
+            items={options}
+            inputValue={field.value}
+            onInputValueChange={(value) => field.onChange(_formatNumber(value))}
+            // Always surface the recommended/recent presets regardless of the typed value
+            filter={() => true}
+            inputRef={field.ref}
+          >
+            <Tooltip open={!!message}>
+              <TooltipTrigger render={<div className="contents" />}>
+                <ComboboxInput
+                  name={field.name}
+                  aria-label={message || undefined}
+                  showTrigger
+                  className="[&_input]:font-bold"
+                  style={{ minWidth: getFieldMinWidth(field.value) }}
+                  onBlur={() => {
+                    field.onBlur()
 
-              if (fieldState.error) {
-                formMethods.setValue(field.name, recommendedNonce.toString())
-              }
-            }}
-            options={[recommendedNonce, ...previousNonces]}
-            getOptionLabel={(option) => option.toString()}
-            filterOptions={(options, params) => {
-              const filtered = filter(options, params)
+                    if (fieldState.error) {
+                      formMethods.setValue(field.name, recommendedNonce.toString())
+                    }
+                  }}
+                >
+                  {showRecommendedNonceButton && (
+                    <InputGroupAddon align="inline-end">
+                      <InputGroupButton
+                        variant="ghost"
+                        size="icon-xs"
+                        aria-label="Reset to recommended nonce"
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          resetNonce()
+                        }}
+                      >
+                        <RotateCcw className="size-4" />
+                      </InputGroupButton>
+                    </InputGroupAddon>
+                  )}
+                </ComboboxInput>
+              </TooltipTrigger>
+              {message && <TooltipContent side="top">{message}</TooltipContent>}
+            </Tooltip>
 
-              // Prevent segments from showing recommended, e.g. if recommended is 250, don't show for 2, 5 or 25
-              const shouldShow = !recommendedNonce.includes(params.inputValue)
-              const isQueued = options.some((option) => params.inputValue === option)
-
-              if (params.inputValue !== '' && !isQueued && shouldShow) {
-                filtered.push(recommendedNonce)
-              }
-
-              return filtered
-            }}
-            renderOption={(props, option) => {
-              const isRecommendedNonce = option === recommendedNonce
-              const isInitialPreviousNonce = option === previousNonces[0]
-
-              const { key, ...rest } = props
-
-              return (
-                <div key={key}>
-                  {isRecommendedNonce && <NonceFormHeader>Recommended nonce</NonceFormHeader>}
-                  {isInitialPreviousNonce && <NonceFormHeader sx={{ pt: 3 }}>Replace existing</NonceFormHeader>}
-                  <NonceFormOption menuItemProps={rest} nonce={option} />
-                </div>
-              )
-            }}
-            disableClearable
-            componentsProps={{
-              paper: {
-                elevation: 2,
-              },
-            }}
-            renderInput={(params) => {
-              // Extract Autocomplete's ref from params and combine with NumberField's forwardRef
-              const autocompleteRef = params.inputProps.ref
-
-              // Create combined ref that applies Autocomplete's ref
-              const combinedRef = (node: HTMLInputElement | null) => {
-                // Apply Autocomplete's ref
-                if (typeof autocompleteRef === 'function') {
-                  autocompleteRef(node)
-                } else if (autocompleteRef && typeof autocompleteRef === 'object' && 'current' in autocompleteRef) {
-                  ;(autocompleteRef as React.RefObject<HTMLInputElement | null>).current = node
-                }
-              }
-
-              // Remove ref from inputProps since we'll pass it via NumberField's forwardRef
-              const { ref: _, ...inputPropsWithoutRef } = params.inputProps
-
-              return (
-                <Tooltip title={fieldState.error?.message || warning} open arrow placement="top">
-                  <NumberField
-                    ref={combinedRef}
-                    {...params}
-                    error={!!fieldState.error}
-                    InputProps={{
-                      ...params.InputProps,
-                      name: field.name,
-                      endAdornment: showRecommendedNonceButton ? (
-                        <InputAdornment position="end" className={css.adornment}>
-                          <Tooltip title="Reset to recommended nonce">
-                            <IconButton onClick={resetNonce} size="small" color="primary">
-                              <RotateLeftIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </InputAdornment>
-                      ) : null,
-                    }}
-                    inputProps={{
-                      ...inputPropsWithoutRef,
-                    }}
-                    className={classNames([
-                      css.input,
-                      {
-                        [css.withAdornment]: showRecommendedNonceButton,
-                      },
-                    ])}
-                    sx={{
-                      minWidth: getFieldMinWidth(field.value),
-                    }}
-                  />
-                </Tooltip>
-              )
-            }}
-            PopperComponent={CustomPopper}
-          />
+            <ComboboxContent>
+              <ComboboxList>
+                {(option: string) => (
+                  <Fragment key={option}>
+                    {option === recommendedNonce && <ComboboxLabel>Recommended nonce</ComboboxLabel>}
+                    {option === previousNonces[0] && <ComboboxLabel className="pt-3">Replace existing</ComboboxLabel>}
+                    <ComboboxItem value={option}>
+                      <NonceFormOption nonce={option} />
+                    </ComboboxItem>
+                  </Fragment>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
         )
       }}
     />
@@ -300,21 +229,21 @@ const TxNonce = ({ canEdit = true }: { canEdit?: boolean } = {}) => {
   const { nonce, recommendedNonce, isReadOnly } = useContext(SafeTxContext)
 
   return (
-    <Box data-testid="nonce-fld" display="flex" alignItems="center" gap={1} className={css.nonce}>
+    <div data-testid="nonce-fld" className={classNames('flex items-center gap-2', css.nonce)}>
       Nonce{' '}
-      <Typography component="span" fontWeight={700}>
+      <Typography variant="paragraph-bold" className="inline">
         #
       </Typography>
       {nonce === undefined || recommendedNonce === undefined ? (
-        <Skeleton width={skeletonMinWidth} height="38px" />
+        <Skeleton style={{ width: skeletonMinWidth }} className="h-[38px]" />
       ) : canEdit && !isReadOnly ? (
         <TxNonceForm nonce={nonce.toString()} recommendedNonce={recommendedNonce.toString()} />
       ) : (
-        <Typography ml={-1} fontWeight={700}>
+        <Typography variant="paragraph-bold" className="-ml-2">
           {nonce}
         </Typography>
       )}
-    </Box>
+    </div>
   )
 }
 

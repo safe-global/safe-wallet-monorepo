@@ -1,10 +1,11 @@
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Operation } from '@safe-global/store/gateway/types'
 import { useState, useEffect } from 'react'
-import type { Dispatch, ReactElement, SetStateAction } from 'react'
-import type { AccordionProps } from '@mui/material/Accordion/Accordion'
+import type { Dispatch, ReactElement, SetStateAction, SyntheticEvent } from 'react'
 import SingleTxDecoded from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded'
-import { Button, Divider, Stack } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 import css from './styles.module.css'
 import classnames from 'classnames'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -38,14 +39,15 @@ export const MultisendActionsHeader = ({
   return (
     <div data-testid="all-actions" className={classnames(css.actionsHeader, { [css.compactHeader]: compact })}>
       {title}
-      <Stack direction="row" divider={<Divider className={css.divider} />}>
-        <Button data-testid="expande-all-btn" onClick={onClickAll(true)} variant="text">
+      <div className="flex flex-row">
+        <Button data-testid="expande-all-btn" onClick={onClickAll(true)} variant="ghost">
           Expand all
         </Button>
-        <Button data-testid="collapse-all-btn" onClick={onClickAll(false)} variant="text">
+        <Separator orientation="vertical" className={css.divider} />
+        <Button data-testid="collapse-all-btn" onClick={onClickAll(false)} variant="ghost">
           Collapse all
         </Button>
-      </Stack>
+      </div>
     </div>
   )
 }
@@ -77,6 +79,38 @@ const Multisend = ({
 
   if (!multiSendTransactions) return null
 
+  const actionItems =
+    Array.isArray(multiSendTransactions) &&
+    multiSendTransactions.map(({ dataDecoded, data, value, to: rawTo, operation }, index) => {
+      const to = defaultsToSelf ? resolveMultiSendToAddress(rawTo, safeAddress) : rawTo
+
+      const onChange = (_: SyntheticEvent, expanded: boolean) => {
+        setOpenMap((prev) => ({
+          ...prev,
+          [index]: expanded,
+        }))
+      }
+
+      return (
+        <SingleTxDecoded
+          key={`${data ?? to}-${index}`}
+          tx={{
+            dataDecoded,
+            data,
+            value,
+            to,
+            operation,
+          }}
+          txData={txData}
+          actionTitle={`${index + 1}`}
+          variant={compact ? 'outlined' : 'elevation'}
+          expanded={openMap?.[index] ?? false}
+          onChange={onChange}
+          isExecuted={isExecuted}
+        />
+      )
+    })
+
   return (
     <>
       <MultisendActionsHeader
@@ -85,38 +119,15 @@ const Multisend = ({
         compact={compact}
       />
 
-      <div className={compact ? css.compact : ''}>
-        {Array.isArray(multiSendTransactions) &&
-          multiSendTransactions.map(({ dataDecoded, data, value, to: rawTo, operation }, index) => {
-            const to = defaultsToSelf ? resolveMultiSendToAddress(rawTo, safeAddress) : rawTo
-
-            const onChange: AccordionProps['onChange'] = (_, expanded) => {
-              setOpenMap((prev) => ({
-                ...prev,
-                [index]: expanded,
-              }))
-            }
-
-            return (
-              <SingleTxDecoded
-                key={`${data ?? to}-${index}`}
-                tx={{
-                  dataDecoded,
-                  data,
-                  value,
-                  to,
-                  operation,
-                }}
-                txData={txData}
-                actionTitle={`${index + 1}`}
-                variant={compact ? 'outlined' : 'elevation'}
-                expanded={openMap?.[index] ?? false}
-                onChange={onChange}
-                isExecuted={isExecuted}
-              />
-            )
-          })}
-      </div>
+      {compact ? (
+        <Card variant="muted" size="none" className="mt-2">
+          <CardContent>
+            <div className="flex flex-col divide-y divide-border p-2">{actionItems}</div>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="mt-3 flex flex-col gap-2">{actionItems}</div>
+      )}
     </>
   )
 }

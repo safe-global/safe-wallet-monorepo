@@ -1,7 +1,7 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { useHasFeature } from '@/hooks/useChains'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -46,7 +46,7 @@ const SwapPage: NextPage = () => {
         ) : isFeatureEnabled === true && isCowEnabled === false ? (
           <FallbackSwapWidget fromToken={sell?.asset} />
         ) : isFeatureEnabled === false ? (
-          <Typography textAlign="center" my={3}>
+          <Typography align="center" className="my-6">
             Swaps are not supported on this network.
           </Typography>
         ) : null}

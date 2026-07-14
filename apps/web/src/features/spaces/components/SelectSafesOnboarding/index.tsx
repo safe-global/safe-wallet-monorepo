@@ -1,11 +1,10 @@
 import { useMemo, type ReactElement } from 'react'
 import { FormProvider, useWatch } from 'react-hook-form'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { Button } from '@/components/ui/button'
+import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Typography } from '@/components/ui/typography'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { SearchInput } from '@/components/ui/search-input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { ChevronLeft, ChevronRight, Search, Loader2 } from 'lucide-react'
 import { OnboardingLayout, StepCounter, SafeAppMockup, deriveSidePanelAccountsFromSpace } from '../OnboardingLayout'
 import useWallet from '@/hooks/wallets/useWallet'
 import { type AllSafeItems } from '@/hooks/safes'
@@ -90,17 +89,13 @@ const SelectSafesOnboarding = (): ReactElement => {
           </Alert>
         ) : (
           <>
-            <InputGroup className="bg-card px-2 shrink-0">
-              <InputGroupAddon>
-                <Search className="size-4" />
-              </InputGroupAddon>
-              <InputGroupInput
-                placeholder="Search for safes"
-                aria-label="Search Safe list"
-                autoComplete="off"
-                onChange={(e) => handleSearch(e.target.value)}
-              />
-            </InputGroup>
+            <SearchInput
+              className="shrink-0"
+              placeholder="Search for safes"
+              aria-label="Search Safe list"
+              autoComplete="off"
+              onChange={(e) => handleSearch(e.target.value)}
+            />
 
             <div className="relative min-w-0" data-testid="onboarding-safes-list-region">
               <OnboardingSafesList
@@ -138,34 +133,16 @@ const SelectSafesOnboarding = (): ReactElement => {
 
   const footer = (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col-reverse gap-3 xl:flex-row xl:items-center">
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={handleBack}
-          disabled={isSubmitting}
-          className="w-full h-12 rounded-lg bg-muted hover:bg-border xl:flex-1"
-        >
-          <ChevronLeft className="size-4 mr-1" />
-          Back
-        </Button>
-        <Button
-          data-testid="select-safes-continue-button"
-          type="submit"
-          form={FORM_ID}
-          disabled={selectedSafesLength === 0 || isSubmitting}
-          className="w-full h-12 rounded-lg text-base xl:flex-1"
-        >
-          {isSubmitting ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <>
-              Next
-              <ChevronRight className="size-4 ml-1" />
-            </>
-          )}
-        </Button>
-      </div>
+      <OnboardingFooter
+        onBack={handleBack}
+        backDisabled={isSubmitting}
+        continueLabel="Next"
+        continueType="submit"
+        continueForm={FORM_ID}
+        continueDisabled={selectedSafesLength === 0 || isSubmitting}
+        continueLoading={isSubmitting}
+        continueTestId="select-safes-continue-button"
+      />
       <button
         data-testid="select-safes-skip-link"
         type="button"

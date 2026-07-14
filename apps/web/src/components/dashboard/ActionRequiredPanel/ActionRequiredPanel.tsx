@@ -1,18 +1,16 @@
-import { useState, useRef, useEffect, type ReactElement, type ReactNode } from 'react'
-import { Card, Stack, Typography, Collapse, IconButton } from '@mui/material'
-import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded'
+import { useState, useRef, type ReactElement, type ReactNode } from 'react'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
+import { ChevronDown } from 'lucide-react'
 
 import { SidebarListItemCounter } from '@/components/common/SidebarList'
+import classnames from 'classnames'
 import { useWarningCount } from './useWarningCount'
 import css from './styles.module.css'
 
 export interface ActionRequiredPanelProps {
   children: ReactNode
-  /**
-   * Opens the panel once when this turns true (e.g. a critical item was detected).
-   * A manual user toggle always wins thereafter, so a late/again-true signal never
-   * re-opens a panel the user has collapsed.
-   */
   defaultExpanded?: boolean
 }
 
@@ -36,20 +34,11 @@ export interface ActionRequiredPanelProps {
  * ```
  */
 export const ActionRequiredPanel = ({ children, defaultExpanded = false }: ActionRequiredPanelProps): ReactElement => {
-  const [isExpanded, setIsExpanded] = useState(false)
-  const userToggledRef = useRef(false)
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded)
   const containerRef = useRef<HTMLDivElement>(null)
   const warningCount = useWarningCount(containerRef)
 
-  // Open once when a critical item is detected, unless the user has already toggled the panel.
-  useEffect(() => {
-    if (defaultExpanded && !userToggledRef.current) {
-      setIsExpanded(true)
-    }
-  }, [defaultExpanded])
-
   const toggleExpanded = () => {
-    userToggledRef.current = true
     setIsExpanded((prev) => !prev)
   }
 
@@ -61,57 +50,53 @@ export const ActionRequiredPanel = ({ children, defaultExpanded = false }: Actio
   }
 
   return (
-    <Card
+    <Collapsible
+      open={isExpanded}
+      onOpenChange={setIsExpanded}
       data-testid="action-required-panel"
-      sx={{
-        border: 0,
-        px: { xs: 3, lg: 1.5 },
-        pt: 2.5,
-        pb: isExpanded ? 2.5 : 1.5,
-        height: 1,
-        width: 1,
-        display: warningCount === 0 ? 'none' : 'block',
-      }}
-      component="section"
+      render={<section />}
+      className={classnames(
+        'h-full w-full overflow-hidden rounded-xl bg-[var(--color-background-paper)] px-6 pt-5 lg:px-3',
+        isExpanded ? 'pb-5' : 'pb-3',
+        { hidden: warningCount === 0 },
+      )}
     >
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
+      <div
         onClick={toggleExpanded}
         onKeyDown={handleKeyDown}
-        className={css.header}
-        sx={{ px: 1.5, mb: 1, cursor: 'pointer' }}
+        className={classnames(css.header, 'mb-2 flex flex-row items-center justify-between px-3')}
         role="button"
         tabIndex={0}
         aria-expanded={isExpanded}
         aria-label="Toggle action required panel"
         data-testid="action-required-panel-toggle"
       >
-        <Typography fontWeight={700} className={css.headerText}>
+        <Typography variant="paragraph-bold" className={css.headerText}>
           Action required <SidebarListItemCounter count={warningCount.toString()} variant="subtle" />
         </Typography>
 
-        <IconButton
-          size="small"
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="pointer-events-none ml-2"
           aria-label={isExpanded ? 'Collapse action required panel' : 'Expand action required panel'}
-          sx={{ ml: 1, pointerEvents: 'none' }}
         >
-          <KeyboardArrowDownRoundedIcon
-            className={css.chevron}
-            sx={{
-              transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s ease-in-out',
-            }}
+          <ChevronDown
+            className={classnames(css.chevron, 'transition-transform duration-200 ease-in-out', {
+              'rotate-180': isExpanded,
+            })}
           />
-        </IconButton>
-      </Stack>
+        </Button>
+      </div>
 
-      <Collapse in={isExpanded}>
+      <CollapsibleContent
+        keepMounted
+        className="data-[ending-style]:h-0 data-[starting-style]:h-0 h-[var(--collapsible-panel-height)] overflow-hidden transition-[height] duration-200 ease-in-out"
+      >
         <div ref={containerRef} className={css.warningsContainer} data-testid="action-required-panel-content">
           {children}
         </div>
-      </Collapse>
-    </Card>
+      </CollapsibleContent>
+    </Collapsible>
   )
 }

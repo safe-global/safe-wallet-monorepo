@@ -1,8 +1,3 @@
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import DialogTitle from '@mui/material/DialogTitle'
 import ModalDialog from '@/components/common/ModalDialog'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -10,7 +5,12 @@ import { ChainIndicatorList } from '@/features/multichain'
 import { useAddressBooksDeleteByAddressV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { useState } from 'react'
-import { Alert, CircularProgress } from '@mui/material'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 
@@ -26,6 +26,7 @@ const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContact
   const [isSubmitting, setIsSubmitting] = useState(false)
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
+  const isDarkMode = useDarkMode()
   const [deleteEntry] = useAddressBooksDeleteByAddressV1Mutation()
 
   const handleConfirm = async () => {
@@ -58,38 +59,39 @@ const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContact
   }
 
   return (
-    <ModalDialog open onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Remove address book entry</DialogTitle>
+    <ModalDialog
+      open
+      onClose={onClose}
+      dialogTitle="Remove address book entry"
+      maxWidth="sm"
+      fullWidth
+      hideChainIndicator
+    >
+      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+        <div className="p-6">
+          <Typography className="mb-2">
+            Are you sure you want to remove <strong>{name}</strong> from the address book? This change will apply to the
+            following networks:
+          </Typography>
 
-      <DialogContent sx={{ p: '24px !important' }}>
-        <Typography mb={1}>
-          Are you sure you want to remove <strong>{name}</strong> from the address book? This change will apply to the
-          following networks:
-        </Typography>
+          <ChainIndicatorList chainIds={networks} />
 
-        <ChainIndicatorList chainIds={networks} />
+          {error && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+        </div>
 
-        {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {error}
-          </Alert>
-        )}
-      </DialogContent>
-
-      <DialogActions>
-        <Button onClick={onClose} color="inherit">
-          Cancel
-        </Button>
-        <Button
-          data-testid="delete-btn"
-          onClick={handleConfirm}
-          variant="danger"
-          disableElevation
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? <CircularProgress size={20} /> : 'Remove'}
-        </Button>
-      </DialogActions>
+        <div className="flex justify-end gap-2 p-4 pt-0">
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button data-testid="delete-btn" onClick={handleConfirm} variant="destructive" disabled={isSubmitting}>
+            {isSubmitting ? <Spinner className="size-5" /> : 'Remove'}
+          </Button>
+        </div>
+      </div>
     </ModalDialog>
   )
 }

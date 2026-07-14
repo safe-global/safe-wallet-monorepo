@@ -1,17 +1,5 @@
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import {
-  Accordion,
-  AccordionSummary,
-  Avatar,
-  Box,
-  Typography,
-  AccordionDetails,
-  SvgIcon,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-} from '@mui/material'
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
+import { Typography } from '@/components/ui/typography'
 import { useState } from 'react'
 import type { ReactElement } from 'react'
 import Question from '@/public/images/common/question.svg'
@@ -31,26 +19,32 @@ const HintAccordion = ({
   onExpand: () => void
 }): ReactElement => {
   return (
-    <Accordion onClick={onExpand} expanded={expanded}>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography className={css.title}>
-          <SvgIcon component={Question} inheritViewBox className={css.questionIcon} />
-          {title}
-        </Typography>
-      </AccordionSummary>
+    <Accordion value={expanded ? ['item'] : []} onValueChange={onExpand}>
+      <AccordionItem value="item">
+        <AccordionTrigger>
+          <Typography className={css.title}>
+            <Question className={`size-4 ${css.questionIcon}`} />
+            {title}
+          </Typography>
+        </AccordionTrigger>
 
-      <AccordionDetails sx={{ p: 0 }}>
-        <List className={css.list}>
-          {items.map((item, i) => (
-            <ListItem key={i} sx={{ p: 0 }}>
-              <ListItemAvatar className={css.listItemAvatar}>
-                <Avatar className={css.avatar}>{i + 1}</Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={item} sx={{ m: 0 }} primaryTypographyProps={{ variant: 'body2' }} />
-            </ListItem>
-          ))}
-        </List>
-      </AccordionDetails>
+        <AccordionContent className="p-0">
+          <div className={css.list}>
+            {items.map((item, i) => (
+              <div key={i} className="flex items-center">
+                <div className={`flex ${css.listItemAvatar}`}>
+                  <div
+                    className={`flex items-center justify-center rounded-full bg-[var(--color-border-light)] text-foreground ${css.avatar}`}
+                  >
+                    {i + 1}
+                  </div>
+                </div>
+                <Typography variant="paragraph-small">{item}</Typography>
+              </div>
+            ))}
+          </div>
+        </AccordionContent>
+      </AccordionItem>
     </Accordion>
   )
 }
@@ -85,7 +79,7 @@ const WcHints = (): ReactElement => {
   }
 
   return (
-    <Box display="flex" flexDirection="column" gap={1}>
+    <div className="flex flex-col gap-2">
       <HintAccordion
         title={ConnectionTitle}
         items={ConnectionSteps}
@@ -98,7 +92,7 @@ const WcHints = (): ReactElement => {
         onExpand={() => onExpand('interaction')}
         expanded={expandedAccordion === 'interaction'}
       />
-    </Box>
+    </div>
   )
 }
 

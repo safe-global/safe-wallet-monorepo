@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
-import { Search } from 'lucide-react'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@/components/ui/typography'
+import { SearchInput } from '@/components/ui/search-input'
 import TrustedSafesItem from './TrustedSafesItem'
 import MultiChainSelectionItem from './MultiChainSelectionItem'
 import type { SelectableSafe, SelectableItem } from './useTrustedSafesModal.types'
@@ -74,15 +74,15 @@ const SimilarityGroupContainer = ({
 }) => {
   return (
     <div
-      className="my-0.5 overflow-hidden rounded-md border border-border/50"
+      className="border-border my-0.5 overflow-hidden rounded-md border"
       data-testid={`similarity-group-${group.groupKey}`}
     >
-      <div className="bg-yellow-50 px-3 py-1.5 dark:bg-[var(--color-warning-background)]">
-        <span className="text-xs font-medium text-yellow-800 dark:text-[var(--color-warning1-contrast-text)]">
+      <div className="bg-[var(--color-warning-background)] px-3 py-1.5">
+        <Typography variant="paragraph-mini-medium" className="text-[var(--color-warning-main)]">
           Similar addresses – verify carefully
-        </span>
+        </Typography>
       </div>
-      <div className="mb-4 bg-background p-2">
+      <div className="bg-background mb-4 p-2">
         {group.items.map((item) => (
           <SelectionItem key={item.address} item={item} onToggle={onToggle} />
         ))}
@@ -116,25 +116,21 @@ const TrustedSafesList = ({ items, isLoading, searchQuery, onSearchChange, onTog
   return (
     <div>
       {showSearch && (
-        <InputGroup className="mb-4 rounded-md border-gray-100 shadow-none">
-          <InputGroupAddon>
-            <Search className="size-4" />
-          </InputGroupAddon>
-          <InputGroupInput
-            placeholder="Search by name or full address"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            autoComplete="off"
-          />
-        </InputGroup>
+        <SearchInput
+          className="mb-4"
+          placeholder="Search by name or full address"
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          autoComplete="off"
+        />
       )}
 
       <div>
         {items.length === 0 ? (
           <div className="py-8 text-center">
-            <span className="text-sm text-muted-foreground">
+            <Typography color="muted">
               {searchQuery ? 'No safes found matching your search' : 'No safes available'}
-            </span>
+            </Typography>
           </div>
         ) : (
           <>

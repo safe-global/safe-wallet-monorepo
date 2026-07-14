@@ -1,5 +1,6 @@
 import { AddressImage } from '../AddressImage'
-import { Typography, Stack, Tooltip, Box } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import { useState } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
@@ -35,63 +36,44 @@ export const ShowAllAddress = ({ addresses, showImage }: ShowAllAddressProps) =>
 
   return (
     <AnalysisDetailsDropdown>
-      <Box display="flex" flexDirection="column" gap={1}>
+      <div className="flex flex-col gap-2">
         {addresses.map((item, index) => {
           const explorerLink = currentChain ? getBlockExplorerLink(currentChain, item.address) : undefined
           const name = addressBook[item.address] || item.name
 
           return (
-            <Box
+            <div
               key={`${item}-${index}`}
-              padding="8px"
-              gap={1}
-              display="flex"
-              flexDirection="row"
-              bgcolor="background.paper"
-              borderRadius="4px"
+              className="flex flex-row gap-2 rounded-[4px] bg-[var(--color-background-paper)] p-2"
             >
               {showImage && <AddressImage logoUrl={item.logoUrl} />}
-              <Stack spacing={0.5}>
+              <div className="flex flex-col gap-1">
                 {name && (
-                  <Typography variant="body2" color="text.primary" fontSize={12} mb={0.5}>
+                  <Typography variant="paragraph-mini" className="block mb-1 text-[var(--color-text-primary)]">
                     {name}
                   </Typography>
                 )}
-                <Typography
-                  variant="body2"
-                  lineHeight="20px"
-                  onClick={() => handleCopyToClipboard(item.address, index)}
-                >
-                  <Tooltip title={copiedIndex === index ? 'Copied to clipboard' : 'Copy address'} placement="top" arrow>
-                    <Typography
-                      component="span"
-                      variant="body2"
-                      lineHeight="20px"
-                      fontSize={12}
-                      color="primary.light"
-                      sx={{
-                        cursor: 'pointer',
-                        transition: 'background-color 0.2s',
-                        overflowWrap: 'break-word',
-                        wordBreak: 'break-all',
-                        flex: 1,
-                        '&:hover': {
-                          color: 'text.primary',
-                        },
-                      }}
-                    >
-                      {item.address}
-                    </Typography>
+                <div className="leading-5" onClick={() => handleCopyToClipboard(item.address, index)}>
+                  <Tooltip>
+                    <TooltipTrigger render={<span className="inline-flex" />}>
+                      <Typography
+                        variant="paragraph-mini"
+                        className="flex-1 cursor-pointer leading-5 break-words text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
+                      >
+                        {item.address}
+                      </Typography>
+                    </TooltipTrigger>
+                    <TooltipContent>{copiedIndex === index ? 'Copied to clipboard' : 'Copy address'}</TooltipContent>
                   </Tooltip>
-                  <Box component="span" color="text.secondary">
+                  <span className="text-[var(--color-text-secondary)]">
                     {explorerLink && <ExplorerButton href={explorerLink.href} />}
-                  </Box>
-                </Typography>
-              </Stack>
-            </Box>
+                  </span>
+                </div>
+              </div>
+            </div>
           )
         })}
-      </Box>
+      </div>
     </AnalysisDetailsDropdown>
   )
 }

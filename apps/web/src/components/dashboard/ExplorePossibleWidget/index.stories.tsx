@@ -3,9 +3,9 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import ExplorePossibleWidget from './index'
-import { Box } from '@mui/material'
 
 const meta = {
+  title: 'Components/Dashboard/ExplorePossibleWidget',
   component: ExplorePossibleWidget,
   parameters: {
     componentSubtitle: 'Renders a horizontal scrollable carousel showcasing key Safe features',
@@ -42,9 +42,9 @@ const meta = {
               },
             }}
           >
-            <Box sx={{ maxWidth: '100%' }}>
+            <div className="max-w-full">
               <Story />
-            </Box>
+            </div>
           </RouterDecorator>
         </StoreDecorator>
       )

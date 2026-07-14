@@ -33,11 +33,6 @@
   text-overflow: ellipsis;
 }
 
-.categoryChip {
-  border-radius: 4px;
-  height: auto;
-}
-
 .box {
   border-radius: 6px;
   border: 1px solid var(--color-border-light);

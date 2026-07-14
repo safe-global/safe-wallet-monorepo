@@ -1,31 +1,38 @@
-import { render } from '@/tests/test-utils'
+import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 
 const normalizer = (text: string) => text.replace(/\u200A/g, ' ')
 
 describe('FiatValue', () => {
   beforeEach(() => {
-    Object.defineProperty(window, 'navigator', {
-      value: {
-        language: 'en-US',
-      },
-      writable: true,
+    // Only override `language`; replacing the whole navigator object removes
+    // `userAgent`, which Base UI (tooltip) reads at import time.
+    Object.defineProperty(window.navigator, 'language', {
+      value: 'en-US',
+      configurable: true,
     })
   })
 
-  it('should render fiat value', () => {
+  it('should render fiat value', async () => {
     const FiatValue = require('.').default
-    const { getByText } = render(<FiatValue value={100} />)
+    const { user, getByText } = renderWithUserEvent(<FiatValue value={100} />)
     const span = getByText((content) => normalizer(content) === '$ 100', { normalizer })
     expect(span).toBeInTheDocument()
-    expect(span).toHaveAttribute('aria-label', '$ 100.00')
+
+    // Full-precision value is now shown in a hover tooltip (was an aria-label)
+    await user.hover(span)
+    const tooltip = await screen.findByText('$ 100.00', { selector: '[data-slot="tooltip-content"]' })
+    expect(tooltip).toBeInTheDocument()
   })
 
-  it('should render a big fiat value', () => {
+  it('should render a big fiat value', async () => {
     const FiatValue = require('.').default
-    const { getByText } = render(<FiatValue value={100_285_367} />)
+    const { user, getByText } = renderWithUserEvent(<FiatValue value={100_285_367} />)
     const span = getByText((content) => normalizer(content) === '$ 100.29M', { normalizer })
     expect(span).toBeInTheDocument()
-    expect(span).toHaveAttribute('aria-label', '$ 100,285,367.00')
+
+    await user.hover(span)
+    const tooltip = await screen.findByText('$ 100,285,367.00', { selector: '[data-slot="tooltip-content"]' })
+    expect(tooltip).toBeInTheDocument()
   })
 
   it('should render fiat value with precise=true', () => {

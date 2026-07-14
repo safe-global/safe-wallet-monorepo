@@ -6,6 +6,17 @@
   background-color: var(--color-background-main) !important;
 }
 
-.position:global(.Mui-expanded) {
+.position[aria-expanded='true'] {
   background-color: transparent;
+}
+
+.withSeparator[aria-expanded='false']::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 56px;
+  right: 0;
+  height: 1px;
+  background-color: var(--color-border-light);
+  opacity: 0.5;
 }

@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { useRouter } from 'next/router'
 import { useContext } from 'react'
-import { Grid } from '@mui/material'
 import ModalDialog from '@/components/common/ModalDialog'
 import ChoiceButton from '@/components/common/ChoiceButton'
 import { TxModalContext } from '@/components/tx-flow'
@@ -16,7 +15,7 @@ import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import RecoveryPlus from '@/public/images/common/recovery-plus.svg'
 import SwapIcon from '@/public/images/common/swap.svg'
 import SafeLogo from '@/public/images/logo-no-text.svg'
-import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined'
+import { Wrench } from 'lucide-react'
 import { useIsSwapFeatureEnabled } from '@/features/swap'
 
 const FirstTxFlow = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
@@ -72,68 +71,60 @@ const FirstTxFlow = ({ open, onClose }: { open: boolean; onClose: () => void }) 
 
   return (
     <ModalDialog open={open} dialogTitle="Create new transaction" hideChainIndicator onClose={onClose}>
-      <Grid
-        container
-        spacing={2}
-        sx={{
-          justifyContent: 'center',
-          flexDirection: 'column',
-          p: 3,
-        }}
-      >
-        <Grid item>
+      <div className="flex flex-col justify-center gap-4 p-6">
+        <div>
           <ChoiceButton
             title="Activate Safe now"
             description="Pay a one-time network fee to deploy your safe onchain"
             icon={SafeLogo}
             onClick={() => handleClick(onActivateSafe)}
           />
-        </Grid>
+        </div>
 
-        <Grid item>
+        <div>
           <ChoiceButton
             title="Add another signer"
             description="Improve the security of your Safe account"
             icon={SaveAddressIcon}
             onClick={() => handleClick(onAddSigner)}
           />
-        </Grid>
+        </div>
 
         {showRecoveryOption && (
-          <Grid item>
+          <div>
             <ChoiceButton
               title="Set up recovery"
               description="Ensure you never lose access to your funds"
               icon={RecoveryPlus}
               onClick={() => handleClick(onRecovery)}
             />
-          </Grid>
+          </div>
         )}
 
-        <Grid item>
+        <div>
           <ChoiceButton
             title="Swap tokens"
             description="Explore Safe Apps and trade any token"
             icon={SwapIcon}
             onClick={() => handleClick(onSwap)}
           />
-        </Grid>
+        </div>
 
         {txBuilder && (
-          <Grid item>
+          <div>
             <ChoiceButton
               title="Custom transaction"
               description="Compose custom contract interactions"
-              icon={HandymanOutlinedIcon}
+              icon={Wrench}
               onClick={() => handleClick(onCustomTransaction)}
             />
-          </Grid>
+          </div>
         )}
 
-        <Grid item>
+        <div>
           <ChoiceButton title="Send token" icon={AssetsIcon} onClick={() => handleClick(onSendToken)} />
-        </Grid>
-      </Grid>
+        </div>
+      </div>
     </ModalDialog>
   )
 }

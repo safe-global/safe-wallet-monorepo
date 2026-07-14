@@ -21,7 +21,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div style={{ display: 'block' }}>
       <div style={{ marginBottom: '2rem' }}>
@@ -71,6 +71,12 @@ export const AllVariants: Story = {
           <div style={{ width: '200px' }}>
             <NativeSelect disabled>
               <NativeSelectOption value="">Disabled</NativeSelectOption>
+              <NativeSelectOption value="option-1">Option 1</NativeSelectOption>
+            </NativeSelect>
+          </div>
+          <div style={{ width: '200px' }}>
+            <NativeSelect aria-invalid>
+              <NativeSelectOption value="">Invalid</NativeSelectOption>
               <NativeSelectOption value="option-1">Option 1</NativeSelectOption>
             </NativeSelect>
           </div>

@@ -34,7 +34,8 @@ export const SidebarActionButton = (): ReactElement => {
           variant="secondary"
           size="lg"
           disabled={!isOk}
-          className="w-full rounded-xs font-semibold py-0 hover:bg-sidebar-accent group-data-[collapsible=icon]:w-9 group-data-[collapsible=icon]:px-0"
+          // eslint-disable-next-line no-restricted-syntax -- sidebar action button: tight radius + collapsible icon-mode sizing
+          className="w-full rounded-xs font-semibold hover:bg-sidebar-accent group-data-[collapsible=icon]:w-9 group-data-[collapsible=icon]:px-0"
         >
           <Plus className="size-4 shrink-0" />
           <span className="group-data-[collapsible=icon]:hidden">New transaction</span>

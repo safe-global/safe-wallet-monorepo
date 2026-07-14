@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
+import { render, renderWithUserEvent, screen, fireEvent, waitFor } from '@/tests/test-utils'
 import RefreshPositionsButton from '../index'
 import * as analytics from '@/services/analytics'
 import * as useRefetchBalances from '@/hooks/useRefetchBalances'
@@ -46,14 +46,11 @@ describe('RefreshPositionsButton', () => {
     })
 
     it('should show tooltip on hover', async () => {
-      render(<RefreshPositionsButton />)
+      const { user } = renderWithUserEvent(<RefreshPositionsButton />)
 
-      const button = screen.getByRole('button')
-      fireEvent.mouseOver(button)
+      await user.hover(screen.getByRole('button'))
 
-      await waitFor(() => {
-        expect(screen.getByText('Refresh positions data')).toBeInTheDocument()
-      })
+      expect(await screen.findByText('Refresh positions data')).toBeInTheDocument()
     })
 
     it('should show portfolio tooltip when portfolio endpoint is enabled', async () => {
@@ -65,14 +62,11 @@ describe('RefreshPositionsButton', () => {
         isFetching: false,
       })
 
-      render(<RefreshPositionsButton />)
+      const { user } = renderWithUserEvent(<RefreshPositionsButton />)
 
-      const button = screen.getByRole('button')
-      fireEvent.mouseOver(button)
+      await user.hover(screen.getByRole('button'))
 
-      await waitFor(() => {
-        expect(screen.getByText('Refresh portfolio data')).toBeInTheDocument()
-      })
+      expect(await screen.findByText('Refresh portfolio data')).toBeInTheDocument()
     })
   })
 
@@ -84,14 +78,11 @@ describe('RefreshPositionsButton', () => {
     })
 
     it('should use custom tooltip when provided', async () => {
-      render(<RefreshPositionsButton label="Refresh" tooltip="Custom tooltip text" />)
+      const { user } = renderWithUserEvent(<RefreshPositionsButton label="Refresh" tooltip="Custom tooltip text" />)
 
-      const button = screen.getByRole('button')
-      fireEvent.mouseOver(button)
+      await user.hover(screen.getByRole('button'))
 
-      await waitFor(() => {
-        expect(screen.getByText('Custom tooltip text')).toBeInTheDocument()
-      })
+      expect(await screen.findByText('Custom tooltip text')).toBeInTheDocument()
     })
   })
 
@@ -149,25 +140,27 @@ describe('RefreshPositionsButton', () => {
   })
 
   describe('size variants', () => {
+    // Sizes map to shadcn Button size classes: small -> icon-xs (size-6),
+    // medium -> icon-sm (size-8), large label button -> lg (h-10).
     it('should render small size by default', () => {
       render(<RefreshPositionsButton />)
 
       const button = screen.getByRole('button')
-      expect(button).toHaveClass('MuiIconButton-sizeSmall')
+      expect(button).toHaveClass('size-6')
     })
 
     it('should render medium size when specified', () => {
       render(<RefreshPositionsButton size="medium" />)
 
       const button = screen.getByRole('button')
-      expect(button).toHaveClass('MuiIconButton-sizeMedium')
+      expect(button).toHaveClass('size-8')
     })
 
     it('should render button with label at specified size', () => {
       render(<RefreshPositionsButton label="Refresh" size="large" />)
 
       const button = screen.getByRole('button')
-      expect(button).toHaveClass('MuiButton-sizeLarge')
+      expect(button).toHaveClass('h-10')
     })
   })
 })

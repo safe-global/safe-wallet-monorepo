@@ -38,12 +38,6 @@ declare global {
   }
 }
 
-declare module '@mui/material/Button' {
-  interface ButtonPropsVariantOverrides {
-    danger: true
-  }
-}
-
 declare module '*.svg' {
   const content: any
   export const ReactComponent: React.FC<React.SVGProps<SVGSVGElement>>

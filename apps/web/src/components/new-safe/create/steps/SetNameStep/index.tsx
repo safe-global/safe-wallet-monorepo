@@ -1,4 +1,8 @@
-import { InputAdornment, Tooltip, SvgIcon, Typography, Box, Divider, Button, Grid } from '@mui/material'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
+import { Button } from '@/components/ui/button'
+import { Link } from '@/components/ui/link'
 import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { useMnemonicSafeName } from '@/hooks/useMnemonicName'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -9,9 +13,7 @@ import layoutCss from '@/components/new-safe/create/styles.module.css'
 import NameInput from '@/components/common/NameInput'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
-import { getNewSafeReturnUrl } from '@/components/new-safe/getReturnUrl'
-import MUILink from '@mui/material/Link'
-import Link from 'next/link'
+import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import NoWalletConnectedWarning from '../../NoWalletConnectedWarning'
 import { type SafeVersion } from '@safe-global/types-kit'
@@ -91,7 +93,7 @@ function SetNameStep({
 
   const onCancel = () => {
     trackEvent(CREATE_SAFE_EVENTS.CANCEL_CREATE_SAFE_FORM)
-    router.push(getNewSafeReturnUrl(router.query.next))
+    router.push(AppRoutes.welcome.index)
   }
 
   // whenever the chain switches we need to update the latest Safe version and selected chain
@@ -99,14 +101,24 @@ function SetNameStep({
     setValue(SetNameStepFields.safeVersion, getLatestSafeVersion(currentChain))
   }, [currentChain, setValue])
 
+  // The form's default networks are computed once on mount; if the chain configs weren't
+  // loaded yet at that point, seed the wallet's chain when it becomes available.
+  useEffect(() => {
+    if (!networks.length && walletChain) {
+      setValue(SetNameStepFields.networks, [walletChain], { shouldValidate: true })
+    }
+    // Only a late-arriving walletChain should trigger the seed, not the user clearing the field
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [walletChain, setValue])
+
   const isDisabled = !isValid
 
   return (
     <FormProvider {...formMethods}>
       <form onSubmit={handleSubmit(onFormSubmit)} id={SET_NAME_STEP_FORM_ID}>
-        <Box className={layoutCss.row}>
-          <Grid container spacing={1}>
-            <Grid item xs={12} md={12}>
+        <div className={layoutCss.row}>
+          <div className="grid grid-cols-12 gap-2">
+            <div className="col-span-12">
               <NameInput
                 name={SetNameStepFields.name}
                 label={errors?.[SetNameStepFields.name]?.message || 'Name'}
@@ -114,55 +126,51 @@ function SetNameStep({
                 InputLabelProps={{ shrink: true }}
                 InputProps={{
                   endAdornment: (
-                    <Tooltip
-                      title="This name is stored locally and will never be shared with us or any third parties."
-                      arrow
-                      placement="top"
-                    >
-                      <InputAdornment position="end">
-                        <SvgIcon component={InfoIcon} inheritViewBox />
-                      </InputAdornment>
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <span className="flex items-center">
+                            <InfoIcon className="size-5" />
+                          </span>
+                        }
+                      />
+                      <TooltipContent>
+                        This name is stored locally and will never be shared with us or any third parties.
+                      </TooltipContent>
                     </Tooltip>
                   ),
                 }}
               />
-            </Grid>
+            </div>
 
-            <Grid xs={12} item>
-              <Typography variant="h5" fontWeight={700} display="inline-flex" alignItems="center" gap={1} mt={2}>
-                Select Networks
+            <div className="col-span-12">
+              <Typography variant="h4" className="mt-4 inline-flex items-center gap-2">
+                Select networks
               </Typography>
-              <Typography variant="body2" mb={2}>
+              <Typography variant="paragraph-small" className="mb-4 block">
                 Choose which networks you want your account to be active on. You can add more networks later.{' '}
               </Typography>
               <SafeCreationNetworkInput isAdvancedFlow={isAdvancedFlow} name={SetNameStepFields.networks} />
-            </Grid>
-          </Grid>
-          <Typography variant="body2" mt={2}>
-            By continuing, you agree to our{' '}
-            <Link href={AppRoutes.terms} passHref legacyBehavior>
-              <MUILink>terms of use</MUILink>
-            </Link>{' '}
-            and{' '}
-            <Link href={AppRoutes.privacy} passHref legacyBehavior>
-              <MUILink>privacy policy</MUILink>
-            </Link>
-            .
+            </div>
+          </div>
+          <Typography variant="paragraph-small" className="mt-4 block">
+            By continuing, you agree to our <Link render={<NextLink href={AppRoutes.terms} />}>terms of use</Link> and{' '}
+            <Link render={<NextLink href={AppRoutes.privacy} />}>privacy policy</Link>.
           </Typography>
 
           <NoWalletConnectedWarning />
-        </Box>
-        <Divider />
-        <Box className={layoutCss.row}>
-          <Box display="flex" flexDirection="row" justifyContent="space-between" gap={3}>
-            <Button data-testid="cancel-btn" variant="outlined" onClick={onCancel} size="large">
+        </div>
+        <Separator />
+        <div className={layoutCss.row}>
+          <div className="flex flex-row justify-between gap-6">
+            <Button data-testid="cancel-btn" variant="outline" onClick={onCancel} size="lg">
               Cancel
             </Button>
-            <Button data-testid="next-btn" type="submit" variant="contained" size="large" disabled={isDisabled}>
+            <Button data-testid="next-btn" type="submit" variant="default" size="lg" disabled={isDisabled}>
               Next
             </Button>
-          </Box>
-        </Box>
+          </div>
+        </div>
       </form>
     </FormProvider>
   )

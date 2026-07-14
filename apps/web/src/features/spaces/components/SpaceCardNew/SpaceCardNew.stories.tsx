@@ -5,6 +5,7 @@ import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED
 import { withMockProvider } from '@/storybook/preview'
 
 const meta: Meta<typeof SpaceCardNew> = {
+  title: 'Features/Spaces/SpaceCardNew',
   component: SpaceCardNew,
   parameters: {
     layout: 'centered',

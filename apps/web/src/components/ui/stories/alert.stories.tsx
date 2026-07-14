@@ -23,7 +23,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div style={{ display: 'block' }}>
       <div style={{ marginBottom: '2rem' }}>
@@ -46,6 +46,18 @@ export const AllVariants: Story = {
             <Alert variant="destructive">
               <AlertTitle>Destructive Alert</AlertTitle>
               <AlertDescription>This is a destructive alert message.</AlertDescription>
+            </Alert>
+          </div>
+          <div style={{ width: '400px' }}>
+            <Alert variant="warning">
+              <AlertTitle>Warning Alert</AlertTitle>
+              <AlertDescription>This is a warning alert message.</AlertDescription>
+            </Alert>
+          </div>
+          <div style={{ width: '400px' }}>
+            <Alert variant="success">
+              <AlertTitle>Success Alert</AlertTitle>
+              <AlertDescription>This is a success alert message.</AlertDescription>
             </Alert>
           </div>
         </div>

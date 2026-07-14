@@ -15,7 +15,7 @@ const GlobalSearchInput = ({ className }: GlobalSearchInputProps) => {
       type="button"
       onClick={() => dispatch(openGlobalSearch())}
       className={cn(
-        'flex w-full items-center gap-2 rounded-md bg-card border border-input px-3 py-2 text-sm text-muted-foreground transition-colors',
+        'flex w-full items-center gap-2 rounded-md bg-card border border-border px-3 py-2 text-sm text-muted-foreground transition-colors',
         'hover:ring-1 hover:ring-ring',
         'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
         className,

@@ -9,7 +9,8 @@ Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide r
 - Each new feature must be behind a feature flag (stored on the CGW API in chains configs)
 - When making a new component, create a Storybook story file for it
 - Use theme variables from vars.css instead of hard-coded CSS values
-- Use MUI components and the Safe MUI theme
+- Build UI from the shadcn/ui primitives in `@/components/ui/*` (Tailwind); MUI/Emotion are removed
+- **Prefer a component's variant/size prop over one-off `className` overrides.** If you find yourself hand-rolling padding, height, border color, or hover on a `Button`/`Input`/etc., there is probably a variant for it — and if a pattern recurs, add a variant rather than repeating the classes. Watch the tokens: `--input` is white in light mode, so a visible field border needs `border-border`, not `border-input`. The `Button` and `Input` stories are the canonical variant reference; see [.storybook/AGENTS.md](.storybook/AGENTS.md#component-variants-over-custom-styling).
 
 ## Feature Architecture Import Rules
 
@@ -357,20 +358,19 @@ export const Empty: Story = (() => {
 })()
 ```
 
-### Chromatic Visual Regression Testing
+### Argos visual regression testing (Storybook)
 
-Chromatic is integrated for visual regression testing. It automatically captures snapshots of all stories in both light and dark themes.
+Storybook visual regression runs on Argos (the same service as the Cypress visual E2E suite), via
+`.github/workflows/web-argos-storybook.yml`: it builds the static Storybook, screenshots every story
+in **light and dark** with the render-sweep harness, and uploads to Argos. Requires the
+`ARGOS_TOKEN_STORYBOOK` repo secret.
 
-- **Workflow**: Runs automatically on PRs affecting `apps/web/**` or `packages/**`
-- **TurboSnap**: Only stories affected by code changes are re-snapshotted
-- **Theme modes**: Both light and dark themes are captured automatically
-- **PR checks**: Chromatic posts status checks with links to visual diffs
-
-To run locally (set `CHROMATIC_PROJECT_TOKEN` in `.env.local`):
-
-```bash
-yarn workspace @safe-global/web chromatic
-```
+- **Opting a story out of snapshots**: add `tags: ['skip-visual-test']` (story- or meta-level) for
+  flaky/animated/interactive-only stories. The story is still render-checked (errors fail CI) —
+  only the pixel snapshot is skipped. This replaces the Chromatic-era `!chromatic` tag and
+  `chromatic: { disableSnapshot: true }` parameter.
+- **Local run**: `yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>` produces the
+  same screenshots; add `--filter=<substr>` to scope.
 
 ## Web-specific common pitfalls
 

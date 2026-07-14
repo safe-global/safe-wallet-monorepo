@@ -4,48 +4,48 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 import AssetsIcon from '@/public/images/sidebar/assets.svg'
 import AppsIcon from '@/public/images/apps/apps-icon.svg'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
-import { Box, SvgIcon, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 
 const EmptyBatch = ({ children }: { children: ReactNode }) => (
-  <Box display="flex" flexWrap="wrap" justifyContent="center" textAlign="center" mt={3} px={4}>
-    <SvgIcon component={EmptyBatchIcon} inheritViewBox sx={{ fontSize: 110 }} />
+  <div className="flex w-full max-w-full flex-col items-center px-2 py-6 text-center sm:px-4">
+    <EmptyBatchIcon className="size-[110px]" />
 
-    <Typography variant="h4" fontWeight={700}>
+    <Typography variant="h4" className="mt-4 font-bold">
       Add an initial transaction to the batch
     </Typography>
 
-    <Typography variant="body2" mt={2} mb={4} px={8} sx={{ textWrap: 'balance' }}>
+    <Typography variant="paragraph-small" className="block mt-4 mb-8 max-w-md px-2 [text-wrap:balance] sm:px-4">
       Save gas and signatures by adding multiple Safe transactions to a single batch transaction. You can reorder and
       delete individual transactions in a batch.
     </Typography>
 
     {children}
 
-    <Typography variant="body2" color="border.main" mt={8}>
-      <Box mb={1}>
-        <SvgIcon component={InfoIcon} inheritViewBox />
-      </Box>
+    <Typography variant="paragraph-small" className="block mt-12 w-full text-[var(--color-border-main)]">
+      <span className="mb-2 block">
+        <InfoIcon className="mx-auto size-6" />
+      </span>
 
       <b>What type of transactions can you add to the batch?</b>
 
-      <Box display="flex" mt={3} gap={6}>
-        <div>
-          <SvgIcon component={AssetsIcon} inheritViewBox />
-          <div>Token and NFT transfers</div>
-        </div>
+      <span className="mt-6 flex flex-wrap justify-center gap-6 sm:gap-12">
+        <span className="min-w-[120px]">
+          <AssetsIcon className="mx-auto size-6" />
+          <span className="mt-1 block">Token and NFT transfers</span>
+        </span>
 
-        <div>
-          <SvgIcon component={AppsIcon} inheritViewBox />
-          <div>Safe App transactions</div>
-        </div>
+        <span className="min-w-[120px]">
+          <AppsIcon className="mx-auto size-6" />
+          <span className="mt-1 block">Safe App transactions</span>
+        </span>
 
-        <div>
-          <SvgIcon component={SettingsIcon} inheritViewBox />
-          <div>Safe account settings</div>
-        </div>
-      </Box>
+        <span className="min-w-[120px]">
+          <SettingsIcon className="mx-auto size-6" />
+          <span className="mt-1 block">Safe account settings</span>
+        </span>
+      </span>
     </Typography>
-  </Box>
+  </div>
 )
 
 export default EmptyBatch

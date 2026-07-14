@@ -13,5 +13,7 @@ export default function TxNoteForm({
 }) {
   if (!isCreation && !txDetails?.note) return null
 
-  return isCreation ? <TxNoteInput onChange={onChange} /> : <TxNote txDetails={txDetails} />
+  return (
+    <div className="pt-6">{isCreation ? <TxNoteInput onChange={onChange} /> : <TxNote txDetails={txDetails} />}</div>
+  )
 }

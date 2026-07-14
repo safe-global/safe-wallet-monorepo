@@ -1,7 +1,10 @@
 import type { ReactElement } from 'react'
 import type { PermissionRequest } from '@safe-global/safe-apps-sdk/dist/types/types/permissions'
-import { Button, Dialog, DialogActions, DialogContent, Divider, Typography } from '@mui/material'
 
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
 import { ModalDialogTitle } from '@/components/common/ModalDialog'
 import { getSafePermissionDisplayValues } from '@/hooks/safe-apps/permissions'
 
@@ -24,38 +27,32 @@ const PermissionsPrompt = ({
 }: PermissionsPromptProps): ReactElement => {
   return (
     <Dialog open={isOpen}>
-      <ModalDialogTitle onClose={() => onReject()}>
-        <Typography variant="body1" fontWeight={700}>
-          Permissions Request
-        </Typography>
-      </ModalDialogTitle>
-      <Divider />
-      <DialogContent>
-        <Typography>
-          <b>{origin}</b> is requesting permissions for:
-        </Typography>
-        <ul>
-          {permissions.map((permission, index) => (
-            <li key={index}>
-              <Typography>{getSafePermissionDisplayValues(Object.keys(permission)[0]).description}</Typography>
-            </li>
-          ))}
-        </ul>
+      <DialogContent showCloseButton={false} padding="none">
+        <ModalDialogTitle onClose={() => onReject()}>
+          <Typography variant="paragraph-bold">Permissions Request</Typography>
+        </ModalDialogTitle>
+        <Separator />
+        <div className="px-6 py-4">
+          <Typography>
+            <b>{origin}</b> is requesting permissions for:
+          </Typography>
+          <ul>
+            {permissions.map((permission, index) => (
+              <li key={index}>
+                <Typography>{getSafePermissionDisplayValues(Object.keys(permission)[0]).description}</Typography>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="my-6 flex justify-center gap-2">
+          <Button variant="destructive" size="sm" onClick={() => onReject(requestId)} className="min-w-[130px]">
+            Reject
+          </Button>
+          <Button variant="default" size="sm" onClick={() => onAccept(origin, requestId)} className="min-w-[130px]">
+            Accept
+          </Button>
+        </div>
       </DialogContent>
-      <DialogActions sx={{ justifyContent: 'center', my: 3 }}>
-        <Button
-          variant="contained"
-          color="error"
-          size="small"
-          onClick={() => onReject(requestId)}
-          sx={{ minWidth: '130px' }}
-        >
-          Reject
-        </Button>
-        <Button variant="contained" size="small" onClick={() => onAccept(origin, requestId)} sx={{ minWidth: '130px' }}>
-          Accept
-        </Button>
-      </DialogActions>
     </Dialog>
   )
 }

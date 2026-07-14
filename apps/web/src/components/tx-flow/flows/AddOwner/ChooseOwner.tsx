@@ -1,18 +1,9 @@
-import {
-  Box,
-  Typography,
-  FormControl,
-  InputAdornment,
-  CircularProgress,
-  Button,
-  CardActions,
-  Divider,
-  Grid,
-  TextField,
-  MenuItem,
-  SvgIcon,
-  Tooltip,
-} from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useForm, FormProvider, Controller } from 'react-hook-form'
 
 import AddressBookInput from '@/components/common/AddressBookInput'
@@ -84,141 +75,104 @@ export const ChooseOwner = ({
         <form onSubmit={onFormSubmit} className={commonCss.form}>
           {params.removedOwner && (
             <>
-              <Typography
-                variant="body2"
-                sx={{
-                  mb: 1,
-                }}
-              >
+              <Typography variant="paragraph-small" className="block mb-2">
                 {params.removedOwner &&
                   'Review the signer you want to replace in the active Safe account, then specify the new signer you want to replace it with:'}
               </Typography>
-              <Box
-                sx={{
-                  my: 3,
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: 'text.secondary',
-                    mb: 1,
-                  }}
-                >
+              <div className="my-6">
+                <Typography variant="paragraph-small" className="block mb-2 text-muted-foreground">
                   Current signer
                 </Typography>
                 <EthHashInfo address={params.removedOwner.address} showCopyButton shortAddress={false} hasExplorer />
-              </Box>
+              </div>
             </>
           )}
 
-          <FormControl fullWidth>
+          <div className="mb-7 w-full">
             <NameInput
               label="New signer"
               name="newOwner.name"
               placeholder={fallbackName || 'Signer name'}
               InputLabelProps={{ shrink: true }}
               InputProps={{
-                endAdornment: resolving && (
-                  <InputAdornment position="end">
-                    <CircularProgress size={20} />
-                  </InputAdornment>
-                ),
+                endAdornment: resolving && <Spinner className="size-5" />,
               }}
             />
-          </FormControl>
+          </div>
 
-          <FormControl fullWidth>
+          <div className="mb-7 w-full">
             <AddressBookInput
               name="newOwner.address"
               label="Signer address or ENS"
               validate={combinedValidate}
               required
             />
-          </FormControl>
+          </div>
 
-          <Divider className={commonCss.nestedDivider} />
+          <Separator className={commonCss.nestedDivider} />
 
           {mode === ChooseOwnerMode.ADD && (
-            <FormControl fullWidth>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 700,
-                  mt: 3,
-                }}
-              >
+            <div className="mb-7 w-full">
+              <Typography variant="h4" className="mt-6 inline-flex items-center gap-1 font-bold">
                 Threshold
-                <Tooltip title={TOOLTIP_TITLES.THRESHOLD} arrow placement="top">
-                  <span>
-                    <SvgIcon
-                      component={InfoIcon}
-                      inheritViewBox
-                      color="border"
-                      fontSize="small"
-                      sx={{
-                        verticalAlign: 'middle',
-                        ml: 0.5,
-                      }}
-                    />
-                  </span>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <span className="flex text-[var(--color-border-main)]">
+                        <InfoIcon className="size-4" />
+                      </span>
+                    }
+                  />
+                  <TooltipContent>{TOOLTIP_TITLES.THRESHOLD}</TooltipContent>
                 </Tooltip>
               </Typography>
 
-              <Typography
-                variant="body2"
-                sx={{
-                  mb: 1,
-                }}
-              >
+              <Typography variant="paragraph-small" className="mb-2 block">
                 Any transaction requires the confirmation of:
               </Typography>
 
-              <Grid
-                container
-                direction="row"
-                sx={{
-                  alignItems: 'center',
-                  gap: 2,
-                  pt: 1,
-                }}
-              >
-                <Grid item>
+              <div className="flex flex-row items-center gap-4 pt-2">
+                <div>
                   <Controller
                     control={control}
                     name="threshold"
                     render={({ field }) => (
-                      <TextField data-testid="owner-number-dropdown" select {...field}>
-                        {safe.owners.map((_, idx) => (
-                          <MenuItem key={idx + 1} value={idx + 1}>
-                            {idx + 1}
-                          </MenuItem>
-                        ))}
-                        {!params.removedOwner && (
-                          <MenuItem key={newNumberOfOwners} value={newNumberOfOwners}>
-                            {newNumberOfOwners}
-                          </MenuItem>
-                        )}
-                      </TextField>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger data-testid="owner-number-dropdown">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {safe.owners.map((_, idx) => (
+                            <SelectItem key={idx + 1} value={idx + 1}>
+                              {idx + 1}
+                            </SelectItem>
+                          ))}
+                          {!params.removedOwner && (
+                            <SelectItem key={newNumberOfOwners} value={newNumberOfOwners}>
+                              {newNumberOfOwners}
+                            </SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
                     )}
                   />
-                </Grid>
-                <Grid item>
+                </div>
+                <div>
                   <Typography>
                     out of {newNumberOfOwners} signer{maybePlural(newNumberOfOwners)}
                   </Typography>
-                </Grid>
-              </Grid>
-            </FormControl>
+                </div>
+              </div>
+            </div>
           )}
 
-          <Divider className={commonCss.nestedDivider} />
+          <Separator className={commonCss.nestedDivider} />
 
-          <CardActions>
-            <Button data-testid="add-owner-next-btn" variant="contained" type="submit" disabled={!isValid || resolving}>
+          <div className="flex items-center p-2">
+            <Button data-testid="add-owner-next-btn" type="submit" disabled={!isValid || resolving}>
               Next
             </Button>
-          </CardActions>
+          </div>
         </form>
       </FormProvider>
     </TxCard>

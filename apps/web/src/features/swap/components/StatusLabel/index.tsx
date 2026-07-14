@@ -1,5 +1,4 @@
 import type { OrderStatuses } from '@safe-global/store/gateway/types'
-import { SvgIcon } from '@mui/material'
 import type { ReactElement } from 'react'
 import CheckIcon from '@/public/images/common/circle-check.svg'
 import ClockIcon from '@/public/images/common/clock.svg'
@@ -16,7 +15,7 @@ type Props = {
 type StatusProps = {
   label: string
   color: TxStatusChipProps['color']
-  icon: React.ComponentType
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
 }
 
 const statusMap: Record<CustomOrderStatuses, StatusProps> = {
@@ -59,11 +58,11 @@ const statusMap: Record<CustomOrderStatuses, StatusProps> = {
 }
 const StatusLabel = (props: Props): ReactElement => {
   const { status } = props
-  const { label, color, icon } = statusMap[status]
+  const { label, color, icon: Icon } = statusMap[status]
 
   return (
     <TxStatusChip color={color}>
-      <SvgIcon component={icon} inheritViewBox fontSize="small" />
+      <Icon className="size-5" />
       {label}
     </TxStatusChip>
   )

@@ -4,7 +4,6 @@ import { useMemo, useContext } from 'react'
 import type { ReactElement } from 'react'
 import MinusIcon from '@/public/images/common/minus.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Stack, Box } from '@mui/material'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import FieldsGrid from '../../FieldsGrid'
 import { getNewSafeSetup } from './get-new-safe-setup'
@@ -59,7 +58,7 @@ export function ManageSigners({
   }, [txInfo, txData, safe, signerNames])
 
   return (
-    <Stack display="flex" flexDirection="column" gap={3} sx={{ '& .MuiGrid-container': { alignItems: 'flex-start' } }}>
+    <div className="flex flex-col gap-6 [&_.MuiGrid-container]:items-start">
       <ChangeSignerSetupWarning />
 
       <Actions newOwners={newOwners} />
@@ -67,7 +66,7 @@ export function ManageSigners({
       <Signers owners={newOwners} />
 
       <Threshold owners={newOwners} threshold={newThreshold} />
-    </Stack>
+    </div>
   )
 }
 
@@ -98,7 +97,7 @@ function Actions({ newOwners }: { newOwners: Array<AddressInfo> }): ReactElement
           owners={removedOwners}
           title={`Remove owner${maybePlural(removedOwners)}`}
           icon={MinusIcon}
-          sx={{ backgroundColor: ({ palette }) => `${palette.warning.background} !important`, mb: 2 }}
+          className="mb-4 bg-[var(--color-warning-background)]"
         />
       )}
 
@@ -110,7 +109,7 @@ function Actions({ newOwners }: { newOwners: Array<AddressInfo> }): ReactElement
 function Signers({ owners }: { owners: Array<AddressInfo> }): ReactElement {
   return (
     <FieldsGrid title="Signers">
-      <Box display="flex" flexDirection="column" gap={2} padding="var(--space-2)" fontSize="14px">
+      <div className="flex flex-col gap-4 p-[var(--space-2)] text-sm">
         {owners.map(({ value, name }) => (
           <NamedAddressInfo
             avatarSize={32}
@@ -122,7 +121,7 @@ function Signers({ owners }: { owners: Array<AddressInfo> }): ReactElement {
             name={name}
           />
         ))}
-      </Box>
+      </div>
     </FieldsGrid>
   )
 }
@@ -130,19 +129,9 @@ function Signers({ owners }: { owners: Array<AddressInfo> }): ReactElement {
 function Threshold({ owners, threshold }: { owners: Array<AddressInfo>; threshold: number }): ReactElement {
   return (
     <FieldsGrid title="Threshold">
-      <Box
-        component="span"
-        sx={{
-          // sx must be used as component is set
-          backgroundColor: 'background.main',
-          py: 0.5,
-          px: 1,
-          borderRadius: ({ shape }) => `${shape.borderRadius}px`,
-          fontWeight: 700,
-        }}
-      >
+      <span className="rounded-md bg-[var(--color-background-main)] px-2 py-1 font-bold">
         {threshold} of {owners.length} signer{maybePlural(owners)}
-      </Box>{' '}
+      </span>{' '}
       required to confirm new transactions
     </FieldsGrid>
   )

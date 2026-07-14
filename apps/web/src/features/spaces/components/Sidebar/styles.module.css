@@ -5,10 +5,16 @@
 
 .sidebarNavItem {
   font-weight: 700;
+  color: var(--sidebar-foreground);
 }
 
 .sidebarNavItem svg {
   stroke-width: 2;
+}
+
+.sidebarNavItem[data-active],
+.sidebarNavItem[data-active='true'] {
+  color: var(--color-text-primary);
 }
 
 .activeIcon svg {

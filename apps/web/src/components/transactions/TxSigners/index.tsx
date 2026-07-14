@@ -1,7 +1,9 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type ReactElement } from 'react'
-import { Alert, Box, IconButton, SvgIcon, Tooltip } from '@mui/material'
-import CopyIcon from '@mui/icons-material/ContentCopy'
+import { Copy } from 'lucide-react'
+import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import TxConfirmations from '@/components/transactions/TxConfirmations'
 import { AuditRow, AuditLogHeader, useCopyToClipboard } from '@/components/common/AuditLog'
 
@@ -48,21 +50,35 @@ const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
 
   if (!txHash) {
     return (
-      <Tooltip title="Available after execution" placement="top">
-        <span>
-          <IconButton size="small" disabled>
-            <SvgIcon component={HashIcon} inheritViewBox fontSize="small" />
-          </IconButton>
-        </span>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button variant="ghost" size="icon-sm" className="text-inherit" disabled>
+              <HashIcon className="size-5" />
+            </Button>
+          }
+        />
+        <TooltipContent side="top">Available after execution</TooltipContent>
       </Tooltip>
     )
   }
 
   return (
-    <Tooltip title={copied ? 'Copied' : 'Copy transaction hash'} placement="top">
-      <IconButton data-testid="copy-tx-hash-btn" size="small" onClick={handleCopy} sx={{ color: 'inherit' }}>
-        <SvgIcon component={HashIcon} inheritViewBox fontSize="small" />
-      </IconButton>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            data-testid="copy-tx-hash-btn"
+            variant="ghost"
+            size="icon-sm"
+            className="text-inherit"
+            onClick={handleCopy}
+          >
+            <HashIcon className="size-5" />
+          </Button>
+        }
+      />
+      <TooltipContent side="top">{copied ? 'Copied' : 'Copy transaction hash'}</TooltipContent>
     </Tooltip>
   )
 }
@@ -79,21 +95,31 @@ const TxAuditLogActions = ({
   <>
     <CopyTxHashButton txHash={txHash} />
     <TxShareLinkWrapper id={txId} eventLabel={CopyDeeplinkLabels.shareBlock}>
-      <Tooltip title="Copy transaction link" placement="top">
-        <IconButton data-testid="share-tx-link-btn" size="small" sx={{ color: 'inherit' }}>
-          <CopyIcon fontSize="small" />
-        </IconButton>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button data-testid="share-tx-link-btn" variant="ghost" size="icon-sm" className="text-inherit">
+              <Copy className="size-5" />
+            </Button>
+          }
+        />
+        <TooltipContent side="top">Copy transaction link</TooltipContent>
       </Tooltip>
     </TxShareLinkWrapper>
     {explorerLink ? (
       <ExplorerButton {...explorerLink} isCompact />
     ) : (
-      <Tooltip title="Available after execution" placement="top">
-        <span>
-          <IconButton size="small" disabled>
-            <SvgIcon component={ExplorerFallbackIcon} inheritViewBox fontSize="small" />
-          </IconButton>
-        </span>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <span>
+              <Button variant="ghost" size="icon-sm" disabled>
+                <ExplorerFallbackIcon className="size-5" />
+              </Button>
+            </span>
+          }
+        />
+        <TooltipContent side="top">Available after execution</TooltipContent>
       </Tooltip>
     )}
   </>
@@ -134,7 +160,7 @@ const TxSigners = ({
     if (!txDetails.executedAt) return null
 
     return (
-      <Box data-testid="transaction-actions-list">
+      <div data-testid="transaction-actions-list">
         <AuditLogHeader
           actions={<TxAuditLogActions txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />}
         />
@@ -146,7 +172,7 @@ const TxSigners = ({
           timestamp={txDetails.executedAt}
           isLast
         />
-      </Box>
+      </div>
     )
   }
 
@@ -157,7 +183,7 @@ const TxSigners = ({
     const moduleName = detailedExecutionInfo.address.name?.replace(/([a-z])([A-Z])/g, '$1 $2')
 
     return (
-      <Box data-testid="transaction-actions-list">
+      <div data-testid="transaction-actions-list">
         <AuditLogHeader
           actions={<TxAuditLogActions txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />}
         />
@@ -178,7 +204,7 @@ const TxSigners = ({
           timestamp={txDetails.executedAt}
           isLast
         />
-      </Box>
+      </div>
     )
   }
 
@@ -205,7 +231,7 @@ const TxSigners = ({
   const showExecutionRow = isConfirmed || !!executor || txDetails.txStatus !== 'AWAITING_CONFIRMATIONS'
 
   return (
-    <Box data-testid="transaction-actions-list">
+    <div data-testid="transaction-actions-list">
       <AuditLogHeader
         chip={
           <TxConfirmations
@@ -249,7 +275,7 @@ const TxSigners = ({
       )}
 
       {confirmationsNeeded > 0 && !executor && !isExpired && (
-        <Alert severity="info" sx={{ mt: 2, py: 0.5 }}>
+        <Alert className="mt-4 py-1">
           {isCancellation
             ? 'Cancellation can be executed once the required approvals are collected.'
             : 'Can be executed once the threshold is reached.'}
@@ -257,7 +283,7 @@ const TxSigners = ({
       )}
 
       {isTxFromProposer && !executor && !isExpired && (
-        <Alert severity="info" sx={{ mt: 2, py: 0.5 }}>
+        <Alert className="mt-4 py-1">
           {isCancellation
             ? 'This on-chain rejection was initiated by a proposer. Please review and approve or dismiss it.'
             : 'This transaction was created by a proposer. Please review and either confirm or reject it.'}
@@ -265,11 +291,11 @@ const TxSigners = ({
       )}
 
       {isExpired && (
-        <Alert severity="warning" sx={{ mt: 2, py: 0.5 }}>
+        <Alert variant="warning" className="mt-4 py-1">
           This order has expired. Reject this transaction and try again.
         </Alert>
       )}
-    </Box>
+    </div>
   )
 }
 

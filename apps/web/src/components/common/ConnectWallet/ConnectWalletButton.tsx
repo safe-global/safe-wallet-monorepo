@@ -1,18 +1,18 @@
-import { Button } from '@mui/material'
+import { Button } from '@/components/ui/button'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { cn } from '@/utils/cn'
 
 const ConnectWalletButton = ({
   onConnect,
   contained = true,
-  small = false,
+  size = 'default',
   text,
   className,
   fullWidth = false,
 }: {
   onConnect?: () => void
   contained?: boolean
-  small?: boolean
+  size?: React.ComponentProps<typeof Button>['size']
   text?: string
   className?: string
   fullWidth?: boolean
@@ -28,12 +28,9 @@ const ConnectWalletButton = ({
     <Button
       data-testid="connect-wallet-btn"
       onClick={handleConnect}
-      variant={contained ? 'contained' : 'text'}
-      size={small ? 'small' : 'medium'}
-      disableElevation
-      fullWidth={fullWidth}
-      className={cn(className)}
-      sx={{ fontSize: small ? ['12px', '13px'] : '' }}
+      variant={contained ? 'default' : 'ghost'}
+      size={size}
+      className={cn(fullWidth && 'w-full', className)}
     >
       {text || 'Connect'}
     </Button>

@@ -7,8 +7,12 @@ import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { getClipboard, isClipboardSupported } from '@/utils/clipboard'
-import { Button, CircularProgress, InputAdornment, TextField } from '@mui/material'
-import { useCallback, useContext, useEffect, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { InputGroup, InputGroupInput, InputGroupAddon } from '@/components/ui/input-group'
+import { useCallback, useContext, useEffect, useId, useState } from 'react'
 
 const PROPOSAL_TIMEOUT = 30_000
 
@@ -27,6 +31,7 @@ const WcInput = ({ uri }: { uri: string }) => {
   const { walletConnect, loading, setLoading, setError } = useContext(WalletConnectContext)
   const [value, setValue] = useState('')
   const [inputError, setInputError] = useState<Error>()
+  const inputId = useId()
   useTrackErrors(inputError)
 
   const onInput = useCallback(
@@ -78,36 +83,55 @@ const WcInput = ({ uri }: { uri: string }) => {
     }
   }, [onInput])
 
+  const label = inputError ? inputError.message : 'Pairing code'
+
   return (
-    <TextField
-      data-testid="wc-input"
-      value={value}
-      onChange={(e) => onInput(e.target.value)}
-      fullWidth
-      autoComplete="off"
-      autoFocus
-      disabled={!!loading}
-      error={!!inputError}
-      label={inputError ? inputError.message : 'Pairing code'}
-      placeholder="wc:"
-      spellCheck={false}
-      InputProps={{
-        autoComplete: 'off',
-        endAdornment: isClipboardSupported() ? undefined : (
-          <InputAdornment position="end">
+    <div className="flex w-full flex-col gap-1.5 text-left">
+      <Label htmlFor={inputId} className={inputError ? 'text-destructive' : undefined}>
+        {label}
+      </Label>
+
+      {isClipboardSupported() ? (
+        <Input
+          id={inputId}
+          data-testid="wc-input"
+          value={value}
+          onChange={(e) => onInput(e.target.value)}
+          autoComplete="off"
+          autoFocus
+          disabled={!!loading}
+          aria-invalid={!!inputError}
+          placeholder="wc:"
+          spellCheck={false}
+        />
+      ) : (
+        <InputGroup>
+          <InputGroupInput
+            id={inputId}
+            data-testid="wc-input"
+            value={value}
+            onChange={(e) => onInput(e.target.value)}
+            autoComplete="off"
+            autoFocus
+            disabled={!!loading}
+            aria-invalid={!!inputError}
+            placeholder="wc:"
+            spellCheck={false}
+          />
+          <InputGroupAddon align="inline-end">
             <Track {...WALLETCONNECT_EVENTS.PASTE_CLICK}>
-              <Button variant="contained" onClick={onPaste} sx={{ py: 1 }} disabled={!!loading}>
+              <Button variant="default" size="sm" onClick={onPaste} disabled={!!loading}>
                 {loading === WCLoadingState.CONNECT || loading === WCLoadingState.APPROVE ? (
-                  <CircularProgress size={20} />
+                  <Spinner className="size-5" />
                 ) : (
                   'Paste'
                 )}
               </Button>
             </Track>
-          </InputAdornment>
-        ),
-      }}
-    />
+          </InputGroupAddon>
+        </InputGroup>
+      )}
+    </div>
   )
 }
 

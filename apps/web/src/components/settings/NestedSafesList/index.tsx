@@ -1,4 +1,6 @@
-import { Paper, Grid2, Typography, Button, SvgIcon, Tooltip, IconButton } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useContext, useMemo, useState } from 'react'
 import type { ReactElement } from 'react'
 
@@ -18,6 +20,7 @@ import { useHasFeature } from '@/hooks/useChains'
 
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import SettingsCard from '@/components/settings/SettingsCard'
 
 export function NestedSafesList(): ReactElement | null {
   const isEnabled = useHasFeature(FEATURES.NESTED_SAFES)
@@ -49,12 +52,22 @@ export function NestedSafesList(): ReactElement | null {
                 <CheckWallet>
                   {(isOk) => (
                     <Track {...NESTED_SAFE_EVENTS.RENAME}>
-                      <Tooltip title={isOk ? 'Rename nested Safe' : undefined}>
-                        <span>
-                          <IconButton onClick={() => setAddressToRename(nestedSafe)} size="small" disabled={!isOk}>
-                            <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="border" />
-                          </IconButton>
-                        </span>
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <span>
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                onClick={() => setAddressToRename(nestedSafe)}
+                                disabled={!isOk}
+                              >
+                                <EditIcon className="size-4 text-muted-foreground" />
+                              </Button>
+                            </span>
+                          }
+                        />
+                        {isOk && <TooltipContent>Rename nested Safe</TooltipContent>}
                       </Tooltip>
                     </Track>
                   )}
@@ -73,46 +86,36 @@ export function NestedSafesList(): ReactElement | null {
 
   return (
     <>
-      <Paper sx={{ padding: 4, mt: 2 }}>
-        <Grid2 container direction="row" justifyContent="space-between" spacing={3} mb={2}>
-          <Grid2 size={{ lg: 4, xs: 12 }}>
-            <Typography variant="h4" fontWeight={700}>
-              Nested Safes
-            </Typography>
-          </Grid2>
+      <SettingsCard title="Nested Safes" className="mt-4">
+        <Typography className="mb-6">
+          Nested Safes are separate wallets owned by your main Account, perfect for organizing different funds and
+          projects.
+        </Typography>
 
-          <Grid2 size="grow">
-            <Typography mb={3}>
-              Nested Safes are separate wallets owned by your main Account, perfect for organizing different funds and
-              projects.
-            </Typography>
+        {rows.length === 0 && (
+          <Typography className="mb-6">
+            You don&apos;t have any Nested Safes yet. Set one up now to better organize your assets
+          </Typography>
+        )}
 
-            {rows.length === 0 && (
-              <Typography mb={3}>
-                You don&apos;t have any Nested Safes yet. Set one up now to better organize your assets
-              </Typography>
+        {safe.deployed && (
+          <CheckWallet>
+            {(isOk) => (
+              <Button
+                onClick={() => setTxFlow(<CreateNestedSafeFlow />)}
+                variant="ghost"
+                disabled={!isOk}
+                className="mb-6"
+              >
+                <AddIcon className="size-4" />
+                Add nested Safe
+              </Button>
             )}
+          </CheckWallet>
+        )}
 
-            {safe.deployed && (
-              <CheckWallet>
-                {(isOk) => (
-                  <Button
-                    onClick={() => setTxFlow(<CreateNestedSafeFlow />)}
-                    variant="text"
-                    startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
-                    disabled={!isOk}
-                    sx={{ mb: 3 }}
-                  >
-                    Add nested Safe
-                  </Button>
-                )}
-              </CheckWallet>
-            )}
-
-            {rows && rows.length > 0 && <EnhancedTable rows={rows} headCells={[]} />}
-          </Grid2>
-        </Grid2>
-      </Paper>
+        {rows && rows.length > 0 && <EnhancedTable rows={rows} headCells={[]} />}
+      </SettingsCard>
 
       {addressToRename && (
         <EntryDialog

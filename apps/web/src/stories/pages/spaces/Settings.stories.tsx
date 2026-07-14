@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { createMockStory } from '@/stories/mocks'
-import SpaceSettings from '@/pages/spaces/settings'
+// The settings index page only client-redirects to /spaces/settings/general, which no-ops
+// in Storybook — render the general settings page directly instead.
+import SpaceSettings from '@/pages/spaces/settings/general'
 
 /**
  * Space Settings page - configure Space options.
@@ -12,7 +14,7 @@ const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'connected',
   layout: 'fullPage',
-  pathname: '/spaces/settings',
+  pathname: '/spaces/settings/general',
   features: { spaces: true },
   query: { spaceId: '1' },
 })

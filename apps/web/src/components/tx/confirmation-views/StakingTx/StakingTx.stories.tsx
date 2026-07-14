@@ -1,18 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import StakingTx from './index'
 import { mockStakingDepositTxInfo, mockStakingExitTxInfo, mockStakingWithdrawTxInfo } from './mockData'
 
 const meta = {
+  title: 'Components/TxFlow/ConfirmationViews/StakingTx',
   component: StakingTx,
   decorators: [
     (Story) => {
       return (
         <StoreDecorator initialState={{}}>
-          <Paper sx={{ padding: 2 }}>
+          <div className="rounded-lg bg-background p-4">
             <Story />
-          </Paper>
+          </div>
         </StoreDecorator>
       )
     },

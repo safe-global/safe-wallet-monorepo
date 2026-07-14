@@ -1,32 +1,60 @@
-import type { TextFieldProps } from '@mui/material'
-import { TextField, Tooltip } from '@mui/material'
-import { getNameValidationDisplay, sanitizeName, validateName } from '@safe-global/utils/validation/names'
+import { type ComponentProps, type ReactNode, useId } from 'react'
 import get from 'lodash/get'
-import { useState } from 'react'
 import { Controller, type FieldError, useFormContext } from 'react-hook-form'
-import inputCss from '@/styles/inputs.module.css'
+import { getNameValidationDisplay, sanitizeName, validateName } from '@safe-global/utils/validation/names'
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+
+type NameInputProps = {
+  name: string
+  required?: boolean
+  label?: ReactNode
+  placeholder?: string
+  disabled?: boolean
+  autoFocus?: boolean
+  className?: string
+  helperText?: ReactNode
+  'data-testid'?: string
+  // Charset validation (from the shared name rules): sanitizes + validates the allowed
+  // character set and surfaces a focus tooltip explaining rejected characters.
+  validateCharset?: boolean
+  minLength?: number
+  maxLength?: number
+  inputSize?: ComponentProps<typeof Input>['inputSize']
+  variant?: ComponentProps<typeof Input>['variant']
+  InputProps?: {
+    endAdornment?: ReactNode
+    startAdornment?: ReactNode
+    readOnly?: boolean
+    className?: string
+  }
+  // Accepted for backwards-compatibility with the previous MUI TextField API; no shadcn equivalent.
+  InputLabelProps?: { shrink?: boolean }
+}
 
 const DEFAULT_MAX_LENGTH = 50
 
 const NameInput = ({
   name,
   required = false,
+  label,
+  placeholder,
+  disabled,
+  autoFocus,
+  className,
+  helperText,
   validateCharset = false,
   minLength = 0,
   maxLength,
-  helperText,
-  label,
-  sx,
+  inputSize,
+  variant,
+  InputProps,
+  InputLabelProps,
   ...props
-}: Omit<TextFieldProps, 'error' | 'variant' | 'ref' | 'fullWidth'> & {
-  name: string
-  required?: boolean
-  validateCharset?: boolean
-  minLength?: number
-  maxLength?: number
-}) => {
+}: NameInputProps) => {
+  const id = useId()
   const { formState, control } = useFormContext() || {}
-  const [isFocused, setIsFocused] = useState(false)
   // the name can be a path: e.g. "owner.3.name"
   const fieldError = get(formState.errors, name) as FieldError | undefined
 
@@ -36,6 +64,9 @@ const NameInput = ({
   const resolvedLabel = validateCharset ? label : legacyLabel
   const tooltip = validationDisplay?.tooltip
   const resolvedHelperText = validateCharset ? (validationDisplay?.label ?? helperText) : helperText
+
+  const { endAdornment, startAdornment, readOnly } = InputProps ?? {}
+  const hasAdornment = Boolean(endAdornment || startAdornment)
 
   return (
     <Controller
@@ -54,31 +85,53 @@ const NameInput = ({
           return true
         },
       }}
-      render={({ field: { ref, onBlur, onChange, ...field } }) => (
-        <Tooltip title={tooltip ?? ''} open={Boolean(tooltip) && isFocused} arrow describeChild>
-          <TextField
-            {...field}
-            {...props}
-            sx={[{ mb: validateCharset ? 2.5 : 0 }, ...(Array.isArray(sx) ? sx : [sx])]}
-            inputRef={ref}
-            variant="outlined"
-            label={resolvedLabel}
-            helperText={resolvedHelperText}
-            error={Boolean(fieldError)}
-            fullWidth
-            onChange={(e) => onChange(e)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={(e) => {
-              setIsFocused(false)
-              onBlur()
-              onChange(validateCharset ? sanitizeName(e.target.value) : e.target.value.trim())
-            }}
-            required={required}
-            className={inputCss.input}
-            onKeyDown={(e) => e.stopPropagation()}
-          />
-        </Tooltip>
-      )}
+      render={({ field: { ref, onBlur, onChange, value, name: fieldName } }) => {
+        const inputProps = {
+          ...props,
+          id,
+          ref,
+          name: fieldName,
+          value: value ?? '',
+          placeholder,
+          disabled,
+          readOnly,
+          required,
+          autoFocus,
+          // Full charset-validation explanation as a native tooltip (short label goes in the description below).
+          title: tooltip || undefined,
+          'aria-invalid': Boolean(fieldError) || undefined,
+          onChange: (e: React.ChangeEvent<HTMLInputElement>) => onChange(e),
+          onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
+            onBlur()
+            onChange(validateCharset ? sanitizeName(e.target.value) : e.target.value.trim())
+          },
+          onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => e.stopPropagation(),
+        }
+
+        const inputControl = hasAdornment ? (
+          <InputGroup inputSize={inputSize} variant={variant} className={InputProps?.className}>
+            {startAdornment && <InputGroupAddon align="inline-start">{startAdornment}</InputGroupAddon>}
+            <InputGroupInput {...inputProps} />
+            {endAdornment && <InputGroupAddon align="inline-end">{endAdornment}</InputGroupAddon>}
+          </InputGroup>
+        ) : (
+          <Input inputSize={inputSize} variant={variant} className={InputProps?.className} {...inputProps} />
+        )
+
+        return (
+          <Field className={className}>
+            {resolvedLabel != null && resolvedLabel !== '' && (
+              <FieldLabel htmlFor={id} className={fieldError ? 'text-destructive' : undefined}>
+                {resolvedLabel}
+              </FieldLabel>
+            )}
+
+            {inputControl}
+
+            {resolvedHelperText ? <FieldDescription>{resolvedHelperText}</FieldDescription> : null}
+          </Field>
+        )
+      }}
     />
   )
 }

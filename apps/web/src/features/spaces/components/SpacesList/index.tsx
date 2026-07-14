@@ -11,9 +11,10 @@ import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import SafeMarkIcon from '@/public/images/logo-no-text.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { Box, Card, Grid2, Link, Typography } from '@mui/material'
 import { Button } from '@/components/ui/button'
-import { Typography as ShadcnTypography } from '@/components/ui/typography'
+import { Card } from '@/components/ui/card'
+import { Link } from '@/components/ui/link'
+import { Typography } from '@/components/ui/typography'
 import { type GetSpaceResponse, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import SpaceListInvite from '../InviteBanner'
@@ -31,7 +32,7 @@ import { AppRoutes } from '@/config/routes'
 import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
-import { SPACES_LIMIT } from '@/features/spaces/constants'
+import { SPACES_LIMIT } from '../Sidebar/constants'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import SafeLogo from '@/public/images/logo-no-text.svg'
 import { Pulse } from '../Sidebar/SidebarSkeleton/SidebarSkeleton'
@@ -102,9 +103,9 @@ const SignedOutState = ({
                 <SafeMarkIcon className="size-10" />
               </div>
 
-              <ShadcnTypography variant="h3" className="mb-6 text-center">
+              <Typography variant="h3" className="mb-6 text-center">
                 Sign in to your workspace
-              </ShadcnTypography>
+              </Typography>
 
               <LocalSafesAlert />
 
@@ -142,20 +143,21 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
   return (
     <>
-      <Card sx={{ p: 5, textAlign: 'center', width: 1 }}>
-        <Box display="flex" justifyContent="center">
+      {/* eslint-disable-next-line no-restricted-syntax -- 40px empty-state padding; no p-10 Card size variant */}
+      <Card className="w-full p-10 text-center">
+        <div className="flex justify-center">
           <SpacesIcon />
-        </Box>
+        </div>
 
-        <Box mb={3}>
-          <Typography color="text.secondary" mb={1}>
+        <div className="mb-6">
+          <Typography color="muted" className="mb-2">
             No workspaces found.
             <br />
           </Typography>
           <Link onClick={() => setIsInfoOpen(true)} href="#">
             What are workspaces?
           </Link>
-        </Box>
+        </div>
         <div className="h-12">
           <AddSpaceButton
             disabled={isAtLimit}
@@ -225,8 +227,8 @@ const SpacesList = () => {
   }
 
   return (
-    <Box className={css.container}>
-      <Box className={cn(css.mySpaces, { [css.headerSpacer]: !isUserSignedIn })}>
+    <div className={css.container}>
+      <div className={cn(css.mySpaces, { [css.headerSpacer]: !isUserSignedIn })}>
         {isRequireLoginEnabled ? (
           <div className="py-6 mb-6 flex items-center justify-between border-b">
             <div className="flex gap-6 absolute left-6 top-6 items-center">
@@ -250,13 +252,13 @@ const SpacesList = () => {
             )}
           </div>
         ) : (
-          <Box className={css.spacesHeader}>
+          <div className={css.spacesHeader}>
             <AccountsNavigation />
 
             {isUserSignedIn && activeSpaces.length > 0 && (
               <AddSpaceButton disabled={isAtSpacesLimit} onClick={onAddSpaceBtnClick} />
             )}
-          </Box>
+          </div>
         )}
 
         {isUserSignedIn &&
@@ -272,18 +274,18 @@ const SpacesList = () => {
         {!isUserSignedIn ? (
           <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} inline />
         ) : activeSpaces.length > 0 ? (
-          <Grid2 container spacing={2} flexWrap="wrap" data-testid="org-list">
+          <div className="grid grid-cols-1 flex-wrap gap-4 md:grid-cols-2" data-testid="org-list">
             {activeSpaces.map((space) => (
-              <Grid2 size={{ xs: 12, md: 6 }} key={space.name}>
+              <div key={space.name}>
                 <SpaceCard space={space} currentUserId={currentUser?.id} />
-              </Grid2>
+              </div>
             ))}
-          </Grid2>
+          </div>
         ) : (
           <NoSpacesState isAtLimit={isAtSpacesLimit} />
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

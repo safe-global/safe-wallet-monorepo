@@ -1,15 +1,8 @@
-import {
-  Box,
-  Button,
-  CardActions,
-  Divider,
-  Grid,
-  MenuItem,
-  SvgIcon,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Controller, FormProvider } from 'react-hook-form'
 import { useContext } from 'react'
 import type { ReactElement } from 'react'
@@ -46,22 +39,21 @@ export function SignersStructureView(props: Props): ReactElement {
         <form onSubmit={props.formMethods.handleSubmit(onNext)} className={commonCss.form}>
           <Signers {...props} />
 
-          <Divider className={commonCss.nestedDivider} />
+          <Separator className={commonCss.nestedDivider} />
 
           <Threshold {...props} />
 
-          <Divider className={commonCss.nestedDivider} />
+          <Separator className={commonCss.nestedDivider} />
 
-          <CardActions>
+          <div className="flex items-center p-2">
             <Button
               data-testId="submit-next"
-              variant="contained"
               type="submit"
               disabled={props.isSameSetup || !props.formMethods.formState.isValid}
             >
               Next
             </Button>
-          </CardActions>
+          </div>
         </form>
       </FormProvider>
     </TxCard>
@@ -93,12 +85,12 @@ function Signers({
       <Track {...SETTINGS_EVENTS.SETUP.ADD_OWNER} label={SETTINGS_LABELS.manage_signers}>
         <Button
           data-testid="add-new-signer"
-          variant="text"
+          variant="ghost"
           onClick={onAdd}
-          startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
-          size="large"
-          sx={{ mt: -1, mb: 3 }}
+          size="lg"
+          className="-mt-2 mb-6 self-start"
         >
+          <AddIcon className="size-4" />
           Add new signer
         </Button>
       </Track>
@@ -108,53 +100,63 @@ function Signers({
 
 function Threshold({ formMethods, newOwners }: Pick<Props, 'formMethods' | 'newOwners'>): ReactElement {
   return (
-    <Box my={3}>
-      <Typography variant="h4" fontWeight={700} display="inline-flex" alignItems="center" gap={1}>
+    <div className="my-6">
+      <Typography variant="h4" className="inline-flex items-center gap-2 font-bold">
         Threshold
-        <Tooltip
-          title="The threshold of a Safe account specifies how many signers need to confirm a Safe account transaction before it can be executed."
-          arrow
-          placement="top"
-        >
-          <span style={{ display: 'flex' }}>
-            <SvgIcon component={InfoIcon} inheritViewBox color="border" fontSize="small" />
-          </span>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <span className="flex text-[var(--color-border-main)]">
+                <InfoIcon className="size-4" />
+              </span>
+            }
+          />
+          <TooltipContent>
+            The threshold of a Safe account specifies how many signers need to confirm a Safe account transaction before
+            it can be executed.
+          </TooltipContent>
         </Tooltip>
       </Typography>
 
-      <Typography variant="body2" mb={2}>
+      <Typography variant="paragraph-small" className="mb-4 block">
         Any transaction requires the confirmation of:
       </Typography>
 
-      <Grid container direction="row" sx={{ alignItems: 'center', gap: 2, pt: 1 }}>
-        <Grid item>
+      <div className="flex flex-row items-center gap-4 pt-2">
+        <div>
           <Controller
             control={formMethods.control}
             name="threshold"
             render={({ field }) => {
-              const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-                field.onChange(event)
+              const onChange = (value: number | null) => {
+                if (value == null) return
+                field.onChange(value)
                 trackEvent({ ...SETTINGS_EVENTS.SETUP.CHANGE_THRESHOLD, label: SETTINGS_LABELS.manage_signers })
               }
 
               return (
-                <TextField select {...field} onChange={onChange}>
-                  {newOwners.map((_, index) => (
-                    <MenuItem key={index + 1} value={index + 1}>
-                      {index + 1}
-                    </MenuItem>
-                  ))}
-                </TextField>
+                <Select value={field.value} onValueChange={onChange}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {newOwners.map((_, index) => (
+                      <SelectItem key={index + 1} value={index + 1}>
+                        {index + 1}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               )
             }}
           />
-        </Grid>
-        <Grid item>
+        </div>
+        <div>
           <Typography>
             out of {newOwners.length} signer{maybePlural(newOwners)}
           </Typography>
-        </Grid>
-      </Grid>
-    </Box>
+        </div>
+      </div>
+    </div>
   )
 }

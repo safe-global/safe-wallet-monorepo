@@ -22,5 +22,6 @@
 .divider {
   margin-right: calc(-1 * var(--space-2));
   margin-left: calc(-1 * var(--space-2));
-  border-color: var(--color-info-light);
+  width: auto;
+  background-color: var(--color-info-light);
 }

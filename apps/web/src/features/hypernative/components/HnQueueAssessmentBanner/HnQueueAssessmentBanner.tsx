@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
-import type { AlertProps } from '@mui/material'
-import { Alert, Stack, Typography } from '@mui/material'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Typography } from '@/components/ui/typography'
 import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -14,6 +14,8 @@ import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
+
+type AlertVariant = 'default' | 'warning' | 'destructive'
 
 interface HnQueueAssessmentBannerProps {
   safeTxHash: string
@@ -29,12 +31,12 @@ const SEVERITY_MESSAGES: Record<Severity, string> = {
   [Severity.ERROR]: 'Unable to fetch security scan result.',
 }
 
-const ALERT_SEVERITIES: Record<Severity, AlertProps['severity']> = {
-  [Severity.OK]: 'success',
-  [Severity.INFO]: 'info',
+const ALERT_SEVERITIES: Record<Severity, AlertVariant> = {
+  [Severity.OK]: 'default',
+  [Severity.INFO]: 'default',
   [Severity.WARN]: 'warning',
-  [Severity.CRITICAL]: 'error',
-  [Severity.ERROR]: 'error',
+  [Severity.CRITICAL]: 'destructive',
+  [Severity.ERROR]: 'destructive',
 }
 
 export const HnQueueAssessmentBanner = ({
@@ -57,26 +59,18 @@ export const HnQueueAssessmentBanner = ({
     }
 
     return (
-      <Alert severity="background" icon={<LockIcon />}>
-        <Stack gap={1}>
-          <Typography variant="body2" color="text.secondary">
-            Log in to Hypernative to view security scan result.
-          </Typography>
-          <ExternalLink
-            onClick={handleLogin}
-            href="#"
-            noIcon={false}
-            sx={{
-              textDecoration: 'underline',
-              display: 'inline-flex',
-              alignSelf: 'flex-start',
-            }}
-          >
-            <Typography variant="body2" fontWeight="bold">
-              Log in
+      <Alert variant="default">
+        <LockIcon />
+        <AlertDescription>
+          <div className="flex flex-col gap-2">
+            <Typography variant="paragraph-small" className="text-[var(--color-text-secondary)]">
+              Log in to Hypernative to view security scan result.
             </Typography>
-          </ExternalLink>
-        </Stack>
+            <ExternalLink onClick={handleLogin} href="#" noIcon={false} className="inline-flex self-start underline">
+              <Typography variant="paragraph-small-bold">Log in</Typography>
+            </ExternalLink>
+          </div>
+        </AlertDescription>
       </Alert>
     )
   }
@@ -86,29 +80,26 @@ export const HnQueueAssessmentBanner = ({
   }
 
   const message = SEVERITY_MESSAGES[severity]
-  const alertSeverity = ALERT_SEVERITIES[severity]
+  const alertVariant = ALERT_SEVERITIES[severity]
 
   return (
-    <Alert severity={alertSeverity} icon={<SeverityIcon severity={severity} width={20} height={20} />}>
-      <Stack gap={1}>
-        <Typography variant="body2">{message}</Typography>
-        <ExternalLink
-          onClick={(e) => {
-            e.stopPropagation()
-            trackEvent(HYPERNATIVE_EVENTS.SECURITY_REPORT_CLICKED)
-          }}
-          href={assessmentUrl}
-          sx={{
-            textDecoration: 'underline',
-            display: 'inline-flex',
-            alignSelf: 'flex-start',
-          }}
-        >
-          <Typography variant="body2" fontWeight="bold">
-            View details
-          </Typography>
-        </ExternalLink>
-      </Stack>
+    <Alert variant={alertVariant}>
+      <SeverityIcon severity={severity} width={20} height={20} />
+      <AlertDescription>
+        <div className="flex flex-col gap-2">
+          <Typography variant="paragraph-small">{message}</Typography>
+          <ExternalLink
+            onClick={(e) => {
+              e.stopPropagation()
+              trackEvent(HYPERNATIVE_EVENTS.SECURITY_REPORT_CLICKED)
+            }}
+            href={assessmentUrl}
+            className="inline-flex self-start underline"
+          >
+            <Typography variant="paragraph-small-bold">View details</Typography>
+          </ExternalLink>
+        </div>
+      </AlertDescription>
     </Alert>
   )
 }

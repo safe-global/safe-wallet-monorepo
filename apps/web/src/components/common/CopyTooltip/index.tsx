@@ -1,9 +1,7 @@
 import type { ReactNode } from 'react'
 import React, { type ReactElement, type SyntheticEvent, useCallback, useState } from 'react'
-import { Tooltip } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import ConfirmCopyModal from './ConfirmCopyModal'
-
-const spanStyle = { cursor: 'pointer' }
 
 const CopyTooltip = ({
   text,
@@ -57,20 +55,11 @@ const CopyTooltip = ({
 
   return (
     <>
-      <Tooltip
-        title={tooltipText}
-        open={showTooltip}
-        onOpen={() => setShowTooltip(true)}
-        onClose={() => setShowTooltip(false)}
-        placement="top"
-        TransitionProps={{
-          // Otherwise the initialToolTipText is briefly visible during the exit animation
-          exit: false,
-        }}
-      >
-        <span onClick={handleCopy} style={spanStyle}>
+      <Tooltip open={showTooltip} onOpenChange={setShowTooltip}>
+        <TooltipTrigger render={<span className="inline-flex cursor-pointer" onClick={handleCopy} />}>
           {children}
-        </span>
+        </TooltipTrigger>
+        <TooltipContent side="top">{tooltipText}</TooltipContent>
       </Tooltip>
       {dialogContent !== undefined && (
         <ConfirmCopyModal onClose={() => setShowConfirmation(false)} onCopy={handleCopy} open={showConfirmation}>

@@ -12,7 +12,8 @@ import { useCurrentChain } from '@/hooks/useChains'
 import Rocket from '@/public/images/common/rocket.svg'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
 import { useAppDispatch } from '@/store'
-import { Alert, AlertTitle, Box, Button, Paper, Stack, SvgIcon, Typography } from '@mui/material'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
@@ -95,61 +96,31 @@ export const CreateSafeStatus = ({
   }
 
   return (
-    <Paper
-      sx={{
-        textAlign: 'center',
-      }}
-    >
-      <Box
-        sx={{
-          p: { xs: 2, sm: 8 },
-        }}
-      >
+    <div className="bg-card text-card-foreground overflow-hidden rounded-xl text-center">
+      <div className="p-4 sm:p-16">
         <StatusMessage status={status} isError={isError} pendingSafe={pendingSafe} />
 
         {counter && counter > SPEED_UP_THRESHOLD_IN_SECONDS && !isError && (
-          <Alert severity="warning" icon={<SvgIcon component={Rocket} />} sx={{ mt: 5 }}>
-            <AlertTitle>
-              <Typography
-                variant="body2"
-                sx={{
-                  textAlign: 'left',
-                  fontWeight: 'bold',
-                }}
-              >
-                Transaction is taking too long
-              </Typography>
-            </AlertTitle>
-            <Typography
-              variant="body2"
-              sx={{
-                textAlign: 'left',
-              }}
-            >
+          <Alert variant="warning" className="mt-10">
+            <Rocket />
+            <AlertTitle className="text-left font-bold">Transaction is taking too long</AlertTitle>
+            <AlertDescription className="text-left">
               Try to speed it up with better gas parameters in your wallet.
-            </Typography>
+            </AlertDescription>
           </Alert>
         )}
 
         {isError && (
-          <Stack
-            direction="row"
-            sx={{
-              justifyContent: 'center',
-              gap: 2,
-            }}
-          >
-            <Link href={AppRoutes.welcome.index} passHref>
-              <Button variant="outlined" onClick={onCancel}>
-                Go to homepage
-              </Button>
-            </Link>
-            <Button variant="contained" onClick={tryAgain}>
+          <div className="flex flex-row justify-center gap-4">
+            <Button variant="outline" onClick={onCancel} render={<Link href={AppRoutes.welcome.index} />}>
+              Go to homepage
+            </Button>
+            <Button variant="default" onClick={tryAgain}>
               Try again
             </Button>
-          </Stack>
+          </div>
         )}
-      </Box>
-    </Paper>
+      </div>
+    </div>
   )
 }

@@ -3,7 +3,7 @@ import { ActionCard } from '.'
 import { Countdown } from '@/components/common/Countdown'
 
 const meta = {
-  title: 'Common/ActionCard',
+  title: 'Components/Common/ActionCard',
   component: ActionCard,
   tags: ['autodocs'],
   parameters: {

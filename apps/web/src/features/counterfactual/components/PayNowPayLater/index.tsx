@@ -1,20 +1,12 @@
-import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import classnames from 'classnames'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useNativeTokenDisplay } from '@/hooks/useNativeTokenDisplay'
-import CheckRoundedIcon from '@mui/icons-material/CheckRounded'
-import {
-  Box,
-  CircularProgress,
-  FormControl,
-  FormControlLabel,
-  List,
-  ListItem,
-  ListItemIcon,
-  Radio,
-  RadioGroup,
-  Typography,
-} from '@mui/material'
+import { Check } from 'lucide-react'
+import { Spinner } from '@/components/ui/spinner'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
+import { Typography } from '@/components/ui/typography'
 
 import css from './styles.module.css'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -25,15 +17,15 @@ import { setAuthenticated, SESSION_LIFETIME_MS } from '@/store/authSlice'
 
 const PayNowPayLater = ({
   totalFee,
-  willRelay,
-  isMultiChain = false,
+  canRelay,
+  isMultiChain,
   payMethod,
   setPayMethod,
   isUserAuthenticated = true,
 }: {
   totalFee: string
-  willRelay: boolean
-  isMultiChain?: boolean
+  canRelay: boolean
+  isMultiChain: boolean
   payMethod: PayMethod
   setPayMethod: Dispatch<SetStateAction<PayMethod>>
   isUserAuthenticated?: boolean
@@ -52,7 +44,7 @@ const PayNowPayLater = ({
     }
   }
 
-  const onChoosePayMethod = async (_: ChangeEvent<HTMLInputElement>, newPayMethod: string) => {
+  const onChoosePayMethod = async (newPayMethod: unknown) => {
     if (newPayMethod === PayMethod.PayLater && !isUserAuthenticated) {
       await signInAndSelectPayLater()
       return
@@ -62,7 +54,7 @@ const PayNowPayLater = ({
 
   return (
     <>
-      <Typography variant="h4" fontWeight="bold">
+      <Typography variant="h4" className="font-bold">
         Before we continue...
       </Typography>
       {isMultiChain && (
@@ -72,124 +64,132 @@ const PayNowPayLater = ({
         </ErrorMessage>
       )}
       {showStablecoinFeeInfo && (
-        <Box mt={2}>
+        <div className="mt-4">
           <ErrorMessage level="info">
             This network uses USD stablecoins for transaction fees instead of a native token. Ensure your connected
             wallet holds a supported stablecoin to cover fees.
           </ErrorMessage>
-        </Box>
+        </div>
       )}
-      <List>
+      <div className="flex flex-col py-2">
         {isMultiChain && (
-          <ListItem disableGutters>
-            <ListItemIcon className={css.listItem}>
-              <CheckRoundedIcon fontSize="small" color="inherit" />
-            </ListItemIcon>
-            <Typography variant="body2">
+          <div className="flex items-center py-2">
+            <div className={classnames(css.listItem, 'flex items-center')}>
+              <Check className="size-5" />
+            </div>
+            <Typography variant="paragraph-small">
               Start exploring the accounts now, and activate them later to start making transactions
             </Typography>
-          </ListItem>
+          </div>
         )}
-        <ListItem disableGutters>
-          <ListItemIcon className={css.listItem}>
-            <CheckRoundedIcon fontSize="small" color="inherit" />
-          </ListItemIcon>
-          <Typography variant="body2">There will be a one-time activation fee</Typography>
-        </ListItem>
+        <div className="flex items-center py-2">
+          <div className={classnames(css.listItem, 'flex items-center')}>
+            <Check className="size-5" />
+          </div>
+          <Typography variant="paragraph-small">There will be a one-time activation fee</Typography>
+        </div>
         {!isMultiChain && (
-          <ListItem disableGutters>
-            <ListItemIcon className={css.listItem}>
-              <CheckRoundedIcon fontSize="small" color="inherit" />
-            </ListItemIcon>
-            <Typography variant="body2">
+          <div className="flex items-center py-2">
+            <div className={classnames(css.listItem, 'flex items-center')}>
+              <Check className="size-5" />
+            </div>
+            <Typography variant="paragraph-small">
               If you choose to pay later, the fee will be included with the first transaction you make.
             </Typography>
-          </ListItem>
+          </div>
         )}
-        <ListItem disableGutters>
-          <ListItemIcon className={css.listItem}>
-            <CheckRoundedIcon fontSize="small" color="inherit" />
-          </ListItemIcon>
-          <Typography variant="body2">Safe doesn&apos;t profit from the fees.</Typography>
-        </ListItem>
-      </List>
-      <FormControl fullWidth>
-        <RadioGroup row value={payMethod} onChange={onChoosePayMethod} className={css.radioGroup}>
-          <FormControlLabel
+        <div className="flex items-center py-2">
+          <div className={classnames(css.listItem, 'flex items-center')}>
+            <Check className="size-5" />
+          </div>
+          <Typography variant="paragraph-small">Safe doesn&apos;t profit from the fees.</Typography>
+        </div>
+      </div>
+      <div className="w-full">
+        <RadioGroup
+          value={payMethod}
+          onValueChange={onChoosePayMethod}
+          className={classnames(css.radioGroup, 'flex flex-row')}
+        >
+          <Label
+            htmlFor="pay-now-execution-method"
             data-testid="pay-now-execution-method"
-            sx={{ flex: 1 }}
-            value={PayMethod.PayNow}
-            disabled={isMultiChain}
-            className={classnames(css.radioContainer, { [css.active]: payMethod === PayMethod.PayNow })}
-            label={
-              <>
-                <Typography className={css.radioTitle}>Pay now</Typography>
-                {isMultiChain ? (
-                  <Typography className={css.radioSubtitle} variant="body2" color="text.secondary">
-                    Not available for multiple networks
+            className={classnames(css.radioContainer, 'flex-1 items-center', {
+              [css.active]: payMethod === PayMethod.PayNow,
+              'cursor-pointer': !isMultiChain,
+              'cursor-not-allowed opacity-60': isMultiChain,
+            })}
+          >
+            <RadioGroupItem
+              id="pay-now-execution-method"
+              value={PayMethod.PayNow}
+              aria-label="Pay now"
+              disabled={isMultiChain}
+            />
+            <span>
+              <Typography className={css.radioTitle}>Pay now</Typography>
+              {isMultiChain ? (
+                <Typography className={css.radioSubtitle} variant="paragraph-small" color="muted">
+                  Not available for multiple networks
+                </Typography>
+              ) : (
+                showGasFeeEstimation && (
+                  <Typography className={css.radioSubtitle} variant="paragraph-small" color="muted">
+                    {canRelay ? (
+                      'Sponsored free transaction'
+                    ) : (
+                      <>
+                        &asymp; {totalFee} {chain?.nativeCurrency.symbol}
+                      </>
+                    )}
                   </Typography>
-                ) : (
-                  showGasFeeEstimation && (
-                    <Typography className={css.radioSubtitle} variant="body2" color="text.secondary">
-                      {willRelay ? (
-                        'Sponsored free transaction'
-                      ) : (
-                        <>
-                          &asymp; {totalFee} {chain?.nativeCurrency.symbol}
-                        </>
-                      )}
-                    </Typography>
-                  )
-                )}
-              </>
-            }
-            control={<Radio />}
-          />
+                )
+              )}
+            </span>
+          </Label>
 
-          <FormControlLabel
+          <Label
+            htmlFor="connected-wallet-execution-method"
             data-testid="connected-wallet-execution-method"
-            sx={{ flex: 1 }}
-            value={PayMethod.PayLater}
-            disabled={signingIn}
-            className={classnames(css.radioContainer, {
+            className={classnames(css.radioContainer, 'flex-1 cursor-pointer items-center', {
               [css.active]: payMethod === PayMethod.PayLater,
             })}
-            label={
-              <>
-                <Typography className={css.radioTitle}>
-                  Pay later {signingIn && <CircularProgress size={14} sx={{ ml: 0.5 }} />}
-                </Typography>
-                <Typography className={css.radioSubtitle} variant="body2" color="text.secondary">
-                  {isUserAuthenticated ? 'with the first transaction' : 'Sign in to enable'}
-                </Typography>
-              </>
-            }
-            control={<Radio />}
-          />
+          >
+            <RadioGroupItem
+              id="connected-wallet-execution-method"
+              value={PayMethod.PayLater}
+              disabled={signingIn}
+              aria-label="Pay later"
+            />
+            <span>
+              <Typography className={classnames(css.radioTitle, 'inline-flex items-center')}>
+                Pay later {signingIn && <Spinner className="ml-1 size-3.5" />}
+              </Typography>
+              <Typography className={css.radioSubtitle} variant="paragraph-small" color="muted">
+                {isUserAuthenticated ? 'with the first transaction' : 'Sign in to enable'}
+              </Typography>
+            </span>
+          </Label>
         </RadioGroup>
         {!isUserAuthenticated && (
-          <Box mt={1}>
+          <div className="mt-2">
             <ErrorMessage level="info">
               <Typography
                 data-testid="sign-in-to-workspace-btn"
-                variant="body2"
-                component="span"
+                variant="paragraph-small"
                 onClick={signInAndSelectPayLater}
-                sx={{
-                  color: 'primary.main',
-                  cursor: signingIn ? 'default' : 'pointer',
-                  textDecoration: 'underline',
-                  fontWeight: 'bold',
-                  opacity: signingIn ? 0.6 : 1,
-                }}
+                className={classnames('font-bold text-[var(--color-primary-main)] underline', {
+                  'cursor-default opacity-60': signingIn,
+                  'cursor-pointer': !signingIn,
+                })}
               >
-                Sign into a workspace
+                Sign in
               </Typography>{' '}
-              to create a Safe and activate later.
+              to create a Safe without immediate deployment.
             </ErrorMessage>
-          </Box>
+          </div>
         )}
-      </FormControl>
+      </div>
     </>
   )
 }

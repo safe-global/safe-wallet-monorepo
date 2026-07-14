@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import AddMemberModal from 'src/features/spaces/components/AddMemberModal'
 import { useState } from 'react'
 import MembersList from '../MembersList'
+import TableCard from '@/components/common/TableCard'
 import { useIsInvited, useSpaceMembersByStatus, useIsAdmin } from '@/features/spaces'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_LABELS } from '@/services/analytics/events/spaces'
@@ -42,7 +43,7 @@ const SpaceMembers = () => {
         </div>
 
         <Tabs defaultValue="members">
-          <TabsList variant="line" className="flex-wrap h-auto mb-4 sm:mb-0">
+          <TabsList variant="line" className="flex-wrap mb-4 sm:mb-0">
             <TabsTrigger value="members" className="cursor-pointer" data-testid="members-tab">
               Members ({activeMembers.length})
             </TabsTrigger>
@@ -51,7 +52,7 @@ const SpaceMembers = () => {
             </TabsTrigger>
           </TabsList>
 
-          <div className="bg-card mt-6 rounded-lg p-4">
+          <TableCard className="mt-6">
             <TabsContent value="members">
               <MembersList members={activeMembers} />
             </TabsContent>
@@ -63,7 +64,7 @@ const SpaceMembers = () => {
                 <MembersList members={invitedMembers} />
               )}
             </TabsContent>
-          </div>
+          </TableCard>
         </Tabs>
 
         {openAddMembersModal && <AddMemberModal onClose={() => setOpenAddMembersModal(false)} />}

@@ -1,5 +1,6 @@
 import { useState, type ReactElement } from 'react'
-import { Box, Button, Stack, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import type { SafeAnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import { SeverityIcon } from '../SeverityIcon'
 import { AddTrustedSafeDialog, useSimilarAddressDetection } from '@/features/myAccounts'
@@ -44,29 +45,24 @@ const UntrustedSafeWarning = ({ safeAnalysis, onAddToTrustedList }: UntrustedSaf
 
   return (
     <>
-      <Box data-testid="untrusted-safe-warning" sx={{ padding: '12px' }}>
-        <Box sx={{ backgroundColor: 'background.main', borderRadius: '4px', p: 2 }}>
-          <Stack direction="row" alignItems="flex-start" gap={1}>
+      <div data-testid="untrusted-safe-warning" className="p-3">
+        <div className="rounded-[4px] bg-[var(--color-background-main)] p-4">
+          <div className="flex flex-row items-start gap-2">
             <SeverityIcon severity={safeAnalysis.severity} />
-            <Stack gap={1} flex={1}>
-              <Typography variant="body2" color="primary.light" fontWeight={500}>
+            <div className="flex flex-1 flex-col gap-2">
+              <Typography variant="paragraph-small-medium" className="text-[var(--color-primary-light)]">
                 {safeAnalysis.title}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="paragraph-small" className="text-[var(--color-text-secondary)]">
                 {safeAnalysis.description}
               </Typography>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={handleOpenConfirmDialog}
-                sx={{ alignSelf: 'flex-start', mt: 1 }}
-              >
+              <Button variant="outline" size="sm" onClick={handleOpenConfirmDialog} className="mt-2 self-start">
                 Trust this Safe
               </Button>
-            </Stack>
-          </Stack>
-        </Box>
-      </Box>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {safeAddress && (
         <AddTrustedSafeDialog

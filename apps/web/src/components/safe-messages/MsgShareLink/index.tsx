@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Button, IconButton, Link, SvgIcon } from '@mui/material'
+import { Button } from '@/components/ui/button'
 import ShareIcon from '@/public/images/common/share.svg'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
@@ -19,13 +19,13 @@ const MsgShareLink = ({ safeMessageHash, button }: { safeMessageHash: string; bu
     <Track {...MESSAGE_EVENTS.COPY_DEEPLINK}>
       <CopyTooltip text={txUrl} initialToolTipText="Copy the message URL">
         {button ? (
-          <Button data-testid="share-btn" aria-label="Share" variant="contained" size="small" onClick={() => {}}>
+          <Button data-testid="share-btn" aria-label="Share" size="sm" onClick={() => {}}>
             Copy link
           </Button>
         ) : (
-          <IconButton data-testid="share-btn" component={Link} aria-label="Share">
-            <SvgIcon component={ShareIcon} inheritViewBox fontSize="small" color="border" />
-          </IconButton>
+          <Button data-testid="share-btn" aria-label="Share" variant="ghost" size="icon-sm">
+            <ShareIcon className="size-5 text-[var(--color-border-main)]" />
+          </Button>
         )}
       </CopyTooltip>
     </Track>

@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Box } from '@mui/system'
 import { lightPalette } from '@safe-global/theme/palettes'
 import css from './styles.module.css'
-import { Card, LinearProgress, CardHeader, Avatar, Typography, CardContent } from '@mui/material'
+import { Card } from '@/components/ui/card'
+import { Typography } from '@/components/ui/typography'
 import type { TxStepperProps } from './useCardStepper'
 import { useCardStepper } from './useCardStepper'
 
@@ -14,27 +14,36 @@ export function CardStepper<StepperData>(props: TxStepperProps<StepperData>) {
   const progress = ((activeStep + 1) / steps.length) * 100
 
   return (
-    <Card className={css.card}>
-      <Box className={css.progress} color={progressColor}>
-        <LinearProgress color="inherit" variant="determinate" value={Math.min(progress, 100)} />
-      </Box>
-      {currentStep.title && (
-        <CardHeader
-          title={currentStep.title}
-          subheader={currentStep.subtitle}
-          titleTypographyProps={{ variant: 'h4' }}
-          subheaderTypographyProps={{ variant: 'body2' }}
-          avatar={
-            <Avatar className={css.step}>
-              <Typography variant="body2">{activeStep + 1}</Typography>
-            </Avatar>
-          }
-          className={css.header}
+    <Card>
+      <div className="h-1 w-full overflow-hidden bg-[var(--color-background-main)]">
+        <div
+          className="h-full transition-all"
+          style={{ width: `${Math.min(progress, 100)}%`, backgroundColor: progressColor }}
         />
+      </div>
+      {currentStep.title && (
+        <div className={`${css.header} flex items-center gap-4`}>
+          <div
+            className={css.step}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}
+          >
+            <Typography variant="paragraph-small" className="text-primary-foreground">
+              {activeStep + 1}
+            </Typography>
+          </div>
+          <div className="flex flex-col gap-1">
+            <Typography variant="h4">{currentStep.title}</Typography>
+            {currentStep.subtitle && (
+              <Typography variant="paragraph-small" className="text-[var(--color-text-primary)]">
+                {currentStep.subtitle}
+              </Typography>
+            )}
+          </div>
+        </div>
       )}
-      <CardContent className={css.content}>
+      <div className={css.content}>
         {currentStep.render(stepData, onSubmit, onBack, setStep, setProgressColor, setStepData)}
-      </CardContent>
+      </div>
     </Card>
   )
 }

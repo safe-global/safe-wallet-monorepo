@@ -1,12 +1,9 @@
-import { Box, Button, Divider, Menu, MenuItem, Typography } from '@mui/material'
 import { type GetSpaceResponse, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useState } from 'react'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import CheckIcon from '@mui/icons-material/Check'
+import { ChevronDown, Check } from 'lucide-react'
 import SpaceCard from '../SpaceCard'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 
-import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { useCurrentSpaceId } from '@/features/spaces'
@@ -17,25 +14,32 @@ import { trackEvent } from '@/services/analytics'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import { getNonDeclinedSpaces } from '@/features/spaces/utils'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 
 const SpaceSidebarSelector = () => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [open, setOpen] = useState(false)
   const router = useRouter()
-  const open = Boolean(anchorEl)
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
+  const isDarkMode = useDarkMode()
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
   const selectedSpace = spaces?.find((space) => space.uuid === spaceId)
 
   const nonDeclinedSpaces = getNonDeclinedSpaces(currentUser, spaces || [])
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
-
   const handleClose = () => {
-    setAnchorEl(null)
+    setOpen(false)
   }
 
   const handleSelectSpace = (space: GetSpaceResponse) => {
@@ -50,94 +54,79 @@ const SpaceSidebarSelector = () => {
   if (!selectedSpace) return null
 
   return (
-    <>
-      <Box display="flex" width="100%">
-        <Button
-          data-testid="space-selector-button"
-          id="space-selector-button"
-          onClick={handleClick}
-          endIcon={
-            <ExpandMoreIcon
-              className={css.expandIcon}
-              sx={{
-                transform: open ? 'rotate(180deg)' : undefined,
-                color: 'border.main',
-              }}
+    <div className={cn('shadcn-scope flex w-full', isDarkMode && 'dark')}>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              data-testid="space-selector-button"
+              id="space-selector-button"
+              variant="ghost"
+              className={cn(
+                'w-full justify-between text-left p-[var(--space-1)] m-[var(--space-1)] border border-[var(--color-border-light)] text-[14px] hover:border hover:border-[var(--color-border-light)]',
+              )}
             />
           }
-          fullWidth
-          className={css.spaceSelectorButton}
         >
-          <Box display="flex" alignItems="center" gap={1}>
+          <div className="flex items-center gap-2">
             <InitialsAvatar name={selectedSpace.name} size="small" />
             <Typography
-              variant="body2"
-              fontWeight="bold"
-              noWrap
-              color="text.primary"
-              sx={{ maxWidth: '140px', textOverflow: 'ellipsis', overflow: 'hidden' }}
+              variant="paragraph-small-bold"
+              className="max-w-[140px] overflow-hidden text-ellipsis whitespace-nowrap"
             >
               {selectedSpace.name}
             </Typography>
-          </Box>
-        </Button>
+          </div>
+          <ChevronDown
+            className={cn('size-4 text-[var(--color-border-main)] transition-transform', open && 'rotate-180')}
+          />
+        </DropdownMenuTrigger>
 
-        <Menu
-          data-testid="space-selector-menu"
-          anchorEl={anchorEl}
-          open={open}
-          onClose={handleClose}
-          sx={{ '& .MuiPaper-root': { minWidth: '260px !important' } }}
-        >
+        <DropdownMenuContent data-testid="space-selector-menu" className="min-w-[260px]">
           <SpaceCard space={selectedSpace} isCompact isLink={false} currentUserId={currentUser?.id} />
 
-          <Divider sx={{ mb: 1 }} />
+          <DropdownMenuSeparator className="mb-1" />
 
           {nonDeclinedSpaces.map((space) => (
-            <MenuItem
+            <DropdownMenuItem
               key={space.uuid}
               onClick={() => handleSelectSpace(space)}
-              selected={space.uuid === selectedSpace.uuid}
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: 1,
-              }}
+              className="flex justify-between gap-2"
             >
-              <Box display="flex" alignItems="center" gap={1}>
+              <div className="flex items-center gap-2">
                 <InitialsAvatar name={space.name} size="small" />
-                <Typography variant="body2">{space.name}</Typography>
-              </Box>
-              {space.uuid === selectedSpace.uuid && <CheckIcon fontSize="small" color="primary" />}
-            </MenuItem>
+                <Typography variant="paragraph-small">{space.name}</Typography>
+              </div>
+              {space.uuid === selectedSpace.uuid && <Check className="size-4 text-[var(--color-primary-main)]" />}
+            </DropdownMenuItem>
           ))}
 
-          <Divider />
+          <DropdownMenuSeparator />
 
-          <MenuItem
+          <DropdownMenuItem
+            className="font-bold"
             onClick={() => {
               handleClose()
               trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.SIDEBAR })
               router.push(AppRoutes.spaces.createSpace)
             }}
-            sx={{ fontWeight: 700 }}
           >
             Create workspace
-          </MenuItem>
+          </DropdownMenuItem>
 
-          <MenuItem
+          <DropdownMenuItem
+            className="font-bold"
             onClick={() => {
               handleClose()
               trackEvent({ ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.space_selector })
               router.push(AppRoutes.welcome.spaces)
             }}
-            sx={{ fontWeight: 700 }}
           >
             View workspaces
-          </MenuItem>
-        </Menu>
-      </Box>
-    </>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   )
 }
 

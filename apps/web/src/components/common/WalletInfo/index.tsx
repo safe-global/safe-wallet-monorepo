@@ -1,6 +1,7 @@
 import WalletBalance from '@/components/common/WalletBalance'
 import { WalletIdenticon } from '@/components/common/WalletOverview'
-import { Box, Button, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import css from './styles.module.css'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ChainSwitcher from '@/components/common/ChainSwitcher'
@@ -8,7 +9,7 @@ import useOnboard, { type ConnectedWallet, switchWallet } from '@/hooks/wallets/
 import useAddressBook from '@/hooks/useAddressBook'
 import { useChain } from '@/hooks/useChains'
 import madProps from '@/utils/mad-props'
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew'
+import { Power } from 'lucide-react'
 import useChainId from '@/hooks/useChainId'
 import { getNativeTokenDisplay, NATIVE_TOKEN_DISPLAY_DEFAULT } from '@safe-global/utils/utils/chains'
 
@@ -55,10 +56,10 @@ export const WalletInfo = ({
 
   return (
     <>
-      <Box display="flex" gap="12px">
+      <div className="flex gap-3">
         <WalletIdenticon wallet={wallet} size={36} />
 
-        <Typography variant="body2" className={css.address} component="div">
+        <div className={css.address}>
           <EthHashInfo
             address={wallet.address}
             name={addressBook[wallet.address] || wallet.ens || wallet.label}
@@ -68,55 +69,47 @@ export const WalletInfo = ({
             showCopyButton
             prefix={prefix}
           />
-        </Typography>
-      </Box>
+        </div>
+      </div>
 
-      <Box className={css.rowContainer}>
-        <Box className={css.row}>
-          <Typography variant="body2" color="primary.light">
+      <div className={css.rowContainer}>
+        <div className={css.row}>
+          <Typography variant="paragraph-small" className="text-muted-foreground">
             Wallet
           </Typography>
-          <Typography variant="body2">{wallet.label}</Typography>
-        </Box>
+          <Typography variant="paragraph-small">{wallet.label}</Typography>
+        </div>
 
         {showWalletBalance && (
-          <Box className={css.row}>
-            <Typography variant="body2" color="primary.light">
+          <div className={css.row}>
+            <Typography variant="paragraph-small" className="text-muted-foreground">
               Balance
             </Typography>
-            <Typography variant="body2" textAlign="right">
+            <Typography variant="paragraph-small" className="text-right">
               <WalletBalance balance={balance} />
 
               {currentChainId !== chainInfo?.chainId && (
-                <>
-                  <Typography variant="body2" color="primary.light">
-                    ({chainInfo?.chainName || 'Unknown chain'})
-                  </Typography>
-                </>
+                <Typography variant="paragraph-small" className="text-muted-foreground">
+                  ({chainInfo?.chainName || 'Unknown chain'})
+                </Typography>
               )}
             </Typography>
-          </Box>
+          </div>
         )}
-      </Box>
+      </div>
 
-      <Box display="flex" flexDirection="column" gap={2} width={1}>
+      <div className="flex w-full flex-col gap-4">
         <ChainSwitcher fullWidth />
 
-        <Button variant="contained" size="small" onClick={handleSwitchWallet} fullWidth>
+        <Button variant="outline" size="sm" onClick={handleSwitchWallet} className="w-full">
           Switch wallet
         </Button>
 
-        <Button
-          onClick={handleDisconnect}
-          variant="danger"
-          size="small"
-          fullWidth
-          disableElevation
-          startIcon={<PowerSettingsNewIcon />}
-        >
+        <Button onClick={handleDisconnect} variant="destructive" size="sm" className="w-full">
+          <Power />
           Disconnect
         </Button>
-      </Box>
+      </div>
     </>
   )
 }

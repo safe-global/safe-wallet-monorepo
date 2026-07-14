@@ -4,6 +4,7 @@ import { Search, Bell, Wallet, Layers, ChevronUp, ChevronDown } from 'lucide-rea
 import { blo } from 'blo'
 import { isAddress } from 'ethers'
 import { Button } from '@/components/ui/button'
+import IconAction from '@/components/common/IconAction'
 import { cn } from '@/utils/cn'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, BATCH_EVENTS } from '@/services/analytics'
@@ -111,15 +112,9 @@ export function HeaderNavigation({
       {/* TODO: Global search button */}
       {showSearch && (
         <div className="flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={onSearchClick}
-            className="cursor-pointer rounded-lg bg-transparent hover:bg-muted/30 transition-colors m-1"
-            aria-label="Search"
-          >
+          <IconAction onClick={onSearchClick} aria-label="Search">
             <Search className="size-5 text-muted-foreground" />
-          </Button>
+          </IconAction>
         </div>
       )}
 
@@ -127,15 +122,9 @@ export function HeaderNavigation({
         className="relative flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]"
         data-testid="notifications-center"
       >
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={onNotificationsClick}
-          className="cursor-pointer rounded-lg bg-transparent hover:bg-muted/30 transition-colors m-1"
-          aria-label="Notifications"
-        >
+        <IconAction onClick={onNotificationsClick} aria-label="Notifications">
           <Bell className="size-5 text-muted-foreground" />
-        </Button>
+        </IconAction>
 
         {messages > 0 && (
           <span
@@ -156,15 +145,9 @@ export function HeaderNavigation({
               className="relative flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]"
               data-track="batching: Batch sidebar open"
             >
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={onBatchClick}
-                className="cursor-pointer rounded-lg bg-transparent hover:bg-muted/30 transition-colors m-1"
-                aria-label="Batch transactions"
-              >
+              <IconAction onClick={onBatchClick} aria-label="Batch transactions">
                 <Layers className="size-5 text-muted-foreground" />
-              </Button>
+              </IconAction>
 
               {batchCount > 0 && (
                 <span
@@ -185,7 +168,7 @@ export function HeaderNavigation({
             variant="ghost"
             size="sm"
             onClick={onWalletClick}
-            className="cursor-pointer gap-1.5 rounded-lg bg-transparent hover:bg-muted/30 transition-colors m-1"
+            className="gap-1.5 m-1"
             aria-label={isConnected ? `Wallet ${walletDisplayName}` : 'Connect wallet'}
             data-testid={isConnected ? 'open-account-center' : 'connect-wallet-btn'}
           >

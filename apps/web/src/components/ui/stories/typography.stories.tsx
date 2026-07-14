@@ -24,6 +24,7 @@ const meta = {
         'paragraph-bold',
         'paragraph-small',
         'paragraph-small-medium',
+        'paragraph-small-bold',
         'paragraph-mini',
         'paragraph-mini-medium',
         'paragraph-mini-bold',
@@ -48,7 +49,7 @@ type Story = StoryObj<typeof meta>
  * All Figma typography variants. Default view.
  */
 export const Default: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     align: 'left',
   },
@@ -103,6 +104,11 @@ export const Default: Story = {
         </Typography>
       </div>
       <div>
+        <Typography {...args} variant="paragraph-small-bold">
+          Paragraph small bold — 14px Semibold
+        </Typography>
+      </div>
+      <div>
         <Typography {...args} variant="paragraph-mini">
           Paragraph mini — 12px Regular
         </Typography>
@@ -121,6 +127,43 @@ export const Default: Story = {
         <Typography {...args} variant="code">
           Monospaced — 16px
         </Typography>
+      </div>
+    </div>
+  ),
+}
+
+/**
+ * The `color` variant group. `default` inherits the surrounding text color; `muted` de-emphasizes.
+ */
+export const Colors: Story = {
+  tags: ['skip-visual-test'],
+  render: () => (
+    <div className="space-y-8">
+      <div>
+        <Typography color="default">Default — inherits text color</Typography>
+      </div>
+      <div>
+        <Typography color="muted">Muted — text-muted-foreground</Typography>
+      </div>
+    </div>
+  ),
+}
+
+/**
+ * The `align` variant group. `center` and `right` render as block-level to occupy the full width.
+ */
+export const Alignment: Story = {
+  tags: ['skip-visual-test'],
+  render: () => (
+    <div className="space-y-8">
+      <div>
+        <Typography align="left">Left aligned</Typography>
+      </div>
+      <div>
+        <Typography align="center">Center aligned</Typography>
+      </div>
+      <div>
+        <Typography align="right">Right aligned</Typography>
       </div>
     </div>
   ),

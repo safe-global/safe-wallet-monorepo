@@ -1,7 +1,7 @@
 import useWallet from '@/hooks/wallets/useWallet'
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { Button } from '@mui/material'
+import { Button } from '@/components/ui/button'
 import { useContext } from 'react'
 import type { SyntheticEvent, ReactElement } from 'react'
 
@@ -65,9 +65,9 @@ export default function CancelRecoveryButton({
           <Button
             data-testid="cancel-recovery-btn"
             onClick={onClick}
-            variant="danger"
+            variant="destructive"
             disabled={isDisabled}
-            size={compact ? 'small' : 'large'}
+            size={compact ? 'sm' : 'lg'}
           >
             Cancel
           </Button>

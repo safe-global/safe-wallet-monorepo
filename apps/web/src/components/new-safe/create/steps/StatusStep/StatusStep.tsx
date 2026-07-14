@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react'
-import { Box, Skeleton, StepLabel, SvgIcon } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
 import css from '@/components/new-safe/create/steps/StatusStep/styles.module.css'
-import CircleIcon from '@mui/icons-material/Circle'
-import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
+import { Circle } from 'lucide-react'
 import Identicon from '@/components/common/Identicon'
 
 const StatusStep = ({
@@ -14,25 +13,22 @@ const StatusStep = ({
   safeAddress?: string
   children: ReactNode
 }) => {
-  const Icon = isLoading ? CircleOutlinedIcon : CircleIcon
-  const color = isLoading ? 'border' : 'primary'
+  const colorClass = isLoading ? 'text-[var(--color-border-main)]' : 'text-[var(--color-primary-main)]'
 
   return (
-    <StepLabel
-      className={css.label}
-      icon={<SvgIcon component={Icon} className={css.icon} color={color} fontSize="small" />}
-    >
-      <Box display="flex" alignItems="center" gap={2} color={color}>
-        <Box flexShrink={0}>
+    <div className={`${css.label} flex items-center gap-2`}>
+      <Circle className={`${css.icon} size-4 ${colorClass} ${isLoading ? '' : 'fill-current'}`} />
+      <div className={`flex items-center gap-4 ${colorClass}`}>
+        <div className="shrink-0">
           {safeAddress && !isLoading ? (
             <Identicon address={safeAddress} size={32} />
           ) : (
-            <Skeleton variant="circular" width="2.3em" height="2.3em" />
+            <Skeleton className="h-[2.3em] w-[2.3em] rounded-full" />
           )}
-        </Box>
+        </div>
         {children}
-      </Box>
-    </StepLabel>
+      </div>
+    </div>
   )
 }
 

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import PortfolioRefreshHint from './index'
 import { toBeHex } from 'ethers'
@@ -55,9 +54,9 @@ const meta: Meta<typeof PortfolioRefreshHint> = {
   decorators: [
     (Story) => (
       <StoreDecorator initialState={baseInitialState}>
-        <Paper sx={{ padding: 4 }}>
+        <div className="rounded-lg bg-card p-8">
           <Story />
-        </Paper>
+        </div>
       </StoreDecorator>
     ),
   ],

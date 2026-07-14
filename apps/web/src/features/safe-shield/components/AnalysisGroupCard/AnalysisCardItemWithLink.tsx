@@ -1,7 +1,6 @@
 import { type AnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
-import { type ReactElement, type ReactNode } from 'react'
-import type { LinkProps } from '@mui/material'
+import { type ComponentProps, type ReactElement, type ReactNode } from 'react'
 import ExternalLink from '@/components/common/ExternalLink'
 
 interface AnalysisCardItemWithLinkProps {
@@ -12,7 +11,7 @@ interface AnalysisCardItemWithLinkProps {
   afterLinkText?: string
   linkUrl: string
   noIcon?: boolean
-  linkProps?: Omit<LinkProps, 'href' | 'target' | 'rel'>
+  linkProps?: Omit<ComponentProps<typeof ExternalLink>, 'href' | 'target' | 'rel'>
 }
 
 export const AnalysisCardItemWithLink = ({

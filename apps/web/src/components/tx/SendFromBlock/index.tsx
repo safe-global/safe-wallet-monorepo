@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
-import { Box, Typography } from '@mui/material'
-import SouthIcon from '@mui/icons-material/South'
+import { ArrowDown } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
 import css from './styles.module.css'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -10,17 +10,15 @@ const SendFromBlock = ({ title }: { title?: string }): ReactElement => {
   const address = useSafeAddress()
 
   return (
-    <Box className={css.container} pb={2} mb={2}>
-      <Typography color="text.secondary" pb={1}>
-        {title || 'Sending from'}
-      </Typography>
+    <div className={`${css.container} mb-4 pb-4`}>
+      <Typography className="pb-2 text-[var(--color-text-secondary)]">{title || 'Sending from'}</Typography>
 
-      <Typography variant="body2" component="div">
+      <div className="text-sm leading-5">
         <EthHashInfo address={address} shortAddress={false} hasExplorer showCopyButton />
-      </Typography>
+      </div>
 
-      <SouthIcon className={css.arrow} />
-    </Box>
+      <ArrowDown className={css.arrow} />
+    </div>
   )
 }
 

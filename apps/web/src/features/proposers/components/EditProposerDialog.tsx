@@ -6,7 +6,8 @@ import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import EditIcon from '@/public/images/common/edit.svg'
 import { SETTINGS_EVENTS } from '@/services/analytics'
-import { IconButton, SvgIcon, Tooltip } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { Delegate } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import React, { useState } from 'react'
 
@@ -22,30 +23,37 @@ const EditProposerDialog = ({ proposer }: { proposer: Delegate }) => {
   return (
     <>
       <CheckWallet allowProposer={false}>
-        {(isOk) => (
-          <Track {...SETTINGS_EVENTS.PROPOSERS.EDIT_PROPOSER}>
-            <Tooltip
-              title={
-                isOk && canEdit
-                  ? 'Edit proposer'
-                  : isOk && !canEdit
-                    ? 'Only the owner of this proposer can edit them'
-                    : undefined
-              }
-            >
-              <span>
-                <IconButton
-                  data-testid="edit-proposer-btn"
-                  onClick={() => setOpen(true)}
-                  size="small"
-                  disabled={!isOk || !canEdit}
-                >
-                  <SvgIcon component={EditIcon} inheritViewBox color="border" fontSize="small" />
-                </IconButton>
-              </span>
-            </Tooltip>
-          </Track>
-        )}
+        {(isOk) => {
+          const tooltipTitle =
+            isOk && canEdit ? 'Edit proposer' : isOk && !canEdit ? 'Only the owner of this proposer can edit them' : ''
+
+          const button = (
+            <span tabIndex={0}>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                data-testid="edit-proposer-btn"
+                onClick={() => setOpen(true)}
+                disabled={!isOk || !canEdit}
+              >
+                <EditIcon className="size-4 text-border" />
+              </Button>
+            </span>
+          )
+
+          return (
+            <Track {...SETTINGS_EVENTS.PROPOSERS.EDIT_PROPOSER}>
+              {tooltipTitle ? (
+                <Tooltip>
+                  <TooltipTrigger render={button} />
+                  <TooltipContent>{tooltipTitle}</TooltipContent>
+                </Tooltip>
+              ) : (
+                button
+              )}
+            </Track>
+          )
+        }}
       </CheckWallet>
 
       {open && <UpsertProposer onClose={() => setOpen(false)} onSuccess={() => setOpen(false)} proposer={proposer} />}

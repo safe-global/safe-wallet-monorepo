@@ -29,7 +29,7 @@ import { Calendar, Home, Inbox, Search, Settings, User2 } from 'lucide-react'
 const meta = {
   title: 'UI/Sidebar',
   component: Sidebar,
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   parameters: {
     layout: 'fullscreen',
   },
@@ -264,6 +264,203 @@ export const RightSide: Story = {
         </SidebarContent>
         <SidebarRail />
       </Sidebar>
+    </SidebarProvider>
+  ),
+}
+
+export const Inset: Story = {
+  render: () => (
+    <SidebarProvider>
+      <Sidebar variant="inset">
+        <SidebarHeader>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton size="lg">
+                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <Home className="size-4" />
+                </div>
+                <span className="font-semibold">Inset</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+        <SidebarRail />
+      </Sidebar>
+      <SidebarInset>
+        <header className="flex h-14 items-center gap-2 border-b px-4">
+          <SidebarTrigger />
+          <span className="font-semibold">Inset Variant</span>
+        </header>
+        <div className="flex-1 p-4">
+          <p className="text-muted-foreground">
+            Sidebar with inset style. The content area is inset with a card shell.
+          </p>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  ),
+}
+
+export const NonCollapsible: Story = {
+  render: () => (
+    <SidebarProvider>
+      <Sidebar collapsible="none">
+        <SidebarHeader>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton size="lg">
+                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <Home className="size-4" />
+                </div>
+                <span className="font-semibold">Always Open</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
+      <SidebarInset>
+        <header className="flex h-14 items-center gap-2 border-b px-4">
+          <span className="font-semibold">Non-Collapsible Variant</span>
+        </header>
+        <div className="flex-1 p-4">
+          <p className="text-muted-foreground">Sidebar stays open and cannot be collapsed. No trigger or rail.</p>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  ),
+}
+
+export const MenuButtonVariants: Story = {
+  render: () => (
+    <SidebarProvider>
+      <Sidebar>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Button variants</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton variant="default">
+                    <Home />
+                    <span>Default</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton variant="outline">
+                    <Settings />
+                    <span>Outline</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton isActive>
+                    <Inbox />
+                    <span>Active</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton disabled>
+                    <Search />
+                    <span>Disabled</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>Button sizes</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton size="sm">
+                    <Home />
+                    <span>Small</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton size="default">
+                    <Home />
+                    <span>Default</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton size="lg">
+                    <Home />
+                    <span>Large</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>Sub-button states</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton>
+                    <span>Parent</span>
+                  </SidebarMenuButton>
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton size="md">Medium (default)</SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton size="sm">Small</SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton isActive>Active</SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+        <SidebarRail />
+      </Sidebar>
+      <SidebarInset>
+        <header className="flex h-14 items-center gap-2 border-b px-4">
+          <SidebarTrigger />
+          <span className="font-semibold">Menu Button Variants</span>
+        </header>
+        <div className="flex-1 p-4">
+          <p className="text-muted-foreground">
+            Menu button variants (default, outline), states (active, disabled), sizes (sm, default, lg), and sub-button
+            states.
+          </p>
+        </div>
+      </SidebarInset>
     </SidebarProvider>
   ),
 }

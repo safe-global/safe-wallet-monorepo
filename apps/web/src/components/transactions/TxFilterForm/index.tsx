@@ -1,12 +1,7 @@
-import Paper from '@mui/material/Paper'
-import Grid from '@mui/material/Grid'
-import FormControl from '@mui/material/FormControl'
-import RadioGroup from '@mui/material/RadioGroup'
-import FormLabel from '@mui/material/FormLabel'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Radio from '@mui/material/Radio'
-import Button from '@mui/material/Button'
-import Divider from '@mui/material/Divider'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
 import { isBefore, isAfter, startOfDay } from 'date-fns'
 import { Controller, FormProvider, useForm, useFormState, type DefaultValues } from 'react-hook-form'
 import { useMemo, type ReactElement } from 'react'
@@ -21,7 +16,6 @@ import { useCurrentChain } from '@/hooks/useChains'
 import NumberField from '@/components/common/NumberField'
 
 import css from './styles.module.css'
-import inputCss from '@/styles/inputs.module.css'
 import AddressInput from '@/components/common/AddressInput'
 
 enum TxFilterFormFieldNames {
@@ -84,7 +78,6 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
   const isMultisigFilter = filterType === TxFilterType.MULTISIG
   const isModuleFilter = filterType === TxFilterType.MODULE
 
-  // Only subscribe to relevant `formState`
   const { dirtyFields, isValid } = useFormState({ control })
 
   const dirtyFieldNames = Object.keys(dirtyFields)
@@ -100,7 +93,6 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
 
     reset({
       ...defaultValues,
-      // Persist the current type
       [TxFilterFormFieldNames.FILTER_TYPE]: getValues(TxFilterFormFieldNames.FILTER_TYPE),
     })
   }
@@ -118,36 +110,46 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
   }
 
   return (
-    <Paper elevation={0} variant="outlined" className={css.filterWrapper}>
+    <div className={css.filterWrapper}>
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid data-testid="filter-modal" container>
-            <Grid item xs={12} md={3} sx={{ p: 4 }}>
-              <FormControl>
-                <FormLabel sx={{ mb: 2, color: ({ palette }) => palette.primary.light }}>Transaction type</FormLabel>
+          <div data-testid="filter-modal" className="flex min-w-0 flex-col md:min-h-[320px] md:flex-row">
+            <div className="w-full shrink-0 p-6 md:w-[220px] md:p-8">
+              <div className="flex w-full flex-col">
+                <Label className={css.filterSectionTitle}>Transaction type</Label>
                 <Controller
                   name={TxFilterFormFieldNames.FILTER_TYPE}
                   control={control}
                   render={({ field }) => (
-                    <RadioGroup {...field}>
+                    <RadioGroup
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      onBlur={field.onBlur}
+                      className="gap-4"
+                    >
                       {Object.values(TxFilterType).map((value) => (
-                        <FormControlLabel value={value} control={<Radio />} label={value} key={value} />
+                        <div key={value} className={css.radioOption}>
+                          <RadioGroupItem value={value} id={`filter-type-${value}`} />
+                          <Label htmlFor={`filter-type-${value}`} className="font-normal">
+                            {value}
+                          </Label>
+                        </div>
                       ))}
                     </RadioGroup>
                   )}
                 />
-              </FormControl>
-            </Grid>
+              </div>
+            </div>
 
-            <Divider orientation="vertical" flexItem />
+            <Separator orientation="vertical" className="hidden md:block md:self-stretch" />
 
-            <Grid item xs={12} md={8} sx={{ p: 4 }}>
-              <FormControl sx={{ width: '100%' }}>
-                <FormLabel sx={{ mb: 3, color: ({ palette }) => palette.primary.light }}>Parameters</FormLabel>
-                <Grid container item spacing={2} xs={12}>
+            <div className="w-full min-w-0 flex-1 p-6 md:p-8">
+              <div className="flex w-full flex-col">
+                <Label className={css.filterSectionTitle}>Parameters</Label>
+                <div className="flex flex-col gap-4">
                   {!isModuleFilter && (
-                    <>
-                      <Grid data-testid="start-date" item xs={12} md={6}>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div className={css.paramField} data-testid="start-date">
                         <DatePickerInput
                           name={TxFilterFormFieldNames.DATE_FROM}
                           label="From"
@@ -159,8 +161,8 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                             }
                           }}
                         />
-                      </Grid>
-                      <Grid data-testid="end-date" item xs={12} md={6}>
+                      </div>
+                      <div className={css.paramField} data-testid="end-date">
                         <DatePickerInput
                           name={TxFilterFormFieldNames.DATE_TO}
                           label="To"
@@ -172,9 +174,13 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                             }
                           }}
                         />
-                      </Grid>
+                      </div>
+                    </div>
+                  )}
 
-                      <Grid item xs={12} md={6}>
+                  {!isModuleFilter && (
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div className={css.paramField}>
                         <Controller
                           name={TxFilterFormFieldNames.AMOUNT}
                           control={control}
@@ -188,7 +194,8 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                           render={({ field, fieldState }) => (
                             <NumberField
                               data-testid="amount-input"
-                              className={inputCss.input}
+                              inputSize="xl"
+                              variant="surface"
                               label={
                                 fieldState.error?.message ||
                                 (isIncomingFilter ? 'Amount' : `Amount (only ${chain?.nativeCurrency.symbol || 'ETH'})`)
@@ -199,33 +206,36 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                             />
                           )}
                         />
-                      </Grid>
-                    </>
-                  )}
+                      </div>
 
-                  {isIncomingFilter && (
-                    <Grid item xs={12} md={6}>
-                      <AddressInput
-                        data-testid="token-input"
-                        label="Token address"
-                        name={TxFilterFormFieldNames.TOKEN_ADDRESS}
-                        required={false}
-                        fullWidth
-                      />
-                    </Grid>
+                      {isIncomingFilter && (
+                        <div className={css.paramField}>
+                          <AddressInput
+                            data-testid="token-input"
+                            label="Token address"
+                            name={TxFilterFormFieldNames.TOKEN_ADDRESS}
+                            required={false}
+                            fullWidth
+                          />
+                        </div>
+                      )}
+
+                      {isMultisigFilter && (
+                        <div className={css.paramField}>
+                          <AddressBookInput
+                            label="Recipient"
+                            name={TxFilterFormFieldNames.RECIPIENT}
+                            required={false}
+                            fullWidth
+                          />
+                        </div>
+                      )}
+                    </div>
                   )}
 
                   {isMultisigFilter && (
-                    <>
-                      <Grid item xs={12} md={6}>
-                        <AddressBookInput
-                          label="Recipient"
-                          name={TxFilterFormFieldNames.RECIPIENT}
-                          required={false}
-                          fullWidth
-                        />
-                      </Grid>
-                      <Grid item xs={12} md={6}>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div className={css.paramField}>
                         <Controller
                           name={TxFilterFormFieldNames.NONCE}
                           control={control}
@@ -239,7 +249,8 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                           render={({ field, fieldState }) => (
                             <NumberField
                               data-testid="nonce-input"
-                              className={inputCss.input}
+                              inputSize="xl"
+                              variant="surface"
                               label={fieldState.error?.message || 'Nonce'}
                               error={!!fieldState.error}
                               {...field}
@@ -247,36 +258,42 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                             />
                           )}
                         />
-                      </Grid>
-                    </>
+                      </div>
+                    </div>
                   )}
 
                   {isModuleFilter && (
-                    <Grid item xs={12} md={6}>
+                    <div className={css.paramField}>
                       <AddressBookInput
                         label="Module"
                         name={TxFilterFormFieldNames.MODULE}
                         required={false}
                         fullWidth
                       />
-                    </Grid>
+                    </div>
                   )}
-                </Grid>
-              </FormControl>
+                </div>
+              </div>
 
-              <Grid item container md={6} sx={{ gap: 2, mt: 3 }}>
-                <Button data-testid="clear-btn" variant="contained" onClick={clearFilter} disabled={!canClear}>
+              <div className="mt-6 flex justify-end gap-2">
+                <Button
+                  data-testid="clear-btn"
+                  type="button"
+                  variant="ghost"
+                  onClick={clearFilter}
+                  disabled={!canClear}
+                >
                   Clear
                 </Button>
-                <Button data-testid="apply-btn" type="submit" variant="contained" color="primary" disabled={!isValid}>
+                <Button data-testid="apply-btn" type="submit" disabled={!isValid}>
                   Apply
                 </Button>
-              </Grid>
-            </Grid>
-          </Grid>
+              </div>
+            </div>
+          </div>
         </form>
       </FormProvider>
-    </Paper>
+    </div>
   )
 }
 

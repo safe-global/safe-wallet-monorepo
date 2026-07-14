@@ -1,6 +1,6 @@
 import { useCallback, useContext } from 'react'
 import { MakeASwapButton, SendTokensButton, TxBuilderButton } from '@/components/tx-flow/common/TxButton'
-import { Container, Grid, Paper, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { TxModalContext } from '../../'
 import TokenTransferFlow from '../TokenTransfer'
 import { ProgressBar } from '@/components/common/ProgressBar'
@@ -22,38 +22,19 @@ const NewTxFlow = () => {
   const progress = 10
 
   return (
-    <Container className={css.container}>
-      <Grid
-        container
-        sx={{
-          justifyContent: 'center',
-        }}
-      >
+    <div className={`mx-auto w-full max-w-[1200px] px-4 ${css.container}`}>
+      <div className="flex justify-center">
         {/* Alignment of `TxLayout` */}
-        <Grid
-          item
-          xs={12}
-          md={11}
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
+        <div className="flex w-full flex-col md:w-11/12">
           <ChainIndicator inline className={css.chain} />
 
-          <Grid container component={Paper}>
-            <Grid item xs={12} className={css.progressBar}>
+          <div
+            className={`relative grid grid-cols-1 rounded-xl border border-border bg-card shadow-sm md:grid-cols-12 ${css.surface}`}
+          >
+            <div className={`md:col-span-12 ${css.progressBar}`}>
               <ProgressBar value={progress} />
-            </Grid>
-            <Grid
-              item
-              xs={12}
-              md={6}
-              className={css.pane}
-              sx={{
-                gap: 3,
-              }}
-            >
+            </div>
+            <div className={`md:col-span-6 ${css.pane}`}>
               <div className={css.globs}>
                 <NewTxIcon />
               </div>
@@ -61,17 +42,9 @@ const NewTxFlow = () => {
               <Typography variant="h1" className={css.title}>
                 New transaction
               </Typography>
-            </Grid>
+            </div>
 
-            <Grid
-              item
-              xs={12}
-              md={5}
-              className={css.pane}
-              sx={{
-                gap: 2,
-              }}
-            >
+            <div className={`md:col-span-5 ${css.pane}`} style={{ gap: 'var(--space-2)' }}>
               <Typography variant="h4" className={css.type}>
                 Manage assets
               </Typography>
@@ -81,22 +54,16 @@ const NewTxFlow = () => {
               <SendTokensButton onClick={onTokensClick} />
               <MakeASwapButton />
 
-              <Typography
-                variant="h4"
-                className={css.type}
-                sx={{
-                  mt: 3,
-                }}
-              >
+              <Typography variant="h4" className={`mt-6 ${css.type}`}>
                 Interact with contracts
               </Typography>
 
               <TxBuilderButton />
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
-    </Container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 

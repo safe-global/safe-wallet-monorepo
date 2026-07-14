@@ -1,7 +1,7 @@
 import { TriangleAlert } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import DialogActions from '@/components/common/DialogActions'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import type { SelectableItem } from './useTrustedSafesModal.types'
 
@@ -19,7 +19,7 @@ interface SimilarityConfirmDialogProps {
 const SimilarityConfirmDialog = ({ open, safe, onConfirm, onCancel }: SimilarityConfirmDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
-      <DialogContent className="max-w-[500px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Similar address detected</DialogTitle>
         </DialogHeader>
@@ -44,14 +44,16 @@ const SimilarityConfirmDialog = ({ open, safe, onConfirm, onCancel }: Similarity
           </p>
         </div>
 
-        <DialogFooter>
-          <Button onClick={onCancel} variant="ghost">
-            Cancel
-          </Button>
-          <Button onClick={onConfirm}>
-            <TriangleAlert className="size-4" />I understand, continue anyway
-          </Button>
-        </DialogFooter>
+        <DialogActions
+          className="p-4"
+          onCancel={onCancel}
+          onConfirm={onConfirm}
+          confirmLabel={
+            <>
+              <TriangleAlert className="size-4" />I understand, continue anyway
+            </>
+          }
+        />
       </DialogContent>
     </Dialog>
   )

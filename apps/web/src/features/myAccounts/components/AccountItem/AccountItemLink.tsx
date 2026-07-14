@@ -1,5 +1,4 @@
 import { type ReactNode, type RefObject } from 'react'
-import { ListItemButton } from '@mui/material'
 import Link from 'next/link'
 import type { UrlObject } from 'url'
 import classnames from 'classnames'
@@ -38,20 +37,19 @@ function AccountItemLink({
   elementRef,
 }: AccountItemLinkProps) {
   return (
-    <ListItemButton
+    <div
       ref={elementRef}
       data-testid="safe-list-item"
-      selected={isCurrentSafe}
-      className={classnames(css.listItem, {
+      className={classnames(css.listItem, 'hover:bg-muted/40 transition-colors', {
         [css.currentListItem]: isCurrentSafe,
       })}
     >
       <Track {...OVERVIEW_EVENTS.OPEN_SAFE} label={trackingLabel}>
-        <Link onClick={onLinkClick} href={href}>
+        <Link onClick={onLinkClick} href={href} className="flex w-full items-center p-2">
           <AccountItemContent>{children}</AccountItemContent>
         </Link>
       </Track>
-    </ListItemButton>
+    </div>
   )
 }
 

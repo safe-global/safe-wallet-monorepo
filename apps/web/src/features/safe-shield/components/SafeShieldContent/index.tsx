@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react'
-import { Box } from '@mui/material'
 import type {
   ContractAnalysisResults,
   DeadlockAnalysisResults,
@@ -69,16 +68,8 @@ export const SafeShieldContent = ({
     calculateAnalysisDelays(recipientEmpty, contractEmpty, deadlockEmpty)
 
   return (
-    <Box padding="0px 4px 4px">
-      <Box
-        sx={{
-          border: '1px solid',
-          borderColor: 'background.main',
-          borderTop: 'none',
-          borderRadius: '0px 0px 6px 6px',
-          position: 'relative',
-        }}
-      >
+    <div className="px-1 pb-1">
+      <div className="relative rounded-b-[6px] border border-t-0 border-[var(--color-background-main)]">
         {showHypernativeInfo && (
           <hn.HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
         )}
@@ -87,7 +78,7 @@ export const SafeShieldContent = ({
 
         {shouldShowContent && !loading && allEmpty && !hypernativeAuth && <SafeShieldAnalysisEmpty />}
 
-        <Box sx={{ '& > div': { borderTop: '1px solid', borderColor: 'background.main' } }}>
+        <div className="[&>div]:border-t [&>div]:border-[var(--color-background-main)]">
           {/* Untrusted Safe warning - shown at top when Safe is not pinned */}
           {safeAnalysis && onAddToTrustedList && (
             <UntrustedSafeWarning safeAnalysis={safeAnalysis} onAddToTrustedList={onAddToTrustedList} />
@@ -139,8 +130,8 @@ export const SafeShieldContent = ({
               highlightedSeverity={highlightedSeverity}
             />
           )}
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   )
 }

@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
 import { useReducer } from 'react'
-import { Box, Typography, Collapse } from '@mui/material'
-import { ExpandMore } from '@mui/icons-material'
+import { ChevronDown } from 'lucide-react'
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
+import { Typography } from '@/components/ui/typography'
 
 interface AnalysisDetailsDropdownProps {
   showLabel?: string
@@ -22,47 +23,27 @@ export const AnalysisDetailsDropdown = ({
   const [expanded, toggle] = useReducer((state: boolean) => !state, defaultExpanded)
 
   return (
-    <Box mt={-1.5}>
-      <Box
+    <Collapsible open={expanded} className="-mt-3">
+      <div
         onClick={toggle}
         role="button"
         aria-label={expanded ? hideLabel : showLabel}
-        display="inline-flex"
-        alignItems="center"
-        position="relative"
-        width="fit-content"
-        overflow="hidden"
-        color="text.secondary"
-        mb={expanded ? 0.5 : 0}
-        sx={{
-          cursor: 'pointer',
-          '&:hover div': { width: '100%', transform: 'translateX(100%)', transition: 'all 0.5s' },
-        }}
+        className={`group relative inline-flex w-fit cursor-pointer items-center overflow-hidden text-[var(--color-text-secondary)] ${
+          expanded ? 'mb-1' : ''
+        }`}
       >
-        <Typography fontSize={12} component="span" letterSpacing="1px" variant="body2" color="text.secondary">
+        <Typography variant="paragraph-mini" className="text-[var(--color-text-secondary)]">
           {expanded ? hideLabel : showLabel}
         </Typography>
-        <Box
-          position="absolute"
-          left={0}
-          bottom={0}
-          sx={{
-            backgroundColor: 'rgba(0, 0, 0, 0.1)',
-            width: 0,
-            transform: 'translateX(-1rem)',
-            height: '1px',
-          }}
+        <div className="absolute bottom-0 left-0 h-px w-0 -translate-x-4 bg-[rgba(0,0,0,0.1)] transition-all group-hover:w-full group-hover:translate-x-full" />
+        <ChevronDown
+          data-testid="ExpandMoreIcon"
+          className="size-5 transition-transform"
+          style={{ transform: expanded ? 'rotate(-180deg)' : 'rotate(0deg)' }}
         />
-        <ExpandMore
-          sx={{
-            transform: expanded ? 'rotate(-180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s',
-          }}
-          fontSize="small"
-        />
-      </Box>
+      </div>
 
-      <Collapse in={expanded}>{contentWrapper ? contentWrapper(children) : children}</Collapse>
-    </Box>
+      <CollapsibleContent keepMounted>{contentWrapper ? contentWrapper(children) : children}</CollapsibleContent>
+    </Collapsible>
   )
 }

@@ -1,17 +1,13 @@
-import Link from 'next/link'
-import Card from '@mui/material/Card'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import IconButton from '@mui/material/IconButton'
-import Divider from '@mui/material/Divider'
-import { default as MuiLink } from '@mui/material/Link'
-import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded'
-import GitHubIcon from '@mui/icons-material/GitHub'
-import TelegramIcon from '@mui/icons-material/Telegram'
-import TwitterIcon from '@mui/icons-material/Twitter'
+import NextLink from 'next/link'
+import { HelpCircle, Github, Send, Twitter } from 'lucide-react'
 import { SafeAppSocialPlatforms } from '@safe-global/store/gateway/types'
 import type { SafeApp as SafeAppData, SafeAppSocialProfile } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
+import { Card } from '@/components/ui/card'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Link } from '@/components/ui/link'
 import DiscordIcon from '@/public/images/common/discord-icon.svg'
 import css from './styles.module.css'
 
@@ -34,110 +30,97 @@ const SafeAppSocialLinksCard = ({ safeApp }: SafeAppSocialLinksCardProps) => {
   const telegramSocialLink = getSocialProfile(socialProfiles, SafeAppSocialPlatforms.TELEGRAM)
 
   return (
-    <Card className={css.container}>
-      <Box display="flex" alignItems="center" gap={1} component="a">
+    <Card
+      // eslint-disable-next-line no-restricted-syntax -- faithful css-module port, pixel-identical; bespoke value has no variant
+      className="mt-[var(--space-4)] bg-[var(--color-info-background)] p-[var(--space-3)]"
+    >
+      <div className="flex items-center gap-2">
         {/* Team Link section */}
         <div className={css.questionMarkIcon}>
-          <HelpOutlineRoundedIcon color="info" />
+          <HelpCircle className="size-6 text-[var(--color-info-main)]" />
         </div>
         <div>
-          <Typography fontWeight="bold" variant="subtitle1">
-            Something wrong with the Safe App?
-          </Typography>
-          <Typography color="primary.light" variant="body2">
+          <Typography variant="paragraph-bold">Something wrong with the Safe App?</Typography>
+          <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
             Get in touch with the team
           </Typography>
         </div>
-      </Box>
+      </div>
 
-      <Box className={css.socialLinksSectionContainer} display="flex" gap={4}>
+      <div className={`${css.socialLinksSectionContainer} flex gap-8`}>
         {/* Social links section */}
         {hasSocialLinks && (
           <div>
-            <Typography color="border.main" variant="body2" pl={1}>
+            <Typography variant="paragraph-small" className="pl-2 text-[var(--color-border-main)]">
               Social Media
             </Typography>
 
-            <Box display="flex" mt={0.2} minHeight="40px">
+            <div className="mt-0.5 flex min-h-[40px]">
               {discordSocialLink && (
-                <IconButton
+                <Button
+                  variant="ghost"
+                  size="icon"
                   aria-label="Discord link"
-                  component="a"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={discordSocialLink.url}
+                  render={<a target="_blank" rel="noopener noreferrer" href={discordSocialLink.url} />}
                 >
                   <DiscordIcon />
-                </IconButton>
+                </Button>
               )}
 
               {twitterSocialLink && (
-                <IconButton
+                <Button
+                  variant="ghost"
+                  size="icon"
                   aria-label="Twitter link"
-                  component="a"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={twitterSocialLink.url}
+                  render={<a target="_blank" rel="noopener noreferrer" href={twitterSocialLink.url} />}
                 >
-                  <TwitterIcon color="border" />
-                </IconButton>
+                  <Twitter className="text-[var(--color-border-main)]" />
+                </Button>
               )}
 
               {githubSocialLink && (
-                <IconButton
+                <Button
+                  variant="ghost"
+                  size="icon"
                   aria-label="Github link"
-                  component="a"
-                  href={githubSocialLink.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ height: '40px', width: '40px' }}
+                  render={<a target="_blank" rel="noopener noreferrer" href={githubSocialLink.url} />}
                 >
-                  <GitHubIcon color="border" />
-                </IconButton>
+                  <Github className="text-[var(--color-border-main)]" />
+                </Button>
               )}
 
               {telegramSocialLink && (
-                <IconButton
+                <Button
+                  variant="ghost"
+                  size="icon"
                   aria-label="Telegram link"
-                  component="a"
-                  href={telegramSocialLink.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ height: '40px', width: '40px' }}
+                  render={<a target="_blank" rel="noopener noreferrer" href={telegramSocialLink.url} />}
                 >
-                  <TelegramIcon color="border" />
-                </IconButton>
+                  <Send className="text-[var(--color-border-main)]" />
+                </Button>
               )}
-            </Box>
+            </div>
           </div>
         )}
 
-        {hasSocialLinks && developerWebsite && (
-          <Divider sx={{ height: '40px' }} orientation="vertical" component="div" />
-        )}
+        {hasSocialLinks && developerWebsite && <Separator orientation="vertical" className="h-[40px]" />}
 
         {/* Developer website section */}
         {developerWebsite && (
-          <Box display="flex" flexDirection="column">
-            <Typography color="border.main" variant="body2">
+          <div className="flex flex-col">
+            <Typography variant="paragraph-small" className="text-[var(--color-border-main)]">
               Website
             </Typography>
 
             <Link
-              href={developerWebsite}
-              passHref
-              target="_blank"
-              rel="noopener noreferrer"
-              color="primary"
-              legacyBehavior
+              className={`${css.websiteLink} mt-1 font-bold`}
+              render={<NextLink href={developerWebsite} target="_blank" rel="noopener noreferrer" />}
             >
-              <MuiLink target="_blank" className={css.websiteLink} underline="hover" fontWeight="bold" mt={1.2}>
-                {developerWebsite}
-              </MuiLink>
+              {developerWebsite}
             </Link>
-          </Box>
+          </div>
         )}
-      </Box>
+      </div>
     </Card>
   )
 }

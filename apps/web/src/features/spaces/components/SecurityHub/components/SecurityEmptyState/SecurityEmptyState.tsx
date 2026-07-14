@@ -6,7 +6,6 @@ import Track from '@/components/common/Track'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { WidgetEmptyState } from '../../../SafeWidget'
 import { Card } from '@/components/ui/card'
-import { Typography as MuiTypography } from '@mui/material'
 import { Typography } from '@/components/ui/typography'
 import css from './styles.module.css'
 import { cn } from '@/utils/cn'
@@ -110,9 +109,9 @@ const SecurityEmptyState = (): ReactElement => {
         />
       </div>
 
-      <MuiTypography component="h4" className="my-3 text-secondary-foreground" variant="caption">
+      <Typography as="h4" variant="paragraph-mini" className="my-3 text-secondary-foreground">
         AVAILABLE ON EVERY SAFE YOU ADD
-      </MuiTypography>
+      </Typography>
 
       <div className="flex gap-4 flex-1 md:flex-row flex-col">
         {CARDS.map((card, index) => (

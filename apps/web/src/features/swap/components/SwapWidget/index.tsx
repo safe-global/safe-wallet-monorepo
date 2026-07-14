@@ -1,7 +1,6 @@
 import { TradeType, type CowSwapWidgetParams } from '@cowprotocol/widget-lib'
 import { type OnTradeParamsPayload, type CowEventListeners, CowEvents } from '@cowprotocol/events'
 import { type MutableRefObject, useEffect, useMemo, useRef, useState } from 'react'
-import { Box, useTheme } from '@mui/material'
 import { CowSwapWidget } from '@cowprotocol/widget-react'
 import { SafeAppAccessPolicyTypes, SafeAppFeatures } from '@safe-global/store/gateway/types'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
@@ -29,6 +28,8 @@ import { getKeyWithTrueValue } from '@/utils/helpers'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { parseCowSupportedChainId } from '../../helpers/cowSupportedChainId'
+import lightPalette from '@safe-global/theme/palettes/light'
+import darkPalette from '@safe-global/theme/palettes/dark'
 
 const BASE_URL = typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
 
@@ -41,8 +42,8 @@ type Params = {
 }
 
 const SwapWidget = ({ sell }: Params) => {
-  const { palette } = useTheme()
   const darkMode = useDarkMode()
+  const palette = darkMode ? darkPalette : lightPalette
   const chainId = useChainId()
   const cowChainId = useMemo(() => parseCowSupportedChainId(chainId), [chainId])
   const dispatch = useAppDispatch()
@@ -284,9 +285,9 @@ const SwapWidget = ({ sell }: Params) => {
   }
 
   return (
-    <Box className={css.swapWidget} id="swapWidget">
+    <div className={css.swapWidget} id="swapWidget">
       <CowSwapWidget params={params} listeners={listeners} />
-    </Box>
+    </div>
   )
 }
 

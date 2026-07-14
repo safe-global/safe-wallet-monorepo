@@ -1,7 +1,9 @@
-import { useCallback, type ReactElement } from 'react'
-import { Checkbox, Autocomplete, TextField, Chip, Box, Typography } from '@mui/material'
+import { useCallback, useRef, useState, type ReactElement } from 'react'
+import { XIcon } from 'lucide-react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import ChainIndicator from '../ChainIndicator'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Typography } from '@/components/ui/typography'
 import css from './styles.module.css'
 import { useFormContext } from 'react-hook-form'
 import useChains from '@/hooks/useChains'
@@ -29,6 +31,9 @@ const NetworkMultiSelectorInput = ({
 }: NetworkMultiSelectorInputProps): ReactElement => {
   const { configs } = useChains()
   const { setValue } = useFormContext()
+  const [open, setOpen] = useState(false)
+  const [inputValue, setInputValue] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const getOptionDisabled = isOptionDisabled || (() => false)
 
@@ -54,6 +59,8 @@ const NetworkMultiSelectorInput = ({
     [handleChange, value],
   )
 
+  const isSelected = useCallback((chainId: string) => value.some((chain) => chain.chainId === chainId), [value])
+
   const isAllSelected = value.length === configs.length
 
   const toggleSelectAll = useCallback(() => {
@@ -64,86 +71,151 @@ const NetworkMultiSelectorInput = ({
     }
   }, [isAllSelected, handleChange, configs])
 
+  const toggleOption = useCallback(
+    (chain: Chain) => {
+      if (isSelected(chain.chainId)) {
+        handleChange(value.filter((item) => item.chainId !== chain.chainId))
+      } else {
+        handleChange([...value, chain])
+      }
+    },
+    [handleChange, isSelected, value],
+  )
+
   const options = showSelectAll ? [SELECT_ALL_OPTION, ...configs] : configs
 
-  const renderTags = useCallback(
-    (selectedOptions: (Chain | typeof SELECT_ALL_OPTION)[]) => {
-      if (showSelectAll && isAllSelected) {
-        return (
-          <Typography variant="body2">
-            All networks{' '}
-            <Box component="span" sx={{ color: 'text.secondary' }}>
-              (Default)
-            </Box>
-          </Typography>
-        )
-      }
-
-      return selectedOptions.map((chain) => (
-        <Chip
-          variant="outlined"
-          key={chain.chainId}
-          avatar={<ChainIndicator chainId={chain.chainId} onlyLogo inline />}
-          label={chain.chainName}
-          onDelete={() => handleDelete(chain.chainId)}
-          className={css.multiChainChip}
-        />
-      ))
-    },
-    [showSelectAll, isAllSelected, handleDelete],
-  )
-
-  const renderOption = useCallback(
-    (
-      props: React.HTMLAttributes<HTMLLIElement> & { key: string },
-      chain: Chain | typeof SELECT_ALL_OPTION,
-      { selected }: { selected: boolean },
-    ) => {
-      const { key, ...rest } = props
-
-      if (showSelectAll && chain.chainId === SELECT_ALL_OPTION.chainId) {
-        return (
-          <Box component="li" key={key} {...rest} onClick={toggleSelectAll}>
-            <Checkbox data-testid="select-all-checkbox" size="small" checked={isAllSelected} />
-            <span>Select All</span>
-          </Box>
-        )
-      }
-
-      return (
-        <Box component="li" key={key} {...rest}>
-          <Checkbox data-testid="network-checkbox" size="small" checked={selected} />
-          <ChainIndicator chainId={chain.chainId} inline />
-        </Box>
+  const visibleOptions = inputValue
+    ? options.filter(
+        (option) =>
+          (showSelectAll && option.chainId === SELECT_ALL_OPTION.chainId) ||
+          option.chainName.toLowerCase().includes(inputValue.toLowerCase()),
       )
-    },
-    [showSelectAll, isAllSelected, toggleSelectAll],
-  )
+    : options
+
+  const renderChips = () => {
+    if (showSelectAll && isAllSelected) {
+      return (
+        <Typography variant="paragraph-small">
+          All networks <span className="text-muted-foreground">(Default)</span>
+        </Typography>
+      )
+    }
+
+    return value.map((chain) => (
+      <span key={chain.chainId} className={css.multiChainChip}>
+        <ChainIndicator chainId={chain.chainId} onlyLogo inline />
+        <span>{chain.chainName}</span>
+        <button
+          type="button"
+          aria-label={`Remove ${chain.chainName}`}
+          className={css.chipDelete}
+          onClick={(e) => {
+            e.stopPropagation()
+            handleDelete(chain.chainId)
+          }}
+        >
+          <XIcon data-testid="CancelIcon" className="size-3.5" />
+        </button>
+      </span>
+    ))
+  }
+
+  const renderOptionContent = (chain: Chain | typeof SELECT_ALL_OPTION) => {
+    if (showSelectAll && chain.chainId === SELECT_ALL_OPTION.chainId) {
+      return (
+        <>
+          <Checkbox data-testid="select-all-checkbox" checked={isAllSelected} className="pointer-events-none" />
+          <span>Select All</span>
+        </>
+      )
+    }
+
+    return (
+      <>
+        <Checkbox data-testid="network-checkbox" checked={isSelected(chain.chainId)} className="pointer-events-none" />
+        <ChainIndicator chainId={chain.chainId} inline />
+      </>
+    )
+  }
+
+  const handleOptionClick = (chain: Chain | typeof SELECT_ALL_OPTION, disabled: boolean) => {
+    if (disabled) return
+    if (showSelectAll && chain.chainId === SELECT_ALL_OPTION.chainId) {
+      toggleSelectAll()
+    } else {
+      toggleOption(chain as Chain)
+    }
+  }
 
   return (
-    <Autocomplete
-      multiple
-      value={value || []}
-      disableCloseOnSelect
-      options={options}
-      renderTags={renderTags}
-      renderOption={renderOption}
-      getOptionLabel={(option) => option.chainName}
-      getOptionDisabled={(option) =>
-        showSelectAll && option.chainId === SELECT_ALL_OPTION.chainId ? false : getOptionDisabled(option)
-      }
-      renderInput={(params) => <TextField {...params} error={error} helperText={helperText} />}
-      filterOptions={(options, { inputValue }) => {
-        if (!inputValue) return options
-        return options.filter(
-          (option) =>
-            (showSelectAll && option.chainId === SELECT_ALL_OPTION.chainId) ||
-            option.chainName.toLowerCase().includes(inputValue.toLowerCase()),
-        )
-      }}
-      isOptionEqualToValue={(option, value) => option.chainId === value.chainId}
-      onChange={(_, data) => handleChange(data)}
-    />
+    <div className={css.multiSelectWrapper}>
+      <div
+        className={`${css.multiSelectControl} ${error ? css.multiSelectError : ''}`}
+        onClick={() => inputRef.current?.focus()}
+      >
+        {renderChips()}
+
+        <input
+          ref={inputRef}
+          role="combobox"
+          aria-expanded={open}
+          aria-controls={`${name}-listbox`}
+          aria-invalid={error || undefined}
+          className={css.multiSelectInput}
+          placeholder={value.length === 0 ? 'Select networks' : undefined}
+          value={inputValue}
+          onChange={(e) => {
+            setInputValue(e.target.value)
+            setOpen(true)
+          }}
+          onClick={() => setOpen((prev) => !prev)}
+        />
+
+        {value.length > 0 && (
+          <button
+            type="button"
+            aria-label="Clear all"
+            className={css.clearAll}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleChange([])
+            }}
+          >
+            <XIcon data-testid="CloseIcon" className="size-4" />
+          </button>
+        )}
+      </div>
+
+      {open && (
+        <ul id={`${name}-listbox`} role="listbox" aria-multiselectable className={css.multiSelectList}>
+          {visibleOptions.map((chain) => {
+            const disabled =
+              showSelectAll && chain.chainId === SELECT_ALL_OPTION.chainId ? false : getOptionDisabled(chain as Chain)
+            const selected =
+              showSelectAll && chain.chainId === SELECT_ALL_OPTION.chainId ? isAllSelected : isSelected(chain.chainId)
+
+            return (
+              <li
+                key={chain.chainId}
+                role="option"
+                aria-disabled={Boolean(disabled)}
+                aria-selected={Boolean(selected)}
+                className={css.multiSelectOption}
+                onClick={() => handleOptionClick(chain, disabled)}
+              >
+                {renderOptionContent(chain)}
+              </li>
+            )
+          })}
+        </ul>
+      )}
+
+      {helperText && (
+        <Typography variant="paragraph-mini" className={error ? 'text-destructive' : 'text-muted-foreground'}>
+          {helperText}
+        </Typography>
+      )}
+    </div>
   )
 }
 

@@ -1,15 +1,14 @@
-import { type ReactElement, useState, useMemo, Children } from 'react'
-import { Controller, useFormContext, useWatch } from 'react-hook-form'
-import { SvgIcon, Typography } from '@mui/material'
-import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete'
+import { type ReactElement, useState, useMemo } from 'react'
+import { useFormContext, useWatch } from 'react-hook-form'
 import AddressInput, { type AddressInputProps } from '../AddressInput'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import EntryDialog from '@/components/address-book/EntryDialog'
+import { Typography } from '@/components/ui/typography'
 import css from './styles.module.css'
-import inputCss from '@/styles/inputs.module.css'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { useMergedAddressBooks, useSafeNameResolver, type ContactSource } from '@/hooks/useAllAddressBooks'
+import type { ContactSource } from '@/hooks/useAllAddressBooks'
+import { useMergedAddressBooks, useSafeNameResolver, type ExtendedContact } from '@/hooks/useAllAddressBooks'
 import { useCurrentChain } from '@/hooks/useChains'
 import useChainId from '@/hooks/useChainId'
 import { useMemberNameResolver } from '@/features/spaces'
@@ -17,9 +16,23 @@ import RecipientOption from './RecipientOption'
 import RecipientGroupHeader from './RecipientGroupHeader'
 import useWorkspaceName from './useWorkspaceName'
 
-const abFilterOptions = createFilterOptions({
-  stringify: (option: { label: string; name: string }) => option.name + ' ' + option.label,
-})
+type AddressBookEntry = { label: string; name: string; source: ContactSource; contact: ExtendedContact }
+
+const filterEntries = (entries: AddressBookEntry[], input: string): AddressBookEntry[] => {
+  const search = input.trim().toLowerCase()
+  if (!search) return entries
+  return entries.filter((entry) => `${entry.name} ${entry.label}`.toLowerCase().includes(search))
+}
+
+const groupEntriesBySource = (entries: AddressBookEntry[]): [ContactSource, AddressBookEntry[]][] => {
+  const groups = new Map<ContactSource, AddressBookEntry[]>()
+  for (const entry of entries) {
+    const group = groups.get(entry.source) ?? []
+    group.push(entry)
+    groups.set(entry.source, group)
+  }
+  return [...groups.entries()]
+}
 
 /**
  *  Temporary component until revamped safe components are done
@@ -37,7 +50,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
   const { setValue, control } = useFormContext()
   const addressValue = useWatch({ name, control })
 
-  const allAddressBookEntries = useMemo(
+  const allAddressBookEntries = useMemo<AddressBookEntry[]>(
     () =>
       mergedAddressBook.list
         // Only suggest contacts configured for the chain we are sending on
@@ -51,6 +64,14 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
     [mergedAddressBook, chainId],
   )
 
+  // Don't show suggestions from the address book once a valid address has been entered.
+  const filteredEntries = useMemo(() => {
+    if (isValidAddress(addressValue)) return []
+    return filterEntries(allAddressBookEntries, addressValue ?? '')
+  }, [allAddressBookEntries, addressValue])
+
+  const groupedEntries = useMemo(() => groupEntriesBySource(filteredEntries), [filteredEntries])
+
   const hasVisibleOptions = useMemo(
     () => !!allAddressBookEntries.filter((entry) => entry.label.includes(addressValue)).length,
     [allAddressBookEntries, addressValue],
@@ -61,13 +82,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
     [allAddressBookEntries, addressValue],
   )
 
-  const customFilterOptions = (options: any, state: any) => {
-    // Don't show suggestions from the address book once a valid address has been entered.
-    if (isValidAddress(addressValue)) return []
-    return abFilterOptions(options, state)
-  }
-
-  const handleOpenAutocomplete = () => {
+  const handleToggleAutocomplete = () => {
     setOpen((value) => !value)
   }
 
@@ -77,76 +92,64 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
       }
     : undefined
 
+  const showList = open && !props.disabled && !props.InputProps?.readOnly && filteredEntries.length > 0
+
+  const onSelectOption = (entry: AddressBookEntry) => {
+    setValue(name, entry.label, { shouldValidate: true })
+    setOpen(false)
+  }
+
   return (
     <>
-      <Controller
-        name={name}
-        control={control}
-        // eslint-disable-next-line
-        render={({ field: { ref, ...field } }) => (
-          <Autocomplete
-            {...field}
-            className={inputCss.input}
-            open={open}
-            onOpen={() => setOpen(true)}
-            onClose={() => setOpen(false)}
-            disableClearable
-            disabled={props.disabled}
-            readOnly={props.InputProps?.readOnly}
-            freeSolo
-            options={allAddressBookEntries}
-            onChange={(_, value) => (typeof value === 'string' ? field.onChange(value) : field.onChange(value.label))}
-            onInputChange={(_, value) => setValue(name, value)}
-            filterOptions={customFilterOptions}
-            componentsProps={{
-              paper: {
-                elevation: 2,
-              },
-            }}
-            ListboxProps={{ className: css.listbox }}
-            groupBy={(option) => option.source}
-            renderGroup={(params) => (
-              <li key={params.key}>
-                <RecipientGroupHeader
-                  source={params.group as ContactSource}
-                  workspaceName={workspaceName}
-                  count={Children.count(params.children)}
-                />
-                <ul className={css.groupList}>{params.children}</ul>
+      <div className={css.wrapper}>
+        <AddressInput
+          {...props}
+          name={name}
+          focused={props.focused || !addressValue}
+          onOpenListClick={hasVisibleOptions ? handleToggleAutocomplete : undefined}
+          isAutocompleteOpen={open}
+          onAddressBookClick={canAdd && !isInAddressBook ? onAddressBookClick : undefined}
+          role="combobox"
+          aria-expanded={showList}
+          aria-autocomplete="list"
+          onMouseDown={() => setOpen(hasVisibleOptions)}
+        />
+
+        {showList && (
+          <ul className={css.options} role="listbox">
+            {groupedEntries.map(([source, entries]) => (
+              <li key={source}>
+                <RecipientGroupHeader source={source} workspaceName={workspaceName} count={entries.length} />
+                <ul className={css.groupList}>
+                  {entries.map((entry) => (
+                    <li
+                      key={entry.label}
+                      data-testid="address-item"
+                      role="option"
+                      aria-selected={sameAddress(entry.label, addressValue)}
+                      className={css.option}
+                      // Keep input focus on press so the click lands before blur removes the option
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => onSelectOption(entry)}
+                    >
+                      <RecipientOption
+                        contact={entry.contact}
+                        prefix={prefix}
+                        memberName={resolveMemberName(entry.contact.createdByUserId)}
+                        resolveName={(address) => resolveSafeName(address, chainId)}
+                      />
+                    </li>
+                  ))}
+                </ul>
               </li>
-            )}
-            renderOption={(props, option) => {
-              const { key, ...rest } = props
-              return (
-                <Typography data-testid="address-item" component="li" variant="body2" {...rest} key={key}>
-                  <RecipientOption
-                    contact={option.contact}
-                    prefix={prefix}
-                    memberName={resolveMemberName(option.contact.createdByUserId)}
-                    resolveName={(address) => resolveSafeName(address, chainId)}
-                  />
-                </Typography>
-              )
-            }}
-            renderInput={(params) => (
-              <AddressInput
-                data-testid="address-item"
-                {...params}
-                {...props}
-                focused={props.focused || !addressValue}
-                name={name}
-                onOpenListClick={hasVisibleOptions ? handleOpenAutocomplete : undefined}
-                isAutocompleteOpen={open}
-                onAddressBookClick={canAdd && !isInAddressBook ? onAddressBookClick : undefined}
-              />
-            )}
-          />
+            ))}
+          </ul>
         )}
-      />
+      </div>
 
       {canAdd && !isInAddressBook ? (
-        <Typography variant="body2" className={css.unknownAddress}>
-          <SvgIcon component={InfoIcon} fontSize="small" />
+        <Typography variant="paragraph-small" className={css.unknownAddress}>
+          <InfoIcon className="size-4" />
           <span>
             This is an unknown address. You can{' '}
             <a role="button" onClick={onAddressBookClick}>

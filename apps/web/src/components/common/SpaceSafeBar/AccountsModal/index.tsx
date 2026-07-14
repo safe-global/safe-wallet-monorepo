@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { Search, CircleFadingPlus, Plus } from 'lucide-react'
+import { CircleFadingPlus, Plus } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { SearchInput } from '@/components/ui/search-input'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { AppRoutes } from '@/config/routes'
@@ -134,24 +134,29 @@ const AccountsModal = ({
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent showCloseButton className="flex max-h-[90vh] w-full max-w-[560px] flex-col gap-0 p-0">
-        <DialogHeader className="shrink-0 border-b border-border/50 px-4 pb-3 pt-4">
+      <DialogContent
+        showCloseButton
+        padding="none"
+        // eslint-disable-next-line no-restricted-syntax -- max-w-[560px]: bespoke width, not a size token (needs design)
+        className="flex max-h-[90vh] max-w-[560px] flex-col"
+      >
+        <DialogHeader
+          divided="subtle"
+          // eslint-disable-next-line no-restricted-syntax -- bespoke header padding px-4 pb-3 pt-4, no token
+          className="shrink-0 px-4 pb-3 pt-4"
+        >
           <DialogTitle>{isQualifiedSafe ? 'Explore other Safes' : 'All Accounts'}</DialogTitle>
         </DialogHeader>
 
         <div className="flex shrink-0 items-center gap-2 px-4 py-3">
-          <InputGroup className="flex-1 rounded-md border-gray-100 shadow-none">
-            <InputGroupAddon>
-              <Search className="size-4" />
-            </InputGroupAddon>
-            <InputGroupInput
-              placeholder="Search by name or address"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              autoComplete="off"
-              data-testid="accounts-search-input"
-            />
-          </InputGroup>
+          <SearchInput
+            className="flex-1"
+            placeholder="Search by name or address"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            autoComplete="off"
+            data-testid="accounts-search-input"
+          />
           <SafeListSortToggle />
         </div>
 
@@ -225,7 +230,11 @@ const AccountsModal = ({
           )}
         </div>
 
-        <DialogFooter className="relative shrink-0 flex-row gap-2 border-t border-border/50 px-4 py-3">
+        <DialogFooter
+          divided="subtle"
+          // eslint-disable-next-line no-restricted-syntax -- bespoke footer padding px-4 py-3, no token
+          className="relative shrink-0 flex-row px-4 py-3"
+        >
           {showFade && (
             <div
               data-testid="scroll-hint"

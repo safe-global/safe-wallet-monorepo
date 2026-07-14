@@ -2,7 +2,7 @@ import AccountListFilters from '../AccountListFilters'
 import AccountsHeader from '../AccountsHeader'
 import AccountsList from '../AccountsList'
 import { useState } from 'react'
-import { Box, Divider, Paper } from '@mui/material'
+import { Separator } from '@/components/ui/separator'
 import madProps from '@/utils/mad-props'
 import css from '../../styles.module.css'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -25,8 +25,8 @@ const MyAccounts = ({ safes, onLinkClick, isSidebar = false }: MyAccountsProps) 
   useTrackSafesCount(safes, wallet)
 
   return (
-    <Box data-testid="sidebar-safe-container" className={css.container}>
-      <Box
+    <div data-testid="sidebar-safe-container" className={css.container}>
+      <div
         className={classNames(css.myAccounts, {
           [css.sidebarAccounts]: isSidebar,
           [css.headerSpacer]: !isSignedIn,
@@ -34,20 +34,20 @@ const MyAccounts = ({ safes, onLinkClick, isSidebar = false }: MyAccountsProps) 
       >
         <AccountsHeader isSidebar={isSidebar} onLinkClick={onLinkClick} />
 
-        <Paper sx={{ padding: 0 }}>
+        <div className="bg-background rounded-lg">
           <AccountListFilters setSearchQuery={setSearchQuery} />
 
-          {isSidebar && <Divider />}
+          {isSidebar && <Separator />}
 
-          <Paper className={css.safeList}>
+          <div className={classNames('bg-background', css.safeList)}>
             <AccountsList searchQuery={searchQuery} safes={safes} isSidebar={isSidebar} onLinkClick={onLinkClick} />
-          </Paper>
-        </Paper>
+          </div>
+        </div>
 
-        {isSidebar && <Divider />}
+        {isSidebar && <Separator />}
         <DataWidget />
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

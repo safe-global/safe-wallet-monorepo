@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import SendAmountBlock from '../SendAmountBlock'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { parseUnits } from 'ethers'
@@ -52,19 +52,23 @@ describe('SendAmountBlock', () => {
     expect(screen.getByTestId('child-element')).toBeInTheDocument()
   })
 
-  it('should show fiat value when fiatConversion is provided', () => {
-    render(
+  it('should show fiat value when fiatConversion is provided', async () => {
+    const { user } = renderWithUserEvent(
       <SendAmountBlock amountInWei={parseUnits('50', 6).toString()} tokenInfo={mockTokenInfo} fiatConversion="1" />,
     )
 
-    // FiatValue renders a Tooltip span with aria-label containing the formatted currency
-    expect(screen.getByLabelText('$ 50.00')).toBeInTheDocument()
+    // FiatValue renders the formatted currency in a tooltip trigger; the precise value shows on hover
+    const valueSpan = screen.getByText('$ 50')
+    expect(valueSpan).toBeInTheDocument()
+
+    await user.hover(valueSpan)
+    expect(await screen.findByText('$ 50.00', { selector: '[data-slot="tooltip-content"]' })).toBeInTheDocument()
   })
 
   it('should not show fiat value when fiatConversion is not provided', () => {
     render(<SendAmountBlock amountInWei={parseUnits('50', 6).toString()} tokenInfo={mockTokenInfo} />)
 
-    expect(screen.queryByLabelText(/^\$/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/^\$/)).not.toBeInTheDocument()
   })
 
   it('should not show fiat value when fiatConversion is "0"', () => {
@@ -72,17 +76,17 @@ describe('SendAmountBlock', () => {
       <SendAmountBlock amountInWei={parseUnits('50', 6).toString()} tokenInfo={mockTokenInfo} fiatConversion="0" />,
     )
 
-    expect(screen.queryByLabelText(/^\$/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/^\$/)).not.toBeInTheDocument()
   })
 
   it('should not show fiat value when amountInWei is "0"', () => {
     render(<SendAmountBlock amountInWei="0" tokenInfo={mockTokenInfo} fiatConversion="1" />)
 
-    expect(screen.queryByLabelText(/^\$/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/^\$/)).not.toBeInTheDocument()
   })
 
-  it('should compute correct fiat value for ETH with high fiatConversion', () => {
-    render(
+  it('should compute correct fiat value for ETH with high fiatConversion', async () => {
+    const { user } = renderWithUserEvent(
       <SendAmountBlock
         amountInWei={parseUnits('0.5', 18).toString()}
         tokenInfo={mockEthTokenInfo}
@@ -90,7 +94,11 @@ describe('SendAmountBlock', () => {
       />,
     )
 
-    // 0.5 ETH * $2000 = $1000
-    expect(screen.getByLabelText('$ 1,000.00')).toBeInTheDocument()
+    // 0.5 ETH * $2000 = $1000; the trigger shows a truncated value and the precise one shows on hover
+    const valueSpan = screen.getByText('$ 1,000')
+    expect(valueSpan).toBeInTheDocument()
+
+    await user.hover(valueSpan)
+    expect(await screen.findByText('$ 1,000.00', { selector: '[data-slot="tooltip-content"]' })).toBeInTheDocument()
   })
 })

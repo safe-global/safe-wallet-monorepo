@@ -1,10 +1,11 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { type ComponentType, type ReactElement, type ReactNode, useContext } from 'react'
-import { Box, Container, Grid2 as Grid, Typography, Button, Paper, SvgIcon, useMediaQuery, Stack } from '@mui/material'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import { useTheme } from '@mui/material/styles'
+import { ArrowLeft } from 'lucide-react'
 import classnames from 'classnames'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { useIsBelowMd, useMediaQuery } from '@/hooks/useMediaQuery'
 import { ProgressBar } from '@/components/common/ProgressBar'
 import SafeTxProvider, { SafeTxContext } from '../../SafeTxProvider'
 import { TxInfoProvider } from '@/components/tx-flow/TxInfoProvider'
@@ -30,21 +31,23 @@ export const TxLayoutHeader = ({
 
   if (hideNonce && !icon && !subtitle) return null
 
+  const Icon = icon
+
   return (
-    <Box className={css.headerInner}>
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        {icon && (
+    <div className={css.headerInner}>
+      <div className="flex items-center">
+        {Icon && (
           <div className={css.icon}>
-            <SvgIcon component={icon} inheritViewBox />
+            <Icon />
           </div>
         )}
 
-        <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
+        <Typography variant="h4" className="font-bold">
           {subtitle}
         </Typography>
-      </Box>
+      </div>
       {!hideNonce && safe.deployed && nonceNeeded && <TxNonce canEdit={!fixedNonce} />}
-    </Box>
+    </div>
   )
 }
 
@@ -81,10 +84,8 @@ const TxLayout = ({
   isMessage = false,
   hideSafeShield = false,
 }: TxLayoutProps): ReactElement => {
-  const smallScreenBreakpoint = 'md'
-  const theme = useTheme()
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down(smallScreenBreakpoint))
-  const isDesktop = useMediaQuery(theme.breakpoints.up('lg'))
+  const isSmallScreen = useIsBelowMd()
+  const isDesktop = useMediaQuery('(min-width:1200px)')
 
   const steps = Array.isArray(children) ? children : [children]
   const progress = Math.round(((step + 1) / steps.length) * 100)
@@ -93,55 +94,51 @@ const TxLayout = ({
     <SafeTxProvider>
       <TxInfoProvider>
         <SafeShieldProvider>
-          <Grid container className={css.container}>
+          <div className={classnames('flex flex-wrap', css.container)}>
             {!isReplacement && !isSmallScreen && (
-              <Grid sx={{ width: 200 }} pt={5}>
+              <div className="w-[200px] pt-10">
                 <aside>
-                  <Stack gap={3} position="fixed">
+                  <div className="fixed flex flex-col gap-6">
                     <TxStatusWidget
                       isLastStep={step === steps.length - 1}
                       txSummary={txSummary}
                       isBatch={isBatch}
                       isMessage={isMessage}
                     />
-                  </Stack>
+                  </div>
                 </aside>
-              </Grid>
+              </div>
             )}
 
-            <Grid size={{ xs: 12, [smallScreenBreakpoint]: 'grow' }} px={{ [smallScreenBreakpoint]: 5 }}>
-              <Container className={css.contentContainer}>
-                <Grid container spacing={3} justifyContent="center">
+            <div className="w-full flex-grow md:w-auto md:px-10">
+              <div className={classnames('mx-auto w-full max-w-[1200px]', css.contentContainer)}>
+                <div className="flex flex-wrap justify-center gap-6">
                   {/* Main content */}
-                  <Grid size="grow" sx={{ maxWidth: { [smallScreenBreakpoint]: 672 } }}>
+                  <div className="min-w-0 flex-grow md:max-w-[672px]">
                     <div className={css.titleWrapper}>
-                      <Typography
-                        data-testid="modal-title"
-                        variant="h3"
-                        component="div"
-                        className={css.title}
-                        sx={{ fontWeight: '700' }}
-                      >
+                      <Typography data-testid="modal-title" variant="h3" className={classnames('font-bold', css.title)}>
                         {title}
                       </Typography>
                     </div>
 
-                    <Paper
+                    <div
                       data-testid="modal-header"
-                      className={css.header}
-                      sx={{
-                        borderTopLeftRadius: !hideProgress ? '0' : '16px',
-                        borderTopRightRadius: !hideProgress ? '0' : '16px',
-                      }}
+                      className={classnames(
+                        'overflow-hidden rounded-t-xl border border-b-0 border-border bg-card',
+                        css.header,
+                        {
+                          'rounded-t-2xl': hideProgress,
+                        },
+                      )}
                     >
                       {!hideProgress && (
-                        <Box className={css.progressBar}>
+                        <div className={css.progressBar}>
                           <ProgressBar value={progress} />
-                        </Box>
+                        </div>
                       )}
 
                       <TxLayoutHeader subtitle={subtitle} icon={icon} hideNonce={hideNonce} fixedNonce={fixedNonce} />
-                    </Paper>
+                    </div>
 
                     <div className={css.step}>
                       {steps[step]}
@@ -149,33 +146,29 @@ const TxLayout = ({
                       {onBack && step > 0 && (
                         <Button
                           data-testid="modal-back-btn"
-                          variant={isDesktop ? 'outlined' : 'text'}
+                          variant={isDesktop ? 'outline' : 'ghost'}
                           onClick={onBack}
                           className={css.backButton}
-                          startIcon={<ArrowBackIcon fontSize="small" />}
                         >
+                          <ArrowLeft className="size-4" />
                           Back
                         </Button>
                       )}
                     </div>
-                  </Grid>
+                  </div>
 
                   {/* Sidebar */}
                   {!isReplacement && !hideSafeShield && (
-                    <Grid
-                      size={{ xs: 12, [smallScreenBreakpoint]: 4.5 }}
-                      sx={{ width: { lg: 320 } }}
-                      className={classnames(css.widget)}
-                    >
-                      <Box className={css.sticky}>
+                    <div className={classnames('w-full md:w-[37.5%] lg:w-[320px]', css.widget)}>
+                      <div className={css.sticky}>
                         <SafeShieldWidget />
-                      </Box>
-                    </Grid>
+                      </div>
+                    </div>
                   )}
-                </Grid>
-              </Container>
-            </Grid>
-          </Grid>
+                </div>
+              </div>
+            </div>
+          </div>
         </SafeShieldProvider>
       </TxInfoProvider>
     </SafeTxProvider>

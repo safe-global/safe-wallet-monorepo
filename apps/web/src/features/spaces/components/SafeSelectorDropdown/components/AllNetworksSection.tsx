@@ -112,7 +112,7 @@ function AllNetworksSection({ safeAddress, deployedChainIds, onAddNetwork }: All
                     </Typography>
                   </div>
                   {disabled ? (
-                    <Badge variant="secondary" className="text-[10px] px-1.5">
+                    <Badge variant="secondary" size="sm">
                       Not available
                     </Badge>
                   ) : (

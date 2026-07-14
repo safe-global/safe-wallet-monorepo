@@ -37,8 +37,8 @@
   margin-top: var(--space-1) !important;
 }
 
-.bannerCtaText:has(:global(.MuiButton-endIcon)) :global(.MuiButton-endIcon) {
-  margin-left: 4px !important;
+.bannerCtaText svg {
+  margin-left: 4px;
 }
 
 .bannerCtaContained {
@@ -60,13 +60,13 @@
 
 .closeButton {
   position: absolute !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--color-static-main);
   top: var(--space-2);
   right: var(--space-2);
-  padding: 10px;
-  padding-top: 12px;
-  width: 16px;
-  height: 16px;
+  padding: var(--space-1);
 }
 
 .closeButton:hover {

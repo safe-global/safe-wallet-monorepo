@@ -1,43 +1,34 @@
-import { Badge, SvgIcon, type BadgeProps } from '@mui/material'
-
-import Box from '@mui/material/Box'
+import type { ComponentType, SVGProps } from 'react'
+import classNames from 'classnames'
 import css from './styles.module.css'
 
+type BadgeColor = 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
+
+const badgeColorVar: Record<BadgeColor, string> = {
+  primary: 'var(--color-primary-main)',
+  secondary: 'var(--color-secondary-main)',
+  error: 'var(--color-error-main)',
+  info: 'var(--color-info-main)',
+  success: 'var(--color-success-main)',
+  warning: 'var(--color-warning-main)',
+}
+
 const CircularIcon = ({
-  icon,
+  icon: Icon,
   size = 40,
   badgeColor,
 }: {
-  icon: any // Using SvgIconProps['component'] (any) directly causes type error
-  badgeColor?: BadgeProps['color']
+  icon: ComponentType<SVGProps<SVGSVGElement>>
+  badgeColor?: BadgeColor
   size?: number
 }) => {
   return (
-    <Badge
-      color={badgeColor}
-      overlap="circular"
-      variant="dot"
-      invisible={!badgeColor}
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'right',
-      }}
-      className={css.badge}
-    >
-      <Box className={css.circle} width={size} height={size}>
-        <SvgIcon
-          component={icon}
-          inheritViewBox
-          sx={{
-            height: size / 2,
-            width: size / 2,
-            '& path': {
-              fill: ({ palette }) => palette.primary.light,
-            },
-          }}
-        />
-      </Box>
-    </Badge>
+    <span className="relative inline-flex">
+      <div className={classNames(css.circle, 'flex items-center justify-center')} style={{ width: size, height: size }}>
+        <Icon style={{ height: size / 2, width: size / 2 }} className="[&_path]:fill-[var(--color-primary-light)]" />
+      </div>
+      {badgeColor && <span className={css.badge} style={{ backgroundColor: badgeColorVar[badgeColor] }} aria-hidden />}
+    </span>
   )
 }
 

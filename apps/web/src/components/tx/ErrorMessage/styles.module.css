@@ -1,6 +1,6 @@
 .container {
   padding: var(--space-2);
-  border-radius: 6px;
+  border-radius: var(--radius-lg);
 }
 
 .container.error {
@@ -17,19 +17,10 @@
   color: var(--color-primary-main);
 }
 
-.container.info svg {
-  color: var(--color-text-secondary);
-}
-
 .message {
   display: flex;
   align-items: flex-start;
   gap: var(--space-1);
-}
-
-/* Ensure body text uses 14px font-size */
-.message :global .MuiTypography-body2 {
-  font-size: 14px;
 }
 
 .message button {

@@ -3,7 +3,9 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import Approvals from '@/components/tx/ApprovalEditor/Approvals'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { decodeSafeTxToBaseTransactions } from '@/utils/transactions'
-import { Alert, Box, Skeleton, Typography } from '@mui/material'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Typography } from '@/components/ui/typography'
 import { type SafeTransaction } from '@safe-global/types-kit'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { useContext } from 'react'
@@ -20,14 +22,8 @@ const Title = ({ isErc721 }: { isErc721: boolean }) => {
 
   return (
     <div>
-      <Typography
-        sx={{
-          fontWeight: 700,
-        }}
-      >
-        {title}
-      </Typography>
-      <Typography variant="body2">{subtitle}</Typography>
+      <Typography className="font-bold">{title}</Typography>
+      <Typography variant="paragraph-small">{subtitle}</Typography>
     </div>
   )
 }
@@ -69,26 +65,20 @@ const ApprovalEditor = ({
     (safeTransaction && safeTransaction.signatures.size > 0) || safeMessage !== undefined || isErc721Approval
 
   return (
-    <Box
-      className={css.container}
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 2,
-        mb: 1,
-      }}
-    >
+    <div className={`${css.container} mb-2 flex flex-col gap-4`}>
       <Title isErc721={isErc721Approval} />
       {error ? (
-        <Alert severity="error">Error while decoding approval transactions.</Alert>
+        <Alert variant="destructive">
+          <AlertDescription>Error while decoding approval transactions.</AlertDescription>
+        </Alert>
       ) : loading || !readableApprovals ? (
-        <Skeleton variant="rounded" height={100} data-testid="approval-editor-loading" />
+        <Skeleton className="h-[100px] w-full" data-testid="approval-editor-loading" />
       ) : isReadOnly ? (
         <Approvals approvalInfos={readableApprovals} />
       ) : (
         <ApprovalEditorForm approvalInfos={readableApprovals} updateApprovals={updateApprovals} />
       )}
-    </Box>
+    </div>
   )
 }
 

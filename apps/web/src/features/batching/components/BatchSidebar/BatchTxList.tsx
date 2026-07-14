@@ -6,7 +6,7 @@ import type {
 import type { DraftBatchItem } from '../../store/batchSlice'
 import BatchTxItem from './BatchTxItem'
 
-import { List } from '@mui/material'
+import { List } from '@/components/ui/list'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
@@ -72,7 +72,7 @@ const BatchTxList = ({ txItems, onDelete }: { txItems: DraftBatchItem[]; onDelet
 
   return (
     <>
-      <List sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <List className="gap-4">
         {txItems.map((item, index) => (
           <BatchTxItem
             key={item.id}

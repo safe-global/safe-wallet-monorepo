@@ -8,6 +8,7 @@ import {
   InputGroupTextarea,
 } from '../input-group'
 import { Search, Mail, Send } from 'lucide-react'
+import { SearchInput } from '../search-input'
 
 /**
  * InputGroup Component Stories
@@ -17,15 +18,75 @@ import { Search, Mail, Send } from 'lucide-react'
 const meta = {
   title: 'UI/InputGroup',
   component: InputGroup,
+  argTypes: {
+    inputSize: {
+      control: 'select',
+      options: ['sm', 'default', 'lg', 'xl'],
+    },
+    variant: {
+      control: 'select',
+      options: ['default', 'surface'],
+    },
+  },
 } satisfies Meta<typeof InputGroup>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div style={{ display: 'block' }}>
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Group Sizes</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+            alignItems: 'end',
+          }}
+        >
+          <div style={{ width: '300px' }}>
+            <InputGroup inputSize="sm">
+              <InputGroupInput placeholder="sm (h-8)" />
+            </InputGroup>
+          </div>
+          <div style={{ width: '300px' }}>
+            <InputGroup>
+              <InputGroupInput placeholder="default (h-9)" />
+            </InputGroup>
+          </div>
+          <div style={{ width: '300px' }}>
+            <InputGroup inputSize="lg">
+              <InputGroupInput placeholder="lg (h-10)" />
+            </InputGroup>
+          </div>
+          <div style={{ width: '300px' }}>
+            <InputGroup inputSize="xl" variant="surface">
+              <InputGroupInput placeholder="xl surface (h-66)" />
+            </InputGroup>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Surface Search Preset</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <div style={{ width: '300px' }}>
+            <SearchInput placeholder="Search..." />
+          </div>
+        </div>
+      </div>
+
       <div style={{ marginBottom: '2rem' }}>
         <h3 className="mb-4 text-lg font-semibold">With Addon (Start)</h3>
         <div
@@ -94,6 +155,118 @@ export const AllVariants: Story = {
                   <Send />
                 </InputGroupButton>
               </InputGroupAddon>
+            </InputGroup>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">With Addon (Block Start)</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <div style={{ width: '300px' }}>
+            <InputGroup>
+              <InputGroupAddon align="block-start">
+                <InputGroupText>Amount</InputGroupText>
+              </InputGroupAddon>
+              <InputGroupInput placeholder="0.00" />
+            </InputGroup>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Button Sizes</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <div style={{ width: '300px' }}>
+            <InputGroup>
+              <InputGroupInput placeholder="Extra small button" />
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton size="xs">Send</InputGroupButton>
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
+          <div style={{ width: '300px' }}>
+            <InputGroup>
+              <InputGroupInput placeholder="Small button" />
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton size="sm">Send</InputGroupButton>
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
+          <div style={{ width: '300px' }}>
+            <InputGroup>
+              <InputGroupInput placeholder="Icon xs button" />
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton size="icon-xs">
+                  <Send />
+                </InputGroupButton>
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
+          <div style={{ width: '300px' }}>
+            <InputGroup>
+              <InputGroupInput placeholder="Icon sm button" />
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton size="icon-sm">
+                  <Send />
+                </InputGroupButton>
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Invalid</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <div style={{ width: '300px' }}>
+            <InputGroup>
+              <InputGroupAddon align="inline-start">
+                <Mail />
+              </InputGroupAddon>
+              <InputGroupInput placeholder="Email" aria-invalid defaultValue="not-an-email" />
+            </InputGroup>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Disabled</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <div style={{ width: '300px' }}>
+            <InputGroup data-disabled="true">
+              <InputGroupAddon align="inline-start">
+                <Search />
+              </InputGroupAddon>
+              <InputGroupInput placeholder="Disabled" disabled />
             </InputGroup>
           </div>
         </div>

@@ -121,7 +121,9 @@ describe('AboutPage', () => {
   describe('Contact Support', () => {
     it('renders Contact Support as a button when the support chat feature is available', () => {
       renderWithStore()
-      expect(screen.getByRole('button', { name: /Contact Support/i })).toBeInTheDocument()
+      const button = screen.getByRole('button', { name: /Contact Support/i })
+      expect(button).toBeInTheDocument()
+      expect(button).toHaveAttribute('data-slot', 'button')
       expect(screen.queryByRole('link', { name: /Contact Support/i })).not.toBeInTheDocument()
     })
 
@@ -169,7 +171,7 @@ describe('AboutPage', () => {
   describe('cookie preferences', () => {
     it('renders the cookie preferences button', () => {
       renderWithStore()
-      expect(screen.getByTestId('cookie-preferences-button')).toBeInTheDocument()
+      expect(screen.getByTestId('cookie-preferences-button')).toHaveAttribute('data-slot', 'button')
     })
 
     it('dispatches openCookieBanner with NECESSARY key when clicked', () => {

@@ -1,7 +1,5 @@
 import CopyButton from '@/components/common/CopyButton'
 import ExplorerButton from '@/components/common/ExplorerButton'
-import { Box } from '@mui/material'
-import Stack from '@mui/material/Stack'
 
 const OrderId = ({
   orderId,
@@ -18,13 +16,13 @@ const OrderId = ({
   const truncatedOrderId = orderId.replace('0x', '').slice(0, length)
 
   return (
-    <Stack direction="row">
+    <div className="flex flex-row">
       <span>{truncatedOrderId}</span>
       {showCopyButton && <CopyButton text={orderId} />}
-      <Box color="border.main">
+      <div className="text-[var(--color-border-main)]">
         <ExplorerButton href={href} />
-      </Box>
-    </Stack>
+      </div>
+    </div>
   )
 }
 

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Box } from '@mui/material'
 import { useForm } from 'react-hook-form'
 import { createMockStory } from '@/stories/mocks'
 import AddMemberInput from './AddMemberInput'
@@ -32,14 +31,14 @@ const AddMemberInputStory = ({ error }: { error?: string }) => {
   })
 
   return (
-    <Box sx={{ width: 360, minHeight: '50vh', pt: '22vh' }}>
+    <div className="w-[360px] min-h-[50vh] pt-[22vh]">
       <AddMemberInput
         error={error}
         inputProps={register('inviteeIdentifier')}
         onSelectAddress={(address) => setValue('inviteeIdentifier', address)}
         value={watch('inviteeIdentifier')}
       />
-    </Box>
+    </div>
   )
 }
 

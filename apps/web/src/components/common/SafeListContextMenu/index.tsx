@@ -1,20 +1,17 @@
 import type { MouseEvent } from 'react'
-import { useState, type ReactElement } from 'react'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import IconButton from '@mui/material/IconButton'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-import MenuItem from '@mui/material/MenuItem'
-import ListItemText from '@mui/material/ListItemText'
+import { useRef, useState, type ReactElement } from 'react'
+import { EllipsisVertical } from 'lucide-react'
 
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import SafeListRemoveDialog from '@/components/common/SafeListRemoveDialog'
 import NestedSafesIcon from '@/public/images/sidebar/nested-safes-icon.svg'
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import PlusIcon from '@/public/images/common/plus.svg'
-import ContextMenu from '@/components/common/ContextMenu'
 import { trackEvent, OVERVIEW_EVENTS, OVERVIEW_LABELS, type AnalyticsEvent } from '@/services/analytics'
-import { SvgIcon } from '@mui/material'
+import useAddressBook from '@/hooks/useAddressBook'
 import { AppRoutes } from '@/config/routes'
 import router from 'next/router'
 import { CreateSafeOnNewChain } from '@/features/multichain'
@@ -59,13 +56,18 @@ const SafeListContextMenu = ({
   hideNestedSafes?: boolean
   onClose?: () => void
 }): ReactElement => {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
   const isNestedSafesEnabled = useHasFeature(FEATURES.NESTED_SAFES)
   const { currentData: ownedSafes } = useOwnersGetSafesByOwnerV1Query(
     { chainId, ownerAddress: address },
-    { skip: !isNestedSafesEnabled || hideNestedSafes || !address || !anchorEl },
+    {
+      skip: !isNestedSafesEnabled || hideNestedSafes || !address || (!menuOpen && !open[ModalType.NESTED_SAFES]),
+    },
   )
-  const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
+  const addressBook = useAddressBook()
+  const hasName = address in addressBook
 
   const nestedSafesForChain = ownedSafes?.safes ?? []
   const { allSafesWithStatus, visibleSafes, hasCompletedCuration, isLoading, startFiltering } =
@@ -74,23 +76,10 @@ const SafeListContextMenu = ({
   const trackingLabel =
     router.pathname === AppRoutes.welcome.accounts ? OVERVIEW_LABELS.login_page : OVERVIEW_LABELS.sidebar
 
-  const handleOpenContextMenu = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
-    e.stopPropagation()
-    e.preventDefault()
-    setAnchorEl(e.currentTarget)
-  }
-
-  const handleCloseContextMenu = () => {
-    setAnchorEl(null)
-  }
-
   const handleOpenModal =
-    (type: keyof typeof open, event: AnalyticsEvent) => (e: MouseEvent<HTMLLIElement, globalThis.MouseEvent>) => {
+    (type: keyof typeof open, event: AnalyticsEvent) => (e: MouseEvent<HTMLElement, globalThis.MouseEvent>) => {
       e.stopPropagation()
       e.preventDefault()
-      if (type !== ModalType.NESTED_SAFES) {
-        handleCloseContextMenu()
-      }
       if (type === ModalType.NESTED_SAFES) {
         startFiltering()
       }
@@ -105,66 +94,73 @@ const SafeListContextMenu = ({
 
   return (
     <>
-      <IconButton data-testid="safe-options-btn" edge="end" size="small" onClick={handleOpenContextMenu}>
-        <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
-      </IconButton>
-      <ContextMenu
-        anchorEl={anchorEl}
-        open={!!anchorEl}
-        onClose={handleCloseContextMenu}
-        onClick={(e) => {
-          e.stopPropagation()
-        }}
-      >
-        {isNestedSafesEnabled &&
-          !hideNestedSafes &&
-          !undeployedSafe &&
-          nestedSafesForChain &&
-          nestedSafesForChain.length > 0 && (
-            <MenuItem
-              onClick={handleOpenModal(ModalType.NESTED_SAFES, {
-                ...NESTED_SAFE_EVENTS.OPEN_LIST,
-                label: NESTED_SAFE_LABELS.sidebar,
-              })}
-            >
-              <ListItemIcon>
-                <SvgIcon component={NestedSafesIcon} inheritViewBox fontSize="small" color="success" />
-              </ListItemIcon>
-              <ListItemText data-testid="nested-safes-btn">Nested Safes</ListItemText>
-            </MenuItem>
+      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              ref={triggerRef}
+              variant="ghost"
+              size="icon-sm"
+              data-testid="safe-options-btn"
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+              }}
+              className="text-[var(--color-border-main)]"
+            />
+          }
+        >
+          <EllipsisVertical />
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent
+          align="end"
+          onClick={(e) => {
+            e.stopPropagation()
+          }}
+        >
+          {isNestedSafesEnabled &&
+            !hideNestedSafes &&
+            !undeployedSafe &&
+            nestedSafesForChain &&
+            nestedSafesForChain.length > 0 && (
+              <DropdownMenuItem
+                onClick={handleOpenModal(ModalType.NESTED_SAFES, {
+                  ...NESTED_SAFE_EVENTS.OPEN_LIST,
+                  label: NESTED_SAFE_LABELS.sidebar,
+                })}
+              >
+                <NestedSafesIcon className="text-[var(--color-success-main)]" />
+                <span data-testid="nested-safes-btn">Nested Safes</span>
+              </DropdownMenuItem>
+            )}
+
+          {rename && (
+            <DropdownMenuItem onClick={handleOpenModal(ModalType.RENAME, OVERVIEW_EVENTS.SIDEBAR_RENAME)}>
+              <EditIcon className="text-[var(--color-success-main)]" />
+              <span data-testid="rename-btn">{hasName ? 'Rename' : 'Give name'}</span>
+            </DropdownMenuItem>
           )}
 
-        {rename && (
-          <MenuItem onClick={handleOpenModal(ModalType.RENAME, OVERVIEW_EVENTS.SIDEBAR_RENAME)}>
-            <ListItemIcon>
-              <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="success" />
-            </ListItemIcon>
-            <ListItemText data-testid="rename-btn">Rename</ListItemText>
-          </MenuItem>
-        )}
+          {undeployedSafe && (
+            <DropdownMenuItem onClick={handleOpenModal(ModalType.REMOVE, OVERVIEW_EVENTS.REMOVE_FROM_WATCHLIST)}>
+              <DeleteIcon className="text-[var(--color-error-main)]" />
+              <span data-testid="remove-btn">Remove</span>
+            </DropdownMenuItem>
+          )}
 
-        {undeployedSafe && (
-          <MenuItem onClick={handleOpenModal(ModalType.REMOVE, OVERVIEW_EVENTS.REMOVE_FROM_WATCHLIST)}>
-            <ListItemIcon>
-              <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" color="error" />
-            </ListItemIcon>
-            <ListItemText data-testid="remove-btn">Remove</ListItemText>
-          </MenuItem>
-        )}
-
-        {addNetwork && (
-          <MenuItem onClick={handleOpenModal(ModalType.ADD_CHAIN, OVERVIEW_EVENTS.ADD_NEW_NETWORK)}>
-            <ListItemIcon>
-              <SvgIcon component={PlusIcon} inheritViewBox fontSize="small" color="primary" />
-            </ListItemIcon>
-            <ListItemText data-testid="add-chain-btn">Add another network</ListItemText>
-          </MenuItem>
-        )}
-      </ContextMenu>
+          {addNetwork && (
+            <DropdownMenuItem onClick={handleOpenModal(ModalType.ADD_CHAIN, OVERVIEW_EVENTS.ADD_NEW_NETWORK)}>
+              <PlusIcon className="text-[var(--color-primary-main)]" />
+              <span data-testid="add-chain-btn">Add another network</span>
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {open[ModalType.NESTED_SAFES] && (
         <NestedSafesPopover
-          anchorEl={anchorEl}
+          anchorEl={triggerRef.current}
           onClose={() => {
             handleCloseModal()
             onClose?.()

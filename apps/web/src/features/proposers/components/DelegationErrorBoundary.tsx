@@ -1,5 +1,6 @@
 import { Component, type ReactElement, type ReactNode } from 'react'
-import { Box, Button, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 
 type DelegationErrorBoundaryProps = {
   children: ReactNode
@@ -52,26 +53,19 @@ function DelegationFallback({
   onRetry: () => void
 }): ReactElement {
   return (
-    <Box
-      sx={{
-        p: 2,
-        bgcolor: 'var(--color-error-background)',
-        borderRadius: 1,
-        border: '1px solid var(--color-error-main)',
-      }}
-    >
-      <Typography variant="body2" color="error.main" gutterBottom>
+    <div className="rounded-lg border border-[var(--color-error-main)] bg-[var(--color-error-background)] p-4">
+      <Typography variant="paragraph-small" className="mb-1 block text-destructive">
         {fallbackMessage || 'Something went wrong loading this content.'}
       </Typography>
       {process.env.NODE_ENV !== 'production' && (
-        <Typography variant="caption" color="text.secondary" component="pre" sx={{ mb: 1, whiteSpace: 'pre-wrap' }}>
+        <Typography variant="paragraph-mini" color="muted" className="mb-2 block whitespace-pre-wrap font-mono">
           {error.message}
         </Typography>
       )}
-      <Button size="small" variant="outlined" color="error" onClick={onRetry}>
+      <Button size="sm" variant="outline" className="text-destructive" onClick={onRetry}>
         Try again
       </Button>
-    </Box>
+    </div>
   )
 }
 

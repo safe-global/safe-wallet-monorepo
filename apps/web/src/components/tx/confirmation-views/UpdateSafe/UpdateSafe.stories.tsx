@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { _UpdateSafe } from './index'
 import { mockUpdateSafeTxData, mockUnknownContractTxData } from './mockData'
@@ -9,7 +8,9 @@ import { faker } from '@faker-js/faker'
 faker.seed(123)
 
 const meta = {
+  title: 'Components/TxFlow/ConfirmationViews/UpdateSafe',
   component: _UpdateSafe,
+  tags: ['autodocs', 'skip-visual-test'],
   parameters: {
     // Stories use faker for addresses which causes non-deterministic visual tests
     visualTest: { disable: true },
@@ -18,14 +19,13 @@ const meta = {
     (Story) => {
       return (
         <StoreDecorator initialState={{}}>
-          <Paper sx={{ padding: 2 }}>
+          <div className="rounded-lg bg-background p-4">
             <Story />
-          </Paper>
+          </div>
         </StoreDecorator>
       )
     },
   ],
-  tags: ['autodocs'],
 } satisfies Meta<typeof _UpdateSafe>
 
 export default meta

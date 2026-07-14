@@ -3,11 +3,21 @@
   z-index: 2;
   position: sticky !important;
   top: 49px;
+  padding: var(--space-3) 0 var(--space-4);
+  margin-bottom: var(--space-2);
+}
 
-  padding: var(--space-1) 0 var(--space-1) 0;
+/* In dark mode the page background is black (var(--background), set on .mainSpace),
+   so match it here — otherwise this opaque sticky bar shows as a lighter strip. */
+[data-theme='dark'] .filterContainer {
+  background-color: var(--background);
 }
 
 .optimizedWithBatchLabel {
   font-size: 12px;
   color: var(--color-text-primary);
+}
+
+.selectPlaceholder {
+  color: var(--muted-foreground);
 }

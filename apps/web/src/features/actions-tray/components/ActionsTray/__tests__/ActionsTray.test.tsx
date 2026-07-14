@@ -1,5 +1,5 @@
 import { createElement, type ReactNode } from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import ActionsTray, { TRANSACTION_BUILDER_TOOLTIP } from '../ActionsTray'
@@ -95,18 +95,18 @@ describe('ActionsTray geoblocking', () => {
     })
 
     it('shows the geoblocking tooltip on hover when geoblocked', async () => {
+      const user = userEvent.setup()
       renderTray({ isBlockedCountry: true })
 
       const sendButton = screen.getByRole('button', { name: /send/i })
-      // Hover the wrapping span (the button itself has pointer-events: none while disabled)
-      fireEvent.mouseOver(sendButton.parentElement as HTMLElement)
+      // Hover the wrapping trigger span (the button itself has pointer-events: none while disabled)
+      await user.hover(sendButton.parentElement as HTMLElement)
 
-      await waitFor(() => {
-        expect(screen.getByRole('tooltip')).toHaveTextContent('Send is not allowed for your country')
-      })
+      expect(await screen.findByText(/Send is not allowed for your country/)).toBeInTheDocument()
     })
 
     it('is disabled and shows the no-assets tooltip when noAssets is true', async () => {
+      const user = userEvent.setup()
       const { container } = renderTray({ isBlockedCountry: false, noAssets: true })
 
       const sendButton = screen.getByRole('button', { name: /send/i })
@@ -116,20 +116,17 @@ describe('ActionsTray geoblocking', () => {
       expect(wrapper).not.toBeNull()
       expect(wrapper).toContainElement(sendButton)
 
-      fireEvent.mouseOver(sendButton.parentElement as HTMLElement)
-      await waitFor(() => {
-        expect(screen.getByRole('tooltip')).toHaveTextContent('You have no assets or balance on this safe account')
-      })
+      await user.hover(sendButton.parentElement as HTMLElement)
+      expect(await screen.findByText(/You have no assets or balance on this safe account/)).toBeInTheDocument()
     })
 
     it('prefers the geoblocking tooltip over the no-assets tooltip when both are true', async () => {
+      const user = userEvent.setup()
       renderTray({ isBlockedCountry: true, noAssets: true })
 
       const sendButton = screen.getByRole('button', { name: /send/i })
-      fireEvent.mouseOver(sendButton.parentElement as HTMLElement)
-      await waitFor(() => {
-        expect(screen.getByRole('tooltip')).toHaveTextContent('Send is not allowed for your country')
-      })
+      await user.hover(sendButton.parentElement as HTMLElement)
+      expect(await screen.findByText(/Send is not allowed for your country/)).toBeInTheDocument()
     })
   })
 
@@ -159,17 +156,17 @@ describe('ActionsTray geoblocking', () => {
     })
 
     it('shows the geoblocking tooltip on hover when geoblocked', async () => {
+      const user = userEvent.setup()
       renderTray({ isBlockedCountry: true })
 
       const swapButton = screen.getByRole('button', { name: /swap/i })
-      fireEvent.mouseOver(swapButton.parentElement as HTMLElement)
+      await user.hover(swapButton.parentElement as HTMLElement)
 
-      await waitFor(() => {
-        expect(screen.getByRole('tooltip')).toHaveTextContent('Swap is not allowed for your country')
-      })
+      expect(await screen.findByText(/Swap is not allowed for your country/)).toBeInTheDocument()
     })
 
     it('is disabled and shows the no-assets tooltip when noAssets is true', async () => {
+      const user = userEvent.setup()
       const { container } = renderTray({ isBlockedCountry: false, noAssets: true })
 
       const swapButton = screen.getByRole('button', { name: /swap/i })
@@ -180,20 +177,17 @@ describe('ActionsTray geoblocking', () => {
       )
       expect(wrapperForSwap).toBeDefined()
 
-      fireEvent.mouseOver(swapButton.parentElement as HTMLElement)
-      await waitFor(() => {
-        expect(screen.getByRole('tooltip')).toHaveTextContent('You have no assets or balance on this safe account')
-      })
+      await user.hover(swapButton.parentElement as HTMLElement)
+      expect(await screen.findByText(/You have no assets or balance on this safe account/)).toBeInTheDocument()
     })
 
     it('prefers the geoblocking tooltip over the no-assets tooltip when both are true', async () => {
+      const user = userEvent.setup()
       renderTray({ isBlockedCountry: true, noAssets: true })
 
       const swapButton = screen.getByRole('button', { name: /swap/i })
-      fireEvent.mouseOver(swapButton.parentElement as HTMLElement)
-      await waitFor(() => {
-        expect(screen.getByRole('tooltip')).toHaveTextContent('Swap is not allowed for your country')
-      })
+      await user.hover(swapButton.parentElement as HTMLElement)
+      expect(await screen.findByText(/Swap is not allowed for your country/)).toBeInTheDocument()
     })
   })
 
@@ -232,9 +226,7 @@ describe('ActionsTray geoblocking', () => {
       expect(tooltipTrigger).toBeTruthy()
       await user.hover(tooltipTrigger as HTMLElement)
 
-      await waitFor(() => {
-        expect(screen.getByRole('tooltip')).toHaveTextContent(TRANSACTION_BUILDER_TOOLTIP)
-      })
+      expect(await screen.findByText(TRANSACTION_BUILDER_TOOLTIP)).toBeInTheDocument()
     })
   })
 
