@@ -64,7 +64,7 @@ const DEFAULT_SETTINGS = {
   currency: 'usd',
   hiddenTokens: {},
   tokenList: TOKEN_LISTS.TRUSTED,
-  shortName: { copy: true, qr: true },
+  shortName: { qr: true },
   theme: { darkMode: false },
   env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
   signing: { onChainSigning: false, blindSigning: false },

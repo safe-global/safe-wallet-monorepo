@@ -9,6 +9,7 @@ import reducer, {
   markOutstandingProposing,
   markReviewAbandoned,
   clearOutstandingRequest,
+  rekeyOutstandingRequest,
   rejectPending,
   sessionRequestReceived,
   clearWalletKitState,
@@ -122,6 +123,50 @@ describe('walletKitSlice reducers', () => {
     })
     state = reducer(state, clearOutstandingRequest('0xhash'))
     expect(state.outstandingRequests).toEqual({})
+  })
+
+  it('rekeyOutstandingRequest moves the entry to the new safeTxHash', () => {
+    let state = reducer(
+      undefined,
+      setOutstandingRequest({
+        safeTxHash: '0xold',
+        topic: 't',
+        id: 7,
+        method: 'eth_sendTransaction',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
+    )
+    state = reducer(state, rekeyOutstandingRequest({ fromSafeTxHash: '0xold', toSafeTxHash: '0xnew' }))
+
+    expect(state.outstandingRequests['0xold']).toBeUndefined()
+    expect(state.outstandingRequests['0xnew']).toEqual({
+      topic: 't',
+      id: 7,
+      method: 'eth_sendTransaction',
+      chainId: '1',
+      safeAddress: '0xsafe',
+    })
+  })
+
+  it('rekeyOutstandingRequest is a no-op for unknown hashes and identical hashes', () => {
+    const start = reducer(
+      undefined,
+      setOutstandingRequest({
+        safeTxHash: '0xhash',
+        topic: 't',
+        id: 7,
+        method: 'eth_sendTransaction',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
+    )
+
+    const afterUnknown = reducer(start, rekeyOutstandingRequest({ fromSafeTxHash: '0xmissing', toSafeTxHash: '0xnew' }))
+    expect(afterUnknown.outstandingRequests).toEqual(start.outstandingRequests)
+
+    const afterSame = reducer(start, rekeyOutstandingRequest({ fromSafeTxHash: '0xhash', toSafeTxHash: '0xhash' }))
+    expect(afterSame.outstandingRequests).toEqual(start.outstandingRequests)
   })
 
   it('rejectPending and sessionRequestReceived are no-op signals (state unchanged)', () => {

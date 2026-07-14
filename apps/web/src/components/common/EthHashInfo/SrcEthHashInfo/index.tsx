@@ -22,7 +22,6 @@ export type EthHashInfoProps = {
   showCopyButton?: boolean
   prefix?: string
   showPrefix?: boolean
-  copyPrefix?: boolean
   shortAddress?: boolean
   copyAddress?: boolean
   customAvatar?: string | null
@@ -42,7 +41,6 @@ const SrcEthHashInfo = ({
   address,
   customAvatar,
   prefix = '',
-  copyPrefix = true,
   showPrefix = true,
   shortAddress = true,
   copyAddress = true,
@@ -63,7 +61,6 @@ const SrcEthHashInfo = ({
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const identicon = <Identicon address={address} size={avatarSize} />
-  const shouldCopyPrefix = shouldPrefix && copyPrefix
 
   const accountStylesWithBadge = badgeTooltip
     ? {
@@ -150,7 +147,7 @@ const SrcEthHashInfo = ({
           {(!onlyName || !name) && (
             <Box fontWeight="inherit" fontSize="inherit" overflow="hidden" textOverflow="ellipsis">
               {copyAddress ? (
-                <CopyAddressButton prefix={prefix} address={address} copyPrefix={shouldCopyPrefix} trusted={trusted}>
+                <CopyAddressButton address={address} trusted={trusted}>
                   {addressElement}
                 </CopyAddressButton>
               ) : (
@@ -159,9 +156,7 @@ const SrcEthHashInfo = ({
             </Box>
           )}
 
-          {showCopyButton && (
-            <CopyAddressButton prefix={prefix} address={address} copyPrefix={shouldCopyPrefix} trusted={trusted} />
-          )}
+          {showCopyButton && <CopyAddressButton address={address} trusted={trusted} />}
 
           {hasExplorer && ExplorerButtonProps && (
             <Box color="border.main">

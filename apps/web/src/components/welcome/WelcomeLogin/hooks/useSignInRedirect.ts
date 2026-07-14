@@ -78,8 +78,8 @@ export const useSignInRedirect = ({
       // Priority 2: if the user has exactly one space, jump straight to it.
       // Falling back to the workspace list (i.e. leaving the user on
       // /welcome/spaces) is intentional only when there are multiple to choose
-      // between.
-      if (singleSpaceId) {
+      // between, or when there are pending invites the user should see.
+      if (singleSpaceId && inviteAmount === 0) {
         setRedirectLoading(true)
         router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: singleSpaceId } })
       }

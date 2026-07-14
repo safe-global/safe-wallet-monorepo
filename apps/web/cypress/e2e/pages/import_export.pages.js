@@ -19,8 +19,6 @@ const fileUploadSection = '[data-testid="file-upload-section"]'
 
 const exportFileSection = '[data-testid="export-file-section"]'
 
-export const prependChainPrefixStr = 'Prepend chain prefix to addresses'
-export const copyAddressStr = 'Copy addresses with chain prefix'
 export const darkModeStr = 'Dark mode'
 
 // Import messages for data_import.json
@@ -147,7 +145,7 @@ export function clickOnSettingsBtn() {
 export function clickOnAppearenceBtn() {
   cy.contains(tab, appearenceTabStr).click()
   // Wait for appearance page content to render after Next.js client-side navigation
-  cy.contains('Chain-specific addresses').should('be.visible')
+  cy.contains('Theme').should('be.visible')
 }
 
 export function clickOnShowMoreTabsBtn() {

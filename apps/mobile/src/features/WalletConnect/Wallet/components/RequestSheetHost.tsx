@@ -7,7 +7,7 @@ import {
 } from '@gorhom/bottom-sheet'
 import type { IWalletKit } from '@reown/walletkit'
 import { useStore } from 'react-redux'
-import { getVariable, useTheme, YStack, XStack } from 'tamagui'
+import { getVariable, useTheme, YStack, XStack, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
 import { SafeButton } from '@/src/components/SafeButton'
@@ -22,10 +22,6 @@ import { SendTransactionSheet } from './SendTransactionSheet'
 import { ConnectionPermissionsPanel } from './ConnectionPermissionsPanel'
 
 type Props = { walletKit: IWalletKit | null }
-
-// Sheet snap indices: 0 = compact (proposal), 1 = taller (permissions panel).
-const SNAP_COMPACT = 0
-const SNAP_EXPANDED = 1
 
 // Scroll-content clearance so it never sits under the pinned footer CTA (on top of the inset).
 const FOOTER_CLEARANCE = 72
@@ -61,15 +57,8 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
     setPermissionsOpen(false)
   }, [current?.id, current?.kind])
 
-  // The permissions panel is taller, so grow the sheet while it's open and shrink back after.
-  const openPermissions = useCallback(() => {
-    setPermissionsOpen(true)
-    ref.current?.snapToIndex(SNAP_EXPANDED)
-  }, [])
-  const closePermissions = useCallback(() => {
-    setPermissionsOpen(false)
-    ref.current?.snapToIndex(SNAP_COMPACT)
-  }, [])
+  const openPermissions = useCallback(() => setPermissionsOpen(true), [])
+  const closePermissions = useCallback(() => setPermissionsOpen(false), [])
 
   useEffect(() => {
     if (!current || !walletKit) {
@@ -178,21 +167,29 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
   return (
     <BottomSheetModal
       ref={ref}
-      snapPoints={['40%', '60%']}
-      enableDynamicSizing={false}
+      accessible={false}
+      enableDynamicSizing
+      topInset={insets.top}
       onDismiss={onSheetDismiss}
       backgroundComponent={BackgroundComponent}
       backdropComponent={renderBackdrop}
       footerComponent={renderFooter}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
     >
-      {/* Scrollable so content can't clip under large font scaling; the footer is pinned. */}
-      <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_CLEARANCE }}>
-        {proposal && !permissionsOpen && (
-          <SessionProposalSheet pending={proposal} onOpenPermissions={openPermissions} />
-        )}
-        {request && !permissionsOpen && <SendTransactionSheet pending={request} onOpenPermissions={openPermissions} />}
-        {(proposal || request) && permissionsOpen && <ConnectionPermissionsPanel variant={variant} />}
+      <BottomSheetScrollView
+        bounces={false}
+        overScrollMode="never"
+        contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_CLEARANCE }}
+      >
+        <View padding="$4">
+          {proposal && !permissionsOpen && (
+            <SessionProposalSheet pending={proposal} onOpenPermissions={openPermissions} />
+          )}
+          {request && !permissionsOpen && (
+            <SendTransactionSheet pending={request} onOpenPermissions={openPermissions} />
+          )}
+          {(proposal || request) && permissionsOpen && <ConnectionPermissionsPanel variant={variant} />}
+        </View>
       </BottomSheetScrollView>
     </BottomSheetModal>
   )

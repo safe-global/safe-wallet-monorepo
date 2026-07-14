@@ -63,7 +63,7 @@ export const contractVersionScanner: SecurityScanner = {
         evidence: [
           { label: 'Current version', value: versionLabel },
           { label: 'Status', value: 'Unsupported' },
-          { label: 'Implementation', value: `${implementationAddress.slice(0, 10)}...` },
+          { label: 'Implementation', value: implementationAddress },
         ],
         remediation: canMigrateL2
           ? 'This version may miss security fixes and improvements. You can migrate it to a compatible version.'
@@ -114,7 +114,7 @@ export const contractVersionScanner: SecurityScanner = {
         score,
         evidence: [
           { label: 'Current version', value: versionLabel },
-          { label: 'Implementation', value: `${implementationAddress.slice(0, 10)}...` },
+          { label: 'Implementation', value: implementationAddress },
           { label: 'Status', value: 'Unrecognized implementation' },
         ],
         remediation:
@@ -132,7 +132,7 @@ export const contractVersionScanner: SecurityScanner = {
         score,
         evidence: [
           { label: 'Current version', value: versionLabel },
-          { label: 'Original implementation', value: `${creationInfo.masterCopy.slice(0, 10)}...` },
+          { label: 'Original implementation', value: creationInfo.masterCopy },
           { label: 'Status', value: 'Deployed with unrecognized implementation' },
         ],
         remediation:
