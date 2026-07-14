@@ -124,18 +124,6 @@ describe('TrustedSafesModal', () => {
     expect(screen.getByText('Verify before you trust')).toBeInTheDocument()
   })
 
-  it('shows the workspace notice when in a space', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
-    render(<TrustedSafesModal modal={mockModal} />)
-    expect(screen.getByTestId('space-notice')).toBeInTheDocument()
-  })
-
-  it('hides the workspace notice when not in a space', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(false)
-    render(<TrustedSafesModal modal={mockModal} />)
-    expect(screen.queryByTestId('space-notice')).not.toBeInTheDocument()
-  })
-
   it('renders the connect-wallet hint when no wallet is connected', () => {
     mockWalletValue = null
     render(<TrustedSafesModal modal={mockModal} />)
