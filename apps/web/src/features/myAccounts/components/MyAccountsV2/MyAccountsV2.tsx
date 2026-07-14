@@ -45,7 +45,7 @@ const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
 
         {showGetStarted && <GetStartedCard />}
 
-        {showEmptyState && <AddTrustedSafesCard onAdd={modal.open} />}
+        {showEmptyState && <AddTrustedSafesCard onAdd={modal.open} onLinkClick={onLinkClick} />}
 
         {showList && (
           <WelcomeContentCard className="flex flex-col gap-4">

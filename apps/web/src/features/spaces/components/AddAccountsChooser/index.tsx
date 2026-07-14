@@ -1,16 +1,16 @@
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { buildCurrentNextUrl } from '@/utils/nextUrl'
-import { ChevronRight, CirclePlus, Plus } from 'lucide-react'
+import { CirclePlus, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { cn } from '@/utils/cn'
+import { ChooserRow } from '@/components/common/ChooserRow'
 import AddAccounts from '../AddAccounts'
 import { SAFE_ACCOUNTS_LIMIT, useCurrentSpaceId, useIsAdmin, useIsCurrentSpaceAtSafeLimit } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 type EntryPoint = 'dashboard' | 'safe_accounts'
 
@@ -18,67 +18,6 @@ interface AddAccountsChooserProps {
   buttonVariant?: 'outline' | 'default'
   buttonLabel?: string
   entryPoint: EntryPoint
-}
-
-interface ChooserRowProps {
-  icon: ReactNode
-  title: string
-  subtitle?: string
-  onClick: () => void
-  disabled?: boolean
-  disabledTooltip?: string
-  warning?: string
-  testId?: string
-}
-
-const ChooserRow = ({
-  icon,
-  title,
-  subtitle,
-  onClick,
-  disabled,
-  disabledTooltip,
-  warning,
-  testId,
-}: ChooserRowProps) => {
-  const row = (
-    <button
-      type="button"
-      data-testid={testId}
-      onClick={disabled ? undefined : onClick}
-      aria-disabled={disabled || undefined}
-      className={cn(
-        'group flex w-full items-center gap-3 rounded-md p-3 text-left text-sm text-sidebar-foreground transition-colors',
-        '[&_svg]:[stroke-width:2] [&_svg]:transition-colors',
-        disabled
-          ? 'cursor-not-allowed opacity-50'
-          : 'cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:[&_svg]:text-green-500',
-      )}
-    >
-      <span className="shrink-0">{icon}</span>
-      <span className="flex-1 min-w-0">
-        <span className="block font-semibold">{title}</span>
-        {subtitle && (
-          <span className="block text-xs text-muted-foreground mt-1 group-hover:text-sidebar-accent-foreground/70">
-            {subtitle}
-          </span>
-        )}
-        {warning && <span className="block text-xs text-destructive mt-1">{warning}</span>}
-      </span>
-      <ChevronRight className="size-3.5 shrink-0" />
-    </button>
-  )
-
-  if (disabled && disabledTooltip) {
-    return (
-      <Tooltip>
-        <TooltipTrigger render={row} />
-        <TooltipContent>{disabledTooltip}</TooltipContent>
-      </Tooltip>
-    )
-  }
-
-  return row
 }
 
 const AddAccountsChooser = ({
