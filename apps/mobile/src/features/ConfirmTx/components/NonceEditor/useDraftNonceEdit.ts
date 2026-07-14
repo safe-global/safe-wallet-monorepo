@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useAppDispatch } from '@/src/store/hooks'
 import { showToast } from '@/src/store/toastSlice'
@@ -21,8 +21,7 @@ export function useDraftNonceEdit(draft: DraftTx) {
     draft.safeAddress,
   )
 
-  const draftNonce =
-    typeof draft.buildParams.nonce === 'number' ? draft.buildParams.nonce : Number(draft.buildParams.nonce ?? 0)
+  const draftNonce = Number(draft.buildParams.nonce ?? 0)
 
   const applyNonce = useCallback(
     async (nonce: number) => {
@@ -60,10 +59,14 @@ export function useDraftNonceEdit(draft: DraftTx) {
     [applyNonce],
   )
 
+  const customNonceTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  useEffect(() => () => clearTimeout(customNonceTimer.current), [])
+
   const handleAddCustomNonce = useCallback(() => {
     nonceSheetRef.current?.dismiss()
     // Let the sheet's dismiss animation finish before the modal takes over
-    setTimeout(() => setShowCustomNonceModal(true), 300)
+    clearTimeout(customNonceTimer.current)
+    customNonceTimer.current = setTimeout(() => setShowCustomNonceModal(true), 300)
   }, [])
 
   const handleSaveCustomNonce = useCallback(

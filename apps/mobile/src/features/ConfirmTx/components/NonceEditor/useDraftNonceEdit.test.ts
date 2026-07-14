@@ -66,6 +66,22 @@ describe('useDraftNonceEdit', () => {
     })
   })
 
+  it('opens the custom nonce modal after the sheet dismiss delay, collapsing rapid taps', () => {
+    jest.useFakeTimers()
+    try {
+      const { result } = renderDraftNonceEdit()
+
+      act(() => result.current.handleAddCustomNonce())
+      act(() => result.current.handleAddCustomNonce())
+      expect(result.current.showCustomNonceModal).toBe(false)
+
+      act(() => jest.advanceTimersByTime(300))
+      expect(result.current.showCustomNonceModal).toBe(true)
+    } finally {
+      jest.useRealTimers()
+    }
+  })
+
   it('shows an error toast and keeps the draft when the rebuild fails', async () => {
     mockRebuildDraftWithNonce.mockRejectedValue(new Error('preview failed'))
     const { result, store } = renderDraftNonceEdit()

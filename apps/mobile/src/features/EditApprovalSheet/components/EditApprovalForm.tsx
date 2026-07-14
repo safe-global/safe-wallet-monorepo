@@ -221,7 +221,7 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
           <Text fontSize="$4" fontWeight={500} color="$color">
             Spender
           </Text>
-          <HashDisplay value={approval.spender} textProps={{ color: '$color' }} />
+          <HashDisplay value={approval.spender} showExternalLink textProps={{ color: '$color' }} />
         </XStack>
       </YStack>
     </View>

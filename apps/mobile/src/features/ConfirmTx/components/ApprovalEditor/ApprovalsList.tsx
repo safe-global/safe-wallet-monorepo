@@ -53,7 +53,7 @@ const ApprovalItem = ({
         <Text color="$color" fontSize="$4">
           Spender
         </Text>
-        <HashDisplay value={approval.spender} textProps={{ color: '$textSecondaryLight' }} />
+        <HashDisplay value={approval.spender} showExternalLink textProps={{ color: '$textSecondaryLight' }} />
       </XStack>
 
       {onEdit && (

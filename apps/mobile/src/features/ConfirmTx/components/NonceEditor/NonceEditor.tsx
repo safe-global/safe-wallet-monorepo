@@ -22,6 +22,8 @@ export const NonceEditor = ({ txId }: { txId: string }) => {
 
 const DraftNonceRow = ({ draft }: { draft: DraftTx }) => {
   const nonce = useDraftNonceEdit(draft)
+  // Without currentNonce the custom-nonce modal cannot validate its lower bound
+  const canEdit = !nonce.isRebuilding && nonce.currentNonce !== undefined
 
   return (
     <>
@@ -42,7 +44,7 @@ const DraftNonceRow = ({ draft }: { draft: DraftTx }) => {
               )}
             </View>
           }
-          onPress={nonce.isRebuilding ? undefined : nonce.handleOpenNonceSheet}
+          onPress={canEdit ? nonce.handleOpenNonceSheet : undefined}
           testID="nonce-row"
         />
       </View>
