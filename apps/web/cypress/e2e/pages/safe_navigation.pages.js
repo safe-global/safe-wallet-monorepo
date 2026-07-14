@@ -40,10 +40,12 @@ export function verifyDropdownContainsSafe(address) {
 }
 
 export function verifyMultichainSafeChainLogos(address, expectedCount) {
+  // Count only the summary-row logos: an active group expands by default, and each expanded network
+  // sub-row repeats its own chain logo, so scoping to the collapsible trigger keeps the count stable.
   cy.get(dropdownContent)
     .contains(address)
     .closest('[data-slot="collapsible"]')
-    .find('[data-testid="chain-logo"]')
+    .find('[data-slot="collapsible-trigger"] [data-testid="chain-logo"]')
     .should('have.length', expectedCount)
 }
 

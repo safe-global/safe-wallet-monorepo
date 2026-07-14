@@ -10,6 +10,9 @@ const openSafesIcon = '[data-testid="open-safes-icon"]'
 const dropdownContent = '[data-slot="select-content"]'
 const dropdownScrollArea = '[data-testid="dropdown-scroll-area"]'
 const dropdownRow = '[data-slot="select-item"]'
+// A safe's name + rename pencil (SafeInfoDisplay) live in a select-item (single-chain safe) or in the
+// collapsible trigger of a multi-chain group summary, so target either when renaming.
+const safeRow = '[data-slot="select-item"], [data-slot="collapsible-trigger"]'
 const safeItemAddress = '[data-testid="safe-item-address"]'
 const searchInput = '[data-testid="safe-dropdown-search-input"]'
 const tabLocal = '[data-testid="dropdown-tab-local"]'
@@ -96,7 +99,7 @@ export function verifyMissingSignatureInfoExists() {
 }
 
 export function clickSafeOptionsBtn(index = 0) {
-  cy.get(dropdownScrollArea).find(dropdownRow).eq(index).find(renameIcon).click({ force: true })
+  cy.get(dropdownScrollArea).find(safeRow).eq(index).find(renameIcon).click({ force: true })
   cy.get(nameInput).should('be.visible')
 }
 
@@ -113,7 +116,7 @@ export function clickSaveBtn() {
 }
 
 export function renameSafe(oldName, newName) {
-  cy.get(dropdownScrollArea).contains(dropdownRow, oldName).find(renameIcon).click({ force: true })
+  cy.get(dropdownScrollArea).contains(safeRow, oldName).find(renameIcon).click({ force: true })
   typeSafeName(newName)
   clickSaveBtn()
 }
