@@ -351,6 +351,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
         // Single code path for backend persist + Redux add — shared with the
         // "Add another network" flow to keep the write path consistent.
+        const provider = createWeb3ReadOnly(chain, customRpc[chain.chainId])
         const result = await persistCounterfactualSafe({
           chainId: chain.chainId,
           safeAddress,
@@ -362,6 +363,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           isAdminOfActiveSpace,
           spaceSafeCount,
           isMultiChainCreation: isMultiChainDeployment,
+          provider: provider ?? undefined,
           dispatch,
         })
         if (!result.ok) throw result.error

@@ -1,6 +1,8 @@
+import type { JsonRpcProvider } from 'ethers'
 import type { AppDispatch } from '@/store'
 import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
+import { isSmartContract } from '@/utils/wallets'
 import { cgwApi as counterfactualSafesApi } from '@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes'
 import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { toBackendDto } from './counterfactualSafeMapper'
@@ -35,6 +37,9 @@ type PersistArgs = {
    *  entry) instead of swallowing it as success. Single-create flows keep the
    *  soft toast-and-succeed behavior. */
   isMultiChainCreation?: boolean
+  /** Read-only provider for `chainId`, used to check the Safe isn't already
+   *  deployed before saving it as counterfactual. */
+  provider?: JsonRpcProvider
   dispatch: AppDispatch
 }
 
@@ -62,8 +67,19 @@ export const persistCounterfactualSafe = async ({
   isAdminOfActiveSpace,
   spaceSafeCount,
   isMultiChainCreation,
+  provider,
   dispatch,
 }: PersistArgs): Promise<PersistResult> => {
+  // 0. Never store an already-deployed Safe as counterfactual — it would surface
+  //    as "Not activated" for every space member. Fail open to match the backend.
+  try {
+    if (await isSmartContract(safeAddress, provider)) {
+      return { ok: true }
+    }
+  } catch {
+    // Deployment check failed — fall through and save.
+  }
+
   // 1. Save to backend (blocking). Unauth users fall back to local-only —
   //    matches pre-backend-sync behavior and avoids creating orphan entries
   //    that can never be cleaned up server-side.
@@ -165,8 +181,9 @@ export const persistCounterfactualSafe = async ({
   return { ok: true }
 }
 
+// Shown on backend 409: the Safe is already deployed on-chain.
 const CONFLICT_MESSAGE =
-  'A counterfactual Safe with these parameters already exists on this chain. Please contact support if this is unexpected.'
+  'This Safe is already deployed, so it cannot be created as a counterfactual account. Add it as a regular Safe account instead.'
 
 type BackendError = { status?: number; data?: { message?: string } }
 

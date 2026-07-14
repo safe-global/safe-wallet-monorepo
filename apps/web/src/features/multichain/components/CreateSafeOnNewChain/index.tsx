@@ -117,6 +117,7 @@ const ReplaySafeDialog = ({
         isUserAuthenticated,
         isAdminOfActiveSpace,
         spaceSafeCount,
+        provider,
         dispatch,
       })
       if (!persistResult.ok) {
