@@ -1,11 +1,10 @@
 import { useMemo } from 'react'
-import { ChevronLeft, Info, Search } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { ChevronLeft, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Spinner } from '@/components/ui/spinner'
-import { ConnectWalletHint, useIsQualifiedSafe } from '@/features/spaces'
+import { ConnectWalletHint } from '@/features/spaces'
 import { SafeAccountsTable, type AccountLine, type SafeAccountColumnId } from '@/features/myAccounts'
 import type { AllSafeItems } from '@/hooks/safes'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
@@ -68,7 +67,6 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
     setSearchQuery,
   } = modal
 
-  const isInSpace = useIsQualifiedSafe()
   const wallet = useWallet()
   const isDarkMode = useDarkMode()
   const dispatch = useAppDispatch()
