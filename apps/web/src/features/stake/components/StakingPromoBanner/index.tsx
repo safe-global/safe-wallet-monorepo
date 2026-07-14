@@ -28,10 +28,10 @@ const StakingPromoBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   return (
     <div className={css.stakingPromoBanner}>
       <PromoBanner
-        title="SAFE staking is now live"
+        title="Stake SAFE tokens and earn up to ~15% APR"
         description={
           <>
-            Stake SAFE tokens now and get rewards on deposit.{' '}
+            Earn by staking your SAFE tokens, currently rewarded up to 15%.{' '}
             <Link
               href={LEARN_MORE_LINK}
               target="_blank"
