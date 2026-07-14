@@ -335,25 +335,24 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
     gtmSetChainId(chain.chainId)
 
-    trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE, {
-      [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
-      [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
-      [MixpanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
-      [MixpanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
-      [MixpanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
-      [MixpanelEventParams.DEPLOYMENT_TYPE]: getDeploymentType(isCounterfactualEnabled, effectivePayMethod),
-      [MixpanelEventParams.PAYMENT_METHOD]: getPaymentMethodLabel(
-        isCounterfactualEnabled,
-        effectivePayMethod,
-        willRelay,
-      ),
-    })
+    const trackCreatedSafe = () =>
+      trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE, {
+        [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+        [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
+        [MixpanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
+        [MixpanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
+        [MixpanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
+        [MixpanelEventParams.DEPLOYMENT_TYPE]: getDeploymentType(isCounterfactualEnabled, effectivePayMethod),
+        [MixpanelEventParams.PAYMENT_METHOD]: getPaymentMethodLabel(
+          isCounterfactualEnabled,
+          effectivePayMethod,
+          willRelay,
+        ),
+      })
 
     try {
       if (isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater) {
         gtmSetSafeAddress(safeAddress)
-
-        trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
 
         // Single code path for backend persist + Redux add — shared with the
         // "Add another network" flow to keep the write path consistent.
@@ -374,8 +373,17 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         })
         if (!result.ok) throw result.error
 
-        return { chain, safeAddress, success: true, alreadyDeployed: result.skipped === 'already-deployed' }
+        const alreadyDeployed = result.skipped === 'already-deployed'
+        // Already-deployed Safes weren't created as counterfactual — don't report a creation.
+        if (!alreadyDeployed) {
+          trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
+          trackCreatedSafe()
+        }
+
+        return { chain, safeAddress, success: true, alreadyDeployed }
       }
+
+      trackCreatedSafe()
 
       const options: TransactionOptions = buildTransactionOptions(
         !!isEIP1559,

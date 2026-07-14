@@ -5,6 +5,8 @@ import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactu
 import { isSmartContract } from '@/utils/wallets'
 import { cgwApi as counterfactualSafesApi } from '@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes'
 import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { addOrUpdateSafe } from '@/store/addedSafesSlice'
+import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { toBackendDto } from './counterfactualSafeMapper'
 import { replayCounterfactualSafeDeployment } from './safeDeployment'
 import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
@@ -73,12 +75,26 @@ export const persistCounterfactualSafe = async ({
   dispatch,
 }: PersistArgs): Promise<PersistResult> => {
   // 0. Never store an already-deployed Safe as counterfactual — it would surface
-  //    as "Not activated" for every space member. Skip the check without a
-  //    chain-specific provider (the global one may target a different chain) and
-  //    fail open on error to match the backend.
+  //    as "Not activated" for every space member. Add it as a regular Safe
+  //    instead. Skip the check without a chain-specific provider (the global one
+  //    may target a different chain) and fail open on error to match the backend.
   if (provider) {
     try {
       if (await isSmartContract(safeAddress, provider)) {
+        // Add it as a regular deployed Safe (sidebar bookmark) so it stays
+        // reachable — but not to the undeployed slice, which would show it as
+        // "Not activated". Its info loads from the gateway on navigation.
+        dispatch(
+          addOrUpdateSafe({
+            safe: {
+              ...defaultSafeInfo,
+              chainId,
+              address: { value: safeAddress, name },
+              threshold: Number(props.safeAccountConfig.threshold),
+              owners: props.safeAccountConfig.owners.map((owner) => ({ value: owner })),
+            },
+          }),
+        )
         return { ok: true, skipped: 'already-deployed' }
       }
     } catch {

@@ -2,6 +2,7 @@ import { persistCounterfactualSafe } from '../persistCounterfactualSafe'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import type { AppDispatch } from '@/store'
+import { addOrUpdateSafe } from '@/store/addedSafesSlice'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const userInitiate = jest.fn()
@@ -179,7 +180,7 @@ describe('persistCounterfactualSafe', () => {
     }
   })
 
-  it('skips the POST and Redux add and reports skipped when the Safe is already deployed', async () => {
+  it('skips the POST and undeployed add and reports skipped when the Safe is already deployed', async () => {
     isSmartContractImpl.mockResolvedValue(true)
     const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
 
@@ -195,6 +196,29 @@ describe('persistCounterfactualSafe', () => {
     expect(replayImpl).not.toHaveBeenCalled()
     expect(result.ok).toBe(true)
     if (result.ok) expect(result.skipped).toBe('already-deployed')
+  })
+
+  it('adds the already-deployed Safe to the added-safes slice as a regular Safe', async () => {
+    isSmartContractImpl.mockResolvedValue(true)
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: null,
+      isUserAuthenticated: true,
+      dispatch,
+    })
+
+    expect(dispatch).toHaveBeenCalledWith(
+      addOrUpdateSafe({
+        safe: expect.objectContaining({
+          chainId: '100',
+          address: { value: '0xSafe', name: 'MySafe' },
+          threshold: 1,
+          owners: [{ value: '0xabc' }],
+        }),
+      }),
+    )
   })
 
   it('skips the deployment check and persists when no provider is passed', async () => {
