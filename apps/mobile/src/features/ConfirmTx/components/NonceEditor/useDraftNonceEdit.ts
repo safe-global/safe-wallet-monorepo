@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import type { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useAppDispatch } from '@/src/store/hooks'
 import { showToast } from '@/src/store/toastSlice'
 import type { DraftTx } from '@/src/store/draftTxSlice'
 import { redirectDraft } from '@/src/services/tx/draft'
 import { rebuildDraftWithNonce } from '@/src/services/tx/rebuildDraftWithNonce'
 import { useNonce } from '@/src/features/Send/hooks/useNonce'
-import { isMultisigDetailedExecutionInfo } from '@/src/utils/transaction-guards'
 import Logger from '@/src/utils/logger'
 
 /** Picking a different nonce rebuilds the draft under its new safeTxHash; the screen follows the redirect */
-export function useDraftNonceEdit(draft: DraftTx) {
+export function useDraftNonceEdit(draft: DraftTx, executionInfo: MultisigExecutionDetails) {
   const dispatch = useAppDispatch()
   const nonceSheetRef = useRef<BottomSheetModal>(null)
   const [showCustomNonceModal, setShowCustomNonceModal] = useState(false)
@@ -21,7 +21,7 @@ export function useDraftNonceEdit(draft: DraftTx) {
     draft.safeAddress,
   )
 
-  const draftNonce = Number(draft.buildParams.nonce ?? 0)
+  const draftNonce = executionInfo.nonce
 
   const applyNonce = useCallback(
     async (nonce: number) => {
@@ -30,10 +30,6 @@ export function useDraftNonceEdit(draft: DraftTx) {
       }
       setIsRebuilding(true)
       try {
-        const executionInfo = draft.txDetails.detailedExecutionInfo
-        if (!isMultisigDetailedExecutionInfo(executionInfo)) {
-          throw new Error('Draft transaction has no multisig execution info')
-        }
         const safe = { owners: executionInfo.signers, threshold: executionInfo.confirmationsRequired }
         const newSafeTxHash = await rebuildDraftWithNonce({ draft, newNonce: nonce, safe, dispatch })
         redirectDraft(dispatch, draft.safeTxHash, newSafeTxHash)
@@ -44,7 +40,7 @@ export function useDraftNonceEdit(draft: DraftTx) {
         setIsRebuilding(false)
       }
     },
-    [draft, draftNonce, dispatch],
+    [draft, draftNonce, executionInfo, dispatch],
   )
 
   const handleOpenNonceSheet = useCallback(() => {

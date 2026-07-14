@@ -39,14 +39,14 @@ const mockRebuildDraftWithNonce = rebuildDraftWithNonce as jest.MockedFunction<t
 const DRAFT_HASH = '0xdrafthash'
 const owners = [{ value: faker.finance.ethereumAddress(), name: null, logoUri: null }]
 
-const buildDraft = (): DraftTx => ({
+const buildDraft = (executionInfo?: object): DraftTx => ({
   chainId: '1',
   safeAddress: faker.finance.ethereumAddress(),
   buildParams: { to: faker.finance.ethereumAddress(), value: '0', data: '0x', nonce: 7 },
   safeTxHash: DRAFT_HASH,
   txDetails: {
     txId: DRAFT_HASH,
-    detailedExecutionInfo: { type: 'MULTISIG', signers: owners, confirmationsRequired: 1 },
+    detailedExecutionInfo: executionInfo ?? { type: 'MULTISIG', nonce: 7, signers: owners, confirmationsRequired: 1 },
   } as TransactionDetails,
 })
 
@@ -64,6 +64,16 @@ describe('NonceEditor', () => {
 
   it('renders nothing for a transaction without a draft', () => {
     const store = createTestStore({ draftTx: { drafts: {}, redirects: {} } })
+
+    const { queryByTestId } = renderWithStore(<NonceEditor txId={DRAFT_HASH} />, store)
+
+    expect(queryByTestId('nonce-row')).toBeNull()
+  })
+
+  it('renders nothing for a draft without multisig execution info', () => {
+    const store = createTestStore({
+      draftTx: { drafts: { [DRAFT_HASH]: buildDraft({ type: 'MODULE' }) }, redirects: {} },
+    })
 
     const { queryByTestId } = renderWithStore(<NonceEditor txId={DRAFT_HASH} />, store)
 
@@ -113,7 +123,15 @@ describe('NonceEditor', () => {
     fireEvent.press(getByTestId('nonce-row'))
     fireEvent.press(getByTestId('nonce-recommended'))
 
-    await waitFor(() => expect(queryByTestId('nonce-row-value')).toBeNull())
+    // Selecting dismisses the sheet, and the loader replaces the value while rebuilding
+    await waitFor(() => {
+      expect(queryByTestId('nonce-recommended')).toBeNull()
+      expect(queryByTestId('nonce-row-value')).toBeNull()
+    })
+
+    // The row is not pressable mid-rebuild — the sheet must not reopen
+    fireEvent.press(getByTestId('nonce-row'))
+    expect(queryByTestId('nonce-recommended')).toBeNull()
 
     await act(async () => resolveRebuild('0xnewhash'))
     await waitFor(() => expect(selectDraftRedirect(store.getState(), DRAFT_HASH)).toEqual('0xnewhash'))

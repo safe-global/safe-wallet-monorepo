@@ -1,5 +1,8 @@
 import { faker } from '@faker-js/faker'
-import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type {
+  MultisigExecutionDetails,
+  TransactionDetails,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { act, createTestStore, renderHookWithStore, waitFor } from '@/src/tests/test-utils'
 import { selectDraftByHash, selectDraftRedirect, type DraftTx } from '@/src/store/draftTxSlice'
 import { selectToastQueue } from '@/src/store/toastSlice'
@@ -26,23 +29,26 @@ const mockRebuildDraftWithNonce = rebuildDraftWithNonce as jest.MockedFunction<t
 
 const DRAFT_HASH = '0xdrafthash'
 const owners = [{ value: faker.finance.ethereumAddress(), name: null, logoUri: null }]
+const executionInfo = {
+  type: 'MULTISIG',
+  nonce: 7,
+  signers: owners,
+  confirmationsRequired: 1,
+} as unknown as MultisigExecutionDetails
 
 const buildDraft = (): DraftTx => ({
   chainId: '1',
   safeAddress: faker.finance.ethereumAddress(),
   buildParams: { to: faker.finance.ethereumAddress(), value: '0', data: '0x', nonce: 7 },
   safeTxHash: DRAFT_HASH,
-  txDetails: {
-    txId: DRAFT_HASH,
-    detailedExecutionInfo: { type: 'MULTISIG', signers: owners, confirmationsRequired: 1 },
-  } as TransactionDetails,
+  txDetails: { txId: DRAFT_HASH, detailedExecutionInfo: executionInfo } as TransactionDetails,
 })
 
 const renderDraftNonceEdit = () => {
   const store = createTestStore({
     draftTx: { drafts: { [DRAFT_HASH]: buildDraft() }, redirects: {} },
   })
-  return renderHookWithStore(() => useDraftNonceEdit(buildDraft()), store)
+  return renderHookWithStore(() => useDraftNonceEdit(buildDraft(), executionInfo), store)
 }
 
 describe('useDraftNonceEdit', () => {
