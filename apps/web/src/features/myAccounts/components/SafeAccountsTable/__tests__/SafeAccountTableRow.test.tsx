@@ -42,6 +42,8 @@ const leaf = (over: Partial<AccountLine> = {}): AccountLine => ({
   workspaces: [],
   pending: 0,
   dataLoaded: true,
+  undeployed: false,
+  isActivating: false,
   href: '/home?safe=eth:0xabc',
   contextMenu: {
     type: 'single',
@@ -161,6 +163,34 @@ describe('SafeAccountTableRow', () => {
 
       expect(onToggle).toHaveBeenCalled()
       expect(push).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('balance cell', () => {
+    const balanceColumns: SafeAccountColumn[] = [{ id: 'balance', label: 'Balance', sortable: false }]
+
+    const renderBalance = (over: Partial<AccountLine>) =>
+      render(
+        <table>
+          <tbody>
+            <SafeAccountTableRow line={leaf(over)} columns={balanceColumns} />
+          </tbody>
+        </table>,
+      )
+
+    it('shows the Not activated badge in place of the balance for an undeployed safe', () => {
+      renderBalance({ undeployed: true })
+      expect(screen.getByTestId('not-activated-badge')).toHaveAttribute('aria-label', 'Inactive')
+    })
+
+    it('shows the Activating badge while an undeployed safe is being activated', () => {
+      renderBalance({ undeployed: true, isActivating: true })
+      expect(screen.getByTestId('not-activated-badge')).toHaveAttribute('aria-label', 'Activating')
+    })
+
+    it('renders the balance (no badge) for a deployed safe', () => {
+      renderBalance({ undeployed: false })
+      expect(screen.queryByTestId('not-activated-badge')).not.toBeInTheDocument()
     })
   })
 

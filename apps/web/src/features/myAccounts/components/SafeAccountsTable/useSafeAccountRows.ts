@@ -54,6 +54,10 @@ export type AccountLine = {
   contextMenu: AccountContextMenu
   /** Whether on-chain data resolved (overview or counterfactual) — drives skeletons vs. blanks. */
   dataLoaded: boolean
+  /** Counterfactual Safe not yet deployed here — the Balance cell shows a status badge, not a balance. */
+  undeployed: boolean
+  /** Activation tx submitted and awaiting execution — the badge reads "Activating" instead of "Inactive". */
+  isActivating: boolean
 }
 
 export type SafeSortKeys = { name: string; threshold: number | null; networks: number; workspaces: number }
@@ -76,6 +80,7 @@ const buildSafeLine = (safe: SafeItem, deps: BuildDeps, variant: 'single' | 'chi
   const chain = deps.chainMap[chainId]
   const overview = deps.overviewByKey.get(overviewKey(chainId, address))
   const undeployed = deps.undeployedSafes[chainId]?.[address]
+  const isActivating = undeployed ? undeployed.status.status !== 'AWAITING_EXECUTION' : false
   const setup = getSharedSetup(getSafeSetups([safe], deps.overviews, deps.undeployedSafes))
   const isReplayable =
     hasMultiChainAddNetworkFeature(chain) && !isReadOnly && (!undeployed || !isPredictedSafeProps(undeployed.props))
@@ -105,6 +110,8 @@ const buildSafeLine = (safe: SafeItem, deps: BuildDeps, variant: 'single' | 'chi
       undeployedSafe: Boolean(undeployed),
     },
     dataLoaded: Boolean(overview || undeployed),
+    undeployed: Boolean(undeployed),
+    isActivating,
   }
 }
 
@@ -141,6 +148,12 @@ const buildMultiGroup = (item: MultiChainSafeItem, deps: BuildDeps): AccountGrou
   const dataLoaded = safes.some((s) =>
     Boolean(deps.overviewByKey.get(overviewKey(s.chainId, s.address)) || deps.undeployedSafes[s.chainId]?.[s.address]),
   )
+  // The aggregate shows a balance whenever any chain is deployed; the "Not activated" badge only stands in
+  // for the balance when every chain is still counterfactual.
+  const isFullyUndeployed = safes.length > 0 && safes.every((s) => deps.undeployedSafes[s.chainId]?.[s.address])
+  const isActivating =
+    isFullyUndeployed &&
+    safes.some((s) => deps.undeployedSafes[s.chainId]?.[s.address]?.status.status !== 'AWAITING_EXECUTION')
   const childThresholds = children.map((c) => c.threshold).filter((t): t is number => t != null)
 
   const parent: AccountLine = {
@@ -167,6 +180,8 @@ const buildMultiGroup = (item: MultiChainSafeItem, deps: BuildDeps): AccountGrou
       addNetwork: hasReplayableSafe,
     },
     dataLoaded,
+    undeployed: isFullyUndeployed,
+    isActivating,
   }
 
   return {

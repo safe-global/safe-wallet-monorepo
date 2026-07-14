@@ -76,6 +76,8 @@ const line = (over: Partial<AccountLine> & Pick<AccountLine, 'key' | 'displayNam
   workspaces: [],
   pending: 0,
   dataLoaded: true,
+  undeployed: false,
+  isActivating: false,
   contextMenu: { type: 'single', name: '', address: '0x0', chainId: '1', addNetwork: false, undeployedSafe: false },
   ...over,
 })

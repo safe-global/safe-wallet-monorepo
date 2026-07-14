@@ -10,6 +10,7 @@ import Identicon from '@/components/common/Identicon'
 import { SafeInfoDisplay } from '@/components/common/AccountRow'
 import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
 import FiatBalance from '@/components/common/FiatBalance'
+import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useChain } from '@/hooks/useChains'
@@ -219,6 +220,9 @@ const CellContent = ({ column, line }: { column: SafeAccountColumn; line: Accoun
     case 'pending':
       return <PendingBadge count={line.pending} loading={!line.dataLoaded} />
     case 'balance':
+      if (line.undeployed) {
+        return <NotActivatedBadge isActivating={line.isActivating} />
+      }
       return line.dataLoaded ? <FiatBalance value={line.balance} /> : <Skeleton className="h-4 w-16" />
     case 'actions':
       return line.contextMenu.type === 'single' ? (
