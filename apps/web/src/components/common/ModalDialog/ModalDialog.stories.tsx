@@ -10,7 +10,7 @@ const createInitialState = () => ({
     currency: 'usd',
     hiddenTokens: {},
     tokenList: TOKEN_LISTS.ALL,
-    shortName: { copy: true, qr: true },
+    shortName: { qr: true },
     theme: { darkMode: false },
     env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
     signing: { onChainSigning: false, blindSigning: false },
