@@ -250,6 +250,27 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(screen.queryByTestId('space-card')).not.toBeInTheDocument()
   })
 
+  it('passes singleSpaceId with inviteAmount>0 so useSignInRedirect skips the auto-redirect, rendering both the active space card and the invite banner', () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: [
+        { uuid: 'uuid-active', name: 'Active Space', memberStatus: 'ACTIVE' },
+        { uuid: 'uuid-invite', name: 'Pending Space', memberStatus: 'INVITED' },
+      ],
+      isFetching: false,
+      error: undefined,
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(mockUseSignInRedirect).toHaveBeenCalledWith(
+      expect.objectContaining({ singleSpaceId: 'uuid-active', inviteAmount: 1 }),
+    )
+    expect(screen.getByTestId('space-card')).toBeInTheDocument()
+    expect(screen.getByTestId('invite-banner')).toBeInTheDocument()
+  })
+
   it('passes singleSpaceId=null to useSignInRedirect when the user has multiple spaces', () => {
     mockUseAppSelector.mockReturnValue(true)
     mockUseSpacesGetV1Query.mockReturnValue({
