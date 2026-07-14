@@ -133,7 +133,7 @@ const ReplaySafeDialog = ({
         return
       }
 
-      // Already-deployed Safes weren't created as counterfactual — don't report a creation.
+      // Don't report a creation for Safes that were already deployed.
       if (persistResult.skipped !== 'already-deployed') {
         trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
         trackEvent({ ...CREATE_SAFE_EVENTS.CREATED_SAFE, label: 'counterfactual' })

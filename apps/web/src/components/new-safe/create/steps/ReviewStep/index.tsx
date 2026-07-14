@@ -311,8 +311,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           query: { safe: `${successfulChains[0].chain.shortName}:${safeAddress}` },
         })
 
-        // Already-deployed Safes aren't awaiting activation — only fire the event
-        // for chains that were persisted as counterfactual.
+        // Only counterfactual chains are awaiting activation.
         const awaitingChains = successfulChains.filter((r) => !r.alreadyDeployed)
         if (awaitingChains.length > 0) {
           safeCreationDispatch(SafeCreationEvent.AWAITING_EXECUTION, {
@@ -374,7 +373,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         if (!result.ok) throw result.error
 
         const alreadyDeployed = result.skipped === 'already-deployed'
-        // Already-deployed Safes weren't created as counterfactual — don't report a creation.
+        // Don't report a creation for Safes that were already deployed.
         if (!alreadyDeployed) {
           trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
           trackCreatedSafe()
