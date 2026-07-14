@@ -3,11 +3,17 @@ import type { ReactNode } from 'react'
 import FiatValue from '@/components/common/FiatValue'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import { SelectItem } from '@/components/ui/select'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import { ExplorerLinkButton, HOVER_ACTION_CLASS, SafeInfoDisplay } from '@/components/common/AccountRow'
+import {
+  ExplorerLinkButton,
+  HOVER_ACTION_CLASS,
+  SafeInfoDisplay,
+  TOOLTIP_DELAY_MS,
+} from '@/components/common/AccountRow'
 import { cn } from '@/utils/cn'
 import BalanceDisplay from './BalanceDisplay'
 import RowEndColumn from './RowEndColumn'
@@ -33,12 +39,21 @@ interface MultiChainSafeItemRowProps {
   leading?: ReactNode
 }
 
+// Icon-only read-only indicator. The full "Read-only" text widened the row and pushed the explorer
+// link / stat columns off to the right, so the label moves into a hover tooltip instead.
 function ReadOnlyBadge() {
   return (
-    <span className="inline-flex w-fit shrink-0 items-center gap-1 rounded-full border border-border px-1.5 py-px text-[11px] leading-none text-muted-foreground">
-      <Eye className="size-3 shrink-0" />
-      Read-only
-    </span>
+    <Tooltip delay={TOOLTIP_DELAY_MS}>
+      {/* A span trigger (not the default button) so it can nest inside the row's select item without
+          producing invalid nested-button markup. */}
+      <TooltipTrigger
+        render={<span className="inline-flex shrink-0 items-center text-muted-foreground" />}
+        aria-label="Read-only safe"
+      >
+        <Eye className="size-4 shrink-0" />
+      </TooltipTrigger>
+      <TooltipContent>Read-only safe</TooltipContent>
+    </Tooltip>
   )
 }
 

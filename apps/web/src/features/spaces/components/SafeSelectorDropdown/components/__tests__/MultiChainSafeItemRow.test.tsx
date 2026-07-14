@@ -175,11 +175,12 @@ describe('MultiChainSafeItemRow expanded per-chain rows', () => {
     expect(pendingBadges).toEqual(expect.arrayContaining(['3', '2', '1']))
   })
 
-  it('marks a read-only chain row with a Read-only badge', async () => {
+  it('marks only the read-only chain row with a labelled read-only icon', async () => {
     render(<MultiChainSafeItemRow item={createItem([makeChain('1', { isReadOnly: true }), makeChain('137')])} />)
     await expandRow()
 
-    expect(screen.getByText('Read-only')).toBeInTheDocument()
+    // The label moved into a hover tooltip, so the visible affordance is the aria-labelled icon.
+    expect(screen.getAllByLabelText('Read-only safe')).toHaveLength(1)
   })
 })
 
