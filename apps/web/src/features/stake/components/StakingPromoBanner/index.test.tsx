@@ -21,8 +21,8 @@ describe('StakingPromoBanner', () => {
   it('renders the title, description, learn more link and CTA', () => {
     render(<StakingPromoBanner onDismiss={jest.fn()} />, { routerProps: { query: { safe: SAFE } } })
 
-    expect(screen.getByText('SAFE staking is now live')).toBeInTheDocument()
-    expect(screen.getByText(/Stake SAFE tokens now and get rewards on deposit/i)).toBeInTheDocument()
+    expect(screen.getByText('Stake SAFE tokens and earn up to ~15% APR')).toBeInTheDocument()
+    expect(screen.getByText(/Earn by staking your SAFE tokens, currently rewarded up to 15%/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Stake now' })).toBeInTheDocument()
 
     const learnMore = screen.getByRole('link', { name: 'Learn more' })
