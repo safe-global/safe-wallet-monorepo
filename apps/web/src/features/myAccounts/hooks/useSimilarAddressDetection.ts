@@ -3,6 +3,7 @@ import { useAppSelector } from '@/store'
 import useAllSafes from '@/hooks/safes/useAllSafes'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
 import { selectAnchorIndex } from '@/features/address-poisoning/store'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SimilarAddressInfo } from './useNonPinnedSafeWarning.types'
 
 type SimilarAddressResult = {
@@ -37,13 +38,12 @@ const useSimilarAddressDetection = (safeAddress: string | undefined): SimilarAdd
     }
 
     const matchedAddress = `0x${match.anchor}`
-    const lower = matchedAddress.toLowerCase()
-    const matchedSafe = allSafes?.find((safe) => safe.address.toLowerCase() === lower)
+    const matchedSafe = allSafes?.find((safe) => sameAddress(safe.address, matchedAddress))
     // The anchor set also includes address-book contacts that aren't in useAllSafes(); fall back to
     // the address-book name (any chain) so a lookalike of a contact still shows the trusted name.
     const addressBookName = Object.values(addressBooks)
       .flatMap((entries) => Object.entries(entries))
-      .find(([addr]) => addr.toLowerCase() === lower)?.[1]
+      .find(([addr]) => sameAddress(addr, matchedAddress))?.[1]
 
     return {
       hasSimilarAddress: true,

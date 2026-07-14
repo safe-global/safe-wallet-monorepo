@@ -11,6 +11,7 @@
  */
 
 import { Severity } from '../features/safe-shield/types'
+import { isSeverityHigherOrEqual } from '../features/safe-shield/utils/analysisUtils'
 import type {
   SimilarityConfig,
   SimilarityGroup,
@@ -126,6 +127,10 @@ const isBlankOrZeroAddress = (normalized: string): boolean => normalized.length 
 /** A well-formed 20-byte address in normalized form (no `0x`, lowercase hex). */
 const NORMALIZED_ADDRESS = /^[0-9a-f]{40}$/
 
+/** A candidate/anchor worth indexing or querying: well-formed 20-byte hex, and not the zero address. */
+const isUsableAddress = (normalized: string): boolean =>
+  NORMALIZED_ADDRESS.test(normalized) && !isBlankOrZeroAddress(normalized)
+
 /** Number of leading characters two strings share before the first difference. */
 export const longestCommonPrefixLen = (a: string, b: string): number => {
   const max = Math.min(a.length, b.length)
@@ -154,12 +159,11 @@ const buildMatch = (candidate: string, anchor: string, config: AnchorSimilarityC
   return { anchor, prefixLen, suffixLen, severity }
 }
 
-/** Prefer CRITICAL over WARN; tie-break on more matched characters (L + S). */
-const isStrongerMatch = (a: SimilarityMatch, b: SimilarityMatch): boolean => {
-  const rank = (m: SimilarityMatch): number => (m.severity === Severity.CRITICAL ? 1 : 0)
-  if (rank(a) !== rank(b)) return rank(a) > rank(b)
-  return a.prefixLen + a.suffixLen > b.prefixLen + b.suffixLen
-}
+/** Prefer higher severity; tie-break on more matched characters (L + S). */
+const isStrongerMatch = (a: SimilarityMatch, b: SimilarityMatch): boolean =>
+  a.severity !== b.severity
+    ? isSeverityHigherOrEqual(a.severity, b.severity)
+    : a.prefixLen + a.suffixLen > b.prefixLen + b.suffixLen
 
 /**
  * Build an index over the user's trusted anchor addresses for cheap per-candidate
@@ -193,9 +197,9 @@ export const buildSimilarityIndex = (
 
   for (const raw of anchors) {
     const normalized = normalizeAddress(raw)
-    // Only index well-formed, non-zero 20-byte addresses — a corrupted persisted value must not seed
-    // the index (a short/non-hex anchor could yield surprising cross-length matches).
-    if (!NORMALIZED_ADDRESS.test(normalized) || isBlankOrZeroAddress(normalized) || anchorSet.has(normalized)) continue
+    // Only index well-formed, non-zero 20-byte addresses (a corrupted persisted value must not seed
+    // the index), and dedupe.
+    if (!isUsableAddress(normalized) || anchorSet.has(normalized)) continue
     anchorSet.add(normalized)
     pushTo(prefixBuckets, normalized.slice(0, keyLen), normalized)
     pushTo(suffixBuckets, normalized.slice(-keyLen), normalized)
@@ -205,9 +209,8 @@ export const buildSimilarityIndex = (
 
   const query = (address: string): SimilarityMatch | null => {
     const normalized = normalizeAddress(address)
-    // Skip blank/zero, malformed, or exact-anchor (incl. cross-chain replica = identity) candidates.
-    if (isBlankOrZeroAddress(normalized) || !NORMALIZED_ADDRESS.test(normalized) || anchorSet.has(normalized))
-      return null
+    // Skip malformed/zero, or exact-anchor (incl. cross-chain replica = identity) candidates.
+    if (!isUsableAddress(normalized) || anchorSet.has(normalized)) return null
 
     const candidates = new Set<string>()
     for (const anchor of prefixBuckets.get(normalized.slice(0, keyLen)) ?? []) candidates.add(anchor)
