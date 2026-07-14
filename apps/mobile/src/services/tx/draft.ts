@@ -2,7 +2,8 @@ import { cgwApi, type Operation } from '@safe-global/store/gateway/AUTO_GENERATE
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { getSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
-import { setDraft, type DraftTx } from '@/src/store/draftTxSlice'
+import { clearDraft, setDraft, setDraftRedirect, type DraftTx } from '@/src/store/draftTxSlice'
+import { rekeyOutstandingRequest } from '@/src/features/WalletConnect/Wallet/store/walletKitSlice'
 import { synthesizeDraftTxDetails } from '@/src/features/ConfirmTx/utils/synthesizeDraftTxDetails'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import type { AppDispatch } from '@/src/store'
@@ -95,4 +96,14 @@ export const previewAndStashDraft = async ({
   dispatch(setDraft(draft))
 
   return safeTxHash
+}
+
+/** After a rebuild: hands everything keyed by the old hash over to the new draft and drops the old entry */
+export const redirectDraft = (dispatch: AppDispatch, fromSafeTxHash: string, toSafeTxHash: string): void => {
+  if (fromSafeTxHash === toSafeTxHash) {
+    return
+  }
+  dispatch(rekeyOutstandingRequest({ fromSafeTxHash, toSafeTxHash }))
+  dispatch(setDraftRedirect({ fromSafeTxHash, toSafeTxHash }))
+  dispatch(clearDraft(fromSafeTxHash))
 }
