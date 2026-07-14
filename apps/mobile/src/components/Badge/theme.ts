@@ -1,5 +1,8 @@
 import { tokens } from '@/src/theme/tokens'
 
+/** The design system's background/backdropOverlay: backdrop.main at 75%, identical in light and dark */
+export const backdropOverlayBackground = `${tokens.color.backdropMainLight.val}BF`
+
 export const badgeTheme = {
   light_badge_success: {
     background: tokens.color.successLightDark,
@@ -41,6 +44,23 @@ export const badgeTheme = {
   dark_badge_warning_variant2: {
     color: tokens.color.warning1MainDark,
     background: tokens.color.warning1ContrastTextDark,
+  },
+  // warning.dark on its opposite-mode counterpart, so the pill stands out on the warning card
+  light_badge_warning_variant3: {
+    color: tokens.color.warningDarkDark,
+    background: tokens.color.warningDarkLight,
+  },
+  dark_badge_warning_variant3: {
+    color: tokens.color.warningDarkLight,
+    background: tokens.color.warningDarkDark,
+  },
+  light_badge_overlay: {
+    color: tokens.color.staticPrimaryLight,
+    background: backdropOverlayBackground,
+  },
+  dark_badge_overlay: {
+    color: tokens.color.staticPrimaryDark,
+    background: backdropOverlayBackground,
   },
   dark_badge_background: {
     color: tokens.color.textPrimaryDark,
