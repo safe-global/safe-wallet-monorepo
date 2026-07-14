@@ -23,6 +23,7 @@ export function useDraftNonceEdit(draft: DraftTx, executionInfo: MultisigExecuti
 
   const draftNonce = executionInfo.nonce
 
+  // Intentionally closes over the pre-rebuild draft: its safeTxHash is the redirect source key
   const applyNonce = useCallback(
     async (nonce: number) => {
       if (nonce === draftNonce) {

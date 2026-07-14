@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker'
+import type { BottomSheetModal } from '@gorhom/bottom-sheet'
 import type {
   MultisigExecutionDetails,
   TransactionDetails,
@@ -72,13 +73,16 @@ describe('useDraftNonceEdit', () => {
     })
   })
 
-  it('opens the custom nonce modal after the sheet dismiss delay, collapsing rapid taps', () => {
+  it('dismisses the sheet before opening the custom nonce modal, collapsing rapid taps', () => {
     jest.useFakeTimers()
     try {
       const { result } = renderDraftNonceEdit()
+      const dismiss = jest.fn()
+      result.current.nonceSheetRef.current = { dismiss } as unknown as BottomSheetModal
 
       act(() => result.current.handleAddCustomNonce())
       act(() => result.current.handleAddCustomNonce())
+      expect(dismiss).toHaveBeenCalledTimes(2)
       expect(result.current.showCustomNonceModal).toBe(false)
 
       act(() => jest.advanceTimersByTime(300))

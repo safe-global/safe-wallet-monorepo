@@ -82,6 +82,7 @@ export const previewAndStashDraft = async ({
       preview: previewResult.data,
     })
   } finally {
+    // Safe to release the cache subscription immediately: the result was consumed above
     previewPromise.reset()
   }
 
