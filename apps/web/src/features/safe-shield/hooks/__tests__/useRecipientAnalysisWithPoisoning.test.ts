@@ -1,5 +1,5 @@
 import { renderHook } from '@/tests/test-utils'
-import { useRecipientAnalysisWithPoisoning } from '../useAddressPoisoningAnalysis'
+import { useRecipientAnalysisWithPoisoning } from '../useRecipientAnalysisWithPoisoning'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { getAddressPoisoningResult, mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
 import {

@@ -13,16 +13,9 @@ import { StatusGroup, type RecipientAnalysisResults } from '@safe-global/utils/f
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 
 /**
- * Overlays the client-side address-poisoning check onto recipient analysis results.
- *
- * Every analyzed recipient is compared against the user's trusted anchors; any resemblance
- * (front or back) gains a single CRITICAL ADDRESS_POISONING status group ("Potential address
- * poisoning") rendered by the Copilot recipient card.
- *
- * `extraAddresses` covers tx-flows without recipient analysis (add owner, recovery,
- * spending limit, …): a matched extra address gets a poisoning-only entry so the card
- * shows just this check. Gated by the ADDRESS_POISONING_PROTECTION chain flag; a
- * pass-through when nothing matches.
+ * Adds the client-side address-poisoning check to recipient analysis: each recipient (and each
+ * `extraAddresses` entry, for flows without recipient analysis) that resembles a trusted anchor
+ * gains a CRITICAL ADDRESS_POISONING group. Flag-gated; returns the input unchanged when nothing matches.
  */
 export const useRecipientAnalysisWithPoisoning = (
   recipient: AsyncResult<RecipientAnalysisResults>,
@@ -33,8 +26,7 @@ export const useRecipientAnalysisWithPoisoning = (
   const anchorIndex = useAppSelector(selectAnchorIndex)
   const allAddressBooks = useAppSelector(selectAllAddressBooks)
 
-  // Normalized anchor address → contact name, built once per address-book change so resolving a
-  // name is O(1) per match instead of an O(chains × entries) scan for every look-alike.
+  // Normalized anchor → contact name, built once per address-book change (O(1) name lookup per match).
   const anchorNameByAddress = useMemo(() => {
     const map = new Map<string, string>()
     for (const chainAddressBook of Object.values(allAddressBooks)) {
@@ -67,20 +59,17 @@ export const useRecipientAnalysisWithPoisoning = (
         continue
       }
 
-      // Insert the poisoning group FIRST: the card colors/titles only the top visible result, and
-      // the stable severity sort breaks ties by insertion order — so the CRITICAL poisoning group
-      // leads and also wins any same-severity tie.
+      // Insert poisoning FIRST so it leads and wins insertion-order severity ties (the card
+      // titles/colors only the top visible result).
       next[address] = { [StatusGroup.ADDRESS_POISONING]: poisoningGroup(address, match), ...groups }
       changed = true
     }
 
-    // Poisoning-only entries for registered addresses outside the recipient analysis.
-    // Skip partial input (registration follows the field as the user types).
+    // Poisoning-only entries for non-recipient addresses (skip partial input as the user types).
     for (const address of extraAddresses ?? []) {
       if (!isAddress(address)) continue
 
-      // data-path keys are lowercased (useRecipientAnalysis), so dedupe case-insensitively — a
-      // checksummed key would never match a lowercase one and could double-add the same address.
+      // Dedupe case-insensitively — data-path keys are lowercased, a checksummed key would double-add.
       const lowerKey = address.toLowerCase()
       if (Object.keys(next).some((k) => k.toLowerCase() === lowerKey)) continue
 

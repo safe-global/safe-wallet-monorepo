@@ -1,5 +1,5 @@
 export { useRecipientAnalysis } from './useRecipientAnalysis'
 export { useCounterpartyAnalysis } from './useCounterpartyAnalysis'
-export { useRecipientAnalysisWithPoisoning } from './useAddressPoisoningAnalysis'
+export { useRecipientAnalysisWithPoisoning } from './useRecipientAnalysisWithPoisoning'
 export { useThreatAnalysis } from './useThreatAnalysis'
 export { useReportFalseResult } from './useReportFalseResult'
