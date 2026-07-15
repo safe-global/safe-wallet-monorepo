@@ -7,16 +7,20 @@ import {
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 
-/** Maps a lowercased Safe address to the Spaces (workspaces) it belongs to. */
+/** Maps a chain-qualified Safe key (`${chainId}:${lowercased address}`) to the Spaces (workspaces) it belongs to. */
 export type SafeSpacesMap = Record<string, GetSpaceResponse[]>
 
+/** Chain-qualified key for the reverse lookup. Matches the accounts table's row keys. */
+const safeSpaceKey = (chainId: string, address: string) => `${chainId}:${address.toLowerCase()}`
+
 /**
- * Builds a reverse lookup from a Safe address to the Spaces it belongs to.
+ * Builds a reverse lookup from a chain-qualified Safe key to the Spaces it belongs to.
  *
- * The gateway only exposes space → safes, so this fetches the signed-in user's
- * spaces and each space's safes, then indexes them by lowercased address (deduping
- * a space that lists the same address on several chains). Signed-out users belong to
- * no space, so the map is empty and the "Workspaces" column simply renders nothing.
+ * The gateway only exposes space → safes, so this fetches the signed-in user's spaces and
+ * each space's safes, then indexes them by `${chainId}:${address}`. Keying by chain (not
+ * address alone) keeps a Safe that shares an address across chains from inheriting another
+ * chain's workspace membership. Signed-out users belong to no space, so the map is empty and
+ * the "Workspaces" column simply renders nothing.
  *
  * Lives in shared hooks (not the spaces feature) so cross-feature consumers like the
  * accounts table can use it without importing the heavy `@/features/spaces` barrel,
@@ -32,6 +36,7 @@ export const useSafeSpaces = (): { safeSpaces: SafeSpacesMap; isLoading: boolean
   useEffect(() => {
     if (!spaces || spaces.length === 0) {
       setSafeSpaces({})
+      setIsResolving(false)
       return
     }
 
@@ -54,7 +59,7 @@ export const useSafeSpaces = (): { safeSpaces: SafeSpacesMap; isLoading: boolean
         const seen = new Set<string>()
         for (const chainId in result.safes) {
           for (const address of result.safes[chainId]) {
-            const key = address.toLowerCase()
+            const key = safeSpaceKey(chainId, address)
             if (seen.has(key)) continue
             seen.add(key)
             ;(nextMap[key] ??= []).push(result.space)

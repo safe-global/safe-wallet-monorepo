@@ -155,13 +155,21 @@ describe('MultiChainSafeItemRow expanded per-chain rows', () => {
     expect(screen.getByText('Chain 137')).toBeInTheDocument()
   })
 
-  it('shows a full threshold pill on each chain row (per-chain, not icon-only)', async () => {
-    render(<MultiChainSafeItemRow item={createItem(['1', '137'], { threshold: 2, owners: 3 })} />)
+  it('shows each chain row its own threshold/owners, not the parent aggregate', async () => {
+    // Parent aggregate is 2/3, but the chains have different setups — each row must show its own.
+    render(
+      <MultiChainSafeItemRow
+        item={createItem([makeChain('1', { threshold: 2, owners: 3 }), makeChain('137', { threshold: 3, owners: 5 })], {
+          threshold: 2,
+          owners: 3,
+        })}
+      />,
+    )
     await expandRow()
 
-    // Collapsed summary badge stays icon-only; the two expanded rows show the full "2/3".
-    const fullBadges = screen.getAllByText('2/3')
-    expect(fullBadges).toHaveLength(2)
+    // The collapsed summary badge stays icon-only; the expanded rows show each chain's own "2/3" and "3/5".
+    expect(screen.getByText('2/3')).toBeInTheDocument()
+    expect(screen.getByText('3/5')).toBeInTheDocument()
   })
 
   it('shows per-chain pending counts (not the summed total) on the expanded rows', async () => {

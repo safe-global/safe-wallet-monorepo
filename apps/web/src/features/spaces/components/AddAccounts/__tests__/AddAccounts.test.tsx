@@ -63,10 +63,11 @@ jest.mock('@/hooks/safes', () => {
 
 let mockIsAdmin = true
 let mockSpaceSafes: Array<{ chainId: string; address: string }> = []
+let mockSpaceSafesLoading = false
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
   useIsAdmin: () => mockIsAdmin,
-  useSpaceSafes: () => ({ allSafes: mockSpaceSafes }),
+  useSpaceSafes: () => ({ allSafes: mockSpaceSafes, isLoading: mockSpaceSafesLoading }),
   useIsQualifiedSafe: () => false,
 }))
 
@@ -92,6 +93,7 @@ describe('AddAccounts — wallet connection state', () => {
     mockAllOwned = {}
     mockIsAdmin = true
     mockSpaceSafes = []
+    mockSpaceSafesLoading = false
   })
 
   it('shows trusted safes in the list', () => {
@@ -127,6 +129,7 @@ describe('AddAccounts — manage trusted safes view switch', () => {
     mockAllOwned = {}
     mockIsAdmin = true
     mockSpaceSafes = []
+    mockSpaceSafesLoading = false
   })
 
   it('switches to the manage view and back', () => {
@@ -167,6 +170,7 @@ describe('AddAccounts — admin guard on submit', () => {
     mockAllOwned = {}
     mockIsAdmin = true
     mockSpaceSafes = []
+    mockSpaceSafesLoading = false
   })
 
   it('blocks submission and shows an error when the user is not an admin', async () => {
@@ -205,5 +209,22 @@ describe('AddAccounts — admin guard on submit', () => {
     expect(screen.queryByText('Only admins can add or remove Safe accounts in this workspace')).not.toBeInTheDocument()
     expect(mockAddSafesToSpace).not.toHaveBeenCalled()
     expect(mockRemoveSafesFromSpace).not.toHaveBeenCalled()
+  })
+
+  it('does not diff existing members as removals when the modal opens before space safes load', () => {
+    // Cold cache: the modal opens (via the chooser) while the space-safes query is still in flight.
+    mockSpaceSafesLoading = true
+    mockSpaceSafes = []
+    const { rerender } = render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
+
+    // The query resolves with an existing member. The reset must now seed it (pre-checked), so Save
+    // sees no changes rather than treating the member as a removal (which would delete it on submit).
+    mockSpaceSafesLoading = false
+    mockSpaceSafes = [{ chainId: '1', address: TRUSTED_ADDRESS }]
+    rerender(<AddAccounts externalOpen onExternalClose={() => {}} />)
+
+    // Form is clean (nothing to add or remove) → Save disabled. If the empty seed had been finalized,
+    // the member would diff as a removal and the button would be enabled.
+    expect(screen.getByTestId('add-accounts-button')).toBeDisabled()
   })
 })

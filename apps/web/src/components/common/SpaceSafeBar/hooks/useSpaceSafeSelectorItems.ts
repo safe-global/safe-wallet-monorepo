@@ -67,6 +67,8 @@ const mapMultiChainItemChains = (
         id,
         chainConfigs.find((c) => c.chainId === id),
       ),
+      threshold: overview?.threshold,
+      owners: overview?.owners.length,
       balance: overview?.fiatTotal,
       isLoading: overviewsLoading && !overview,
       queued: overview?.queued,

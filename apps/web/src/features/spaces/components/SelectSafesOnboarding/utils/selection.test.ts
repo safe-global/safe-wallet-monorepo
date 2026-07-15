@@ -78,4 +78,22 @@ describe('applySafeSelectionToggle', () => {
     expect(setValue).toHaveBeenCalledTimes(1)
     expect(setValue).toHaveBeenCalledWith('selectedSafes.1:0xStandalone', true, { shouldValidate: true })
   })
+
+  it('skips disabled (locked) children when a group is toggled off', () => {
+    const setValue = makeSetValue()
+    const disabledKeys = new Set(['1:0xA']) // already in the workspace — locked, must not be removed
+
+    // Group toggled off: only the addable child is unselected; the locked child is left untouched.
+    applySafeSelectionToggle(
+      setValue,
+      [],
+      { '1:0xA': true, '137:0xA': true },
+      groupLine('0xA', ['1', '137']),
+      false,
+      disabledKeys,
+    )
+
+    expect(setValue).not.toHaveBeenCalledWith('selectedSafes.1:0xA', expect.anything(), expect.anything())
+    expect(setValue).toHaveBeenCalledWith('selectedSafes.137:0xA', false, { shouldValidate: true })
+  })
 })

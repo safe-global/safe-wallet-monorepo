@@ -61,17 +61,7 @@ function ReadOnlyBadge() {
  * One selectable network under a multi-chain safe. Carries the per-chain explorer link (the summary
  * row above spans several chains, so its explorer would be arbitrary — it lives here instead).
  */
-function NetworkRow({
-  chain,
-  address,
-  threshold,
-  owners,
-}: {
-  chain: SafeItemDataChain
-  address: string
-  threshold: number
-  owners: number
-}) {
+function NetworkRow({ chain, address }: { chain: SafeItemDataChain; address: string }) {
   const chainConfig = useChain(chain.chainId)
   const explorerLink = chainConfig ? getBlockExplorerLink(chainConfig, address) : undefined
 
@@ -99,8 +89,8 @@ function NetworkRow({
         )}
       </div>
       <SafeRowStats
-        threshold={threshold}
-        owners={owners}
+        threshold={chain.threshold ?? 0}
+        owners={chain.owners ?? 0}
         chains={[chain]}
         pending={chain.isUndeployed ? 0 : (chain.queued ?? 0)}
         awaitingConfirmation={chain.isUndeployed ? 0 : (chain.awaitingConfirmation ?? 0)}
@@ -169,13 +159,7 @@ const MultiChainSafeItemRow = ({ item, onRename, isSelected = false, leading }: 
       <CollapsibleContent>
         <div className="flex flex-col gap-0.5 pb-1">
           {item.chains.map((chain) => (
-            <NetworkRow
-              key={`${chain.chainId}:${item.address}`}
-              chain={chain}
-              address={item.address}
-              threshold={item.threshold}
-              owners={item.owners}
-            />
+            <NetworkRow key={`${chain.chainId}:${item.address}`} chain={chain} address={item.address} />
           ))}
         </div>
       </CollapsibleContent>

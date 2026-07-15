@@ -77,6 +77,17 @@ type BuildDeps = {
 
 const overviewKey = (chainId: string, address: string) => `${chainId}:${address.toLowerCase()}`
 
+/** Unions workspace memberships across a multi-chain safe's per-chain keys, deduped by space uuid. */
+const unionWorkspaces = (safes: SafeItem[], safeSpaces: SafeSpacesMap): GetSpaceResponse[] => {
+  const byUuid = new Map<string, GetSpaceResponse>()
+  for (const safe of safes) {
+    for (const space of safeSpaces[overviewKey(safe.chainId, safe.address)] ?? []) {
+      byUuid.set(space.uuid, space)
+    }
+  }
+  return Array.from(byUuid.values())
+}
+
 const buildSafeLine = (safe: SafeItem, deps: BuildDeps, variant: 'single' | 'child'): AccountLine => {
   const { chainId, address, isReadOnly, name } = safe
   const chain = deps.chainMap[chainId]
@@ -99,7 +110,7 @@ const buildSafeLine = (safe: SafeItem, deps: BuildDeps, variant: 'single' | 'chi
     threshold: setup?.threshold,
     owners: setup?.owners.length,
     thresholdMixed: false,
-    workspaces: variant === 'child' ? [] : (deps.safeSpaces[address.toLowerCase()] ?? []),
+    workspaces: variant === 'child' ? [] : (deps.safeSpaces[overviewKey(chainId, address)] ?? []),
     pending: overview?.queued ?? 0,
     awaitingConfirmation: overview?.awaitingConfirmation ?? 0,
     balance: overview?.fiatTotal,
@@ -136,7 +147,7 @@ const buildMultiGroup = (item: MultiChainSafeItem, deps: BuildDeps): AccountGrou
   const { address, safes, name } = item
   const shared = getSharedSetup(getSafeSetups(safes, deps.overviews, deps.undeployedSafes))
   const overviewsForItem = safes.map((s) => deps.overviewByKey.get(overviewKey(s.chainId, s.address)))
-  const workspaces = deps.safeSpaces[address.toLowerCase()] ?? []
+  const workspaces = unionWorkspaces(safes, deps.safeSpaces)
   const children = safes.map((s) => buildSafeLine(s, deps, 'child'))
 
   const pending = overviewsForItem.reduce((sum, o) => sum + (o?.queued ?? 0), 0)

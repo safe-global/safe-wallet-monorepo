@@ -99,7 +99,7 @@ const AddAccounts = ({
 
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const dispatch = useAppDispatch()
-  const { allSafes: spaceSafes } = useSpaceSafes()
+  const { allSafes: spaceSafes, isLoading: isLoadingSpaceSafes } = useSpaceSafes()
   const sortComparator = getComparator(orderBy)
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
@@ -194,17 +194,19 @@ const AddAccounts = ({
   )
 
   const handleTableToggle = (line: AccountLine, nextChecked: boolean) =>
-    applySafeSelectionToggle(setValue, visibleTrusted, selectedSafes || {}, line, nextChecked)
+    applySafeSelectionToggle(setValue, visibleTrusted, selectedSafes || {}, line, nextChecked, spaceSafeKeys)
 
-  // Reset form when modal opens
+  // Reset form when modal opens. Wait until the space-safes query has resolved before seeding:
+  // opening via the AddAccountsChooser on a cold cache can render with `spaceSafes` still empty, and
+  // finalizing that empty seed would make Save diff every existing member as a removal (data loss).
   useEffect(() => {
-    if (isOpen && !hasResetForOpen.current) {
+    if (isOpen && !hasResetForOpen.current && !isLoadingSpaceSafes) {
       reset({ selectedSafes: defaultSelectedSafes })
       hasResetForOpen.current = true
     } else if (!isOpen) {
       hasResetForOpen.current = false
     }
-  }, [isOpen, defaultSelectedSafes, reset])
+  }, [isOpen, defaultSelectedSafes, reset, isLoadingSpaceSafes])
 
   const onSubmit = handleSubmit(async (data) => {
     if (!isAdmin) {

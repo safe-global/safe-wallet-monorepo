@@ -1,6 +1,10 @@
 import type { ChainInfo } from '@/features/spaces/types'
 
 export interface SafeItemDataChain extends ChainInfo {
+  /** Signing threshold on this chain. Populated for multi-chain items so each network row shows its own setup. */
+  threshold?: number
+  /** Owner count on this chain. Populated for multi-chain items so each network row shows its own setup. */
+  owners?: number
   /** Per-chain fiat total for this safe. Populated for multi-chain items so the accordion can show chain balances. */
   balance?: string
   /** True while the per-chain overview is still being fetched. */

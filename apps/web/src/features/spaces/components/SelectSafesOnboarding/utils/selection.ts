@@ -21,6 +21,10 @@ export const getSelectedLeafKeys = (selectedSafes: Record<string, boolean>): Set
  * parent keys with their children: toggling a group cascades to every child, and toggling a single
  * child re-derives its parent's aggregate (checked only when all siblings are checked).
  *
+ * `disabledKeys` are locked leaves (e.g. safes already in the workspace) that the group cascade must
+ * never touch — otherwise toggling a partially-locked group off would unselect and remove a locked
+ * workspace Safe through a control the row-level UI marks disabled.
+ *
  * Shared by the onboarding selection hook and the workspace "Add accounts" picker so the two stay in
  * lockstep.
  */
@@ -30,11 +34,16 @@ export const applySafeSelectionToggle = (
   selectedSafes: Record<string, boolean>,
   line: AccountLine,
   nextChecked: boolean,
+  disabledKeys?: ReadonlySet<string>,
 ): void => {
   if (line.variant === 'group') {
     const group = line.source as MultiChainSafeItem
     setValue(`selectedSafes.${getMultiChainSafeId(group)}`, nextChecked, { shouldValidate: true })
-    group.safes.forEach((safe) => setValue(`selectedSafes.${getSafeId(safe)}`, nextChecked, { shouldValidate: true }))
+    group.safes.forEach((safe) => {
+      const key = getSafeId(safe)
+      if (disabledKeys?.has(key)) return
+      setValue(`selectedSafes.${key}`, nextChecked, { shouldValidate: true })
+    })
     return
   }
 
