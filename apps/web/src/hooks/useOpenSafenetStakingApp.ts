@@ -3,6 +3,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { AppRoutes } from '@/config/routes'
 import { SafeAppsTag } from '@/config/constants'
 import useChainId from '@/hooks/useChainId'
+import { logError } from '@/services/exceptions'
+import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { useLazySafeAppsGetSafeAppsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 /**
@@ -26,12 +28,14 @@ export const useOpenSafenetStakingApp = () => {
     setIsNavigating(true)
     try {
       const [apps] = await Promise.all([
-        triggerSafeApps({ chainId, clientUrl: window.location.origin }),
+        triggerSafeApps({ chainId, clientUrl: window.location.origin }).unwrap(),
         new Promise((resolve) => setTimeout(resolve, 1000)),
       ])
-      const safenetApp = apps.data?.find((app) => app.tags.includes(SafeAppsTag.SAFENET))
+      const safenetApp = apps.find((app) => app.tags.includes(SafeAppsTag.SAFENET))
       if (!safenetApp) return
       router.push(`${AppRoutes.apps.open}?safe=${query?.get('safe')}&appUrl=${encodeURIComponent(safenetApp.url)}`)
+    } catch (error) {
+      logError(ErrorCodes._902, error)
     } finally {
       setIsNavigating(false)
       isNavigatingRef.current = false
