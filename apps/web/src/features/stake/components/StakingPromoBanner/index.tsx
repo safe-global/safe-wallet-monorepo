@@ -1,9 +1,8 @@
 import { useEffect } from 'react'
-import { useRouter } from 'next/router'
-import { Link } from '@mui/material'
+import { CircularProgress, Link } from '@mui/material'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import PromoBanner from '@/components/common/PromoBanner/PromoBanner'
-import { AppRoutes } from '@/config/routes'
+import { useOpenSafenetStakingApp } from '@/hooks/useOpenSafenetStakingApp'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import css from './styles.module.css'
 
@@ -11,14 +10,14 @@ const LEARN_MORE_LINK =
   'https://forum.safefoundation.org/t/sep-55-phase-2-fund-safenet-beta-for-safe-token-utility/6967'
 
 const StakingPromoBanner = ({ onDismiss }: { onDismiss: () => void }) => {
-  const router = useRouter()
+  const { openSafenetStakingApp, isNavigating } = useOpenSafenetStakingApp()
 
   useEffect(() => {
     trackEvent(OVERVIEW_EVENTS.SHOW_STAKING_BANNER)
   }, [])
 
   const onStake = () => {
-    router.push({ pathname: AppRoutes.stake, query: { safe: router.query.safe } })
+    openSafenetStakingApp()
   }
 
   const onLearnMore = () => {
@@ -46,7 +45,7 @@ const StakingPromoBanner = ({ onDismiss }: { onDismiss: () => void }) => {
         ctaLabel="Stake now"
         onCtaClick={onStake}
         ctaVariant="text"
-        endIcon={<ArrowForwardIcon fontSize="small" />}
+        endIcon={isNavigating ? <CircularProgress size={16} color="inherit" /> : <ArrowForwardIcon fontSize="small" />}
         imageSrc="/images/common/staking-promo/safe-coin.svg"
         imageAlt="Safe token"
         trackingEvents={OVERVIEW_EVENTS.OPEN_STAKING_WIDGET}
