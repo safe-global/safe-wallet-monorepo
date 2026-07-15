@@ -1,11 +1,20 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { Copy, Check } from 'lucide-react'
-import { OVERVIEW_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import RowIconAction from './RowIconAction'
 
 // Copies a safe address to the clipboard. Used in the dropdown trigger and list rows; the rows pass
 // a distinct testId so the trigger's `copy-address-btn` stays a single, unambiguous element.
-const CopyAddressButton = ({ address, testId = 'copy-address-btn' }: { address: string; testId?: string }) => {
+// Tracking-agnostic: pass `onCopy` to fire an analytics event labelled for the call site's surface
+// (the component itself no longer emits sidebar-specific events from the table/dropdown).
+const CopyAddressButton = ({
+  address,
+  testId = 'copy-address-btn',
+  onCopy,
+}: {
+  address: string
+  testId?: string
+  onCopy?: () => void
+}) => {
   const [copied, setCopied] = useState(false)
   const resetTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
@@ -14,8 +23,8 @@ const CopyAddressButton = ({ address, testId = 'copy-address-btn' }: { address: 
     setCopied(true)
     clearTimeout(resetTimer.current)
     resetTimer.current = setTimeout(() => setCopied(false), 2000)
-    trackEvent(OVERVIEW_EVENTS.COPY_ADDRESS, { [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Copy Address' })
-  }, [address])
+    onCopy?.()
+  }, [address, onCopy])
 
   useEffect(() => () => clearTimeout(resetTimer.current), [])
 

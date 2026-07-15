@@ -2,13 +2,6 @@ import React from 'react'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ExplorerLinkButton from '../ExplorerLinkButton'
-import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
-
-jest.mock('@/services/analytics', () => ({
-  __esModule: true,
-  ...jest.requireActual('@/services/analytics'),
-  trackEvent: jest.fn(),
-}))
 
 jest.mock('@/components/ui/tooltip', () => ({
   __esModule: true,
@@ -36,17 +29,18 @@ describe('ExplorerLinkButton', () => {
     expect(link).toHaveAttribute('aria-label', 'View on Etherscan')
   })
 
-  it('tracks the open-explorer event and stops propagation on click', async () => {
+  it('invokes onOpen and stops propagation on click', async () => {
     const onParentClick = jest.fn()
+    const onOpen = jest.fn()
     render(
       <div onClick={onParentClick}>
-        <ExplorerLinkButton href="https://etherscan.io/address/0x123" />
+        <ExplorerLinkButton href="https://etherscan.io/address/0x123" onOpen={onOpen} />
       </div>,
     )
 
     await userEvent.click(screen.getByTestId('safe-item-explorer-link'))
 
-    expect(trackEvent).toHaveBeenCalledWith(OVERVIEW_EVENTS.OPEN_EXPLORER, expect.any(Object))
+    expect(onOpen).toHaveBeenCalledTimes(1)
     expect(onParentClick).not.toHaveBeenCalled()
   })
 })

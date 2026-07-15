@@ -1,13 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import CopyAddressButton from '../CopyAddressButton'
 
-const trackEvent = jest.fn()
-jest.mock('@/services/analytics', () => ({
-  trackEvent: (...args: unknown[]) => trackEvent(...args),
-  OVERVIEW_EVENTS: { COPY_ADDRESS: { action: 'copy' } },
-  MixpanelEventParams: { SIDEBAR_ELEMENT: 'sidebar_element' },
-}))
-
 describe('CopyAddressButton', () => {
   const writeText = jest.fn()
   const originalClipboard = navigator.clipboard
@@ -23,7 +16,6 @@ describe('CopyAddressButton', () => {
 
   beforeEach(() => {
     writeText.mockClear()
-    trackEvent.mockClear()
   })
 
   it('uses the default copy-address-btn testid', () => {
@@ -36,19 +28,27 @@ describe('CopyAddressButton', () => {
     expect(screen.getByTestId('safe-item-copy-address')).toBeInTheDocument()
   })
 
-  it('copies the address and tracks the event on click', () => {
-    render(<CopyAddressButton address="0xdeadbeef" />)
+  it('copies the address and invokes the onCopy callback on click', () => {
+    const onCopy = jest.fn()
+    render(<CopyAddressButton address="0xdeadbeef" onCopy={onCopy} />)
     fireEvent.click(screen.getByTestId('copy-address-btn'))
     expect(writeText).toHaveBeenCalledWith('0xdeadbeef')
-    expect(trackEvent).toHaveBeenCalled()
+    expect(onCopy).toHaveBeenCalledTimes(1)
   })
 
   it('copies once per pointer-driven click (pointerdown + click do not double-fire)', () => {
-    render(<CopyAddressButton address="0xdeadbeef" />)
+    const onCopy = jest.fn()
+    render(<CopyAddressButton address="0xdeadbeef" onCopy={onCopy} />)
     const btn = screen.getByTestId('copy-address-btn')
     fireEvent.pointerDown(btn)
     fireEvent.click(btn)
     expect(writeText).toHaveBeenCalledTimes(1)
-    expect(trackEvent).toHaveBeenCalledTimes(1)
+    expect(onCopy).toHaveBeenCalledTimes(1)
+  })
+
+  it('copies without error when no onCopy callback is provided', () => {
+    render(<CopyAddressButton address="0xdeadbeef" />)
+    fireEvent.click(screen.getByTestId('copy-address-btn'))
+    expect(writeText).toHaveBeenCalledWith('0xdeadbeef')
   })
 })
