@@ -23,7 +23,8 @@ const spaceSaveBtn = '[data-testid="space-save-button"]'
 const spaceDeleteBtn = '[data-testid="space-delete-button"]'
 const spaceConfirmDeleteBtn = '[data-testid="space-confirm-delete-button"]'
 const spaceConfirmNameInput = '[data-testid="space-confirm-name-input"]'
-const spaceCard = '[data-testid="space-card"]'
+// The welcome "Workspaces" list renders one SpaceRow per space (reworked from the old SpaceCard).
+const spaceCard = '[data-testid="space-row"]'
 const spaceCardName = '[data-testid="org-name"]'
 const spaceCardContextMenuBtn = '[data-testid="space-card-context-menu-button"]'
 const contectMenuRemoveBtn = '[data-testid="remove-button"]'
@@ -104,10 +105,19 @@ const headerAccountMenuTrigger = '[data-testid="header-account-info"] button'
 const sidebarProfilePopover = '[data-testid="sidebar-profile-popover"]'
 const sidebarProfileSignOutBtn = '[data-testid="sidebar-profile-sign-out"]'
 const continueWithWalletBtn = '[data-testid="continue-with-wallet-btn"]'
+// The signed-out /welcome/spaces keeps the Topbar, which renders its own generic "Connect Wallet"
+// button with the same data-testid as the sign-in card's button — so the card button is matched by
+// its "Continue with wallet" text instead of by index.
+const connectWalletBtn = '[data-testid="connect-wallet-btn"]'
+const workspaceWalletBtnText = 'Continue with wallet'
+const onboardV2 = 'onboard-v2'
+const pkInput = '[data-testid="private-key-input"]'
+const pkConnectBtn = '[data-testid="pk-connect-btn"]'
 
 // -- Onboarding --
 const orgSpaceInput = '[data-testid="space-name-input"]'
 const createSpaceOnboardingContinueBtn = '[data-testid="create-space-onboarding-continue-button"]'
+const selectSafesSkipLink = '[data-testid="select-safes-skip-link"]'
 const inviteMembersSkipBtn = '[data-testid="invite-members-skip-button"]'
 const surveyOptionCard = '[data-testid="survey-option-card"]'
 const surveyFinishBtn = '[data-testid="survey-finish-button"]'
@@ -165,16 +175,6 @@ export function getPendingTxItem(index) {
   return `${pendingTxWidget} ${widgetItem}:eq(${index})`
 }
 
-function getSpaceId() {
-  return cy.url().then((url) => {
-    const match = url.match(/spaceId=([^&]+)/)
-    if (!match) {
-      throw new Error('spaceId not found in the URL')
-    }
-    return match[1]
-  })
-}
-
 const spaceDashboardWidgetSelectorByTitle = {
   Accounts: spaceDashboardAccountsWidget,
   Pending: pendingTxWidget,
@@ -186,6 +186,24 @@ const spaceDashboardWidgetSelectorByTitle = {
 
 export function clickOnSignInBtn() {
   cy.get(continueWithWalletBtn).click()
+}
+
+// Full workspace sign-in from the signed-out /welcome/spaces card. Clicking the card's "Continue
+// with wallet" button opens onboard; after injecting the signer the card flips to a "Continue with
+// <wallet>" button that runs SIWE, which finishes signing into the workspace.
+export function signInWithWallet(signer) {
+  cy.contains(connectWalletBtn, workspaceWalletBtnText, { timeout: 30000 }).should('be.visible').click()
+  cy.get(onboardV2, { timeout: 30000 }).shadow().find('button').contains('Private key').click()
+  cy.get(pkInput, { timeout: 30000 })
+    .find('input')
+    .then(($input) => {
+      $input.val(signer)
+      cy.wrap($input).trigger('input').trigger('change')
+    })
+  cy.get(pkConnectBtn).click()
+  // The page renders more than one sign-in card (the workspace card plus the generic "Sign in to
+  // see content" gate), each with a continue-with-wallet-btn — click the visible one.
+  cy.get(continueWithWalletBtn, { timeout: 30000 }).filter(':visible').first().click()
 }
 
 export function clickOnUseOldUiBtn() {
@@ -256,6 +274,13 @@ export function goToSpacesView() {
   cy.get(`${orgList}, ${createSpaceBtn}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
 }
 
+export function openSpaceByName(name) {
+  // From the Spaces View list, open the space whose row carries this name (call goToSpacesView first
+  // if a single-space account may have auto-redirected into a dashboard).
+  cy.contains(spaceCard, name, { timeout: 30000 }).should('be.visible').click()
+  cy.url({ timeout: 30000 }).should('include', constants.spaceDashboardUrl).and('include', 'spaceId=')
+}
+
 export function clickOnSpaceSelector(spaceName) {
   cy.get(spaceSelectorBtn, { timeout: 15000 }).should('be.visible').click()
   if (spaceName) {
@@ -268,17 +293,25 @@ export function disconnectFromSpaceLevel() {
   navigation.clickOnDisconnectBtn()
 }
 
+// Navigate to a space section through the sidebar (client-side) rather than a full cy.visit reload.
+// Dismiss any open popover first (e.g. the space selector left open by clickOnSpaceSelector) so it
+// can't cover the nav item.
+function openSpaceSection(sidebarSelector, pathFragment) {
+  cy.get('body').type('{esc}')
+  cy.get(sidebarSelector, { timeout: 30000 }).should('be.visible').click()
+  cy.url({ timeout: 30000 }).should('include', pathFragment).and('include', 'spaceId=')
+}
+
 export function goToSpaceSettings() {
-  getSpaceId().then((spaceId) => {
-    cy.visit(constants.spaceUrl + spaceId)
-  })
+  openSpaceSection(sidebarItemSettings, '/spaces/settings')
 }
 
 export function goToSpaceMembers() {
-  cy.wait(1000)
-  getSpaceId().then((spaceId) => {
-    cy.visit(constants.spaceMembersUrl + spaceId)
-  })
+  openSpaceSection(sidebarItemTeam, '/spaces/members')
+}
+
+export function goToSpaceSafeAccounts() {
+  openSpaceSection(sidebarItemAccounts, '/spaces/safe-accounts')
 }
 
 // ===========================================
@@ -559,7 +592,8 @@ export function addAccountManually(address, network) {
   cy.get(addAddressInput).find('input').should('have.value', address)
   cy.get(addSpaceAccountManuallyBtn).should('be.enabled').click()
   cy.get(addAccountsBtn).should('be.enabled').click()
-  cy.get(dashboardSafeList).contains(main.shortenAddress(address)).should('be.visible')
+  // Added accounts land in the Safe accounts table; FullAddress keeps the whole address in the DOM.
+  cy.contains(accountAddress, address, { timeout: 30000 }).should('be.visible')
 }
 
 // ===========================================
@@ -587,11 +621,13 @@ export function verifySpaceInviteBannerVisible(spaceName) {
     })
 }
 
-export function acceptInvite(name) {
-  cy.get(acceptInviteBtn).click()
+export function acceptInvite(spaceName, name) {
+  // Scope to this run's invite: the member may hold several pending invites, so click Accept inside
+  // the banner for the space under test rather than the first accept-invite-button on the page.
+  cy.contains(inviteBanner, spaceName).find(acceptInviteBtn).click()
   cy.get(inviteNameInput).find('input').clear().type(name)
   cy.get(confirmAcceptInviteBtn).click()
-  cy.contains(name).should('be.visible')
+  // Accepting navigates into the joined workspace; the caller verifies the success message.
 }
 
 // ===========================================
@@ -625,12 +661,11 @@ function submitSpaceName(name) {
 
 function skipSelectSafesStep() {
   cy.url({ timeout: 30000 }).should('include', onboardingSelectSafesPath).and('include', 'spaceId=')
-  cy.url().then((url) => {
-    const match = url.match(/spaceId=([^&]+)/)
-    if (!match) throw new Error('spaceId not found in URL')
-    const spaceId = match[1]
-    cy.visit(`${onboardingInviteMembersPath}?spaceId=${spaceId}`)
-  })
+  // Click the on-page skip link (client-side router.push to invite-members) instead of a full
+  // cy.visit reload: the reload reboots the app and pays the per-navigation long task, so the
+  // invite-members skip button renders after the command times out.
+  cy.get(selectSafesSkipLink).should('be.visible').click()
+  cy.url({ timeout: 30000 }).should('include', onboardingInviteMembersPath).and('include', 'spaceId=')
 }
 
 function skipInviteMembersStep() {
@@ -658,23 +693,4 @@ export function createSpaceViaOnboardingWithSkip(name) {
   skipInviteMembersStep()
   completeSurveyStep()
   verifySpaceDashboardLoaded()
-}
-
-function openFirstExistingSpace() {
-  cy.get(`${orgList} ${spaceCard}`, { timeout: 30000 }).first().should('be.visible').click()
-  cy.url({ timeout: 30000 }).should('include', constants.spaceDashboardUrl).and('include', 'spaceId=')
-}
-
-export function openFirstSpaceFromSpacesView() {
-  // After sign-in a single-space account auto-redirects into the space dashboard;
-  // click the logo to return to the Spaces View so a space card is always present.
-  cy.wait('@spacesList', { timeout: 60000 })
-  cy.url({ timeout: 30000 }).then((url) => {
-    if (url.includes(constants.spaceDashboardUrl)) {
-      cy.get(sidebarLogo).should('be.visible').click()
-      cy.url().should('include', constants.spacesUrl)
-    }
-  })
-  cy.get(`${orgList} ${spaceCard}`, { timeout: 30000 }).should('have.length.at.least', 1)
-  openFirstExistingSpace()
 }
