@@ -142,7 +142,9 @@ export const exploreSpacesLabel = 'Introducing workspaces'
 // ===========================================
 
 const spaceDashboardTotalValueLabelText = 'Total value'
-const viewAllAccountsLabel = 'View all accounts'
+// Both the Accounts and Pending widgets render a "View all" button with this testid, so scope it to
+// the Accounts widget container when clicking.
+const widgetViewAllBtn = '[data-testid="widget-view-all"]'
 const updateSuccessMsg = 'Workspace name updated'
 const formattedSpaceTotalValuePattern = /^\$[\u200a\s]*[\d,]+\.\d{2}$/
 
@@ -331,7 +333,7 @@ export function clickExpandedPanelSubAccountRow(rowIndex, subRowIndex) {
 }
 
 export function clickViewAllAccounts() {
-  cy.contains(viewAllAccountsLabel).click()
+  cy.get(spaceDashboardAccountsWidget).find(widgetViewAllBtn).should('be.visible').click()
 }
 
 export function verifySidebarItemNavigates(sidebarSelector, pathFragment) {
@@ -415,8 +417,9 @@ function verifySafeDashboardUrlSafeQuery(expectedSafeParam) {
 }
 
 function verifySafeSelectorNavigationPanel({ expectedName, fullAddress, balanceRegex, ownersThreshold }) {
-  // The selector no longer shows the chain prefix; assert the (unprefixed) shortened address only.
-  const expectedLine = main.shortenAddress(fullAddress)
+  // The header renders the full, unprefixed address via <FullAddress> on sm+ viewports (the test
+  // viewport is 1280px), no longer a shortened form.
+  const expectedLine = fullAddress
   cy.get(safeSelectorTriggerIdenticon, { timeout: 30000 }).should('be.visible')
   cy.get(safeSelectorTriggerName, { timeout: 30000 }).should('be.visible').and('contain.text', expectedName)
   cy.get(safeSelectorTriggerAddress).should('be.visible').and('contain.text', expectedLine)
