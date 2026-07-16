@@ -57,7 +57,9 @@ const safeSelectorTriggerIdenticon = '[data-testid="safe-icon"]'
 const safeSelectorTriggerName = '[data-testid="safe-selector-trigger-name"]'
 const safeSelectorTriggerAddress = '[data-testid="safe-selector-trigger-address"]'
 const safeSelectorBalance = '[data-testid="safe-selector-balance"]'
-const safeSelectorThreshold = '[data-testid="safe-selector-threshold"]'
+// The header threshold is the shared ThresholdBadge (account-threshold), no longer a dedicated
+// safe-selector-threshold testid.
+const safeSelectorThreshold = '[data-testid="account-threshold"]'
 const safeLevelNavigation = '[data-testid="safe-level-navigation"]'
 const spaceSafesNavigationBlock = '[data-testid="space-safes-navigation-block"]'
 const spaceChainNavigationButton = '[data-testid="space-chain-navigation-button"]'
@@ -74,7 +76,9 @@ export const sidebarItemSettings = '[data-testid="sidebar-item-settings"]'
 
 // -- Safe accounts page --
 const safeAccountsPageTitle = 'Safe accounts'
-const safeAccountsListItem = '[data-testid="safe-list-item"]'
+// The Safe accounts page now renders the shared SafeAccountsTable; count only top-level rows
+// (multichain children render only when a group is expanded).
+const safeAccountsTableRow = '[data-testid="account-table-row"]:not([data-variant="child"])'
 
 // -- Add account --
 const openAddAccountsChooserBtn = '[data-testid="open-add-accounts-chooser-button"]'
@@ -490,7 +494,7 @@ export function verifyViewAllAccountsPageOpened(expectedAccountsCount) {
   cy.url().should('include', '/spaces/safe-accounts').and('include', 'spaceId=')
   cy.contains(safeAccountsPageTitle, { timeout: 30000 }).should('be.visible')
   if (expectedAccountsCount !== undefined) {
-    main.verifyElementsCount(safeAccountsListItem, expectedAccountsCount)
+    main.verifyElementsCount(safeAccountsTableRow, expectedAccountsCount)
   }
 }
 
