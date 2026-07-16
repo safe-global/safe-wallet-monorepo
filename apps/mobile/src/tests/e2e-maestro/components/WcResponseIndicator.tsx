@@ -30,12 +30,14 @@ export function WcResponseIndicator() {
   const outstanding = useAppSelector(selectOutstandingRequests)
   const lastHashRef = useRef<string | null>(null)
 
-  const hashes = Object.keys(outstanding)
+  // The flows drive one tx at a time, so `outstanding` holds at most one entry when
+  // populated — "last key" relies on that invariant, not on object-key ordering.
   useEffect(() => {
+    const hashes = Object.keys(outstanding)
     if (hashes.length > 0) {
       lastHashRef.current = hashes[hashes.length - 1]
     }
-  })
+  }, [outstanding])
 
   if (!response) {
     return null
