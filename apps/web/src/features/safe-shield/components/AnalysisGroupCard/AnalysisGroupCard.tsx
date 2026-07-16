@@ -1,4 +1,4 @@
-import { type ReactElement, type ReactNode, useMemo, useState, useEffect, useRef } from 'react'
+import { type ReactElement, type ReactNode, type TransitionEvent, useMemo, useState, useEffect, useRef } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import {
@@ -82,13 +82,15 @@ export const AnalysisGroupCard = ({
     return null
   }
 
+  // Drop the reveal's max-height cap once its own transition ends (ignore opacity + bubbling Collapse height).
+  const handleRevealTransitionEnd = (e: TransitionEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget && e.propertyName === 'max-height' && isVisible) setRevealed(true)
+  }
+
   return (
     <Box
       data-testid={dataTestId}
-      onTransitionEnd={(e) => {
-        // Only the reveal's own max-height transition (ignore opacity + bubbling Collapse height).
-        if (e.target === e.currentTarget && e.propertyName === 'max-height' && isVisible) setRevealed(true)
-      }}
+      onTransitionEnd={handleRevealTransitionEnd}
       sx={{
         // Capped during the reveal (animatable), uncapped after — see `revealed` above.
         overflow: revealed ? 'visible' : 'hidden',

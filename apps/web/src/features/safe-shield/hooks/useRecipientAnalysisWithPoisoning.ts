@@ -7,7 +7,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { selectAnchorIndex } from '@/features/address-poisoning'
 import { normalizeAddress } from '@safe-global/utils/utils/addressSimilarity'
 import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
-import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { checksumAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import { getAddressPoisoningResult } from '@safe-global/utils/features/safe-shield/utils'
 import { StatusGroup, type RecipientAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
@@ -70,8 +70,7 @@ export const useRecipientAnalysisWithPoisoning = (
       if (!isAddress(address)) continue
 
       // Dedupe case-insensitively — data-path keys are lowercased, a checksummed key would double-add.
-      const lowerKey = address.toLowerCase()
-      if (Object.keys(next).some((k) => k.toLowerCase() === lowerKey)) continue
+      if (Object.keys(next).some((k) => sameAddress(k, address))) continue
 
       const match = anchorIndex.query(address)
       if (!match) continue
