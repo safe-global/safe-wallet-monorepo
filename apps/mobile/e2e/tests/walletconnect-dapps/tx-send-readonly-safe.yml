@@ -8,6 +8,9 @@ tags:
 # "Add a signer" CTA does not exist in the implementation.)
 # The toast shows for ~2.5s, so it is asserted first; the marker persists.
 
+- runScript:
+    file: ../../utils/scripts/defaults.js
+
 - runFlow:
     file: ../../utils/setup/app-start.yml
 
@@ -26,7 +29,7 @@ tags:
 - extendedWaitUntil:
     visible:
       text: 'No signer attached to this Safe'
-    timeout: 5000
+    timeout: ${output.defaults.wcTxUiTimeout}
 - assertVisible:
     id: 'e2e-wc-response-error-4100'
 
