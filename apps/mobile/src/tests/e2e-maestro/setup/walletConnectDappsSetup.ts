@@ -50,6 +50,7 @@ let requestSeq = REQUEST_SEQ_START
 // Owner #1 of the primary test Safe (mockedActiveSafeInfo.owners). The key is the
 // same throwaway Sepolia key the onboarding import flow types into the UI — it must
 // be an owner so routing treats the Safe as signable and staging CGW accepts /propose.
+// INTENTIONALLY PUBLIC test key (already committed in the onboarding flows); never fund it.
 export const E2E_TX_OWNER_ADDRESS = '0x3336745b7EA628F5134Bd9d08aa68b4979fA3472'
 const E2E_TX_OWNER_PRIVATE_KEY = '0xffc4b004b8746a7ce547ffa644686ca660efcf7a5a39910c714f922d7ad9bcc8'
 
@@ -146,9 +147,17 @@ export const setupWcDappsTx = async (dispatch: Dispatch, router: Router) => {
   const signer = setupSigner(dispatch, E2E_TX_OWNER_ADDRESS)
   dispatch(setActiveSigner({ safeAddress: mockedActiveAccount.address, signer }))
   dispatch(setBiometricsEnabled(true))
-  await keyStorageService.storePrivateKey(E2E_TX_OWNER_ADDRESS, E2E_TX_OWNER_PRIVATE_KEY, {
-    requireAuthentication: false,
-  })
+  // The keychain write can genuinely fail on a simulator; report the outcome as a
+  // marker so flows wait for 'ready' instead of failing later on a missing signer.
+  try {
+    await keyStorageService.storePrivateKey(E2E_TX_OWNER_ADDRESS, E2E_TX_OWNER_PRIVATE_KEY, {
+      requireAuthentication: false,
+    })
+    walletKitE2eState.set({ txSetupStatus: 'ready' })
+  } catch (e) {
+    walletKitE2eState.set({ txSetupStatus: 'failed' })
+    throw e
+  }
 }
 
 const synthProposal = (verified: VerifiedFixture) => {

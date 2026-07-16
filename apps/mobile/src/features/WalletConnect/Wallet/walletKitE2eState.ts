@@ -24,6 +24,9 @@ export type PairBehavior = 'resolve' | 'hang' | 'reject'
 /** What the e2e fetch interceptor should do with the CGW /propose call. */
 export type ProposeBehavior = 'live' | 'fail500'
 
+/** Outcome of the async tx-request setup (keychain write can fail on a simulator). */
+export type TxSetupStatus = 'idle' | 'ready' | 'failed'
+
 /** The last JSON-RPC response the fake respondSessionRequest() delivered to the "dApp". */
 export type RecordedRequestResponse = {
   topic: string
@@ -75,6 +78,13 @@ export interface WalletKitE2eState {
    *  - 'fail500' → synthetic 500, for the CGW-failure flow
    */
   proposeBehavior: ProposeBehavior
+
+  /**
+   * Set by setupWcDappsTx once its async tail (keychain write) settles. Surfaced
+   * as e2e-wc-tx-setup-ready / -failed markers so flows wait for setup instead of
+   * failing later with a confusing missing-signer symptom.
+   */
+  txSetupStatus: TxSetupStatus
 }
 
 const initialState: WalletKitE2eState = {
@@ -84,6 +94,7 @@ const initialState: WalletKitE2eState = {
   rejectSessionCalled: false,
   lastRequestResponse: null,
   proposeBehavior: 'live',
+  txSetupStatus: 'idle',
 }
 
 export const walletKitE2eState = createE2eStore('walletKitE2eState', initialState)

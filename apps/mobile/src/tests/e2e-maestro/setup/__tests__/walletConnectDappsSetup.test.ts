@@ -175,11 +175,20 @@ describe('walletConnectDappsSetup tx requests', () => {
     expect(walletKitE2eState.get().proposeBehavior).toBe('fail500')
   })
 
+  it('setupWcDappsTx reports failed setup when the keychain write rejects', async () => {
+    const router = { replace: jest.fn() } as unknown as Router
+    jest.mocked(keyStorageService.storePrivateKey).mockRejectedValueOnce(new Error('keychain unavailable'))
+
+    await expect(setupWcDappsTx(store.dispatch, router)).rejects.toThrow('keychain unavailable')
+    expect(walletKitE2eState.get().txSetupStatus).toBe('failed')
+  })
+
   it('setupWcDappsTx seeds an owner signer with a keychain key and enables biometrics', async () => {
     const router = { replace: jest.fn() } as unknown as Router
     await setupWcDappsTx(store.dispatch, router)
 
     const state = store.getState()
+    expect(walletKitE2eState.get().txSetupStatus).toBe('ready')
     expect(state.signers[E2E_TX_OWNER_ADDRESS]).toBeDefined()
     expect(state.activeSigner[mockedActiveAccount.address]?.value).toBe(E2E_TX_OWNER_ADDRESS)
     expect(selectBiometricsEnabled(state)).toBe(true)
