@@ -18,6 +18,7 @@ import {
   EllipsisVertical,
   Shield,
   History,
+  FlaskConical,
 } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
@@ -125,6 +126,17 @@ export const safeDefiGroup: SidebarGroupConfig = {
       icon: TrendingUp,
       label: 'Stake',
       href: AppRoutes.stake,
+    },
+  ],
+}
+
+export const safeDeveloperGroup: SidebarGroupConfig = {
+  label: 'Developer',
+  items: [
+    {
+      icon: FlaskConical,
+      label: 'Feature flags',
+      href: AppRoutes.featureFlags,
     },
   ],
 }

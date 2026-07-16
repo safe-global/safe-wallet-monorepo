@@ -33,6 +33,7 @@ export const SafeSidebarVariant = ({
   workspaceHeader,
   mainNavItems,
   defiGroup,
+  developerGroup,
   isLoading = false,
 }: SafeSidebarVariantProps): ReactElement => {
   const router = useRouter()
@@ -119,6 +120,22 @@ export const SafeSidebarVariant = ({
                 <SidebarMenu className="gap-0">
                   {displayDefiItems.map((item, index) => (
                     <NavItem key={item?.href ?? `skeleton-defi-${index}`} item={item} isLoading={isLoading} />
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </motion.div>
+        )}
+
+        {/* Developer Group */}
+        {(developerGroup?.items?.length ?? 0) > 0 && (
+          <motion.div variants={itemVariants}>
+            <SidebarGroup className={css.sidebarGroup}>
+              <SidebarGroupLabel>{developerGroup?.label ?? ''}</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu className="gap-0">
+                  {developerGroup?.items.map((item) => (
+                    <NavItem key={item.href} item={item} isLoading={isLoading} />
                   ))}
                 </SidebarMenu>
               </SidebarGroupContent>
