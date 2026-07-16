@@ -27,7 +27,7 @@ import { DEFAULT_SIMILARITY_CONFIG, DEFAULT_ANCHOR_SIMILARITY_CONFIG } from './a
  * Get the bucket key for an address based on prefix and suffix
  */
 export const getBucketKey = (address: string, prefixLength: number, suffixLength: number): string => {
-  const hex = address.toLowerCase().slice(2) // Remove '0x' prefix
+  const hex = normalizeAddress(address)
   const prefix = hex.slice(0, prefixLength)
   const suffix = hex.slice(-suffixLength)
   return `${prefix}_${suffix}`
