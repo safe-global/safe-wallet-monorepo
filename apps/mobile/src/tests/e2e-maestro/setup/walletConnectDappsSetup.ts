@@ -47,25 +47,19 @@ let proposalSeq = PROPOSAL_SEQ_START
 const REQUEST_SEQ_START = 5000
 let requestSeq = REQUEST_SEQ_START
 
-// Owner #1 of the primary test Safe (mockedActiveSafeInfo.owners). The key is the
-// same throwaway Sepolia key the onboarding import flow types into the UI — it must
-// be an owner so routing treats the Safe as signable and staging CGW accepts /propose.
-// INTENTIONALLY PUBLIC test key (already committed in the onboarding flows); never fund it.
+// Owner of the primary test Safe, so staging CGW accepts the /propose signature.
+// INTENTIONALLY PUBLIC throwaway key (already committed in the onboarding flows); never fund it.
 export const E2E_TX_OWNER_ADDRESS = '0x3336745b7EA628F5134Bd9d08aa68b4979fA3472'
 const E2E_TX_OWNER_PRIVATE_KEY = '0xffc4b004b8746a7ce547ffa644686ca660efcf7a5a39910c714f922d7ad9bcc8'
 
-// 0.001 / 0.002 ETH to two fellow owners. Proposing needs no balance (nothing executes).
+// 0.001 / 0.002 ETH; proposing needs no balance (nothing executes).
 const E2E_TX_VALUE = 0x38d7ea4c68000n
 const E2E_BATCH_VALUE_2 = 0x71afd498d0000n
 
 // The Safe's on-chain nonce never advances (nothing executes), so identical calldata
-// reproduces the same safeTxHash on every run — and CGW then serves the previous run's
-// already-signed queue entry, skipping the sign tail. Wei-level jitter keeps each
-// composed tx unique while the display still rounds to the fixture amount.
-// Separate from requestSeq (the request-id counter) so ids stay contiguous.
+// would reproduce an already-signed safeTxHash on reruns and skip the sign tail.
+// Non-zero wei jitter (invisible at display precision) keeps every composed tx unique.
 let jitterSeq = 0
-// `+ 1` so the jitter is never zero (zero would reproduce the already-queued base
-// value); 0xffffff wei ≈ 1.7e-11 ETH, invisible at display precision, ~4.7h cycle.
 const jitteredValue = (base: bigint): string =>
   `0x${(base + BigInt(((Date.now() + ++jitterSeq) % 0xffffff) + 1)).toString(16)}`
 
@@ -76,7 +70,7 @@ const buildTxCall = () => ({
   data: '0x',
 })
 
-// EIP-5792 bundle; chainId is hex-quantity Sepolia (0xaa36a7 = 11155111).
+// EIP-5792 bundle; 0xaa36a7 = Sepolia (11155111).
 const buildBatchBundle = () => ({
   version: '1.0',
   chainId: '0xaa36a7',
@@ -135,11 +129,9 @@ export const setupWcDappsBase = (dispatch: Dispatch, router: Router) => {
 }
 
 /**
- * Tx-request setup: base + seeded session + an owner signer whose private key is
- * in the (simulator) keychain, biometrics-enabled so the confirm flow signs
- * without the opt-in detour. The key is stored without auth-gating: the item
- * is readable regardless of the requireAuthentication flag getPrivateKey passes,
- * and the simulator has no Secure Enclave to enforce it anyway.
+ * Tx-request setup: base + seeded session + an owner signer with its key in the
+ * simulator keychain (un-gated, so no biometric prompt), biometrics-enabled so
+ * the confirm flow signs without the opt-in detour.
  */
 export const setupWcDappsTx = async (dispatch: Dispatch, router: Router) => {
   setupWcDappsBase(dispatch, router)
@@ -147,8 +139,7 @@ export const setupWcDappsTx = async (dispatch: Dispatch, router: Router) => {
   const signer = setupSigner(dispatch, E2E_TX_OWNER_ADDRESS)
   dispatch(setActiveSigner({ safeAddress: mockedActiveAccount.address, signer }))
   dispatch(setBiometricsEnabled(true))
-  // The keychain write can genuinely fail on a simulator; report the outcome as a
-  // marker so flows wait for 'ready' instead of failing later on a missing signer.
+  // The keychain write can fail on a simulator; flows gate on the resulting marker.
   try {
     await keyStorageService.storePrivateKey(E2E_TX_OWNER_ADDRESS, E2E_TX_OWNER_PRIVATE_KEY, {
       requireAuthentication: false,
@@ -194,11 +185,8 @@ export const setWcPairHang = () => walletKitE2eState.set({ pairBehavior: 'hang' 
 
 // ── Transaction requests ─────────────────────────────────────────────────────
 
-/**
- * Build a session_request envelope for the seeded session. Dispatched through
- * sessionRequestReceived so the REAL router runs (read-only 4100 rejection,
- * chain/params validation) instead of pushing straight into the pending queue.
- */
+// Dispatched through sessionRequestReceived (not pushed straight into the pending
+// queue) so the real router runs — read-only 4100 rejection, chain/params validation.
 const buildTxRequest = (
   method: 'eth_sendTransaction' | 'wallet_sendCalls',
   params: unknown[],

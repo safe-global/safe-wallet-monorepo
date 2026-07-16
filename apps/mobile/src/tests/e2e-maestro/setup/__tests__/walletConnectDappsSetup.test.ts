@@ -32,8 +32,7 @@ import {
   E2E_TX_OWNER_ADDRESS,
 } from '../walletConnectDappsSetup'
 
-// setupWcDappsTx runs the full base setup; stub the pieces that hit the network
-// (chains re-fetch) or navigation so the slice-seeding behaviour stays observable.
+// Stub the network (chains re-fetch) and navigation pieces of the base setup.
 jest.mock('../setupHelpers', () => ({
   ...jest.requireActual('../setupHelpers'),
   resetReduxForE2E: jest.fn(),

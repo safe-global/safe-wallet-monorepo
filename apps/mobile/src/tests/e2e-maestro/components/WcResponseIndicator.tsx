@@ -5,19 +5,14 @@ import { selectOutstandingRequests } from '@/src/features/WalletConnect/Wallet/s
 import { walletKitE2eState } from '@/src/features/WalletConnect/Wallet/walletKitE2eState'
 
 /**
- * Side-channel for the WalletConnect tx-request flows: surfaces what the fake
- * respondSessionRequest() delivered to the "dApp" as 1x1 markers Maestro can assert.
- *
- *  - `e2e-wc-response-error-<code>`  — an error was delivered (4100 read-only, 5000 USER_REJECTED, …)
- *  - `e2e-wc-response-hash-match`    — eth_sendTransaction: bare result === the handed-off safeTxHash
- *  - `e2e-wc-response-5792-match`    — wallet_sendCalls: result is exactly `{ id: safeTxHash }`
- *
- * The expected hash is the outstandingRequests key observed while the tx was in
- * review; it's kept in a ref because the propose-success listener clears the
- * entry in the same tick it responds.
+ * Surfaces what the fake respondSessionRequest() delivered as 1x1 markers:
+ *  - `e2e-wc-response-error-<code>`
+ *  - `e2e-wc-response-hash-match` — bare result === the handed-off safeTxHash
+ *  - `e2e-wc-response-5792-match` — result is exactly `{ id: safeTxHash }`
+ * The expected hash lives in a ref because the propose-success listener clears
+ * the outstanding entry in the same tick it responds.
  */
 
-/** EIP-5792 send envelope: an object whose ONLY key is `id`, holding the safeTxHash. */
 const isBundleEnvelope = (result: unknown, safeTxHash: string): boolean =>
   typeof result === 'object' &&
   result !== null &&
@@ -30,8 +25,7 @@ export function WcResponseIndicator() {
   const outstanding = useAppSelector(selectOutstandingRequests)
   const lastHashRef = useRef<string | null>(null)
 
-  // The flows drive one tx at a time, so `outstanding` holds at most one entry when
-  // populated — "last key" relies on that invariant, not on object-key ordering.
+  // Flows drive one tx at a time; the last-key read relies on that, not on key order.
   useEffect(() => {
     const hashes = Object.keys(outstanding)
     if (hashes.length > 0) {

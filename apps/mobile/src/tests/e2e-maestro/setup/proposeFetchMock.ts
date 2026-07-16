@@ -1,18 +1,11 @@
 /**
- * E2E fetch interceptor for CGW's propose-transaction endpoint. Installed once
- * from TestCtrls.e2e.tsx (so it never reaches production bundles) and driven by
- * `walletKitE2eState.proposeBehavior`:
- *  - 'live'    → passthrough (default; reset() restores it between flows)
- *  - 'fail500' → synthetic 500 for /propose only
+ * E2E fetch interceptor for CGW's propose endpoint, driven by
+ * `walletKitE2eState.proposeBehavior` ('fail500' → synthetic 500; reset()
+ * restores passthrough). Intercepting at the fetch layer keeps the real RTK
+ * matchers firing, which the walletKit listeners depend on.
  *
- * Intercepting at the fetch layer (not the RTK endpoint) keeps the real
- * `transactionsProposeTransactionV1` matchers firing, which the walletKit
- * listeners depend on for proposing/abandon bookkeeping.
- *
- * Contract: install-once per JS runtime. The wrapper binds the underlying fetch
- * at install time and the `installed` guard makes later calls no-ops — so a test
- * (or anything else) that swaps global.fetch AFTER installation silently unhooks
- * the interceptor. Bind your mock fetch first, then install (see the test).
+ * Install-once per JS runtime: the wrapper binds the underlying fetch at
+ * install time, so anything swapping global.fetch must do so before installing.
  */
 import { walletKitE2eState } from '@/src/features/WalletConnect/Wallet/walletKitE2eState'
 
