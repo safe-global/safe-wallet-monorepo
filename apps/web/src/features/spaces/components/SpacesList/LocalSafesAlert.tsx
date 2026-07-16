@@ -1,10 +1,12 @@
 import { WalletMinimal } from 'lucide-react'
 import { useAppSelector } from '@/store'
-import { selectAllAddedSafes } from '@/store/addedSafesSlice'
+import { selectAllAddedSafesOnSupportedChains } from '@/store/addedSafesSlice'
+import useChains from '@/hooks/useChains'
 
 const LocalSafesAlert = () => {
-  const allAdded = useAppSelector(selectAllAddedSafes)
-  const count = Object.values(allAdded ?? {}).reduce((sum, safes) => sum + Object.keys(safes).length, 0)
+  const { configs } = useChains()
+  const allAdded = useAppSelector((state) => selectAllAddedSafesOnSupportedChains(state, configs))
+  const count = Object.values(allAdded).reduce((sum, safes) => sum + Object.keys(safes).length, 0)
 
   if (count === 0) return null
 

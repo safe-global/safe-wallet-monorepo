@@ -1,5 +1,6 @@
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { addOrUpdateSafe, removeSafe, addedSafesSlice } from '../addedSafesSlice'
+import { addOrUpdateSafe, removeSafe, addedSafesSlice, selectAllAddedSafesOnSupportedChains } from '../addedSafesSlice'
+import type { RootState } from '..'
 
 describe('addedSafesSlice', () => {
   describe('addOrUpdateSafe', () => {
@@ -44,6 +45,30 @@ describe('addedSafesSlice', () => {
         removeSafe({ chainId: '1', address: '0x0' }),
       )
       expect(state).toEqual({ '4': { ['0x0']: {} as SafeState } })
+    })
+  })
+
+  describe('selectAllAddedSafesOnSupportedChains', () => {
+    const buildState = (added: Record<string, Record<string, unknown>>) =>
+      ({ [addedSafesSlice.name]: added }) as unknown as RootState
+
+    it('drops Safes on chains that are no longer supported', () => {
+      const state = buildState({
+        '1': { '0xAAA': {} },
+        '137': { '0xBBB': {} },
+        '999': { '0xCCC': {} },
+      })
+
+      expect(selectAllAddedSafesOnSupportedChains(state, [{ chainId: '1' }, { chainId: '137' }])).toEqual({
+        '1': { '0xAAA': {} },
+        '137': { '0xBBB': {} },
+      })
+    })
+
+    it('returns an empty map when no chain is supported', () => {
+      const state = buildState({ '1': { '0xAAA': {} } })
+
+      expect(selectAllAddedSafesOnSupportedChains(state, [])).toEqual({})
     })
   })
 })

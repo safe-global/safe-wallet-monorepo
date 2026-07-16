@@ -2,18 +2,25 @@ import { render, screen } from '@testing-library/react'
 import LocalSafesAlert from '../LocalSafesAlert'
 
 const mockUseAppSelector = jest.fn()
+const mockUseChains = jest.fn()
 
 jest.mock('@/store', () => ({
   useAppSelector: (selector: unknown) => mockUseAppSelector(selector),
 }))
 
 jest.mock('@/store/addedSafesSlice', () => ({
-  selectAllAddedSafes: jest.fn(() => 'selectAllAddedSafes'),
+  selectAllAddedSafesOnSupportedChains: jest.fn(() => 'selectAllAddedSafesOnSupportedChains'),
+}))
+
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: () => mockUseChains(),
 }))
 
 describe('LocalSafesAlert', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseChains.mockReturnValue({ configs: [{ chainId: '1' }, { chainId: '100' }, { chainId: '137' }] })
   })
 
   it('renders nothing when no local Safes are present', () => {
@@ -23,7 +30,7 @@ describe('LocalSafesAlert', () => {
   })
 
   it('renders nothing when the addedSafes slice is undefined (cold start)', () => {
-    mockUseAppSelector.mockReturnValue(undefined)
+    mockUseAppSelector.mockReturnValue({})
     const { container } = render(<LocalSafesAlert />)
     expect(container).toBeEmptyDOMElement()
   })

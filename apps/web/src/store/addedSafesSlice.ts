@@ -1,6 +1,8 @@
 import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { SafeState, AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { RootState } from '.'
+import { pickSupportedChainEntries } from '@/utils/chainEntries'
 
 export type AddedSafesOnChain = {
   [safeAddress: string]: {
@@ -77,4 +79,13 @@ export const selectAddedSafes = createSelector(
   (allAddedSafes, chainId): AddedSafesOnChain | undefined => {
     return allAddedSafes?.[chainId]
   },
+)
+
+/**
+ * Returns the added Safes map with entries on unsupported chains dropped.
+ * Read-time filter — does not mutate the persisted state. See #2585.
+ */
+export const selectAllAddedSafesOnSupportedChains = createSelector(
+  [selectAllAddedSafes, (_: RootState, chains: ReadonlyArray<Pick<Chain, 'chainId'>>) => chains],
+  (allAddedSafes, chains): AddedSafesState => pickSupportedChainEntries(allAddedSafes, chains),
 )

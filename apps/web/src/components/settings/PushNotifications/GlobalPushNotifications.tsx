@@ -24,6 +24,7 @@ import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { pickSupportedChainEntries } from '@/utils/chainEntries'
 import useChains from '@/hooks/useChains'
 import { useAppSelector } from '@/store'
 import { useNotificationPreferences } from './hooks/useNotificationPreferences'
@@ -83,15 +84,7 @@ export const _transformCurrentSubscribedSafes = (
 
 // Remove Safes that are not on a supported chain
 export const _sanitizeNotifiableSafes = (chains: Array<Chain>, notifiableSafes: NotifiableSafes): NotifiableSafes => {
-  return Object.entries(notifiableSafes).reduce<NotifiableSafes>((acc, [chainId, safeAddresses]) => {
-    const chain = chains.find((chain) => chain.chainId === chainId)
-
-    if (chain) {
-      acc[chainId] = safeAddresses
-    }
-
-    return acc
-  }, {})
+  return pickSupportedChainEntries(notifiableSafes, chains)
 }
 
 // Merges added Safes, currently notified Safes, and owned safes into a single data structure without duplicates
