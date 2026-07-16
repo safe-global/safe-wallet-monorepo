@@ -91,7 +91,7 @@ type AnchorButtonProps = React.ComponentPropsWithoutRef<'a'> & {
 }
 
 const isAnchorRender = (render: ButtonProps['render']): render is AnchorRenderElement => {
-  return React.isValidElement(render) && render.type === 'a'
+  return React.isValidElement<Record<string, unknown>>(render) && (render.type === 'a' || 'href' in render.props)
 }
 
 function Button({ className, variant = 'default', size = 'default', render, nativeButton, ...props }: ButtonProps) {
@@ -113,7 +113,7 @@ function Button({ className, variant = 'default', size = 'default', render, nati
       data-slot="button"
       className={buttonClassName}
       render={render}
-      nativeButton={nativeButton}
+      nativeButton={nativeButton ?? !render}
       {...props}
     />
   )

@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import NextLink from 'next/link'
 import { buttonVariants } from './button'
 import { Button } from './button'
 
@@ -75,6 +76,19 @@ describe('Button', () => {
       render(<Button render={<a href="/docs" />}>Docs</Button>)
 
       expect(screen.getByRole('link', { name: 'Docs' })).toHaveAttribute('href', '/docs')
+      expect(consoleError).not.toHaveBeenCalled()
+    } finally {
+      consoleError.mockRestore()
+    }
+  })
+
+  it('renders Next.js link buttons without requesting native button semantics', () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation()
+
+    try {
+      render(<Button render={<NextLink href="/welcome" />}>Welcome</Button>)
+
+      expect(screen.getByRole('link', { name: 'Welcome' })).toHaveAttribute('href', '/welcome')
       expect(consoleError).not.toHaveBeenCalled()
     } finally {
       consoleError.mockRestore()
