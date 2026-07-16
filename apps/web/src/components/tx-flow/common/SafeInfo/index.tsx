@@ -10,8 +10,6 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import CopyAddressButton from '@/components/common/CopyAddressButton'
 import { Box, Stack } from '@mui/material'
 import { useChain } from '@/hooks/useChains'
-import { useAppSelector } from '@/store'
-import { selectSettings } from '@/store/settingsSlice'
 
 const SafeInfo = (): ReactElement => {
   const safeAddress = useSafeAddress()
@@ -19,11 +17,9 @@ const SafeInfo = (): ReactElement => {
   const { ens } = useAddressResolver(safeAddress)
   const addressBookItem = useAddressBookItem(safeAddress, chainId)
   const chain = useChain(chainId)
-  const settings = useAppSelector(selectSettings)
 
   const name = addressBookItem?.name || ens
   const prefix = chain?.shortName
-  const copyPrefix = settings.shortName.copy
 
   return (
     <Stack data-testid="tx-flow-safe-info" direction="row" gap={1} alignItems="center">
@@ -50,7 +46,7 @@ const SafeInfo = (): ReactElement => {
               </Typography>
             )}
             <Typography variant="body2">
-              <CopyAddressButton address={safeAddress} prefix={prefix} copyPrefix={copyPrefix}>
+              <CopyAddressButton address={safeAddress}>
                 {prefix && <b>{prefix}:</b>}
                 {shortenAddress(safeAddress)}
               </CopyAddressButton>

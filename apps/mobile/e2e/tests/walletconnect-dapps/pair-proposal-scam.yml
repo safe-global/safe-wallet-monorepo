@@ -1,0 +1,34 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# Scam: synthesise a scam-flagged session_proposal (isScam) → open the
+# permissions panel via the domain pill → assert the malicious banner copy and
+# the warning line. Mirrors pair-proposal-unverified for the malicious variant.
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eWcDappsBase'
+- assertVisible:
+    id: 'home-tab'
+
+- tapOn:
+    id: 'e2eWcSynthProposalScam'
+- extendedWaitUntil:
+    visible:
+      id: 'wc-proposal-connect'
+    timeout: 10000
+
+# Open the permissions panel via the domain pill.
+- tapOn:
+    id: 'wc-proposal-domain'
+
+# The (red) banner shows the known-scam copy + the trust warning line.
+- extendedWaitUntil:
+    visible:
+      id: 'wc-permissions-banner'
+    timeout: 5000
+- assertVisible: 'This domain is flagged as a known scam.'
+- assertVisible: 'Only continue if you trust the source.'

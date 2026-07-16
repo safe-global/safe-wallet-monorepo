@@ -1,0 +1,33 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# Deep link: a wc:// link is opened while the app runs → WalletKitController pairs
+# it (fake resolves) → synthesise the proposal → proposal sheet opens WITHOUT the
+# scanner ever being mounted.
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eWcDappsBase'
+- assertVisible:
+    id: 'home-tab'
+
+# Open a wc: deep link — handled by WalletKitController's Linking listener, not the scanner.
+- openLink:
+    link: 'wc:e2e-deeplink@2?relay-protocol=irn'
+
+# Synthesise the proposal the relay would deliver after pairing.
+- tapOn:
+    id: 'e2eWcSynthProposalValid'
+
+# Proposal sheet opens (anchor on the Connect button id — sheet text nodes are
+# merged into one grouped accessibility label).
+- extendedWaitUntil:
+    visible:
+      id: 'wc-proposal-connect'
+    timeout: 10000
+
+# The scanner was never mounted — its footer copy is absent.
+- assertNotVisible: 'Scan an Ethereum wallet address or connect to a desktop app'

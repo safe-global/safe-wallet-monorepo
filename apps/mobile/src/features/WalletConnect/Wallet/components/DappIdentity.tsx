@@ -45,7 +45,7 @@ export const DappIdentity: React.FC<Props> = ({
   }, [url])
 
   return (
-    <YStack gap="$5" padding="$4">
+    <YStack gap="$5">
       <Text fontSize={20} fontWeight="600" letterSpacing={-0.2} textAlign="center">
         {title}
       </Text>

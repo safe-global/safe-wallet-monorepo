@@ -6,6 +6,8 @@ import { NavBarTitle } from '@/src/components/Title'
 import { TransactionInfo } from './components/TransactionInfo'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import { ConfirmationView } from './components/ConfirmationView'
+import { ApprovalEditor } from './components/ApprovalEditor'
+import { NonceEditor } from './components/NonceEditor'
 import { Loader } from '@/src/components/Loader'
 import { Alert } from '@/src/components/Alert'
 import { ConfirmTxForm } from './components/ConfirmTxForm'
@@ -13,6 +15,7 @@ import { useTransactionSigner } from './hooks/useTransactionSigner'
 import { useTxSignerAutoSelection } from './hooks/useTxSignerAutoSelection'
 import { useAppSelector } from '@/src/store/hooks'
 import { PendingStatus, selectPendingTxById } from '@/src/store/pendingTxsSlice'
+import { selectDraftRedirect } from '@/src/store/draftTxSlice'
 import { useTransactionProcessingState } from '@/src/hooks/useTransactionProcessingState'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
@@ -30,7 +33,10 @@ const getHeaderText = (isExecuting: boolean, isSigning: boolean): string => {
 }
 
 function ConfirmTxContainer() {
-  const txId = useRoute<RouteProp<{ params: { txId: string } }>>().params.txId
+  const routeTxId = useRoute<RouteProp<{ params: { txId: string } }>>().params.txId
+  // A rebuilt draft (edited approval) lives under a new hash — follow the redirect at render time
+  const redirectTxId = useAppSelector((state) => selectDraftRedirect(state, routeTxId))
+  const txId = redirectTxId ?? routeTxId
   const router = useRouter()
   const pendingTx = useAppSelector((state) => selectPendingTxById(state, txId))
   const { isProcessing, isExecuting, isSigning } = useTransactionProcessingState(txId)
@@ -102,6 +108,8 @@ function ConfirmTxContainer() {
               <>
                 <View paddingHorizontal="$4">
                   <ConfirmationView txDetails={txDetails} />
+                  <NonceEditor txId={txId} />
+                  <ApprovalEditor txId={txId} />
                 </View>
 
                 <TransactionInfo
