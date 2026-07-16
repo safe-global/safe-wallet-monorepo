@@ -2,12 +2,9 @@ appId: ${APP_ID}
 tags:
   - walletconnect-dapps
 ---
-# eth_sendTransaction happy path: synthesise a request from the seeded session,
-# review, drive the sign tail (real key in the simulator keychain, real staging
-# CGW /propose), and assert the safeTxHash was delivered back to the dApp.
-# `e2e-wc-response-hash-match` renders only when the delivered JSON-RPC result
-# strictly equals the safeTxHash handed off to the confirm flow — this is the
-# end-to-end delivery check, not just "the sheet closed".
+# eth_sendTransaction happy path: real keychain signing + staging CGW /propose.
+# `e2e-wc-response-hash-match` renders only when the delivered result strictly
+# equals the handed-off safeTxHash — end-to-end delivery, not just "sheet closed".
 
 - runScript:
     file: ../../utils/scripts/defaults.js
@@ -15,8 +12,7 @@ tags:
 - runFlow:
     file: ../../utils/setup/app-start.yml
 
-# Seeded session + owner signer (key in keychain) + biometrics enabled. The
-# keychain write is async and can fail — wait for the setup-ready marker.
+# Setup's keychain write is async — gate on the ready marker.
 - tapOn:
     id: 'e2eWcDappsTx'
 - extendedWaitUntil:
@@ -24,7 +20,6 @@ tags:
       id: 'e2e-wc-tx-setup-ready'
     timeout: ${output.defaults.wcTxUiTimeout}
 
-# The dApp sends eth_sendTransaction (0.001 ETH transfer fixture).
 - tapOn:
     id: 'e2eWcSynthTxRequest'
 
@@ -37,7 +32,6 @@ tags:
     id: 'wc-tx-domain'
 - assertVisible: 'Uniswap'
 
-# Review composes the draft (CGW Safe fetch + RPC → allow a generous window).
 - extendedWaitUntil:
     visible:
       id: 'wc-tx-review'
@@ -45,7 +39,7 @@ tags:
 - tapOn:
     id: 'wc-tx-review'
 
-# Confirm screen renders the decoded transfer (signed amount = balance change).
+# Decoded transfer on the confirm screen (signed amount = balance change).
 - extendedWaitUntil:
     visible:
       text: 'Confirm transaction'
@@ -53,7 +47,6 @@ tags:
 - assertVisible:
     text: '.*-0\.001.*'
 
-# Sign tail: Continue → review data → Confirm.
 - tapOn:
     id: 'sign-transaction-continue-button'
 - extendedWaitUntil:
@@ -69,9 +62,8 @@ tags:
       text: 'You successfully signed this transaction.'
     timeout: ${output.defaults.wcTxNetworkTimeout}
 
-# Back out to home: signing-success is a native modal and iOS hides everything
-# beneath it (including the TestCtrls markers), so the delivery assert must run
-# from the home tab.
+# The native success modal hides the TestCtrls markers — back out to home
+# before asserting delivery.
 - tapOn: 'Done'
 - extendedWaitUntil:
     visible:
@@ -84,12 +76,10 @@ tags:
       id: 'home-tab'
     timeout: ${output.defaults.wcTxUiTimeout}
 
-# safeTxHash delivered to the dApp (bare hash for eth_sendTransaction).
 - assertVisible:
     id: 'e2e-wc-response-hash-match'
 
-# The proposed tx shows up in the queue UI (backed by staging CGW); the fixture
-# amount scopes the match to our row rather than any "Send" copy on screen.
+# Queue UI (staging-backed); the fixture amount scopes the match to our row.
 - extendedWaitUntil:
     visible:
       id: 'pending-transactions'

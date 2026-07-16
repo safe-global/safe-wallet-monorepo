@@ -2,11 +2,9 @@ appId: ${APP_ID}
 tags:
   - walletconnect-dapps
 ---
-# CGW /propose failure: the e2e fetch interceptor 500s the propose call. By
-# design the app does NOT answer the dApp with -32603 (see methodRouter's
-# reserved-code note): the signing-error screen shows, the request stays
-# outstanding (retryable), and only backing out of review settles it with
-# USER_REJECTED (5000). This flow asserts that actual contract.
+# CGW /propose failure (interceptor 500s it). By design the app never answers
+# with -32603: the request stays outstanding (retryable) and only backing out
+# of review settles it with USER_REJECTED (5000).
 
 - runScript:
     file: ../../utils/scripts/defaults.js
@@ -21,7 +19,6 @@ tags:
       id: 'e2e-wc-tx-setup-ready'
     timeout: ${output.defaults.wcTxUiTimeout}
 
-# Arm the propose interceptor, then request.
 - tapOn:
     id: 'e2eWcArmProposeFailure'
 - tapOn:
@@ -57,18 +54,16 @@ tags:
       text: "Couldn't sign the transaction"
     timeout: ${output.defaults.wcTxNetworkTimeout}
 
-# The request is retained for retry: closing the (modal) error screen lands back
-# on review-and-confirm with the Confirm button still live. A direct "no response
-# yet" marker assert is impossible here — markers are hidden under modals/pushed
-# screens — so retryability is the observable contract, and the
-# no-response-until-abandon ordering is covered by walletKitListeners unit tests.
+# Closing the error modal lands back on review-and-confirm with Confirm still
+# live — retryability is the observable "not answered yet" contract (markers are
+# hidden under modals; the ordering itself is unit-tested in walletKitListeners).
 - tapOn: 'Close'
 - extendedWaitUntil:
     visible:
       id: 'review-and-confirm-button'
     timeout: ${output.defaults.wcTxUiTimeout}
 
-# Back out of the review flow entirely; abandoning settles the dApp with USER_REJECTED.
+# Backing out of review settles the dApp with USER_REJECTED.
 - tapOn:
     id: 'go-back'
 - extendedWaitUntil:

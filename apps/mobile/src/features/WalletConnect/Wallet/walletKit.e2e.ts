@@ -51,8 +51,7 @@ export const APPROVED_SESSION: SessionTypes.Struct = deepFreeze({
 const asyncNoop = async (): Promise<void> => undefined
 const noop = (): void => undefined
 
-// Structural twin of jsonrpc-utils' JsonRpcResult | JsonRpcError (avoids depending
-// on @walletconnect/jsonrpc-types directly).
+// Structural twin of jsonrpc-utils' JsonRpcResult | JsonRpcError.
 type JsonRpcResponseLike = { id: number; result?: unknown; error?: { code: number; message: string } }
 
 const fakeWalletKit = {

@@ -44,7 +44,6 @@ import { walletKitE2eState } from '@/src/features/WalletConnect/Wallet/walletKit
 
 LogBox.ignoreAllLogs()
 
-// e2e bundles only (this module is an RN_SRC_EXT override): make CGW /propose mockable.
 installProposeFetchMock()
 
 /**
@@ -108,11 +107,7 @@ function ClipboardVerificationContainer({
   )
 }
 
-/**
- * Side-channel for the tx-request setup: setupWcDappsTx's keychain write is async
- * and can fail on a simulator, so flows wait for `e2e-wc-tx-setup-ready` before
- * synthesising instead of failing later with a missing-signer symptom.
- */
+/** Surfaces setupWcDappsTx's async keychain outcome as e2e-wc-tx-setup-ready/-failed. */
 function WcTxSetupIndicator() {
   const status = useSyncExternalStore(walletKitE2eState.subscribe, () => walletKitE2eState.get().txSetupStatus)
   if (status === 'idle') {

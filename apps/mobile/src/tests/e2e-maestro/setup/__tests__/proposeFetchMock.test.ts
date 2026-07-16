@@ -9,8 +9,7 @@ describe('proposeFetchMock', () => {
   const passthrough = jest.fn()
 
   beforeAll(() => {
-    // Install once against the mock: the interceptor binds the underlying fetch
-    // at install time and guards against double-installation.
+    // Bind the mock first — the interceptor captures the underlying fetch at install.
     global.fetch = passthrough as unknown as typeof fetch
     installProposeFetchMock()
   })

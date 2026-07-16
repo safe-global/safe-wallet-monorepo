@@ -2,11 +2,9 @@ appId: ${APP_ID}
 tags:
   - walletconnect-dapps
 ---
-# wallet_sendCalls (EIP-5792) batch of two calls: both calls render in the
-# actions list of the confirm screen (the request sheet is identity-only by
-# design), and after signing the dApp receives the bundle envelope
-# `{ id: safeTxHash }` — `e2e-wc-response-5792-match` renders only when the
-# result is exactly that shape with the handed-off hash.
+# wallet_sendCalls (EIP-5792) batch of two calls: both render in the confirm
+# screen's actions list, and `e2e-wc-response-5792-match` asserts the dApp got
+# exactly `{ id: safeTxHash }`.
 
 - runScript:
     file: ../../utils/scripts/defaults.js
@@ -21,7 +19,6 @@ tags:
       id: 'e2e-wc-tx-setup-ready'
     timeout: ${output.defaults.wcTxUiTimeout}
 
-# The dApp sends a wallet_sendCalls bundle with two calls.
 - tapOn:
     id: 'e2eWcSynthTxBatch'
 - extendedWaitUntil:
@@ -36,7 +33,7 @@ tags:
 - tapOn:
     id: 'wc-tx-review'
 
-# Confirm screen: the multisend draft exposes an Actions row with both calls.
+# The multisend draft exposes an Actions row with both calls.
 - extendedWaitUntil:
     visible:
       text: 'Confirm transaction'
@@ -58,7 +55,6 @@ tags:
 - tapOn:
     id: 'go-back'
 
-# Sign tail (same as the happy path).
 - extendedWaitUntil:
     visible:
       id: 'sign-transaction-continue-button'
@@ -76,7 +72,7 @@ tags:
       text: 'You successfully signed this transaction.'
     timeout: ${output.defaults.wcTxNetworkTimeout}
 
-# Markers are invisible while the success modal is up; assert from home.
+# The native success modal hides the TestCtrls markers — assert from home.
 - tapOn: 'Done'
 - extendedWaitUntil:
     visible:
@@ -89,6 +85,5 @@ tags:
       id: 'home-tab'
     timeout: ${output.defaults.wcTxUiTimeout}
 
-# EIP-5792 response shape { id: safeTxHash } asserted explicitly.
 - assertVisible:
     id: 'e2e-wc-response-5792-match'

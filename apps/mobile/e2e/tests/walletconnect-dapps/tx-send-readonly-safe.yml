@@ -2,11 +2,9 @@ appId: ${APP_ID}
 tags:
   - walletconnect-dapps
 ---
-# Read-only Safe: the base setup seeds NO signer, so routing rejects the
-# request synchronously with EIP-1193 code 4100 and toasts — the sheet must
-# never open. (The toast reads "No signer attached to this Safe"; the ticket's
-# "Add a signer" CTA does not exist in the implementation.)
-# The toast shows for ~2.5s, so it is asserted first; the marker persists.
+# Read-only Safe (base setup seeds no signer): routing rejects synchronously
+# with code 4100 + toast, and the sheet must never open. The toast lives ~2.5s,
+# so it is asserted first; the marker persists.
 
 - runScript:
     file: ../../utils/scripts/defaults.js
@@ -14,7 +12,6 @@ tags:
 - runFlow:
     file: ../../utils/setup/app-start.yml
 
-# Base setup only: active Safe with no signer attached (read-only).
 - tapOn:
     id: 'e2eWcDappsBase'
 - assertVisible:
@@ -25,7 +22,6 @@ tags:
 - tapOn:
     id: 'e2eWcSynthTxRequest'
 
-# Toast first (time-boxed), then the persistent side-channel markers.
 - extendedWaitUntil:
     visible:
       text: 'No signer attached to this Safe'

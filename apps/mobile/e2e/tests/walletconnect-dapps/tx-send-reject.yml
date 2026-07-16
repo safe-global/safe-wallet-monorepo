@@ -2,9 +2,7 @@ appId: ${APP_ID}
 tags:
   - walletconnect-dapps
 ---
-# Reject path: the user declines the request on the sheet. The listener answers
-# the dApp with formatJsonRpcError(USER_REJECTED) — code 5000 — which the fake
-# respondSessionRequest records and WcResponseIndicator surfaces as a marker.
+# Reject on the sheet → the dApp gets USER_REJECTED (code 5000), surfaced as a marker.
 
 - runScript:
     file: ../../utils/scripts/defaults.js
