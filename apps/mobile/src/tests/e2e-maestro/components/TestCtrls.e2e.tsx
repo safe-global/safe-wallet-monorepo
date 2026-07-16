@@ -109,6 +109,19 @@ function ClipboardVerificationContainer({
 }
 
 /**
+ * Side-channel for the tx-request setup: setupWcDappsTx's keychain write is async
+ * and can fail on a simulator, so flows wait for `e2e-wc-tx-setup-ready` before
+ * synthesising instead of failing later with a missing-signer symptom.
+ */
+function WcTxSetupIndicator() {
+  const status = useSyncExternalStore(walletKitE2eState.subscribe, () => walletKitE2eState.get().txSetupStatus)
+  if (status === 'idle') {
+    return null
+  }
+  return <RNView testID={`e2e-wc-tx-setup-${status}`} style={styles.marker} />
+}
+
+/**
  * Side-channel for the WalletConnect dApp reject flow: renders a 1x1 marker with
  * the `e2e-wc-reject-called` test-id once the fake rejectSession() has run.
  */
@@ -362,8 +375,9 @@ export function TestCtrls() {
         {/* Clipboard Verification Trigger */}
         <ClipboardVerificationTrigger onPress={() => setIsClipboardVisible(true)} />
 
-        {/* WalletConnect dApp reject + tx-response side-channels */}
+        {/* WalletConnect dApp reject + tx-setup + tx-response side-channels */}
         <WcRejectIndicator />
+        <WcTxSetupIndicator />
         <WcResponseIndicator />
       </View>
 

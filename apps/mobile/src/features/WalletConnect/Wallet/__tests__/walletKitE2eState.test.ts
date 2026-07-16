@@ -11,6 +11,7 @@ describe('walletKitE2eState', () => {
       rejectSessionCalled: false,
       lastRequestResponse: null,
       proposeBehavior: 'live',
+      txSetupStatus: 'idle',
     })
   })
 
