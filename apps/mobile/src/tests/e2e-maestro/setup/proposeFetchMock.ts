@@ -8,6 +8,11 @@
  * Intercepting at the fetch layer (not the RTK endpoint) keeps the real
  * `transactionsProposeTransactionV1` matchers firing, which the walletKit
  * listeners depend on for proposing/abandon bookkeeping.
+ *
+ * Contract: install-once per JS runtime. The wrapper binds the underlying fetch
+ * at install time and the `installed` guard makes later calls no-ops — so a test
+ * (or anything else) that swaps global.fetch AFTER installation silently unhooks
+ * the interceptor. Bind your mock fetch first, then install (see the test).
  */
 import { walletKitE2eState } from '@/src/features/WalletConnect/Wallet/walletKitE2eState'
 
