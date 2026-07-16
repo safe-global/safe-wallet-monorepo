@@ -43940,11 +43940,11 @@ __metadata:
   linkType: hard
 
 "systeminformation@npm:^5.27.14":
-  version: 5.31.6
-  resolution: "systeminformation@npm:5.31.6"
+  version: 5.31.15
+  resolution: "systeminformation@npm:5.31.15"
   bin:
     systeminformation: lib/cli.js
-  checksum: 10/42c986adc6af3dc296458177a5bb79922d7892a684b8271bce6dfaf9d40285330606a36dbb0b41f3b76fd745b6658a92bf5c62d6d56d4a746d64bb45be81b394
+  checksum: 10/db458a96ae256550f3f6163d10010ed90ff60748337d0bed89978ebd56a3e65cb3152fe4243f750dfe4b4d0608575e2f47cf8113881d3d40602d4caccd05d763
   conditions: (os=darwin | os=linux | os=win32 | os=freebsd | os=openbsd | os=netbsd | os=sunos | os=android)
   languageName: node
   linkType: hard
