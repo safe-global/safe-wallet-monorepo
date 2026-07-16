@@ -13,10 +13,11 @@ const nestedSafesButton = '[data-testid="nested-safes-button"]'
 // SafeSelectorDropdown dropdown list
 const dropdownContent = '[data-slot="select-content"]'
 const dropdownRow = '[data-slot="select-item"]'
-const multichainItemSummary = '[data-testid="multichain-item-summary"]'
 const notActivatedBadge = '[data-testid="not-activated-badge"]'
-const pendingActivationChip = '[data-testid="pending-activation-chip"]'
-const subAccountsContainer = '[data-testid="subacounts-container"]'
+// The welcome accounts list now renders the shared SafeAccountsTable: a multichain safe is a `group`
+// row that expands to per-chain `child` rows; an undeployed chain shows the not-activated badge.
+const accountGroupRow = '[data-testid="account-table-row"][data-variant="group"]'
+const accountChildRow = '[data-testid="account-table-row"][data-variant="child"]'
 
 const balanceRegex = /\d/
 export const multichainSafePolygonLabel = 'Multichain polygon'
@@ -79,12 +80,12 @@ export function clickOnNestedSafesBtn() {
 }
 
 export function expandMultichainItem(index = 0) {
-  cy.get(multichainItemSummary).eq(index).click()
-  cy.get(subAccountsContainer).should('be.visible')
+  cy.get(accountGroupRow).eq(index).click()
+  cy.get(accountChildRow).should('be.visible')
 }
 
 export function verifyNotActivatedSafeExists() {
-  cy.get(subAccountsContainer).find(pendingActivationChip).should('exist')
+  cy.get(notActivatedBadge).should('exist')
 }
 
 export function verifyAddedSafesInDropdown(safes) {
