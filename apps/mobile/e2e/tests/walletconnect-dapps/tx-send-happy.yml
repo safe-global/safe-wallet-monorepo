@@ -9,14 +9,20 @@ tags:
 # strictly equals the safeTxHash handed off to the confirm flow — this is the
 # end-to-end delivery check, not just "the sheet closed".
 
+- runScript:
+    file: ../../utils/scripts/defaults.js
+
 - runFlow:
     file: ../../utils/setup/app-start.yml
 
-# Seeded session + owner signer (key in keychain) + biometrics enabled.
+# Seeded session + owner signer (key in keychain) + biometrics enabled. The
+# keychain write is async and can fail — wait for the setup-ready marker.
 - tapOn:
     id: 'e2eWcDappsTx'
-- assertVisible:
-    id: 'home-tab'
+- extendedWaitUntil:
+    visible:
+      id: 'e2e-wc-tx-setup-ready'
+    timeout: ${output.defaults.wcTxUiTimeout}
 
 # The dApp sends eth_sendTransaction (0.001 ETH transfer fixture).
 - tapOn:
@@ -26,7 +32,7 @@ tags:
 - extendedWaitUntil:
     visible:
       text: 'Transaction request'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 - assertVisible:
     id: 'wc-tx-domain'
 - assertVisible: 'Uniswap'
@@ -35,17 +41,17 @@ tags:
 - extendedWaitUntil:
     visible:
       id: 'wc-tx-review'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 - tapOn:
     id: 'wc-tx-review'
 
-# Confirm screen renders the decoded transfer.
+# Confirm screen renders the decoded transfer (signed amount = balance change).
 - extendedWaitUntil:
     visible:
       text: 'Confirm transaction'
-    timeout: 30000
+    timeout: ${output.defaults.wcTxNetworkTimeout}
 - assertVisible:
-    text: '.*0\.001.*'
+    text: '.*-0\.001.*'
 
 # Sign tail: Continue → review data → Confirm.
 - tapOn:
@@ -53,7 +59,7 @@ tags:
 - extendedWaitUntil:
     visible:
       text: '.*Review this transaction data.*'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 - tapOn:
     id: 'review-and-confirm-button'
 
@@ -61,7 +67,7 @@ tags:
 - extendedWaitUntil:
     visible:
       text: 'You successfully signed this transaction.'
-    timeout: 30000
+    timeout: ${output.defaults.wcTxNetworkTimeout}
 
 # Back out to home: signing-success is a native modal and iOS hides everything
 # beneath it (including the TestCtrls markers), so the delivery assert must run
@@ -70,28 +76,29 @@ tags:
 - extendedWaitUntil:
     visible:
       text: 'Confirm transaction'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 - tapOn:
     id: 'go-back'
 - extendedWaitUntil:
     visible:
       id: 'home-tab'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 
 # safeTxHash delivered to the dApp (bare hash for eth_sendTransaction).
 - assertVisible:
     id: 'e2e-wc-response-hash-match'
 
-# The proposed tx shows up in the queue UI (backed by staging CGW).
+# The proposed tx shows up in the queue UI (backed by staging CGW); the fixture
+# amount scopes the match to our row rather than any "Send" copy on screen.
 - extendedWaitUntil:
     visible:
       id: 'pending-transactions'
-    timeout: 30000
+    timeout: ${output.defaults.wcTxNetworkTimeout}
 - tapOn:
     id: 'pending-transactions'
 - extendedWaitUntil:
     visible:
       id: 'pending-tx-list'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 - assertVisible:
-    text: 'Send'
+    text: '.*0\.001.*'

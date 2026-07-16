@@ -6,20 +6,25 @@ tags:
 # the dApp with formatJsonRpcError(USER_REJECTED) — code 5000 — which the fake
 # respondSessionRequest records and WcResponseIndicator surfaces as a marker.
 
+- runScript:
+    file: ../../utils/scripts/defaults.js
+
 - runFlow:
     file: ../../utils/setup/app-start.yml
 
 - tapOn:
     id: 'e2eWcDappsTx'
-- assertVisible:
-    id: 'home-tab'
+- extendedWaitUntil:
+    visible:
+      id: 'e2e-wc-tx-setup-ready'
+    timeout: ${output.defaults.wcTxUiTimeout}
 
 - tapOn:
     id: 'e2eWcSynthTxRequest'
 - extendedWaitUntil:
     visible:
       text: 'Transaction request'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 
 - tapOn:
     id: 'wc-tx-reject'
@@ -28,6 +33,6 @@ tags:
 - extendedWaitUntil:
     visible:
       id: 'e2e-wc-response-error-5000'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 - assertNotVisible:
     text: 'Transaction request'

@@ -8,13 +8,18 @@ tags:
 # `{ id: safeTxHash }` — `e2e-wc-response-5792-match` renders only when the
 # result is exactly that shape with the handed-off hash.
 
+- runScript:
+    file: ../../utils/scripts/defaults.js
+
 - runFlow:
     file: ../../utils/setup/app-start.yml
 
 - tapOn:
     id: 'e2eWcDappsTx'
-- assertVisible:
-    id: 'home-tab'
+- extendedWaitUntil:
+    visible:
+      id: 'e2e-wc-tx-setup-ready'
+    timeout: ${output.defaults.wcTxUiTimeout}
 
 # The dApp sends a wallet_sendCalls bundle with two calls.
 - tapOn:
@@ -22,12 +27,12 @@ tags:
 - extendedWaitUntil:
     visible:
       text: 'Transaction request'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 
 - extendedWaitUntil:
     visible:
       id: 'wc-tx-review'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 - tapOn:
     id: 'wc-tx-review'
 
@@ -35,17 +40,17 @@ tags:
 - extendedWaitUntil:
     visible:
       text: 'Confirm transaction'
-    timeout: 30000
+    timeout: ${output.defaults.wcTxNetworkTimeout}
 - extendedWaitUntil:
     visible:
       id: 'actions-row'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 - tapOn:
     id: 'actions-row'
 - extendedWaitUntil:
     visible:
       id: 'tx-action-item-0'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 - assertVisible:
     id: 'tx-action-item-1'
 - assertNotVisible:
@@ -57,33 +62,32 @@ tags:
 - extendedWaitUntil:
     visible:
       id: 'sign-transaction-continue-button'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 - tapOn:
     id: 'sign-transaction-continue-button'
 - extendedWaitUntil:
     visible:
       text: '.*Review this transaction data.*'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 - tapOn:
     id: 'review-and-confirm-button'
 - extendedWaitUntil:
     visible:
       text: 'You successfully signed this transaction.'
-    timeout: 30000
+    timeout: ${output.defaults.wcTxNetworkTimeout}
 
-# The native success modal hides the root accessibility tree (and with it the
-# TestCtrls markers), so the delivery assert runs from the home tab.
+# Markers are invisible while the success modal is up; assert from home.
 - tapOn: 'Done'
 - extendedWaitUntil:
     visible:
       text: 'Confirm transaction'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 - tapOn:
     id: 'go-back'
 - extendedWaitUntil:
     visible:
       id: 'home-tab'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 
 # EIP-5792 response shape { id: safeTxHash } asserted explicitly.
 - assertVisible:

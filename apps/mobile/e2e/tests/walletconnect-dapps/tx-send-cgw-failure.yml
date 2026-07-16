@@ -8,13 +8,18 @@ tags:
 # outstanding (retryable), and only backing out of review settles it with
 # USER_REJECTED (5000). This flow asserts that actual contract.
 
+- runScript:
+    file: ../../utils/scripts/defaults.js
+
 - runFlow:
     file: ../../utils/setup/app-start.yml
 
 - tapOn:
     id: 'e2eWcDappsTx'
-- assertVisible:
-    id: 'home-tab'
+- extendedWaitUntil:
+    visible:
+      id: 'e2e-wc-tx-setup-ready'
+    timeout: ${output.defaults.wcTxUiTimeout}
 
 # Arm the propose interceptor, then request.
 - tapOn:
@@ -25,24 +30,24 @@ tags:
 - extendedWaitUntil:
     visible:
       text: 'Transaction request'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 - extendedWaitUntil:
     visible:
       id: 'wc-tx-review'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 - tapOn:
     id: 'wc-tx-review'
 
 - extendedWaitUntil:
     visible:
       text: 'Confirm transaction'
-    timeout: 30000
+    timeout: ${output.defaults.wcTxNetworkTimeout}
 - tapOn:
     id: 'sign-transaction-continue-button'
 - extendedWaitUntil:
     visible:
       text: '.*Review this transaction data.*'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 - tapOn:
     id: 'review-and-confirm-button'
 
@@ -50,7 +55,7 @@ tags:
 - extendedWaitUntil:
     visible:
       text: "Couldn't sign the transaction"
-    timeout: 30000
+    timeout: ${output.defaults.wcTxNetworkTimeout}
 
 # The request is retained for retry: closing the (modal) error screen lands back
 # on review-and-confirm with the Confirm button still live. A direct "no response
@@ -61,7 +66,7 @@ tags:
 - extendedWaitUntil:
     visible:
       id: 'review-and-confirm-button'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 
 # Back out of the review flow entirely; abandoning settles the dApp with USER_REJECTED.
 - tapOn:
@@ -69,15 +74,15 @@ tags:
 - extendedWaitUntil:
     visible:
       id: 'sign-transaction-continue-button'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 - tapOn:
     id: 'go-back'
 - extendedWaitUntil:
     visible:
       id: 'home-tab'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
 
 - extendedWaitUntil:
     visible:
       id: 'e2e-wc-response-error-5000'
-    timeout: 10000
+    timeout: ${output.defaults.wcTxUiTimeout}
