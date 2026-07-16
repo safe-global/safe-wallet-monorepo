@@ -1,6 +1,6 @@
 import { renderHook, waitFor, act } from '@testing-library/react'
-import { SafeShieldProvider, useSafeShield } from '../SafeShieldContext'
-import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
+import { SafeShieldProvider, useSafeShield, useSafeShieldForAddressPoisoning } from '../SafeShieldContext'
+import { RecipientStatus, Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import {
   DeadlockAnalysisBuilder,
   DeadlockAnalysisResultBuilder,
@@ -17,6 +17,8 @@ jest.mock('../hooks', () => ({
     deadlock: [undefined, undefined, false],
   })),
   useThreatAnalysis: jest.fn(),
+  // Pass-through by default (set in beforeEach); the overlay is covered by its own suite
+  useRecipientAnalysisWithPoisoning: jest.fn(),
 }))
 
 // Mock new dependencies for untrusted Safe check
@@ -57,6 +59,7 @@ const mockSafeTxContextValue = {
 
 const mockUseThreatAnalysis = jest.requireMock('../hooks').useThreatAnalysis
 const mockUseCounterpartyAnalysis = jest.requireMock('../hooks').useCounterpartyAnalysis
+const mockUseRecipientAnalysisWithPoisoning = jest.requireMock('../hooks').useRecipientAnalysisWithPoisoning
 
 const buildSafeTransaction = (data: string): SafeTransaction => ({
   addSignature: jest.fn(),
@@ -95,6 +98,7 @@ const buildThreatResult = (severity: Severity) => [
 describe('SafeShieldContext', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseRecipientAnalysisWithPoisoning.mockImplementation((recipient: unknown) => recipient)
   })
 
   it('should require risk confirmation for critical threats', async () => {
@@ -277,6 +281,57 @@ describe('SafeShieldContext', () => {
     await waitFor(
       () => {
         expect(result.current.needsRiskConfirmation).toBe(false)
+      },
+      { timeout: 3000 },
+    )
+  })
+
+  it('registers poisoning-only addresses for the overlay', async () => {
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <SafeTxContext.Provider value={mockSafeTxContextValue}>
+        <SafeShieldProvider>{children}</SafeShieldProvider>
+      </SafeTxContext.Provider>
+    )
+
+    const addresses = ['0x00000000000000000000000000000000000000bb']
+    renderHook(() => useSafeShieldForAddressPoisoning(addresses), { wrapper })
+
+    await waitFor(() => {
+      expect(mockUseRecipientAnalysisWithPoisoning).toHaveBeenLastCalledWith(expect.anything(), addresses)
+    })
+  })
+
+  it('should require risk confirmation for a CRITICAL address-poisoning match', async () => {
+    mockUseThreatAnalysis.mockReturnValue([undefined, undefined, false])
+    mockUseRecipientAnalysisWithPoisoning.mockImplementation(() => [
+      {
+        '0x00000000000000000000000000000000000000cc': {
+          [StatusGroup.ADDRESS_POISONING]: [
+            {
+              severity: Severity.CRITICAL,
+              type: RecipientStatus.RESEMBLES_TRUSTED_ADDRESS,
+              title: 'Potential address poisoning',
+              description: 'test',
+            },
+          ],
+        },
+      },
+      undefined,
+      false,
+    ])
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <SafeTxContext.Provider value={mockSafeTxContextValue}>
+        <SafeShieldProvider>{children}</SafeShieldProvider>
+      </SafeTxContext.Provider>
+    )
+
+    const { result } = renderHook(() => useSafeShield(), { wrapper })
+
+    await waitFor(
+      () => {
+        expect(result.current.needsRiskConfirmation).toBe(true)
+        expect(result.current.isRiskConfirmed).toBe(false)
       },
       { timeout: 3000 },
     )

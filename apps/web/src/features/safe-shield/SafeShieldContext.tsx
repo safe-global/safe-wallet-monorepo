@@ -9,7 +9,12 @@ import {
   type Dispatch,
   type SetStateAction,
 } from 'react'
-import { useCounterpartyAnalysis, useRecipientAnalysis, useThreatAnalysis } from './hooks'
+import {
+  useRecipientAnalysisWithPoisoning,
+  useCounterpartyAnalysis,
+  useRecipientAnalysis,
+  useThreatAnalysis,
+} from './hooks'
 import useUntrustedSafeAnalysis from './hooks/useUntrustedSafeAnalysis'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
@@ -21,12 +26,14 @@ import {
   type DeadlockAnalysisResults,
   type SafeAnalysisResult,
   Severity,
+  StatusGroup,
 } from '@safe-global/utils/features/safe-shield/types'
 import { getPrimaryResult, isSeverityHigherOrEqual } from '@safe-global/utils/features/safe-shield/utils'
 import { useAuthToken } from '@/features/hypernative'
 
 type SafeShieldContextType = {
   setRecipientAddresses: Dispatch<SetStateAction<string[] | undefined>>
+  setPoisoningAddresses: Dispatch<SetStateAction<string[] | undefined>>
   setSafeTx: Dispatch<SetStateAction<SafeTransaction | undefined>>
   safeTx?: SafeTransaction
   recipient: AsyncResult<RecipientAnalysisResults>
@@ -46,6 +53,8 @@ const SafeShieldContext = createContext<SafeShieldContextType | null>(null)
 export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const safeTxContext = useContext(SafeTxContext)
   const [recipientAddresses, setRecipientAddresses] = useState<string[] | undefined>(undefined)
+  // Addresses registered for the poisoning check only (flows without recipient analysis)
+  const [poisoningAddresses, setPoisoningAddresses] = useState<string[] | undefined>(undefined)
   const [safeTx, setSafeTx] = useState<SafeTransaction | undefined>(undefined)
 
   const recipientOnlyAnalysis = useRecipientAnalysis(recipientAddresses)
@@ -58,7 +67,19 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const deadlock = counterpartyAnalysis.deadlock
   const [deadlockResults] = deadlock
 
-  const recipient = recipientOnlyAnalysis || counterpartyAnalysis.recipient
+  // Add the address-poisoning check to the recipient analysis (create-step recipients + review-step
+  // counterparty), plus poisoning-only entries for registered non-recipient addresses.
+  const recipient = useRecipientAnalysisWithPoisoning(
+    recipientOnlyAnalysis || counterpartyAnalysis.recipient,
+    poisoningAddresses,
+  )
+  const [recipientData] = recipient
+
+  // Any address-poisoning look-alike requires explicit risk confirmation
+  const hasPoisoning = useMemo(
+    () => Object.values(recipientData ?? {}).some((groups) => (groups[StatusGroup.ADDRESS_POISONING] ?? []).length > 0),
+    [recipientData],
+  )
   const contract = counterpartyAnalysis.contract
   const safeShieldTx = safeTx || safeTxContext.safeTx
 
@@ -79,24 +100,25 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
     const deadlockSeverity = primaryDeadlockResult?.severity
     const hasCriticalDeadlock = isSeverityHigherOrEqual(deadlockSeverity, Severity.CRITICAL)
 
-    // Include Safe-level analysis and deadlock in risk confirmation
+    // Include Safe-level analysis, deadlock and address-poisoning in risk confirmation
     const needsRiskConfirmation =
-      hasCriticalThreat || hasCriticalDeadlock || safeAnalysis?.severity === Severity.CRITICAL
+      hasCriticalThreat || hasCriticalDeadlock || hasPoisoning || safeAnalysis?.severity === Severity.CRITICAL
 
     return {
       needsRiskConfirmation,
       primaryThreatSeverity: severity,
     }
-  }, [threatAnalysisResult, deadlockResults, safeAnalysis])
+  }, [threatAnalysisResult, deadlockResults, safeAnalysis, hasPoisoning])
 
   useEffect(() => {
     setIsRiskConfirmed(false)
-  }, [primaryThreatSeverity, safeShieldTx, safeAnalysis, deadlockResults])
+  }, [primaryThreatSeverity, safeShieldTx, safeAnalysis, deadlockResults, hasPoisoning])
 
   return (
     <SafeShieldContext.Provider
       value={{
         setRecipientAddresses,
+        setPoisoningAddresses,
         setSafeTx,
         safeTx: safeShieldTx,
         recipient,
@@ -133,6 +155,33 @@ export const useSafeShieldForRecipients = (recipientAddresses: string[]) => {
   useEffect(() => {
     setRecipientAddresses(recipientAddresses)
   }, [recipientAddresses, setRecipientAddresses])
+
+  return recipient
+}
+
+/**
+ * Register addresses for the address-poisoning check only (no recipient analysis).
+ *
+ * For tx-flows whose address is not a transfer recipient (add owner, recovery setup,
+ * spending-limit beneficiary, signers, …): a matched address surfaces in the Copilot recipient
+ * card with just the ADDRESS_POISONING state.
+ *
+ * Keys on the joined VALUE, not array identity — RHF's watch() mutates its array in place, so a
+ * value key is what makes the check re-trigger. (Do NOT key on the array reference / useMemoDeepCompare:
+ * they compare by reference and would miss the in-place mutation.)
+ * @param addresses - Addresses to check against the user's trusted anchors (undefined entries are dropped)
+ */
+export const useSafeShieldForAddressPoisoning = (addresses: Array<string | undefined>) => {
+  const { setPoisoningAddresses, recipient } = useSafeShield()
+  const key = addresses.filter(Boolean).join(',')
+
+  useEffect(() => {
+    setPoisoningAddresses(key ? key.split(',') : undefined)
+  }, [key, setPoisoningAddresses])
+
+  // Clear the registration when the owning flow unmounts, so a stale look-alike card can't linger
+  // against addresses no current flow cares about if the provider outlives the flow.
+  useEffect(() => () => setPoisoningAddresses(undefined), [setPoisoningAddresses])
 
   return recipient
 }
