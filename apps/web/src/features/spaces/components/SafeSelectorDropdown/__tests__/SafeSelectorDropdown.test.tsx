@@ -43,7 +43,11 @@ jest.mock('@/components/ui/tooltip', () => ({
 jest.mock('../components/SafeSelectorTriggerContent', () => ({
   __esModule: true,
   default: ({ selectedItem }: { selectedItem: { chains: Array<{ shortName: string }> } }) => (
-    <span data-testid="safe-selector-trigger-content" data-shortname={selectedItem.chains[0]?.shortName ?? ''} />
+    <span data-testid="safe-selector-trigger-content" data-shortname={selectedItem.chains[0]?.shortName ?? ''}>
+      <a data-testid="safe-item-explorer-link" href="https://etherscan.io/address/0xabc">
+        View on explorer
+      </a>
+    </span>
   ),
 }))
 
@@ -108,7 +112,14 @@ jest.mock('@/components/ui/select', () => {
         {children}
       </div>
     ),
-    SelectTrigger: ({ children, ...rest }: { children?: React.ReactNode }) => (
+    SelectTrigger: ({
+      children,
+      iconWrapperClassName: _iconWrapperClassName,
+      ...rest
+    }: {
+      children?: React.ReactNode
+      iconWrapperClassName?: string
+    }) => (
       <button type="button" data-testid="select-trigger" {...rest}>
         {children}
       </button>
@@ -166,6 +177,15 @@ describe('SafeSelectorDropdown', () => {
   })
 
   describe('onValueChange filtering by reason', () => {
+    it('keeps inline Safe actions outside the select trigger button', () => {
+      const itemA = createItem()
+      const { container } = render(
+        <SafeSelectorDropdown items={[itemA]} selectedItemId={itemA.id} onItemSelect={jest.fn()} />,
+      )
+
+      expect(container.querySelector('[data-testid="open-safes-icon"] a')).not.toBeInTheDocument()
+    })
+
     it('forwards user item-press picks to onItemSelect', async () => {
       const user = userEvent.setup()
       const onItemSelect = jest.fn()

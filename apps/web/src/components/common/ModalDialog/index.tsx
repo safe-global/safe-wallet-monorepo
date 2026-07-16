@@ -107,7 +107,16 @@ const ModalDialog = ({
 
   // fullScreen positioning must beat DialogContent's centered base classes, so apply it inline.
   const fullScreenStyle = isFullScreen
-    ? { top: 0, left: 0, maxWidth: '100%', width: '100%', height: '100%', maxHeight: '100%', transform: 'none' }
+    ? {
+        top: 0,
+        left: 0,
+        maxWidth: '100%',
+        width: '100%',
+        height: '100%',
+        maxHeight: '100%',
+        transform: 'none',
+        translate: 'none',
+      }
     : undefined
 
   return (
@@ -122,7 +131,12 @@ const ModalDialog = ({
         showCloseButton={false}
         keepMounted={keepMounted}
         size={size}
-        className={cn(css.dialog, { [css.fullScreen]: isFullScreen }, className)}
+        className={cn(
+          css.dialog,
+          { [css.fullScreen]: isFullScreen },
+          isFullScreen && 'translate-x-0 translate-y-0',
+          className,
+        )}
         style={{ ...(inlineMaxWidth != null ? { maxWidth: inlineMaxWidth } : {}), ...fullScreenStyle }}
         onClick={(e) => e.stopPropagation()}
       >

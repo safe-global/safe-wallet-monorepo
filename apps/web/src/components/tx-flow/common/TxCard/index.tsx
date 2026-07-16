@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
+import { cn } from '@/utils/cn'
 import css from '../styles.module.css'
 
 /** @deprecated MUI `sx` is ignored after the shadcn migration; use `className` instead. */
@@ -19,10 +20,18 @@ const TxCard = ({ children, sx = {} }: { children: ReactNode; sx?: DeprecatedSx 
 
 export default TxCard
 
-export const TxCardActions = ({ children, sx }: { children: ReactNode; sx?: DeprecatedSx }) => {
+export const TxCardActions = ({
+  children,
+  className,
+  sx,
+}: {
+  children: ReactNode
+  className?: string
+  sx?: DeprecatedSx
+}) => {
   void sx
   return (
-    <div className="txCardActions flex items-center">
+    <div className={cn('txCardActions flex items-center', className)}>
       <div className="flex w-full flex-col-reverse gap-4 lg:w-auto lg:flex-row">{children}</div>
     </div>
   )

@@ -33,18 +33,22 @@ const CSVAirdropAppModal = ({ onClose, appUrl }: { onClose: () => void; appUrl?:
       </div>
       {appUrl && (
         <div className="block p-2 text-center">
-          <Link
-            href={{
-              pathname: AppRoutes.apps.open,
-              query: {
-                safe: router.query.safe,
-                appUrl,
-              },
-            }}
-            passHref
+          <Button
+            data-testid="open-app-btn"
+            render={
+              <Link
+                href={{
+                  pathname: AppRoutes.apps.open,
+                  query: {
+                    safe: router.query.safe,
+                    appUrl,
+                  },
+                }}
+              />
+            }
           >
-            <Button data-testid="open-app-btn">Open CSV Airdrop</Button>
-          </Link>
+            Open CSV Airdrop
+          </Button>
         </div>
       )}
     </ModalDialog>

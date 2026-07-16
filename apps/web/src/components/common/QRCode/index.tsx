@@ -14,6 +14,8 @@ const QRCode = ({ value, size }: { value?: string; size: number }): ReactElement
     <QRCodeReact
       value={value}
       size={size}
+      role="img"
+      aria-label="QR code"
       bgColor={palette.background.paper}
       fgColor={palette.text.primary}
       imageSettings={{

@@ -85,7 +85,7 @@ export const ReviewTransactionContent = ({
         <NetworkWarning />
         <UnknownContractError txData={txDetails?.txData ?? txPreview?.txData} />
 
-        <TxCardActions sx={{ marginTop: '0 !important' }}>
+        <TxCardActions className="!mt-0">
           {/* Continue button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!isSubmitDisabled}>
             {(isOk) => {

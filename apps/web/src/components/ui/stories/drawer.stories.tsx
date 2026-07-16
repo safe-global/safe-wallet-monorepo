@@ -32,7 +32,7 @@ type Story = StoryObj<typeof meta>
 export const Open: Story = {
   render: () => (
     <Drawer defaultOpen>
-      <DrawerTrigger>
+      <DrawerTrigger asChild>
         <Button>Open Drawer</Button>
       </DrawerTrigger>
       <DrawerContent>
@@ -45,7 +45,7 @@ export const Open: Story = {
         </div>
         <DrawerFooter>
           <Button>Save</Button>
-          <DrawerClose>
+          <DrawerClose asChild>
             <Button variant="outline">Cancel</Button>
           </DrawerClose>
         </DrawerFooter>
@@ -69,7 +69,7 @@ export const AllVariants: Story = {
           }}
         >
           <Drawer>
-            <DrawerTrigger>
+            <DrawerTrigger asChild>
               <Button>Open Drawer</Button>
             </DrawerTrigger>
             <DrawerContent>
@@ -82,7 +82,7 @@ export const AllVariants: Story = {
               </div>
               <DrawerFooter>
                 <Button>Save</Button>
-                <DrawerClose>
+                <DrawerClose asChild>
                   <Button variant="outline">Cancel</Button>
                 </DrawerClose>
               </DrawerFooter>
@@ -102,7 +102,7 @@ export const AllVariants: Story = {
           }}
         >
           <Drawer>
-            <DrawerTrigger>
+            <DrawerTrigger asChild>
               <Button>Open with Footer</Button>
             </DrawerTrigger>
             <DrawerContent>
@@ -115,7 +115,7 @@ export const AllVariants: Story = {
               </div>
               <DrawerFooter>
                 <Button>Submit</Button>
-                <DrawerClose>
+                <DrawerClose asChild>
                   <Button variant="outline">Cancel</Button>
                 </DrawerClose>
               </DrawerFooter>

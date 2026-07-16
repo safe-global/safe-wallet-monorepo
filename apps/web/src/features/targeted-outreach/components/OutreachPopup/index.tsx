@@ -108,11 +108,14 @@ const OutreachPopup = (): ReactElement | null => {
             experience for you!
           </Typography>
           <Track {...OUTREACH_EVENTS.OPEN_SURVEY}>
-            <Link rel="noreferrer noopener" target="_blank" href={outreachUrl}>
-              <Button className="w-full" variant="default" onClick={handleOpenSurvey}>
-                Get Involved
-              </Button>
-            </Link>
+            <Button
+              className="w-full"
+              variant="default"
+              onClick={handleOpenSurvey}
+              render={<Link rel="noreferrer noopener" target="_blank" href={outreachUrl} />}
+            >
+              Get Involved
+            </Button>
           </Track>
           <Track {...OUTREACH_EVENTS.ASK_AGAIN_LATER}>
             <Button className="w-full" variant="ghost" onClick={handleAskAgainLater}>

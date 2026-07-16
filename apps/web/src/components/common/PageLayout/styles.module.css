@@ -51,18 +51,16 @@
   .topbarElevated:not(.topbarNoSidebar) header {
     padding-left: var(--space-3);
   }
-
-  .mainSpace {
-    && {
-      @apply pt-0;
-    }
-  }
 }
 
 .mainSpace {
   /* we need it in order to have higher importance than the .main class */
   && {
     padding-top: var(--topbar-height);
+
+    @media (max-width: 899.95px) {
+      @apply pt-0;
+    }
 
     @media (max-width: 640px) {
       padding-top: 0;

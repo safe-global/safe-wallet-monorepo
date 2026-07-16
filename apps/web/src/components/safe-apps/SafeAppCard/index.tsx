@@ -86,6 +86,7 @@ const SafeAppCardGridView = ({
       onClickSafeApp={onClickSafeApp}
       height="100%"
       compact={compact}
+      ariaLabel={`Open ${safeApp.name}`}
     >
       {/* Safe App Header */}
       <div className={classNames('flex items-start justify-between', css.safeAppHeader)}>
@@ -141,6 +142,7 @@ type SafeAppCardContainerProps = {
   height?: string
   className?: string
   compact?: boolean
+  ariaLabel?: string
 }
 
 export const SafeAppCardContainer = ({
@@ -149,6 +151,7 @@ export const SafeAppCardContainer = ({
   onClickSafeApp,
   height,
   className,
+  ariaLabel = 'Open Safe app',
 }: SafeAppCardContainerProps) => {
   const handleClickSafeApp = (event: SyntheticEvent) => {
     if (onClickSafeApp) {
@@ -157,10 +160,17 @@ export const SafeAppCardContainer = ({
   }
 
   return (
-    <Link href={safeAppUrl} passHref rel="noreferrer" onClick={handleClickSafeApp}>
-      <Card size="none" className={classNames(css.safeAppContainer, className)} style={{ height }}>
+    <Card size="none" className={classNames(css.safeAppContainer, 'relative', className)} style={{ height }}>
+      <Link
+        href={safeAppUrl}
+        rel="noreferrer"
+        onClick={handleClickSafeApp}
+        aria-label={ariaLabel}
+        className="absolute inset-0 z-0 rounded-[inherit] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      />
+      <div className="relative z-10 h-full pointer-events-none [&_[data-slot=tooltip-trigger]]:pointer-events-auto [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
         {children}
-      </Card>
-    </Link>
+      </div>
+    </Card>
   )
 }

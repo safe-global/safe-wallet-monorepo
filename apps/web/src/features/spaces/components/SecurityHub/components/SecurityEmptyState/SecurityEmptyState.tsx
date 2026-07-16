@@ -25,7 +25,7 @@ const EmptyCardItem = ({ iconNode, title, description, label, onClick }: EmptyCa
     <Card className={cn(css.emptyCardState, 'group')} onClick={onClick}>
       {typeof iconNode === 'string' ? (
         <div>
-          <img className="w-[54px] rounded-md" src={iconNode} />
+          <img alt="" className="w-[54px] rounded-md" src={iconNode} />
         </div>
       ) : (
         <div className="flex size-14 items-center justify-center rounded-md bg-green-100">{iconNode}</div>

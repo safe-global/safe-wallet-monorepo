@@ -7,17 +7,18 @@ type ProgressBarProps = {
   value?: number
   className?: string
   style?: CSSProperties
-  /** @deprecated retained for backwards compatibility, no longer applied */
+  /** Maps legacy MUI `primary` and `secondary` intents to the shadcn indicator. */
   color?: string
   /** @deprecated retained for backwards compatibility, applied as inline style */
   sx?: CSSProperties
 }
 
-export const ProgressBar = ({ value, className, style, sx }: ProgressBarProps) => {
+export const ProgressBar = ({ value, className, style, sx, color }: ProgressBarProps) => {
   return (
     <Progress
       value={value ?? null}
       className={`${css.progressBar} ${className ?? ''}`}
+      indicatorClassName={color === 'secondary' ? 'bg-[var(--color-secondary-main)]' : undefined}
       style={{ ...sx, ...style }}
       aria-label="Progress"
     />

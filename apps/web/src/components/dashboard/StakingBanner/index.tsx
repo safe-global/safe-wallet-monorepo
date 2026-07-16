@@ -54,13 +54,15 @@ const StakingBanner = ({
             <Typography variant="paragraph-small">
               <strong>Stake ETH and earn rewards up to 5% APY.</strong> Lock 32 ETH to become a validator via the Kiln
               widget. You can also{' '}
-              <NextLink
-                href={{ pathname: AppRoutes.apps.index, query: { ...router.query, categories: ['Staking'] } }}
-                passHref
-                type="link"
+              <Link
+                render={
+                  <NextLink
+                    href={{ pathname: AppRoutes.apps.index, query: { ...router.query, categories: ['Staking'] } }}
+                  />
+                }
               >
-                <Link>explore Safe Apps</Link>
-              </NextLink>{' '}
+                explore Safe Apps
+              </Link>{' '}
               and home staking for other options. Staking involves risks like slashing.
               {LEARN_MORE_LINK && (
                 <>
@@ -79,17 +81,19 @@ const StakingBanner = ({
                 Don&apos;t show again
               </Button>
             </div>
-            <NextLink
-              href={AppRoutes.stake && { pathname: AppRoutes.stake, query: { safe: router.query.safe } }}
-              passHref
-              rel="noreferrer"
-              onClick={onClick}
-              className={classNames(css.stakeButton)}
+            <Button
+              size="sm"
+              className={classNames(css.stakeButton, 'w-full')}
+              render={
+                <NextLink
+                  href={AppRoutes.stake && { pathname: AppRoutes.stake, query: { safe: router.query.safe } }}
+                  rel="noreferrer"
+                  onClick={onClick}
+                />
+              }
             >
-              <Button size="sm" className="w-full">
-                Stake
-              </Button>
-            </NextLink>
+              Stake
+            </Button>
           </div>
         </div>
       </div>

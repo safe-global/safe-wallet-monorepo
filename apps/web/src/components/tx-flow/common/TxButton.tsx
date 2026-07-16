@@ -38,12 +38,15 @@ export const TxBuilderButton = () => {
 
   return (
     <Track {...MODALS_EVENTS.CONTRACT_INTERACTION}>
-      <Link href={txBuilder.link} passHref style={{ width: '100%' }}>
-        <Button variant="outline" className={buttonClasses} onClick={onClick}>
-          <img src="/images/apps/tx-builder.png" height={24} width="auto" alt="Transaction Builder" />
-          Transaction Builder
-        </Button>
-      </Link>
+      <Button
+        variant="outline"
+        className={buttonClasses}
+        onClick={onClick}
+        render={<Link href={txBuilder.link} style={{ width: '100%' }} />}
+      >
+        <img src="/images/apps/tx-builder.png" height={24} width="auto" alt="Transaction Builder" />
+        Transaction Builder
+      </Button>
     </Track>
   )
 }

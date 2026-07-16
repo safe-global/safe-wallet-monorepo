@@ -57,9 +57,9 @@ const WelcomeLogin = () => {
               <Separator className="flex-1" />
             </div>
 
-            <Link href={AppRoutes.newSafe.load} className={css.watchViewAccountLink}>
-              <Button size="sm">Watch any account</Button>
-            </Link>
+            <Button size="sm" className={css.watchViewAccountLink} render={<Link href={AppRoutes.newSafe.load} />}>
+              Watch any account
+            </Button>
           </>
         )}
       </div>

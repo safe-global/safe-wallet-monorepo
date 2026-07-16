@@ -40,15 +40,21 @@ function AccountItemLink({
     <div
       ref={elementRef}
       data-testid="safe-list-item"
-      className={classnames(css.listItem, 'hover:bg-muted/40 transition-colors', {
+      className={classnames(css.listItem, 'relative hover:bg-muted/40 transition-colors', {
         [css.currentListItem]: isCurrentSafe,
       })}
     >
       <Track {...OVERVIEW_EVENTS.OPEN_SAFE} label={trackingLabel}>
-        <Link onClick={onLinkClick} href={href} className="flex w-full items-center p-2">
-          <AccountItemContent>{children}</AccountItemContent>
-        </Link>
+        <Link
+          onClick={onLinkClick}
+          href={href}
+          aria-label="Open Safe"
+          className="absolute inset-0 z-0 rounded-[inherit] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
       </Track>
+      <div className="relative z-10 pointer-events-none [&_[data-slot=tooltip-trigger]]:pointer-events-auto [&_[role=button]]:pointer-events-auto [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
+        <AccountItemContent>{children}</AccountItemContent>
+      </div>
     </div>
   )
 }
