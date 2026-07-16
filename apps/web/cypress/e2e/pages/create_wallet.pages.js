@@ -9,7 +9,10 @@ const ownerInput = 'input[name^="owners"][name$="name"]'
 const ownerAddress = 'input[name^="owners"][name$="address"]'
 const thresholdInput = 'input[name="threshold"]'
 export const removeOwnerBtn = 'button[aria-label="Remove signer"]'
-const createNewSafeBtn = '[data-testid="create-safe-btn"]'
+// Welcome "My accounts" redesign (V2): creation lives behind the "Add accounts" chooser rather than a
+// standalone create-safe button.
+const addAccountsChooserBtn = '[data-testid="open-add-accounts-chooser-button"]'
+const createNewAccountOption = '[data-testid="add-accounts-create-new"]'
 const continueWithWalletBtn = 'Continue with Private key'
 export const accountInfoHeader = '[data-testid="open-account-center"]'
 export const reviewStepOwnerInfo = '[data-testid="review-step-owner-info"]'
@@ -171,7 +174,10 @@ export function verifyNextBtnIsEnabled() {
 }
 
 export function clickOnCreateNewSafeBtn() {
-  cy.get(createNewSafeBtn).click().wait(1000)
+  // Open the "Add accounts" chooser, then pick "Create new" to enter the create-safe flow.
+  cy.get(addAccountsChooserBtn).should('be.visible').click()
+  cy.get(createNewAccountOption).should('be.visible').click()
+  cy.wait(1000)
 }
 
 export function clickOnContinueWithWalletBtn() {
