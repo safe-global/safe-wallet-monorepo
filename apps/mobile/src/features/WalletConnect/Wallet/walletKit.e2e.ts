@@ -51,13 +51,28 @@ export const APPROVED_SESSION: SessionTypes.Struct = deepFreeze({
 const asyncNoop = async (): Promise<void> => undefined
 const noop = (): void => undefined
 
+// Structural twin of jsonrpc-utils' JsonRpcResult | JsonRpcError.
+type JsonRpcResponseLike = { id: number; result?: unknown; error?: { code: number; message: string } }
+
 const fakeWalletKit = {
   on: noop,
   off: noop,
   emitSessionEvent: asyncNoop,
   updateSession: asyncNoop,
   rejectSessionAuthenticate: asyncNoop,
-  respondSessionRequest: asyncNoop,
+
+  // Records what the app would deliver to the dApp; WcResponseIndicator surfaces it to Maestro.
+  respondSessionRequest: async (params: { topic: string; response: JsonRpcResponseLike }): Promise<void> => {
+    const { topic, response } = params
+    walletKitE2eState.set({
+      lastRequestResponse: {
+        topic,
+        id: response.id,
+        ...('result' in response ? { result: response.result } : {}),
+        ...(response.error ? { error: { code: response.error.code, message: response.error.message } } : {}),
+      },
+    })
+  },
 
   // Reflects approved sessions so setSessions(getActiveSessions()) can't clobber the slice.
   // Spread so callers can't mutate the singleton's map (real getActiveSessions returns fresh).

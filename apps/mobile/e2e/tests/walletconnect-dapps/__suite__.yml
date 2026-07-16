@@ -45,3 +45,18 @@ tags:
 
 - runFlow:
     file: ./manage-disconnect-from-dapp.yml
+
+- runFlow:
+    file: ./tx-send-reject.yml
+
+- runFlow:
+    file: ./tx-send-readonly-safe.yml
+
+- runFlow:
+    file: ./tx-send-happy.yml
+
+- runFlow:
+    file: ./tx-send-batch.yml
+
+- runFlow:
+    file: ./tx-send-cgw-failure.yml

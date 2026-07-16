@@ -1,0 +1,94 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# eth_sendTransaction happy path: real keychain signing + staging CGW /propose.
+# `e2e-wc-response-hash-match` renders only when the delivered result strictly
+# equals the handed-off safeTxHash — end-to-end delivery, not just "sheet closed".
+
+- runScript:
+    file: ../../utils/scripts/defaults.js
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+# Setup's keychain write is async — gate on the ready marker.
+- tapOn:
+    id: 'e2eWcDappsTx'
+- extendedWaitUntil:
+    visible:
+      id: 'e2e-wc-tx-setup-ready'
+    timeout: ${output.defaults.wcTxUiTimeout}
+
+- tapOn:
+    id: 'e2eWcSynthTxRequest'
+
+# Identity-only request sheet (decoded payload comes after Review, by design).
+- extendedWaitUntil:
+    visible:
+      text: 'Transaction request'
+    timeout: ${output.defaults.wcTxUiTimeout}
+- assertVisible:
+    id: 'wc-tx-domain'
+- assertVisible: 'Uniswap'
+
+- extendedWaitUntil:
+    visible:
+      id: 'wc-tx-review'
+    timeout: ${output.defaults.wcTxUiTimeout}
+- tapOn:
+    id: 'wc-tx-review'
+
+# Decoded transfer on the confirm screen (signed amount = balance change).
+- extendedWaitUntil:
+    visible:
+      text: 'Confirm transaction'
+    timeout: ${output.defaults.wcTxNetworkTimeout}
+- assertVisible:
+    text: '.*-0\.001.*'
+
+- tapOn:
+    id: 'sign-transaction-continue-button'
+- extendedWaitUntil:
+    visible:
+      text: '.*Review this transaction data.*'
+    timeout: ${output.defaults.wcTxUiTimeout}
+- tapOn:
+    id: 'review-and-confirm-button'
+
+# Signing + staging /propose round-trip.
+- extendedWaitUntil:
+    visible:
+      text: 'You successfully signed this transaction.'
+    timeout: ${output.defaults.wcTxNetworkTimeout}
+
+# The native success modal hides the TestCtrls markers — back out to home
+# before asserting delivery.
+- tapOn: 'Done'
+- extendedWaitUntil:
+    visible:
+      text: 'Confirm transaction'
+    timeout: ${output.defaults.wcTxUiTimeout}
+- tapOn:
+    id: 'go-back'
+- extendedWaitUntil:
+    visible:
+      id: 'home-tab'
+    timeout: ${output.defaults.wcTxUiTimeout}
+
+- assertVisible:
+    id: 'e2e-wc-response-hash-match'
+
+# Queue UI (staging-backed); the fixture amount scopes the match to our row.
+- extendedWaitUntil:
+    visible:
+      id: 'pending-transactions'
+    timeout: ${output.defaults.wcTxNetworkTimeout}
+- tapOn:
+    id: 'pending-transactions'
+- extendedWaitUntil:
+    visible:
+      id: 'pending-tx-list'
+    timeout: ${output.defaults.wcTxUiTimeout}
+- assertVisible:
+    text: '.*0\.001.*'

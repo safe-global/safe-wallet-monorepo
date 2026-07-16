@@ -1,0 +1,34 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# Read-only Safe (base setup seeds no signer): routing rejects synchronously
+# with code 4100 + toast, and the sheet must never open. The toast lives ~2.5s,
+# so it is asserted first; the marker persists.
+
+- runScript:
+    file: ../../utils/scripts/defaults.js
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eWcDappsBase'
+- assertVisible:
+    id: 'home-tab'
+- tapOn:
+    id: 'e2eWcSeedSession'
+
+- tapOn:
+    id: 'e2eWcSynthTxRequest'
+
+- extendedWaitUntil:
+    visible:
+      text: 'No signer attached to this Safe'
+    timeout: ${output.defaults.wcTxUiTimeout}
+- assertVisible:
+    id: 'e2e-wc-response-error-4100'
+
+# The sheet must not have opened.
+- assertNotVisible:
+    text: 'Transaction request'
