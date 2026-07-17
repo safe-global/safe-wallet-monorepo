@@ -162,6 +162,28 @@ describe('SafeAccountsTable', () => {
     expect(screen.queryByTestId('select-0xB')).not.toBeInTheDocument()
   })
 
+  it('makes headers non-interactive and keeps the provided order when sortableColumns is false', async () => {
+    render(<SafeAccountsTable items={items} sortableColumns={false} />)
+
+    // The header label still shows, but it is not a clickable sort control.
+    expect(screen.getByText('Name')).toBeInTheDocument()
+    expect(screen.queryByTestId('account-sort-name')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('account-sort-threshold')).not.toBeInTheDocument()
+
+    // Rows stay in the provided (external) order regardless.
+    expect(rowNames()).toEqual(['Bravo', 'Alpha', 'Group'])
+  })
+
+  it('clears an active column sort when sortableColumns switches off', async () => {
+    const { rerender } = render(<SafeAccountsTable items={items} />)
+    await userEvent.click(screen.getByTestId('account-sort-name'))
+    expect(rowNames()).toEqual(['Alpha', 'Bravo', 'Group'])
+
+    // Switching the surface to a non-Name mode drops the column sort back to the provided order.
+    rerender(<SafeAccountsTable items={items} sortableColumns={false} />)
+    expect(rowNames()).toEqual(['Bravo', 'Alpha', 'Group'])
+  })
+
   it('renders rows without a column header in embedded mode', () => {
     render(<SafeAccountsTable items={items} embedded columns={['name', 'threshold', 'networks', 'balance']} />)
 

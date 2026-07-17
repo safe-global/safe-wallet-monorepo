@@ -72,7 +72,11 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
         <Typography variant="paragraph-small" color="muted" className="mb-2">
           Found {filteredSafes.length} result{maybePlural(filteredSafes)}
         </Typography>
-        <SafeAccountsTable items={filteredSafes} onLinkClick={onLinkClick} />
+        <SafeAccountsTable
+          items={filteredSafes}
+          onLinkClick={onLinkClick}
+          sortableColumns={orderBy === OrderByOption.NAME}
+        />
       </>
     )
   }
@@ -95,6 +99,7 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
           <SafeAccountsTable
             items={pinnedSafes}
             onLinkClick={onLinkClick}
+            sortableColumns={orderBy === OrderByOption.NAME}
             reorder={
               isManualOrder
                 ? { onReorder: (order) => dispatch(setManualOrder({ scope: TRUSTED_ORDER_SCOPE, order })) }

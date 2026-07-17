@@ -170,6 +170,8 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
               columns={MANAGE_COLUMNS}
               flaggedAddresses={flaggedAddresses}
               allowRenameInDialog
+              // Column sorting is only offered in Name mode; Last visited / Manual own the order.
+              sortableColumns={orderBy === OrderByOption.NAME}
               selection={{
                 selectedKeys,
                 onToggle: (line: AccountLine) => toggleSelection(line.address),

@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
@@ -104,6 +104,13 @@ export type SafeAccountsTableProps = {
   allowRenameInDialog?: boolean
   /** Enables a leading drag-handle column and makes top-level accounts reorderable. */
   reorder?: SafeAccountsReorder
+  /**
+   * Whether the column headers can re-sort the table. Defaults to `true`. Surfaces with their own
+   * sort-mode control (the Name / Last visited / Manual dropdown) pass `false` whenever the active
+   * mode isn't Name, so that mode owns the order instead of being silently overridden by a header
+   * click (Last visited and Manual have no column equivalent).
+   */
+  sortableColumns?: boolean
   /** Fired when a row's link is clicked; receives the clicked line so callers can track the safe. */
   onLinkClick?: (line: AccountLine) => void
   /**
@@ -143,6 +150,7 @@ const SafeAccountsTable = ({
   selection,
   allowRenameInDialog = false,
   reorder,
+  sortableColumns = true,
   onLinkClick,
   embedded = false,
   'data-testid': testId = 'safe-accounts-table',
@@ -177,10 +185,16 @@ const SafeAccountsTable = ({
   )
 
   const sortedGroups = useMemo(() => {
-    if (reorderActive || !sort.orderBy) return groups
+    if (reorderActive || !sortableColumns || !sort.orderBy) return groups
     const orderBy = sort.orderBy
     return [...groups].sort((a, b) => compareGroups(a, b, orderBy, sort.order))
-  }, [groups, sort, reorderActive])
+  }, [groups, sort, reorderActive, sortableColumns])
+
+  // When an external sort-mode control takes over ordering (Last visited / Manual), clear any active
+  // column sort so a stale header arrow and order don't linger if column sorting re-enables.
+  useEffect(() => {
+    if (!sortableColumns) setSort({ orderBy: null, order: 'asc' })
+  }, [sortableColumns])
 
   const lines = useMemo<Array<{ line: AccountLine; groupKey: string; group: AccountGroup }>>(() => {
     const result: Array<{ line: AccountLine; groupKey: string; group: AccountGroup }> = []
@@ -294,7 +308,7 @@ const SafeAccountsTable = ({
                     )}
                     sx={{ ...headerSx, width: column.width, textAlign: column.align ?? 'left' }}
                   >
-                    {column.sortable && column.sortKey && !reorderActive ? (
+                    {column.sortable && column.sortKey && !reorderActive && sortableColumns ? (
                       <TableSortLabel
                         active={sort.orderBy === column.sortKey}
                         direction={sort.orderBy === column.sortKey ? sort.order : 'asc'}

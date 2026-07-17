@@ -138,6 +138,8 @@ const SpaceSafeAccounts = () => {
             // Inside a workspace every Safe belongs to it, so the Workspaces column adds no information.
             columns={['name', 'threshold', 'networks', 'pending', 'balance', 'actions']}
             flaggedAddresses={similarAddresses}
+            // Column sorting is only offered in Name mode; Last visited / Manual own the order.
+            sortableColumns={orderBy === OrderByOption.NAME}
             renderActions={(line) =>
               line.variant === 'child' ? null : <SpaceSafeContextMenu safeItem={line.source} />
             }
