@@ -1,6 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react'
 import { useContext, useMemo, useRef, type ReactElement } from 'react'
 import { Menu } from 'lucide-react'
+import { useRouter } from 'next/router'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { AppRoutes } from '@/config/routes'
@@ -67,11 +68,12 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const draftBatch = useDraftBatch()
   const showSafeToken = useSafeTokenEnabled()
   const { txFlow } = useContext(TxModalContext)
+  const router = useRouter()
 
-  // On space routes we show the global search input by default, but when a transaction
-  // modal is open (e.g. Send via the Actions Tray) the URL keeps the space pathname —
-  // swap in the SpaceSafeBar so the user can see the Safe they're transacting against.
-  const showSpaceSafeBar = !isSpaceRoute || Boolean(txFlow)
+  // On space routes we show the global search input by default. Swap in the SpaceSafeBar
+  // when a transaction modal is open (e.g. Send via the Actions Tray) or when the URL
+  // points at a specific Safe (?safe=...), so the user always sees what they're acting on.
+  const showSpaceSafeBar = !isSpaceRoute || Boolean(txFlow) || Boolean(router.query.safe)
 
   const showBatchButton = Boolean(safeAddress && (!isProposer || isSafeOwner))
 

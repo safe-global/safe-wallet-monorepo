@@ -56,6 +56,7 @@ jest.mock('@/config/routes', () => ({
       members: '/spaces/members',
       safeAccounts: '/spaces/safe-accounts',
       addressBook: '/spaces/address-book',
+      policies: '/spaces/policies',
     },
     welcome: { spaces: '/welcome/spaces' },
   },

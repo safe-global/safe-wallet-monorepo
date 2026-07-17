@@ -193,7 +193,14 @@ export function useSpaceSafeSelectorItems() {
           source: 'space_selector',
         },
       )
-      router.push({ pathname: AppRoutes.home, query: { safe: `${chain.shortName}:${address}` } })
+      const safeParam = `${chain.shortName}:${address}`
+      // On the policies wizard, switching Safes should stay in the wizard so the
+      // existing reset effect can snap the flow back to step 1.
+      if (router.pathname === AppRoutes.spaces.policies) {
+        router.push({ pathname: router.pathname, query: { ...router.query, safe: safeParam } })
+      } else {
+        router.push({ pathname: AppRoutes.home, query: { safe: safeParam } })
+      }
     },
     [chainConfigs, router, spaceId],
   )

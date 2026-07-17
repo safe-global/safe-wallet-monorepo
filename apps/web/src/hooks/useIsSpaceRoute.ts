@@ -10,6 +10,7 @@ const SPACES_PREFIX_ROUTES = [
   AppRoutes.spaces.members,
   AppRoutes.spaces.safeAccounts,
   AppRoutes.spaces.addressBook,
+  AppRoutes.spaces.policies,
   AppRoutes.spaces.security,
   AppRoutes.spaces.activity,
 ]

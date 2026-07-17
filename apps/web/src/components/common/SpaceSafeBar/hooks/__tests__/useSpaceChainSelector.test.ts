@@ -51,7 +51,7 @@ jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 jest.mock('@/config/routes', () => ({
-  AppRoutes: { home: '/home' },
+  AppRoutes: { home: '/home', spaces: { policies: '/spaces/policies' } },
 }))
 
 import { useCurrentSpaceId } from '@/features/spaces'

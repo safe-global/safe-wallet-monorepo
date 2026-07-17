@@ -28,6 +28,7 @@ import type SpaceMembersPage from './components/Members/Page'
 import type SpaceSafeAccountsPage from './components/SafeAccounts/Page'
 import type SpaceAddressBookPage from './components/SpaceAddressBook/Page'
 import type SpaceSettingsPage from './components/SpaceSettings/Page'
+import type SpacePoliciesPage from './components/Policies/Page'
 import type CreateSpaceOnboarding from './components/CreateSpaceOnboarding'
 import type SelectSafesOnboarding from './components/SelectSafesOnboarding'
 import type InviteMembersOnboarding from './components/InviteMembersOnboarding'
@@ -66,6 +67,7 @@ export interface SpacesContract {
   SpaceSafeAccountsPage: typeof SpaceSafeAccountsPage
   SpaceAddressBookPage: typeof SpaceAddressBookPage
   SpaceSettingsPage: typeof SpaceSettingsPage
+  SpacePoliciesPage: typeof SpacePoliciesPage
   SecurityHubPage: typeof SecurityHubPage
   SpaceActivityLogPage: typeof SpaceActivityLogPage
 

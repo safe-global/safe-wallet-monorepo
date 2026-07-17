@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { usePathname } from 'next/navigation'
 import { useIsQualifiedSafe, useSpaceSafes } from '@/features/spaces'
 import { useAllSafes, useAllSafesGrouped, getComparator, type AllSafeItems } from '@/hooks/safes'
 import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
@@ -9,6 +10,16 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { AppRoutes } from '@/config/routes'
+
+const SPACE_PATHNAMES = new Set<string>([
+  AppRoutes.spaces.index,
+  AppRoutes.spaces.settings,
+  AppRoutes.spaces.members,
+  AppRoutes.spaces.safeAccounts,
+  AppRoutes.spaces.addressBook,
+  AppRoutes.spaces.policies,
+])
 
 /**
  * Orders a dropdown list consistently across space / non-space contexts:
@@ -41,7 +52,12 @@ const orderDropdownSafes = (
 export function useSafeBarSafes() {
   const isQualifiedSafe = useIsQualifiedSafe()
   const isSpaceRoute = useIsSpaceRoute()
-  const isInSpaceContext = isQualifiedSafe || isSpaceRoute
+  // Also force space context whenever the URL is on a known space sub-route, even
+  // without a stored `lastUsedSpace` — this guarantees /spaces/policies (and friends)
+  // never fall back to the global "trusted safes" list.
+  const pathname = usePathname() ?? ''
+  const isOnSpacePathname = SPACE_PATHNAMES.has(pathname)
+  const isInSpaceContext = isQualifiedSafe || isSpaceRoute || isOnSpacePathname
   const { allSafes: spaceSafes } = useSpaceSafes()
   const urlSafeAddress = useSafeAddressFromUrl()
   const { safeAddress: reduxSafeAddress } = useSafeInfo()
