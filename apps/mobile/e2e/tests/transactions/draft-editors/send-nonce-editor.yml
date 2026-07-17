@@ -111,6 +111,9 @@ tags:
 - assertVisible:
     id: 'nonce-row-value'
     text: '99999'
+# The rebuilt draft's transaction details must carry the same nonce.
+- runFlow:
+    file: ../../../utils/components/draft-editors/verify-details-nonce.yml
 
 # Back to the recommended nonce: the custom value must disappear from the row.
 - tapOn:
@@ -127,3 +130,6 @@ tags:
     timeout: ${output.defaults.draftNetworkTimeout}
 - assertVisible:
     id: 'nonce-row-value'
+# Details must reflect the recommended nonce too.
+- runFlow:
+    file: ../../../utils/components/draft-editors/verify-details-nonce.yml
