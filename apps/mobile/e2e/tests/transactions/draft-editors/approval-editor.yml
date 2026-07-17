@@ -61,6 +61,11 @@ tags:
     visible:
       text: '.*2[.,]5 COW.*'
     timeout: ${output.defaults.draftNetworkTimeout}
+# Verify the rebuilt action carries the edited amount (2.5 COW = 2.5e18 wei).
+- runFlow:
+    file: ../../../utils/components/draft-editors/verify-approve-amount.yml
+    env:
+      EXPECTED_APPROVAL_VALUE: '2500000000000000000'
 
 - scrollUntilVisible:
     element:
@@ -81,3 +86,8 @@ tags:
     visible:
       text: 'Unlimited'
     timeout: ${output.defaults.draftNetworkTimeout}
+# Verify the rebuilt action carries the unlimited amount (2^256 - 1 wei).
+- runFlow:
+    file: ../../../utils/components/draft-editors/verify-approve-amount.yml
+    env:
+      EXPECTED_APPROVAL_VALUE: '115792089237316195423570985008687907853269984665640564039457584007913129639935'
