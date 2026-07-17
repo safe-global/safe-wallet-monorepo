@@ -16,7 +16,7 @@ import { applySafeSelectionToggle, getSelectedLeafKeys } from '../SelectSafesOnb
 import ExternalLink from '@/components/common/ExternalLink'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
-import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
+import { useFlaggedSimilarAddresses } from '@/features/address-poisoning'
 import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import {
@@ -143,10 +143,9 @@ const AddAccounts = ({
     sortComparator,
   ])
 
-  const similarAddresses = useMemo<Set<string>>(
-    () => getFlaggedSimilarAddressSet(trustedSafes.map((s) => s.address)),
-    [trustedSafes],
-  )
+  const trustedSafeAddresses = useMemo(() => trustedSafes.map((s) => s.address), [trustedSafes])
+  // Intra-list look-alikes (always on) + anchor look-alikes (flag-gated) — see useFlaggedSimilarAddresses.
+  const similarAddresses = useFlaggedSimilarAddresses(trustedSafeAddresses)
 
   const [rawSearchQuery, setRawSearchQuery] = useState('')
   const debouncedSearchQuery = useDebounce(rawSearchQuery, 300)

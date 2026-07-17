@@ -14,8 +14,7 @@ import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
 import useWallet from '@/hooks/wallets/useWallet'
 import useChains from '@/hooks/useChains'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
+import { useFlaggedSimilarAddresses } from '@/features/address-poisoning'
 
 const useOnboardingSafes = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -37,16 +36,31 @@ const useOnboardingSafes = () => {
     const buildItem = (chainId: string, address: string) =>
       _buildSafeItem(chainId, address, walletAddress, allAdded, allOwned, allUndeployed, allVisitedSafes, allSafeNames)
 
-    // Trusted safes: from addedSafes (user-pinned, stored in localStorage)
-    const trusted = allChainIds.flatMap((chainId) =>
-      Object.keys(allAdded[chainId] || {}).map((address) => buildItem(chainId, address)),
+    // A safe is trusted if it's added/pinned on ANY chain — then ALL its chains show under trusted,
+    // so the same multi-chain safe never appears split across trusted and owned.
+    const trustedAddresses = new Set(
+      allChainIds.flatMap((chainId) => Object.keys(allAdded[chainId] || {})).map((address) => address.toLowerCase()),
     )
 
-    // Owned safes: from CGW API + undeployed, excluding safes already in trusted list
+    // Trusted safes: every chain instance (owned + undeployed + added) whose address is trusted anywhere.
+    const trusted = allChainIds.flatMap((chainId) => {
+      const chainAddresses = [
+        ...new Set([
+          ...(allOwned[chainId] || []),
+          ...Object.keys(allUndeployed[chainId] || {}),
+          ...Object.keys(allAdded[chainId] || {}),
+        ]),
+      ]
+      return chainAddresses
+        .filter((address) => trustedAddresses.has(address.toLowerCase()))
+        .map((address) => buildItem(chainId, address))
+    })
+
+    // Owned safes: from CGW API + undeployed, excluding any address trusted on any chain.
     const owned = allChainIds.flatMap((chainId) => {
       const combined = [...new Set([...(allOwned[chainId] || []), ...Object.keys(allUndeployed[chainId] || {})])]
       return combined
-        .filter((address) => !trusted.some((t) => t.chainId === chainId && sameAddress(t.address, address)))
+        .filter((address) => !trustedAddresses.has(address.toLowerCase()))
         .map((address) => buildItem(chainId, address))
     })
 
@@ -55,11 +69,16 @@ const useOnboardingSafes = () => {
 
   // Flag against the combined pool (so an owned safe impersonating a trusted one is caught) but
   // only surface warnings on owned safes — a safe the user trusted at some point is treated as vetted.
+  const combinedAddresses = useMemo(
+    () => [...trustedSafeItems, ...ownedSafeItems].map((s) => s.address),
+    [trustedSafeItems, ownedSafeItems],
+  )
+  // Intra-list look-alikes (always on) + anchor look-alikes (flag-gated) — see useFlaggedSimilarAddresses.
+  const flaggedCombined = useFlaggedSimilarAddresses(combinedAddresses)
   const flaggedOwnedAddresses = useMemo<Set<string>>(() => {
-    const flagged = getFlaggedSimilarAddressSet([...trustedSafeItems, ...ownedSafeItems].map((s) => s.address))
     const ownedAddresses = new Set(ownedSafeItems.map((s) => s.address.toLowerCase()))
-    return new Set([...flagged].filter((address) => ownedAddresses.has(address)))
-  }, [trustedSafeItems, ownedSafeItems])
+    return new Set([...flaggedCombined].filter((address) => ownedAddresses.has(address)))
+  }, [flaggedCombined, ownedSafeItems])
 
   // Group into multi-chain / single-chain and sort
   const trustedGrouped = useMemo<AllSafeItems>(

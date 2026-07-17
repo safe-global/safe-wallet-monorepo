@@ -5,6 +5,10 @@ import type { SafeItem } from '@/hooks/safes'
 const mockUseSpaceSafes = jest.fn()
 const mockUseIsAdmin = jest.fn()
 
+jest.mock('@/features/address-poisoning', () => ({
+  useFlaggedSimilarAddresses: () => new Set<string>(),
+}))
+
 jest.mock('../../AddAccountsChooser', () => ({
   __esModule: true,
   default: ({ buttonLabel, entryPoint }: { buttonLabel?: string; entryPoint?: string }) => (

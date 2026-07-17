@@ -20,7 +20,7 @@ import {
   useSafesSearch,
 } from '@/hooks/safes'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
-import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
+import { useFlaggedSimilarAddresses } from '@/features/address-poisoning'
 import { useSpaceSafes, useIsInvited, useIsAdmin, useCurrentSpaceId } from '@/features/spaces'
 import { SafeAccountsTable } from '@/features/myAccounts'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
@@ -53,10 +53,9 @@ const SpaceSafeAccounts = () => {
   // re-derive the name from the local address book only and drop the workspace name.
   const spaceSafeItems = useMemo<SafeItem[]>(() => flattenSafeItems(allSafes ?? []), [allSafes])
 
-  const similarAddresses = useMemo<Set<string>>(
-    () => getFlaggedSimilarAddressSet(spaceSafeItems.map((s) => s.address)),
-    [spaceSafeItems],
-  )
+  const spaceSafeAddresses = useMemo(() => spaceSafeItems.map((s) => s.address), [spaceSafeItems])
+  // Intra-list look-alikes (always on) + anchor look-alikes (flag-gated) — see useFlaggedSimilarAddresses.
+  const similarAddresses = useFlaggedSimilarAddresses(spaceSafeAddresses)
 
   // Group and sort
   const displaySafes = useMemo<AllSafeItems>(

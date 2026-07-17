@@ -8,6 +8,7 @@ import {
   buildSimilarityIndex,
   detectListSimilarities,
   getCommonAffixLengths,
+  detectListClusters,
 } from '../addressSimilarity'
 import { Severity } from '../../features/safe-shield/types'
 
@@ -333,6 +334,38 @@ describe('addressSimilarity (anchor engine)', () => {
       const a = '0x1111111111111111111111111111111111111111'
       const b = '0x2222222222222222222222222222222222222222'
       expect(getCommonAffixLengths(a, b)).toEqual({ prefixLen: 0, suffixLen: 0 })
+    })
+  })
+
+  describe('detectListClusters', () => {
+    const A = '0x1234' + 'a'.repeat(32) + '5678' // front 1234, back 5678
+    const B = '0x1234' + 'b'.repeat(32) + '9999' // shares front 1234 with A
+    const C = '0xcccc' + 'd'.repeat(32) + '5678' // shares back 5678 with A (chains via A)
+    const D = '0xdead' + 'e'.repeat(32) + 'beef' // unrelated
+
+    it('clusters addresses that share front-4 OR back-4 (union-find over the OR relation)', () => {
+      const { flagged, groupIdByAddress } = detectListClusters([A, B, C, D])
+
+      expect(flagged.has(A.toLowerCase())).toBe(true)
+      expect(flagged.has(B.toLowerCase())).toBe(true)
+      expect(flagged.has(C.toLowerCase())).toBe(true)
+      expect(flagged.has(D.toLowerCase())).toBe(false)
+
+      // A, B and C are one connected component; D is on its own.
+      const groupId = groupIdByAddress.get(A.toLowerCase())
+      expect(groupId).toBeDefined()
+      expect(groupIdByAddress.get(B.toLowerCase())).toBe(groupId)
+      expect(groupIdByAddress.get(C.toLowerCase())).toBe(groupId)
+      expect(groupIdByAddress.has(D.toLowerCase())).toBe(false)
+    })
+
+    it('does not flag a single address listed several times (identical addresses are deduped)', () => {
+      expect(detectListClusters([A, A, A]).flagged.size).toBe(0)
+    })
+
+    it('returns nothing for fewer than two distinct addresses', () => {
+      expect(detectListClusters([A]).flagged.size).toBe(0)
+      expect(detectListClusters([]).flagged.size).toBe(0)
     })
   })
 })

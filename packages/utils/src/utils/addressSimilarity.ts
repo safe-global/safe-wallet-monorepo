@@ -113,6 +113,92 @@ export const getFlaggedSimilarAddressSet = (addresses: string[]): Set<string> =>
   return new Set(unique.filter((addr) => result.isFlagged(addr)))
 }
 
+/** Look-alike clustering of a single list: flagged set + a group id per flagged address. */
+export interface ListClusterResult {
+  /** Lowercased (0x-prefixed) addresses that look alike another list member. Query with `addr.toLowerCase()`. */
+  flagged: Set<string>
+  /** Lowercased address → its cluster id (an opaque, stable key) for boxing look-alikes together. */
+  groupIdByAddress: Map<string, string>
+}
+
+/**
+ * Cluster the addresses in one list that look alike, using the OR rule: two addresses are connected
+ * when they share the same first-`prefixLength` OR last-`suffixLength` hex chars (union-find over that
+ * relation). Every address in a component of 2+ is flagged and carries that component's id.
+ *
+ * Identical addresses are deduped first (by normalized value), so the same Safe listed on several
+ * chains never matches itself. Front/back are compared on the normalized hex (0x stripped); the
+ * returned keys are the lowercased 0x-prefixed originals so callers can `has(addr.toLowerCase())`.
+ */
+export const detectListClusters = (
+  addresses: string[],
+  config: SimilarityConfig = DEFAULT_SIMILARITY_CONFIG,
+): ListClusterResult => {
+  const flagged = new Set<string>()
+  const groupIdByAddress = new Map<string, string>()
+
+  // Dedupe by normalized value, keeping the first lowercased original for the returned keys.
+  const originalByNorm = new Map<string, string>()
+  for (const address of addresses) {
+    const normalized = normalizeAddress(address)
+    if (!isUsableAddress(normalized) || originalByNorm.has(normalized)) continue
+    originalByNorm.set(normalized, address.toLowerCase())
+  }
+  const uniques = [...originalByNorm.keys()]
+  if (uniques.length < 2) return { flagged, groupIdByAddress }
+
+  // Union-find over "shares prefix OR suffix".
+  const parent = new Map<string, string>(uniques.map((u) => [u, u]))
+  const find = (x: string): string => {
+    let root = x
+    while (parent.get(root) !== root) root = parent.get(root) as string
+    let cur = x
+    while (parent.get(cur) !== root) {
+      const next = parent.get(cur) as string
+      parent.set(cur, root)
+      cur = next
+    }
+    return root
+  }
+  const union = (a: string, b: string): void => {
+    const ra = find(a)
+    const rb = find(b)
+    if (ra !== rb) parent.set(ra, rb)
+  }
+
+  const firstByPrefix = new Map<string, string>()
+  const firstBySuffix = new Map<string, string>()
+  for (const norm of uniques) {
+    const prefix = norm.slice(0, config.prefixLength)
+    const suffix = norm.slice(-config.suffixLength)
+    const prevP = firstByPrefix.get(prefix)
+    if (prevP) union(norm, prevP)
+    else firstByPrefix.set(prefix, norm)
+    const prevS = firstBySuffix.get(suffix)
+    if (prevS) union(norm, prevS)
+    else firstBySuffix.set(suffix, norm)
+  }
+
+  // Keep only components with 2+ members; flag them and stamp the component id.
+  const membersByRoot = new Map<string, string[]>()
+  for (const norm of uniques) {
+    const root = find(norm)
+    const arr = membersByRoot.get(root)
+    if (arr) arr.push(norm)
+    else membersByRoot.set(root, [norm])
+  }
+  for (const [root, members] of membersByRoot) {
+    if (members.length < 2) continue
+    for (const norm of members) {
+      const original = originalByNorm.get(norm) as string
+      flagged.add(original)
+      groupIdByAddress.set(original, root)
+    }
+  }
+
+  return { flagged, groupIdByAddress }
+}
+
 // Anchor detector — build the index once over the user's trusted anchors, then query each candidate.
 
 /** Strip a leading `0x` (any case) and lowercase. Pure & synchronous. */

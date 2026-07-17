@@ -5,6 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Spinner } from '@/components/ui/spinner'
 import { ConnectWalletHint } from '@/features/spaces'
+import { useFlaggedSimilarAddresses } from '@/features/address-poisoning'
 import { SafeAccountsTable, type AccountLine, type SafeAccountColumnId } from '@/features/myAccounts'
 import type { AllSafeItems } from '@/hooks/safes'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
@@ -96,10 +97,10 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
     return keys
   }, [availableItems])
 
-  const flaggedAddresses = useMemo(
-    () => new Set(availableItems.filter((item) => item.similarityGroup).map((item) => item.address.toLowerCase())),
-    [availableItems],
-  )
+  // Intra-list look-alikes (always on) + anchor look-alikes (flag-gated). similarityGroup still drives
+  // the visual grouping; this set drives the per-row badge and also catches out-of-list anchor matches.
+  const availableAddresses = useMemo(() => availableItems.map((item) => item.address), [availableItems])
+  const flaggedAddresses = useFlaggedSimilarAddresses(availableAddresses)
 
   const someSelected = selectedCount > 0
 
