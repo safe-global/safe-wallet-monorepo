@@ -24,6 +24,16 @@ describe('comparators', () => {
       ]
       expect(order(items, nameComparator)).toEqual(['0x2', '0x1', '0x3'])
     })
+
+    it('sorts unnamed safes by address A→Z, case-insensitively', () => {
+      const items = [safe({ address: '0xCCC' }), safe({ address: '0xaaa' }), safe({ address: '0xBBB' })]
+      expect(order(items, nameComparator)).toEqual(['0xaaa', '0xBBB', '0xCCC'])
+    })
+
+    it('breaks equal-name ties by address', () => {
+      const items = [safe({ address: '0xBBB', name: 'Safe' }), safe({ address: '0xaaa', name: 'Safe' })]
+      expect(order(items, nameComparator)).toEqual(['0xaaa', '0xBBB'])
+    })
   })
 
   describe('lastVisitedComparator', () => {

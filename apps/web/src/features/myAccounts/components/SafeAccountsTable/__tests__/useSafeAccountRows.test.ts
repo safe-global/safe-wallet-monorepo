@@ -1,10 +1,10 @@
 import { compareGroups, type AccountGroup, type SafeSortKeys } from '../useSafeAccountRows'
 
-const group = (sort: Partial<SafeSortKeys>): AccountGroup =>
+const group = (sort: Partial<SafeSortKeys>, address = '0x0'): AccountGroup =>
   ({
-    parent: {} as AccountGroup['parent'],
+    parent: { address } as AccountGroup['parent'],
     children: [],
-    sort: { name: '', threshold: null, networks: 0, workspaces: 0, ...sort },
+    sort: { name: '', threshold: null, owners: null, networks: '', workspaces: 0, ...sort },
   }) as AccountGroup
 
 describe('compareGroups', () => {
@@ -25,6 +25,32 @@ describe('compareGroups', () => {
     expect(compareGroups(named, empty, 'name', 'desc')).toBeLessThan(0)
   })
 
+  it('keeps named accounts above unnamed ones in both directions', () => {
+    const named = group({ name: 'zulu' }, '0xaaa')
+    const unnamed = group({ name: '' }, '0x111')
+
+    expect(compareGroups(named, unnamed, 'name', 'asc')).toBeLessThan(0)
+    expect(compareGroups(named, unnamed, 'name', 'desc')).toBeLessThan(0)
+  })
+
+  it('sorts unnamed accounts by address, reversing with the sort direction', () => {
+    const bbb = group({ name: '' }, '0xBBB')
+    const aaa = group({ name: '' }, '0xaaa')
+
+    // Ascending: 0xaaa before 0xbbb (case-insensitively)
+    expect(compareGroups(aaa, bbb, 'name', 'asc')).toBeLessThan(0)
+    // Descending toggles the order — an all-unnamed list actually reverses
+    expect(compareGroups(aaa, bbb, 'name', 'desc')).toBeGreaterThan(0)
+  })
+
+  it('breaks equal-name ties by address', () => {
+    const a = group({ name: 'safe' }, '0xaaa')
+    const b = group({ name: 'safe' }, '0xbbb')
+
+    expect(compareGroups(a, b, 'name', 'asc')).toBeLessThan(0)
+    expect(compareGroups(a, b, 'name', 'desc')).toBeGreaterThan(0)
+  })
+
   it('sorts numeric columns and pushes null values to the end', () => {
     const low = group({ threshold: 2 })
     const high = group({ threshold: 5 })
@@ -37,11 +63,31 @@ describe('compareGroups', () => {
     expect(compareGroups(low, unknown, 'threshold', 'desc')).toBeLessThan(0)
   })
 
-  it('sorts by networks and workspaces counts', () => {
-    const few = group({ networks: 1, workspaces: 0 })
-    const many = group({ networks: 4, workspaces: 3 })
+  it('breaks threshold ties by owner count (2/3 before 2/15)', () => {
+    const small = group({ threshold: 2, owners: 3 })
+    const large = group({ threshold: 2, owners: 15 })
 
-    expect(compareGroups(few, many, 'networks', 'asc')).toBeLessThan(0)
+    expect(compareGroups(small, large, 'threshold', 'asc')).toBeLessThan(0)
+    expect(compareGroups(small, large, 'threshold', 'desc')).toBeGreaterThan(0)
+  })
+
+  it('sorts the networks column by chain identity, not by chain count', () => {
+    const eth = group({ networks: 'ethereum' })
+    const pol = group({ networks: 'polygon' })
+    const unknown = group({ networks: '' })
+
+    expect(compareGroups(eth, pol, 'networks', 'asc')).toBeLessThan(0)
+    expect(compareGroups(eth, pol, 'networks', 'desc')).toBeGreaterThan(0)
+    // A safe on no known chain sinks to the bottom in both directions
+    expect(compareGroups(eth, unknown, 'networks', 'asc')).toBeLessThan(0)
+    expect(compareGroups(eth, unknown, 'networks', 'desc')).toBeLessThan(0)
+  })
+
+  it('sorts the workspaces column by count', () => {
+    const few = group({ workspaces: 0 })
+    const many = group({ workspaces: 3 })
+
+    expect(compareGroups(few, many, 'workspaces', 'asc')).toBeLessThan(0)
     expect(compareGroups(few, many, 'workspaces', 'desc')).toBeGreaterThan(0)
   })
 

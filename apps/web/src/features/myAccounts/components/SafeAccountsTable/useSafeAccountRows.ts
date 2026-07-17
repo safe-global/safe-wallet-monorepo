@@ -62,7 +62,14 @@ export type AccountLine = {
   isActivating: boolean
 }
 
-export type SafeSortKeys = { name: string; threshold: number | null; networks: number; workspaces: number }
+export type SafeSortKeys = {
+  name: string
+  threshold: number | null
+  /** Owner count (the N in "M/N") — breaks threshold ties. */
+  owners: number | null
+  networks: string
+  workspaces: number
+}
 
 export type AccountGroup = { parent: AccountLine; children: AccountLine[]; sort: SafeSortKeys }
 
@@ -76,6 +83,16 @@ type BuildDeps = {
 }
 
 const overviewKey = (chainId: string, address: string) => `${chainId}:${address.toLowerCase()}`
+
+/**
+ * Network sort key: the chain identity to order the Networks column by (e.g. Ethereum before
+ * Polygon), not the number of chains. A multi-chain account is represented by its alphabetically
+ * first chain name; chains with no config fall back to their id so they still sort deterministically.
+ */
+const networkSortKey = (safes: SafeItem[], chainMap: Record<string, Chain>): string => {
+  const names = safes.map((s) => (chainMap[s.chainId]?.chainName ?? s.chainId).toLowerCase())
+  return names.sort()[0] ?? ''
+}
 
 /** Unions workspace memberships across a multi-chain safe's per-chain keys, deduped by space uuid. */
 const unionWorkspaces = (safes: SafeItem[], safeSpaces: SafeSpacesMap): GetSpaceResponse[] => {
@@ -137,7 +154,8 @@ const buildSingleGroup = (item: SafeItem, deps: BuildDeps): AccountGroup => {
     sort: {
       name: (item.name ?? '').toLowerCase(),
       threshold: parent.threshold ?? null,
-      networks: 1,
+      owners: parent.owners ?? null,
+      networks: networkSortKey([item], deps.chainMap),
       workspaces: parent.workspaces.length,
     },
   }
@@ -206,7 +224,8 @@ const buildMultiGroup = (item: MultiChainSafeItem, deps: BuildDeps): AccountGrou
     sort: {
       name: (name ?? '').toLowerCase(),
       threshold: shared?.threshold ?? (childThresholds.length ? Math.max(...childThresholds) : null),
-      networks: safes.length,
+      owners: parent.owners ?? null,
+      networks: networkSortKey(safes, deps.chainMap),
       workspaces: workspaces.length,
     },
   }
@@ -256,8 +275,42 @@ export function useSafeAccountRows(items: AllSafeItems): { groups: AccountGroup[
   return { groups, isLoading }
 }
 
+const compareAddresses = (a: AccountGroup, b: AccountGroup) =>
+  a.parent.address.toLowerCase().localeCompare(b.parent.address.toLowerCase())
+
+/**
+ * Name column: named accounts sort before unnamed ones (in both directions); unnamed accounts fall
+ * back to their address. Within each bucket the order flips with the sort direction, so toggling
+ * asc/desc actually reverses an all-unnamed list. Address also breaks ties between equal names.
+ */
+const compareByName = (a: AccountGroup, b: AccountGroup, order: 'asc' | 'desc') => {
+  const an = a.sort.name
+  const bn = b.sort.name
+  if (an && !bn) return -1
+  if (!an && bn) return 1
+  const cmp = an && bn ? an.localeCompare(bn) || compareAddresses(a, b) : compareAddresses(a, b)
+  return order === 'asc' ? cmp : -cmp
+}
+
+/**
+ * Threshold column: sorts by required signatures (M), then by owner count (N) so e.g. 2/3 orders
+ * before 2/15. Accounts with no known threshold sink to the bottom in both directions.
+ */
+const compareByThreshold = (a: AccountGroup, b: AccountGroup, order: 'asc' | 'desc') => {
+  const at = a.sort.threshold
+  const bt = b.sort.threshold
+  if (at === null && bt === null) return 0
+  if (at === null) return 1
+  if (bt === null) return -1
+  const cmp = at - bt || (a.sort.owners ?? 0) - (b.sort.owners ?? 0)
+  return order === 'asc' ? cmp : -cmp
+}
+
 /** Orders groups by a sortable column; empty/unknown values always sink to the bottom. */
 export const compareGroups = (a: AccountGroup, b: AccountGroup, orderBy: SafeSortColumn, order: 'asc' | 'desc') => {
+  if (orderBy === 'name') return compareByName(a, b, order)
+  if (orderBy === 'threshold') return compareByThreshold(a, b, order)
+
   const av = a.sort[orderBy]
   const bv = b.sort[orderBy]
   const aEmpty = av === null || av === ''

@@ -87,17 +87,17 @@ const groups: AccountGroup[] = [
   {
     parent: line({ key: '0xB', displayName: 'Bravo' }),
     children: [],
-    sort: { name: 'bravo', threshold: 2, networks: 1, workspaces: 0 },
+    sort: { name: 'bravo', threshold: 2, owners: 3, networks: 'ethereum', workspaces: 0 },
   },
   {
     parent: line({ key: '0xA', displayName: 'Alpha' }),
     children: [],
-    sort: { name: 'alpha', threshold: 5, networks: 1, workspaces: 2 },
+    sort: { name: 'alpha', threshold: 5, owners: 7, networks: 'ethereum', workspaces: 2 },
   },
   {
     parent: line({ key: '0xG', displayName: 'Group', expandable: true, variant: 'group' }),
     children: [line({ key: '0xG:1', displayName: 'Ethereum', variant: 'child' })],
-    sort: { name: 'group', threshold: 3, networks: 3, workspaces: 1 },
+    sort: { name: 'group', threshold: 3, owners: 5, networks: 'gnosis', workspaces: 1 },
   },
 ]
 
@@ -224,7 +224,7 @@ describe('SafeAccountsTable — selection mode', () => {
     {
       parent: line({ key: '0xB', displayName: 'Bravo' }),
       children: [],
-      sort: { name: 'bravo', threshold: 2, networks: 1, workspaces: 0 },
+      sort: { name: 'bravo', threshold: 2, owners: 3, networks: 'ethereum', workspaces: 0 },
     },
     {
       parent: line({ key: '0xG', displayName: 'Group', expandable: true, variant: 'group' }),
@@ -232,7 +232,7 @@ describe('SafeAccountsTable — selection mode', () => {
         line({ key: '1:0xG', displayName: 'Ethereum', variant: 'child' }),
         line({ key: '2:0xG', displayName: 'Base', variant: 'child' }),
       ],
-      sort: { name: 'group', threshold: 3, networks: 2, workspaces: 0 },
+      sort: { name: 'group', threshold: 3, owners: 5, networks: 'base', workspaces: 0 },
     },
   ]
 

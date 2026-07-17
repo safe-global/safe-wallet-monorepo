@@ -4,12 +4,14 @@ import type { MultiChainSafeItem } from './useAllSafesGrouped'
 
 type SortableSafe = SafeItem | MultiChainSafeItem
 
+const byAddress = (a: SortableSafe, b: SortableSafe) => a.address.toLowerCase().localeCompare(b.address.toLowerCase())
+
 export const nameComparator = (a: SortableSafe, b: SortableSafe) => {
-  // Put undefined names last
-  if (!a.name && !b.name) return 0
+  // Named safes sort A→Z first; unnamed ones sort by address, always after the named ones.
+  if (!a.name && !b.name) return byAddress(a, b)
   if (!a.name) return 1
   if (!b.name) return -1
-  return a.name.localeCompare(b.name)
+  return a.name.localeCompare(b.name) || byAddress(a, b)
 }
 
 export const lastVisitedComparator = (a: SortableSafe, b: SortableSafe) => {
