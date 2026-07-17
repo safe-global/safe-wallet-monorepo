@@ -32,6 +32,8 @@ import {
   synthSessionDelete,
   setWcPairHang,
 } from '../setup/walletConnectDappsSetup'
+import { setupSendFlow, setupApprovalDraft } from '../setup/draftEditorsSetup'
+import { draftEditorsE2eState } from '../setup/draftEditorsE2eState'
 import { appUpdateE2eState } from '@/src/features/AppUpdate/hooks/appUpdateE2eState'
 import { walletKitE2eState } from '@/src/features/WalletConnect/Wallet/walletKitE2eState'
 
@@ -96,6 +98,15 @@ function ClipboardVerificationContainer({
       </Pressable>
     </View>
   )
+}
+
+/** Surfaces the async draft-editor setup outcome as e2e-draft-setup-ready/-failed. */
+function DraftSetupIndicator() {
+  const status = useSyncExternalStore(draftEditorsE2eState.subscribe, () => draftEditorsE2eState.get().setupStatus)
+  if (status === 'idle') {
+    return null
+  }
+  return <RNView testID={`e2e-draft-setup-${status}`} style={styles.marker} />
 }
 
 /**
@@ -325,11 +336,28 @@ export function TestCtrls() {
         />
         <Pressable testID="e2eWcPairHang" onPress={() => setWcPairHang()} accessibilityRole="button" style={BTN} />
 
+        {/* Draft-editor scenarios (send flow / approval draft) */}
+        <Pressable
+          testID="e2eSendFlow"
+          onPress={() => setupSendFlow(dispatch, router)}
+          accessibilityRole="button"
+          style={BTN}
+        />
+        <Pressable
+          testID="e2eApprovalDraft"
+          onPress={() => {
+            setupApprovalDraft(dispatch, router).catch((e) => console.error('[E2E] setupApprovalDraft failed:', e))
+          }}
+          accessibilityRole="button"
+          style={BTN}
+        />
+
         {/* Clipboard Verification Trigger */}
         <ClipboardVerificationTrigger onPress={() => setIsClipboardVisible(true)} />
 
-        {/* WalletConnect dApp reject side-channel */}
+        {/* WalletConnect dApp reject + draft-setup side-channels */}
         <WcRejectIndicator />
+        <DraftSetupIndicator />
       </View>
 
       {/* Clipboard Verification Container - rendered outside buttons View */}

@@ -18,6 +18,7 @@ import { resetE2EState } from '@/src/store/resetE2EState'
 import { web3API } from '@/src/store/signersBalance'
 import { walletConnectE2eState } from '@/src/features/WalletConnect/Signer/context/walletConnectE2eState'
 import { walletKitE2eState } from '@/src/features/WalletConnect/Wallet/walletKitE2eState'
+import { draftEditorsE2eState } from './draftEditorsE2eState'
 import { mockedActiveAccount, mockedActiveSafeInfo } from './mockData'
 
 /**
@@ -47,6 +48,7 @@ export const resetReduxForE2E = (dispatch: Dispatch) => {
   dispatch(hypernativeApi.util.resetApiState())
   walletConnectE2eState.reset()
   walletKitE2eState.reset()
+  draftEditorsE2eState.reset()
   store.dispatch(
     apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY, { forceRefetch: true }),
   )
