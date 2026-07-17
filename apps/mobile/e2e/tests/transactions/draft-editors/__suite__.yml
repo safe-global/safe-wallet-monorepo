@@ -1,0 +1,14 @@
+appId: ${APP_ID}
+tags:
+  - transactions
+  - draft-editors
+  - suite
+---
+# Draft-editor suite: nonce editor (via the send flow) and approval editor
+# (via a composed multiSend approve draft). Flows reset state independently.
+
+- runFlow:
+    file: ./send-nonce-editor.yml
+
+- runFlow:
+    file: ./approval-editor.yml

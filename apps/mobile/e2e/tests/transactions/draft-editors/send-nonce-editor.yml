@@ -1,0 +1,129 @@
+appId: ${APP_ID}
+tags:
+  - transactions
+  - draft-editors
+---
+# Nonce editor via the real send flow: build a draft, set a custom nonce (rebuilds
+# under a new safeTxHash, shown on the row), then pick recommended to replace it.
+# Nothing is signed or proposed.
+
+- runScript:
+    file: ../../../utils/scripts/defaults.js
+
+- runFlow:
+    file: ../../../utils/setup/app-start.yml
+
+# Primary Safe (holds ETH on staging) + owner signer so the send button shows.
+- tapOn:
+    id: 'e2eSendFlow'
+- assertVisible:
+    id: 'home-tab'
+
+- extendedWaitUntil:
+    visible:
+      id: 'send-button'
+    timeout: ${output.defaults.draftNetworkTimeout}
+- tapOn:
+    id: 'send-button'
+
+- extendedWaitUntil:
+    visible:
+      id: 'recipient-input'
+    timeout: ${output.defaults.draftUiTimeout}
+- tapOn:
+    id: 'recipient-input'
+- inputText: '0x4d5CF9E6df9a95F4c1F5398706cA27218add5949'
+- extendedWaitUntil:
+    visible:
+      id: 'continue-button'
+    timeout: ${output.defaults.draftUiTimeout}
+- tapOn:
+    id: 'continue-button'
+
+- extendedWaitUntil:
+    visible:
+      id: 'send-token-ETH'
+    timeout: ${output.defaults.draftNetworkTimeout}
+- tapOn:
+    id: 'send-token-ETH'
+
+# The amount TextInput is invisible (opacity 0) and auto-focused — Maestro
+# can't see it, so type directly and assert the mirrored display instead.
+- extendedWaitUntil:
+    visible:
+      text: 'Review & confirm'
+    timeout: ${output.defaults.draftUiTimeout}
+- inputText: '0.01'
+- extendedWaitUntil:
+    visible:
+      text: '.*0\.01.*'
+    timeout: ${output.defaults.draftUiTimeout}
+- tapOn:
+    id: 'review-button'
+
+- extendedWaitUntil:
+    visible:
+      text: 'Confirm transaction'
+    timeout: ${output.defaults.draftNetworkTimeout}
+- extendedWaitUntil:
+    visible:
+      id: 'nonce-row'
+    timeout: ${output.defaults.draftNetworkTimeout}
+- assertVisible:
+    id: 'nonce-row-value'
+
+# Custom nonce: too-low errors, a high value saves and rebuilds the draft.
+- tapOn:
+    id: 'nonce-row'
+- extendedWaitUntil:
+    visible:
+      id: 'nonce-recommended'
+    timeout: ${output.defaults.draftUiTimeout}
+- tapOn:
+    id: 'nonce-add-custom'
+- extendedWaitUntil:
+    visible:
+      id: 'custom-nonce-input'
+    timeout: ${output.defaults.draftUiTimeout}
+- eraseText
+- inputText: '0'
+- assertVisible:
+    id: 'custom-nonce-error'
+- eraseText
+- inputText: '99999'
+- assertNotVisible:
+    id: 'custom-nonce-error'
+# The number-pad covers the dialog's Save row (KeyboardAvoidingView doesn't lift
+# inside an RN Modal), so blur the input by tapping the title (above the keyboard,
+# non-interactive) to drop it — otherwise the Save tap is absorbed by the keyboard.
+- tapOn:
+    text: 'New nonce'
+- tapOn:
+    id: 'dialog-save'
+- extendedWaitUntil:
+    notVisible:
+      id: 'custom-nonce-input'
+    timeout: ${output.defaults.draftUiTimeout}
+- extendedWaitUntil:
+    visible:
+      id: 'nonce-row'
+    timeout: ${output.defaults.draftNetworkTimeout}
+- assertVisible:
+    id: 'nonce-row-value'
+    text: '99999'
+
+# Back to the recommended nonce: the custom value must disappear from the row.
+- tapOn:
+    id: 'nonce-row'
+- extendedWaitUntil:
+    visible:
+      id: 'nonce-recommended'
+    timeout: ${output.defaults.draftUiTimeout}
+- tapOn:
+    id: 'nonce-recommended'
+- extendedWaitUntil:
+    notVisible:
+      text: '99999'
+    timeout: ${output.defaults.draftNetworkTimeout}
+- assertVisible:
+    id: 'nonce-row-value'
