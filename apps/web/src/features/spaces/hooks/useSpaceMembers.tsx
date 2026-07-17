@@ -12,6 +12,7 @@ import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { NAME_MAX_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 
 // Stable reference so consumers relying on identity don't re-run on every render
 const EMPTY_MEMBERS: MemberDto[] = []
@@ -31,6 +32,14 @@ export enum MemberRole {
   ADMIN = 'ADMIN',
   MEMBER = 'MEMBER',
 }
+
+// CGW stores the self-set alias with the default NameSchema (30), not the 255-char member name.
+export const MEMBER_ALIAS_MAX_LENGTH = NAME_MAX_LENGTH
+
+// Members show their self-set alias when present, otherwise the name set at creation.
+export const getMemberDisplayName = (member: Pick<MemberDto, 'alias' | 'name'>): string => member.alias || member.name
+
+export const sanitizeMemberAlias = sanitizeName
 
 export const isAdmin = (member: MemberDto) => member.role === MemberRole.ADMIN
 
