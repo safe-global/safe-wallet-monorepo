@@ -30,6 +30,9 @@ tags:
     visible:
       text: '.*${EXPECTED_APPROVAL_VALUE}.*'
     timeout: ${output.defaults.draftUiTimeout}
+# Spender is fixed (0x81BdB0…14fec, shortened) and must survive amount edits.
+- assertVisible:
+    text: '.*0x81Bd.*4fec.*'
 
 # Back out: action-details → transaction-actions → confirm screen.
 - tapOn:
