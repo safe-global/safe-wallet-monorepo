@@ -1,0 +1,83 @@
+appId: ${APP_ID}
+tags:
+  - transactions
+  - draft-editors
+---
+# Approval editor: e2eApprovalDraft composes a multiSend (COW approve + call) and
+# opens the confirm screen — the editor only renders for drafts. Editing the amount
+# and toggling unlimited each rebuild the draft; nothing is signed or proposed.
+
+- runScript:
+    file: ../../../utils/scripts/defaults.js
+
+- runFlow:
+    file: ../../../utils/setup/app-start.yml
+
+# Compose is async (SDK init + CGW fetch) — gate on the ready marker.
+- tapOn:
+    id: 'e2eApprovalDraft'
+- extendedWaitUntil:
+    visible:
+      id: 'e2e-draft-setup-ready'
+    timeout: ${output.defaults.draftNetworkTimeout}
+
+- extendedWaitUntil:
+    visible:
+      text: 'Confirm transaction'
+    timeout: ${output.defaults.draftUiTimeout}
+- extendedWaitUntil:
+    visible:
+      id: 'approval-editor'
+    timeout: ${output.defaults.draftNetworkTimeout}
+# Pill reads "<amount> COW"; the decimal separator is locale-dependent.
+- assertVisible:
+    text: '.*1[.,]5 COW.*'
+
+# centerElement so the button clears the pinned Continue footer (which otherwise
+# overlaps it and absorbs the tap).
+- scrollUntilVisible:
+    element:
+      id: 'edit-approval-button'
+    direction: DOWN
+    centerElement: true
+- tapOn:
+    id: 'edit-approval-button'
+- extendedWaitUntil:
+    visible:
+      id: 'input-approval-amount'
+    timeout: ${output.defaults.draftUiTimeout}
+- tapOn:
+    id: 'input-approval-amount'
+- eraseText
+- inputText: '2.5'
+- tapOn:
+    id: 'save-approval-button'
+
+- extendedWaitUntil:
+    visible:
+      id: 'approval-editor'
+    timeout: ${output.defaults.draftNetworkTimeout}
+- extendedWaitUntil:
+    visible:
+      text: '.*2[.,]5 COW.*'
+    timeout: ${output.defaults.draftNetworkTimeout}
+
+- scrollUntilVisible:
+    element:
+      id: 'edit-approval-button'
+    direction: DOWN
+    centerElement: true
+- tapOn:
+    id: 'edit-approval-button'
+- extendedWaitUntil:
+    visible:
+      id: 'switch-unlimited-approval'
+    timeout: ${output.defaults.draftUiTimeout}
+- tapOn:
+    id: 'switch-unlimited-approval'
+- tapOn:
+    id: 'save-approval-button'
+- extendedWaitUntil:
+    visible:
+      text: 'Unlimited'
+    timeout: ${output.defaults.draftNetworkTimeout}
