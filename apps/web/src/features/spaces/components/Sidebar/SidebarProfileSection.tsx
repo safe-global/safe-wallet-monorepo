@@ -5,7 +5,7 @@ import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/utils/cn'
 import { User } from 'lucide-react'
-import { useCurrentMemberProfile, MemberStatus } from '@/features/spaces'
+import { useCurrentMemberProfile, MemberStatus, getMemberDisplayName } from '@/features/spaces'
 import useLogout from '@/hooks/useLogout'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -75,7 +75,7 @@ const ProfileSkeleton = () => (
 )
 
 export const getSidebarProfileInfo = (membership?: MemberDto, signerAddress?: string, email?: string) => {
-  const memberName = membership?.name || 'User'
+  const memberName = (membership && getMemberDisplayName(membership)) || 'User'
   const profileName = email || memberName
   const displayName = email || (signerAddress ? shortenAddress(signerAddress) : memberName)
 

@@ -88,7 +88,9 @@ describe('MemberRowActionsMenu', () => {
   const openMenu = () => fireEvent.click(screen.getByRole('button', { name: 'Member actions' }))
 
   it('opens the edit dialog from the menu for active members', () => {
-    render(<MemberRowActionsMenu member={member} disabled={false} isInvite={false} canRenew={false} />)
+    render(
+      <MemberRowActionsMenu member={member} disabled={false} editDisabled={false} isInvite={false} canRenew={false} />,
+    )
 
     openMenu()
     fireEvent.click(screen.getByRole('button', { name: 'Edit member' }))
@@ -97,7 +99,9 @@ describe('MemberRowActionsMenu', () => {
   })
 
   it('opens the remove dialog from the menu', () => {
-    render(<MemberRowActionsMenu member={member} disabled={false} isInvite={false} canRenew={false} />)
+    render(
+      <MemberRowActionsMenu member={member} disabled={false} editDisabled={false} isInvite={false} canRenew={false} />,
+    )
 
     openMenu()
     fireEvent.click(screen.getByRole('button', { name: 'Remove member' }))
@@ -106,7 +110,7 @@ describe('MemberRowActionsMenu', () => {
   })
 
   it('hides edit and renew for declined invites but still offers remove', () => {
-    render(<MemberRowActionsMenu member={member} disabled={false} isInvite canRenew={false} />)
+    render(<MemberRowActionsMenu member={member} disabled={false} editDisabled={false} isInvite canRenew={false} />)
 
     openMenu()
 
@@ -116,7 +120,7 @@ describe('MemberRowActionsMenu', () => {
   })
 
   it('triggers renew from the menu when the invite is renewable', () => {
-    render(<MemberRowActionsMenu member={member} disabled={false} isInvite canRenew />)
+    render(<MemberRowActionsMenu member={member} disabled={false} editDisabled={false} isInvite canRenew />)
 
     openMenu()
     fireEvent.click(screen.getByRole('button', { name: 'Renew invitation' }))
@@ -125,7 +129,7 @@ describe('MemberRowActionsMenu', () => {
   })
 
   it('wraps the renew action in the renew analytics event (parity with the desktop button)', () => {
-    render(<MemberRowActionsMenu member={member} disabled={false} isInvite canRenew />)
+    render(<MemberRowActionsMenu member={member} disabled={false} editDisabled={false} isInvite canRenew />)
 
     openMenu()
     const renewItem = screen.getByRole('button', { name: 'Renew invitation' })
@@ -137,11 +141,20 @@ describe('MemberRowActionsMenu', () => {
   })
 
   it('disables edit and remove when the member is the last admin', () => {
-    render(<MemberRowActionsMenu member={member} disabled isInvite={false} canRenew={false} />)
+    render(<MemberRowActionsMenu member={member} disabled editDisabled isInvite={false} canRenew={false} />)
 
     openMenu()
 
     expect(screen.getByRole('button', { name: 'Edit member' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Remove member' })).toBeDisabled()
+  })
+
+  it('keeps edit enabled for the current user while remove stays disabled', () => {
+    render(<MemberRowActionsMenu member={member} disabled editDisabled={false} isInvite={false} canRenew={false} />)
+
+    openMenu()
+
+    expect(screen.getByRole('button', { name: 'Edit member' })).not.toBeDisabled()
     expect(screen.getByRole('button', { name: 'Remove member' })).toBeDisabled()
   })
 })
