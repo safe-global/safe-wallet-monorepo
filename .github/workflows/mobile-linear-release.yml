@@ -1,0 +1,79 @@
+name: Linear Release (Mobile)
+
+# Syncs mobile releases to the "Mobile" scheduled release pipeline in Linear.
+# Mobile has no automated production release/tag flow in this repo yet, so this
+# is driven manually to match the EAS release cadence: run `sync` when cutting a
+# release, `update` to move it between stages, and `complete` once it ships.
+#
+# Setup: add the Mobile pipeline access key as the `LINEAR_ACCESS_KEY_MOBILE`
+# repository secret (Settings -> Secrets and variables -> Actions). This must be
+# a pipeline access key generated from the pipeline settings in Linear, not a
+# personal API key.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 1.0.14) - defaults to apps/mobile/package.json'
+        required: false
+        type: string
+      command:
+        description: 'Linear release command'
+        required: true
+        type: choice
+        default: sync
+        options:
+          - sync
+          - update
+          - complete
+      stage:
+        description: 'Deployment stage (required for the "update" command, e.g. In Progress)'
+        required: false
+        type: string
+      dry_run:
+        description: 'Preview the action without modifying Linear'
+        required: false
+        type: boolean
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: linear-release-mobile-${{ inputs.version || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  linear-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
+        with:
+          fetch-depth: 0 # Full history required to scan commits for Linear issue IDs
+
+      - name: Resolve release version
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ -n "$INPUT_VERSION" ]; then
+            VERSION="$INPUT_VERSION"
+          else
+            VERSION=$(node -p "require('./apps/mobile/package.json').version")
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Linear release version: $VERSION"
+
+      - name: Run Linear release (${{ inputs.command }})
+        uses: linear/linear-release-action@c0cb8354a362c24c6d3e0948f37fd66d07588e3f # v0.14.5
+        with:
+          access_key: ${{ secrets.LINEAR_ACCESS_KEY_MOBILE }}
+          command: ${{ inputs.command }}
+          version: ${{ steps.version.outputs.version }}
+          stage: ${{ inputs.stage }}
+          # include_paths is only valid for `sync`; omit it for update/complete
+          include_paths: ${{ inputs.command == 'sync' && 'apps/mobile/**,packages/**,expo-plugins/**' || '' }}
+          dry_run: ${{ inputs.dry_run }}
