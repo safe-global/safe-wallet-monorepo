@@ -31,7 +31,12 @@ export function ReviewFooter({ txId, activeSigner, isSigningLoading, onConfirmPr
       <SelectSigner address={activeSigner?.value as Address} txId={txId} disabled={buttonDisabled} />
 
       <WalletConnectGate signerAddress={activeSigner?.value || ''}>
-        <SafeButton onPress={onConfirmPress} disabled={buttonDisabled} loading={isSigningLoading}>
+        <SafeButton
+          onPress={onConfirmPress}
+          disabled={buttonDisabled}
+          loading={isSigningLoading}
+          testID="review-and-confirm-button"
+        >
           {buttonText}
         </SafeButton>
       </WalletConnectGate>
