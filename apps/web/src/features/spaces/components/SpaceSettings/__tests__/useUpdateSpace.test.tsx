@@ -20,10 +20,10 @@ const mockSpace: GetSpaceResponse = {
   memberCount: 0,
 }
 
-const renderWithStore = () => {
+const renderWithStore = (onSuccess?: () => void) => {
   const store = makeStore(undefined, { skipBroadcast: true })
   const wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>
-  return { store, ...renderHook(() => useUpdateSpace(mockSpace), { wrapper }) }
+  return { store, ...renderHook(() => useUpdateSpace(mockSpace, onSuccess), { wrapper }) }
 }
 
 describe('useUpdateSpace', () => {
@@ -63,6 +63,30 @@ describe('useUpdateSpace', () => {
     expect(last.message).toBe('Updated workspace name')
     expect(last.variant).toBe('success')
     expect(last.groupKey).toBe('space-update-name')
+  })
+
+  it('calls onSuccess after a successful update', async () => {
+    mockUnwrap.mockResolvedValue({})
+    const onSuccess = jest.fn()
+    const { result } = renderWithStore(onSuccess)
+
+    await act(async () => {
+      await result.current.handleUpdate({ name: 'Renamed' })
+    })
+
+    expect(onSuccess).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not call onSuccess when the mutation rejects', async () => {
+    mockUnwrap.mockRejectedValue({ status: 422, data: { message: 'Name contains invalid characters' } })
+    const onSuccess = jest.fn()
+    const { result } = renderWithStore(onSuccess)
+
+    await act(async () => {
+      await result.current.handleUpdate({ name: 'Renamed' })
+    })
+
+    expect(onSuccess).not.toHaveBeenCalled()
   })
 
   it('bubbles the backend error message when the mutation rejects', async () => {
