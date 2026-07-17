@@ -1,0 +1,46 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+# From the confirm screen: open the approve action and assert its raw on-chain
+# _value equals EXPECTED_APPROVAL_VALUE (wei), then return to the confirm screen.
+# The action detail renders the decoded uint256 verbatim, so the assert is exact.
+
+- runScript:
+    file: ../../../utils/scripts/defaults.js
+
+# actions-row sits above the approval card; scroll up to it (the screen is left
+# scrolled to the edit button) and center it clear of the pinned footer.
+- scrollUntilVisible:
+    element:
+      id: 'actions-row'
+    direction: UP
+    centerElement: true
+- tapOn:
+    id: 'actions-row'
+
+# Approve is the first sub-call of the composed multiSend.
+- extendedWaitUntil:
+    visible:
+      id: 'tx-action-item-0'
+    timeout: ${output.defaults.draftUiTimeout}
+- tapOn:
+    id: 'tx-action-item-0'
+- extendedWaitUntil:
+    visible:
+      text: '.*${EXPECTED_APPROVAL_VALUE}.*'
+    timeout: ${output.defaults.draftUiTimeout}
+
+# Back out: action-details → transaction-actions → confirm screen.
+- tapOn:
+    id: 'go-back'
+- extendedWaitUntil:
+    visible:
+      id: 'tx-action-item-0'
+    timeout: ${output.defaults.draftUiTimeout}
+- tapOn:
+    id: 'go-back'
+- extendedWaitUntil:
+    visible:
+      id: 'approval-editor'
+    timeout: ${output.defaults.draftNetworkTimeout}
