@@ -21,7 +21,7 @@ const meta = {
   argTypes: {
     inputSize: {
       control: 'select',
-      options: ['sm', 'default', 'lg', 'xl'],
+      options: ['sm', 'default', 'lg', 'hero'],
     },
     variant: {
       control: 'select',
@@ -64,8 +64,8 @@ export const AllVariants: Story = {
             </InputGroup>
           </div>
           <div style={{ width: '300px' }}>
-            <InputGroup inputSize="xl" variant="surface">
-              <InputGroupInput placeholder="xl surface (h-66)" />
+            <InputGroup inputSize="hero" variant="surface">
+              <InputGroupInput placeholder="hero surface (h-66)" />
             </InputGroup>
           </div>
         </div>

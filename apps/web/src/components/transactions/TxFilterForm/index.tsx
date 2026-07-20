@@ -194,7 +194,7 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                           render={({ field, fieldState }) => (
                             <NumberField
                               data-testid="amount-input"
-                              inputSize="xl"
+                              inputSize="hero"
                               variant="surface"
                               label={
                                 fieldState.error?.message ||
@@ -249,7 +249,7 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                           render={({ field, fieldState }) => (
                             <NumberField
                               data-testid="nonce-input"
-                              inputSize="xl"
+                              inputSize="hero"
                               variant="surface"
                               label={fieldState.error?.message || 'Nonce'}
                               error={!!fieldState.error}

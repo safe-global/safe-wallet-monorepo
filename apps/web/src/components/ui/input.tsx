@@ -22,7 +22,7 @@ const inputVariants = cva(
         sm: 'h-8 px-3',
         default: 'h-9 px-3',
         lg: 'h-10 px-3',
-        xl: 'h-[66px] min-h-[66px] rounded-[calc(var(--radius)-2px)] px-4',
+        hero: 'h-[66px] min-h-[66px] rounded-[calc(var(--radius)-2px)] px-4',
       },
       variant: {
         default: 'bg-transparent dark:bg-input/30',

@@ -109,7 +109,7 @@ const DatePickerField = ({
       </FieldLabel>
 
       <Popover>
-        <InputGroup inputSize="xl" variant="surface" aria-invalid={hasError}>
+        <InputGroup inputSize="hero" variant="surface" aria-invalid={hasError}>
           <InputGroupInput
             id={inputId}
             name={field.name}

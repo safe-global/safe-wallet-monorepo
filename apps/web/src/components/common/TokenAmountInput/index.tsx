@@ -132,61 +132,69 @@ const TokenAmountInput = ({
 
   return (
     <>
-      <div
-        data-testid="token-amount-section"
-        className={classNames(css.outline, { [css.error]: isAmountError }, 'w-full')}
-      >
-        <label className={classNames(css.label, 'block text-xs font-medium')}>
-          {get(errors, tokenAddressField)?.message?.toString() ||
+      <div data-testid="token-amount-section" className="w-full">
+        <NumberField
+          data-testid="token-amount-field"
+          label={
+            get(errors, tokenAddressField)?.message?.toString() ||
             get(errors, amountField)?.message?.toString() ||
-            'Amount'}
-        </label>
-        <div className={css.inputs}>
-          <NumberField
-            data-testid="token-amount-field"
-            endAdornment={
-              maxAmount !== undefined && (
-                <Button variant="ghost" data-testid="max-btn" className={css.max} onClick={onMaxAmountClick}>
+            'Amount'
+          }
+          error={isAmountError}
+          fullWidth
+          inputSize="hero"
+          endAdornment={
+            <div className="flex items-center gap-1">
+              {maxAmount !== undefined && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  data-testid="max-btn"
+                  className="uppercase"
+                  onClick={onMaxAmountClick}
+                >
                   Max
                 </Button>
-              )
-            }
-            className={css.amount}
-            required
-            placeholder="0"
-            {...register(amountField, {
-              required: true,
-              setValueAs: (value: string): string => {
-                if (typeof value !== 'string') {
-                  return value
-                }
+              )}
+              {/* data-[orientation=vertical]:self-center replaces Separator's base self-stretch (same variant,
+                  so tailwind-merge drops it), centering the fixed-height divider in the tall amount field. */}
+              <Separator orientation="vertical" className="mx-1 h-8 data-[orientation=vertical]:self-center" />
+              <div data-testid="token-selector" className={css.select}>
+                <Select name={tokenAddressField} value={tokenAddress} onValueChange={handleTokenChange} required>
+                  <SelectTrigger>
+                    <SelectValue>
+                      {selectedBalance && (
+                        <AutocompleteItem tokenInfo={selectedBalance.tokenInfo} balance={selectedBalance.balance} />
+                      )}
+                    </SelectValue>
+                  </SelectTrigger>
+                  {/* w-auto: size to the token names instead of the compact trigger (base w-(--anchor-width)) */}
+                  <SelectContent className="w-auto min-w-44">
+                    {balances.map((item) => (
+                      <SelectItem data-testid="token-item" key={item.tokenInfo.address} value={item.tokenInfo.address}>
+                        <AutocompleteItem {...item} />
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          }
+          required
+          placeholder="0"
+          {...register(amountField, {
+            required: true,
+            setValueAs: (value: string): string => {
+              if (typeof value !== 'string') {
+                return value
+              }
 
-                return value.replace(/,/g, '.')
-              },
-              validate: validate ?? validateAmount,
-              deps,
-            })}
-          />
-          <Separator orientation="vertical" className="h-auto self-stretch" />
-          <div data-testid="token-selector" className={css.select}>
-            <Select name={tokenAddressField} value={tokenAddress} onValueChange={handleTokenChange} required>
-              <SelectTrigger>
-                <SelectValue>
-                  {selectedBalance && (
-                    <AutocompleteItem tokenInfo={selectedBalance.tokenInfo} balance={selectedBalance.balance} />
-                  )}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {balances.map((item) => (
-                  <SelectItem data-testid="token-item" key={item.tokenInfo.address} value={item.tokenInfo.address}>
-                    <AutocompleteItem {...item} />
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+              return value.replace(/,/g, '.')
+            },
+            validate: validate ?? validateAmount,
+            deps,
+          })}
+        />
       </div>
       {fiatValue != null && (
         <Typography

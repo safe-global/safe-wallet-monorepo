@@ -108,7 +108,7 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
                   label={errors?.[Field.name]?.message || 'Name'}
                   placeholder={fallbackName}
                   InputLabelProps={{ shrink: true }}
-                  inputSize="xl"
+                  inputSize="hero"
                   variant="surface"
                   InputProps={{
                     endAdornment: resolving ? (

@@ -5,7 +5,7 @@ import { InputGroup, InputGroupInput } from './input-group'
 describe('InputGroup variants', () => {
   it('renders the xl surface group through props instead of className drift', () => {
     render(
-      <InputGroup inputSize="xl" variant="surface">
+      <InputGroup inputSize="hero" variant="surface">
         <InputGroupInput placeholder="Search" />
       </InputGroup>,
     )

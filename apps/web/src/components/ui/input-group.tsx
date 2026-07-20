@@ -38,7 +38,7 @@ const inputGroupVariants = cva(
         sm: 'h-8',
         default: 'h-9',
         lg: 'h-10',
-        xl: 'h-[66px] min-h-[66px] rounded-[calc(var(--radius)-2px)] px-4 [&_[data-slot=input-group-addon][data-align=inline-end]]:pr-0 [&_[data-slot=input-group-control]]:px-0 [&_[data-slot=input-group-control]]:shadow-none [&_[data-slot=input-group-control]]:focus-visible:ring-0',
+        hero: 'h-[66px] min-h-[66px] rounded-[calc(var(--radius)-2px)] px-4 [&_[data-slot=input-group-addon][data-align=inline-end]]:pr-0 [&_[data-slot=input-group-control]]:px-0 [&_[data-slot=input-group-control]]:shadow-none [&_[data-slot=input-group-control]]:focus-visible:ring-0',
       },
       variant: {
         default: 'dark:bg-input/30',

@@ -14,7 +14,7 @@ describe('NameInput rendering', () => {
   it('passes inputSize and variant to a plain input', () => {
     render(
       <FormWrapper>
-        <NameInput name="name" label="Name" inputSize="xl" variant="surface" />
+        <NameInput name="name" label="Name" inputSize="hero" variant="surface" />
       </FormWrapper>,
     )
 
@@ -24,7 +24,7 @@ describe('NameInput rendering', () => {
   it('passes inputSize and variant to an adorned input group', () => {
     const { container } = render(
       <FormWrapper>
-        <NameInput name="name" label="Name" inputSize="xl" variant="surface" InputProps={{ endAdornment: 'ETH' }} />
+        <NameInput name="name" label="Name" inputSize="hero" variant="surface" InputProps={{ endAdornment: 'ETH' }} />
       </FormWrapper>,
     )
 
