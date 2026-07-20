@@ -35,7 +35,7 @@ import { getDeterministicColor } from '@/utils/colors'
 
 export const SAFE_ALREADY_IN_WORKSPACE_TOOLTIP = 'Safe is already in this workspace'
 
-const MENU_ITEM_CLASS = 'gap-3 min-h-9 px-2 py-2'
+const MENU_ITEM_CLASS = 'cursor-pointer gap-3 min-h-9 px-2 py-2'
 
 interface SpaceSelectorDropdownProps {
   selectedSpace?: SpaceItem

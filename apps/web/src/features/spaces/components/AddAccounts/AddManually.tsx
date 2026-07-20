@@ -6,7 +6,9 @@ import chains from '@safe-global/utils/config/chains'
 import css from './styles.module.css'
 import useChains from '@/hooks/useChains'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { Plus } from 'lucide-react'
 import { Button, DialogActions, DialogContent, MenuItem, Select, Stack, Box } from '@mui/material'
+import { Button as UIButton } from '@/components/ui/button'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import React, { useCallback, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
@@ -88,22 +90,27 @@ const AddManually = ({
 
   return (
     <>
-      <Button
+      <UIButton
+        type="button"
         data-testid="add-manually-button"
-        size="medium"
-        fullWidth
+        variant="secondary"
+        size="lg"
         disabled={disabled}
         onClick={() => setAddManuallyOpen(true)}
-        sx={{ borderRadius: 'var(--radius-md)' }}
+        className="w-full"
       >
-        + Add manually
-      </Button>
+        <Plus className="size-4" />
+        Add manually
+      </UIButton>
       <ModalDialog
         open={addManuallyOpen}
         dialogTitle="Add safe account"
         onClose={onClose}
         hideChainIndicator
         PaperProps={{ sx: { maxWidth: '760px' } }}
+        // Sit above the "My accounts" shadcn dialog (--z-overlay: 1400) so this nested
+        // modal layers on top instead of behind it.
+        sx={{ zIndex: 1450 }}
       >
         <FormProvider {...formMethods}>
           <form
@@ -135,6 +142,8 @@ const AddManually = ({
                     MenuProps={{
                       transitionDuration: 0,
                       slotProps: { paper: { sx: { overflow: 'auto' } } },
+                      // Above this dialog's own z-index (1450) so the network dropdown isn't hidden behind it.
+                      sx: { zIndex: 1451 },
                     }}
                   >
                     {configs.map((chain) => renderMenuItem(chain.chainId, false))}

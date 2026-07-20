@@ -85,6 +85,23 @@ export const Assets: Story = {
   ),
 }
 
+export const WithViewAllHeader: Story = {
+  render: () => (
+    <SafeWidget title="Accounts" action={<SafeWidget.ViewAll count={14} onClick={() => console.log('View all')} />}>
+      <SafeWidget.Item
+        label="Treasury"
+        info="0x8675…bca19b"
+        startNode={
+          <Avatar>
+            <AvatarFallback className="bg-[#f0fdf4] text-xs font-semibold">TR</AvatarFallback>
+          </Avatar>
+        }
+        actionNode={<span className="text-sm font-medium text-muted-foreground">$123.72K</span>}
+      />
+    </SafeWidget>
+  ),
+}
+
 export const EmptyState: Story = {
   render: () => (
     <SafeWidget title="Accounts">

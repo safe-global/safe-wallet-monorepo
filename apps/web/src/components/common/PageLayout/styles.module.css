@@ -46,8 +46,10 @@
   background-color: var(--background);
 }
 
-/* Spaces: reduce left padding when the sidebar is collapsed to icon mode */
-.mainSpaceCollapsed {
+/* Reduce left padding when the sidebar is collapsed to icon mode so the content
+   reclaims the freed space. 4rem matches the floating sidebar's collapsed width
+   (--sidebar-width-icon 3rem + 1rem padding). */
+.mainSidebarCollapsed {
   padding-left: 4rem;
 }
 
@@ -62,6 +64,18 @@
   flex-direction: column;
   flex-wrap: wrap;
   min-width: 0;
+}
+
+/* Soft brand-green glow behind the welcome list pages (Workspaces + Trusted
+   accounts). Lives on .content so it sits below the opaque topbar without a seam. */
+.welcomeGlow {
+  background-image: radial-gradient(
+    60% 55% at 50% 42%,
+    color-mix(in srgb, var(--color-static-text-brand) 14%, transparent) 0%,
+    color-mix(in srgb, var(--color-static-text-brand) 4%, transparent) 42%,
+    transparent 72%
+  );
+  background-repeat: no-repeat;
 }
 
 /* Onboarding flows: prevent flex descendants from forcing horizontal overflow on narrow viewports */

@@ -12,6 +12,7 @@ import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import DeclineButton from './DeclineButton'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import { cn } from '@/utils/cn'
 import Inviter from './Inviter'
 import { getInvitedByName } from '@/features/spaces/utils'
 
@@ -38,7 +39,7 @@ const PreviewInvite = () => {
           </Typography>
           <Inviter invitedByName={invitedByName} variant="body1" avatarSize={20} />
         </Stack>
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} className={cn('shadcn-scope', isDarkMode && 'dark')}>
           <Track {...SPACE_EVENTS.ACCEPT_INVITE} label={SPACE_LABELS.preview_banner}>
             <AcceptButton space={space} />
           </Track>

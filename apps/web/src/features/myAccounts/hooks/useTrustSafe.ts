@@ -56,7 +56,7 @@ export function useTrustSafe() {
       dispatch(
         showNotification({
           title: 'Safe confirmed',
-          message: 'This Safe has been added to your trusted list',
+          message: 'This Safe has been added to your accounts',
           groupKey: `pin-safe-success-${address}`,
           variant: 'success',
         }),

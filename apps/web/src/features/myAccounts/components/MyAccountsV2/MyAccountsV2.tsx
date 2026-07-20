@@ -1,48 +1,69 @@
 import { useState } from 'react'
-import AccountsHeader from '../AccountsHeader'
+import AccountsNavigation from '../AccountsNavigation'
 import AccountsList from './components/AccountsList'
 import AccountsSearch from './components/AccountsSearch'
+import GetStartedCard from './components/GetStartedCard'
+import TrustedAccountsActions from './components/TrustedAccountsActions'
+import SafeListSortToggle from '@/components/common/SafeListSortToggle'
+import AddTrustedSafesCard from '@/components/common/AddTrustedSafesCard'
+import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import madProps from '@/utils/mad-props'
 import css from '../../styles.module.css'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useIsSignedIn } from '@/hooks/useIsSignedIn'
 import { type AllSafeItemsGrouped, useAllSafesGrouped } from '@/hooks/safes'
-import classNames from 'classnames'
 import useTrackSafesCount from '../../hooks/useTrackedSafesCount'
-import { Separator } from '@/components/ui/separator'
+import useMigrationPrompt from '../../hooks/useMigrationPrompt'
+import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
+import TrustedSafesModal from '@/components/common/TrustedSafesModal'
+import WelcomeContentCard from '@/components/common/WelcomeContentCard'
 import { DataWidget } from '../DataWidget'
 
 type MyAccountsProps = {
   safes: AllSafeItemsGrouped
-  isSidebar?: boolean
   onLinkClick?: () => void
 }
 
-const MyAccountsV2 = ({ safes, onLinkClick, isSidebar = false }: MyAccountsProps) => {
+const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
   const wallet = useWallet()
-  const isSignedIn = useIsSignedIn()
+  const isDarkMode = useDarkMode()
   const [searchQuery, setSearchQuery] = useState('')
+  const modal = useTrustedSafesModal()
+  const migration = useMigrationPrompt()
   useTrackSafesCount(safes, wallet)
+
+  const showGetStarted = !wallet && !migration.hasPinnedSafes
+  const showEmptyState = !showGetStarted && !migration.isLoading && !migration.hasPinnedSafes
+  const showList = !showGetStarted && !showEmptyState
 
   return (
     <div data-testid="sidebar-safe-container" className={css.container}>
-      <div
-        className={classNames(css.myAccounts, {
-          [css.sidebarAccounts]: isSidebar,
-          [css.headerSpacer]: !isSignedIn,
-        })}
-      >
-        <AccountsHeader isSidebar={isSidebar} onLinkClick={onLinkClick} />
-
-        <div className="bg-background/50 text-card-foreground overflow-hidden rounded-xl">
-          <AccountsSearch setSearchQuery={setSearchQuery} />
-
-          {isSidebar && <Separator />}
-
-          <div className={classNames(css.safeList)}>
-            <AccountsList searchQuery={searchQuery} safes={safes} isSidebar={isSidebar} onLinkClick={onLinkClick} />
-          </div>
+      <div className={css.myAccounts}>
+        <div className="flex justify-center py-6">
+          <AccountsNavigation />
         </div>
+
+        {showGetStarted && <GetStartedCard />}
+
+        {showEmptyState && <AddTrustedSafesCard onAdd={modal.open} onLinkClick={onLinkClick} />}
+
+        {showList && (
+          <WelcomeContentCard className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="flex-1">
+                <AccountsSearch setSearchQuery={setSearchQuery} />
+              </div>
+              <ShadcnProvider dark={isDarkMode} className="flex items-center">
+                <SafeListSortToggle className="border-border shadow-xs" />
+              </ShadcnProvider>
+              <TrustedAccountsActions onManage={modal.open} onLinkClick={onLinkClick} />
+            </div>
+
+            <AccountsList searchQuery={searchQuery} safes={safes} onLinkClick={onLinkClick} />
+          </WelcomeContentCard>
+        )}
+
+        <TrustedSafesModal modal={modal} />
 
         <DataWidget />
       </div>

@@ -2,7 +2,6 @@ import { useContext, useEffect, useState, type ReactElement } from 'react'
 import classnames from 'classnames'
 import Topbar from '@/components/common/Header/Topbar'
 import SafeLogo from '@/components/common/SafeLogo'
-import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import css from './styles.module.css'
 import SafeLoadingError from '../SafeLoadingError'
 import Footer from '../Footer'
@@ -19,10 +18,6 @@ import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
 import { useIsTopbarElevated } from '@/hooks/useTopbarElevation'
-import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
-import { useIsAuthGateBlocking } from '@/hooks/useIsAuthGateBlocking'
-import { useIsSignedIn } from '@/hooks/useIsSignedIn'
-import { isAlwaysPublic } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -43,35 +38,22 @@ const NO_HEADER_ROUTES = [
   ...STATIC_PAGE_ROUTES,
 ]
 
+// The two tabbed welcome landing pages (Workspaces + Trusted accounts) share a
+// soft brand-green glow behind their content.
+const WELCOME_LIST_ROUTES = [AppRoutes.welcome.accounts, AppRoutes.welcome.spaces]
+
 const PageLayout = ({ pathname, children }: { pathname: string; children: ReactElement }): ReactElement => {
   const [isSidebarRoute, isAnimated] = useIsSidebarRoute(pathname)
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(true)
-  const [isSpacesSidebarExpanded, setSpacesSidebarExpanded] = useState<boolean>(true)
+  const [isSidebarExpanded, setSidebarExpanded] = useState<boolean>(true)
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
   const { txFlow, setFullWidth } = useContext(TxModalContext)
   const { BatchSidebar } = useLoadFeature(BatchingFeature)
   const { SelectSafeModal } = useLoadFeature(SpacesFeature)
   const isStaticPage = STATIC_PAGE_ROUTES.includes(pathname)
-  // Tri-state: `undefined` while the chains config (hence the gate decision) is still loading.
-  const isRequireLoginEnabled = useIsRequireLoginEnabled()
-  const isSignedIn = useIsSignedIn()
-  // The login page (`/welcome/spaces` or `/`) is the canonical login surface
-  // when the require-login gate is on (and the Topbar's URL-derived hooks then
-  // add SSR hydration noise on top of being pointless). With the gate off,
-  // /welcome/spaces still renders the sign-in form when signed out and the
-  // legacy workspaces list when signed in — only the list needs the Topbar.
-  const isLoginPath = pathname === AppRoutes.welcome.spaces || pathname === AppRoutes.index
-  const isWelcomeWorskpacePage = pathname === AppRoutes.welcome.spaces
-  const hideHeader =
-    NO_HEADER_ROUTES.includes(pathname) ||
-    Boolean(isRequireLoginEnabled && isLoginPath) ||
-    Boolean(isRequireLoginEnabled && isWelcomeWorskpacePage) ||
-    (isWelcomeWorskpacePage && !isSignedIn) ||
-    // While the gate is still resolving, keep the Topbar off the login paths so it
-    // can't flash an empty safe-selector skeleton before it (often) gets hidden.
-    (isRequireLoginEnabled === undefined && isLoginPath)
+  const hideHeader = NO_HEADER_ROUTES.includes(pathname)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
-  const isSpaceRoute = useIsSpaceRoute()
+  const isWelcomeListRoute = WELCOME_LIST_ROUTES.includes(pathname)
   const parentSafe = useParentSafe()
   const menuToggleHandler = isSidebarRoute ? setSidebarOpen : undefined
 
@@ -86,17 +68,6 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
     setFullWidth(!isSidebarVisible)
   }, [isSidebarVisible, setFullWidth])
 
-  // While the require-login gate is keeping the user out of a protected page,
-  // render nothing instead of letting the page's data hooks mount and fire
-  // pending-tx / message toasts before the router guard's redirect resolves.
-  // The login page, onboarding flow and always-public pages stay rendered.
-  const isGateBlocking = useIsAuthGateBlocking()
-  const isGateBlockedRoute =
-    isGateBlocking && !isAlwaysPublic(pathname) && !isLoginPath && !isOnboardingRoute && !isStaticPage
-  if (isGateBlockedRoute) {
-    return <></>
-  }
-
   return (
     <>
       {isStaticPage && (
@@ -106,11 +77,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       )}
 
       {isSidebarRoute ? (
-        <SideDrawer
-          isOpen={isSidebarVisible}
-          onToggle={setSidebarOpen}
-          onSidebarOpenChange={isSpaceRoute ? setSpacesSidebarExpanded : undefined}
-        />
+        <SideDrawer isOpen={isSidebarVisible} onToggle={setSidebarOpen} onSidebarOpenChange={setSidebarExpanded} />
       ) : null}
 
       <div
@@ -119,7 +86,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
           [css.mainAnimated]: isSidebarRoute && isAnimated,
           [css.mainNoHeader]: hideHeader,
           [css.mainSpace]: !hideHeader,
-          [css.mainSpaceCollapsed]: isSpaceRoute && !isSpacesSidebarExpanded,
+          [css.mainSidebarCollapsed]: isSidebarRoute && isSidebarVisible && !isSidebarExpanded,
         })}
       >
         {!hideHeader && (
@@ -132,7 +99,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
           </div>
         )}
 
-        <div className={css.content}>
+        <div className={classnames(css.content, { [css.welcomeGlow]: isWelcomeListRoute })}>
           <SafeLoadingError>
             {!hideHeader && parentSafe && <Breadcrumbs />}
 

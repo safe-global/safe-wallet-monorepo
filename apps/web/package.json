@@ -68,6 +68,7 @@
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.14.0",
     "@gnosis.pm/zodiac": "^4.0.3",
+    "@hello-pangea/dnd": "^18.0.1",
     "@ledgerhq/context-module": "^1.8.0",
     "@ledgerhq/device-management-kit": "^0.9.1",
     "@ledgerhq/device-signer-kit-ethereum": "^1.8.0",

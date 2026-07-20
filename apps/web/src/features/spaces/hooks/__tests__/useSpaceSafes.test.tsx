@@ -37,6 +37,7 @@ jest.mock('@/store/authSlice', () => ({
 
 jest.mock('@/store/orderByPreferenceSlice', () => ({
   selectOrderByPreference: 'selectOrderByPreference',
+  getSpaceOrderScope: (id: string) => `space:${id}`,
 }))
 
 jest.mock('@/store/slices', () => ({
@@ -52,7 +53,7 @@ jest.mock('@/hooks/safes', () => ({
   _buildSafeItems: jest.fn(() => []),
   useAllSafesGrouped: () => mockUseAllSafesGrouped(),
   useAllOwnedSafes: () => mockUseAllOwnedSafes(),
-  getComparator: () => () => 0,
+  useSafeOrderComparator: () => () => 0,
 }))
 
 jest.mock('@/hooks/wallets/useWallet', () => ({

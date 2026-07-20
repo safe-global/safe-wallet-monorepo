@@ -1,21 +1,21 @@
-import { Button, SvgIcon, Card, CardHeader, CardContent, Tooltip, Box } from '@mui/material'
 import { useState } from 'react'
 import type { ReactElement } from 'react'
+import { Download, Info, Upload } from 'lucide-react'
+import { useRouter } from 'next/router'
 
 import { useAppSelector } from '@/store'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
-import ExportIcon from '@/public/images/common/export.svg'
-import ImportIcon from '@/public/images/common/import.svg'
 import { exportAppData } from '@/components/settings/DataManagement'
 import { ImportDialog } from '@/components/settings/DataManagement/ImportDialog'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import Track from '@/components/common/Track'
-import InfoIcon from '@/public/images/notifications/info.svg'
-
-import css from './styles.module.css'
 import { AppRoutes } from '@/config/routes'
-import { useRouter } from 'next/router'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useDarkMode } from '@/hooks/useDarkMode'
+import { cn } from '@/utils/cn'
 
 export const DataWidget = (): ReactElement => {
   const [importModalOpen, setImportModalOpen] = useState(false)
@@ -24,75 +24,60 @@ export const DataWidget = (): ReactElement => {
   const addressBook = useAppSelector(selectAllAddressBooks)
   const addedSafes = useAppSelector(selectAllAddedSafes)
   const router = useRouter()
+  const isDarkMode = useDarkMode()
   const hasData = Object.keys(addressBook).length > 0 || Object.keys(addedSafes).length > 0
   const trackingLabel =
     router.pathname === AppRoutes.welcome.accounts ? OVERVIEW_LABELS.login_page : OVERVIEW_LABELS.sidebar
 
-  const onImport = () => {
-    setImportModalOpen(true)
-  }
-
-  const onClose = () => {
-    setImportModalOpen(false)
-  }
-
   return (
-    <Card className={css.card}>
-      <CardHeader
-        className={css.cardHeader}
-        title={
-          <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
-            <b>{hasData ? 'Export or import your Safe data' : 'Import your Safe data'}</b>
-            <Tooltip
-              title="Download or upload your local data with your added Safe accounts, address book and settings."
-              placement="top"
-              arrow
-            >
-              <span>
-                <InfoIcon className={css.infoIcon} />
-              </span>
-            </Tooltip>
-          </Box>
-        }
-      />
-      <CardContent>
-        <Box display="flex" gap={2} justifyContent="center" sx={{ maxWidth: 240, margin: 'auto' }}>
-          {hasData && (
-            <Track {...OVERVIEW_EVENTS.EXPORT_DATA} label={trackingLabel}>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={exportAppData}
-                startIcon={<SvgIcon component={ExportIcon} inheritViewBox fontSize="small" />}
-                sx={{ width: '100%', py: 0.5, px: 2, mt: 2 }}
-              >
-                Export
-              </Button>
-            </Track>
-          )}
-          <Track {...OVERVIEW_EVENTS.IMPORT_DATA} label={trackingLabel}>
-            <Button
-              data-testid="import-btn"
-              variant="outlined"
-              size="small"
-              onClick={onImport}
-              startIcon={<SvgIcon component={ImportIcon} inheritViewBox fontSize="small" />}
-              sx={{ width: '100%', py: 0.5, px: 2, mt: 2 }}
-            >
-              Import
+    <div className={cn('shadcn-scope flex flex-col items-center gap-2 py-6', isDarkMode && 'dark')}>
+      <div className="flex items-center gap-1">
+        <Typography variant="paragraph">
+          {hasData ? 'Export or import your Safe data' : 'Import your Safe data'}
+        </Typography>
+
+        <Tooltip>
+          <TooltipTrigger render={<span className="inline-flex cursor-default text-muted-foreground" />}>
+            <Info className="size-4" />
+          </TooltipTrigger>
+          <TooltipContent>
+            Download or upload your local data with your added Safe accounts, address book and settings.
+          </TooltipContent>
+        </Tooltip>
+      </div>
+
+      <div className="flex w-full max-w-[240px] justify-center gap-4">
+        {hasData && (
+          <Track {...OVERVIEW_EVENTS.EXPORT_DATA} label={trackingLabel}>
+            <Button variant="outline" className="flex-1" onClick={exportAppData}>
+              <Download className="size-4" />
+              Export
             </Button>
           </Track>
-        </Box>
-      </CardContent>
+        )}
+
+        <Track {...OVERVIEW_EVENTS.IMPORT_DATA} label={trackingLabel}>
+          <Button
+            data-testid="import-btn"
+            variant="outline"
+            className="flex-1"
+            onClick={() => setImportModalOpen(true)}
+          >
+            <Upload className="size-4" />
+            Import
+          </Button>
+        </Track>
+      </div>
+
       {importModalOpen && (
         <ImportDialog
           fileName={fileName}
           setFileName={setFileName}
           jsonData={jsonData}
           setJsonData={setJsonData}
-          onClose={onClose}
+          onClose={() => setImportModalOpen(false)}
         />
       )}
-    </Card>
+    </div>
   )
 }

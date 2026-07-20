@@ -6,6 +6,8 @@ import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { OVERVIEW_EVENTS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
 import { useAllSafesGrouped } from '@/hooks/safes/useAllSafesGrouped'
 import useAllSafes from '@/hooks/safes/useAllSafes'
+import { useSafeOrderComparator } from '@/hooks/safes'
+import { TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
 import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
 import type { SelectableSafe, SelectableMultiChainSafe, SelectableItem } from './useTrustedSafesModal.types'
 import { isSelectableMultiChainSafe } from './useTrustedSafesModal.types'
@@ -98,6 +100,8 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
   const allSafes = useAllSafes()
   const { allMultiChainSafes, allSingleSafes } = useAllSafesGrouped()
   const addedSafes = useAppSelector(selectAllAddedSafes)
+  // Same global Name / Last visited / Manual preference used across the trusted-safes lists.
+  const sortComparator = useSafeOrderComparator(TRUSTED_ORDER_SCOPE)
 
   const addresses = useMemo(() => {
     return allSafes?.map((safe) => safe.address) ?? []
@@ -158,8 +162,8 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
       } as SelectableSafe)
     }
 
-    return items
-  }, [allMultiChainSafes, allSingleSafes, addedSafes, similarityResult, searchQuery])
+    return items.sort(sortComparator)
+  }, [allMultiChainSafes, allSingleSafes, addedSafes, similarityResult, searchQuery, sortComparator])
 
   // Thin overlay injecting selection state over the structural list
   const availableItems = useMemo<SelectableItem[]>(() => {
@@ -294,9 +298,10 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     let pinnedCount = 0
     let unpinnedCount = 0
 
+    // Pin newly selected safes. Only safes present in the current list carry the owner/threshold
+    // context we need to store, so pinning is driven by `allSafes`.
     for (const safe of allSafes) {
-      const normalizedAddress = safe.address.toLowerCase()
-      const isSelected = selectedAddresses.has(normalizedAddress)
+      const isSelected = selectedAddresses.has(safe.address.toLowerCase())
       const isPinned = Boolean(addedSafes[safe.chainId]?.[safe.address])
 
       if (isSelected && !isPinned) {
@@ -312,9 +317,18 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
           }),
         )
         pinnedCount++
-      } else if (!isSelected && isPinned) {
-        dispatch(unpinSafe({ chainId: safe.chainId, address: safe.address }))
-        unpinnedCount++
+      }
+    }
+
+    // Unpin deselected safes by walking the pin store directly (not `allSafes`), so a safe pinned on a
+    // chain outside the current config — invisible to the list — is still cleared. Otherwise it would
+    // linger in `addedSafes` and keep re-selecting itself on every open.
+    for (const [chainId, safesOnChain] of Object.entries(addedSafes)) {
+      for (const address of Object.keys(safesOnChain)) {
+        if (!selectedAddresses.has(address.toLowerCase())) {
+          dispatch(unpinSafe({ chainId, address }))
+          unpinnedCount++
+        }
       }
     }
 

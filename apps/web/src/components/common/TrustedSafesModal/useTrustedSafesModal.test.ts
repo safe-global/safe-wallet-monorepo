@@ -3,6 +3,8 @@ import useTrustedSafesModal from './useTrustedSafesModal'
 import * as store from '@/store'
 import * as useAllSafes from '@/hooks/safes/useAllSafes'
 import * as addressSimilarity from '@safe-global/utils/utils/addressSimilarity'
+import { OrderByOption, selectOrderByPreference } from '@/store/orderByPreferenceSlice'
+import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 
 jest.mock('@/store', () => ({
   useAppDispatch: jest.fn(),
@@ -216,6 +218,37 @@ describe('useTrustedSafesModal', () => {
       expect.objectContaining({
         type: 'addedSafes/unpinSafe',
         payload: { chainId: '1', address: pinnedAddress },
+      }),
+    )
+  })
+
+  it('unpins a deselected safe pinned on a chain absent from the current list', () => {
+    // Pinned on chain 137, which is NOT among the safes returned by useAllSafes (config-scoped list).
+    const pinnedAddress = '0xfeed000000000000000000000000000000001234'
+    ;(store.useAppSelector as jest.Mock).mockReturnValue({
+      '137': { [pinnedAddress]: { owners: [], threshold: 1 } },
+    })
+
+    const { result } = renderHook(() => useTrustedSafesModal())
+
+    // Opens pre-selecting the pinned address (collected across all chains)…
+    act(() => {
+      result.current.open()
+    })
+    expect(result.current.selectedAddresses.has(pinnedAddress)).toBe(true)
+
+    // …deselecting and saving must still unpin it, even though it's not in `useAllSafes`.
+    act(() => {
+      result.current.toggleSelection(pinnedAddress)
+    })
+    act(() => {
+      result.current.submitSelection()
+    })
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'addedSafes/unpinSafe',
+        payload: { chainId: '137', address: pinnedAddress },
       }),
     )
   })
@@ -440,6 +473,41 @@ describe('useTrustedSafesModal', () => {
 
       expect(result.current.selectedAddresses.has(pinnedAddress.toLowerCase())).toBe(true)
       expect(result.current.hasChanges).toBe(false)
+    })
+  })
+
+  describe('ordering', () => {
+    const orderedSafes = [
+      { chainId: '1', address: '0x1111111111111111111111111111111111111111', name: 'Zebra', lastVisited: 300 },
+      { chainId: '1', address: '0x2222222222222222222222222222222222222222', name: 'Alpha', lastVisited: 100 },
+      { chainId: '1', address: '0x3333333333333333333333333333333333333333', name: 'Mango', lastVisited: 200 },
+    ]
+
+    // Selector-aware mock so the global order preference can be varied per test.
+    const mockOrderBy = (orderBy: OrderByOption) => {
+      ;(store.useAppSelector as jest.Mock).mockImplementation((selector: unknown) => {
+        if (selector === selectOrderByPreference) return { orderBy }
+        if (selector === selectAllAddedSafes) return {}
+        return undefined
+      })
+    }
+
+    beforeEach(() => {
+      ;(useAllSafes.default as jest.Mock).mockReturnValue(orderedSafes)
+    })
+
+    it('sorts by name (A→Z) when the preference is Name', () => {
+      mockOrderBy(OrderByOption.NAME)
+      const { result } = renderHook(() => useTrustedSafesModal())
+
+      expect(result.current.availableItems.map((item) => item.name)).toEqual(['Alpha', 'Mango', 'Zebra'])
+    })
+
+    it('sorts by most recently visited when the preference is Last visited', () => {
+      mockOrderBy(OrderByOption.LAST_VISITED)
+      const { result } = renderHook(() => useTrustedSafesModal())
+
+      expect(result.current.availableItems.map((item) => item.name)).toEqual(['Zebra', 'Mango', 'Alpha'])
     })
   })
 

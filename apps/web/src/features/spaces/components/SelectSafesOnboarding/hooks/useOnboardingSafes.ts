@@ -2,10 +2,8 @@ import { useCallback, useMemo, useState } from 'react'
 import debounce from 'lodash/debounce'
 import {
   type AllSafeItems,
-  type SafeItem,
   _buildSafeItem,
-  _getMultiChainAccounts,
-  _getSingleChainAccounts,
+  _groupAndSort,
   getComparator,
   useAllOwnedSafes,
   useSafesSearch,
@@ -18,15 +16,6 @@ import useWallet from '@/hooks/wallets/useWallet'
 import useChains from '@/hooks/useChains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
-
-const _groupAndSort = (
-  items: SafeItem[],
-  sortComparator: (a: AllSafeItems[number], b: AllSafeItems[number]) => number,
-): AllSafeItems => {
-  const multi = _getMultiChainAccounts(items)
-  const single = _getSingleChainAccounts(items, multi)
-  return [...multi, ...single].sort(sortComparator)
-}
 
 const useOnboardingSafes = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -64,9 +53,12 @@ const useOnboardingSafes = () => {
     return { trustedSafeItems: trusted, ownedSafeItems: owned }
   }, [allChainIds, allAdded, allOwned, allUndeployed, walletAddress, allVisitedSafes, allSafeNames])
 
-  const similarAddresses = useMemo<Set<string>>(() => {
-    const allItems = [...trustedSafeItems, ...ownedSafeItems]
-    return getFlaggedSimilarAddressSet(allItems.map((s) => s.address))
+  // Flag against the combined pool (so an owned safe impersonating a trusted one is caught) but
+  // only surface warnings on owned safes — a safe the user trusted at some point is treated as vetted.
+  const flaggedOwnedAddresses = useMemo<Set<string>>(() => {
+    const flagged = getFlaggedSimilarAddressSet([...trustedSafeItems, ...ownedSafeItems].map((s) => s.address))
+    const ownedAddresses = new Set(ownedSafeItems.map((s) => s.address.toLowerCase()))
+    return new Set([...flagged].filter((address) => ownedAddresses.has(address)))
   }, [trustedSafeItems, ownedSafeItems])
 
   // Group into multi-chain / single-chain and sort
@@ -92,7 +84,7 @@ const useOnboardingSafes = () => {
   return {
     trustedSafes: searchQuery ? filteredTrusted : trustedGrouped,
     ownedSafes: searchQuery ? filteredOwned : ownedGrouped,
-    similarAddresses,
+    flaggedOwnedAddresses,
     handleSearch,
     hasNoSafes,
   }

@@ -11,9 +11,8 @@ export const MAX_DISPLAY_MS = 10_000
  * Drives the app-boot launch screen.
  *
  * Visible from first mount until the app shell is ready — i.e. the chains
- * config query has settled (the same signal `useIsRequireLoginEnabled` waits
- * on) AND a minimum display time has elapsed — or until a safety timeout
- * fires. One-way: once hidden it never returns, so client-side navigations
+ * config query has settled AND a minimum display time has elapsed — or until
+ * a safety timeout fires. One-way: once hidden it never returns, so client-side navigations
  * after boot don't replay it (`_app` only mounts this once per hard load).
  */
 export const useLaunchScreen = (): { visible: boolean } => {

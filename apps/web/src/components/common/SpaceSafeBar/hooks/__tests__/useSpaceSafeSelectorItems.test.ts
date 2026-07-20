@@ -132,7 +132,9 @@ function setupDefaults(
   } = {},
 ) {
   ;(useSafeBarSafes as jest.Mock).mockReturnValue({
-    dropdownSafes: overrides.allSafes ?? [singleChainSafe],
+    workspaceSafes: [],
+    localSafes: overrides.allSafes ?? [singleChainSafe],
+    isInSpaceContext: false,
   })
   ;(useCurrentSpaceId as jest.Mock).mockReturnValue(overrides.spaceId ?? '42')
   ;(useSafeInfo as jest.Mock).mockReturnValue({
@@ -430,6 +432,34 @@ describe('useSpaceSafeSelectorItems', () => {
     expect(result.current.items[0].owners).toBe(4)
   })
 
+  it('populates each chain row with its own threshold/owners from that chain overview', () => {
+    setupDefaults({
+      allSafes: [multiChainSafe],
+      safeAddress: '0xDifferentSafe',
+      overviews: [
+        {
+          address: { value: '0xSafe2' },
+          chainId: '1',
+          fiatTotal: '100',
+          threshold: 2,
+          owners: [{ value: '0x1' }, { value: '0x2' }],
+        },
+        {
+          address: { value: '0xSafe2' },
+          chainId: '137',
+          fiatTotal: '200',
+          threshold: 3,
+          owners: [{ value: '0x1' }, { value: '0x2' }, { value: '0x3' }],
+        },
+      ],
+    })
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    const chains = result.current.items[0].chains
+    expect(chains.find((c) => c.chainId === '1')).toMatchObject({ threshold: 2, owners: 2 })
+    expect(chains.find((c) => c.chainId === '137')).toMatchObject({ threshold: 3, owners: 3 })
+  })
+
   // ── toChainInfo fallback when chain config not found ──
 
   it('falls back to chainId for chainName and shortName when chain config is missing', () => {
@@ -524,7 +554,11 @@ describe('useSpaceSafeSelectorItems', () => {
       safeAddress: '0xAbCdEf',
     })
     ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('0xabcdef') // lowercase vs mixed-case in item
-    ;(useSafeBarSafes as jest.Mock).mockReturnValue({ dropdownSafes: [mixedCaseSafe] })
+    ;(useSafeBarSafes as jest.Mock).mockReturnValue({
+      workspaceSafes: [],
+      localSafes: [mixedCaseSafe],
+      isInSpaceContext: false,
+    })
 
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
     // Should use live safe.threshold (3) not overview, proving case-insensitive match worked

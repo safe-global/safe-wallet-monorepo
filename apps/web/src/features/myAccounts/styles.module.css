@@ -7,23 +7,13 @@
 
 .myAccounts {
   width: 100vw;
-  max-width: 750px;
+  /* Panel padding (2 × 16px) + table columns (958px) + table border (2px). */
+  max-width: 992px;
   margin: var(--space-2);
 }
 
 .sidebarAccounts {
   margin: 0 !important;
-}
-
-/* Signed-out top spacing, kept in sync with the Workspaces page. */
-.headerSpacer {
-  padding-top: calc(var(--topbar-height) / 2);
-}
-
-@media (max-width: 899.95px) {
-  .headerSpacer {
-    padding-top: 0;
-  }
 }
 
 .safeList {

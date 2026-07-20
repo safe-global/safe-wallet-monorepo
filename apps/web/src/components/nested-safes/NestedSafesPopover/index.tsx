@@ -321,8 +321,13 @@ export function NestedSafesPopover({
         paper: {
           sx: {
             width: getPopoverWidth(isManageMode),
-            height: 'calc(100vh - 100px)',
+            // Size to content, but never past the viewport cap — the inner list scrolls once it
+            // hits the cap, so a near-empty popover (e.g. the intro screen) stays compact while a
+            // long list of nested safes grows to the maximum height.
+            height: 'auto',
             maxHeight: 'calc(100vh - 100px)',
+            // Match the other header popovers (WalletConnect, wallet, notifications).
+            borderRadius: '24px',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
