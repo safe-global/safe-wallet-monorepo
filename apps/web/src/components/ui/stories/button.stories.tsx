@@ -13,7 +13,7 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'secondary', 'outline', 'ghost', 'destructive', 'destructive-outline', 'surface', 'link'],
+      options: ['default', 'secondary', 'outline', 'ghost', 'destructive', 'surface'],
     },
     size: {
       control: 'select',
@@ -43,8 +43,6 @@ export const AllVariants: Story = {
           <Button variant="outline">Outline</Button>
           <Button variant="ghost">Ghost</Button>
           <Button variant="destructive">Destructive</Button>
-          <Button variant="destructive-outline">Destructive outline</Button>
-          <Button variant="link">Link</Button>
         </div>
       </div>
 
@@ -238,16 +236,9 @@ export const Guidelines: Story = {
                   ],
                   [
                     'destructive',
-                    'Filled-tint primary destructive action (Delete/Remove)',
+                    'Destructive action (Delete / Remove / Leave)',
                     <Button key="v-destructive" variant="destructive">
                       Delete
-                    </Button>,
-                  ],
-                  [
-                    'destructive-outline',
-                    'Bordered destructive that reads as a normal button (Leave workspace)',
-                    <Button key="v-destructive-outline" variant="destructive-outline">
-                      Leave
                     </Button>,
                   ],
                   [
@@ -255,13 +246,6 @@ export const Guidelines: Story = {
                     'Card-surface CTA on a coloured / promo surface (Earn, Stake, Add funds)',
                     <Button key="v-surface" variant="surface">
                       Surface
-                    </Button>,
-                  ],
-                  [
-                    'link',
-                    'Inline text / navigational action',
-                    <Button key="v-link" variant="link">
-                      Link
                     </Button>,
                   ],
                 ] as const

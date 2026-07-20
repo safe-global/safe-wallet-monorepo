@@ -18,7 +18,7 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'destructive-outline' | 'surface' | 'link')
+ * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'surface')
  * - `size` ('default' | 'sm' | 'lg' | 'action' | 'submit' | 'xl' | 'icon' | 'icon-xs' | 'icon-sm')
  * - `render`
  * - `className`
@@ -41,15 +41,10 @@ const buttonVariants = cva(
           'hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground',
         destructive:
           'bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30',
-        // Bordered destructive: for labelled destructive actions that read as a bordered button
-        // (e.g. "Leave workspace"). Replaces hand-rolled `outline` + `className="text-destructive"`.
-        'destructive-outline':
-          'border-border bg-background text-destructive hover:bg-destructive/10 hover:text-destructive dark:bg-input/30 dark:border-border shadow-xs',
         // Card-surface CTA: reads as a raised card on a coloured/promo surface (Earn/Stake/
         // Add-funds style). Same border+shadow as outline, filled with the `card` token
         // instead of the page background. Replaces per-call `bg-card`/`bg-[--color-background-paper]`.
         surface: 'border-border bg-card text-card-foreground hover:bg-muted hover:text-foreground shadow-xs',
-        link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {
         default:

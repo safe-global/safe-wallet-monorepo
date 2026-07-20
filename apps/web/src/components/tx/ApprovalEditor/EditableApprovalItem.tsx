@@ -57,7 +57,7 @@ const EditableApprovalItem = ({
             <SquarePen className="size-4" />
           </Button>
         ) : (
-          <Button variant="link" size="sm" onClick={handleSave} title="Save" disabled={!!fieldErrors || !isDirty}>
+          <Button variant="ghost" size="sm" onClick={handleSave} title="Save" disabled={!!fieldErrors || !isDirty}>
             Save
           </Button>
         )}

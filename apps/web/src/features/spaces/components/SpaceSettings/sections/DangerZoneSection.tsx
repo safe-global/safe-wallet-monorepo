@@ -29,7 +29,7 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
             <TooltipTrigger
               render={
                 <span tabIndex={0}>
-                  <Button variant="destructive-outline" size="sm" data-testid="space-leave-button" disabled>
+                  <Button variant="destructive" size="sm" data-testid="space-leave-button" disabled>
                     Leave workspace
                   </Button>
                 </span>
@@ -39,7 +39,7 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
           </Tooltip>
         ) : (
           <Button
-            variant="destructive-outline"
+            variant="destructive"
             size="sm"
             data-testid="space-leave-button"
             disabled={!isActiveMember}

@@ -24,7 +24,7 @@ export const Open: Story = {
   render: () => (
     <div className="flex min-h-48 items-start justify-center pt-4">
       <HoverCard defaultOpen>
-        <HoverCardTrigger render={<Button variant="link">@username</Button>} />
+        <HoverCardTrigger render={<Button variant="ghost">@username</Button>} />
         <HoverCardContent side="bottom">
           <div>
             <h4 className="text-sm font-semibold mb-1">User Profile</h4>
@@ -101,7 +101,7 @@ export const AllVariants: Story = {
           }}
         >
           <HoverCard>
-            <HoverCardTrigger render={<Button variant="link">@username</Button>} />
+            <HoverCardTrigger render={<Button variant="ghost">@username</Button>} />
             <HoverCardContent>
               <div>
                 <h4 className="text-sm font-semibold mb-1">User Profile</h4>

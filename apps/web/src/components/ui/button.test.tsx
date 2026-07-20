@@ -26,17 +26,6 @@ describe('buttonVariants', () => {
     expect(button).not.toHaveClass('border-transparent')
   })
 
-  it('renders the destructive-outline variant as a bordered destructive button', () => {
-    render(
-      <Button data-testid="destructive-outline" variant="destructive-outline">
-        Leave workspace
-      </Button>,
-    )
-
-    const button = screen.getByTestId('destructive-outline')
-    expect(button).toHaveClass('border-border', 'text-destructive', 'bg-background', 'shadow-xs')
-  })
-
   it('applies the action size CTA pill scale', () => {
     render(
       <Button data-testid="action" size="action">

@@ -1,7 +1,7 @@
 import { ArrowUpRight, Sparkles } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Link } from '@/components/ui/link'
 import { cn } from '@/utils/cn'
 import { WORKSPACE_ANNOUNCEMENT_URL } from '@/config/constants'
 import css from './styles.module.css'
@@ -29,23 +29,16 @@ const WorkspaceBanner = ({ className }: { className?: string }) => {
           <span className="text-sm font-semibold tracking-[-0.01em] text-foreground">Introducing Workspace</span>
         </div>
 
-        <Button
-          variant="link"
-          size="sm"
-          // eslint-disable-next-line no-restricted-syntax -- link-variant inline button sheds button height/padding; pending link-variant reset
-          className="group h-auto shrink-0 gap-1 px-0 text-xs font-medium"
-          render={
-            <a
-              href={WORKSPACE_ANNOUNCEMENT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Read the Workspace announcement"
-            />
-          }
+        <Link
+          href={WORKSPACE_ANNOUNCEMENT_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Read the Workspace announcement"
+          className="group inline-flex shrink-0 items-center gap-1 text-xs font-medium"
         >
           Read announcement
           <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-        </Button>
+        </Link>
       </div>
     </Card>
   )
