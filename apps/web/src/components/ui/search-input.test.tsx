@@ -4,10 +4,10 @@ import { SearchInput } from './search-input'
 
 describe('SearchInput', () => {
   it('renders a search input with the canonical surface group', () => {
-    const { container } = render(<SearchInput inputSize="lg" className="w-full" placeholder="Search safes" />)
+    const { container } = render(<SearchInput className="w-full" placeholder="Search safes" />)
 
     expect(screen.getByRole('searchbox')).toHaveAttribute('type', 'search')
-    expect(container.querySelector('[data-slot="input-group"]')).toHaveClass('h-10', 'w-full', 'bg-card')
+    expect(container.querySelector('[data-slot="input-group"]')).toHaveClass('h-9', 'w-full', 'bg-card')
   })
 
   it('forwards change events to the underlying input', () => {

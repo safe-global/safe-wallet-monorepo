@@ -9,12 +9,6 @@ describe('Input variants', () => {
     expect(screen.getByPlaceholderText('Amount')).toHaveClass('h-[66px]', 'px-4', 'bg-card')
   })
 
-  it('renders the sm size at h-8', () => {
-    render(<Input inputSize="sm" placeholder="Small" />)
-
-    expect(screen.getByPlaceholderText('Small')).toHaveClass('h-8', 'px-3')
-  })
-
   it('renders the explicit default size at h-9', () => {
     render(<Input inputSize="default" placeholder="Explicit default" />)
 

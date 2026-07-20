@@ -11,7 +11,7 @@ type SearchFieldProps = Omit<ComponentProps<'input'>, 'type'> & {
 const SearchField = ({ className, inputClassName, ...props }: SearchFieldProps): ReactElement => {
   return (
     <div className={cn('relative', className)}>
-      <SearchInput inputSize="lg" className={inputClassName} {...props} />
+      <SearchInput className={inputClassName} {...props} />
     </div>
   )
 }

@@ -22,7 +22,7 @@ const meta = {
     },
     inputSize: {
       control: 'select',
-      options: ['sm', 'default', 'lg', 'hero'],
+      options: ['default', 'hero'],
     },
     variant: {
       control: 'select',
@@ -97,15 +97,13 @@ export const AllVariants: Story = {
       <div>
         <h3 className="mb-1 text-lg font-semibold">Sizes</h3>
         <p className="mb-4 text-sm text-muted-foreground">
-          Heights mirror <code>SelectTrigger</code> (<code>sm</code> h-8 / <code>default</code> h-9 / <code>lg</code>{' '}
-          h-10), with <code>hero</code> preserving the 66px Safe creation/filter field tier. Prefer{' '}
+          Two heights: <code>default</code> (h-9) mirrors <code>SelectTrigger</code>&apos;s default so a field and a
+          select on one row line up, and <code>hero</code> (66px) is the Safe creation / big-filter field tier. Prefer{' '}
           <code>inputSize</code> over a hand-rolled <code>className=&quot;h-…&quot;</code>. (Named{' '}
           <code>inputSize</code>, not <code>size</code>, to avoid the native numeric <code>size</code> attr.)
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 250px)', gap: '1.5rem', alignItems: 'end' }}>
-          <Input inputSize="sm" placeholder="sm (h-8)" />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 250px)', gap: '1.5rem', alignItems: 'end' }}>
           <Input inputSize="default" placeholder="default (h-9)" />
-          <Input inputSize="lg" placeholder="lg (h-10)" />
           <Input inputSize="hero" variant="surface" placeholder="hero surface (h-66)" />
         </div>
       </div>

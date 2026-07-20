@@ -21,7 +21,7 @@ const meta = {
   argTypes: {
     inputSize: {
       control: 'select',
-      options: ['sm', 'default', 'lg', 'hero'],
+      options: ['default', 'hero'],
     },
     variant: {
       control: 'select',
@@ -49,18 +49,8 @@ export const AllVariants: Story = {
           }}
         >
           <div style={{ width: '300px' }}>
-            <InputGroup inputSize="sm">
-              <InputGroupInput placeholder="sm (h-8)" />
-            </InputGroup>
-          </div>
-          <div style={{ width: '300px' }}>
             <InputGroup>
               <InputGroupInput placeholder="default (h-9)" />
-            </InputGroup>
-          </div>
-          <div style={{ width: '300px' }}>
-            <InputGroup inputSize="lg">
-              <InputGroupInput placeholder="lg (h-10)" />
             </InputGroup>
           </div>
           <div style={{ width: '300px' }}>
