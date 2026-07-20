@@ -3,7 +3,6 @@ import semverValid from 'semver/functions/valid'
 import { isValidMasterCopy, isMigrationToL2Possible } from '@safe-global/utils/services/contracts/safeContracts'
 import { getSafeSingletonDeployments, getSafeL2SingletonDeployments } from '@safe-global/safe-deployments'
 import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
-import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { SecurityScanner } from './types'
 import { KNOWN_SAFE_VERSIONS, getSeverityFromScore } from './constants'
 
@@ -46,12 +45,7 @@ export const contractVersionScanner: SecurityScanner = {
 
     // Unsupported mastercopy — same check as UnsupportedMastercopyWarning
     if (!isValidMasterCopy(implementationVersionState)) {
-      // isMigrationToL2Possible only reads version and chainId from SafeState.
-      // We cast to satisfy the type, but only these 2 fields are accessed.
-      const canMigrateL2 = isMigrationToL2Possible({
-        version,
-        chainId,
-      } as Pick<SafeState, 'version' | 'chainId'> as SafeState)
+      const canMigrateL2 = isMigrationToL2Possible({ version, chainId })
 
       const score = 10
       return {

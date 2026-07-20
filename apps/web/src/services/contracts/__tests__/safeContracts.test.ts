@@ -1,11 +1,6 @@
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { _getMinimumMultiSendCallOnlyVersion } from '../safeContracts'
-import {
-  isValidMasterCopy,
-  _getValidatedGetContractProps,
-  isMigrationToL2Possible,
-} from '@safe-global/utils/services/contracts/safeContracts'
-import { safeInfoBuilder } from '@/tests/builders/safe'
+import { isValidMasterCopy, _getValidatedGetContractProps } from '@safe-global/utils/services/contracts/safeContracts'
 
 describe('safeContracts', () => {
   describe('isValidMasterCopy', () => {
@@ -67,20 +62,6 @@ describe('safeContracts', () => {
 
     it('should return the Safe version if the Safe version is higher than the initial version', () => {
       expect(_getMinimumMultiSendCallOnlyVersion('1.4.1')).toBe('1.4.1')
-    })
-  })
-
-  describe('isMigrationToL2Possible', () => {
-    it('should be possible to migrate Safes on unregistered chains (chain-agnostic canonical fallback)', () => {
-      expect(isMigrationToL2Possible(safeInfoBuilder().with({ nonce: 0, chainId: '69420' }).build())).toBeTruthy()
-    })
-
-    it('should not be possible to migrate Safes with nonce > 0', () => {
-      expect(isMigrationToL2Possible(safeInfoBuilder().with({ nonce: 2, chainId: '10' }).build())).toBeFalsy()
-    })
-
-    it('should be possible to migrate Safes with nonce 0 on chains with migration lib', () => {
-      expect(isMigrationToL2Possible(safeInfoBuilder().with({ nonce: 0, chainId: '10' }).build())).toBeTruthy()
     })
   })
 })

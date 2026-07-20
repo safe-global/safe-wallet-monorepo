@@ -112,5 +112,11 @@ describe('safeContracts', () => {
 
       expect(isMigrationToL2Possible(safe)).toBe(false)
     })
+
+    it('should return true on unregistered chains via the chain-agnostic canonical fallback', () => {
+      const safe = createMockSafe({ chainId: '69420' })
+
+      expect(isMigrationToL2Possible(safe)).toBe(true)
+    })
   })
 })

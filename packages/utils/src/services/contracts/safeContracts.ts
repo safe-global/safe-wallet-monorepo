@@ -58,8 +58,10 @@ export const _getValidatedGetContractProps = (
  * Checks if a Safe can be migrated to the canonical L2 singleton via the
  * SafeMigration contract (`migrateL2Singleton`). The contract supports
  * 1.3.0 and 1.4.1 Safes and does not depend on the Safe's nonce.
+ * Only the base version is matched — build metadata such as `+L2` or
+ * `+Circles` is ignored.
  */
-export const isMigrationToL2Possible = (safe: SafeState): boolean => {
+export const isMigrationToL2Possible = (safe: Pick<SafeState, 'version' | 'chainId'>): boolean => {
   if (!safe.version || !isSupportedL2Version(safe.version)) {
     return false
   }
