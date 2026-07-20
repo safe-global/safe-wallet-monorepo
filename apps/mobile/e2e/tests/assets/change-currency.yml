@@ -75,42 +75,42 @@ tags:
 - tapOn:
     text: '.*Currency.*'
 
-# Verify navigation to currency selection screen
-- assertVisible:
-    text: '.*(EUR|GBP).*'
-
 # ============================================
 # Currency List Verification
 # ============================================
+# The list order comes from the backend, so scroll to known entries in list
+# order (USD → EUR → GBP) instead of asserting on the initial viewport.
 
-# Verify currencies show currency code (EUR, GBP, etc.)
+# Verify current currency (USD) is in the list — first fiat entry
+# Note: Selected currency shows a checkmark icon, but Maestro verifies via text matching
+- scrollUntilVisible:
+    element:
+      text: 'USD.*'
+
 - assertVisible:
-    text: '.*EUR.*'
+    text: '.*US Dollar.*'
 
-- assertVisible:
-    text: '.*GBP.*'
-
-# Verify currency symbols ($, €, £, etc.)
+# Verify EUR row shows code, symbol and name
+- scrollUntilVisible:
+    element:
+      text: 'EUR.*'
 
 - assertVisible:
     text: '.*€.*'
 
 - assertVisible:
-    text: '.*£.*'
-
-# Verify currency names (US Dollar, Euro, etc.)
-- assertVisible:
     text: '.*Euro.*'
+
+# Verify GBP row shows code, symbol and name
+- scrollUntilVisible:
+    element:
+      text: 'GBP.*'
+
+- assertVisible:
+    text: '.*£.*'
 
 - assertVisible:
     text: '.*(British Pound|Pound).*'
-
-- scroll
-
-# Verify current currency (USD) is visible
-# Note: Selected currency shows a checkmark icon, but Maestro verifies via text matching
-- assertVisible:
-    text: 'USD.*'
 
 # ============================================
 # Change Currency to EUR
