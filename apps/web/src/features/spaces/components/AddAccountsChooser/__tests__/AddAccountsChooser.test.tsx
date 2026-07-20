@@ -7,6 +7,7 @@ jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
   useIsAdmin: () => mockIsAdmin,
   useIsCurrentSpaceAtSafeLimit: () => mockIsAtSafeLimit,
+  useSpaceSafeLimit: () => ({ limit: 40, isLoading: false }),
   SAFE_ACCOUNTS_LIMIT: jest.requireActual('@/features/spaces/constants').SAFE_ACCOUNTS_LIMIT,
 }))
 

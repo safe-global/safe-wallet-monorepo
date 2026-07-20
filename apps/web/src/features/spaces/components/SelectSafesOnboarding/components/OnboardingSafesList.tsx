@@ -3,7 +3,8 @@ import SafeCard from './SafeCard'
 import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
 import SelectAllToggle, { type SelectAllState } from '../../SelectAllToggle/SelectAllToggle'
 import { Typography } from '@/components/ui/typography'
-import { SAFE_ACCOUNTS_LIMIT, safeAccountsLimitReachedText } from '@/features/spaces/constants'
+import { safeAccountsLimitReachedText } from '@/features/spaces/constants'
+import { useSpaceSafeLimit } from '@/features/spaces'
 
 interface SectionSelectAll {
   state: SelectAllState
@@ -31,7 +32,17 @@ const renderSafeCards = (safes: AllSafeItems, similarAddresses: Set<string>, isA
     return <SafeCard key={`${safe.chainId}:${safe.address}`} safe={safe} isSimilar={isSimilar} isAtLimit={isAtLimit} />
   })
 
-const SectionRow = ({ label, selectAll, testId }: { label: string; selectAll?: SectionSelectAll; testId?: string }) => (
+const SectionRow = ({
+  label,
+  selectAll,
+  testId,
+  limit,
+}: {
+  label: string
+  selectAll?: SectionSelectAll
+  testId?: string
+  limit: number
+}) => (
   <div className="flex items-center justify-between px-2 pb-1 pt-3">
     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
     {selectAll && selectAll.total > 0 && (
@@ -42,7 +53,7 @@ const SectionRow = ({ label, selectAll, testId }: { label: string; selectAll?: S
         onToggle={selectAll.onToggle}
         disabled={selectAll.disabled}
         label="Select all"
-        labelTooltip={`You can select up to ${SAFE_ACCOUNTS_LIMIT} Safe accounts`}
+        labelTooltip={`You can select up to ${limit} Safe account${limit === 1 ? '' : 's'}`}
         showCount
         countTooltip="Multi-chain safes count once per network"
         testId={testId}
@@ -60,11 +71,13 @@ const OnboardingSafesList = ({
   ownedSelectAll,
   isAtLimit = false,
 }: SafeListProps) => {
+  const { limit } = useSpaceSafeLimit()
+
   return (
     <div className="flex w-full min-w-0 flex-col gap-2">
       {isAtLimit && (
         <Typography variant="paragraph" className="text-destructive text-xs pb-1">
-          {safeAccountsLimitReachedText()}
+          {safeAccountsLimitReachedText(limit)}
         </Typography>
       )}
 
@@ -72,14 +85,14 @@ const OnboardingSafesList = ({
 
       {trustedSafes.length > 0 && (
         <>
-          <SectionRow label="Trusted safes" selectAll={trustedSelectAll} testId="select-all-trusted" />
+          <SectionRow label="Trusted safes" selectAll={trustedSelectAll} testId="select-all-trusted" limit={limit} />
           {renderSafeCards(trustedSafes, similarAddresses, isAtLimit)}
         </>
       )}
 
       {ownedSafes.length > 0 && (
         <>
-          <SectionRow label="Owned safes" selectAll={ownedSelectAll} testId="select-all-owned" />
+          <SectionRow label="Owned safes" selectAll={ownedSelectAll} testId="select-all-owned" limit={limit} />
           {renderSafeCards(ownedSafes, similarAddresses, isAtLimit)}
         </>
       )}

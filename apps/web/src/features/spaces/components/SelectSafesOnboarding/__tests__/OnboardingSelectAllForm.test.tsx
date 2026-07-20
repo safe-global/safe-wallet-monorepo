@@ -10,6 +10,9 @@ jest.mock('@/features/spaces/constants', () => ({
   ...jest.requireActual('@/features/spaces/constants'),
   SAFE_ACCOUNTS_LIMIT: 10,
 }))
+jest.mock('@/features/spaces/hooks/billing/useSpaceSafeLimit', () => ({
+  useSpaceSafeLimit: () => ({ limit: 10, isLoading: false }),
+}))
 
 const makeSafe = (chainId: string, address: string): SafeItem => ({
   chainId,

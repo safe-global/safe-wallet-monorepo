@@ -10,7 +10,7 @@ import AccountsModal from '@/components/common/SpaceSafeBar/AccountsModal'
 import TrustedSafesModal from '@/components/common/TrustedSafesModal'
 import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import AddAccounts from '../AddAccounts'
-import { SAFE_ACCOUNTS_LIMIT, useCurrentSpaceId, useIsAdmin, useIsCurrentSpaceAtSafeLimit } from '@/features/spaces'
+import { useCurrentSpaceId, useIsAdmin, useIsCurrentSpaceAtSafeLimit, useSpaceSafeLimit } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { OVERVIEW_LABELS } from '@/services/analytics/events/overview'
@@ -95,6 +95,7 @@ const AddAccountsChooser = ({
   const isAdmin = useIsAdmin()
   const spaceId = useCurrentSpaceId()
   const isSpaceAtSafeLimit = useIsCurrentSpaceAtSafeLimit()
+  const { limit: safeLimit } = useSpaceSafeLimit()
   const trustedSafesModal = useTrustedSafesModal()
 
   const router = useRouter()
@@ -165,7 +166,7 @@ const AddAccountsChooser = ({
               onClick={handleCreate}
               warning={
                 isSpaceAtSafeLimit && isAdmin
-                  ? `This workspace already has ${SAFE_ACCOUNTS_LIMIT} Safes (the maximum). Your new Safe won't be added to it, but you can still create it.`
+                  ? `This workspace already has ${safeLimit} Safe${safeLimit === 1 ? '' : 's'} (the maximum). Your new Safe won't be added to it, but you can still create it.`
                   : undefined
               }
             />

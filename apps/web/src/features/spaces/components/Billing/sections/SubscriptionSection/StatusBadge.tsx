@@ -1,21 +1,22 @@
 import { type ReactElement } from 'react'
-import type { UsageStatus } from '../../types'
+import type { BillingState } from '@/features/spaces'
 import css from './styles.module.css'
 
-const STATUS_CONFIG: Record<UsageStatus, { label: string; className: string }> = {
-  within_limit: { label: 'Within limit', className: css.badgeSuccess },
-  approaching_limit: { label: 'Approaching limit', className: css.badgeWarning },
-  limit_reached: { label: 'Limit reached', className: css.badgeError },
+const STATUS_CONFIG: Partial<Record<BillingState, { label: string; className: string }>> = {
+  active: { label: 'Active', className: css.badgeSuccess },
+  activating: { label: 'Activating', className: css.badgeWarning },
   payment_failed: { label: 'Payment failed', className: css.badgeError },
+  canceled: { label: 'Canceled', className: css.badgeError },
 }
 
-const StatusBadge = ({ status }: { status: UsageStatus }): ReactElement => {
-  const { label, className } = STATUS_CONFIG[status]
+const StatusBadge = ({ state }: { state: BillingState }): ReactElement | null => {
+  const config = STATUS_CONFIG[state]
+  if (!config) return null
 
   return (
-    <span className={`${css.badge} ${className}`} data-testid="billing-status-badge">
+    <span className={`${css.badge} ${config.className}`} data-testid="billing-status-badge">
       <span className={css.badgeDot} aria-hidden />
-      {label}
+      {config.label}
     </span>
   )
 }

@@ -4,9 +4,8 @@ import { FormProvider, useForm, useFormContext } from 'react-hook-form'
 import type { AllSafeItems, MultiChainSafeItem, SafeItem } from '@/hooks/safes'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../../components/SelectSafesOnboarding/constants'
 
-jest.mock('../../constants', () => ({
-  ...jest.requireActual('../../constants'),
-  SAFE_ACCOUNTS_LIMIT: 3,
+jest.mock('../billing/useSpaceSafeLimit', () => ({
+  useSpaceSafeLimit: () => ({ limit: 3, isLoading: false }),
 }))
 
 import type { AddAccountsFormValues } from '../useSelectAll.types'

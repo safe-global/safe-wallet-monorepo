@@ -106,6 +106,9 @@ export const SpaceSelectorDropdown = ({
 
   const isAddToWorkspace = triggerVariant === 'addToWorkspace'
 
+  // This dropdown lists many spaces; the per-plan limit lives behind a per-space
+  // billing query, so we can't cheaply resolve it for every row here. Fall back
+  // to the static server cap. TODO(billing): surface the plan limit on SpaceItem.
   const isAtSafeLimit = (space: SpaceItem) => isAddToWorkspace && space.safeCount >= SAFE_ACCOUNTS_LIMIT
   const isAdminOfSpace = (space: SpaceItem) => isUserActiveAdmin(space.members ?? [], currentUser?.id)
 
