@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowUpRight, ArrowDownLeft, Repeat, SquareDashedBottomCode } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
+import { ActionBar, ActionButton } from '@/components/common/ActionBar'
 import Track from '@/components/common/Track'
 import QrCodeButton from '@/components/common/QrCodeButton'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -109,17 +110,17 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-      <div className="flex flex-wrap items-center gap-2">
+      <ActionBar>
         <Wallet>
           {(isOk) => {
             const sendDisabled = !isOk || isBlockedCountry || noAssets
             return (
               <Tooltip>
                 <TooltipTrigger render={<span className={cn('inline-flex', { 'cursor-not-allowed': sendDisabled })} />}>
-                  <Button variant="default" size="action" onClick={handleOnSend} disabled={sendDisabled}>
+                  <ActionButton variant="default" onClick={handleOnSend} disabled={sendDisabled}>
                     <ArrowUpRight className="size-5 text-green-400" />
                     Send
-                  </Button>
+                  </ActionButton>
                 </TooltipTrigger>
                 {sendTooltip ? <TooltipContent side="top">{sendTooltip}</TooltipContent> : null}
               </Tooltip>
@@ -129,16 +130,16 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
 
         <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
           {isSpace ? (
-            <Button variant={secondaryVariant} size="action" onClick={handleOnReceive} disabled={noAssets}>
+            <ActionButton variant={secondaryVariant} onClick={handleOnReceive} disabled={noAssets}>
               <ArrowDownLeft className="size-5" />
               Receive
-            </Button>
+            </ActionButton>
           ) : (
             <QrCodeButton>
-              <Button variant={secondaryVariant} size="action">
+              <ActionButton variant={secondaryVariant}>
                 <ArrowDownLeft className="size-5" />
                 Receive
-              </Button>
+              </ActionButton>
             </QrCodeButton>
           )}
         </Track>
@@ -154,20 +155,18 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
                       render={<span className={cn('inline-flex', { 'cursor-not-allowed': swapDisabled })} />}
                     >
                       {isSpace ? (
-                        <Button
+                        <ActionButton
                           variant={secondaryVariant}
-                          size="action"
                           data-testid="overview-swap-btn"
                           disabled={swapDisabled}
                           onClick={handleOnSwap}
                         >
                           <Repeat className="size-5" strokeWidth={1.5} />
                           Swap
-                        </Button>
+                        </ActionButton>
                       ) : (
-                        <Button
+                        <ActionButton
                           variant={secondaryVariant}
-                          size="action"
                           data-testid="overview-swap-btn"
                           disabled={swapDisabled}
                           render={
@@ -178,7 +177,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
                         >
                           <Repeat className="size-5" strokeWidth={1.5} />
                           Swap
-                        </Button>
+                        </ActionButton>
                       )}
                     </TooltipTrigger>
                     {swapTooltip ? <TooltipContent side="top">{swapTooltip}</TooltipContent> : null}
@@ -192,16 +191,15 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
         <Wallet>
           {(isOk) => {
             const buildTxButton = isSpace ? (
-              <Button
+              <ActionButton
                 variant={secondaryVariant}
-                size="action"
                 disabled={!isOk || noAssets}
                 onClick={handleOnBuildTx}
                 aria-label="Transaction builder"
               >
                 <SquareDashedBottomCode className="size-5" strokeWidth={1.5} />
                 Build transaction
-              </Button>
+              </ActionButton>
             ) : (
               <Button
                 variant={secondaryVariant}
@@ -226,7 +224,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
             )
           }}
         </Wallet>
-      </div>
+      </ActionBar>
     </div>
   )
 }
