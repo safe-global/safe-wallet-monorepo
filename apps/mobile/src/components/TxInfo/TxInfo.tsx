@@ -40,9 +40,11 @@ type TxInfoProps = {
   onPress?: (tx: TxCardPress) => void
 } & Partial<Omit<SafeListItemProps, 'onPress'>>
 
-function TxInfoComponent({ tx, onPress, ...rest }: TxInfoProps) {
+function TxInfoComponent({ tx, onPress, ...restProps }: TxInfoProps) {
   const txType = useTransactionType(tx)
   const txInfo = tx.txInfo
+  // Stable per-transaction testID so E2E flows can target a card regardless of list order
+  const rest = { testID: `tx-card-${tx.id}`, ...restProps }
 
   const onCardPress = useCallback(() => {
     if (onPress) {
