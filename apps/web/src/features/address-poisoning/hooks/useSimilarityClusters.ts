@@ -4,7 +4,7 @@ import {
   normalizeAddress,
   type ListClusterResult,
 } from '@safe-global/utils/utils/addressSimilarity'
-import useListSimilarities from './useListSimilarities'
+import useAnchorListMatches from './useAnchorListMatches'
 
 /**
  * Look-alike clustering for a rendered list, combining:
@@ -19,22 +19,34 @@ import useListSimilarities from './useListSimilarities'
  * Pass a referentially-stable `addresses` array (memoize at the call site).
  */
 const useSimilarityClusters = (addresses: string[]): ListClusterResult => {
-  const anchorAnnotations = useListSimilarities(addresses)
+  const anchorAnnotations = useAnchorListMatches(addresses)
 
   return useMemo(() => {
     const { flagged, groupIdByAddress } = detectListClusters(addresses)
 
-    const imitated = new Set<string>()
+    // Common case (flag off / no look-alike of a trusted anchor): intra-list result is the answer.
+    if (anchorAnnotations.size === 0) return { flagged, groupIdByAddress }
+
+    // normalized (no-0x) → lowercased 0x original, for locating an imitated anchor within the list.
+    const inListByNorm = new Map<string, string>()
+    for (const address of addresses) inListByNorm.set(normalizeAddress(address), address.toLowerCase())
+
     anchorAnnotations.forEach((annotation) => {
-      if (annotation.match) {
-        flagged.add(annotation.address.toLowerCase())
-        imitated.add(annotation.match.anchor)
+      if (!annotation.match) return
+      const impostor = annotation.address.toLowerCase()
+      flagged.add(impostor)
+
+      // When the imitated trusted original is ALSO in this list, flag it and group it WITH the impostor
+      // explicitly — so the pair reads side by side regardless of whether the intra-list bucket length
+      // (SimilarityConfig) matches the anchor threshold (AnchorSimilarityConfig); both default to 4.
+      const anchorInList = inListByNorm.get(annotation.match.anchor)
+      if (anchorInList) {
+        flagged.add(anchorInList)
+        const groupId = groupIdByAddress.get(impostor) ?? groupIdByAddress.get(anchorInList) ?? impostor
+        groupIdByAddress.set(impostor, groupId)
+        groupIdByAddress.set(anchorInList, groupId)
       }
     })
-    // Also flag an in-list trusted original that an impostor imitates, so the pair reads side by side.
-    for (const address of addresses) {
-      if (imitated.has(normalizeAddress(address))) flagged.add(address.toLowerCase())
-    }
 
     return { flagged, groupIdByAddress }
   }, [addresses, anchorAnnotations])

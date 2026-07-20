@@ -4,8 +4,8 @@
  */
 export { selectAnchorIndex, selectAnchorAddresses } from './store'
 
-// Mode B — list detection for account/list surfaces
-export { default as useListSimilarities } from './hooks/useListSimilarities'
+// Anchor detector: annotate each list address with the trusted anchor it resembles (anchor-based only)
+export { default as useAnchorListMatches } from './hooks/useAnchorListMatches'
 // Flat flagged-address set for display lists (intra-list always on + anchor flag-gated)
 export { default as useFlaggedSimilarAddresses } from './hooks/useFlaggedSimilarAddresses'
 // Flagged set + per-address cluster id, for surfaces that also box look-alikes together

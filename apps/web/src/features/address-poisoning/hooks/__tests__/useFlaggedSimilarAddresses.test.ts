@@ -4,7 +4,7 @@ import type { ListAnnotation } from '@safe-global/utils/utils/addressSimilarity.
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 
 let mockAnchor: Map<string, ListAnnotation>
-jest.mock('../useListSimilarities', () => ({ __esModule: true, default: () => mockAnchor }))
+jest.mock('../useAnchorListMatches', () => ({ __esModule: true, default: () => mockAnchor }))
 
 const ANCHOR = '0x1111111111111111111111111111111111111111'
 const IMPOSTOR = '0x2222222222222222222222222222222222222222'

@@ -61,6 +61,9 @@ export interface UseTrustedSafesModalReturn {
   pendingSelectAllConfirmation: boolean
   /** Addresses flagged as similar that would be selected by "Select All" */
   similarAddressesForSelectAll: SelectableItem[]
+  /** Lowercased look-alike addresses (per-row badge), over the FULL list — single source of truth
+   * shared with the confirm-gate, so a badge shows even when its pair is filtered out of view. */
+  flagged: Set<string>
   /** Current search query */
   searchQuery: string
   /** Whether safes are loading */
@@ -381,6 +384,7 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     pendingConfirmation,
     pendingSelectAllConfirmation,
     similarAddressesForSelectAll,
+    flagged: flaggedAll,
     searchQuery,
     isLoading: !allSafes || !allMultiChainSafes || !allSingleSafes,
     hasChanges,

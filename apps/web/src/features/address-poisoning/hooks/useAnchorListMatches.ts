@@ -19,7 +19,7 @@ import { selectAnchorIndex } from '../store'
  * Pass a referentially-stable `addresses` array (memoize at the call site) so detection is
  * not recomputed on every render.
  */
-const useListSimilarities = (addresses: string[]): Map<string, ListAnnotation> => {
+const useAnchorListMatches = (addresses: string[]): Map<string, ListAnnotation> => {
   const isEnabled = useHasFeature(FEATURES.ADDRESS_POISONING_PROTECTION)
   const anchorIndex = useAppSelector(selectAnchorIndex)
 
@@ -29,4 +29,4 @@ const useListSimilarities = (addresses: string[]): Map<string, ListAnnotation> =
   }, [isEnabled, addresses, anchorIndex])
 }
 
-export default useListSimilarities
+export default useAnchorListMatches
