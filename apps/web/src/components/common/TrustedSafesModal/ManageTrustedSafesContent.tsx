@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ChevronLeft, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -71,6 +71,20 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
   const isDarkMode = useDarkMode()
   const dispatch = useAppDispatch()
   const { orderBy } = useAppSelector(selectOrderByPreference)
+
+  // Rendering hundreds of account rows takes ~1s and blocks the dialog's first paint. Defer the table
+  // past one painted frame (double rAF) so the shell + spinner show immediately, then the rows fill in.
+  const [showTable, setShowTable] = useState(false)
+  useEffect(() => {
+    let inner = 0
+    const outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => setShowTable(true))
+    })
+    return () => {
+      cancelAnimationFrame(outer)
+      cancelAnimationFrame(inner)
+    }
+  }, [])
 
   // Reordering shares the trusted list's Manual order (same scope as the workspace accounts list).
   // Suppressed while searching: a drop then would persist only the filtered subset, dropping the
@@ -155,7 +169,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
           </div>
         </div>
 
-        {isLoading ? (
+        {isLoading || !showTable ? (
           <div className="flex justify-center py-8">
             <Spinner />
           </div>

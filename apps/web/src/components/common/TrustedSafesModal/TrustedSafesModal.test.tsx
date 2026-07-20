@@ -116,6 +116,13 @@ describe('TrustedSafesModal', () => {
     ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
     mockUseIsQualifiedSafe.mockReturnValue(false)
     mockWalletValue = null
+    // The content defers its table mount past two animation frames; run them synchronously so the
+    // table renders in the same tick and the assertions below don't need to await frames.
+    jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb: FrameRequestCallback) => {
+      cb(0)
+      return 0
+    })
+    jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {})
   })
 
   it('should render modal when open', () => {
@@ -152,6 +159,17 @@ describe('TrustedSafesModal', () => {
   it('should render the search bar', () => {
     render(<TrustedSafesModal modal={mockModal} />)
     expect(screen.getByPlaceholderText('by name, address or network')).toBeInTheDocument()
+  })
+
+  it('renders the dialog shell before the accounts table (deferred mount)', () => {
+    // Use real rAF (won't fire during the synchronous render) so the table stays deferred.
+    jest.restoreAllMocks()
+    ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
+    render(<TrustedSafesModal modal={mockModal} />)
+    // Shell is present immediately…
+    expect(screen.getByText('Manage my account list')).toBeInTheDocument()
+    // …but the heavy table is not mounted yet.
+    expect(screen.queryByTestId('safe-accounts-table')).not.toBeInTheDocument()
   })
 
   it('should call close when cancel clicked', () => {
