@@ -78,22 +78,26 @@ tags:
 # ============================================
 # Currency List Verification
 # ============================================
-# The list order comes from the backend, so scroll to known entries in list
-# order (USD → EUR → GBP) instead of asserting on the initial viewport.
+# The list order comes from the backend, so use the search field instead of
+# scrolling — assertions stay valid regardless of ordering.
 
-# Verify current currency (USD) is in the list — first fiat entry
-# Note: Selected currency shows a checkmark icon, but Maestro verifies via text matching
-- scrollUntilVisible:
-    element:
-      text: 'USD.*'
+- tapOn: 'Search'
+
+# Verify current currency (USD) row shows code, symbol and name.
+# Assert/tap the full row label ("USD - $") — a bare code regex would also
+# match the search input's own text.
+- inputText: 'USD'
+
+- assertVisible:
+    text: '.*USD - \$.*'
 
 - assertVisible:
     text: '.*US Dollar.*'
 
 # Verify EUR row shows code, symbol and name
-- scrollUntilVisible:
-    element:
-      text: 'EUR.*'
+- eraseText
+
+- inputText: 'EUR'
 
 - assertVisible:
     text: '.*€.*'
@@ -102,9 +106,9 @@ tags:
     text: '.*Euro.*'
 
 # Verify GBP row shows code, symbol and name
-- scrollUntilVisible:
-    element:
-      text: 'GBP.*'
+- eraseText
+
+- inputText: 'GBP'
 
 - assertVisible:
     text: '.*£.*'
@@ -116,14 +120,17 @@ tags:
 # Change Currency to EUR
 # ============================================
 
-# Scroll if needed to find EUR
-- scrollUntilVisible:
-    element:
-      text: 'EUR.*'
+- eraseText
+
+- inputText: 'EUR'
+
+# Dismiss the keyboard first — while it is open the first tap only closes it
+# and never reaches the row (keyboardShouldPersistTaps is 'never')
+- hideKeyboard
 
 # Tap "EUR - Euro" option (currency selection navigates back automatically)
 - tapOn:
-    text: 'EUR.*'
+    text: '.*EUR - €.*'
 
 # Wait for automatic navigation back to app settings screen
 - assertVisible:
@@ -184,13 +191,15 @@ tags:
 - tapOn:
     text: '.*Currency.*'
 
-# Select "GBP - British Pound"
-- scrollUntilVisible:
-    element:
-      text: 'GBP.*'
+# Select "GBP - British Pound" via search (order-independent)
+- tapOn: 'Search'
+
+- inputText: 'GBP'
+
+- hideKeyboard
 
 - tapOn:
-    text: 'GBP.*'
+    text: '.*GBP - £.*'
 
 # Wait for automatic navigation back
 - assertVisible:
@@ -232,13 +241,15 @@ tags:
 - tapOn:
     text: '.*Currency.*'
 
-# Select "USD - US Dollar"
-- scrollUntilVisible:
-    element:
-      text: 'USD.*'
+# Select "USD - US Dollar" via search (order-independent)
+- tapOn: 'Search'
+
+- inputText: 'USD'
+
+- hideKeyboard
 
 - tapOn:
-    text: 'USD.*'
+    text: '.*USD - \$.*'
 
 # Wait for automatic navigation back
 - assertVisible:

@@ -14,7 +14,7 @@ tags:
 #   TAP_TEXT: Text to tap on (e.g., "Settings change", ".*0\.001 MATIC.*")
 #   TAP_INDEX: Optional index if multiple matches (default: 0)
 
-- evalScript: '${output.useTapId = (typeof TAP_ID !== "undefined" && TAP_ID !== "")}'
+- evalScript: '${output.useTapId = (typeof TAP_ID !== "undefined" && TAP_ID.trim() !== "")}'
 
 - runFlow:
     when:

@@ -43,7 +43,8 @@ type TxInfoProps = {
 function TxInfoComponent({ tx, onPress, ...restProps }: TxInfoProps) {
   const txType = useTransactionType(tx)
   const txInfo = tx.txInfo
-  // Stable per-transaction testID so E2E flows can target a card regardless of list order
+  // Stable per-transaction testID so E2E flows can target a card regardless of list order.
+  // Deliberately placed BEFORE the spread: a testID passed by the caller must win.
   const rest = { testID: `tx-card-${tx.id}`, ...restProps }
 
   const onCardPress = useCallback(() => {
