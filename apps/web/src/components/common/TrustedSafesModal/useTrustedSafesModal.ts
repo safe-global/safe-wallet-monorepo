@@ -61,8 +61,7 @@ export interface UseTrustedSafesModalReturn {
   pendingSelectAllConfirmation: boolean
   /** Addresses flagged as similar that would be selected by "Select All" */
   similarAddressesForSelectAll: SelectableItem[]
-  /** Lowercased look-alike addresses (per-row badge), over the FULL list — single source of truth
-   * shared with the confirm-gate, so a badge shows even when its pair is filtered out of view. */
+  /** Look-alike addresses over the FULL list (not just the filtered view), shared by badge and confirm-gate. */
   flagged: Set<string>
   /** Current search query */
   searchQuery: string
@@ -110,9 +109,7 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     return allSafes?.map((safe) => safe.address) ?? []
   }, [allSafes])
 
-  // Look-alike clustering (union-find over shared front-4 OR back-4) + anchor matches (flag-gated).
-  // `groupIdByAddress` drives the visual grouping (similarityGroup); `flagged` drives the row badge,
-  // the select confirm-gate and Select-All. An anchor-only match with no in-list partner flags per-row.
+  // `groupIdByAddress` → visual grouping; `flagged` → row badge, confirm-gate and Select-All.
   const { flagged: flaggedAll, groupIdByAddress } = useSimilarityClusters(addresses)
   const isAddressFlagged = useCallback((address: string) => flaggedAll.has(address.toLowerCase()), [flaggedAll])
 

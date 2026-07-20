@@ -68,9 +68,7 @@ export const useManageNestedSafes = (allSafesWithStatus: NestedSafeWithStatus[])
 
   const addresses = useMemo(() => allSafesWithStatus.map((safe) => safe.address), [allSafesWithStatus])
 
-  // Look-alike clustering (union-find over shared front-4 OR back-4) + anchor matches (flag-gated).
-  // `flagged` drives per-row badges; `groupIdByAddress` boxes look-alikes together. An anchor-only
-  // match with no in-list partner is flagged but ungrouped → surfaces per-row, not in a box.
+  // `flagged` → per-row badges; `groupIdByAddress` → boxes look-alikes together.
   const { flagged: flaggedAll, groupIdByAddress } = useSimilarityClusters(addresses)
   const isAddressFlagged = useCallback((address: string) => flaggedAll.has(address.toLowerCase()), [flaggedAll])
 

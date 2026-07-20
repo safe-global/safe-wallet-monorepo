@@ -73,7 +73,6 @@ const useOnboardingSafes = () => {
     () => [...trustedSafeItems, ...ownedSafeItems].map((s) => s.address),
     [trustedSafeItems, ownedSafeItems],
   )
-  // Intra-list look-alikes (always on) + anchor look-alikes (flag-gated) — see useFlaggedSimilarAddresses.
   const flaggedCombined = useFlaggedSimilarAddresses(combinedAddresses)
   const flaggedOwnedAddresses = useMemo<Set<string>>(() => {
     const ownedAddresses = new Set(ownedSafeItems.map((s) => s.address.toLowerCase()))

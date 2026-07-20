@@ -113,22 +113,17 @@ export const getFlaggedSimilarAddressSet = (addresses: string[]): Set<string> =>
   return new Set(unique.filter((addr) => result.isFlagged(addr)))
 }
 
-/** Look-alike clustering of a single list: flagged set + a group id per flagged address. */
 export interface ListClusterResult {
-  /** Lowercased (0x-prefixed) addresses that look alike another list member. Query with `addr.toLowerCase()`. */
+  /** Lowercased 0x-prefixed addresses that look alike another list member. */
   flagged: Set<string>
-  /** Lowercased address → its cluster id (an opaque, stable key) for boxing look-alikes together. */
+  /** Lowercased address → its cluster id, for boxing look-alikes together. */
   groupIdByAddress: Map<string, string>
 }
 
 /**
- * Cluster the addresses in one list that look alike, using the OR rule: two addresses are connected
- * when they share the same first-`prefixLength` OR last-`suffixLength` hex chars (union-find over that
- * relation). Every address in a component of 2+ is flagged and carries that component's id.
- *
- * Identical addresses are deduped first (by normalized value), so the same Safe listed on several
- * chains never matches itself. Front/back are compared on the normalized hex (0x stripped); the
- * returned keys are the lowercased 0x-prefixed originals so callers can `has(addr.toLowerCase())`.
+ * Cluster a list's look-alikes by the OR rule: two addresses connect when they share first-N OR
+ * last-N hex (union-find). Every member of a component of 2+ is flagged with that component's id.
+ * Identical addresses are deduped first, so the same Safe on several chains never self-matches.
  */
 export const detectListClusters = (
   addresses: string[],

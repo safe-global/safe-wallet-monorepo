@@ -54,7 +54,6 @@ const SpaceSafeAccounts = () => {
   const spaceSafeItems = useMemo<SafeItem[]>(() => flattenSafeItems(allSafes ?? []), [allSafes])
 
   const spaceSafeAddresses = useMemo(() => spaceSafeItems.map((s) => s.address), [spaceSafeItems])
-  // Intra-list look-alikes (always on) + anchor look-alikes (flag-gated) — see useFlaggedSimilarAddresses.
   const similarAddresses = useFlaggedSimilarAddresses(spaceSafeAddresses)
 
   // Group and sort

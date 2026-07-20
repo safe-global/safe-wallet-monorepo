@@ -144,7 +144,6 @@ const AddAccounts = ({
   ])
 
   const trustedSafeAddresses = useMemo(() => trustedSafes.map((s) => s.address), [trustedSafes])
-  // Intra-list look-alikes (always on) + anchor look-alikes (flag-gated) — see useFlaggedSimilarAddresses.
   const similarAddresses = useFlaggedSimilarAddresses(trustedSafeAddresses)
 
   const [rawSearchQuery, setRawSearchQuery] = useState('')
