@@ -19,6 +19,8 @@ import { getSafeSetups, getSharedSetup, hasMultiChainAddNetworkFeature } from '@
 import { useSafeSpaces, type SafeSpacesMap } from '@/hooks/useSafeSpaces'
 import { useAppSelector } from '@/store'
 import useChains from '@/hooks/useChains'
+import useWallet from '@/hooks/wallets/useWallet'
+import { getOwnerAwaitingConfirmations } from '@/utils/transaction-guards'
 
 export type SafeSortColumn = 'name' | 'threshold' | 'networks' | 'workspaces'
 
@@ -76,6 +78,8 @@ type BuildDeps = {
   undeployedSafes: UndeployedSafesState
   chainMap: Record<string, Chain>
   getHref: (chain: Chain, address: string) => LinkProps['href']
+  /** Connected wallet — `awaitingConfirmation` is only surfaced when it's an owner of the Safe. */
+  walletAddress?: string
 }
 
 export const overviewKey = (chainId: string, address: string) => `${chainId}:${address.toLowerCase()}`
@@ -125,7 +129,7 @@ const buildSafeLine = (safe: SafeItem, deps: BuildDeps, variant: 'single' | 'chi
     thresholdMixed: false,
     workspaces: variant === 'child' ? [] : (deps.safeSpaces[overviewKey(chainId, address)] ?? []),
     pending: overview?.queued ?? 0,
-    awaitingConfirmation: overview?.awaitingConfirmation ?? 0,
+    awaitingConfirmation: getOwnerAwaitingConfirmations(overview, deps.walletAddress),
     balance: overview?.fiatTotal,
     href: chain ? deps.getHref(chain, address) : undefined,
     contextMenu: {
@@ -165,7 +169,10 @@ const buildMultiGroup = (item: MultiChainSafeItem, deps: BuildDeps): AccountGrou
   const children = safes.map((s) => buildSafeLine(s, deps, 'child'))
 
   const pending = overviewsForItem.reduce((sum, o) => sum + (o?.queued ?? 0), 0)
-  const awaitingConfirmation = overviewsForItem.reduce((sum, o) => sum + (o?.awaitingConfirmation ?? 0), 0)
+  const awaitingConfirmation = overviewsForItem.reduce(
+    (sum, o) => sum + getOwnerAwaitingConfirmations(o, deps.walletAddress),
+    0,
+  )
   const fiatValues = overviewsForItem.filter((o): o is SafeOverview => Boolean(o)).map((o) => Number(o.fiatTotal))
   const hasReplayableSafe = safes.some((s) => {
     const undeployed = deps.undeployedSafes[s.chainId]?.[s.address]
@@ -243,6 +250,7 @@ export function useSafeAccountRows(
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
   const { configs } = useChains()
   const { safeSpaces } = useSafeSpaces()
+  const { address: walletAddress } = useWallet() ?? {}
 
   const chainMap = useMemo(
     () => Object.fromEntries(configs.map((c) => [c.chainId, c])) as Record<string, Chain>,
@@ -258,11 +266,12 @@ export function useSafeAccountRows(
       undeployedSafes,
       chainMap,
       getHref,
+      walletAddress,
     }
     return items.map((item) =>
       isMultiChainSafeItem(item) ? buildMultiGroup(item, deps) : buildSingleGroup(item, deps),
     )
-  }, [items, overviewsByKey, safeSpaces, undeployedSafes, chainMap, getHref])
+  }, [items, overviewsByKey, safeSpaces, undeployedSafes, chainMap, getHref, walletAddress])
 
   return { groups }
 }
