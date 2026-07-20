@@ -17,7 +17,7 @@ const meta = {
     },
     size: {
       control: 'select',
-      options: ['default', 'sm', 'xs', 'lg', 'action', 'submit', 'xl', 'icon', 'icon-sm', 'icon-xs', 'icon-lg'],
+      options: ['default', 'sm', 'lg', 'action', 'submit', 'xl', 'icon', 'icon-sm', 'icon-xs'],
     },
     disabled: {
       control: 'boolean',
@@ -51,7 +51,6 @@ export const AllVariants: Story = {
       <div>
         <h3 className="mb-4 text-lg font-semibold">Sizes</h3>
         <div className="flex flex-wrap items-center gap-4">
-          <Button size="xs">Extra Small</Button>
           <Button size="sm">Small</Button>
           <Button size="default">Default</Button>
           <Button size="lg">Large</Button>
@@ -102,9 +101,6 @@ export const AllVariants: Story = {
           </Button>
           <Button size="icon" variant="outline">
             <Plus className="size-4" />
-          </Button>
-          <Button size="icon-lg" variant="outline">
-            <Plus className="size-5" />
           </Button>
         </div>
       </div>
@@ -157,9 +153,6 @@ export const AllVariants: Story = {
           {(['default', 'secondary', 'outline', 'ghost', 'destructive'] as const).map((variant) => (
             <div key={variant} className="flex items-center gap-4">
               <span className="w-24 text-sm text-muted-foreground">{variant}</span>
-              <Button variant={variant} size="xs">
-                XS
-              </Button>
               <Button variant={variant} size="sm">
                 SM
               </Button>
@@ -355,17 +348,9 @@ export const Guidelines: Story = {
                     </Button>,
                   ],
                   [
-                    'xs',
-                    'h-6',
-                    'Very dense contexts (chip / tag-like)',
-                    <Button key="s-xs" size="xs">
-                      XS
-                    </Button>,
-                  ],
-                  [
                     'icon*',
                     'square',
-                    'Icon-only; match the neighbouring text button (icon-sm↔sm, icon↔default, icon-lg↔lg)',
+                    'Icon-only; match the neighbouring text button (icon-sm↔sm, icon↔default)',
                     <Button key="s-icon" size="icon-sm" variant="outline">
                       <Plus />
                     </Button>,

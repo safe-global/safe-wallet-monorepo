@@ -39,11 +39,11 @@ describe('SelectTrigger', () => {
     expect(trigger).toHaveClass('data-[size=default]:h-9')
   })
 
-  it('drives height off the data-size attribute (lg → h-10)', () => {
-    const trigger = renderTrigger({ size: 'lg' })
+  it('drives height off the data-size attribute (sm → h-8)', () => {
+    const trigger = renderTrigger({ size: 'sm' })
 
     expect(trigger).toBeInTheDocument()
-    expect(trigger).toHaveAttribute('data-size', 'lg')
-    expect(trigger).toHaveClass('data-[size=lg]:h-10')
+    expect(trigger).toHaveAttribute('data-size', 'sm')
+    expect(trigger).toHaveClass('data-[size=sm]:h-8')
   })
 })

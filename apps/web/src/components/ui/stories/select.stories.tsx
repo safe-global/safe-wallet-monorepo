@@ -68,16 +68,6 @@ export const AllVariants: Story = {
               <SelectItem value="option-3">Option 3</SelectItem>
             </SelectContent>
           </Select>
-          <Select defaultValue="option-1" items={OPTION_ITEMS}>
-            <SelectTrigger size="lg">
-              <SelectValue placeholder="Large" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="option-1">Option 1</SelectItem>
-              <SelectItem value="option-2">Option 2</SelectItem>
-              <SelectItem value="option-3">Option 3</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       </div>
 
