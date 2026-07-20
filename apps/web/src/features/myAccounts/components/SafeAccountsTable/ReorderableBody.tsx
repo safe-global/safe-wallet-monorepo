@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { reorderByKey } from '@/utils/reorder'
 import type { SafeAccountColumn } from './columns'
 import type { AccountGroup, AccountLine } from './useSafeAccountRows'
@@ -25,6 +26,8 @@ type ReorderableBodyProps = {
   onSelectToggle?: (line: AccountLine, nextChecked: boolean) => void
   /** Fired on drop with the reordered top-level account addresses, in display order. */
   onReorder: (orderedAddresses: string[]) => void
+  /** Reports a row's lazily-fetched Safe overviews up to the table. */
+  onOverviewsLoaded?: (overviews: SafeOverview[]) => void
 }
 
 /** Toggles a group's expanded state, returning a new set (parent keys are stable across reorders). */
@@ -54,6 +57,7 @@ const ReorderableBody = ({
   getCheckbox,
   onSelectToggle,
   onReorder,
+  onOverviewsLoaded,
 }: ReorderableBodyProps) => {
   // Remembers what was open across a drag: collapsing must happen before dnd measures the rows.
   const expandedBeforeDrag = useRef<Set<string>>(new Set())
@@ -113,6 +117,7 @@ const ReorderableBody = ({
                           rowDraggableProps={dragProvided.draggableProps}
                           dragHandleProps={dragProvided.dragHandleProps}
                           isDragging={snapshot.isDragging}
+                          onOverviewsLoaded={onOverviewsLoaded}
                         />
                       )
 

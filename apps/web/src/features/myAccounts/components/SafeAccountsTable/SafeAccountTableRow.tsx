@@ -1,9 +1,13 @@
-import { type MouseEvent, type ReactNode } from 'react'
+import { useMemo, type MouseEvent, type ReactNode } from 'react'
 import type { DraggableProvidedDraggableProps, DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import TableCell from '@mui/material/TableCell'
 import TableRow from '@mui/material/TableRow'
+import { useForkRef } from '@mui/material/utils'
+import type { SafeItem } from '@/hooks/safes'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { useRowOverviews } from './useRowOverviews'
 import { Badge } from '@/components/ui/badge'
 import { GripVertical, TriangleAlert } from 'lucide-react'
 import Identicon from '@/components/common/Identicon'
@@ -55,6 +59,8 @@ type SafeAccountTableRowProps = {
   rowRef?: (element: HTMLElement | null) => void
   rowDraggableProps?: DraggableProvidedDraggableProps
   isDragging?: boolean
+  /** Reports this row's lazily-fetched Safe overviews up to the table so it can fill balance/threshold. */
+  onOverviewsLoaded?: (overviews: SafeOverview[]) => void
 }
 
 const HighSimilarityBadge = () => (
@@ -346,8 +352,19 @@ const SafeAccountTableRow = ({
   rowRef,
   rowDraggableProps,
   isDragging,
+  onOverviewsLoaded,
 }: SafeAccountTableRowProps) => {
   const router = useRouter()
+
+  // A group parent covers its per-chain safes, a single/child its own. Children don't fetch — the
+  // parent already loaded them (enabled = variant !== 'child').
+  const rowSafes = useMemo<SafeItem[]>(
+    () => (line.variant === 'group' ? (line.networks ?? []) : [line.source as SafeItem]),
+    [line],
+  )
+  const observerRef = useRowOverviews(rowSafes, line.variant !== 'child', onOverviewsLoaded)
+  // Compose the visibility observer ref with the drag-and-drop ref (only set in reorder mode).
+  const setRowRef = useForkRef(observerRef, rowRef)
 
   // In selection mode a leaf row is one big checkbox — clicking anywhere on it toggles selection
   // (except affordances that stop propagation: the checkbox, actions, copy and explorer link).
@@ -387,7 +404,7 @@ const SafeAccountTableRow = ({
 
   const rowEl = (
     <TableRow
-      ref={rowRef}
+      ref={setRowRef}
       {...rowDraggableProps}
       data-testid="account-table-row"
       data-variant={line.variant}

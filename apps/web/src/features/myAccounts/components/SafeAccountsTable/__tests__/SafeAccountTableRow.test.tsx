@@ -5,6 +5,8 @@ import { SELECT_COLUMN, type SafeAccountColumn } from '../columns'
 import type { AccountLine } from '../useSafeAccountRows'
 
 // Keep the heavy per-cell widgets out of the way; this suite covers row-level link/selection wiring.
+// Stub the lazy overview fetch — its own suite covers it (and it needs an IntersectionObserver).
+jest.mock('../useRowOverviews', () => ({ useRowOverviews: () => ({ current: null }) }))
 jest.mock('@/components/common/Identicon', () => ({ __esModule: true, default: () => <div data-testid="identicon" /> }))
 jest.mock('../../AccountItem', () => ({
   AccountItem: { Icon: () => null, ChainBadge: () => null, ContextMenu: () => null },
