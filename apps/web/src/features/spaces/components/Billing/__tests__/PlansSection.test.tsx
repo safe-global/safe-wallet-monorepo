@@ -1,53 +1,59 @@
-import { render, screen, fireEvent, within } from '@/tests/test-utils'
+import { render, screen } from '@/tests/test-utils'
 import PlansSection from '../sections/PlansSection'
-import { BillingDataProvider } from '../BillingDataContext'
-import { createStarterBillingState } from '../mocks'
+import { paymentLinkFixture, subscriptionFixture } from '../../../hooks/billing/testFixtures'
 
-const renderSection = () =>
-  render(
-    <BillingDataProvider value={createStarterBillingState()}>
-      <PlansSection />
-    </BillingDataProvider>,
-  )
+const mockStartCheckout = jest.fn()
+const mockUsePaymentLinks = jest.fn()
+const mockUseBillingSubscription = jest.fn()
+
+jest.mock('@/features/spaces/hooks/billing/usePaymentLinks', () => ({
+  usePaymentLinks: () => mockUsePaymentLinks(),
+}))
+jest.mock('@/features/spaces/hooks/billing/useBillingSubscription', () => ({
+  useBillingSubscription: () => mockUseBillingSubscription(),
+}))
+jest.mock('@/features/spaces/hooks/billing/useCheckout', () => ({
+  useCheckout: () => ({ startCheckout: mockStartCheckout, isRedirecting: false, error: false }),
+}))
 
 describe('PlansSection', () => {
-  it('renders the heading, compare link and one card per plan group', () => {
-    renderSection()
-
-    expect(screen.getByRole('heading', { name: 'Plans' })).toBeInTheDocument()
-    expect(screen.getByText('Compare all features')).toBeInTheDocument()
-    expect(screen.getByTestId('billing-plan-card-starter')).toBeInTheDocument()
-    expect(screen.getByTestId('billing-plan-card-pro')).toBeInTheDocument()
-    expect(screen.getByTestId('billing-plan-card-business')).toBeInTheDocument()
+  beforeEach(() => {
+    mockUsePaymentLinks.mockReturnValue({ paymentLinks: [], isLoading: false })
+    mockUseBillingSubscription.mockReturnValue({ subscription: undefined, isLoading: false })
   })
 
-  it('applies the -10% yearly discount when switching billing period', () => {
-    renderSection()
+  it('renders one card per active payment link', () => {
+    mockUsePaymentLinks.mockReturnValue({
+      paymentLinks: [
+        paymentLinkFixture({ id: 'pl_pro', metadata: { planName: 'Pro', planPrice: '49' } }),
+        paymentLinkFixture({ id: 'pl_biz', metadata: { planName: 'Business', planPrice: '599' } }),
+      ],
+      isLoading: false,
+    })
+    render(<PlansSection />)
 
-    const proCard = screen.getByTestId('billing-plan-card-pro')
-    expect(within(proCard).getByText('$49')).toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: /Yearly/ }))
-
-    expect(within(proCard).getByText('$44')).toBeInTheDocument()
+    expect(screen.getByTestId('billing-plan-card-pl_pro')).toBeInTheDocument()
+    expect(screen.getByTestId('billing-plan-card-pl_biz')).toBeInTheDocument()
+    expect(screen.getByText('Plans')).toBeInTheDocument()
   })
 
-  it('switches the displayed price when selecting a different tier', () => {
-    renderSection()
+  it('marks the active subscription plan as current', () => {
+    mockUsePaymentLinks.mockReturnValue({
+      paymentLinks: [paymentLinkFixture({ id: 'pl_pro' })],
+      isLoading: false,
+    })
+    mockUseBillingSubscription.mockReturnValue({
+      subscription: subscriptionFixture({ plan: { id: 'pl_pro' } as never }),
+      isLoading: false,
+    })
+    render(<PlansSection />)
 
-    const proCard = screen.getByTestId('billing-plan-card-pro')
-    expect(within(proCard).getByText('$49')).toBeInTheDocument()
-
-    fireEvent.click(within(proCard).getByRole('button', { name: 'Pro+' }))
-
-    expect(within(proCard).getByText('$99')).toBeInTheDocument()
+    expect(screen.getByText('Current plan')).toBeInTheDocument()
+    expect(screen.queryByTestId('billing-plan-cta-pl_pro')).not.toBeInTheDocument()
   })
 
-  it('renders the current plan CTA as non-actionable and upgrade CTAs as buttons', () => {
-    renderSection()
-
-    expect(screen.queryByTestId('billing-plan-cta-starter')).not.toBeInTheDocument()
-    expect(screen.getByTestId('billing-plan-cta-pro')).toBeInTheDocument()
-    expect(screen.getByTestId('billing-plan-cta-business')).toBeInTheDocument()
+  it('renders nothing when there are no payment links', () => {
+    render(<PlansSection />)
+    expect(screen.queryByTestId('billing-plans-section')).not.toBeInTheDocument()
   })
 })

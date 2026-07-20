@@ -86,6 +86,7 @@ jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
   useIsAdmin: () => mockIsAdmin,
   useSpaceSafes: () => ({ allSafes: mockSpaceSafes }),
+  useSpaceSafeLimit: () => ({ limit: 40, isLoading: false }),
 }))
 
 const mockAddSafesToSpace = jest.fn()

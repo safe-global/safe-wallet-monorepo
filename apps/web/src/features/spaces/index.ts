@@ -55,6 +55,24 @@ export {
   useCurrentSpaceSafeCount,
   useSpaceSafeCount,
 } from './hooks/useIsCurrentSpaceAtSafeLimit'
+export { useSpaceSafeLimit } from './hooks/billing/useSpaceSafeLimit'
+export { useBillingPage } from './hooks/billing/useBillingPage'
+export { useBillingSubscription } from './hooks/billing/useBillingSubscription'
+export { usePaymentLinks } from './hooks/billing/usePaymentLinks'
+export { useCheckout } from './hooks/billing/useCheckout'
+export { useCheckoutReturn, type CheckoutReturnStatus } from './hooks/billing/useCheckoutReturn'
+export { useManagePlan } from './hooks/billing/useManagePlan'
+export { getBillingState, selectActiveSubscription, type BillingState } from './hooks/billing/subscriptionState'
+export {
+  getPlanFeatures,
+  getPlanName,
+  getPlanPrice,
+  type PlanPrice,
+  getSubscriptionNumberOfSafes,
+  getNumberOfSafes,
+  FREE_NUMBER_OF_SAFES,
+  FEATURE_NUMBER_OF_SAFES,
+} from './hooks/billing/features'
 export { default as useFeatureFlagRedirect } from './hooks/useFeatureFlagRedirect'
 export { default as useFeatureRedirect } from './hooks/useFeatureRedirect'
 export { default as useIsBillingVisible } from './hooks/useIsBillingVisible'

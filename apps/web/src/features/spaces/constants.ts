@@ -11,6 +11,9 @@ export const SAFE_ACCOUNTS_LIMIT = !Number.isNaN(safeAccountsLimitRaw) ? safeAcc
 
 export const SPACES_LIMIT = 10
 
+/** Safe accounts included in a workspace with no paid plan (free tier). */
+export const FREE_NUMBER_OF_SAFES = 1
+
 /** Maximum length of a workspace name. Enforced on both create and rename. */
 export const SPACE_NAME_MAX_LENGTH = 30
 

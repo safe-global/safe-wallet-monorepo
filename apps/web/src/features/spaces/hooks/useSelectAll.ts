@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { useWatch, type Control, type UseFormSetValue } from 'react-hook-form'
 import { type AllSafeItems } from '@/hooks/safes'
-import { SAFE_ACCOUNTS_LIMIT } from '../constants'
+import { useSpaceSafeLimit } from './billing/useSpaceSafeLimit'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../components/SelectSafesOnboarding/constants'
 import { collectSafeKeys, collectParentKeys, getSelectionState } from './selectAllHelpers'
 import type { AddAccountsFormValues } from './useSelectAll.types'
@@ -28,11 +28,11 @@ interface Args {
 
 export function useSelectAll({ visibleTrusted, visibleOwned, control, setValue }: Args) {
   const selectedSafes = useWatch({ control, name: 'selectedSafes' }) ?? {}
+  const { limit } = useSpaceSafeLimit()
   const isAtLimit = useMemo(
     () =>
-      Object.entries(selectedSafes).filter(([k, v]) => v && !k.startsWith(MULTICHAIN_SAFE_KEY_PREFIX)).length >=
-      SAFE_ACCOUNTS_LIMIT,
-    [selectedSafes],
+      Object.entries(selectedSafes).filter(([k, v]) => v && !k.startsWith(MULTICHAIN_SAFE_KEY_PREFIX)).length >= limit,
+    [selectedSafes, limit],
   )
 
   const trustedSelection = useMemo(
@@ -62,7 +62,7 @@ export function useSelectAll({ visibleTrusted, visibleOwned, control, setValue }
         ([k, v]) => v && !k.startsWith(MULTICHAIN_SAFE_KEY_PREFIX) && !scopeIds.has(k),
       ).length
 
-      const remaining = Math.max(0, SAFE_ACCOUNTS_LIMIT - selectedOutsideScope)
+      const remaining = Math.max(0, limit - selectedOutsideScope)
       const orderedIds = safeKeys.map((k) => k.id)
       const allowed = new Set(orderedIds.slice(0, remaining))
 
@@ -80,7 +80,7 @@ export function useSelectAll({ visibleTrusted, visibleOwned, control, setValue }
         setValue(`selectedSafes.${parentId}`, allChecked, { shouldValidate: true })
       })
     },
-    [visibleTrusted, visibleOwned, selectedSafes, setValue],
+    [visibleTrusted, visibleOwned, selectedSafes, setValue, limit],
   )
 
   return { trustedSelection, ownedSelection, handleSelectAll, isAtLimit }
