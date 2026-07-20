@@ -13,7 +13,7 @@ import useOnceVisible from '@/hooks/useOnceVisible'
  * Fetches a row's Safe overview(s) only once the row scrolls into view, reporting the result via
  * `onLoaded`. Undeployed safes are skipped (no overview). Returns the ref to attach to the row.
  */
-export function useRowOverviews(safes: SafeItem[], enabled: boolean, onLoaded?: (overviews: SafeOverview[]) => void) {
+export function useRowOverviews(safes: SafeItem[], enabled: boolean, onLoaded: (overviews: SafeOverview[]) => void) {
   const ref = useRef<HTMLElement | null>(null)
   const isVisible = useOnceVisible(ref)
   const currency = useAppSelector(selectCurrency)
@@ -25,15 +25,19 @@ export function useRowOverviews(safes: SafeItem[], enabled: boolean, onLoaded?: 
     [safes, undeployedSafes],
   )
 
-  const active = enabled && isVisible && Boolean(onLoaded) && deployedSafes.length > 0
+  const active = enabled && isVisible && deployedSafes.length > 0
 
   const { data } = useGetMultipleSafeOverviewsQuery(
     active ? { currency, walletAddress, safes: deployedSafes } : skipToken,
   )
 
+  // Reporting keys off `data` alone (via a ref for the callback), so a genuine load/refetch fires it
+  // exactly once no matter how `onLoaded` is passed — the correctness can't be broken by a caller.
+  const onLoadedRef = useRef(onLoaded)
+  onLoadedRef.current = onLoaded
   useEffect(() => {
-    if (data && data.length > 0) onLoaded?.(data)
-  }, [data, onLoaded])
+    if (data && data.length > 0) onLoadedRef.current(data)
+  }, [data])
 
   return ref
 }

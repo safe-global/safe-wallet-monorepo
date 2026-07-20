@@ -27,7 +27,7 @@ type ReorderableBodyProps = {
   /** Fired on drop with the reordered top-level account addresses, in display order. */
   onReorder: (orderedAddresses: string[]) => void
   /** Reports a row's lazily-fetched Safe overviews up to the table. */
-  onOverviewsLoaded?: (overviews: SafeOverview[]) => void
+  onOverviewsLoaded: (overviews: SafeOverview[]) => void
 }
 
 /** Toggles a group's expanded state, returning a new set (parent keys are stable across reorders). */
@@ -156,6 +156,7 @@ const ReorderableBody = ({
                         checkbox={getCheckbox?.(group, child)}
                         onSelectToggle={onSelectToggle ? (next) => onSelectToggle(child, next) : undefined}
                         showDivider={groupHasDivider && childIndex === group.children.length - 1}
+                        onOverviewsLoaded={onOverviewsLoaded}
                       />
                     ))}
                 </Fragment>

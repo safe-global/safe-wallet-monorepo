@@ -159,8 +159,9 @@ const SafeAccountsTable = ({
 }: SafeAccountsTableProps) => {
   const [overviewsByKey, setOverviewsByKey] = useState<Map<string, SafeOverview>>(new Map())
 
-  // Rows report their lazily-fetched overviews here. Keep the previous map when nothing new arrived,
-  // so a repeated report doesn't churn a re-render.
+  // Rows report their lazily-fetched overviews here. RTK returns a stable object ref per cache entry
+  // (a new ref only on a genuine refetch), so reference equality detects real updates; keep the
+  // previous map when nothing new arrived, so a repeated report doesn't churn a re-render.
   const handleOverviewsLoaded = useCallback((overviews: SafeOverview[]) => {
     setOverviewsByKey((prev) => {
       let changed = false

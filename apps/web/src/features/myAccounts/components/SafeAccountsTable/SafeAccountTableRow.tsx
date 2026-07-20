@@ -60,7 +60,7 @@ type SafeAccountTableRowProps = {
   rowDraggableProps?: DraggableProvidedDraggableProps
   isDragging?: boolean
   /** Reports this row's lazily-fetched Safe overviews up to the table so it can fill balance/threshold. */
-  onOverviewsLoaded?: (overviews: SafeOverview[]) => void
+  onOverviewsLoaded: (overviews: SafeOverview[]) => void
 }
 
 const HighSimilarityBadge = () => (

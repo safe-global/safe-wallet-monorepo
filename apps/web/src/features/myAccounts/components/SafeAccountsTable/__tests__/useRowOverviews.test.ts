@@ -61,10 +61,19 @@ describe('useRowOverviews', () => {
     expect(onLoaded).not.toHaveBeenCalled()
   })
 
-  it('does not fetch when no callback is provided', () => {
-    renderHook(() => useRowOverviews([safeItemBuilder().build()], true))
+  it('reports once while the resolved data keeps a stable reference across re-renders', () => {
+    const data = [overview('1', '0xabc')]
+    querySpy.mockReturnValue({ data } as never)
+    const onLoaded = jest.fn()
+    const safes = [safeItemBuilder().with({ chainId: '1', address: '0xabc' }).build()]
 
-    expect(querySpy).toHaveBeenCalledWith(skipToken)
+    // The table's map merge relies on this: RTK hands back the same `data` ref until a genuine
+    // refetch, so a plain re-render must not re-report already-seen overviews.
+    const { rerender } = renderHook(() => useRowOverviews(safes, true, onLoaded))
+    rerender()
+    rerender()
+
+    expect(onLoaded).toHaveBeenCalledTimes(1)
   })
 
   it('skips counterfactual safes that have no overview', () => {
