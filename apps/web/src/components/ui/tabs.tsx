@@ -1,5 +1,5 @@
 import { Tabs as TabsPrimitive } from '@base-ui/react/tabs'
-import { cva, type VariantProps } from 'class-variance-authority'
+import { cva } from 'class-variance-authority'
 
 import { cn } from '@/utils/cn'
 
@@ -26,7 +26,8 @@ import { cn } from '@/utils/cn'
  * Key Props:
  * - Tabs (Root): `defaultValue`, `value`, `onValueChange`
  * - Tabs (Root): `orientation` ('horizontal' | 'vertical')
- * - TabsList: `variant` ('default' | 'line' | 'nav' | 'segmented')
+ * - TabsList: `variant` ('underline' | 'toggle'); on `underline`, `tone` ('brand' | 'neutral');
+ *   on `toggle`, `size` ('default' | 'lg')
  * - TabsTrigger: `value`, `disabled`
  */
 
@@ -41,37 +42,57 @@ function Tabs({ className, orientation = 'horizontal', ...props }: TabsPrimitive
   )
 }
 
+// Two public tab families:
+//  - `underline` — flush-underline tabs. `tone="brand"` is the bold, primary-coloured page nav
+//    (NavTabs: Assets/Settings/Transactions); `tone="neutral"` (default) is the lighter in-content
+//    look (Spaces address book, members).
+//  - `toggle` — pill-on-track switch. `size="default"` is the compact muted-track switch (SecurityHub
+//    drawer); `size="lg"` is the large paper-track welcome switch (Accounts/Workspaces).
+// Each (variant, tone|size) pair maps to one internal `look`, emitted as data-variant so TabsTrigger
+// (styled off the list's data-variant) remains the single source of truth for the per-look treatment.
 const tabsListVariants = cva(
   'rounded-lg p-[3px] group-data-horizontal/tabs:h-9 group/tabs-list text-muted-foreground inline-flex w-fit items-center justify-center group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col',
   {
     variants: {
-      variant: {
+      look: {
         default: 'bg-muted',
         line: 'h-auto gap-1 rounded-none bg-transparent p-0',
-        // Top-level page navigation (Assets, Settings, Transactions…): wider gap,
-        // brand-coloured triggers with a flush underline. See TabsTrigger below.
         nav: 'h-auto gap-6 rounded-none bg-transparent p-0',
-        // Segmented pill toggle on a paper track (welcome Accounts/Workspaces switch):
-        // large rounded pills, active pill gets the secondary surface. See TabsTrigger below.
-        segmented: 'h-auto gap-1 bg-[var(--color-background-paper)] p-1',
+        // group-data-horizontal:h-auto overrides the base's horizontal h-9 (same variant prefix so
+        // twMerge collapses them) — the track must grow around the h-9 pills plus the p-1 gutter.
+        segmented: 'h-auto group-data-horizontal/tabs:h-auto gap-1 bg-[var(--color-background-paper)] p-1',
       },
     },
     defaultVariants: {
-      variant: 'default',
+      look: 'default',
     },
   },
 )
 
+type TabsListVariant = 'underline' | 'toggle'
+type TabsListTone = 'brand' | 'neutral'
+type TabsListSize = 'default' | 'lg'
+
+const resolveLook = (variant: TabsListVariant, tone: TabsListTone, size: TabsListSize) =>
+  variant === 'underline' ? (tone === 'brand' ? 'nav' : 'line') : size === 'lg' ? 'segmented' : 'default'
+
 function TabsList({
   className,
-  variant = 'default',
+  variant = 'toggle',
+  tone = 'neutral',
+  size = 'default',
   ...props
-}: TabsPrimitive.List.Props & VariantProps<typeof tabsListVariants>) {
+}: TabsPrimitive.List.Props & {
+  variant?: TabsListVariant
+  tone?: TabsListTone
+  size?: TabsListSize
+}) {
+  const look = resolveLook(variant, tone, size)
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
-      data-variant={variant}
-      className={cn(tabsListVariants({ variant }), className)}
+      data-variant={look}
+      className={cn(tabsListVariants({ look }), className)}
       {...props}
     />
   )

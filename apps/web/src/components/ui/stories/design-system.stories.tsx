@@ -732,13 +732,14 @@ export const Tabs_: Story = {
       title="Tabs"
       lead={
         <>
-          Switch between views. All four <code>variant</code>s are in use — each in a specific place, linked below.
+          Switch between views. Two families: <code>underline</code> (page nav &amp; in-content) and <code>toggle</code>{' '}
+          (compact &amp; large switches). Each treatment below is one of those two.
         </>
       }
     >
-      <Row label="nav" note="page navigation (NavTabs) — Assets / Settings / Transactions headers">
+      <Row label="underline · tone=brand" note="bold page navigation (NavTabs) — Assets / Settings / Transactions">
         <Tabs defaultValue="a">
-          <TabsList variant="nav">
+          <TabsList variant="underline" tone="brand">
             <TabsTrigger value="a">Home</TabsTrigger>
             <TabsTrigger value="b">Assets</TabsTrigger>
             <TabsTrigger value="c">Transactions</TabsTrigger>
@@ -747,19 +748,9 @@ export const Tabs_: Story = {
         <StoryLink title="Pages/Core/Balances">Assets header</StoryLink>
       </Row>
 
-      <Row label="segmented" note="large pill toggle — the Accounts / Workspaces switch (AccountsNavigation)">
+      <Row label="underline (neutral)" note="lighter in-content tabs — Spaces address book & members">
         <Tabs defaultValue="a">
-          <TabsList variant="segmented">
-            <TabsTrigger value="a">Accounts</TabsTrigger>
-            <TabsTrigger value="b">Workspaces</TabsTrigger>
-          </TabsList>
-        </Tabs>
-        <StoryLink title="Pages/Onboarding/MyAccounts">My accounts</StoryLink>
-      </Row>
-
-      <Row label="line" note="underlined content tabs — Spaces address book & members">
-        <Tabs defaultValue="a">
-          <TabsList variant="line">
+          <TabsList variant="underline">
             <TabsTrigger value="a">Contacts</TabsTrigger>
             <TabsTrigger value="b">Pending</TabsTrigger>
           </TabsList>
@@ -768,7 +759,17 @@ export const Tabs_: Story = {
         <StoryLink title="Pages/Spaces/Members">Members</StoryLink>
       </Row>
 
-      <Row label="default" note="boxed toggle on a muted track — SecurityHub report drawer (least used)">
+      <Row label="toggle · size=lg" note="large pill toggle — the Accounts / Workspaces switch (AccountsNavigation)">
+        <Tabs defaultValue="a">
+          <TabsList variant="toggle" size="lg">
+            <TabsTrigger value="a">Accounts</TabsTrigger>
+            <TabsTrigger value="b">Workspaces</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <StoryLink title="Pages/Onboarding/MyAccounts">My accounts</StoryLink>
+      </Row>
+
+      <Row label="toggle (default)" note="compact pill toggle on a muted track — SecurityHub report drawer">
         <Tabs defaultValue="a">
           <TabsList>
             <TabsTrigger value="a">Overview</TabsTrigger>

@@ -41,7 +41,7 @@ const AccountsNavigation = () => {
 
   return (
     <Tabs value={activeUrl}>
-      <TabsList variant="segmented" aria-label="Accounts navigation">
+      <TabsList variant="toggle" size="lg" aria-label="Accounts navigation">
         {navItems.map((item) => (
           <TabsTrigger
             key={item.url}

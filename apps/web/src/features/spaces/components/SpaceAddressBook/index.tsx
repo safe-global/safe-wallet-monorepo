@@ -112,7 +112,7 @@ const SpaceAddressBook = () => {
             setActiveTab(val)
           }}
         >
-          <TabsList variant="line" className="flex-wrap mb-4">
+          <TabsList variant="underline" className="flex-wrap mb-4">
             <TabsTrigger value="workspace" className="cursor-pointer">
               <Tooltip>
                 <TooltipTrigger render={<span />}>Workspace contacts ({addressBookItems.length})</TooltipTrigger>
