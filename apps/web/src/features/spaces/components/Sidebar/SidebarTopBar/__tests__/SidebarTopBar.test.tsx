@@ -3,10 +3,19 @@ import { SidebarTopBar } from '../SidebarTopBar'
 import { AppRoutes } from '@/config/routes'
 
 const mockUseRouter = jest.fn()
-const mockUseIsRequireLoginEnabled = jest.fn()
+const mockUseSafeAddressFromUrl = jest.fn()
+const mockUseIsSpaceRoute = jest.fn()
 
 jest.mock('next/router', () => ({
   useRouter: () => mockUseRouter(),
+}))
+
+jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
+  useSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
+}))
+
+jest.mock('@/hooks/useIsSpaceRoute', () => ({
+  useIsSpaceRoute: () => mockUseIsSpaceRoute(),
 }))
 
 jest.mock('@/components/ui/sidebar', () => ({
@@ -21,22 +30,27 @@ jest.mock('@/components/ui/sidebar', () => ({
 }))
 
 jest.mock('@/components/common/SafeLogo', () => {
-  const MockSafeLogo = ({ href, 'data-testid': testId }: { href?: string; 'data-testid'?: string }) => (
-    <a data-testid={testId} href={href} />
-  )
+  const MockSafeLogo = ({
+    href,
+    showHomeLabel,
+    'data-testid': testId,
+  }: {
+    href?: string
+    showHomeLabel?: boolean
+    'data-testid'?: string
+  }) => <a data-testid={testId} href={href} data-home-label={String(Boolean(showHomeLabel))} />
   MockSafeLogo.displayName = 'SafeLogo'
   return { __esModule: true, default: MockSafeLogo }
 })
-
-jest.mock('@/hooks/useIsRequireLoginEnabled', () => ({
-  useIsRequireLoginEnabled: () => mockUseIsRequireLoginEnabled(),
-}))
 
 describe('SidebarTopBar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.accounts })
-    mockUseIsRequireLoginEnabled.mockReturnValue(false)
+    mockUseSafeAddressFromUrl.mockReturnValue('')
+    mockUseIsSpaceRoute.mockReturnValue(false)
+    const { useSidebar } = require('@/components/ui/sidebar')
+    useSidebar.mockReturnValue({ state: 'expanded' })
   })
 
   it('renders all required elements', () => {
@@ -69,37 +83,54 @@ describe('SidebarTopBar', () => {
     expect(topBar).toHaveClass('min-h-16')
   })
 
-  it('passes /welcome href to SafeLogo when on /welcome/accounts', () => {
-    mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.accounts })
-
-    render(<SidebarTopBar />)
-
-    expect(screen.getByTestId('logo-container')).toHaveAttribute('href', AppRoutes.welcome.index)
-  })
-
-  it('passes /welcome/accounts href to SafeLogo when not on /welcome/accounts', () => {
-    mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.index })
+  it('links the logo to the accounts view outside a safe or space', () => {
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.spaces })
 
     render(<SidebarTopBar />)
 
     expect(screen.getByTestId('logo-container')).toHaveAttribute('href', AppRoutes.welcome.accounts)
   })
 
-  it('passes /welcome/spaces href to SafeLogo when the require-login gate is on', () => {
-    mockUseIsRequireLoginEnabled.mockReturnValue(true)
+  it('shows the Home label pill linking to /welcome/accounts on an individual safe', () => {
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.home })
+    mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
+
+    render(<SidebarTopBar />)
+
+    const logo = screen.getByTestId('logo-container')
+    expect(logo).toHaveAttribute('data-home-label', 'true')
+    expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
+  })
+
+  it('shows the Home label pill inside a space route', () => {
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.spaces.index })
+    mockUseIsSpaceRoute.mockReturnValue(true)
+
+    render(<SidebarTopBar />)
+
+    const logo = screen.getByTestId('logo-container')
+    expect(logo).toHaveAttribute('data-home-label', 'true')
+    expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
+  })
+
+  it('does not show the Home label pill when the sidebar is collapsed', () => {
+    const { useSidebar } = require('@/components/ui/sidebar')
+    useSidebar.mockReturnValue({ state: 'collapsed' })
+    mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
+
+    render(<SidebarTopBar />)
+
+    // Still links home, but as the plain logo (no room for the pill when collapsed).
+    const logo = screen.getByTestId('logo-container')
+    expect(logo).toHaveAttribute('data-home-label', 'false')
+    expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
+  })
+
+  it('keeps the plain logo on the welcome accounts view (no safe, no space)', () => {
     mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.accounts })
 
     render(<SidebarTopBar />)
 
-    expect(screen.getByTestId('logo-container')).toHaveAttribute('href', AppRoutes.welcome.spaces)
-  })
-
-  it('falls back to the legacy toggle when the require-login gate is still loading', () => {
-    mockUseIsRequireLoginEnabled.mockReturnValue(undefined)
-    mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.index })
-
-    render(<SidebarTopBar />)
-
-    expect(screen.getByTestId('logo-container')).toHaveAttribute('href', AppRoutes.welcome.accounts)
+    expect(screen.getByTestId('logo-container')).toHaveAttribute('data-home-label', 'false')
   })
 })

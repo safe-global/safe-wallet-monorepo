@@ -58,13 +58,6 @@ describe('Multichain add network tests', { defaultCommandTimeout: 60000 }, () =>
     safeNav.verifyNotActivatedSafeExists()
   })
 
-  // TODO clarify behavior in the new UI:
-  it.skip('Verify that "Add network" button in Add another network modal is disabled when network is not selected', () => {
-    sideBar.openSidebar()
-    sideBar.clickOnAddNetworkBtn()
-    sideBar.getModalAddNetworkBtn().should('be.disabled')
-  })
-
   it('Verify that already added network is not shown in the add network list', () => {
     network.clickChainNavigationButton()
     network.clickAllNetworksAccordion()

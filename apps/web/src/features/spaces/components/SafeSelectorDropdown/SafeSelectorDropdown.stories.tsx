@@ -261,7 +261,7 @@ export const LoadingWithHeaderFooter: Story = {
   render: () => {
     const header = (
       <div className="flex items-center gap-1 px-4 pt-3 pb-2">
-        <span className="text-sm font-semibold text-secondary-foreground">Trusted Safes</span>
+        <span className="text-sm font-semibold text-secondary-foreground">My accounts</span>
       </div>
     )
     const footer = (
@@ -315,7 +315,7 @@ export const ErrorWithHeaderFooter: Story = {
   render: () => {
     const header = (
       <div className="flex items-center gap-1 px-4 pt-3 pb-2">
-        <span className="text-sm font-semibold text-secondary-foreground">Trusted Safes</span>
+        <span className="text-sm font-semibold text-secondary-foreground">My accounts</span>
       </div>
     )
     const footer = (

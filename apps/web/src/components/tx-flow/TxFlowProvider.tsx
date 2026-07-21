@@ -32,7 +32,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { isGtfSafePaid } from '@/features/gtf/utils/isGtfSafePaid'
+import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 
 export type TxFlowContextType<T extends unknown = any> = {

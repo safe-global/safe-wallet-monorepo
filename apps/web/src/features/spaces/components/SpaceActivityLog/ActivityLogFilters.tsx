@@ -1,9 +1,11 @@
-import { endOfDay, format, isValid, startOfDay } from 'date-fns'
+import type { ReactNode } from 'react'
+import { format } from 'date-fns'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import useGetSpaceAuditLogActors from '../../hooks/useGetSpaceAuditLogActors'
 import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
+import { getDateFilterValidation, toDateInputValue, toIsoBound } from './dateFilters'
 
 export type ActivityLogFilterState = {
   actorUserId?: number
@@ -22,18 +24,49 @@ const SORT_LABELS: Record<'asc' | 'desc', string> = {
   asc: 'Oldest first',
 }
 
-function toIsoBound(dateValue: string, isUpperBound: boolean): string | undefined {
-  if (!dateValue) return undefined
-  const date = new Date(`${dateValue}T00:00:00`)
-  if (!isValid(date)) return undefined
-  return (isUpperBound ? endOfDay(date) : startOfDay(date)).toISOString()
+/** A labelled filter column shared by every control in the row. */
+function FilterField({ id, label, children }: { id: string; label: string; children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor={id} className="text-muted-foreground text-xs">
+        {label}
+      </Label>
+      {children}
+    </div>
+  )
 }
 
-/** ISO bound → the `YYYY-MM-DD` (local) value a date input expects. */
-function toDateInputValue(isoBound: string | undefined): string {
-  if (!isoBound) return ''
-  const date = new Date(isoBound)
-  return isValid(date) ? format(date, 'yyyy-MM-dd') : ''
+function DateFilter({
+  id,
+  label,
+  value,
+  min,
+  max,
+  error,
+  onValueChange,
+}: {
+  id: string
+  label: string
+  value: string
+  min?: string
+  max?: string
+  error?: string
+  onValueChange: (value: string) => void
+}) {
+  return (
+    <FilterField id={id} label={label}>
+      <Input
+        id={id}
+        type="date"
+        className="bg-card dark:bg-card border-input w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark] [&~p]:w-40 [&~p]:text-xs"
+        value={value}
+        min={min}
+        max={max}
+        error={error}
+        onChange={(event) => onValueChange(event.target.value)}
+      />
+    </FilterField>
+  )
 }
 
 function ActivityLogFilters({
@@ -54,19 +87,23 @@ function ActivityLogFilters({
   const selectedActor = actors.find((actor) => actor.actorUserId === filters.actorUserId)
   const sortDirection = filters.sortDirection ?? 'desc'
 
+  // Activity is historical, so neither bound may be in the future.
+  const today = format(new Date(), 'yyyy-MM-dd')
+  const validation = getDateFilterValidation(filters.createdAtGte, filters.createdAtLte, today)
+  // Cap From at the To date, but never let a (typed) future To re-open it past today.
+  const toDateBound = toDateInputValue(filters.createdAtLte)
+  const fromDateMax = toDateBound && toDateBound < today ? toDateBound : today
+
   return (
-    <div data-testid="activity-log-filters" className="mb-4 flex flex-wrap items-end gap-3">
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="activity-actor-filter" className="text-muted-foreground text-xs">
-          Member
-        </Label>
+    <div data-testid="activity-log-filters" className="mb-4 flex flex-wrap items-start gap-3">
+      <FilterField id="activity-actor-filter" label="Member">
         <Select
           value={filters.actorUserId !== undefined ? String(filters.actorUserId) : ALL_ACTORS}
           onValueChange={(value) =>
             onFiltersChange({ ...filters, actorUserId: value === ALL_ACTORS ? undefined : Number(value) })
           }
         >
-          <SelectTrigger id="activity-actor-filter" className="bg-card w-48 cursor-pointer rounded-lg">
+          <SelectTrigger id="activity-actor-filter" className="bg-card dark:bg-card w-48 cursor-pointer rounded-lg">
             <SelectValue placeholder={ALL_ACTORS_LABEL}>
               <span className="truncate">
                 {selectedActor ? getActorLabel(selectedActor.actorUserId, selectedActor.actor) : ALL_ACTORS_LABEL}
@@ -82,43 +119,33 @@ function ActivityLogFilters({
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </FilterField>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="activity-from-filter" className="text-muted-foreground text-xs">
-          From
-        </Label>
-        <Input
-          id="activity-from-filter"
-          type="date"
-          className="bg-card border-input w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark]"
-          value={toDateInputValue(filters.createdAtGte)}
-          onChange={(event) => onFiltersChange({ ...filters, createdAtGte: toIsoBound(event.target.value, false) })}
-        />
-      </div>
+      <DateFilter
+        id="activity-from-filter"
+        label="From"
+        value={toDateInputValue(filters.createdAtGte)}
+        max={fromDateMax}
+        error={validation.fromError}
+        onValueChange={(value) => onFiltersChange({ ...filters, createdAtGte: toIsoBound(value, false) })}
+      />
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="activity-to-filter" className="text-muted-foreground text-xs">
-          To
-        </Label>
-        <Input
-          id="activity-to-filter"
-          type="date"
-          className="bg-card border-input w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark]"
-          value={toDateInputValue(filters.createdAtLte)}
-          onChange={(event) => onFiltersChange({ ...filters, createdAtLte: toIsoBound(event.target.value, true) })}
-        />
-      </div>
+      <DateFilter
+        id="activity-to-filter"
+        label="To"
+        value={toDateInputValue(filters.createdAtLte)}
+        min={toDateInputValue(filters.createdAtGte) || undefined}
+        max={today}
+        error={validation.toError}
+        onValueChange={(value) => onFiltersChange({ ...filters, createdAtLte: toIsoBound(value, true) })}
+      />
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="activity-sort-filter" className="text-muted-foreground text-xs">
-          Sort
-        </Label>
+      <FilterField id="activity-sort-filter" label="Sort">
         <Select
           value={sortDirection}
           onValueChange={(value) => onFiltersChange({ ...filters, sortDirection: value === 'asc' ? 'asc' : undefined })}
         >
-          <SelectTrigger id="activity-sort-filter" className="bg-card w-40 cursor-pointer rounded-lg">
+          <SelectTrigger id="activity-sort-filter" className="bg-card dark:bg-card w-40 cursor-pointer rounded-lg">
             <SelectValue>{SORT_LABELS[sortDirection]}</SelectValue>
           </SelectTrigger>
           <SelectContent alignItemWithTrigger={false} align="start">
@@ -126,7 +153,7 @@ function ActivityLogFilters({
             <SelectItem value="asc">{SORT_LABELS.asc}</SelectItem>
           </SelectContent>
         </Select>
-      </div>
+      </FilterField>
     </div>
   )
 }

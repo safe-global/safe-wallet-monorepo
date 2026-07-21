@@ -13,8 +13,9 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import classnames from 'classnames'
 import { type MultiChainSafeItem, type SafeItem } from '@/hooks/safes'
 import { AddNetworkButton } from '../AddNetworkButton'
-import MultiAccountContextMenu from '@/components/sidebar/SafeListContextMenu/MultiAccountContextMenu'
+import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
+import { getOwnerAwaitingConfirmations } from '@/utils/transaction-guards'
 
 function MultiChainSubItem({
   safeItem,
@@ -25,15 +26,25 @@ function MultiChainSubItem({
   safeOverview?: SafeOverview
   onLinkClick?: () => void
 }) {
-  const { chain, href, threshold, owners, elementRef, trackingLabel, isCurrentSafe, undeployedSafe, isActivating } =
-    useSafeItemData(safeItem, {
-      safeOverview,
-    })
+  const {
+    chain,
+    href,
+    threshold,
+    owners,
+    elementRef,
+    trackingLabel,
+    isCurrentSafe,
+    undeployedSafe,
+    isActivating,
+    walletAddress,
+  } = useSafeItemData(safeItem, {
+    safeOverview,
+  })
+
+  const awaitingConfirmation = getOwnerAwaitingConfirmations(safeOverview, walletAddress)
 
   const hasQueuedItems =
-    !safeItem.isReadOnly &&
-    safeOverview &&
-    ((safeOverview.queued ?? 0) > 0 || (safeOverview.awaitingConfirmation ?? 0) > 0)
+    !safeItem.isReadOnly && safeOverview && ((safeOverview.queued ?? 0) > 0 || awaitingConfirmation > 0)
 
   return (
     <AccountItem.Link
@@ -61,7 +72,7 @@ function MultiChainSubItem({
             safeAddress={safeOverview.address.value}
             chainShortName={chain?.shortName || ''}
             queued={safeOverview.queued ?? 0}
-            awaitingConfirmation={safeOverview.awaitingConfirmation ?? 0}
+            awaitingConfirmation={awaitingConfirmation}
           />
         )}
       </AccountItem.Info>

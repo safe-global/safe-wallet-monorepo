@@ -139,8 +139,10 @@ describe('ImportAddressBookDialog', () => {
     jest.useRealTimers()
   })
 
-  it('shows an inline error when the mutation returns an error', async () => {
-    upsertionSpyFn.mockResolvedValue({ error: { status: 500 } })
+  it('bubbles the backend error message inline when the mutation returns an error', async () => {
+    upsertionSpyFn.mockResolvedValue({
+      error: { status: 422, data: { message: 'name must contain only valid characters' } },
+    })
 
     mockedUseAllAddressBooks.mockReturnValue({
       '1': { '0x123': 'Alice' },
@@ -152,9 +154,38 @@ describe('ImportAddressBookDialog', () => {
     await userEvent.click(screen.getByText(/Import contacts \(1\)/i))
 
     await waitFor(() => {
-      expect(screen.getByText(/Something went wrong\. Please try again\./i)).toBeInTheDocument()
+      expect(screen.getByText(/name must contain only valid characters/i)).toBeInTheDocument()
     })
     expect(screen.getByRole('button', { name: /Import contacts \(1\)/i })).not.toBeDisabled()
+  })
+
+  it('disables a contact whose name has invalid characters and keeps it unselectable', async () => {
+    mockedUseAllAddressBooks.mockReturnValue({
+      '1': {
+        '0x123': 'Alice',
+        '0x456': 'Bad/Name',
+      },
+    })
+
+    render(<ImportAddressBookDialog handleClose={jest.fn()} />)
+
+    const invalidRow = screen.getByText('Bad/Name').closest('[role="button"]') as HTMLElement
+    expect(invalidRow).toHaveAttribute('aria-disabled', 'true')
+
+    await userEvent.click(invalidRow)
+    expect(screen.getByRole('button', { name: /Import contacts \(0\)/i })).toBeInTheDocument()
+  })
+
+  it('explains in a tooltip why an invalid-name contact cannot be imported', async () => {
+    mockedUseAllAddressBooks.mockReturnValue({
+      '1': { '0x456': 'Bad/Name' },
+    })
+
+    render(<ImportAddressBookDialog handleClose={jest.fn()} />)
+
+    await userEvent.hover(screen.getByText('Bad/Name').closest('[role="button"]')?.parentElement as HTMLElement)
+
+    await waitFor(() => expect(screen.getByText(/Rename this contact to add it to the workspace/)).toBeInTheDocument())
   })
 
   it('filters the contact list based on the search input', async () => {

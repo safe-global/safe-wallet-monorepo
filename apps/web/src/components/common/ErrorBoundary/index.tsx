@@ -47,7 +47,7 @@ const ErrorBoundary = ({ error, componentStack }: ErrorBoundaryProps) => {
           </>
         )}
         <Link
-          href={AppRoutes.welcome.index}
+          href={AppRoutes.index}
           color="primary"
           sx={{
             mt: 2,

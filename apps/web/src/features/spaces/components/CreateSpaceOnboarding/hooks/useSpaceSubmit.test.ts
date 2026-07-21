@@ -212,3 +212,45 @@ describe('useSpaceSubmit routing', () => {
     })
   })
 })
+
+describe('useSpaceSubmit sanitization', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockRouterQuery = {}
+  })
+
+  const setupHook = (rawName: string, spaceId?: string, isEditMode = false) => {
+    const handleSubmit = (fn: (data: { name: string }) => Promise<void>) => () => fn({ name: rawName })
+    const { result } = renderHook(() => useSpaceSubmit(handleSubmit as never, spaceId, isEditMode))
+    return result
+  }
+
+  it('sends the sanitized name to the create mutation', async () => {
+    mockCreateSpaceWithUser.mockResolvedValue({
+      data: { id: 7, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
+    })
+
+    const result = setupHook('  O’Brien​  ')
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockCreateSpaceWithUser).toHaveBeenCalledWith({ createSpaceDto: { name: "O'Brien" } })
+  })
+
+  it('sends the sanitized name to the update mutation', async () => {
+    mockUpdateSpace.mockResolvedValue({ data: {} })
+
+    const result = setupHook('  O’Brien​  ', '11111111-1111-1111-1111-111111111111', true)
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockUpdateSpace).toHaveBeenCalledWith({
+      id: '11111111-1111-1111-1111-111111111111',
+      updateSpaceDto: { name: "O'Brien" },
+    })
+  })
+})

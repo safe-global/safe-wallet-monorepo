@@ -9,7 +9,7 @@ import { useCurrentSpaceId } from '@/features/spaces'
 
 const Open: NextPage = () => {
   const spaceId = useCurrentSpaceId()
-  const logoHref = spaceId ? `${AppRoutes.spaces.index}?spaceId=${spaceId}` : AppRoutes.welcome.index
+  const logoHref = spaceId ? `${AppRoutes.spaces.index}?spaceId=${spaceId}` : AppRoutes.index
 
   return (
     <main>
@@ -17,7 +17,7 @@ const Open: NextPage = () => {
         <SafeLogo href={logoHref} />
       </div>
       <Head>
-        <title>{`${BRAND_NAME} – Create Safe Account`}</title>
+        <title>{`${BRAND_NAME} – Create Safe account`}</title>
       </Head>
 
       <CreateSafe />

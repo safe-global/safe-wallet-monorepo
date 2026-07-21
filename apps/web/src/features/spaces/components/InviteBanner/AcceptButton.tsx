@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { Button } from '@mui/material'
+import { Button } from '@/components/ui/button'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import AcceptInviteDialog from './AcceptInviteDialog'
-import css from './styles.module.css'
 
 type AcceptButtonProps = {
   space: GetSpaceResponse
@@ -23,13 +22,7 @@ const AcceptButton = ({ space }: AcceptButtonProps) => {
 
   return (
     <>
-      <Button
-        data-testid="accept-invite-button"
-        className={css.inviteButton}
-        variant="contained"
-        onClick={handleAcceptInvite}
-        aria-label="Accept invitation"
-      >
+      <Button data-testid="accept-invite-button" size="sm" onClick={handleAcceptInvite} aria-label="Accept invitation">
         Accept
       </Button>
       {inviteOpen && <AcceptInviteDialog space={space} onClose={handleCloseInviteDialog} />}

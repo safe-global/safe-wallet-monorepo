@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
 import { type GetSpaceResponse, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useIsAdmin } from '@/features/spaces'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { Input } from '@/components/ui/input'
@@ -8,8 +11,8 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Typography } from '@/components/ui/typography'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
-
-const MAX_NAME_LENGTH = 60
+import { NAME_MIN_LENGTH, sanitizeName, validateName } from '@safe-global/utils/validation/names'
+import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 
 const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const dispatch = useAppDispatch()
@@ -28,10 +31,13 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
     setName(space?.name ?? '')
   }, [space?.name])
 
-  const trimmedName = name.trim()
-  const isDirty = !!space && trimmedName !== space.name && trimmedName.length > 0
-  const canSave = isDirty && isAdmin && !isSaving && !isAwaitingCacheSync.current
-  const canCancel = !!space && name !== space.name && isAdmin && !isSaving && !isAwaitingCacheSync.current
+  const sanitizedName = sanitizeName(name)
+  const validationError = validateName(sanitizedName, { minLength: NAME_MIN_LENGTH, maxLength: SPACE_NAME_MAX_LENGTH })
+  const isUnchanged = sanitizedName === (space?.name ?? '')
+  const displayError = isUnchanged ? undefined : validationError
+  const isDirty = !!space && !isUnchanged && sanitizedName.length > 0
+  const canSave = isDirty && isAdmin && !isSaving && !isAwaitingCacheSync.current && !validationError
+  const canCancel = !!space && !isUnchanged && isAdmin && !isSaving && !isAwaitingCacheSync.current
 
   const handleCancel = () => {
     setName(space?.name ?? '')
@@ -43,8 +49,8 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
     setError(undefined)
     try {
       isAwaitingCacheSync.current = true
-      await updateSpace({ id: space.uuid, updateSpaceDto: { name: trimmedName } }).unwrap()
-      setName(trimmedName)
+      await updateSpace({ id: space.uuid, updateSpaceDto: { name: sanitizedName } }).unwrap()
+      setName(sanitizedName)
       isAwaitingCacheSync.current = false
       dispatch(
         showNotification({
@@ -56,7 +62,7 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
     } catch (e) {
       console.error(e)
       isAwaitingCacheSync.current = false
-      setError("Couldn't update workspace. Please try again.")
+      setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
     }
   }
 
@@ -76,8 +82,8 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
             id="space-name"
             data-testid="space-name-input"
             value={name}
-            maxLength={MAX_NAME_LENGTH}
             onChange={(e) => setName(e.target.value)}
+            onBlur={() => setName(sanitizeName(name))}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && canSave) {
                 e.preventDefault()
@@ -85,7 +91,7 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
               }
             }}
             disabled={!isAdmin}
-            error={error}
+            error={error ?? displayError}
             className="max-w-md"
           />
           {canCancel && (

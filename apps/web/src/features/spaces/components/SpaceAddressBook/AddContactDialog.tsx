@@ -7,12 +7,17 @@ import ModalDialog from '@/components/common/ModalDialog'
 import { useState, type ReactNode } from 'react'
 import AddressInput from '@/components/common/AddressInput'
 import NameInput from '@/components/common/NameInput'
+import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import useChains from '@/hooks/useChains'
+import { DEFAULT_MAINNET_CHAIN_ID } from '@/config/constants'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
 
 export type ContactField = {
   name: string
@@ -36,6 +41,7 @@ type AddContactDialogProps = {
   submit: (item: AddContactItem, spaceId: string) => Promise<{ error?: unknown }>
   onSubmitStart?: () => void
   onSuccess?: () => void
+  validateCharset?: boolean
 }
 
 const AddContactDialog = ({
@@ -48,6 +54,7 @@ const AddContactDialog = ({
   submit,
   onSubmitStart,
   onSuccess,
+  validateCharset = false,
 }: AddContactDialogProps) => {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string>()
@@ -55,6 +62,9 @@ const AddContactDialog = ({
   const { configs: allNetworks } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
+
+  // Contacts are chain-agnostic, so resolve ENS names on mainnet regardless of the connected chain
+  const ensChain = allNetworks.find((chain) => chain.chainId === String(DEFAULT_MAINNET_CHAIN_ID))
 
   const defaultValues = {
     name: '',
@@ -86,7 +96,7 @@ const AddContactDialog = ({
     setError(undefined)
 
     const item: AddContactItem = {
-      name: data.name,
+      name: validateCharset ? sanitizeName(data.name) : data.name,
       address: data.address,
       chainIds: data.networks.map((network) => network.chainId),
     }
@@ -98,7 +108,9 @@ const AddContactDialog = ({
       const result = await submit(item, spaceId ?? '')
 
       if (result.error) {
-        setError('Something went wrong. Please try again.')
+        const message = getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError)
+        setError(message)
+        dispatch(showNotification({ message, variant: 'error', groupKey: `${successGroupKey}-error` }))
         return
       }
 
@@ -113,8 +125,10 @@ const AddContactDialog = ({
       )
 
       handleClose()
-    } catch {
-      setError('Something went wrong. Please try again.')
+    } catch (error) {
+      const message = getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError)
+      setError(message)
+      dispatch(showNotification({ message, variant: 'error', groupKey: `${successGroupKey}-error` }))
     } finally {
       setIsSubmitting(false)
     }
@@ -133,8 +147,15 @@ const AddContactDialog = ({
               <div className="flex flex-col gap-6">
                 {intro && <p className="text-muted-foreground text-sm">{intro}</p>}
 
-                <NameInput name="name" label="Name" required />
-                <AddressInput name="address" label="Address or ENS" required showPrefix={false} />
+                <NameInput
+                  name="name"
+                  label="Name"
+                  required
+                  validateCharset={validateCharset}
+                  minLength={validateCharset ? NAME_MIN_LENGTH : undefined}
+                  maxLength={validateCharset ? ADDRESS_BOOK_NAME_MAX_LENGTH : undefined}
+                />
+                <AddressInput name="address" label="Address or ENS" required showPrefix={false} chain={ensChain} />
 
                 <div>
                   <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>

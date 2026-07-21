@@ -5,8 +5,6 @@ import { useAppSelector } from '@/store'
 import { isAuthenticated, selectIsOidcLoginPending } from '@/store/authSlice'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
-import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
-import { parseNextUrlForRouter } from '@/utils/nextUrl'
 
 type RtkError = FetchBaseQueryError | SerializedError
 
@@ -19,10 +17,6 @@ interface UseSignInRedirectProps {
   // after sign-in instead of leaving them on the workspace list. Pass null when
   // there are zero or multiple active spaces.
   singleSpaceId?: string | null
-}
-
-const hasNotFoundSpaces = (error?: RtkError) => {
-  return error && 'status' in error && error.status === 404
 }
 
 export const useSignInRedirect = ({
@@ -38,7 +32,6 @@ export const useSignInRedirect = ({
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const isOidcLoginPending = useAppSelector(selectIsOidcLoginPending)
   const wasOidcLoginPending = useRef(false)
-  const isRequireLoginEnabled = useIsRequireLoginEnabled()
 
   // Treat OIDC sign-in completion (pending → done) the same as wallet sign-in
   useEffect(() => {
@@ -51,49 +44,22 @@ export const useSignInRedirect = ({
   }, [isOidcLoginPending, isUserSignedIn])
 
   useEffect(() => {
-    const isNewUser = !inviteAmount && !isSpacesLoading && spacesAmount === 0 && isUserSignedIn
-
-    if (error && !hasNotFoundSpaces(error)) return
-
-    if (hasSignedIn && (isNewUser || hasNotFoundSpaces(error))) {
-      setRedirectLoading(true)
-      router.push({ pathname: AppRoutes.welcome.createSpace, query: router.query })
-      return
-    }
+    // A new user (no active spaces) is no longer pushed into the create-workspace
+    // flow — they stay on the Workspaces tab and see the "Create your first
+    // workspace" card. Any spaces-query error keeps them there too.
+    if (error) return
 
     if (hasSignedIn && isUserSignedIn && !isSpacesLoading && spacesAmount > 0) {
-      // Priority 1: an explicit ?next= round-trip target wins (the user
-      // originally tried to open that URL and was bounced to login). Only the
-      // require-login gate populates this — wait for the flag to resolve so a
-      // fast sign-in + slow chains config doesn't permanently strand the user.
-      if (isRequireLoginEnabled === true) {
-        const next = parseNextUrlForRouter(router.query.next)
-        if (next) {
-          setRedirectLoading(true)
-          router.push(next)
-          return
-        }
-      }
-
-      // Priority 2: if the user has exactly one space, jump straight to it.
-      // Falling back to the workspace list (i.e. leaving the user on
-      // /welcome/spaces) is intentional only when there are multiple to choose
-      // between.
-      if (singleSpaceId) {
+      // If the user has exactly one space, jump straight to it. Falling back to
+      // the workspace list (i.e. leaving the user on /welcome/spaces) is
+      // intentional only when there are multiple to choose between, or when
+      // there are pending invites the user should see.
+      if (singleSpaceId && inviteAmount === 0) {
         setRedirectLoading(true)
         router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: singleSpaceId } })
       }
     }
-  }, [
-    hasSignedIn,
-    isSpacesLoading,
-    spacesAmount,
-    inviteAmount,
-    isUserSignedIn,
-    error,
-    isRequireLoginEnabled,
-    singleSpaceId,
-  ])
+  }, [hasSignedIn, isSpacesLoading, spacesAmount, inviteAmount, isUserSignedIn, error, singleSpaceId, router])
 
   return { setHasSignedIn, redirectLoading }
 }

@@ -455,7 +455,6 @@ export const safeSettings = {
     hiddenTokens: {},
     shortName: {
       show: false,
-      copy: false,
       qr: false,
     },
     theme: {
@@ -480,7 +479,6 @@ export const safeSettings = {
     hideDust: false,
     shortName: {
       show: true,
-      copy: true,
       qr: true,
     },
     theme: {},
@@ -801,26 +799,6 @@ export const addedSafes = {
         ethBalance: '0',
       },
       '0xBb26E3717172d5000F87DeFd391994f789D80aEB': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-    },
-  },
-  // sidebar_6.cy.js - single safes for sorting tests
-  sidebarTrustedSafesForSorting: {
-    11155111: {
-      '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-      '0xBb26E3717172d5000F87DeFd391994f789D80aEB': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-      '0x905934aA8758c06B2422F0C90D97d2fbb6677811': {
         owners: [],
         threshold: 1,
         ethBalance: '0',

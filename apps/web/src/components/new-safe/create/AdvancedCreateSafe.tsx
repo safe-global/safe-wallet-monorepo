@@ -31,8 +31,8 @@ const AdvancedCreateSafe = () => {
 
   const CreateSafeSteps: TxStepperProps<NewSafeFormData>['steps'] = [
     {
-      title: 'Select network and name of your Safe Account',
-      subtitle: 'Select the network on which to create your Safe Account',
+      title: 'Select network and name of your Safe account',
+      subtitle: 'Select the network on which to create your Safe account',
       render: (data, onSubmit, onBack, setStep) => (
         <SetNameStep
           isAdvancedFlow
@@ -49,7 +49,7 @@ const AdvancedCreateSafe = () => {
     {
       title: 'Signers and confirmations',
       subtitle:
-        'Set the signer wallets of your Safe Account and how many need to confirm to execute a valid transaction.',
+        'Set the signer wallets of your Safe account and how many need to confirm to execute a valid transaction.',
       render: (data, onSubmit, onBack, setStep) => (
         <OwnerPolicyStep
           setDynamicHint={setDynamicHint}
@@ -70,7 +70,7 @@ const AdvancedCreateSafe = () => {
     {
       title: 'Review',
       subtitle:
-        "You're about to create a new Safe Account and will have to confirm the transaction with your connected wallet.",
+        "You're about to create a new Safe account and will have to confirm the transaction with your connected wallet.",
       render: (data, onSubmit, onBack, setStep) => (
         <ReviewStep data={data} onSubmit={onSubmit} onBack={onBack} setStep={setStep} />
       ),
@@ -123,7 +123,7 @@ const AdvancedCreateSafe = () => {
               pb: 2,
             }}
           >
-            Create new Safe Account
+            Create new Safe account
           </Typography>
         </Grid>
         <Grid

@@ -11,9 +11,8 @@ const editProposerBtn = '[data-testid="edit-proposer-btn"]'
 const confrimDeleteProposerBtn = '[data-testid="confirm-delete-proposer-btn"]'
 const submitProposerBtn = '[data-testid="submit-proposer-btn"]'
 
-const safeAsProposerMessage = 'Cannot add Safe Account itself as proposer'
-const proposedTxMessage =
-  'This transaction was created by a Proposer. Please review and either confirm or reject it. Once confirmed, it can be finalized and executed'
+const safeAsProposerMessage = 'Cannot add Safe account itself as proposer'
+const proposedTxMessage = 'This transaction was created by a proposer. Please review and either confirm or reject it.'
 const proposerAddedMsg = 'Proposer added successfully!'
 
 export function verifyPropsalStatusExists() {
@@ -21,13 +20,8 @@ export function verifyPropsalStatusExists() {
 }
 
 export function verifyProposerInTxActionList(address) {
-  cy.get(create_tx.txSigner).within(() => {
+  cy.get(create_tx.transactionSideList).within(() => {
     cy.contains(address)
-    cy.get('div[style]')
-      .filter((index, element) => {
-        return element.style.backgroundImage.includes('url')
-      })
-      .should('exist')
   })
 }
 export function verifyProposedTxMsgVisible() {

@@ -17,22 +17,18 @@ const SecurityBanner = ({ title, className }: SecurityBannerProps) => {
   return (
     <Alert
       variant="warning"
-      className={cn(
-        'mb-4 dark:bg-[var(--color-warning-background)] dark:text-[var(--color-warning1-contrast-text)]',
-        className,
-      )}
+      className={cn('mb-4 dark:bg-[var(--color-warning-background)] dark:text-[var(--color-text-primary)]', className)}
     >
-      <TriangleAlert />
+      <TriangleAlert className="dark:text-[var(--color-warning-main)]" />
       {title && <AlertTitle className="font-bold">{title}</AlertTitle>}
       <AlertDescription className="dark:text-current">
-        Some Safes linked to your wallet may be malicious or impersonations (address poisoning). Only trust Safes you
-        can verify.{' '}
+        Some Safe accounts may be malicious or impersonations. Only trust Safe accounts you can verify.{' '}
         <ExternalLink
           href={HelpCenterArticle.ADDRESS_POISONING}
           noIcon
-          sx={{ textDecoration: 'underline', '.dark &': { color: 'inherit' } }}
+          sx={{ '& span': { textDecoration: 'underline' }, '.dark &': { color: 'inherit' } }}
         >
-          Learn more about address poisoning
+          Learn more
         </ExternalLink>
       </AlertDescription>
     </Alert>

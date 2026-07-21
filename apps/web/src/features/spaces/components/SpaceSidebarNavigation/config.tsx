@@ -22,12 +22,12 @@ export type DynamicNavItem = {
 
 export const navItems: DynamicNavItem[] = [
   {
-    label: 'Home',
+    label: 'Dashboard',
     icon: <SvgIcon component={HomeIcon} inheritViewBox />,
     href: AppRoutes.spaces.index,
   },
   {
-    label: 'Safe Accounts',
+    label: 'Safe accounts',
     icon: <SvgIcon component={AccountsIcon} inheritViewBox />,
     href: AppRoutes.spaces.safeAccounts,
   },

@@ -16,6 +16,7 @@ import {
 import { useForm, FormProvider, Controller } from 'react-hook-form'
 
 import AddressBookInput from '@/components/common/AddressBookInput'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import NameInput from '@/components/common/NameInput'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -60,6 +61,9 @@ export const ChooseOwner = ({
 
   const address = watch('newOwner.address')
 
+  // Copilot address-poisoning check for the new owner (poisoning-only entry in the recipient card)
+  useSafeShieldForAddressPoisoning([address])
+
   const { name, ens, resolving } = useAddressResolver(address)
 
   // Address book, ENS
@@ -91,7 +95,7 @@ export const ChooseOwner = ({
                 }}
               >
                 {params.removedOwner &&
-                  'Review the signer you want to replace in the active Safe Account, then specify the new signer you want to replace it with:'}
+                  'Review the signer you want to replace in the active Safe account, then specify the new signer you want to replace it with:'}
               </Typography>
               <Box
                 sx={{

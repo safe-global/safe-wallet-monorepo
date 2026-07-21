@@ -1,21 +1,11 @@
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import type { SafeItemData } from './types'
 
-export const getInitials = (name: string): string => {
-  return name
-    .split(' ')
-    .map((word) => word[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
-}
-
-const MAX_NAME_LENGTH = 20
-
-export const truncateName = (name: string, maxLength = MAX_NAME_LENGTH): string =>
-  name.length > maxLength ? `${name.slice(0, maxLength)}...` : name
-
-export const getSafeDisplayInfo = (name: string, address: string): { shortAddress: string; displayName: string } => {
-  const shortAddress = shortenAddress(address)
-  const displayName = name ? truncateName(name) : shortAddress
-  return { shortAddress, displayName }
+/** Case-insensitive safe search on resolved name, address, and chain name/short name. */
+export const matchesSafeSearch = (item: SafeItemData, displayName: string, query: string): boolean => {
+  const name = displayName.toLowerCase()
+  const address = item.address.toLowerCase()
+  if (name.includes(query) || address.includes(query)) return true
+  return item.chains.some(
+    (chain) => chain.chainName?.toLowerCase().includes(query) || chain.shortName?.toLowerCase().includes(query),
+  )
 }

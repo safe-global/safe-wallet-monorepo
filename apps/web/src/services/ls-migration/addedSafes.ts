@@ -61,7 +61,7 @@ export const migrateAddedSafes = (lsData: LOCAL_STORAGE_DATA): AddedSafesState |
     const legacyAddedSafes = parseLsValue<OldAddedSafes>(lsData[IMMORTAL_PREFIX + chainPrefix + OLD_LS_KEY])
 
     if (legacyAddedSafes && Object.keys(legacyAddedSafes).length > 0) {
-      console.log('Migrating added Safe Accounts on chain', chainId)
+      console.log('Migrating added Safe accounts on chain', chainId)
 
       const safesPerChain = Object.values(legacyAddedSafes).reduce<AddedSafesOnChain>((acc, oldItem) => {
         const migratedOwners = migrateAddedSafesOwners(oldItem.owners)

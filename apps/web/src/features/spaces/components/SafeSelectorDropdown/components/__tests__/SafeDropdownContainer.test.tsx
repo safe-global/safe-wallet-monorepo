@@ -47,7 +47,26 @@ jest.mock('@/components/ui/select', () => ({
 
 jest.mock('../SafeItem', () => ({
   __esModule: true,
-  default: ({ name }: { name: string }) => <div data-testid="safe-item">{name}</div>,
+  default: ({
+    name,
+    address,
+    onRename,
+  }: {
+    name: string
+    address: string
+    onRename?: (target: { address: string; name: string; chainIds: string[] }) => void
+  }) => (
+    <div data-testid="safe-item">
+      {name}
+      {onRename && (
+        <button
+          type="button"
+          data-testid="safe-item-rename-trigger"
+          onClick={() => onRename({ address, name, chainIds: ['1'] })}
+        />
+      )}
+    </div>
+  ),
 }))
 
 jest.mock('../MultiChainSafeItemRow', () => ({
@@ -98,7 +117,7 @@ describe('SafeDropdownContainer', () => {
 
       render(<SafeDropdownContainer items={[]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
 
-      expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('Connect a wallet to find your Safe Accounts')
+      expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('Connect a wallet to find your Safe accounts')
     })
 
     it('shows "No safes yet" when there are no safes but a wallet is connected', () => {
@@ -107,6 +126,58 @@ describe('SafeDropdownContainer', () => {
       render(<SafeDropdownContainer items={[]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
 
       expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('No safes yet')
+    })
+
+    it('renders emptyStateOverride instead of the default empty text when there are no safes', () => {
+      render(
+        <SafeDropdownContainer
+          items={[]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          emptyStateOverride={<div data-testid="custom-empty">Sign in to a workspace</div>}
+        />,
+      )
+
+      expect(screen.getByTestId('custom-empty')).toBeInTheDocument()
+      expect(screen.queryByTestId('dropdown-empty')).not.toBeInTheDocument()
+    })
+
+    it('keeps emptyStateOverride while searching when there are no safes to search through', () => {
+      render(
+        <SafeDropdownContainer
+          items={[]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          emptyStateOverride={<div data-testid="custom-empty">Sign in to a workspace</div>}
+          searchValue="treasury"
+          onSearchValueChange={jest.fn()}
+        />,
+      )
+
+      // "No safes match your search" would be misleading — there is nothing to search yet.
+      expect(screen.getByTestId('custom-empty')).toBeInTheDocument()
+      expect(screen.queryByTestId('dropdown-empty')).not.toBeInTheDocument()
+    })
+
+    it('renders a function-form emptyStateOverride and passes closeDropdown to it', () => {
+      const closeDropdown = jest.fn()
+      render(
+        <SafeDropdownContainer
+          items={[]}
+          onItemSelect={jest.fn()}
+          closeDropdown={closeDropdown}
+          emptyStateOverride={(close) => (
+            <button data-testid="custom-empty-action" onClick={close}>
+              Manage list
+            </button>
+          )}
+        />,
+      )
+
+      const action = screen.getByTestId('custom-empty-action')
+      expect(action).toBeInTheDocument()
+      action.click()
+      expect(closeDropdown).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -174,7 +245,7 @@ describe('SafeDropdownContainer', () => {
       expect(screen.getByTestId('safe-dropdown-search-input')).toBeInTheDocument()
     })
 
-    it('hides the search input when the only safe is the currently-selected one', () => {
+    it('keeps the currently-selected safe in the list (with the search input)', () => {
       render(
         <SafeDropdownContainer
           items={[createItem({ id: '1:0xaaaa', address: '0xaaaa' })]}
@@ -184,8 +255,9 @@ describe('SafeDropdownContainer', () => {
         />,
       )
 
-      expect(screen.queryByTestId('safe-dropdown-search-input')).not.toBeInTheDocument()
-      expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('No safes yet')
+      expect(screen.getByTestId('safe-dropdown-search-input')).toBeInTheDocument()
+      expect(screen.getByTestId('safe-item')).toBeInTheDocument()
+      expect(screen.queryByTestId('dropdown-empty')).not.toBeInTheDocument()
     })
 
     it('keeps the search input visible when a query matches nothing', async () => {
@@ -265,6 +337,54 @@ describe('SafeDropdownContainer', () => {
       expect(screen.queryByTestId('safe-item')).not.toBeInTheDocument()
     })
 
+    it('filters with a controlled searchValue and reports typing via onSearchValueChange', () => {
+      const onSearchValueChange = jest.fn()
+      render(
+        <SafeDropdownContainer
+          items={[itemA, itemB]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          searchValue="alpha"
+          onSearchValueChange={onSearchValueChange}
+        />,
+      )
+
+      expect(screen.getByText('Alpha Treasury')).toBeInTheDocument()
+      expect(screen.queryByText('Beta Ops')).not.toBeInTheDocument()
+
+      fireEvent.change(screen.getByTestId('safe-dropdown-search-input'), { target: { value: 'beta' } })
+      expect(onSearchValueChange).toHaveBeenCalledWith('beta')
+    })
+
+    it('keeps a controlled search visible even when the active list is empty (query spans both tabs)', () => {
+      render(
+        <SafeDropdownContainer
+          items={[]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          searchValue=""
+          onSearchValueChange={jest.fn()}
+        />,
+      )
+
+      expect(screen.getByTestId('safe-dropdown-search-input')).toBeInTheDocument()
+    })
+
+    it('renders the search input above the header slot', () => {
+      render(
+        <SafeDropdownContainer
+          items={[itemA]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          header={<div data-testid="header-slot" />}
+        />,
+      )
+
+      const search = screen.getByTestId('safe-dropdown-search-input')
+      const header = screen.getByTestId('header-slot')
+      expect(search.compareDocumentPosition(header) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    })
+
     it('stops character keystrokes from bubbling to the popup (defeats base-ui typeahead) but lets Escape through', () => {
       const onKeyDownSpy = jest.fn()
       render(
@@ -279,6 +399,99 @@ describe('SafeDropdownContainer', () => {
 
       fireEvent.keyDown(input, { key: 'Escape' })
       expect(onKeyDownSpy).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('rename', () => {
+    it('does not pass a rename handler to rows when onItemRename is absent', () => {
+      render(<SafeDropdownContainer items={[createItem()]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
+
+      expect(screen.queryByTestId('safe-item-rename-trigger')).not.toBeInTheDocument()
+    })
+
+    it('forwards the rename target without closing the dropdown', () => {
+      const closeDropdown = jest.fn()
+      const onItemRename = jest.fn()
+      render(
+        <SafeDropdownContainer
+          items={[createItem()]}
+          onItemSelect={jest.fn()}
+          closeDropdown={closeDropdown}
+          onItemRename={onItemRename}
+        />,
+      )
+
+      fireEvent.click(screen.getByTestId('safe-item-rename-trigger'))
+
+      // The dropdown stays open — the rename dialog layers above it (see keepOpen).
+      expect(closeDropdown).not.toHaveBeenCalled()
+      expect(onItemRename).toHaveBeenCalledWith({
+        address: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        name: 'Safe A',
+        chainIds: ['1'],
+      })
+    })
+  })
+
+  describe('reorder (Manual sort)', () => {
+    const itemA = createItem({ id: '1:0xaaaa', name: 'Alpha', address: '0xaaaa' })
+    const itemB = createItem({ id: '137:0xbbbb', name: 'Beta', address: '0xbbbb' })
+
+    it('renders the drag-to-reorder list when onReorder is provided', () => {
+      render(
+        <SafeDropdownContainer
+          items={[itemA, itemB]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          onReorder={jest.fn()}
+        />,
+      )
+
+      expect(screen.getByTestId('safe-selector-reorder-list')).toBeInTheDocument()
+      expect(screen.getAllByTestId('safe-drag-handle')).toHaveLength(2)
+      // The Select-item rows are replaced by the reorder rows in this mode.
+      expect(screen.queryByTestId('select-item')).not.toBeInTheDocument()
+    })
+
+    it('renders the normal Select list when onReorder is absent', () => {
+      render(<SafeDropdownContainer items={[itemA, itemB]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
+
+      expect(screen.queryByTestId('safe-selector-reorder-list')).not.toBeInTheDocument()
+      expect(screen.getAllByTestId('select-item')).toHaveLength(2)
+    })
+
+    it('falls back to the normal list while a search is active (never persists a partial order)', () => {
+      render(
+        <SafeDropdownContainer
+          items={[itemA, itemB]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          onReorder={jest.fn()}
+          searchValue="alpha"
+          onSearchValueChange={jest.fn()}
+        />,
+      )
+
+      expect(screen.queryByTestId('safe-selector-reorder-list')).not.toBeInTheDocument()
+      expect(screen.getByTestId('select-item')).toBeInTheDocument()
+    })
+
+    it('navigates and closes the dropdown when a reorder row is clicked', () => {
+      const onItemSelect = jest.fn()
+      const closeDropdown = jest.fn()
+      render(
+        <SafeDropdownContainer
+          items={[itemA, itemB]}
+          onItemSelect={onItemSelect}
+          closeDropdown={closeDropdown}
+          onReorder={jest.fn()}
+        />,
+      )
+
+      fireEvent.click(screen.getAllByTestId('reorder-safe-row')[0])
+
+      expect(onItemSelect).toHaveBeenCalledWith('1:0xaaaa')
+      expect(closeDropdown).toHaveBeenCalledTimes(1)
     })
   })
 

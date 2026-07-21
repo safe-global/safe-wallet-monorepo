@@ -25,7 +25,7 @@ import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
 export const spacesMainNavigation: SidebarItemConfig[] = [
   {
     icon: House,
-    label: 'Home',
+    label: 'Dashboard',
     href: AppRoutes.spaces.index,
   },
   // TODO: Activate when Spaces Transactions page is ready
@@ -62,7 +62,7 @@ export const spacesSetupGroup: SidebarGroupConfig = {
     },
     {
       icon: Shield,
-      label: 'Security',
+      label: 'Security hub',
       href: AppRoutes.spaces.security,
       activeMemberOnly: true,
     },

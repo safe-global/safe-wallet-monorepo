@@ -4,6 +4,7 @@ import type { SafeItemData } from '../../types'
 
 const mockUseSafeDisplayName = jest.fn()
 const mockUseChain = jest.fn()
+const mockUseIsHypernativeGuard = jest.fn()
 
 jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: (...args: unknown[]) => mockUseSafeDisplayName(...args),
@@ -12,6 +13,18 @@ jest.mock('@/hooks/useSafeDisplayName', () => ({
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   useChain: (...args: unknown[]) => mockUseChain(...args),
+  useHasFeature: () => false,
+}))
+
+jest.mock('@/features/hypernative', () => ({
+  __esModule: true,
+  HypernativeFeature: {},
+  useIsHypernativeGuard: (...args: unknown[]) => mockUseIsHypernativeGuard(...args),
+}))
+
+jest.mock('@/features/__core__', () => ({
+  __esModule: true,
+  useLoadFeature: () => ({ SafeHeaderHnTooltip: () => null }),
 }))
 
 jest.mock('../SafeBalanceBlock', () => {
@@ -45,6 +58,7 @@ describe('SafeSelectorTriggerContent', () => {
     jest.resetAllMocks()
     mockUseSafeDisplayName.mockReturnValue('')
     mockUseChain.mockReturnValue(undefined)
+    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: false })
   })
 
   it('resolves name per chain without using the cross-chain item name', () => {
@@ -71,8 +85,16 @@ describe('SafeSelectorTriggerContent', () => {
 
     const { getByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="137" />)
 
-    // When no name is resolved, the address line shows the (unprefixed) shortened address.
     expect(getByTestId('safe-selector-trigger-address')).toHaveTextContent(/0xabc/)
+  })
+
+  it('writes out the full address on the address line', () => {
+    const address = '0x245C153cBa7b65d01706B09a30dEf30190Da1878'
+    const item = createItem({ address })
+
+    const { getByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="1" />)
+
+    expect(getByTestId('safe-selector-trigger-address').textContent).toBe(address)
   })
 
   it('shows the not-activated warning icon instead of the balance when the selected chain is undeployed', () => {
@@ -110,12 +132,33 @@ describe('SafeSelectorTriggerContent', () => {
     expect(getByTestId('safe-selector-not-activated-icon')).toHaveAttribute('aria-label', 'Activating')
   })
 
-  it('renders the threshold badge on the avatar', () => {
+  it('renders the threshold pill with the setup for a single-chain safe', () => {
+    const item = createItem({
+      threshold: 2,
+      owners: 3,
+      chains: [{ chainId: '1', chainName: 'Ethereum', chainLogoUri: null, shortName: 'eth' }],
+    })
+
+    const { getByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="1" />)
+
+    expect(getByTestId('account-threshold')).toHaveTextContent('2/3')
+  })
+
+  it('renders an icon-only threshold pill for a multi-chain safe (setup can differ per chain)', () => {
     const item = createItem({ threshold: 2, owners: 3 })
 
     const { getByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="1" />)
 
-    expect(getByTestId('safe-selector-threshold')).toHaveTextContent('2/3')
+    expect(getByTestId('account-threshold')).toBeInTheDocument()
+    expect(getByTestId('account-threshold')).not.toHaveTextContent('2/3')
+  })
+
+  it('does not render the threshold pill when the setup is unknown', () => {
+    const item = createItem({ threshold: 0, owners: 0 })
+
+    const { queryByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="1" />)
+
+    expect(queryByTestId('account-threshold')).not.toBeInTheDocument()
   })
 
   it('shows the balance when the selected chain is deployed', () => {

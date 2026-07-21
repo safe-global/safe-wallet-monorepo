@@ -26,6 +26,7 @@ import TxCard from '../../common/TxCard'
 import { useRecoveryPeriods } from './useRecoveryPeriods'
 import { UpsertRecoveryFlowFields, type UpsertRecoveryFlowProps } from '.'
 import AddressBookInput from '@/components/common/AddressBookInput'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -81,6 +82,9 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
   })
 
   const recoverer = formMethods.watch(UpsertRecoveryFlowFields.recoverer)
+
+  // Copilot address-poisoning check for the recoverer
+  useSafeShieldForAddressPoisoning([recoverer])
   const expiry = formMethods.watch(UpsertRecoveryFlowFields.expiry)
   const selectedDelay = formMethods.watch(UpsertRecoveryFlowFields.selectedDelay)
   const customDelay = formMethods.watch(UpsertRecoveryFlowFields.customDelay)
@@ -99,7 +103,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
 
   const validateRecoverer = (recoverer: string) => {
     if (sameAddress(recoverer, safeAddress)) {
-      return 'The Safe Account cannot be a Recoverer of itself'
+      return 'The Safe account cannot be a Recoverer of itself'
     }
   }
 
@@ -149,7 +153,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
             </Typography>
 
             <Typography variant="body2">
-              Choose a Recoverer, such as a hardware wallet or a Safe Account controlled by family or friends, that can
+              Choose a Recoverer, such as a hardware wallet or a Safe account controlled by family or friends, that can
               initiate the recovery process in the future.
             </Typography>
           </Box>
@@ -309,7 +313,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
 
           <FormControlLabel
             data-testid="warning-section"
-            label={`I understand that the Recoverer will be able to initiate recovery of this Safe Account and that I will only be informed within the ${BRAND_NAME}.`}
+            label={`I understand that the Recoverer will be able to initiate recovery of this Safe account and that I will only be informed within the ${BRAND_NAME}.`}
             control={<Checkbox checked={understandsRisk} onChange={(_, checked) => setUnderstandsRisk(checked)} />}
             sx={{ my: 2, pl: 2 }}
           />

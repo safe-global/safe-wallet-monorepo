@@ -37,7 +37,7 @@ export const ReviewRemoveModule = ({
       <EthHashInfo address={params.address} showCopyButton hasExplorer shortAddress={false} />
 
       <Typography my={2}>
-        After removing this module, any feature or app that uses this module might no longer work. If this Safe Account
+        After removing this module, any feature or app that uses this module might no longer work. If this Safe account
         requires more than one signature, the module removal will have to be confirmed by other signers as well.
       </Typography>
 

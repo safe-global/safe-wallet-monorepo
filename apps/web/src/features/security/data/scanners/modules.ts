@@ -105,7 +105,7 @@ export const modulesScanner: SecurityScanner = {
 
     const activeModules = (modules ?? []).filter((m) => m.value !== ZERO_ADDRESS)
 
-    const moduleLabel = (m: { value: string; name?: string | null }) => m.name || `${m.value.slice(0, 10)}...`
+    const moduleLabel = (m: { value: string; name?: string | null }) => m.name || m.value
 
     // Tier 1: No modules — perfectly fine for most Safes
     if (activeModules.length === 0) {

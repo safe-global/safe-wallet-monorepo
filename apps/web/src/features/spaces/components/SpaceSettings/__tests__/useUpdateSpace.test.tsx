@@ -20,10 +20,10 @@ const mockSpace: GetSpaceResponse = {
   memberCount: 0,
 }
 
-const renderWithStore = () => {
+const renderWithStore = (onSuccess?: () => void) => {
   const store = makeStore(undefined, { skipBroadcast: true })
   const wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>
-  return { store, ...renderHook(() => useUpdateSpace(mockSpace), { wrapper }) }
+  return { store, ...renderHook(() => useUpdateSpace(mockSpace, onSuccess), { wrapper }) }
 }
 
 describe('useUpdateSpace', () => {
@@ -65,15 +65,50 @@ describe('useUpdateSpace', () => {
     expect(last.groupKey).toBe('space-update-name')
   })
 
-  it('sets an error message when the mutation rejects', async () => {
-    mockUnwrap.mockRejectedValue(new Error('network'))
+  it('calls onSuccess after a successful update', async () => {
+    mockUnwrap.mockResolvedValue({})
+    const onSuccess = jest.fn()
+    const { result } = renderWithStore(onSuccess)
+
+    await act(async () => {
+      await result.current.handleUpdate({ name: 'Renamed' })
+    })
+
+    expect(onSuccess).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not call onSuccess when the mutation rejects', async () => {
+    mockUnwrap.mockRejectedValue({ status: 422, data: { message: 'Name contains invalid characters' } })
+    const onSuccess = jest.fn()
+    const { result } = renderWithStore(onSuccess)
+
+    await act(async () => {
+      await result.current.handleUpdate({ name: 'Renamed' })
+    })
+
+    expect(onSuccess).not.toHaveBeenCalled()
+  })
+
+  it('bubbles the backend error message when the mutation rejects', async () => {
+    mockUnwrap.mockRejectedValue({ status: 422, data: { message: 'Name contains invalid characters' } })
     const { result } = renderWithStore()
 
     await act(async () => {
       await result.current.handleUpdate({ name: 'Renamed' })
     })
 
-    expect(result.current.error).toBe('Error updating the workspace. Please try again.')
+    expect(result.current.error).toBe('Name contains invalid characters')
+  })
+
+  it('falls back to a generic error when the backend provides no message', async () => {
+    mockUnwrap.mockRejectedValue({ status: 500, data: {} })
+    const { result } = renderWithStore()
+
+    await act(async () => {
+      await result.current.handleUpdate({ name: 'Renamed' })
+    })
+
+    expect(result.current.error).toMatch(/Something went wrong \(500\)/)
   })
 
   it('clears a previous error before a new attempt', async () => {

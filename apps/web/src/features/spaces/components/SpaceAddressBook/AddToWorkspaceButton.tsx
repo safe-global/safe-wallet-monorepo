@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
-import { removeAddressBookEntry } from '@/store/addressBookSlice'
 import { useAppDispatch } from '@/store'
 import { Spinner } from '@/components/ui/spinner'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { validateContactName } from './utils'
+import { sanitizeName } from '@safe-global/utils/validation/names'
 
 type AddToWorkspaceButtonProps = {
   address: string
@@ -20,27 +23,28 @@ const AddToWorkspaceButton = ({ address, name, chainIds }: AddToWorkspaceButtonP
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [added, setAdded] = useState(false)
 
+  const nameError = validateContactName(name)
+
   const handleAdd = async () => {
-    if (!spaceId || added) return
+    if (!spaceId || added || nameError) return
 
     try {
       setIsSubmitting(true)
 
       const result = await upsertAddressBook({
         spaceId: spaceId ?? '',
-        upsertAddressBookItemsDto: { items: [{ name, address, chainIds }] },
+        upsertAddressBookItemsDto: { items: [{ name: sanitizeName(name), address, chainIds }] },
       })
 
       if (result.error) {
         dispatch(
-          showNotification({ message: 'Failed to add contact', variant: 'error', groupKey: 'add-to-workspace-error' }),
+          showNotification({
+            message: getRtkQueryErrorMessage(result.error),
+            variant: 'error',
+            groupKey: 'add-to-workspace-error',
+          }),
         )
         return
-      }
-
-      // Remove from local address book
-      for (const chainId of chainIds) {
-        dispatch(removeAddressBookEntry({ chainId, address }))
       }
 
       setAdded(true)
@@ -60,11 +64,17 @@ const AddToWorkspaceButton = ({ address, name, chainIds }: AddToWorkspaceButtonP
     }
   }
 
-  return (
-    <Button variant="outline" size="sm" onClick={handleAdd} disabled={isSubmitting || added}>
+  const button = (
+    <Button variant="outline" size="sm" onClick={handleAdd} disabled={isSubmitting || added || !!nameError}>
       {isSubmitting ? <Spinner className="size-3.5" /> : added ? 'Added' : 'Add to workspace'}
     </Button>
   )
+
+  if (!nameError) {
+    return button
+  }
+
+  return <InvalidContactNameTooltip nameError={nameError}>{button}</InvalidContactNameTooltip>
 }
 
 export default AddToWorkspaceButton

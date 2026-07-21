@@ -43,6 +43,7 @@ import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
 import { CounterfactualFeature, useCounterfactualSafeSync } from '@/features/counterfactual'
+import { useInviteNotification } from '@/features/spaces'
 import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
@@ -98,7 +99,6 @@ import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
-import { useIsAuthGateBlocking } from '@/hooks/useIsAuthGateBlocking'
 
 // Initialize observability before React rendering starts
 // This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration
@@ -124,6 +124,7 @@ const SafeScopedSubscriptions = (): null => {
   usePortfolioRefetchOnTxHistory()
   useInvalidateOverviewsOnTx()
   useCounterfactualSafeSync()
+  useInviteNotification()
   return null
 }
 
@@ -144,8 +145,7 @@ const InitApp = (): ReactElement | null => {
   useSessionExpiryGuard()
   useUnlockBodyScroll()
 
-  const isGateBlocking = useIsAuthGateBlocking()
-  return isGateBlocking ? null : <SafeScopedSubscriptions />
+  return <SafeScopedSubscriptions />
 }
 
 // Client-side cache, shared for the whole session of the user in the browser.

@@ -19,9 +19,7 @@ type SpacePendingTxItem = TransactionQueuedItem & { safeAddress?: string; chainI
 interface PendingTxWidgetProps {
   transactions: SpacePendingTxItem[]
   loading?: boolean
-  remainingCount?: number
   error?: string
-  onViewAll?: () => void
   onRefresh?: () => void
   onItemClick?: (safeAddress: string, txId: string) => void
 }

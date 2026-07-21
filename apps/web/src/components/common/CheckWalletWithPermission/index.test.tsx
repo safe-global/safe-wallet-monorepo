@@ -90,7 +90,7 @@ describe('CheckWalletWithPermission', () => {
     const { getByText, getByLabelText } = renderButton()
 
     expect(getByText('Continue')).toBeDisabled()
-    expect(getByLabelText('Your connected wallet is not a signer of this Safe Account')).toBeInTheDocument()
+    expect(getByLabelText('Your connected wallet is not a signer of this Safe account')).toBeInTheDocument()
 
     expect(useHasPermissionSpy).toHaveBeenCalledTimes(1)
     expect(useHasPermissionSpy).toHaveBeenCalledWith(Permission.SignTransaction)

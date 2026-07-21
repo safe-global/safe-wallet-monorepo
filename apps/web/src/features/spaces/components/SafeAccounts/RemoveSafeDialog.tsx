@@ -68,7 +68,7 @@ const RemoveSafeDialog = ({
   }
 
   return (
-    <ModalDialog open onClose={handleClose} dialogTitle="Remove Safe Account" hideChainIndicator>
+    <ModalDialog open onClose={handleClose} dialogTitle="Remove Safe account" hideChainIndicator>
       <DialogContent sx={{ p: '24px !important' }}>
         <Typography>
           Are you sure you want to remove <b>{address}</b> from this space?

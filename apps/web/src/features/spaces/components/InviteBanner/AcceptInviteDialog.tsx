@@ -8,6 +8,7 @@ import { Alert, Box, Button, CircularProgress, DialogActions, DialogContent, Typ
 import { FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
+import { MEMBER_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -16,6 +17,9 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { showNotification } from '@/store/notificationsSlice'
 import ExternalLink from '@/components/common/ExternalLink'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
 function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClose: () => void }): ReactElement {
   const [error, setError] = useState<string>()
@@ -36,35 +40,37 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
 
     try {
       setIsSubmitting(true)
-      const response = await acceptInvite({ spaceId: space.uuid, acceptInviteDto: { name: data.name } })
+      const response = await acceptInvite({ spaceId: space.uuid, acceptInviteDto: { name: sanitizeName(data.name) } })
 
       if (response.error) {
-        throw response.error
+        setError(getRtkQueryErrorMessage(response.error as FetchBaseQueryError | SerializedError))
+        return
       }
-
-      trackEvent(
-        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_ACCEPTED, label: space.uuid },
-        { workspace_id: space.uuid, user_id: currentUser?.id },
-      )
-
-      if (router.pathname === AppRoutes.welcome.spaces) {
-        router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: space.uuid } })
-      }
-
-      onClose()
-
-      dispatch(
-        showNotification({
-          message: `Accepted invite to ${space.name}`,
-          variant: 'success',
-          groupKey: 'accept-invite-success',
-        }),
-      )
     } catch (e) {
-      setError('Failed accepting the invite. Please try again.')
+      setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
+      return
     } finally {
       setIsSubmitting(false)
     }
+
+    trackEvent(
+      { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_ACCEPTED, label: space.uuid },
+      { workspace_id: space.uuid, user_id: currentUser?.id },
+    )
+
+    if (router.pathname === AppRoutes.welcome.spaces) {
+      router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: space.uuid } })
+    }
+
+    onClose()
+
+    dispatch(
+      showNotification({
+        message: `Accepted invite to ${space.name}`,
+        variant: 'success',
+        groupKey: 'accept-invite-success',
+      }),
+    )
   })
 
   return (
@@ -73,7 +79,16 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
         <form onSubmit={onSubmit}>
           <DialogContent sx={{ py: 2 }}>
             <Box mb={2}>
-              <NameInput data-testid="invite-name-input" label="Name" autoFocus name="name" required />
+              <NameInput
+                data-testid="invite-name-input"
+                label="Name"
+                autoFocus
+                name="name"
+                required
+                validateCharset
+                minLength={NAME_MIN_LENGTH}
+                maxLength={MEMBER_NAME_MAX_LENGTH}
+              />
             </Box>
             <Typography variant="body2" color="text.secondary">
               How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>

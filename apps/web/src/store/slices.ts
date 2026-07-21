@@ -38,6 +38,7 @@ export * from './orderByPreferenceSlice'
 export * from './authSlice'
 export * from '@/features/hypernative/store'
 export * from '@/features/gtf/store'
+export * from '@/features/address-poisoning/store'
 export {
   globalSearchSlice,
   openGlobalSearch,
@@ -53,4 +54,7 @@ export {
   selectSafeActionsModal,
   selectSafeActionsModalOpen,
   selectSafeActionsModalType,
+  spaceNavigationSlice,
+  setLastUsedSpaceOrigin,
+  selectLastUsedSpaceOrigin,
 } from '@/features/spaces/store'

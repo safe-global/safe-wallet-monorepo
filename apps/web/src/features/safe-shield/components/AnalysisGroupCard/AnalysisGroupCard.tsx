@@ -1,8 +1,9 @@
-import { type ReactElement, type ReactNode, useMemo, useState, useEffect, useRef } from 'react'
+import { type ReactElement, type ReactNode, type TransitionEvent, useMemo, useState, useEffect, useRef } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import {
   ContractStatus,
+  RecipientStatus,
   type GroupedAnalysisResults,
   type Severity,
   type StatusGroup,
@@ -11,6 +12,7 @@ import { mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shie
 import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'
 import { SeverityIcon } from '../SeverityIcon'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
+import { AddressPoisoningCardItem } from './AddressPoisoningCardItem'
 import { DelegateCallCardItem } from './DelegateCallCardItem'
 import { FallbackHandlerCardItem } from './FallbackHandlerCardItem'
 import { type AnalyticsEvent, MixpanelEventParams, trackEvent } from '@/services/analytics'
@@ -41,6 +43,9 @@ export const AnalysisGroupCard = ({
 }: AnalysisGroupCardProps): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+  // The reveal animation caps max-height (can't animate to `auto`); once it finishes we drop the cap
+  // so tall content (many warnings) isn't clipped behind the widget footer.
+  const [revealed, setRevealed] = useState(false)
 
   const visibleResults = useMemo(() => mapVisibleAnalysisResults(data, expandedGroups), [data, expandedGroups])
   const primaryResult = useMemo(() => getPrimaryAnalysisResult(data), [data])
@@ -51,6 +56,7 @@ export const AnalysisGroupCard = ({
   useEffect(() => {
     if (!primaryResult || isDataEmpty) {
       setIsVisible(false)
+      setRevealed(false)
       return
     }
 
@@ -76,13 +82,20 @@ export const AnalysisGroupCard = ({
     return null
   }
 
+  // Drop the reveal's max-height cap once its own transition ends (ignore opacity + bubbling Collapse height).
+  const handleRevealTransitionEnd = (e: TransitionEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget && e.propertyName === 'max-height' && isVisible) setRevealed(true)
+  }
+
   return (
     <Box
       data-testid={dataTestId}
+      onTransitionEnd={handleRevealTransitionEnd}
       sx={{
-        overflow: 'hidden',
+        // Capped during the reveal (animatable), uncapped after — see `revealed` above.
+        overflow: revealed ? 'visible' : 'hidden',
         opacity: isVisible ? 1 : 0,
-        maxHeight: isVisible ? 1000 : 0, // Replace 'fit-content' with a large px value for animatable maxHeight
+        maxHeight: revealed ? 'none' : isVisible ? 1000 : 0,
         transition: `opacity 0.6s ease-in-out, max-height 0.6s ease-in-out`,
         transitionDelay: `${delay}ms`,
       }}
@@ -130,6 +143,10 @@ export const AnalysisGroupCard = ({
 
               if (result.type === ContractStatus.UNOFFICIAL_FALLBACK_HANDLER) {
                 return <FallbackHandlerCardItem key={index} result={result} isPrimary={isPrimary} />
+              }
+
+              if (result.type === RecipientStatus.RESEMBLES_TRUSTED_ADDRESS) {
+                return <AddressPoisoningCardItem key={index} result={result} />
               }
 
               return (

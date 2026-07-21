@@ -1,40 +1,32 @@
-import { useCallback, useEffect, useMemo } from 'react'
-import useWallet from '@/hooks/wallets/useWallet'
-import { type AllSafeItems, type AllSafeItemsGrouped, getComparator, useSafesSearch } from '@/hooks/safes'
+import { memo, useEffect, useMemo } from 'react'
+import { type AllSafeItems, type AllSafeItemsGrouped, useSafeOrderComparator, useSafesSearch } from '@/hooks/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useAddressBook from '@/hooks/useAddressBook'
-import { useAppSelector } from '@/store'
-import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
+import { useAppDispatch, useAppSelector } from '@/store'
+import {
+  OrderByOption,
+  selectOrderByPreference,
+  setManualOrder,
+  TRUSTED_ORDER_SCOPE,
+} from '@/store/orderByPreferenceSlice'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
 import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
-import BookmarkIcon from '@/public/images/apps/bookmark.svg'
 
-import ConnectWalletPrompt from '../../../ConnectWalletPrompt'
-import MigrationPrompt from '../../../MigrationPrompt'
-import TrustedSafesModal from '@/components/common/TrustedSafesModal'
-import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
-import useMigrationPrompt from '../../../../hooks/useMigrationPrompt'
-import AccountItem from '../AccountItem'
+import SafeAccountsTable from '../../../SafeAccountsTable'
 
 type AccountsListProps = {
   searchQuery: string
   safes: AllSafeItemsGrouped
   onLinkClick?: () => void
-  isSidebar?: boolean
 }
 
 const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) => {
-  const wallet = useWallet()
-  const isConnected = Boolean(wallet)
-
+  const dispatch = useAppDispatch()
   const { orderBy } = useAppSelector(selectOrderByPreference)
-  const sortComparator = getComparator(orderBy)
-
-  const modal = useTrustedSafesModal()
-  const migration = useMigrationPrompt()
+  const sortComparator = useSafeOrderComparator(TRUSTED_ORDER_SCOPE)
+  const isManualOrder = orderBy === OrderByOption.MANUAL
 
   const { safe: currentSafe, safeAddress } = useSafeInfo()
   const addressBook = useAddressBook()
@@ -68,8 +60,6 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
     [currentSafe.chainId, safeAddress, currentSafeInList, addressBook],
   )
 
-  const handleMigrationProceed = useCallback(() => modal.open(), [modal])
-
   useEffect(() => {
     if (searchQuery) {
       trackEvent({ category: OVERVIEW_EVENTS.SEARCH.category, action: OVERVIEW_EVENTS.SEARCH.action })
@@ -82,72 +72,46 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
         <Typography variant="paragraph-small" color="muted" className="mb-2">
           Found {filteredSafes.length} result{maybePlural(filteredSafes)}
         </Typography>
-        <div className="flex flex-col gap-2">
-          {filteredSafes.map((item) => (
-            <AccountItem key={item.address} safe={item} onLinkClick={onLinkClick} />
-          ))}
-        </div>
+        <SafeAccountsTable
+          items={filteredSafes}
+          onLinkClick={onLinkClick}
+          sortableColumns={orderBy === OrderByOption.NAME}
+        />
       </>
     )
   }
 
-  if (!isConnected && !migration.hasPinnedSafes) {
-    return <ConnectWalletPrompt />
-  }
-
   const showCurrentSafe = safeAddress && currentSafeItem && !currentSafeInList?.isPinned
-  const showEmptyState = !migration.hasPinnedSafes && !migration.shouldShowPrompt
 
   return (
     <>
-      {migration.shouldShowPrompt && <MigrationPrompt onProceed={handleMigrationProceed} />}
-
       {showCurrentSafe && (
         <section data-testid="current-safe-section" className="mb-6">
           <Typography variant="paragraph-small-bold" className="mb-2">
-            Current Safe Account
+            Current Safe account
           </Typography>
-          <AccountItem safe={currentSafeItem} onLinkClick={onLinkClick} />
+          <SafeAccountsTable items={currentSafeItem ? [currentSafeItem] : []} onLinkClick={onLinkClick} />
         </section>
-      )}
-
-      {pinnedSafes.length > 0 && (
-        <div className="mb-4 flex items-center gap-1.5">
-          <BookmarkIcon className="text-foreground size-4 [&_path]:stroke-current" />
-          <Typography variant="paragraph-small-bold">Trusted Safes</Typography>
-        </div>
       )}
 
       {pinnedSafes.length > 0 && (
         <section data-testid="pinned-accounts" className="mb-4">
-          <div className="flex flex-col gap-2">
-            {pinnedSafes.map((item) => (
-              <AccountItem key={item.address} safe={item} onLinkClick={onLinkClick} />
-            ))}
-          </div>
-          <div className="mt-3 flex justify-center">
-            <Button variant="outline" size="sm" onClick={modal.open} data-testid="add-more-safes-button">
-              Manage trusted Safes
-            </Button>
-          </div>
+          <SafeAccountsTable
+            items={pinnedSafes}
+            onLinkClick={onLinkClick}
+            sortableColumns={orderBy === OrderByOption.NAME}
+            reorder={
+              isManualOrder
+                ? { onReorder: (order) => dispatch(setManualOrder({ scope: TRUSTED_ORDER_SCOPE, order })) }
+                : undefined
+            }
+          />
         </section>
       )}
-
-      {showEmptyState && (
-        <Typography
-          data-testid="empty-safe-list"
-          variant="paragraph-small"
-          color="muted"
-          align="center"
-          className="py-6"
-        >
-          You don&apos;t have any safes yet
-        </Typography>
-      )}
-
-      <TrustedSafesModal modal={modal} />
     </>
   )
 }
 
-export default AccountsList
+// Memoised so opening the "Manage my account list" modal (state lives in the parent) doesn't
+// re-render the full pinned-accounts table — a costly synchronous pass with hundreds of rows.
+export default memo(AccountsList)

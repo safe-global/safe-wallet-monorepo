@@ -4,14 +4,6 @@ import type { BeamerConfig, BeamerMethods } from '@services/beamer/types'
 declare global {
   interface Window {
     isDesktop?: boolean
-    ethereum?: {
-      autoRefreshOnNetworkChange: boolean
-      isMetaMask: boolean
-      _metamask: {
-        isUnlocked: () => Promise<boolean>
-      }
-      isConnected?: () => boolean
-    }
     beamer_config?: BeamerConfig
     Beamer?: BeamerMethods
     dataLayer?: any[]

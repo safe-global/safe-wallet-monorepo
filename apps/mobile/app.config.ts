@@ -31,7 +31,7 @@ const config: ExpoConfig = {
   name: name,
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
-  version: '1.0.14',
+  version: '1.0.15',
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
     eas: {
@@ -40,7 +40,8 @@ const config: ExpoConfig = {
   },
   orientation: 'portrait',
   icon: './assets/images/icon.png',
-  scheme: ['wc'],
+  // `safe` matches the WalletConnect registry native link (and SAFE_WALLET_METADATA.redirect); `wc` keeps raw wc: links.
+  scheme: ['safe', 'wc'],
   userInterfaceStyle: 'automatic',
   ios: {
     config: {

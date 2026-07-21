@@ -250,15 +250,15 @@ export const addressBookErrrMsg = {
   invalidFormat: 'Invalid address format',
   invalidChecksum: 'Invalid address checksum',
   exceedChars: 'Maximum 50 symbols',
-  ownSafeManage: 'The Safe Account cannot own itself',
-  ownSafe: 'Cannot use Safe Account itself as signer',
+  ownSafeManage: 'The Safe account cannot own itself',
+  ownSafe: 'Cannot use Safe account itself as signer',
   alreadyAdded: 'Address already added',
   ownerAdded: 'Signer is already added',
-  failedResolve: 'Failed to resolve the address',
+  failedResolve: 'ENS name not available on Sepolia',
   emptyAddress: 'Owner',
-  safeAlreadyAdded: 'Safe Account is already added',
+  safeAlreadyAdded: 'Safe account is already added',
   prefixMismatch: "doesn't match the current chain",
-  ownSafeGuardian: 'The Safe Account cannot be a Recoverer of itself',
+  ownSafeGuardian: 'The Safe account cannot be a Recoverer of itself',
   invalidPrefix(prefix) {
     return `"${prefix}" doesn't match the current chain`
   },
@@ -323,4 +323,8 @@ export const localStorageKeys = {
   SAFE_v2__pendingCfDeletes: 'SAFE_v2__pendingCfDeletes',
   SAFE_v2__visitedSafes: 'SAFE_v2__visitedSafes',
   SAFE_v2__auth: 'SAFE_v2__auth',
+}
+
+export const sessionStorageKeys = {
+  SAFE_v2__classicViewEnabled: 'SAFE_v2__classicViewEnabled',
 }

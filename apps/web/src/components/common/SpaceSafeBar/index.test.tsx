@@ -1,6 +1,5 @@
-import { render } from '@testing-library/react'
+import { fireEvent, render } from '@testing-library/react'
 import SpaceSafeBar from './index'
-import { TxModalContext } from '@/components/tx-flow'
 
 const mockItems = [
   {
@@ -24,10 +23,30 @@ jest.mock('next/router', () => ({
 
 jest.mock('@/features/spaces', () => ({
   useIsQualifiedSafe: jest.fn(() => false),
+  useCurrentSpaceId: () => undefined,
+  matchesSafeSearch: jest.requireActual('@/features/spaces/components/SafeSelectorDropdown/utils').matchesSafeSearch,
   get SafeSelectorDropdown() {
     return jest.requireMock('@/features/spaces/components/SafeSelectorDropdown').default
   },
 }))
+
+jest.mock('@/hooks/useAllAddressBooks', () => ({
+  useSafeNameResolver: () => (_address: string, _chainId: string | undefined, preferredName?: string) =>
+    preferredName ?? '',
+}))
+
+jest.mock('@/components/address-book/EntryDialog', () => {
+  const MockEntryDialog = (props: { defaultValues?: { name: string; address: string }; chainIds?: string[] }) => (
+    <div
+      data-testid="entry-dialog"
+      data-name={props.defaultValues?.name}
+      data-address={props.defaultValues?.address}
+      data-chain-ids={JSON.stringify(props.chainIds)}
+    />
+  )
+  MockEntryDialog.displayName = 'EntryDialog'
+  return { __esModule: true, default: MockEntryDialog }
+})
 
 jest.mock('./hooks/useSpaceSafeSelectorItems', () => ({
   useSpaceSafeSelectorItems: jest.fn(),
@@ -46,6 +65,11 @@ jest.mock('./SpaceChainSelector', () => {
 jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
   const MockSafeSelectorDropdown = (props: Record<string, unknown>) => {
     const footerFn = props.footer as ((close: () => void) => React.ReactNode) | undefined
+    const emptyStateOverride = props.emptyStateOverride as React.ReactNode | ((close: () => void) => React.ReactNode)
+    const onSearchValueChange = props.onSearchValueChange as ((value: string) => void) | undefined
+    const onItemRename = props.onItemRename as
+      | ((target: { address: string; name: string; chainIds: string[] }) => void)
+      | undefined
     return (
       <div
         data-testid="safe-selector-dropdown"
@@ -55,9 +79,25 @@ jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
         data-has-on-item-select={String(typeof props.onItemSelect === 'function')}
         data-has-on-retry={String(typeof props.onRetry === 'function')}
         data-has-footer={String(typeof props.footer === 'function')}
+        data-keep-open={String(props.keepOpen)}
       >
         {props.header as React.ReactNode}
+        {emptyStateOverride != null && (
+          <div data-testid="dropdown-empty-slot">
+            {typeof emptyStateOverride === 'function' ? emptyStateOverride(() => {}) : emptyStateOverride}
+          </div>
+        )}
         {typeof footerFn === 'function' && <div data-testid="dropdown-footer-slot">{footerFn(() => {})}</div>}
+        <input
+          data-testid="mock-search-input"
+          value={(props.searchValue as string) ?? ''}
+          onChange={(e) => onSearchValueChange?.(e.target.value)}
+        />
+        <button
+          type="button"
+          data-testid="mock-rename-btn"
+          onClick={() => onItemRename?.({ address: '0xSafe1', name: 'My Safe', chainIds: ['1'] })}
+        />
       </div>
     )
   }
@@ -69,12 +109,6 @@ jest.mock('./SpaceNestedSafesButton', () => {
   const MockSpaceNestedSafesButton = () => <div data-testid="nested-safes-button" />
   MockSpaceNestedSafesButton.displayName = 'SpaceNestedSafesButton'
   return { __esModule: true, default: MockSpaceNestedSafesButton }
-})
-
-jest.mock('./AccountsModal', () => {
-  const MockAccountsModal = () => <div data-testid="accounts-modal" />
-  MockAccountsModal.displayName = 'AccountsModal'
-  return { __esModule: true, default: MockAccountsModal }
 })
 
 jest.mock('@/features/myAccounts', () => ({
@@ -113,30 +147,21 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   default: jest.fn(() => null),
 }))
 
-jest.mock('@/components/common/ConnectWallet/useConnectWallet', () => () => jest.fn())
+jest.mock('@/components/common/ConnectWallet/useConnectWallet', () => {
+  const connect = jest.fn()
+  return { __esModule: true, default: () => connect }
+})
 
 jest.mock('@/store', () => ({
   useAppDispatch: () => jest.fn(),
   useAppSelector: () => ({}),
 }))
 
-jest.mock('./SpaceBackLink', () => {
-  const MockSpaceBackLink = (props: Record<string, unknown>) => (
-    <div
-      data-testid="space-back-link"
-      data-space-name={(props.space as { name: string })?.name}
-      data-has-on-click={String(typeof props.onClick === 'function')}
-    />
-  )
-  MockSpaceBackLink.displayName = 'SpaceBackLink'
-  return { __esModule: true, default: MockSpaceBackLink }
-})
-
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
+import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { useIsQualifiedSafe } from '@/features/spaces'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
-import useWallet from '@/hooks/wallets/useWallet'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 
@@ -146,7 +171,6 @@ const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
 const mockUseSafeAddressFromUrl = useSafeAddressFromUrl as jest.Mock
 const mockUseSpaceSafeSelectorItems = useSpaceSafeSelectorItems as jest.Mock
 const mockUseSpaceBackLink = useSpaceBackLink as jest.Mock
-const mockUseWallet = useWallet as jest.Mock
 
 describe('SpaceSafeBar', () => {
   beforeEach(() => {
@@ -155,12 +179,14 @@ describe('SpaceSafeBar', () => {
     mockUseRouter.mockReturnValue({ pathname: '/home' })
     mockUseSafeAddressFromUrl.mockReturnValue('0xSafe1')
     mockUseSpaceSafeSelectorItems.mockReturnValue({
-      items: mockItems,
+      workspaceItems: [],
+      localItems: mockItems,
       selectedItemId: '1:0xSafe1',
       handleItemSelect: jest.fn(),
       isError: false,
       refetch: jest.fn(),
       isInSpaceContext: false,
+      hasWallet: true,
     })
     mockUseSpaceBackLink.mockReturnValue({
       space: undefined,
@@ -183,7 +209,7 @@ describe('SpaceSafeBar', () => {
     expect(getByTestId('nested-safes-button')).toBeInTheDocument()
   })
 
-  it('passes items from the hook to SafeSelectorDropdown', () => {
+  it('passes the union of workspace + local items to SafeSelectorDropdown (for the trigger)', () => {
     const { getByTestId } = render(<SpaceSafeBar />)
     const dropdown = getByTestId('safe-selector-dropdown')
     expect(JSON.parse(dropdown.getAttribute('data-items')!)).toEqual(mockItems)
@@ -191,11 +217,14 @@ describe('SpaceSafeBar', () => {
 
   it('passes isError=true to SafeSelectorDropdown when the overview query fails', () => {
     mockUseSpaceSafeSelectorItems.mockReturnValue({
-      items: [],
+      workspaceItems: [],
+      localItems: [],
       selectedItemId: '',
       handleItemSelect: jest.fn(),
       isError: true,
       refetch: jest.fn(),
+      isInSpaceContext: false,
+      hasWallet: true,
     })
 
     const { getByTestId } = render(<SpaceSafeBar />)
@@ -211,149 +240,192 @@ describe('SpaceSafeBar', () => {
     expect(dropdown.getAttribute('data-has-on-retry')).toBe('true')
   })
 
-  it('passes an All Accounts footer to SafeSelectorDropdown on the Spaces level (WA-2462)', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
-    mockUseSpaceBackLink.mockReturnValue({
-      space: { id: 1, name: 'Test Space' },
-      handleBackToSpace: jest.fn(),
-    })
-
+  it('renders the Manage list footer on the default Local tab', () => {
+    // Off the Spaces level the default tab is Local, which carries the manage-trusted footer.
     const { getByTestId } = render(<SpaceSafeBar />)
     expect(getByTestId('safe-selector-dropdown').getAttribute('data-has-footer')).toBe('true')
+    const manageBtn = getByTestId('dropdown-manage-trusted-btn')
+    expect(manageBtn).toHaveTextContent('Manage list')
+    expect(manageBtn).toHaveTextContent('Add or remove accounts from this list')
   })
 
-  it('passes a footer to SafeSelectorDropdown when not on the Spaces level', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(false)
-
-    const { getByTestId } = render(<SpaceSafeBar />)
-    expect(getByTestId('safe-selector-dropdown').getAttribute('data-has-footer')).toBe('true')
-  })
-
-  it('labels the dropdown footer "All Accounts" when not on the Spaces level (wallet connected)', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(false)
-    mockUseWallet.mockReturnValue({ address: '0xWalletOwner' })
-
-    const { getByTestId } = render(<SpaceSafeBar />)
-    expect(getByTestId('all-accounts-btn').textContent).toContain('All Accounts')
-  })
-
-  it('labels the dropdown footer "Explore other Safes" on the Spaces level', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
-    mockUseSpaceBackLink.mockReturnValue({
-      space: { id: 1, name: 'Test Space' },
-      handleBackToSpace: jest.fn(),
+  it('drops the footer and shows the No accounts empty state when connected with no trusted safes', () => {
+    mockUseSpaceSafeSelectorItems.mockReturnValue({
+      workspaceItems: [],
+      localItems: [],
+      selectedItemId: '',
+      handleItemSelect: jest.fn(),
+      isError: false,
+      refetch: jest.fn(),
+      isInSpaceContext: false,
+      hasWallet: true,
     })
 
-    const { getByTestId } = render(<SpaceSafeBar />)
-    expect(getByTestId('all-accounts-btn').textContent).toContain('Explore other Safes')
+    const { getByTestId, queryByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('safe-selector-dropdown').getAttribute('data-has-footer')).toBe('false')
+    expect(queryByTestId('dropdown-manage-trusted-btn')).not.toBeInTheDocument()
+    const emptyState = getByTestId('dropdown-no-trusted')
+    expect(emptyState).toHaveTextContent('No accounts yet')
+    expect(emptyState).toHaveTextContent('Manage your list to add or remove accounts.')
+    expect(getByTestId('dropdown-manage-list-btn')).toBeInTheDocument()
   })
 
-  it('renders the "Safes in this workspace" dropdown header on the Spaces level', () => {
+  it('shows the Connect wallet empty state on the Local tab when no wallet is connected', () => {
+    mockUseSpaceSafeSelectorItems.mockReturnValue({
+      workspaceItems: [],
+      localItems: [],
+      selectedItemId: '',
+      handleItemSelect: jest.fn(),
+      isError: false,
+      refetch: jest.fn(),
+      isInSpaceContext: false,
+      hasWallet: false,
+    })
+
+    const { getByTestId, queryByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('safe-selector-dropdown').getAttribute('data-has-footer')).toBe('false')
+    const emptyState = getByTestId('dropdown-connect-cta')
+    expect(emptyState).toHaveTextContent('Connect your wallet to access existing accounts or add new ones.')
+    expect(getByTestId('dropdown-connect-wallet-body-btn')).toBeInTheDocument()
+    expect(queryByTestId('dropdown-no-trusted')).not.toBeInTheDocument()
+  })
+
+  it('opens wallet onboarding from the Connect wallet empty state (dropdown closes first)', () => {
+    mockUseSpaceSafeSelectorItems.mockReturnValue({
+      workspaceItems: [],
+      localItems: [],
+      selectedItemId: '',
+      handleItemSelect: jest.fn(),
+      isError: false,
+      refetch: jest.fn(),
+      isInSpaceContext: false,
+      hasWallet: false,
+    })
+    // The empty state is rendered via the function form of emptyStateOverride, so its button runs
+    // close() before connect() — this is what keeps the wallet modal from opening behind the popup.
+    const connect = useConnectWallet()
+
+    const { getByTestId } = render(<SpaceSafeBar />)
+    fireEvent.click(getByTestId('dropdown-connect-wallet-body-btn'))
+
+    expect(connect).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not render a footer on the Workspace tab (default in a space context)', () => {
     mockUseIsQualifiedSafe.mockReturnValue(true)
     mockUseSpaceSafeSelectorItems.mockReturnValue({
-      items: mockItems,
+      workspaceItems: mockItems,
+      localItems: [],
       selectedItemId: '1:0xSafe1',
       handleItemSelect: jest.fn(),
       isError: false,
       refetch: jest.fn(),
       isInSpaceContext: true,
+      hasWallet: true,
     })
-    mockUseSpaceBackLink.mockReturnValue({
-      space: { id: 1, name: 'Test Space' },
-      handleBackToSpace: jest.fn(),
-    })
+    mockUseSpaceBackLink.mockReturnValue({ space: { id: 1, name: 'Test Space' }, handleBackToSpace: jest.fn() })
 
     const { getByTestId } = render(<SpaceSafeBar />)
-    expect(getByTestId('workspace-header').textContent).toBe('Safes in this workspace')
+    expect(getByTestId('safe-selector-dropdown').getAttribute('data-has-footer')).toBe('false')
   })
 
-  it('does not render the workspace header off the Spaces level', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(false)
-
-    const { queryByTestId } = render(<SpaceSafeBar />)
-    expect(queryByTestId('workspace-header')).not.toBeInTheDocument()
+  it('renders Workspace and Local tabs in the dropdown', () => {
+    const { getByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('dropdown-tab-workspace')).toBeInTheDocument()
+    expect(getByTestId('dropdown-tab-local')).toBeInTheDocument()
   })
 
-  it('renders the workspace header in a space context even when the safe is not qualified', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(false)
+  it('labels the Workspace tab "Workspace" off the Spaces level', () => {
+    const { getByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('dropdown-tab-workspace').textContent).toBe('Workspace')
+  })
+
+  it('labels the Workspace tab "Workspace" when a fallback space is loaded but the safe is not part of it', () => {
+    // `useCurrentSpaceId` resolves a fallback space (last-used / first in the list) even when the
+    // current safe belongs to no workspace, so `space` is populated while isInSpaceContext is false.
+    mockUseSpaceBackLink.mockReturnValue({ space: { id: 1, name: 'Daniel Test space' }, handleBackToSpace: jest.fn() })
+
+    const { getByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('dropdown-tab-workspace').textContent).toBe('Workspace')
+  })
+
+  it('labels the Workspace tab with the space name in a space context', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(true)
     mockUseSpaceSafeSelectorItems.mockReturnValue({
-      items: mockItems,
+      workspaceItems: mockItems,
+      localItems: [],
       selectedItemId: '1:0xSafe1',
       handleItemSelect: jest.fn(),
       isError: false,
       refetch: jest.fn(),
       isInSpaceContext: true,
+      hasWallet: true,
     })
+    mockUseSpaceBackLink.mockReturnValue({ space: { id: 1, name: 'Test Space' }, handleBackToSpace: jest.fn() })
 
     const { getByTestId } = render(<SpaceSafeBar />)
-    expect(getByTestId('workspace-header').textContent).toBe('Safes in this workspace')
+    expect(getByTestId('dropdown-tab-workspace').textContent).toBe('Test Space (1)')
   })
 
-  it('renders SpaceBackLink when in space context and space data is available', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
-    mockUseSpaceBackLink.mockReturnValue({
-      space: { id: 42, name: 'Acme Corp' },
-      handleBackToSpace: jest.fn(),
+  it('labels the Local tab with the my accounts count', () => {
+    const { getByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('dropdown-tab-local').textContent).toBe('My accounts (1)')
+  })
+
+  it('updates the tab counts while searching across both lists', () => {
+    mockUseSpaceSafeSelectorItems.mockReturnValue({
+      workspaceItems: mockItems,
+      localItems: [
+        ...mockItems,
+        {
+          id: '1:0xSafe2',
+          name: 'Other Safe',
+          address: '0xSafe2',
+          threshold: 1,
+          owners: 1,
+          balance: '0',
+          chains: [{ chainId: '1', chainName: 'Ethereum', chainLogoUri: null, shortName: 'eth' }],
+        },
+      ],
+      selectedItemId: '1:0xSafe1',
+      handleItemSelect: jest.fn(),
+      isError: false,
+      refetch: jest.fn(),
+      isInSpaceContext: true,
+      hasWallet: true,
     })
+    mockUseIsQualifiedSafe.mockReturnValue(true)
+    mockUseSpaceBackLink.mockReturnValue({ space: { id: 1, name: 'Test Space' }, handleBackToSpace: jest.fn() })
 
     const { getByTestId } = render(<SpaceSafeBar />)
-    const backLink = getByTestId('space-back-link')
-    expect(backLink).toBeInTheDocument()
-    expect(backLink.getAttribute('data-space-name')).toBe('Acme Corp')
-    expect(backLink.getAttribute('data-has-on-click')).toBe('true')
+    expect(getByTestId('dropdown-tab-workspace').textContent).toBe('Test Space (1)')
+    expect(getByTestId('dropdown-tab-local').textContent).toBe('My accounts (2)')
+
+    fireEvent.change(getByTestId('mock-search-input'), { target: { value: 'Other' } })
+
+    expect(getByTestId('dropdown-tab-workspace').textContent).toBe('Test Space (0)')
+    expect(getByTestId('dropdown-tab-local').textContent).toBe('My accounts (1)')
   })
 
-  it('does not render SpaceBackLink when not in space context', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(false)
-    mockUseSpaceBackLink.mockReturnValue({
-      space: { id: 42, name: 'Acme Corp' },
-      handleBackToSpace: jest.fn(),
-    })
+  it('opens the rename dialog with the safe details when a row rename is requested', () => {
+    const { getByTestId, queryByTestId } = render(<SpaceSafeBar />)
+    expect(queryByTestId('entry-dialog')).not.toBeInTheDocument()
 
-    const { queryByTestId } = render(<SpaceSafeBar />)
-    expect(queryByTestId('space-back-link')).not.toBeInTheDocument()
+    fireEvent.click(getByTestId('mock-rename-btn'))
+
+    const dialog = getByTestId('entry-dialog')
+    expect(dialog.getAttribute('data-name')).toBe('My Safe')
+    expect(dialog.getAttribute('data-address')).toBe('0xSafe1')
+    expect(dialog.getAttribute('data-chain-ids')).toBe('["1"]')
   })
 
-  it('does not render SpaceBackLink when space data is undefined', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
-    mockUseSpaceBackLink.mockReturnValue({
-      space: undefined,
-      handleBackToSpace: jest.fn(),
-    })
-
-    const { queryByTestId } = render(<SpaceSafeBar />)
-    expect(queryByTestId('space-back-link')).not.toBeInTheDocument()
-  })
-
-  it('renders both SpaceBackLink and SafeSelectorDropdown together', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
-    mockUseSpaceBackLink.mockReturnValue({
-      space: { id: 1, name: 'Test Space' },
-      handleBackToSpace: jest.fn(),
-    })
-
+  it('keeps the dropdown open while the rename dialog is showing', () => {
     const { getByTestId } = render(<SpaceSafeBar />)
-    expect(getByTestId('space-back-link')).toBeInTheDocument()
-    expect(getByTestId('safe-selector-dropdown')).toBeInTheDocument()
-  })
+    expect(getByTestId('safe-selector-dropdown').getAttribute('data-keep-open')).toBe('false')
 
-  it('hides SpaceBackLink while a tx-flow modal is open', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
-    mockUseSpaceBackLink.mockReturnValue({
-      space: { id: 1, name: 'Test Space' },
-      handleBackToSpace: jest.fn(),
-    })
+    fireEvent.click(getByTestId('mock-rename-btn'))
 
-    const { queryByTestId, getByTestId } = render(
-      <TxModalContext.Provider value={{ txFlow: <div />, setTxFlow: jest.fn(), setFullWidth: jest.fn() }}>
-        <SpaceSafeBar />
-      </TxModalContext.Provider>,
-    )
-
-    expect(queryByTestId('space-back-link')).not.toBeInTheDocument()
-    // Other elements still render — only the back link is hidden
-    expect(getByTestId('safe-selector-dropdown')).toBeInTheDocument()
-    expect(getByTestId('space-chain-selector')).toBeInTheDocument()
+    expect(getByTestId('safe-selector-dropdown').getAttribute('data-keep-open')).toBe('true')
   })
 
   it.each([['/welcome/accounts'], ['/welcome/spaces'], ['/new-safe/create'], ['/new-safe/load']])(

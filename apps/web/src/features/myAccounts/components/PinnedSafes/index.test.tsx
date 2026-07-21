@@ -38,13 +38,13 @@ describe('PinnedSafes', () => {
     expect(screen.queryByTestId('add-more-safes-button')).not.toBeInTheDocument()
   })
 
-  it('renders the "Trusted Safes" header when there are pinned safes', () => {
+  it('renders the "My accounts" header when there are pinned safes', () => {
     const pinnedSafes: AllSafeItems = [
       { name: 'PinnedSafe1', address: '0x1', isPinned: true, chainId: '1', isReadOnly: false, lastVisited: 0 },
     ]
 
     render(<PinnedSafes allSafes={pinnedSafes} />)
-    expect(screen.getByText('Trusted Safes')).toBeInTheDocument()
+    expect(screen.getByText('My accounts')).toBeInTheDocument()
   })
 
   it('renders SafesList when there are pinned safes', () => {
@@ -88,7 +88,7 @@ describe('PinnedSafes', () => {
 
     const addButton = screen.getByTestId('add-more-safes-button')
     expect(addButton).toBeInTheDocument()
-    expect(addButton).toHaveTextContent('Manage trusted Safes')
+    expect(addButton).toHaveTextContent('Manage list')
   })
 
   it('calls onOpenSelectionModal when "Manage trusted Safes" button is clicked', () => {

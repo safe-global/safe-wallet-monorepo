@@ -19,14 +19,11 @@ const fileUploadSection = '[data-testid="file-upload-section"]'
 
 const exportFileSection = '[data-testid="export-file-section"]'
 
-export const safeHeaderInfo = '[data-testid="safe-header-info"]'
-export const prependChainPrefixStr = 'Prepend chain prefix to addresses'
-export const copyAddressStr = 'Copy addresses with chain prefix'
 export const darkModeStr = 'Dark mode'
 
 // Import messages for data_import.json
 const importMessages = [
-  'Added Safe Accounts on 4 chains',
+  'Added Safe accounts on 4 chains',
   'Address book for 4 chains',
   'Address book for 4 chains',
   'Settings (appearance, currency, hidden tokens and custom environment variables)',
@@ -91,19 +88,14 @@ export function clickOnImportBtnDataImportModal() {
 
 export function verifyImportModalData() {
   //verifies that the modal says the amount of chains/addressbook values it uploaded for file ../fixtures/data_import.json
-  cy.contains('Added Safe Accounts on 4 chains').should('be.visible')
+  cy.contains('Added Safe accounts on 4 chains').should('be.visible')
   cy.contains('Address book for 4 chains').should('be.visible')
   cy.contains('Settings').should('be.visible')
   cy.contains('Bookmarked Safe Apps').should('be.visible')
 }
 
-export function clickOnImportedSafe(safe) {
-  cy.contains(safe).click()
-  cy.get(safeHeaderInfo).contains(safe).should('exist')
-}
-
 export function clickOnOpenSafeListSidebar() {
-  cy.contains('My Safe Accounts').click()
+  cy.contains('My Safe accounts').click()
 }
 
 export function clickOnAddressBookBtn() {
@@ -153,7 +145,7 @@ export function clickOnSettingsBtn() {
 export function clickOnAppearenceBtn() {
   cy.contains(tab, appearenceTabStr).click()
   // Wait for appearance page content to render after Next.js client-side navigation
-  cy.contains('Chain-specific addresses').should('be.visible')
+  cy.contains('Theme').should('be.visible')
 }
 
 export function clickOnShowMoreTabsBtn() {

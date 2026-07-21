@@ -20,6 +20,9 @@ import { useCurrentSpaceId, useGetSpaceAddressBook } from '@/features/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
@@ -91,14 +94,9 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
       })
 
       if (result.error) {
-        setError('Something went wrong. Please try again.')
-        dispatch(
-          showNotification({
-            message: 'Failed to import contacts. Please try again.',
-            variant: 'error',
-            groupKey: 'import-contacts-error',
-          }),
-        )
+        const message = getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError)
+        setError(message)
+        dispatch(showNotification({ message, variant: 'error', groupKey: 'import-contacts-error' }))
         return
       }
 
@@ -114,14 +112,9 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
 
       setIsSuccess(true)
     } catch (e) {
-      setError('Something went wrong. Please try again.')
-      dispatch(
-        showNotification({
-          message: 'Failed to import contacts. Please try again.',
-          variant: 'error',
-          groupKey: 'import-contacts-error',
-        }),
-      )
+      const message = getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError)
+      setError(message)
+      dispatch(showNotification({ message, variant: 'error', groupKey: 'import-contacts-error' }))
     } finally {
       setIsSubmitting(false)
     }
@@ -155,24 +148,22 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
 
             <ContactsList contactItems={searchQuery ? filteredEntries : allContactItems} />
 
-            {error && (
-              <Alert variant="destructive" className="mt-2 mx-4">
-                {error}
-              </Alert>
-            )}
+            <DialogFooter className="flex-col items-stretch gap-2 p-4 border-t">
+              {error && <Alert variant="destructive">{error}</Alert>}
 
-            <DialogFooter className="flex-row justify-end gap-2 p-4 border-t">
-              <Button variant="ghost" data-testid="cancel-btn" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Tooltip>
-                <TooltipTrigger render={<div className="inline-flex" />}>
-                  <Button type="submit" disabled={selectedCount === 0 || isSubmitting || isSuccess}>
-                    {isSubmitting ? <Spinner className="size-4" /> : `Import contacts (${selectedCount})`}
-                  </Button>
-                </TooltipTrigger>
-                {hasNoImportableContacts && <TooltipContent>You have no new contacts to import.</TooltipContent>}
-              </Tooltip>
+              <div className="flex flex-row justify-end gap-2">
+                <Button variant="ghost" data-testid="cancel-btn" onClick={handleClose}>
+                  Cancel
+                </Button>
+                <Tooltip>
+                  <TooltipTrigger render={<div className="inline-flex" />}>
+                    <Button type="submit" disabled={selectedCount === 0 || isSubmitting || isSuccess}>
+                      {isSubmitting ? <Spinner className="size-4" /> : `Import contacts (${selectedCount})`}
+                    </Button>
+                  </TooltipTrigger>
+                  {hasNoImportableContacts && <TooltipContent>You have no new contacts to import.</TooltipContent>}
+                </Tooltip>
+              </div>
             </DialogFooter>
           </form>
         </FormProvider>

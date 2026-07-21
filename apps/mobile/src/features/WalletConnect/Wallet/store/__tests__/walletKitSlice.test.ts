@@ -6,19 +6,26 @@ import reducer, {
   pushPending,
   removePending,
   setOutstandingRequest,
+  markOutstandingProposing,
+  markReviewAbandoned,
   clearOutstandingRequest,
+  rekeyOutstandingRequest,
+  rejectPending,
+  sessionRequestReceived,
   clearWalletKitState,
   selectSessions,
   selectSessionCount,
   selectCurrentRequest,
   selectOutstandingRequestByHash,
   selectVerifyByTopic,
+  selectDappMetadataByTxHash,
   walletKitSliceName,
   type PendingItem,
 } from '../walletKitSlice'
 import type { SessionTypes } from '@walletconnect/types'
 
-const session = (topic: string): SessionTypes.Struct => ({ topic }) as unknown as SessionTypes.Struct
+const session = (topic: string, metadata?: SessionTypes.Struct['peer']['metadata']): SessionTypes.Struct =>
+  ({ topic, peer: { metadata } }) as unknown as SessionTypes.Struct
 
 const proposalItem = (id: number): PendingItem => ({ kind: 'proposal', id, proposal: { id } as never })
 const requestItem = (id: number): PendingItem => ({
@@ -57,14 +64,115 @@ describe('walletKitSlice reducers', () => {
     expect(state.pending).toEqual([proposalItem(1)])
   })
 
+  it('markOutstandingProposing toggles the flag and is a no-op for unknown hashes', () => {
+    let state = reducer(
+      undefined,
+      setOutstandingRequest({
+        safeTxHash: '0xhash',
+        topic: 't',
+        id: 7,
+        method: 'wallet_sendCalls',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
+    )
+    state = reducer(state, markOutstandingProposing({ safeTxHash: '0xhash', proposing: true }))
+    expect(state.outstandingRequests['0xhash'].proposing).toBe(true)
+    state = reducer(state, markOutstandingProposing({ safeTxHash: '0xhash', proposing: false }))
+    expect(state.outstandingRequests['0xhash'].proposing).toBe(false)
+    state = reducer(state, markOutstandingProposing({ safeTxHash: '0xnope', proposing: true }))
+    expect(state.outstandingRequests['0xnope']).toBeUndefined()
+  })
+
+  it('markReviewAbandoned sets cancelRequested and is a no-op for unknown hashes', () => {
+    let state = reducer(
+      undefined,
+      setOutstandingRequest({
+        safeTxHash: '0xhash',
+        topic: 't',
+        id: 7,
+        method: 'eth_sendTransaction',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
+    )
+    state = reducer(state, markReviewAbandoned({ safeTxHash: '0xhash' }))
+    expect(state.outstandingRequests['0xhash'].cancelRequested).toBe(true)
+    state = reducer(state, markReviewAbandoned({ safeTxHash: '0xnope' }))
+    expect(state.outstandingRequests['0xnope']).toBeUndefined()
+  })
+
   it('setOutstandingRequest / clearOutstandingRequest key by safeTxHash', () => {
     let state = reducer(
       undefined,
-      setOutstandingRequest({ safeTxHash: '0xhash', topic: 't', id: 7, method: 'wallet_sendCalls' }),
+      setOutstandingRequest({
+        safeTxHash: '0xhash',
+        topic: 't',
+        id: 7,
+        method: 'wallet_sendCalls',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
     )
-    expect(state.outstandingRequests['0xhash']).toEqual({ topic: 't', id: 7, method: 'wallet_sendCalls' })
+    expect(state.outstandingRequests['0xhash']).toEqual({
+      topic: 't',
+      id: 7,
+      method: 'wallet_sendCalls',
+      chainId: '1',
+      safeAddress: '0xsafe',
+    })
     state = reducer(state, clearOutstandingRequest('0xhash'))
     expect(state.outstandingRequests).toEqual({})
+  })
+
+  it('rekeyOutstandingRequest moves the entry to the new safeTxHash', () => {
+    let state = reducer(
+      undefined,
+      setOutstandingRequest({
+        safeTxHash: '0xold',
+        topic: 't',
+        id: 7,
+        method: 'eth_sendTransaction',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
+    )
+    state = reducer(state, rekeyOutstandingRequest({ fromSafeTxHash: '0xold', toSafeTxHash: '0xnew' }))
+
+    expect(state.outstandingRequests['0xold']).toBeUndefined()
+    expect(state.outstandingRequests['0xnew']).toEqual({
+      topic: 't',
+      id: 7,
+      method: 'eth_sendTransaction',
+      chainId: '1',
+      safeAddress: '0xsafe',
+    })
+  })
+
+  it('rekeyOutstandingRequest is a no-op for unknown hashes and identical hashes', () => {
+    const start = reducer(
+      undefined,
+      setOutstandingRequest({
+        safeTxHash: '0xhash',
+        topic: 't',
+        id: 7,
+        method: 'eth_sendTransaction',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
+    )
+
+    const afterUnknown = reducer(start, rekeyOutstandingRequest({ fromSafeTxHash: '0xmissing', toSafeTxHash: '0xnew' }))
+    expect(afterUnknown.outstandingRequests).toEqual(start.outstandingRequests)
+
+    const afterSame = reducer(start, rekeyOutstandingRequest({ fromSafeTxHash: '0xhash', toSafeTxHash: '0xhash' }))
+    expect(afterSame.outstandingRequests).toEqual(start.outstandingRequests)
+  })
+
+  it('rejectPending and sessionRequestReceived are no-op signals (state unchanged)', () => {
+    const start = reducer(undefined, { type: '@@init' })
+    expect(reducer(start, rejectPending({ kind: 'request', id: 1 } as never))).toBe(start)
+    expect(reducer(start, sessionRequestReceived({ id: 1 } as never))).toBe(start)
   })
 
   it('clearWalletKitState resets to initial', () => {
@@ -131,12 +239,48 @@ describe('walletKitSlice selectors', () => {
   it('selectOutstandingRequestByHash looks up by hash', () => {
     const state = reducer(
       undefined,
-      setOutstandingRequest({ safeTxHash: '0xabc', topic: 't', id: 1, method: 'eth_sendTransaction' }),
+      setOutstandingRequest({
+        safeTxHash: '0xabc',
+        topic: 't',
+        id: 1,
+        method: 'eth_sendTransaction',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
     )
     expect(selectOutstandingRequestByHash(wrap(state), '0xabc')).toEqual({
       topic: 't',
       id: 1,
       method: 'eth_sendTransaction',
+      chainId: '1',
+      safeAddress: '0xsafe',
     })
+  })
+
+  it('selectDappMetadataByTxHash resolves safeTxHash → session peer metadata', () => {
+    const metadata = {
+      name: 'Uniswap',
+      description: 'Swap tokens',
+      url: 'https://uniswap.org',
+      icons: ['https://x/i.png'],
+    }
+    let state = reducer(undefined, addSession({ session: session('t', metadata), verifyVariant: 'verified' }))
+    state = reducer(
+      state,
+      setOutstandingRequest({
+        safeTxHash: '0xabc',
+        topic: 't',
+        id: 1,
+        method: 'eth_sendTransaction',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
+    )
+    expect(selectDappMetadataByTxHash(wrap(state), '0xabc')).toEqual(metadata)
+  })
+
+  it('selectDappMetadataByTxHash returns undefined for an unknown hash (non-WC tx)', () => {
+    const state = reducer(undefined, { type: '@@init' })
+    expect(selectDappMetadataByTxHash(wrap(state), '0xnope')).toBeUndefined()
   })
 })

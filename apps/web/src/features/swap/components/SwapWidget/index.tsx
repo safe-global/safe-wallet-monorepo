@@ -70,6 +70,9 @@ const SwapWidget = ({ sell }: Params) => {
 
   const [params, setParams] = useState<CowSwapWidgetParams>({
     appCode: 'Safe Wallet Swaps', // Name of your app (max 50 characters)
+    // Must match appData.url (used as the communicator's allowed origin) or the Safe Apps SDK
+    // handshake is dropped and the widget can't auto-connect the Safe
+    baseUrl: cowSwapBaseUrl,
     width: '100%', // Width in pixels (or 100% to use all available space)
     height: '860px',
     chainId: cowChainId,
@@ -227,6 +230,7 @@ const SwapWidget = ({ sell }: Params) => {
   useEffect(() => {
     setParams((params) => ({
       ...params,
+      baseUrl: cowSwapBaseUrl,
       chainId: cowChainId,
       theme: {
         baseTheme: darkMode ? 'dark' : 'light',
@@ -241,7 +245,7 @@ const SwapWidget = ({ sell }: Params) => {
         alert: palette.warning.main,
       },
     }))
-  }, [palette, darkMode, cowChainId])
+  }, [palette, darkMode, cowChainId, cowSwapBaseUrl])
 
   useEffect(() => {
     if (!sell) return

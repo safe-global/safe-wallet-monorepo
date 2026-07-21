@@ -1,0 +1,59 @@
+import { useEffect } from 'react'
+import { CircularProgress, Link } from '@mui/material'
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import PromoBanner from '@/components/common/PromoBanner/PromoBanner'
+import { useOpenSafenetStakingApp } from '@/hooks/useOpenSafenetStakingApp'
+import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import css from './styles.module.css'
+
+const LEARN_MORE_LINK =
+  'https://forum.safefoundation.org/t/sep-55-phase-2-fund-safenet-beta-for-safe-token-utility/6967'
+
+const StakingPromoBanner = ({ onDismiss }: { onDismiss: () => void }) => {
+  const { openSafenetStakingApp, isNavigating } = useOpenSafenetStakingApp()
+
+  useEffect(() => {
+    trackEvent(OVERVIEW_EVENTS.SHOW_STAKING_BANNER)
+  }, [])
+
+  const onStake = () => {
+    openSafenetStakingApp()
+  }
+
+  const onLearnMore = () => {
+    trackEvent(OVERVIEW_EVENTS.OPEN_LEARN_MORE_STAKING_BANNER)
+  }
+
+  return (
+    <div className={css.stakingPromoBanner}>
+      <PromoBanner
+        title="Stake SAFE tokens and earn up to ~15% APR"
+        description={
+          <>
+            Earn by staking your SAFE tokens, currently rewarded up to 15%.{' '}
+            <Link
+              href={LEARN_MORE_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={onLearnMore}
+              sx={{ color: 'inherit', textDecoration: 'underline', fontWeight: 'bold' }}
+            >
+              Learn more
+            </Link>
+          </>
+        }
+        ctaLabel="Stake now"
+        onCtaClick={onStake}
+        ctaVariant="text"
+        endIcon={isNavigating ? <CircularProgress size={16} color="inherit" /> : <ArrowForwardIcon fontSize="small" />}
+        imageSrc="/images/common/staking-promo/safe-coin.svg"
+        imageAlt="Safe token"
+        trackingEvents={OVERVIEW_EVENTS.OPEN_STAKING_WIDGET}
+        trackHideProps={OVERVIEW_EVENTS.HIDE_STAKING_BANNER}
+        onDismiss={onDismiss}
+      />
+    </div>
+  )
+}
+
+export default StakingPromoBanner

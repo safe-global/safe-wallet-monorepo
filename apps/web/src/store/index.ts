@@ -62,6 +62,7 @@ const rootReducer = combineReducers({
   [slices.calendlySlice.name]: slices.calendlySlice.reducer,
   [slices.globalSearchSlice.name]: slices.globalSearchSlice.reducer,
   [slices.safeActionsModalSlice.name]: slices.safeActionsModalSlice.reducer,
+  [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
   [slices.gtfPaymentSourcePreferenceSlice.name]: slices.gtfPaymentSourcePreferenceSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
@@ -150,6 +151,8 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
       nextState[slices.orderByPreferenceSlice.name] = {
         orderBy: slices.OrderByOption.NAME,
         resetVersion: slices.ORDER_BY_RESET_VERSION,
+        // Only the default sort direction is reset — the user's custom drag order is preserved.
+        manualOrder: orderByState.manualOrder ?? {},
       }
     }
 

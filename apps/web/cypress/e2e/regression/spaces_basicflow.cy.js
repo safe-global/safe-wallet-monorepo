@@ -1,7 +1,6 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import * as wallet from '../../support/utils/wallet.js'
 import * as space from '../pages/spaces.page.js'
 
 let staticSafes = []
@@ -16,6 +15,8 @@ describe('Spaces basic flow tests', () => {
   })
 
   beforeEach(() => {
+    space.blockBeamer()
+    space.interceptSpacesList()
     cy.visit(constants.spacesUrl)
   })
 
@@ -23,8 +24,8 @@ describe('Spaces basic flow tests', () => {
     const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
     const newSpaceName = 'Renamed Space' + Math.random().toString(36).substring(2, 12)
 
-    wallet.connectSigner(admin)
-    space.clickOnSignInBtn()
+    space.signInWithWallet(admin)
+    space.goToSpacesView()
     space.ensureReadyToCreateSpace()
     cy.wait(3000)
     space.createSpaceViaOnboardingWithSkip(spaceName)
@@ -42,48 +43,30 @@ describe('Spaces basic flow tests', () => {
   })
 
   it('Verify an account can be added manually', () => {
+    // Adding a Safe already in the workspace is a no-op ("Add accounts (0)", disabled), so create a
+    // fresh empty workspace, add into it, then delete it — keeping the run idempotent regardless of
+    // what previous runs left in the account. The Safe accounts page is the persistent add entry point.
     const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
 
-    wallet.connectSigner(admin)
-    space.clickOnSignInBtn()
+    space.signInWithWallet(admin)
+    space.goToSpacesView()
     space.ensureReadyToCreateSpace()
     cy.wait(3000)
     space.createSpaceViaOnboardingWithSkip(spaceName)
+    space.goToSpaceSafeAccounts()
     space.addAccountManually(staticSafes.SEP_STATIC_SAFE_35.substring(4), constants.networks.sepolia)
-  })
-
-  // Skipping this test as it is not possible to log out on localhost:
-  // there is a redirect to the page https://safe-client.staging.5afe.dev/v1/auth/logout/redirect after clicking sign out,
-  // and test is failing
-  it.skip('Verify that re-signing in lands on the single space, not on /welcome/create-space', () => {
-    const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
-
-    wallet.connectSigner(admin)
-    space.clickOnSignInBtn()
-    space.ensureReadyToCreateSpace()
-    cy.wait(3000)
-    space.createSpaceViaOnboardingWithSkip(spaceName)
-
-    space.signOutViaSidebarProfile()
-    wallet.connectSigner(admin)
-    space.clickOnSignInBtn()
-
-    // With exactly one space, sign-in should short-circuit straight to the
-    // space dashboard. Crucially we must NOT be bounced into /welcome/create-space
-    // (the regressed re-login behavior).
-    space.verifyOnSingleSpaceDashboard(spaceName)
-
     space.goToSpaceSettings()
+    space.verifySpaceSettingsGeneralLoaded()
     space.deleteSpace(spaceName)
   })
 
-  it.only('Verify a new member can be invited and accept the invite', () => {
+  it('Verify a new member can be invited and accept the invite', () => {
     const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
     const memberName = 'Member ' + Math.random().toString(36).substring(2, 12)
     const newInviteName = 'Invited member ' + Math.random().toString(36).substring(2, 12)
 
-    wallet.connectSigner(admin)
-    space.clickOnSignInBtn()
+    space.signInWithWallet(admin)
+    space.goToSpacesView()
     space.ensureReadyToCreateSpace()
     cy.wait(3000)
     space.createSpaceViaOnboardingWithSkip(spaceName)
@@ -93,10 +76,27 @@ describe('Spaces basic flow tests', () => {
     space.goToSpaceMembers()
     space.addMember(memberName, user_address)
     space.disconnectFromSpaceLevel()
-    wallet.connectSigner(user)
-    space.clickOnSignInBtn()
+    cy.clearAllCookies()
+    cy.visit(constants.spacesUrl)
+    space.signInWithWallet(user)
+    // No reload here: a member with a pending invite is kept on /welcome/spaces after sign-in
+    // (useSignInRedirect only redirects when there are no invites), and a full reload would drop the
+    // freshly-connected injected wallet and leave the page blank. The banner renders once the
+    // member's spaces query resolves.
     space.verifySpaceInviteBannerVisible(spaceName)
-    space.acceptInvite(newInviteName)
+    space.acceptInvite(spaceName, newInviteName)
     main.verifyElementByTextExists(space.acceptInviteConfirmationMsg(spaceName))
+
+    // Clean up: the invitee is only a member and cannot delete the workspace, so sign back in as the
+    // admin who created it and remove it — keeping the run idempotent (tests 1 and 2 self-clean too).
+    space.disconnectFromSpaceLevel()
+    cy.clearAllCookies()
+    cy.visit(constants.spacesUrl)
+    space.signInWithWallet(admin)
+    space.goToSpacesView()
+    space.openSpaceByName(spaceName)
+    space.goToSpaceSettings()
+    space.verifySpaceSettingsGeneralLoaded()
+    space.deleteSpace(spaceName)
   })
 })

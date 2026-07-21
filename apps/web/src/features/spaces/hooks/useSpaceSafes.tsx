@@ -1,11 +1,17 @@
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { _buildSafeItems, type AllSafeItems, useAllSafesGrouped, useAllOwnedSafes, getComparator } from '@/hooks/safes'
+import {
+  _buildSafeItems,
+  type AllSafeItems,
+  useAllSafesGrouped,
+  useAllOwnedSafes,
+  useSafeOrderComparator,
+} from '@/hooks/safes'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import useGetSpaceAddressBook from './useGetSpaceAddressBook'
 import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 import { mapSpaceContactsToAddressBookState } from '../utils'
 import { useAppSelector } from '@/store'
-import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
+import { getSpaceOrderScope } from '@/store/orderByPreferenceSlice'
 import { selectAllAddressBooks, selectAllVisitedSafes } from '@/store/slices'
 import merge from 'lodash/merge'
 import { useMemo } from 'react'
@@ -42,8 +48,7 @@ export const useSpaceSafes = () => {
   const allVisitedSafes = useAppSelector(selectAllVisitedSafes)
   const safeItems = currentData ? _buildSafeItems(currentData.safes, addressBooks, allOwned, allVisitedSafes) : []
   const safes = useAllSafesGrouped(safeItems)
-  const { orderBy } = useAppSelector(selectOrderByPreference)
-  const sortComparator = getComparator(orderBy)
+  const sortComparator = useSafeOrderComparator(spaceId ? getSpaceOrderScope(spaceId) : undefined)
 
   const allSafes = useMemo<AllSafeItems>(
     () => [...(safes.allMultiChainSafes ?? []), ...(safes.allSingleSafes ?? [])].sort(sortComparator),

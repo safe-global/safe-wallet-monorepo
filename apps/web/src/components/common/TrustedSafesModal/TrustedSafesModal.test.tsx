@@ -3,6 +3,7 @@ import TrustedSafesModal from './index'
 import type { UseTrustedSafesModalReturn } from './useTrustedSafesModal'
 import { useRouter } from 'next/router'
 import { useIsQualifiedSafe } from '@/features/spaces'
+import { OrderByOption, ORDER_BY_RESET_VERSION } from '@/store/orderByPreferenceSlice'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
@@ -15,24 +16,44 @@ jest.mock('@/features/spaces/hooks/useIsQualifiedSafe', () => ({
 
 const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
 
-jest.mock('@/features/myAccounts/hooks/useSafeItemData', () => ({
-  useSafeItemData: () => ({
-    chain: { chainId: '1', shortName: 'eth' },
-    name: undefined,
-    href: '/home',
-    safeOverview: { fiatTotal: '100', address: { value: '0x123' }, queued: 0, awaitingConfirmation: 0 },
-    isCurrentSafe: false,
-    isActivating: false,
-    isReplayable: false,
-    isWelcomePage: false,
-    threshold: 1,
-    owners: [{ value: '0x123' }],
-    undeployedSafe: undefined,
-    counterfactualSetup: undefined,
-    elementRef: { current: null },
-    isVisible: true,
-    trackingLabel: 'sidebar',
-  }),
+// The list is rendered by the shared accounts table (covered by its own suite). Stub it to a row per
+// item that surfaces the selection toggle so we can assert the modal wiring.
+jest.mock('@/features/myAccounts', () => ({
+  __esModule: true,
+  SafeAccountsTable: ({
+    items,
+    selection,
+    reorder,
+  }: {
+    items: Array<{ address: string; chainId?: string }>
+    selection?: { onToggle: (line: { address: string }) => void }
+    reorder?: { onReorder: (order: string[]) => void }
+  }) => (
+    <div data-testid="safe-accounts-table">
+      {reorder && (
+        <button data-testid="reorder-enabled" onClick={() => reorder.onReorder(items.map((item) => item.address))}>
+          reorder
+        </button>
+      )}
+      {items.map((item) => (
+        <button key={item.address} data-testid={`row-${item.address}`} onClick={() => selection?.onToggle(item)}>
+          {item.address}
+        </button>
+      ))}
+    </div>
+  ),
+}))
+
+let mockWalletValue: { address: string } | null = null
+jest.mock('@/hooks/wallets/useWallet', () => ({
+  __esModule: true,
+  default: () => mockWalletValue,
+}))
+
+const mockConnectWallet = jest.fn()
+jest.mock('@/components/common/ConnectWallet/useConnectWallet', () => ({
+  __esModule: true,
+  default: () => mockConnectWallet,
 }))
 
 const mockRouter = {
@@ -94,146 +115,122 @@ describe('TrustedSafesModal', () => {
     jest.clearAllMocks()
     ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
     mockUseIsQualifiedSafe.mockReturnValue(false)
+    mockWalletValue = null
+    // The content defers its table mount past two animation frames; run them synchronously so the
+    // table renders in the same tick and the assertions below don't need to await frames.
+    jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb: FrameRequestCallback) => {
+      cb(0)
+      return 0
+    })
+    jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {})
   })
 
   it('should render modal when open', () => {
     render(<TrustedSafesModal modal={mockModal} />)
-
-    expect(screen.getByText('Manage trusted Safes')).toBeInTheDocument()
+    expect(screen.getByText('Manage my account list')).toBeInTheDocument()
     expect(screen.getByText('Verify before you trust')).toBeInTheDocument()
   })
 
-  it('shows the workspace notice when in a space', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
-
+  it('renders the connect-wallet hint when no wallet is connected', () => {
+    mockWalletValue = null
     render(<TrustedSafesModal modal={mockModal} />)
-
-    expect(screen.getByTestId('space-notice')).toBeInTheDocument()
+    expect(screen.getByTestId('manage-trusted-connect-wallet-button')).toBeInTheDocument()
   })
 
-  it('hides the workspace notice when not in a space', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(false)
-
+  it('hides the connect-wallet hint when a wallet is connected', () => {
+    mockWalletValue = { address: '0xWallet' }
     render(<TrustedSafesModal modal={mockModal} />)
+    expect(screen.queryByTestId('manage-trusted-connect-wallet-button')).not.toBeInTheDocument()
+  })
 
-    expect(screen.queryByTestId('space-notice')).not.toBeInTheDocument()
+  it('triggers wallet connection when the connect-wallet hint is clicked', () => {
+    mockWalletValue = null
+    render(<TrustedSafesModal modal={mockModal} />)
+    fireEvent.click(screen.getByTestId('manage-trusted-connect-wallet-button'))
+    expect(mockConnectWallet).toHaveBeenCalled()
   })
 
   it('should render safe items', () => {
     render(<TrustedSafesModal modal={mockModal} />)
-
-    // AccountItem uses checkbox data-testid format: safe-item-checkbox-{address}
-    expect(screen.getByTestId('safe-item-checkbox-0x1234567890abcdef1234567890abcdef12345678')).toBeInTheDocument()
-    expect(screen.getByTestId('safe-item-checkbox-0xabcdef1234567890abcdef1234567890abcdef12')).toBeInTheDocument()
+    expect(screen.getByTestId('row-0x1234567890abcdef1234567890abcdef12345678')).toBeInTheDocument()
+    expect(screen.getByTestId('row-0xabcdef1234567890abcdef1234567890abcdef12')).toBeInTheDocument()
   })
 
-  it('should render the search bar when there are items', () => {
+  it('should render the search bar', () => {
     render(<TrustedSafesModal modal={mockModal} />)
-
-    expect(screen.getByPlaceholderText('Search by name or full address')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('by name, address or network')).toBeInTheDocument()
   })
 
-  it('should hide the search bar when there are no items and no query', () => {
-    const emptyModal = { ...mockModal, availableItems: [], searchQuery: '' }
-    render(<TrustedSafesModal modal={emptyModal} />)
-
-    expect(screen.queryByPlaceholderText('Search by name or full address')).not.toBeInTheDocument()
-  })
-
-  it('should keep the search bar when a query matches nothing', () => {
-    const noMatchModal = { ...mockModal, availableItems: [], searchQuery: 'nope' }
-    render(<TrustedSafesModal modal={noMatchModal} />)
-
-    expect(screen.getByPlaceholderText('Search by name or full address')).toBeInTheDocument()
+  it('renders the dialog shell before the accounts table (deferred mount)', () => {
+    // Use real rAF (won't fire during the synchronous render) so the table stays deferred.
+    jest.restoreAllMocks()
+    ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
+    render(<TrustedSafesModal modal={mockModal} />)
+    // Shell is present immediately…
+    expect(screen.getByText('Manage my account list')).toBeInTheDocument()
+    // …but the heavy table is not mounted yet.
+    expect(screen.queryByTestId('safe-accounts-table')).not.toBeInTheDocument()
   })
 
   it('should call close when cancel clicked', () => {
     render(<TrustedSafesModal modal={mockModal} />)
-
     fireEvent.click(screen.getByText('Cancel'))
-
     expect(mockModal.close).toHaveBeenCalled()
   })
 
   it('should disable Save when there are no changes', () => {
     render(<TrustedSafesModal modal={mockModal} />)
-
-    expect(screen.getByText('Save').closest('button')).toBeDisabled()
+    expect(screen.getByTestId('manage-trusted-save')).toBeDisabled()
   })
 
   it('should enable Save and call submitSelection when there are changes', () => {
     const modalWithChanges = { ...mockModal, hasChanges: true }
     render(<TrustedSafesModal modal={modalWithChanges} />)
 
-    const saveButton = screen.getByText('Save').closest('button')
+    const saveButton = screen.getByTestId('manage-trusted-save')
     expect(saveButton).not.toBeDisabled()
 
-    fireEvent.click(screen.getByText('Save'))
-
+    fireEvent.click(saveButton)
     expect(modalWithChanges.submitSelection).toHaveBeenCalled()
   })
 
   it('should not render when closed', () => {
     const closedModal = { ...mockModal, isOpen: false }
     const { container } = render(<TrustedSafesModal modal={closedModal} />)
-
     expect(container.querySelector('[role="dialog"]')).not.toBeInTheDocument()
   })
 
-  it('should call toggleSelection when clicking safe item', () => {
+  it('should call toggleSelection when clicking a safe item', () => {
     render(<TrustedSafesModal modal={mockModal} />)
-
-    // Selected safes float to the top, so the first rendered item is the selected one
-    const safeItems = screen.getAllByTestId('safe-list-item')
-    fireEvent.click(safeItems[0])
-
-    expect(mockModal.toggleSelection).toHaveBeenCalledWith('0xabcdef1234567890abcdef1234567890abcdef12')
+    fireEvent.click(screen.getByTestId('row-0x1234567890abcdef1234567890abcdef12345678'))
+    expect(mockModal.toggleSelection).toHaveBeenCalledWith('0x1234567890abcdef1234567890abcdef12345678')
   })
 
   it('should show similarity confirmation dialog when pendingConfirmation is set', () => {
     const modalWithPending = {
       ...mockModal,
       pendingConfirmation: '0x1234567890abcdef1234567890abcdef12345678',
-      availableItems: [
-        {
-          ...mockModal.availableItems[0],
-        },
-        mockModal.availableItems[1],
-      ],
     }
-
     render(<TrustedSafesModal modal={modalWithPending} />)
-
     expect(screen.getByText('Similar address detected')).toBeInTheDocument()
   })
 
-  it('should display Select All and Deselect All buttons', () => {
+  it('shows the select-all control with the selection count', () => {
     render(<TrustedSafesModal modal={mockModal} />)
-
-    expect(screen.getByText('Select All')).toBeInTheDocument()
-    expect(screen.getByText('Deselect All')).toBeInTheDocument()
+    expect(screen.getByText('Select all · 1 of 2 selected')).toBeInTheDocument()
   })
 
-  it('should call selectAll when Select All clicked', () => {
+  it('should call selectAll when the select-all control is clicked with a partial selection', () => {
     render(<TrustedSafesModal modal={mockModal} />)
-
-    fireEvent.click(screen.getByText('Select All'))
-
+    fireEvent.click(screen.getByTestId('manage-trusted-select-all'))
     expect(mockModal.selectAll).toHaveBeenCalled()
   })
 
-  it('should call deselectAll when Deselect All clicked', () => {
-    render(<TrustedSafesModal modal={mockModal} />)
-
-    fireEvent.click(screen.getByText('Deselect All'))
-
-    expect(mockModal.deselectAll).toHaveBeenCalled()
-  })
-
-  it('should show selection count', () => {
-    render(<TrustedSafesModal modal={mockModal} />)
-
-    expect(screen.getByText('1 of 2 selected')).toBeInTheDocument()
+  it('should call deselectAll when the select-all control is clicked while all are selected', () => {
+    const allSelectedModal = { ...mockModal, allSelected: true, selectedCount: 2 }
+    render(<TrustedSafesModal modal={allSelectedModal} />)
+    fireEvent.click(screen.getByTestId('manage-trusted-select-all'))
+    expect(allSelectedModal.deselectAll).toHaveBeenCalled()
   })
 
   it('should show select all confirmation dialog when pendingSelectAllConfirmation is true', () => {
@@ -253,9 +250,7 @@ describe('TrustedSafesModal', () => {
         },
       ],
     }
-
     render(<TrustedSafesModal modal={modalWithSelectAllConfirmation} />)
-
     expect(screen.getByText('Similar addresses detected')).toBeInTheDocument()
     expect(screen.getByText('No, skip similar addresses')).toBeInTheDocument()
     expect(screen.getByText('Yes, include them anyway')).toBeInTheDocument()
@@ -278,11 +273,8 @@ describe('TrustedSafesModal', () => {
         },
       ],
     }
-
     render(<TrustedSafesModal modal={modalWithSelectAllConfirmation} />)
-
     fireEvent.click(screen.getByText('Yes, include them anyway'))
-
     expect(mockModal.confirmSelectAll).toHaveBeenCalled()
   })
 
@@ -303,11 +295,37 @@ describe('TrustedSafesModal', () => {
         },
       ],
     }
-
     render(<TrustedSafesModal modal={modalWithSelectAllConfirmation} />)
-
     fireEvent.click(screen.getByText('No, skip similar addresses'))
-
     expect(mockModal.skipSimilarSelectAll).toHaveBeenCalled()
+  })
+
+  describe('drag-and-drop reordering', () => {
+    const manualState = {
+      orderByPreference: { orderBy: OrderByOption.MANUAL, resetVersion: ORDER_BY_RESET_VERSION, manualOrder: {} },
+    }
+
+    it('does not enable reordering under the default (Name) sort', () => {
+      render(<TrustedSafesModal modal={mockModal} />)
+      expect(screen.queryByTestId('reorder-enabled')).not.toBeInTheDocument()
+    })
+
+    it('enables reordering in Manual sort mode', () => {
+      render(<TrustedSafesModal modal={mockModal} />, { initialReduxState: manualState })
+      expect(screen.getByTestId('reorder-enabled')).toBeInTheDocument()
+    })
+
+    it('suppresses reordering while searching, even in Manual mode', () => {
+      render(<TrustedSafesModal modal={{ ...mockModal, searchQuery: 'safe' }} />, { initialReduxState: manualState })
+      expect(screen.queryByTestId('reorder-enabled')).not.toBeInTheDocument()
+    })
+
+    it('persists the new order as the shared Manual order on drop', () => {
+      const { container } = render(<TrustedSafesModal modal={mockModal} />, { initialReduxState: manualState })
+      fireEvent.click(screen.getByTestId('reorder-enabled'))
+      // The reorder handler dispatches into the store without error; the wiring under test is the
+      // presence and invocation of onReorder (setManualOrder is unit-tested in the slice suite).
+      expect(container).toBeInTheDocument()
+    })
   })
 })

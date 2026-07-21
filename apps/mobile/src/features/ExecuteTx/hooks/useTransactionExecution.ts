@@ -58,12 +58,13 @@ export function useTransactionExecution({
         feeParams,
       })
     },
-    [ExecutionMethod.WITH_RELAY]: async () => {
+    [ExecutionMethod.WITH_RELAY]: async (acceptUnverifiedSimulation?: boolean) => {
       return await executeRelayTx({
         chain: activeChain,
         activeSafe,
         safe,
         txId,
+        acceptUnverifiedSimulation,
         relayMutation: async (args) => {
           const result = await relayMutation(args).unwrap()
           return result
@@ -93,46 +94,48 @@ export function useTransactionExecution({
     },
   }
 
-  const execute = useCallback(async () => {
-    setStatus(ExecutionStatus.LOADING)
-    dispatch(startExecuting({ txId, executionMethod }))
+  const execute = useCallback(
+    async (acceptUnverifiedSimulation?: boolean) => {
+      setStatus(ExecutionStatus.LOADING)
+      dispatch(startExecuting({ txId, executionMethod }))
 
-    try {
-      const executor = executors[executionMethod]
+      try {
+        const executor = executors[executionMethod]
 
-      if (!executor) {
-        throw new Error(`No executor found for execution method: ${executionMethod}`)
+        if (!executor) {
+          throw new Error(`No executor found for execution method: ${executionMethod}`)
+        }
+
+        const pendingTxPayload = await executor(acceptUnverifiedSimulation)
+
+        dispatch(setExecutingSuccess(txId))
+        dispatch(addPendingTx(pendingTxPayload))
+
+        setStatus(ExecutionStatus.PROCESSING)
+      } catch (error) {
+        logger.error('Error executing transaction:', error)
+        setStatus(ExecutionStatus.ERROR)
+        dispatch(setExecutingError({ txId, error: asError(error).message }))
+
+        // CGW's pre-relay simulation surfaces SIMULATION_FAILED / INDETERMINATE_SIMULATION as a typed
+        // RelaySimulationError. It's re-thrown unchanged so useExecutionFlow can branch on it
+        // (SIMULATION_FAILED is terminal, INDETERMINATE offers an explicit retry).
+        throw error
       }
+    },
+    [
+      executionMethod,
+      activeChain,
+      activeSafe,
+      safe,
+      txId,
+      signerAddress,
+      feeParams,
+      relayMutation,
+      wcProvider,
+      dispatch,
+    ],
+  )
 
-      const pendingTxPayload = await executor()
-
-      dispatch(setExecutingSuccess(txId))
-      dispatch(addPendingTx(pendingTxPayload))
-
-      setStatus(ExecutionStatus.PROCESSING)
-    } catch (error) {
-      logger.error('Error executing transaction:', error)
-      setStatus(ExecutionStatus.ERROR)
-      dispatch(setExecutingError({ txId, error: asError(error).message }))
-
-      throw error
-    }
-  }, [
-    executionMethod,
-    activeChain,
-    activeSafe,
-    safe,
-    txId,
-    signerAddress,
-    feeParams,
-    relayMutation,
-    wcProvider,
-    dispatch,
-  ])
-
-  const retry = useCallback(() => {
-    execute()
-  }, [execute])
-
-  return { status, execute, retry }
+  return { status, execute }
 }

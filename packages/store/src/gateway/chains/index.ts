@@ -54,6 +54,14 @@ const getChainsConfigs = async (
     return getChainsConfigs(api, url, serviceKey, nextUrl, nextResults)
   }
 
+  // A successful but empty response would otherwise wipe the cached chains via setAll. Treat it as
+  // an error so RTK Query retains the last successful data instead of overwriting it with nothing.
+  if (nextResults.length === 0) {
+    return {
+      error: { status: 'CUSTOM_ERROR', error: 'Empty chains result' } as FetchBaseQueryError,
+    }
+  }
+
   return { data: chainsAdapter.setAll(initialState, nextResults) }
 }
 

@@ -46,8 +46,9 @@
   --onboard-warning-600: var(--color-error-main);
   --onboard-warning-700: var(--color-error-dark);
 
-  /* Connect modal */
-  --onboard-modal-z-index: 1301;
+  /* Connect modal — above shadcn dialogs (--z-overlay: 1400) so it stacks on top of
+     modals that trigger a wallet connect (e.g. the Manage account list) instead of behind them. */
+  --onboard-modal-z-index: 1450;
 
   --onboard-modal-backdrop: rgba(99, 102, 105, 0.75);
 
@@ -83,7 +84,7 @@
 
   --account-select-danger-500: var(--onboard-danger-500);
 
-  --onboard-account-select-modal-z-index: 1301;
+  --onboard-account-select-modal-z-index: 1450;
 }
 
 #walletconnect-qrcode-modal {
@@ -99,9 +100,9 @@
   gap: 5px;
 }
 
-/* Keystone modal */
+/* Keystone modal — matches the connect modal so it stays above shadcn dialogs. */
 #kv_sdk_container + .ReactModalPortal > div {
-  z-index: 1301 !important;
+  z-index: 1450 !important;
 }
 
 #kv_sdk_container + .ReactModalPortal .ReactModal__Content {

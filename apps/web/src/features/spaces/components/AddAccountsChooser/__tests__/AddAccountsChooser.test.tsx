@@ -29,33 +29,7 @@ jest.mock('@/features/spaces/components/AddAccounts', () => ({
   },
 }))
 
-const mockAccountsModalMount = jest.fn()
-jest.mock('@/components/common/SpaceSafeBar/AccountsModal', () => ({
-  __esModule: true,
-  default: ({
-    open,
-    trackingLabel,
-    onManageTrustedSafes,
-  }: {
-    open: boolean
-    trackingLabel?: string
-    onManageTrustedSafes?: () => void
-  }) => {
-    mockAccountsModalMount({ trackingLabel, onManageTrustedSafes })
-    return open ? <div data-testid="accounts-modal-mock" data-tracking-label={trackingLabel} /> : null
-  },
-}))
-
-jest.mock('@/components/common/TrustedSafesModal', () => ({
-  __esModule: true,
-  default: () => null,
-}))
-
-const mockTrustedSafesModalOpen = jest.fn()
-jest.mock('@/components/common/TrustedSafesModal/useTrustedSafesModal', () => ({
-  __esModule: true,
-  default: () => ({ open: mockTrustedSafesModalOpen, close: jest.fn(), isOpen: false }),
-}))
+const ADD_ROW = 'add-safe-accounts-to-workspace-button'
 
 describe('AddAccountsChooser', () => {
   beforeEach(() => {
@@ -64,68 +38,47 @@ describe('AddAccountsChooser', () => {
     mockTrackEvent.mockClear()
     mockPush.mockClear()
     mockAddAccountsMount.mockClear()
-    mockAccountsModalMount.mockClear()
-    mockTrustedSafesModalOpen.mockClear()
   })
+
+  const openChooser = () => fireEvent.click(screen.getByTestId('open-add-accounts-chooser-button'))
 
   it('renders the trigger button with the default label', () => {
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
-    expect(screen.getByTestId('add-space-account-button')).toHaveTextContent('Add accounts')
+    expect(screen.getByTestId('open-add-accounts-chooser-button')).toHaveTextContent('Add accounts')
   })
 
   it('respects a custom buttonLabel', () => {
     render(<AddAccountsChooser buttonLabel="Manage accounts" entryPoint="dashboard" />)
 
-    expect(screen.getByTestId('add-space-account-button')).toHaveTextContent('Manage accounts')
+    expect(screen.getByTestId('open-add-accounts-chooser-button')).toHaveTextContent('Manage accounts')
   })
 
   it('opens the chooser dialog when the trigger button is clicked', () => {
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
-    expect(screen.queryByText('Manage Safe accounts')).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Add Safe accounts' })).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    openChooser()
 
-    expect(screen.getByText('Manage Safe accounts')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Add Safe accounts' })).toBeInTheDocument()
   })
 
-  it('shows three chooser rows', () => {
+  it('shows the two chooser rows and no "See all Safe accounts" row', () => {
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    openChooser()
 
-    expect(screen.getByText('See all Safe accounts')).toBeInTheDocument()
-    expect(screen.getByText('Add Safe accounts to this workspace')).toBeInTheDocument()
+    expect(screen.getByTestId(ADD_ROW)).toBeInTheDocument()
     expect(screen.getByText('Create new Safe')).toBeInTheDocument()
+    expect(screen.queryByText('See all Safe accounts')).not.toBeInTheDocument()
   })
 
-  it('opens AccountsModal with the owned_safes_modal tracking label when "See all Safe accounts" is clicked', () => {
+  it('opens AddAccounts picker when admin clicks the add row', () => {
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
-    fireEvent.click(screen.getByText('See all Safe accounts'))
-
-    const modal = screen.getByTestId('accounts-modal-mock')
-    expect(modal).toBeInTheDocument()
-    expect(modal).toHaveAttribute('data-tracking-label', 'owned_safes_modal')
-  })
-
-  it('wires the Manage trusted Safes action to the trusted-safes modal in "See all Safe accounts"', () => {
-    render(<AddAccountsChooser entryPoint="dashboard" />)
-
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
-    fireEvent.click(screen.getByText('See all Safe accounts'))
-
-    const { onManageTrustedSafes } = mockAccountsModalMount.mock.calls.at(-1)![0]
-    expect(onManageTrustedSafes).toBe(mockTrustedSafesModalOpen)
-  })
-
-  it('opens AddAccounts picker when admin clicks "Add Safe accounts to this workspace"', () => {
-    render(<AddAccountsChooser entryPoint="dashboard" />)
-
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
-    fireEvent.click(screen.getByText('Add Safe accounts to this workspace'))
+    openChooser()
+    fireEvent.click(screen.getByTestId(ADD_ROW))
 
     expect(screen.getByTestId('add-accounts-picker')).toBeInTheDocument()
   })
@@ -133,8 +86,8 @@ describe('AddAccountsChooser', () => {
   it('fires WORKSPACE_SAFE_LINK_STARTED with the dashboard entry point when rendered from the dashboard', () => {
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
-    fireEvent.click(screen.getByText('Add Safe accounts to this workspace'))
+    openChooser()
+    fireEvent.click(screen.getByTestId(ADD_ROW))
 
     expect(mockTrackEvent).toHaveBeenCalledWith(
       expect.objectContaining({ action: expect.any(String) }),
@@ -145,8 +98,8 @@ describe('AddAccountsChooser', () => {
   it('fires WORKSPACE_SAFE_LINK_STARTED with the safe_accounts entry point when rendered from the SafeAccounts page', () => {
     render(<AddAccountsChooser entryPoint="safe_accounts" />)
 
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
-    fireEvent.click(screen.getByText('Add Safe accounts to this workspace'))
+    openChooser()
+    fireEvent.click(screen.getByTestId(ADD_ROW))
 
     expect(mockTrackEvent).toHaveBeenCalledWith(
       expect.objectContaining({ action: expect.any(String) }),
@@ -154,13 +107,13 @@ describe('AddAccountsChooser', () => {
     )
   })
 
-  it('disables the "Add to Workspace" row for non-admin and shows the tooltip text', () => {
+  it('disables the add row for non-admin and shows the tooltip text', () => {
     mockIsAdmin = false
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    openChooser()
 
-    const row = screen.getByRole('button', { name: /Add Safe accounts to this workspace/i })
+    const row = screen.getByTestId(ADD_ROW)
     expect(row).toHaveAttribute('aria-disabled', 'true')
 
     fireEvent.click(row)
@@ -171,15 +124,15 @@ describe('AddAccountsChooser', () => {
     mockIsAdmin = false
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    openChooser()
 
-    expect(screen.getByRole('button', { name: /Add Safe accounts to this workspace/i })).not.toHaveAttribute('title')
+    expect(screen.getByTestId(ADD_ROW)).not.toHaveAttribute('title')
   })
 
   it('navigates to /new-safe/create with the originating page as `next` when "Create new Safe" is clicked', () => {
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    openChooser()
     fireEvent.click(screen.getByText('Create new Safe'))
 
     expect(mockPush).toHaveBeenCalledWith({
@@ -192,7 +145,7 @@ describe('AddAccountsChooser', () => {
     mockIsAtSafeLimit = true
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    openChooser()
 
     expect(screen.getByText(/already has 40 Safes/i)).toBeInTheDocument()
   })
@@ -202,7 +155,7 @@ describe('AddAccountsChooser', () => {
     mockIsAtSafeLimit = true
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    openChooser()
 
     expect(screen.queryByText(/already has 40 Safes/i)).not.toBeInTheDocument()
   })
@@ -210,7 +163,7 @@ describe('AddAccountsChooser', () => {
   it('does not show the safe-limit warning when the workspace is below the limit', () => {
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    openChooser()
 
     expect(screen.queryByText(/already has 40 Safes/i)).not.toBeInTheDocument()
   })
@@ -219,7 +172,7 @@ describe('AddAccountsChooser', () => {
     mockIsAtSafeLimit = true
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    openChooser()
     fireEvent.click(screen.getByText('Create new Safe'))
 
     expect(mockPush).toHaveBeenCalledWith({
@@ -228,21 +181,11 @@ describe('AddAccountsChooser', () => {
     })
   })
 
-  it('lets non-admin members open AccountsModal from "See all Safe accounts"', () => {
-    mockIsAdmin = false
-    render(<AddAccountsChooser entryPoint="dashboard" />)
-
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
-    fireEvent.click(screen.getByText('See all Safe accounts'))
-
-    expect(screen.getByTestId('accounts-modal-mock')).toBeInTheDocument()
-  })
-
   it('lets non-admin members navigate to /new-safe/create from "Create new Safe"', () => {
     mockIsAdmin = false
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    openChooser()
     fireEvent.click(screen.getByText('Create new Safe'))
 
     expect(mockPush).toHaveBeenCalledWith({
@@ -255,50 +198,38 @@ describe('AddAccountsChooser', () => {
     mockIsAdmin = false
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
-    fireEvent.click(screen.getByRole('button', { name: /Add Safe accounts to this workspace/i }))
+    openChooser()
+    fireEvent.click(screen.getByTestId(ADD_ROW))
 
     expect(mockTrackEvent).not.toHaveBeenCalled()
   })
 
-  it('does not mount AccountsModal or AddAccounts before the chooser is opened', () => {
+  it('does not mount AddAccounts before the chooser is opened', () => {
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
-    expect(mockAccountsModalMount).not.toHaveBeenCalled()
     expect(mockAddAccountsMount).not.toHaveBeenCalled()
   })
 
-  it('does not mount AccountsModal or AddAccounts when only the chooser is opened', () => {
+  it('does not mount AddAccounts when only the chooser is opened', () => {
     render(<AddAccountsChooser entryPoint="dashboard" />)
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    openChooser()
 
-    expect(mockAccountsModalMount).not.toHaveBeenCalled()
     expect(mockAddAccountsMount).not.toHaveBeenCalled()
   })
 
-  it('mounts only AccountsModal when "See all Safe accounts" is clicked', () => {
+  it('mounts AddAccounts when an admin picks the add row', () => {
     render(<AddAccountsChooser entryPoint="dashboard" />)
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
-    fireEvent.click(screen.getByText('See all Safe accounts'))
-
-    expect(mockAccountsModalMount).toHaveBeenCalled()
-    expect(mockAddAccountsMount).not.toHaveBeenCalled()
-  })
-
-  it('mounts only AddAccounts when an admin picks "Add Safe accounts to this workspace"', () => {
-    render(<AddAccountsChooser entryPoint="dashboard" />)
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
-    fireEvent.click(screen.getByText('Add Safe accounts to this workspace'))
+    openChooser()
+    fireEvent.click(screen.getByTestId(ADD_ROW))
 
     expect(mockAddAccountsMount).toHaveBeenCalled()
-    expect(mockAccountsModalMount).not.toHaveBeenCalled()
   })
 
   it('does not mount AddAccounts when a non-admin clicks the disabled row', () => {
     mockIsAdmin = false
     render(<AddAccountsChooser entryPoint="dashboard" />)
-    fireEvent.click(screen.getByTestId('add-space-account-button'))
-    fireEvent.click(screen.getByRole('button', { name: /Add Safe accounts to this workspace/i }))
+    openChooser()
+    fireEvent.click(screen.getByTestId(ADD_ROW))
 
     expect(mockAddAccountsMount).not.toHaveBeenCalled()
   })

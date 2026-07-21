@@ -4,6 +4,10 @@ import { SafeInfo } from '@/src/types/address'
 // Mocked signer address for pending tx tests
 export const mockedPendingTxSignerAddress = '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED'
 
+/** 1x1 green PNG pixel — a self-contained icon for tests, avoids an external URL dependency. */
+export const TEST_WALLET_ICON =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+
 // Primary onboarded account (used by multiple tests)
 export const mockedActiveAccount: SafeInfo = {
   address: '0x2f3e600a3F38b66aDcbe6530B191F2BE55c2Fbb6',
