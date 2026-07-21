@@ -10,7 +10,10 @@ const mockSimilarityClusters = jest.fn(() => ({
   groupIdByAddress: new Map<string, string>(),
 }))
 jest.mock('@/features/address-poisoning', () => ({
-  useSimilarityClusters: () => mockSimilarityClusters(),
+  useSimilarityClusters: () => {
+    const result = mockSimilarityClusters()
+    return { ...result, isAddressFlagged: (address: string) => result.flagged.has(address.toLowerCase()) }
+  },
 }))
 
 jest.mock('@/store', () => ({

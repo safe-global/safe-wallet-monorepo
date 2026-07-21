@@ -45,6 +45,10 @@ describe('useSimilarityClusters', () => {
     expect(result.current.flagged.has(LONE.toLowerCase())).toBe(true)
     expect(result.current.flagged.has(CLEAN.toLowerCase())).toBe(false)
     expect(result.current.groupIdByAddress.has(LONE.toLowerCase())).toBe(false)
+
+    // isAddressFlagged mirrors `flagged`, case-insensitively
+    expect(result.current.isAddressFlagged(LONE.toUpperCase())).toBe(true)
+    expect(result.current.isAddressFlagged(CLEAN)).toBe(false)
   })
 
   it('with no anchor matches (flag off), returns the pure intra-list result', () => {

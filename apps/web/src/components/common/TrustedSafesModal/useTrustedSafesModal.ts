@@ -111,8 +111,7 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
   }, [allSafes])
 
   // `groupIdByAddress` → visual grouping; `flagged` → row badge, confirm-gate and Select-All.
-  const { flagged: flaggedAll, groupIdByAddress } = useSimilarityClusters(addresses)
-  const isAddressFlagged = useCallback((address: string) => flaggedAll.has(address.toLowerCase()), [flaggedAll])
+  const { flagged: flaggedAll, groupIdByAddress, isAddressFlagged } = useSimilarityClusters(addresses)
 
   // Full list without selection state, rebuilt only when the safes, pins, or similarity change.
   const structuralItems = useMemo<SelectableItem[]>(() => {

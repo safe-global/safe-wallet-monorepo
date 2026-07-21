@@ -69,8 +69,7 @@ export const useManageNestedSafes = (allSafesWithStatus: NestedSafeWithStatus[])
   const addresses = useMemo(() => allSafesWithStatus.map((safe) => safe.address), [allSafesWithStatus])
 
   // `flagged` → per-row badges; `groupIdByAddress` → boxes look-alikes together.
-  const { flagged: flaggedAll, groupIdByAddress } = useSimilarityClusters(addresses)
-  const isAddressFlagged = useCallback((address: string) => flaggedAll.has(address.toLowerCase()), [flaggedAll])
+  const { groupIdByAddress, isAddressFlagged } = useSimilarityClusters(addresses)
 
   // Reset selection when curatedAddresses changes (e.g., on safe switch)
   useEffect(() => {
