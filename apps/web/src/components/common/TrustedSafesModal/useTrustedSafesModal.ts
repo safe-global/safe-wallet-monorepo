@@ -6,6 +6,7 @@ import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { OVERVIEW_EVENTS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
 import { useAllSafesGrouped } from '@/hooks/safes/useAllSafesGrouped'
 import useAllSafes from '@/hooks/safes/useAllSafes'
+import { useSafesSearch } from '@/hooks/safes/useSafesSearch'
 import { useSafeOrderComparator } from '@/hooks/safes'
 import { TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
 import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
@@ -109,22 +110,13 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
 
   const similarityResult = useMemo(() => detectSimilarAddresses(addresses), [addresses])
 
-  // Structural list (no selection state) — rebuilds only when the underlying safes, pins,
-  // similarity, or search change, not on every checkbox click.
+  // Full list without selection state, rebuilt only when the safes, pins, or similarity change.
   const structuralItems = useMemo<SelectableItem[]>(() => {
     if (!allMultiChainSafes || !allSingleSafes) return []
 
     const items: SelectableItem[] = []
 
-    const matchesSearch = (address: string, name?: string): boolean => {
-      if (!searchQuery) return true
-      const query = searchQuery.toLowerCase()
-      return address.toLowerCase().includes(query) || (name ? name.toLowerCase().includes(query) : false)
-    }
-
     for (const multiSafe of allMultiChainSafes) {
-      if (!matchesSearch(multiSafe.address, multiSafe.name)) continue
-
       const group = similarityResult.getGroup(multiSafe.address)
 
       const selectableSafes: SelectableSafe[] = multiSafe.safes.map((safe) => ({
@@ -149,8 +141,6 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     }
 
     for (const safe of allSingleSafes) {
-      if (!matchesSearch(safe.address, safe.name)) continue
-
       const group = similarityResult.getGroup(safe.address)
       const isPinned = Boolean(addedSafes[safe.chainId]?.[safe.address])
 
@@ -163,11 +153,21 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     }
 
     return items.sort(sortComparator)
-  }, [allMultiChainSafes, allSingleSafes, addedSafes, similarityResult, searchQuery, sortComparator])
+  }, [allMultiChainSafes, allSingleSafes, addedSafes, similarityResult, sortComparator])
 
-  // Thin overlay injecting selection state over the structural list
+  // Shared name/address/network search (as on the main list); returns [] for an empty query.
+  const searchResults = useSafesSearch(structuralItems, searchQuery)
+
+  // Filter by the search matches, keeping the structural sort order and SelectableItem typing.
+  const visibleItems = useMemo<SelectableItem[]>(() => {
+    if (!searchQuery) return structuralItems
+    const matched = new Set(searchResults.map((item) => item.address.toLowerCase()))
+    return structuralItems.filter((item) => matched.has(item.address.toLowerCase()))
+  }, [searchQuery, searchResults, structuralItems])
+
+  // Thin overlay injecting selection state over the visible (search-filtered) list
   const availableItems = useMemo<SelectableItem[]>(() => {
-    return structuralItems.map((item) => {
+    return visibleItems.map((item) => {
       const isSelected = selectedAddresses.has(item.address.toLowerCase())
       if (isSelectableMultiChainSafe(item)) {
         return {
@@ -178,7 +178,7 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
       }
       return { ...item, isSelected }
     })
-  }, [structuralItems, selectedAddresses])
+  }, [visibleItems, selectedAddresses])
 
   // Check if there are any changes to submit (pins or unpins) across the full list,
   // not just the search-filtered view — selection persists across searches, so Save

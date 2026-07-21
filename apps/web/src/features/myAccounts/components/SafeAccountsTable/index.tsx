@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
@@ -12,6 +13,7 @@ import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNT_COLUMNS, SELECT_COLUMN, type SafeAccountColumnId } from './columns'
 import {
   compareGroups,
+  overviewKey,
   useSafeAccountRows,
   type AccountGroup,
   type AccountLine,
@@ -155,7 +157,27 @@ const SafeAccountsTable = ({
   embedded = false,
   'data-testid': testId = 'safe-accounts-table',
 }: SafeAccountsTableProps) => {
-  const { groups } = useSafeAccountRows(items)
+  const [overviewsByKey, setOverviewsByKey] = useState<Map<string, SafeOverview>>(new Map())
+
+  // Rows report their lazily-fetched overviews here. RTK returns a stable object ref per cache entry
+  // (a new ref only on a genuine refetch), so reference equality detects real updates; keep the
+  // previous map when nothing new arrived, so a repeated report doesn't churn a re-render.
+  const handleOverviewsLoaded = useCallback((overviews: SafeOverview[]) => {
+    setOverviewsByKey((prev) => {
+      let changed = false
+      const next = new Map(prev)
+      for (const overview of overviews) {
+        const key = overviewKey(overview.chainId, overview.address.value)
+        if (next.get(key) !== overview) {
+          next.set(key, overview)
+          changed = true
+        }
+      }
+      return changed ? next : prev
+    })
+  }, [])
+
+  const { groups } = useSafeAccountRows(items, overviewsByKey)
   const [sort, setSort] = useState<SortState>({ orderBy: null, order: 'asc' })
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [renameTarget, setRenameTarget] = useState<RenameTarget | null>(null)
@@ -339,6 +361,7 @@ const SafeAccountsTable = ({
               getCheckbox={selection ? (group, line) => getRowCheckbox(group, line, selection) : undefined}
               onSelectToggle={selection ? (line, next) => selection.onToggle(line, next) : undefined}
               onReorder={reorder.onReorder}
+              onOverviewsLoaded={handleOverviewsLoaded}
             />
           ) : (
             <TableBody>
@@ -356,6 +379,7 @@ const SafeAccountsTable = ({
                   onToggle={line.expandable ? () => toggle(groupKey) : undefined}
                   onLinkClick={onLinkClick}
                   showDivider={index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}
+                  onOverviewsLoaded={handleOverviewsLoaded}
                 />
               ))}
             </TableBody>

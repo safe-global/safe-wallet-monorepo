@@ -10,19 +10,17 @@ import {
   type AllSafeItems,
   type MultiChainSafeItem,
   type SafeItem,
-  flattenSafeItems,
   isMultiChainSafeItem,
   useGetHref,
 } from '@/hooks/safes'
-import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { selectUndeployedSafes } from '@/features/counterfactual/store'
 import { isPredictedSafeProps } from '@/features/counterfactual/services'
 import { getSafeSetups, getSharedSetup, hasMultiChainAddNetworkFeature } from '@/features/multichain'
 import { useSafeSpaces, type SafeSpacesMap } from '@/hooks/useSafeSpaces'
 import { useAppSelector } from '@/store'
-import { selectCurrency } from '@/store/settingsSlice'
-import useWallet from '@/hooks/wallets/useWallet'
 import useChains from '@/hooks/useChains'
+import useWallet from '@/hooks/wallets/useWallet'
+import { getOwnerAwaitingConfirmations } from '@/utils/transaction-guards'
 
 export type SafeSortColumn = 'name' | 'threshold' | 'networks' | 'workspaces'
 
@@ -80,9 +78,11 @@ type BuildDeps = {
   undeployedSafes: UndeployedSafesState
   chainMap: Record<string, Chain>
   getHref: (chain: Chain, address: string) => LinkProps['href']
+  /** Connected wallet — `awaitingConfirmation` is only surfaced when it's an owner of the Safe. */
+  walletAddress?: string
 }
 
-const overviewKey = (chainId: string, address: string) => `${chainId}:${address.toLowerCase()}`
+export const overviewKey = (chainId: string, address: string) => `${chainId}:${address.toLowerCase()}`
 
 /**
  * Network sort key: the chain identity to order the Networks column by (e.g. Ethereum before
@@ -129,7 +129,7 @@ const buildSafeLine = (safe: SafeItem, deps: BuildDeps, variant: 'single' | 'chi
     thresholdMixed: false,
     workspaces: variant === 'child' ? [] : (deps.safeSpaces[overviewKey(chainId, address)] ?? []),
     pending: overview?.queued ?? 0,
-    awaitingConfirmation: overview?.awaitingConfirmation ?? 0,
+    awaitingConfirmation: getOwnerAwaitingConfirmations(overview, deps.walletAddress),
     balance: overview?.fiatTotal,
     href: chain ? deps.getHref(chain, address) : undefined,
     contextMenu: {
@@ -169,7 +169,10 @@ const buildMultiGroup = (item: MultiChainSafeItem, deps: BuildDeps): AccountGrou
   const children = safes.map((s) => buildSafeLine(s, deps, 'child'))
 
   const pending = overviewsForItem.reduce((sum, o) => sum + (o?.queued ?? 0), 0)
-  const awaitingConfirmation = overviewsForItem.reduce((sum, o) => sum + (o?.awaitingConfirmation ?? 0), 0)
+  const awaitingConfirmation = overviewsForItem.reduce(
+    (sum, o) => sum + getOwnerAwaitingConfirmations(o, deps.walletAddress),
+    0,
+  )
   const fiatValues = overviewsForItem.filter((o): o is SafeOverview => Boolean(o)).map((o) => Number(o.fiatTotal))
   const hasReplayableSafe = safes.some((s) => {
     const undeployed = deps.undeployedSafes[s.chainId]?.[s.address]
@@ -232,31 +235,22 @@ const buildMultiGroup = (item: MultiChainSafeItem, deps: BuildDeps): AccountGrou
 }
 
 /**
- * Enriches grouped Safe items with the data the accounts table sorts and renders by:
- * eagerly fetches Safe overviews for the (small) trusted set and resolves workspace
- * membership, then derives per-account threshold, networks, workspaces, pending and
- * balance. Sort keys are computed at the group level so multi-chain children never
- * detach from their parent when the table re-sorts.
+ * Enriches grouped Safe items with the data the accounts table sorts and renders by: resolves
+ * workspace membership and derives per-account threshold, networks, workspaces, pending and balance
+ * from the `overviewsByKey` map (populated lazily per row by `useRowOverviews`). Sort keys are
+ * computed at the group level so multi-chain children never detach from their parent when the table
+ * re-sorts.
  */
-export function useSafeAccountRows(items: AllSafeItems): { groups: AccountGroup[]; isLoading: boolean } {
+export function useSafeAccountRows(
+  items: AllSafeItems,
+  overviewsByKey: Map<string, SafeOverview>,
+): { groups: AccountGroup[] } {
   const router = useRouter()
   const getHref = useGetHref(router)
-  const currency = useAppSelector(selectCurrency)
-  const { address: walletAddress } = useWallet() || {}
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
   const { configs } = useChains()
   const { safeSpaces } = useSafeSpaces()
-
-  const deployedSafes = useMemo(
-    () => flattenSafeItems(items).filter((s) => !undeployedSafes[s.chainId]?.[s.address]),
-    [items, undeployedSafes],
-  )
-
-  const { data: overviews, isLoading } = useGetMultipleSafeOverviewsQuery({
-    currency,
-    walletAddress,
-    safes: deployedSafes,
-  })
+  const { address: walletAddress } = useWallet() ?? {}
 
   const chainMap = useMemo(
     () => Object.fromEntries(configs.map((c) => [c.chainId, c])) as Record<string, Chain>,
@@ -264,15 +258,22 @@ export function useSafeAccountRows(items: AllSafeItems): { groups: AccountGroup[
   )
 
   const groups = useMemo<AccountGroup[]>(() => {
-    const overviewList = overviews ?? []
-    const overviewByKey = new Map(overviewList.map((o) => [overviewKey(o.chainId, o.address.value), o]))
-    const deps: BuildDeps = { overviews: overviewList, overviewByKey, safeSpaces, undeployedSafes, chainMap, getHref }
+    const overviewList = Array.from(overviewsByKey.values())
+    const deps: BuildDeps = {
+      overviews: overviewList,
+      overviewByKey: overviewsByKey,
+      safeSpaces,
+      undeployedSafes,
+      chainMap,
+      getHref,
+      walletAddress,
+    }
     return items.map((item) =>
       isMultiChainSafeItem(item) ? buildMultiGroup(item, deps) : buildSingleGroup(item, deps),
     )
-  }, [items, overviews, safeSpaces, undeployedSafes, chainMap, getHref])
+  }, [items, overviewsByKey, safeSpaces, undeployedSafes, chainMap, getHref, walletAddress])
 
-  return { groups, isLoading }
+  return { groups }
 }
 
 const compareAddresses = (a: AccountGroup, b: AccountGroup) =>
