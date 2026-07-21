@@ -107,6 +107,106 @@ export interface ListClusterResult {
   groupIdByAddress: Map<string, string>
 }
 
+interface Clusters {
+  /** The address that represents x's cluster (x itself until it's clustered with someone). */
+  leaderOf: (address: string) => string
+  /** Put a and b into the same cluster. */
+  putInSameCluster: (a: string, b: string) => void
+}
+
+/**
+ * Tracks which addresses belong together. Every address points at another address in its cluster;
+ * follow that chain to reach the cluster's "leader". Merging two clusters = point one leader at the other.
+ */
+const createClusters = (): Clusters => {
+  const leader = new Map<string, string>()
+
+  const leaderOf = (address: string): string => {
+    const up = leader.get(address)
+    return up === undefined || up === address ? address : leaderOf(up)
+  }
+
+  return {
+    leaderOf,
+    putInSameCluster: (a, b) => {
+      const leaderA = leaderOf(a)
+      const leaderB = leaderOf(b)
+      if (leaderA !== leaderB) leader.set(leaderA, leaderB) // A's cluster now follows B's → one cluster
+    },
+  }
+}
+
+/** Dedupe addresses by normalized value, keeping the first lowercased original as the map key's value. */
+const dedupeUsableAddresses = (addresses: string[]): Map<string, string> => {
+  const originalByNorm = new Map<string, string>()
+  for (const address of addresses) {
+    const normalized = normalizeAddress(address)
+    if (isUsableAddress(normalized) && !originalByNorm.has(normalized)) {
+      originalByNorm.set(normalized, address.toLowerCase())
+    }
+  }
+  return originalByNorm
+}
+
+/**
+ * Bucket addresses by `keyOf`, then merge everyone in each shared bucket into one cluster.
+ * Addresses that land in the same bucket share the key, so they all look alike.
+ */
+const mergeAddressesSharingKey = (
+  addresses: string[],
+  keyOf: (address: string) => string,
+  clusters: Clusters,
+): void => {
+  const bucketByKey = new Map<string, string[]>()
+  for (const address of addresses) {
+    const key = keyOf(address)
+    const bucket = bucketByKey.get(key) ?? []
+    bucket.push(address)
+    bucketByKey.set(key, bucket)
+  }
+
+  for (const bucket of bucketByKey.values()) {
+    // Everyone in this bucket looks alike → put them all in one cluster.
+    for (const address of bucket.slice(1)) clusters.putInSameCluster(address, bucket[0])
+  }
+}
+
+/** Link any two addresses that share the same first-N OR last-N hex. */
+const linkBySharedAffix = (uniqueAddresses: string[], clusters: Clusters, config: SimilarityConfig): void => {
+  const firstN = (address: string) => address.slice(0, config.prefixLength)
+  const lastN = (address: string) => address.slice(-config.suffixLength)
+
+  mergeAddressesSharingKey(uniqueAddresses, firstN, clusters)
+  mergeAddressesSharingKey(uniqueAddresses, lastN, clusters)
+}
+
+/** Flag every address whose cluster has 2+ members, stamping the cluster leader as its cluster id. */
+const collectClusters = (
+  uniqueAddresses: string[],
+  clusters: Clusters,
+  originalByNorm: Map<string, string>,
+): ListClusterResult => {
+  const membersByLeader = new Map<string, string[]>()
+  for (const address of uniqueAddresses) {
+    const leader = clusters.leaderOf(address)
+    const members = membersByLeader.get(leader)
+    if (members) members.push(address)
+    else membersByLeader.set(leader, [address])
+  }
+
+  const flagged = new Set<string>()
+  const groupIdByAddress = new Map<string, string>()
+  for (const [leader, members] of membersByLeader) {
+    if (members.length < 2) continue
+    for (const address of members) {
+      const original = originalByNorm.get(address) as string
+      flagged.add(original)
+      groupIdByAddress.set(original, leader)
+    }
+  }
+  return { flagged, groupIdByAddress }
+}
+
 /**
  * Cluster a list's look-alikes by the OR rule: two addresses connect when they share first-N OR
  * last-N hex (union-find). Every member of a component of 2+ is flagged with that component's id.
@@ -116,69 +216,14 @@ export const detectIntraListClusters = (
   addresses: string[],
   config: SimilarityConfig = DEFAULT_SIMILARITY_CONFIG,
 ): ListClusterResult => {
-  const flagged = new Set<string>()
-  const groupIdByAddress = new Map<string, string>()
+  const originalByNorm = dedupeUsableAddresses(addresses)
+  const uniqueAddresses = Array.from(originalByNorm.keys())
+  if (uniqueAddresses.length < 2) return { flagged: new Set(), groupIdByAddress: new Map() }
 
-  // Dedupe by normalized value, keeping the first lowercased original for the returned keys.
-  const originalByNorm = new Map<string, string>()
-  for (const address of addresses) {
-    const normalized = normalizeAddress(address)
-    if (!isUsableAddress(normalized) || originalByNorm.has(normalized)) continue
-    originalByNorm.set(normalized, address.toLowerCase())
-  }
-  const uniques = [...originalByNorm.keys()]
-  if (uniques.length < 2) return { flagged, groupIdByAddress }
+  const clusters = createClusters()
+  linkBySharedAffix(uniqueAddresses, clusters, config)
 
-  // Union-find over "shares prefix OR suffix".
-  const parent = new Map<string, string>(uniques.map((u) => [u, u]))
-  const find = (x: string): string => {
-    let root = x
-    while (parent.get(root) !== root) root = parent.get(root) as string
-    let cur = x
-    while (parent.get(cur) !== root) {
-      const next = parent.get(cur) as string
-      parent.set(cur, root)
-      cur = next
-    }
-    return root
-  }
-  const union = (a: string, b: string): void => {
-    const ra = find(a)
-    const rb = find(b)
-    if (ra !== rb) parent.set(ra, rb)
-  }
-
-  const firstByPrefix = new Map<string, string>()
-  const firstBySuffix = new Map<string, string>()
-  for (const norm of uniques) {
-    const prefix = norm.slice(0, config.prefixLength)
-    const suffix = norm.slice(-config.suffixLength)
-    const prevP = firstByPrefix.get(prefix)
-    if (prevP) union(norm, prevP)
-    else firstByPrefix.set(prefix, norm)
-    const prevS = firstBySuffix.get(suffix)
-    if (prevS) union(norm, prevS)
-    else firstBySuffix.set(suffix, norm)
-  }
-
-  // Keep only components with 2+ members; flag them and stamp the component id.
-  const membersByRoot = new Map<string, string[]>()
-  for (const norm of uniques) {
-    const root = find(norm)
-    const arr = membersByRoot.get(root)
-    if (arr) arr.push(norm)
-    else membersByRoot.set(root, [norm])
-  }
-  for (const [root, members] of membersByRoot) {
-    if (members.length < 2) continue
-    for (const norm of members) {
-      const original = originalByNorm.get(norm) as string
-      flagged.add(original)
-      groupIdByAddress.set(original, root)
-    }
-  }
-
-  return { flagged, groupIdByAddress }
+  return collectClusters(uniqueAddresses, clusters, originalByNorm)
 }
 
 // Anchor detector — build the index once over the user's trusted anchors, then query each candidate.
