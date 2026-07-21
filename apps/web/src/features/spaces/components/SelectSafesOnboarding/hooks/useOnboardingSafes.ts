@@ -1,19 +1,9 @@
 import { useCallback, useMemo, useState } from 'react'
 import debounce from 'lodash/debounce'
-import {
-  type AllSafeItems,
-  _buildSafeItem,
-  _groupAndSort,
-  getComparator,
-  useAllOwnedSafes,
-  useSafesSearch,
-} from '@/hooks/safes'
+import { type AllSafeItems, _groupAndSort, getComparator, useSafesSearch } from '@/hooks/safes'
+import useAllSafes, { type SafeItem } from '@/hooks/safes/useAllSafes'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
-import { selectAllAddedSafes } from '@/store/addedSafesSlice'
-import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
-import useWallet from '@/hooks/wallets/useWallet'
-import useChains from '@/hooks/useChains'
 import { useSimilarityClusters } from '@/features/address-poisoning'
 
 const useOnboardingSafes = () => {
@@ -22,50 +12,21 @@ const useOnboardingSafes = () => {
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = getComparator(orderBy)
 
-  const { address: walletAddress = '' } = useWallet() || {}
-  const [allOwned = {}] = useAllOwnedSafes(walletAddress)
-  const { configs } = useChains()
-  const allAdded = useAppSelector(selectAllAddedSafes)
-  const allUndeployed = useAppSelector(selectUndeployedSafes)
-  const allVisitedSafes = useAppSelector(selectAllVisitedSafes)
-  const allSafeNames = useAppSelector(selectAllAddressBooks)
-
-  const allChainIds = useMemo(() => configs.map((c) => c.chainId), [configs])
+  const allSafes = useAllSafes()
 
   const { trustedSafeItems, ownedSafeItems } = useMemo(() => {
-    const buildItem = (chainId: string, address: string) =>
-      _buildSafeItem(chainId, address, walletAddress, allAdded, allOwned, allUndeployed, allVisitedSafes, allSafeNames)
+    const safes = allSafes ?? []
 
-    // A safe is trusted if it's added/pinned on ANY chain — then ALL its chains show under trusted,
-    // so the same multi-chain safe never appears split across trusted and owned.
-    const trustedAddresses = new Set(
-      allChainIds.flatMap((chainId) => Object.keys(allAdded[chainId] || {})).map((address) => address.toLowerCase()),
-    )
+    // A safe is trusted if it's pinned (added) on ANY chain — then ALL its chains show under
+    // trusted, so the same multi-chain safe never appears split across trusted and owned.
+    const trustedAddresses = new Set(safes.filter((safe) => safe.isPinned).map((safe) => safe.address.toLowerCase()))
+    const isTrusted = (safe: SafeItem) => trustedAddresses.has(safe.address.toLowerCase())
 
-    // Trusted safes: every chain instance (owned + undeployed + added) whose address is trusted anywhere.
-    const trusted = allChainIds.flatMap((chainId) => {
-      const chainAddresses = [
-        ...new Set([
-          ...(allOwned[chainId] || []),
-          ...Object.keys(allUndeployed[chainId] || {}),
-          ...Object.keys(allAdded[chainId] || {}),
-        ]),
-      ]
-      return chainAddresses
-        .filter((address) => trustedAddresses.has(address.toLowerCase()))
-        .map((address) => buildItem(chainId, address))
-    })
-
-    // Owned safes: from CGW API + undeployed, excluding any address trusted on any chain.
-    const owned = allChainIds.flatMap((chainId) => {
-      const combined = [...new Set([...(allOwned[chainId] || []), ...Object.keys(allUndeployed[chainId] || {})])]
-      return combined
-        .filter((address) => !trustedAddresses.has(address.toLowerCase()))
-        .map((address) => buildItem(chainId, address))
-    })
-
-    return { trustedSafeItems: trusted, ownedSafeItems: owned }
-  }, [allChainIds, allAdded, allOwned, allUndeployed, walletAddress, allVisitedSafes, allSafeNames])
+    return {
+      trustedSafeItems: safes.filter(isTrusted),
+      ownedSafeItems: safes.filter((safe) => !isTrusted(safe)),
+    }
+  }, [allSafes])
 
   // Flag against the combined pool (so an owned safe impersonating a trusted one is caught) but
   // only surface warnings on owned safes — a safe the user trusted at some point is treated as vetted.
