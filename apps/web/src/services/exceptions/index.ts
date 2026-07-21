@@ -1,6 +1,7 @@
 import { IS_PRODUCTION } from '@/config/constants'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { normalizeError } from '@safe-global/utils/services/exceptions/normalizeError'
 import { logger, captureException } from '../observability'
 
 /**
@@ -62,6 +63,17 @@ export class CodedException extends Error {
    * are not counted against the Error-Free Views SLO. Use `track()` / `trackError`
    * for failures that truly break a user action.
    */
+  /**
+   * Context attached to the Datadog RUM error/action, so issues can be grouped
+   * by the same taxonomy as the Mixpanel `Error Surfaced` event and reconciled
+   * across the two tools (WA-2775). Namespaced `error_*` to avoid colliding with
+   * Datadog's built-in `@type` field.
+   */
+  private getObservabilityContext(): Record<string, unknown> {
+    const { domain, type, layer } = normalizeError({ code: this.code, message: this.message, isUserFacing: false })
+    return { code: this.code, error_domain: domain, error_type: type, error_layer: layer }
+  }
+
   public log(context?: ErrorContext): void {
     // Filter out the logError fn from the stack trace
     if (this.stack) {
@@ -77,7 +89,7 @@ export class CodedException extends Error {
     console.warn(IS_PRODUCTION ? this.message : this)
 
     if (IS_PRODUCTION) {
-      logger.warn(this.message, { code: this.code })
+      logger.warn(this.message, this.getObservabilityContext())
       errorSurfacedHandler?.({ code: this.code, message: this.message, isUserFacing: false, context })
     }
   }
@@ -86,8 +98,9 @@ export class CodedException extends Error {
     console.error(IS_PRODUCTION ? this.message : this)
 
     if (IS_PRODUCTION) {
-      logger.error(this.message, { code: this.code })
-      captureException(this)
+      const tags = this.getObservabilityContext()
+      logger.error(this.message, tags)
+      captureException(this, tags)
       errorSurfacedHandler?.({ code: this.code, message: this.message, isUserFacing: true, context })
     }
   }

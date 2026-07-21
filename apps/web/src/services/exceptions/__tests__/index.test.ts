@@ -1,4 +1,5 @@
 import { Errors, CodedException } from '..'
+import { ErrorDomain, ErrorLayer, ErrorType } from '@safe-global/utils/services/exceptions/errorTaxonomy'
 
 const defaultPublicIsProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION
 describe('CodedException', () => {
@@ -102,7 +103,15 @@ describe('CodedException', () => {
       const { logError, Errors } = await import('..')
 
       logError(Errors._601, 'rpc down')
-      expect(mockWarn).toHaveBeenCalledWith(expect.stringContaining('601'), { code: 601 })
+      expect(mockWarn).toHaveBeenCalledWith(
+        expect.stringContaining('601'),
+        expect.objectContaining({
+          code: 601,
+          error_domain: ErrorDomain.DATA_LOADING,
+          error_type: ErrorType.FETCH_FAILED,
+          error_layer: ErrorLayer.OFF_CHAIN,
+        }),
+      )
       expect(mockError).not.toHaveBeenCalled()
     })
 
@@ -138,9 +147,47 @@ describe('CodedException', () => {
       const { trackError, Errors } = await import('..')
 
       const err = trackError(Errors._100)
-      expect(mockCaptureException).toHaveBeenCalled()
-      expect(mockError).toHaveBeenCalledWith(err.message, { code: 100 })
+      expect(mockCaptureException).toHaveBeenCalledWith(
+        err,
+        expect.objectContaining({
+          code: 100,
+          error_domain: ErrorDomain.TX_CREATION,
+          error_type: ErrorType.ADDRESS_INVALID,
+          error_layer: ErrorLayer.OFF_CHAIN,
+        }),
+      )
+      expect(mockError).toHaveBeenCalledWith(
+        err.message,
+        expect.objectContaining({
+          code: 100,
+          error_domain: ErrorDomain.TX_CREATION,
+          error_type: ErrorType.ADDRESS_INVALID,
+        }),
+      )
       expect(console.error).toHaveBeenCalledWith(err.message)
+    })
+
+    it('tags the Datadog error with the refined domain/type/layer (on-chain revert)', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureException = jest.fn()
+      jest.doMock('@/services/observability', () => ({
+        __esModule: true,
+        ...jest.requireActual('@/services/observability'),
+        captureException: mockCaptureException,
+        logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
+      }))
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._804, 'execution reverted GS013')
+      expect(mockCaptureException).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          error_domain: ErrorDomain.TX_EXECUTION,
+          error_type: ErrorType.ON_CHAIN_REVERT,
+          error_layer: ErrorLayer.ON_CHAIN,
+        }),
+      )
     })
 
     it('does not track in non-production envs', async () => {
