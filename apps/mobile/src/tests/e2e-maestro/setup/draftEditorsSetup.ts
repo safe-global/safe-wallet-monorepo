@@ -36,7 +36,7 @@ const POLL_ATTEMPTS = 40
 const waitFor = async <T>(label: string, read: () => T | undefined | null): Promise<T> => {
   for (let attempt = 0; attempt < POLL_ATTEMPTS; attempt++) {
     const value = read()
-    if (value) {
+    if (value != null) {
       return value
     }
     await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS))
