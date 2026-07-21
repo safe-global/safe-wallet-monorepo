@@ -15,9 +15,11 @@ initialize({
 // These are not applied globally but can be imported and used per-story
 export { withMockProvider } from './decorators'
 
-// Canvas colors mirror the shadcn --background token per mode so bg-background elements
-// never render as visible patches against the canvas.
-const BACKGROUND_COLORS: Record<string, string> = { light: '#ffffff', dark: '#000000' }
+// Canvas colors mirror the card/paper surface components actually sit on (--color-background-paper):
+// light #fff, dark #1c1c1c. Transparent controls (the default Input, ghost Button, etc.) rely on this
+// paper fill to be visible; the muted page background (--color-background-main) is drawn by full-page
+// (Pages/*) stories themselves, so the canvas represents the immediate surface, not the page behind it.
+const BACKGROUND_COLORS: Record<string, string> = { light: '#ffffff', dark: '#1c1c1c' }
 
 // Syncs data-theme attribute and background color with the theme switcher
 const ThemeSyncDecorator = (
@@ -100,6 +102,9 @@ const preview: Preview = {
         // Alphabetical within groups; explicit `order` entries below keep their curated order.
         method: 'alphabetical',
         order: [
+          // Designer-facing curated showcase — kept at the top, ahead of the dev-facing groups.
+          'Design System',
+          ['Overview', 'Buttons', 'Text Fields', 'Dropdowns', 'Search', 'Tables', 'Cards', 'Tabs', 'Dialog', 'Tooltip'],
           'Pages',
           [
             'Core',
