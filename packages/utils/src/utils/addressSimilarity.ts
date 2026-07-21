@@ -100,19 +100,6 @@ export const detectSimilarAddresses = (
   }
 }
 
-/**
- * Lowercase address set for every address that {@link detectSimilarAddresses} flags (intra-list).
- * Dedupes case-insensitively; returns an empty set when there are fewer than two distinct addresses.
- */
-export const getFlaggedSimilarAddressSet = (addresses: string[]): Set<string> => {
-  const unique = [...new Set(addresses.map((a) => a.toLowerCase()))]
-  if (unique.length < 2) {
-    return new Set()
-  }
-  const result = detectSimilarAddresses(unique)
-  return new Set(unique.filter((addr) => result.isFlagged(addr)))
-}
-
 export interface ListClusterResult {
   /** Lowercased 0x-prefixed addresses that look alike another list member. */
   flagged: Set<string>
