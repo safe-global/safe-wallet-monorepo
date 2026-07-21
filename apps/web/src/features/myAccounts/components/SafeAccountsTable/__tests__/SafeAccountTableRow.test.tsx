@@ -5,6 +5,12 @@ import { SELECT_COLUMN, type SafeAccountColumn } from '../columns'
 import type { AccountLine } from '../useSafeAccountRows'
 
 // Keep the heavy per-cell widgets out of the way; this suite covers row-level link/selection wiring.
+// Stub the lazy overview fetch — its own suite covers it (and it needs an IntersectionObserver). The
+// spy lets us assert the group-vs-child fetch gating (`enabled`) without a real store/observer.
+const mockUseRowOverviews: jest.Mock = jest.fn(() => ({ current: null }))
+jest.mock('../useRowOverviews', () => ({
+  useRowOverviews: (...args: unknown[]) => mockUseRowOverviews(...args),
+}))
 jest.mock('@/components/common/Identicon', () => ({ __esModule: true, default: () => <div data-testid="identicon" /> }))
 jest.mock('../../AccountItem', () => ({
   AccountItem: { Icon: () => null, ChainBadge: () => null, ContextMenu: () => null },
@@ -61,7 +67,7 @@ const renderRow = (props: Partial<Parameters<typeof SafeAccountTableRow>[0]>) =>
   render(
     <table>
       <tbody>
-        <SafeAccountTableRow line={leaf()} columns={columns} {...props} />
+        <SafeAccountTableRow line={leaf()} columns={columns} onOverviewsLoaded={jest.fn()} {...props} />
       </tbody>
     </table>,
   )
@@ -74,9 +80,25 @@ const checkbox = (over: Partial<RowCheckbox> = {}): RowCheckbox => ({
 })
 
 describe('SafeAccountTableRow', () => {
+  beforeEach(() => {
+    mockUseRowOverviews.mockClear()
+  })
+
   it('renders the name as a navigation link when not in selection mode', () => {
     renderRow({})
     expect(screen.getByTestId('account-row-link')).toHaveAttribute('href', '/home?safe=eth:0xabc')
+  })
+
+  describe('lazy overview fetching', () => {
+    // The parent already loads a group's per-chain overviews, so a child row must not fetch them again.
+    it('enables the fetch for single/parent rows and disables it for child rows', () => {
+      renderRow({ line: leaf({ variant: 'single' }) })
+      expect(mockUseRowOverviews).toHaveBeenLastCalledWith(expect.anything(), true, expect.any(Function))
+
+      mockUseRowOverviews.mockClear()
+      renderRow({ line: leaf({ variant: 'child', showAddress: false, displayName: 'Ethereum' }) })
+      expect(mockUseRowOverviews).toHaveBeenLastCalledWith(expect.anything(), false, expect.any(Function))
+    })
   })
 
   it('does not navigate in selection mode — the whole row toggles the checkbox instead', () => {
@@ -116,7 +138,7 @@ describe('SafeAccountTableRow', () => {
       render(
         <table>
           <tbody>
-            <SafeAccountTableRow line={leaf()} columns={navColumns} {...props} />
+            <SafeAccountTableRow line={leaf()} columns={navColumns} onOverviewsLoaded={jest.fn()} {...props} />
           </tbody>
         </table>,
         { routerProps: { push } },
@@ -154,6 +176,7 @@ describe('SafeAccountTableRow', () => {
               line={leaf({ variant: 'group', expandable: true, href: undefined })}
               columns={navColumns}
               onToggle={onToggle}
+              onOverviewsLoaded={jest.fn()}
             />
           </tbody>
         </table>,
@@ -174,7 +197,7 @@ describe('SafeAccountTableRow', () => {
       render(
         <table>
           <tbody>
-            <SafeAccountTableRow line={leaf(over)} columns={balanceColumns} />
+            <SafeAccountTableRow line={leaf(over)} columns={balanceColumns} onOverviewsLoaded={jest.fn()} />
           </tbody>
         </table>,
       )

@@ -23,6 +23,18 @@ jest.mock('@/hooks/safes/useAllSafes', () => ({
   default: jest.fn(),
 }))
 
+// Stub the Fuse search (covered by its own suite) with a deterministic substring filter.
+jest.mock('@/hooks/safes/useSafesSearch', () => ({
+  useSafesSearch: (items: Array<{ address: string; name?: string }>, query: string) =>
+    query
+      ? items.filter(
+          (item) =>
+            item.address.toLowerCase().includes(query.toLowerCase()) ||
+            (item.name ? item.name.toLowerCase().includes(query.toLowerCase()) : false),
+        )
+      : [],
+}))
+
 describe('useTrustedSafesModal', () => {
   const mockDispatch = jest.fn()
   const mockSafes = [

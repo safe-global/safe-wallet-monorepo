@@ -1,13 +1,21 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import StakingPromoBanner from './index'
 import { OVERVIEW_EVENTS } from '@/services/analytics'
-import { AppRoutes } from '@/config/routes'
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),
 }))
 import { trackEvent } from '@/services/analytics'
+
+const mockOpenSafenetStakingApp = jest.fn()
+let mockIsNavigating = false
+jest.mock('@/hooks/useOpenSafenetStakingApp', () => ({
+  useOpenSafenetStakingApp: () => ({
+    openSafenetStakingApp: mockOpenSafenetStakingApp,
+    isNavigating: mockIsNavigating,
+  }),
+}))
 
 const mockTrackEvent = trackEvent as jest.MockedFunction<typeof trackEvent>
 
@@ -16,13 +24,14 @@ const SAFE = 'eth:0x0000000000000000000000000000000000000001'
 describe('StakingPromoBanner', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockIsNavigating = false
   })
 
   it('renders the title, description, learn more link and CTA', () => {
     render(<StakingPromoBanner onDismiss={jest.fn()} />, { routerProps: { query: { safe: SAFE } } })
 
-    expect(screen.getByText('SAFE staking is now live')).toBeInTheDocument()
-    expect(screen.getByText(/Stake SAFE tokens now and get rewards on deposit/i)).toBeInTheDocument()
+    expect(screen.getByText('Stake SAFE tokens and earn up to ~15% APR')).toBeInTheDocument()
+    expect(screen.getByText(/Earn by staking your SAFE tokens, currently rewarded up to 15%/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Stake now' })).toBeInTheDocument()
 
     const learnMore = screen.getByRole('link', { name: 'Learn more' })
@@ -39,14 +48,22 @@ describe('StakingPromoBanner', () => {
     expect(mockTrackEvent).toHaveBeenCalledWith(OVERVIEW_EVENTS.SHOW_STAKING_BANNER)
   })
 
-  it('navigates to the staking route and tracks the CTA click', () => {
-    const push = jest.fn(() => Promise.resolve(true))
-    render(<StakingPromoBanner onDismiss={jest.fn()} />, { routerProps: { push, query: { safe: SAFE } } })
+  it('opens the native SAFE staking app and tracks the CTA click', () => {
+    render(<StakingPromoBanner onDismiss={jest.fn()} />, { routerProps: { query: { safe: SAFE } } })
 
     fireEvent.click(screen.getByRole('button', { name: 'Stake now' }))
 
-    expect(push).toHaveBeenCalledWith({ pathname: AppRoutes.stake, query: { safe: SAFE } })
+    expect(mockOpenSafenetStakingApp).toHaveBeenCalled()
     expect(mockTrackEvent.mock.calls.some((call) => call[0] === OVERVIEW_EVENTS.OPEN_STAKING_WIDGET)).toBe(true)
+  })
+
+  it('shows a spinner in the CTA while navigating to the staking app', () => {
+    mockIsNavigating = true
+    render(<StakingPromoBanner onDismiss={jest.fn()} />, { routerProps: { query: { safe: SAFE } } })
+
+    expect(screen.getByRole('progressbar')).toBeInTheDocument()
+    // The CTA stays enabled and visible while loading (re-clicks are guarded inside the hook)
+    expect(screen.getByRole('button', { name: 'Stake now' })).toBeEnabled()
   })
 
   it('tracks the learn more click', () => {
