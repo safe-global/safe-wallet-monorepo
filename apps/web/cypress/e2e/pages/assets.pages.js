@@ -15,7 +15,8 @@ const currencyDropdownList = 'ul[role="listbox"]'
 const currencyDropdownListSelected = 'ul[role="listbox"] li[aria-selected="true"]'
 const hideAssetCheckbox = '[data-testid="hide-asset-checkbox"]'
 const hiddenTokenCheckbox = 'input[type="checkbox"]'
-const paginationPageList = 'ul[role="listbox"]'
+const rowsPerPageSelect = '[data-testid="rows-per-page"]'
+const paginationPageList = '[data-slot="select-item"]'
 export const tokenListTable = 'table[aria-labelledby="tableTitle"]'
 const manageTokensButton = '[data-testid="manage-tokens-button"]'
 const manageTokensMenu = '[data-testid="manage-tokens-menu"]'
@@ -41,7 +42,6 @@ const sendBtnStr = 'Send'
 const pageRowsDefault = '25'
 const rowsPerPage10 = '10'
 const tablePageRage21to28 = '21–28 of'
-const rowsPerPageString = 'Rows per page:'
 const pageCountString1to25 = '1–25 of'
 const pageCountString1to10 = '1–10 of'
 const pageCountString10to20 = '11–20 of'
@@ -403,18 +403,18 @@ export function saveHiddenTokenSelection() {
 }
 
 export function verifyInitialTableState() {
-  cy.contains(rowsPerPageString).next().contains(pageRowsDefault)
+  cy.get(rowsPerPageSelect).contains(pageRowsDefault)
   cy.contains(pageCountString1to25)
   cy.get(balanceSingleRow).should('have.length', 25)
 }
 
 export function changeTo10RowsPerPage() {
-  cy.contains(rowsPerPageString).next().contains(pageRowsDefault).click({ force: true })
+  cy.get(rowsPerPageSelect).click()
   cy.get(paginationPageList).contains(rowsPerPage10).click()
 }
 
 export function verifyTableHas10Rows() {
-  cy.contains(rowsPerPageString).next().contains(rowsPerPage10)
+  cy.get(rowsPerPageSelect).contains(rowsPerPage10)
   cy.contains(pageCountString1to10)
   cy.get(balanceSingleRow).should('have.length', 10)
 }

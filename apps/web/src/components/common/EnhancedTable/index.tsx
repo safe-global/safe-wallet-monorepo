@@ -5,7 +5,7 @@ import classNames from 'classnames'
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Typography } from '@/components/ui/typography'
 import css from './styles.module.css'
 
@@ -133,6 +133,7 @@ export type EnhancedTableProps = {
 }
 
 const pageSizes = [10, 25, 100]
+const pageSizeItems = Object.fromEntries(pageSizes.map((size) => [String(size), String(size)]))
 
 function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, footer }: EnhancedTableProps) {
   const [order, setOrder] = useState<SortDirection>('asc')
@@ -150,8 +151,9 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
     setPage(newPage)
   }
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10))
+  const handleChangeRowsPerPage = (value: string | null) => {
+    if (value == null) return
+    setRowsPerPage(parseInt(value, 10))
     setPage(0)
   }
 
@@ -234,19 +236,18 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
             <Typography variant="paragraph-small" color="muted">
               Rows per page:
             </Typography>
-            <NativeSelect
-              size="sm"
-              aria-label="Rows per page"
-              value={rowsPerPage}
-              onChange={handleChangeRowsPerPage}
-              className="text-sm"
-            >
-              {pageSizes.map((size) => (
-                <NativeSelectOption key={size} value={size}>
-                  {size}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
+            <Select value={String(rowsPerPage)} onValueChange={handleChangeRowsPerPage} items={pageSizeItems}>
+              <SelectTrigger size="sm" aria-label="Rows per page" data-testid="rows-per-page">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {pageSizes.map((size) => (
+                  <SelectItem key={size} value={String(size)}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Typography variant="paragraph-small">
               {from}–{to} of {rows.length}
             </Typography>
