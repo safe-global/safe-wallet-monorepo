@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { memo, useEffect, useMemo } from 'react'
 import { type AllSafeItems, type AllSafeItemsGrouped, useSafeOrderComparator, useSafesSearch } from '@/hooks/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -112,4 +112,6 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
   )
 }
 
-export default AccountsList
+// Memoised so opening the "Manage my account list" modal (state lives in the parent) doesn't
+// re-render the full pinned-accounts table — a costly synchronous pass with hundreds of rows.
+export default memo(AccountsList)
