@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { _UpdateSafe } from './index'
-import { mockUpdateSafeTxData, mockUnknownContractTxData } from './mockData'
+import { MOCK_SAFE_ADDRESS, mockUpdateSafeTxData, mockUnknownContractTxData } from './mockData'
 import { faker } from '@faker-js/faker'
 
 // Seed faker for deterministic visual regression tests
@@ -33,7 +33,8 @@ type Story = StoryObj<typeof meta>
 
 const mockSafeInfo = {
   safe: {
-    address: { value: faker.finance.ethereumAddress() },
+    // Must match mockUpdateSafeTxData.to — the upgrade call targets the Safe itself.
+    address: { value: MOCK_SAFE_ADDRESS },
     chainId: '1',
     nonce: 100,
     threshold: 2,
@@ -92,7 +93,8 @@ const mockL2Chain = {
 
 export const Default: Story = {
   args: {
-    safeInfo: mockSafeInfo,
+    // Old Safe (1.2.0) upgrading to the mocked 1.3.0 mastercopy.
+    safeInfo: mockOldSafeInfo,
     queueSize: '0',
     chain: mockChain,
     txData: mockUpdateSafeTxData,

@@ -18,7 +18,7 @@ import {
   TokenTransferType,
   MultiTransfersFields,
 } from './types'
-import TxCard from '../../common/TxCard'
+import TxCard, { TxCardActions } from '../../common/TxCard'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -49,7 +49,7 @@ export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balanc
     <TokenIcon logoUri={item.tokenInfo.logoUri} key={item.tokenInfo.address} tokenSymbol={item.tokenInfo.symbol} />
 
     <div className="flex-1" data-testid="token-item">
-      <Typography variant="paragraph-small" className="block whitespace-normal">
+      <Typography variant="paragraph-small" className="block whitespace-nowrap">
         {item.tokenInfo.name}
       </Typography>
 
@@ -189,13 +189,7 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
               <>
                 <div className="mb-8 flex flex-row items-center justify-between">
                   <Track {...MODALS_EVENTS.ADD_RECIPIENT}>
-                    <Button
-                      data-testid="add-recipient-btn"
-                      variant="ghost"
-                      onClick={addRecipient}
-                      disabled={!canAddMoreRecipients}
-                      size="lg"
-                    >
+                    <Button data-testid="add-recipient-btn" onClick={addRecipient} disabled={!canAddMoreRecipients}>
                       <AddIcon className="size-4" />
                       Add recipient
                     </Button>
@@ -262,11 +256,11 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
             <div>
               <Separator className={commonCss.nestedDivider} />
 
-              <div className="flex items-center gap-2 p-2">
-                <Button type="submit" disabled={!formState.isValid}>
+              <TxCardActions>
+                <Button type="submit" size="submit" disabled={!formState.isValid} className="w-full lg:w-auto">
                   Next
                 </Button>
-              </div>
+              </TxCardActions>
             </div>
           </div>
         </form>

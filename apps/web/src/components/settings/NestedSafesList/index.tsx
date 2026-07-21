@@ -101,12 +101,7 @@ export function NestedSafesList(): ReactElement | null {
         {safe.deployed && (
           <CheckWallet>
             {(isOk) => (
-              <Button
-                onClick={() => setTxFlow(<CreateNestedSafeFlow />)}
-                variant="ghost"
-                disabled={!isOk}
-                className="mb-6"
-              >
+              <Button onClick={() => setTxFlow(<CreateNestedSafeFlow />)} disabled={!isOk} className="mb-6">
                 <AddIcon className="size-4" />
                 Add nested Safe
               </Button>

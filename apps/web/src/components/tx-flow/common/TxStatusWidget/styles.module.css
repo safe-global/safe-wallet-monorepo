@@ -36,7 +36,13 @@
   margin-right: var(--space-2);
   padding: var(--space-1);
   padding-left: 0;
-  background-color: var(--color-background-main);
+  /* Notch over the connector line — must match the tx-flow page surface (--background),
+     not --color-background-main, or it shows as a gray square behind each icon.
+     position/z-index lift the icon above the absolutely-positioned .status::before line
+     so the line renders behind the icons (the background then hides it at each step). */
+  background-color: var(--background);
+  position: relative;
+  z-index: 1;
 }
 
 [data-theme='light'] .itemIcon {

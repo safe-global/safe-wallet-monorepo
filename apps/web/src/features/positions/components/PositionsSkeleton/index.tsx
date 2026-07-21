@@ -43,7 +43,7 @@ const PositionsSkeleton = () => {
       <div className="overflow-hidden rounded-xl border border-border bg-card">
         <Accordion defaultValue={['skeleton']}>
           <AccordionItem value="skeleton" className="border-b-0">
-            <AccordionTrigger className="overflow-x-auto px-6 py-4">
+            <AccordionTrigger className="items-center overflow-x-auto px-6 py-4">
               <div className="flex w-full items-center gap-4">
                 <Skeleton className="size-10 rounded-md" />
                 <div className="flex-1">

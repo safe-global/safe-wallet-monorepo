@@ -69,7 +69,9 @@ export const SafeShieldContent = ({
 
   return (
     <div className="px-1 pb-1">
-      <div className="relative rounded-b-[6px] border border-t-0 border-[var(--color-background-main)]">
+      {/* overflow-hidden clips the last analysis row's square background to the rounded corners;
+          rounded-b-lg (8px) matches the parent's rounded-xl minus the 4px px-1/pb-1 inset. */}
+      <div className="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]">
         {showHypernativeInfo && (
           <hn.HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
         )}

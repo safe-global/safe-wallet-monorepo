@@ -53,7 +53,8 @@ const Setup: NextPage = () => {
                 </Tooltip>
               </Typography>
 
-              <Typography className="pt-2">
+              {/* as="div": the Skeleton renders a div, which is invalid inside the default <p> */}
+              <Typography as="div" className="pt-2">
                 Current nonce: {safeLoaded ? <b>{nonce}</b> : <Skeleton className="inline-block h-4 w-[30px]" />}
               </Typography>
             </div>

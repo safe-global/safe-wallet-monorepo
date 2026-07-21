@@ -159,7 +159,7 @@ function BridgeTransaction({ txInfo }: BridgeTransactionProps) {
     )
   }
   rows.push(
-    <BridgeTxRecipientRow txInfo={txInfo} />,
+    <BridgeTxRecipientRow key="recipient" txInfo={txInfo} />,
     <DataRow datatestid="total-fee" key="fees" title="Fees">
       {formatAmount(totalFee)} {txInfo.fromToken.symbol}
     </DataRow>,

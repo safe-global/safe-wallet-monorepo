@@ -1,5 +1,6 @@
 import TxCard from '@/components/tx-flow/common/TxCard'
 import { Typography } from '@/components/ui/typography'
+import { Spinner } from '@/components/ui/spinner'
 import ExternalLink from '@/components/common/ExternalLink'
 import { type PropsWithChildren, useContext } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -72,8 +73,18 @@ export const ConfirmTxReceipt = ({ children, onSubmit }: PropsWithChildren<{ onS
   const showHashes = wallet ? isHardwareWallet(wallet) || isLedgerLive(wallet) : false
   const steps = showHashes ? HardwareWalletStep : InfoSteps
 
+  // Render inside TxFlowStep (rather than bailing with `false`) so the step title still updates and
+  // the user sees a loading state instead of an empty card with the previous step's stale title.
   if (!safeTx) {
-    return false
+    return (
+      <TxFlowStep title="Review details" fixedNonce>
+        <TxCard>
+          <div className="flex items-center justify-center py-10">
+            <Spinner className="size-6" />
+          </div>
+        </TxCard>
+      </TxFlowStep>
+    )
   }
 
   return (

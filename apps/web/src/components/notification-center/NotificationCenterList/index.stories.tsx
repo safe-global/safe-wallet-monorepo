@@ -62,7 +62,7 @@ const meta = {
   loaders: [mswLoader],
   decorators: [
     (Story) => (
-      <div className="max-w-md rounded-lg border border-border bg-background-paper">
+      <div className="max-w-md rounded-lg border border-border bg-card">
         <Story />
       </div>
     ),

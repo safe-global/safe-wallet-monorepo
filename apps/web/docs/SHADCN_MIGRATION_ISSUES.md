@@ -783,3 +783,297 @@ account sidebar drawer and any other Sheet consumer.
 
 **Verify (live):** Batch drawer opens above a dimmed sidebar + topbar, left corners rounded,
 all three option icons visible at correct size, light + dark, desktop + mobile.
+
+---
+
+## QA round 2026-07-16 — fixed same-day on `feat/shadcn-migration`
+
+All found while live-QA-ing against the local fork; each fixed, unit-tested, and visually
+verified (light + dark) in the same session.
+
+## ISSUE-015 — Tx details: multisend action rows flush against container edges ✅
+
+**Resolution:** `px-4 pb-4` on the non-compact action list (`Multisend/index.tsx`). Pre-migration
+the rows were flush MUI accordions; the shadcn rounded cards need the inset to align with the
+"All actions" header. Compact variant untouched. Test added.
+
+## ISSUE-016 — Header Safe card: fiat value clipped, chevron hidden behind avatar ✅
+
+**Resolution:** The branch split the SelectTrigger into an absolute sr-only layer + visible
+content sibling; the sr-only SelectValue left the layout, so `justify-between` parked the lone
+chevron at the LEFT, and the content row lost the right-side icon-zone inset (8px clipped by the
+wrapper's overflow-hidden). Fixed with `justify-end` on the trigger and `pr-12` on the openable
+variant (`SafeSelectorDropdown/index.tsx`, `utils/classVariants.ts`). Tests added for the variant
+helper.
+
+## ISSUE-017 — Settings > Setup: button variants inconsistent with app conventions ✅
+
+**Resolution:** "Export as CSV" → `outline` + export icon (matches address book / history
+Export); "Add proposer" and "Add nested Safe" → primary (matches "New entry", "New spending
+limit"). Dev had MUI `text` for all three, but the migrated app's convention won.
+
+## ISSUE-018 — Segmented tabs: active pill overflows the track; Workspaces tab switch jumps ✅
+
+**Resolution:** (a) The base TabsList `group-data-horizontal/tabs:h-9` beat the segmented
+variant's plain `h-auto` on specificity, locking the track to the pill height — pills spilled
+out of the `p-1` gutter. Fixed with a same-prefix `group-data-horizontal/tabs:h-auto` in the
+segmented variant (`ui/tabs.tsx`). (b) The topbar was hidden on `/welcome/spaces` while signed
+out, so switching Accounts↔Workspaces shifted the layout by the topbar height. With the
+require-login gate OFF the topbar now stays (`PageLayout/index.tsx`); gate-on behavior is
+unchanged. PageLayout test updated to the new intent.
+
+## ISSUE-019 — `<div>`-inside-`<p>` hydration errors: Skeleton nested in Typography ✅
+
+**Resolution:** `Typography as="div"` at all 13 sites where a (div) Skeleton renders inside the
+default `<p>` — settings setup page, ContractVersion, AssetsTable, SpendingLimitsTable,
+tx-flow SafeInfo, SafenetStakingWidget. Structural scan (regex over `<Typography …>…<Skeleton`)
+is clean.
+
+## ISSUE-020 — History Fees accordion: chevron top-aligned, open background bleeds past corners ✅
+
+**Resolution:** `items-center` on the trigger (base accordion trigger is `items-start`, wrong for
+the two-line summary); `overflow-hidden` on the item so the square open/hover background clips to
+the rounded corners (same approach as ColorCodedTxAccordion); radius 6px → `var(--radius-lg)` to
+match the stacked "Transaction details" card (`features/gtf/components/HistoryFeesAccordion`).
+
+## QA round 2026-07-16 (2) — fixed same-day on `feat/shadcn-migration`
+
+## ISSUE-021 — Tx history rows stack vertically at medium viewports ✅
+
+**Resolution:** The generic `@media (max-width: 1350px)` flex-wrap fallback (needed by 8-column
+queue rows) also stacked the narrower history/bulk rows. Added a 1000–1350px override keeping
+`.history`/`.bulkGroup` rows on the grid (`TxSummary/styles.module.css`). Verified single-line at
+1200px.
+
+## ISSUE-022 — "New spending limit" button inconsistent with sibling CTAs ✅
+
+**Resolution:** Dropped `size="sm"`, added the AddIcon — now identical to "Add proposer" /
+"Add nested Safe" (`SpendingLimitsSettings/index.tsx`).
+
+## ISSUE-023 — Inline 24h-change chip renders as a broken zero-padding pill ✅
+
+**Resolution:** Pre-migration the `inline` variant was transparent text, not a pill. Restored:
+`bg-transparent` (light+dark) alongside the existing `px-0` (`AssetsTable/FiatChange.tsx`).
+
+## ISSUE-024 — NFTs table missing card background/rounding ✅
+
+**Resolution:** `bg-background-paper` is not a generated Tailwind utility (vars.css tokens are
+outside `@theme`), so the wrapper background silently no-opped. Switched to `bg-card`
+(`NftGrid/index.tsx`; same dead class fixed in the NotificationCenterList story).
+
+## ISSUE-025 — Positions protocol accordion chevron top-aligned ✅
+
+**Resolution:** `items-center` on the trigger (base accordion trigger is items-start) in
+`features/positions/index.tsx` and `PositionsSkeleton`.
+
+## ISSUE-026 — SafeShield header/last row corners break against the parent card ✅
+
+**Resolution:** Header and content are inset 4px inside a `rounded-xl` parent, so their radius
+must be 8px, not 6px: `rounded-t-lg` on the header, `rounded-b-lg` + `overflow-hidden` on the
+content wrapper so the last analysis row clips (`SafeShieldHeader.tsx`, `SafeShieldContent`).
+
+## ISSUE-027 — BatchTransactions story appears broken (endless skeletons) 🔵 verified — intentional
+
+**Resolution:** The Safe SDK that decodes the batch is stubbed in Storybook (`setSafeSDK({})`),
+so the composite view can only show its loading treatment — same as the documented
+`BatchTxList` stories. Added meta + story docs framing it; decoded rows are covered by
+`Features/Batching/BatchTxItem` stories.
+
+## ISSUE-028 — New-safe Name input "not using text field variants" 🔵 verified — not a bug
+
+**Resolution:** `NameInput` composes the standard `InputGroup`/`InputGroupInput` primitives; the
+inner input's `border-0 rounded-none bg-transparent` classes are the primitive's own internals
+(the group wrapper owns border/radius).
+
+## QA round 2026-07-16 (3) — fixed same-day on `feat/shadcn-migration`
+
+## ISSUE-029 — Sidebar shows a visible panel edge against the page background ✅
+
+**Resolution:** `--sidebar` was hardcoded `#ffffff` (light) / `#171717` (dark) while the page is
+`--color-background-main` (#f4f4f4 / #121312). Now `--sidebar: var(--color-background-main)` in
+both blocks (`styles/shadcn.css`) so the sidebar blends with no edge.
+
+## ISSUE-030 — Sticky page header transparent: content bleeds through on scroll ✅
+
+**Resolution:** Branch regression — dev had `background-color: var(--color-background-main)` on
+`PageHeader .container`; the branch made it `transparent`. Restored. Swept the other sticky
+elements (SafeAppsHeader/Filters, topbar): all already opaque.
+
+## ISSUE-031 — "Your Safe account preview" card has a border ✅
+
+**Resolution:** Removed `border border-[var(--color-border-light)]` from the OverviewWidget Card
+(new-safe create flow).
+
+## ISSUE-032 — Network multi-select doesn't close on outside click ✅
+
+**Resolution:** `NetworkMultiSelectorInput` had no outside-click handling. Added a wrapper-ref
+pointerdown listener + Escape handling while open. Unit tests added.
+
+## ISSUE-033 — Network multi-select doesn't match the Name text field ✅
+
+**Resolution:** `.multiSelectControl` (56px, border-light, 6px radius, paper bg) now mirrors the
+InputGroup default variant: min-height 36px, `var(--border)`, `var(--radius-md)`, shadow-xs
+equivalent, focus-within ring (`NetworkSelector/styles.module.css`).
+
+## ISSUE-034 — "Merge dev into the branch?" 🔵 verified — nothing to merge locally
+
+**Resolution:** Per local refs the branch is 0 behind / 77 ahead of `origin/dev` (last merged
+2026-07-14, `8c558ef23`). `git fetch` isn't possible from the agent environment (no credentials);
+run `git fetch origin dev` from a personal terminal to check for newer upstream commits. The
+tx-details layout differences vs dev are this branch's own migration changes.
+
+## QA round 2026-07-16 (4) — fixed same-day on `feat/shadcn-migration`
+
+## ISSUE-035 — Tx/message list row chevron top-aligned when the row grows ✅
+
+**Resolution:** `items-center` on the list accordion triggers (`ExpandableTransactionItem` ×2,
+`ExpandableMsgItem`) — same base `items-start` issue as the Fees/Positions accordions.
+
+## ISSUE-036 — Base UI nativeButton warning on tx/message lists ✅
+
+**Resolution:** The list accordion triggers deliberately render `<div role="button">` (their
+summaries contain nested interactive elements, invalid inside a native button) but didn't tell
+base-ui: added `nativeButton={false}` to all three triggers. Console warning gone on
+/transactions/history.
+
+## ISSUE-037 — NFTs table styling diverges from the tokens list ✅
+
+**Resolution:** NftGrid now reuses the tokens-list treatment verbatim: same `Card` wrapper
+(size="none", transparent 4px border), same paper table-container classes, and EnhancedTable's
+shared `compactTable` cell paddings (imported, not duplicated). Full EnhancedTable adoption was
+deliberately NOT done: its built-in client-side pagination conflicts with the NFT list's
+infinite scroll.
+
+## ISSUE-038 — BatchTransactions story squished number badges / collapsed width ✅
+
+**Resolution:** `.number` badge gets `flex-shrink: 0` (a fixed 24px circle must never deform —
+also hardens the real batch sidebar), and the story decorator now constrains to `w-[400px]`
+matching the sidebar, so rows no longer collapse to min-content.
+
+## ISSUE-039 — Network multi-select grows when a network is selected ✅
+
+**Resolution:** The chain chip (24px logo + 4px padding + margins ≈ 38px) exceeded the 36px
+control's content box, so any selection stretched the field. Chip is now a compact 24px pill
+(16px logo, no vertical padding), fitting inside the h-9 control — field height is stable at
+36px empty or filled (`NetworkSelector/styles.module.css`). Verified live: 36px in both states.
+
+---
+
+## QA round 2026-07-16 (5) — pre-existing test failures + tx-flow Storybook audit
+
+## ISSUE-040 — Pre-existing test failures (3 suites) ✅
+
+**Resolution:**
+
+- `SpacesList` "disables the Create space button": disabled state renders a `<span>` (to disarm
+  the NextLink), which cannot carry a native `disabled` attribute — assertion updated to
+  `aria-disabled="true"` + tag check.
+- `ReviewTransactionV2` snapshot: stale after `!mt-0` from e66bee4c8 — updated.
+- `apps.test.tsx` (3 tests): the migrated Safe-app card is an overlay-link design; clicking the
+  title passes through `pointer-events-none` in a real browser but jsdom does no hit-testing.
+  Tests now click the accessible overlay link (`Open <app name>`).
+  **Full suite: 752/752 suites, 6619/6619 tests green.**
+
+## Tx-flow Storybook audit (ConfirmationViews + NewTx + SendAmountBlock)
+
+Fixed:
+
+- **ISSUE-041** — Transaction Builder button icon rendered at intrinsic PNG size (giant helmet,
+  also in the real app): Tailwind preflight `img { height: auto }` overrides the `height`
+  attribute. Sized via `className="h-6 w-auto"` (`tx-flow/common/TxButton.tsx`). ✅
+- **ISSUE-042** — StakingTx stories rendered blank: lazy StakeFeature gated on the chain's
+  STAKING flag; story seeded no chains. Seeded Sepolia + STAKING. ✅
+- **ISSUE-043** — UpdateSafe stories always hit the "Unknown contract" path: mock txData had
+  empty hexData and a random `to`; the version extractor reads raw calldata targeting the Safe.
+  Mock now encodes `changeMasterCopy(1.3.0 singleton)` with a shared fixed Safe address;
+  Default shows 1.2.0 → 1.3.0. ✅
+- **ISSUE-044** — ChangeThreshold story showed "1 out of 0 signers": seeded safeInfo with
+  3 owners. ✅
+- **ISSUE-045** — tx-flow OwnerList colored panel had square corners: `border-radius:
+var(--radius-md)` added (used by ManageSigners/SettingsChange add/remove-owner panels). ✅
+- **ISSUE-046** — React key warnings in SwapOrderConfirmation and LifiSwapTransaction row
+  arrays (unkeyed fragments/conditional rows): keys added. ✅
+- Dead `[&_.MuiGrid-container]` selector removed from ManageSigners. ✅
+
+Logged, not fixed (needs infra):
+
+- **ISSUE-047 🔵** — NestedSafeCreation story renders blank: the component predicts the safe
+  address via `useWeb3ReadOnly` RPC calls; Storybook has no provider/RPC mock infrastructure.
+  Needs an RPC mock (MSW or a mocked provider decorator).
+- **ISSUE-048 🔵** — Dead `.Mui*` selectors linger in css modules (tx-flow common/Execute/
+  ReplaceTx stepper, ExecuteCheckbox): zero visual effect (MUI markup is gone) — safe cleanup,
+  and ReplaceTx stepper styling should be rebuilt on the shadcn stepper look.
+- **ISSUE-049 🔵** — Story-data nits: StakingTx mock fee shows `10000000000000000.00 %`;
+  BridgeTransaction "Successful" bridges to an unseeded chain ("Unknown Chain").
+
+## ISSUE-050 — Send tokens step: padding gone, overlapping amount field, off-DS dropdown, stepper squares ✅
+
+**Root causes (stacked):**
+
+1. `TxCard` content padding: `Card size="none"` ships a `group-data-[size=none]/card:px-0`
+   utility whose two-class selector silently outranks the tx-flow `cardContent` module class —
+   horizontal padding stripped on EVERY tx-flow card. Fixed with a documented `!important`.
+2. `TokenAmountInput` styles were half-ported MUI: dead `.MuiInput-input` selector, a 50px MAX
+   button sized for a 56px MUI outlined input (overlapping the 36px shadcn input), a
+   non-floating "notched" label, and `inline-flex` inputs that didn't fill the field. Rebuilt:
+   floating label, borderless inner input group inside the field outline, compact MAX chip.
+3. Token dropdown: base `SelectContent` is locked to trigger width (`w-(--anchor-width)`) while
+   items used `whitespace-normal` → 4-line wrapping. Now `w-auto min-w-44` + nowrap names.
+4. Stepper (Create/Confirmed/Execute): the icon "notch" background used
+   `--color-background-main` but the flow surface moved to `--background` → gray squares behind
+   every icon. Notch now uses `--background`.
+
+**Why the flow didn't catch it:** the send-tokens journey story exists (ab766eabf) but visual
+baselines were never generated — tx-flow stories are tagged `!test`/`skip-visual-test` and the
+committed snapshot suite was already stale branch-wide, so no pixels are ever compared. Unit
+tests (6,619 green) assert behavior, not layout. And in the app the flow sits behind a
+connected wallet, so manual QA passes skipped it. **Action:** generate visual baselines for the
+tx-flow stories now that they render correctly, and drop the skip tags where data is
+deterministic.
+
+## ISSUE-051 — SafeShield widget border removed + prevention hardening ✅
+
+**Fix:** Dropped `border border-border` from the SafeShieldDisplay container (design decision:
+the widget is a plain elevated card).
+
+**Prevention shipped alongside (the "how does this keep slipping through" answer):**
+
+1. `.github/workflows/web-argos-storybook.yml` now triggers on **pull_request** for
+   `apps/web/**` / `packages/**` (was `workflow_dispatch` only — the entire visual-regression
+   pipeline existed but never ran unless someone remembered to click it). Fork PRs skip only the
+   Argos upload; the render-error check still gates.
+2. Ran the render-sweep over all tx-flow stories: after fixing two more findings (unkeyed
+   `BridgeTxRecipientRow` in BridgeTransaction rows; BatchTransactions story seeding the same
+   draft item twice → duplicate React keys), the sweep reports **0 real issues** across 22
+   confirmation-view renders. Known benign noise documented: MSW `reading 'url'` page error
+   under concurrency, `Unexpected key "chains"` preloadedState warning, story 404s for mocked
+   assets.
+3. `apps/web/AGENTS.md` pitfalls now include the three systemic traps behind this incident
+   class: variant utilities out-specificity-ing CSS modules, Tailwind preflight overriding
+   `<img height>` attributes, and "green unit tests say nothing about layout" (with the
+   no-permanent-skeleton-stories rule).
+
+Local visual snapshots (`test:visual`) remain baseline-less by design — Argos is the source of
+truth for pixels; generating its baseline branch (`dev`) requires the first upload from CI.
+
+## ISSUE-052 — Tx-flow round 2: amount field chrome, disabled-primary variant, stepper notch ✅
+
+**Amount field (TokenAmountInput):** was a hand-rolled outline box (raw divs + module CSS)
+wrapping a NumberField that drew its OWN InputGroup border → double border, strikethrough
+label, misplaced MAX. Rebuilt on the primitives themselves: `NumberField` with `label` (error
+coloring built in), `error`, `inputSize="xl"`, and MAX + separator + token-select embedded via
+the `endAdornment` slot. Custom CSS reduced to the token-trigger chip + fiat display.
+
+**"Next" / "Add recipient" don't follow variants — verified they DO:** live inspection shows
+zero custom classes; both are pure DS Button variants (primary / ghost). What looked broken was
+the primary variant's own light-mode disabled state (50 %-opacity black) — inconsistent with
+dark mode's solid muted pill. Fixed at the primitive: `ui/button.tsx` default variant now uses
+`disabled:bg-muted disabled:text-muted-foreground` in both modes.
+
+**Stepper line over icons:** already fixed by the ISSUE-050 notch change (`--background`);
+verified clean in the story — the connector only shows between items.
+
+**Why lint didn't catch these:** the variant lint flags skin/size utilities placed ON design-
+system components. It cannot flag (a) raw-div chrome that avoids DS components entirely
+(amount field), or (b) a variant whose own design is wrong (disabled primary). (a) is now
+AGENTS.md pitfall #8; (b) is exactly what the PR-triggered Argos visual diff exists to surface.

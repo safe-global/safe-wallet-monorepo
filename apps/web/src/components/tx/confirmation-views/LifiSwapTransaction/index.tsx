@@ -67,7 +67,7 @@ export const LifiSwapTransaction = ({ txInfo, isPreview }: { txInfo: SwapTransac
   const exchangeRate = Number(toAmountDecimals) / Number(fromAmountDecimals)
 
   const rows = [
-    isPreview ? <PreviewSwapAmount txInfo={txInfo} /> : <ListSwapAmount txInfo={txInfo} />,
+    isPreview ? <PreviewSwapAmount key="amount" txInfo={txInfo} /> : <ListSwapAmount key="amount" txInfo={txInfo} />,
     <DataRow datatestid="price" key="price" title="Price">
       1 {txInfo.fromToken.symbol} = {formatAmount(exchangeRate)} {txInfo.toToken!.symbol}
     </DataRow>,

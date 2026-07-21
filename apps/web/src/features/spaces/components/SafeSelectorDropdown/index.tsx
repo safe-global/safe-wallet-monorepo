@@ -120,7 +120,6 @@ function SafeSelectorDropdown({
         className={cn(
           // The wrapper's overflow-hidden clips this focus-visible ring into stray top/bottom bars,
           // so the native control stays visually hidden behind the display content.
-          // eslint-disable-next-line no-restricted-syntax -- bespoke card-embedded trigger: full-bleed inset (-m-4), ring suppression, inline address actions; not a variant
           '-m-4 flex-1 border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-6 hover:bg-transparent dark:hover:bg-transparent relative',
           variants.triggerClass,
           isDisabled && 'cursor-not-allowed opacity-50',
@@ -128,7 +127,10 @@ function SafeSelectorDropdown({
       >
         <SelectTrigger
           className={cn(
-            'absolute inset-0 z-0 h-auto w-auto border-0 bg-transparent p-0 hover:bg-transparent focus-visible:border-0 focus-visible:ring-0',
+            // justify-end: the SelectValue is sr-only (out of flow), so the icon is the only flex
+            // item and justify-between would park it at the left, behind the avatar.
+            // eslint-disable-next-line no-restricted-syntax -- invisible full-bleed overlay trigger behind the card content (inset-0, ring/skin suppression); not a size/skin variant
+            'absolute inset-0 z-0 h-auto w-auto justify-end border-0 bg-transparent p-0 hover:bg-transparent focus-visible:border-0 focus-visible:ring-0',
             isDisabled && 'cursor-not-allowed opacity-50',
           )}
           variant="ghost"

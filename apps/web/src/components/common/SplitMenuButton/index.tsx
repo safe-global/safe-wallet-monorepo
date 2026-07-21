@@ -58,7 +58,7 @@ export default function SplitMenuButton({
   const maxCharLen = Math.max(...options.map(({ id, label }) => (label || id).length)) + 2
 
   return (
-    <div data-slot="button-group" className="flex w-full" aria-label="Button group with a nested menu">
+    <div data-slot="button-group" className="flex h-10 w-full" aria-label="Button group with a nested menu">
       <Tooltip>
         <TooltipTrigger
           render={

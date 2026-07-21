@@ -96,3 +96,23 @@
     margin: 0 var(--space-1);
   }
 }
+
+/* History and bulk-group rows have fewer columns (no confirmations/actions) and still fit as a
+   single grid row well below the generic 1350px stacking fallback needed by queue rows. */
+@media (max-width: 1350px) and (min-width: 1000px) {
+  .gridContainer.history,
+  .gridContainer.bulkGroup {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .gridContainer.history .date,
+  .gridContainer.bulkGroup .date {
+    width: auto;
+  }
+
+  .gridContainer.history .status,
+  .gridContainer.bulkGroup .status {
+    margin-right: var(--space-3);
+  }
+}

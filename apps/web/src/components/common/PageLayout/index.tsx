@@ -66,7 +66,10 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
     NO_HEADER_ROUTES.includes(pathname) ||
     Boolean(isRequireLoginEnabled && isLoginPath) ||
     Boolean(isRequireLoginEnabled && isWelcomeWorskpacePage) ||
-    (isWelcomeWorskpacePage && !isSignedIn) ||
+    // Gate on (or unresolved): the signed-out workspaces page is the full-screen login takeover.
+    // Gate off (classic view): keep the Topbar so switching between the Accounts and Workspaces
+    // tabs doesn't shift the layout by the Topbar height.
+    (isWelcomeWorskpacePage && !isSignedIn && isRequireLoginEnabled !== false) ||
     // While the gate is still resolving, keep the Topbar off the login paths so it
     // can't flash an empty safe-selector skeleton before it (often) gets hidden.
     (isRequireLoginEnabled === undefined && isLoginPath)

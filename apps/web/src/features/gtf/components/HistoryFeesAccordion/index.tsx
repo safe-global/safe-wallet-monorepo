@@ -40,12 +40,14 @@ const HistoryFeesAccordion = ({
         value="history-fees"
         className={cn(
           css.feesAccordion,
-          'relative border border-[var(--color-border-light)] bg-[var(--color-background-paper)] hover:z-[1] hover:border-[var(--fees-accordion-border)] data-open:z-[1] data-open:border-[var(--fees-accordion-border)]',
+          // overflow-hidden: the trigger's square open/hover background must be clipped by the
+          // item's rounded corners (same approach as ColorCodedTxAccordion's card).
+          'relative overflow-hidden border border-[var(--color-border-light)] bg-[var(--color-background-paper)] hover:z-[1] hover:border-[var(--fees-accordion-border)] data-open:z-[1] data-open:border-[var(--fees-accordion-border)]',
         )}
       >
         <AccordionTrigger
           data-testid="history-fees-summary"
-          className="min-h-[56px] rounded-none border-none px-4 hover:no-underline data-panel-open:bg-[var(--fees-accordion-bg)]"
+          className="min-h-[56px] items-center rounded-none border-none px-4 hover:no-underline data-panel-open:bg-[var(--fees-accordion-bg)]"
         >
           <div className={css.summaryContent}>
             <div className={css.summaryLeftColumn}>

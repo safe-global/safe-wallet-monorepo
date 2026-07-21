@@ -166,11 +166,11 @@ describe('PageLayout', () => {
       expect(screen.getByTestId('topbar')).toBeInTheDocument()
     })
 
-    it('hides Topbar on /welcome/spaces when the user is signed out (sign-in form rendered)', () => {
+    it('renders Topbar on /welcome/spaces when the gate is OFF even while signed out (keeps the Accounts/Workspaces tab switch from jumping)', () => {
       useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
       mockUseIsSignedIn.mockReturnValue(false)
       renderLayout(AppRoutes.welcome.spaces)
-      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
+      expect(screen.getByTestId('topbar')).toBeInTheDocument()
     })
 
     it('hides Topbar on /welcome/spaces when the gate is ON', () => {

@@ -80,7 +80,7 @@ export const SafeShieldDisplay = ({
 
   return (
     <div className="flex flex-col gap-2" data-testid="safe-shield-widget">
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <div className="overflow-hidden rounded-xl bg-card">
         <SafeShieldHeader
           recipient={recipient}
           contract={contract}

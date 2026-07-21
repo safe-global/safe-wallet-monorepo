@@ -43,7 +43,8 @@
   --chart-4: oklch(0.488 0.243 264.376);
   --chart-5: oklch(0.424 0.199 265.638);
   --radius: 1rem;
-  --sidebar: #ffffff;
+  /* Matches the page background so the sidebar blends in without a visible panel edge. */
+  --sidebar: var(--color-background-main);
   --sidebar-foreground: #404040;
   --sidebar-primary: #171717;
   --sidebar-primary-foreground: #fafafa;
@@ -90,7 +91,8 @@
   --chart-3: oklch(0.546 0.245 262.881);
   --chart-4: oklch(0.488 0.243 264.376);
   --chart-5: oklch(0.424 0.199 265.638);
-  --sidebar: #171717;
+  /* Matches the page background so the sidebar blends in without a visible panel edge. */
+  --sidebar: var(--color-background-main);
   --sidebar-foreground: #d4d4d4;
   --sidebar-primary: #fafafa;
   --sidebar-primary-foreground: #171717;

@@ -33,7 +33,7 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
     content: (
       <div className={css.token}>
         <Skeleton className="h-[26px] w-[26px] rounded-md" />
-        <Typography>
+        <Typography as="div">
           <Skeleton className="h-4 w-[80px]" />
         </Typography>
       </div>
@@ -42,7 +42,7 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   price: {
     rawValue: '0',
     content: (
-      <Typography>
+      <Typography as="div">
         <Skeleton className="h-4 w-[32px]" />
       </Typography>
     ),
@@ -50,7 +50,7 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   balance: {
     rawValue: '0',
     content: (
-      <Typography>
+      <Typography as="div">
         <Skeleton className="h-4 w-[32px]" />
       </Typography>
     ),
@@ -58,7 +58,7 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   weight: {
     rawValue: '0',
     content: (
-      <Typography>
+      <Typography as="div">
         <Skeleton className="h-4 w-[32px]" />
       </Typography>
     ),
@@ -66,7 +66,7 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   value: {
     rawValue: '0',
     content: (
-      <Typography>
+      <Typography as="div">
         <Skeleton className="h-4 w-[32px]" />
       </Typography>
     ),

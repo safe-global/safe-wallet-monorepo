@@ -99,7 +99,7 @@ const SwapOrderConfirmation = ({ order, decodedData, settlementContract }: SwapO
               <OrderId orderId={order.uid} href={explorerUrl!} />
             </DataRow>
           ) : (
-            <></>
+            <Fragment key="no-order-id" />
           ),
           <OrderFeeConfirmationView
             key="SurplusFee"
@@ -109,7 +109,7 @@ const SwapOrderConfirmation = ({ order, decodedData, settlementContract }: SwapO
             <NamedAddress address={settlementContract} onlyName hasExplorer shortAddress={false} avatarSize={24} />
           </DataRow>,
           receiver && owner !== receiver ? (
-            <>
+            <Fragment key="recipient-block">
               <DataRow datatestid="recipient" key="recipient-address" title="Recipient">
                 <EthHashInfo address={receiver} hasExplorer={true} avatarSize={24} />
               </DataRow>
@@ -126,9 +126,9 @@ const SwapOrderConfirmation = ({ order, decodedData, settlementContract }: SwapO
                   </AlertDescription>
                 </Alert>
               </div>
-            </>
+            </Fragment>
           ) : (
-            <></>
+            <Fragment key="no-recipient" />
           ),
         ]}
       />

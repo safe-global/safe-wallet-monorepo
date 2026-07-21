@@ -5,13 +5,14 @@
       "name": "web",
       "runtimeExecutable": "yarn",
       "runtimeArgs": ["workspace", "@safe-global/web", "dev"],
-      "port": 3000
+      "port": 3000,
+      "autoPort": true
     },
     {
       "name": "storybook",
       "runtimeExecutable": "yarn",
-      "runtimeArgs": ["workspace", "@safe-global/web", "storybook"],
-      "port": 6006
+      "runtimeArgs": ["workspace", "@safe-global/web", "storybook", "-p", "6010"],
+      "port": 6010
     },
     {
       "name": "mobile",

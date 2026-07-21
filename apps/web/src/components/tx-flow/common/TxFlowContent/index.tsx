@@ -58,9 +58,15 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
         </div>
       )}
 
-      <div className="w-full flex-grow md:w-auto md:px-10">
+      {/* md:flex-1 + min-w-0 keep this column at a stable share of the row (flex-basis 0) so it
+          never wraps below the fixed-width status rail when a step's content is wide — otherwise the
+          card jumps horizontally and resizes between steps. */}
+      <div className="w-full min-w-0 flex-grow md:flex-1 md:px-10">
         <div className={classnames('mx-auto w-full max-w-[1200px]', css.contentContainer)}>
-          <div className="flex flex-wrap justify-center gap-6">
+          {/* md:flex-nowrap keeps the SafeShield sidebar beside the card (its intended md:37.5% / lg:320px
+              slot) instead of wrapping below it when a step's content is tall enough to add a scrollbar —
+              the card (min-w-0) absorbs the shrink, so it stays put across steps rather than re-centering. */}
+          <div className="flex flex-wrap justify-center gap-6 md:flex-nowrap">
             {/* Main content */}
             <div className="min-w-0 flex-grow md:max-w-[672px]">
               <div className={css.titleWrapper}>
@@ -95,6 +101,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
                   <Button
                     data-testid="modal-back-btn"
                     variant={isDesktop ? 'outline' : 'ghost'}
+                    size="submit"
                     onClick={onPrev}
                     className={css.backButton}
                   >
@@ -107,7 +114,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
 
             {/* Sidebar */}
             {!isReplacement && (
-              <div className={classnames('w-full md:w-[37.5%] lg:w-[320px]', css.widget)}>
+              <div className={classnames('w-full md:w-[37.5%] md:shrink-0 lg:w-[320px]', css.widget)}>
                 <div className={css.sticky}>
                   <SafeShieldWidget />
 

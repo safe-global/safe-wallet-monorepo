@@ -9,7 +9,11 @@ const meta = {
   decorators: [
     (Story) => {
       return (
-        <StoreDecorator initialState={{}}>
+        <StoreDecorator
+          // The lazy StakeFeature only loads when the current chain (default: Sepolia in dev/storybook)
+          // has the STAKING flag.
+          initialState={{ chains: { data: [{ chainId: '11155111', chainName: 'Sepolia', features: ['STAKING'] }] } }}
+        >
           <div className="rounded-lg bg-background p-4">
             <Story />
           </div>

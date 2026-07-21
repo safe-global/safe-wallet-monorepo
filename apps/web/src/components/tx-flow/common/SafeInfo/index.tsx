@@ -42,7 +42,7 @@ const SafeInfo = (): ReactElement => {
             </Typography>
           </>
         ) : (
-          <Typography variant="paragraph-small">
+          <Typography as="div" variant="paragraph-small">
             <Skeleton className="h-4 w-[86px]" />
             <Skeleton className="h-4 w-[120px]" />
           </Typography>

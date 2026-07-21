@@ -63,6 +63,8 @@
   width: 24px;
   height: 24px;
   margin-top: var(--space-2);
+  /* Fixed-size badge: as a flex item it must never shrink into an oval. */
+  flex-shrink: 0;
 }
 
 .details {

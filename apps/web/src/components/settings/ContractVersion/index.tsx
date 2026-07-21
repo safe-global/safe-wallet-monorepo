@@ -54,7 +54,8 @@ export const ContractVersion = () => {
         Contract version
       </Typography>
 
-      <Typography className="flex items-center">
+      {/* as="div": the Skeleton renders a div, which is invalid inside the default <p> */}
+      <Typography as="div" className="flex items-center">
         {safeLoaded ? (
           <>
             {safe.version ?? 'Unsupported contract'}

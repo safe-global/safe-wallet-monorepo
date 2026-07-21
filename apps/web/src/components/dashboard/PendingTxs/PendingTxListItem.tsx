@@ -39,7 +39,7 @@ const PendingTx = ({ transaction }: PendingTxType): ReactElement => {
             <TxTypeIcon tx={transaction} />
           </div>
           <div className="min-w-0">
-            <Typography className={css.txDescription}>
+            <Typography as="div" className={css.txDescription}>
               <TxTypeText tx={transaction} />
               <TxInfo info={transaction.txInfo} />
             </Typography>

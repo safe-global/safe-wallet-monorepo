@@ -15,9 +15,10 @@ const ExpandableMsgItem = ({ msg, expanded = false }: { msg: MessageItem; expand
     <Accordion defaultValue={expanded ? [ITEM_VALUE] : []}>
       <AccordionItem value={ITEM_VALUE} className={css.listItem}>
         <AccordionTrigger
+          nativeButton={false}
           render={<div role="button" tabIndex={0} />}
           data-testid="message-item"
-          className="cursor-pointer justify-start overflow-x-auto px-4 py-3 hover:no-underline sm:px-6"
+          className="cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 hover:no-underline sm:px-6"
         >
           <MsgSummary msg={msg} />
         </AccordionTrigger>

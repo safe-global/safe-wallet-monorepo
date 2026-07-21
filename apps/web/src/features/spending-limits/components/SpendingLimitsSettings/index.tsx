@@ -1,6 +1,7 @@
 import { useContext } from 'react'
 import { Typography } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
+import AddIcon from '@/public/images/common/add.svg'
 import { NoSpendingLimits } from './NoSpendingLimits'
 import { SpendingLimitsTable } from './SpendingLimitsTable'
 import { useHasFeature } from '@/hooks/useChains'
@@ -46,8 +47,8 @@ const SpendingLimitsSettings = () => {
                       onClick={() => setTxFlow(<NewSpendingLimitFlow />)}
                       className="my-4"
                       disabled={!isOk}
-                      size="sm"
                     >
+                      <AddIcon className="size-4" />
                       New spending limit
                     </Button>
                   </Track>

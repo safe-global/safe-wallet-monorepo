@@ -40,8 +40,8 @@ export const FiatChange = ({ balanceItem, change, inline = false }: FiatChangePr
           <Chip
             variant={direction === 'up' ? 'positive' : direction === 'down' ? 'negative' : 'default'}
             size={inline ? 'default' : 'auto'}
-            // eslint-disable-next-line no-restricted-syntax -- inline table-cell variant drops chip padding (px-0) so the % change sits flush in the column
-            className={inline ? 'px-0 pr-0' : 'pr-1'}
+            // eslint-disable-next-line no-restricted-syntax -- inline table-cell variant is not a pill: transparent background and no padding (pre-migration parity), colored text/arrow only
+            className={inline ? 'bg-transparent px-0 pr-0 dark:bg-transparent' : 'pr-1'}
           >
             {direction === 'down' ? (
               <ArrowDown className="h-[6px] w-[9px] text-[var(--color-error-main)]" />

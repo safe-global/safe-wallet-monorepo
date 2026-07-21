@@ -25,10 +25,10 @@ const SKELETON_ROWS = new Array(3).fill('').map(() => {
           <div className="flex flex-row items-center gap-2">
             <Skeleton className="size-[26px] rounded-full" />
             <div>
-              <Typography>
+              <Typography as="div">
                 <Skeleton className="h-4 w-[75px]" />
               </Typography>
-              <Typography>
+              <Typography as="div">
                 <Skeleton className="h-4 w-[300px]" />
               </Typography>
             </div>
@@ -40,7 +40,7 @@ const SKELETON_ROWS = new Array(3).fill('').map(() => {
         content: (
           <div className="flex flex-row items-center gap-2">
             <Skeleton className="size-[26px] rounded-full" />
-            <Typography>
+            <Typography as="div">
               <Skeleton className="h-4 w-[100px]" />
             </Typography>
           </div>
@@ -49,7 +49,7 @@ const SKELETON_ROWS = new Array(3).fill('').map(() => {
       resetTime: {
         rawValue: '0',
         content: (
-          <Typography>
+          <Typography as="div">
             <Skeleton className="h-4 w-full" />
           </Typography>
         ),

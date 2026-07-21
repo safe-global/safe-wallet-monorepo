@@ -11,6 +11,7 @@ import { useContext, useMemo } from 'react'
 import { EditOwnerDialog } from '../EditOwnerDialog'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import EditOwnerIcon from '@/public/images/common/edit-owner.svg'
+import ExportIcon from '@/public/images/common/export.svg'
 import { ManageSignersFlow } from '@/components/tx-flow/flows'
 import Track from '@/components/common/Track'
 import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
@@ -133,7 +134,8 @@ export const OwnerList = () => {
             )}
           </CheckWallet>
 
-          <Button variant="ghost" onClick={() => exportOwners(safe, addressBook)}>
+          <Button variant="outline" onClick={() => exportOwners(safe, addressBook)}>
+            <ExportIcon className="size-4" />
             Export as CSV
           </Button>
         </div>

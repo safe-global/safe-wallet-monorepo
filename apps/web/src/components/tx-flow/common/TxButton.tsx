@@ -44,7 +44,8 @@ export const TxBuilderButton = () => {
         onClick={onClick}
         render={<Link href={txBuilder.link} style={{ width: '100%' }} />}
       >
-        <img src="/images/apps/tx-builder.png" height={24} width="auto" alt="Transaction Builder" />
+        {/* Sized via classes: Tailwind's preflight (img { height: auto }) overrides the height attribute. */}
+        <img src="/images/apps/tx-builder.png" className="h-6 w-auto" alt="Transaction Builder" />
         Transaction Builder
       </Button>
     </Track>

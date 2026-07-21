@@ -32,7 +32,9 @@ const buttonVariants = cva(
         // NB dark disabled: opacity-50 alone still reads as an actionable green (#12ff80) pill,
         // so the filled primary swaps to the muted surface — mirroring how light mode grays out.
         default:
-          'bg-primary text-primary-foreground hover:bg-primary/80 dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground',
+          // Disabled: solid muted pill in BOTH modes (light previously fell back to 50%-opacity
+          // black, which read as a broken gray button next to the dark mode treatment).
+          'bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground',
         outline:
           'border-border bg-background hover:bg-muted hover:text-foreground dark:bg-input/30 dark:border-border dark:hover:bg-input/50 aria-expanded:bg-muted aria-expanded:text-foreground shadow-xs',
         secondary:

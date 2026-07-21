@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, type ReactElement } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react'
 import { XIcon } from 'lucide-react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import ChainIndicator from '../ChainIndicator'
@@ -34,6 +34,29 @@ const NetworkMultiSelectorInput = ({
   const [open, setOpen] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpen(false)
+      }
+    }
+
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [open])
 
   const getOptionDisabled = isOptionDisabled || (() => false)
 
@@ -148,7 +171,7 @@ const NetworkMultiSelectorInput = ({
   }
 
   return (
-    <div className={css.multiSelectWrapper}>
+    <div ref={wrapperRef} className={css.multiSelectWrapper}>
       <div
         className={`${css.multiSelectControl} ${error ? css.multiSelectError : ''}`}
         onClick={() => inputRef.current?.focus()}

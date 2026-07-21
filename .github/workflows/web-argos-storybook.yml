@@ -8,6 +8,13 @@ name: Web Argos Storybook
 # Storybook, separate from the E2E project's ARGOS_TOKEN_E2E).
 
 on:
+  # Runs automatically on web PRs so visual regressions surface in review instead of
+  # being discovered by hand (see SHADCN_MIGRATION_ISSUES.md ISSUE-050 for the incident
+  # that motivated this). Fork PRs without ARGOS_TOKEN_STORYBOOK skip the upload step.
+  pull_request:
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
   workflow_dispatch:
     inputs:
       reference_branch:
@@ -77,6 +84,9 @@ jobs:
             ${{ inputs.filter && format('--filter={0}', inputs.filter) || '' }}
 
       - name: Upload to Argos
+        # Fork PRs have no access to ARGOS_TOKEN_STORYBOOK — skip the upload (the sweep's
+        # broken-story check below still runs and fails the job on render errors).
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         working-directory: apps/web
         run: npx --yes @argos-ci/cli upload argos-screenshots
         env:

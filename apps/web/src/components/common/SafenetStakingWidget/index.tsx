@@ -60,7 +60,7 @@ const SafenetStakingWidget = () => {
           }
         >
           {navigating ? <Spinner className="size-4" /> : <SafeTokenIcon width={24} height={24} />}
-          <Typography variant="paragraph-small" className="leading-none">
+          <Typography as="div" variant="paragraph-small" className="leading-none">
             {loading ? <Skeleton className="h-4 w-4" /> : safeBalance}
           </Typography>
         </TooltipTrigger>

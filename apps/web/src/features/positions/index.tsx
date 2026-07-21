@@ -50,7 +50,7 @@ const Positions = () => {
           <div key={protocol.protocol} className="overflow-hidden rounded-xl bg-card">
             <Accordion defaultValue={[protocol.protocol]}>
               <AccordionItem value={protocol.protocol} className="border-b-0">
-                <AccordionTrigger className="overflow-x-auto px-6 py-4">
+                <AccordionTrigger className="items-center overflow-x-auto px-6 py-4">
                   <PositionsHeader protocol={protocol} fiatTotal={positionsFiatTotal} />
                 </AccordionTrigger>
                 <AccordionContent className="px-6 pb-4 pt-0">

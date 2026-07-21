@@ -63,6 +63,16 @@ describe('Multisend', () => {
     expect(result.queryByText('0x0000...0000')).not.toBeInTheDocument()
   })
 
+  it('insets the action list from the container edges in the default (non-compact) variant', () => {
+    const moduleAddress = faker.finance.ethereumAddress()
+    const result = render(<Multisend txData={buildMultisendTxData([{ to: ZERO_ADDRESS, module: moduleAddress }])} />)
+
+    const actionsHeader = result.getByTestId('all-actions')
+    const actionList = actionsHeader.nextElementSibling
+
+    expect(actionList).toHaveClass('px-4', 'pb-4')
+  })
+
   it('leaves a non-zero inner action target unchanged', () => {
     const contract = faker.finance.ethereumAddress()
     const moduleAddress = faker.finance.ethereumAddress()

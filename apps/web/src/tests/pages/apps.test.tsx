@@ -72,9 +72,11 @@ describe('AppsPage', () => {
       // drawer is not present
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
-      // clicks on Transaction Builder Safe App
+      // clicks on Transaction Builder Safe App — target the card's overlay link: in the browser a
+      // click anywhere on the card passes through the pointer-events-none content layer to this
+      // link, but jsdom does no hit-testing, so the test must click the link directly.
       await waitFor(() => {
-        fireEvent.click(screen.getByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }))
+        fireEvent.click(screen.getByRole('link', { name: 'Open Transaction Builder' }))
       })
 
       await waitFor(() => {
@@ -171,9 +173,11 @@ describe('AppsPage', () => {
       // drawer is not present
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
-      // clicks on Transaction Builder Safe App
+      // clicks on Transaction Builder Safe App — target the card's overlay link: in the browser a
+      // click anywhere on the card passes through the pointer-events-none content layer to this
+      // link, but jsdom does no hit-testing, so the test must click the link directly.
       await waitFor(() => {
-        fireEvent.click(screen.getByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }))
+        fireEvent.click(screen.getByRole('link', { name: 'Open Transaction Builder' }))
       })
 
       await waitFor(() => {
@@ -275,8 +279,8 @@ describe('AppsPage', () => {
       // shows safe app description drawer is not present
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
-      // clicks on Custom test Safe app Safe App
-      await userEvent.click(screen.getByText('Custom test Safe app', { selector: '[data-variant="paragraph-bold"]' }))
+      // clicks on Custom test Safe app Safe App (overlay link — see note above about jsdom hit-testing)
+      fireEvent.click(screen.getByRole('link', { name: 'Open Custom test Safe app' }))
 
       await waitFor(() => {
         const safeAppPreviewDrawer = screen.getByRole('dialog')

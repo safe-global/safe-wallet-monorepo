@@ -65,14 +65,24 @@
   width: 100%;
 }
 
+/* Compact chip (24px tall) that fits inside the 36px control without growing it —
+   selecting networks must not change the field height. */
 .multiChainChip {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  padding: 4px 8px;
-  margin: 2px;
+  height: 24px;
+  padding: 0 8px;
+  font-size: 14px;
   border: 1px solid var(--color-border-main);
   border-radius: 6px;
+}
+
+.multiChainChip img[data-testid='chain-indicator-network-logo-img'] {
+  width: 16px;
+  height: 16px;
+  /* The logo img carries an inline min-width from ChainIndicator. */
+  min-width: 16px !important;
 }
 
 .chipDelete {
@@ -90,17 +100,28 @@
   width: 100%;
 }
 
+/* Mirrors the InputGroup default variant (h-9, border-border, rounded-md, shadow-xs,
+   focus ring) so the control matches the standard text fields in the same form. */
 .multiSelectControl {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-1);
-  min-height: 56px;
-  padding: 8px var(--space-2);
-  background-color: var(--color-background-paper);
-  border: 1px solid var(--color-border-light);
-  border-radius: 6px;
+  min-height: 36px;
+  padding: 3px 12px;
+  background-color: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  transition:
+    color 0.15s,
+    box-shadow 0.15s;
   cursor: text;
+}
+
+.multiSelectControl:focus-within {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent);
 }
 
 .multiSelectError {

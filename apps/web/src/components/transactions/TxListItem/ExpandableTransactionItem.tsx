@@ -50,8 +50,9 @@ const ExpandableTransactionItem = ({
         data-testid={testId}
       >
         <AccordionTrigger
+          nativeButton={false}
           render={<div role="button" tabIndex={0} />}
-          className="cursor-pointer justify-start overflow-x-auto px-4 py-3 hover:no-underline sm:px-6"
+          className="cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 hover:no-underline sm:px-6"
         >
           <TxSummary item={item} isConflictGroup={isConflictGroup} isBulkGroup={isBulkGroup} />
         </AccordionTrigger>
@@ -78,8 +79,9 @@ export const TransactionSkeleton = () => (
     <Accordion defaultValue={[ITEM_VALUE]}>
       <AccordionItem value={ITEM_VALUE} className={css.listItem}>
         <AccordionTrigger
+          nativeButton={false}
           render={<div role="button" tabIndex={0} />}
-          className="cursor-pointer justify-start overflow-x-auto px-4 py-3 hover:no-underline sm:px-6"
+          className="cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 hover:no-underline sm:px-6"
         >
           <Skeleton className="h-5 w-full rounded-none bg-[var(--color-background-skeleton)]" />
         </AccordionTrigger>

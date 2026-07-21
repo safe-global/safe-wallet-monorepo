@@ -126,7 +126,7 @@ const Multisend = ({
           </CardContent>
         </Card>
       ) : (
-        <div className="mt-3 flex flex-col gap-2">{actionItems}</div>
+        <div className="mt-3 flex flex-col gap-2 px-4 pb-4">{actionItems}</div>
       )}
     </>
   )
