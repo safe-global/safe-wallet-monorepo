@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import {
-  detectListClusters,
+  detectIntraListClusters,
   normalizeAddress,
   type ListClusterResult,
 } from '@safe-global/utils/utils/addressSimilarity'
@@ -17,7 +17,7 @@ const useSimilarityClusters = (addresses: string[]): ListClusterResult => {
   const anchorAnnotations = useAnchorListMatches(addresses)
 
   return useMemo(() => {
-    const { flagged, groupIdByAddress } = detectListClusters(addresses)
+    const { flagged, groupIdByAddress } = detectIntraListClusters(addresses)
 
     if (anchorAnnotations.size === 0) return { flagged, groupIdByAddress }
 

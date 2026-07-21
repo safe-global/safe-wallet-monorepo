@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { detectListSimilarities } from '@safe-global/utils/utils/addressSimilarity'
+import { detectAnchorMatches } from '@safe-global/utils/utils/addressSimilarity'
 import type { ListAnnotation } from '@safe-global/utils/utils/addressSimilarity.types'
 import { selectAnchorIndex } from '../store'
 
@@ -17,7 +17,7 @@ const useAnchorListMatches = (addresses: string[]): Map<string, ListAnnotation> 
 
   return useMemo(() => {
     if (!isEnabled || addresses.length === 0) return new Map<string, ListAnnotation>()
-    return detectListSimilarities(addresses, anchorIndex)
+    return detectAnchorMatches(addresses, anchorIndex)
   }, [isEnabled, addresses, anchorIndex])
 }
 

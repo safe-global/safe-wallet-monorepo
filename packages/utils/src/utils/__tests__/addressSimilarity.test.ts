@@ -6,9 +6,9 @@ import {
   longestCommonPrefixLen,
   longestCommonSuffixLen,
   buildSimilarityIndex,
-  detectListSimilarities,
+  detectAnchorMatches,
   getCommonAffixLengths,
-  detectListClusters,
+  detectIntraListClusters,
 } from '../addressSimilarity'
 import { Severity } from '../../features/safe-shield/types'
 
@@ -300,12 +300,12 @@ describe('addressSimilarity (anchor engine)', () => {
     })
   })
 
-  describe('detectListSimilarities (Mode B)', () => {
+  describe('detectAnchorMatches (Mode B)', () => {
     it('annotates impostors against anchors and leaves anchors/unrelated unmarked', () => {
       const idx = buildSimilarityIndex([TRUSTED])
       const impostor = '0xa1b2ffffffffffffffffffffffffffffffff5678'
       const unrelated = '0x7f3e9a01bc4d2e8f00112233445566778899aabb'
-      const result = detectListSimilarities([TRUSTED, impostor, unrelated], idx)
+      const result = detectAnchorMatches([TRUSTED, impostor, unrelated], idx)
 
       expect(result.get(TRUSTED)?.match).toBeUndefined() // an anchor is never an impostor
       expect(result.get(impostor)?.match?.severity).toBe(Severity.CRITICAL)
@@ -315,7 +315,7 @@ describe('addressSimilarity (anchor engine)', () => {
     it('keys annotations by lowercased address while preserving the original on .address', () => {
       const idx = buildSimilarityIndex([TRUSTED])
       const impostorMixed = '0xA1B2FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5678'
-      const result = detectListSimilarities([impostorMixed], idx)
+      const result = detectAnchorMatches([impostorMixed], idx)
 
       expect(result.get(impostorMixed.toLowerCase())?.match?.severity).toBe(Severity.CRITICAL)
       expect(result.get(impostorMixed.toLowerCase())?.address).toBe(impostorMixed)
@@ -337,14 +337,14 @@ describe('addressSimilarity (anchor engine)', () => {
     })
   })
 
-  describe('detectListClusters', () => {
+  describe('detectIntraListClusters', () => {
     const A = '0x1234' + 'a'.repeat(32) + '5678' // front 1234, back 5678
     const B = '0x1234' + 'b'.repeat(32) + '9999' // shares front 1234 with A
     const C = '0xcccc' + 'd'.repeat(32) + '5678' // shares back 5678 with A (chains via A)
     const D = '0xdead' + 'e'.repeat(32) + 'beef' // unrelated
 
     it('clusters addresses that share front-4 OR back-4 (union-find over the OR relation)', () => {
-      const { flagged, groupIdByAddress } = detectListClusters([A, B, C, D])
+      const { flagged, groupIdByAddress } = detectIntraListClusters([A, B, C, D])
 
       expect(flagged.has(A.toLowerCase())).toBe(true)
       expect(flagged.has(B.toLowerCase())).toBe(true)
@@ -360,12 +360,12 @@ describe('addressSimilarity (anchor engine)', () => {
     })
 
     it('does not flag a single address listed several times (identical addresses are deduped)', () => {
-      expect(detectListClusters([A, A, A]).flagged.size).toBe(0)
+      expect(detectIntraListClusters([A, A, A]).flagged.size).toBe(0)
     })
 
     it('returns nothing for fewer than two distinct addresses', () => {
-      expect(detectListClusters([A]).flagged.size).toBe(0)
-      expect(detectListClusters([]).flagged.size).toBe(0)
+      expect(detectIntraListClusters([A]).flagged.size).toBe(0)
+      expect(detectIntraListClusters([]).flagged.size).toBe(0)
     })
   })
 })

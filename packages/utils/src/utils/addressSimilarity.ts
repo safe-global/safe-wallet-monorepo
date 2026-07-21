@@ -125,7 +125,7 @@ export interface ListClusterResult {
  * last-N hex (union-find). Every member of a component of 2+ is flagged with that component's id.
  * Identical addresses are deduped first, so the same Safe on several chains never self-matches.
  */
-export const detectListClusters = (
+export const detectIntraListClusters = (
   addresses: string[],
   config: SimilarityConfig = DEFAULT_SIMILARITY_CONFIG,
 ): ListClusterResult => {
@@ -325,7 +325,7 @@ export const buildSimilarityIndex = (
  * Keyed by the lowercased address (the original, case-preserved value is kept on
  * `ListAnnotation.address`); query the result with `addr.toLowerCase()`.
  */
-export const detectListSimilarities = (addresses: string[], index: SimilarityIndex): Map<string, ListAnnotation> => {
+export const detectAnchorMatches = (addresses: string[], index: SimilarityIndex): Map<string, ListAnnotation> => {
   const annotations = new Map<string, ListAnnotation>()
   for (const address of addresses) {
     const match = index.isAnchor(address) ? undefined : (index.query(address) ?? undefined)
