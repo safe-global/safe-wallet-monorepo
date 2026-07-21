@@ -75,14 +75,14 @@ Highlights so agents don't rediscover them:
 
 - **Button** — pick **variant by emphasis**: `default` (the one filled primary per surface/row), `secondary`
   (filled — white/card surfaces only), `outline` (secondary on page/toolbar backgrounds + dialog Cancel),
-  `ghost` (low-emphasis/icon/toolbar/menu), `destructive` / `destructive-outline` (filled vs bordered
-  destructive), `surface` (card-surface CTA on a coloured/promo surface — Earn/Stake/Add-funds), `link`
-  (inline). Pick **size by box**: `action` (h-10 px-6 CTA/action-bar pill: Send/Receive/Swap, Confirm/Execute,
-  Filter/Export, page-header primary actions), `submit` (action + stable min-width for modal/flow submits —
-  replaces magic `min-w-[…]`), `lg` (h-10 form-step buttons), `default` (h-9), `sm` (h-8 compact/toolbar/cards),
-  `xs` (h-6), `xl` (h-12 full-screen onboarding footer — via `OnboardingFooter`). Full decision matrix +
-  Do/Don't: the **`UI/Button` → Guidelines** story.
-- **Input** — `inputSize` `sm`/`default`/`lg` mirrors `SelectTrigger` so a field and a select on one row line up (named `inputSize`, not `size`, to dodge the native numeric `size` attr).
+  `ghost` (low-emphasis/icon/toolbar/menu — also inline text actions and links, via the `Link`
+  component for navigation), `destructive` (the one destructive style), `surface` (card-surface CTA on a
+  coloured/promo surface — Earn/Stake/Add-funds). Pick **size by box**: `action` (h-10 px-6 CTA/action-bar
+  pill: Send/Receive/Swap, Confirm/Execute, Filter/Export, page-header primary actions), `submit` (action +
+  stable min-width for modal/flow submits — replaces magic `min-w-[…]`), `lg` (h-10 form-step buttons),
+  `default` (h-9), `sm` (h-8 compact/toolbar/cards), `xl` (h-12 full-screen onboarding footer — via
+  `OnboardingFooter`). Full decision matrix + Do/Don't: the **`UI/Button` → Guidelines** story.
+- **Input** — `inputSize` `default` (h-9, mirrors `SelectTrigger`'s default so a field and a select on one row line up) or `hero` (66px Safe-creation / big-filter field); named `inputSize`, not `size`, to dodge the native numeric `size` attr.
 - **Surface & token rules (bit you) :** filled `secondary` only reads on white/card surfaces — on the muted
   page background use `variant="outline"`. `--input` is `#fff` in light mode, so a **visible field/button
   border must use `border-border`, not `border-input`** (which also looks borderless in dark until you

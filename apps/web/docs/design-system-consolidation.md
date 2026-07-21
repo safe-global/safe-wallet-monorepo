@@ -155,24 +155,22 @@ non-search fields — NameInput, NumberField, DatePicker, etc.)
 
 ---
 
-## Tabs — "why not one underline type?"
+## Tabs — "why not one underline type?" ✅ _(landed — faithful refactor)_
 
-`components/ui/tabs.tsx` — `TabsList variant`: `default | line | nav | segmented`. You're right that
-Line and Nav are near-duplicates.
+`components/ui/tabs.tsx` — `TabsList variant` went from `default | line | nav | segmented` to **two
+public families**, chosen as a faithful (zero-visible-change) refactor:
 
-**Proposal: 4 → 2 variants.**
+- **`underline`** — folds **nav** + **line**. `tone="brand"` is the bold, primary-coloured page nav
+  (NavTabs → Assets / Settings / Transactions); `tone="neutral"` (default) is the lighter in-content look
+  (Spaces address book & members).
+- **`toggle`** — folds **default** + **segmented**. `size="default"` is the compact muted-track switch
+  (SecurityHub drawer, and the component default); `size="lg"` is the large paper-track welcome switch
+  (Accounts / Workspaces on My accounts).
 
-- **`underline`** — folds **nav** + **line**. Both are underline tabs; the only deltas are cosmetic:
-  colour (`nav` = `--color-primary-main`, `line` = foreground), weight (bold vs medium), inter-tab gap.
-  Make one `underline` variant with the page-nav look as default and the neutral in-content look via a
-  prop/className.
-  - `nav` (NavTabs → Assets / Safe Apps / Settings / Transactions headers) · `line` (Spaces address book, members).
-- **`toggle`** — folds **default** + **segmented**. Both are pill-on-track toggles; they differ only in
-  scale and track colour. One `toggle` variant, with the larger welcome-switch scale via a `size` prop.
-  - `default` (SecurityHub drawer) · `segmented` (Accounts / Workspaces switch on My accounts).
-
-Trade-off: this is the only change with a **visible design shift** (nav loses its brand colour /bold, or
-we make that the underline default). Needs design sign-off; the others are mechanical.
+Each `(variant, tone|size)` pair maps to one internal `look` (`nav`/`line`/`default`/`segmented`), emitted
+as `data-variant` so `TabsTrigger` stays the single source of truth for the per-look treatment and every
+screen keeps its exact current appearance. The visible-unification alternative (one look for both) was
+declined in favour of this no-regression reorganisation.
 
 ---
 
@@ -183,9 +181,11 @@ we make that the underline default). Needs design sign-off; the others are mecha
    (SidebarInput, SearchField); Input + InputGroup collapsed to `default`/`hero`. Select `sm` **kept**
    (see Dropdowns). NativeSelect→Select **deferred** (behavioural, see above). _(landed except NativeSelect)_
 3. ✅ **Variant merges:** Button `destructive-outline`→`destructive` (DangerZoneSection); `link`→`ghost`
-   (EditableApprovalItem) / `Link` component (WorkspaceBanner). _(landed)_ — NetworkSelector inline strip →
-   `variant="ghost"` **deferred** (embedded `h-full` layout risk); `SearchInput.inputSize` now narrows to
-   `default`/`hero` (full public-API lock deferred, to avoid churning the DS stories).
-4. ⏳ **Design decision:** Tabs 4 → 2 variants (underline + toggle) — **needs design sign-off before landing.**
+   (EditableApprovalItem) / `Link` component (WorkspaceBanner). NativeSelect→Select (EnhancedTable,
+   `native-select.tsx` deleted). NetworkSelector inline strip → `SelectTrigger variant="ghost"` _(landed)_.
+   `SearchInput.inputSize` now narrows to `default`/`hero` (full public-API lock deferred, to avoid churning
+   the DS stories).
+4. ✅ **Tabs 4 → 2 variants** (underline + toggle) — landed as a faithful, zero-visible-change refactor
+   (design sign-off: keep each screen's look). _(landed)_
 
 After each merge, the now-unused key is removed from the component's `cva` so it can't be reintroduced.

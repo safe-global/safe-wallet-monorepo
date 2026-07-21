@@ -43,7 +43,7 @@ const dsInputClassnameRule = (element, message) => ({
 })
 
 // Design-system Tabs-styling guard. TabsList owns bg/padding/height/radius/gap via its
-// `variant` (default/line/nav/segmented) and TabsTrigger owns its per-variant styling — so
+// `variant` (underline/toggle, + tone/size) and TabsTrigger owns its per-variant styling — so
 // call sites pass only `variant` + layout-only className (w-*, margins, flex/grid). Same wide
 // regex as Card. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.
 const dsTabsClassnameRule = (element, message) => ({
@@ -223,7 +223,7 @@ export default [
         ),
         dsButtonClassnameRule(
           'SelectTrigger',
-          "Don't set size/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*) on <SelectTrigger> — use `size` ('sm'|'default'|'lg') / `variant` ('default'|'surface'|'ghost'). See the UI/Select story; add a variant to components/ui/select.tsx if none fits. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.",
+          "Don't set size/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*) on <SelectTrigger> — use `size` ('sm'|'default') / `variant` ('default'|'surface'|'ghost'). See the UI/Select story; add a variant to components/ui/select.tsx if none fits. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.",
         ),
         ...['Card', 'CardHeader', 'CardContent', 'CardFooter', 'CardTitle', 'CardDescription', 'CardAction'].map(
           (element) =>
@@ -255,7 +255,7 @@ export default [
         ].map((element) =>
           dsInputClassnameRule(
             element,
-            `Don't set height/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*, border) on <${element}> — use \`inputSize\` ('sm'|'default'|'lg'|'xl') / \`variant\` ('default'|'surface'). \`className\` is layout-only (w-*, margins, flex/grid). See the UI/Input story; add a variant to components/ui/input.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
+            `Don't set height/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*, border) on <${element}> — use \`inputSize\` ('default'|'hero') / \`variant\` ('default'|'surface'). \`className\` is layout-only (w-*, margins, flex/grid). See the UI/Input story; add a variant to components/ui/input.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
           ),
         ),
         dsInputClassnameRule(
@@ -277,7 +277,7 @@ export default [
         ...['TabsList', 'TabsTrigger'].map((element) =>
           dsTabsClassnameRule(
             element,
-            `Don't set spacing/surface/radius utilities (gap-*, p-*/px-*/py-*, rounded-*, bg-*, border, shadow-*, text-xs|sm|base|lg) on <${element}> — use the TabsList \`variant\` ('default'|'line'|'nav'|'segmented'). \`className\` is layout-only (w-*, margins, flex/grid). See the UI/Tabs story; add a variant to components/ui/tabs.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
+            `Don't set spacing/surface/radius utilities (gap-*, p-*/px-*/py-*, rounded-*, bg-*, border, shadow-*, text-xs|sm|base|lg) on <${element}> — use the TabsList \`variant\` ('underline'|'toggle', with tone/size). \`className\` is layout-only (w-*, margins, flex/grid). See the UI/Tabs story; add a variant to components/ui/tabs.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
           ),
         ),
         ...['Badge', 'Chip'].map((element) =>
