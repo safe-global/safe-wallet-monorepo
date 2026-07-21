@@ -4,6 +4,7 @@ import { composeSafeTxDraft } from '@/src/features/WalletConnect/Wallet/services
 import { draftEditorsE2eState } from '../draftEditorsE2eState'
 import { setupSendFlow, setupApprovalDraft } from '../draftEditorsSetup'
 import { mockedActiveAccount } from '../mockData'
+import { onboardAndNavigate } from '../setupHelpers'
 
 // Stub the network (chains re-fetch) and navigation pieces of the base setup.
 jest.mock('../setupHelpers', () => ({
@@ -53,12 +54,14 @@ describe('draftEditorsSetup', () => {
   })
 
   it('setupSendFlow seeds an owner signer as active signer', () => {
-    setupSendFlow(store.dispatch, makeRouter())
+    const router = makeRouter()
+    setupSendFlow(store.dispatch, router)
 
     const state = store.getState()
     const owner = '0x3336745b7EA628F5134Bd9d08aa68b4979fA3472'
     expect(state.signers[owner]).toBeDefined()
     expect(state.activeSigner[mockedActiveAccount.address]?.value).toBe(owner)
+    expect(onboardAndNavigate).toHaveBeenCalledWith(store.dispatch, router)
   })
 
   it('setupApprovalDraft composes an approve multiSend draft and opens the confirm screen', async () => {
