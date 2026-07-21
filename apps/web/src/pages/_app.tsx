@@ -90,6 +90,8 @@ import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
 import useInvalidateOverviewsOnTx from '@/hooks/useInvalidateOverviewsOnTx'
 import { GATEWAY_URL } from '@/config/gateway'
 import { captureException, initObservability } from '@/services/observability'
+import { setErrorSurfacedHandler } from '@/services/exceptions'
+import { trackErrorSurfaced } from '@/services/analytics/error-tracking'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { CaptchaProvider } from '@/components/common/Captcha'
@@ -104,6 +106,8 @@ import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 // This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration
 if (typeof window !== 'undefined') {
   initObservability()
+  // Wire the coded-error logger to the Mixpanel "Error Surfaced" event (WA-2775)
+  setErrorSurfacedHandler(trackErrorSurfaced)
 }
 
 const reduxStore = makeStore()

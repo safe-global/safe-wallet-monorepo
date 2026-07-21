@@ -158,4 +158,53 @@ describe('CodedException', () => {
       expect(console.error).toHaveBeenCalledWith(err)
     })
   })
+
+  describe('Error Surfaced analytics', () => {
+    it('emits a user-facing Error Surfaced event to the registered handler when tracking in production', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const handler = jest.fn()
+      const { trackError, setErrorSurfacedHandler, Errors } = await import('..')
+      setErrorSurfacedHandler(handler)
+
+      trackError(Errors._804, 'rpc down')
+      expect(handler).toHaveBeenCalledWith(expect.objectContaining({ code: 804, isUserFacing: true }))
+    })
+
+    it('emits a non-user-facing Error Surfaced event to the registered handler when logging in production', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const handler = jest.fn()
+      const { logError, setErrorSurfacedHandler, Errors } = await import('..')
+      setErrorSurfacedHandler(handler)
+
+      logError(Errors._601)
+      expect(handler).toHaveBeenCalledWith(expect.objectContaining({ code: 601, isUserFacing: false }))
+    })
+
+    it('does not emit Error Surfaced in non-production envs', async () => {
+      const handler = jest.fn()
+      const { trackError, logError, setErrorSurfacedHandler, Errors } = await import('..')
+      setErrorSurfacedHandler(handler)
+
+      trackError(Errors._804)
+      logError(Errors._601)
+      expect(handler).not.toHaveBeenCalled()
+    })
+
+    it('forwards call-site context (e.g. txHash) to the handler', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const handler = jest.fn()
+      const { trackError, setErrorSurfacedHandler, Errors } = await import('..')
+      setErrorSurfacedHandler(handler)
+
+      trackError(Errors._814, 'speed up failed', { txHash: '0xdeadbeef' })
+      expect(handler).toHaveBeenCalledWith(expect.objectContaining({ context: { txHash: '0xdeadbeef' } }))
+    })
+
+    it('does not throw when no handler is registered', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const { trackError, Errors } = await import('..')
+
+      expect(() => trackError(Errors._804)).not.toThrow()
+    })
+  })
 })
