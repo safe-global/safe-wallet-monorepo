@@ -18,6 +18,7 @@ import { formatCurrencyMinimal } from '@safe-global/utils/utils/formatNumber'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { useGasTokenCandidates, type GasTokenCandidate } from './useGasTokenCandidates'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
+import { isGtfFeePreviewAvailable } from '../utils/isGtfFeePreviewAvailable'
 import {
   computeTotalOutgoing,
   getSendInGasToken,
@@ -148,7 +149,12 @@ export const useFeesPreview = (): FeesPreviewData => {
   const gasSymbol = selectedCandidate?.symbol ?? nativeSymbol
   const gasDecimals = selectedCandidate?.decimals ?? nativeDecimals
 
-  const isSignerMode = !isConfirmation && (gtfPaymentMode === 'signer' || candidates.length === 0)
+  // Chains without a RELAY_FEE relayer can't quote Safe-pays fees at all
+  // — render the signer-pays variant: free execution fee, no
+  // gas-token selector, and no call to the preview endpoint.
+  const feePreviewAvailable = isGtfFeePreviewAvailable(chain)
+  const isSignerMode =
+    !isConfirmation && (!feePreviewAvailable || gtfPaymentMode === 'signer' || candidates.length === 0)
 
   // Confirmers render the fee locked in the signed payload, not a fresh CGW quote.
   // Skip the query when the Safe holds no eligible gas token — without this the CGW endpoint
@@ -215,11 +221,16 @@ export const useFeesPreview = (): FeesPreviewData => {
     } as SafeTransaction
   }, [safeTx, previewTxData])
 
+  // When the chain can't quote Safe-pays fees, expose no candidates so the UI takes the same
+  // locked signer-pays notice as "no eligible gas token" (PLA-1435) — otherwise the component
+  // would offer a "Pay fees from: Safe" choice that can never work. Confirmers are exempt:
+  // they render the fields locked in the signed payload.
+  const canOfferSafePays = feePreviewAvailable || isConfirmation
   const base = {
     executionFee: EXECUTION_FEE,
-    availableGasTokens,
+    availableGasTokens: canOfferSafePays ? availableGasTokens : [],
     selectedGasToken: selectedAddress,
-    onGasTokenChange: isConfirmation ? undefined : setGtfSelectedGasToken,
+    onGasTokenChange: isConfirmation || !feePreviewAvailable ? undefined : setGtfSelectedGasToken,
     isConfirmation: isConfirmation || undefined,
   }
 

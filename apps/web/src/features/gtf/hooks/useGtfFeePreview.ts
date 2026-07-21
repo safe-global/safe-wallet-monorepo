@@ -5,6 +5,8 @@ import { useGetGtfFeePreviewQuery } from '@/store/api/gateway'
 import { toSupportedFiatCode } from '@/store/api/gateway/gtfFeePreview'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
+import { useCurrentChain } from '@/hooks/useChains'
+import { isGtfFeePreviewAvailable } from '../utils/isGtfFeePreviewAvailable'
 
 type Args = {
   enabled: boolean
@@ -19,12 +21,16 @@ type Args = {
  * Thin wrapper around `useGetGtfFeePreviewQuery` that centralises the arg shape and the
  * eligibility gate. RTK Query dedupes identical args across consumers, so calling this from
  * multiple components (FeesPreview hook, Receipt, etc.) issues a single network request.
+ *
+ * Skipped entirely on chains without a RELAY_FEE relayer — the CGW rejects every preview
+ * there, so no `enabled` flag from a caller can override the capability gate.
  */
 export const useGtfFeePreview = ({ enabled, safeTx, chainId, safeAddress, gasToken, numberSignatures }: Args) => {
   const currency = useAppSelector(selectCurrency)
+  const chain = useCurrentChain()
 
   return useGetGtfFeePreviewQuery(
-    enabled && safeTx && chainId && safeAddress && gasToken && numberSignatures > 0
+    enabled && isGtfFeePreviewAvailable(chain) && safeTx && chainId && safeAddress && gasToken && numberSignatures > 0
       ? {
           chainId,
           safeAddress,
