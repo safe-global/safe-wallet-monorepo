@@ -14,7 +14,7 @@ import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
 import useWallet from '@/hooks/wallets/useWallet'
 import useChains from '@/hooks/useChains'
-import { useFlaggedSimilarAddresses } from '@/features/address-poisoning'
+import { useSimilarityClusters } from '@/features/address-poisoning'
 
 const useOnboardingSafes = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -73,7 +73,7 @@ const useOnboardingSafes = () => {
     () => [...trustedSafeItems, ...ownedSafeItems].map((s) => s.address),
     [trustedSafeItems, ownedSafeItems],
   )
-  const flaggedCombined = useFlaggedSimilarAddresses(combinedAddresses)
+  const flaggedCombined = useSimilarityClusters(combinedAddresses).flagged
   const flaggedOwnedAddresses = useMemo<Set<string>>(() => {
     const ownedAddresses = new Set(ownedSafeItems.map((s) => s.address.toLowerCase()))
     return new Set([...flaggedCombined].filter((address) => ownedAddresses.has(address)))

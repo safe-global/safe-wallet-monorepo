@@ -5,5 +5,4 @@
 export { selectAnchorIndex, selectAnchorAddresses } from './store'
 
 export { default as useAnchorListMatches } from './hooks/useAnchorListMatches'
-export { default as useFlaggedSimilarAddresses } from './hooks/useFlaggedSimilarAddresses'
 export { default as useSimilarityClusters } from './hooks/useSimilarityClusters'

@@ -20,7 +20,7 @@ import {
   useSafesSearch,
 } from '@/hooks/safes'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
-import { useFlaggedSimilarAddresses } from '@/features/address-poisoning'
+import { useSimilarityClusters } from '@/features/address-poisoning'
 import { useSpaceSafes, useIsInvited, useIsAdmin, useCurrentSpaceId } from '@/features/spaces'
 import { SafeAccountsTable } from '@/features/myAccounts'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
@@ -54,7 +54,7 @@ const SpaceSafeAccounts = () => {
   const spaceSafeItems = useMemo<SafeItem[]>(() => flattenSafeItems(allSafes ?? []), [allSafes])
 
   const spaceSafeAddresses = useMemo(() => spaceSafeItems.map((s) => s.address), [spaceSafeItems])
-  const similarAddresses = useFlaggedSimilarAddresses(spaceSafeAddresses)
+  const similarAddresses = useSimilarityClusters(spaceSafeAddresses).flagged
 
   // Group and sort
   const displaySafes = useMemo<AllSafeItems>(

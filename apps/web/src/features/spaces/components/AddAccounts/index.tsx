@@ -16,7 +16,7 @@ import { applySafeSelectionToggle, getSelectedLeafKeys } from '../SelectSafesOnb
 import ExternalLink from '@/components/common/ExternalLink'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
-import { useFlaggedSimilarAddresses } from '@/features/address-poisoning'
+import { useSimilarityClusters } from '@/features/address-poisoning'
 import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import {
@@ -144,7 +144,7 @@ const AddAccounts = ({
   ])
 
   const trustedSafeAddresses = useMemo(() => trustedSafes.map((s) => s.address), [trustedSafes])
-  const similarAddresses = useFlaggedSimilarAddresses(trustedSafeAddresses)
+  const similarAddresses = useSimilarityClusters(trustedSafeAddresses).flagged
 
   const [rawSearchQuery, setRawSearchQuery] = useState('')
   const debouncedSearchQuery = useDebounce(rawSearchQuery, 300)

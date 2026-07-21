@@ -6,7 +6,7 @@ const mockUseSpaceSafes = jest.fn()
 const mockUseIsAdmin = jest.fn()
 
 jest.mock('@/features/address-poisoning', () => ({
-  useFlaggedSimilarAddresses: () => new Set<string>(),
+  useSimilarityClusters: () => ({ flagged: new Set<string>(), groupIdByAddress: new Map<string, string>() }),
 }))
 
 jest.mock('../../AddAccountsChooser', () => ({
