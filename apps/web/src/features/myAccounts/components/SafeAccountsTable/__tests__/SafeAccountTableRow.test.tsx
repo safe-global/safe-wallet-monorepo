@@ -89,6 +89,15 @@ describe('SafeAccountTableRow', () => {
     expect(screen.getByTestId('account-row-link')).toHaveAttribute('href', '/home?safe=eth:0xabc')
   })
 
+  it('does not nest the explorer link inside the row navigation link (invalid <a> in <a>)', () => {
+    renderRow({ onRename: jest.fn() })
+
+    const rowLink = screen.getByTestId('account-row-link')
+    expect(rowLink).not.toContainElement(screen.getByTestId('safe-item-row-explorer-link'))
+    expect(rowLink).not.toContainElement(screen.getByRole('button', { name: 'Copy address' }))
+    expect(rowLink).not.toContainElement(screen.getByTestId('safe-item-rename-btn'))
+  })
+
   describe('lazy overview fetching', () => {
     // The parent already loads a group's per-chain overviews, so a child row must not fetch them again.
     it('enables the fetch for single/parent rows and disables it for child rows', () => {

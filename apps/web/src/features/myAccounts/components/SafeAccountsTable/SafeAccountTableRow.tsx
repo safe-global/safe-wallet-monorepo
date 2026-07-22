@@ -1,6 +1,6 @@
 import { useCallback, useMemo, type MouseEvent, type ReactNode } from 'react'
 import type { DraggableProvidedDraggableProps, DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
-import NextLink from 'next/link'
+import type { LinkProps } from 'next/link'
 import { useRouter } from 'next/router'
 import { TableCell, TableRow } from '@/components/ui/table'
 import type { SafeItem } from '@/hooks/safes'
@@ -76,10 +76,13 @@ const NameCellContent = ({
   line,
   isFlagged,
   onRename,
+  nameLink,
 }: {
   line: AccountLine
   isFlagged?: boolean
   onRename?: () => void
+  /** When set, only the name text becomes a navigation link — see SafeInfoDisplay's `nameLink`. */
+  nameLink?: { href: LinkProps['href']; onClick?: () => void; testId?: string }
 }) => {
   const chainConfig = useChain(line.chainId)
   // Explorer links are per-chain, so only single safes and per-chain child rows get one — never the
@@ -103,6 +106,7 @@ const NameCellContent = ({
       badge={isFlagged ? <HighSimilarityBadge /> : undefined}
       nameVariant="paragraph-bold"
       className="min-w-0"
+      nameLink={nameLink}
     />
   )
 }
@@ -125,7 +129,16 @@ const NameCell = ({
   onLinkClick?: () => void
   onRename?: () => void
 }) => {
-  const content = <NameCellContent line={line} isFlagged={isFlagged} onRename={onRename} />
+  // Only the name text is the navigation link — never a wrapper around the whole cell — so the row's
+  // explorer/copy/rename controls stay outside it (a nested <a> is invalid HTML). Expandable group
+  // rows render inside a <button>, so they never get a link (an <a> inside a <button> is invalid too);
+  // selection mode (disableLink) makes the whole row toggle the checkbox instead of navigating.
+  const nameLink =
+    line.href && !line.expandable && !disableLink
+      ? { href: line.href, onClick: onLinkClick, testId: 'account-row-link' }
+      : undefined
+
+  const content = <NameCellContent line={line} isFlagged={isFlagged} onRename={onRename} nameLink={nameLink} />
 
   if (line.expandable) {
     return (
@@ -138,14 +151,6 @@ const NameCell = ({
       >
         {content}
       </button>
-    )
-  }
-
-  if (line.href && !disableLink) {
-    return (
-      <NextLink href={line.href} onClick={onLinkClick} data-testid="account-row-link" className="block">
-        {content}
-      </NextLink>
     )
   }
 
