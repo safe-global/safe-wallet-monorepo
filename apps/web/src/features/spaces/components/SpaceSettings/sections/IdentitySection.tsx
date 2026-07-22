@@ -93,11 +93,11 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
             className="max-w-md"
           />
           {canCancel && (
-            <Button size="sm" variant="outline" onClick={handleCancel} data-testid="space-cancel-button">
+            <Button variant="outline" onClick={handleCancel} data-testid="space-cancel-button">
               Cancel
             </Button>
           )}
-          <Button size="sm" onClick={handleSave} disabled={!canSave} data-testid="space-save-button">
+          <Button onClick={handleSave} disabled={!canSave} data-testid="space-save-button">
             {isSaving ? 'Saving…' : 'Save'}
           </Button>
         </div>

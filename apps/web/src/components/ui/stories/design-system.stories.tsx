@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useState, type ReactNode } from 'react'
-import { Plus, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
+import { Plus, ArrowUpRight, ArrowDownLeft, Download } from 'lucide-react'
 
 import { Button } from '../button'
 import { Input } from '../input'
@@ -257,7 +257,9 @@ export const Buttons: Story = {
         <>
           The real buttons we ship, by intent. Most don&apos;t pick a size — they come through a{' '}
           <strong>fixed-size preset</strong> (DialogActions, ActionButton, SubmitButton, OnboardingFooter). Aim for
-          uniformity: reach for these, and migrate one-off sizes/variants toward the common ones (see the bottom).
+          uniformity: reach for these, and migrate one-off sizes/variants toward the common ones (see the bottom).{' '}
+          <strong>Leading icon</strong> only for standalone verb actions (money movement, add/create, export) — dialog
+          &amp; form-footer actions (confirm, cancel, save, delete) stay text-only.
         </>
       }
     >
@@ -284,15 +286,19 @@ export const Buttons: Story = {
           </Button>
         </Swatch>
         <Swatch label="default" to="Pages/Core/Home" toLabel="Dashboard">
-          <Button>Add funds</Button>
+          <Button>
+            <Plus />
+            Add funds
+          </Button>
         </Swatch>
         <Swatch label="outline · action" to="Pages/Core/Transactions/History" toLabel="Transactions">
           <Button variant="outline" size="action">
+            <Download />
             Export
           </Button>
         </Swatch>
-        <Swatch label="default · sm" to="Pages/Spaces/Settings" toLabel="Space settings">
-          <Button size="sm">Save</Button>
+        <Swatch label="default" to="Pages/Spaces/Settings" toLabel="Space settings">
+          <Button>Save</Button>
         </Swatch>
         <Swatch label="outline · submit" to="Components/Common/DialogActions" toLabel="DialogActions">
           <Button variant="outline" size="submit">

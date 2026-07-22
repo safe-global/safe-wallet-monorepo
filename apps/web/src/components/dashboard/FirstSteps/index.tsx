@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Typography } from '@/components/ui/typography'
-import { Circle, CircleCheck, CircleCheckBig, Lightbulb } from 'lucide-react'
+import { Circle, CircleCheck, CircleCheckBig, Lightbulb, Plus } from 'lucide-react'
 import css from './styles.module.css'
 import { ProgressRing } from './ProgressRing'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
@@ -133,6 +133,7 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
           <div className="mt-4">
             <Track {...OVERVIEW_EVENTS.ADD_FUNDS}>
               <Button data-testid="add-funds-btn" onClick={toggleDialog}>
+                <Plus />
                 Add funds
               </Button>
             </Track>
