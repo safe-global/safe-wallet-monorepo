@@ -56,12 +56,33 @@ type Story = StoryObj<typeof meta>
 
 /* ------------------------------------------------------------------ layout helpers */
 
-const Family = ({ title, lead, children }: { title: string; lead?: ReactNode; children: ReactNode }) => (
+const Family = ({
+  title,
+  lead,
+  review,
+  children,
+}: {
+  title: string
+  lead?: ReactNode
+  /** Open questions + when-to-use suggestions surfaced for the design review (not a component reference). */
+  review?: ReactNode[]
+  children: ReactNode
+}) => (
   <div className="flex max-w-5xl flex-col gap-12">
     <div>
       <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
       {lead ? <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">{lead}</p> : null}
     </div>
+    {review && review.length > 0 ? (
+      <section className="rounded-lg border border-dashed border-border bg-muted/50 p-4">
+        <h3 className="mb-2 text-xs font-semibold tracking-wider text-foreground uppercase">To review with design</h3>
+        <ul className="flex list-disc flex-col gap-1.5 pl-5 text-sm text-muted-foreground">
+          {review.map((item, i) => (
+            <li key={i}>{item}</li>
+          ))}
+        </ul>
+      </section>
+    ) : null}
     {children}
   </div>
 )
@@ -253,6 +274,13 @@ export const Buttons: Story = {
   render: () => (
     <Family
       title="Buttons"
+      review={[
+        'When to use which preset: ActionButton = a prominent surface CTA; SubmitButton = the single form/flow submit (label→spinner at a stable width); IconAction = header/toolbar icon buttons; DialogActions = every dialog footer.',
+        'Collapse the three ghost icon-buttons (IconAction, CopyButton, ExplorerButton) into one preset?',
+        'lg / action / submit all render at h-10 — is lg redundant, and should action + submit merge?',
+        'ChoiceButton is a bespoke button, not built on the primitive — rebuild on Button or bless it as an exception?',
+        'The "Aim for uniformity" list below still cites removed variants (link, destructive-outline, icon-lg, xs) — reconcile with the current set.',
+      ]}
       lead={
         <>
           The real buttons we ship, by intent. Most don&apos;t pick a size — they come through a{' '}
@@ -433,6 +461,12 @@ export const TextFields: Story = {
   render: () => (
     <Family
       title="Text fields"
+      review={[
+        'When to use which: NumberField for any numeric value (amounts, gas, nonce, threshold) — not a raw Input; AddressInput / AddressBookInput for addresses; TokenAmountInput for amount + token.',
+        'AddressInput bypasses the DS Input (base-ui + its own CSS module) — consolidate onto the shared Input / InputGroup shell?',
+        'The size note is stale: only default (h-9) and hero exist now — sm & lg are gone.',
+        'Bless NumberField as the canonical numeric field, so numeric parsing is not re-implemented on a plain Input.',
+      ]}
       lead={
         <>
           Text entry. Wrap fields in <code>Field</code> for a label, description and error; the input height comes from{' '}
@@ -538,6 +572,13 @@ export const Dropdowns: Story = {
   render: () => (
     <Family
       title="Dropdowns"
+      review={[
+        'When to use which: Select = pick one value from a short list; DropdownMenu = trigger an action from a menu; Combobox = type-to-filter a long/dynamic list; ContextMenu = right-click.',
+        'context-menu.tsx has zero real consumers — every *ContextMenu we ship is actually a DropdownMenu. Adopt it or drop it (and rename the composites).',
+        'Roughly seven near-identical row-overflow menus (SafeListContextMenu, MultiAccountContextMenu, MemberRowActionsMenu…) — one shared OverflowMenu?',
+        'SafeListSortToggle and OrderByButton do the same job — unify into one sort control.',
+        'This page shows only Select; DropdownMenu (~16 composites) and Combobox are not represented.',
+      ]}
       lead={
         <>
           <code>Select</code> is the main value picker (currency, network, threshold…). Sizes mirror text fields so a
@@ -613,6 +654,12 @@ export const Search: Story = {
   render: () => (
     <Family
       title="Search"
+      review={[
+        'When to use which: SearchInput / SearchField = the standard list-filter box; the topbar global search is a button that only looks like a field (it opens a modal).',
+        'SearchField vs SearchInput identity is muddled — the swatch labelled "SearchField" actually renders SearchInput. Pick one canonical component.',
+        'The topbar entry point hand-reimplements the field look — add a read-only / trigger variant so it stays in sync.',
+        'Three controlled clones (SafeSearch, GlobalSearch, AddressBookSearchInput) — replace with one controlled SearchField?',
+      ]}
       lead={
         <>
           <code>SearchField</code> is the standard app search box (address book, accounts, filters). It defaults to the
@@ -661,6 +708,12 @@ export const Tables: Story = {
   render: () => (
     <Family
       title="Tables"
+      review={[
+        'When to use which: EnhancedTable = default desktop grid (sort/paginate); PaginatedDataTable = newer typed-column grid (Spaces); DataTable = a read-only key/value list, not a grid; SafeAccountsTable = hand-assembled (reorder + grouping).',
+        'Two generic grids (EnhancedTable vs PaginatedDataTable) — is PaginatedDataTable the successor? Needs a migration plan or a clear boundary.',
+        'Naming: DataTable is a key/value list, not a table — rename it (DataList / SummaryList)?',
+        'Pick one pagination pattern across the grids (they differ today).',
+      ]}
       lead={
         <>
           <code>EnhancedTable</code> is the app&apos;s default data grid (sorting, pagination, sticky columns) —
@@ -724,6 +777,12 @@ export const Cards: Story = {
   render: () => (
     <Family
       title="Cards"
+      review={[
+        'When to use which: raw Card for generic surfaces; SettingsCard for titled settings sections; TxCard for tx-flow steps.',
+        'Five+ "cards" bypass the primitive with raw rounded divs (ActionCard, dashboard Card, WelcomeContentCard, GetStartedCard) — because the radius/elevation scale cannot express the real surfaces (rounded-2xl/3xl/md + shadows). Extend the scale?',
+        'Severity cards are duplicated (ActionCard vs InfoWidget) — consolidate into one.',
+        'After shadows/rings were removed, default has no border or elevation — should outlined be the effective default?',
+      ]}
       lead={
         <>
           Surfaces that group content. Padding is the <code>size</code> prop, the surface is <code>variant</code> —{' '}
@@ -795,6 +854,12 @@ export const Tabs_: Story = {
   render: () => (
     <Family
       title="Tabs"
+      review={[
+        'When to use which: underline·brand = top-level page nav (NavTabs); underline·neutral = in-content sub-tabs; toggle = pill switches (lg = welcome switch, default = compact drawer).',
+        'The variant × tone × size API collapses to just four looks — flatten to a single 4-value enum so invalid combinations cannot be expressed?',
+        'TabsList defaults to toggle (used only by the SecurityHub drawer) though underline nav is the common case — should the default be underline?',
+        'Public names (underline/toggle) diverge from the internal data-variant (nav/line/segmented) — pick one shared vocabulary.',
+      ]}
       lead={
         <>
           Switch between views. Two families: <code>underline</code> (page nav &amp; in-content) and <code>toggle</code>{' '}
@@ -858,6 +923,12 @@ export const Dialog_: Story = {
   render: () => (
     <Family
       title="Dialog"
+      review={[
+        'When to use which: ModalDialog = the default app modal (titled header, ~39 screens); AlertDialog = blocking, must-answer confirmations; raw Dialog = bespoke composition only.',
+        'sm means opposite sizes in Dialog vs AlertDialog — align the size scale.',
+        'Three different backdrops (Dialog, AlertDialog, TxModalDialog) — pick one canonical scrim.',
+        'The example below hand-builds its footer, but the lead prescribes DialogActions — make the reference follow it.',
+      ]}
       lead={
         <>
           Modal for focused tasks and confirmations. The footer pairs a <code>Cancel</code> (outline) with the primary
@@ -901,7 +972,16 @@ export const Dialog_: Story = {
 
 export const Tooltip_: Story = {
   render: () => (
-    <Family title="Tooltip" lead="Short, on-hover helper text for icons and truncated values.">
+    <Family
+      title="Tooltip"
+      lead="Short, on-hover helper text for icons and truncated values."
+      review={[
+        'When to use which: Tooltip = plain hover bubble; InfoTooltip = the (i)-icon explanation; CopyTooltip = click-to-copy feedback; OnboardingTooltip = first-run hint.',
+        'Three near-identical info-icon tooltips (InfoTooltip, HelpIconTooltip, HelpTooltip) — consolidate on InfoTooltip.',
+        'CustomTooltip has no app consumers (dead code) — remove it, or bless it as the sanctioned light tooltip.',
+        'Two default surfaces (dark bubble vs light) exist with no rule — pick the canonical one.',
+      ]}
+    >
       <Row label="Positions" note="shown open">
         <div className="flex min-h-28 flex-wrap items-center gap-12 pt-8">
           <Tooltip open>
