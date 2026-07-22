@@ -49,7 +49,11 @@ export type MergedAddressBook = {
   has: (address: string, chainId: string) => boolean
 }
 
-export const useMergedAddressBooks = (chainId?: string): MergedAddressBook => {
+// Hoisted `function` (not a `const` arrow) on purpose: this hook sits in the myAccounts ↔ spaces
+// barrel import cycle, and webpack's React Refresh reads every export at module-eval time. A
+// `const` binding read mid-cycle throws a TDZ "Cannot access before initialization" and crashes
+// Storybook; a hoisted function is readable while its module is still initializing.
+export function useMergedAddressBooks(chainId?: string): MergedAddressBook {
   const fallbackChainId = useChainId()
   const actualChainId = chainId ?? fallbackChainId
   const spaceAddressBook = useGetSpaceAddressBook()
