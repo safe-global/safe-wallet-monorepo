@@ -79,22 +79,44 @@ describe('safeContracts', () => {
       ({
         nonce: 0,
         chainId: '1',
+        version: '1.3.0',
         address: { value: '0x123' },
         ...overrides,
       }) as SafeState
 
-    it('should return false when nonce is not 0', () => {
-      const safe = createMockSafe({ nonce: 1 })
+    it('should return true for a 1.3.0 Safe with nonce > 0 (migration does not depend on nonce)', () => {
+      const safe = createMockSafe({ nonce: 5, version: '1.3.0' })
+
+      expect(isMigrationToL2Possible(safe)).toBe(true)
+    })
+
+    it('should return true for a 1.4.1 Safe with nonce > 0', () => {
+      const safe = createMockSafe({ nonce: 12, version: '1.4.1' })
+
+      expect(isMigrationToL2Possible(safe)).toBe(true)
+    })
+
+    it('should return true for versions with build metadata like 1.3.0+L2', () => {
+      const safe = createMockSafe({ nonce: 3, version: '1.3.0+L2' })
+
+      expect(isMigrationToL2Possible(safe)).toBe(true)
+    })
+
+    it('should return false for versions not supported by the SafeMigration contract', () => {
+      expect(isMigrationToL2Possible(createMockSafe({ version: '1.1.1' }))).toBe(false)
+      expect(isMigrationToL2Possible(createMockSafe({ version: '1.0.0' }))).toBe(false)
+    })
+
+    it('should return false when the Safe version is unknown', () => {
+      const safe = createMockSafe({ version: null })
 
       expect(isMigrationToL2Possible(safe)).toBe(false)
     })
 
-    it('should check for migration deployment when nonce is 0', () => {
-      const safe = createMockSafe()
+    it('should return true on unregistered chains via the chain-agnostic canonical fallback', () => {
+      const safe = createMockSafe({ chainId: '69420' })
 
-      // Result depends on whether migration deployment exists for the chain
-      const result = isMigrationToL2Possible(safe)
-      expect(typeof result).toBe('boolean')
+      expect(isMigrationToL2Possible(safe)).toBe(true)
     })
   })
 })
