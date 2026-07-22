@@ -73,7 +73,7 @@ export const AllVariants: Story = {
             </Tabs>
           </div>
           <div style={{ width: '400px' }}>
-            {/* toggle (lg): large pill toggle on a paper track — the welcome Accounts/Workspaces switch */}
+            {/* toggle (lg): large pill toggle on a muted track — the welcome Accounts/Workspaces switch */}
             <Tabs defaultValue="tab1">
               <TabsList variant="toggle" size="lg">
                 <TabsTrigger value="tab1">Accounts</TabsTrigger>

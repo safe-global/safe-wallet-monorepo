@@ -47,7 +47,7 @@ function Tabs({ className, orientation = 'horizontal', ...props }: TabsPrimitive
 //    (NavTabs: Assets/Settings/Transactions); `tone="neutral"` (default) is the lighter in-content
 //    look (Spaces address book, members).
 //  - `toggle` — pill-on-track switch. `size="default"` is the compact muted-track switch (SecurityHub
-//    drawer); `size="lg"` is the large paper-track welcome switch (Accounts/Workspaces).
+//    drawer); `size="lg"` is the large muted-track welcome switch (Accounts/Workspaces).
 // Each (variant, tone|size) pair maps to one internal `look`, emitted as data-variant so TabsTrigger
 // (styled off the list's data-variant) remains the single source of truth for the per-look treatment.
 const tabsListVariants = cva(
@@ -60,7 +60,7 @@ const tabsListVariants = cva(
         nav: 'h-auto gap-6 rounded-none bg-transparent p-0',
         // group-data-horizontal:h-auto overrides the base's horizontal h-9 (same variant prefix so
         // twMerge collapses them) — the track must grow around the h-9 pills plus the p-1 gutter.
-        segmented: 'h-auto group-data-horizontal/tabs:h-auto gap-1 bg-[var(--color-background-paper)] p-1',
+        segmented: 'h-auto group-data-horizontal/tabs:h-auto gap-1 bg-muted p-1',
       },
     },
     defaultVariants: {
@@ -115,9 +115,10 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
         'after:bg-foreground after:absolute after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5',
         'group-data-[variant=line]/tabs-list:after:bottom-[-5px] group-data-[variant=line]/tabs-list:data-active:after:opacity-100',
         'group-data-[variant=nav]/tabs-list:after:bottom-0 group-data-[variant=nav]/tabs-list:after:bg-[var(--color-primary-main)] group-data-[variant=nav]/tabs-list:data-active:after:opacity-100',
-        // segmented pill: large rounded pills on the paper track; the active pill takes the secondary surface
-        'group-data-[variant=segmented]/tabs-list:h-9 group-data-[variant=segmented]/tabs-list:flex-none group-data-[variant=segmented]/tabs-list:rounded-lg group-data-[variant=segmented]/tabs-list:px-6 group-data-[variant=segmented]/tabs-list:py-2 group-data-[variant=segmented]/tabs-list:text-xl group-data-[variant=segmented]/tabs-list:font-semibold',
-        'group-data-[variant=segmented]/tabs-list:text-[var(--color-text-secondary)] group-data-[variant=segmented]/tabs-list:hover:text-[var(--color-text-primary)] group-data-[variant=segmented]/tabs-list:data-active:bg-[var(--color-background-secondary)] group-data-[variant=segmented]/tabs-list:data-active:text-[var(--color-text-primary)] group-data-[variant=segmented]/tabs-list:data-active:shadow-none',
+        // segmented pill: large rounded pills on a muted track; the active pill is a raised paper surface
+        // (matches the pre-migration welcome switch). Idle triggers are normal-weight muted text.
+        'group-data-[variant=segmented]/tabs-list:h-[38px] group-data-[variant=segmented]/tabs-list:px-2.5 group-data-[variant=segmented]/tabs-list:text-lg group-data-[variant=segmented]/tabs-list:font-normal group-data-[variant=segmented]/tabs-list:text-muted-foreground group-data-[variant=segmented]/tabs-list:hover:text-foreground',
+        'group-data-[variant=segmented]/tabs-list:data-active:bg-background group-data-[variant=segmented]/tabs-list:data-active:font-semibold group-data-[variant=segmented]/tabs-list:data-active:text-foreground group-data-[variant=segmented]/tabs-list:data-active:shadow-sm dark:group-data-[variant=segmented]/tabs-list:data-active:border-input dark:group-data-[variant=segmented]/tabs-list:data-active:bg-input/30 dark:group-data-[variant=segmented]/tabs-list:data-active:text-foreground',
         className,
       )}
       {...props}

@@ -13,7 +13,9 @@ import { SidebarTopBar } from '../SidebarTopBar'
 import css from '../styles.module.css'
 
 const SIDEBAR_CONTAINER_CLASSNAME = '!p-0 border-r-0 group-data-[side=left]:border-r-0'
-const SIDEBAR_INNER_CLASSNAME = 'rounded-[0_8px_8px_0] group-data-[variant=floating]:rounded-[0_8px_8px_0] shadow-none'
+// Keep the divider identical to EnhancedSidebar so the skeleton doesn't pop a border on load.
+const SIDEBAR_INNER_CLASSNAME =
+  'rounded-[0_8px_8px_0] group-data-[variant=floating]:rounded-[0_8px_8px_0] shadow-none border-r border-sidebar-border group-data-[variant=floating]:ring-0'
 
 export const Pulse = ({ className }: { className: string }): ReactElement => (
   <div className={`bg-sidebar-border animate-pulse ${className}`} />

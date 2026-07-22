@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs'
 
 describe('TabsList', () => {
-  it('renders the toggle lg look on a paper track', () => {
+  it('renders the toggle lg look on a muted track', () => {
     render(
       <Tabs defaultValue="accounts">
         <TabsList data-testid="list" variant="toggle" size="lg">
@@ -16,9 +16,8 @@ describe('TabsList', () => {
 
     const list = screen.getByTestId('list')
     expect(list).toHaveAttribute('data-variant', 'segmented')
-    expect(list).toHaveClass('bg-[var(--color-background-paper)]', 'p-1', 'h-auto', 'gap-1')
-    // the default muted track must not leak into the paper-track toggle
-    expect(list).not.toHaveClass('bg-muted')
+    // large segmented switch: a muted track with a roomy gutter (vs the compact default track)
+    expect(list).toHaveClass('bg-muted', 'p-1', 'h-auto', 'gap-1')
   })
 
   it('renders the underline brand look for page nav', () => {
