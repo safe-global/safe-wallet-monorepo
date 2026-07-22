@@ -24,7 +24,8 @@ const Popup = ({ children, open, onClose, anchorEl }: PopupProps): ReactElement 
         anchor={anchorEl ?? undefined}
         align="center"
         side="bottom"
-        className="top-[var(--header-height)] max-h-[calc(100vh-var(--header-height))] w-[454px] overflow-y-auto"
+        sideOffset={12}
+        className="max-h-[calc(100vh-var(--header-height))] w-[454px] overflow-y-auto rounded-3xl"
       >
         {children}
       </PopoverContent>

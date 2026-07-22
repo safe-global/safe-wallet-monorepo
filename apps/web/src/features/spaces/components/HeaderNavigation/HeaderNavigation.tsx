@@ -111,17 +111,14 @@ export function HeaderNavigation({
     <div className={cn('flex items-center gap-1')}>
       {/* TODO: Global search button */}
       {showSearch && (
-        <div className="flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+        <div className="flex items-center rounded-lg bg-muted">
           <IconAction onClick={onSearchClick} aria-label="Search">
             <Search className="size-5 text-muted-foreground" />
           </IconAction>
         </div>
       )}
 
-      <div
-        className="relative flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]"
-        data-testid="notifications-center"
-      >
+      <div className="relative flex items-center rounded-lg bg-muted" data-testid="notifications-center">
         <IconAction onClick={onNotificationsClick} aria-label="Notifications">
           <Bell className="size-5 text-muted-foreground" />
         </IconAction>
@@ -141,10 +138,7 @@ export function HeaderNavigation({
       {showBatch && (
         <BatchTooltip>
           <Track {...BATCH_EVENTS.BATCH_SIDEBAR_OPEN} label={batchCount}>
-            <div
-              className="relative flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]"
-              data-track="batching: Batch sidebar open"
-            >
+            <div className="relative flex items-center rounded-lg bg-muted" data-track="batching: Batch sidebar open">
               <IconAction onClick={onBatchClick} aria-label="Batch transactions">
                 <Layers className="size-5 text-muted-foreground" />
               </IconAction>
@@ -163,7 +157,7 @@ export function HeaderNavigation({
       )}
 
       <Track label={OVERVIEW_LABELS.top_bar} {...OVERVIEW_EVENTS.OPEN_ONBOARD}>
-        <div className="flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+        <div className="flex items-center rounded-lg bg-muted">
           <Button
             variant="ghost"
             size="sm"

@@ -1,53 +1,21 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import type { SafeItem } from '@/hooks/safes'
+import type { AllSafeItems, SafeItem } from '@/hooks/safes'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { AccountsWidget } from './AccountsWidget'
-import type { Account } from './types'
 
-const mockSafeItem = (chainId: string): SafeItem => ({
+const mockSafeItem = (chainId: string, address: string, name?: string): SafeItem => ({
   chainId,
-  address: '0x8675309a19b',
+  address,
   isReadOnly: false,
   isPinned: false,
   lastVisited: 0,
-  name: undefined,
+  name,
 })
 
-const MOCK_ACCOUNTS: Account[] = [
-  {
-    name: 'My account',
-    address: '0x8675309a19b00000000000000000000000000000',
-    href: '/home?safe=eth:0x8675309a19b00000000000000000000000000000',
-    safes: [mockSafeItem('1')],
-    fiatTotal: '39950000',
-    owners: '3/5',
-  },
-  {
-    name: 'Treasury',
-    address: '0x8675309a19b00000000000000000000000000001',
-    href: '/home?safe=eth:0x8675309a19b00000000000000000000000000001',
-    safes: [mockSafeItem('1'), mockSafeItem('100'), mockSafeItem('8453')],
-    fiatTotal: '39950000',
-    owners: '3/5',
-    subAccounts: [
-      { chainId: '1', fiatTotal: '20000000', href: '/home?safe=eth:0x8675309a19b00000000000000000000000000001' },
-      { chainId: '100', fiatTotal: '15000000', href: '/home?safe=gno:0x8675309a19b00000000000000000000000000001' },
-      { chainId: '8453', fiatTotal: '4950000', href: '/home?safe=base:0x8675309a19b00000000000000000000000000001' },
-    ],
-  },
-  {
-    name: 'Name',
-    address: '0x8675309a19b00000000000000000000000000002',
-    href: '/home?safe=gno:0x8675309a19b00000000000000000000000000002',
-    safes: [mockSafeItem('100'), mockSafeItem('137')],
-    fiatTotal: '39950000',
-    owners: '3/5',
-    highlighted: true,
-    subAccounts: [
-      { chainId: '100', fiatTotal: '25000000', href: '/home?safe=gno:0x8675309a19b00000000000000000000000000002' },
-      { chainId: '137', fiatTotal: '14950000', href: '/home?safe=matic:0x8675309a19b00000000000000000000000000002' },
-    ],
-  },
+const MOCK_ITEMS: AllSafeItems = [
+  mockSafeItem('1', '0x1111111111111111111111111111111111111111', 'My account'),
+  mockSafeItem('1', '0x2222222222222222222222222222222222222222', 'Treasury'),
+  mockSafeItem('137', '0x3333333333333333333333333333333333333333', 'Vault'),
 ]
 
 const meta: Meta<typeof AccountsWidget> = {
@@ -72,40 +40,35 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    accounts: MOCK_ACCOUNTS,
-    remainingCount: 14,
+    items: MOCK_ITEMS,
+    // 3 accounts shown out of 17 total → "+14" overflow badge.
+    totalCount: 17,
+    onViewAll: () => {},
   },
 }
 
 export const SingleAccount: Story = {
   args: {
-    accounts: MOCK_ACCOUNTS.slice(0, 1),
+    items: MOCK_ITEMS.slice(0, 1),
   },
 }
 
 export const Loading: Story = {
   args: {
-    accounts: [],
+    items: [],
     loading: true,
-  },
-}
-
-export const ManyAccounts: Story = {
-  args: {
-    accounts: MOCK_ACCOUNTS,
-    remainingCount: 42,
   },
 }
 
 export const Empty: Story = {
   args: {
-    accounts: [],
+    items: [],
   },
 }
 
 export const Error: Story = {
   args: {
-    accounts: [],
+    items: [],
     error: 'Failed to load accounts',
     onRefresh: () => console.log('Refresh clicked'),
   },

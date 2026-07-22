@@ -25,14 +25,14 @@ const PinnedSafes = ({ allSafes, onLinkClick, onOpenSelectionModal }: PinnedSafe
       <div className={css.listHeader}>
         <BookmarkIcon className="mt-0.5 mr-2 size-5 [stroke-width:2]" />
         <Typography variant="h4" className="mb-4">
-          Trusted Safes
+          My accounts
         </Typography>
       </div>
       <SafesList safes={pinnedSafes} onLinkClick={onLinkClick} />
       {onOpenSelectionModal && (
         <div className="mt-6 flex justify-center">
           <Button variant="outline" size="sm" onClick={onOpenSelectionModal} data-testid="add-more-safes-button">
-            Manage trusted Safes
+            Manage list
           </Button>
         </div>
       )}

@@ -9,6 +9,10 @@ jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
 
+jest.mock('@/hooks/useDarkMode', () => ({
+  useDarkMode: jest.fn(() => false),
+}))
+
 jest.mock('@/services/analytics/events/spaces', () => ({
   SPACE_EVENTS: {
     VIEW_INVITING_SPACE: { action: 'view inviting space', category: 'spaces' },

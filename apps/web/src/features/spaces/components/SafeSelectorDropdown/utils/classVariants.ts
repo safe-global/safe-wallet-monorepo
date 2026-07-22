@@ -2,9 +2,9 @@ export const getSafeSelectorClassVariants = (isSingleSafe: boolean) => {
   return {
     canOpen: !isSingleSafe,
     wrapperClass: isSingleSafe ? '' : 'cursor-pointer',
-    // pr-12 reserves the chevron zone (pl-4 + size-4 icon + pr-4) so the trailing balance is not
-    // clipped by the card wrapper's overflow-hidden and does not run under the icon.
+    // pr-12 reserves trailing space so the balance is not clipped by the card wrapper's
+    // overflow-hidden and does not run under the chevron icon.
     triggerClass: isSingleSafe ? 'pr-10' : 'cursor-pointer pr-12',
-    iconWrapperClass: isSingleSafe ? 'hidden' : 'pl-4 pr-4 ml-1 self-stretch flex items-center min-h-[2.5rem]',
+    iconWrapperClass: isSingleSafe ? 'hidden' : 'pl-2 pr-2.5 self-stretch flex items-center min-h-10',
   }
 }

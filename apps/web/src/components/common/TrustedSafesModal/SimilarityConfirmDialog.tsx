@@ -3,11 +3,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import DialogActions from '@/components/common/DialogActions'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import type { SelectableItem } from './useTrustedSafesModal.types'
 
 interface SimilarityConfirmDialogProps {
   open: boolean
-  safe: SelectableItem
+  /** Only the address and name are rendered, so any flagged safe/line can be passed. */
+  safe: { address: string; name?: string }
   onConfirm: () => void
   onCancel: () => void
 }

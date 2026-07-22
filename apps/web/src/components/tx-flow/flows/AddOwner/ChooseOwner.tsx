@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useForm, FormProvider, Controller } from 'react-hook-form'
 
 import AddressBookInput from '@/components/common/AddressBookInput'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import NameInput from '@/components/common/NameInput'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -50,6 +51,9 @@ export const ChooseOwner = ({
   const combinedValidate = (address: string) => notAlreadyOwner(address) || notCurrentSafe(address)
 
   const address = watch('newOwner.address')
+
+  // Copilot address-poisoning check for the new owner (poisoning-only entry in the recipient card)
+  useSafeShieldForAddressPoisoning([address])
 
   const { name, ens, resolving } = useAddressResolver(address)
 

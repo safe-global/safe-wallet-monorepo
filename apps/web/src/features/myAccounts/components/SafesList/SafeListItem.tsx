@@ -5,6 +5,7 @@ import css from '../AccountItems/styles.module.css'
 import type { SafeItem } from '@/hooks/safes'
 import { SpacesFeature } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
+import { getOwnerAwaitingConfirmations } from '@/utils/transaction-guards'
 
 export interface SafeListItemProps {
   safeItem: SafeItem
@@ -29,12 +30,13 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
     undeployedSafe,
     elementRef,
     trackingLabel,
+    walletAddress,
   } = useSafeItemData(safeItem, { isSpaceSafe })
 
+  const awaitingConfirmation = getOwnerAwaitingConfirmations(safeOverview, walletAddress)
+
   const hasQueuedItems =
-    !safeItem.isReadOnly &&
-    safeOverview &&
-    ((safeOverview.queued ?? 0) > 0 || (safeOverview.awaitingConfirmation ?? 0) > 0)
+    !safeItem.isReadOnly && safeOverview && ((safeOverview.queued ?? 0) > 0 || awaitingConfirmation > 0)
 
   const statusChips = (
     <>
@@ -48,7 +50,7 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
           safeAddress={safeOverview.address.value}
           chainShortName={chain?.shortName || ''}
           queued={safeOverview.queued ?? 0}
-          awaitingConfirmation={safeOverview.awaitingConfirmation ?? 0}
+          awaitingConfirmation={awaitingConfirmation}
         />
       )}
     </>

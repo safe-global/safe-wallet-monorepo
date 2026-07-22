@@ -4,7 +4,7 @@ import { Menu } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { AppRoutes } from '@/config/routes'
-import { HeaderNavigation } from '@/features/spaces'
+import { HeaderNavigation, HeaderAccountInfo } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
 import { WalletFeature, useWalletPopover } from '@/features/wallet'
 import { GlobalSearchFeature } from '@/features/global-search'
@@ -109,7 +109,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
             narrow to fit both groups, this drops onto its own full-width row below the actions.
             Below md (sidebar hidden) the wrapped rows align right; at/above md they align left. */}
         <div className="shrink-0 flex items-center @max-[1100px]:order-1 @max-[1100px]:basis-full max-[899px]:justify-end">
-          {isSettingsWithoutSafe ? (
+          {isSettingsWithoutSafe || isWelcomeListRoute ? (
             <SafeLogo />
           ) : showSpaceSafeBar ? (
             <SpaceSafeBar />
@@ -120,8 +120,9 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
 
         {/* Right content (actions): ml-auto pushes it right (page padding) on one row. When the
             header wraps at/above md (sidebar shown) ml-0 left-aligns it with the context below;
-            below md (sidebar hidden) it keeps ml-auto so the wrapped rows hug the right edge. */}
-        <div className="flex items-center gap-1 shrink-0 ml-auto @max-[1100px]:min-[900px]:ml-0">
+            below md (sidebar hidden) it keeps ml-auto so the wrapped rows hug the right edge.
+            One 56px card holding the muted action chips, matching the safe-selector pill. */}
+        <div className="flex items-center gap-1 shrink-0 ml-auto @max-[1100px]:min-[900px]:ml-0 rounded-xl bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
           {showSafeToken && (
             <div className="hidden sm:block">
               <SafenetStakingButton />
@@ -145,6 +146,8 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
             batchCount={draftBatch.length}
             onBatchClick={() => onBatchToggle?.((open) => !open)}
           />
+
+          <HeaderAccountInfo />
         </div>
       </header>
 

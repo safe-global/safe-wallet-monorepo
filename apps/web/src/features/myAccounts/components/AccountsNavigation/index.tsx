@@ -5,7 +5,6 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
-import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 
 type Item = {
   label: string
@@ -15,21 +14,18 @@ type Item = {
 
 const navItems: Item[] = [
   {
-    label: 'Accounts',
-    url: AppRoutes.welcome.accounts,
-  },
-  {
     label: 'Workspaces',
     url: AppRoutes.welcome.spaces,
     trackEvent: { ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.accounts_page },
+  },
+  {
+    label: 'My accounts',
+    url: AppRoutes.welcome.accounts,
   },
 ]
 
 const AccountsNavigation = () => {
   const router = useRouter()
-  const isRequireLoginEnabled = useIsRequireLoginEnabled() ?? false
-
-  if (isRequireLoginEnabled) return null
 
   const activeUrl = navItems.some((item) => item.url === router.pathname) ? router.pathname : navItems[0].url
 
@@ -41,7 +37,7 @@ const AccountsNavigation = () => {
 
   return (
     <Tabs value={activeUrl}>
-      <TabsList variant="toggle" size="lg" aria-label="Accounts navigation">
+      <TabsList variant="toggle" size="lg" aria-label="Accounts navigation" className="w-full max-w-[440px]">
         {navItems.map((item) => (
           <TabsTrigger
             key={item.url}

@@ -108,6 +108,7 @@ jest.mock('@/features/spaces', () => ({
   get HeaderNavigation() {
     return jest.requireActual('@/features/spaces/components/HeaderNavigation').HeaderNavigation
   },
+  HeaderAccountInfo: () => <div data-testid="header-account-info" />,
 }))
 
 jest.mock(
@@ -226,6 +227,24 @@ describe('Topbar', () => {
       expect(screen.queryByTestId('logo-image')).not.toBeInTheDocument()
       // Default top alignment is preserved when the SpaceSafeBar is shown
       expect(container.querySelector('header')?.className).toMatch(/items-start/)
+    })
+
+    it.each([['/welcome/accounts'], ['/welcome/spaces']])(
+      'renders SafeLogo instead of the search input on %s',
+      (pathname) => {
+        mockIsSpaceRoute.mockReturnValue(false)
+        mockUsePathname.mockReturnValue(pathname)
+        render(<Topbar />)
+        expect(screen.getByTestId('logo-image')).toBeInTheDocument()
+        expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
+      },
+    )
+
+    it('renders the account info slot next to the wallet section', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/welcome/accounts')
+      render(<Topbar />)
+      expect(screen.getByTestId('header-account-info')).toBeInTheDocument()
     })
   })
 

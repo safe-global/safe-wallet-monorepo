@@ -39,7 +39,7 @@ const ErrorBoundary = ({ error, componentStack }: ErrorBoundaryProps) => {
             <Typography className="text-destructive">{componentStack}</Typography>
           </>
         )}
-        <Link href={AppRoutes.welcome.index} className="mt-4" render={<NextLink href={AppRoutes.welcome.index} />}>
+        <Link href={AppRoutes.index} className="mt-4" render={<NextLink href={AppRoutes.index} />}>
           Go home
         </Link>
       </div>

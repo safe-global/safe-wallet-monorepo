@@ -46,8 +46,8 @@ function ChainSelectorBlock({
   }
 
   const triggerClassName = disabled
-    ? 'w-16 flex items-center justify-between px-2 m-1 rounded-lg shrink-0 cursor-not-allowed opacity-50 focus:outline-none'
-    : 'w-16 flex items-center justify-between px-2 m-1 rounded-lg shrink-0 cursor-pointer hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+    ? 'w-16 flex items-center justify-between px-2 rounded-lg shrink-0 cursor-not-allowed opacity-50 focus:outline-none'
+    : 'w-16 flex items-center justify-between px-2 rounded-lg shrink-0 cursor-pointer hover:bg-muted-foreground/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
 
   // modal=false in DropdownMenu below: this props avoids Base UI's body scroll-lock that can leave the page frozen
   return (
@@ -69,7 +69,11 @@ function ChainSelectorBlock({
           </span>
         }
       />
-      <DropdownMenuContent align="end" sideOffset={8} className="w-[196px] bg-card text-foreground ring-0 p-1">
+      <DropdownMenuContent
+        align="end"
+        sideOffset={12}
+        className="w-[196px] bg-card text-foreground ring-0 p-1 rounded-2xl"
+      >
         <div className="flex flex-col">
           {deployedChains.map((chainItem) => (
             <button

@@ -9,6 +9,7 @@ import TxCard from '../../common/TxCard'
 import { useRecoveryPeriods } from './useRecoveryPeriods'
 import { UpsertRecoveryFlowFields, type UpsertRecoveryFlowProps } from '.'
 import AddressBookInput from '@/components/common/AddressBookInput'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -73,6 +74,9 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
   })
 
   const recoverer = formMethods.watch(UpsertRecoveryFlowFields.recoverer)
+
+  // Copilot address-poisoning check for the recoverer
+  useSafeShieldForAddressPoisoning([recoverer])
   const expiry = formMethods.watch(UpsertRecoveryFlowFields.expiry)
   const selectedDelay = formMethods.watch(UpsertRecoveryFlowFields.selectedDelay)
   const customDelay = formMethods.watch(UpsertRecoveryFlowFields.customDelay)

@@ -1,5 +1,6 @@
 import type { MouseEvent } from 'react'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/utils/cn'
 import { useSingleChainPinActions } from '../../hooks/useSingleChainPinActions'
 import { usePinActions } from '../../hooks/usePinActions'
@@ -73,9 +74,18 @@ function AccountItemPinButton(props: AccountItemPinButtonProps) {
   const PinIcon = isPinned ? BookmarkedIcon : BookmarkIcon
 
   return (
-    <Button data-testid="bookmark-icon" variant="ghost" size="icon" onClick={handleClick}>
-      <PinIcon className={cn('size-4', isPinned ? 'fill-current text-primary' : 'text-[var(--color-border-main)]')} />
-    </Button>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button data-testid="bookmark-icon" variant="ghost" size="icon" onClick={handleClick}>
+            <PinIcon
+              className={cn('size-4', isPinned ? 'fill-current text-primary' : 'text-[var(--color-border-main)]')}
+            />
+          </Button>
+        }
+      />
+      <TooltipContent>{isPinned ? 'Remove from my accounts' : 'Add to my accounts'}</TooltipContent>
+    </Tooltip>
   )
 }
 

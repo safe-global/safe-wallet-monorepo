@@ -6,10 +6,6 @@ import { Buffer } from 'buffer'
 ;(globalThis as any).Buffer = (globalThis as any).Buffer ?? Buffer
 ;(globalThis as any).global = (globalThis as any).global ?? globalThis
 
-// Sync `require()` polyfill for the reused file that needs it
-// ('blo' for blockie avatars). Must run before any reused code runs.
-import './compat/require-shim'
-
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from '@tanstack/react-router'
 import { router } from './router'

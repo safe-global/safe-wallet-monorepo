@@ -14,15 +14,16 @@ const Inviter = ({ invitedByName, variant, avatarSize }: InviterProps) => {
   if (!invitedByName) return null
 
   return (
-    <div className="flex flex-row items-end gap-1.5">
+    <div className="flex flex-row items-center gap-1.5">
       <Typography variant={variant}>by</Typography>
-      <div className="flex items-center gap-1 font-bold text-primary">
+      {/* Typography wrapper keeps the inviter name at the same font size as the surrounding text. */}
+      <Typography variant={variant} as="div" className="flex items-center gap-1 font-bold text-primary">
         {isAddress(invitedByName) ? (
           <EthHashInfo address={invitedByName} avatarSize={avatarSize} showName={false} showPrefix={false} />
         ) : (
           <EmailInfo email={invitedByName} size="small" />
         )}
-      </div>
+      </Typography>
     </div>
   )
 }

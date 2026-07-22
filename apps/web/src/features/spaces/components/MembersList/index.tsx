@@ -17,7 +17,11 @@ import {
   isInviteExpired,
   MemberStatus,
   useAdminCount,
+  getMemberDisplayName,
 } from '@/features/spaces'
+import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
 import EditMemberDialog from './EditMemberDialog'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
@@ -40,7 +44,9 @@ const EditButton = ({ member, disabled }: { member: MemberDto; disabled: boolean
             <EditIcon className="size-4 text-muted-foreground" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>{disabled ? 'Cannot edit role of last admin' : 'Edit member'}</TooltipContent>
+        <TooltipContent>
+          {disabled ? 'Cannot edit role of last admin' : `Edit ${checkIsAdmin(member) ? 'admin' : 'member'}`}
+        </TooltipContent>
       </Tooltip>
       {open && <EditMemberDialog member={member} handleClose={() => setOpen(false)} />}
     </>
@@ -84,7 +90,7 @@ export const RemoveMemberButton = ({
       {openRemoveMemberDialog && (
         <RemoveMemberDialog
           userId={member.user.id}
-          memberName={member.name}
+          memberName={getMemberDisplayName(member)}
           handleClose={() => setOpenRemoveMemberDialog(false)}
           isInvite={isInvite}
         />
@@ -97,6 +103,8 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
   const isAdmin = useIsAdmin()
   const adminCount = useAdminCount(members)
   const isMobile = useIsMobile()
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
 
   if (!members.length) {
     return null
@@ -105,16 +113,19 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
   // Per-row state shared by the name and actions cells
   const memberFlags = (member: MemberDto) => {
     const isLastAdmin = adminCount === 1 && isActiveAdmin(member)
-    const isInvite = member.status === MemberStatus.INVITED || member.status === MemberStatus.DECLINED
-    const isDeclined = member.status === MemberStatus.DECLINED
-    const isDisabled = isAdmin && isLastAdmin && !isInvite
-    const memberEmail = member.user.email
     const isPendingInvite = member.status === MemberStatus.INVITED
+    const isDeclined = member.status === MemberStatus.DECLINED
+    const isInvite = isPendingInvite || isDeclined
     const isExpired = isInviteExpired(member)
+    const isCurrentUser = member.user.id === currentUser?.id
+    const isDisabled = isAdmin && isLastAdmin && !isInvite
+    // The last admin can't be removed, but may still open edit to rename themselves.
+    const editDisabled = isDisabled && !isCurrentUser
+    const memberEmail = member.user.email
     // Contract: Email invites can always be renewed (resending the email);
     // wallet invites are only renewed once they have expired.
     const canRenew = isPendingInvite && (Boolean(memberEmail) || isExpired)
-    return { isDeclined, isExpired, isInvite, isDisabled, canRenew, memberEmail }
+    return { isDeclined, isExpired, isInvite, isDisabled, editDisabled, canRenew, memberEmail }
   }
 
   const columns: DataTableColumn<MemberDto>[] = [
@@ -125,7 +136,7 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
       sticky: true,
       minWidth: 200,
       cellTestId: 'table-cell-name',
-      sortValue: (m) => m.name,
+      sortValue: (m) => getMemberDisplayName(m),
       cell: (member) => {
         const { isDeclined, isExpired, memberEmail } = memberFlags(member)
         return (
@@ -176,12 +187,18 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
       minWidth: 80,
       cell: (member) => {
         if (!isAdmin) return null
-        const { isInvite, isDisabled, canRenew } = memberFlags(member)
+        const { isInvite, isDisabled, editDisabled, canRenew } = memberFlags(member)
         return isMobile ? (
-          <MemberRowActionsMenu member={member} disabled={isDisabled} isInvite={isInvite} canRenew={canRenew} />
+          <MemberRowActionsMenu
+            member={member}
+            disabled={isDisabled}
+            editDisabled={editDisabled}
+            isInvite={isInvite}
+            canRenew={canRenew}
+          />
         ) : (
           <span className="inline-flex items-center justify-end gap-1">
-            {!isInvite && <EditButton member={member} disabled={isDisabled} />}
+            {!isInvite && <EditButton member={member} disabled={editDisabled} />}
             {canRenew && <RenewInviteButton member={member} />}
             <RemoveMemberButton member={member} disabled={isDisabled} isInvite={isInvite} />
           </span>

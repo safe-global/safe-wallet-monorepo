@@ -314,7 +314,11 @@ export function NestedSafesPopover({
         side="bottom"
         align="start"
         className={cn(
-          'flex h-[calc(100vh-100px)] max-h-[calc(100vh-100px)] flex-col gap-0 overflow-hidden p-0',
+          // Size to content, but never past the viewport cap — the inner list scrolls once it hits
+          // the cap, so a near-empty popover (e.g. the intro screen) stays compact while a long list
+          // of nested safes grows to the maximum height. rounded-3xl (24px) matches the other header
+          // popovers (WalletConnect, wallet, notifications).
+          'flex h-auto max-h-[calc(100vh-100px)] flex-col gap-0 overflow-hidden rounded-3xl p-0',
           // Centered mode: pin to the viewport center (matches the previous MUI transformOrigin center/center)
           centered && 'fixed left-1/2 top-1/2 max-h-[calc(100vh-32px)] -translate-x-1/2 -translate-y-1/2',
         )}

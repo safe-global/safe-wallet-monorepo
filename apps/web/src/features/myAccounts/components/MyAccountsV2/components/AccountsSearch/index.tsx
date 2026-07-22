@@ -11,11 +11,11 @@ const AccountsSearch = ({ setSearchQuery }: AccountsSearchProps) => {
   const handleSearch = useCallback(debounce(setSearchQuery, 300), [])
 
   return (
-    <div className="w-full px-4 py-3">
+    <div className="w-full">
       <SearchInput
         id="search-by-name"
-        placeholder="Search for safes"
-        aria-label="Search Safe list by name"
+        placeholder="by name, address or network"
+        aria-label="Search Safe accounts by name, address or network"
         onChange={(e) => handleSearch(e.target.value)}
       />
     </div>

@@ -62,7 +62,7 @@ const AddTrustedSafeDialog = ({
       maxWidth="sm"
       fullWidth
       data-testid="add-trusted-safe-dialog"
-      dialogTitle="Confirm trusted Safe"
+      dialogTitle="Add to my accounts"
       hideChainIndicator
     >
       <FormProvider {...methods}>
@@ -87,7 +87,7 @@ const AddTrustedSafeDialog = ({
             {!hasSimilarAddress && (
               <Typography variant="paragraph-small" color="muted" className="mb-4 block">
                 Review the full address above. Continue only if you recognize this Safe and want to add it to your
-                trusted list.
+                accounts.
               </Typography>
             )}
 

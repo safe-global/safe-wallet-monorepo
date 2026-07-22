@@ -60,7 +60,7 @@ const NotificationsPopover = forwardRef<NotificationsPopoverRef>((_props, ref): 
         anchor={anchorEl}
         side="bottom"
         align="start"
-        sideOffset={8}
+        sideOffset={12}
         className={cn('w-auto gap-0 p-0', notificationCss.popoverContainer)}
       >
         <div className={notificationCss.popoverHeader}>

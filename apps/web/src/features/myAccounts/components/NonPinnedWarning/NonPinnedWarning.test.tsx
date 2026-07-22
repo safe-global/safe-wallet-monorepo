@@ -1,4 +1,4 @@
-import { screen, fireEvent, waitFor } from '@testing-library/react'
+import { screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { render } from '@/tests/test-utils'
 import NonPinnedWarning from './index'
 import useNonPinnedSafeWarning from '../../hooks/useNonPinnedSafeWarning'
@@ -41,8 +41,8 @@ describe('NonPinnedWarning', () => {
     render(<NonPinnedWarning />)
 
     expect(screen.getByTestId('non-pinned-warning')).toBeInTheDocument()
-    expect(screen.getByText('Not in your trusted list')).toBeInTheDocument()
-    expect(screen.getByText(/haven.t marked it as trusted yet/i)).toBeInTheDocument()
+    expect(screen.getByText('Not in your accounts')).toBeInTheDocument()
+    expect(screen.getByText(/haven.t added it to your accounts yet/i)).toBeInTheDocument()
   })
 
   it('should not render when shouldShowWarning is false', () => {
@@ -59,7 +59,7 @@ describe('NonPinnedWarning', () => {
   it('should call openConfirmDialog when action button is clicked', () => {
     render(<NonPinnedWarning />)
 
-    fireEvent.click(screen.getByText('Trust this Safe'))
+    fireEvent.click(screen.getByText('Add to my accounts'))
 
     expect(mockOpenConfirmDialog).toHaveBeenCalled()
   })
@@ -88,8 +88,9 @@ describe('NonPinnedWarning', () => {
 
     render(<NonPinnedWarning />)
 
-    expect(screen.getByTestId('add-trusted-safe-dialog')).toBeInTheDocument()
-    expect(screen.getByText('Confirm trusted Safe')).toBeInTheDocument()
+    const dialog = screen.getByTestId('add-trusted-safe-dialog')
+    expect(dialog).toBeInTheDocument()
+    expect(within(dialog).getByText('Add to my accounts')).toBeInTheDocument()
   })
 
   it('should show similar address warning in dialog when hasSimilarAddress is true', () => {

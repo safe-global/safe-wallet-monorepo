@@ -51,7 +51,7 @@ export function usePinActions(
 
     dispatch(
       showNotification({
-        title: 'Trusted multi-chain Safe',
+        title: 'Added to my accounts',
         message: name ?? shortenAddress(address),
         groupKey: `pin-safe-success-${address}`,
         variant: 'success',

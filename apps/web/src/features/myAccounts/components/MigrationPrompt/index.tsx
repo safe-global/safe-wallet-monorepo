@@ -13,8 +13,8 @@ interface MigrationPromptProps {
 const MigrationPrompt = ({ onProceed }: MigrationPromptProps) => {
   return (
     <Alert data-testid="migration-prompt" className="mb-4">
-      <AlertTitle>Add trusted Safes</AlertTitle>
-      <AlertDescription>Only Safes you trust will appear in your account list.</AlertDescription>
+      <AlertTitle>Add to my accounts</AlertTitle>
+      <AlertDescription>Only Safes you add will appear in your account list.</AlertDescription>
       <div className="mt-4">
         <Button size="sm" onClick={onProceed} data-testid="select-safes-button">
           Add Safes

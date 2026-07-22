@@ -1,5 +1,6 @@
-import { LogOut } from 'lucide-react'
-import { useCurrentMemberProfile, MemberStatus } from '@/features/spaces'
+import { LogOut, Pencil } from 'lucide-react'
+import { useState } from 'react'
+import { useCurrentMemberProfile, MemberStatus, getMemberDisplayName } from '@/features/spaces'
 import useLogout from '@/hooks/useLogout'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -10,10 +11,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import SpaceSettingsSection, { SpaceSettingsSectionTitle } from '../SpaceSettingsSection'
+import EditMemberDialog from '../../MembersList/EditMemberDialog'
 
 const AccountPage = () => {
   const { membership, signerAddress, email, isLoading } = useCurrentMemberProfile()
   const { logout } = useLogout()
+  const [isEditOpen, setIsEditOpen] = useState(false)
 
   const handleSignOut = () => {
     trackEvent(SPACE_EVENTS.AUTH_LOGGED_OUT)
@@ -46,7 +49,7 @@ const AccountPage = () => {
     )
   }
 
-  const memberName = membership.name || 'User'
+  const memberName = getMemberDisplayName(membership) || 'User'
   const role = membership.role.toLowerCase()
 
   return (
@@ -57,9 +60,20 @@ const AccountPage = () => {
         <div className="flex items-center gap-4 min-w-0">
           <InitialsAvatar name={memberName} size="large" rounded />
           <div className="flex flex-col min-w-0">
-            <Typography variant="paragraph-small-bold" className="block">
-              {memberName}
-            </Typography>
+            <div className="flex items-center gap-1">
+              <Typography variant="paragraph-small-bold" className="block">
+                {memberName}
+              </Typography>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => setIsEditOpen(true)}
+                aria-label="Edit your name"
+                data-testid="settings-edit-name"
+              >
+                <Pencil className="size-3.5 text-muted-foreground" />
+              </Button>
+            </div>
             {email ? (
               <Typography variant="paragraph-mini" color="muted" className="block mt-0.5">
                 {email}
@@ -92,6 +106,8 @@ const AccountPage = () => {
           Sign out
         </Button>
       </div>
+
+      {isEditOpen && <EditMemberDialog member={membership} handleClose={() => setIsEditOpen(false)} />}
     </SpaceSettingsSection>
   )
 }

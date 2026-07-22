@@ -1,50 +1,53 @@
 import AddAccountsChooser from '../AddAccountsChooser'
 import EmptySafeAccounts from './EmptySafeAccounts'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Typography } from '@/components/ui/typography'
-import { useMemo } from 'react'
-import { useAppSelector } from '@/store'
-import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
+import { useMemo, useState } from 'react'
+import { useAppDispatch, useAppSelector } from '@/store'
+import {
+  getSpaceOrderScope,
+  OrderByOption,
+  selectOrderByPreference,
+  setManualOrder,
+} from '@/store/orderByPreferenceSlice'
 import {
   type AllSafeItems,
   type SafeItem,
-  _getMultiChainAccounts,
-  _getSingleChainAccounts,
-  getComparator,
-  useSafeItemBuilder,
+  _groupAndSort,
+  flattenSafeItems,
+  useSafeOrderComparator,
+  useSafesSearch,
 } from '@/hooks/safes'
+import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
-import { useSpaceSafes, useIsInvited } from '@/features/spaces'
+import { useSpaceSafes, useIsInvited, useIsAdmin, useCurrentSpaceId } from '@/features/spaces'
+import { SafeAccountsTable } from '@/features/myAccounts'
+import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import { TriangleAlert, RotateCw } from 'lucide-react'
+import { TriangleAlert, RotateCw, Search } from 'lucide-react'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_LABELS, SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import AccountsSafesList from './AccountsSafesList'
-
-const _groupAndSort = (
-  items: SafeItem[],
-  sortComparator: (a: AllSafeItems[number], b: AllSafeItems[number]) => number,
-): AllSafeItems => {
-  const multi = _getMultiChainAccounts(items)
-  const single = _getSingleChainAccounts(items, multi)
-  return [...multi, ...single].sort(sortComparator)
-}
+import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
+import SpaceSafeContextMenu from './SpaceSafeContextMenu'
 
 const SpaceSafeAccounts = () => {
   const { allSafes, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()
   const isInvited = useIsInvited()
+  const isAdmin = useIsAdmin()
+  const dispatch = useAppDispatch()
+  const spaceId = useCurrentSpaceId()
+  const orderScope = spaceId ? getSpaceOrderScope(spaceId) : undefined
 
   // Use same organization logic as onboarding
   const { orderBy } = useAppSelector(selectOrderByPreference)
-  const sortComparator = getComparator(orderBy)
-  const { buildSafeItem } = useSafeItemBuilder()
+  const sortComparator = useSafeOrderComparator(orderScope)
+  const isManualOrder = orderBy === OrderByOption.MANUAL
 
-  const spaceSafeItems = useMemo(() => {
-    // Only include safes that are part of the current space
-    const spaceSafes = allSafes?.flatMap((item) => ('safes' in item ? item.safes : [item])) || []
-
-    return spaceSafes.map((safe) => buildSafeItem(safe.chainId, safe.address))
-  }, [buildSafeItem, allSafes])
+  // useSpaceSafes already resolves names via the merged (workspace-priority, local fallback) address
+  // book, so flatten those items rather than rebuilding them — rebuilding via buildSafeItem would
+  // re-derive the name from the local address book only and drop the workspace name.
+  const spaceSafeItems = useMemo<SafeItem[]>(() => flattenSafeItems(allSafes ?? []), [allSafes])
 
   const similarAddresses = useMemo<Set<string>>(
     () => getFlaggedSimilarAddressSet(spaceSafeItems.map((s) => s.address)),
@@ -57,20 +60,44 @@ const SpaceSafeAccounts = () => {
     [spaceSafeItems, sortComparator],
   )
 
-  const hasResults = displaySafes.length > 0
+  const [searchQuery, setSearchQuery] = useState('')
+  const debouncedSearchQuery = useDebounce(searchQuery.trim(), 300)
+  const filteredSafes = useSafesSearch(displaySafes, debouncedSearchQuery)
+  const visibleSafes = debouncedSearchQuery ? filteredSafes : displaySafes
+
+  const isSpaceEmpty = allSafes.length === 0
 
   return (
     <>
       {isInvited && <PreviewInvite />}
-      <div className="mb-6 flex flex-col gap-6">
-        <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
-          Safe accounts
-        </Typography>
-        <div className="flex flex-row justify-start">
+      <Typography variant="h2" className="mb-6 font-bold leading-[1] tracking-tight">
+        Safe accounts
+      </Typography>
+
+      <div className="mb-6 flex items-center gap-4">
+        {isAdmin && (
           <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
-            <AddAccountsChooser buttonVariant="default" buttonLabel="Manage accounts" entryPoint="safe_accounts" />
+            <AddAccountsChooser buttonVariant="default" buttonLabel="Add accounts" entryPoint="safe_accounts" />
           </Track>
-        </div>
+        )}
+        {!isSpaceEmpty && !isSpaceSafesError && (
+          <>
+            <InputGroup className="flex-1">
+              <InputGroupAddon>
+                <Search className="size-4" />
+              </InputGroupAddon>
+              <InputGroupInput
+                placeholder="by name, address or network"
+                aria-label="Search Safe accounts by name, address or network"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoComplete="off"
+                data-testid="space-safe-accounts-search-input"
+              />
+            </InputGroup>
+            <SafeListSortToggle className="border-border shadow-xs" />
+          </>
+        )}
       </div>
 
       {isSpaceSafesError ? (
@@ -91,10 +118,32 @@ const SpaceSafeAccounts = () => {
             Retry
           </button>
         </div>
-      ) : !hasResults && allSafes && allSafes.length === 0 ? (
+      ) : isSpaceEmpty ? (
         <EmptySafeAccounts />
+      ) : visibleSafes.length === 0 ? (
+        <Typography variant="paragraph-small" color="muted" align="center" className="py-8">
+          No Safe accounts match your search
+        </Typography>
       ) : (
-        <AccountsSafesList safes={displaySafes} similarAddresses={similarAddresses} />
+        <>
+          {similarAddresses.size > 0 && <SimilarAddressAlert />}
+          <SafeAccountsTable
+            items={visibleSafes}
+            // Inside a workspace every Safe belongs to it, so the Workspaces column adds no information.
+            columns={['name', 'threshold', 'networks', 'pending', 'balance', 'actions']}
+            flaggedAddresses={similarAddresses}
+            // Column sorting is only offered in Name mode; Last visited / Manual own the order.
+            sortableColumns={orderBy === OrderByOption.NAME}
+            renderActions={(line) =>
+              line.variant === 'child' ? null : <SpaceSafeContextMenu safeItem={line.source} />
+            }
+            reorder={
+              isManualOrder && !debouncedSearchQuery && orderScope
+                ? { onReorder: (order) => dispatch(setManualOrder({ scope: orderScope, order })) }
+                : undefined
+            }
+          />
+        </>
       )}
     </>
   )

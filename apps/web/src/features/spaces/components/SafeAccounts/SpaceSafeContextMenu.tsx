@@ -1,11 +1,9 @@
 import { type SafeItem, type MultiChainSafeItem, isMultiChainSafeItem } from '@/hooks/safes'
 import RemoveSafeDialog from './RemoveSafeDialog'
 import { type MouseEvent, useState } from 'react'
-import { MoreVertical } from 'lucide-react'
+import { LogOut, MoreVertical, Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import DeleteIcon from '@/public/images/common/delete.svg'
-import EditIcon from '@/public/images/common/edit.svg'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import { useAppSelector } from '@/store'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
@@ -60,7 +58,7 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)} onSelect={(e) => e.stopPropagation()}>
-            <EditIcon className="size-4 text-success" />
+            <Pencil className="size-4 text-muted-foreground" />
             <span>Rename</span>
           </DropdownMenuItem>
 
@@ -68,10 +66,9 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
             <DropdownMenuItem
               onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}
               onSelect={(e) => e.stopPropagation()}
-              variant="destructive"
             >
-              <DeleteIcon className="size-4" />
-              <span>Remove</span>
+              <LogOut className="size-4 text-muted-foreground" />
+              <span>Remove from workspace</span>
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>

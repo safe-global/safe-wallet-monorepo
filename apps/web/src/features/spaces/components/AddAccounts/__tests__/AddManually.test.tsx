@@ -4,6 +4,7 @@ import AddManually from '../AddManually'
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: () => ({ configs: [] }),
+  useHasFeature: () => false,
 }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/safes', () => ({

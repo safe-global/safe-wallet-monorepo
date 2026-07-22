@@ -57,7 +57,7 @@ const UntrustedSafeWarning = ({ safeAnalysis, onAddToTrustedList }: UntrustedSaf
                 {safeAnalysis.description}
               </Typography>
               <Button variant="outline" onClick={handleOpenConfirmDialog} className="mt-2 self-start">
-                Trust this Safe
+                Add to my accounts
               </Button>
             </div>
           </div>

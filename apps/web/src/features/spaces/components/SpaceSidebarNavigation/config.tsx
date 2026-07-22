@@ -20,7 +20,7 @@ export type DynamicNavItem = {
 
 export const navItems: DynamicNavItem[] = [
   {
-    label: 'Home',
+    label: 'Dashboard',
     icon: <HomeIcon />,
     href: AppRoutes.spaces.index,
   },

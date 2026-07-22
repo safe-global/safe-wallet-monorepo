@@ -29,7 +29,12 @@ const AccountCenter = ({ wallet }: { wallet: ConnectedWallet }) => {
         </div>
       </PopoverTrigger>
 
-      <PopoverContent align="center" side="bottom" sideOffset={0} className="w-auto border-0 p-0 ring-0 shadow-none">
+      <PopoverContent
+        align="center"
+        side="bottom"
+        sideOffset={0}
+        className="w-auto overflow-hidden rounded-3xl border-0 p-0 ring-0 shadow-none"
+      >
         <div className={css.popoverContainer}>
           <WalletInfo wallet={wallet} handleClose={closeWalletInfo} balance={balance} />
         </div>

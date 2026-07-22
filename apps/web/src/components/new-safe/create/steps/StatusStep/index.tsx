@@ -112,7 +112,7 @@ export const CreateSafeStatus = ({
 
         {isError && (
           <div className="flex flex-row justify-center gap-4">
-            <Button variant="outline" onClick={onCancel} render={<Link href={AppRoutes.welcome.index} />}>
+            <Button variant="outline" onClick={onCancel} render={<Link href={AppRoutes.index} />}>
               Go to homepage
             </Button>
             <Button variant="default" onClick={tryAgain}>

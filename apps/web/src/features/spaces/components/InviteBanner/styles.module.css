@@ -17,17 +17,11 @@
   gap: var(--space-1);
 }
 
-.inviteButton {
-  padding: 4px var(--space-2);
-  min-height: 32px;
-}
-
 .inviterName {
   display: flex;
   align-items: center;
   gap: var(--space-1);
   color: var(--color-primary-main);
-  font-weight: 700;
 }
 
 @media (max-width: 600px) {
@@ -46,12 +40,5 @@
     flex-direction: column;
     gap: var(--space-1);
     width: 100%;
-  }
-
-  .inviteButton {
-    width: 100%;
-    padding-top: var(--space-1);
-    padding-bottom: var(--space-1);
-    min-height: 40px;
   }
 }

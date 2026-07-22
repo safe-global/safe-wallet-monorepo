@@ -4,6 +4,7 @@ import ModalDialog from '@/components/common/ModalDialog'
 import chains from '@safe-global/utils/config/chains'
 import css from './styles.module.css'
 import useChains from '@/hooks/useChains'
+import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
@@ -19,7 +20,7 @@ export type AddManuallyFormValues = {
 
 const AddManually = ({
   handleAddSafe,
-  disabled,
+  disabled = false,
 }: {
   handleAddSafe: (data: AddManuallyFormValues) => void
   disabled?: boolean
@@ -65,11 +66,18 @@ const AddManually = ({
 
   return (
     <>
-      <div className="flex justify-center">
-        <Button data-testid="add-manually-button" disabled={disabled} onClick={() => setAddManuallyOpen(true)}>
-          + Add manually
-        </Button>
-      </div>
+      <Button
+        type="button"
+        data-testid="add-manually-button"
+        variant="secondary"
+        size="lg"
+        disabled={disabled}
+        onClick={() => setAddManuallyOpen(true)}
+        className="w-full"
+      >
+        <Plus className="size-4" />
+        Add manually
+      </Button>
       <ModalDialog
         open={addManuallyOpen}
         dialogTitle="Add safe account"

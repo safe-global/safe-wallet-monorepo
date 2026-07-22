@@ -18,7 +18,7 @@ const UpdateSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse; onClos
             The workspace name is visible in the sidebar menu, headings to all its members. Usually it&apos;s a name of
             the company or a business. <ExternalLink href={AppRoutes.privacy}>How is this data stored?</ExternalLink>
           </Typography>
-          <UpdateSpaceForm space={space} />
+          <UpdateSpaceForm space={space} onClose={onClose} />
         </div>
       </div>
     </ModalDialog>

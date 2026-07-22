@@ -93,7 +93,6 @@ import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
-import { useIsAuthGateBlocking } from '@/hooks/useIsAuthGateBlocking'
 
 // Initialize observability before React rendering starts
 // This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration
@@ -140,8 +139,7 @@ const InitApp = (): ReactElement | null => {
   useSessionExpiryGuard()
   useUnlockBodyScroll()
 
-  const isGateBlocking = useIsAuthGateBlocking()
-  return isGateBlocking ? null : <SafeScopedSubscriptions />
+  return <SafeScopedSubscriptions />
 }
 
 export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }) => {

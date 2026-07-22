@@ -8,7 +8,6 @@ import { useIsSurveyEnabled } from '@/hooks/useIsSurveyEnabled'
 // Mock the whole `@/hooks/useChains` module rather than using jest.spyOn —
 // spy-based mocks break React's hook-ordering invariants when the consumer
 // also calls useSyncExternalStore (the same reason the sibling
-// useIsRequireLoginEnabled.test.ts uses this approach).
 let mockChainData: Chain | undefined
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,

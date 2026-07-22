@@ -63,8 +63,19 @@ export const formatAmount = (number: string | number, precision = 5, maxLength =
  * @param number Number to format
  * @param precision Fraction digits to show
  */
+// A string that `Intl.NumberFormat.format` can consume while preserving full precision.
+const isNumericString = (value: string): value is `${number}` => value.trim() !== '' && !Number.isNaN(Number(value))
+
 export const formatAmountPrecise = (number: string | number, precision?: number): string => {
-  return getNumberFormatter(precision).format(Number(number))
+  const formatter = getNumberFormatter(precision)
+  // Pass the numeric string straight to Intl to keep full precision — converting to a JS
+  // number first (float64) loses digits beyond ~15 significant figures, e.g.
+  // 0.016000000000020475 would render as 0.016000000000020474.
+  if (typeof number === 'number' || isNumericString(number)) {
+    return formatter.format(number)
+  }
+
+  return NaN.toString()
 }
 
 /**

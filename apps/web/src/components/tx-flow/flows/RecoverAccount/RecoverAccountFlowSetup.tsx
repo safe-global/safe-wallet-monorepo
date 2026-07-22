@@ -6,6 +6,7 @@ import AddIcon from '@/public/images/common/add.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { RecoverAccountFlowFields } from '.'
 import AddressBookInput from '@/components/common/AddressBookInput'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import { TOOLTIP_TITLES } from '../../common/constants'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -61,6 +62,9 @@ export function RecoverAccountFlowSetup({
   })
 
   const newOwners = formMethods.watch(RecoverAccountFlowFields.owners)
+
+  // Copilot address-poisoning check for the recovery signers.
+  useSafeShieldForAddressPoisoning(newOwners.map((owner) => owner.value))
   const newThreshold = formMethods.watch(RecoverAccountFlowFields.threshold)
 
   const { fields, append, remove } = useFieldArray({

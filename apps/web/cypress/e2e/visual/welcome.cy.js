@@ -8,11 +8,6 @@ describe('[VISUAL] Welcome page screenshots', { defaultCommandTimeout: 60000, ..
     mockVisualTestApis()
   })
 
-  it('[VISUAL] Screenshot welcome page', () => {
-    cy.visit(constants.welcomeUrl)
-    main.awaitVisualStability()
-  })
-
   it('[VISUAL] Screenshot accounts page with added safes', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set1)
     cy.visit(constants.welcomeAccountUrl)

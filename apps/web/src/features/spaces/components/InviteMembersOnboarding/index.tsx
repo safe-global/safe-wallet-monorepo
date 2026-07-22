@@ -102,7 +102,7 @@ const InviteMembersOnboarding = (): ReactElement => {
         type="button"
         onClick={redirectToNextStep}
         disabled={isSubmitting}
-        className="cursor-pointer text-sm text-muted-foreground underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+        className="cursor-pointer text-sm font-semibold text-foreground underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
       >
         Skip, invite later
       </button>
