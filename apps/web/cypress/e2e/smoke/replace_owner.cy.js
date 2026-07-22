@@ -19,7 +19,7 @@ describe('[SMOKE] Replace Owners tests', () => {
   })
 
   it('[SMOKE] Verify that "Replace" icon is visible', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     owner.verifyReplaceBtnIsEnabled()
   })
 
@@ -29,7 +29,7 @@ describe('[SMOKE] Replace Owners tests', () => {
   })
 
   it('[SMOKE] Verify that the owner replacement form is opened', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     owner.waitForConnectionStatus()
     owner.openReplaceOwnerWindow(0)
   })

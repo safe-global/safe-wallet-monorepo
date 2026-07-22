@@ -28,7 +28,7 @@ describe('Proposers tests', () => {
   beforeEach(() => {
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
   })
 
   it('Verify the proposers section on the Set up in the settings when there are no proposers', () => {

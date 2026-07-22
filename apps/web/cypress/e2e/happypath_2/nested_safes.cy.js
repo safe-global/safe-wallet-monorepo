@@ -27,7 +27,7 @@ describe('Nested safes happy path tests', () => {
     cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_39)
     main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.nestedParentSafe39)
     cy.reload()
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     cy.wait(5000)
     createTx.deleteAllTx()
 

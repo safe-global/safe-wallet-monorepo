@@ -54,7 +54,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
   it('Verify that guardian can not delete or edit recovery set up on Security and Login', () => {
     cy.visit(constants.securityUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
     cy.clearLocalStorage()
-    wallet.connectSigner(guardian)
+    wallet.connectSignerViaStorage(guardian)
     main.acceptCookies()
     recovery.postponeRecovery()
     recovery.verifyRecoveryTableDisplayed()
@@ -126,7 +126,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     const confirmationData = [recovery.recoveryOptions.fiveMin, recovery.recoveryOptions.oneHr]
     cy.visit(constants.securityUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
     cy.clearLocalStorage()
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     main.acceptCookies()
     recovery.verifyRecoveryTableDisplayed()
     recovery.verifyRecovererSettings(settings)
@@ -171,7 +171,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     ]
     cy.visit(constants.securityUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
     cy.clearLocalStorage()
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     main.acceptCookies()
     recovery.verifyRecoveryTableDisplayed()
     recovery.clickOnEditRecoverer()

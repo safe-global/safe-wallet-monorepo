@@ -21,8 +21,10 @@ describe('Transaction queue Replace button tests', { defaultCommandTimeout: 3000
   })
 
   it('Verify "Reject tx" modal has the Replace tx option', () => {
-    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_34 + swaps.swapTxs.sellQLimitOrder)
-    wallet.connectSigner(signer2)
+    wallet.connectSignerViaStorage(
+      signer2,
+      constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_34 + swaps.swapTxs.sellQLimitOrder,
+    )
     create_tx.clickOnRejectBtn()
     create_tx.verifyTxRejectModalVisible()
     create_tx.verifyReplaceChoiceBtnVisible()

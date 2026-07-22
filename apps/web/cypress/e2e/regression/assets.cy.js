@@ -26,7 +26,7 @@ describe('Assets tests', () => {
   })
 
   it('Verify that clicking the button with an owner opens the Send funds form', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     assets.toggleShowAllTokens(true)
     assets.toggleHideDust(false)
     cy.wait(2000)

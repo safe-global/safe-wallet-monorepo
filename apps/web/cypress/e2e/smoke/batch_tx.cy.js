@@ -45,7 +45,7 @@ describe('[SMOKE] Batch transaction tests', { defaultCommandTimeout: 30000 }, ()
       .then(() => main.isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__batch, ls.batchData.entry0))
       .then(() => {
         cy.reload()
-        wallet.connectSigner(signer)
+        wallet.connectSignerViaStorage(signer)
         batch.clickOnBatchCounter()
         batch.clickOnConfirmBatchBtn()
         batch.verifyBatchTransactionsCount(2)

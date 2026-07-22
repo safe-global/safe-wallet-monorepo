@@ -21,7 +21,7 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
     cy.intercept('GET', constants.transactionHistoryEndpoint).as('History')
     cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_27)
     cy.wait('@History', { timeout: 20000 })
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     iframeSelector = `iframe[src*="${constants.swapWidget}"]`
   })
 
