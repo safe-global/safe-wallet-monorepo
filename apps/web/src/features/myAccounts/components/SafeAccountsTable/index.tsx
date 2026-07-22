@@ -1,13 +1,8 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import Box from '@mui/material/Box'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import TableSortLabel from '@mui/material/TableSortLabel'
+import { ChevronDown, ChevronUp } from 'lucide-react'
+import { TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import tableCss from './styles.module.css'
 import type { AllSafeItems } from '@/hooks/safes'
 import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNT_COLUMNS, SELECT_COLUMN, type SafeAccountColumnId } from './columns'
@@ -123,26 +118,6 @@ export type SafeAccountsTableProps = {
   'data-testid'?: string
 }
 
-// Header labels sit on a light-grey rounded bar (see the header cell sx below), matching the design.
-const headerSx = {
-  textTransform: 'uppercase',
-  fontSize: '12px',
-  fontWeight: 500,
-  letterSpacing: '0.04em',
-  color: 'text.secondary',
-  whiteSpace: 'nowrap',
-  py: 1.25,
-  // Match the body cells' slim padding so labels align with their columns.
-  px: 1,
-  // The grey bar sits inset 4px from the panel edges: transparent borders +
-  // padding-box clip shrink the painted background without moving the cells.
-  // `&&` outranks the theme's MuiTableCell-head border-bottom.
-  backgroundClip: 'padding-box',
-  '&&': { border: '4px solid transparent', borderLeft: 'none', borderRight: 'none' },
-  '&&:first-of-type': { pl: 2, borderLeft: '4px solid transparent' },
-  '&&:last-of-type': { pr: 2, borderRight: '4px solid transparent' },
-} as const
-
 const SafeAccountsTable = ({
   items,
   columns,
@@ -242,68 +217,25 @@ const SafeAccountsTable = ({
   if (items.length === 0) return null
 
   return (
-    <Box data-testid={testId} sx={{ width: '100%' }}>
-      <TableContainer
-        sx={
-          embedded
-            ? { width: '100%', overflowX: 'visible' }
-            : {
-                width: '100%',
-                // Reorder mode floats the drag grip in the left gutter, outside the card — clipping it
-                // would hide the handle, so drop the horizontal scroll container while reordering.
-                overflowX: reorderActive ? 'visible' : 'auto',
-                borderRadius: '16px',
-                backgroundColor: 'background.paper',
-                border: '1px solid',
-                borderColor: 'border.light',
-                // Keep the last row off the rounded bottom edge (the header already insets from the top).
-                pb: 1,
-              }
-        }
+    <div data-testid={testId} className="w-full">
+      <div
+        className={cn(
+          'w-full',
+          // Reorder mode floats the drag grip in the left gutter, outside the card — clipping it
+          // would hide the handle, so use a visible (non-scrolling) container while reordering.
+          embedded || reorderActive ? 'overflow-x-visible' : 'overflow-x-auto',
+          !embedded && tableCss.container,
+        )}
       >
-        <Table
-          sx={{
+        {/* Raw <table> instead of the ui <Table> wrapper: its fixed overflow-x-auto container would
+            clip the reorder grip in the gutter. The shadcn table sub-components are used throughout. */}
+        <table
+          className={cn('w-full caption-bottom text-sm', tableCss.table)}
+          style={{
             tableLayout: 'fixed',
             minWidth: embedded ? undefined : minWidth,
             borderCollapse: 'separate',
             borderSpacing: 0,
-            // The base theme tints every MuiTableRow green on hover; suppress it on the <tr> (otherwise
-            // it bleeds green into the inset corners) and instead paint a grey pill (the same --muted as
-            // the safe-selector dropdown) on the row's cells — inset and rounded like the dropdown rows.
-            // Painting the cells (not the <tr>) lets the first/last cells' transparent side borders inset
-            // the fill from the panel edges. Locked rows stay un-hovered.
-            '& .MuiTableBody-root .MuiTableRow-root:hover': { backgroundColor: 'transparent' },
-            '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root': {
-              backgroundColor: 'var(--muted)',
-            },
-            '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root:first-of-type': {
-              borderTopLeftRadius: '8px',
-              borderBottomLeftRadius: '8px',
-            },
-            '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root:last-of-type': {
-              borderTopRightRadius: '8px',
-              borderBottomRightRadius: '8px',
-            },
-            // Transparent top/bottom borders (with background-clip) inset the hover pill vertically so it
-            // floats clear of the separators. Set here — not per-cell — because the base theme forces
-            // cell borderBottom to `none` at a specificity a per-cell sx can't beat (which is why only
-            // the bottom touched). The outer cells' horizontal inset borders live in the cell sx.
-            '& .MuiTableBody-root .MuiTableCell-root': {
-              borderTop: '6px solid transparent',
-              borderBottom: '6px solid transparent',
-              backgroundClip: 'padding-box',
-            },
-            // Row separator, drawn as a 1px line at the bottom of the <tr> (keyed off data-divider,
-            // absent on the last row). It lives on the row — not the cells — so the cells' transparent
-            // top/bottom borders can inset the hover pill clear of the separator. Inset 4px each side to
-            // line up with the pill.
-            '& .MuiTableBody-root .MuiTableRow-root[data-divider]': {
-              backgroundImage:
-                'linear-gradient(to right, transparent 4px, var(--color-border-light) 4px, var(--color-border-light) calc(100% - 4px), transparent calc(100% - 4px))',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'bottom',
-              backgroundSize: '100% 1px',
-            },
           }}
         >
           {/* Embedded (headerless) tables need a colgroup to keep fixed-layout column widths; the Name
@@ -317,35 +249,53 @@ const SafeAccountsTable = ({
           )}
 
           {!embedded && (
-            <TableHead>
-              <TableRow>
-                {visibleColumns.map((column, index) => (
-                  <TableCell
-                    key={column.id}
-                    sortDirection={sort.orderBy === column.sortKey ? sort.order : false}
-                    className={cn(
-                      'bg-muted',
-                      index === 0 && 'rounded-l-lg',
-                      index === visibleColumns.length - 1 && 'rounded-r-lg',
-                    )}
-                    sx={{ ...headerSx, width: column.width, textAlign: column.align ?? 'left' }}
-                  >
-                    {column.sortable && column.sortKey && !reorderActive && sortableColumns ? (
-                      <TableSortLabel
-                        active={sort.orderBy === column.sortKey}
-                        direction={sort.orderBy === column.sortKey ? sort.order : 'asc'}
-                        onClick={() => handleSort(column.sortKey as SafeSortColumn)}
-                        data-testid={`account-sort-${column.id}`}
-                      >
-                        {column.label}
-                      </TableSortLabel>
-                    ) : (
-                      column.label
-                    )}
-                  </TableCell>
-                ))}
+            <TableHeader>
+              <TableRow className="border-0 hover:bg-transparent">
+                {visibleColumns.map((column, index) => {
+                  const active = sort.orderBy === column.sortKey
+                  const canSort = column.sortable && column.sortKey && !reorderActive && sortableColumns
+                  return (
+                    <TableHead
+                      key={column.id}
+                      aria-sort={active ? (sort.order === 'asc' ? 'ascending' : 'descending') : undefined}
+                      className={cn(
+                        'bg-muted whitespace-nowrap px-2 py-2.5 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground',
+                        index === 0 && 'rounded-l-lg',
+                        index === visibleColumns.length - 1 && 'rounded-r-lg',
+                      )}
+                      style={{ width: column.width, textAlign: column.align ?? 'left' }}
+                    >
+                      {canSort ? (
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => handleSort(column.sortKey as SafeSortColumn)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault()
+                              handleSort(column.sortKey as SafeSortColumn)
+                            }
+                          }}
+                          data-testid={`account-sort-${column.id}`}
+                          className="inline-flex cursor-pointer items-center gap-0.5 select-none uppercase"
+                        >
+                          {column.label}
+                          {active ? (
+                            sort.order === 'desc' ? (
+                              <ChevronDown className="size-4" aria-hidden />
+                            ) : (
+                              <ChevronUp className="size-4" aria-hidden />
+                            )
+                          ) : null}
+                        </span>
+                      ) : (
+                        column.label
+                      )}
+                    </TableHead>
+                  )
+                })}
               </TableRow>
-            </TableHead>
+            </TableHeader>
           )}
 
           {reorder ? (
@@ -384,8 +334,8 @@ const SafeAccountsTable = ({
               ))}
             </TableBody>
           )}
-        </Table>
-      </TableContainer>
+        </table>
+      </div>
 
       {renameTarget && (
         <EntryDialog
@@ -396,7 +346,7 @@ const SafeAccountsTable = ({
           sx={allowRenameInDialog ? { zIndex: 1450 } : undefined}
         />
       )}
-    </Box>
+    </div>
   )
 }
 

@@ -1,10 +1,8 @@
-import { useMemo, type MouseEvent, type ReactNode } from 'react'
+import { useCallback, useMemo, type MouseEvent, type ReactNode } from 'react'
 import type { DraggableProvidedDraggableProps, DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
-import TableCell from '@mui/material/TableCell'
-import TableRow from '@mui/material/TableRow'
-import { useForkRef } from '@mui/material/utils'
+import { TableCell, TableRow } from '@/components/ui/table'
 import type { SafeItem } from '@/hooks/safes'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useRowOverviews } from './useRowOverviews'
@@ -300,17 +298,11 @@ const RowCell = ({
   return (
     <TableCell
       data-testid={`account-cell-${column.id}`}
-      sx={{
+      // Slim 8px padding (ui default), 16px on the outer cells + the hover-pill inset borders live in
+      // styles.module.css (they need background-clip + specificity the primitive's classes can't beat).
+      className={cn(hostsHandle ? 'relative overflow-visible' : 'overflow-hidden')}
+      style={{
         textAlign: column.align ?? 'left',
-        verticalAlign: 'middle',
-        overflow: hostsHandle ? 'visible' : 'hidden',
-        ...(hostsHandle ? { position: 'relative' } : {}),
-        // Slimmer than MUI's default 16px so the fixed column budget matches the design.
-        px: 1,
-        // Horizontal inset for the hover pill on the outer cells (vertical inset + background-clip are set
-        // at the Table level, where they can beat the theme's cell-border override).
-        '&:first-of-type': { pl: 2, borderLeft: '4px solid transparent' },
-        '&:last-of-type': { pr: 2, borderRight: '4px solid transparent' },
         ...(reorderable && column.width ? { width: column.width, minWidth: column.width, maxWidth: column.width } : {}),
       }}
       onClick={column.id === 'actions' || column.id === 'select' ? (e) => e.stopPropagation() : undefined}
@@ -363,8 +355,15 @@ const SafeAccountTableRow = ({
     [line],
   )
   const observerRef = useRowOverviews(rowSafes, line.variant !== 'child', onOverviewsLoaded)
-  // Compose the visibility observer ref with the drag-and-drop ref (only set in reorder mode).
-  const setRowRef = useForkRef(observerRef, rowRef)
+  // Compose the visibility observer ref (an object ref) with the drag-and-drop callback ref
+  // (only set in reorder mode) — replaces MUI's useForkRef.
+  const setRowRef = useCallback(
+    (element: HTMLTableRowElement | null) => {
+      observerRef.current = element
+      if (typeof rowRef === 'function') rowRef(element)
+    },
+    [observerRef, rowRef],
+  )
 
   // In selection mode a leaf row is one big checkbox — clicking anywhere on it toggles selection
   // (except affordances that stop propagation: the checkbox, actions, copy and explorer link).
@@ -413,14 +412,16 @@ const SafeAccountTableRow = ({
       // Draws the row separator (via the Table sx override); false only at the last row of a group/list.
       data-divider={showDivider ? '' : undefined}
       // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover.
-      className="group/row"
+      // The row border + row-level hover are neutralised in styles.module.css (we paint the hover pill
+      // on the cells and draw our own data-divider separator); the lifted-while-dragging chrome is here.
+      className={cn(
+        'group/row',
+        checkbox?.disabledReason && 'opacity-[0.55]',
+        (rowSelectable || rowNavigable) && 'cursor-pointer',
+        isDragging && 'rounded-xl bg-[var(--color-background-paper)] shadow-md',
+      )}
       tabIndex={-1}
       onClick={rowSelectable ? () => onSelectToggle?.(!checkbox?.checked) : rowNavigable ? handleRowClick : undefined}
-      sx={{
-        ...(checkbox?.disabledReason ? { opacity: 0.55 } : {}),
-        ...(rowSelectable || rowNavigable ? { cursor: 'pointer' } : {}),
-        ...(isDragging ? { backgroundColor: 'background.paper', boxShadow: 3, borderRadius: '12px' } : {}),
-      }}
     >
       {columns.map((column, index) => (
         <RowCell

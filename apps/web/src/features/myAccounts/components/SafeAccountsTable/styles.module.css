@@ -1,0 +1,85 @@
+/* Colocated styling for SafeAccountsTable — ports the component's former MUI `sx` (grey rounded
+   header bar, inset rounded hover pills painted on the cells, and the gradient row divider) onto
+   the shadcn Table primitive. Kept as a CSS module (in the spirit of EnhancedTable/cardTable.module.css)
+   because the pill/divider tricks rely on background-clip + descendant selectors that don't fit
+   inline utilities and would otherwise be lost when dropping MUI's theme-level cell overrides. */
+
+/* Card container (non-embedded): a rounded panel on the paper surface. */
+.container {
+  width: 100%;
+  border-radius: 16px;
+  background-color: var(--color-background-paper);
+  border: 1px solid var(--color-border-light);
+  /* Keep the last row off the rounded bottom edge (the header already insets from the top). */
+  padding-bottom: 8px;
+}
+
+/* Header: labels sit on a grey bar (bg-muted, set via className) inset 4px from the panel edges —
+   transparent borders + a padding-box clip shrink the painted background without moving the cells. */
+.table thead th {
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  background-clip: padding-box;
+}
+.table thead th:first-of-type {
+  padding-left: 16px;
+  border-left: 4px solid transparent;
+}
+.table thead th:last-of-type {
+  padding-right: 16px;
+  border-right: 4px solid transparent;
+}
+
+/* Body cells: transparent 6px top/bottom borders (with clip) inset the hover pill vertically so it
+   floats clear of the row separator; the outer cells add a 4px horizontal inset. */
+.table tbody td {
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  background-clip: padding-box;
+}
+.table tbody td:first-of-type {
+  padding-left: 16px;
+  border-left: 4px solid transparent;
+}
+.table tbody td:last-of-type {
+  padding-right: 16px;
+  border-right: 4px solid transparent;
+}
+
+/* Neutralise the primitive's per-row border + row-level hover: we draw our own divider and paint
+   the hover pill on the cells instead. */
+.table tbody tr {
+  border: 0;
+}
+.table tbody tr:hover {
+  background-color: transparent;
+}
+
+/* Hover pill: painted on the cells (not the <tr>) so the inset borders float it clear of the panel
+   edges and round the outer corners. Locked rows (data-disabled) stay un-hovered. */
+.table tbody tr:not([data-disabled]):hover td {
+  background-color: var(--muted);
+}
+.table tbody tr:not([data-disabled]):hover td:first-of-type {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+.table tbody tr:not([data-disabled]):hover td:last-of-type {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+/* Row separator: a 1px line at the row's bottom, inset 4px each side to line up with the pill.
+   Keyed off data-divider (absent on the last row of a group/list). */
+.table tbody tr[data-divider] {
+  background-image: linear-gradient(
+    to right,
+    transparent 4px,
+    var(--color-border-light) 4px,
+    var(--color-border-light) calc(100% - 4px),
+    transparent calc(100% - 4px)
+  );
+  background-repeat: no-repeat;
+  background-position: bottom;
+  background-size: 100% 1px;
+}
