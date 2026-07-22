@@ -25,10 +25,8 @@ export const MigrateSafeL2Review = ({ children, ...props }: ReviewTransactionPro
       <ReviewTransaction {...props}>
         <ErrorMessage level="warning" title="Migration transaction">
           <Typography>
-            When executing this transaction, it will not get indexed and appear in the history due to the current
-            incompatible base contract. It might also take a few minutes until the new Safe account version and nonce
-            are reflected in the interface. After the migration is complete, future transactions will get processed and
-            indexed as usual, and there will be no further restrictions.
+            The migration may take a few minutes. Transactions made before or during the migration won&apos;t show up in
+            your transaction history, but all future transactions will appear as usual.
           </Typography>
         </ErrorMessage>
 
