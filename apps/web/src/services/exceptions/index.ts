@@ -5,13 +5,8 @@ import { normalizeError } from '@safe-global/utils/services/exceptions/normalize
 import { logger, captureError } from '../observability'
 import type { ErrorContext } from '../observability/types'
 
-/**
- * Re-exported from the observability core so existing call sites can keep
- * importing `ErrorContext` from `@/services/exceptions`. It lives in the core
- * (not here) so both the exceptions layer and analytics providers can reference
- * it without closing an import cycle — the analytics layer is itself a consumer
- * of `logError` (see WA-2775).
- */
+// Re-exported for back-compat with `@/services/exceptions` call sites.
+// Canonical definition + cycle rationale: observability/types.ts.
 export type { ErrorContext }
 
 export class CodedException extends Error {
