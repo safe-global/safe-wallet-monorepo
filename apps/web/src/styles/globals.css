@@ -47,6 +47,8 @@ button {
 :root {
   --header-height: 56px;
   --footer-height: 67px;
+  /* SSR/first-paint fallback only — useTopbarHeight overwrites this with the
+     topbar's measured height once it mounts. */
   --topbar-height: 100px;
 }
 
