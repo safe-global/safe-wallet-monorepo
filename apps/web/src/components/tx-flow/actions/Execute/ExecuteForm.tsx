@@ -267,13 +267,12 @@ export const ExecuteForm = ({
                   : undefined
               }
             />
-
             {showExecutionSelector && (
               <div className={css.noTopBorder}>
                 <ExecutionMethodSelector
                   executionMethod={executionMethod}
                   setExecutionMethod={handleExecutionMethodChange}
-                  relays={canNoFeeCampaign || isNestedApproveHash ? undefined : relays[0]}
+                  relays={canNoFeeCampaign || (isNestedApproveHash && isGtfChain) ? undefined : relays[0]}
                   noFeeCampaign={
                     isNoFeeCampaign && !blockedAddress
                       ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 }

@@ -5,12 +5,17 @@ import { OperationType } from '@safe-global/types-kit'
 import { type ReactElement } from 'react'
 import { ExecuteForm } from '../ExecuteForm'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
+import { Safe__factory } from '@safe-global/utils/types/contracts'
 import * as useGasLimit from '@/hooks/useGasLimit'
 import * as useIsValidExecution from '@/hooks/useIsValidExecution'
 import * as useWalletCanRelay from '@/hooks/useWalletCanRelay'
 import * as relayUtils from '@/utils/relaying'
 import * as walletCanPay from '@/hooks/useWalletCanPay'
 import * as useValidateTxData from '@/hooks/useValidateTxData'
+import * as useRemainingRelays from '@/hooks/useRemainingRelays'
+import * as useChains from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { render } from '@/tests/test-utils'
 import { fireEvent, waitFor } from '@testing-library/react'
 import type {
@@ -134,6 +139,50 @@ describe('ExecuteForm', () => {
     const { getByText } = render(<ExecuteForm {...defaultProps} />)
 
     expect(getByText('Who will pay gas fees:')).toBeInTheDocument()
+  })
+
+  const nestedApproveHashTx = () =>
+    createMockSafeTransaction({
+      to: '0x0000000000000000000000000000000000000C11', // child Safe address
+      data: Safe__factory.createInterface().encodeFunctionData('approveHash', [
+        '0x' + 'ab'.repeat(32), // child safeTxHash
+      ]),
+      operation: OperationType.Call,
+    })
+
+  // Regression: a nested approveHash on a daily-limit relay chain (RELAYING, no GTF) still draws from the
+  // daily quota, so the "free transactions left today" counter must be shown. Previously the call site
+  // forced relays=undefined for every nested approveHash, suppressing the counter on daily-limit chains too.
+  it('shows the remaining-relays counter for a nested approveHash on a daily-limit chain', () => {
+    jest.spyOn(useWalletCanRelay, 'default').mockReturnValue([true, undefined, false])
+    jest.spyOn(relayUtils, 'hasRemainingRelays').mockReturnValue(true)
+    jest.spyOn(useRemainingRelays, 'useRelaysBySafe').mockReturnValue([{ remaining: 3, limit: 5 }, undefined, false])
+    // Daily-limit chain: relaying is available but it is NOT the sponsored/unlimited GTF relay.
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(
+      chainBuilder()
+        .with({ features: [FEATURES.RELAYING] })
+        .build(),
+    )
+
+    const { getByText } = render(<ExecuteForm {...defaultProps} safeTx={nestedApproveHashTx()} />)
+
+    expect(getByText(/free transactions left today/)).toBeInTheDocument()
+  })
+
+  // A nested approveHash on a GTF (sponsored/unlimited) chain has no daily quota, so the counter stays hidden.
+  it('does not show the remaining-relays counter for a nested approveHash on a GTF chain', () => {
+    jest.spyOn(useWalletCanRelay, 'default').mockReturnValue([true, undefined, false])
+    jest.spyOn(relayUtils, 'hasRemainingRelays').mockReturnValue(true)
+    jest.spyOn(useRemainingRelays, 'useRelaysBySafe').mockReturnValue([{ remaining: 3, limit: 5 }, undefined, false])
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(
+      chainBuilder()
+        .with({ features: [FEATURES.GTF] })
+        .build(),
+    )
+
+    const { queryByText } = render(<ExecuteForm {...defaultProps} safeTx={nestedApproveHashTx()} />)
+
+    expect(queryByText(/free transactions left today/)).not.toBeInTheDocument()
   })
 
   it('shows an execution validation error', () => {
