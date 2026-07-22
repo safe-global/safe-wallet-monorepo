@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
+import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Select, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -105,14 +105,6 @@ function SafeSelectorDropdown({
   )
   const triggerItem = selectedItem ?? fallbackSelectedItem
 
-  // The trigger item for the current safe can be a chain-scoped entry while the same safe appears
-  // as a multi-chain group elsewhere in the list — check by address, not just the item's chains.
-  const isTriggerSafeMultiChain = useMemo(() => {
-    if (!triggerItem) return false
-    if (triggerItem.chains.length > 1) return true
-    return items.some((item) => sameAddress(item.address, triggerItem.address) && item.chains.length > 1)
-  }, [items, triggerItem])
-
   // A lifted search query would otherwise persist across open/close (local state resets with the popup).
   const handleOpenChangeWithReset = (open: boolean) => {
     // Ignore close requests while a modal is layered on top (e.g. renaming): base-ui tries to close
@@ -159,11 +151,7 @@ function SafeSelectorDropdown({
         data-testid="open-safes-icon"
       >
         <SelectValue>
-          <SafeSelectorTriggerContent
-            selectedItem={triggerItem}
-            selectedChainId={selectedChainId}
-            isMultiChain={isTriggerSafeMultiChain}
-          />
+          <SafeSelectorTriggerContent selectedItem={triggerItem} selectedChainId={selectedChainId} />
         </SelectValue>
       </SelectTrigger>
 
