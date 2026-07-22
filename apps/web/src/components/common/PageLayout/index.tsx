@@ -18,6 +18,7 @@ import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
 import { useIsTopbarElevated } from '@/hooks/useTopbarElevation'
+import { useTopbarHeight } from '@/hooks/useTopbarHeight'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -60,6 +61,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   useRouterGuard({ useGuard: useFlowActivationGuard })
   useKeyboardObserver()
   const isTopbarElevated = useIsTopbarElevated()
+  const setTopbarNode = useTopbarHeight()
 
   // Hide sidebar when transaction flow is open
   const isSidebarVisible = isSidebarOpen && !txFlow
@@ -91,6 +93,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       >
         {!hideHeader && (
           <div
+            ref={setTopbarNode}
             className={classnames(css.topbar, {
               [css.topbarElevated]: isTopbarElevated,
             })}
