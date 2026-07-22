@@ -163,7 +163,7 @@ export const useFeesPreview = (): FeesPreviewData => {
   const preview = useGtfFeePreview({
     enabled: !isConfirmation && !isSignerMode && !isLegacySigned && candidates.length > 0,
     safeTx,
-    chainId: chain?.chainId,
+    chain,
     safeAddress,
     gasToken: selectedAddress,
     numberSignatures: safe.threshold,

@@ -70,7 +70,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
   const { data: previewData } = useGtfFeePreview({
     enabled: shouldPreviewGtf,
     safeTx,
-    chainId: chain?.chainId,
+    chain,
     safeAddress,
     gasToken: gtfSelectedGasToken,
     numberSignatures: safe.threshold,
