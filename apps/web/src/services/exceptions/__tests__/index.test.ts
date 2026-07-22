@@ -130,30 +130,37 @@ describe('CodedException', () => {
     })
   })
 
+  const mockObservability = (captureError: jest.Mock, logger?: Record<string, jest.Mock>) => {
+    jest.doMock('@/services/observability', () => ({
+      __esModule: true,
+      ...jest.requireActual('@/services/observability'),
+      captureError,
+      logger: logger ?? { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
+    }))
+  }
+
   describe('Tracking (error level)', () => {
-    it('logs at error level AND forwards to captureException on production', async () => {
+    it('logs at error level AND reports a user-facing error to observability on production', async () => {
       process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
 
-      const mockCaptureException = jest.fn()
+      const mockCaptureError = jest.fn()
       const mockError = jest.fn()
-
-      jest.doMock('@/services/observability', () => ({
-        __esModule: true,
-        ...jest.requireActual('@/services/observability'),
-        captureException: mockCaptureException,
-        logger: { info: jest.fn(), warn: jest.fn(), error: mockError, debug: jest.fn() },
-      }))
+      mockObservability(mockCaptureError, { info: jest.fn(), warn: jest.fn(), error: mockError, debug: jest.fn() })
 
       const { trackError, Errors } = await import('..')
 
       const err = trackError(Errors._100)
-      expect(mockCaptureException).toHaveBeenCalledWith(
-        err,
+      expect(mockCaptureError).toHaveBeenCalledWith(
         expect.objectContaining({
+          error: err,
+          isUserFacing: true,
           code: 100,
-          error_domain: ErrorDomain.TX_CREATION,
-          error_type: ErrorType.ADDRESS_INVALID,
-          error_layer: ErrorLayer.OFF_CHAIN,
+          tags: expect.objectContaining({
+            code: 100,
+            error_domain: ErrorDomain.TX_CREATION,
+            error_type: ErrorType.ADDRESS_INVALID,
+            error_layer: ErrorLayer.OFF_CHAIN,
+          }),
         }),
       )
       expect(mockError).toHaveBeenCalledWith(
@@ -169,89 +176,74 @@ describe('CodedException', () => {
 
     it('tags the Datadog error with the refined domain/type/layer (on-chain revert)', async () => {
       process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
-      const mockCaptureException = jest.fn()
-      jest.doMock('@/services/observability', () => ({
-        __esModule: true,
-        ...jest.requireActual('@/services/observability'),
-        captureException: mockCaptureException,
-        logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
-      }))
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
 
       const { trackError, Errors } = await import('..')
 
       trackError(Errors._804, 'execution reverted GS013')
-      expect(mockCaptureException).toHaveBeenCalledWith(
-        expect.anything(),
+      expect(mockCaptureError).toHaveBeenCalledWith(
         expect.objectContaining({
-          error_domain: ErrorDomain.TX_EXECUTION,
-          error_type: ErrorType.ON_CHAIN_REVERT,
-          error_layer: ErrorLayer.ON_CHAIN,
+          tags: expect.objectContaining({
+            error_domain: ErrorDomain.TX_EXECUTION,
+            error_type: ErrorType.ON_CHAIN_REVERT,
+            error_layer: ErrorLayer.ON_CHAIN,
+          }),
         }),
       )
     })
 
     it('does not track in non-production envs', async () => {
-      const mockCaptureException = jest.fn()
-      jest.doMock('@/services/observability', () => ({
-        __esModule: true,
-        ...jest.requireActual('@/services/observability'),
-        captureException: mockCaptureException,
-      }))
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
 
       const { trackError, Errors } = await import('..')
 
       const err = trackError(Errors._100)
-      expect(mockCaptureException).not.toHaveBeenCalled()
+      expect(mockCaptureError).not.toHaveBeenCalled()
       expect(console.error).toHaveBeenCalledWith(err)
     })
   })
 
   describe('Error Surfaced analytics', () => {
-    it('emits a user-facing Error Surfaced event to the registered handler when tracking in production', async () => {
+    it('reports a user-facing error to observability when tracking in production', async () => {
       process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
-      const handler = jest.fn()
-      const { trackError, setErrorSurfacedHandler, Errors } = await import('..')
-      setErrorSurfacedHandler(handler)
+      const captureError = jest.fn()
+      mockObservability(captureError)
+      const { trackError, Errors } = await import('..')
 
       trackError(Errors._804, 'rpc down')
-      expect(handler).toHaveBeenCalledWith(expect.objectContaining({ code: 804, isUserFacing: true }))
+      expect(captureError).toHaveBeenCalledWith(expect.objectContaining({ code: 804, isUserFacing: true }))
     })
 
-    it('emits a non-user-facing Error Surfaced event to the registered handler when logging in production', async () => {
+    it('reports a non-user-facing error to observability when logging in production', async () => {
       process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
-      const handler = jest.fn()
-      const { logError, setErrorSurfacedHandler, Errors } = await import('..')
-      setErrorSurfacedHandler(handler)
+      const captureError = jest.fn()
+      mockObservability(captureError)
+      const { logError, Errors } = await import('..')
 
       logError(Errors._601)
-      expect(handler).toHaveBeenCalledWith(expect.objectContaining({ code: 601, isUserFacing: false }))
+      expect(captureError).toHaveBeenCalledWith(expect.objectContaining({ code: 601, isUserFacing: false }))
     })
 
-    it('does not emit Error Surfaced in non-production envs', async () => {
-      const handler = jest.fn()
-      const { trackError, logError, setErrorSurfacedHandler, Errors } = await import('..')
-      setErrorSurfacedHandler(handler)
+    it('does not report an error in non-production envs', async () => {
+      const captureError = jest.fn()
+      mockObservability(captureError)
+      const { trackError, logError, Errors } = await import('..')
 
       trackError(Errors._804)
       logError(Errors._601)
-      expect(handler).not.toHaveBeenCalled()
+      expect(captureError).not.toHaveBeenCalled()
     })
 
-    it('forwards call-site context (e.g. txHash) to the handler', async () => {
+    it('forwards call-site context (e.g. txHash) to observability', async () => {
       process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
-      const handler = jest.fn()
-      const { trackError, setErrorSurfacedHandler, Errors } = await import('..')
-      setErrorSurfacedHandler(handler)
-
-      trackError(Errors._814, 'speed up failed', { txHash: '0xdeadbeef' })
-      expect(handler).toHaveBeenCalledWith(expect.objectContaining({ context: { txHash: '0xdeadbeef' } }))
-    })
-
-    it('does not throw when no handler is registered', async () => {
-      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const captureError = jest.fn()
+      mockObservability(captureError)
       const { trackError, Errors } = await import('..')
 
-      expect(() => trackError(Errors._804)).not.toThrow()
+      trackError(Errors._814, 'speed up failed', { txHash: '0xdeadbeef' })
+      expect(captureError).toHaveBeenCalledWith(expect.objectContaining({ context: { txHash: '0xdeadbeef' } }))
     })
   })
 })

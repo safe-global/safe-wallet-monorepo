@@ -1,4 +1,4 @@
-import type { ILogger, IObservabilityProvider } from '../types'
+import type { ILogger, IObservabilityProvider, ObservedError } from '../types'
 
 export class CompositeProvider implements IObservabilityProvider {
   readonly name = 'Composite'
@@ -55,12 +55,12 @@ export class CompositeProvider implements IObservabilityProvider {
     }
   }
 
-  captureException(error: Error, context?: Record<string, unknown>): void {
+  captureError(error: ObservedError): void {
     this.providers.forEach((provider) => {
       try {
-        provider.captureException(error, context)
+        provider.captureError(error)
       } catch (err) {
-        console.error('Error capturing exception in provider:', err)
+        console.error('Error capturing error in provider:', err)
       }
     })
   }
