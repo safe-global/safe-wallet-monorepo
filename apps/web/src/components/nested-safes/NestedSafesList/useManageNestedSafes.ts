@@ -4,8 +4,7 @@ import { useAppDispatch } from '@/store'
 import { setCuratedNestedSafes } from '@/store/settingsSlice'
 import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
 import { useCuratedNestedSafes } from '@/hooks/useCuratedNestedSafes'
-import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
-import type { SimilarityDetectionResult } from '@safe-global/utils/utils/addressSimilarity.types'
+import { useSimilarityClusters } from '@/features/address-poisoning'
 
 const toggleAddress = (prev: Set<string>, normalizedAddress: string): Set<string> => {
   const next = new Set(prev)
@@ -19,20 +18,20 @@ const toggleAddress = (prev: Set<string>, normalizedAddress: string): Set<string
 
 const groupSafesBySimilarity = (
   safes: NestedSafeWithStatus[],
-  similarityResult: SimilarityDetectionResult,
+  groupIdByAddress: Map<string, string>,
 ): { groups: { key: string; safes: NestedSafeWithStatus[] }[]; ungrouped: NestedSafeWithStatus[] } => {
   const groupMap = new Map<string, NestedSafeWithStatus[]>()
   const ungrouped: NestedSafeWithStatus[] = []
 
   for (const safe of safes) {
-    const group = similarityResult.getGroup(safe.address)
-    if (!group) {
+    const groupId = groupIdByAddress.get(safe.address.toLowerCase())
+    if (!groupId) {
       ungrouped.push(safe)
       continue
     }
-    const existing = groupMap.get(group.bucketKey) || []
+    const existing = groupMap.get(groupId) || []
     existing.push(safe)
-    groupMap.set(group.bucketKey, existing)
+    groupMap.set(groupId, existing)
   }
 
   const groups: { key: string; safes: NestedSafeWithStatus[] }[] = []
@@ -67,11 +66,10 @@ export const useManageNestedSafes = (allSafesWithStatus: NestedSafeWithStatus[])
   // Track pending confirmation for flagged address selection
   const [pendingConfirmation, setPendingConfirmation] = useState<string | null>(null)
 
-  // Run similarity detection on all nested safe addresses
-  const similarityResult: SimilarityDetectionResult = useMemo(() => {
-    const addresses = allSafesWithStatus.map((safe) => safe.address)
-    return detectSimilarAddresses(addresses)
-  }, [allSafesWithStatus])
+  const addresses = useMemo(() => allSafesWithStatus.map((safe) => safe.address), [allSafesWithStatus])
+
+  // `flagged` → per-row badges; `groupIdByAddress` → boxes look-alikes together.
+  const { groupIdByAddress, isAddressFlagged } = useSimilarityClusters(addresses)
 
   // Reset selection when curatedAddresses changes (e.g., on safe switch)
   useEffect(() => {
@@ -94,23 +92,23 @@ export const useManageNestedSafes = (allSafesWithStatus: NestedSafeWithStatus[])
     (address: string) => {
       const normalizedAddress = address.toLowerCase()
 
-      if (!selectedAddresses.has(normalizedAddress) && similarityResult.isFlagged(address)) {
+      if (!selectedAddresses.has(normalizedAddress) && isAddressFlagged(address)) {
         setPendingConfirmation(normalizedAddress)
         return
       }
 
       setSelectedAddresses((prev) => toggleAddress(prev, normalizedAddress))
     },
-    [similarityResult, selectedAddresses],
+    [isAddressFlagged, selectedAddresses],
   )
 
   // Select all safes (excludes flagged addresses - they must be selected individually)
   const selectAll = useCallback(() => {
     const nonFlaggedAddresses = allSafesWithStatus
-      .filter((safe) => !similarityResult.isFlagged(safe.address))
+      .filter((safe) => !isAddressFlagged(safe.address))
       .map((safe) => safe.address.toLowerCase())
     setSelectedAddresses(new Set(nonFlaggedAddresses))
-  }, [allSafesWithStatus, similarityResult])
+  }, [allSafesWithStatus, isAddressFlagged])
 
   // Deselect all safes
   const deselectAll = useCallback(() => {
@@ -165,21 +163,23 @@ export const useManageNestedSafes = (allSafesWithStatus: NestedSafeWithStatus[])
   const allSelected = selectedCount === allSafesWithStatus.length && allSafesWithStatus.length > 0
 
   // Check if an address is flagged for similarity
-  const isFlagged = useCallback((address: string) => similarityResult.isFlagged(address), [similarityResult])
+  const isFlagged = isAddressFlagged
 
   // Get similar addresses for a flagged address
   const getSimilarAddresses = useCallback(
     (address: string): string[] => {
-      const group = similarityResult.getGroup(address)
-      if (!group) return []
-      return group.addresses.filter((a) => a.toLowerCase() !== address.toLowerCase())
+      const groupId = groupIdByAddress.get(address.toLowerCase())
+      if (!groupId) return []
+      return addresses.filter(
+        (a) => a.toLowerCase() !== address.toLowerCase() && groupIdByAddress.get(a.toLowerCase()) === groupId,
+      )
     },
-    [similarityResult],
+    [groupIdByAddress, addresses],
   )
 
   const groupedSafes = useMemo(
-    () => groupSafesBySimilarity(allSafesWithStatus, similarityResult),
-    [allSafesWithStatus, similarityResult],
+    () => groupSafesBySimilarity(allSafesWithStatus, groupIdByAddress),
+    [allSafesWithStatus, groupIdByAddress],
   )
 
   return {

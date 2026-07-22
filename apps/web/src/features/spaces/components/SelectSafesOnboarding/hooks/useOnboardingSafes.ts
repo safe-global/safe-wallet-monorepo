@@ -1,21 +1,10 @@
 import { useCallback, useMemo, useState } from 'react'
 import debounce from 'lodash/debounce'
-import {
-  type AllSafeItems,
-  _buildSafeItem,
-  _groupAndSort,
-  getComparator,
-  useAllOwnedSafes,
-  useSafesSearch,
-} from '@/hooks/safes'
+import { type AllSafeItems, _groupAndSort, getComparator, useSafesSearch } from '@/hooks/safes'
+import useAllSafes, { type SafeItem } from '@/hooks/safes/useAllSafes'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
-import { selectAllAddedSafes } from '@/store/addedSafesSlice'
-import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
-import useWallet from '@/hooks/wallets/useWallet'
-import useChains from '@/hooks/useChains'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
+import { useSimilarityClusters } from '@/features/address-poisoning'
 
 const useOnboardingSafes = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -23,43 +12,33 @@ const useOnboardingSafes = () => {
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = getComparator(orderBy)
 
-  const { address: walletAddress = '' } = useWallet() || {}
-  const [allOwned = {}] = useAllOwnedSafes(walletAddress)
-  const { configs } = useChains()
-  const allAdded = useAppSelector(selectAllAddedSafes)
-  const allUndeployed = useAppSelector(selectUndeployedSafes)
-  const allVisitedSafes = useAppSelector(selectAllVisitedSafes)
-  const allSafeNames = useAppSelector(selectAllAddressBooks)
-
-  const allChainIds = useMemo(() => configs.map((c) => c.chainId), [configs])
+  const allSafes = useAllSafes()
 
   const { trustedSafeItems, ownedSafeItems } = useMemo(() => {
-    const buildItem = (chainId: string, address: string) =>
-      _buildSafeItem(chainId, address, walletAddress, allAdded, allOwned, allUndeployed, allVisitedSafes, allSafeNames)
+    const safes = allSafes ?? []
 
-    // Trusted safes: from addedSafes (user-pinned, stored in localStorage)
-    const trusted = allChainIds.flatMap((chainId) =>
-      Object.keys(allAdded[chainId] || {}).map((address) => buildItem(chainId, address)),
-    )
+    // A safe is trusted if it's pinned (added) on ANY chain — then ALL its chains show under
+    // trusted, so the same multi-chain safe never appears split across trusted and owned.
+    const trustedAddresses = new Set(safes.filter((safe) => safe.isPinned).map((safe) => safe.address.toLowerCase()))
+    const isTrusted = (safe: SafeItem) => trustedAddresses.has(safe.address.toLowerCase())
 
-    // Owned safes: from CGW API + undeployed, excluding safes already in trusted list
-    const owned = allChainIds.flatMap((chainId) => {
-      const combined = [...new Set([...(allOwned[chainId] || []), ...Object.keys(allUndeployed[chainId] || {})])]
-      return combined
-        .filter((address) => !trusted.some((t) => t.chainId === chainId && sameAddress(t.address, address)))
-        .map((address) => buildItem(chainId, address))
-    })
-
-    return { trustedSafeItems: trusted, ownedSafeItems: owned }
-  }, [allChainIds, allAdded, allOwned, allUndeployed, walletAddress, allVisitedSafes, allSafeNames])
+    return {
+      trustedSafeItems: safes.filter(isTrusted),
+      ownedSafeItems: safes.filter((safe) => !isTrusted(safe)),
+    }
+  }, [allSafes])
 
   // Flag against the combined pool (so an owned safe impersonating a trusted one is caught) but
   // only surface warnings on owned safes — a safe the user trusted at some point is treated as vetted.
+  const combinedAddresses = useMemo(
+    () => [...trustedSafeItems, ...ownedSafeItems].map((s) => s.address),
+    [trustedSafeItems, ownedSafeItems],
+  )
+  const flaggedCombined = useSimilarityClusters(combinedAddresses).flagged
   const flaggedOwnedAddresses = useMemo<Set<string>>(() => {
-    const flagged = getFlaggedSimilarAddressSet([...trustedSafeItems, ...ownedSafeItems].map((s) => s.address))
     const ownedAddresses = new Set(ownedSafeItems.map((s) => s.address.toLowerCase()))
-    return new Set([...flagged].filter((address) => ownedAddresses.has(address)))
-  }, [trustedSafeItems, ownedSafeItems])
+    return new Set([...flaggedCombined].filter((address) => ownedAddresses.has(address)))
+  }, [flaggedCombined, ownedSafeItems])
 
   // Group into multi-chain / single-chain and sort
   const trustedGrouped = useMemo<AllSafeItems>(

@@ -49,6 +49,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
     pendingConfirmation,
     pendingSelectAllConfirmation,
     similarAddressesForSelectAll,
+    flagged: flaggedAddresses,
     searchQuery,
     isLoading,
     hasChanges,
@@ -109,11 +110,6 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
     }
     return keys
   }, [availableItems])
-
-  const flaggedAddresses = useMemo(
-    () => new Set(availableItems.filter((item) => item.similarityGroup).map((item) => item.address.toLowerCase())),
-    [availableItems],
-  )
 
   const someSelected = selectedCount > 0
 
