@@ -12,6 +12,7 @@ import { useGetGtfFeePreviewQuery } from '@/store/api/gateway'
 import { toSupportedFiatCode } from '@/store/api/gateway/gtfFeePreview'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
+import { isGtfFeePreviewAvailable } from '../utils/isGtfFeePreviewAvailable'
 
 /**
  * The encoded transaction payload the fees endpoint needs to probe a gas token.
@@ -28,8 +29,8 @@ export type FeePreviewTx = {
  *
  * - `resolving`: the cascade is still probing or not enough context to start
  * - `resolved`: a token (at `address`) successfully passed a `/fees/preview` probe
- * - `blocked`: every candidate probe errored, including the sent token — the Safe cannot cover
- *   fees with anything it holds
+ * - `blocked`: fees cannot be paid from the Safe — every candidate probe errored (including the
+ *   sent token), or the chain has no RELAY_FEE relayer so previews are impossible
  */
 export type ResolvedGasTokenState =
   | { status: 'resolving' }
@@ -40,6 +41,9 @@ export type ResolvedGasTokenState =
  * Walk the Safe's balances probing `/fees/preview` per token. The sent token is guaranteed last
  * as the fallback, so any other held token is preferred if the backend says it can cover fees.
  * Stops at the first probe that returns 200. If every probe errors, resolution is `blocked`.
+ *
+ * On chains without a RELAY_FEE relayer no probe can ever succeed, so the hook returns
+ * `blocked` immediately without firing a single request.
  *
  * The `tx` payload is what each probe submits alongside the candidate `gasToken`. Callers on the
  * Create step typically build it from form state via `createTokenTransferParams`; on Review it
@@ -92,7 +96,13 @@ export const useResolvedGasToken = (
   const currentCandidate = candidates[index]
 
   const canProbe = Boolean(
-    currentCandidate && tx && chain?.chainId && safeAddress && safe.threshold > 0 && recommendedNonce !== undefined,
+    isGtfFeePreviewAvailable(chain) &&
+      currentCandidate &&
+      tx &&
+      chain?.chainId &&
+      safeAddress &&
+      safe.threshold > 0 &&
+      recommendedNonce !== undefined,
   )
 
   const probe = useGetGtfFeePreviewQuery(
@@ -119,6 +129,9 @@ export const useResolvedGasToken = (
     }
   }, [probe.isLoading, probe.isFetching, probe.error, canProbe, index, candidates.length])
 
+  if (!isGtfFeePreviewAvailable(chain)) {
+    return { status: 'blocked' }
+  }
   if (candidates.length === 0 || !canProbe) {
     return { status: 'resolving' }
   }

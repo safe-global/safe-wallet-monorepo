@@ -767,8 +767,18 @@ describe('SignOrExecute hooks', () => {
     }
 
     const setupGtfChain = () => {
+      // Safe-pays requires both the GTF flag and a RELAY_FEE relayer on the chain.
       const gtfChain = chainBuilder()
-        .with({ chainId: '1', features: [FEATURES.GTF] })
+        .with({
+          chainId: '1',
+          features: [FEATURES.GTF],
+          relayer: {
+            type: 'RELAY_FEE',
+            safeCreationSponsored: false,
+            safeTransactionSponsored: false,
+            enableTenderlySimulationBeforeRelay: false,
+          },
+        })
         .build()
       jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(gtfChain)
       jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({

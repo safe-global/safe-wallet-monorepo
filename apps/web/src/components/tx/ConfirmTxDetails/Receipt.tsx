@@ -3,8 +3,7 @@ import { Fragment, useContext, useMemo, type ReactElement } from 'react'
 import { Box, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import TokenIcon from '@/components/common/TokenIcon'
-import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useCurrentChain } from '@/hooks/useChains'
 import useBalances from '@/hooks/useBalances'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -14,7 +13,7 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import { Operation } from '@safe-global/store/gateway/types'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { useGtfFeePreview } from '@/features/gtf'
+import { isGtfFeePreviewAvailable, useGtfFeePreview } from '@/features/gtf'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import {
   useDomainHash,
@@ -45,7 +44,6 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
   const chain = useCurrentChain()
   const { safe, safeAddress } = useSafeInfo()
   const { safeTx, gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
-  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
   const { balances } = useBalances()
   const operation = Number(safeTxData.operation) as Operation
 
@@ -57,7 +55,10 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
   }, [txDetails?.detailedExecutionInfo])
 
   const shouldPreviewGtf =
-    isGtfChain && (!safeTx || safeTx.signatures.size === 0) && gtfPaymentMode === 'safe' && !!gtfSelectedGasToken
+    isGtfFeePreviewAvailable(chain) &&
+    (!safeTx || safeTx.signatures.size === 0) &&
+    gtfPaymentMode === 'safe' &&
+    !!gtfSelectedGasToken
   const displayGasToken = shouldPreviewGtf ? gtfSelectedGasToken : safeTxData.gasToken
   const isNativeGasToken = displayGasToken === ZERO_ADDRESS
   const heldToken = isNativeGasToken
@@ -69,7 +70,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
   const { data: previewData } = useGtfFeePreview({
     enabled: shouldPreviewGtf,
     safeTx,
-    chainId: chain?.chainId,
+    chain,
     safeAddress,
     gasToken: gtfSelectedGasToken,
     numberSignatures: safe.threshold,

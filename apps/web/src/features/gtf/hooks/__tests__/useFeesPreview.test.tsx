@@ -13,10 +13,22 @@ import * as useGasTokenCandidatesModule from '../useGasTokenCandidates'
 import * as gatewayApi from '@/store/api/gateway'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { SafeTransaction, SafeTransactionData } from '@safe-global/types-kit'
 
+// Safe-pays requires both the GTF flag and a RELAY_FEE relayer on the chain.
 const mockChain = chainBuilder()
-  .with({ chainId: '1', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: 'https://eth.logo' } })
+  .with({
+    chainId: '1',
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: 'https://eth.logo' },
+    features: [FEATURES.GTF],
+    relayer: {
+      type: 'RELAY_FEE',
+      safeCreationSponsored: false,
+      safeTransactionSponsored: false,
+      enableTenderlySimulationBeforeRelay: false,
+    },
+  })
   .build()
 
 const mockSafe = extendedSafeInfoBuilder().with({ threshold: 2 }).build()
@@ -208,6 +220,29 @@ describe('useFeesPreview', () => {
     expect(result.current.executionFee).toEqual({ label: 'Execution fee', isFree: true })
     expect(result.current.executionFee.amount).toBeUndefined()
     expect(result.current.executionFee.currency).toBeUndefined()
+  })
+
+  it('renders signer mode and never queries the preview when the chain has no RELAY_FEE relayer', () => {
+    jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(
+      chainBuilder()
+        .with({ ...mockChain, relayer: null })
+        .build(),
+    )
+    const spy = jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    // Multi-sig signer mode (threshold 2): execution fee stays free, gas is not quoted.
+    expect(result.current.executionFee).toEqual({ label: 'Execution fee', isFree: true })
+    expect(result.current.gasFee).toEqual({ label: 'Max gas fee', note: 'Calculated at execution' })
+    expect(result.current.loading).toBe(false)
+    // No candidates and no change handler → the UI takes the locked signer-pays notice
+    // (PLA-1435) instead of offering a "Pay fees from: Safe" choice that can never work.
+    expect(result.current.availableGasTokens).toEqual([])
+    expect(result.current.onGasTokenChange).toBeUndefined()
+    expect(result.current.canCoverFees).toBe(true)
+    expect(spy.mock.calls.length).toBeGreaterThan(0)
+    spy.mock.calls.forEach(([arg]) => expect(arg).toBe(skipToken))
   })
 
   it('maps a successful preview response to gasFee amount + fiat (canCoverFees = true)', () => {

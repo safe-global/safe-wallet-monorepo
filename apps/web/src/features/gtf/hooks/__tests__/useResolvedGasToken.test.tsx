@@ -1,4 +1,5 @@
 import { waitFor } from '@testing-library/react'
+import { skipToken } from '@reduxjs/toolkit/query'
 import { OperationType } from '@safe-global/types-kit'
 import { renderHook } from '@/tests/test-utils'
 import { useResolvedGasToken, type FeePreviewTx } from '../useResolvedGasToken'
@@ -9,6 +10,7 @@ import { getNonces } from '@/services/tx/tx-sender/recommendedNonce'
 import * as gatewayApi from '@/store/api/gateway'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 jest.mock('@/services/tx/tx-sender/recommendedNonce', () => ({
   getNonces: jest.fn(),
@@ -21,8 +23,19 @@ const ETH_ADDRESS = '0x0000000000000000000000000000000000000000'
 const USDC_ADDRESS = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 const SAFE_TOKEN_ADDRESS = '0x5aFE3855358E112B5647B952709E6165e1c1eEEe'
 
+// Probing requires both the GTF flag and a RELAY_FEE relayer on the chain.
 const mockChain = chainBuilder()
-  .with({ chainId: '1', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: '' } })
+  .with({
+    chainId: '1',
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: '' },
+    features: [FEATURES.GTF],
+    relayer: {
+      type: 'RELAY_FEE',
+      safeCreationSponsored: false,
+      safeTransactionSponsored: false,
+      enableTenderlySimulationBeforeRelay: false,
+    },
+  })
   .build()
 
 const mockSafe = extendedSafeInfoBuilder().with({ threshold: 1 }).build()
@@ -196,6 +209,22 @@ describe('useResolvedGasToken', () => {
     const { result } = renderHook(() => useResolvedGasToken(SAFE_TOKEN_ADDRESS, erc20Tx))
 
     expect(result.current.status).toBe('resolving')
+  })
+
+  it('returns blocked without firing a single probe when the chain has no RELAY_FEE relayer', () => {
+    jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(
+      chainBuilder()
+        .with({ ...mockChain, relayer: null })
+        .build(),
+    )
+    jest.spyOn(useBalancesModule, 'default').mockReturnValue(buildBalances([ethBalance, safeTokenBalance]))
+    const spy = jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(loadingProbe)
+
+    const { result } = renderHook(() => useResolvedGasToken(SAFE_TOKEN_ADDRESS, erc20Tx))
+
+    expect(result.current).toEqual({ status: 'blocked' })
+    expect(spy.mock.calls.length).toBeGreaterThan(0)
+    spy.mock.calls.forEach(([arg]) => expect(arg).toBe(skipToken))
   })
 
   it('ignores usdcBalance entry when sentTokenAddress dedupes', async () => {
