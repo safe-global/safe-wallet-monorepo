@@ -2,38 +2,17 @@ import { IS_PRODUCTION } from '@/config/constants'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { normalizeError } from '@safe-global/utils/services/exceptions/normalizeError'
-import { logger, captureException } from '../observability'
+import { logger, captureError } from '../observability'
+import type { ErrorContext } from '../observability/types'
 
 /**
- * Sink for surfaced errors, registered by the analytics layer at app startup
- * (see WA-2775). Kept as an injected callback so this low-level logger never
- * imports the analytics/Mixpanel module graph — that coupling would create an
- * import cycle, since the analytics layer is itself a consumer of `logError`.
+ * Re-exported from the observability core so existing call sites can keep
+ * importing `ErrorContext` from `@/services/exceptions`. It lives in the core
+ * (not here) so both the exceptions layer and analytics providers can reference
+ * it without closing an import cycle — the analytics layer is itself a consumer
+ * of `logError` (see WA-2775).
  */
-/**
- * Optional call-site context for a surfaced error. Analytics-agnostic on
- * purpose (no Mixpanel types here) — the analytics layer maps these to event
- * properties. Only populated where the data is genuinely in scope (e.g. a
- * `txHash` exists only once a transaction has been broadcast).
- */
-export interface ErrorContext {
-  txHash?: string
-  targetContractLabel?: string
-  transactionType?: string
-}
-
-export type ErrorSurfacedHandler = (params: {
-  code: number
-  message: string
-  isUserFacing: boolean
-  context?: ErrorContext
-}) => void
-
-let errorSurfacedHandler: ErrorSurfacedHandler | undefined
-
-export const setErrorSurfacedHandler = (handler: ErrorSurfacedHandler | undefined): void => {
-  errorSurfacedHandler = handler
-}
+export type { ErrorContext }
 
 export class CodedException extends Error {
   public readonly code: number
@@ -89,8 +68,9 @@ export class CodedException extends Error {
     console.warn(IS_PRODUCTION ? this.message : this)
 
     if (IS_PRODUCTION) {
-      logger.warn(this.message, this.getObservabilityContext())
-      errorSurfacedHandler?.({ code: this.code, message: this.message, isUserFacing: false, context })
+      const tags = this.getObservabilityContext()
+      logger.warn(this.message, tags)
+      captureError({ error: this, isUserFacing: false, code: this.code, tags, context })
     }
   }
 
@@ -100,8 +80,7 @@ export class CodedException extends Error {
     if (IS_PRODUCTION) {
       const tags = this.getObservabilityContext()
       logger.error(this.message, tags)
-      captureException(this, tags)
-      errorSurfacedHandler?.({ code: this.code, message: this.message, isUserFacing: true, context })
+      captureError({ error: this, isUserFacing: true, code: this.code, tags, context })
     }
   }
 }
