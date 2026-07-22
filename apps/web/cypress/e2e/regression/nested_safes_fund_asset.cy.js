@@ -24,7 +24,7 @@ describe('Nested safes fund asset tests', () => {
     cy.reload()
     main.setupSafeSettingsWithAllTokens().then(() => {
       cy.reload()
-      wallet.connectSigner(signer)
+      wallet.connectSignerViaStorage(signer)
       safeNav.clickOnNestedSafesBtn()
       // This safe has no existing nested safes, so no intro screen - just click add
       nsafes.clickOnAddNestedSafeBtn()

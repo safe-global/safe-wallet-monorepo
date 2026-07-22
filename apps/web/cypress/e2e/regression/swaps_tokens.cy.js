@@ -28,7 +28,7 @@ describe('Swaps token tests', () => {
     'Verify that clicking the swap from assets tab, autofills that token automatically in the form',
     { defaultCommandTimeout: 30000 },
     () => {
-      wallet.connectSigner(signer)
+      wallet.connectSignerViaStorage(signer)
       swaps.clickOnAssetSwapBtn(0)
       swaps.acceptLegalDisclaimer()
       cy.wait(2000)

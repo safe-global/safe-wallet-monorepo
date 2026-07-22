@@ -351,7 +351,7 @@ export function navigateToTransactionAndSetupCopilot(
     },
   })
 
-  walletUtils.connectSigner(signer)
+  walletUtils.connectSignerViaStorage(signer)
 
   clickOnConfirmTransactionBtn()
   verifySafeShieldDisplayed()

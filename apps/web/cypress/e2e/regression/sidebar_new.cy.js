@@ -20,13 +20,12 @@ describe('Sidebar tests', () => {
   })
 
   it('Verify New transaction button enabled for owners', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     sideBar.verifyNewTxBtnStatus(constants.enabledStates.enabled)
   })
 
   it('Verify New transaction button enabled for beneficiaries who are non-owners', () => {
-    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_11)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.homeUrl + staticSafes.SEP_STATIC_SAFE_11)
     sideBar.verifyNewTxBtnStatus(constants.enabledStates.enabled)
   })
 

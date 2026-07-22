@@ -23,7 +23,7 @@ describe('[SMOKE] Add Owners tests', () => {
 
   // TODO: Check if this test is covered with unit tests
   it('[SMOKE] Verify relevant error messages are displayed in Address input', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     owner.openManageSignersWindow()
     owner.clickOnAddSignerBtn()
 
@@ -45,7 +45,7 @@ describe('[SMOKE] Add Owners tests', () => {
   })
 
   it('[SMOKE] Verify the presence of "Manage Signers" button', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     owner.verifyManageSignersBtnIsEnabled()
   })
 

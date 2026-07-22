@@ -94,7 +94,7 @@ describe('Address book tests - 3', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sepoliaAddress2)
     cy.wait(1000)
     cy.reload()
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     addressBook.clickOnSendBtn()
     addressBook.verifyRecipientData(recipientData)
   })

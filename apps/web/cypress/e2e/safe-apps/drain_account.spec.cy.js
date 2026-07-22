@@ -28,7 +28,7 @@ describe('Drain Account tests', { defaultCommandTimeout: 40000 }, () => {
   })
 
   it('Verify drain can be created', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findByLabelText(safeapps.recipientStr).type(getMockAddress())
       getBody().findAllByText(safeapps.transferEverythingStr).click()

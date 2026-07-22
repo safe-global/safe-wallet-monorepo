@@ -29,7 +29,7 @@ describe('Recovery regression tests 2', { defaultCommandTimeout: 50000 }, () => 
   it('Verify "Edit Recovery" flow start from the Recovery widget', () => {
     cy.visit(constants.securityUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
     cy.clearLocalStorage()
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     main.acceptCookies()
     recovery.verifyRecoveryTableDisplayed()
     recovery.clickOnEditRecoverer()
@@ -39,7 +39,7 @@ describe('Recovery regression tests 2', { defaultCommandTimeout: 50000 }, () => 
   it('Verify that Recovery widget has "Edit recovery" button when the recovery module is enabled', () => {
     cy.visit(constants.securityUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
     cy.clearLocalStorage()
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     main.acceptCookies()
     recovery.verifyRecoveryTableDisplayed()
     main.verifyElementsCount(recovery.editRecovererBtn, 1)
@@ -48,7 +48,7 @@ describe('Recovery regression tests 2', { defaultCommandTimeout: 50000 }, () => 
   it('Verify that the "Set up recovery" button starts the set up recovery flow when no enabled recovery module in the safe', () => {
     cy.visit(constants.securityUrl + staticSafes.SEP_STATIC_SAFE_13)
     cy.clearLocalStorage()
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     main.acceptCookies()
     recovery.clickOnSetupRecoveryBtn()
     recovery.verifyRecoveryModalDisplayed()
@@ -57,7 +57,7 @@ describe('Recovery regression tests 2', { defaultCommandTimeout: 50000 }, () => 
   it('Verify that there is validation for the Guardian address field', () => {
     cy.visit(constants.securityUrl + staticSafes.SEP_STATIC_SAFE_13)
     cy.clearLocalStorage()
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     main.acceptCookies()
     recovery.clickOnSetupRecoveryBtn()
     recovery.clickOnNextBtn()

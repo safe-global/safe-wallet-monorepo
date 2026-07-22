@@ -23,8 +23,10 @@ describe('Transaction queue Delete button tests', { defaultCommandTimeout: 30000
   })
 
   it('Verify the option to Delete tx is available in the Reject tx modal for the next tx to be executed', () => {
-    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_7 + nextTxToBeExecuted)
-    wallet.connectSigner(signer2)
+    wallet.connectSignerViaStorage(
+      signer2,
+      constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_7 + nextTxToBeExecuted,
+    )
     create_tx.clickOnRejectBtn()
     create_tx.verifyTxRejectModalVisible()
     create_tx.verifyDeleteChoiceBtnStatus(constants.enabledStates.enabled)

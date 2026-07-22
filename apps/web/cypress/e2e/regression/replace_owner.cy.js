@@ -30,7 +30,7 @@ describe('Replace Owners tests', () => {
 
   // TODO: Check unit tests
   it('Verify max characters in name field', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     owner.waitForConnectionStatus()
     owner.openReplaceOwnerWindow(0)
     owner.typeOwnerName(main.generateRandomString(51))
@@ -39,8 +39,7 @@ describe('Replace Owners tests', () => {
 
   it('Verify that Address input auto-fills with related value', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.autofillData)
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
     owner.waitForConnectionStatus()
     owner.openReplaceOwnerWindow(0)
     owner.typeOwnerAddress(constants.addresBookContacts.user1.address)
@@ -48,7 +47,7 @@ describe('Replace Owners tests', () => {
   })
 
   it('Verify that Name field not mandatory. Verify confirmation for owner replacement is displayed', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     owner.waitForConnectionStatus()
     owner.openReplaceOwnerWindow(0)
     owner.typeOwnerAddress(getMockAddress())
@@ -57,7 +56,7 @@ describe('Replace Owners tests', () => {
   })
 
   it('Verify relevant error messages are displayed in Address input', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     owner.waitForConnectionStatus()
     owner.openReplaceOwnerWindow(0)
     owner.typeOwnerAddress(main.generateRandomString(10))
@@ -86,8 +85,7 @@ describe('Replace Owners tests', () => {
         safeAddress: staticSafes.SEP_STATIC_SAFE_25.slice(6),
       },
     ]
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_25)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_25)
     owner.waitForConnectionStatus()
     owner.openReplaceOwnerWindow(1)
     cy.wait(1000)

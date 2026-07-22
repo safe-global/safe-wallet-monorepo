@@ -18,8 +18,7 @@ describe('[VISUAL] Spending limits screenshots', { defaultCommandTimeout: 60000,
 
   beforeEach(() => {
     mockVisualTestApis()
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8)
     owner.waitForConnectionStatus()
     spendinglimit.clickOnNewSpendingLimitBtn()
     main.awaitVisualStability()

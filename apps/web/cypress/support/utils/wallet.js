@@ -1,4 +1,6 @@
 import * as main from '../../e2e/pages/main.page'
+import * as constants from '../constants'
+import { PRIVATE_KEY_MODULE_LABEL } from '../../../src/services/private-key-module/constants'
 
 const onboardv2 = 'onboard-v2'
 const pkInput = '[data-testid="private-key-input"]'
@@ -76,4 +78,46 @@ export function connectSigner(signer) {
   enterPrivateKey().then(() => {
     main.closeOutreachPopup()
   })
+}
+
+/**
+ * Connects the private-key signer by seeding storage, so the app auto-reconnects without opening
+ * the connect-wallet modal. Skips the slow UI flow of connectSigner().
+ *
+ * The app reconnects the last wallet on startup (useOnboard -> connectLastWallet): it reads the
+ * wallet label from localStorage and the key from sessionStorage, and connects silently because
+ * isWalletUnlocked() returns true for the private-key module. Both slots must exist before app JS
+ * runs on the load that connects.
+ *
+ * Two modes:
+ * - With `url`: seeds in onBeforeLoad and visits (single load, fastest). Use to replace an adjacent
+ *   `cy.visit(url)` + `connectSigner(signer)`.
+ * - Without `url`: seeds the already-loaded window and reloads. Use when the visit happened earlier
+ *   (e.g. in beforeEach) and only the connect is in the test body.
+ *
+ * @param {string} signer - Private key of the signer to connect.
+ * @param {string} [url] - URL to visit; omit to seed the current window and reload.
+ * @param {object} [visitOptions] - Extra cy.visit options; its onBeforeLoad runs after seeding.
+ */
+export function connectSignerViaStorage(signer, url, visitOptions = {}) {
+  const seed = (win) => {
+    win.localStorage.setItem(constants.localStorageKeys.SAFE_v2__lastWallet, JSON.stringify(PRIVATE_KEY_MODULE_LABEL))
+    win.sessionStorage.setItem(
+      constants.sessionStorageKeys.SAFE_v2__privateKeyModulePK,
+      JSON.stringify({ isOpen: false, privateKey: signer }),
+    )
+  }
+
+  if (url) {
+    return cy.visit(url, {
+      ...visitOptions,
+      onBeforeLoad(win) {
+        seed(win)
+        visitOptions.onBeforeLoad?.(win)
+      },
+    })
+  }
+
+  cy.window().then(seed)
+  return cy.reload()
 }

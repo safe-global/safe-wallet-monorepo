@@ -23,8 +23,7 @@ describe('Batch transaction tests', { defaultCommandTimeout: 30000 }, () => {
   })
 
   beforeEach(() => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
     owner.waitForConnectionStatus()
   })
 
@@ -92,7 +91,7 @@ describe('Batch transaction tests', { defaultCommandTimeout: 30000 }, () => {
   })
 
   it('Verify a transaction can be added to the batch', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     batch.addNewTransactionToBatch(constants.EOA, currentNonce, funds_first_tx)
     batch.verifyBatchIconCount(1)
     batch.clickOnBatchCounter()
@@ -105,7 +104,7 @@ describe('Batch transaction tests', { defaultCommandTimeout: 30000 }, () => {
       .then(() => main.isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__batch, ls.batchData.entry0))
       .then(() => {
         cy.reload()
-        wallet.connectSigner(signer)
+        wallet.connectSignerViaStorage(signer)
         batch.clickOnBatchCounter()
         cy.contains(batch.batchedTransactionsStr).should('be.visible').parents('aside').find('ul > li').as('BatchList')
         cy.get('@BatchList').find(batch.deleteTransactionbtn).eq(0).click()

@@ -38,12 +38,12 @@ describe('Remove Owners tests', () => {
   })
 
   it('Verify owner removal form can be opened', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     owner.openRemoveOwnerWindow(1)
   })
 
   it('Verify that threshold input displays the upper limit as the current safe number of owners minus one', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     owner.openRemoveOwnerWindow(1)
     owner.verifyThresholdLimit(1, 1)
     owner.getThresholdOptions().should('have.length', 1)
@@ -51,7 +51,7 @@ describe('Remove Owners tests', () => {
 
   // Added to prod
   it('Verify owner deletion transaction has been created', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     owner.waitForConnectionStatus()
     owner.openRemoveOwnerWindow(1)
     cy.wait(3000)

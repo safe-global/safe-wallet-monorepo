@@ -29,7 +29,7 @@ describe('CF Safe regression tests', () => {
   it('Verify "Add native assets" button opens a modal with a QR code and the safe address', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
     cy.reload()
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     owner.waitForConnectionStatus()
     createwallet.clickOnAddFundsBtn()
     main.verifyElementsIsVisible([createwallet.qrCode, createwallet.addressInfo])
@@ -38,7 +38,7 @@ describe('CF Safe regression tests', () => {
   it('Verify QR code switch status change works in "Add native assets" modal', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
     cy.reload()
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     owner.waitForConnectionStatus()
     createwallet.clickOnAddFundsBtn()
     createwallet.checkQRCodeSwitchStatus(constants.checkboxStates.unchecked)
@@ -62,8 +62,7 @@ describe('CF Safe regression tests', () => {
 
   it('Verify clicking on "Activate now" button opens safe activation flow', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_0)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_0)
     owner.waitForConnectionStatus()
     createwallet.clickOnActivateAccountBtn(1)
     cy.contains(createwallet.deployWalletStr)

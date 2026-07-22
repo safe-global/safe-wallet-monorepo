@@ -27,12 +27,12 @@ describe('Add Owners tests', () => {
 
   // Added to prod
   it('Verify the Add New Owner Form can be opened', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     owner.openManageSignersWindow()
   })
 
   it('Verify error message displayed if character limit is exceeded in Name input', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     owner.openManageSignersWindow()
     owner.clickOnAddSignerBtn()
     owner.typeOwnerNameManage(1, main.generateRandomString(51))
@@ -46,8 +46,7 @@ describe('Add Owners tests', () => {
     addressBook.typeInAddress(constants.addresBookContacts.user1.address)
     addressBook.clickOnSaveEntryBtn()
     addressBook.verifyNewEntryAdded(constants.addresBookContacts.user1.name, constants.addresBookContacts.user1.address)
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
     owner.openManageSignersWindow()
     owner.clickOnAddSignerBtn()
     owner.typeOwnerAddressManage(1, constants.addresBookContacts.user1.address)
@@ -55,7 +54,7 @@ describe('Add Owners tests', () => {
   })
   //The case should be updated with review "Add owner" field on next page and other options
   it('Verify that Name field not mandatory', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     owner.openManageSignersWindow()
     owner.clickOnAddSignerBtn()
     owner.typeOwnerAddressManage(1, getMockAddress())
@@ -64,7 +63,7 @@ describe('Add Owners tests', () => {
   })
 
   it('Verify default threshold value. Verify correct threshold calculation', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     owner.openManageSignersWindow()
     owner.clickOnAddSignerBtn()
     owner.typeOwnerAddressManage(1, constants.DEFAULT_OWNER_ADDRESS)
@@ -72,7 +71,7 @@ describe('Add Owners tests', () => {
   })
   //TBD the case should be updated with additional steps to verify a new owner address and name
   it('Verify valid Address validation', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     owner.openManageSignersWindow()
     owner.clickOnAddSignerBtn()
     owner.typeOwnerAddressManage(1, constants.SEPOLIA_OWNER_2)

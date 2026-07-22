@@ -27,8 +27,7 @@ describe('Multichain header network switch tests', { defaultCommandTimeout: 3000
 
   it('Verify the list of networks where the safe is already deployed with the same address when all networks added', () => {
     let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
-    cy.visit(constants.BALANCE_URL + safe)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + safe)
     network.addNetwork(constants.networks.ethereum)
     cy.contains(network.createSafeMsg(constants.networks.ethereum))
     network.clickChainNavigationButton()

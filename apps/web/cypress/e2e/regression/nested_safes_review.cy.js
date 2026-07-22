@@ -23,7 +23,7 @@ describe('Nested safes review step tests', () => {
     cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_45)
     main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.nestedParentSafe45)
     cy.reload()
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     safeNav.clickOnNestedSafesBtn()
     // This safe has no existing nested safes, so no intro screen - just click add
     nsafes.clickOnAddNestedSafeBtn()

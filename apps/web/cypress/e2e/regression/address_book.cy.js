@@ -122,7 +122,7 @@ describe('Address book tests', () => {
         addressBook.clickOnImportFileBtn()
         addressBook.importCSVFile(addressBook.addedSafesCSVFile)
         addressBook.clickOnImportBtn()
-        wallet.connectSigner(signer)
+        wallet.connectSignerViaStorage(signer)
         accountsModal.openAccountsModal()
         accountsModal.verifyAccountsListContains(importedSafe)
       })

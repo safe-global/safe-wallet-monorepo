@@ -30,8 +30,7 @@ describe('NFTs tests', () => {
   })
 
   beforeEach(() => {
-    cy.visit(constants.balanceNftsUrl + staticSafes.SEP_STATIC_SAFE_2)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.balanceNftsUrl + staticSafes.SEP_STATIC_SAFE_2)
     nfts.waitForNftItems(2)
   })
 
@@ -87,8 +86,7 @@ describe('NFTs tests', () => {
 
   // Added to prod
   it('Verify Send NFT transaction has been created', () => {
-    cy.visit(constants.balanceNftsUrl + nftsSafes.SEP_NFT_SAFE_1)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.balanceNftsUrl + nftsSafes.SEP_NFT_SAFE_1)
     nfts.verifyInitialNFTData()
     nfts.selectNFTs(1)
     nfts.sendNFT()
