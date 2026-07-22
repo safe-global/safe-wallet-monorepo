@@ -43,8 +43,10 @@
   --chart-4: oklch(0.488 0.243 264.376);
   --chart-5: oklch(0.424 0.199 265.638);
   --radius: 1rem;
-  /* Matches the page background so the sidebar blends in without a visible panel edge. */
-  --sidebar: var(--color-background-main);
+  /* Light mode: the sidebar is the white "paper" surface so it reads as a distinct panel against
+     the grey page background (restores the pre-migration white sidebar). Dark mode keeps the
+     page-background blend below. */
+  --sidebar: var(--color-background-paper);
   --sidebar-foreground: #404040;
   --sidebar-primary: #171717;
   --sidebar-primary-foreground: #fafafa;

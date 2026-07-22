@@ -36,8 +36,8 @@ const AccountsNavigation = () => {
   }
 
   return (
-    <Tabs value={activeUrl}>
-      <TabsList variant="toggle" size="lg" aria-label="Accounts navigation" className="w-full max-w-[440px]">
+    <Tabs value={activeUrl} className="w-full max-w-[440px]">
+      <TabsList variant="toggle" size="lg" aria-label="Accounts navigation" className="w-full">
         {navItems.map((item) => (
           <TabsTrigger
             key={item.url}
