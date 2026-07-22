@@ -105,7 +105,7 @@ function ActivityLogFilters({
             onFiltersChange({ ...filters, actorUserId: value === ALL_ACTORS ? undefined : Number(value) })
           }
         >
-          <SelectTrigger id="activity-actor-filter" variant="surface" className="w-48 cursor-pointer">
+          <SelectTrigger id="activity-actor-filter" className="w-48 cursor-pointer">
             <SelectValue placeholder={ALL_ACTORS_LABEL}>
               <span className="truncate">
                 {selectedActor ? getActorLabel(selectedActor.actorUserId, selectedActor.actor) : ALL_ACTORS_LABEL}
@@ -147,7 +147,7 @@ function ActivityLogFilters({
           value={sortDirection}
           onValueChange={(value) => onFiltersChange({ ...filters, sortDirection: value === 'asc' ? 'asc' : undefined })}
         >
-          <SelectTrigger id="activity-sort-filter" variant="surface" className="w-40 cursor-pointer">
+          <SelectTrigger id="activity-sort-filter" className="w-40 cursor-pointer">
             <SelectValue>{SORT_LABELS[sortDirection]}</SelectValue>
           </SelectTrigger>
           <SelectContent alignItemWithTrigger={false} align="start">

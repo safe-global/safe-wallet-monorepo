@@ -237,7 +237,7 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
               Rows per page:
             </Typography>
             <Select value={String(rowsPerPage)} onValueChange={handleChangeRowsPerPage} items={pageSizeItems}>
-              <SelectTrigger size="sm" aria-label="Rows per page" data-testid="rows-per-page">
+              <SelectTrigger aria-label="Rows per page" data-testid="rows-per-page">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

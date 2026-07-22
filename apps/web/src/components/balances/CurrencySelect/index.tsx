@@ -27,7 +27,6 @@ const CurrencySelect = (): ReactElement => {
       <SelectTrigger
         data-testid="currency-selector"
         id="currency"
-        size="sm"
         // eslint-disable-next-line no-restricted-syntax -- bg-background is a deliberate flat/outline look (not the card surface); no variant matches
         className="min-w-[72px] bg-background font-medium shadow-none"
       >

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Plus, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
 
 import { Button } from '../button'
@@ -22,6 +22,8 @@ import {
   DialogClose,
 } from '../dialog'
 import { Tooltip, TooltipTrigger, TooltipContent } from '../tooltip'
+import { Typography } from '../typography'
+import TokenIcon from '@/components/common/TokenIcon'
 import { linkTo } from '@storybook/addon-links'
 import SubmitButton from '@/components/common/SubmitButton'
 import { ActionButton } from '@/components/common/ActionBar'
@@ -101,9 +103,9 @@ const Swatch = ({
   </div>
 )
 
-const DemoSelect = ({ variant, size }: { variant?: 'default' | 'surface' | 'ghost'; size?: 'sm' | 'default' }) => (
+const DemoSelect = ({ variant }: { variant?: 'default' | 'ghost' }) => (
   <Select defaultValue="1" items={{ '1': 'Mainnet', '2': 'Base', '3': 'Arbitrum' }}>
-    <SelectTrigger variant={variant} size={size} className="w-40">
+    <SelectTrigger variant={variant} className="w-40">
       <SelectValue />
     </SelectTrigger>
     <SelectContent>
@@ -113,6 +115,66 @@ const DemoSelect = ({ variant, size }: { variant?: 'default' | 'surface' | 'ghos
     </SelectContent>
   </Select>
 )
+
+// Mirrors the AutocompleteItem the app renders inside TokenAmountInput's compact `sm` select —
+// an icon + name + balance — so the story shows what `sm` actually carries in use, not just a plain
+// label. Kept self-contained (no tx-flow import) to stay Storybook-safe.
+const DEMO_TOKENS = [
+  {
+    symbol: 'ETH',
+    name: 'Ether',
+    balance: '2.4',
+    logoUri: 'https://assets.smold.app/api/token/1/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE/logo-128.png',
+  },
+  {
+    symbol: 'USDC',
+    name: 'USD Coin',
+    balance: '1,250.00',
+    logoUri: 'https://assets.smold.app/api/token/1/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo-128.png',
+  },
+  {
+    symbol: 'DAI',
+    name: 'Dai Stablecoin',
+    balance: '820.50',
+    logoUri: 'https://assets.smold.app/api/token/1/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo-128.png',
+  },
+]
+
+const TokenOptionItem = ({ token }: { token: (typeof DEMO_TOKENS)[number] }) => (
+  <div className="flex items-center gap-2">
+    <TokenIcon logoUri={token.logoUri} tokenSymbol={token.symbol} />
+    <div className="flex-1">
+      <Typography variant="paragraph-small" className="block whitespace-nowrap">
+        {token.name}
+      </Typography>
+      <Typography variant="paragraph-mini" className="block">
+        {token.balance} {token.symbol}
+      </Typography>
+    </div>
+  </div>
+)
+
+// Rich-content `sm` select: the trigger value and each item carry a token row (mirrors TokenAmountInput).
+const DemoTokenSelect = () => {
+  const [value, setValue] = useState('ETH')
+  const selected = DEMO_TOKENS.find((token) => token.symbol === value) ?? DEMO_TOKENS[0]
+  return (
+    <Select value={value} onValueChange={(next) => next && setValue(next)}>
+      <SelectTrigger>
+        <SelectValue>
+          <TokenOptionItem token={selected} />
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent className="w-auto min-w-44">
+        {DEMO_TOKENS.map((token) => (
+          <SelectItem key={token.symbol} value={token.symbol}>
+            <TokenOptionItem token={token} />
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )
+}
 
 // Links to other Storybook stories (navigates the manager via addon-links) — so "where used"
 // jumps straight to the exhaustive UI reference or the component living in a real screen.
@@ -477,15 +539,9 @@ export const Dropdowns: Story = {
         </>
       }
     >
-      <Row
-        label="Variants"
-        note="default = the everyday select (almost all uses) · surface = filter/toolbar · ghost = inline trigger"
-      >
+      <Row label="Variants" note="default = the everyday select (almost all uses) · ghost = inline trigger">
         <Swatch label="default">
           <DemoSelect variant="default" />
-        </Swatch>
-        <Swatch label="surface">
-          <DemoSelect variant="surface" />
         </Swatch>
         <Swatch label="ghost">
           <DemoSelect variant="ghost" />
@@ -493,14 +549,14 @@ export const Dropdowns: Story = {
       </Row>
 
       <Row
-        label="Sizes we use"
-        note="default is the standard; sm is for compact inline selects — the currency selector, rows-per-page, and the token select inside amount inputs"
+        label="Height"
+        note="one height (min-h-9) — it grows to fit rich multi-line values like the token picker (no separate sm size)"
       >
-        <Swatch label="default · h-9" to="Pages/Onboarding/NewSafe/AdvancedCreate" toLabel="Threshold / network">
-          <DemoSelect size="default" />
+        <Swatch label="default" to="Pages/Onboarding/NewSafe/AdvancedCreate" toLabel="Threshold / network">
+          <DemoSelect />
         </Swatch>
-        <Swatch label="sm · h-8" to="Pages/Core/Balances" toLabel="Currency select">
-          <DemoSelect size="sm" />
+        <Swatch label="grows for rich content" to="Pages/Core/Balances" toLabel="Currency select">
+          <DemoTokenSelect />
         </Swatch>
       </Row>
 

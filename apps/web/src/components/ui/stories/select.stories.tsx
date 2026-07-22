@@ -39,43 +39,10 @@ export const AllVariants: Story = {
   render: () => (
     <div style={{ display: 'block' }}>
       <div style={{ marginBottom: '2rem' }}>
-        <h3 className="mb-4 text-lg font-semibold">Sizes</h3>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, max-content))',
-            gap: '1.5rem',
-            justifyItems: 'start',
-          }}
-        >
-          <Select defaultValue="option-1" items={OPTION_ITEMS}>
-            <SelectTrigger size="sm">
-              <SelectValue placeholder="Small" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="option-1">Option 1</SelectItem>
-              <SelectItem value="option-2">Option 2</SelectItem>
-              <SelectItem value="option-3">Option 3</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select defaultValue="option-1" items={OPTION_ITEMS}>
-            <SelectTrigger size="default">
-              <SelectValue placeholder="Default" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="option-1">Option 1</SelectItem>
-              <SelectItem value="option-2">Option 2</SelectItem>
-              <SelectItem value="option-3">Option 3</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div style={{ marginBottom: '2rem' }}>
         <h3 className="mb-4 text-lg font-semibold">Variants</h3>
         <p className="text-muted-foreground mb-4 text-sm">
-          <b>default</b> — bordered field on the page background. <b>surface</b> — bg-card + rounded-lg filter/toolbar
-          select. <b>ghost</b> — border/shadow/bg reset for inline/embedded triggers.
+          <b>default</b> — bordered field on the page background. <b>ghost</b> — border/shadow/bg reset for
+          inline/embedded triggers. One height (min-h-9) that grows for rich multi-line values.
         </p>
         <div
           style={{
@@ -88,15 +55,6 @@ export const AllVariants: Story = {
           <Select defaultValue="option-1" items={OPTION_ITEMS}>
             <SelectTrigger variant="default" className="w-48">
               <SelectValue placeholder="Default" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="option-1">Option 1</SelectItem>
-              <SelectItem value="option-2">Option 2</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select defaultValue="option-1" items={OPTION_ITEMS}>
-            <SelectTrigger variant="surface" className="w-48">
-              <SelectValue placeholder="Surface" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="option-1">Option 1</SelectItem>

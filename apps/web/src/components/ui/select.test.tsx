@@ -18,32 +18,18 @@ const renderTrigger = (props: Omit<TriggerProps, 'children'> = {}) => {
 }
 
 describe('SelectTrigger', () => {
-  it('renders the surface variant as a bg-card rounded filter select', () => {
-    const trigger = renderTrigger({ variant: 'surface' })
-
-    expect(trigger).toHaveClass('bg-card', 'rounded-lg', 'border-border', 'shadow-none')
-  })
-
   it('renders the ghost variant with borders and background reset', () => {
     const trigger = renderTrigger({ variant: 'ghost' })
 
     expect(trigger).toHaveClass('border-0', 'bg-transparent', 'shadow-none', 'px-0', 'py-0')
   })
 
-  it('drives height off the data-size attribute (default)', () => {
+  it('applies a single min-height via the data-size hook', () => {
     const trigger = renderTrigger()
 
     expect(trigger).toBeInTheDocument()
     expect(trigger).toHaveAttribute('data-size', 'default')
-    // height is applied via the data-[size] selector baked into the base string
-    expect(trigger).toHaveClass('data-[size=default]:h-9')
-  })
-
-  it('drives height off the data-size attribute (sm → h-8)', () => {
-    const trigger = renderTrigger({ size: 'sm' })
-
-    expect(trigger).toBeInTheDocument()
-    expect(trigger).toHaveAttribute('data-size', 'sm')
-    expect(trigger).toHaveClass('data-[size=sm]:h-8')
+    // one height (min-h-9) baked into the base string — it grows for rich multi-line values
+    expect(trigger).toHaveClass('data-[size=default]:min-h-9')
   })
 })

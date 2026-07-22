@@ -161,7 +161,7 @@ const TokenAmountInput = ({
               <Separator orientation="vertical" className="mx-1 h-8 data-[orientation=vertical]:self-center" />
               <div data-testid="token-selector" className={css.select}>
                 <Select name={tokenAddressField} value={tokenAddress} onValueChange={handleTokenChange} required>
-                  <SelectTrigger size="sm">
+                  <SelectTrigger>
                     <SelectValue>
                       {selectedBalance && (
                         <AutocompleteItem tokenInfo={selectedBalance.tokenInfo} balance={selectedBalance.balance} />

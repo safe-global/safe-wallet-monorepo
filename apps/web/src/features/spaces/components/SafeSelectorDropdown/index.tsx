@@ -161,7 +161,6 @@ function SafeSelectorDropdown({
             isDisabled && 'cursor-not-allowed opacity-50',
           )}
           variant="ghost"
-          size="default"
           iconWrapperClassName={variants.iconWrapperClass}
           aria-label={`Select Safe ${triggerItem.address}`}
           aria-disabled={isDisabled || undefined}
