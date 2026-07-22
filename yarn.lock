@@ -45263,11 +45263,11 @@ __metadata:
   linkType: hard
 
 "ua-parser-js@npm:^0.7.33":
-  version: 0.7.40
-  resolution: "ua-parser-js@npm:0.7.40"
+  version: 0.7.41
+  resolution: "ua-parser-js@npm:0.7.41"
   bin:
     ua-parser-js: script/cli.js
-  checksum: 10/914b8134894e0060a695e519c4b25625613572911466fdcd60f995babc2a61e75a318d98f5e777961ab428069b6ee2f7c5e3a4595eee858a1e86de694579baac
+  checksum: 10/e41306332d8ace098d51a644a3ba95522ddfc04243727a3c0419efcdf486c8f868c3af8e6a56f6aa86bdc26e6b893abb0b2bde0c9e1a1625a183dfdf839cac82
   languageName: node
   linkType: hard
 
