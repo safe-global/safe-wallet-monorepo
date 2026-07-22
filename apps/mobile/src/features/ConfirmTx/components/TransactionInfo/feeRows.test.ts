@@ -3,7 +3,7 @@ import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balance
 import type { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const ZERO = '0x0000000000000000000000000000000000000000'
-const GELATO = '0xaEf22e5f09980fC1Ba6F2ec3EC34c1B9aeC885b5'
+const REFUND_RECEIVER = '0x0C51b4d70492D81f9f96B1EB1a826FBfb3fd27d8'
 const USDC = '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359'
 
 const NATIVE: TokenMeta = { address: ZERO, symbol: 'MATIC', decimals: 18 }
@@ -15,7 +15,7 @@ const SAFE_PAYS_NATIVE: MultisigExecutionDetails = {
   baseGas: '79646',
   gasPrice: '443094379592',
   gasToken: ZERO,
-  refundReceiver: { value: GELATO },
+  refundReceiver: { value: REFUND_RECEIVER },
 } as unknown as MultisigExecutionDetails
 
 // (12936 + 79646) * 443094379592
@@ -66,7 +66,7 @@ describe('buildFeesBreakdown', () => {
       gasPrice: '1',
       gasToken: USDC,
       gasTokenInfo: { address: USDC, symbol: 'USDC', decimals: 6, type: 'ERC20' },
-      refundReceiver: { value: GELATO },
+      refundReceiver: { value: REFUND_RECEIVER },
     } as unknown as MultisigExecutionDetails
 
     it('denominates the gas fee in the gas token', () => {

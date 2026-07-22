@@ -120,7 +120,7 @@ describe('helpers', () => {
   })
 
   describe('txRequiresRelay', () => {
-    const GELATO = '0xaEf22e5f09980fC1Ba6F2ec3EC34c1B9aeC885b5'
+    const REFUND_RECEIVER = '0x0C51b4d70492D81f9f96B1EB1a826FBfb3fd27d8'
 
     const makeTx = (info: Partial<Record<string, unknown>>): TransactionDetails =>
       ({
@@ -128,7 +128,7 @@ describe('helpers', () => {
           type: 'MULTISIG',
           baseGas: '79646',
           gasPrice: '443094379592',
-          refundReceiver: { value: GELATO },
+          refundReceiver: { value: REFUND_RECEIVER },
           ...info,
         },
       }) as unknown as TransactionDetails

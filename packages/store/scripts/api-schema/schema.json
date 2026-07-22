@@ -10278,7 +10278,7 @@
           "gasLimit": {
             "type": "string",
             "nullable": true,
-            "description": "Accepted for backward compatibility and validation; not forwarded to the relay provider (Gelato)."
+            "description": "Accepted for backward compatibility and validation; not forwarded to the relay provider."
           },
           "safeTxHash": {
             "type": "string",

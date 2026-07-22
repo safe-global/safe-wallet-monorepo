@@ -294,7 +294,7 @@ const variantCounterfactualState = {
     [VARIANT_CHAIN_ID]: {
       [VARIANT_SAFE_ADDRESS]: {
         props: {},
-        status: { status: 'AWAITING_EXECUTION', type: 'GELATO_RELAY' },
+        status: { status: 'AWAITING_EXECUTION', type: 'RELAYER' },
       },
     },
   },
