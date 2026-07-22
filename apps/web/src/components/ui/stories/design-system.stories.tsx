@@ -492,7 +492,10 @@ export const Dropdowns: Story = {
         </Swatch>
       </Row>
 
-      <Row label="Sizes we use" note="default is the standard; sm only for the compact currency selector">
+      <Row
+        label="Sizes we use"
+        note="default is the standard; sm is for compact inline selects — the currency selector, rows-per-page, and the token select inside amount inputs"
+      >
         <Swatch label="default · h-9" to="Pages/Onboarding/NewSafe/AdvancedCreate" toLabel="Threshold / network">
           <DemoSelect size="default" />
         </Swatch>
