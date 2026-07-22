@@ -151,14 +151,12 @@ const lastWalletStorage = localItem<string>('lastWallet')
 
 const connectLastWallet = async (onboard: OnboardAPI) => {
   const lastWalletLabel = lastWalletStorage.get()
-  if (lastWalletLabel) {
-    const isUnlocked = await isWalletUnlocked(lastWalletLabel)
+  if (!lastWalletLabel) return
 
-    if (isUnlocked === true || isUnlocked === undefined) {
-      await connectWallet(onboard, {
-        autoSelect: { label: lastWalletLabel, disableModals: isUnlocked || false },
-      })
-    }
+  if (await isWalletUnlocked(lastWalletLabel)) {
+    await connectWallet(onboard, {
+      autoSelect: { label: lastWalletLabel, disableModals: true },
+    })
   }
 }
 

@@ -7,7 +7,9 @@ import {
   isSmartContract,
   isEIP7702DelegatedAccount,
   EIP_7702_DELEGATED_ACCOUNT_PREFIX,
+  isWalletUnlocked,
 } from '@/utils/wallets'
+import { PRIVATE_KEY_MODULE_LABEL } from '@/services/private-key-module/constants'
 
 describe('wallets', () => {
   const getCodeMock = jest.fn()
@@ -21,6 +23,69 @@ describe('wallets', () => {
       return {
         getCode: getCodeMock,
       } as unknown as JsonRpcProvider
+    })
+  })
+
+  describe('isWalletUnlocked', () => {
+    const announceListeners: Array<() => void> = []
+
+    // Simulates a wallet extension answering the EIP-6963 roll call
+    const announceWallet = (name: string, request: jest.Mock) => {
+      const onRequest = () => {
+        window.dispatchEvent(
+          new CustomEvent('eip6963:announceProvider', {
+            detail: { info: { name }, provider: { request } },
+          }),
+        )
+      }
+      window.addEventListener('eip6963:requestProvider', onRequest)
+      announceListeners.push(() => window.removeEventListener('eip6963:requestProvider', onRequest))
+    }
+
+    afterEach(() => {
+      announceListeners.forEach((removeListener) => removeListener())
+      announceListeners.length = 0
+    })
+
+    it('should return true for WalletConnect and the private key module without probing providers', async () => {
+      expect(await isWalletUnlocked('WalletConnect')).toBe(true)
+      expect(await isWalletUnlocked(PRIVATE_KEY_MODULE_LABEL)).toBe(true)
+    })
+
+    it('should return true when the announced provider reports authorized accounts', async () => {
+      const request = jest.fn().mockResolvedValue(['0x1234'])
+      announceWallet('MetaMask', request)
+
+      expect(await isWalletUnlocked('MetaMask')).toBe(true)
+      expect(request).toHaveBeenCalledWith({ method: 'eth_accounts' })
+    })
+
+    it('should return false when the announced provider reports no accounts (locked or unauthorized)', async () => {
+      const request = jest.fn().mockResolvedValue([])
+      announceWallet('MetaMask', request)
+
+      expect(await isWalletUnlocked('MetaMask')).toBe(false)
+    })
+
+    it('should return false when the provider request throws', async () => {
+      const request = jest.fn().mockRejectedValue(new Error('Provider error'))
+      announceWallet('MetaMask', request)
+
+      expect(await isWalletUnlocked('MetaMask')).toBe(false)
+    })
+
+    it('should return false when no provider announces itself', async () => {
+      expect(await isWalletUnlocked('MetaMask')).toBe(false)
+    })
+
+    it('should only probe the provider matching the saved label', async () => {
+      const braveRequest = jest.fn().mockResolvedValue(['0x1234'])
+      const metaMaskRequest = jest.fn().mockResolvedValue([])
+      announceWallet('Brave Wallet', braveRequest)
+      announceWallet('MetaMask', metaMaskRequest)
+
+      expect(await isWalletUnlocked('MetaMask')).toBe(false)
+      expect(braveRequest).not.toHaveBeenCalled()
     })
   })
 
