@@ -1,4 +1,4 @@
-import { NoOpProvider } from '../providers/noop'
+import { NoOpProvider } from '../noop'
 
 describe('NoOpProvider', () => {
   it('should be a no-op implementation that never throws', () => {

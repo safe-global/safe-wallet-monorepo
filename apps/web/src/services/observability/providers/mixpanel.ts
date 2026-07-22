@@ -1,5 +1,5 @@
-import type { ILogger, IObservabilityProvider, ObservedError } from '@/services/observability/types'
-import { trackErrorSurfaced } from './error-tracking'
+import type { ILogger, IObservabilityProvider, ObservedError } from '../types'
+import { trackErrorSurfaced } from '@/services/analytics/error-tracking'
 
 const noopLogger: ILogger = {
   info: () => {},

@@ -1,5 +1,5 @@
-import { CompositeProvider } from '../providers/composite'
-import type { IObservabilityProvider, ILogger, ObservedError } from '../types'
+import { CompositeProvider } from '../composite'
+import type { IObservabilityProvider, ILogger, ObservedError } from '../../types'
 
 describe('CompositeProvider', () => {
   const createMockProvider = (name: string): IObservabilityProvider => {
