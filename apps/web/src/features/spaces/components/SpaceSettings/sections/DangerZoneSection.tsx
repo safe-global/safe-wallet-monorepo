@@ -29,7 +29,7 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
             <TooltipTrigger
               render={
                 <span tabIndex={0}>
-                  <Button variant="destructive" size="sm" data-testid="space-leave-button" disabled>
+                  <Button variant="destructive" data-testid="space-leave-button" disabled>
                     Leave workspace
                   </Button>
                 </span>
@@ -40,7 +40,6 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
         ) : (
           <Button
             variant="destructive"
-            size="sm"
             data-testid="space-leave-button"
             disabled={!isActiveMember}
             onClick={() => {
@@ -57,7 +56,6 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
         <div className="flex items-center justify-start gap-6 py-4 last:pb-0">
           <Button
             variant="destructive"
-            size="sm"
             data-testid="space-delete-button"
             onClick={() => {
               setDeleteOpen(true)
