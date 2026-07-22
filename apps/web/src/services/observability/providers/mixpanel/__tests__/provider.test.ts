@@ -1,7 +1,7 @@
-import { MixpanelTracingProvider } from '../mixpanel'
-import { trackErrorSurfaced } from '@/services/analytics/error-tracking'
+import { MixpanelTracingProvider } from '../provider'
+import { trackErrorSurfaced } from '../error-tracking'
 
-jest.mock('@/services/analytics/error-tracking', () => ({
+jest.mock('../error-tracking', () => ({
   trackErrorSurfaced: jest.fn(),
 }))
 

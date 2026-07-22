@@ -1,9 +1,9 @@
 import { trackErrorSurfaced } from '../error-tracking'
-import { MixpanelEvent, MixpanelEventParams } from '../mixpanel-events'
-import { mixpanelTrack } from '../mixpanel'
+import { MixpanelEvent, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { mixpanelTrack } from '@/services/analytics/mixpanel'
 import { ErrorDomain, ErrorLayer, ErrorType } from '@safe-global/utils/services/exceptions/errorTaxonomy'
 
-jest.mock('../mixpanel', () => ({
+jest.mock('@/services/analytics/mixpanel', () => ({
   mixpanelTrack: jest.fn(),
 }))
 

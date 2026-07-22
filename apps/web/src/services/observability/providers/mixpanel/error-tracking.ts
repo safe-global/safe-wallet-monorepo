@@ -1,7 +1,7 @@
 import { normalizeError } from '@safe-global/utils/services/exceptions/normalizeError'
-import type { ErrorContext, SurfacedError } from '@/services/observability/types'
-import { MixpanelEvent, MixpanelEventParams } from './mixpanel-events'
-import { mixpanelTrack } from './mixpanel'
+import type { ErrorContext, SurfacedError } from '../../types'
+import { MixpanelEvent, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { mixpanelTrack } from '@/services/analytics/mixpanel'
 
 /**
  * Maps the analytics-agnostic `ErrorContext` to Mixpanel event properties.
