@@ -1,4 +1,4 @@
-import { NoOpProvider } from '../providers/noop'
+import { NoOpProvider } from '../noop'
 
 describe('NoOpProvider', () => {
   it('should be a no-op implementation that never throws', () => {
@@ -9,7 +9,9 @@ describe('NoOpProvider', () => {
 
     // Test that all operations are safe no-ops
     expect(() => provider.init()).not.toThrow()
-    expect(() => provider.captureException(new Error('test'), { key: 'value' })).not.toThrow()
+    expect(() =>
+      provider.captureError({ error: new Error('test'), isUserFacing: true, tags: { key: 'value' } }),
+    ).not.toThrow()
     expect(() => logger.info('test', { context: 'data' })).not.toThrow()
     expect(() => logger.warn('test')).not.toThrow()
     expect(() => logger.error('test')).not.toThrow()

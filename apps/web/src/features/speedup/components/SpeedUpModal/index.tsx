@@ -127,7 +127,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
       const error = asError(e)
       setWaitingForConfirmation(false)
       if (!isWalletRejection(error)) {
-        trackError(ErrorCodes._814, error)
+        trackError(ErrorCodes._814, error, { txHash })
         dispatch(
           showNotification({
             message: 'Speed up failed',
