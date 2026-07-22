@@ -113,7 +113,7 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
     swaps.unlockTwapOrders(iframeSelector)
     main.getIframeBody(iframeSelector).within(() => {
       swaps.selectInputCurrency(swaps.swapTokens.cow)
-      swaps.setInputValue(10)
+      swaps.setInputValue(1)
       swaps.selectOutputCurrency(swaps.swapTokens.dai)
       swaps.checkSmallSellAmountMessageDisplayed()
     })
