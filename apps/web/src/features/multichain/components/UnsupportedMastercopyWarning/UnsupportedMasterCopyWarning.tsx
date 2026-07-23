@@ -29,10 +29,9 @@ export const UnsupportedMastercopyWarning = () => {
 
   if (!showWarning) return null
 
-  // Check if migration is possible based on bytecode comparison
-  const canMigrate =
-    canMigrateUnsupportedMastercopy(safe, bytecodeComparison.result) ||
-    (!isValidMasterCopy(safe.implementationVersionState) && isMigrationToL2Possible(safe))
+  // Migration is offered when the bytecode matches an official L2 singleton
+  // or the Safe runs an official singleton of the wrong chain flavour
+  const canMigrate = canMigrateUnsupportedMastercopy(safe, bytecodeComparison.result) || isMigrationToL2Possible(safe)
 
   return (
     <ActionCard

@@ -45,7 +45,11 @@ export const contractVersionScanner: SecurityScanner = {
 
     // Unsupported mastercopy — same check as UnsupportedMastercopyWarning
     if (!isValidMasterCopy(implementationVersionState)) {
-      const canMigrateL2 = isMigrationToL2Possible({ version, chainId })
+      const canMigrateL2 = isMigrationToL2Possible({
+        version,
+        chainId,
+        implementation: { value: implementationAddress },
+      })
 
       const score = 10
       return {

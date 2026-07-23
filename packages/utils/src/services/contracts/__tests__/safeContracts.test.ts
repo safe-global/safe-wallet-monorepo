@@ -75,31 +75,68 @@ describe('safeContracts', () => {
   })
 
   describe('isMigrationToL2Possible', () => {
+    // Official canonical singleton addresses from safe-deployments
+    const SINGLETON_130_L1 = '0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552'
+    const SINGLETON_130_L2 = '0x3E5c63644E683549055b9Be8653de26E0B4CD36E'
+    const SINGLETON_141_L1 = '0x41675C099F32341bf84BFc5382aF534df5C7461a'
+
     const createMockSafe = (overrides?: Partial<SafeState>): SafeState =>
       ({
         nonce: 0,
         chainId: '1',
         version: '1.3.0',
         address: { value: '0x123' },
+        implementation: { value: SINGLETON_130_L1 },
         ...overrides,
       }) as SafeState
 
-    it('should return true for a 1.3.0 Safe with nonce > 0 (migration does not depend on nonce)', () => {
+    it('should return true for a 1.3.0 Safe on the official L1 singleton with nonce > 0 (migration does not depend on nonce)', () => {
       const safe = createMockSafe({ nonce: 5, version: '1.3.0' })
 
       expect(isMigrationToL2Possible(safe)).toBe(true)
     })
 
-    it('should return true for a 1.4.1 Safe with nonce > 0', () => {
-      const safe = createMockSafe({ nonce: 12, version: '1.4.1' })
+    it('should return true for a 1.4.1 Safe on the official L1 singleton with nonce > 0', () => {
+      const safe = createMockSafe({ nonce: 12, version: '1.4.1', implementation: { value: SINGLETON_141_L1 } })
 
       expect(isMigrationToL2Possible(safe)).toBe(true)
     })
 
     it('should return true for versions with build metadata like 1.3.0+L2', () => {
-      const safe = createMockSafe({ nonce: 3, version: '1.3.0+L2' })
+      const safe = createMockSafe({ nonce: 3, version: '1.3.0+L2', implementation: { value: SINGLETON_130_L2 } })
 
       expect(isMigrationToL2Possible(safe)).toBe(true)
+    })
+
+    it('should return false for forks that self-report a supported version but use an unofficial mastercopy', () => {
+      // Third-party forks of the Safe contracts return an official-looking
+      // VERSION() (e.g. 1.3.0) while running modified code at an address that
+      // is not part of any official deployment
+      const safe = createMockSafe({
+        nonce: 4,
+        chainId: '137',
+        version: '1.3.0',
+        implementation: { value: '0x1111111111111111111111111111111111111111' },
+      })
+
+      expect(isMigrationToL2Possible(safe)).toBe(false)
+    })
+
+    it('should return false for unofficial mastercopies even at nonce 0 (pre-existing bug: the old nonce gate allowed them)', () => {
+      const safe = createMockSafe({
+        nonce: 0,
+        chainId: '137',
+        version: '1.3.0',
+        implementation: { value: '0x1111111111111111111111111111111111111111' },
+      })
+
+      expect(isMigrationToL2Possible(safe)).toBe(false)
+    })
+
+    it('should return false when the implementation address is missing', () => {
+      const safe = createMockSafe({ implementation: undefined })
+
+      expect(isMigrationToL2Possible(safe)).toBe(false)
     })
 
     it('should return false for versions not supported by the SafeMigration contract', () => {

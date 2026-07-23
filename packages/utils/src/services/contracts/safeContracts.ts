@@ -4,7 +4,7 @@ import type { SafeVersion } from '@safe-global/types-kit'
 import { assertValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
 import { getSafeMigrationDeployments } from '@safe-global/safe-deployments'
 import { SAFE_TO_L2_MIGRATION_VERSION } from '@safe-global/utils/config/constants'
-import { getChainAgnosticAddress } from '@safe-global/utils/services/contracts/deployments'
+import { getChainAgnosticAddress, isOfficialMasterCopy } from '@safe-global/utils/services/contracts/deployments'
 import { isSupportedL2Version, type BytecodeComparisonResult } from './bytecodeComparison'
 
 // `UNKNOWN` is returned if the mastercopy does not match supported ones
@@ -60,9 +60,18 @@ export const _getValidatedGetContractProps = (
  * 1.3.0 and 1.4.1 Safes and does not depend on the Safe's nonce.
  * Only the base version is matched — build metadata such as `+L2` or
  * `+Circles` is ignored.
+ *
+ * The implementation must be an official Safe singleton address: the reported
+ * version comes from the contract's own VERSION() and is also returned by
+ * third-party forks, for which a blind singleton swap is unsafe.
+ * Byte-identical redeployments at unofficial addresses are covered separately
+ * by the bytecode comparison in `canMigrateUnsupportedMastercopy`.
  */
-export const isMigrationToL2Possible = (safe: Pick<SafeState, 'version' | 'chainId'>): boolean => {
+export const isMigrationToL2Possible = (safe: Pick<SafeState, 'version' | 'chainId' | 'implementation'>): boolean => {
   if (!safe.version || !isSupportedL2Version(safe.version)) {
+    return false
+  }
+  if (!isOfficialMasterCopy(safe.implementation?.value, safe.version)) {
     return false
   }
   const deployment = getSafeMigrationDeployments({ version: SAFE_TO_L2_MIGRATION_VERSION })
