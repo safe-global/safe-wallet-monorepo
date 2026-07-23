@@ -12,7 +12,7 @@ import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import useBalances from '@/hooks/useBalances'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly, getProviderRpcEndpointInfo } from '@/hooks/wallets/web3'
 import { Errors, logError } from '@/services/exceptions'
 import type { FeeRow } from './useFeesPreview'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
@@ -119,8 +119,8 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
   }, [isGtfEnabled, executedAt, !!exec, isSafePaid, txHash, provider])
 
   useEffect(() => {
-    if (receiptError) logError(Errors._612, receiptError.message)
-  }, [receiptError])
+    if (receiptError) logError(Errors._612, receiptError.message, getProviderRpcEndpointInfo(provider))
+  }, [receiptError, provider])
 
   const signerPaidData = useMemo<HistoryFeesData | null>(() => {
     if (!receipt) return null

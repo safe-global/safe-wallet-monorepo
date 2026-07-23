@@ -3,6 +3,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
+import { getProviderRpcEndpointInfo } from '@/hooks/wallets/web3'
 import chains from '@safe-global/utils/config/chains'
 import { useSigner } from './wallets/useWallet'
 import { useSafeSDK } from './coreSDK/safeCoreSDK'
@@ -83,9 +84,9 @@ const useGasLimit = (
 
   useEffect(() => {
     if (gasLimitError) {
-      logError(Errors._612, gasLimitError.message)
+      logError(Errors._612, gasLimitError.message, getProviderRpcEndpointInfo(web3ReadOnly))
     }
-  }, [gasLimitError])
+  }, [gasLimitError, web3ReadOnly])
 
   return { gasLimit, gasLimitError, gasLimitLoading }
 }
