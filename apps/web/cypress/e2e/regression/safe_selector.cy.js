@@ -82,7 +82,7 @@ describe('Safe selector tests - pin/unpin and undeployed safes', () => {
   })
 
   it('Verify "Add accounts" button is displayed on the accounts page', () => {
-    wallet.connectSignerViaStorage(signer, constants.welcomeAccountsSepoliaUrl)
+    wallet.connectSignerViaStorage(signer, constants.welcomeAccountsSepoliaUrl, { waitForConnection: false })
     accountsModal.verifyAddAccountsButtonVisible()
   })
 
@@ -170,7 +170,7 @@ describe('Safe selector tests - accounts modal actions', () => {
   })
 
   it('Verify Import button is present on the accounts page', () => {
-    wallet.connectSignerViaStorage(signer, constants.welcomeAccountsSepoliaUrl)
+    wallet.connectSignerViaStorage(signer, constants.welcomeAccountsSepoliaUrl, { waitForConnection: false })
     accountsModal.verifyImportBtnVisible()
   })
 
@@ -297,7 +297,7 @@ describe('Safe selector tests - add safe button', () => {
   })
 
   it('Verify selecting an existing safe from Add accounts opens the load flow', () => {
-    wallet.connectSignerViaStorage(signer, constants.welcomeAccountsSepoliaUrl)
+    wallet.connectSignerViaStorage(signer, constants.welcomeAccountsSepoliaUrl, { waitForConnection: false })
 
     accountsModal.clickAddAccountsSelectExistingAndVerifyLoadFlow()
   })
