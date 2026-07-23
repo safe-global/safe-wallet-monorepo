@@ -119,31 +119,11 @@
 }
 
 @media (max-width: 899.95px) {
+  /* Narrow screens stack vertically: title above the card, then the card, then the
+     SafeShield widget full-width below it. The flex row wraps (see min-[900px]:flex-nowrap
+     in the JSX), so the widget only needs its top offset reset — the flex gap spaces it. */
   .widget {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    margin-top: unset;
-  }
-
-  .widget :global([data-testid='safe-shield-widget']) {
-    height: 100%;
-  }
-
-  .titleWrapper {
-    position: absolute;
-    top: 16px;
-    left: var(--space-2);
-    margin-bottom: 0;
-    width: calc(100% - 70px);
-  }
-
-  .title {
-    font-size: 16px;
-    line-height: 18px;
+    margin-top: 0;
   }
 
   .container {

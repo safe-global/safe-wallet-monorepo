@@ -58,17 +58,19 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
         </div>
       )}
 
-      {/* md:flex-1 + min-w-0 keep this column at a stable share of the row (flex-basis 0) so it
-          never wraps below the fixed-width status rail when a step's content is wide — otherwise the
-          card jumps horizontally and resizes between steps. */}
-      <div className="w-full min-w-0 flex-grow md:flex-1 md:px-10">
+      {/* min-[900px]:flex-1 + min-w-0 keep this column at a stable share of the row (flex-basis 0)
+          so it never wraps below the fixed-width status rail when a step's content is wide — otherwise
+          the card jumps horizontally and resizes between steps. The 900px breakpoint matches the CSS
+          module and useIsBelowMd so the layout switches in one place, not across two mismatched ones. */}
+      <div className="w-full min-w-0 flex-grow min-[900px]:flex-1 min-[900px]:px-10">
         <div className={classnames('mx-auto w-full max-w-[1200px]', css.contentContainer)}>
-          {/* md:flex-nowrap keeps the SafeShield sidebar beside the card (its intended md:37.5% / lg:320px
+          {/* min-[900px]:flex-nowrap keeps the SafeShield sidebar beside the card (its 37.5% / lg:320px
               slot) instead of wrapping below it when a step's content is tall enough to add a scrollbar —
-              the card (min-w-0) absorbs the shrink, so it stays put across steps rather than re-centering. */}
-          <div className="flex flex-wrap justify-center gap-6 md:flex-nowrap">
+              the card (min-w-0) absorbs the shrink, so it stays put across steps. Below 900px the row
+              wraps and the widget stacks full-width beneath the card. */}
+          <div className="flex flex-wrap justify-center gap-6 min-[900px]:flex-nowrap">
             {/* Main content */}
-            <div className="min-w-0 flex-grow md:max-w-[672px]">
+            <div className="min-w-0 flex-grow min-[900px]:max-w-[672px]">
               <div className={css.titleWrapper}>
                 <Typography data-testid="modal-title" variant="h3" className={classnames('font-bold', css.title)}>
                   {title}
@@ -114,7 +116,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
 
             {/* Sidebar */}
             {!isReplacement && (
-              <div className={classnames('w-full md:w-[37.5%] md:shrink-0 lg:w-[320px]', css.widget)}>
+              <div className={classnames('w-full min-[900px]:w-[37.5%] min-[900px]:shrink-0 lg:w-[320px]', css.widget)}>
                 <div className={css.sticky}>
                   <SafeShieldWidget />
 
