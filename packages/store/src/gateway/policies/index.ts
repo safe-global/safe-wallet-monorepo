@@ -2,6 +2,9 @@ import { cgwClient as api } from '../cgwClient'
 import { buildMockAvailablePolicies, buildMockActivePolicies } from './mocks'
 import type { GetPoliciesResponse, GetActivePoliciesResponse, PolicyQueryArg } from './types'
 
+// Hand-declared while the endpoint is mocked. Every other slice imports
+// `addTagTypes` from its AUTO_GENERATED sibling — once the real policies schema
+// is code-generated, import it from there and delete this local declaration.
 export const addTagTypes = ['policies'] as const
 
 /**
@@ -24,5 +27,3 @@ export const policiesApi = api.enhanceEndpoints({ addTagTypes }).injectEndpoints
 })
 
 export const { usePoliciesGetPoliciesV1Query, usePoliciesGetActivePoliciesV1Query } = policiesApi
-
-export * from './types'

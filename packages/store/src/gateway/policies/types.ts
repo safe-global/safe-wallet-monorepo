@@ -13,16 +13,6 @@ export enum PolicyType {
 }
 
 /**
- * Which kind of guard a policy engine is installed as on the Safe:
- *  - TransactionGuard — checks every Safe transaction (`execTransaction`).
- *  - ModuleGuard      — checks every module execution (`execTransactionFromModule`).
- */
-export enum PolicyKind {
-  TransactionGuard = 'transaction-guard',
-  ModuleGuard = 'module-guard',
-}
-
-/**
  * A plain ERC20 token descriptor (display metadata).
  */
 export type TokenInfo = {

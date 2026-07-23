@@ -167,7 +167,7 @@ const SpacePolicies = () => {
       <Stack mb={5} gap={1}>
         <Typography variant="h1">Policies</Typography>
         <Typography sx={{ fontSize: 15, color: 'text.secondary' }}>
-          Rules that govern this workspace&apos;s Safes — applied onchain, enforced by audited modules.
+          Rules that govern this workspace&apos;s Safes — applied onchain, enforced by audited modules and guards.
         </Typography>
       </Stack>
 

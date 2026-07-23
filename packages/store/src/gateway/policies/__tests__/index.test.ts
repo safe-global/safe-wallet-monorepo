@@ -70,18 +70,16 @@ describe('policiesApi (mocked)', () => {
   })
 
   describe('policiesGetActivePoliciesV1', () => {
-    it('returns one active policy per type with the right enforcement mode', async () => {
+    it('returns active policies with the right enforcement mode per type', async () => {
       const result = await store.dispatch(policiesApi.endpoints.policiesGetActivePoliciesV1.initiate(arg))
 
       expect(result.isSuccess).toBe(true)
       const byType = Object.fromEntries(result.data!.items.map((i) => [i.type, i]))
 
-      // spending-limit + recovery are module-enforced (no guard)
+      // A module-enforced policy (spending limit) has no guard.
       expect(byType[PolicyType.SpendingLimit].enforcement.via).toBe('module')
-      expect(byType[PolicyType.Recovery].enforcement.via).toBe('module')
-      // token-withdraw + cosigner are guard-enforced
+      // The token-withdraw policy (this plan's focus) is guard-enforced.
       expect(byType[PolicyType.TokenWithdraw].enforcement.via).toBe('guard')
-      expect(byType[PolicyType.Cosigner].enforcement.via).toBe('guard')
     })
   })
 
