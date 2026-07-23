@@ -76,6 +76,8 @@ import {
   hasFeature,
   getNativeTokenDisplay,
   NATIVE_TOKEN_DISPLAY_DEFAULT,
+  isSafeCreationSponsored,
+  isDailyRelayQuota,
 } from '@safe-global/utils/utils/chains'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { type TransactionOptions } from '@safe-global/types-kit'
@@ -205,8 +207,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
   const isMultiChainDeployment = data.networks.length > 1
 
-  // Every owner has remaining relays and relay method is selected
-  const canRelay = hasRemainingRelays(minRelays)
+  // Daily-quota relay models (daily-limit, no-fee-campaign) additionally require every owner to have remaining relays.
+  const canRelay = isSafeCreationSponsored(chain) && (!isDailyRelayQuota(chain) || hasRemainingRelays(minRelays))
   const willRelay = getWillRelay(canRelay, executionMethod)
 
   const newSafeProps = useMemo(
