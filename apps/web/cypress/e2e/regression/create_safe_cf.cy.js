@@ -16,29 +16,31 @@ describe('CF Safe regression tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  beforeEach(() => {
-    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_0)
-  })
+  const seedUndeployedSafe = (win) =>
+    win.localStorage.setItem(
+      constants.localStorageKeys.SAFE_v2__undeployedSafes,
+      JSON.stringify(ls.undeployedSafe.safe1),
+    )
+  const undeployedSafeStorage = { [constants.localStorageKeys.SAFE_v2__undeployedSafes]: ls.undeployedSafe.safe1 }
 
   it('Verify "0 out of 2 step completed" is shown in the dashboard', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
-    cy.reload()
+    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_0, { onBeforeLoad: seedUndeployedSafe })
     createwallet.checkInitialStepsDisplayed()
   })
 
   it('Verify "Add native assets" button opens a modal with a QR code and the safe address', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
-    cy.reload()
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.homeUrl + staticSafes.SEP_STATIC_SAFE_0, {
+      extraStorage: undeployedSafeStorage,
+    })
     owner.waitForConnectionStatus()
     createwallet.clickOnAddFundsBtn()
     main.verifyElementsIsVisible([createwallet.qrCode, createwallet.addressInfo])
   })
 
   it('Verify QR code switch status change works in "Add native assets" modal', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
-    cy.reload()
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.homeUrl + staticSafes.SEP_STATIC_SAFE_0, {
+      extraStorage: undeployedSafeStorage,
+    })
     owner.waitForConnectionStatus()
     createwallet.clickOnAddFundsBtn()
     createwallet.checkQRCodeSwitchStatus(constants.checkboxStates.unchecked)
@@ -47,23 +49,19 @@ describe('CF Safe regression tests', () => {
   })
 
   it('Verify "Notifications" in the settings are disabled', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
-    cy.reload()
-    cy.visit(constants.notificationsUrl + staticSafes.SEP_STATIC_SAFE_0)
+    cy.visit(constants.notificationsUrl + staticSafes.SEP_STATIC_SAFE_0, { onBeforeLoad: seedUndeployedSafe })
     createwallet.checkNotificationsSwitchIs(constants.enabledStates.disabled)
   })
 
   it('Verify in assets, that a "Add funds" block is present', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
-    cy.reload()
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_0)
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_0, { onBeforeLoad: seedUndeployedSafe })
     main.verifyElementsIsVisible([createwallet.addFundsSection, createwallet.noTokensAlert])
   })
 
   it('Verify clicking on "Activate now" button opens safe activation flow', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_0)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_0, {
+      extraStorage: undeployedSafeStorage,
+    })
     owner.waitForConnectionStatus()
     createwallet.clickOnActivateAccountBtn(1)
     cy.contains(createwallet.deployWalletStr)

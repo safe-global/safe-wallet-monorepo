@@ -26,9 +26,8 @@ describe('Proposers tests', () => {
   })
 
   beforeEach(() => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
+    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
-    wallet.connectSigner(signer)
   })
 
   it('Verify the proposers section on the Set up in the settings when there are no proposers', () => {
@@ -67,13 +66,6 @@ describe('Proposers tests', () => {
     proposer.verifyEditProposerBtnDisabled(proposerAddress)
   })
 
-  it('Verify that the address book name of the proposers overwrites the name given during its creation', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.proposers)
-    cy.reload()
-    cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
-    proposer.checkProposerData([proposerNameAD])
-  })
-
   it('Verify if the address book entry of propers name is removed, then the name given during its creation shows again', () => {
     proposer.checkProposerData([proposerName])
   })
@@ -94,5 +86,15 @@ describe('Proposers tests', () => {
   it('Verify a tx with the "proposal" status shows the details of a proposer', () => {
     cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_31 + proposedTx)
     proposer.verifyProposerInTxActionList(proposerAddress2)
+  })
+
+  describe('With a pre-seeded address book', () => {
+    it('Verify that the address book name of the proposers overwrites the name given during its creation', () => {
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31, {
+        extraStorage: { [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.proposers },
+      })
+      cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
+      proposer.checkProposerData([proposerNameAD])
+    })
   })
 })

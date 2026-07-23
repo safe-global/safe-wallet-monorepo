@@ -1,5 +1,4 @@
 import * as constants from '../../support/constants.js'
-import * as main from '../pages/main.page.js'
 import * as safeNav from '../pages/safe_navigation.pages.js'
 import * as accountsModal from '../pages/accounts_modal.pages.js'
 import * as ls from '../../support/localstorage_data.js'
@@ -17,11 +16,12 @@ describe('Multichain safe selector tests', { defaultCommandTimeout: 60000 }, () 
   })
 
   beforeEach(() => {
-    cy.visit(constants.BALANCE_URL + staticSafes.MATIC_STATIC_SAFE_28)
-    cy.wait(2000)
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set5WithSingleSafe)
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.multichain)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.MATIC_STATIC_SAFE_28, {
+      extraStorage: {
+        [constants.localStorageKeys.SAFE_v2__addedSafes]: ls.addedSafes.set5WithSingleSafe,
+        [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.multichain,
+      },
+    })
   })
 
   it('Verify balance of the safe group', () => {

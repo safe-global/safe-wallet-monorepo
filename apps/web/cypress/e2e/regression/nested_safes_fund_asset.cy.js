@@ -7,7 +7,6 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as owner from '../pages/owners.pages.js'
 import * as assets from '../pages/assets.pages.js'
-import * as main from '../pages/main.page.js'
 
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
@@ -19,16 +18,15 @@ describe('Nested safes fund asset tests', () => {
   })
 
   beforeEach(() => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_45)
-    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.nestedParentSafe45)
-    cy.reload()
-    main.setupSafeSettingsWithAllTokens().then(() => {
-      cy.reload()
-      wallet.connectSigner(signer)
-      safeNav.clickOnNestedSafesBtn()
-      // This safe has no existing nested safes, so no intro screen - just click add
-      nsafes.clickOnAddNestedSafeBtn()
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_45, {
+      extraStorage: {
+        [constants.localStorageKeys.SAFE_v2__addedSafes]: ls.addedSafes.nestedParentSafe45,
+        [constants.localStorageKeys.SAFE_v2__settings]: ls.safeSettings.slimitSettings,
+      },
     })
+    safeNav.clickOnNestedSafesBtn()
+    // This safe has no existing nested safes, so no intro screen - just click add
+    nsafes.clickOnAddNestedSafeBtn()
   })
 
   it('Verify that the token can be selected from the drop-down', () => {

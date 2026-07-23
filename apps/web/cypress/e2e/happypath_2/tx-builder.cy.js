@@ -44,8 +44,7 @@ describe('Transaction Builder happy path tests', { defaultCommandTimeout: 20000 
       iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
       const visitUrl = `/apps/open?safe=${safeAppSafes.SEP_SAFEAPP_SAFE_1}&appUrl=${encodeURIComponent(appUrl)}`
 
-      cy.visit(constants.transactionQueueUrl + safeAppSafes.SEP_SAFEAPP_SAFE_1)
-      wallet.connectSigner(signer)
+      wallet.connectSignerViaStorage(signer, constants.transactionQueueUrl + safeAppSafes.SEP_SAFEAPP_SAFE_1)
       cy.wait(5000)
       createtx.deleteAllTx()
       cy.visit(visitUrl)

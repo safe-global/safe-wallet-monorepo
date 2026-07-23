@@ -386,7 +386,7 @@ export function visitWelcomeAccountPage(chain = 'sep') {
 }
 
 export function connectWalletAndCreateSafe(signer) {
-  wallet.connectSigner(signer)
+  wallet.connectSignerViaStorage(signer)
   owner.waitForConnectionStatus()
   clickOnCreateNewSafeBtn()
 }

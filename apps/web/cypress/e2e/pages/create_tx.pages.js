@@ -1141,8 +1141,7 @@ export function checkThatComboButtonOptionIsNotPresent(option) {
 }
 //Functions for the happy path flow
 export function cleanTransactionQueue(safeAddress, signer) {
-  cy.visit(constants.transactionQueueUrl + safeAddress)
-  walletUtils.connectSigner(signer)
+  walletUtils.connectSignerViaStorage(signer, constants.transactionQueueUrl + safeAddress)
   deleteAllTx()
   navigation.clickOnWalletExpandMoreIcon()
   navigation.clickOnDisconnectBtn()
@@ -1167,8 +1166,7 @@ export function deleteTransactionAndSwitchToSigner(signer) {
 
 export function createAddOwnerTransaction(safeAddress, signer, ownerAddress, ownerIndex = 2) {
   // Create add owner transaction
-  cy.visit(constants.setupUrl + safeAddress)
-  walletUtils.connectSigner(signer)
+  walletUtils.connectSignerViaStorage(signer, constants.setupUrl + safeAddress)
   owner.waitForConnectionStatus()
   owner.openManageSignersWindow()
   owner.clickOnAddSignerBtn()

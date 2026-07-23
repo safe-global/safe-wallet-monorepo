@@ -20,8 +20,7 @@ describe(
 
     beforeEach(() => {
       mockVisualTestApis()
-      cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
-      wallet.connectSigner(signer)
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
       main.awaitVisualStability()
     })
 

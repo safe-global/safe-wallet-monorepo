@@ -1,6 +1,5 @@
 import * as constants from '../../support/constants.js'
 import * as addressBook from '../pages/address_book.page.js'
-import * as main from '../pages/main.page.js'
 import * as ls from '../../support/localstorage_data.js'
 import * as createtx from '../../e2e/pages/create_tx.pages'
 import * as data from '../../fixtures/txhistory_data_data.json'
@@ -19,13 +18,13 @@ describe('Address book tests - 2', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  beforeEach(() => {
-    cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4)
-  })
+  const seedAddressBook = (value) => (win) =>
+    win.localStorage.setItem(constants.localStorageKeys.SAFE_v2__addressBook, JSON.stringify(value))
 
   it('Verify Name and Address columns sorting works', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sortingData)
-    cy.reload()
+    cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4, {
+      onBeforeLoad: seedAddressBook(ls.addressBookData.sortingData),
+    })
     addressBook.clickOnNameSortBtn()
     addressBook.verifyEntriesOrder()
     addressBook.clickOnNameSortBtn()
@@ -40,8 +39,9 @@ describe('Address book tests - 2', () => {
   })
 
   it('Verify that edit owners name changes the name in the settings', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sepoliaAddress2)
-    cy.reload()
+    cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4, {
+      onBeforeLoad: seedAddressBook(ls.addressBookData.sepoliaAddress2),
+    })
     addressBook.clickOnEditEntryBtn()
     addressBook.typeInNameInput(onwer2)
     addressBook.clickOnSaveEntryBtn()
@@ -66,16 +66,16 @@ describe('Address book tests - 2', () => {
   })
 
   it('Verify by default there 25 rows shown per page', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.pagination)
-    cy.wait(1000)
-    cy.reload()
+    cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4, {
+      onBeforeLoad: seedAddressBook(ls.addressBookData.pagination),
+    })
     addressBook.verifyCountOfSafes(25)
   })
 
   it('Verify that clicking on next and previous page buttons shows safes', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.pagination)
-    cy.wait(1000)
-    cy.reload()
+    cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4, {
+      onBeforeLoad: seedAddressBook(ls.addressBookData.pagination),
+    })
     addressBook.clickOnNextPageBtn()
     addressBook.verifyCountOfSafes(1)
     addressBook.clickOnPrevPageBtn()
