@@ -387,28 +387,6 @@ export type MasterCopyFlavour = {
  * fix would require bytecode inspection (already done in the `!isValidMasterCopy`
  * branch of initSafeSDK) but that adds an RPC round-trip to the happy path.
  */
-/**
- * Checks whether an implementation address is an official Safe singleton
- * deployment (L1 or L2 flavour, any deployment variant) for the given version.
- * The match is address-based and chain-agnostic: official singletons are
- * deployed deterministically, so the address alone identifies the contract.
- * Forks that self-report an official VERSION() do not pass this check.
- * Build metadata in the version (`+L2`, `+Circles`) is ignored.
- */
-export const isOfficialMasterCopy = (implementation: string | undefined, version: string): boolean => {
-  if (!implementation) return false
-  const [cleanVersion] = version.split('+')
-
-  for (const getter of [getSafeSingletonDeployments, getSafeL2SingletonDeployments]) {
-    const deployment = getter({ version: cleanVersion })
-    if (!deployment?.deployments) continue
-    for (const variant of Object.values(deployment.deployments)) {
-      if (variant?.address && sameAddress(implementation, variant.address)) return true
-    }
-  }
-  return false
-}
-
 export const getDeploymentTypeForMasterCopy = (
   implementation: string | undefined,
   version: string,
@@ -438,6 +416,28 @@ export const getDeploymentTypeForMasterCopy = (
   }
 
   return defaults
+}
+
+/**
+ * Checks whether an implementation address is an official Safe singleton
+ * deployment (L1 or L2 flavour, any deployment variant) for the given version.
+ * The match is address-based and chain-agnostic: official singletons are
+ * deployed deterministically, so the address alone identifies the contract.
+ * Forks that self-report an official VERSION() do not pass this check.
+ * Build metadata in the version (`+L2`, `+Circles`) is ignored.
+ */
+export const isOfficialMasterCopy = (implementation: string | undefined, version: string): boolean => {
+  if (!implementation) return false
+  const [cleanVersion] = version.split('+')
+
+  for (const getter of [getSafeSingletonDeployments, getSafeL2SingletonDeployments]) {
+    const deployment = getter({ version: cleanVersion })
+    if (!deployment?.deployments) continue
+    for (const variant of Object.values(deployment.deployments)) {
+      if (variant?.address && sameAddress(implementation, variant.address)) return true
+    }
+  }
+  return false
 }
 
 export const resolveChainAgnosticContractAddresses = (
