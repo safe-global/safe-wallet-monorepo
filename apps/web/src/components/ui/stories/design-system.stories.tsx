@@ -32,6 +32,8 @@ import ChoiceButton from '@/components/common/ChoiceButton'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
 import DialogActions from '@/components/common/DialogActions'
 import OnboardingFooter from '@/components/common/OnboardingFooter'
+import CopyButton from '@/components/common/CopyButton'
+import ExplorerButton from '@/components/common/ExplorerButton'
 
 /**
  * Design System — the shared, most-used building blocks of Safe{Wallet}, shown as they actually
@@ -99,18 +101,25 @@ const Row = ({ label, note, children }: { label: string; note?: ReactNode; child
 
 const Swatch = ({
   label,
+  use,
+  review,
   to,
   toLabel,
   children,
 }: {
   label?: string
+  /** A short "when to use this" caption under the label. */
+  use?: string
+  /** A short open question for the design review, shown inline beside the component it's about. */
+  review?: ReactNode
   to?: string
   toLabel?: string
   children: ReactNode
 }) => (
-  <div className="flex flex-col items-start gap-2">
+  <div className="flex flex-col items-start gap-1.5">
     <div className="flex min-h-9 items-center">{children}</div>
     {label ? <span className="font-mono text-[11px] leading-none text-muted-foreground">{label}</span> : null}
+    {use ? <span className="max-w-[220px] text-[11px] leading-snug text-muted-foreground">{use}</span> : null}
     {to ? (
       <button
         type="button"
@@ -120,6 +129,11 @@ const Swatch = ({
         {toLabel ?? 'Where'}
         <ArrowUpRight className="size-3" />
       </button>
+    ) : null}
+    {review ? (
+      <span className="mt-0.5 max-w-[220px] rounded border border-dashed border-border bg-muted/50 px-1.5 py-1 text-[11px] leading-snug text-foreground">
+        {review}
+      </span>
     ) : null}
   </div>
 )
@@ -274,13 +288,6 @@ export const Buttons: Story = {
   render: () => (
     <Family
       title="Buttons"
-      review={[
-        'When to use which preset: ActionButton = a prominent surface CTA; SubmitButton = the single form/flow submit (label→spinner at a stable width); IconAction = header/toolbar icon buttons; DialogActions = every dialog footer.',
-        'Collapse the three ghost icon-buttons (IconAction, CopyButton, ExplorerButton) into one preset?',
-        'lg / action / submit all render at h-10 — is lg redundant, and should action + submit merge?',
-        'ChoiceButton is a bespoke button, not built on the primitive — rebuild on Button or bless it as an exception?',
-        'The "Aim for uniformity" list below still cites removed variants (link, destructive-outline, icon-lg, xs) — reconcile with the current set.',
-      ]}
       lead={
         <>
           The real buttons we ship, by intent. Most don&apos;t pick a size — they come through a{' '}
@@ -351,7 +358,12 @@ export const Buttons: Story = {
         <Swatch label="sm · h-8" to="Components/Settings/OwnerList" toLabel="Signer rows">
           <Button size="sm">Small</Button>
         </Swatch>
-        <Swatch label="lg · h-10" to="Pages/Onboarding/NewSafe/Create" toLabel="Create Safe">
+        <Swatch
+          label="lg · h-10"
+          review="lg / action / submit all render at h-10 — is lg redundant, and should action + submit merge?"
+          to="Pages/Onboarding/NewSafe/Create"
+          toLabel="Create Safe"
+        >
           <Button size="lg">Large</Button>
         </Swatch>
         <Swatch label="action · h-10 → ActionButton" to="Features/ActionsTray/ActionsTray" toLabel="Actions tray">
@@ -366,18 +378,45 @@ export const Buttons: Story = {
         label="Presets & composites"
         note="most buttons come through one of these — they lock size + styling so usage stays uniform"
       >
-        <Swatch label="SubmitButton" to="Components/Common/SubmitButton" toLabel="SubmitButton">
+        <Swatch
+          label="SubmitButton"
+          use="The one form/flow submit — label→spinner at a stable width"
+          to="Components/Common/SubmitButton"
+          toLabel="SubmitButton"
+        >
           <SubmitButton>Save changes</SubmitButton>
         </Swatch>
-        <Swatch label="ActionButton" to="Components/Common/ActionBar" toLabel="ActionBar">
+        <Swatch
+          label="ActionButton"
+          use="A prominent surface CTA (Send / Receive)"
+          to="Components/Common/ActionBar"
+          toLabel="ActionBar"
+        >
           <ActionButton>Send</ActionButton>
         </Swatch>
-        <Swatch label="IconAction" to="Components/Common/IconAction" toLabel="IconAction">
+        <Swatch
+          label="IconAction"
+          use="Header / toolbar icon button (ghost, icon-sm)"
+          review="These three are all ghost icon-sm buttons — collapse into one preset?"
+          to="Components/Common/IconAction"
+          toLabel="IconAction"
+        >
           <IconAction aria-label="Add">
             <Plus />
           </IconAction>
         </Swatch>
-        <Swatch label="SplitMenuButton" to="Components/Common/SplitMenuButton" toLabel="SplitMenuButton">
+        <Swatch label="CopyButton" use="Copy-to-clipboard affordance">
+          <CopyButton text="0x1234…5678" />
+        </Swatch>
+        <Swatch label="ExplorerButton" use="Open a block explorer link">
+          <ExplorerButton title="View on explorer" href="https://etherscan.io" />
+        </Swatch>
+        <Swatch
+          label="SplitMenuButton"
+          use="One action + alternate execution modes"
+          to="Components/Common/SplitMenuButton"
+          toLabel="SplitMenuButton"
+        >
           <SplitMenuButton
             options={[
               { id: 'execute', label: 'Execute' },
@@ -388,17 +427,33 @@ export const Buttons: Story = {
       </Row>
 
       <Row label="Composite footers" note="the fixed dialog / onboarding footers — never hand-rolled">
-        <Swatch label="DialogActions" to="Components/Common/DialogActions" toLabel="DialogActions">
+        <Swatch
+          label="DialogActions"
+          use="Every dialog footer (Cancel + Confirm), CheckWallet-gated"
+          to="Components/Common/DialogActions"
+          toLabel="DialogActions"
+        >
           <div className="w-72">
             <DialogActions confirmLabel="Confirm" onCancel={() => {}} />
           </div>
         </Swatch>
-        <Swatch label="OnboardingFooter" to="Components/Common/OnboardingFooter" toLabel="OnboardingFooter">
+        <Swatch
+          label="OnboardingFooter"
+          use="Back / Continue for full-screen onboarding"
+          to="Components/Common/OnboardingFooter"
+          toLabel="OnboardingFooter"
+        >
           <div className="w-80">
             <OnboardingFooter continueLabel="Continue" onBack={() => {}} onContinue={() => {}} />
           </div>
         </Swatch>
-        <Swatch label="ChoiceButton" to="Components/Common/ChoiceButton" toLabel="ChoiceButton">
+        <Swatch
+          label="ChoiceButton"
+          use="Card-like mutually-exclusive chooser row"
+          review="A bespoke button, not built on Button — rebuild on the primitive or bless as an exception?"
+          to="Components/Common/ChoiceButton"
+          toLabel="ChoiceButton"
+        >
           <div className="w-72">
             <ChoiceButton
               title="Send tokens"
@@ -431,6 +486,10 @@ export const Buttons: Story = {
             consistent.
           </li>
         </ul>
+        <p className="mt-3 max-w-2xl rounded border border-dashed border-border bg-muted/50 px-2.5 py-1.5 text-xs leading-snug text-foreground">
+          To review: this list still cites removed variants (link, destructive-outline, icon-lg, xs) — reconcile it with
+          the current buttonVariants.
+        </p>
       </section>
 
       <WhereUsed>
