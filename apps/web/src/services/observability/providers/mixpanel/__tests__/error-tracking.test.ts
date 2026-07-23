@@ -61,6 +61,21 @@ describe('trackErrorSurfaced', () => {
     })
   })
 
+  it('maps RPC endpoint context (kind + host) to Mixpanel properties', () => {
+    trackErrorSurfaced({
+      code: 105,
+      message: 'Code 105: Error connecting to the blockchain',
+      isUserFacing: true,
+      context: { rpcEndpointKind: 'infura', rpcHost: 'mainnet.infura.io' },
+    })
+
+    expect(mockedTrack.mock.calls[0][1]).toMatchObject({
+      [MixpanelEventParams.RPC_ENDPOINT_KIND]: 'infura',
+      [MixpanelEventParams.RPC_HOST]: 'mainnet.infura.io',
+      [MixpanelEventParams.ERROR_DOMAIN]: ErrorDomain.RPC,
+    })
+  })
+
   it('omits context keys that are not provided', () => {
     trackErrorSurfaced({ code: 804, message: 'Code 804: revert', isUserFacing: true, context: { txHash: '0xabc' } })
 
