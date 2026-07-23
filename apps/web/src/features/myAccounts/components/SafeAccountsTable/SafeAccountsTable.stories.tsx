@@ -90,3 +90,50 @@ export const SelectionAndReorder: Story = {
     reorder: { onReorder: () => {} },
   },
 }
+
+// 40-hex helper so look-alikes share a front-4 / back-6 but differ in the middle.
+const addr = (head: string, fill: string, tail: string) =>
+  '0x' + head + fill.repeat(40 - head.length - tail.length) + tail
+
+const REAL = '0x8675b754342754a30a2aef474d114d8460bca19b' // trusted "Treasury" — front 8675 … back bca19b
+const IMPOSTOR_1 = addr('8675', 'a', 'bca19b') // shares BOTH front-4 (8675) and back-4 (bca19b)
+const IMPOSTOR_2 = addr('1f9e', 'c', 'bca19b') // shares ONLY the back-4 (bca19b)
+const OPS = addr('1111', '1', '111111') // unrelated, normal row
+const VAULT_A = addr('2222', 'a', '333333') // intra-list look-alike pair (no trusted anchor)
+const VAULT_B = addr('2222', 'b', '333333')
+
+const groupedItems: AllSafeItems = [
+  { name: 'Treasury', address: REAL, isPinned: true, chainId: '1', isReadOnly: false, lastVisited: Date.now() },
+  { name: 'Treasury', address: IMPOSTOR_1, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },
+  { name: 'Treasury', address: IMPOSTOR_2, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },
+  { name: 'Ops', address: OPS, isPinned: true, chainId: '1', isReadOnly: false, lastVisited: Date.now() },
+  { name: 'Vault A', address: VAULT_A, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },
+  { name: 'Vault B', address: VAULT_B, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },
+]
+
+// g1 = anchor case (REAL trusted + 2 impostors); g2 = intra-list (two look-alikes, no trusted member).
+const similarityGroups = new Map<string, string>([
+  [REAL, 'g1'],
+  [IMPOSTOR_1, 'g1'],
+  [IMPOSTOR_2, 'g1'],
+  [VAULT_A, 'g2'],
+  [VAULT_B, 'g2'],
+])
+
+// ⚠️ on look-alikes only — the trusted REAL anchor is in the band but carries no warning.
+const flaggedAddresses = new Set([IMPOSTOR_1, IMPOSTOR_2, VAULT_A, VAULT_B])
+
+/**
+ * Address-poisoning similarity band (Approach A: tinted rows + header, no bordered card yet).
+ * g1: a trusted anchor (checked, no ⚠️) grouped with its two impostors (⚠️).
+ * g2: an intra-list pair where neither is trusted → both ⚠️.
+ */
+export const SimilarityGrouped: Story = {
+  args: {
+    items: groupedItems,
+    columns: ['select', 'name', 'threshold', 'networks', 'balance'],
+    selection: { selectedKeys: new Set([`1:${REAL}`]), onToggle: () => {} },
+    flaggedAddresses,
+    similarityGroups,
+  },
+}

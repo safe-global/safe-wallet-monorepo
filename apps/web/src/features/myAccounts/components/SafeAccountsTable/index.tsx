@@ -8,6 +8,8 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import TableSortLabel from '@mui/material/TableSortLabel'
+import Typography from '@mui/material/Typography'
+import { TriangleAlert, Info } from 'lucide-react'
 import type { AllSafeItems } from '@/hooks/safes'
 import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNT_COLUMNS, SELECT_COLUMN, type SafeAccountColumnId } from './columns'
@@ -96,6 +98,13 @@ export type SafeAccountsTableProps = {
   renderActions?: (line: AccountLine) => ReactNode
   /** Lowercased addresses to flag with a "High similarity" warning badge. */
   flaggedAddresses?: Set<string>
+  /**
+   * Lowercased address → similarity-cluster id. When set, contiguous rows sharing a cluster id are
+   * rendered inside an "Address poisoning warning" band (tinted rows + a header). Pairs with
+   * flaggedAddresses, which still drives the per-row ⚠️ (so a trusted anchor can sit in the band
+   * without a ⚠️). Grouping is applied in the non-reorder body only for now.
+   */
+  similarityGroups?: Map<string, string>
   /** Enables a leading checkbox column and makes rows selectable. */
   selection?: SafeAccountsSelection
   /**
@@ -143,12 +152,28 @@ const headerSx = {
   '&&:last-of-type': { pr: 2, borderRight: '4px solid transparent' },
 } as const
 
+/** Full-width header row that opens an address-poisoning similarity band (tint lives in the Table sx). */
+const SimilarityBandHeader = ({ colSpan }: { colSpan: number }) => (
+  <TableRow data-band-header="">
+    <TableCell colSpan={colSpan} sx={{ py: 0.75, px: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, color: 'var(--color-yellow-800)' }}>
+        <TriangleAlert size={16} aria-hidden />
+        <Typography variant="caption" fontWeight={600}>
+          Address poisoning warning
+        </Typography>
+        <Info size={14} aria-hidden />
+      </Box>
+    </TableCell>
+  </TableRow>
+)
+
 const SafeAccountsTable = ({
   items,
   columns,
   actionsWidth,
   renderActions,
   flaggedAddresses,
+  similarityGroups,
   selection,
   allowRenameInDialog = false,
   reorder,
@@ -304,6 +329,39 @@ const SafeAccountsTable = ({
               backgroundPosition: 'bottom',
               backgroundSize: '100% 1px',
             },
+            // Address-poisoning similarity band: paint the header + member rows yellow, including the
+            // 6px inset borders above, so the run reads as one continuous block rather than separated
+            // pills. Placed after the hover rule so the same-specificity hover override below wins.
+            '& .MuiTableBody-root .MuiTableRow-root[data-band-header] .MuiTableCell-root, & .MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root':
+              {
+                backgroundColor: 'var(--color-yellow-50)',
+                borderTopColor: 'var(--color-yellow-50)',
+                borderBottomColor: 'var(--color-yellow-50)',
+              },
+            // Keep the band yellow on hover (beat the grey hover pill, which has equal specificity).
+            '& .MuiTableBody-root .MuiTableRow-root[data-band-header]:hover .MuiTableCell-root, & .MuiTableBody-root .MuiTableRow-root[data-highlighted]:hover .MuiTableCell-root':
+              {
+                backgroundColor: 'var(--color-yellow-50)',
+              },
+            // Every band member (incl. the trusted anchor) renders as its own rounded, yellow-bordered
+            // card. The border is drawn with inset box-shadows on the row's cells (continuous top/bottom
+            // on every cell; left only on the first, right only on the last) so it follows the first/last
+            // cell radii into a rounded rectangle with no internal vertical lines.
+            '& .MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root': {
+              boxShadow: 'inset 0 1px 0 var(--color-yellow-400), inset 0 -1px 0 var(--color-yellow-400)',
+            },
+            '& .MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root:first-of-type': {
+              boxShadow:
+                'inset 1px 0 0 var(--color-yellow-400), inset 0 1px 0 var(--color-yellow-400), inset 0 -1px 0 var(--color-yellow-400)',
+              borderTopLeftRadius: '8px',
+              borderBottomLeftRadius: '8px',
+            },
+            '& .MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root:last-of-type': {
+              boxShadow:
+                'inset -1px 0 0 var(--color-yellow-400), inset 0 1px 0 var(--color-yellow-400), inset 0 -1px 0 var(--color-yellow-400)',
+              borderTopRightRadius: '8px',
+              borderBottomRightRadius: '8px',
+            },
           }}
         >
           {/* Embedded (headerless) tables need a colgroup to keep fixed-layout column widths; the Name
@@ -365,23 +423,37 @@ const SafeAccountsTable = ({
             />
           ) : (
             <TableBody>
-              {lines.map(({ line, groupKey, group }, index) => (
-                <SafeAccountTableRow
-                  key={line.key}
-                  line={line}
-                  columns={visibleColumns}
-                  expanded={line.expandable ? expanded.has(groupKey) : undefined}
-                  isFlagged={flaggedAddresses?.has(line.address.toLowerCase())}
-                  renderActions={renderActions}
-                  onRename={onRename}
-                  checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
-                  onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
-                  onToggle={line.expandable ? () => toggle(groupKey) : undefined}
-                  onLinkClick={onLinkClick}
-                  showDivider={index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}
-                  onOverviewsLoaded={handleOverviewsLoaded}
-                />
-              ))}
+              {lines.flatMap(({ line, groupKey, group }, index) => {
+                const clusterId = similarityGroups?.get(line.address.toLowerCase())
+                const prevClusterId =
+                  index > 0 ? similarityGroups?.get(lines[index - 1].line.address.toLowerCase()) : undefined
+                // Open a band once, on the first row of each contiguous cluster run.
+                const bandHeader =
+                  clusterId && clusterId !== prevClusterId ? (
+                    <SimilarityBandHeader key={`band-${clusterId}`} colSpan={visibleColumns.length} />
+                  ) : null
+
+                const row = (
+                  <SafeAccountTableRow
+                    key={line.key}
+                    line={line}
+                    columns={visibleColumns}
+                    expanded={line.expandable ? expanded.has(groupKey) : undefined}
+                    isFlagged={flaggedAddresses?.has(line.address.toLowerCase())}
+                    highlighted={Boolean(clusterId)}
+                    renderActions={renderActions}
+                    onRename={onRename}
+                    checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
+                    onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
+                    onToggle={line.expandable ? () => toggle(groupKey) : undefined}
+                    onLinkClick={onLinkClick}
+                    showDivider={index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}
+                    onOverviewsLoaded={handleOverviewsLoaded}
+                  />
+                )
+
+                return bandHeader ? [bandHeader, row] : [row]
+              })}
             </TableBody>
           )}
         </Table>
