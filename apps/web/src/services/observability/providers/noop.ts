@@ -1,4 +1,4 @@
-import type { ILogger, IObservabilityProvider } from '../types'
+import type { ILogger, IObservabilityProvider, ObservedError } from '../types'
 
 const noopLogger: ILogger = {
   // eslint-disable-next-line unused-imports/no-unused-vars
@@ -21,5 +21,5 @@ export class NoOpProvider implements IObservabilityProvider {
   }
 
   // eslint-disable-next-line unused-imports/no-unused-vars
-  captureException(_error: Error, _context?: Record<string, unknown>): void {}
+  captureError(_error: ObservedError): void {}
 }

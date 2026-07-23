@@ -5,7 +5,15 @@ import { mergeGtfFeeParams } from '../mergeGtfFeeParams'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import type { AppDispatch } from '@/store'
 
-const buildChain = (features: string[]): Chain => ({ chainId: '1', features }) as unknown as Chain
+const RELAY_FEE_RELAYER = {
+  type: 'RELAY_FEE',
+  safeCreationSponsored: false,
+  safeTransactionSponsored: false,
+  enableTenderlySimulationBeforeRelay: false,
+}
+
+const buildChain = (features: string[], relayer: typeof RELAY_FEE_RELAYER | null = RELAY_FEE_RELAYER): Chain =>
+  ({ chainId: '1', features, relayer }) as unknown as Chain
 
 const buildFeature = (overrides: Partial<{ $isReady: boolean; resolveFeeParams: jest.Mock }> = {}) => ({
   $isReady: overrides.$isReady ?? true,
@@ -44,6 +52,20 @@ describe('mergeGtfFeeParams', () => {
     const result = await mergeGtfFeeParams({
       ...baseArgs(safeTx),
       chain: buildChain([]),
+      gtfFeature: feature,
+    })
+
+    expect(result).toBe(safeTx)
+    expect(feature.resolveFeeParams).not.toHaveBeenCalled()
+  })
+
+  it('bails out when the chain has the GTF flag but no RELAY_FEE relayer', async () => {
+    const safeTx = createSafeTx()
+    const feature = buildFeature()
+
+    const result = await mergeGtfFeeParams({
+      ...baseArgs(safeTx),
+      chain: buildChain(['GTF'], null),
       gtfFeature: feature,
     })
 

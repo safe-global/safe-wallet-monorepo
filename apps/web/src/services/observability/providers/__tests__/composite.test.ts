@@ -1,5 +1,5 @@
-import { CompositeProvider } from '../providers/composite'
-import type { IObservabilityProvider, ILogger } from '../types'
+import { CompositeProvider } from '../composite'
+import type { IObservabilityProvider, ILogger, ObservedError } from '../../types'
 
 describe('CompositeProvider', () => {
   const createMockProvider = (name: string): IObservabilityProvider => {
@@ -14,9 +14,11 @@ describe('CompositeProvider', () => {
       name,
       init: jest.fn().mockResolvedValue(undefined),
       getLogger: jest.fn().mockReturnValue(mockLogger),
-      captureException: jest.fn(),
+      captureError: jest.fn(),
     }
   }
+
+  const observedError: ObservedError = { error: new Error('Code 804: revert'), isUserFacing: true, code: 804 }
 
   it('should initialize all providers', async () => {
     const provider1 = createMockProvider('Provider1')
@@ -44,18 +46,15 @@ describe('CompositeProvider', () => {
     expect(logger2.info).toHaveBeenCalledWith('test message', { key: 'value' })
   })
 
-  it('should call captureException on all providers', () => {
+  it('should call captureError on all providers', () => {
     const provider1 = createMockProvider('Provider1')
     const provider2 = createMockProvider('Provider2')
     const composite = new CompositeProvider([provider1, provider2])
 
-    const error = new Error('test error')
-    const context = { componentStack: 'test' }
+    composite.captureError(observedError)
 
-    composite.captureException(error, context)
-
-    expect(provider1.captureException).toHaveBeenCalledWith(error, context)
-    expect(provider2.captureException).toHaveBeenCalledWith(error, context)
+    expect(provider1.captureError).toHaveBeenCalledWith(observedError)
+    expect(provider2.captureError).toHaveBeenCalledWith(observedError)
   })
 
   it('should continue if one provider throws during logger call', () => {
@@ -80,20 +79,19 @@ describe('CompositeProvider', () => {
     consoleErrorSpy.mockRestore()
   })
 
-  it('should continue if one provider throws during captureException', () => {
+  it('should continue if one provider throws during captureError', () => {
     const provider1 = createMockProvider('Provider1')
     const provider2 = createMockProvider('Provider2')
 
-    ;(provider1.captureException as jest.Mock).mockImplementation(() => {
+    ;(provider1.captureError as jest.Mock).mockImplementation(() => {
       throw new Error('Provider1 error')
     })
 
     const composite = new CompositeProvider([provider1, provider2])
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
 
-    const error = new Error('test error')
-    expect(() => composite.captureException(error)).not.toThrow()
-    expect(provider2.captureException).toHaveBeenCalledWith(error, undefined)
+    expect(() => composite.captureError(observedError)).not.toThrow()
+    expect(provider2.captureError).toHaveBeenCalledWith(observedError)
 
     consoleErrorSpy.mockRestore()
   })

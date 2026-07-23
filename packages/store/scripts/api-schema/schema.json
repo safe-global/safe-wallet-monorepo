@@ -343,6 +343,239 @@
         ]
       }
     },
+    "/v1/billing/spaces/{spaceId}/subscriptions": {
+      "get": {
+        "operationId": "billingGetSubscriptionsV1",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Subscription"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get a space subscriptions",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/plans/{planId}": {
+      "get": {
+        "operationId": "billingGetPlanV1",
+        "parameters": [
+          {
+            "name": "planId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Plan"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get a plan by id",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/spaces/{spaceId}/session-url": {
+      "get": {
+        "operationId": "billingGetSessionUrlV1",
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UrlResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get the billing portal session URL for a space",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/spaces/{spaceId}/payment-links": {
+      "get": {
+        "operationId": "billingGetSpacePaymentLinksV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PaymentLink"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get payment links for a space, plus the general catalog",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/spaces/{spaceId}/payment-links/{paymentLinkId}/checkout-url": {
+      "get": {
+        "operationId": "billingGetCheckoutUrlV1",
+        "parameters": [
+          {
+            "name": "paymentLinkId",
+            "required": true,
+            "in": "path",
+            "description": "Payment link identifier",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "returnUrl",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutSessionResult"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create a checkout session for a payment link",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/sessions/{sessionId}": {
+      "get": {
+        "operationId": "billingGetCheckoutSessionV1",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutSession"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get a checkout session by id",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
     "/v1/chains/{chainId}/safes/{safeAddress}/positions/{fiatCode}": {
       "get": {
         "operationId": "positionsGetPositionsV1",
@@ -495,7 +728,7 @@
         ]
       },
       "delete": {
-        "description": "Clears the cached portfolio data for a specific address",
+        "description": "Clears all cached Zerion portfolio data (overview, portfolio, positions) for a specific address",
         "operationId": "portfolioClearPortfolioV1",
         "parameters": [
           {
@@ -1480,7 +1713,7 @@
     },
     "/v1/chains/{chainId}/fees/{safeAddress}/preview": {
       "post": {
-        "description": "Calculates the estimated fees for executing a transaction via Pay with Safe, including gas costs, relay fees, and total costs in USD.",
+        "description": "Calculates the estimated fees for executing a transaction via Pay with Safe. The fee model applied is selected internally per-chain and is transparent to the caller.",
         "operationId": "feesGetFeePreviewV1",
         "parameters": [
           {
@@ -1505,7 +1738,7 @@
         ],
         "requestBody": {
           "required": true,
-          "description": "Transaction data for fee calculation including recipient, value, data, operation type, gas token, and number of signatures",
+          "description": "Transaction data for fee calculation including recipient, value, data, operation type, nonce, gas token, and number of signatures",
           "content": {
             "application/json": {
               "schema": {
@@ -1516,7 +1749,7 @@
         },
         "responses": {
           "200": {
-            "description": "Fee preview with transaction data, relay cost, and pricing context",
+            "description": "Fee preview with transaction data plus, depending on the fee model applied for the chain, either a relay cost or a fee breakdown",
             "content": {
               "application/json": {
                 "schema": {
@@ -4503,294 +4736,6 @@
         ]
       }
     },
-    "/v1/chains/{chainId}/multisig-transactions/{safeTxHash}/raw": {
-      "get": {
-        "deprecated": true,
-        "operationId": "transactionsGetDomainMultisigTransactionBySafeTxHashV1",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "safeTxHash",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TXSMultisigTransaction"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Deprecated",
-        "tags": [
-          "transactions"
-        ]
-      }
-    },
-    "/v1/chains/{chainId}/safes/{safeAddress}/multisig-transactions/raw": {
-      "get": {
-        "deprecated": true,
-        "operationId": "transactionsGetDomainMultisigTransactionsV1",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "safeAddress",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "failed",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "modified__lt",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "modified__gt",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "modified__lte",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "modified__gte",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "nonce__lt",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "nonce__gt",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "nonce__lte",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "nonce__gte",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "nonce",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "safe_tx_hash",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "to",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "value__lt",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "value__gt",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "value",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "executed",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "has_confirmations",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "trusted",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "execution_date__gte",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "execution_date__lte",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "submission_date__gte",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "submission_date__lte",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "transaction_hash",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "ordering",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "offset",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TXSMultisigTransactionPage"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Deprecated",
-        "tags": [
-          "transactions"
-        ]
-      }
-    },
     "/v1/chains/{chainId}/safes/{safeAddress}/multisig-transactions": {
       "get": {
         "description": "Retrieves a paginated list of multisig transactions for a Safe with optional filtering by execution date, recipient, value, nonce, and execution status.",
@@ -5503,46 +5448,6 @@
           }
         },
         "summary": "Get Safe creation transaction",
-        "tags": [
-          "transactions"
-        ]
-      }
-    },
-    "/v1/chains/{chainId}/safes/{safeAddress}/creation/raw": {
-      "get": {
-        "deprecated": true,
-        "operationId": "transactionsGetDomainCreationTransactionV1",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "safeAddress",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TXSCreationTransaction"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Deprecated",
         "tags": [
           "transactions"
         ]
@@ -6625,6 +6530,397 @@
         "required": [
           "fiatTotal",
           "items"
+        ]
+      },
+      "SubscriptionPlan": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentPrice": {
+            "type": "number"
+          },
+          "originalPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "paymentMethod": {
+            "type": "string",
+            "enum": [
+              "fiat"
+            ]
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "usd",
+              "eur"
+            ]
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "billingCycle": {
+            "type": "string",
+            "enum": [
+              "month",
+              "year"
+            ],
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "standard",
+              "premium",
+              "enterprise"
+            ]
+          },
+          "product": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "currentPrice",
+          "originalPrice",
+          "paymentMethod",
+          "currency",
+          "features",
+          "type",
+          "product"
+        ]
+      },
+      "Subscription": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "string"
+          },
+          "upstreamCustomerId": {
+            "type": "string"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/SubscriptionPlan"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "canceled",
+              "incomplete",
+              "incomplete_expired",
+              "past_due",
+              "paused",
+              "trialing",
+              "unpaid"
+            ]
+          },
+          "createdAt": {
+            "type": "number"
+          },
+          "startAt": {
+            "type": "number"
+          },
+          "cancelledAt": {
+            "type": "number",
+            "nullable": true
+          },
+          "cancelAt": {
+            "type": "number",
+            "nullable": true
+          },
+          "validUntil": {
+            "type": "number",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "customerId",
+          "upstreamCustomerId",
+          "plan",
+          "status",
+          "createdAt",
+          "startAt",
+          "cancelledAt",
+          "cancelAt"
+        ]
+      },
+      "MarketingFeature": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "marketingFeatures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MarketingFeature"
+            }
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "active",
+          "description",
+          "marketingFeatures",
+          "metadata",
+          "name"
+        ]
+      },
+      "Plan": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentPrice": {
+            "type": "number"
+          },
+          "originalPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "paymentMethod": {
+            "type": "string",
+            "enum": [
+              "fiat"
+            ]
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "usd",
+              "eur"
+            ]
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "billingCycle": {
+            "type": "string",
+            "enum": [
+              "month",
+              "year"
+            ],
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "standard",
+              "premium",
+              "enterprise"
+            ]
+          },
+          "product": {
+            "$ref": "#/components/schemas/Product"
+          }
+        },
+        "required": [
+          "id",
+          "currentPrice",
+          "originalPrice",
+          "paymentMethod",
+          "currency",
+          "features",
+          "type",
+          "product"
+        ]
+      },
+      "UrlResponse": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "PaymentLink": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "customText": {
+            "type": "object"
+          },
+          "afterCompletion": {
+            "type": "object"
+          },
+          "lineItems": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "active",
+          "metadata"
+        ]
+      },
+      "CheckoutSessionResult": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sessionId",
+          "url"
+        ]
+      },
+      "CheckoutSession": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "object": {
+            "type": "string"
+          },
+          "amountSubtotal": {
+            "type": "number"
+          },
+          "amountTotal": {
+            "type": "number"
+          },
+          "cancelUrl": {
+            "type": "string"
+          },
+          "clientReferenceId": {
+            "type": "object",
+            "nullable": true
+          },
+          "created": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "customer": {
+            "type": "object",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "number"
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "paymentStatus": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "successUrl": {
+            "type": "string"
+          },
+          "url": {
+            "type": "object",
+            "nullable": true
+          },
+          "subscription": {
+            "type": "object",
+            "nullable": true
+          },
+          "invoice": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "object",
+          "amountSubtotal",
+          "amountTotal",
+          "cancelUrl",
+          "created",
+          "currency",
+          "expiresAt",
+          "metadata",
+          "mode",
+          "paymentStatus",
+          "status",
+          "successUrl"
         ]
       },
       "Position": {
@@ -8544,45 +8840,91 @@
           "fiatValue"
         ]
       },
-      "PriceSource": {
-        "type": "string",
-        "enum": [
-          "COINGECKO"
-        ],
-        "description": "Price data source"
-      },
-      "FeePreviewPricingContext": {
+      "FeePreviewValuationDetail": {
         "type": "object",
         "properties": {
-          "phase": {
-            "type": "number",
-            "description": "Pricing phase"
+          "tokenAddress": {
+            "type": "string",
+            "description": "Token contract address (absent for native transfers)"
           },
-          "priceSource": {
-            "description": "Price data source",
-            "example": "COINGECKO",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PriceSource"
-              }
-            ]
+          "symbol": {
+            "type": "string",
+            "description": "Token symbol",
+            "example": "USDC"
           },
-          "priceTimestamp": {
-            "type": "number",
-            "description": "Price snapshot Unix timestamp",
-            "example": 1700000000
+          "amount": {
+            "type": "string",
+            "description": "Token amount",
+            "example": "1000"
           },
-          "gasPriceVolatilityBuffer": {
+          "priceUsd": {
             "type": "number",
-            "description": "Gas price volatility buffer multiplier",
-            "example": 1.3
+            "description": "Token price in USD"
+          },
+          "valueUsd": {
+            "type": "number",
+            "description": "Token value in USD"
           }
         },
         "required": [
-          "phase",
-          "priceSource",
-          "priceTimestamp",
-          "gasPriceVolatilityBuffer"
+          "symbol",
+          "amount"
+        ]
+      },
+      "FeePreviewFeeBreakdown": {
+        "type": "object",
+        "properties": {
+          "txValueUsd": {
+            "type": "number",
+            "description": "Transaction value in USD",
+            "example": 1000
+          },
+          "trailingVolumeUsd": {
+            "type": "number",
+            "description": "Trailing volume in USD that fed tier selection",
+            "example": 0
+          },
+          "tierBps": {
+            "type": "number",
+            "description": "Tier fee in basis points",
+            "example": 5
+          },
+          "gtfFeeUsd": {
+            "type": "number",
+            "description": "GTF fee in USD",
+            "example": 0.5
+          },
+          "relayCostUsd": {
+            "type": "number",
+            "description": "Relay cost in USD",
+            "example": 38.22
+          },
+          "totalUsd": {
+            "type": "number",
+            "description": "Total fee in USD",
+            "example": 38.72
+          },
+          "numberSignatures": {
+            "type": "number",
+            "description": "Number of signatures",
+            "example": 2
+          },
+          "valuationDetails": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeePreviewValuationDetail"
+            }
+          }
+        },
+        "required": [
+          "txValueUsd",
+          "trailingVolumeUsd",
+          "tierBps",
+          "gtfFeeUsd",
+          "relayCostUsd",
+          "totalUsd",
+          "numberSignatures",
+          "valuationDetails"
         ]
       },
       "FeePreviewResponse": {
@@ -8592,16 +8934,28 @@
             "$ref": "#/components/schemas/FeePreviewTxData"
           },
           "relayCost": {
-            "$ref": "#/components/schemas/FeePreviewRelayCost"
+            "description": "Relay cost. Present when the relay fee flow applies.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeePreviewRelayCost"
+              }
+            ]
           },
-          "pricingContextSnapshot": {
-            "$ref": "#/components/schemas/FeePreviewPricingContext"
+          "feeBreakdown": {
+            "description": "GTF fee breakdown, as returned by the fee-engine service. Present when the GTF fee flow applies.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeePreviewFeeBreakdown"
+              }
+            ]
+          },
+          "maxFeeCapUsd": {
+            "type": "number",
+            "description": "Maximum fee cap in USD (buffered max fee). Present when the GTF fee flow applies."
           }
         },
         "required": [
-          "txData",
-          "relayCost",
-          "pricingContextSnapshot"
+          "txData"
         ]
       },
       "TypedDataParameter": {
@@ -11497,7 +11851,8 @@
             "enum": [
               "ERC20",
               "ERC721",
-              "ERC1155"
+              "ERC1155",
+              "NONERC"
             ]
           },
           "address": {
@@ -13794,169 +14149,6 @@
           "txStatus"
         ]
       },
-      "TXSMultisigTransaction": {
-        "type": "object",
-        "properties": {
-          "safe": {
-            "type": "string"
-          },
-          "to": {
-            "type": "string"
-          },
-          "value": {
-            "type": "string"
-          },
-          "data": {
-            "type": "object"
-          },
-          "operation": {
-            "description": "Operation type: 0 for CALL, 1 for DELEGATE",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Operation"
-              }
-            ]
-          },
-          "gasToken": {
-            "type": "object"
-          },
-          "safeTxGas": {
-            "type": "object"
-          },
-          "baseGas": {
-            "type": "object"
-          },
-          "gasPrice": {
-            "type": "object"
-          },
-          "proposer": {
-            "type": "object"
-          },
-          "proposedByDelegate": {
-            "type": "object"
-          },
-          "refundReceiver": {
-            "type": "object"
-          },
-          "nonce": {
-            "type": "number"
-          },
-          "executionDate": {
-            "type": "object"
-          },
-          "submissionDate": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "modified": {
-            "type": "object"
-          },
-          "blockNumber": {
-            "type": "object"
-          },
-          "transactionHash": {
-            "type": "object"
-          },
-          "safeTxHash": {
-            "type": "string"
-          },
-          "executor": {
-            "type": "object"
-          },
-          "isExecuted": {
-            "type": "boolean"
-          },
-          "isSuccessful": {
-            "type": "object"
-          },
-          "ethGasPrice": {
-            "type": "object"
-          },
-          "gasUsed": {
-            "type": "object"
-          },
-          "fee": {
-            "type": "object"
-          },
-          "payment": {
-            "type": "object"
-          },
-          "origin": {
-            "type": "object"
-          },
-          "confirmationsRequired": {
-            "type": "number"
-          },
-          "confirmations": {
-            "type": "object"
-          },
-          "signatures": {
-            "type": "object"
-          },
-          "trusted": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "safe",
-          "to",
-          "value",
-          "data",
-          "operation",
-          "gasToken",
-          "safeTxGas",
-          "baseGas",
-          "gasPrice",
-          "proposer",
-          "proposedByDelegate",
-          "refundReceiver",
-          "nonce",
-          "executionDate",
-          "submissionDate",
-          "modified",
-          "blockNumber",
-          "transactionHash",
-          "safeTxHash",
-          "executor",
-          "isExecuted",
-          "isSuccessful",
-          "ethGasPrice",
-          "gasUsed",
-          "fee",
-          "payment",
-          "origin",
-          "confirmationsRequired",
-          "confirmations",
-          "signatures",
-          "trusted"
-        ]
-      },
-      "TXSMultisigTransactionPage": {
-        "type": "object",
-        "properties": {
-          "count": {
-            "type": "number",
-            "nullable": true
-          },
-          "next": {
-            "type": "string",
-            "nullable": true
-          },
-          "previous": {
-            "type": "string",
-            "nullable": true
-          },
-          "results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TXSMultisigTransaction"
-            }
-          }
-        },
-        "required": [
-          "results"
-        ]
-      },
       "ModuleExecutionInfo": {
         "type": "object",
         "properties": {
@@ -14656,42 +14848,6 @@
           "creator",
           "transactionHash",
           "factoryAddress"
-        ]
-      },
-      "TXSCreationTransaction": {
-        "type": "object",
-        "properties": {
-          "created": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "creator": {
-            "type": "string"
-          },
-          "transactionHash": {
-            "type": "string"
-          },
-          "factoryAddress": {
-            "type": "string"
-          },
-          "masterCopy": {
-            "type": "object"
-          },
-          "setupData": {
-            "type": "object"
-          },
-          "saltNonce": {
-            "type": "object"
-          }
-        },
-        "required": [
-          "created",
-          "creator",
-          "transactionHash",
-          "factoryAddress",
-          "masterCopy",
-          "setupData",
-          "saltNonce"
         ]
       },
       "TransactionExportDto": {
