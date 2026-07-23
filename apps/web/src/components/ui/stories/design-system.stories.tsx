@@ -8,7 +8,7 @@ import { Textarea } from '../textarea'
 import { Field, FieldLabel, FieldDescription, FieldError } from '../field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select'
 import { SearchInput } from '../search-input'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../table'
+import EnhancedTable from '@/components/common/EnhancedTable'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../card'
 import { Tabs, TabsList, TabsTrigger } from '../tabs'
 import {
@@ -236,6 +236,37 @@ const WhereUsed = ({ children }: { children: ReactNode }) => (
     <h3 className="text-foreground mb-3 text-xs font-semibold tracking-wider uppercase">Where it&apos;s used</h3>
     <div className="flex flex-col gap-2.5">{children}</div>
   </section>
+)
+
+// A catalog entry for a component we ship but don't render inline (too heavy / feature-scoped to
+// mock here) — its name, a when-to-use line, a link to its own story, and an optional review question.
+const CatalogRow = ({
+  name,
+  use,
+  to,
+  toLabel,
+  review,
+}: {
+  name: string
+  use: string
+  to?: string
+  toLabel?: string
+  review?: string
+}) => (
+  <li className="flex flex-col gap-1.5 border-b border-border py-3 last:border-0">
+    <div className="flex flex-wrap items-baseline gap-x-2">
+      <code className="text-[13px] text-foreground">{name}</code>
+      <span className="text-sm text-muted-foreground">{use}</span>
+    </div>
+    <div className="flex flex-wrap items-center gap-2">
+      {to ? <StoryLink title={to}>{toLabel ?? name}</StoryLink> : null}
+      {review ? (
+        <span className="rounded border border-dashed border-border bg-muted/50 px-1.5 py-0.5 text-[11px] leading-snug text-foreground">
+          {review}
+        </span>
+      ) : null}
+    </div>
+  </li>
 )
 
 /* ================================================================= OVERVIEW */
@@ -764,70 +795,112 @@ export const Search: Story = {
 /* =================================================================== TABLES */
 
 export const Tables: Story = {
-  render: () => (
-    <Family
-      title="Tables"
-      review={[
-        'When to use which: EnhancedTable = default desktop grid (sort/paginate); PaginatedDataTable = newer typed-column grid (Spaces); DataTable = a read-only key/value list, not a grid; SafeAccountsTable = hand-assembled (reorder + grouping).',
-        'Two generic grids (EnhancedTable vs PaginatedDataTable) — is PaginatedDataTable the successor? Needs a migration plan or a clear boundary.',
-        'Naming: DataTable is a key/value list, not a table — rename it (DataList / SummaryList)?',
-        'Pick one pagination pattern across the grids (they differ today).',
-      ]}
-      lead={
-        <>
-          <code>EnhancedTable</code> is the app&apos;s default data grid (sorting, pagination, sticky columns) —
-          it&apos;s built on this <code>Table</code> primitive. Rows highlight on hover and when selected.
-        </>
-      }
-    >
-      <Row label="Data table">
-        <div className="w-full max-w-xl">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Threshold</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell>alice.eth</TableCell>
-                <TableCell>Owner</TableCell>
-                <TableCell>2 of 3</TableCell>
-              </TableRow>
-              <TableRow data-state="selected">
-                <TableCell>bob.eth</TableCell>
-                <TableCell>Owner</TableCell>
-                <TableCell>2 of 3</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>carol.eth</TableCell>
-                <TableCell>Proposer</TableCell>
-                <TableCell>—</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </div>
-      </Row>
+  render: () => {
+    const headCells = [
+      { id: 'name', label: 'Name', width: '45%' },
+      { id: 'role', label: 'Role', width: '30%' },
+      { id: 'threshold', label: 'Threshold', width: '25%', disableSort: true },
+    ]
+    const rows = [
+      {
+        key: 'a',
+        cells: {
+          name: { content: 'alice.eth', rawValue: 'alice.eth' },
+          role: { content: 'Owner', rawValue: 'Owner' },
+          threshold: { content: '2 of 3', rawValue: '2' },
+        },
+      },
+      {
+        key: 'b',
+        cells: {
+          name: { content: 'bob.eth', rawValue: 'bob.eth' },
+          role: { content: 'Owner', rawValue: 'Owner' },
+          threshold: { content: '2 of 3', rawValue: '2' },
+        },
+      },
+      {
+        key: 'c',
+        cells: {
+          name: { content: 'carol.eth', rawValue: 'carol.eth' },
+          role: { content: 'Proposer', rawValue: 'Proposer' },
+          threshold: { content: '—', rawValue: '' },
+        },
+      },
+    ]
+    return (
+      <Family
+        title="Tables"
+        lead={
+          <>
+            We don&apos;t hand-build raw <code>Table</code>s — you pick a table <em>type</em>. Below are the ones we
+            ship. The open question for the review: the two generic grids (<code>EnhancedTable</code> and{' '}
+            <code>PaginatedDataTable</code>) overlap — should they unify?
+          </>
+        }
+      >
+        <Row label="Default grid — EnhancedTable" note="what most feature tables use — sortable, paginated, sticky">
+          <Swatch
+            label="EnhancedTable"
+            use="Untyped rows + headCells. ~9 consumers (AssetsTable, OwnerList, ProposersList, NestedSafesList…)."
+            review="Is the newer PaginatedDataTable its successor? If yes, ~9 consumers need migrating; if no, draw a clear boundary — and their pagination differs, so pick one."
+            to="Components/Common/EnhancedTable"
+            toLabel="EnhancedTable"
+          >
+            <div className="w-[440px]">
+              <EnhancedTable headCells={headCells} rows={rows} />
+            </div>
+          </Swatch>
+        </Row>
 
-      <WhereUsed>
-        <LinkGroup label="Pages">
-          <StoryLink title="Pages/Core/AddressBook">Address book</StoryLink>
-          <StoryLink title="Pages/Core/Balances">Assets</StoryLink>
-        </LinkGroup>
-        <LinkGroup label="Components">
-          <StoryLink title="Components/Balances/AssetsTable">AssetsTable</StoryLink>
-          <StoryLink title="Components/Settings/OwnerList">OwnerList</StoryLink>
-          <StoryLink title="Features/Proposers/ProposersList">ProposersList</StoryLink>
-        </LinkGroup>
-        <LinkGroup label="Reference">
-          <StoryLink title="UI/Table">Table</StoryLink>
-          <StoryLink title="Components/Common/EnhancedTable">EnhancedTable</StoryLink>
-        </LinkGroup>
-      </WhereUsed>
-    </Family>
-  ),
+        <section>
+          <h3 className="mb-1 text-xs font-semibold tracking-wider text-foreground uppercase">Which table for what</h3>
+          <p className="mb-2 text-xs text-muted-foreground">
+            the other types we ship — open each in its own story to see it live
+          </p>
+          <ul className="flex flex-col">
+            <CatalogRow
+              name="PaginatedDataTable"
+              use="Newer typed-column grid (alignment, emphasis, sticky, responsive column drop). Powers the Spaces address book, members and requests."
+              to="Features/Spaces/PaginatedDataTable"
+              review="The generic-grid overlap with EnhancedTable is the main thing to resolve; its own note wants the bounded column variants promoted onto the ui/table primitive."
+            />
+            <CatalogRow
+              name="SafeAccountsTable"
+              use="My accounts / Workspaces — drag-reorder + multi-chain grouping + selection. Hand-assembled, not a generic grid."
+              to="Features/MyAccounts/SafeAccountsTable"
+            />
+            <CatalogRow
+              name="AssetsTable"
+              use="Balances — desktop table, mobile cards."
+              to="Components/Balances/AssetsTable"
+            />
+            <CatalogRow
+              name="NftGrid"
+              use="NFT collections."
+              to="Features/Nfts/NftGrid"
+              review="Borrows EnhancedTable's CSS module instead of the component — render through it, or promote shared cell styles onto the primitive?"
+            />
+            <CatalogRow
+              name="DataTable"
+              use="NOT a grid — a read-only key/value list used in tx confirmations (Bridge, Swap, Vault)."
+              to="Components/Common/DataTable"
+              review="Naming collision with PaginatedDataTable / DataTableColumn — rename it (DataList / SummaryList)?"
+            />
+          </ul>
+        </section>
+
+        <WhereUsed>
+          <LinkGroup label="Pages">
+            <StoryLink title="Pages/Core/AddressBook">Address book</StoryLink>
+            <StoryLink title="Pages/Core/Balances">Assets</StoryLink>
+          </LinkGroup>
+          <LinkGroup label="Reference">
+            <StoryLink title="UI/Table">Table (the shared shell — rarely used directly)</StoryLink>
+          </LinkGroup>
+        </WhereUsed>
+      </Family>
+    )
+  },
 }
 
 /* ==================================================================== CARDS */
