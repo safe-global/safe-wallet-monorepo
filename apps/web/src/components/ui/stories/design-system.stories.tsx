@@ -9,6 +9,7 @@ import { Field, FieldLabel, FieldDescription, FieldError } from '../field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select'
 import { SearchInput } from '../search-input'
 import EnhancedTable from '@/components/common/EnhancedTable'
+import TableCard from '@/components/common/TableCard'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../card'
 import { Tabs, TabsList, TabsTrigger } from '../tabs'
 import {
@@ -838,16 +839,21 @@ export const Tables: Story = {
           </>
         }
       >
-        <Row label="Default grid — EnhancedTable" note="what most feature tables use — sortable, paginated, sticky">
+        <Row
+          label="Default grid — EnhancedTable"
+          note="shown in its card wrapper (TableCard), the way it renders in the app — sortable, paginated, sticky"
+        >
           <Swatch
-            label="EnhancedTable"
-            use="Untyped rows + headCells. ~9 consumers (AssetsTable, OwnerList, ProposersList, NestedSafesList…)."
+            label="TableCard › EnhancedTable"
+            use="Untyped rows + headCells. ~9 consumers (AssetsTable, OwnerList, ProposersList, NestedSafesList…). Always wrapped in a card surface — never rendered bare."
             review="Is the newer PaginatedDataTable its successor? If yes, ~9 consumers need migrating; if no, draw a clear boundary — and their pagination differs, so pick one."
             to="Components/Common/EnhancedTable"
             toLabel="EnhancedTable"
           >
-            <div className="w-[440px]">
-              <EnhancedTable headCells={headCells} rows={rows} />
+            <div className="w-full max-w-2xl rounded-lg bg-[var(--color-background-main)] p-6">
+              <TableCard>
+                <EnhancedTable headCells={headCells} rows={rows} />
+              </TableCard>
             </div>
           </Swatch>
         </Row>
@@ -885,6 +891,11 @@ export const Tables: Story = {
               use="NOT a grid — a read-only key/value list used in tx confirmations (Bridge, Swap, Vault)."
               to="Components/Common/DataTable"
               review="Naming collision with PaginatedDataTable / DataTableColumn — rename it (DataList / SummaryList)?"
+            />
+            <CatalogRow
+              name="TableCard"
+              use="The card wrapper, not a table — the single source of truth for the 'table inside a card' look (bg-card, rounded, padded, in-card row polish). Address book, Spaces team & contacts wrap their grid in it."
+              review="AssetsTable uses its own Card wrapper instead — should every grid go through TableCard so the surface is consistent?"
             />
           </ul>
         </section>
