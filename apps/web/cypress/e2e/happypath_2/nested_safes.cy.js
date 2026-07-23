@@ -24,11 +24,9 @@ describe('Nested safes happy path tests', () => {
   it('Verify that batch tx appears in the Queue with create proxy action', () => {
     const safe = 'Created safe'
 
-    cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_39)
-    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.nestedParentSafe39)
-    cy.reload()
-    wallet.connectSignerViaStorage(signer)
-    cy.wait(5000)
+    wallet.connectSignerViaStorage(signer, constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_39, {
+      extraStorage: { [constants.localStorageKeys.SAFE_v2__addedSafes]: ls.addedSafes.nestedParentSafe39 },
+    })
     createTx.deleteAllTx()
 
     safeNav.clickOnNestedSafesBtn()

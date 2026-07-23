@@ -1,6 +1,5 @@
 import * as batch from '../pages/batches.pages'
 import * as constants from '../../support/constants'
-import * as main from '../../e2e/pages/main.page'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
@@ -19,40 +18,40 @@ describe('[SMOKE] Batch transaction tests', { defaultCommandTimeout: 30000 }, ()
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  beforeEach(() => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
+  describe('Empty batch', () => {
+    beforeEach(() => {
+      cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
+    })
+
+    it('[SMOKE] Verify empty batch list can be opened', () => {
+      batch.openBatchtransactionsModal()
+      cy.contains(batch.addInitialTransactionStr).should('be.visible')
+    })
   })
 
-  it('[SMOKE] Verify empty batch list can be opened', () => {
-    batch.openBatchtransactionsModal()
-    cy.contains(batch.addInitialTransactionStr).should('be.visible')
-  })
-
-  it('[SMOKE] Verify a transaction is visible in a batch', () => {
-    cy.wrap(null)
-      .then(() => main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__batch, ls.batchData.entry1))
-      .then(() => {
-        cy.reload()
-        batch.verifyBatchIconCount(1)
-        batch.clickOnBatchCounter()
-        batch.verifyAmountTransactionsInBatch(1)
+  describe('Pre-seeded batch', () => {
+    it('[SMOKE] Verify a transaction is visible in a batch', () => {
+      cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2, {
+        onBeforeLoad(win) {
+          win.localStorage.setItem(constants.localStorageKeys.SAFE_v2__batch, JSON.stringify(ls.batchData.entry1))
+        },
       })
-  })
+      batch.verifyBatchIconCount(1)
+      batch.clickOnBatchCounter()
+      batch.verifyAmountTransactionsInBatch(1)
+    })
 
-  it('[SMOKE] Verify the batch can be confirmed and related transactions exist in the form', () => {
-    cy.wrap(null)
-      .then(() => main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__batch, ls.batchData.entry0))
-      .then(() => main.isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__batch, ls.batchData.entry0))
-      .then(() => {
-        cy.reload()
-        wallet.connectSignerViaStorage(signer)
-        batch.clickOnBatchCounter()
-        batch.clickOnConfirmBatchBtn()
-        batch.verifyBatchTransactionsCount(2)
-        batch.clickOnBatchCounter()
-        cy.contains(funds_first_tx).parents('ul').as('TransactionList')
-        cy.get('@TransactionList').find('li').eq(0).contains(funds_first_tx)
-        cy.get('@TransactionList').find('li').eq(1).contains(funds_second_tx)
+    it('[SMOKE] Verify the batch can be confirmed and related transactions exist in the form', () => {
+      wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2, {
+        extraStorage: { [constants.localStorageKeys.SAFE_v2__batch]: ls.batchData.entry0 },
       })
+      batch.clickOnBatchCounter()
+      batch.clickOnConfirmBatchBtn()
+      batch.verifyBatchTransactionsCount(2)
+      batch.clickOnBatchCounter()
+      cy.contains(funds_first_tx).parents('ul').as('TransactionList')
+      cy.get('@TransactionList').find('li').eq(0).contains(funds_first_tx)
+      cy.get('@TransactionList').find('li').eq(1).contains(funds_second_tx)
+    })
   })
 })

@@ -14,9 +14,14 @@ describe('[VISUAL] Address book screenshots', { defaultCommandTimeout: 60000, ..
 
   beforeEach(() => {
     mockVisualTestApis()
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sepoliaAddress1)
-    cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4)
-    cy.reload()
+    cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4, {
+      onBeforeLoad(win) {
+        win.localStorage.setItem(
+          constants.localStorageKeys.SAFE_v2__addressBook,
+          JSON.stringify(ls.addressBookData.sepoliaAddress1),
+        )
+      },
+    })
   })
 
   it('[VISUAL] Screenshot address book page with entries', () => {
