@@ -141,6 +141,8 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - uses: ./.github/actions/yarn
+        with:
+          verify_cache: 'true'
 
       - uses: ./.github/actions/build
         with:

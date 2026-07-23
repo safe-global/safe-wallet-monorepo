@@ -28,8 +28,6 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
       - uses: ./.github/actions/yarn
-        with:
-          after-install: 'false'
       - name: Run lint
         run: yarn workspace @safe-global/mobile lint
 
@@ -43,8 +41,6 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
       - uses: ./.github/actions/yarn
-        with:
-          after-install: 'false'
       - name: Run Prettier check
         run: yarn workspace @safe-global/mobile prettier
 
@@ -58,7 +54,5 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
       - uses: ./.github/actions/yarn
-        with:
-          after-install: 'false'
       - name: Type check
         run: yarn workspace @safe-global/mobile type-check

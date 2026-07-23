@@ -47,6 +47,14 @@ runs:
   steps:
     - uses: ./.github/actions/yarn
 
+    - name: Cache Cypress binary
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: /home/runner/.cache/Cypress
+        key: ${{ runner.os }}-cypress-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cypress-
+
     - name: Install Chrome
       uses: browser-actions/setup-chrome@c785b87e244131f27c9f19c1a33e2ead956ab7ce # v1.7.3
       with:
