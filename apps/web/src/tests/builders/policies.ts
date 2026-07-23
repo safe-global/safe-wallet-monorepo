@@ -2,7 +2,6 @@ import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import {
   PolicyType,
-  PolicyKind,
   type Enforcement,
   type TokenInfo,
   type PolicyContracts,
@@ -103,8 +102,7 @@ export const availablePolicyBuilder = (): IBuilder<AvailablePolicy> =>
     type: PolicyType.TokenWithdraw,
     title: 'Token withdraw allowlist',
     description: faker.lorem.sentence(),
-    guardKinds: [PolicyKind.TransactionGuard],
     available: true,
     configuredCount: faker.number.int({ min: 0, max: 5 }),
-    contracts: policyContractsBuilder().build(),
+    enforcement: guardEnforced(),
   })

@@ -114,15 +114,19 @@ export type CosignerPolicy = PolicyBase & { type: PolicyType.Cosigner; data: Cos
 /** Discriminated union of all active-policy shapes (returned by getActivePolicies). */
 export type ActivePolicy = SpendingLimitPolicy | RecoveryPolicy | TokenWithdrawPolicy | CosignerPolicy
 
-/** A catalogue entry for a policy type the Safe can configure (returned by getPolicies). */
+/**
+ * A catalogue entry for a policy type the Safe can configure (returned by
+ * getPolicies). `enforcement` describes how creating this policy is wired on the
+ * Safe — module-enabled (spending limit, recovery) or guard-based (token
+ * withdraw, cosigner) — and carries the contract address(es) the builder needs.
+ */
 export type AvailablePolicy = {
   type: PolicyType
   title: string
   description: string
-  guardKinds: PolicyKind[]
   available: boolean // false - Disable related Policy Card or hide it
   configuredCount: number
-  contracts: PolicyContracts
+  enforcement: Enforcement
 }
 
 /* ---- request / response envelopes (space-scoped, credentialed routes) ---- */

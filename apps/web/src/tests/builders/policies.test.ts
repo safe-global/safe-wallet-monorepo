@@ -1,5 +1,5 @@
 import { isAddress } from 'ethers'
-import { PolicyType, PolicyKind, type ActivePolicy } from '@safe-global/store/gateway/policies/types'
+import { PolicyType, type ActivePolicy } from '@safe-global/store/gateway/policies/types'
 import {
   tokenInfoBuilder,
   policyContractsBuilder,
@@ -74,12 +74,14 @@ describe('policy builders', () => {
     }
   })
 
-  it('availablePolicyBuilder: catalogue entry with contracts + guardKinds', () => {
+  it('availablePolicyBuilder: catalogue entry with guard enforcement', () => {
     const a = availablePolicyBuilder().build()
     expect(Object.values(PolicyType)).toContain(a.type)
-    expect(a.guardKinds).toContain(PolicyKind.TransactionGuard)
-    expect(isAddress(a.contracts.policyContract)).toBe(true)
-    expect(isAddress(a.contracts.safePolicyGuard)).toBe(true)
+    expect(a.enforcement.via).toBe('guard')
+    if (a.enforcement.via === 'guard') {
+      expect(isAddress(a.enforcement.guards.transactionGuard!.policyContract)).toBe(true)
+      expect(isAddress(a.enforcement.guards.transactionGuard!.safePolicyGuard)).toBe(true)
+    }
     expect(a.configuredCount).toBeGreaterThanOrEqual(0)
   })
 })
