@@ -97,15 +97,23 @@ export function connectSigner(signer) {
  *
  * @param {string} signer - Private key of the signer to connect.
  * @param {string} [url] - URL to visit; omit to seed the current window and reload.
- * @param {object} [visitOptions] - Extra cy.visit options; its onBeforeLoad runs after seeding.
+ * @param {object} [options] - Extra cy.visit options; its onBeforeLoad runs after seeding.
+ * @param {Record<string, unknown>} [options.extraStorage] - localStorage entries to seed in
+ *   onBeforeLoad (values are JSON-stringified). Use to pre-seed persisted state (e.g. a batch)
+ *   on the single load, replacing a later addToLocalStorage + cy.reload().
  */
-export function connectSignerViaStorage(signer, url, visitOptions = {}) {
+export function connectSignerViaStorage(signer, url, { extraStorage, ...visitOptions } = {}) {
   const seed = (win) => {
     win.localStorage.setItem(constants.localStorageKeys.SAFE_v2__lastWallet, JSON.stringify(PRIVATE_KEY_MODULE_LABEL))
     win.sessionStorage.setItem(
       constants.sessionStorageKeys.SAFE_v2__privateKeyModulePK,
       JSON.stringify({ isOpen: false, privateKey: signer }),
     )
+    if (extraStorage) {
+      Object.entries(extraStorage).forEach(([key, value]) => {
+        win.localStorage.setItem(key, JSON.stringify(value))
+      })
+    }
   }
 
   if (url) {
