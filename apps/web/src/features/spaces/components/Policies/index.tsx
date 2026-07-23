@@ -4,6 +4,7 @@ import type { LucideIcon } from 'lucide-react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import AppliedPolicies from './AppliedPolicies'
+import ActivePoliciesList from './ActivePoliciesList'
 import SpendingLimitFlow from './SpendingLimitFlow'
 import RecoveryFlow from './RecoveryFlow'
 
@@ -200,6 +201,8 @@ const SpacePolicies = () => {
       </Stack>
 
       <AppliedPolicies />
+
+      <ActivePoliciesList />
     </>
   )
 }
