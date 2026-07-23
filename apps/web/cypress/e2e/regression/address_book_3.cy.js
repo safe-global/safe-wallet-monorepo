@@ -1,6 +1,5 @@
 import * as constants from '../../support/constants.js'
 import * as addressBook from '../pages/address_book.page.js'
-import * as main from '../pages/main.page.js'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
@@ -21,81 +20,80 @@ describe('Address book tests - 3', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  beforeEach(() => {
-    cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4)
+  describe('Without pre-seeded data', () => {
+    beforeEach(() => {
+      cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4)
+    })
+
+    it('Verify entry can be added', () => {
+      addressBook.clickOnCreateEntryBtn()
+      addressBook.addEntry(NAME, constants.RECIPIENT_ADDRESS)
+    })
+
+    it('Verify csv file can be imported', () => {
+      addressBook.clickOnImportFileBtn()
+      addressBook.importCSVFile(addressBook.validCSVFile)
+      addressBook.verifyImportBtnStatus(constants.enabledStates.enabled)
+      addressBook.clickOnImportBtn()
+      addressBook.verifyDataImported(addressBook.entries)
+      addressBook.verifyNumberOfRows(4)
+    })
+
+    it('Import a csv file with an empty address/name/network in one row', () => {
+      addressBook.clickOnImportFileBtn()
+      addressBook.importCSVFile(addressBook.emptyCSVFile)
+      addressBook.verifyImportBtnStatus(constants.enabledStates.disabled)
+      addressBook.verifyUploadExportMessage([addressBook.uploadErrorMessages.emptyFile])
+    })
+
+    it('Import a non-csv file', () => {
+      addressBook.clickOnImportFileBtn()
+      addressBook.importCSVFile(addressBook.nonCSVFile)
+      addressBook.verifyImportBtnStatus(constants.enabledStates.disabled)
+      addressBook.verifyUploadExportMessage([addressBook.uploadErrorMessages.fileType])
+    })
+
+    it('Import a csv file with a repeated address and same network', () => {
+      addressBook.clickOnImportFileBtn()
+      addressBook.importCSVFile(addressBook.duplicatedCSVFile)
+      addressBook.verifyImportBtnStatus(constants.enabledStates.enabled)
+      addressBook.clickOnImportBtn()
+      addressBook.verifyDataImported([duplicateEntry])
+      addressBook.verifyNumberOfRows(1)
+    })
+
+    it('Verify modal shows the amount of entries and networks detected', () => {
+      addressBook.clickOnImportFileBtn()
+      addressBook.importCSVFile(addressBook.networksCSVFile)
+      addressBook.verifyImportBtnStatus(constants.enabledStates.enabled)
+      addressBook.verifyModalSummaryMessage(4, 3)
+    })
+
+    it('Verify an entry can be added by ENS name', () => {
+      addressBook.clickOnCreateEntryBtn()
+      addressBook.addEntryByENS(NAME_2, constants.ENS_TEST_SEPOLIA)
+    })
   })
 
-  it('Verify entry can be added', () => {
-    addressBook.clickOnCreateEntryBtn()
-    addressBook.addEntry(NAME, constants.RECIPIENT_ADDRESS)
-  })
+  describe('With pre-seeded data', () => {
+    const seedAddressBook = (value) => (win) =>
+      win.localStorage.setItem(constants.localStorageKeys.SAFE_v2__addressBook, JSON.stringify(value))
 
-  it('Verify entry can be deleted', () => {
-    cy.wrap(null)
-      .then(() =>
-        main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sepoliaAddress1),
-      )
-      .then(() =>
-        main.isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sepoliaAddress1),
-      )
-      .then(() => {
-        cy.reload()
-        addressBook.clickDeleteEntryButton()
-        addressBook.clickDeleteEntryModalDeleteButton()
-        addressBook.verifyEditedNameNotExists(EDITED_NAME)
+    it('Verify entry can be deleted', () => {
+      cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4, {
+        onBeforeLoad: seedAddressBook(ls.addressBookData.sepoliaAddress1),
       })
-  })
+      addressBook.clickDeleteEntryButton()
+      addressBook.clickDeleteEntryModalDeleteButton()
+      addressBook.verifyEditedNameNotExists(EDITED_NAME)
+    })
 
-  it('Verify csv file can be imported', () => {
-    addressBook.clickOnImportFileBtn()
-    addressBook.importCSVFile(addressBook.validCSVFile)
-    addressBook.verifyImportBtnStatus(constants.enabledStates.enabled)
-    addressBook.clickOnImportBtn()
-    addressBook.verifyDataImported(addressBook.entries)
-    addressBook.verifyNumberOfRows(4)
-  })
-
-  it('Import a csv file with an empty address/name/network in one row', () => {
-    addressBook.clickOnImportFileBtn()
-    addressBook.importCSVFile(addressBook.emptyCSVFile)
-    addressBook.verifyImportBtnStatus(constants.enabledStates.disabled)
-    addressBook.verifyUploadExportMessage([addressBook.uploadErrorMessages.emptyFile])
-  })
-
-  it('Import a non-csv file', () => {
-    addressBook.clickOnImportFileBtn()
-    addressBook.importCSVFile(addressBook.nonCSVFile)
-    addressBook.verifyImportBtnStatus(constants.enabledStates.disabled)
-    addressBook.verifyUploadExportMessage([addressBook.uploadErrorMessages.fileType])
-  })
-
-  it('Import a csv file with a repeated address and same network', () => {
-    addressBook.clickOnImportFileBtn()
-    addressBook.importCSVFile(addressBook.duplicatedCSVFile)
-    addressBook.verifyImportBtnStatus(constants.enabledStates.enabled)
-    addressBook.clickOnImportBtn()
-    addressBook.verifyDataImported([duplicateEntry])
-    addressBook.verifyNumberOfRows(1)
-  })
-
-  it('Verify modal shows the amount of entries and networks detected', () => {
-    addressBook.clickOnImportFileBtn()
-    addressBook.importCSVFile(addressBook.networksCSVFile)
-    addressBook.verifyImportBtnStatus(constants.enabledStates.enabled)
-    addressBook.verifyModalSummaryMessage(4, 3)
-  })
-
-  it('Verify an entry can be added by ENS name', () => {
-    addressBook.clickOnCreateEntryBtn()
-    addressBook.addEntryByENS(NAME_2, constants.ENS_TEST_SEPOLIA)
-  })
-
-  it('Verify clicking on Send button autofills the recipient filed with correct value', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sepoliaAddress2)
-    cy.wait(1000)
-    cy.reload()
-    wallet.connectSignerViaStorage(signer)
-    addressBook.clickOnSendBtn()
-    addressBook.verifyRecipientData(recipientData)
+    it('Verify clicking on Send button autofills the recipient filed with correct value', () => {
+      wallet.connectSignerViaStorage(signer, constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4, {
+        extraStorage: { [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.sepoliaAddress2 },
+      })
+      addressBook.clickOnSendBtn()
+      addressBook.verifyRecipientData(recipientData)
+    })
   })
 })

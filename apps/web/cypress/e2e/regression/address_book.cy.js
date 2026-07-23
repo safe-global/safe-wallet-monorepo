@@ -2,7 +2,6 @@ const path = require('path')
 import { format } from 'date-fns'
 import * as constants from '../../support/constants'
 import * as addressBook from '../../e2e/pages/address_book.page'
-import * as main from '../../e2e/pages/main.page'
 import * as ls from '../../support/localstorage_data.js'
 import * as accountsModal from '../pages/accounts_modal.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
@@ -21,110 +20,83 @@ describe('Address book tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  beforeEach(() => {
-    cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4)
-  })
+  const seedAddressBook = (value) => (win) =>
+    win.localStorage.setItem(constants.localStorageKeys.SAFE_v2__addressBook, JSON.stringify(value))
 
   it('Verify owners name can be edited', () => {
-    cy.wrap(null)
-      .then(() =>
-        main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sepoliaAddress1),
-      )
-      .then(() =>
-        main.isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sepoliaAddress1),
-      )
-      .then(() => {
-        cy.reload()
-        addressBook.clickOnEditEntryBtn()
-        addressBook.typeInNameInput(EDITED_NAME)
-        addressBook.clickOnSaveEntryBtn()
-        addressBook.verifyNameWasChanged(NAME, EDITED_NAME)
-      })
+    cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4, {
+      onBeforeLoad: seedAddressBook(ls.addressBookData.sepoliaAddress1),
+    })
+    addressBook.clickOnEditEntryBtn()
+    addressBook.typeInNameInput(EDITED_NAME)
+    addressBook.clickOnSaveEntryBtn()
+    addressBook.verifyNameWasChanged(NAME, EDITED_NAME)
   })
 
   it('Verify the address book file can be exported', () => {
-    cy.wrap(null)
-      .then(() => main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.dataSet))
-      .then(() =>
-        main.isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.dataSet),
-      )
-      .then(() => {
-        cy.reload()
-        cy.contains(ls.addressBookData.dataSet[11155111]['0xf405BC611F4a4c89CCB3E4d083099f9C36D966f8'])
-        const date = format(new Date(), 'yyyy-MM-dd', { timeZone: 'UTC' })
-        const fileName = `safe-address-book-${date}.csv`
-        addressBook.clickOnExportFileBtn()
-        addressBook.verifyExportMessage(12)
-        addressBook.confirmExport()
-        const downloadsFolder = Cypress.config('downloadsFolder')
+    cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4, {
+      onBeforeLoad: seedAddressBook(ls.addressBookData.dataSet),
+    })
+    cy.contains(ls.addressBookData.dataSet[11155111]['0xf405BC611F4a4c89CCB3E4d083099f9C36D966f8'])
+    const date = format(new Date(), 'yyyy-MM-dd', { timeZone: 'UTC' })
+    const fileName = `safe-address-book-${date}.csv`
+    addressBook.clickOnExportFileBtn()
+    addressBook.verifyExportMessage(12)
+    addressBook.confirmExport()
+    const downloadsFolder = Cypress.config('downloadsFolder')
 
-        cy.readFile(path.join(downloadsFolder, fileName), 'utf-8').then((content) => {
-          const lines = content
-            .replace(/^\uFEFF/, '')
-            .trim()
-            .split('\r\n')
+    cy.readFile(path.join(downloadsFolder, fileName), 'utf-8').then((content) => {
+      const lines = content
+        .replace(/^\uFEFF/, '')
+        .trim()
+        .split('\r\n')
 
-          const [header, ...dataLines] = lines
-          const actualData = dataLines.reduce((acc, line) => {
-            const [address, name, chainId] = line.split(',')
-            acc[chainId] = acc[chainId] || {}
-            acc[chainId][address] = name
-            return acc
-          }, {})
+      const [header, ...dataLines] = lines
+      const actualData = dataLines.reduce((acc, line) => {
+        const [address, name, chainId] = line.split(',')
+        acc[chainId] = acc[chainId] || {}
+        acc[chainId][address] = name
+        return acc
+      }, {})
 
-          Object.keys(ls.addressBookData.dataSet).forEach((chainId) => {
-            cy.log(`Checking chainId: ${chainId}`)
+      Object.keys(ls.addressBookData.dataSet).forEach((chainId) => {
+        cy.log(`Checking chainId: ${chainId}`)
 
-            const actualChainData = actualData[chainId] || {}
-            const expectedChainData = ls.addressBookData.dataSet[chainId]
+        const actualChainData = actualData[chainId] || {}
+        const expectedChainData = ls.addressBookData.dataSet[chainId]
 
-            Object.keys(expectedChainData).forEach((address) => {
-              const actualName = actualChainData[address]
-              const expectedName = expectedChainData[address]
+        Object.keys(expectedChainData).forEach((address) => {
+          const actualName = actualChainData[address]
+          const expectedName = expectedChainData[address]
 
-              cy.log(
-                `ChainId: ${chainId}, Address: ${address}, Actual Name: ${actualName}, Expected Name: ${expectedName}`,
-              )
-              expect(actualName).to.equal(expectedName)
-            })
-          })
+          cy.log(`ChainId: ${chainId}, Address: ${address}, Actual Name: ${actualName}, Expected Name: ${expectedName}`)
+          expect(actualName).to.equal(expectedName)
         })
       })
+    })
   })
 
   it('Verify that importing a csv file does not alter addresses in the Address book not present in the file', () => {
-    cy.wrap(null)
-      .then(() =>
-        main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sepoliaAddress1),
-      )
-      .then(() =>
-        main.isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sepoliaAddress1),
-      )
-      .then(() => {
-        cy.wait(1000)
-        cy.reload()
-        addressBook.clickOnImportFileBtn()
-        addressBook.importCSVFile(addressBook.validCSVFile)
-        addressBook.clickOnImportBtn()
-        addressBook.verifyDataImported([constants.RECIPIENT_ADDRESS])
-      })
+    cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4, {
+      onBeforeLoad: seedAddressBook(ls.addressBookData.sepoliaAddress1),
+    })
+    addressBook.clickOnImportFileBtn()
+    addressBook.importCSVFile(addressBook.validCSVFile)
+    addressBook.clickOnImportBtn()
+    addressBook.verifyDataImported([constants.RECIPIENT_ADDRESS])
   })
 
   it('Verify Safe name changes after uploading a csv file', () => {
-    cy.wrap(null)
-      .then(() => main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set2))
-      .then(() =>
-        main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.addedSafesImport),
-      )
-      .then(() => {
-        cy.wait(1000)
-        cy.reload()
-        addressBook.clickOnImportFileBtn()
-        addressBook.importCSVFile(addressBook.addedSafesCSVFile)
-        addressBook.clickOnImportBtn()
-        wallet.connectSignerViaStorage(signer)
-        accountsModal.openAccountsModal()
-        accountsModal.verifyAccountsListContains(importedSafe)
-      })
+    wallet.connectSignerViaStorage(signer, constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4, {
+      extraStorage: {
+        [constants.localStorageKeys.SAFE_v2__addedSafes]: ls.addedSafes.set2,
+        [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.addedSafesImport,
+      },
+    })
+    addressBook.clickOnImportFileBtn()
+    addressBook.importCSVFile(addressBook.addedSafesCSVFile)
+    addressBook.clickOnImportBtn()
+    accountsModal.openAccountsModal()
+    accountsModal.verifyAccountsListContains(importedSafe)
   })
 })
