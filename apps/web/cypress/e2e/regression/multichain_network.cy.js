@@ -17,11 +17,12 @@ describe('Multichain add network tests', { defaultCommandTimeout: 60000 }, () =>
   })
 
   beforeEach(() => {
-    cy.visit(constants.BALANCE_URL + staticSafes.MATIC_STATIC_SAFE_28)
-    cy.wait(2000)
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set5)
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.multichain)
-    wallet.connectSignerViaStorage(signer)
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.MATIC_STATIC_SAFE_28, {
+      extraStorage: {
+        [constants.localStorageKeys.SAFE_v2__addedSafes]: ls.addedSafes.set5,
+        [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.multichain,
+      },
+    })
   })
 
   it('Verify CF safe can be created when adding a new network from more options menu', () => {
