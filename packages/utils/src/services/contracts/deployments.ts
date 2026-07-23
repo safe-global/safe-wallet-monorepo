@@ -419,25 +419,31 @@ export const getDeploymentTypeForMasterCopy = (
 }
 
 /**
- * Checks whether an implementation address is an official Safe singleton
- * deployment (L1 or L2 flavour, any deployment variant) for the given version.
+ * Returns the deployment type of an implementation address if it is an
+ * official Safe singleton deployment (L1 or L2 flavour) for the given
+ * version, or `null` when the address is not an official deployment.
  * The match is address-based and chain-agnostic: official singletons are
  * deployed deterministically, so the address alone identifies the contract.
- * Forks that self-report an official VERSION() do not pass this check.
+ * Forks that self-report an official VERSION() do not match.
  * Build metadata in the version (`+L2`, `+Circles`) is ignored.
  */
-export const isOfficialMasterCopy = (implementation: string | undefined, version: string): boolean => {
-  if (!implementation) return false
+export const getOfficialMasterCopyDeploymentType = (
+  implementation: string | undefined,
+  version: string,
+): DeploymentType | null => {
+  if (!implementation) return null
   const [cleanVersion] = version.split('+')
 
   for (const getter of [getSafeSingletonDeployments, getSafeL2SingletonDeployments]) {
     const deployment = getter({ version: cleanVersion })
     if (!deployment?.deployments) continue
-    for (const variant of Object.values(deployment.deployments)) {
-      if (variant?.address && sameAddress(implementation, variant.address)) return true
+    for (const [deploymentType, variant] of Object.entries(deployment.deployments)) {
+      if (variant?.address && sameAddress(implementation, variant.address)) {
+        return deploymentType as DeploymentType
+      }
     }
   }
-  return false
+  return null
 }
 
 export const resolveChainAgnosticContractAddresses = (

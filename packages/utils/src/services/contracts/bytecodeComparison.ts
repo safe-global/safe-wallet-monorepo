@@ -1,6 +1,7 @@
 import { getSafeL2SingletonDeployments } from '@safe-global/safe-deployments'
 import type { SafeVersion } from '@safe-global/types-kit'
 import { keccak256 } from 'ethers'
+import type { DeploymentType } from './deployments'
 
 /**
  * Supported L2 versions for bytecode comparison and migration
@@ -13,6 +14,7 @@ const SUPPORTED_L2_VERSIONS: SafeVersion[] = ['1.3.0', '1.4.1']
 export type BytecodeComparisonResult = {
   isMatch: boolean
   matchedVersion?: SafeVersion
+  matchedDeploymentType?: DeploymentType
 }
 
 /**
@@ -45,12 +47,12 @@ export const compareWithSupportedL2Contracts = async (
     }
 
     // Compare bytecode hash with all deployment variants (canonical, eip155, zksync)
-    const deploymentVariants = Object.values(deployment.deployments)
-    for (const variant of deploymentVariants) {
+    for (const [deploymentType, variant] of Object.entries(deployment.deployments)) {
       if (variant.codeHash === bytecodeHash) {
         return {
           isMatch: true,
           matchedVersion: version,
+          matchedDeploymentType: deploymentType as DeploymentType,
         }
       }
     }

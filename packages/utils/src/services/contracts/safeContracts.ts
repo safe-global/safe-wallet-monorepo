@@ -4,7 +4,10 @@ import type { SafeVersion } from '@safe-global/types-kit'
 import { assertValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
 import { getSafeMigrationDeployments } from '@safe-global/safe-deployments'
 import { SAFE_TO_L2_MIGRATION_VERSION } from '@safe-global/utils/config/constants'
-import { getChainAgnosticAddress, isOfficialMasterCopy } from '@safe-global/utils/services/contracts/deployments'
+import {
+  getChainAgnosticAddress,
+  getOfficialMasterCopyDeploymentType,
+} from '@safe-global/utils/services/contracts/deployments'
 import { isSupportedL2Version, type BytecodeComparisonResult } from './bytecodeComparison'
 
 // `UNKNOWN` is returned if the mastercopy does not match supported ones
@@ -33,6 +36,11 @@ export const canMigrateUnsupportedMastercopy = (
 
   // Must have bytecode comparison result with a match
   if (!bytecodeComparisonResult || !bytecodeComparisonResult.isMatch) {
+    return false
+  }
+
+  // zksync (EraVM) bytecode matches cannot use the canonical SafeMigration flow
+  if (bytecodeComparisonResult.matchedDeploymentType === 'zksync') {
     return false
   }
 
@@ -71,7 +79,10 @@ export const isMigrationToL2Possible = (safe: Pick<SafeState, 'version' | 'chain
   if (!safe.version || !isSupportedL2Version(safe.version)) {
     return false
   }
-  if (!isOfficialMasterCopy(safe.implementation?.value, safe.version)) {
+  // Must be an official singleton, and not the zksync variant: EraVM chains
+  // cannot execute the canonical SafeMigration flow this migration builds
+  const deploymentType = getOfficialMasterCopyDeploymentType(safe.implementation?.value, safe.version)
+  if (deploymentType === null || deploymentType === 'zksync') {
     return false
   }
   const deployment = getSafeMigrationDeployments({ version: SAFE_TO_L2_MIGRATION_VERSION })

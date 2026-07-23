@@ -61,6 +61,25 @@ describe('safeContracts', () => {
       expect(typeof canMigrate).toBe('boolean')
     })
 
+    it('should return true for canonical bytecode matches but false for zksync matches', () => {
+      const safe = createMockSafe()
+
+      const canonicalMatch: BytecodeComparisonResult = {
+        isMatch: true,
+        matchedVersion: '1.3.0',
+        matchedDeploymentType: 'canonical',
+      }
+      expect(canMigrateUnsupportedMastercopy(safe, canonicalMatch)).toBe(true)
+
+      // EraVM bytecode cannot be migrated via the canonical SafeMigration flow
+      const zksyncMatch: BytecodeComparisonResult = {
+        isMatch: true,
+        matchedVersion: '1.3.0',
+        matchedDeploymentType: 'zksync',
+      }
+      expect(canMigrateUnsupportedMastercopy(safe, zksyncMatch)).toBe(false)
+    })
+
     it('should return true when all conditions are met', () => {
       const safe = createMockSafe()
       const result: BytecodeComparisonResult = { isMatch: true, matchedVersion: '1.3.0' }
@@ -137,6 +156,20 @@ describe('safeContracts', () => {
       const safe = createMockSafe({ implementation: undefined })
 
       expect(isMigrationToL2Possible(safe)).toBe(false)
+    })
+
+    it('should return false for official zksync-variant mastercopies (EraVM cannot execute the canonical migration)', () => {
+      const ZKSYNC_130_L1 = '0xB00ce5CCcdEf57e539ddcEd01DF43a13855d9910'
+      const ZKSYNC_130_L2 = '0x1727c2c531cf966f902E5927b98490fDFb3b2b70'
+
+      expect(
+        isMigrationToL2Possible(createMockSafe({ chainId: '324', implementation: { value: ZKSYNC_130_L1 } })),
+      ).toBe(false)
+      expect(
+        isMigrationToL2Possible(
+          createMockSafe({ chainId: '324', version: '1.3.0+L2', implementation: { value: ZKSYNC_130_L2 } }),
+        ),
+      ).toBe(false)
     })
 
     it('should return false for versions not supported by the SafeMigration contract', () => {
