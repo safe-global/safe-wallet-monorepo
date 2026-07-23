@@ -107,8 +107,7 @@ describe('Safe selector tests - pin/unpin and undeployed safes', () => {
   })
 
   it('Verify untrusted safe can be added to trusted list from dashboard action required panel', () => {
-    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9, { skipAutoTrust: true })
-    wallet.connectSignerViaStorage(signer)
+    wallet.connectSignerViaStorage(signer, constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9, { skipAutoTrust: true })
     dashboard.verifyActionRequiredCard({ messages: [dashboard.nonPinnedWarningTitle] })
     dashboard.clickActionInPanel(dashboard.trustThisSafeButtonTestId)
     dashboard.verifyTrustDialogVisible()

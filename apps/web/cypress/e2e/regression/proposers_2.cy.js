@@ -22,9 +22,8 @@ describe('Proposers 2 tests', () => {
   })
 
   it('Verify a proposers is capable of propose transactions', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_33)
+    wallet.connectSignerViaStorage(signer2, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_33)
     assets.toggleHideDust(false)
-    wallet.connectSignerViaStorage(signer2)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
     createtx.typeRecipientAddress(getMockAddress())
