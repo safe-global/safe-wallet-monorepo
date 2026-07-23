@@ -17,41 +17,50 @@ describe('Swaps token tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  beforeEach(() => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_1)
-    assets.toggleShowAllTokens(true)
-    assets.toggleHideDust(false)
-  })
-
-  // Added to prod
-  it(
-    'Verify that clicking the swap from assets tab, autofills that token automatically in the form',
-    { defaultCommandTimeout: 30000 },
-    () => {
-      wallet.connectSignerViaStorage(signer)
-      swaps.clickOnAssetSwapBtn(0)
-      swaps.acceptLegalDisclaimer()
-      cy.wait(2000)
-      main.getIframeBody(iframeSelector).within(() => {
-        swaps.verifySelectedInputCurrancy(swaps.swapTokens.eth)
-      })
-    },
-  )
-
-  it('Verify swap button are displayed in assets table and dashboard', () => {
-    assets.toggleShowAllTokens(true)
-    assets.toggleHideDust(false)
-    swaps.verifyAssetsPageSwapButtonsCount(4)
-
-    cy.window().then((window) => {
-      window.localStorage.setItem(
-        constants.localStorageKeys.SAFE_v2__settings,
-        JSON.stringify(ls.safeSettings.slimitSettings),
-      )
+  describe('Disconnected', () => {
+    beforeEach(() => {
+      cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_1)
+      assets.toggleShowAllTokens(true)
+      assets.toggleHideDust(false)
     })
 
-    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_1)
-    swaps.verifyDashboardPageSwapButtonsCount(4)
-    main.verifyElementsCount(swaps.dashboardSwapBtn, 1)
+    it('Verify swap button are displayed in assets table and dashboard', () => {
+      assets.toggleShowAllTokens(true)
+      assets.toggleHideDust(false)
+      swaps.verifyAssetsPageSwapButtonsCount(4)
+
+      cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_1, {
+        onBeforeLoad(win) {
+          win.localStorage.setItem(
+            constants.localStorageKeys.SAFE_v2__settings,
+            JSON.stringify(ls.safeSettings.slimitSettings),
+          )
+        },
+      })
+      swaps.verifyDashboardPageSwapButtonsCount(4)
+      main.verifyElementsCount(swaps.dashboardSwapBtn, 1)
+    })
+  })
+
+  describe('Connected', () => {
+    beforeEach(() => {
+      wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_1)
+      assets.toggleShowAllTokens(true)
+      assets.toggleHideDust(false)
+    })
+
+    // Added to prod
+    it(
+      'Verify that clicking the swap from assets tab, autofills that token automatically in the form',
+      { defaultCommandTimeout: 30000 },
+      () => {
+        swaps.clickOnAssetSwapBtn(0)
+        swaps.acceptLegalDisclaimer()
+        cy.wait(2000)
+        main.getIframeBody(iframeSelector).within(() => {
+          swaps.verifySelectedInputCurrancy(swaps.swapTokens.eth)
+        })
+      },
+    )
   })
 })
