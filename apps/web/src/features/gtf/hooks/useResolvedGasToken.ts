@@ -62,7 +62,6 @@ export const useResolvedGasToken = (
     isGtfFeePreviewAvailable(chain) &&
     sentTokenAddress &&
     tx &&
-    chain &&
     safeAddress &&
     safe.threshold > 0 &&
     recommendedNonce !== undefined

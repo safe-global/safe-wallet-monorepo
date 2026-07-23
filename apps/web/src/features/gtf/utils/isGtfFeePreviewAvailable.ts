@@ -12,5 +12,5 @@ const PREVIEW_RELAYER_TYPES: ReadonlyArray<Relayer['type']> = ['RELAY_FEE', 'GTF
  * the fee section still renders, but as signer-pays with a free execution
  * fee, and the preview endpoint must never be called.
  */
-export const isGtfFeePreviewAvailable = (chain: Chain | undefined): boolean =>
+export const isGtfFeePreviewAvailable = (chain: Chain | undefined): chain is Chain =>
   !!chain && hasFeature(chain, FEATURES.GTF) && PREVIEW_RELAYER_TYPES.includes(chain.relayer?.type ?? null)
