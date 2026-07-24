@@ -24,6 +24,11 @@ const MIGRATION_METHODS = [
 
 type MigrationMethod = (typeof MIGRATION_METHODS)[number]
 
+const MIGRATION_METHOD_BY_FLAVOUR = {
+  l1: { keep: 'migrateSingleton', reset: 'migrateWithFallbackHandler' },
+  l2: { keep: 'migrateL2Singleton', reset: 'migrateL2WithFallbackHandler' },
+} as const satisfies Record<'l1' | 'l2', Record<'keep' | 'reset', MigrationMethod>>
+
 /**
  * Resolves the SafeMigration contract address for the chain and master copy.
  *
@@ -81,13 +86,7 @@ export const createUpdateMigration = (
       safeVersion as SafeVersion,
     ])
 
-  const method: MigrationMethod = keepFallbackHandler
-    ? chain.l2
-      ? 'migrateL2Singleton'
-      : 'migrateSingleton'
-    : chain.l2
-      ? 'migrateL2WithFallbackHandler'
-      : 'migrateWithFallbackHandler'
+  const method = MIGRATION_METHOD_BY_FLAVOUR[chain.l2 ? 'l2' : 'l1'][keepFallbackHandler ? 'keep' : 'reset']
 
   const interfce = Safe_migration__factory.createInterface()
 
