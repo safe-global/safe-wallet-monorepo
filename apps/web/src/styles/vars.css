@@ -3,6 +3,7 @@
 :root {
   --color-text-primary: #121312;
   --color-text-secondary: #a1a3a7;
+  --color-text-muted: #737373;
   --color-text-disabled: #dddee0;
   --color-text-contrast: #ffffff;
   --color-primary-dark: #3c3c3c;
@@ -44,6 +45,7 @@
   --color-background-paper: #ffffff;
   --color-background-light: #effff4;
   --color-background-secondary: #dddee0;
+  --color-background-muted-secondary: #fafafa;
   --color-background-skeleton: rgba(0, 0, 0, 0.04);
   --color-background-disabled: #7878801f;
   --color-backdrop-main: #636669;
@@ -71,6 +73,7 @@
 [data-theme='dark'] {
   --color-text-primary: #ffffff;
   --color-text-secondary: #636669;
+  --color-text-muted: #737373;
   --color-text-disabled: rgba(255, 255, 255, 0.3);
   --color-text-contrast: #000000;
   --color-primary-dark: #0cb259;
@@ -112,6 +115,7 @@
   --color-background-paper: #1c1c1c;
   --color-background-light: #1b2a22;
   --color-background-secondary: #303033;
+  --color-background-muted-secondary: #1c1c1c;
   --color-background-skeleton: rgba(255, 255, 255, 0.04);
   --color-background-disabled: #7878801f;
   --color-backdrop-main: #636669;
@@ -129,6 +133,7 @@
   :root:not([data-theme='light']) {
     --color-text-primary: #ffffff;
     --color-text-secondary: #636669;
+    --color-text-muted: #737373;
     --color-text-disabled: rgba(255, 255, 255, 0.3);
     --color-text-contrast: #000000;
     --color-primary-dark: #0cb259;
@@ -170,6 +175,7 @@
     --color-background-paper: #1c1c1c;
     --color-background-light: #1b2a22;
     --color-background-secondary: #303033;
+    --color-background-muted-secondary: #1c1c1c;
     --color-background-skeleton: rgba(255, 255, 255, 0.04);
     --color-background-disabled: #7878801f;
     --color-backdrop-main: #636669;

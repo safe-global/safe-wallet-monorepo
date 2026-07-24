@@ -18,6 +18,7 @@ import {
   EllipsisVertical,
   Shield,
   History,
+  Ticket,
 } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
@@ -59,6 +60,12 @@ export const spacesSetupGroup: SidebarGroupConfig = {
       icon: UsersRound,
       label: 'Team',
       href: AppRoutes.spaces.members,
+    },
+    {
+      icon: Ticket,
+      label: 'Billing',
+      href: AppRoutes.spaces.billing,
+      activeMemberOnly: true,
     },
     {
       icon: Shield,

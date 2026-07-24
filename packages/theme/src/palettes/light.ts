@@ -8,6 +8,7 @@ const lightPalette: ColorPalette = {
   text: {
     primary: '#121312',
     secondary: '#A1A3A7',
+    muted: '#737373',
     disabled: '#DDDEE0',
     contrast: '#FFFFFF',
   },
@@ -71,6 +72,7 @@ const lightPalette: ColorPalette = {
     paper: '#FFFFFF',
     light: '#EFFFF4',
     secondary: '#DDDEE0',
+    mutedSecondary: '#FAFAFA',
     skeleton: 'rgba(0, 0, 0, 0.04)',
     disabled: '#7878801F',
   },
