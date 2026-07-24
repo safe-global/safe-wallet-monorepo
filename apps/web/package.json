@@ -91,7 +91,7 @@
     "@walletconnect/core": "^2.21.10",
     "@walletconnect/utils": "^2.21.10",
     "@web3-onboard/coinbase": "^2.4.2",
-    "@web3-onboard/core": "^2.24.1",
+    "@web3-onboard/core": "patch:@web3-onboard/core@npm%3A2.24.1#~/.yarn/patches/@web3-onboard-core-npm-2.24.1-56d6bba493.patch",
     "@web3-onboard/hw-common": "^2.3.3",
     "@web3-onboard/injected-wallets": "^2.11.3",
     "@web3-onboard/walletconnect": "2.6.2",

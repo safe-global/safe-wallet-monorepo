@@ -1,0 +1,13 @@
+diff --git a/dist/index-6ae5acf7.js b/dist/index-6ae5acf7.js
+index 2a629f8f1fa428c0d475551b706be3fdcf7594d3..8e619c583cd47ee692a72acfebeb888d3667db7b 100644
+--- a/dist/index-6ae5acf7.js
++++ b/dist/index-6ae5acf7.js
+@@ -2762,7 +2762,7 @@ async function getProvider(chain) {
+         const { createPublicClient, http } = await import('viem');
+         const publicProvider = createPublicClient({
+             chain: viemChain,
+-            transport: http()
++            transport: http(chain.rpcUrl || chain.publicRpcUrl)
+         });
+         viemProviders[chain.rpcUrl] = publicProvider;
+     }
