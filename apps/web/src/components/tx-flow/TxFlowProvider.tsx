@@ -22,6 +22,7 @@ import {
   useRoles,
 } from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import { SafeTxContext } from '../tx-flow/SafeTxProvider'
+import type { SubmitCallback } from './TxFlow'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { trackTxEvents } from '@/components/tx/shared/tracking'
 import { useSigner } from '@/hooks/wallets/useWallet'
@@ -41,6 +42,9 @@ export type TxFlowContextType<T extends unknown = any> = {
   data?: T
   onPrev: () => void
   onNext: (data?: T) => void
+  /** Flow-level submit hook (tracking + the flow's own onSubmit). Used by single-screen flows that
+   * render the submit actions inline instead of via the default ConfirmTxReceipt step. */
+  onFlowSubmit: SubmitCallback
 
   txLayoutProps: {
     title?: ReactNode
@@ -94,6 +98,7 @@ export const initialContext: TxFlowContextType = {
   data: undefined,
   onPrev: () => {},
   onNext: () => {},
+  onFlowSubmit: () => {},
 
   txLayoutProps: {},
   updateTxLayoutProps: () => {},
@@ -134,6 +139,7 @@ export type TxFlowProviderProps<T extends unknown> = {
   data: T
   prevStep: () => void
   nextStep: (data: T) => void
+  onFlowSubmit?: SubmitCallback
   progress?: number
   txId?: string
   txNonce?: TxFlowContextType['txNonce']
@@ -151,6 +157,7 @@ const TxFlowProvider = <T extends unknown>({
   data,
   nextStep,
   prevStep,
+  onFlowSubmit = initialContext.onFlowSubmit,
   progress = 0,
   txId,
   txNonce,
@@ -252,6 +259,7 @@ const TxFlowProvider = <T extends unknown>({
     data,
     onPrev: prevStep,
     onNext: nextStep,
+    onFlowSubmit,
 
     txLayoutProps,
     updateTxLayoutProps,

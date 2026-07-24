@@ -7,7 +7,6 @@ import { TxFlowContent } from './common/TxFlowContent'
 import ReviewTransaction from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
 import { TxNote, SignerSelect, BalanceChanges, FeeInfoBanner, FeesPreview, RiskConfirmation } from './features'
-import { Batching, ComboSubmit, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
 import { SlotProvider } from './slots'
 import { useTrackTimeSpent } from '@/components/tx/shared/tracking'
 import { useLoadFeature } from '@/features/__core__'
@@ -31,6 +30,12 @@ type TxFlowProps<T extends unknown> = {
   isBatchable?: TxFlowProviderProps<T>['isBatchable']
   ReviewTransactionComponent?: typeof ReviewTransaction
   eventCategory?: string
+  /**
+   * When set, TxFlow does not append the default Review + Confirm steps. Flows that render their
+   * own single merged screen (e.g. the one-screen Token Transfer) opt in; every other flow keeps
+   * the default multi-step behaviour.
+   */
+  hideDefaultSteps?: boolean
 } & TxFlowContextType['txLayoutProps']
 
 /**
@@ -52,17 +57,11 @@ export const TxFlow = <T extends unknown>({
   isBatchable,
   ReviewTransactionComponent = ReviewTransaction,
   eventCategory,
+  hideDefaultSteps = false,
   ...txLayoutProps
 }: TxFlowProps<T>) => {
   const { LedgerHashComparison } = useLoadFeature(LedgerFeature)
   const { step, data, nextStep, prevStep } = useTxStepper(initialData, eventCategory)
-
-  const childrenArray = Array.isArray(children) ? children : [children]
-
-  const progress = useMemo(
-    () => Math.round(((step + 1) / (childrenArray.length + 2)) * 100),
-    [step, childrenArray.length],
-  )
 
   const trackTimeSpent = useTrackTimeSpent()
 
@@ -74,6 +73,30 @@ export const TxFlow = <T extends unknown>({
     [onSubmit, data, trackTimeSpent],
   )
 
+  const childrenArray = Array.isArray(children) ? children : [children]
+
+  const steps = useMemo(
+    () =>
+      hideDefaultSteps
+        ? childrenArray
+        : [
+            ...childrenArray,
+            <ReviewTransactionComponent key="tx-flow-review" onSubmit={() => nextStep()}>
+              <BalanceChanges />
+              <FeesPreview />
+              <FeeInfoBanner />
+              <TxNote />
+              <SignerSelect />
+              <RiskConfirmation />
+            </ReviewTransactionComponent>,
+            <ConfirmTxReceipt key="tx-flow-confirm" onSubmit={handleFlowSubmit} />,
+          ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [hideDefaultSteps, childrenArray.length, ReviewTransactionComponent, nextStep, handleFlowSubmit],
+  )
+
+  const progress = useMemo(() => Math.round(((step + 1) / steps.length) * 100), [step, steps.length])
+
   return (
     <SafeTxProvider>
       <TxInfoProvider>
@@ -84,6 +107,7 @@ export const TxFlow = <T extends unknown>({
               data={data}
               nextStep={nextStep}
               prevStep={prevStep}
+              onFlowSubmit={handleFlowSubmit}
               progress={progress}
               txId={txId}
               txNonce={txNonce}
@@ -94,31 +118,7 @@ export const TxFlow = <T extends unknown>({
               isBatch={isBatch}
               isBatchable={isBatchable}
             >
-              <TxFlowContent>
-                {...childrenArray}
-
-                <ReviewTransactionComponent onSubmit={() => nextStep()}>
-                  <BalanceChanges />
-                  <FeesPreview />
-                  <FeeInfoBanner />
-                  <TxNote />
-                  <SignerSelect />
-                  <RiskConfirmation />
-                </ReviewTransactionComponent>
-
-                <ConfirmTxReceipt onSubmit={handleFlowSubmit}>
-                  <Counterfactual />
-
-                  <ComboSubmit>
-                    <Sign />
-                    <Execute />
-                    <ExecuteThroughRole />
-                    <Batching />
-                  </ComboSubmit>
-
-                  <Propose />
-                </ConfirmTxReceipt>
-              </TxFlowContent>
+              <TxFlowContent>{...steps}</TxFlowContent>
               <LedgerHashComparison />
             </TxFlowProvider>
           </SlotProvider>

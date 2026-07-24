@@ -29,6 +29,9 @@ export const CONFIG_SERVICE_KEY = process.env.NEXT_PUBLIC_CONFIG_SERVICE_KEY || 
 // Status page
 export const STATUS_PAGE_URL = process.env.NEXT_PUBLIC_SAFE_STATUS_PAGE_URL || 'https://status.safe.global'
 
+// Transaction AI insights backend (empty until configured)
+export const TX_AI_INSIGHTS_URL = process.env.NEXT_PUBLIC_TX_AI_INSIGHTS_URL || ''
+
 // Magic numbers
 export const POLLING_INTERVAL = 15_000
 export const PORTFOLIO_CACHE_TIME_MS = 10_000

@@ -58,3 +58,4 @@ export {
   setLastUsedSpaceOrigin,
   selectLastUsedSpaceOrigin,
 } from '@/features/spaces/store'
+export { txAiInsightsSlice, setTxAiInsight, selectTxAiInsight } from '@/features/tx-ai-insights/store'
