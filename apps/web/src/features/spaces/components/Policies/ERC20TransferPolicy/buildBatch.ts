@@ -1,7 +1,14 @@
 import { AbiCoder, getAddress, isAddress } from 'ethers'
 import type { Address } from 'viem'
 import type { MetaTransactionData } from '@safe-global/types-kit'
-import { buildSetGuardTx, encodeConfiguration, OPERATION_CALL, type PolicyConfiguration } from '../shared/guardTx'
+import {
+  buildSetGuardTx,
+  encodeConfiguration,
+  encodeRequestConfiguration,
+  computeConfigureRoot,
+  OPERATION_CALL,
+  type PolicyConfiguration,
+} from '../shared/guardTx'
 import { ERC20_TRANSFER_SELECTOR, ERC20_TRANSFER_FROM_SELECTOR, RECIPIENT_DATA_TYPE } from './contracts'
 
 /**
@@ -52,17 +59,41 @@ const encodeRecipientData = (recipients: AllowlistRecipient[]): string => {
 }
 
 /**
- * Assembles the multi-send for creating/editing the Token Withdraw policy:
+ * How the batch configures the guard:
+ *  - `immediate`: guard not yet active → `setGuard` + `configureImmediately`,
+ *    applied in one signed batch.
+ *  - `request`: guard already active → `requestConfiguration(root)` only. The
+ *    config takes effect via a SEPARATE `applyConfiguration` tx once the guard's
+ *    on-chain DELAY has elapsed (a later, follow-up action).
+ */
+export type ConfigureMode = 'immediate' | 'request'
+
+/**
+ * Assembles the multi-send for creating/editing the Token Withdraw policy.
+ *
+ * Guard NOT yet active (`immediate`):
  *   Tx 1 (optional) — `setGuard(SafePolicyGuard)` on the Safe, iff the guard
  *     isn't already the policy guard.
- *   Tx 2 — `configureImmediately([Configuration])` on the guard, one
- *     Configuration per token (× per restricted selector) carrying the
- *     `RecipientData[]` allowlist.
+ *   Tx 2 — `configureImmediately([Configuration])` on the guard.
+ *
+ * Guard ALREADY active (`request`):
+ *   Tx 1 — `requestConfiguration(root)` on the guard. `configureImmediately`
+ *     would revert in `checkTransaction`; the change must go through the delayed
+ *     request/apply path. Apply happens later, after DELAY.
  *
  * Pure — no network. The caller resolves addresses (from the policy response)
  * and the current guard (via `usePolicyGuard`) and passes them in.
  */
-export const buildTokenWithdrawBatch = (input: BuildTokenWithdrawBatchInput): { txs: MetaTransactionData[] } => {
+export type BuildTokenWithdrawBatchResult = {
+  txs: MetaTransactionData[]
+  mode: ConfigureMode
+  /** The Configuration[] the batch commits to — persisted so a later applyConfiguration can replay it. */
+  configurations: PolicyConfiguration[]
+  /** keccak256(abi.encode(configurations)) — the on-chain configureRoot. */
+  configureRoot: string
+}
+
+export const buildTokenWithdrawBatch = (input: BuildTokenWithdrawBatchInput): BuildTokenWithdrawBatchResult => {
   const { safeAddress, currentGuard, safePolicyGuard, policyContract, allowlist, restrictTransferFrom } = input
 
   if (!isAddress(safePolicyGuard)) throw new Error('Missing or invalid SafePolicyGuard address')
@@ -95,15 +126,25 @@ export const buildTokenWithdrawBatch = (input: BuildTokenWithdrawBatchInput): { 
     }))
   })
 
-  const txs: MetaTransactionData[] = []
+  const configureRoot = computeConfigureRoot(configurations)
 
-  // install the guard only if it isn't already the policy guard.
-  if (!guardAlreadySet) {
-    txs.push(buildSetGuardTx(safeAddress, safePolicyGuard))
+  // Guard already active → the immediate path reverts in checkTransaction, so
+  // request the change and let it apply after the on-chain DELAY.
+  if (guardAlreadySet) {
+    return {
+      txs: [encodeRequestConfiguration(safePolicyGuard, configurations)],
+      mode: 'request',
+      configurations,
+      configureRoot,
+    }
   }
 
-  // register the allowlist with the guard.
-  txs.push(encodeConfiguration(safePolicyGuard, configurations))
+  // Guard isn't the policy guard yet (none, or a foreign one confirmed above) →
+  // install it and configure in one batch.
+  const txs: MetaTransactionData[] = [
+    buildSetGuardTx(safeAddress, safePolicyGuard),
+    encodeConfiguration(safePolicyGuard, configurations),
+  ]
 
-  return { txs }
+  return { txs, mode: 'immediate', configurations, configureRoot }
 }

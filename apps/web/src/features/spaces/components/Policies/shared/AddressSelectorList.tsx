@@ -1,6 +1,6 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
 import { isAddress } from 'ethers'
-import { IconButton, Stack } from '@mui/material'
+import { Box, IconButton, Stack } from '@mui/material'
 import { Plus, Trash2, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { WizardField } from '../wizardCommon'
@@ -14,9 +14,23 @@ type AddressSelectorListProps = {
   entryLabel?: string
 }
 
-const rowState = (address: string): 'default' | 'valid' | 'error' => {
+const EMPTY_ROW: AddressEntry[] = [{ address: '' }]
+
+const normalize = (address: string) => address.trim().toLowerCase()
+
+/** True if this row's (valid) address already appears in an EARLIER row. */
+const isDuplicate = (rows: AddressEntry[], index: number): boolean => {
+  const addr = normalize(rows[index].address)
+  if (!addr) return false
+  return rows.slice(0, index).some((r) => normalize(r.address) === addr)
+}
+
+const rowState = (rows: AddressEntry[], index: number): 'default' | 'valid' | 'error' => {
+  const address = rows[index].address.trim()
   if (!address) return 'default'
-  return isAddress(address) ? 'valid' : 'error'
+  if (!isAddress(address)) return 'error'
+  if (isDuplicate(rows, index)) return 'error'
+  return 'valid'
 }
 
 /**
@@ -26,7 +40,8 @@ const rowState = (address: string): 'default' | 'valid' | 'error' => {
  * layered by the caller when it wires this into a wizard step (Step 8).
  */
 export const AddressSelectorList = ({ addresses, onChange, entryLabel = 'address' }: AddressSelectorListProps) => {
-  const rows = useMemo(() => (addresses.length > 0 ? addresses : [{ address: '' }]), [addresses])
+  // Always render at least one row. Never mutate the incoming array in place.
+  const rows = addresses.length > 0 ? addresses : EMPTY_ROW
 
   const updateRow = useCallback(
     (index: number, patch: Partial<AddressEntry>) => {
@@ -45,27 +60,42 @@ export const AddressSelectorList = ({ addresses, onChange, entryLabel = 'address
     [rows, onChange],
   )
 
+  // Can't add a new row while any existing row is empty or a duplicate.
+  const hasEmptyRow = rows.some((r) => !r.address.trim())
+  const hasDuplicate = rows.some((_, i) => isDuplicate(rows, i))
+  const canAdd = !hasEmptyRow && !hasDuplicate
+
   return (
     <Stack gap={1}>
       {rows.map((row, index) => (
+        // Key by index intentionally: rows are positional and fully controlled
+        // (value comes from `row.address`), so React reuses the input by slot and
+        // removing a row re-renders every remaining slot from its own `row`.
         <Stack key={index} direction="row" alignItems="center" gap={1}>
-          <WizardField
-            icon={<User size={16} color="#737373" />}
-            value={row.address}
-            onChange={(value) => updateRow(index, { address: value })}
-            placeholder="0x… or name.eth"
-            state={rowState(row.address)}
-            ariaLabel={`${entryLabel} ${index + 1}`}
-          />
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <WizardField
+              icon={<User size={16} color="#737373" />}
+              value={row.address}
+              onChange={(value) => updateRow(index, { address: value })}
+              placeholder="0x… or name.eth"
+              state={rowState(rows, index)}
+              ariaLabel={`${entryLabel} ${index + 1}`}
+            />
+          </Box>
           {rows.length > 1 && (
-            <IconButton aria-label={`Remove ${entryLabel} ${index + 1}`} onClick={() => removeRow(index)} size="small">
+            <IconButton
+              aria-label={`Remove ${entryLabel} ${index + 1}`}
+              onClick={() => removeRow(index)}
+              size="small"
+              sx={{ flexShrink: 0 }}
+            >
               <Trash2 size={16} />
             </IconButton>
           )}
         </Stack>
       ))}
 
-      <Button variant="outline" size="sm" onClick={addRow} className="self-start">
+      <Button variant="outline" size="sm" onClick={addRow} disabled={!canAdd} className="self-start">
         <Plus size={16} /> Add {entryLabel}
       </Button>
     </Stack>

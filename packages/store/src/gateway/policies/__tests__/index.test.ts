@@ -31,12 +31,9 @@ describe('policiesApi (mocked)', () => {
 
       expect(result.isSuccess).toBe(true)
       const byType = Object.fromEntries(result.data!.items.map((i) => [i.type, i]))
-      expect(Object.keys(byType).sort()).toEqual([
-        PolicyType.Cosigner,
-        PolicyType.Recovery,
-        PolicyType.SpendingLimit,
-        PolicyType.TokenWithdraw,
-      ])
+      expect(Object.keys(byType).sort()).toEqual(
+        [PolicyType.SpendingLimit, PolicyType.Recovery, PolicyType.TokenWithdraw, PolicyType.Cosigner].sort(),
+      )
 
       // Spending limit + recovery are enabled via a module (no guard).
       for (const type of [PolicyType.SpendingLimit, PolicyType.Recovery]) {
@@ -52,6 +49,20 @@ describe('policiesApi (mocked)', () => {
           expect(e.guards.transactionGuard!.policyContract).toMatch(/^0x[0-9a-fA-F]{40}$/)
           expect(e.guards.transactionGuard!.safePolicyGuard).toMatch(/^0x[0-9a-fA-F]{40}$/)
         }
+      }
+    })
+
+    it('returns the real Sepolia policy-engine deployment addresses on chain 11155111', async () => {
+      const onSepolia = await store.dispatch(
+        policiesApi.endpoints.policiesGetPoliciesV1.initiate({ ...arg, chainId: '11155111' }),
+      )
+      const tw = onSepolia.data!.items.find((i) => i.type === PolicyType.TokenWithdraw)!
+      expect(tw.available).toBe(true)
+      expect(tw.enforcement.via).toBe('guard')
+      if (tw.enforcement.via === 'guard') {
+        const { transactionGuard } = tw.enforcement.guards
+        expect(transactionGuard!.safePolicyGuard).toBe('0xde4c448904537EBBA654Ac3803E7D74A77C7a1a8')
+        expect(transactionGuard!.policyContract).toBe('0xec399EE72199DBc1f7DCf8b69cFa0290d1e06Fb7')
       }
     })
 
@@ -80,6 +91,36 @@ describe('policiesApi (mocked)', () => {
       expect(byType[PolicyType.SpendingLimit].enforcement.via).toBe('module')
       // The token-withdraw policy (this plan's focus) is guard-enforced.
       expect(byType[PolicyType.TokenWithdraw].enforcement.via).toBe('guard')
+    })
+  })
+
+  describe('policiesGetPendingPoliciesV1', () => {
+    it('returns policy changes that are requested but not yet applied', async () => {
+      const result = await store.dispatch(policiesApi.endpoints.policiesGetPendingPoliciesV1.initiate(arg))
+
+      expect(result.isSuccess).toBe(true)
+      expect(result.data!.items.length).toBeGreaterThan(0)
+
+      const pending = result.data!.items[0]
+      // Pending = requested-but-not-applied: disabled, carrying the delay metadata.
+      expect(pending.enabled).toBe(false)
+      expect(pending.isReady).toBe(false)
+      expect(pending.readyAt).toBe(pending.requestedAt + 86_400)
+      expect(pending.configureRoot).toMatch(/^0x[0-9a-fA-F]+$/)
+      // It's guard-enforced (the token-withdraw change).
+      expect(pending.enforcement.via).toBe('guard')
+    })
+
+    it('carries the real Sepolia deployment addresses on chain 11155111', async () => {
+      const onSepolia = await store.dispatch(
+        policiesApi.endpoints.policiesGetPendingPoliciesV1.initiate({ ...arg, chainId: '11155111' }),
+      )
+      const pending = onSepolia.data!.items[0]
+      if (pending.enforcement.via === 'guard') {
+        expect(pending.enforcement.guards.transactionGuard!.safePolicyGuard).toBe(
+          '0xde4c448904537EBBA654Ac3803E7D74A77C7a1a8',
+        )
+      }
     })
   })
 

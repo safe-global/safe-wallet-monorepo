@@ -1,12 +1,13 @@
 import { Box, Paper, Stack, Typography } from '@mui/material'
-import { ArrowUpRight, LifeBuoy, Shield, WalletMinimal } from 'lucide-react'
+import { ArrowUpRight, Ban, LifeBuoy, Shield, WalletMinimal } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import AppliedPolicies from './AppliedPolicies'
 import ActivePoliciesList from './ActivePoliciesList'
+import PendingPoliciesList from './PendingPoliciesList'
 import SpendingLimitFlow from './SpendingLimitFlow'
 import RecoveryFlow from './RecoveryFlow'
+import ERC20TransferPolicyFlow from './ERC20TransferPolicy'
 
 type PolicyCardProps = {
   icon: LucideIcon
@@ -155,12 +156,20 @@ const SpacePolicies = () => {
     return <RecoveryFlow />
   }
 
+  if (router.query.policy === 'tokenWithdraw') {
+    return <ERC20TransferPolicyFlow />
+  }
+
   const openSpendingLimitFlow = () => {
     void router.push({ pathname: AppRoutes.spaces.policies, query: { ...router.query, policy: 'spendingLimit' } })
   }
 
   const openRecoveryFlow = () => {
     void router.push({ pathname: AppRoutes.spaces.policies, query: { ...router.query, policy: 'accountRecovery' } })
+  }
+
+  const openTokenWithdrawFlow = () => {
+    void router.push({ pathname: AppRoutes.spaces.policies, query: { ...router.query, policy: 'tokenWithdraw' } })
   }
 
   return (
@@ -190,6 +199,12 @@ const SpacePolicies = () => {
             description="Per-member spending cap."
             onClick={openSpendingLimitFlow}
           />
+          <PolicyCard
+            icon={Ban}
+            title="Token Withdraw"
+            description="Restrict withdrawal recipients."
+            onClick={openTokenWithdrawFlow}
+          />
           <PolicyCard icon={Shield} title="Operator Role" description="Scoped DeFi permissions." comingSoon />
           <PolicyCard
             icon={LifeBuoy}
@@ -200,7 +215,7 @@ const SpacePolicies = () => {
         </Box>
       </Stack>
 
-      <AppliedPolicies />
+      <PendingPoliciesList />
 
       <ActivePoliciesList />
     </>

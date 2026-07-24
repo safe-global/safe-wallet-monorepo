@@ -10,6 +10,7 @@ import {
   type TokenWithdrawPolicy,
   type CosignerPolicy,
   type ActivePolicy,
+  type PendingPolicy,
   type AvailablePolicy,
 } from '@safe-global/store/gateway/policies/types'
 
@@ -96,6 +97,19 @@ export const cosignerPolicyBuilder = (): IBuilder<CosignerPolicy> =>
   })
 
 export const activePolicyBuilder = (): IBuilder<ActivePolicy> => tokenWithdrawPolicyBuilder()
+
+export const pendingPolicyBuilder = (): IBuilder<PendingPolicy> => {
+  const requestedAt = faker.date.recent().getTime() / 1000
+  const readyAt = requestedAt + 86_400
+  return Builder.new<PendingPolicy>().with({
+    ...tokenWithdrawPolicyBuilder().build(),
+    enabled: false,
+    configureRoot: faker.string.hexadecimal({ length: 64 }),
+    requestedAt: Math.floor(requestedAt),
+    readyAt: Math.floor(readyAt),
+    isReady: false,
+  })
+}
 
 export const availablePolicyBuilder = (): IBuilder<AvailablePolicy> =>
   Builder.new<AvailablePolicy>().with({

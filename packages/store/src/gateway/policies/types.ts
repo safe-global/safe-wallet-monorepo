@@ -8,7 +8,7 @@
 export enum PolicyType {
   SpendingLimit = 'spending-limit',
   Recovery = 'recovery',
-  TokenWithdraw = 'token-withdraw',
+  TokenWithdraw = 'ERC20TransferPolicy',
   Cosigner = 'cosigner',
 }
 
@@ -105,6 +105,24 @@ export type CosignerPolicy = PolicyBase & { type: PolicyType.Cosigner; data: Cos
 export type ActivePolicy = SpendingLimitPolicy | RecoveryPolicy | TokenWithdrawPolicy | CosignerPolicy
 
 /**
+ * A policy change that has been REQUESTED on-chain (`requestConfiguration`) but
+ * not yet APPLIED — it sits out the SafePolicyGuard's DELAY before
+ * `applyConfiguration` becomes valid. Returned by getPendingPolicies.
+ *
+ * Carries the same discriminated `data` as an active policy (the change being
+ * made) plus the request metadata the apply step needs:
+ *  - configureRoot: keccak256(abi.encode(Configuration[])) — the requested root.
+ *  - requestedAt / readyAt: unix seconds; readyAt = requestedAt + DELAY.
+ *  - isReady: whether the delay has elapsed (readyAt <= now) so it can be applied.
+ */
+export type PendingPolicy = ActivePolicy & {
+  configureRoot: string
+  requestedAt: number
+  readyAt: number
+  isReady: boolean
+}
+
+/**
  * A catalogue entry for a policy type the Safe can configure (returned by
  * getPolicies). `enforcement` describes how creating this policy is wired on the
  * Safe — module-enabled (spending limit, recovery) or guard-based (token
@@ -123,3 +141,4 @@ export type AvailablePolicy = {
 export type PolicyQueryArg = { spaceId: string; chainId: string; safeAddress: string }
 export type GetPoliciesResponse = { items: AvailablePolicy[] }
 export type GetActivePoliciesResponse = { items: ActivePolicy[] }
+export type GetPendingPoliciesResponse = { items: PendingPolicy[] }

@@ -1,7 +1,7 @@
 import { useContext, type ReactElement, type ReactNode } from 'react'
 import { Box, Drawer, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { AnimatePresence, motion } from 'framer-motion'
-import { CalendarClock, Clock, ExternalLink, LifeBuoy, ShieldCheck, Trash2, WalletMinimal, X } from 'lucide-react'
+import { Ban, CalendarClock, Clock, ExternalLink, LifeBuoy, ShieldCheck, Trash2, WalletMinimal, X } from 'lucide-react'
 import { safeFormatUnits, shortenAddress } from '@safe-global/utils/utils/formatters'
 import { relativeTime } from '@safe-global/utils/utils/date'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -36,7 +36,16 @@ type RecoveryDetail = {
   safe: SafeRef
 }
 
-export type PolicyDetail = SpendingLimitDetail | RecoveryDetail
+type TokenWithdrawDetail = {
+  type: 'ERC20TransferPolicy'
+  safe: SafeRef
+  allowlist: Array<{
+    token: { address: string; symbol: string }
+    recipients: Array<{ address: string; name?: string | null }>
+  }>
+}
+
+export type PolicyDetail = SpendingLimitDetail | RecoveryDetail | TokenWithdrawDetail
 
 type PolicyDetailDrawerProps = {
   policy: PolicyDetail | null
@@ -303,10 +312,20 @@ const PolicyDetailDrawer = ({ policy, onClose }: PolicyDetailDrawerProps): React
                     justifyContent: 'center',
                   }}
                 >
-                  {policy.type === 'spending-limit' ? <WalletMinimal size={13} /> : <LifeBuoy size={13} />}
+                  {policy.type === 'spending-limit' ? (
+                    <WalletMinimal size={13} />
+                  ) : policy.type === 'recovery' ? (
+                    <LifeBuoy size={13} />
+                  ) : (
+                    <Ban size={13} />
+                  )}
                 </Box>
                 <Typography sx={{ fontSize: 13, fontWeight: 700 }}>
-                  {policy.type === 'spending-limit' ? 'Spending limit' : 'Account recovery'}
+                  {policy.type === 'spending-limit'
+                    ? 'Spending limit'
+                    : policy.type === 'recovery'
+                      ? 'Account recovery'
+                      : 'Token withdraw allowlist'}
                 </Typography>
               </Stack>
               <IconButton onClick={onClose} size="small" aria-label="Close policy details">
@@ -454,6 +473,23 @@ const PolicyDetailDrawer = ({ policy, onClose }: PolicyDetailDrawerProps): React
                     />
                   </>
                 )}
+
+                {policy.type === 'ERC20TransferPolicy' &&
+                  policy.allowlist.map((entry) => (
+                    <SummaryRow
+                      key={entry.token.address}
+                      label={entry.token.symbol}
+                      value={
+                        <Stack gap={0.5} alignItems="flex-end">
+                          {entry.recipients.map((r) => (
+                            <Typography key={r.address} sx={{ fontSize: 13, fontWeight: 600 }}>
+                              {r.name || shortenAddress(r.address)}
+                            </Typography>
+                          ))}
+                        </Stack>
+                      }
+                    />
+                  ))}
               </SummaryCard>
 
               {/* Enforced-by footnote, matching the wizard summary */}
@@ -464,7 +500,12 @@ const PolicyDetailDrawer = ({ policy, onClose }: PolicyDetailDrawerProps): React
                 sx={{ mt: 1.5, px: 0.5, fontSize: 11.5, fontWeight: 600, color: 'text.secondary' }}
               >
                 <ShieldCheck size={12} color="#1C5538" />
-                Enforced by {policy.type === 'spending-limit' ? 'Safe Allowance Module' : 'Safe Delay Modifier'}
+                Enforced by{' '}
+                {policy.type === 'spending-limit'
+                  ? 'Safe Allowance Module'
+                  : policy.type === 'recovery'
+                    ? 'Safe Delay Modifier'
+                    : 'Safe Policy Guard'}
               </Stack>
 
               {/* CTAs */}

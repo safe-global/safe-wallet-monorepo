@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { render, screen, fireEvent } from '@/tests/test-utils'
 import * as spaces from '@/features/spaces'
 import * as useActivePoliciesHook from '../useActivePolicies'
 import { spendingLimitPolicyBuilder, tokenWithdrawPolicyBuilder } from '@/tests/builders/policies'
@@ -70,5 +70,37 @@ describe('ActivePoliciesList', () => {
 
     render(<ActivePoliciesList />)
     expect(screen.queryByText('Ops Safe')).not.toBeInTheDocument()
+  })
+
+  it('shows the header with a total count and a refresh control', () => {
+    mockSpaceSafes([SAFE])
+    mockActivePolicies({ policies: [spendingLimitPolicyBuilder().build(), tokenWithdrawPolicyBuilder().build()] })
+
+    render(<ActivePoliciesList />)
+
+    expect(screen.getByText('Active policies')).toBeInTheDocument()
+    expect(screen.getByText('2')).toBeInTheDocument() // total count
+    expect(screen.getByRole('button', { name: /refresh policies/i })).toBeInTheDocument()
+  })
+
+  it('shows an empty state when safes exist but have no policies', () => {
+    mockSpaceSafes([SAFE])
+    mockActivePolicies({ policies: [] })
+
+    render(<ActivePoliciesList />)
+
+    expect(screen.getByText('Active policies')).toBeInTheDocument()
+    expect(screen.getByText(/no policies applied/i)).toBeInTheDocument()
+  })
+
+  it('opens the detail drawer when a policy row is clicked', () => {
+    mockSpaceSafes([SAFE])
+    mockActivePolicies({ policies: [tokenWithdrawPolicyBuilder().build()] })
+
+    render(<ActivePoliciesList />)
+
+    fireEvent.click(screen.getByText('Token withdraw allowlist'))
+    // The drawer renders its own header (a second occurrence of the label).
+    expect(screen.getAllByText('Token withdraw allowlist').length).toBeGreaterThan(1)
   })
 })

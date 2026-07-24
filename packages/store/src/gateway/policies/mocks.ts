@@ -3,8 +3,10 @@ import {
   type TokenInfo,
   type AvailablePolicy,
   type ActivePolicy,
+  type PendingPolicy,
   type GetPoliciesResponse,
   type GetActivePoliciesResponse,
+  type GetPendingPoliciesResponse,
   type PolicyQueryArg,
 } from './types'
 
@@ -15,14 +17,27 @@ import {
  * `query: { url }`.
  */
 
-/** Chains we have policy-engine deployments for (mock). */
-const SUPPORTED_CHAIN_IDS = ['1', '137', '11155111']
+const SEPOLIA = '11155111'
 
-// Stable placeholder addresses so the mock is deterministic.
-const SAFE_POLICY_GUARD = '0x1111111111111111111111111111111111111111'
+/** Chains we have policy-engine deployments for (mock). */
+const SUPPORTED_CHAIN_IDS = ['1', '137', SEPOLIA]
+
+// Real Sepolia deployments; placeholders elsewhere until the backend lands.
+const DEPLOYMENTS: Record<string, { safePolicyGuard: string; erc20TransferPolicy: string }> = {
+  [SEPOLIA]: {
+    safePolicyGuard: '0xde4c448904537EBBA654Ac3803E7D74A77C7a1a8',
+    erc20TransferPolicy: '0xec399EE72199DBc1f7DCf8b69cFa0290d1e06Fb7',
+  },
+}
+const PLACEHOLDER = {
+  safePolicyGuard: '0x1111111111111111111111111111111111111111',
+  erc20TransferPolicy: '0x4444444444444444444444444444444444444444',
+}
+const deploymentsFor = (chainId: string) => DEPLOYMENTS[chainId] ?? PLACEHOLDER
+
+// Modules aren't deployed yet — stable placeholders so the mock is deterministic.
 const SPENDING_LIMIT_MODULE = '0x2222222222222222222222222222222222222222'
 const RECOVERY_MODULE = '0x3333333333333333333333333333333333333333'
-const ERC20_TRANSFER_POLICY = '0x4444444444444444444444444444444444444444'
 const COSIGNER_POLICY = '0x5555555555555555555555555555555555555555'
 
 const USDC: TokenInfo = {
@@ -42,6 +57,7 @@ const isSupportedChain = (chainId: string) => SUPPORTED_CHAIN_IDS.includes(chain
 
 export const buildMockAvailablePolicies = (arg: PolicyQueryArg): GetPoliciesResponse => {
   const supported = isSupportedChain(arg.chainId)
+  const { safePolicyGuard, erc20TransferPolicy } = deploymentsFor(arg.chainId)
 
   const items: AvailablePolicy[] = [
     {
@@ -69,7 +85,7 @@ export const buildMockAvailablePolicies = (arg: PolicyQueryArg): GetPoliciesResp
       // Guard-enforced: SafePolicyGuard in the transaction-guard slot.
       enforcement: {
         via: 'guard',
-        guards: { transactionGuard: { policyContract: ERC20_TRANSFER_POLICY, safePolicyGuard: SAFE_POLICY_GUARD } },
+        guards: { transactionGuard: { policyContract: erc20TransferPolicy, safePolicyGuard } },
       },
       available: supported,
       configuredCount: 1,
@@ -80,7 +96,7 @@ export const buildMockAvailablePolicies = (arg: PolicyQueryArg): GetPoliciesResp
       description: 'Require a cosigner when a token transfer exceeds a threshold.',
       enforcement: {
         via: 'guard',
-        guards: { transactionGuard: { policyContract: COSIGNER_POLICY, safePolicyGuard: SAFE_POLICY_GUARD } },
+        guards: { transactionGuard: { policyContract: COSIGNER_POLICY, safePolicyGuard } },
       },
       available: supported,
       configuredCount: 0,
@@ -90,7 +106,9 @@ export const buildMockAvailablePolicies = (arg: PolicyQueryArg): GetPoliciesResp
   return { items }
 }
 
-export const buildMockActivePolicies = (): GetActivePoliciesResponse => {
+export const buildMockActivePolicies = (arg: PolicyQueryArg): GetActivePoliciesResponse => {
+  const { safePolicyGuard, erc20TransferPolicy } = deploymentsFor(arg.chainId)
+
   const items: ActivePolicy[] = [
     {
       id: 'pol_spending_limit_1',
@@ -108,7 +126,7 @@ export const buildMockActivePolicies = (): GetActivePoliciesResponse => {
       enabled: true,
       enforcement: {
         via: 'guard',
-        guards: { transactionGuard: { policyContract: ERC20_TRANSFER_POLICY, safePolicyGuard: SAFE_POLICY_GUARD } },
+        guards: { transactionGuard: { policyContract: erc20TransferPolicy, safePolicyGuard } },
       },
       data: {
         allowlist: [
@@ -122,6 +140,42 @@ export const buildMockActivePolicies = (): GetActivePoliciesResponse => {
           { token: DAI, recipients: [{ address: '0xDEeF00000000000000000000000000000000DE03', name: 'Treasury' }] },
         ],
       },
+    },
+  ]
+
+  return { items }
+}
+
+// Fixed timestamps keep the mock deterministic (real CGW supplies live values).
+const REQUESTED_AT = 1_753_000_000 // ~2025-07-20
+const GUARD_DELAY_SEC = 86_400 // 24h — mirrors a typical SafePolicyGuard DELAY
+
+export const buildMockPendingPolicies = (arg: PolicyQueryArg): GetPendingPoliciesResponse => {
+  const { safePolicyGuard, erc20TransferPolicy } = deploymentsFor(arg.chainId)
+  const readyAt = REQUESTED_AT + GUARD_DELAY_SEC
+
+  const items: PendingPolicy[] = [
+    {
+      id: 'pol_token_withdraw_pending_1',
+      type: PolicyType.TokenWithdraw,
+      enabled: false, // requested, not yet applied
+      enforcement: {
+        via: 'guard',
+        guards: { transactionGuard: { policyContract: erc20TransferPolicy, safePolicyGuard } },
+      },
+      // The requested change: add a new recipient to USDC's allowlist.
+      data: {
+        allowlist: [
+          {
+            token: USDC,
+            recipients: [{ address: '0xDEeF00000000000000000000000000000000DE04', name: 'New vendor' }],
+          },
+        ],
+      },
+      configureRoot: '0x00000000000000000000000000000000000000000000000000000000c0f16007',
+      requestedAt: REQUESTED_AT,
+      readyAt,
+      isReady: false,
     },
   ]
 
