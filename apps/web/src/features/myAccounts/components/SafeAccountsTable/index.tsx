@@ -21,7 +21,8 @@ import {
 } from './useSafeAccountRows'
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
 import ReorderableBody, { toggleExpanded } from './ReorderableBody'
-import { SimilarityBandHeader } from './SimilarityBand'
+import { bandHeaderAt } from './SimilarityBand'
+import { bodyRowSx } from './tableStyles'
 import EntryDialog from '@/components/address-book/EntryDialog'
 
 /** Renaming a safe = editing its address-book entry across every chain it lives on. */
@@ -95,7 +96,7 @@ export type SafeAccountsTableProps = {
   actionsWidth?: string
   /** Replaces the default context-menu actions cell for each row (e.g. an "Add to workspace" button). */
   renderActions?: (line: AccountLine) => ReactNode
-  /** Lowercased addresses to flag with a "High similarity" warning badge. */
+  /** Lowercased addresses to flag with an inline look-alike ⚠️ (address-poisoning defence). */
   flaggedAddresses?: Set<string>
   /**
    * Lowercased address → similarity-cluster id. When set, contiguous rows sharing a cluster id are
@@ -159,7 +160,7 @@ const headerSx = {
  * Within the band the anchor(s) lead, then the look-alikes keep their sorted order. Non-clustered
  * groups stay in place. No-op when `similarityGroups` is empty.
  */
-const orderGroupsBySimilarity = (
+export const orderGroupsBySimilarity = (
   groups: AccountGroup[],
   similarityGroups?: Map<string, string>,
   flaggedAddresses?: Set<string>,
@@ -328,76 +329,7 @@ const SafeAccountsTable = ({
             minWidth: embedded ? undefined : minWidth,
             borderCollapse: 'separate',
             borderSpacing: 0,
-            // The base theme tints every MuiTableRow green on hover; suppress it on the <tr> (otherwise
-            // it bleeds green into the inset corners) and instead paint a grey pill (the same --muted as
-            // the safe-selector dropdown) on the row's cells — inset and rounded like the dropdown rows.
-            // Painting the cells (not the <tr>) lets the first/last cells' transparent side borders inset
-            // the fill from the panel edges. Locked rows stay un-hovered.
-            '& .MuiTableBody-root .MuiTableRow-root:hover': { backgroundColor: 'transparent' },
-            '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root': {
-              backgroundColor: 'var(--muted)',
-            },
-            '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root:first-of-type': {
-              borderTopLeftRadius: '8px',
-              borderBottomLeftRadius: '8px',
-            },
-            '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root:last-of-type': {
-              borderTopRightRadius: '8px',
-              borderBottomRightRadius: '8px',
-            },
-            // Transparent top/bottom borders (with background-clip) inset the hover pill vertically so it
-            // floats clear of the separators. Set here — not per-cell — because the base theme forces
-            // cell borderBottom to `none` at a specificity a per-cell sx can't beat (which is why only
-            // the bottom touched). The outer cells' horizontal inset borders live in the cell sx.
-            '& .MuiTableBody-root .MuiTableCell-root': {
-              borderTop: '6px solid transparent',
-              borderBottom: '6px solid transparent',
-              backgroundClip: 'padding-box',
-            },
-            // Row separator, drawn as a 1px line at the bottom of the <tr> (keyed off data-divider,
-            // absent on the last row). It lives on the row — not the cells — so the cells' transparent
-            // top/bottom borders can inset the hover pill clear of the separator. Inset 4px each side to
-            // line up with the pill.
-            '& .MuiTableBody-root .MuiTableRow-root[data-divider]': {
-              backgroundImage:
-                'linear-gradient(to right, transparent 4px, var(--color-border-light) 4px, var(--color-border-light) calc(100% - 4px), transparent calc(100% - 4px))',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'bottom',
-              backgroundSize: '100% 1px',
-            },
-            // Address-poisoning similarity band: paint the header + member rows yellow, including the
-            // 6px inset borders above, so the run reads as one continuous block rather than separated
-            // pills. Placed after the hover rule so the same-specificity hover override below wins.
-            '& .MuiTableBody-root .MuiTableRow-root[data-band-header] .MuiTableCell-root, & .MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root':
-              {
-                backgroundColor: 'var(--color-yellow-50)',
-                borderTopColor: 'var(--color-yellow-50)',
-                borderBottomColor: 'var(--color-yellow-50)',
-              },
-            // Keep the band yellow on hover (beat the grey hover pill, which has equal specificity).
-            '& .MuiTableBody-root .MuiTableRow-root[data-band-header]:hover .MuiTableCell-root, & .MuiTableBody-root .MuiTableRow-root[data-highlighted]:hover .MuiTableCell-root':
-              {
-                backgroundColor: 'var(--color-yellow-50)',
-              },
-            // Every band member (incl. the trusted anchor) renders as its own rounded, yellow-bordered
-            // card. The border is drawn with inset box-shadows on the row's cells (continuous top/bottom
-            // on every cell; left only on the first, right only on the last) so it follows the first/last
-            // cell radii into a rounded rectangle with no internal vertical lines.
-            '& .MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root': {
-              boxShadow: 'inset 0 1px 0 var(--color-yellow-400), inset 0 -1px 0 var(--color-yellow-400)',
-            },
-            '& .MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root:first-of-type': {
-              boxShadow:
-                'inset 1px 0 0 var(--color-yellow-400), inset 0 1px 0 var(--color-yellow-400), inset 0 -1px 0 var(--color-yellow-400)',
-              borderTopLeftRadius: '8px',
-              borderBottomLeftRadius: '8px',
-            },
-            '& .MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root:last-of-type': {
-              boxShadow:
-                'inset -1px 0 0 var(--color-yellow-400), inset 0 1px 0 var(--color-yellow-400), inset 0 -1px 0 var(--color-yellow-400)',
-              borderTopRightRadius: '8px',
-              borderBottomRightRadius: '8px',
-            },
+            ...bodyRowSx,
           }}
         >
           {/* Embedded (headerless) tables need a colgroup to keep fixed-layout column widths; the Name
@@ -462,13 +394,11 @@ const SafeAccountsTable = ({
             <TableBody>
               {lines.flatMap(({ line, groupKey, group }, index) => {
                 const clusterId = similarityGroups?.get(line.address.toLowerCase())
-                const prevClusterId =
-                  index > 0 ? similarityGroups?.get(lines[index - 1].line.address.toLowerCase()) : undefined
-                // Open a band once, on the first row of each contiguous cluster run.
-                const bandHeader =
-                  clusterId && clusterId !== prevClusterId ? (
-                    <SimilarityBandHeader key={`band-${clusterId}`} colSpan={visibleColumns.length} />
-                  ) : null
+                const bandHeader = bandHeaderAt(
+                  index,
+                  (i) => similarityGroups?.get(lines[i].line.address.toLowerCase()),
+                  visibleColumns.length,
+                )
 
                 const row = (
                   <SafeAccountTableRow

@@ -26,7 +26,7 @@ export interface SafeInfoDisplayProps {
   leading?: ReactNode
   /** Hides the address line — e.g. multi-chain child rows that show only a chain name. */
   hideAddress?: boolean
-  /** Rendered above the name (e.g. a "High similarity" warning badge). */
+  /** Rendered above the name (e.g. a status badge). */
   badge?: ReactNode
   /** Rendered inline, right after the name (e.g. a small look-alike ⚠️ icon). */
   nameAdornment?: ReactNode

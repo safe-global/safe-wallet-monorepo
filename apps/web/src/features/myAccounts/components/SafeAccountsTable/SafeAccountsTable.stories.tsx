@@ -126,7 +126,7 @@ const similarityGroups = new Map<string, string>([
 const flaggedAddresses = new Set([IMPOSTOR_1, IMPOSTOR_2, VAULT_A, VAULT_B])
 
 /**
- * Address-poisoning similarity band (Approach A: tinted rows + header, no bordered card yet).
+ * Address-poisoning similarity band: a header + rounded, bordered cards on a warning surface.
  * g1: a trusted anchor (checked, no ⚠️) grouped with its two impostors (⚠️).
  * g2: an intra-list pair where neither is trusted → both ⚠️.
  */

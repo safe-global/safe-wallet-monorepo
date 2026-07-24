@@ -42,7 +42,7 @@ type SafeAccountTableRowProps = {
   expanded?: boolean
   /** Draw a bottom divider — only true at the boundary between top-level accounts, not within a group. */
   showDivider?: boolean
-  /** Flags the row with a "High similarity" warning (address-poisoning defence). */
+  /** Flags the row with an inline look-alike ⚠️ after the name (address-poisoning defence). */
   isFlagged?: boolean
   /** Tints the row (warning background) as a member of an address-poisoning similarity group. */
   highlighted?: boolean
@@ -66,7 +66,11 @@ type SafeAccountTableRowProps = {
 
 /** Inline look-alike marker shown right after the name of a flagged (address-poisoning) row. */
 const SimilarityWarningIcon = () => (
-  <TriangleAlert size={14} className="shrink-0 text-yellow-800" aria-label="Possible address poisoning" />
+  <TriangleAlert
+    size={14}
+    className="shrink-0 text-yellow-800 dark:text-[var(--color-warning-main)]"
+    aria-label="Possible address poisoning"
+  />
 )
 
 // Shares the dropdown's row identity cell: clip-gated name/address tooltips and copy/explorer icons

@@ -8,7 +8,7 @@ import { reorderByKey } from '@/utils/reorder'
 import type { SafeAccountColumn } from './columns'
 import type { AccountGroup, AccountLine } from './useSafeAccountRows'
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
-import { SimilarityBandHeader } from './SimilarityBand'
+import { bandHeaderAt } from './SimilarityBand'
 
 type ReorderableBodyProps = {
   /** Top-level accounts in their current display order — each renders as one draggable row. */
@@ -103,13 +103,11 @@ const ReorderableBody = ({
               const { parent } = group
               const isExpanded = group.children.length > 0 && expanded.has(parent.key)
               const hasDivider = index < pinnedGroups.length - 1 || draggableGroups.length > 0
-              const clusterId = similarityGroups?.get(parent.address.toLowerCase())
-              const prevClusterId =
-                index > 0 ? similarityGroups?.get(pinnedGroups[index - 1].parent.address.toLowerCase()) : undefined
-              const bandHeader =
-                clusterId && clusterId !== prevClusterId ? (
-                  <SimilarityBandHeader key={`band-${clusterId}`} colSpan={columns.length} />
-                ) : null
+              const bandHeader = bandHeaderAt(
+                index,
+                (i) => similarityGroups?.get(pinnedGroups[i].parent.address.toLowerCase()),
+                columns.length,
+              )
 
               return (
                 <Fragment key={parent.key}>
