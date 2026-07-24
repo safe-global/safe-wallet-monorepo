@@ -1,6 +1,10 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import AddAccounts from '../index'
 
+jest.mock('@/features/address-poisoning', () => ({
+  useSimilarityClusters: () => ({ flagged: new Set<string>(), groupIdByAddress: new Map<string, string>() }),
+}))
+
 jest.mock('../AddManually', () => ({
   __esModule: true,
   default: () => <div data-testid="add-manually" />,

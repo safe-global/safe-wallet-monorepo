@@ -100,17 +100,130 @@ export const detectSimilarAddresses = (
   }
 }
 
+export interface ListClusterResult {
+  /** Lowercased 0x-prefixed addresses that look alike another list member. */
+  flagged: Set<string>
+  /** Lowercased address → its cluster id, for boxing look-alikes together. */
+  groupIdByAddress: Map<string, string>
+}
+
+interface Clusters {
+  /** The address that represents x's cluster (x itself until it's clustered with someone). */
+  leaderOf: (address: string) => string
+  /** Put a and b into the same cluster. */
+  putInSameCluster: (a: string, b: string) => void
+}
+
 /**
- * Lowercase address set for every address that {@link detectSimilarAddresses} flags (intra-list).
- * Dedupes case-insensitively; returns an empty set when there are fewer than two distinct addresses.
+ * Tracks which addresses belong together. Every address points at another address in its cluster;
+ * follow that chain to reach the cluster's "leader". Merging two clusters = point one leader at the other.
  */
-export const getFlaggedSimilarAddressSet = (addresses: string[]): Set<string> => {
-  const unique = [...new Set(addresses.map((a) => a.toLowerCase()))]
-  if (unique.length < 2) {
-    return new Set()
+const createClusters = (): Clusters => {
+  const leader = new Map<string, string>()
+
+  const leaderOf = (address: string): string => {
+    const up = leader.get(address)
+    return up === undefined || up === address ? address : leaderOf(up)
   }
-  const result = detectSimilarAddresses(unique)
-  return new Set(unique.filter((addr) => result.isFlagged(addr)))
+
+  return {
+    leaderOf,
+    putInSameCluster: (a, b) => {
+      const leaderA = leaderOf(a)
+      const leaderB = leaderOf(b)
+      if (leaderA !== leaderB) leader.set(leaderA, leaderB) // A's cluster now follows B's → one cluster
+    },
+  }
+}
+
+/** Dedupe addresses by normalized value, keeping the first lowercased original as the map key's value. */
+const dedupeUsableAddresses = (addresses: string[]): Map<string, string> => {
+  const originalByNorm = new Map<string, string>()
+  for (const address of addresses) {
+    const normalized = normalizeAddress(address)
+    if (isUsableAddress(normalized) && !originalByNorm.has(normalized)) {
+      originalByNorm.set(normalized, address.toLowerCase())
+    }
+  }
+  return originalByNorm
+}
+
+/**
+ * Bucket addresses by `keyOf`, then merge everyone in each shared bucket into one cluster.
+ * Addresses that land in the same bucket share the key, so they all look alike.
+ */
+const mergeAddressesSharingKey = (
+  addresses: string[],
+  keyOf: (address: string) => string,
+  clusters: Clusters,
+): void => {
+  const bucketByKey = new Map<string, string[]>()
+  for (const address of addresses) {
+    const key = keyOf(address)
+    const bucket = bucketByKey.get(key) ?? []
+    bucket.push(address)
+    bucketByKey.set(key, bucket)
+  }
+
+  for (const bucket of bucketByKey.values()) {
+    // Everyone in this bucket looks alike → put them all in one cluster.
+    for (const address of bucket.slice(1)) clusters.putInSameCluster(address, bucket[0])
+  }
+}
+
+/** Link any two addresses that share the same first-N OR last-N hex. */
+const linkBySharedAffix = (uniqueAddresses: string[], clusters: Clusters, config: SimilarityConfig): void => {
+  const firstN = (address: string) => address.slice(0, config.prefixLength)
+  const lastN = (address: string) => address.slice(-config.suffixLength)
+
+  mergeAddressesSharingKey(uniqueAddresses, firstN, clusters)
+  mergeAddressesSharingKey(uniqueAddresses, lastN, clusters)
+}
+
+/** Flag every address whose cluster has 2+ members, stamping the cluster leader as its cluster id. */
+const collectClusters = (
+  uniqueAddresses: string[],
+  clusters: Clusters,
+  originalByNorm: Map<string, string>,
+): ListClusterResult => {
+  const membersByLeader = new Map<string, string[]>()
+  for (const address of uniqueAddresses) {
+    const leader = clusters.leaderOf(address)
+    const members = membersByLeader.get(leader)
+    if (members) members.push(address)
+    else membersByLeader.set(leader, [address])
+  }
+
+  const flagged = new Set<string>()
+  const groupIdByAddress = new Map<string, string>()
+  for (const [leader, members] of membersByLeader) {
+    if (members.length < 2) continue
+    for (const address of members) {
+      const original = originalByNorm.get(address) as string
+      flagged.add(original)
+      groupIdByAddress.set(original, leader)
+    }
+  }
+  return { flagged, groupIdByAddress }
+}
+
+/**
+ * Cluster a list's look-alikes by the OR rule: two addresses connect when they share first-N OR
+ * last-N hex (union-find). Every member of a component of 2+ is flagged with that component's id.
+ * Identical addresses are deduped first, so the same Safe on several chains never self-matches.
+ */
+export const detectIntraListClusters = (
+  addresses: string[],
+  config: SimilarityConfig = DEFAULT_SIMILARITY_CONFIG,
+): ListClusterResult => {
+  const originalByNorm = dedupeUsableAddresses(addresses)
+  const uniqueAddresses = Array.from(originalByNorm.keys())
+  if (uniqueAddresses.length < 2) return { flagged: new Set(), groupIdByAddress: new Map() }
+
+  const clusters = createClusters()
+  linkBySharedAffix(uniqueAddresses, clusters, config)
+
+  return collectClusters(uniqueAddresses, clusters, originalByNorm)
 }
 
 // Anchor detector — build the index once over the user's trusted anchors, then query each candidate.
@@ -244,7 +357,7 @@ export const buildSimilarityIndex = (
  * Keyed by the lowercased address (the original, case-preserved value is kept on
  * `ListAnnotation.address`); query the result with `addr.toLowerCase()`.
  */
-export const detectListSimilarities = (addresses: string[], index: SimilarityIndex): Map<string, ListAnnotation> => {
+export const detectAnchorMatches = (addresses: string[], index: SimilarityIndex): Map<string, ListAnnotation> => {
   const annotations = new Map<string, ListAnnotation>()
   for (const address of addresses) {
     const match = index.isAnchor(address) ? undefined : (index.query(address) ?? undefined)

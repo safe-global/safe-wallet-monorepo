@@ -1,4 +1,4 @@
-import type { ILogger, IObservabilityProvider } from '../types'
+import type { ILogger, IObservabilityProvider, ObservedError } from '../types'
 import {
   datadogRum,
   type RumEvent,
@@ -176,9 +176,12 @@ export class DatadogProvider implements IObservabilityProvider {
     }
   }
 
-  captureException(error: Error, context?: Record<string, unknown>): void {
-    if (this.isInitialized) {
-      datadogRum.addError(error, context)
+  captureError({ error, isUserFacing, tags }: ObservedError): void {
+    // Only user-facing failures become RUM errors (addError) so background /
+    // logged errors don't count against the Error-Free Views SLO — those are
+    // already recorded as warn-level actions via getLogger().warn.
+    if (this.isInitialized && isUserFacing) {
+      datadogRum.addError(error, tags)
     }
   }
 }

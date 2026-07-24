@@ -7,8 +7,15 @@ const REFUND_RECEIVER = '0x0C51b4d70492D81f9f96B1EB1a826FBfb3fd27d8'
 const ZERO = '0x0000000000000000000000000000000000000000'
 const GAS_TOKEN = ZERO
 
+let mockRelayer: { type: string } | null = null
+
 jest.mock('@/hooks/useChains', () => ({
-  useCurrentChain: () => ({ chainId: '137', nativeCurrency: { symbol: 'POL', decimals: 18, logoUri: '' } }),
+  useCurrentChain: () => ({
+    chainId: '137',
+    nativeCurrency: { symbol: 'POL', decimals: 18, logoUri: '' },
+    features: ['GTF'],
+    relayer: mockRelayer,
+  }),
   useHasFeature: () => true,
 }))
 
@@ -78,7 +85,27 @@ const renderReceipt = (ctx: Partial<SafeTxContextParams>, safeTxData: SafeTransa
 }
 
 describe('Receipt GTF fee preview', () => {
-  beforeEach(() => jest.clearAllMocks())
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockRelayer = {
+      type: 'RELAY_FEE',
+    }
+  })
+
+  it('ignores the preview on chains without a RELAY_FEE relayer', () => {
+    mockRelayer = null
+    mockUseGtfFeePreview.mockReturnValue({
+      data: {
+        txData: { safeTxGas: '12936', baseGas: '72094', gasPrice: '456199317491', refundReceiver: GELATO },
+      },
+    })
+
+    const { getAllByText, queryByText } = renderReceipt({})
+
+    expect(queryByText('12936')).not.toBeInTheDocument()
+    // safeTxGas, baseGas, gasPrice all render the base "0".
+    expect(getAllByText('0').length).toBeGreaterThanOrEqual(3)
+  })
 
   it('previews the resolved gas fields before signing instead of the base zeros', () => {
     mockUseGtfFeePreview.mockReturnValue({

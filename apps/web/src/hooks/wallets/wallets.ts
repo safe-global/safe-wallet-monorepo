@@ -28,7 +28,9 @@ const walletConnectV2 = (chain: Chain) => {
     projectId: WC_PROJECT_ID,
     qrModalOptions: {
       themeVariables: {
-        '--wcm-z-index': '1302',
+        // Above the web3-onboard connect modal (1450) that spawns it, matching the
+        // private-key popup, so the QR modal isn't hidden behind the wallet list.
+        '--wcm-z-index': '1451',
       },
       themeMode: prefersDarkMode() ? 'dark' : 'light',
     },
