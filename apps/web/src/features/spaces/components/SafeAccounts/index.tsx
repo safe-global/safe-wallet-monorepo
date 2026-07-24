@@ -54,7 +54,7 @@ const SpaceSafeAccounts = () => {
   const spaceSafeItems = useMemo<SafeItem[]>(() => flattenSafeItems(allSafes ?? []), [allSafes])
 
   const spaceSafeAddresses = useMemo(() => spaceSafeItems.map((s) => s.address), [spaceSafeItems])
-  const similarAddresses = useSimilarityClusters(spaceSafeAddresses).flagged
+  const { flagged: similarAddresses, groupIdByAddress: similarityGroups } = useSimilarityClusters(spaceSafeAddresses)
 
   // Group and sort
   const displaySafes = useMemo<AllSafeItems>(
@@ -136,6 +136,7 @@ const SpaceSafeAccounts = () => {
             // Inside a workspace every Safe belongs to it, so the Workspaces column adds no information.
             columns={['name', 'threshold', 'networks', 'pending', 'balance', 'actions']}
             flaggedAddresses={similarAddresses}
+            similarityGroups={similarityGroups}
             // Column sorting is only offered in Name mode; Last visited / Manual own the order.
             sortableColumns={orderBy === OrderByOption.NAME}
             renderActions={(line) =>

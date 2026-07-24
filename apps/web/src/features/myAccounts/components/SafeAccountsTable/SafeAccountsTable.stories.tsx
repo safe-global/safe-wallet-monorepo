@@ -102,12 +102,14 @@ const OPS = addr('1111', '1', '111111') // unrelated, normal row
 const VAULT_A = addr('2222', 'a', '333333') // intra-list look-alike pair (no trusted anchor)
 const VAULT_B = addr('2222', 'b', '333333')
 
+// Deliberately interleaved (cluster members NOT adjacent) to exercise the table's similarity ordering,
+// which pulls each cluster together at its lead's position.
 const groupedItems: AllSafeItems = [
   { name: 'Treasury', address: REAL, isPinned: true, chainId: '1', isReadOnly: false, lastVisited: Date.now() },
-  { name: 'Treasury', address: IMPOSTOR_1, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },
-  { name: 'Treasury', address: IMPOSTOR_2, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },
   { name: 'Ops', address: OPS, isPinned: true, chainId: '1', isReadOnly: false, lastVisited: Date.now() },
+  { name: 'Treasury', address: IMPOSTOR_1, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },
   { name: 'Vault A', address: VAULT_A, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },
+  { name: 'Treasury', address: IMPOSTOR_2, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },
   { name: 'Vault B', address: VAULT_B, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },
 ]
 
@@ -135,5 +137,17 @@ export const SimilarityGrouped: Story = {
     selection: { selectedKeys: new Set([`1:${REAL}`]), onToggle: () => {} },
     flaggedAddresses,
     similarityGroups,
+  },
+}
+
+/** Manual / reorder mode: the band survives drag-and-drop — clusters stay grouped as one unit. */
+export const SimilarityGroupedReorder: Story = {
+  args: {
+    items: groupedItems,
+    columns: ['select', 'name', 'threshold', 'networks', 'balance'],
+    selection: { selectedKeys: new Set([`1:${REAL}`]), onToggle: () => {} },
+    flaggedAddresses,
+    similarityGroups,
+    reorder: { onReorder: () => {} },
   },
 }

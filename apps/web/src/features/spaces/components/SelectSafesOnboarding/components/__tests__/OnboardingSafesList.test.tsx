@@ -42,6 +42,7 @@ const noop = () => {}
 
 const baseProps = {
   flaggedOwnedAddresses: new Set<string>(),
+  ownedSimilarityGroups: new Map<string, string>(),
   selectedKeys: new Set<string>(),
   onToggle: noop,
   isAtLimit: false,

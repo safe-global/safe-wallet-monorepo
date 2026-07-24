@@ -8,8 +8,6 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import TableSortLabel from '@mui/material/TableSortLabel'
-import Typography from '@mui/material/Typography'
-import { TriangleAlert, Info } from 'lucide-react'
 import type { AllSafeItems } from '@/hooks/safes'
 import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNT_COLUMNS, SELECT_COLUMN, type SafeAccountColumnId } from './columns'
@@ -23,6 +21,7 @@ import {
 } from './useSafeAccountRows'
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
 import ReorderableBody, { toggleExpanded } from './ReorderableBody'
+import { SimilarityBandHeader } from './SimilarityBand'
 import EntryDialog from '@/components/address-book/EntryDialog'
 
 /** Renaming a safe = editing its address-book entry across every chain it lives on. */
@@ -153,19 +152,50 @@ const headerSx = {
 } as const
 
 /** Full-width header row that opens an address-poisoning similarity band (tint lives in the Table sx). */
-const SimilarityBandHeader = ({ colSpan }: { colSpan: number }) => (
-  <TableRow data-band-header="">
-    <TableCell colSpan={colSpan} sx={{ py: 0.75, px: 2 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, color: 'var(--color-yellow-800)' }}>
-        <TriangleAlert size={16} aria-hidden />
-        <Typography variant="caption" fontWeight={600}>
-          Address poisoning warning
-        </Typography>
-        <Info size={14} aria-hidden />
-      </Box>
-    </TableCell>
-  </TableRow>
-)
+/**
+ * Pulls each similarity cluster's members together so they render as one contiguous band. The whole
+ * cluster is placed at its LEAD's sorted position — the lead is the anchor (a member that's in a
+ * cluster but NOT flagged, i.e. already trusted) if present, otherwise the first member in sort order.
+ * Within the band the anchor(s) lead, then the look-alikes keep their sorted order. Non-clustered
+ * groups stay in place. No-op when `similarityGroups` is empty.
+ */
+const orderGroupsBySimilarity = (
+  groups: AccountGroup[],
+  similarityGroups?: Map<string, string>,
+  flaggedAddresses?: Set<string>,
+): AccountGroup[] => {
+  if (!similarityGroups || similarityGroups.size === 0) return groups
+
+  const clusterOf = (group: AccountGroup) => similarityGroups.get(group.parent.address.toLowerCase())
+  const isAnchor = (group: AccountGroup) => !flaggedAddresses?.has(group.parent.address.toLowerCase())
+
+  const membersByCluster = new Map<string, AccountGroup[]>()
+  const leadByCluster = new Map<string, AccountGroup>()
+  for (const group of groups) {
+    const cluster = clusterOf(group)
+    if (!cluster) continue
+    const members = membersByCluster.get(cluster)
+    if (members) members.push(group)
+    else membersByCluster.set(cluster, [group])
+    // Lead = first-seen member (first in sort order), upgraded to an anchor if one appears.
+    const lead = leadByCluster.get(cluster)
+    if (!lead || (isAnchor(group) && !isAnchor(lead))) leadByCluster.set(cluster, group)
+  }
+
+  const result: AccountGroup[] = []
+  for (const group of groups) {
+    const cluster = clusterOf(group)
+    if (!cluster) {
+      result.push(group)
+      continue
+    }
+    // Emit the whole cluster once, at its lead's position; skip the other members here.
+    if (leadByCluster.get(cluster) !== group) continue
+    const members = membersByCluster.get(cluster) ?? [group]
+    result.push(...members.filter(isAnchor), ...members.filter((member) => !isAnchor(member)))
+  }
+  return result
+}
 
 const SafeAccountsTable = ({
   items,
@@ -243,9 +273,15 @@ const SafeAccountsTable = ({
     if (!sortableColumns) setSort({ orderBy: null, order: 'asc' })
   }, [sortableColumns])
 
+  // Pull similarity clusters together (non-reorder body) so each renders as one contiguous band.
+  const displayGroups = useMemo(
+    () => orderGroupsBySimilarity(sortedGroups, similarityGroups, flaggedAddresses),
+    [sortedGroups, similarityGroups, flaggedAddresses],
+  )
+
   const lines = useMemo<Array<{ line: AccountLine; groupKey: string; group: AccountGroup }>>(() => {
     const result: Array<{ line: AccountLine; groupKey: string; group: AccountGroup }> = []
-    for (const group of sortedGroups) {
+    for (const group of displayGroups) {
       result.push({ line: group.parent, groupKey: group.parent.key, group })
       if (group.children.length > 0 && expanded.has(group.parent.key)) {
         for (const child of group.children) {
@@ -254,7 +290,7 @@ const SafeAccountsTable = ({
       }
     }
     return result
-  }, [sortedGroups, expanded])
+  }, [displayGroups, expanded])
 
   const handleSort = (column: SafeSortColumn) =>
     setSort((prev) => ({
@@ -408,9 +444,10 @@ const SafeAccountsTable = ({
 
           {reorder ? (
             <ReorderableBody
-              groups={sortedGroups}
+              groups={displayGroups}
               columns={visibleColumns}
               flaggedAddresses={flaggedAddresses}
+              similarityGroups={similarityGroups}
               expanded={expanded}
               setExpanded={setExpanded}
               renderActions={renderActions}
