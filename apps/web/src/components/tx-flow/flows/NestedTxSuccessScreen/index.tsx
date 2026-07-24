@@ -73,7 +73,8 @@ const NestedTxSuccessScreen = ({ txId }: Props) => {
           A nested transaction was created
         </Typography>
         <Typography variant="body2" mb={3}>
-          Once confirmed and executed this signer transaction will confirm the child Safe&apos;s transaction.
+          Execute this approval from the parent Safe Account&apos;s queue to confirm the current Safe Account&apos;s
+          transaction. No gas is needed — it&apos;s relayed for you.
         </Typography>
         <Stack spacing={2} width="70%">
           <Box display="flex" flexDirection="column" alignItems="start" gap={1}>

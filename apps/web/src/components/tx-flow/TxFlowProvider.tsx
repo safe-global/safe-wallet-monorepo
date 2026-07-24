@@ -195,8 +195,14 @@ const TxFlowProvider = <T extends unknown>({
   const canExecuteThroughRole = !!allowingRole || (!!mostLikelyRole && !isSafeOwner)
   const preferThroughRole = canExecuteThroughRole && !isSafeOwner // execute through role if a non-owner role member wallet is connected
 
+  // A nested signer (parent Safe) never executes the child tx directly on relay-enabled chains:
+  // signing produces a relayed parent approveHash instead (split signing & execution). Routing it to
+  // Execute would dead-end at the "can't pay gas through a parent Safe" guard.
+  const hasGtfFeature = useHasFeature(FEATURES.GTF) ?? false
+  const isNestedSignerSplitFlow = !!signer?.isSafe && hasGtfFeature
+
   // If checkbox is checked and the transaction is executable, execute it, otherwise sign it
-  const canExecute = isCorrectNonce && (isExecutable || isNewExecutableTx)
+  const canExecute = isCorrectNonce && (isExecutable || isNewExecutableTx) && !isNestedSignerSplitFlow
   const willExecute = (onlyExecute || shouldExecute) && canExecute && !preferThroughRole
   const willExecuteThroughRole =
     (onlyExecute || shouldExecute) && canExecuteThroughRole && (!canExecute || preferThroughRole)
@@ -206,7 +212,7 @@ const TxFlowProvider = <T extends unknown>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
+  const isGtfChain = hasGtfFeature
 
   const trackTxEvent = useCallback(
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {
