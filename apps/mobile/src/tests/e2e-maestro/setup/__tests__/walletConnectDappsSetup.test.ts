@@ -5,10 +5,13 @@ import {
   clearWalletKitState,
   selectPending,
   selectSessionsRecord,
+  selectVerifyByTopic,
   type PendingSessionProposal,
 } from '@/src/features/WalletConnect/Wallet/store/walletKitSlice'
 import { walletKitE2eState, E2E_SESSION_TOPIC } from '@/src/features/WalletConnect/Wallet/walletKitE2eState'
+import { APPROVED_SESSION, getWalletKit } from '@/src/features/WalletConnect/Wallet/walletKit.e2e'
 import {
+  seedWcSession,
   synthSessionProposalValid,
   synthSessionProposalUnverified,
   synthSessionProposalScam,
@@ -43,6 +46,26 @@ describe('walletConnectDappsSetup synthesis', () => {
   it('synthSessionProposalScam pushes a scam-flagged proposal', () => {
     synthSessionProposalScam()
     expect(getProposals()[0].proposal.verifyContext?.verified?.isScam).toBe(true)
+  })
+
+  it('seedWcSession puts the approved-session fixture in the slice as verified', () => {
+    seedWcSession()
+    expect(selectSessionsRecord(store.getState())[E2E_SESSION_TOPIC]).toEqual(APPROVED_SESSION)
+    expect(selectVerifyByTopic(store.getState())[E2E_SESSION_TOPIC]).toBe('verified')
+  })
+
+  it('seedWcSession seeds the fake WalletKit so getActiveSessions reflects the session', async () => {
+    seedWcSession()
+    const walletKit = await getWalletKit()
+    expect(walletKit.getActiveSessions()[E2E_SESSION_TOPIC]).toEqual(APPROVED_SESSION)
+  })
+
+  it('synthSessionDelete removes a seeded session from the slice and the fake', async () => {
+    seedWcSession()
+    synthSessionDelete()
+    expect(selectSessionsRecord(store.getState())[E2E_SESSION_TOPIC]).toBeUndefined()
+    const walletKit = await getWalletKit()
+    expect(walletKit.getActiveSessions()[E2E_SESSION_TOPIC]).toBeUndefined()
   })
 
   it('synthSessionDelete removes the fixture session from the slice', () => {

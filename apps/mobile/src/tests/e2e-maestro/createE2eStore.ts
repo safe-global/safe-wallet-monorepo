@@ -3,9 +3,8 @@
  * and walletConnectE2eState. TestCtrls mutate it via set(); `.e2e` overrides read
  * it via get()/useSyncExternalStore; reset() runs between flows.
  *
- * reset() restores a deep clone of the initial state, so a scenario that mutated
- * even a nested value can't leak into the next flow. Update via set() with new
- * values — mutating get() in place won't notify subscribers.
+ * State is shallow-cloned — update via set() with new values, never mutate a
+ * nested value in place (it would corrupt initialState and break reset()).
  */
 export interface E2eStore<T> {
   get: () => T

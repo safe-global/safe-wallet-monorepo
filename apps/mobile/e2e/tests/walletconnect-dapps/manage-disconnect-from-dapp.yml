@@ -1,0 +1,49 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# dApp-initiated disconnect: synthesise a session_delete for the fixture topic
+# while the list is open → the row disappears silently. Unlike the user paths
+# there is NO confirm sheet and NO toast; the negative toast assertion runs
+# right after the (synchronous) removal, well inside the 2.5s toast window a
+# toast would occupy if one were wrongly shown.
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eWcDappsBase'
+- assertVisible:
+    id: 'home-tab'
+
+- tapOn:
+    id: 'e2eWcSeedSession'
+
+# Open the connected-apps list.
+- tapOn: 'Account, tab, 3 of 3'
+- extendedWaitUntil:
+    visible:
+      id: 'settings-connected-apps-entry'
+    timeout: 10000
+- tapOn:
+    id: 'settings-connected-apps-entry'
+- extendedWaitUntil:
+    visible:
+      id: 'connected-dapp-row'
+    timeout: 10000
+
+# The dApp ends the session (session_delete → removeSession dispatch).
+- tapOn:
+    id: 'e2eWcSynthDelete'
+
+# Row removed; the empty state is the positive anchor for the removal.
+- extendedWaitUntil:
+    visible:
+      text: 'No connected apps.'
+    timeout: 10000
+- assertNotVisible:
+    id: 'connected-dapp-row'
+
+# Explicit negative: the dApp-initiated path must not toast.
+- assertNotVisible:
+    text: 'Uniswap disconnected'

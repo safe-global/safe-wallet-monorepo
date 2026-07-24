@@ -1,0 +1,62 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# Disconnect via swipe: left-swipe the row (ReanimatedSwipeable) → trash →
+# confirm sheet → Disconnect → success toast + row removed.
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eWcDappsBase'
+- assertVisible:
+    id: 'home-tab'
+
+- tapOn:
+    id: 'e2eWcSeedSession'
+
+# Open the connected-apps list.
+- tapOn: 'Account, tab, 3 of 3'
+- extendedWaitUntil:
+    visible:
+      id: 'settings-connected-apps-entry'
+    timeout: 10000
+- tapOn:
+    id: 'settings-connected-apps-entry'
+- extendedWaitUntil:
+    visible:
+      id: 'connected-dapp-row'
+    timeout: 10000
+
+# Left-swipe the row to reveal the trash action, then tap it.
+- swipe:
+    from:
+      id: 'connected-dapp-row'
+    direction: LEFT
+- extendedWaitUntil:
+    visible:
+      id: 'connected-dapp-trash-e2e-session-topic'
+    timeout: 5000
+- tapOn:
+    id: 'connected-dapp-trash-e2e-session-topic'
+
+# Confirm sheet → Disconnect → toast "Uniswap disconnected" (2.5s window).
+- extendedWaitUntil:
+    visible:
+      id: 'disconnect-confirm-button'
+    timeout: 10000
+- tapOn:
+    id: 'disconnect-confirm-button'
+- extendedWaitUntil:
+    visible:
+      text: 'Uniswap disconnected'
+    timeout: 10000
+
+# Row removed; the empty state is the positive anchor for the removal.
+- extendedWaitUntil:
+    visible:
+      text: 'No connected apps.'
+    timeout: 10000
+- assertNotVisible:
+    id: 'connected-dapp-row'
