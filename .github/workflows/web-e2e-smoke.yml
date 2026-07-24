@@ -42,9 +42,39 @@ jobs:
           group: 'Smoke tests'
           tag: 'smoke'
 
+  playwright-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    name: Playwright Smoke tests
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.0
+
+      - uses: ./.github/actions/yarn
+
+      - uses: ./.github/actions/build
+        with:
+          secrets: ${{ toJSON(secrets) }}
+        env:
+          # Bypass the Spaces require-login gate so smoke flows reach the app
+          # (mirrors the Cypress smoke build).
+          NEXT_PUBLIC_IS_TEST_E2E: 'true'
+
+      - name: Install Playwright browser
+        run: yarn workspace @safe-global/web exec playwright install --with-deps chromium
+
+      - name: Run Playwright smoke tests
+        working-directory: apps/web
+        env:
+          CYPRESS_WALLET_CREDENTIALS: ${{ secrets.CYPRESS_WALLET_CREDENTIALS }}
+        # CI=true → the config serves the built ./out on :8080 and runs --grep @smoke
+        run: yarn pw:ci
+
   notify:
     if: failure() && github.event_name == 'push'
-    needs: [e2e]
+    needs: [e2e, playwright-smoke]
     runs-on: ubuntu-latest
     permissions: {}
     steps:
