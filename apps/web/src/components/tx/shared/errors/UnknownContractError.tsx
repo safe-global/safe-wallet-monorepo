@@ -4,29 +4,24 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import {
-  canMigrateUnsupportedMastercopy,
-  isMigrationToL2Possible,
-  isValidMasterCopy,
-} from '@safe-global/utils/services/contracts/safeContracts'
 import { AlertTitle, Typography } from '@mui/material'
-import { isMigrateL2SingletonCall } from '@/utils/safe-migrations'
+import { isSafeMigrationCall } from '@/utils/safe-migrations'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import { useBytecodeComparison } from '@/hooks/useBytecodeComparison'
+import { useMastercopyMigration } from '@/features/multichain'
 
 const UnknownContractError = ({ txData }: { txData: TransactionData | undefined }): ReactElement | null => {
-  const { safe, safeAddress } = useSafeInfo()
+  const { safeAddress } = useSafeInfo()
   const currentChain = useCurrentChain()
-  const bytecodeComparison = useBytecodeComparison()
+  const { action } = useMastercopyMigration()
 
   const isMigrationTx = useMemo((): boolean => {
-    return txData !== undefined && isMigrateL2SingletonCall(txData)
+    return txData !== undefined && isSafeMigrationCall(txData)
   }, [txData])
 
   // Unsupported base contract
-  const isUnknown = !isValidMasterCopy(safe.implementationVersionState)
-  const isMigrationPossible =
-    canMigrateUnsupportedMastercopy(safe, bytecodeComparison.result) || isMigrationToL2Possible(safe)
+  const isUnknown = action === 'migrate' || action === 'cli'
+
+  const isMigrationPossible = action === 'migrate'
 
   if (!isUnknown || isMigrationTx) return null
 

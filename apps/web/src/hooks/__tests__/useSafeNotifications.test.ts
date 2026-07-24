@@ -112,5 +112,23 @@ describe('useSafeNotifications', () => {
       expect(result.current).toBeUndefined()
       expect(showNotification).not.toHaveBeenCalled()
     })
+
+    it('should not show a notification for a non-critical outdated version (>= 1.3.0)', () => {
+      ;(useSafeInfo as jest.Mock).mockReturnValue({
+        safe: {
+          implementation: { value: '0x234' },
+          implementationVersionState: 'OUTDATED',
+          version: '1.3.0',
+          address: { value: '0x123' },
+          chainId: '1',
+        },
+        safeAddress: '0x123',
+      })
+
+      const { result } = renderHook(() => useSafeNotifications())
+
+      expect(result.current).toBeUndefined()
+      expect(showNotification).not.toHaveBeenCalled()
+    })
   })
 })

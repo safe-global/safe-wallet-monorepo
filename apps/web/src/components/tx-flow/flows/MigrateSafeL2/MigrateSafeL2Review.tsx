@@ -1,8 +1,9 @@
 import { useContext, useEffect } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
+import useSafeInfo from '@/hooks/useSafeInfo'
 import { createTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '../../SafeTxProvider'
-import { createMigrateToL2 } from '@/utils/safe-migrations'
+import { createUpdateMigration } from '@/utils/safe-migrations'
 import { Box, Typography } from '@mui/material'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
@@ -10,15 +11,16 @@ import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 
 export const MigrateSafeL2Review = ({ children, ...props }: ReviewTransactionProps) => {
   const chain = useCurrentChain()
+  const { safe } = useSafeInfo()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const safeSDK = useSafeSDK()
 
   useEffect(() => {
     if (!chain || !safeSDK) return
 
-    const txData = createMigrateToL2()
+    const txData = createUpdateMigration(chain, safe.version, safe.fallbackHandler?.value, safe.implementation?.value)
     createTx(txData).then(setSafeTx).catch(setSafeTxError)
-  }, [chain, setSafeTx, setSafeTxError, safeSDK])
+  }, [chain, safe.version, safe.fallbackHandler?.value, safe.implementation?.value, setSafeTx, setSafeTxError, safeSDK])
 
   return (
     <Box>

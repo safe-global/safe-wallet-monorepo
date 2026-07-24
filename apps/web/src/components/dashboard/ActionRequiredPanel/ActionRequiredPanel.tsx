@@ -31,7 +31,7 @@ export interface ActionRequiredPanelProps {
  * <ActionRequiredPanel>
  *   <RecoveryHeader />
  *   <InconsistentSignerSetupWarning />
- *   <UnsupportedMastercopyWarning />
+ *   <MastercopyWarning />
  * </ActionRequiredPanel>
  * ```
  */
