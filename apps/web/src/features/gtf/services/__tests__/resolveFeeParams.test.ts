@@ -5,6 +5,7 @@ import { createTx } from '@/services/tx/tx-sender'
 import { gatewayApi } from '@/store/api/gateway'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import type { AppDispatch } from '@/store'
+import { FEE_COLLECTORS } from '../../constants'
 
 jest.mock('@/services/tx/tx-sender', () => ({
   createTx: jest.fn(),
@@ -48,7 +49,7 @@ describe('resolveFeeParams', () => {
       baseGas: '48564',
       gasPrice: '195000000000000',
       gasToken: '0xa0b86991000000000000000000000000000000aa',
-      refundReceiver: '0xaEf22e5f09980fC1Ba6F2ec3EC34c1B9aeC885b5',
+      refundReceiver: FEE_COLLECTORS[0],
       numberSignatures: 3,
     },
     relayCost: { fiatCode: 'USD', fiatValue: '38.22' },
@@ -100,7 +101,7 @@ describe('resolveFeeParams', () => {
         baseGas: '48564',
         gasPrice: '195000000000000',
         gasToken: '0xa0b86991000000000000000000000000000000aa',
-        refundReceiver: '0xaEf22e5f09980fC1Ba6F2ec3EC34c1B9aeC885b5',
+        refundReceiver: FEE_COLLECTORS[0],
       }),
       safeTx.data.nonce,
     )

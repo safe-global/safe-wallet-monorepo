@@ -96,7 +96,7 @@ describe('Receipt GTF fee preview', () => {
     mockRelayer = null
     mockUseGtfFeePreview.mockReturnValue({
       data: {
-        txData: { safeTxGas: '12936', baseGas: '72094', gasPrice: '456199317491', refundReceiver: GELATO },
+        txData: { safeTxGas: '12936', baseGas: '72094', gasPrice: '456199317491', refundReceiver: REFUND_RECEIVER },
       },
     })
 
