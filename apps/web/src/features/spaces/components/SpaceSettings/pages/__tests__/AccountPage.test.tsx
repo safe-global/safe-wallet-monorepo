@@ -9,6 +9,10 @@ jest.mock('@/features/spaces', () => ({
   getMemberDisplayName: (member: { alias?: string | null; name: string }) => member.alias || member.name,
 }))
 
+jest.mock('@/features/oidc-auth', () => ({
+  SwitchAuthenticatorSection: () => <div data-testid="switch-authenticator-section" />,
+}))
+
 jest.mock('@/hooks/useLogout', () => ({
   __esModule: true,
   default: () => ({ logout: jest.fn() }),
