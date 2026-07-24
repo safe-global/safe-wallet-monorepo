@@ -4,8 +4,8 @@ export type { SafeSetup, SafeOrMultichainSafe, CreateSafeOnNewChainForm } from '
 
 export { MIN_SAFE_VERSION_FOR_MULTICHAIN } from './constants'
 
-export { useIsMultichainSafe, useSafeCreationData, useAddNetworkState } from './hooks'
-export type { AddNetworkState, AddNetworkUnavailableReason, AvailableNetwork } from './hooks'
+export { useIsMultichainSafe, useSafeCreationData, useAddNetworkState, useMastercopyMigration } from './hooks'
+export type { AddNetworkState, AddNetworkUnavailableReason, AvailableNetwork, MastercopyMigration } from './hooks'
 
 export {
   isMultiChainSafeItem,
@@ -50,15 +50,9 @@ const ChainIndicatorList = dynamic(() =>
   })),
 )
 
-const UnsupportedMastercopyWarning = dynamic(() =>
-  import('./components/UnsupportedMastercopyWarning/UnsupportedMasterCopyWarning').then((mod) => ({
-    default: mod.UnsupportedMastercopyWarning,
-  })),
-)
-
-const OutdatedMastercopyWarning = dynamic(() =>
-  import('./components/OutdatedMastercopyWarning/OutdatedMastercopyWarning').then((mod) => ({
-    default: mod.OutdatedMastercopyWarning,
+const MastercopyWarning = dynamic(() =>
+  import('./components/MastercopyWarning/MastercopyWarning').then((mod) => ({
+    default: mod.MastercopyWarning,
   })),
 )
 
@@ -71,6 +65,5 @@ export {
   ChangeSignerSetupWarning,
   InconsistentSignerSetupWarning,
   ChainIndicatorList,
-  UnsupportedMastercopyWarning,
-  OutdatedMastercopyWarning,
+  MastercopyWarning,
 }

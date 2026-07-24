@@ -3,9 +3,9 @@ import { type GetContractProps } from '@safe-global/protocol-kit'
 import type { SafeVersion } from '@safe-global/types-kit'
 import { assertValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
 import { getSafeMigrationDeployments } from '@safe-global/safe-deployments'
-import { SAFE_TO_L2_MIGRATION_VERSION } from '@safe-global/utils/config/constants'
-import { getChainAgnosticAddress } from '@safe-global/utils/services/contracts/deployments'
-import { isSupportedL2Version, type BytecodeComparisonResult } from './bytecodeComparison'
+import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
+import { getChainAgnosticAddress, isOfficialMasterCopy } from '@safe-global/utils/services/contracts/deployments'
+import { isSupportedMigrationVersion, type BytecodeComparisonResult } from './bytecodeComparison'
 
 // `UNKNOWN` is returned if the mastercopy does not match supported ones
 // @see https://github.com/safe-global/safe-client-gateway/blob/main/src/routes/safes/handlers/safes.rs#L28-L31
@@ -14,31 +14,45 @@ export const isValidMasterCopy = (implementationVersionState: SafeState['impleme
   return implementationVersionState !== 'UNKNOWN'
 }
 
-/**
- * Checks if an unsupported mastercopy can be migrated based on bytecode comparison
- * with supported L2 contracts (1.3.0+L2 and 1.4.1+L2)
- *
- * @param safe - The Safe state object
- * @param bytecodeComparisonResult - Optional result from bytecode comparison
- * @returns boolean indicating if migration is possible
- */
-export const canMigrateUnsupportedMastercopy = (
-  safe: SafeState,
-  bytecodeComparisonResult?: BytecodeComparisonResult,
+export type MastercopyMigrationOptions = {
+  bytecodeResult?: BytecodeComparisonResult
+  recommendedVersion?: string
+}
+
+export const isUnsupportedMastercopyMigratable = (
+  safe: Pick<SafeState, 'implementationVersionState' | 'version' | 'chainId' | 'implementation'>,
+  opts?: MastercopyMigrationOptions,
 ): boolean => {
-  // Must be an unsupported mastercopy
-  if (isValidMasterCopy(safe.implementationVersionState)) {
-    return false
+  const targetVersion = opts?.recommendedVersion ?? LATEST_SAFE_VERSION
+
+  const isRecognized = isValidMasterCopy(safe.implementationVersionState)
+  if (isRecognized) return false
+  if (!safe.version) return false
+
+  const isMigratableSource = isSupportedMigrationVersion(safe.version, targetVersion)
+  if (!isMigratableSource) return false
+
+  const isProvablyOfficial =
+    Boolean(opts?.bytecodeResult?.isMatch) || isOfficialMasterCopy(safe.implementation?.value, safe.version)
+  if (!isProvablyOfficial) return false
+
+  const isMigrationContractAvailable = Boolean(
+    getChainAgnosticAddress(getSafeMigrationDeployments({ version: targetVersion }), safe.chainId),
+  )
+  return isMigrationContractAvailable
+}
+
+export type MastercopyAction = 'none' | 'update' | 'migrate' | 'cli'
+
+export const getMastercopyAction = (
+  safe: Pick<SafeState, 'implementationVersionState' | 'version' | 'chainId' | 'implementation'>,
+  opts?: MastercopyMigrationOptions,
+): MastercopyAction => {
+  if (!isValidMasterCopy(safe.implementationVersionState)) {
+    return isUnsupportedMastercopyMigratable(safe, opts) ? 'migrate' : 'cli'
   }
 
-  // Must have bytecode comparison result with a match
-  if (!bytecodeComparisonResult || !bytecodeComparisonResult.isMatch) {
-    return false
-  }
-
-  // Check if migration contract is deployed on this chain
-  const deployment = getSafeMigrationDeployments({ version: SAFE_TO_L2_MIGRATION_VERSION })
-  return Boolean(getChainAgnosticAddress(deployment, safe.chainId))
+  return safe.implementationVersionState === 'OUTDATED' ? 'update' : 'none'
 }
 
 export const _getValidatedGetContractProps = (
@@ -53,18 +67,4 @@ export const _getValidatedGetContractProps = (
   return {
     safeVersion: noMetadataVersion as SafeVersion,
   }
-}
-/**
- * Checks if a Safe can be migrated to the canonical L2 singleton via the
- * SafeMigration contract (`migrateL2Singleton`). The contract supports
- * 1.3.0 and 1.4.1 Safes and does not depend on the Safe's nonce.
- * Only the base version is matched — build metadata such as `+L2` or
- * `+Circles` is ignored.
- */
-export const isMigrationToL2Possible = (safe: Pick<SafeState, 'version' | 'chainId'>): boolean => {
-  if (!safe.version || !isSupportedL2Version(safe.version)) {
-    return false
-  }
-  const deployment = getSafeMigrationDeployments({ version: SAFE_TO_L2_MIGRATION_VERSION })
-  return Boolean(getChainAgnosticAddress(deployment, safe.chainId))
 }

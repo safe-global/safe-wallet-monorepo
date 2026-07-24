@@ -8,6 +8,7 @@ import {
   isCanonicalDeployment,
   isChainAgnosticVersion,
   isEraVmChain,
+  isOfficialMasterCopy,
   getCanonicalMultiSendCallOnlyAddress,
   getCanonicalMultiSendAddress,
   resolveChainAgnosticContractAddresses,
@@ -550,6 +551,52 @@ describe('deployments utils', () => {
       expect(isEraVmChain('232', '1.4.1+L2')).toBe(true)
       expect(isEraVmChain('324', '1.3.0+L2')).toBe(true)
       expect(isEraVmChain('1', '1.3.0+L2')).toBe(false)
+    })
+  })
+
+  describe('isOfficialMasterCopy', () => {
+    const L1_CANONICAL_130 = '0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552'
+    const L1_EIP155_130 = '0x69f4D1788e39c87893C980c06EdF4b7f686e2938'
+    const L2_CANONICAL_130 = '0x3E5c63644E683549055b9Be8653de26E0B4CD36E'
+    const L1_CANONICAL_141 = '0x41675C099F32341bf84BFc5382aF534df5C7461a'
+    const L1_ZKSYNC_141 = '0xC35F063962328aC65cED5D4c3fC5dEf8dec68dFa'
+    const L2_ZKSYNC_141 = '0x610fcA2e0279Fa1F8C00c8c2F71dF522AD469380'
+
+    it('returns true for an official 1.3.0 L1 canonical singleton', () => {
+      expect(isOfficialMasterCopy(L1_CANONICAL_130, '1.3.0')).toBe(true)
+    })
+
+    it('returns true for an official 1.3.0 L1 eip155 singleton', () => {
+      expect(isOfficialMasterCopy(L1_EIP155_130, '1.3.0')).toBe(true)
+    })
+
+    it('returns true for an official 1.3.0 L2 canonical singleton', () => {
+      expect(isOfficialMasterCopy(L2_CANONICAL_130, '1.3.0')).toBe(true)
+    })
+
+    it('returns true for an official 1.4.1 L1 singleton', () => {
+      expect(isOfficialMasterCopy(L1_CANONICAL_141, '1.4.1')).toBe(true)
+    })
+
+    it('returns true for an official zksync-variant singleton (L1 and L2)', () => {
+      expect(isOfficialMasterCopy(L1_ZKSYNC_141, '1.4.1')).toBe(true)
+      expect(isOfficialMasterCopy(L2_ZKSYNC_141, '1.4.1')).toBe(true)
+    })
+
+    it('strips +L2 build metadata before matching', () => {
+      expect(isOfficialMasterCopy(L2_CANONICAL_130, '1.3.0+L2')).toBe(true)
+    })
+
+    it('returns false for an unofficial address', () => {
+      expect(isOfficialMasterCopy('0x000000000000000000000000000000000000dEaD', '1.3.0')).toBe(false)
+    })
+
+    it('returns false when the version has no matching singleton', () => {
+      expect(isOfficialMasterCopy(L1_CANONICAL_130, '1.1.1')).toBe(false)
+    })
+
+    it('returns false when the implementation is undefined', () => {
+      expect(isOfficialMasterCopy(undefined, '1.4.1')).toBe(false)
     })
   })
 })
