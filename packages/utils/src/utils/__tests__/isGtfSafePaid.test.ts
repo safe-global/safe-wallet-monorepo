@@ -2,7 +2,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { isGtfSafePaid } from '../isGtfSafePaid'
 
-const GELATO = '0xc918e75504D1B0c741Eb4236B72Dae7A52401E95'
+const REFUND_RECEIVER = '0x0C51b4d70492D81f9f96B1EB1a826FBfb3fd27d8'
 
 const baseData: SafeTransaction['data'] = {
   to: '0x7811208e0811341ce4E56471aEF0c1C78d83c74b',
@@ -13,7 +13,7 @@ const baseData: SafeTransaction['data'] = {
   baseGas: '75668',
   gasPrice: '362424332',
   gasToken: ZERO_ADDRESS,
-  refundReceiver: GELATO,
+  refundReceiver: REFUND_RECEIVER,
   nonce: 15,
 }
 
@@ -45,13 +45,13 @@ describe('isGtfSafePaid', () => {
     ).toBe(false)
   })
 
-  it('accepts a non-Gelato refundReceiver — check is structural, not address-specific', () => {
+  it('accepts a non defined refundReceiver — check is structural, not address-specific', () => {
     expect(isGtfSafePaid({ ...baseData, refundReceiver: '0x7811208e0811341ce4E56471aEF0c1C78d83c74b' })).toBe(true)
   })
 
   it('returns false on missing scalars (loose CGW-shaped input)', () => {
-    expect(isGtfSafePaid({ gasPrice: undefined, baseGas: '1', refundReceiver: GELATO })).toBe(false)
-    expect(isGtfSafePaid({ gasPrice: '1', baseGas: undefined, refundReceiver: GELATO })).toBe(false)
+    expect(isGtfSafePaid({ gasPrice: undefined, baseGas: '1', refundReceiver: REFUND_RECEIVER })).toBe(false)
+    expect(isGtfSafePaid({ gasPrice: '1', baseGas: undefined, refundReceiver: REFUND_RECEIVER })).toBe(false)
     expect(isGtfSafePaid({ gasPrice: '1', baseGas: '1', refundReceiver: undefined })).toBe(false)
     expect(isGtfSafePaid({ gasPrice: null, baseGas: null, refundReceiver: null })).toBe(false)
   })
