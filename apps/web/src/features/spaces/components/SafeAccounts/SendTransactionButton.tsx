@@ -1,5 +1,5 @@
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useContext } from 'react'
+import { useContext, useMemo } from 'react'
 import { IconButton, Tooltip } from '@mui/material'
 import { useRouter } from 'next/router'
 import ArrowOutwardIcon from '@/public/images/transactions/outgoing.svg'
@@ -9,7 +9,9 @@ import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { getEip3770ShortName } from '@safe-global/utils/utils/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useWallet from '@/hooks/wallets/useWallet'
+import useOwnedSafes from '@/hooks/useOwnedSafes'
 import { isOwner } from '@/utils/transaction-guards'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { gtmSetSafeAddress } from '@/services/analytics/gtm'
@@ -17,7 +19,14 @@ import { gtmSetSafeAddress } from '@/services/analytics/gtm'
 const SendTransactionButton = ({ safe }: { safe: SafeOverview }) => {
   const router = useRouter()
   const wallet = useWallet()
-  const canSend = isOwner(safe.owners as AddressInfo[], wallet?.address)
+  const owners = safe.owners as AddressInfo[]
+  const ownedSafes = useOwnedSafes(safe.chainId)
+  const isDirectOwner = isOwner(owners, wallet?.address)
+  const isNestedOwner = useMemo(() => {
+    const ownedOnChain = ownedSafes[safe.chainId] ?? []
+    return owners.some(({ value }) => ownedOnChain.some((addr) => sameAddress(addr, value)))
+  }, [ownedSafes, owners, safe.chainId])
+  const canSend = isDirectOwner || isNestedOwner
 
   const { setTxFlow } = useContext(TxModalContext)
 
