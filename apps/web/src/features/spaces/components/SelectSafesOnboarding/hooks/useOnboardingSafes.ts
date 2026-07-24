@@ -34,11 +34,29 @@ const useOnboardingSafes = () => {
     () => [...trustedSafeItems, ...ownedSafeItems].map((s) => s.address),
     [trustedSafeItems, ownedSafeItems],
   )
-  const flaggedCombined = useSimilarityClusters(combinedAddresses).flagged
+  const { flagged: flaggedCombined, groupIdByAddress } = useSimilarityClusters(combinedAddresses)
+
   const flaggedOwnedAddresses = useMemo<Set<string>>(() => {
     const ownedAddresses = new Set(ownedSafeItems.map((s) => s.address.toLowerCase()))
     return new Set([...flaggedCombined].filter((address) => ownedAddresses.has(address)))
   }, [flaggedCombined, ownedSafeItems])
+
+  // Band only look-alikes that are BOTH owned — a cluster spanning the trusted list (or an address-book
+  // anchor) can't be boxed across sections, so its owned member just keeps its per-row ⚠️.
+  const ownedSimilarityGroups = useMemo<Map<string, string>>(() => {
+    const ownedAddresses = ownedSafeItems.map((s) => s.address.toLowerCase())
+    const ownedCountByGroup = new Map<string, number>()
+    for (const address of ownedAddresses) {
+      const group = groupIdByAddress.get(address)
+      if (group) ownedCountByGroup.set(group, (ownedCountByGroup.get(group) ?? 0) + 1)
+    }
+    const result = new Map<string, string>()
+    for (const address of ownedAddresses) {
+      const group = groupIdByAddress.get(address)
+      if (group && (ownedCountByGroup.get(group) ?? 0) >= 2) result.set(address, group)
+    }
+    return result
+  }, [groupIdByAddress, ownedSafeItems])
 
   // Group into multi-chain / single-chain and sort
   const trustedGrouped = useMemo<AllSafeItems>(
@@ -64,6 +82,7 @@ const useOnboardingSafes = () => {
     trustedSafes: searchQuery ? filteredTrusted : trustedGrouped,
     ownedSafes: searchQuery ? filteredOwned : ownedGrouped,
     flaggedOwnedAddresses,
+    ownedSimilarityGroups,
     handleSearch,
     hasNoSafes,
   }

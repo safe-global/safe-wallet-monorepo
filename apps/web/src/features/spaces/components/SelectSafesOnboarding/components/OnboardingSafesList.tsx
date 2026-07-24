@@ -10,6 +10,8 @@ interface SafeListProps {
   ownedSafes: AllSafeItems
   /** Lowercased owned addresses flagged as similar (address poisoning) — trusted rows are never flagged. */
   flaggedOwnedAddresses: Set<string>
+  /** Owned address → cluster id, for banding owned look-alike pairs (cross-list matches stay per-row). */
+  ownedSimilarityGroups: Map<string, string>
   selectedKeys: Set<string>
   onToggle: (line: AccountLine, nextChecked: boolean) => void
   isAtLimit: boolean
@@ -23,6 +25,7 @@ const OnboardingSafesList = ({
   trustedSafes,
   ownedSafes,
   flaggedOwnedAddresses,
+  ownedSimilarityGroups,
   selectedKeys,
   onToggle,
   isAtLimit,
@@ -51,6 +54,7 @@ const OnboardingSafesList = ({
             items={ownedSafes}
             columns={COLUMNS}
             flaggedAddresses={flaggedOwnedAddresses}
+            similarityGroups={ownedSimilarityGroups}
             selection={selection}
             data-testid="onboarding-owned-table"
           />

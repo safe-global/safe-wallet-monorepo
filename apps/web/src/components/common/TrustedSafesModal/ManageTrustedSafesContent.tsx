@@ -50,6 +50,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
     pendingSelectAllConfirmation,
     similarAddressesForSelectAll,
     flagged: flaggedAddresses,
+    similarityGroups,
     searchQuery,
     isLoading,
     hasChanges,
@@ -179,6 +180,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
               items={items}
               columns={MANAGE_COLUMNS}
               flaggedAddresses={flaggedAddresses}
+              similarityGroups={similarityGroups}
               allowRenameInDialog
               // Column sorting is only offered in Name mode; Last visited / Manual own the order.
               sortableColumns={orderBy === OrderByOption.NAME}

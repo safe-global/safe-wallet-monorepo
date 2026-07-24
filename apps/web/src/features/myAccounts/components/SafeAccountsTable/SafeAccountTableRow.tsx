@@ -8,7 +8,6 @@ import { useForkRef } from '@mui/material/utils'
 import type { SafeItem } from '@/hooks/safes'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useRowOverviews } from './useRowOverviews'
-import { Badge } from '@/components/ui/badge'
 import { GripVertical, TriangleAlert } from 'lucide-react'
 import Identicon from '@/components/common/Identicon'
 import { SafeInfoDisplay } from '@/components/common/AccountRow'
@@ -43,8 +42,10 @@ type SafeAccountTableRowProps = {
   expanded?: boolean
   /** Draw a bottom divider — only true at the boundary between top-level accounts, not within a group. */
   showDivider?: boolean
-  /** Flags the row with a "High similarity" warning (address-poisoning defence). */
+  /** Flags the row with an inline look-alike ⚠️ after the name (address-poisoning defence). */
   isFlagged?: boolean
+  /** Tints the row (warning background) as a member of an address-poisoning similarity group. */
+  highlighted?: boolean
   /** Replaces the default context-menu actions cell (e.g. an "Add to workspace" button). */
   renderActions?: (line: AccountLine) => ReactNode
   /** When set, adds the hover rename pencil to the identity cell (non-modal surfaces). */
@@ -63,11 +64,13 @@ type SafeAccountTableRowProps = {
   onOverviewsLoaded: (overviews: SafeOverview[]) => void
 }
 
-const HighSimilarityBadge = () => (
-  <Badge variant="warning" className="-ml-px self-start">
-    <TriangleAlert data-icon="inline-start" />
-    High similarity
-  </Badge>
+/** Inline look-alike marker shown right after the name of a flagged (address-poisoning) row. */
+const SimilarityWarningIcon = () => (
+  <TriangleAlert
+    size={14}
+    className="shrink-0 text-yellow-800 dark:text-[var(--color-warning-main)]"
+    aria-label="Possible address poisoning"
+  />
 )
 
 // Shares the dropdown's row identity cell: clip-gated name/address tooltips and copy/explorer icons
@@ -102,7 +105,7 @@ const NameCellContent = ({
       hideAddress={!line.showAddress}
       explorerLink={explorerLink}
       onRename={onRename}
-      badge={isFlagged ? <HighSimilarityBadge /> : undefined}
+      nameAdornment={isFlagged ? <SimilarityWarningIcon /> : undefined}
       nameVariant="paragraph-bold"
       className="min-w-0"
     />
@@ -342,6 +345,7 @@ const SafeAccountTableRow = ({
   expanded,
   showDivider,
   isFlagged,
+  highlighted,
   renderActions,
   onRename,
   checkbox,
@@ -412,6 +416,10 @@ const SafeAccountTableRow = ({
       data-disabled={checkbox?.disabledReason ? '' : undefined}
       // Draws the row separator (via the Table sx override); false only at the last row of a group/list.
       data-divider={showDivider ? '' : undefined}
+      // Marks a member of an address-poisoning similarity band. Every member (incl. the trusted anchor)
+      // renders as its own rounded yellow-bordered card on the band; styling lives in the Table sx, keyed
+      // off this attribute so it composes with the cell-level hover/separator machinery.
+      data-highlighted={highlighted && !isDragging ? '' : undefined}
       // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover.
       className="group/row"
       tabIndex={-1}

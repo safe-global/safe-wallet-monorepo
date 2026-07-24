@@ -64,6 +64,8 @@ export interface UseTrustedSafesModalReturn {
   similarAddressesForSelectAll: SelectableItem[]
   /** Look-alike addresses over the FULL list (not just the filtered view), shared by badge and confirm-gate. */
   flagged: Set<string>
+  /** Lowercased address → similarity-cluster id, for rendering the "Address poisoning warning" band. */
+  similarityGroups: Map<string, string>
   /** Current search query */
   searchQuery: string
   /** Whether safes are loading */
@@ -110,8 +112,16 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     return allSafes?.map((safe) => safe.address) ?? []
   }, [allSafes])
 
-  // `groupIdByAddress` → visual grouping; `flagged` → row badge, confirm-gate and Select-All.
-  const { flagged: flaggedAll, groupIdByAddress, isAddressFlagged } = useSimilarityClusters(addresses)
+  // Look-alike clustering. `groupIdByAddress` drives the visual band; `flagged` drives the ⚠️ badge,
+  // the poison-confirm gate and Select-All. A trusted/pinned member of a cluster is its "real" anchor —
+  // vetted — so it stays in the band but is excluded from `flagged` (no ⚠️, never prompts confirm).
+  const { flagged: flaggedAll, groupIdByAddress } = useSimilarityClusters(addresses)
+  const pinnedAddresses = useMemo(() => collectPinnedAddresses(addedSafes), [addedSafes])
+  const flagged = useMemo(
+    () => new Set([...flaggedAll].filter((address) => !pinnedAddresses.has(address))),
+    [flaggedAll, pinnedAddresses],
+  )
+  const isAddressFlagged = useCallback((address: string) => flagged.has(address.toLowerCase()), [flagged])
 
   // Full list without selection state, rebuilt only when the safes, pins, or similarity change.
   const structuralItems = useMemo<SelectableItem[]>(() => {
@@ -380,7 +390,8 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     pendingConfirmation,
     pendingSelectAllConfirmation,
     similarAddressesForSelectAll,
-    flagged: flaggedAll,
+    flagged,
+    similarityGroups: groupIdByAddress,
     searchQuery,
     isLoading: !allSafes || !allMultiChainSafes || !allSingleSafes,
     hasChanges,

@@ -21,6 +21,8 @@ import {
 } from './useSafeAccountRows'
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
 import ReorderableBody, { toggleExpanded } from './ReorderableBody'
+import { bandHeaderAt } from './SimilarityBand'
+import { bodyRowSx } from './tableStyles'
 import EntryDialog from '@/components/address-book/EntryDialog'
 
 /** Renaming a safe = editing its address-book entry across every chain it lives on. */
@@ -94,8 +96,15 @@ export type SafeAccountsTableProps = {
   actionsWidth?: string
   /** Replaces the default context-menu actions cell for each row (e.g. an "Add to workspace" button). */
   renderActions?: (line: AccountLine) => ReactNode
-  /** Lowercased addresses to flag with a "High similarity" warning badge. */
+  /** Lowercased addresses to flag with an inline look-alike ⚠️ (address-poisoning defence). */
   flaggedAddresses?: Set<string>
+  /**
+   * Lowercased address → similarity-cluster id. When set, contiguous rows sharing a cluster id are
+   * rendered inside an "Address poisoning warning" band (tinted rows + a header). Pairs with
+   * flaggedAddresses, which still drives the per-row ⚠️ (so a trusted anchor can sit in the band
+   * without a ⚠️). Grouping is applied in the non-reorder body only for now.
+   */
+  similarityGroups?: Map<string, string>
   /** Enables a leading checkbox column and makes rows selectable. */
   selection?: SafeAccountsSelection
   /**
@@ -143,12 +152,59 @@ const headerSx = {
   '&&:last-of-type': { pr: 2, borderRight: '4px solid transparent' },
 } as const
 
+/** Full-width header row that opens an address-poisoning similarity band (tint lives in the Table sx). */
+/**
+ * Pulls each similarity cluster's members together so they render as one contiguous band. The whole
+ * cluster is placed at its LEAD's sorted position — the lead is the anchor (a member that's in a
+ * cluster but NOT flagged, i.e. already trusted) if present, otherwise the first member in sort order.
+ * Within the band the anchor(s) lead, then the look-alikes keep their sorted order. Non-clustered
+ * groups stay in place. No-op when `similarityGroups` is empty.
+ */
+export const orderGroupsBySimilarity = (
+  groups: AccountGroup[],
+  similarityGroups?: Map<string, string>,
+  flaggedAddresses?: Set<string>,
+): AccountGroup[] => {
+  if (!similarityGroups || similarityGroups.size === 0) return groups
+
+  const clusterOf = (group: AccountGroup) => similarityGroups.get(group.parent.address.toLowerCase())
+  const isAnchor = (group: AccountGroup) => !flaggedAddresses?.has(group.parent.address.toLowerCase())
+
+  const membersByCluster = new Map<string, AccountGroup[]>()
+  const leadByCluster = new Map<string, AccountGroup>()
+  for (const group of groups) {
+    const cluster = clusterOf(group)
+    if (!cluster) continue
+    const members = membersByCluster.get(cluster)
+    if (members) members.push(group)
+    else membersByCluster.set(cluster, [group])
+    // Lead = first-seen member (first in sort order), upgraded to an anchor if one appears.
+    const lead = leadByCluster.get(cluster)
+    if (!lead || (isAnchor(group) && !isAnchor(lead))) leadByCluster.set(cluster, group)
+  }
+
+  const result: AccountGroup[] = []
+  for (const group of groups) {
+    const cluster = clusterOf(group)
+    if (!cluster) {
+      result.push(group)
+      continue
+    }
+    // Emit the whole cluster once, at its lead's position; skip the other members here.
+    if (leadByCluster.get(cluster) !== group) continue
+    const members = membersByCluster.get(cluster) ?? [group]
+    result.push(...members.filter(isAnchor), ...members.filter((member) => !isAnchor(member)))
+  }
+  return result
+}
+
 const SafeAccountsTable = ({
   items,
   columns,
   actionsWidth,
   renderActions,
   flaggedAddresses,
+  similarityGroups,
   selection,
   allowRenameInDialog = false,
   reorder,
@@ -218,9 +274,15 @@ const SafeAccountsTable = ({
     if (!sortableColumns) setSort({ orderBy: null, order: 'asc' })
   }, [sortableColumns])
 
+  // Pull similarity clusters together (non-reorder body) so each renders as one contiguous band.
+  const displayGroups = useMemo(
+    () => orderGroupsBySimilarity(sortedGroups, similarityGroups, flaggedAddresses),
+    [sortedGroups, similarityGroups, flaggedAddresses],
+  )
+
   const lines = useMemo<Array<{ line: AccountLine; groupKey: string; group: AccountGroup }>>(() => {
     const result: Array<{ line: AccountLine; groupKey: string; group: AccountGroup }> = []
-    for (const group of sortedGroups) {
+    for (const group of displayGroups) {
       result.push({ line: group.parent, groupKey: group.parent.key, group })
       if (group.children.length > 0 && expanded.has(group.parent.key)) {
         for (const child of group.children) {
@@ -229,7 +291,7 @@ const SafeAccountsTable = ({
       }
     }
     return result
-  }, [sortedGroups, expanded])
+  }, [displayGroups, expanded])
 
   const handleSort = (column: SafeSortColumn) =>
     setSort((prev) => ({
@@ -267,43 +329,7 @@ const SafeAccountsTable = ({
             minWidth: embedded ? undefined : minWidth,
             borderCollapse: 'separate',
             borderSpacing: 0,
-            // The base theme tints every MuiTableRow green on hover; suppress it on the <tr> (otherwise
-            // it bleeds green into the inset corners) and instead paint a grey pill (the same --muted as
-            // the safe-selector dropdown) on the row's cells — inset and rounded like the dropdown rows.
-            // Painting the cells (not the <tr>) lets the first/last cells' transparent side borders inset
-            // the fill from the panel edges. Locked rows stay un-hovered.
-            '& .MuiTableBody-root .MuiTableRow-root:hover': { backgroundColor: 'transparent' },
-            '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root': {
-              backgroundColor: 'var(--muted)',
-            },
-            '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root:first-of-type': {
-              borderTopLeftRadius: '8px',
-              borderBottomLeftRadius: '8px',
-            },
-            '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root:last-of-type': {
-              borderTopRightRadius: '8px',
-              borderBottomRightRadius: '8px',
-            },
-            // Transparent top/bottom borders (with background-clip) inset the hover pill vertically so it
-            // floats clear of the separators. Set here — not per-cell — because the base theme forces
-            // cell borderBottom to `none` at a specificity a per-cell sx can't beat (which is why only
-            // the bottom touched). The outer cells' horizontal inset borders live in the cell sx.
-            '& .MuiTableBody-root .MuiTableCell-root': {
-              borderTop: '6px solid transparent',
-              borderBottom: '6px solid transparent',
-              backgroundClip: 'padding-box',
-            },
-            // Row separator, drawn as a 1px line at the bottom of the <tr> (keyed off data-divider,
-            // absent on the last row). It lives on the row — not the cells — so the cells' transparent
-            // top/bottom borders can inset the hover pill clear of the separator. Inset 4px each side to
-            // line up with the pill.
-            '& .MuiTableBody-root .MuiTableRow-root[data-divider]': {
-              backgroundImage:
-                'linear-gradient(to right, transparent 4px, var(--color-border-light) 4px, var(--color-border-light) calc(100% - 4px), transparent calc(100% - 4px))',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'bottom',
-              backgroundSize: '100% 1px',
-            },
+            ...bodyRowSx,
           }}
         >
           {/* Embedded (headerless) tables need a colgroup to keep fixed-layout column widths; the Name
@@ -350,9 +376,10 @@ const SafeAccountsTable = ({
 
           {reorder ? (
             <ReorderableBody
-              groups={sortedGroups}
+              groups={displayGroups}
               columns={visibleColumns}
               flaggedAddresses={flaggedAddresses}
+              similarityGroups={similarityGroups}
               expanded={expanded}
               setExpanded={setExpanded}
               renderActions={renderActions}
@@ -365,23 +392,35 @@ const SafeAccountsTable = ({
             />
           ) : (
             <TableBody>
-              {lines.map(({ line, groupKey, group }, index) => (
-                <SafeAccountTableRow
-                  key={line.key}
-                  line={line}
-                  columns={visibleColumns}
-                  expanded={line.expandable ? expanded.has(groupKey) : undefined}
-                  isFlagged={flaggedAddresses?.has(line.address.toLowerCase())}
-                  renderActions={renderActions}
-                  onRename={onRename}
-                  checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
-                  onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
-                  onToggle={line.expandable ? () => toggle(groupKey) : undefined}
-                  onLinkClick={onLinkClick}
-                  showDivider={index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}
-                  onOverviewsLoaded={handleOverviewsLoaded}
-                />
-              ))}
+              {lines.flatMap(({ line, groupKey, group }, index) => {
+                const clusterId = similarityGroups?.get(line.address.toLowerCase())
+                const bandHeader = bandHeaderAt(
+                  index,
+                  (i) => similarityGroups?.get(lines[i].line.address.toLowerCase()),
+                  visibleColumns.length,
+                )
+
+                const row = (
+                  <SafeAccountTableRow
+                    key={line.key}
+                    line={line}
+                    columns={visibleColumns}
+                    expanded={line.expandable ? expanded.has(groupKey) : undefined}
+                    isFlagged={flaggedAddresses?.has(line.address.toLowerCase())}
+                    highlighted={Boolean(clusterId)}
+                    renderActions={renderActions}
+                    onRename={onRename}
+                    checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
+                    onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
+                    onToggle={line.expandable ? () => toggle(groupKey) : undefined}
+                    onLinkClick={onLinkClick}
+                    showDivider={index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}
+                    onOverviewsLoaded={handleOverviewsLoaded}
+                  />
+                )
+
+                return bandHeader ? [bandHeader, row] : [row]
+              })}
             </TableBody>
           )}
         </Table>
