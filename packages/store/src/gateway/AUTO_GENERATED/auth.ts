@@ -48,6 +48,13 @@ const injectedRtkApi = api
         }),
         providesTags: ['auth'],
       }),
+      oidcAuthListAuthenticatorsV1: build.query<
+        OidcAuthListAuthenticatorsV1ApiResponse,
+        OidcAuthListAuthenticatorsV1ApiArg
+      >({
+        query: () => ({ url: `/v1/auth/oidc/mfa/authenticators` }),
+        providesTags: ['auth'],
+      }),
     }),
     overrideExisting: false,
   })
@@ -85,6 +92,8 @@ export type OidcAuthCallbackV1ApiArg = {
   /** Description of the error returned by the OIDC provider (if failed) */
   errorDescription?: string
 }
+export type OidcAuthListAuthenticatorsV1ApiResponse = /** status 200 MFA authentication methods */ Authenticator[]
+export type OidcAuthListAuthenticatorsV1ApiArg = void
 export type UserSession = {
   id: string
   authMethod: 'siwe' | 'oidc'
@@ -104,6 +113,16 @@ export type LogoutDto = {
   /** Post-logout redirect URL (must be same-origin as pre-configured URL) */
   redirect_url?: string
 }
+export type Authenticator = {
+  /** Auth0 authentication method identifier (e.g. totp|...) */
+  id: string
+  /** Authentication method type (e.g. totp) */
+  type: string
+  /** User-visible authenticator name */
+  name?: string
+  /** ISO 8601 timestamp of when the method was enrolled */
+  createdAt?: string
+}
 export const {
   useAuthGetMeV1Query,
   useLazyAuthGetMeV1Query,
@@ -116,4 +135,6 @@ export const {
   useLazyOidcAuthAuthorizeV1Query,
   useOidcAuthCallbackV1Query,
   useLazyOidcAuthCallbackV1Query,
+  useOidcAuthListAuthenticatorsV1Query,
+  useLazyOidcAuthListAuthenticatorsV1Query,
 } = injectedRtkApi

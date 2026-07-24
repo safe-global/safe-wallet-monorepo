@@ -6278,6 +6278,35 @@
           "notifications"
         ]
       }
+    },
+    "/v1/auth/oidc/mfa/authenticators": {
+      "get": {
+        "description": "Lists the MFA authentication methods of the authenticated user for the self-service authenticator management UI.",
+        "operationId": "oidcAuthListAuthenticatorsV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "MFA authentication methods",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Authenticator"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authenticated"
+          }
+        },
+        "summary": "List MFA authenticators",
+        "tags": [
+          "auth"
+        ]
+      }
     }
   },
   "info": {
@@ -15281,6 +15310,31 @@
         },
         "required": [
           "subscriptions"
+        ]
+      },
+      "Authenticator": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Auth0 authentication method identifier (e.g. totp|...)"
+          },
+          "type": {
+            "type": "string",
+            "description": "Authentication method type (e.g. totp)"
+          },
+          "name": {
+            "type": "string",
+            "description": "User-visible authenticator name"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO 8601 timestamp of when the method was enrolled"
+          }
+        },
+        "required": [
+          "id",
+          "type"
         ]
       }
     }
