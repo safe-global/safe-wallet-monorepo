@@ -1,7 +1,7 @@
 import { usePoliciesGetPoliciesV1Query } from '@safe-global/store/gateway/policies'
 import type { AvailablePolicy } from '@safe-global/store/gateway/policies/types'
 import { useCurrentSpaceId } from '@/features/spaces'
-import { SPACE_REFRESH_OPTIONS } from '../../hooks/refreshOptions'
+import { SPACE_REFRESH_OPTIONS } from '../../../hooks/refreshOptions'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 

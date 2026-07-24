@@ -8,7 +8,7 @@ import { ChainLogo, SafeIdenticon } from '@/components/common/SpaceSafeBar/Accou
 import { useSpaceSafes } from '@/features/spaces'
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import { flattenSafes, safeRefKey, type SafeRef } from './safeRefs'
-import { useActivePolicies } from './useActivePolicies'
+import { useActivePolicies } from './hooks/useActivePolicies'
 import PolicyDetailDrawer, { type PolicyDetail } from './PolicyDetailDrawer'
 
 const POLICY_LABEL: Record<PolicyType, string> = {

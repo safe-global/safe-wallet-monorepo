@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import * as spaces from '@/features/spaces'
-import * as useActivePoliciesHook from '../useActivePolicies'
+import * as useActivePoliciesHook from '../hooks/useActivePolicies'
 import { spendingLimitPolicyBuilder, tokenWithdrawPolicyBuilder } from '@/tests/builders/policies'
 import ActivePoliciesList from '../ActivePoliciesList'
 

@@ -16,7 +16,7 @@ import { useChain } from '@/hooks/useChains'
 import { TxModalContext } from '@/components/tx-flow'
 import { RemoveSpendingLimitFlow } from '@/components/tx-flow/flows'
 import type { SpendingLimitState } from '@/features/spending-limits/types'
-import type { SafeRecoveryConfig } from './useSafeRecovery'
+import type { SafeRecoveryConfig } from './hooks/useSafeRecovery'
 
 const MotionBox = motion.create(Box)
 
