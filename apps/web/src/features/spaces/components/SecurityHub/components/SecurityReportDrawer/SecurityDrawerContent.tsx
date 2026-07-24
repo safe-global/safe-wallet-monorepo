@@ -10,7 +10,6 @@ type SecurityDrawerContentProps = {
   isComplete: boolean
   lastScannedAt: number | null
   safeQueryParam?: string
-  onRemoveModule?: (address: string) => void
   onHnSignupClick?: () => void
 }
 
@@ -21,7 +20,6 @@ const SecurityDrawerContent = ({
   isComplete,
   lastScannedAt,
   safeQueryParam,
-  onRemoveModule,
   onHnSignupClick,
 }: SecurityDrawerContentProps): ReactElement => (
   <Tabs defaultValue="checks" className="flex min-h-0 flex-1 flex-col gap-4 px-6 pb-6">
@@ -42,7 +40,6 @@ const SecurityDrawerContent = ({
           isComplete={isComplete}
           lastScannedAt={lastScannedAt}
           safeQueryParam={safeQueryParam}
-          onRemoveModule={onRemoveModule}
           onHnSignupClick={onHnSignupClick}
         />
       </TabsContent>

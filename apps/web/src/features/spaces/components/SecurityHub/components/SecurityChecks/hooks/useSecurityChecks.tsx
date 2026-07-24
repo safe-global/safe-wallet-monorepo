@@ -66,8 +66,6 @@ export const useSecurityChecks = (
   scanContext: ScanContext,
   results: Record<string, ScanResult>,
   safeQueryParam: string | undefined,
-  /** Launches the remove-module tx flow for a vulnerable module (drawer-provided). */
-  onRemoveModule?: (address: string) => void,
   /** Opens the Hypernative signup flow for a partner-tagged guard nudge (drawer-provided). */
   onHnSignupClick?: () => void,
 ): UseSecurityChecksResult => {
@@ -377,7 +375,7 @@ export const useSecurityChecks = (
             { label: 'Address', value: mod.value },
             ...(mod.name ? [{ label: 'Name', value: mod.name }] : []),
           ]
-          const { intro, cta } = getModuleRowContent(mod, { vulnerable, trusted }, modulesCta, onRemoveModule)
+          const { intro, cta } = getModuleRowContent({ vulnerable, trusted }, modulesCta)
           items.push({
             key: `module-${mod.value}`,
             severity,
@@ -459,7 +457,6 @@ export const useSecurityChecks = (
     results,
     safeQueryParam,
     modulesExpanded,
-    onRemoveModule,
     onHnSignupClick,
   ])
 

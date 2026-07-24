@@ -286,8 +286,7 @@ describe('SecurityChecksSection', () => {
     describe('vulnerable Zodiac modules', () => {
       const DELAY = '0xcccc000000000000000000000000000000000001'
 
-      it('flags a vulnerable module as Critical with a working remove CTA', () => {
-        const onRemoveModule = jest.fn()
+      it('flags a vulnerable module as Critical with a deep-link remove CTA to the target Safe', () => {
         renderPanel({
           scanContext: createMockContext({ modules: [{ value: DELAY, name: 'Delay Modifier' }] }),
           results: {
@@ -300,17 +299,19 @@ describe('SecurityChecksSection', () => {
               ctaLabelOverride: 'Remove unsupported module',
             }),
           },
-          onRemoveModule,
         })
 
-        const row = screen.getByText('Vulnerable module · Delay Modifier')
-        fireEvent.click(row)
-        const button = screen.getByRole('button', { name: /remove unsupported module/i })
-        fireEvent.click(button)
-        expect(onRemoveModule).toHaveBeenCalledWith(DELAY)
+        fireEvent.click(screen.getByText('Vulnerable module · Delay Modifier'))
+        // Deep-links to the target Safe's Modules settings (so the removal runs in the correct
+        // Safe context) rather than launching an in-place flow.
+        const link = screen.getByRole('link', { name: /remove unsupported module/i })
+        expect(link).toHaveAttribute(
+          'href',
+          `${AppRoutes.settings.modules}?safe=${encodeURIComponent(SAFE_QUERY_PARAM)}`,
+        )
       })
 
-      it('falls back to an external link when no remove handler is provided', () => {
+      it('falls back to the external checker link when no safe deep-link is available', () => {
         renderPanel({
           scanContext: createMockContext({ modules: [{ value: DELAY, name: 'Delay Modifier' }] }),
           results: {
@@ -322,22 +323,21 @@ describe('SecurityChecksSection', () => {
               ctaLabelOverride: 'Remove unsupported module',
             }),
           },
+          // No safeQueryParam → no deep-link → external checker fallback.
+          safeQueryParam: undefined,
         })
 
         fireEvent.click(screen.getByText('Vulnerable module · Delay Modifier'))
         expect(screen.getByRole('link', { name: /check affected safes/i })).toBeInTheDocument()
-        expect(screen.queryByRole('button', { name: /remove unsupported module/i })).not.toBeInTheDocument()
       })
 
       it('renders a Critical warning without a remove button for the nested (no removable module) case', () => {
-        const onRemoveModule = jest.fn()
         renderPanel({
           scanContext: createMockContext({ modules: [{ value: DELAY, name: 'Mystery Module' }] }),
           results: {
             ...allClearResults,
             modules: mkResult({ status: 'issue', severity: 'Critical', vulnerableModules: [] }),
           },
-          onRemoveModule,
         })
 
         // Affected, but no module matched as removable → a single warning row, no remove button.
