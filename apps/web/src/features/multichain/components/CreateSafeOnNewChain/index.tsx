@@ -117,6 +117,7 @@ const ReplaySafeDialog = ({
         isUserAuthenticated,
         isAdminOfActiveSpace,
         spaceSafeCount,
+        provider,
         dispatch,
       })
       if (!persistResult.ok) {
@@ -132,8 +133,11 @@ const ReplaySafeDialog = ({
         return
       }
 
-      trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
-      trackEvent({ ...CREATE_SAFE_EVENTS.CREATED_SAFE, label: 'counterfactual' })
+      // Don't report a creation for Safes that were already deployed.
+      if (persistResult.skipped !== 'already-deployed') {
+        trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
+        trackEvent({ ...CREATE_SAFE_EVENTS.CREATED_SAFE, label: 'counterfactual' })
+      }
 
       router.push({
         pathname: UNDEPLOYED_SAFE_BLOCKED_ROUTES.includes(router.pathname) ? AppRoutes.home : router.pathname,
@@ -161,7 +165,10 @@ const ReplaySafeDialog = ({
         showNotification({
           variant: 'success',
           groupKey: 'replay-safe-success',
-          message: `Successfully added your account on ${selectedChain.chainName}`,
+          message:
+            persistResult.skipped === 'already-deployed'
+              ? `This account is already deployed on ${selectedChain.chainName}`
+              : `Successfully added your account on ${selectedChain.chainName}`,
         }),
       )
     } catch (err) {

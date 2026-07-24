@@ -1,11 +1,16 @@
+import type { JsonRpcProvider } from 'ethers'
 import type { AppDispatch } from '@/store'
 import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
+import { isSmartContract } from '@/utils/wallets'
 import { cgwApi as counterfactualSafesApi } from '@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes'
 import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { addOrUpdateSafe } from '@/store/addedSafesSlice'
+import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { toBackendDto } from './counterfactualSafeMapper'
 import { replayCounterfactualSafeDeployment } from './safeDeployment'
 import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
+import { removeUndeployedSafe } from '../store/undeployedSafesSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { normalizeSpaceId } from '@/utils/spaces'
 import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/constants'
@@ -35,10 +40,13 @@ type PersistArgs = {
    *  entry) instead of swallowing it as success. Single-create flows keep the
    *  soft toast-and-succeed behavior. */
   isMultiChainCreation?: boolean
+  /** Read-only provider for `chainId`, used to check the Safe isn't already
+   *  deployed. Must target `chainId`; when absent the check is skipped. */
+  provider?: JsonRpcProvider
   dispatch: AppDispatch
 }
 
-export type PersistResult = { ok: true } | { ok: false; error: Error }
+export type PersistResult = { ok: true; skipped?: 'already-deployed' } | { ok: false; error: Error }
 
 /**
  * Single code path for creating a counterfactual safe: persist to backend
@@ -62,8 +70,38 @@ export const persistCounterfactualSafe = async ({
   isAdminOfActiveSpace,
   spaceSafeCount,
   isMultiChainCreation,
+  provider,
   dispatch,
 }: PersistArgs): Promise<PersistResult> => {
+  // 0. Never store an already-deployed Safe as counterfactual — it would show as
+  //    "Not activated". Skip without a chain-specific provider; fail open on error.
+  if (provider) {
+    let isDeployed = false
+    try {
+      isDeployed = await isSmartContract(safeAddress, provider)
+    } catch {
+      // Couldn't verify deployment — fail open and let the persist proceed.
+    }
+
+    if (isDeployed) {
+      // Add it to My accounts as a regular deployed Safe (not the undeployed
+      // slice, which shows "Not activated"), and drop any stale undeployed entry.
+      dispatch(
+        addOrUpdateSafe({
+          safe: {
+            ...defaultSafeInfo,
+            chainId,
+            address: { value: safeAddress, name },
+            threshold: Number(props.safeAccountConfig.threshold),
+            owners: props.safeAccountConfig.owners.map((owner) => ({ value: owner })),
+          },
+        }),
+      )
+      dispatch(removeUndeployedSafe({ chainId, address: safeAddress }))
+      return { ok: true, skipped: 'already-deployed' }
+    }
+  }
+
   // 1. Save to backend (blocking). Unauth users fall back to local-only —
   //    matches pre-backend-sync behavior and avoids creating orphan entries
   //    that can never be cleaned up server-side.
@@ -165,8 +203,9 @@ export const persistCounterfactualSafe = async ({
   return { ok: true }
 }
 
+// Shown on backend 409 (conflict) — the Safe likely already exists or is deployed.
 const CONFLICT_MESSAGE =
-  'A counterfactual Safe with these parameters already exists on this chain. Please contact support if this is unexpected.'
+  "This Safe can't be created as a counterfactual account — it may already exist or be deployed. Try adding it as a regular Safe account instead."
 
 type BackendError = { status?: number; data?: { message?: string } }
 
