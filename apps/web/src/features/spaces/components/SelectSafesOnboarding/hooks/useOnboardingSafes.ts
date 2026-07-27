@@ -4,58 +4,7 @@ import { type AllSafeItems, _groupAndSort, getComparator, useSafesSearch } from 
 import useAllSafes, { type SafeItem } from '@/hooks/safes/useAllSafes'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
-import { useSimilarityClusters } from '@/features/address-poisoning'
-import type { SimilarWarning } from '@/features/myAccounts'
-
-/**
- * Address → cluster id for every look-alike in one list (deduped by address, so a multi-chain safe
- * isn't listed twice). Each list bands its own members: ≥2 in a list read as one group, a lone
- * cross-list member as a single boxed card. The ⚠️ (see buildSimilarWarnings) marks the cross-list case.
- */
-const bandGroupsForList = (items: SafeItem[], groupIdByAddress: Map<string, string>): Map<string, string> => {
-  const result = new Map<string, string>()
-  for (const address of new Set(items.map((item) => item.address.toLowerCase()))) {
-    const group = groupIdByAddress.get(address)
-    if (group) result.set(address, group)
-  }
-  return result
-}
-
-/**
- * Per-address ⚠️ payload for clusters that span BOTH lists — the case a single band can't box. Each
- * member of such a cluster gets its look-alike peers grouped by list, for the icon's tooltip. Clusters
- * living entirely in one list are boxed by their band and produce no warning here.
- */
-const buildSimilarWarnings = (
-  trustedItems: SafeItem[],
-  ownedItems: SafeItem[],
-  groupIdByAddress: Map<string, string>,
-): Map<string, SimilarWarning> => {
-  const trustedSet = new Set(trustedItems.map((item) => item.address.toLowerCase()))
-  const ownedSet = new Set(ownedItems.map((item) => item.address.toLowerCase()))
-
-  const byCluster = new Map<string, { trusted: string[]; owned: string[] }>()
-  for (const address of new Set([...trustedSet, ...ownedSet])) {
-    const group = groupIdByAddress.get(address)
-    if (!group) continue
-    const entry = byCluster.get(group) ?? { trusted: [], owned: [] }
-    ;(trustedSet.has(address) ? entry.trusted : entry.owned).push(address)
-    byCluster.set(group, entry)
-  }
-
-  const result = new Map<string, SimilarWarning>()
-  for (const { trusted, owned } of byCluster.values()) {
-    // Cross-list only: the cluster must reach into both sections.
-    if (trusted.length === 0 || owned.length === 0) continue
-    for (const address of [...trusted, ...owned]) {
-      result.set(address, {
-        trusted: trusted.filter((peer) => peer !== address),
-        owned: owned.filter((peer) => peer !== address),
-      })
-    }
-  }
-  return result
-}
+import { useSimilarityClusters, bandGroupsForList, buildSimilarWarnings } from '@/features/address-poisoning'
 
 const useOnboardingSafes = () => {
   const [searchQuery, setSearchQuery] = useState('')

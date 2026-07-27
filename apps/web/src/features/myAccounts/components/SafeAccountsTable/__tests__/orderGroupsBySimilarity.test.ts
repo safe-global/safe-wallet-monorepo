@@ -1,4 +1,4 @@
-import { orderGroupsBySimilarity } from '../index'
+import { orderGroupsBySimilarity } from '../orderGroupsBySimilarity'
 import type { AccountGroup } from '../useSafeAccountRows'
 
 // Minimal AccountGroup — orderGroupsBySimilarity only reads `group.parent.address`.

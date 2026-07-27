@@ -1,17 +1,12 @@
-import { useEffect, useRef, useState, type ReactElement } from 'react'
+import type { ReactElement } from 'react'
 import Box from '@mui/material/Box'
 import TableCell from '@mui/material/TableCell'
 import TableRow from '@mui/material/TableRow'
 import Typography from '@mui/material/Typography'
 import { TriangleAlert, Info, Copy, Check } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-
-/**
- * A row's look-alike peers, grouped by the onboarding list they live in. Present only when a cluster
- * spans both lists (trusted ↔ owned) — that's the case a single band can't box, so each member gets
- * the inline ⚠️ instead, and the tooltip points at where its look-alikes are.
- */
-export type SimilarWarning = { trusted: string[]; owned: string[] }
+import useCopyToClipboard from '@/hooks/useCopyToClipboard'
+import type { SimilarWarning } from '@/features/address-poisoning'
 
 /**
  * Full address + inline copy for the warning tooltip. A bare button rather than the shared
@@ -19,9 +14,7 @@ export type SimilarWarning = { trusted: string[]; owned: string[] }
  * wrong inside this dark, hover popup. Hover uses `bg-background/15` so it reads on either theme.
  */
 const PeerAddress = ({ address }: { address: string }) => {
-  const [copied, setCopied] = useState(false)
-  const resetTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
-  useEffect(() => () => clearTimeout(resetTimer.current), [])
+  const { copied, copy } = useCopyToClipboard()
 
   return (
     <div className="flex items-center gap-1.5">
@@ -30,12 +23,7 @@ const PeerAddress = ({ address }: { address: string }) => {
         type="button"
         aria-label="Copy address"
         className="inline-flex shrink-0 cursor-pointer rounded p-0.5 transition-colors hover:bg-background/15"
-        onClick={() => {
-          navigator.clipboard.writeText(address)
-          setCopied(true)
-          clearTimeout(resetTimer.current)
-          resetTimer.current = setTimeout(() => setCopied(false), 2000)
-        }}
+        onClick={() => copy(address)}
       >
         {copied ? <Check className="size-3 text-green-500" /> : <Copy className="size-3" />}
       </button>

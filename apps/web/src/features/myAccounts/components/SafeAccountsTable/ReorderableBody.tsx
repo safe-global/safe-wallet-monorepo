@@ -8,7 +8,8 @@ import { reorderByKey } from '@/utils/reorder'
 import type { SafeAccountColumn } from './columns'
 import type { AccountGroup, AccountLine } from './useSafeAccountRows'
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
-import { bandHeaderAt, type SimilarWarning } from './SimilarityBand'
+import { bandHeaderAt } from './SimilarityBand'
+import type { SimilarWarning } from '@/features/address-poisoning'
 
 type ReorderableBodyProps = {
   /** Top-level accounts in their current display order — each renders as one draggable row. */
