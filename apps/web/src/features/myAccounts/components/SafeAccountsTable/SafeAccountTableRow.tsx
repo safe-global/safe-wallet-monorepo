@@ -145,9 +145,18 @@ const NameCell = ({
 
   if (line.href && !disableLink) {
     return (
-      <NextLink href={line.href} onClick={onLinkClick} data-testid="account-row-link" className="block">
-        {content}
-      </NextLink>
+      <div className="relative">
+        <NextLink
+          href={line.href}
+          onClick={onLinkClick}
+          data-testid="account-row-link"
+          aria-label={line.displayName}
+          className="absolute inset-0"
+        />
+        <div className="pointer-events-none relative [&_[data-slot=tooltip-trigger]]:pointer-events-auto">
+          {content}
+        </div>
+      </div>
     )
   }
 
@@ -216,10 +225,16 @@ const CellContent = ({ column, line }: { column: SafeAccountColumn; line: Accoun
         />
       )
     case 'networks':
-      return line.networks ? (
-        <BaseAccountItem.ChainBadge safes={line.networks} />
-      ) : (
-        <BaseAccountItem.ChainBadge chainId={line.chainId} />
+      // The grey pill lives here, not in the shared ChainBadge — other surfaces (sidebar list,
+      // multi-account items) render the bare logos.
+      return (
+        <span className="bg-muted inline-flex items-center rounded-full p-0.5">
+          {line.networks ? (
+            <BaseAccountItem.ChainBadge safes={line.networks} plain />
+          ) : (
+            <BaseAccountItem.ChainBadge chainId={line.chainId} />
+          )}
+        </span>
       )
     case 'workspaces':
       return <WorkspaceAvatars spaces={line.workspaces} />
