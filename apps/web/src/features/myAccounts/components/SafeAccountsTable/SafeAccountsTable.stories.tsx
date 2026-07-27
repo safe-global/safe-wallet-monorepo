@@ -102,8 +102,7 @@ const OPS = addr('1111', '1', '111111') // unrelated, normal row
 const VAULT_A = addr('2222', 'a', '333333') // intra-list look-alike pair (no trusted anchor)
 const VAULT_B = addr('2222', 'b', '333333')
 
-// Deliberately interleaved (cluster members NOT adjacent) to exercise the table's similarity ordering,
-// which pulls each cluster together at its lead's position.
+// Cluster members deliberately interleaved to exercise the table's similarity ordering.
 const groupedItems: AllSafeItems = [
   { name: 'Treasury', address: REAL, isPinned: true, chainId: '1', isReadOnly: false, lastVisited: Date.now() },
   { name: 'Ops', address: OPS, isPinned: true, chainId: '1', isReadOnly: false, lastVisited: Date.now() },
@@ -122,14 +121,9 @@ const similarityGroups = new Map<string, string>([
   [VAULT_B, 'g2'],
 ])
 
-// The vetted/pinned member leads its band; same-list look-alikes carry no ⚠️ (the band conveys it).
 const anchorAddresses = new Set([REAL])
 
-/**
- * Same-list similarity bands: a header + rounded, bordered cards on a warning surface, with NO per-row
- * ⚠️ — a single list shows its look-alikes grouped, so the band alone reads as the warning. g1 leads
- * with its vetted anchor; g2 is an anchor-less intra-list pair.
- */
+/** Same-list bands: header + bordered cards, no per-row ⚠️. g1 leads with its anchor; g2 has none. */
 export const SimilarityGrouped: Story = {
   args: {
     items: groupedItems,
@@ -152,9 +146,7 @@ export const SimilarityGroupedReorder: Story = {
   },
 }
 
-// A cross-list look-alike as it reaches ONE list (e.g. onboarding's owned list): its peer lives in the
-// OTHER list, so it can't be boxed with it. It shows as a lone banded card carrying an inline ⚠️ whose
-// tooltip points at the peer.
+// A look-alike whose peer lives in ANOTHER list: a lone banded card with an inline ⚠️.
 const crossListItems: AllSafeItems = [
   { name: 'Ops', address: OPS, isPinned: false, chainId: '1', isReadOnly: false, lastVisited: 0 },
   { name: 'Treasury', address: IMPOSTOR_2, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },
@@ -162,10 +154,7 @@ const crossListItems: AllSafeItems = [
 const crossSimilarityGroups = new Map<string, string>([[IMPOSTOR_2, 'x1']])
 const crossWarnings = new Map([[IMPOSTOR_2, { trusted: [REAL], owned: [] }]])
 
-/**
- * Cross-list warning: `IMPOSTOR_2` is a lone banded card (its look-alike is in another list) and gets
- * an inline ⚠️ — hover it for the peer tooltip. `Ops` is a normal, unbanded row.
- */
+/** Cross-list warning: `IMPOSTOR_2` is a lone banded card with an inline ⚠️ (hover for the peer). */
 export const SimilarityCrossList: Story = {
   args: {
     items: crossListItems,

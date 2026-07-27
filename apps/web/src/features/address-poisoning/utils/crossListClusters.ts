@@ -1,24 +1,14 @@
 /**
- * Presentation policy for look-alike clusters rendered across two sublists (e.g. the onboarding
- * "My accounts" / "Owned safe accounts" split): each list visually bands its own cluster members,
- * and a cluster that spans BOTH lists — which a single band can't box — marks each member with an
- * inline ⚠️ pointing at its peers. Pure derivations over `groupIdByAddress` from useSimilarityClusters.
+ * Cluster presentation across two rendered sublists: each list bands its own members; a cluster
+ * spanning both lists can't be boxed, so each member gets an inline ⚠️ pointing at its peers.
  */
 
-/** Anything with an address — keeps this module decoupled from safe-item shapes. */
 type Addressed = { address: string }
 
-/**
- * A row's look-alike peers, grouped by the list they live in. Present only for clusters that span
- * both lists; same-list look-alikes read from their band alone and produce no warning.
- */
+/** A row's cross-list look-alike peers, grouped by list. Only clusters spanning both lists get one. */
 export type SimilarWarning = { trusted: string[]; owned: string[] }
 
-/**
- * Address → cluster id for every look-alike in one list (deduped by address, so a multi-chain safe
- * isn't listed twice). ≥2 members in a list read as one banded group, a lone cross-list member as a
- * single boxed card. The ⚠️ (see buildSimilarWarnings) marks the cross-list case.
- */
+/** Address → cluster id for one list's look-alikes, deduped so a multi-chain safe isn't listed twice. */
 export const bandGroupsForList = (items: Addressed[], groupIdByAddress: Map<string, string>): Map<string, string> => {
   const result = new Map<string, string>()
   for (const address of new Set(items.map((item) => item.address.toLowerCase()))) {
@@ -28,10 +18,7 @@ export const bandGroupsForList = (items: Addressed[], groupIdByAddress: Map<stri
   return result
 }
 
-/**
- * Per-address ⚠️ payload for clusters that span BOTH lists. Each member of such a cluster gets its
- * look-alike peers grouped by list, for the icon's tooltip.
- */
+/** Per-address ⚠️ payload (peers grouped by list) for clusters that span BOTH lists. */
 export const buildSimilarWarnings = (
   trustedItems: Addressed[],
   ownedItems: Addressed[],

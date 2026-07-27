@@ -9,9 +9,8 @@ import useCopyToClipboard from '@/hooks/useCopyToClipboard'
 import type { SimilarWarning } from '@/features/address-poisoning'
 
 /**
- * Full address + inline copy for the warning tooltip. A bare button rather than the shared
- * CopyAddressButton: that one hard-codes a light-surface hover tint (and wraps its own Tooltip), both
- * wrong inside this dark, hover popup. Hover uses `bg-background/15` so it reads on either theme.
+ * Full address + inline copy for the warning tooltip. A bare button, not CopyAddressButton — its
+ * hover tint and nested Tooltip are both wrong inside this dark hover popup.
  */
 const PeerAddress = ({ address }: { address: string }) => {
   const { copied, copy } = useCopyToClipboard()
@@ -31,11 +30,7 @@ const PeerAddress = ({ address }: { address: string }) => {
   )
 }
 
-/**
- * Inline look-alike marker after a name: a ⚠️ whose tooltip lists the account's similar peers grouped
- * by list. Shown only for cross-list clusters (see SimilarWarning); same-list look-alikes read from the
- * band alone, no icon.
- */
+/** Inline ⚠️ after a name, listing cross-list look-alike peers in its tooltip (same-list = band only). */
 export const SimilarityWarningIcon = ({ warning }: { warning: SimilarWarning }) => {
   const sections = (
     [
@@ -45,8 +40,7 @@ export const SimilarityWarningIcon = ({ warning }: { warning: SimilarWarning }) 
   ).filter(([, peers]) => peers.length > 0)
 
   return (
-    // The icon lives inside a selectable/navigable row — swallow the click so interacting with it
-    // (or the tooltip) never toggles selection or navigates.
+    // Swallow the click — the icon sits inside a selectable/navigable row.
     <span className="inline-flex" onClick={(event) => event.stopPropagation()}>
       <Tooltip>
         <TooltipTrigger render={<span className="inline-flex" />}>
@@ -72,9 +66,8 @@ export const SimilarityWarningIcon = ({ warning }: { warning: SimilarWarning }) 
 }
 
 /**
- * Full-width header row that opens an address-poisoning similarity band. The band tint + per-card
- * borders live in the Table sx (keyed off the `data-band-header` / `data-highlighted` attributes)
- * so they compose with the cell-level hover/separator machinery.
+ * Full-width header row opening a similarity band. Tint + card borders live in the Table sx, keyed
+ * off `data-band-header` / `data-highlighted`, so they compose with the hover/separator machinery.
  */
 export const SimilarityBandHeader = ({ colSpan }: { colSpan: number }) => (
   <TableRow data-band-header="">
@@ -102,9 +95,8 @@ export const SimilarityBandHeader = ({ colSpan }: { colSpan: number }) => (
 )
 
 /**
- * The band-opening header for the row at `index`, or null if it doesn't start a new contiguous cluster
- * run. `clusterIdAt` maps a row index → its cluster id (undefined = not in a band). Shared by both the
- * non-reorder body and the reorderable pinned block so the "open a band once per run" rule lives once.
+ * Band header for the row at `index`, or null unless it starts a new contiguous cluster run.
+ * Shared by both table bodies so the "open a band once per run" rule lives once.
  */
 export const bandHeaderAt = (
   index: number,

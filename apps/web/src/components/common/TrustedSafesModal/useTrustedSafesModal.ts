@@ -114,9 +114,7 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     return allSafes?.map((safe) => safe.address) ?? []
   }, [allSafes])
 
-  // Look-alike clustering. `groupIdByAddress` drives the visual band; `flagged` drives the ⚠️ badge,
-  // the poison-confirm gate and Select-All. A trusted/pinned member of a cluster is its "real" anchor —
-  // vetted — so it stays in the band but is excluded from `flagged` (no ⚠️, never prompts confirm).
+  // Pinned cluster members are vetted anchors: they stay in the band but never flag or prompt confirm.
   const { flagged: flaggedAll, groupIdByAddress } = useSimilarityClusters(addresses)
   const pinnedAddresses = useMemo(() => collectPinnedAddresses(addedSafes), [addedSafes])
   const flagged = useMemo(

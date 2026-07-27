@@ -30,9 +30,8 @@ type ReorderableBodyProps = {
   /** Selection mode: fired when a row's checkbox (or the row itself) toggles. */
   onSelectToggle?: (line: AccountLine, nextChecked: boolean) => void
   /**
-   * Fired on drop with ONLY the draggable (non-clustered) addresses in their new relative order.
-   * The parent weaves them back into the persisted order — pinned cluster rows are hoisted for
-   * display only and must keep their stored slots.
+   * Fired on drop with ONLY the draggable (non-clustered) addresses — the parent weaves them into
+   * the persisted order so pinned cluster rows (hoisted for display only) keep their stored slots.
    */
   onReorder: (orderedDraggableAddresses: string[]) => void
   /** Reports a row's lazily-fetched Safe overviews up to the table. */
@@ -102,8 +101,7 @@ const ReorderableBody = ({
       <Droppable droppableId="safe-accounts-reorder">
         {(dropProvided) => (
           <TableBody ref={dropProvided.innerRef} {...dropProvided.droppableProps}>
-            {/* Pinned, non-draggable similarity bands at the top — each cluster reads as one block and
-                can't be split or reordered; only the accounts below it are drag-and-droppable. */}
+            {/* Similarity bands are pinned on top and can't be split; only the rows below drag. */}
             {pinnedGroups.map((group, index) => {
               const { parent } = group
               const isExpanded = group.children.length > 0 && expanded.has(parent.key)
@@ -188,11 +186,9 @@ const ReorderableBody = ({
                         />
                       )
 
-                      // While dragging, dnd pins the row to `position: fixed` in viewport coordinates.
-                      // A transformed ancestor (e.g. the centered modal dialog's translate) would become
-                      // its containing block and shove it sideways, so portal the lifted row to <body>,
-                      // which never carries a transform. The wrapper table restores the table context the
-                      // detached <tr> needs to render its cells at the pinned column widths.
+                      // dnd pins the dragged row with `position: fixed`; a transformed ancestor (the
+                      // centered modal) would become its containing block and shove it sideways, so
+                      // portal it to <body>. The wrapper table keeps the detached <tr> renderable.
                       return snapshot.isDragging
                         ? createPortal(
                             <Table

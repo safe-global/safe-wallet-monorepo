@@ -99,21 +99,11 @@ export type SafeAccountsTableProps = {
   actionsWidth?: string
   /** Replaces the default context-menu actions cell for each row (e.g. an "Add to workspace" button). */
   renderActions?: (line: AccountLine) => ReactNode
-  /**
-   * Lowercased address → its cross-list look-alike peers. Drives the inline ⚠️ + peers tooltip, shown
-   * only where a cluster can't be boxed in one band (spans the two onboarding lists). Same-list
-   * look-alikes read from the band alone and carry no icon.
-   */
+  /** Lowercased address → cross-list look-alike peers; drives the inline ⚠️ + tooltip. */
   similarWarnings?: Map<string, SimilarWarning>
-  /**
-   * Lowercased address → similarity-cluster id. When set, contiguous rows sharing a cluster id are
-   * rendered inside an "Address poisoning warning" band (tinted rows + a header).
-   */
+  /** Lowercased address → cluster id; contiguous same-cluster rows render inside a warning band. */
   similarityGroups?: Map<string, string>
-  /**
-   * Lowercased addresses that lead their band (the vetted/pinned "real" member). Ordering-only — a
-   * band opens at its anchor's slot with the anchor first; absent means the first sorted member leads.
-   */
+  /** Lowercased vetted/pinned addresses — ordering-only: a band opens at its anchor's slot, anchor first. */
   anchorAddresses?: Set<string>
   /** Enables a leading checkbox column and makes rows selectable. */
   selection?: SafeAccountsSelection
@@ -245,9 +235,8 @@ const SafeAccountsTable = ({
     [sortedGroups, similarityGroups, anchorAddresses],
   )
 
-  // A drop reports only the draggable (non-clustered) rows' new order. Weave it back into the
-  // stored order so clustered rows keep their persisted slots — their pin-to-top is display-only
-  // and must not rewrite the user's manual arrangement (it would outlive the cluster).
+  // Weave the dropped (non-clustered) rows into the stored order: the clusters' pin-to-top is
+  // display-only and must not rewrite the user's manual arrangement (it would outlive the cluster).
   const handleReorder = useCallback(
     (reorderedDraggable: string[]) => {
       const storedOrder = sortedGroups.map((group) => group.parent.address)

@@ -1,11 +1,8 @@
 import type { AccountGroup } from './useSafeAccountRows'
 
 /**
- * Pulls each similarity cluster's members together so they render as one contiguous band. The whole
- * cluster is placed at its LEAD's sorted position — the lead is the anchor (a vetted/pinned member in
- * `anchorAddresses`) if present, otherwise the first member in sort order. Within the band the
- * anchor(s) lead, then the look-alikes keep their sorted order. Non-clustered groups stay in place.
- * No-op when `similarityGroups` is empty.
+ * Pulls each cluster's members contiguous, placed at their lead's sorted slot (lead = anchor if any,
+ * else first member; anchors go first inside the band). Non-clustered groups stay in place.
  */
 export const orderGroupsBySimilarity = (
   groups: AccountGroup[],

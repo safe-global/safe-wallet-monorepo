@@ -409,9 +409,7 @@ const SafeAccountTableRow = ({
       data-disabled={checkbox?.disabledReason ? '' : undefined}
       // Draws the row separator (via the Table sx override); false only at the last row of a group/list.
       data-divider={showDivider ? '' : undefined}
-      // Marks a member of an address-poisoning similarity band. Every member (incl. the trusted anchor)
-      // renders as its own rounded yellow-bordered card on the band; styling lives in the Table sx, keyed
-      // off this attribute so it composes with the cell-level hover/separator machinery.
+      // Band membership marker — the card styling lives in the Table sx, keyed off this attribute.
       data-highlighted={highlighted && !isDragging ? '' : undefined}
       // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover.
       className="group/row"
