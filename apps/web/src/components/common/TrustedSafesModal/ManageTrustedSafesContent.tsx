@@ -16,6 +16,7 @@ import {
   OrderByOption,
   selectOrderByPreference,
   setManualOrder,
+  setOrderByPreference,
   TRUSTED_ORDER_SCOPE,
 } from '@/store/orderByPreferenceSlice'
 import SecurityBanner from './SecurityBanner'
@@ -87,10 +88,11 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
     }
   }, [])
 
-  // Reordering shares the trusted list's Manual order (same scope as the workspace accounts list).
-  // Suppressed while searching: a drop then would persist only the filtered subset, dropping the
-  // hidden addresses from the saved order.
-  const canReorder = orderBy === OrderByOption.MANUAL && !searchQuery
+  // Reordering shares the trusted list's Manual order (same scope as the workspace accounts list)
+  // and is offered in every sort mode — dragging switches the mode to Manual. Suppressed while
+  // searching: a drop then would persist only the filtered subset, dropping the hidden addresses
+  // from the saved order.
+  const canReorder = !searchQuery
 
   const pendingItem = pendingConfirmation
     ? availableItems.find((s) => s.address.toLowerCase() === pendingConfirmation)
@@ -188,7 +190,14 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
               }}
               reorder={
                 canReorder
-                  ? { onReorder: (order) => dispatch(setManualOrder({ scope: TRUSTED_ORDER_SCOPE, order })) }
+                  ? {
+                      onReorder: (order) => {
+                        dispatch(setManualOrder({ scope: TRUSTED_ORDER_SCOPE, order }))
+                        if (orderBy !== OrderByOption.MANUAL) {
+                          dispatch(setOrderByPreference({ orderBy: OrderByOption.MANUAL }))
+                        }
+                      },
+                    }
                   : undefined
               }
             />

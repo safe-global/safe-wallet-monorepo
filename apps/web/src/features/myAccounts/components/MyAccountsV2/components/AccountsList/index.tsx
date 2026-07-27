@@ -8,6 +8,7 @@ import {
   OrderByOption,
   selectOrderByPreference,
   setManualOrder,
+  setOrderByPreference,
   TRUSTED_ORDER_SCOPE,
 } from '@/store/orderByPreferenceSlice'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
@@ -100,11 +101,14 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
             items={pinnedSafes}
             onLinkClick={onLinkClick}
             sortableColumns={orderBy === OrderByOption.NAME}
-            reorder={
-              isManualOrder
-                ? { onReorder: (order) => dispatch(setManualOrder({ scope: TRUSTED_ORDER_SCOPE, order })) }
-                : undefined
-            }
+            // Always reorderable: dragging saves the displayed order and switches the sort mode to
+            // Manual, which then owns the order.
+            reorder={{
+              onReorder: (order) => {
+                dispatch(setManualOrder({ scope: TRUSTED_ORDER_SCOPE, order }))
+                if (!isManualOrder) dispatch(setOrderByPreference({ orderBy: OrderByOption.MANUAL }))
+              },
+            }}
           />
         </section>
       )}

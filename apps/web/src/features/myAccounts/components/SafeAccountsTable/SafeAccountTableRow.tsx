@@ -163,19 +163,16 @@ const NameCell = ({
   return content
 }
 
-// Absolutely positioned so entering sort mode never shifts the row content — hidden until the row is
-// hovered/focused, or while it's dragging. Two placements, both reserving no layout space:
-//  • gutter (default): floats in the empty gutter left of the table, used by the page lists where the
-//    Name cell leads and there's room outside the table.
+// Always-visible grip, absolutely positioned so it reserves no layout space. Two placements:
+//  • default: inside the Name cell's left padding (the cell widens via `pl` while reordering, shifting
+//    the avatar right to make room — see the RowCell sx), used by the page lists.
 //  • inline: sits in the leading checkbox cell's own left padding (selection surfaces like the Manage
-//    list, whose table is inside a horizontally-clipping scroll container with no outer gutter).
+//    list, whose table is inside a horizontally-clipping scroll container).
 const ReorderHandle = ({
   dragHandleProps,
-  isDragging,
   inline,
 }: {
   dragHandleProps?: DraggableProvidedDragHandleProps | null
-  isDragging?: boolean
   inline?: boolean
 }) => (
   <span
@@ -183,9 +180,8 @@ const ReorderHandle = ({
     data-testid="account-drag-handle"
     aria-label="Drag to reorder"
     className={cn(
-      'text-muted-foreground hover:text-foreground absolute inset-y-0 flex cursor-grab items-center justify-center transition-opacity active:cursor-grabbing',
-      inline ? 'left-0 w-4' : '-left-8 w-8',
-      isDragging ? 'opacity-100' : 'opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100',
+      'text-muted-foreground hover:text-foreground absolute inset-y-0 flex cursor-grab items-center justify-center active:cursor-grabbing',
+      inline ? 'left-0 w-4' : 'left-0 w-7',
     )}
   >
     <GripVertical className="size-4" />
@@ -294,7 +290,6 @@ const RowCell = ({
   onSelectToggle,
   renderActions,
   dragHandleProps,
-  isDragging,
 }: {
   column: SafeAccountColumn
   line: AccountLine
@@ -305,7 +300,6 @@ const RowCell = ({
   onSelectToggle?: (next: boolean) => void
   renderActions?: (line: AccountLine) => ReactNode
   dragHandleProps?: DraggableProvidedDragHandleProps | null
-  isDragging?: boolean
 }) => {
   // The draggable parent's first cell hosts the (absolutely-positioned) grip — the Name cell normally,
   // or the leading checkbox cell in selection mode, so the grip sits left of the checkbox instead of
@@ -323,16 +317,19 @@ const RowCell = ({
         // Slimmer than MUI's default 16px so the fixed column budget matches the design.
         px: 1,
         // Horizontal inset for the hover pill on the outer cells (vertical inset + background-clip are set
-        // at the Table level, where they can beat the theme's cell-border override).
-        '&:first-of-type': { pl: 2, borderLeft: '4px solid transparent' },
+        // at the Table level, where they can beat the theme's cell-border override). When the Name cell
+        // hosts the reorder grip, the extra padding makes room so the grip sits
+        // left of the avatar instead of over it.
+        '&:first-of-type': {
+          pl: hostsHandle && column.id !== 'select' ? 3.5 : 2,
+          borderLeft: '4px solid transparent',
+        },
         '&:last-of-type': { pr: 2, borderRight: '4px solid transparent' },
         ...(reorderable && column.width ? { width: column.width, minWidth: column.width, maxWidth: column.width } : {}),
       }}
       onClick={column.id === 'actions' || column.id === 'select' ? (e) => e.stopPropagation() : undefined}
     >
-      {hostsHandle && (
-        <ReorderHandle dragHandleProps={dragHandleProps} isDragging={isDragging} inline={column.id === 'select'} />
-      )}
+      {hostsHandle && <ReorderHandle dragHandleProps={dragHandleProps} inline={column.id === 'select'} />}
       {column.id === 'select' ? (
         <SelectCell checkbox={checkbox} onSelectToggle={onSelectToggle} />
       ) : column.id === 'name' ? (
@@ -449,7 +446,6 @@ const SafeAccountTableRow = ({
           onSelectToggle={onSelectToggle}
           renderActions={renderActions}
           dragHandleProps={dragHandleProps}
-          isDragging={isDragging}
         />
       ))}
     </TableRow>

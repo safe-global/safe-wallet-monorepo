@@ -10,6 +10,7 @@ import {
   OrderByOption,
   selectOrderByPreference,
   setManualOrder,
+  setOrderByPreference,
 } from '@/store/orderByPreferenceSlice'
 import {
   type AllSafeItems,
@@ -142,8 +143,13 @@ const SpaceSafeAccounts = () => {
               line.variant === 'child' ? null : <SpaceSafeContextMenu safeItem={line.source} />
             }
             reorder={
-              isManualOrder && !debouncedSearchQuery && orderScope
-                ? { onReorder: (order) => dispatch(setManualOrder({ scope: orderScope, order })) }
+              !debouncedSearchQuery && orderScope
+                ? {
+                    onReorder: (order) => {
+                      dispatch(setManualOrder({ scope: orderScope, order }))
+                      if (!isManualOrder) dispatch(setOrderByPreference({ orderBy: OrderByOption.MANUAL }))
+                    },
+                  }
                 : undefined
             }
           />

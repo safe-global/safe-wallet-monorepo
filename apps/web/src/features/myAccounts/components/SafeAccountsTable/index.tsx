@@ -194,10 +194,6 @@ const SafeAccountsTable = ({
   const canRename = allowRenameInDialog || !selection
   const onRename = canRename ? (line: AccountLine) => setRenameTarget(toRenameTarget(line)) : undefined
 
-  // While reordering, the incoming (manual) order is authoritative: column-header sorting is
-  // suppressed and multi-chain groups collapse so each row is a single draggable account.
-  const reorderActive = Boolean(reorder)
-
   const visibleColumns = useMemo(() => {
     const base = columns ? SAFE_ACCOUNT_COLUMNS.filter((c) => columns.includes(c.id)) : SAFE_ACCOUNT_COLUMNS
     const withActions = actionsWidth ? base.map((c) => (c.id === 'actions' ? { ...c, width: actionsWidth } : c)) : base
@@ -213,10 +209,10 @@ const SafeAccountsTable = ({
   )
 
   const sortedGroups = useMemo(() => {
-    if (reorderActive || !sortableColumns || !sort.orderBy) return groups
+    if (!sortableColumns || !sort.orderBy) return groups
     const orderBy = sort.orderBy
     return [...groups].sort((a, b) => compareGroups(a, b, orderBy, sort.order))
-  }, [groups, sort, reorderActive, sortableColumns])
+  }, [groups, sort, sortableColumns])
 
   // When an external sort-mode control takes over ordering (Last visited / Manual), clear any active
   // column sort so a stale header arrow and order don't linger if column sorting re-enables.
@@ -255,9 +251,7 @@ const SafeAccountsTable = ({
             ? { width: '100%', overflowX: 'visible' }
             : {
                 width: '100%',
-                // Reorder mode floats the drag grip in the left gutter, outside the card — clipping it
-                // would hide the handle, so drop the horizontal scroll container while reordering.
-                overflowX: reorderActive ? 'visible' : 'auto',
+                overflowX: 'auto',
                 borderRadius: '16px',
                 backgroundColor: 'background.paper',
                 border: '1px solid',
@@ -336,7 +330,7 @@ const SafeAccountsTable = ({
                     )}
                     sx={{ ...headerSx, width: column.width, textAlign: column.align ?? 'left' }}
                   >
-                    {column.sortable && column.sortKey && !reorderActive && sortableColumns ? (
+                    {column.sortable && column.sortKey && sortableColumns ? (
                       <TableSortLabel
                         active={sort.orderBy === column.sortKey}
                         direction={sort.orderBy === column.sortKey ? sort.order : 'asc'}

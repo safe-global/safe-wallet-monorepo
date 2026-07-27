@@ -2,7 +2,7 @@ import type { MouseEvent } from 'react'
 import { useState, type ReactElement } from 'react'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import IconButton from '@mui/material/IconButton'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
+import { EllipsisVertical } from 'lucide-react'
 import MenuItem from '@mui/material/MenuItem'
 import ListItemText from '@mui/material/ListItemText'
 
@@ -105,8 +105,14 @@ const SafeListContextMenu = ({
 
   return (
     <>
-      <IconButton data-testid="safe-options-btn" edge="end" size="small" onClick={handleOpenContextMenu}>
-        <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
+      <IconButton
+        data-testid="safe-options-btn"
+        edge="end"
+        size="small"
+        onClick={handleOpenContextMenu}
+        sx={{ color: 'var(--muted-foreground, #737373)' }}
+      >
+        <EllipsisVertical size={20} />
       </IconButton>
       <ContextMenu
         anchorEl={anchorEl}
