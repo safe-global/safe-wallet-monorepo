@@ -230,7 +230,7 @@ const CellContent = ({ column, line }: { column: SafeAccountColumn; line: Accoun
       return (
         <span className="bg-muted inline-flex items-center rounded-full p-0.5">
           {line.networks ? (
-            <BaseAccountItem.ChainBadge safes={line.networks} plain />
+            <BaseAccountItem.ChainBadge safes={line.networks} />
           ) : (
             <BaseAccountItem.ChainBadge chainId={line.chainId} />
           )}
