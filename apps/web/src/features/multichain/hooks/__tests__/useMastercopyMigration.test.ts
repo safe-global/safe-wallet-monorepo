@@ -43,7 +43,7 @@ type Safe = {
   implementationVersionState: ImplementationVersionState
   version: string
   chainId: string
-  implementation: { value: string }
+  implementation?: { value: string }
 }
 
 const setup = (
@@ -178,6 +178,22 @@ describe('useMastercopyMigration', () => {
       [],
       { result: { isMatch: false }, isLoading: false },
     )
+
+    const { result } = renderHook(() => useMastercopyMigration())
+
+    expect(result.current).toMatchObject({
+      action: 'cli',
+      isOfficialDeployer: false,
+    })
+  })
+
+  it('does not crash when the Safe has no implementation', () => {
+    setup({
+      implementationVersionState: ImplementationVersionState.UNKNOWN,
+      version: '1.3.0',
+      chainId: '1',
+      implementation: undefined,
+    })
 
     const { result } = renderHook(() => useMastercopyMigration())
 

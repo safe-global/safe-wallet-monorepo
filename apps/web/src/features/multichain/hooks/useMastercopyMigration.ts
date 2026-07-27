@@ -38,8 +38,8 @@ export const useMastercopyMigration = (): MastercopyMigration => {
   const bytecodeComparison = useBytecodeComparison()
 
   const safeMasterCopy = useMemo(
-    () => masterCopies?.find((mc) => sameAddress(mc.address, safe.implementation.value)),
-    [masterCopies, safe.implementation.value],
+    () => masterCopies?.find((mc) => sameAddress(mc.address, safe.implementation?.value)),
+    [masterCopies, safe.implementation?.value],
   )
 
   return useMemo(() => {
