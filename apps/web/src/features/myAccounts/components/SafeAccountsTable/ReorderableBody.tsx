@@ -8,13 +8,14 @@ import { reorderByKey } from '@/utils/reorder'
 import type { SafeAccountColumn } from './columns'
 import type { AccountGroup, AccountLine } from './useSafeAccountRows'
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
-import { bandHeaderAt } from './SimilarityBand'
+import { bandHeaderAt, type SimilarWarning } from './SimilarityBand'
 
 type ReorderableBodyProps = {
   /** Top-level accounts in their current display order — each renders as one draggable row. */
   groups: AccountGroup[]
   columns: SafeAccountColumn[]
-  flaggedAddresses?: Set<string>
+  /** Lowercased address → cross-list look-alike peers; drives the inline ⚠️ + tooltip. */
+  similarWarnings?: Map<string, SimilarWarning>
   /** Lowercased address → cluster id; contiguous same-cluster rows render inside a warning band. */
   similarityGroups?: Map<string, string>
   /** Parent keys of the multi-chain groups whose per-chain children are currently shown. */
@@ -51,7 +52,7 @@ export const toggleExpanded = (set: Set<string>, key: string): Set<string> => {
 const ReorderableBody = ({
   groups,
   columns,
-  flaggedAddresses,
+  similarWarnings,
   similarityGroups,
   expanded,
   setExpanded,
@@ -115,7 +116,7 @@ const ReorderableBody = ({
                   <SafeAccountTableRow
                     line={parent}
                     columns={columns}
-                    isFlagged={flaggedAddresses?.has(parent.address.toLowerCase())}
+                    warning={similarWarnings?.get(parent.address.toLowerCase())}
                     highlighted
                     expanded={parent.expandable ? isExpanded : undefined}
                     onToggle={
@@ -135,7 +136,7 @@ const ReorderableBody = ({
                         key={child.key}
                         line={child}
                         columns={columns}
-                        isFlagged={flaggedAddresses?.has(child.address.toLowerCase())}
+                        warning={similarWarnings?.get(child.address.toLowerCase())}
                         highlighted
                         renderActions={renderActions}
                         onLinkClick={onLinkClick}
@@ -162,7 +163,7 @@ const ReorderableBody = ({
                         <SafeAccountTableRow
                           line={parent}
                           columns={columns}
-                          isFlagged={flaggedAddresses?.has(parent.address.toLowerCase())}
+                          warning={similarWarnings?.get(parent.address.toLowerCase())}
                           expanded={parent.expandable ? isExpanded : undefined}
                           onToggle={
                             parent.expandable
@@ -212,7 +213,7 @@ const ReorderableBody = ({
                         key={child.key}
                         line={child}
                         columns={columns}
-                        isFlagged={flaggedAddresses?.has(child.address.toLowerCase())}
+                        warning={similarWarnings?.get(child.address.toLowerCase())}
                         renderActions={renderActions}
                         onLinkClick={onLinkClick}
                         checkbox={getCheckbox?.(group, child)}

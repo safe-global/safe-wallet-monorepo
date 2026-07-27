@@ -9,20 +9,20 @@ jest.mock('@/features/myAccounts', () => ({
   __esModule: true,
   SafeAccountsTable: ({
     items,
-    flaggedAddresses,
+    similarWarnings,
     similarityGroups,
     selection,
     'data-testid': testId,
   }: {
     items: Array<{ address: string }>
-    flaggedAddresses?: Set<string>
+    similarWarnings?: Map<string, unknown>
     similarityGroups?: Map<string, string>
     selection?: { isAtLimit?: boolean }
     'data-testid'?: string
   }) => (
     <div
       data-testid={testId}
-      data-flagged={[...(flaggedAddresses ?? [])].join(',')}
+      data-warnings={[...(similarWarnings ?? new Map())].map(([address]) => address).join(',')}
       data-groups={[...(similarityGroups ?? new Map())].map(([address, group]) => `${address}:${group}`).join(',')}
       data-at-limit={String(Boolean(selection?.isAtLimit))}
     >
@@ -47,6 +47,7 @@ const baseProps = {
   flaggedAddresses: new Set<string>(),
   trustedSimilarityGroups: new Map<string, string>(),
   ownedSimilarityGroups: new Map<string, string>(),
+  similarWarnings: new Map<string, { trusted: string[]; owned: string[] }>(),
   selectedKeys: new Set<string>(),
   onToggle: noop,
   isAtLimit: false,
@@ -82,18 +83,22 @@ describe('OnboardingSafesList', () => {
     expect(getByTestId('onboarding-owned-table')).toHaveTextContent('0xOwned')
   })
 
-  it('passes the flag set to both the trusted and owned tables', () => {
+  it('passes the cross-list warnings to both the trusted and owned tables', () => {
+    const warnings = new Map([
+      ['0xtrusted', { trusted: [], owned: ['0xowned'] }],
+      ['0xowned', { trusted: ['0xtrusted'], owned: [] }],
+    ])
     const { getByTestId } = render(
       <OnboardingSafesList
         trustedSafes={[buildSafeItem('0xTrusted')]}
         ownedSafes={[buildSafeItem('0xOwned')]}
         {...baseProps}
-        flaggedAddresses={new Set(['0xtrusted', '0xowned'])}
+        similarWarnings={warnings}
       />,
     )
 
-    expect(getByTestId('onboarding-trusted-table').dataset.flagged).toBe('0xtrusted,0xowned')
-    expect(getByTestId('onboarding-owned-table').dataset.flagged).toBe('0xtrusted,0xowned')
+    expect(getByTestId('onboarding-trusted-table').dataset.warnings).toBe('0xtrusted,0xowned')
+    expect(getByTestId('onboarding-owned-table').dataset.warnings).toBe('0xtrusted,0xowned')
   })
 
   it('shows a single security banner above the sections when any row is flagged', () => {

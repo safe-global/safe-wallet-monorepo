@@ -21,7 +21,7 @@ import {
 } from './useSafeAccountRows'
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
 import ReorderableBody, { toggleExpanded } from './ReorderableBody'
-import { bandHeaderAt } from './SimilarityBand'
+import { bandHeaderAt, type SimilarWarning } from './SimilarityBand'
 import { bodyRowSx } from './tableStyles'
 import EntryDialog from '@/components/address-book/EntryDialog'
 
@@ -96,15 +96,22 @@ export type SafeAccountsTableProps = {
   actionsWidth?: string
   /** Replaces the default context-menu actions cell for each row (e.g. an "Add to workspace" button). */
   renderActions?: (line: AccountLine) => ReactNode
-  /** Lowercased addresses to flag with an inline look-alike ⚠️ (address-poisoning defence). */
-  flaggedAddresses?: Set<string>
+  /**
+   * Lowercased address → its cross-list look-alike peers. Drives the inline ⚠️ + peers tooltip, shown
+   * only where a cluster can't be boxed in one band (spans the two onboarding lists). Same-list
+   * look-alikes read from the band alone and carry no icon.
+   */
+  similarWarnings?: Map<string, SimilarWarning>
   /**
    * Lowercased address → similarity-cluster id. When set, contiguous rows sharing a cluster id are
-   * rendered inside an "Address poisoning warning" band (tinted rows + a header). Pairs with
-   * flaggedAddresses, which still drives the per-row ⚠️ (so a trusted anchor can sit in the band
-   * without a ⚠️). Grouping is applied in the non-reorder body only for now.
+   * rendered inside an "Address poisoning warning" band (tinted rows + a header).
    */
   similarityGroups?: Map<string, string>
+  /**
+   * Lowercased addresses that lead their band (the vetted/pinned "real" member). Ordering-only — a
+   * band opens at its anchor's slot with the anchor first; absent means the first sorted member leads.
+   */
+  anchorAddresses?: Set<string>
   /** Enables a leading checkbox column and makes rows selectable. */
   selection?: SafeAccountsSelection
   /**
@@ -155,20 +162,20 @@ const headerSx = {
 /** Full-width header row that opens an address-poisoning similarity band (tint lives in the Table sx). */
 /**
  * Pulls each similarity cluster's members together so they render as one contiguous band. The whole
- * cluster is placed at its LEAD's sorted position — the lead is the anchor (a member that's in a
- * cluster but NOT flagged, i.e. already trusted) if present, otherwise the first member in sort order.
- * Within the band the anchor(s) lead, then the look-alikes keep their sorted order. Non-clustered
- * groups stay in place. No-op when `similarityGroups` is empty.
+ * cluster is placed at its LEAD's sorted position — the lead is the anchor (a vetted/pinned member in
+ * `anchorAddresses`) if present, otherwise the first member in sort order. Within the band the
+ * anchor(s) lead, then the look-alikes keep their sorted order. Non-clustered groups stay in place.
+ * No-op when `similarityGroups` is empty.
  */
 export const orderGroupsBySimilarity = (
   groups: AccountGroup[],
   similarityGroups?: Map<string, string>,
-  flaggedAddresses?: Set<string>,
+  anchorAddresses?: Set<string>,
 ): AccountGroup[] => {
   if (!similarityGroups || similarityGroups.size === 0) return groups
 
   const clusterOf = (group: AccountGroup) => similarityGroups.get(group.parent.address.toLowerCase())
-  const isAnchor = (group: AccountGroup) => !flaggedAddresses?.has(group.parent.address.toLowerCase())
+  const isAnchor = (group: AccountGroup) => Boolean(anchorAddresses?.has(group.parent.address.toLowerCase()))
 
   const membersByCluster = new Map<string, AccountGroup[]>()
   const leadByCluster = new Map<string, AccountGroup>()
@@ -203,8 +210,9 @@ const SafeAccountsTable = ({
   columns,
   actionsWidth,
   renderActions,
-  flaggedAddresses,
+  similarWarnings,
   similarityGroups,
+  anchorAddresses,
   selection,
   allowRenameInDialog = false,
   reorder,
@@ -276,8 +284,8 @@ const SafeAccountsTable = ({
 
   // Pull similarity clusters together (non-reorder body) so each renders as one contiguous band.
   const displayGroups = useMemo(
-    () => orderGroupsBySimilarity(sortedGroups, similarityGroups, flaggedAddresses),
-    [sortedGroups, similarityGroups, flaggedAddresses],
+    () => orderGroupsBySimilarity(sortedGroups, similarityGroups, anchorAddresses),
+    [sortedGroups, similarityGroups, anchorAddresses],
   )
 
   const lines = useMemo<Array<{ line: AccountLine; groupKey: string; group: AccountGroup }>>(() => {
@@ -378,7 +386,7 @@ const SafeAccountsTable = ({
             <ReorderableBody
               groups={displayGroups}
               columns={visibleColumns}
-              flaggedAddresses={flaggedAddresses}
+              similarWarnings={similarWarnings}
               similarityGroups={similarityGroups}
               expanded={expanded}
               setExpanded={setExpanded}
@@ -406,7 +414,7 @@ const SafeAccountsTable = ({
                     line={line}
                     columns={visibleColumns}
                     expanded={line.expandable ? expanded.has(groupKey) : undefined}
-                    isFlagged={flaggedAddresses?.has(line.address.toLowerCase())}
+                    warning={similarWarnings?.get(line.address.toLowerCase())}
                     highlighted={Boolean(clusterId)}
                     renderActions={renderActions}
                     onRename={onRename}

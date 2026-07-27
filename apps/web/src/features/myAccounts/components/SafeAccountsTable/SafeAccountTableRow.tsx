@@ -8,7 +8,8 @@ import { useForkRef } from '@mui/material/utils'
 import type { SafeItem } from '@/hooks/safes'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useRowOverviews } from './useRowOverviews'
-import { GripVertical, TriangleAlert } from 'lucide-react'
+import { GripVertical } from 'lucide-react'
+import { SimilarityWarningIcon, type SimilarWarning } from './SimilarityBand'
 import Identicon from '@/components/common/Identicon'
 import { SafeInfoDisplay } from '@/components/common/AccountRow'
 import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
@@ -42,8 +43,8 @@ type SafeAccountTableRowProps = {
   expanded?: boolean
   /** Draw a bottom divider — only true at the boundary between top-level accounts, not within a group. */
   showDivider?: boolean
-  /** Flags the row with an inline look-alike ⚠️ after the name (address-poisoning defence). */
-  isFlagged?: boolean
+  /** When set, shows the inline look-alike ⚠️ (with a peers tooltip) after the name — cross-list only. */
+  warning?: SimilarWarning
   /** Tints the row (warning background) as a member of an address-poisoning similarity group. */
   highlighted?: boolean
   /** Replaces the default context-menu actions cell (e.g. an "Add to workspace" button). */
@@ -64,26 +65,17 @@ type SafeAccountTableRowProps = {
   onOverviewsLoaded: (overviews: SafeOverview[]) => void
 }
 
-/** Inline look-alike marker shown right after the name of a flagged (address-poisoning) row. */
-const SimilarityWarningIcon = () => (
-  <TriangleAlert
-    size={14}
-    className="shrink-0 text-yellow-800 dark:text-[var(--color-warning-main)]"
-    aria-label="Possible address poisoning"
-  />
-)
-
 // Shares the dropdown's row identity cell: clip-gated name/address tooltips and copy/explorer icons
 // revealed on row hover. Single/parent rows lead with the blockie identicon; per-chain child rows
 // carry no icon (the chain is already named beside them) — a blank icon-width spacer keeps their name
 // aligned under the parent's. `onRename`, when set, adds the hover rename pencil (non-modal surfaces).
 const NameCellContent = ({
   line,
-  isFlagged,
+  warning,
   onRename,
 }: {
   line: AccountLine
-  isFlagged?: boolean
+  warning?: SimilarWarning
   onRename?: () => void
 }) => {
   const chainConfig = useChain(line.chainId)
@@ -105,7 +97,7 @@ const NameCellContent = ({
       hideAddress={!line.showAddress}
       explorerLink={explorerLink}
       onRename={onRename}
-      nameAdornment={isFlagged ? <SimilarityWarningIcon /> : undefined}
+      nameAdornment={warning ? <SimilarityWarningIcon warning={warning} /> : undefined}
       nameVariant="paragraph-bold"
       className="min-w-0"
     />
@@ -115,7 +107,7 @@ const NameCellContent = ({
 const NameCell = ({
   line,
   expanded,
-  isFlagged,
+  warning,
   disableLink,
   onToggle,
   onLinkClick,
@@ -123,14 +115,14 @@ const NameCell = ({
 }: {
   line: AccountLine
   expanded?: boolean
-  isFlagged?: boolean
+  warning?: SimilarWarning
   /** In selection mode the row itself toggles the checkbox, so the name never navigates. */
   disableLink?: boolean
   onToggle?: () => void
   onLinkClick?: () => void
   onRename?: () => void
 }) => {
-  const content = <NameCellContent line={line} isFlagged={isFlagged} onRename={onRename} />
+  const content = <NameCellContent line={line} warning={warning} onRename={onRename} />
 
   if (line.expandable) {
     return (
@@ -344,7 +336,7 @@ const SafeAccountTableRow = ({
   columns,
   expanded,
   showDivider,
-  isFlagged,
+  warning,
   highlighted,
   renderActions,
   onRename,
@@ -397,7 +389,7 @@ const SafeAccountTableRow = ({
     <NameCell
       line={line}
       expanded={expanded}
-      isFlagged={isFlagged}
+      warning={warning}
       // Per-chain child rows can't be renamed on their own — only the whole safe (single/group).
       onRename={onRename && line.variant !== 'child' ? () => onRename(line) : undefined}
       disableLink={Boolean(checkbox)}

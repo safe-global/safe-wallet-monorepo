@@ -219,7 +219,7 @@ describe('useOnboardingSafes', () => {
       expect(trustedSimilarityGroups.size).toBe(0)
     })
 
-    it('does not band a look-alike pair split across the two lists (per-row ⚠️ only)', () => {
+    it('bands each side of a cross-list pair as a lone card and warns them about each other', () => {
       const trusted = '0x1234567890abcdef1234567890abcdef12345678'
       const owned = '0x123456eeeeeeeeee1234567890abcdef12345678'
       jest.spyOn(allOwnedSafes, 'default').mockReturnValue([{ '1': [owned] }, undefined, false])
@@ -228,10 +228,23 @@ describe('useOnboardingSafes', () => {
         initialReduxState: { addedSafes: { '1': { [trusted]: { owners: [], threshold: 1 } } } },
       })
 
-      // Both flagged, but neither section has ≥2 cluster members → no band on either side.
-      expect(result.current.flaggedAddresses.size).toBeGreaterThanOrEqual(2)
-      expect(result.current.trustedSimilarityGroups.size).toBe(0)
-      expect(result.current.ownedSimilarityGroups.size).toBe(0)
+      // Each list bands its own single member (lone card + title), and the cross-list ⚠️ points across.
+      expect(result.current.trustedSimilarityGroups.get(trusted.toLowerCase())).toBeDefined()
+      expect(result.current.ownedSimilarityGroups.get(owned.toLowerCase())).toBeDefined()
+
+      const { similarWarnings } = result.current
+      expect(similarWarnings.get(trusted.toLowerCase())).toEqual({ trusted: [], owned: [owned.toLowerCase()] })
+      expect(similarWarnings.get(owned.toLowerCase())).toEqual({ trusted: [trusted.toLowerCase()], owned: [] })
+    })
+
+    it('leaves same-list clusters out of similarWarnings (no cross-list ⚠️)', () => {
+      const owned1 = '0x1234567890abcdef1234567890abcdef12345678'
+      const owned2 = '0x123456eeeeeeeeee1234567890abcdef12345678'
+      jest.spyOn(allOwnedSafes, 'default').mockReturnValue([{ '1': [owned1, owned2] }, undefined, false])
+
+      const { result } = renderHook(() => useOnboardingSafes())
+
+      expect(result.current.similarWarnings.size).toBe(0)
     })
   })
 })

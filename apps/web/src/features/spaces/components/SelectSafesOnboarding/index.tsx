@@ -40,6 +40,7 @@ const SelectSafesOnboarding = (): ReactElement => {
     flaggedAddresses,
     trustedSimilarityGroups,
     ownedSimilarityGroups,
+    similarWarnings,
     handleSearch,
     hasNoSafes,
   } = useOnboardingSafes()
@@ -139,6 +140,7 @@ const SelectSafesOnboarding = (): ReactElement => {
                 flaggedAddresses={flaggedAddresses}
                 trustedSimilarityGroups={trustedSimilarityGroups}
                 ownedSimilarityGroups={ownedSimilarityGroups}
+                similarWarnings={similarWarnings}
                 selectedKeys={selectedKeys}
                 onToggle={handleToggle}
                 isAtLimit={isAtLimit}

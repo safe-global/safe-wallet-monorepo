@@ -92,6 +92,7 @@ const mockModal: UseTrustedSafesModalReturn = {
   similarAddressesForSelectAll: [],
   flagged: new Set<string>(),
   similarityGroups: new Map<string, string>(),
+  anchorAddresses: new Set<string>(),
   searchQuery: '',
   isLoading: false,
   hasChanges: false,

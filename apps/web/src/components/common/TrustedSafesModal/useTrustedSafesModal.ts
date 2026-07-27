@@ -62,10 +62,12 @@ export interface UseTrustedSafesModalReturn {
   pendingSelectAllConfirmation: boolean
   /** Addresses flagged as similar that would be selected by "Select All" */
   similarAddressesForSelectAll: SelectableItem[]
-  /** Look-alike addresses over the FULL list (not just the filtered view), shared by badge and confirm-gate. */
+  /** Look-alike addresses over the FULL list, driving the poison-confirm gate and Select-All. */
   flagged: Set<string>
   /** Lowercased address → similarity-cluster id, for rendering the "Address poisoning warning" band. */
   similarityGroups: Map<string, string>
+  /** Pinned (vetted) addresses — lead their band as the "real" anchor. */
+  anchorAddresses: Set<string>
   /** Current search query */
   searchQuery: string
   /** Whether safes are loading */
@@ -392,6 +394,7 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     similarAddressesForSelectAll,
     flagged,
     similarityGroups: groupIdByAddress,
+    anchorAddresses: pinnedAddresses,
     searchQuery,
     isLoading: !allSafes || !allMultiChainSafes || !allSingleSafes,
     hasChanges,

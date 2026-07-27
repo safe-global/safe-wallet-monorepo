@@ -144,7 +144,7 @@ const AddAccounts = ({
   ])
 
   const trustedSafeAddresses = useMemo(() => trustedSafes.map((s) => s.address), [trustedSafes])
-  const { flagged: similarAddresses, groupIdByAddress: similarityGroups } = useSimilarityClusters(trustedSafeAddresses)
+  const { groupIdByAddress: similarityGroups } = useSimilarityClusters(trustedSafeAddresses)
 
   const [rawSearchQuery, setRawSearchQuery] = useState('')
   const debouncedSearchQuery = useDebounce(rawSearchQuery, 300)
@@ -483,7 +483,6 @@ const AddAccounts = ({
                       <SafeAccountsTable
                         items={visibleTrusted}
                         columns={PICKER_COLUMNS}
-                        flaggedAddresses={similarAddresses}
                         similarityGroups={similarityGroups}
                         selection={{
                           selectedKeys,

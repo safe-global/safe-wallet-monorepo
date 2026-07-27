@@ -20,28 +20,21 @@ describe('orderGroupsBySimilarity', () => {
       ['0xb', 'g1'],
       ['0xc', 'g1'],
     ])
-    // No anchor (all flagged) → lead = first-seen member (A); the cluster lands at A's slot.
-    const flagged = new Set(['0xa', '0xb', '0xc'])
-    expect(addrs(orderGroupsBySimilarity(groups, similarityGroups, flagged))).toEqual([
-      '0xA',
-      '0xB',
-      '0xC',
-      '0xX',
-      '0xY',
-    ])
+    // No anchor → lead = first-seen member (A); the cluster lands at A's slot.
+    expect(addrs(orderGroupsBySimilarity(groups, similarityGroups))).toEqual(['0xA', '0xB', '0xC', '0xX', '0xY'])
   })
 
-  it('leads a cluster with its anchor (the member NOT flagged) and positions the band at the anchor', () => {
+  it('leads a cluster with its anchor and positions the band at the anchor', () => {
     // Input: X, impostor1(g1), Y, anchor(g1) — anchor appears later but must lead + set the position.
     const groups = [g('0xX'), g('0xIMP1'), g('0xY'), g('0xANCHOR')]
     const similarityGroups = new Map([
       ['0ximp1', 'g1'],
       ['0xanchor', 'g1'],
     ])
-    const flagged = new Set(['0ximp1']) // anchor is NOT flagged
+    const anchorAddresses = new Set(['0xanchor']) // the vetted/pinned member leads
     // Band placed at the anchor's slot (after X, IMP1, Y in sort order the anchor is 4th → its slot),
     // with the anchor first, then the impostor.
-    expect(addrs(orderGroupsBySimilarity(groups, similarityGroups, flagged))).toEqual([
+    expect(addrs(orderGroupsBySimilarity(groups, similarityGroups, anchorAddresses))).toEqual([
       '0xX',
       '0xY',
       '0xANCHOR',
@@ -57,14 +50,7 @@ describe('orderGroupsBySimilarity', () => {
       ['0xb1', 'gB'],
       ['0xb2', 'gB'],
     ])
-    const flagged = new Set(['0xa1', '0xa2', '0xb1', '0xb2'])
-    // gA lead = A1 (first seen); gB lead = B1 (first seen). N stays where it is.
-    expect(addrs(orderGroupsBySimilarity(groups, similarityGroups, flagged))).toEqual([
-      '0xA1',
-      '0xA2',
-      '0xB1',
-      '0xB2',
-      '0xN',
-    ])
+    // No anchors → each cluster leads with its first-seen member. N stays where it is.
+    expect(addrs(orderGroupsBySimilarity(groups, similarityGroups))).toEqual(['0xA1', '0xA2', '0xB1', '0xB2', '0xN'])
   })
 })

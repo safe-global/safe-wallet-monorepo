@@ -1,6 +1,11 @@
 import type { ReactNode } from 'react'
 import { type AllSafeItems } from '@/hooks/safes'
-import { SafeAccountsTable, type AccountLine, type SafeAccountColumnId } from '@/features/myAccounts'
+import {
+  SafeAccountsTable,
+  type AccountLine,
+  type SafeAccountColumnId,
+  type SimilarWarning,
+} from '@/features/myAccounts'
 import SecurityBanner from '@/components/common/TrustedSafesModal/SecurityBanner'
 
 const COLUMNS: SafeAccountColumnId[] = ['name', 'threshold', 'networks', 'balance']
@@ -8,11 +13,13 @@ const COLUMNS: SafeAccountColumnId[] = ['name', 'threshold', 'networks', 'balanc
 interface SafeListProps {
   trustedSafes: AllSafeItems
   ownedSafes: AllSafeItems
-  /** Lowercased addresses flagged as look-alikes (address poisoning) — trusted and owned rows alike. */
+  /** Any look-alike present → shows the top "Verify before you trust" banner. */
   flaggedAddresses: Set<string>
-  /** Address → cluster id for same-list look-alikes in each section (cross-section pairs stay per-row). */
+  /** Address → cluster id per section; each list bands its own members (cross-list singles = one card). */
   trustedSimilarityGroups: Map<string, string>
   ownedSimilarityGroups: Map<string, string>
+  /** Address → cross-list peers; drives the inline ⚠️ + tooltip (only clusters spanning both lists). */
+  similarWarnings: Map<string, SimilarWarning>
   selectedKeys: Set<string>
   onToggle: (line: AccountLine, nextChecked: boolean) => void
   isAtLimit: boolean
@@ -28,6 +35,7 @@ const OnboardingSafesList = ({
   flaggedAddresses,
   trustedSimilarityGroups,
   ownedSimilarityGroups,
+  similarWarnings,
   selectedKeys,
   onToggle,
   isAtLimit,
@@ -44,7 +52,7 @@ const OnboardingSafesList = ({
           <SafeAccountsTable
             items={trustedSafes}
             columns={COLUMNS}
-            flaggedAddresses={flaggedAddresses}
+            similarWarnings={similarWarnings}
             similarityGroups={trustedSimilarityGroups}
             selection={selection}
             data-testid="onboarding-trusted-table"
@@ -58,7 +66,7 @@ const OnboardingSafesList = ({
           <SafeAccountsTable
             items={ownedSafes}
             columns={COLUMNS}
-            flaggedAddresses={flaggedAddresses}
+            similarWarnings={similarWarnings}
             similarityGroups={ownedSimilarityGroups}
             selection={selection}
             data-testid="onboarding-owned-table"

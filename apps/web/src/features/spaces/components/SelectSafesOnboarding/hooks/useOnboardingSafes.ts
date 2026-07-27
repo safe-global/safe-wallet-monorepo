@@ -5,24 +5,54 @@ import useAllSafes, { type SafeItem } from '@/hooks/safes/useAllSafes'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { useSimilarityClusters } from '@/features/address-poisoning'
+import type { SimilarWarning } from '@/features/myAccounts'
 
 /**
- * Address → cluster id for the look-alikes that share ONE list, so they can be boxed together. A
- * cluster is kept only where ≥2 of its members (counted by distinct address, so a multi-chain safe
- * isn't double-counted) live in the same section; cross-section clusters are dropped here and rely on
- * the per-row ⚠️ instead.
+ * Address → cluster id for every look-alike in one list (deduped by address, so a multi-chain safe
+ * isn't listed twice). Each list bands its own members: ≥2 in a list read as one group, a lone
+ * cross-list member as a single boxed card. The ⚠️ (see buildSimilarWarnings) marks the cross-list case.
  */
-const groupsWithinList = (items: SafeItem[], groupIdByAddress: Map<string, string>): Map<string, string> => {
-  const addresses = [...new Set(items.map((item) => item.address.toLowerCase()))]
-  const countByGroup = new Map<string, number>()
-  for (const address of addresses) {
-    const group = groupIdByAddress.get(address)
-    if (group) countByGroup.set(group, (countByGroup.get(group) ?? 0) + 1)
-  }
+const bandGroupsForList = (items: SafeItem[], groupIdByAddress: Map<string, string>): Map<string, string> => {
   const result = new Map<string, string>()
-  for (const address of addresses) {
+  for (const address of new Set(items.map((item) => item.address.toLowerCase()))) {
     const group = groupIdByAddress.get(address)
-    if (group && (countByGroup.get(group) ?? 0) >= 2) result.set(address, group)
+    if (group) result.set(address, group)
+  }
+  return result
+}
+
+/**
+ * Per-address ⚠️ payload for clusters that span BOTH lists — the case a single band can't box. Each
+ * member of such a cluster gets its look-alike peers grouped by list, for the icon's tooltip. Clusters
+ * living entirely in one list are boxed by their band and produce no warning here.
+ */
+const buildSimilarWarnings = (
+  trustedItems: SafeItem[],
+  ownedItems: SafeItem[],
+  groupIdByAddress: Map<string, string>,
+): Map<string, SimilarWarning> => {
+  const trustedSet = new Set(trustedItems.map((item) => item.address.toLowerCase()))
+  const ownedSet = new Set(ownedItems.map((item) => item.address.toLowerCase()))
+
+  const byCluster = new Map<string, { trusted: string[]; owned: string[] }>()
+  for (const address of new Set([...trustedSet, ...ownedSet])) {
+    const group = groupIdByAddress.get(address)
+    if (!group) continue
+    const entry = byCluster.get(group) ?? { trusted: [], owned: [] }
+    ;(trustedSet.has(address) ? entry.trusted : entry.owned).push(address)
+    byCluster.set(group, entry)
+  }
+
+  const result = new Map<string, SimilarWarning>()
+  for (const { trusted, owned } of byCluster.values()) {
+    // Cross-list only: the cluster must reach into both sections.
+    if (trusted.length === 0 || owned.length === 0) continue
+    for (const address of [...trusted, ...owned]) {
+      result.set(address, {
+        trusted: trusted.filter((peer) => peer !== address),
+        owned: owned.filter((peer) => peer !== address),
+      })
+    }
   }
   return result
 }
@@ -49,20 +79,25 @@ const useOnboardingSafes = () => {
     }
   }, [allSafes])
 
-  // Flag against the full pool so a look-alike in EITHER list warns — including a pinned/trusted
-  // impostor (WA-2912). No owned-only filter and no anchor exemption in onboarding.
+  // Cluster against the full pool so a look-alike in EITHER list is caught — including a pinned/trusted
+  // impostor (WA-2912). `flaggedAddresses` (all similar) still gates the select-confirm dialog.
   const combinedAddresses = useMemo(() => (allSafes ?? []).map((s) => s.address), [allSafes])
   const { flagged: flaggedAddresses, groupIdByAddress } = useSimilarityClusters(combinedAddresses)
 
-  // Trusted and owned each band their own same-list clusters; a cluster split across the two sections
-  // can't be boxed, so its members fall back to the per-row ⚠️ that flaggedAddresses already provides.
+  // Each list bands all of its own cluster members (≥2 → a group, a lone cross-list member → one card).
   const trustedSimilarityGroups = useMemo(
-    () => groupsWithinList(trustedSafeItems, groupIdByAddress),
+    () => bandGroupsForList(trustedSafeItems, groupIdByAddress),
     [trustedSafeItems, groupIdByAddress],
   )
   const ownedSimilarityGroups = useMemo(
-    () => groupsWithinList(ownedSafeItems, groupIdByAddress),
+    () => bandGroupsForList(ownedSafeItems, groupIdByAddress),
     [ownedSafeItems, groupIdByAddress],
+  )
+
+  // ⚠️ only where a cluster spans both lists (can't be boxed) — its members point at each other via tooltip.
+  const similarWarnings = useMemo(
+    () => buildSimilarWarnings(trustedSafeItems, ownedSafeItems, groupIdByAddress),
+    [trustedSafeItems, ownedSafeItems, groupIdByAddress],
   )
 
   // Group into multi-chain / single-chain and sort
@@ -91,6 +126,7 @@ const useOnboardingSafes = () => {
     flaggedAddresses,
     trustedSimilarityGroups,
     ownedSimilarityGroups,
+    similarWarnings,
     handleSearch,
     hasNoSafes,
   }

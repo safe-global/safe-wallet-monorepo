@@ -135,7 +135,6 @@ const SpaceSafeAccounts = () => {
             items={visibleSafes}
             // Inside a workspace every Safe belongs to it, so the Workspaces column adds no information.
             columns={['name', 'threshold', 'networks', 'pending', 'balance', 'actions']}
-            flaggedAddresses={similarAddresses}
             similarityGroups={similarityGroups}
             // Column sorting is only offered in Name mode; Last visited / Manual own the order.
             sortableColumns={orderBy === OrderByOption.NAME}
