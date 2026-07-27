@@ -145,7 +145,7 @@ const headerSx = {
   // `&&` outranks the theme's MuiTableCell-head border-bottom.
   backgroundClip: 'padding-box',
   '&&': { border: '4px solid transparent', borderLeft: 'none', borderRight: 'none' },
-  '&&:first-of-type': { pl: 10.5, borderLeft: '4px solid transparent' },
+  '&&:first-of-type': { pl: 2, borderLeft: '4px solid transparent' },
   '&&:last-of-type': { pr: 2, borderRight: '4px solid transparent' },
 } as const
 
@@ -328,7 +328,15 @@ const SafeAccountsTable = ({
                       index === 0 && 'rounded-l-md',
                       index === visibleColumns.length - 1 && 'rounded-r-md',
                     )}
-                    sx={{ ...headerSx, width: column.width, textAlign: column.align ?? 'left' }}
+                    sx={{
+                      ...headerSx,
+                      width: column.width,
+                      textAlign: column.align ?? 'left',
+                      // Indent the NAME label so it sits above the account name text, not the avatar.
+                      // A leading checkbox column already offsets the cell by 48px, so less is needed.
+                      // `&&&` matches `&&:first-of-type`'s specificity and comes later.
+                      ...(column.id === 'name' ? { '&&&': { pl: selection ? 7.5 : 10.5 } } : {}),
+                    }}
                   >
                     {column.sortable && column.sortKey && sortableColumns ? (
                       <TableSortLabel

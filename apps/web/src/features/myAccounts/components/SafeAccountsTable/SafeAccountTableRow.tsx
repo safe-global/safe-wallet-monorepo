@@ -144,6 +144,9 @@ const NameCell = ({
   }
 
   if (line.href && !disableLink) {
+    // A link can't wrap the content (the explorer <a> is in there — no <a> inside <a>), so it sits
+    // behind it instead. Clicks pass through the content to the link; only the small controls and
+    // the address tooltip still catch the mouse.
     return (
       <div className="relative">
         <NextLink
@@ -153,7 +156,7 @@ const NameCell = ({
           aria-label={line.displayName}
           className="absolute inset-0"
         />
-        <div className="pointer-events-none relative [&_[data-slot=tooltip-trigger]]:pointer-events-auto">
+        <div className="pointer-events-none relative [&_[role=button]]:pointer-events-auto [&_[data-address-tooltip]]:pointer-events-auto [&_a]:pointer-events-auto">
           {content}
         </div>
       </div>
