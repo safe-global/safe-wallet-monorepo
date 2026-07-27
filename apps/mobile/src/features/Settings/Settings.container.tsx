@@ -21,7 +21,7 @@ export const SettingsContainer = () => {
     safeAddress: address,
   })
 
-  const isUnsupportedMasterCopy = isUnsupportedMastercopyMigratable(data)
+  const isUnsupportedMasterCopy = isUnsupportedMastercopyMigratable(data, { recommendedVersion: latestSafeVersion })
 
   const needsUpdate = data.implementationVersionState === 'OUTDATED'
   const isLatestVersion = data.version && !needsUpdate
