@@ -29,8 +29,8 @@ const useOnboardingSafes = () => {
   }, [allSafes])
 
   // Trusted rows are deliberately included — a pinned impostor must still warn (WA-2912).
-  const combinedAddresses = useMemo(() => (allSafes ?? []).map((s) => s.address), [allSafes])
-  const flaggedAddresses = useSimilarityClusters(combinedAddresses).flagged
+  const allSafeAddresses = useMemo(() => (allSafes ?? []).map((s) => s.address), [allSafes])
+  const flaggedAddresses = useSimilarityClusters(allSafeAddresses).flagged
 
   // Group into multi-chain / single-chain and sort
   const trustedGrouped = useMemo<AllSafeItems>(
