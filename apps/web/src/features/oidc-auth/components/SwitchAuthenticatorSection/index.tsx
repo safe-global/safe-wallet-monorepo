@@ -1,7 +1,9 @@
 import { Plus, ShieldCheck, Smartphone } from 'lucide-react'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
+import { useHasFeature } from '@/hooks/useChains'
 import { useAuthenticators } from '../../hooks/useAuthenticators'
 
 const formatDate = (iso?: string): string =>
@@ -25,9 +27,10 @@ const formatDate = (iso?: string): string =>
  * current factor, scan the new QR code there, and return.
  */
 const SwitchAuthenticatorSection = () => {
+  const isSwitchAuthenticatorEnabled = useHasFeature(FEATURES.SWITCH_AUTHENTICATOR)
   const { isOidcSession, authenticators, error, enrollNewAuthenticator } = useAuthenticators()
 
-  if (!isOidcSession) {
+  if (!isSwitchAuthenticatorEnabled || !isOidcSession) {
     return null
   }
 

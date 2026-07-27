@@ -11,6 +11,7 @@ jest.mock('@/features/spaces', () => ({
 
 jest.mock('@/features/oidc-auth', () => ({
   SwitchAuthenticatorSection: () => <div data-testid="switch-authenticator-section" />,
+  WalletTwoFactorSection: () => <div data-testid="wallet-2fa-section" />,
 }))
 
 jest.mock('@/hooks/useLogout', () => ({

@@ -1,7 +1,7 @@
 import { LogOut, Pencil } from 'lucide-react'
 import { useState } from 'react'
 import { useCurrentMemberProfile, MemberStatus, getMemberDisplayName } from '@/features/spaces'
-import { SwitchAuthenticatorSection } from '@/features/oidc-auth'
+import { SwitchAuthenticatorSection, WalletTwoFactorSection } from '@/features/oidc-auth'
 import useLogout from '@/hooks/useLogout'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -118,6 +118,7 @@ const AccountPage = () => {
       </section>
 
       <SwitchAuthenticatorSection />
+      <WalletTwoFactorSection />
     </>
   )
 }
