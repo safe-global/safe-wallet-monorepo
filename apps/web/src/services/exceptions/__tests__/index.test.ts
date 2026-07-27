@@ -193,6 +193,46 @@ describe('CodedException', () => {
       )
     })
 
+    it('merges RPC endpoint context into the Datadog tags', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      const mockError = jest.fn()
+      mockObservability(mockCaptureError, { info: jest.fn(), warn: jest.fn(), error: mockError, debug: jest.fn() })
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._105, 'rpc down', { rpcEndpointKind: 'infura', rpcHost: 'mainnet.infura.io' })
+      expect(mockCaptureError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: expect.objectContaining({
+            code: 105,
+            error_domain: ErrorDomain.RPC,
+            error_type: ErrorType.RPC_ERROR,
+            rpc_endpoint_kind: 'infura',
+            rpc_host: 'mainnet.infura.io',
+          }),
+        }),
+      )
+      // The Datadog action (logger.error) carries the same facets
+      expect(mockError).toHaveBeenCalledWith(
+        expect.stringContaining('105'),
+        expect.objectContaining({ rpc_endpoint_kind: 'infura', rpc_host: 'mainnet.infura.io' }),
+      )
+    })
+
+    it('omits RPC tags when no endpoint context is provided', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._105, 'rpc down')
+      const { tags } = mockCaptureError.mock.calls[0][0]
+      expect(tags).not.toHaveProperty('rpc_endpoint_kind')
+      expect(tags).not.toHaveProperty('rpc_host')
+    })
+
     it('does not track in non-production envs', async () => {
       const mockCaptureError = jest.fn()
       mockObservability(mockCaptureError)

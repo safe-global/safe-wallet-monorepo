@@ -43,9 +43,16 @@ export class CodedException extends Error {
    * across the two tools (WA-2775). Namespaced `error_*` to avoid colliding with
    * Datadog's built-in `@type` field.
    */
-  private getObservabilityContext(): Record<string, unknown> {
+  private getObservabilityContext(context?: ErrorContext): Record<string, unknown> {
     const { domain, type, layer } = normalizeError({ code: this.code, message: this.message, isUserFacing: false })
-    return { code: this.code, error_domain: domain, error_type: type, error_layer: layer }
+    return {
+      code: this.code,
+      error_domain: domain,
+      error_type: type,
+      error_layer: layer,
+      ...(context?.rpcEndpointKind && { rpc_endpoint_kind: context.rpcEndpointKind }),
+      ...(context?.rpcHost && { rpc_host: context.rpcHost }),
+    }
   }
 
   public log(context?: ErrorContext): void {
@@ -63,7 +70,7 @@ export class CodedException extends Error {
     console.warn(IS_PRODUCTION ? this.message : this)
 
     if (IS_PRODUCTION) {
-      const tags = this.getObservabilityContext()
+      const tags = this.getObservabilityContext(context)
       logger.warn(this.message, tags)
       captureError({ error: this, isUserFacing: false, code: this.code, tags, context })
     }
@@ -73,7 +80,7 @@ export class CodedException extends Error {
     console.error(IS_PRODUCTION ? this.message : this)
 
     if (IS_PRODUCTION) {
-      const tags = this.getObservabilityContext()
+      const tags = this.getObservabilityContext(context)
       logger.error(this.message, tags)
       captureError({ error: this, isUserFacing: true, code: this.code, tags, context })
     }

@@ -127,6 +127,8 @@ export enum MixpanelEventParams {
   IS_USER_FACING = 'Is User Facing',
   TARGET_CONTRACT_LABEL = 'Target Contract Label',
   TX_HASH = 'Transaction Hash',
+  RPC_ENDPOINT_KIND = 'RPC Endpoint Kind',
+  RPC_HOST = 'RPC Host',
 }
 
 export enum AuthLoginMethod {

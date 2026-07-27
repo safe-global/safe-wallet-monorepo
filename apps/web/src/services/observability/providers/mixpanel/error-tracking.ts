@@ -13,6 +13,8 @@ const mapContext = (context?: ErrorContext): Record<string, string> => {
     ...(context.txHash && { [MixpanelEventParams.TX_HASH]: context.txHash }),
     ...(context.targetContractLabel && { [MixpanelEventParams.TARGET_CONTRACT_LABEL]: context.targetContractLabel }),
     ...(context.transactionType && { [MixpanelEventParams.TRANSACTION_TYPE]: context.transactionType }),
+    ...(context.rpcEndpointKind && { [MixpanelEventParams.RPC_ENDPOINT_KIND]: context.rpcEndpointKind }),
+    ...(context.rpcHost && { [MixpanelEventParams.RPC_HOST]: context.rpcHost }),
   }
 }
 

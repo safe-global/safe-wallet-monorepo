@@ -15,10 +15,22 @@ export interface ILogger {
  * referenced by both the exceptions layer and analytics providers without
  * closing an import cycle.
  */
+/**
+ * Which RPC endpoint an error came from. Lets us separate failures of our own
+ * Infura endpoint from chain-default public RPCs, user-set custom RPCs, and the
+ * connected wallet's provider — a split that is otherwise only recoverable by
+ * fragile message string-matching.
+ */
+export type RpcEndpointKind = 'infura' | 'chain_default' | 'custom' | 'wallet'
+
 export interface ErrorContext {
   txHash?: string
   targetContractLabel?: string
   transactionType?: string
+  /** Endpoint category of the failing RPC provider. */
+  rpcEndpointKind?: RpcEndpointKind
+  /** Host of the failing RPC endpoint (no token/path), e.g. `mainnet.infura.io`. */
+  rpcHost?: string
 }
 
 /**

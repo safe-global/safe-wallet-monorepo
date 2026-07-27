@@ -6,6 +6,27 @@ import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { useSimilarityClusters } from '@/features/address-poisoning'
 
+/**
+ * Address → cluster id for the look-alikes that share ONE list, so they can be boxed together. A
+ * cluster is kept only where ≥2 of its members (counted by distinct address, so a multi-chain safe
+ * isn't double-counted) live in the same section; cross-section clusters are dropped here and rely on
+ * the per-row ⚠️ instead.
+ */
+const groupsWithinList = (items: SafeItem[], groupIdByAddress: Map<string, string>): Map<string, string> => {
+  const addresses = [...new Set(items.map((item) => item.address.toLowerCase()))]
+  const countByGroup = new Map<string, number>()
+  for (const address of addresses) {
+    const group = groupIdByAddress.get(address)
+    if (group) countByGroup.set(group, (countByGroup.get(group) ?? 0) + 1)
+  }
+  const result = new Map<string, string>()
+  for (const address of addresses) {
+    const group = groupIdByAddress.get(address)
+    if (group && (countByGroup.get(group) ?? 0) >= 2) result.set(address, group)
+  }
+  return result
+}
+
 const useOnboardingSafes = () => {
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -28,35 +49,21 @@ const useOnboardingSafes = () => {
     }
   }, [allSafes])
 
-  // Flag against the combined pool (so an owned safe impersonating a trusted one is caught) but
-  // only surface warnings on owned safes — a safe the user trusted at some point is treated as vetted.
-  const combinedAddresses = useMemo(
-    () => [...trustedSafeItems, ...ownedSafeItems].map((s) => s.address),
-    [trustedSafeItems, ownedSafeItems],
+  // Flag against the full pool so a look-alike in EITHER list warns — including a pinned/trusted
+  // impostor (WA-2912). No owned-only filter and no anchor exemption in onboarding.
+  const combinedAddresses = useMemo(() => (allSafes ?? []).map((s) => s.address), [allSafes])
+  const { flagged: flaggedAddresses, groupIdByAddress } = useSimilarityClusters(combinedAddresses)
+
+  // Trusted and owned each band their own same-list clusters; a cluster split across the two sections
+  // can't be boxed, so its members fall back to the per-row ⚠️ that flaggedAddresses already provides.
+  const trustedSimilarityGroups = useMemo(
+    () => groupsWithinList(trustedSafeItems, groupIdByAddress),
+    [trustedSafeItems, groupIdByAddress],
   )
-  const { flagged: flaggedCombined, groupIdByAddress } = useSimilarityClusters(combinedAddresses)
-
-  const flaggedOwnedAddresses = useMemo<Set<string>>(() => {
-    const ownedAddresses = new Set(ownedSafeItems.map((s) => s.address.toLowerCase()))
-    return new Set([...flaggedCombined].filter((address) => ownedAddresses.has(address)))
-  }, [flaggedCombined, ownedSafeItems])
-
-  // Band only look-alikes that are BOTH owned — a cluster spanning the trusted list (or an address-book
-  // anchor) can't be boxed across sections, so its owned member just keeps its per-row ⚠️.
-  const ownedSimilarityGroups = useMemo<Map<string, string>>(() => {
-    const ownedAddresses = ownedSafeItems.map((s) => s.address.toLowerCase())
-    const ownedCountByGroup = new Map<string, number>()
-    for (const address of ownedAddresses) {
-      const group = groupIdByAddress.get(address)
-      if (group) ownedCountByGroup.set(group, (ownedCountByGroup.get(group) ?? 0) + 1)
-    }
-    const result = new Map<string, string>()
-    for (const address of ownedAddresses) {
-      const group = groupIdByAddress.get(address)
-      if (group && (ownedCountByGroup.get(group) ?? 0) >= 2) result.set(address, group)
-    }
-    return result
-  }, [groupIdByAddress, ownedSafeItems])
+  const ownedSimilarityGroups = useMemo(
+    () => groupsWithinList(ownedSafeItems, groupIdByAddress),
+    [ownedSafeItems, groupIdByAddress],
+  )
 
   // Group into multi-chain / single-chain and sort
   const trustedGrouped = useMemo<AllSafeItems>(
@@ -81,7 +88,8 @@ const useOnboardingSafes = () => {
   return {
     trustedSafes: searchQuery ? filteredTrusted : trustedGrouped,
     ownedSafes: searchQuery ? filteredOwned : ownedGrouped,
-    flaggedOwnedAddresses,
+    flaggedAddresses,
+    trustedSimilarityGroups,
     ownedSimilarityGroups,
     handleSearch,
     hasNoSafes,
