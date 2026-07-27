@@ -70,7 +70,7 @@ const MultiAccountContextMenu = ({
       <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
         <MenuItem onClick={handleOpenModal(ModalType.RENAME, OVERVIEW_EVENTS.SIDEBAR_RENAME)}>
           <ListItemIcon>
-            <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="success" />
+            <SvgIcon component={EditIcon} inheritViewBox fontSize="small" sx={{ color: 'text.primary' }} />
           </ListItemIcon>
           <ListItemText data-testid="rename-btn">Rename</ListItemText>
         </MenuItem>

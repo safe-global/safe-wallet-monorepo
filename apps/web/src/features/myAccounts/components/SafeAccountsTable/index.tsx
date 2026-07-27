@@ -127,11 +127,17 @@ export type SafeAccountsTableProps = {
 const headerSx = {
   textTransform: 'uppercase',
   fontSize: '12px',
-  fontWeight: 500,
-  letterSpacing: '0.04em',
+  fontWeight: 600,
+  lineHeight: '16px',
+  letterSpacing: 0,
   color: 'text.secondary',
   whiteSpace: 'nowrap',
   py: 1.25,
+  // Sort arrow: same grey as the label in every state (MUI defaults dim it to 50% on hover and
+  // darken the active label to text.primary), and snug against the word instead of 4px each side.
+  '& .MuiTableSortLabel-root:hover, & .MuiTableSortLabel-root.Mui-active': { color: 'text.secondary' },
+  '& .MuiTableSortLabel-root:hover .MuiTableSortLabel-icon': { opacity: 1 },
+  '& .MuiTableSortLabel-icon': { color: 'text.secondary', fontSize: '14px', ml: 0.25, mr: 0 },
   // Match the body cells' slim padding so labels align with their columns.
   px: 1,
   // The grey bar sits inset 4px from the panel edges: transparent borders +
@@ -139,7 +145,7 @@ const headerSx = {
   // `&&` outranks the theme's MuiTableCell-head border-bottom.
   backgroundClip: 'padding-box',
   '&&': { border: '4px solid transparent', borderLeft: 'none', borderRight: 'none' },
-  '&&:first-of-type': { pl: 2, borderLeft: '4px solid transparent' },
+  '&&:first-of-type': { pl: 10.5, borderLeft: '4px solid transparent' },
   '&&:last-of-type': { pr: 2, borderRight: '4px solid transparent' },
 } as const
 
@@ -325,8 +331,8 @@ const SafeAccountsTable = ({
                     sortDirection={sort.orderBy === column.sortKey ? sort.order : false}
                     className={cn(
                       'bg-muted',
-                      index === 0 && 'rounded-l-lg',
-                      index === visibleColumns.length - 1 && 'rounded-r-lg',
+                      index === 0 && 'rounded-l-md',
+                      index === visibleColumns.length - 1 && 'rounded-r-md',
                     )}
                     sx={{ ...headerSx, width: column.width, textAlign: column.align ?? 'left' }}
                   >
