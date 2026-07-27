@@ -28,12 +28,8 @@ const useOnboardingSafes = () => {
     }
   }, [allSafes])
 
-  // Flag against the combined pool and surface every hit, trusted rows included — a poisoned
-  // address the user already pinned is exactly the case the warning must not go silent on (WA-2912).
-  const combinedAddresses = useMemo(
-    () => [...trustedSafeItems, ...ownedSafeItems].map((s) => s.address),
-    [trustedSafeItems, ownedSafeItems],
-  )
+  // Trusted rows are deliberately included — a pinned impostor must still warn (WA-2912).
+  const combinedAddresses = useMemo(() => (allSafes ?? []).map((s) => s.address), [allSafes])
   const flaggedAddresses = useSimilarityClusters(combinedAddresses).flagged
 
   // Group into multi-chain / single-chain and sort
