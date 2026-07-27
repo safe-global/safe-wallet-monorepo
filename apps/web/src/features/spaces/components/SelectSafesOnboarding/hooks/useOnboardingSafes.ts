@@ -28,17 +28,13 @@ const useOnboardingSafes = () => {
     }
   }, [allSafes])
 
-  // Flag against the combined pool (so an owned safe impersonating a trusted one is caught) but
-  // only surface warnings on owned safes — a safe the user trusted at some point is treated as vetted.
+  // Flag against the combined pool and surface every hit, trusted rows included — a poisoned
+  // address the user already pinned is exactly the case the warning must not go silent on (WA-2912).
   const combinedAddresses = useMemo(
     () => [...trustedSafeItems, ...ownedSafeItems].map((s) => s.address),
     [trustedSafeItems, ownedSafeItems],
   )
-  const flaggedCombined = useSimilarityClusters(combinedAddresses).flagged
-  const flaggedOwnedAddresses = useMemo<Set<string>>(() => {
-    const ownedAddresses = new Set(ownedSafeItems.map((s) => s.address.toLowerCase()))
-    return new Set([...flaggedCombined].filter((address) => ownedAddresses.has(address)))
-  }, [flaggedCombined, ownedSafeItems])
+  const flaggedAddresses = useSimilarityClusters(combinedAddresses).flagged
 
   // Group into multi-chain / single-chain and sort
   const trustedGrouped = useMemo<AllSafeItems>(
@@ -63,7 +59,7 @@ const useOnboardingSafes = () => {
   return {
     trustedSafes: searchQuery ? filteredTrusted : trustedGrouped,
     ownedSafes: searchQuery ? filteredOwned : ownedGrouped,
-    flaggedOwnedAddresses,
+    flaggedAddresses,
     handleSearch,
     hasNoSafes,
   }

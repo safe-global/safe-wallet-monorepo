@@ -28,7 +28,7 @@ const setup = (opts: { items?: AllSafeItems; flagged?: Set<string> } = {}) =>
       items: opts.items ?? [],
       control,
       setValue,
-      flaggedOwnedAddresses: opts.flagged ?? new Set<string>(),
+      flaggedAddresses: opts.flagged ?? new Set<string>(),
     })
   })
 
@@ -51,7 +51,7 @@ describe('useOnboardingSelection', () => {
     expect(result.current.selectedKeys.has('1:0xA')).toBe(false)
   })
 
-  it('defers selecting a flagged owned safe until confirmed', () => {
+  it('defers selecting a flagged safe until confirmed', () => {
     const { result } = setup({ flagged: new Set(['0xflagged']) })
 
     act(() => result.current.handleToggle(singleLine('1', '0xFlagged'), true))
