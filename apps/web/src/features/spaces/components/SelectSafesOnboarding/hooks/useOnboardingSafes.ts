@@ -81,8 +81,8 @@ const useOnboardingSafes = () => {
 
   // Cluster against the full pool so a look-alike in EITHER list is caught — including a pinned/trusted
   // impostor (WA-2912). `flaggedAddresses` (all similar) still gates the select-confirm dialog.
-  const combinedAddresses = useMemo(() => (allSafes ?? []).map((s) => s.address), [allSafes])
-  const { flagged: flaggedAddresses, groupIdByAddress } = useSimilarityClusters(combinedAddresses)
+  const allSafeAddresses = useMemo(() => (allSafes ?? []).map((s) => s.address), [allSafes])
+  const { flagged: flaggedAddresses, groupIdByAddress } = useSimilarityClusters(allSafeAddresses)
 
   // Each list bands all of its own cluster members (≥2 → a group, a lone cross-list member → one card).
   const trustedSimilarityGroups = useMemo(
