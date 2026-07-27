@@ -54,7 +54,7 @@ const AccountsNavigation = () => {
             onClick={handleClick(item)}
             aria-current={isActive ? 'page' : undefined}
             className={cn(
-              'inline-flex h-[38px] flex-1 items-center justify-center rounded-xl border border-transparent px-2.5 text-lg no-underline transition-all',
+              'inline-flex h-[38px] flex-1 items-center justify-center rounded-xl border border-transparent px-2.5 text-base no-underline transition-all',
               isActive
                 ? 'bg-background font-semibold text-foreground shadow-sm dark:border-input dark:bg-input/30 dark:text-foreground'
                 : 'font-normal text-muted-foreground hover:text-foreground',
