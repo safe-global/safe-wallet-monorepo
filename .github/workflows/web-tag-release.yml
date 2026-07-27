@@ -305,7 +305,7 @@ jobs:
         if: needs.tag.outputs.version && success()
         id: linear_complete
         continue-on-error: true
-        uses: linear/linear-release-action@c0cb8354a362c24c6d3e0948f37fd66d07588e3f # v0.14.5
+        uses: linear/linear-release-action@3858a5d7892435dc63302ac76b0cdb587435caa9 # v0.14.6
         with:
           access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
           command: complete
