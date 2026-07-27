@@ -1,8 +1,10 @@
 import {
   useThreatAnalysis as useThreatAnalysisUtils,
   useThreatAnalysisHypernative,
+  useThreatAnalysisWithGuard,
 } from '@safe-global/utils/features/safe-shield/hooks'
 import { useSigner } from '@/hooks/wallets/useWallet'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { useContext, useMemo } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -23,6 +25,7 @@ export function useThreatAnalysis(
     safeAddress,
   } = useSafeInfo()
   const signer = useSigner()
+  const web3ReadOnly = useWeb3ReadOnly()
   const { safeTx, safeMessage, safeMessageHash, txOrigin } = useContext(SafeTxContext)
   const walletAddress = signer?.address ?? ''
   const isHypernativeFeatureEnabled = useIsHypernativeFeatureEnabled()
@@ -94,5 +97,10 @@ export function useThreatAnalysis(
     return [combinedResult, mainError || nestedError, mainLoading || nestedLoading]
   }, [threatAnalysis, nestedThreatAnalysis, isNested, isNestedLoading, eligibilityLoading])
 
-  return combinedThreatAnalysis
+  return useThreatAnalysisWithGuard(combinedThreatAnalysis, {
+    safeTx: safeTxToCheck,
+    safeAddress,
+    safeVersion: version,
+    web3ReadOnly,
+  })
 }

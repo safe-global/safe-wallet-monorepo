@@ -9,6 +9,9 @@ jest.mock('@safe-global/utils/features/safe-shield/hooks', () => ({
   useThreatAnalysis: jest.fn(),
   useThreatAnalysisHypernative: jest.fn(),
   useThreatAnalysisHypernativeMessage: jest.fn(),
+  // Identity passthrough — the guard check is covered by its own unit test; here we only assert
+  // the threat-merging behaviour of the wrapper.
+  useThreatAnalysisWithGuard: jest.fn((threat) => threat),
 }))
 
 jest.mock('../../components/useNestedTransaction', () => ({
