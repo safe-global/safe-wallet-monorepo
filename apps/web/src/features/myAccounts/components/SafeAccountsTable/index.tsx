@@ -23,6 +23,7 @@ import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
 import ReorderableBody, { toggleExpanded } from './ReorderableBody'
 import { bandHeaderAt } from './SimilarityBand'
 import { orderGroupsBySimilarity } from './orderGroupsBySimilarity'
+import { weaveReorderedKeys } from '@/utils/reorder'
 import type { SimilarWarning } from '@/features/address-poisoning'
 import { bodyRowSx } from './tableStyles'
 import EntryDialog from '@/components/address-book/EntryDialog'
@@ -244,6 +245,18 @@ const SafeAccountsTable = ({
     [sortedGroups, similarityGroups, anchorAddresses],
   )
 
+  // A drop reports only the draggable (non-clustered) rows' new order. Weave it back into the
+  // stored order so clustered rows keep their persisted slots — their pin-to-top is display-only
+  // and must not rewrite the user's manual arrangement (it would outlive the cluster).
+  const handleReorder = useCallback(
+    (reorderedDraggable: string[]) => {
+      const storedOrder = sortedGroups.map((group) => group.parent.address)
+      const isClustered = (address: string) => Boolean(similarityGroups?.get(address.toLowerCase()))
+      reorder?.onReorder(weaveReorderedKeys(storedOrder, reorderedDraggable, isClustered))
+    },
+    [reorder, sortedGroups, similarityGroups],
+  )
+
   const lines = useMemo<Array<{ line: AccountLine; groupKey: string; group: AccountGroup }>>(() => {
     const result: Array<{ line: AccountLine; groupKey: string; group: AccountGroup }> = []
     for (const group of displayGroups) {
@@ -351,7 +364,7 @@ const SafeAccountsTable = ({
               onLinkClick={onLinkClick}
               getCheckbox={selection ? (group, line) => getRowCheckbox(group, line, selection) : undefined}
               onSelectToggle={selection ? (line, next) => selection.onToggle(line, next) : undefined}
-              onReorder={reorder.onReorder}
+              onReorder={handleReorder}
               onOverviewsLoaded={handleOverviewsLoaded}
             />
           ) : (

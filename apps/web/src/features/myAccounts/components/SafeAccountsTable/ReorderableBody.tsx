@@ -29,8 +29,12 @@ type ReorderableBodyProps = {
   getCheckbox?: (group: AccountGroup, line: AccountLine) => RowCheckbox
   /** Selection mode: fired when a row's checkbox (or the row itself) toggles. */
   onSelectToggle?: (line: AccountLine, nextChecked: boolean) => void
-  /** Fired on drop with the reordered top-level account addresses, in display order. */
-  onReorder: (orderedAddresses: string[]) => void
+  /**
+   * Fired on drop with ONLY the draggable (non-clustered) addresses in their new relative order.
+   * The parent weaves them back into the persisted order — pinned cluster rows are hoisted for
+   * display only and must keep their stored slots.
+   */
+  onReorder: (orderedDraggableAddresses: string[]) => void
   /** Reports a row's lazily-fetched Safe overviews up to the table. */
   onOverviewsLoaded: (overviews: SafeOverview[]) => void
 }
@@ -89,9 +93,8 @@ const ReorderableBody = ({
     setExpanded(expandedBeforeDrag.current)
     const { source, destination } = result
     if (!destination || destination.index === source.index) return
-    // Save the pinned cluster addresses first (they stay on top), then the reordered rest.
-    const reordered = reorderByKey(draggableGroups, source.index, destination.index, (group) => group.parent.address)
-    onReorder([...pinnedGroups.map((group) => group.parent.address), ...reordered])
+    // Report only the draggable rows' new order; the parent decides how it lands in the stored order.
+    onReorder(reorderByKey(draggableGroups, source.index, destination.index, (group) => group.parent.address))
   }
 
   return (

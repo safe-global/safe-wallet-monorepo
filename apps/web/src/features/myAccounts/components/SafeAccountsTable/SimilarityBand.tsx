@@ -88,7 +88,14 @@ export const SimilarityBandHeader = ({ colSpan }: { colSpan: number }) => (
         <Typography variant="caption" fontWeight={600} color="inherit">
           Address poisoning warning
         </Typography>
-        <Info size={14} aria-hidden />
+        <Tooltip>
+          <TooltipTrigger render={<span className="inline-flex cursor-help" />}>
+            <Info size={14} aria-label="About address poisoning" />
+          </TooltipTrigger>
+          <TooltipContent className="max-w-xs">
+            These accounts have very similar addresses. Carefully verify the full address before selecting one.
+          </TooltipContent>
+        </Tooltip>
       </Box>
     </TableCell>
   </TableRow>

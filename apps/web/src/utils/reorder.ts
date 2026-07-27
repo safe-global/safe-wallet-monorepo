@@ -9,3 +9,18 @@ export const reorderByKey = <T>(items: T[], from: number, to: number, getKey: (i
   next.splice(to, 0, moved)
   return next.map(getKey)
 }
+
+/**
+ * Weave a reordered movable subset back into the full key list: keys matching `isFixed` keep their
+ * original slots, the remaining slots are filled from `reorderedMovableKeys` in order. Use when part
+ * of a list is hoisted for display only (e.g. similarity clusters pinned on top) — the fixed keys'
+ * persisted positions must survive a drag untouched.
+ */
+export const weaveReorderedKeys = (
+  allKeys: string[],
+  reorderedMovableKeys: string[],
+  isFixed: (key: string) => boolean,
+): string[] => {
+  const queue = [...reorderedMovableKeys]
+  return allKeys.map((key) => (isFixed(key) ? key : (queue.shift() ?? key)))
+}
