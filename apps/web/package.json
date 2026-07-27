@@ -215,7 +215,7 @@
     "typechain": "^8.3.2",
     "typescript": "~5.9.2",
     "typescript-plugin-css-modules": "^4.2.2",
-    "vite": "^6.4.2",
+    "vite": "^6.4.3",
     "vite-plugin-svgr": "^4.5.0",
     "wait-on": "^9.0.3"
   },
