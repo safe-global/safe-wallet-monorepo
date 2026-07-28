@@ -97,6 +97,10 @@ function Input({
   onPaste,
   error,
   address,
+  // Destructured so the `{...props}` spread below cannot overwrite the computed attribute: a caller
+  // passing `aria-invalid={undefined}` (or `false`) alongside `error` would otherwise erase the
+  // invalid state the error or the script-injection guard had set.
+  'aria-invalid': ariaInvalid,
   ...props
 }: React.ComponentProps<'input'> & VariantProps<typeof inputVariants> & { error?: string; address?: boolean }) {
   const [hasScriptInjection, setHasScriptInjection] = React.useState(false)
@@ -137,7 +141,7 @@ function Input({
       <InputPrimitive
         type={type}
         data-slot="input"
-        aria-invalid={hasScriptInjection || !!error || props['aria-invalid'] || undefined}
+        aria-invalid={hasScriptInjection || !!error || ariaInvalid || undefined}
         className={cn(inputVariants({ inputSize, variant }), className)}
         {...props}
         onChange={handleChange}
