@@ -14,33 +14,27 @@ import { useSigner } from '@/hooks/wallets/useWallet'
 import ExternalLink from '@/components/common/ExternalLink'
 import CheckIcon from '@/public/images/common/check.svg'
 import CloseIcon from '@/public/images/common/close.svg'
-import WarningIcon from '@/public/images/notifications/warning.svg'
-import { getSimulationStatus, isTxSimulationEnabled } from '@safe-global/utils/components/tx/security/tenderly/utils'
+import {
+  getSimulationStatus,
+  isTxSimulationEnabled,
+  type SimulationStatus,
+} from '@safe-global/utils/components/tx/security/tenderly/utils'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 
-const getSimulationIcon = (isCallTraceError: boolean, isSuccess: boolean) => {
-  if (isCallTraceError) {
-    return { color: 'var(--color-warning-main)', Component: WarningIcon }
-  }
-  if (isSuccess) {
-    return { color: 'var(--color-success-main)', Component: CheckIcon }
-  }
-  return { color: 'var(--color-error-main)', Component: CloseIcon }
-}
+export const _isSimulationSuccessful = ({ isSuccess, isError, isCallTraceError }: SimulationStatus): boolean =>
+  isSuccess && !isError && !isCallTraceError
 
-const getSimulationStatusText = (isCallTraceError: boolean, isSuccess: boolean) => {
-  if (isCallTraceError) {
-    return 'Can execute (with warnings)'
-  }
-  if (isSuccess) {
-    return 'Simulation successful'
-  }
-  return 'Simulation failed'
-}
+export const _getSimulationIcon = (isSuccessful: boolean) =>
+  isSuccessful
+    ? { color: 'var(--color-success-main)', Component: CheckIcon }
+    : { color: 'var(--color-error-main)', Component: CloseIcon }
+
+export const _getSimulationStatusText = (isSuccessful: boolean) =>
+  isSuccessful ? 'Simulation successful' : 'Simulation failed'
 
 const CompactSimulationButton = ({
   label,
@@ -119,12 +113,13 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
   }
 
   if (status?.isFinished && !status.isError) {
-    const { color, Component } = getSimulationIcon(status.isCallTraceError, status.isSuccess)
+    const isSuccessful = _isSimulationSuccessful(status)
+    const { color, Component } = _getSimulationIcon(isSuccessful)
     return (
       <ExternalLink href={simulationLink}>
         <div className="flex flex-row items-center gap-1">
           <Component className="h-4" style={{ color }} />
-          {getSimulationStatusText(status.isCallTraceError, status.isSuccess)}
+          {_getSimulationStatusText(isSuccessful)}
         </div>
       </ExternalLink>
     )
