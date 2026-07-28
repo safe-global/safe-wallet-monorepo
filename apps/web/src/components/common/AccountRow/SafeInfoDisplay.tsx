@@ -26,8 +26,6 @@ export interface SafeInfoDisplayProps {
   leading?: ReactNode
   /** Hides the address line — e.g. multi-chain child rows that show only a chain name. */
   hideAddress?: boolean
-  /** Rendered above the name (e.g. a status badge). */
-  badge?: ReactNode
   /** Rendered inline, right after the name (e.g. a small look-alike ⚠️ icon). */
   nameAdornment?: ReactNode
   /** Typography variant for the name line. Defaults to the compact `paragraph-small-medium`. */
@@ -42,7 +40,6 @@ const SafeInfoDisplay = ({
   onRename,
   leading,
   hideAddress,
-  badge,
   nameAdornment,
   nameVariant = 'paragraph-small-medium',
 }: SafeInfoDisplayProps) => {
@@ -61,7 +58,6 @@ const SafeInfoDisplay = ({
         )}
       </div>
       <div className="flex flex-col items-start flex-1 min-w-0">
-        {badge}
         <div className="flex items-center gap-1 min-w-0 max-w-full">
           <TruncatedText variant={nameVariant} className="block min-w-0" text={displayName} />
           {nameAdornment}
