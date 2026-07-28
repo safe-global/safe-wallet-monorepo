@@ -43,14 +43,14 @@ jest.mock('../hooks/useOnboardingNavigation', () => ({
 
 let mockTrustedSafes: AllSafeItems = []
 let mockOwnedSafes: AllSafeItems = []
-let mockFlaggedOwned = new Set<string>()
+let mockFlagged = new Set<string>()
 
 jest.mock('../hooks/useOnboardingSafes', () => ({
   __esModule: true,
   default: () => ({
     trustedSafes: mockTrustedSafes,
     ownedSafes: mockOwnedSafes,
-    flaggedOwnedAddresses: mockFlaggedOwned,
+    flaggedAddresses: mockFlagged,
     handleSearch: jest.fn(),
     hasNoSafes: false,
   }),
@@ -97,7 +97,7 @@ describe('SelectSafesOnboarding — selection wiring', () => {
     capturedListProps = {}
     mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
     mockOwnedSafes = []
-    mockFlaggedOwned = new Set<string>()
+    mockFlagged = new Set<string>()
     mockWalletValue = { address: '0xWallet' }
   })
 
@@ -111,13 +111,13 @@ describe('SelectSafesOnboarding — selection wiring', () => {
 
   it('passes the selection model (not select-all toggles) to OnboardingSafesList', () => {
     mockOwnedSafes = [makeSafe('10', '0xB')] as AllSafeItems
-    mockFlaggedOwned = new Set(['0xb'])
+    mockFlagged = new Set(['0xb'])
     render(<SelectSafesOnboarding />)
 
     expect(capturedListProps.selectedKeys).toBeInstanceOf(Set)
     expect(typeof capturedListProps.onToggle).toBe('function')
     expect(capturedListProps.isAtLimit).toBe(false)
-    expect(capturedListProps.flaggedOwnedAddresses).toBe(mockFlaggedOwned)
+    expect(capturedListProps.flaggedAddresses).toBe(mockFlagged)
     expect(capturedListProps.trustedSelectAll).toBeUndefined()
     expect(capturedListProps.ownedSelectAll).toBeUndefined()
   })
@@ -138,7 +138,7 @@ describe('SelectSafesOnboarding — wallet connection state', () => {
     capturedListProps = {}
     mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
     mockOwnedSafes = []
-    mockFlaggedOwned = new Set<string>()
+    mockFlagged = new Set<string>()
     mockWalletValue = { address: '0xWallet' }
   })
 
@@ -174,7 +174,7 @@ describe('SelectSafesOnboarding — step counter reflects the survey flag', () =
     capturedListProps = {}
     mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
     mockOwnedSafes = []
-    mockFlaggedOwned = new Set<string>()
+    mockFlagged = new Set<string>()
     mockWalletValue = { address: '0xWallet' }
   })
 
