@@ -1,7 +1,6 @@
 import { fireEvent } from '@testing-library/react'
 import { render } from '@/tests/test-utils'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { getStoreInstance } from '@/store'
 import * as editorData from '../hooks/useFeatureFlagEditorData'
 import type { FeatureFlagRowData } from '../hooks/useFeatureFlagEditorData'
 import { FeatureFlagEditor } from './FeatureFlagEditor'
@@ -34,12 +33,6 @@ describe('FeatureFlagEditor', () => {
     expect(queryByText(FEATURES.BRIDGE)).not.toBeInTheDocument()
   })
 
-  it('disables "Reset all overrides" when there are no overrides', () => {
-    mockData([], [row(FEATURES.EARN)])
-    const { getByRole } = render(<FeatureFlagEditor />)
-    expect(getByRole('button', { name: 'Reset all overrides' })).toBeDisabled()
-  })
-
   it('omits the local overrides section when there are none', () => {
     mockData([], [row(FEATURES.EARN)])
     const { queryByText } = render(<FeatureFlagEditor />)
@@ -47,17 +40,11 @@ describe('FeatureFlagEditor', () => {
     expect(queryByText('All feature flags')).toBeInTheDocument()
   })
 
-  it('clears all overrides in the store on reset', () => {
-    mockData([row(FEATURES.EARN, true)], [])
-    const { getByRole } = render(<FeatureFlagEditor />, {
-      initialReduxState: { featureFlagOverrides: { [FEATURES.EARN]: true } },
-    })
+  it('renders no page chrome — the dialog shell owns the heading and reset action', () => {
+    mockData([row(FEATURES.EARN, true)], [row(FEATURES.BRIDGE)])
+    const { queryByRole } = render(<FeatureFlagEditor />)
 
-    const resetButton = getByRole('button', { name: 'Reset all overrides' })
-    expect(resetButton).toBeEnabled()
-
-    fireEvent.click(resetButton)
-
-    expect(getStoreInstance().getState().featureFlagOverrides).toEqual({})
+    expect(queryByRole('heading')).not.toBeInTheDocument()
+    expect(queryByRole('button', { name: 'Reset all overrides' })).not.toBeInTheDocument()
   })
 })

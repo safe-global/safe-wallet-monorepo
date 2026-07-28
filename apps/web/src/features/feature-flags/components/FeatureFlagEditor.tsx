@@ -1,10 +1,8 @@
 import { useMemo, useState, type ReactElement } from 'react'
-import { RotateCcw, Search, TriangleAlert } from 'lucide-react'
+import { Search, TriangleAlert } from 'lucide-react'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { useAppDispatch } from '@/store'
-import { clearAllOverrides } from '@/features/feature-flags/store'
+import { SCROLL_AREA } from '@/utils/styles'
 import { useFeatureFlagEditorData } from '../hooks/useFeatureFlagEditorData'
 import { FeatureFlagSection } from './FeatureFlagSection'
 import type { FeatureFlagRowData } from '../hooks/useFeatureFlagEditorData'
@@ -21,7 +19,6 @@ const matchesSearch = (row: FeatureFlagRowData, search: string): boolean =>
 export const EDITOR_BUNDLE_SENTINEL = 'feature-flag-editor:dev-only-ui-sentinel'
 
 export const FeatureFlagEditor = (): ReactElement => {
-  const dispatch = useAppDispatch()
   const { overridden, rest } = useFeatureFlagEditorData()
   const [search, setSearch] = useState('')
 
@@ -29,16 +26,8 @@ export const FeatureFlagEditor = (): ReactElement => {
   const filteredRest = useMemo(() => rest.filter((row) => matchesSearch(row, search)), [rest, search])
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-2" data-bundle-sentinel={EDITOR_BUNDLE_SENTINEL}>
-      <div className="mb-2">
-        <h1 className="text-2xl font-bold tracking-tight">Feature flags</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Override the feature flags delivered by the config service. Changes apply instantly across all chains — no
-          reload needed.
-        </p>
-      </div>
-
-      <Alert variant="warning" className="my-3">
+    <div className="flex min-h-0 flex-1 flex-col" data-bundle-sentinel={EDITOR_BUNDLE_SENTINEL}>
+      <Alert variant="warning" className="mb-3 shrink-0">
         <TriangleAlert />
         <AlertTitle>Development tool.</AlertTitle>
         <AlertDescription>
@@ -47,32 +36,22 @@ export const FeatureFlagEditor = (): ReactElement => {
         </AlertDescription>
       </Alert>
 
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <div className="relative min-w-[220px] flex-1">
-          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-          <Input
-            className="pl-9"
-            type="search"
-            placeholder="Search feature flags"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            aria-label="Search flags"
-          />
-        </div>
-
-        <Button
-          variant="destructive"
-          size="lg"
-          onClick={() => dispatch(clearAllOverrides())}
-          disabled={overridden.length === 0}
-        >
-          <RotateCcw />
-          Reset all overrides
-        </Button>
+      <div className="relative mb-3 shrink-0">
+        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+        <Input
+          className="pl-9"
+          type="search"
+          placeholder="Search feature flags"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          aria-label="Search flags"
+        />
       </div>
 
-      <FeatureFlagSection title="Local overrides" rows={filteredOverridden} />
-      <FeatureFlagSection title="All feature flags" rows={filteredRest} />
+      <div className={SCROLL_AREA}>
+        <FeatureFlagSection title="Local overrides" rows={filteredOverridden} />
+        <FeatureFlagSection title="All feature flags" rows={filteredRest} />
+      </div>
     </div>
   )
 }

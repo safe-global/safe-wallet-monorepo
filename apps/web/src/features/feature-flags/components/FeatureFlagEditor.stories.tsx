@@ -24,7 +24,9 @@ const meta = {
           featureFlagOverrides: { [FEATURES.EARN]: true, [FEATURES.BRIDGE]: false },
         }}
       >
-        <Story />
+        <div className="flex h-[600px] max-w-4xl flex-col">
+          <Story />
+        </div>
       </StoreDecorator>
     ),
   ],
