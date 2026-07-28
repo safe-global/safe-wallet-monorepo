@@ -590,7 +590,12 @@ describe('SignOrExecute hooks', () => {
       expect(id).toEqual('123')
     })
 
-    it('registers the nested-approval confirmation watcher when relaying', async () => {
+    it('registers the nested-approval confirmation watcher when relaying on a GTF chain', async () => {
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(
+        chainBuilder()
+          .with({ chainId: '1', features: [FEATURES.GTF] })
+          .build(),
+      )
       jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
         safe: {
           ...extendedSafeInfo,
@@ -627,6 +632,34 @@ describe('SignOrExecute hooks', () => {
 
       // The watcher is registered for the executed (parent) txId; it self-no-ops for non-approveHash txs
       expect(confirmSpy).toHaveBeenCalledWith('123', zeroPadValue('0x0aaa', 20), '1', tx)
+    })
+
+    // The split sign/execute flow (and therefore TX_P) only exists on GTF chains, so relaying on a
+    // daily-limit relay chain must keep the pre-branch behavior of not posting a child confirmation.
+    it('does not register the nested-approval watcher when relaying on a daily-limit chain', async () => {
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(
+        chainBuilder()
+          .with({ chainId: '1', features: [FEATURES.RELAYING] })
+          .build(),
+      )
+      jest.spyOn(txSender, 'dispatchTxRelay').mockImplementation(() => Promise.resolve(undefined))
+      const confirmSpy = jest
+        .spyOn(confirmNestedApproval, 'confirmNestedApprovalOnExecution')
+        .mockImplementation(() => {})
+
+      const { result } = renderHook(() => useTxActions())
+      const tx = createSafeTx()
+      tx.addSignature({
+        signer: '0x123',
+        data: '0x0001',
+        staticPart: () => '',
+        dynamicPart: () => '',
+        isContractSignature: false,
+      })
+
+      await result.current.executeTx({ gasPrice: 1 }, tx, '123', 'origin.com', true)
+
+      expect(confirmSpy).not.toHaveBeenCalled()
     })
 
     it('should sign a not fully signed tx when relaying', async () => {

@@ -8,6 +8,7 @@ import { useValidateTxData } from '@/hooks/useValidateTxData'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { SafeTxContext } from '../SafeTxProvider'
 import { useAlreadySigned } from '@/components/tx/shared/hooks'
+import useSafeInfo from '@/hooks/useSafeInfo'
 import { isRateLimitError, RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
 
 const COMBO_SUBMIT_ACTION = 'comboSubmitAction'
@@ -30,6 +31,7 @@ const resolveSlotId = (slotIds: string[], storedAction: string | undefined): str
 export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
   const { txId, submitError, isRejectedByUser } = useContext(TxFlowContext)
   const { safeTx } = useContext(SafeTxContext)
+  const { safe } = useSafeInfo()
   const slotItems = useSlot(SlotName.ComboSubmit)
   const slotIds = useSlotIds(SlotName.ComboSubmit)
 
@@ -46,9 +48,11 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
 
   const slotId = useMemo(() => resolveSlotId(slotIds, submitAction), [slotIds, submitAction])
 
-  // Show warning if Execute is available but user selected Sign (either manually or from stored preference)
-  const executeAvailable = slotIds.includes(EXECUTE_ACTION)
-  const showLastSignerWarning = executeAvailable && submitAction === SIGN_ACTION && !hasSigned
+  // Warn when signing completes the threshold. A nested signer (parent Safe) in the split sign/execute
+  // flow gets no Execute action at all, so Execute being offered can't gate this — the signature count
+  // does, and the resolved action (not the stored preference) tells us the user is about to sign.
+  const isLastSignature = !!safeTx && safeTx.signatures.size === safe.threshold - 1
+  const showLastSignerWarning = slotId === SIGN_ACTION && !hasSigned && isLastSignature
 
   if (slotIds.length === 0) {
     return false

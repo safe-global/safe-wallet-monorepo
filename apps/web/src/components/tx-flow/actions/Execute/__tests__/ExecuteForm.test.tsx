@@ -23,7 +23,7 @@ import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { chainBuilder } from '@/tests/builders/chains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { render } from '@/tests/test-utils'
-import { fireEvent, waitFor } from '@testing-library/react'
+import { act, fireEvent, waitFor } from '@testing-library/react'
 import type {
   RecipientAnalysisResults,
   ContractAnalysisResults,
@@ -414,6 +414,16 @@ describe('ExecuteForm', () => {
     const mockSigner = (address: string) =>
       jest.spyOn(useWallet, 'useSigner').mockReturnValue({ address, chainId: '1', provider: null })
 
+    // `useHasFeature` calls the module-local `useCurrentChain`, so it needs its own mock.
+    const mockChainFeature = (feature: FEATURES) => {
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(
+        chainBuilder()
+          .with({ features: [feature] })
+          .build(),
+      )
+      jest.spyOn(useChains, 'useHasFeature').mockImplementation((f) => f === feature)
+    }
+
     beforeEach(() => {
       const safeAddress = '0x0000000000000000000000000000000000000C11'
       jest.spyOn(useSafeInfo, 'default').mockReturnValue({
@@ -424,6 +434,8 @@ describe('ExecuteForm', () => {
         safeLoaded: true,
         safeLoading: false,
       })
+      // Safe-paid fees are a GTF (RELAY_FEE) feature; the daily-limit cases mock their own chain.
+      mockChainFeature(FEATURES.GTF)
     })
 
     afterEach(() => {
@@ -516,6 +528,41 @@ describe('ExecuteForm', () => {
           false,
         )
       })
+    })
+
+    // Branch scope: the split sign/execute behavior must stay on RELAY_FEE (GTF) chains. On a
+    // daily-limit relay chain a parent approveHash is an ordinary relayable tx, so it must not be
+    // forced onto the Safe-paid path nor blocked for a smart account executor.
+    it('does not treat a nested approveHash as Safe-paid on a daily-limit chain', async () => {
+      mockChainFeature(FEATURES.RELAYING)
+      mockSigner('0x0000000000000000000000000000000000000A11')
+      const isSmartAccountCheck = jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(true)
+      jest.spyOn(useWalletCanRelay, 'default').mockReturnValue([true, undefined, false])
+      jest.spyOn(relayUtils, 'hasRemainingRelays').mockReturnValue(true)
+
+      const { queryByText, getByText } = render(<ExecuteForm {...defaultProps} safeTx={nestedApproveHashTx()} />)
+
+      // Let the async smart-account check settle, so a block would have rendered by now if it applied.
+      await waitFor(() => expect(isSmartAccountCheck).toHaveBeenCalled())
+      await act(async () => {})
+
+      expect(queryByText(/pay gas from this Safe account/)).not.toBeInTheDocument()
+      expect(queryByText(/require Gelato relay/)).not.toBeInTheDocument()
+      expect(getByText('Execute')).not.toBeDisabled()
+    })
+
+    // The fully-signed relaxation is GTF-only: on a daily-limit chain a Safe-paid payload keeps the
+    // pre-branch behavior of blocking a smart account executor outright.
+    it('keeps blocking a fully signed Safe-paid tx on a daily-limit chain', async () => {
+      mockChainFeature(FEATURES.RELAYING)
+      mockSigner('0x0000000000000000000000000000000000000A11')
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(true)
+      jest.spyOn(useWalletCanRelay, 'default').mockReturnValue([true, undefined, false])
+
+      const { findByText, getByText } = render(<ExecuteForm {...defaultProps} safeTx={safePaidTx(SAFE_THRESHOLD)} />)
+
+      expect(await findByText(/pay gas from this Safe account/)).toBeInTheDocument()
+      expect(getByText('Execute')).toBeDisabled()
     })
   })
 })

@@ -261,7 +261,10 @@ export const useTxActions = (): TxActions => {
       if (isRelayed) {
         // No-op unless this is a parent Safe's approveHash (TX_P): once relayed, post the parent's
         // confirmation to the child so its approval shows immediately without waiting on indexing.
-        confirmNestedApprovalOnExecution(txId, safeAddress, chainId, safeTx)
+        // Only on GTF chains, where the split sign/execute flow produces TX_P in the first place.
+        if (hasFeature(chain, FEATURES.GTF)) {
+          confirmNestedApprovalOnExecution(txId, safeAddress, chainId, safeTx)
+        }
         await dispatchTxRelay(safeTx, safe, txId, chain, txOptions.gasLimit, acceptUnverifiedSimulation)
       } else {
         const isSmartAccount = await isSmartContractWallet(signer.chainId, signer.address)

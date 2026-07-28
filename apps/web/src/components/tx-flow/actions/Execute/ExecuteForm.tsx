@@ -96,8 +96,10 @@ export const ExecuteForm = ({
   const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
 
   // TX_P: the zero-fee parent approveHash from the nested split-sign and execute flow. It is NOT GtfSafePaid
-  // (carries no fee fields), but it must be relayed — sponsored, so the parent's EOA needs no gas.
-  const isNestedApproveHash = !!safeTx && !!decodeNestedApproval(safeTx)
+  // (carries no fee fields), but it must be relayed — sponsored, so the parent's EOA needs no gas. The
+  // split flow only exists on GTF chains; elsewhere a parent approveHash is an ordinary tx that draws
+  // from the daily relay quota, so it must keep the standard behavior.
+  const isNestedApproveHash = isGtfChain && !!safeTx && !!decodeNestedApproval(safeTx)
 
   const requiresRelay =
     (safeTx && isGtfSafePaid(safeTx.data)) ||
@@ -111,9 +113,15 @@ export const ExecuteForm = ({
     () => (!signer || signer.isSafe ? undefined : isSmartContractWallet(signer.chainId, signer.address)),
     [signer],
   )
-  const isFullySigned = !!safeTx && safeTx.signatures.size >= safe.threshold
+  // A fully signed tx needs nothing from the executor: the relay submits it on-chain and pays the gas,
+  // so a smart account executor is fine. Scoped to GTF chains — that is where this branch's split
+  // sign/execute flow lives, and daily-limit relay chains must keep their existing behavior.
+  const relayNeedsNothingFromExecutor = isGtfChain && !!safeTx && safeTx.signatures.size >= safe.threshold
+
+  // A smart account executor (a parent Safe) can't add its own signature inline while executing, so a
+  // Safe-paid tx that still needs signatures would dead end at sign time — block Execute there.
   const blockSafePaysFromNestedExecutor =
-    (signer?.isSafe === true || isSignerSmartAccount === true) && !!requiresRelay && !isFullySigned
+    (signer?.isSafe === true || isSignerSmartAccount === true) && !!requiresRelay && !relayNeedsNothingFromExecutor
 
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)

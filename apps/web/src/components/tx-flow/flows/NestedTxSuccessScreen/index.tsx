@@ -17,12 +17,17 @@ import Track from '@/components/common/Track'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { getSafeTransaction } from '@/utils/transactions'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 type Props = {
   txId: string
 }
 const NestedTxSuccessScreen = ({ txId }: Props) => {
   const addressBook = useAddressBook()
+  // The parent's approval is only gas-free on GTF chains, where the relay is sponsored. Elsewhere it
+  // is an ordinary tx the parent's signer pays for (or covers from the daily relay quota).
+  const isSponsoredRelay = useHasFeature(FEATURES.GTF) ?? false
 
   // _pendingTx eventually clears from the store, so we need to cache it
   const _pendingTx = useAppSelector((state) => (txId ? selectPendingTxById(state, txId) : undefined))
@@ -74,7 +79,8 @@ const NestedTxSuccessScreen = ({ txId }: Props) => {
         </Typography>
         <Typography variant="body2" mb={3}>
           Execute this approval from the parent Safe Account&apos;s queue to confirm the current Safe Account&apos;s
-          transaction. No gas is needed — it&apos;s relayed for you.
+          transaction.
+          {isSponsoredRelay && " No gas is needed — it's relayed for you."}
         </Typography>
         <Stack spacing={2} width="70%">
           <Box display="flex" flexDirection="column" alignItems="start" gap={1}>
