@@ -140,11 +140,10 @@ const headerSx = {
   '& .MuiTableSortLabel-icon': { color: 'text.secondary', fontSize: '14px', ml: 0.25, mr: 0 },
   // Match the body cells' slim padding so labels align with their columns.
   px: 1,
-  // The grey bar sits inset 4px from the panel edges: transparent borders +
-  // padding-box clip shrink the painted background without moving the cells.
-  // `&&` outranks the theme's MuiTableCell-head border-bottom.
+  // Transparent borders inset the grey bar 4px from the panel's top and side edges (no bottom —
+  // the first row's top border provides that gap). `&&` outranks the theme's head border-bottom.
   backgroundClip: 'padding-box',
-  '&&': { border: '4px solid transparent', borderLeft: 'none', borderRight: 'none' },
+  '&&': { border: 'none', borderTop: '4px solid transparent' },
   '&&:first-of-type': { pl: 2, borderLeft: '4px solid transparent' },
   '&&:last-of-type': { pr: 2, borderRight: '4px solid transparent' },
 } as const
@@ -277,20 +276,23 @@ const SafeAccountsTable = ({
               backgroundColor: 'var(--muted)',
             },
             '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root:first-of-type': {
-              borderTopLeftRadius: '8px',
-              borderBottomLeftRadius: '8px',
+              borderTopLeftRadius: '16px',
+              borderBottomLeftRadius: '16px',
             },
             '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root:last-of-type': {
-              borderTopRightRadius: '8px',
-              borderBottomRightRadius: '8px',
+              borderTopRightRadius: '16px',
+              borderBottomRightRadius: '16px',
             },
             // Transparent top/bottom borders (with background-clip) inset the hover pill vertically so it
             // floats clear of the separators. Set here — not per-cell — because the base theme forces
             // cell borderBottom to `none` at a specificity a per-cell sx can't beat (which is why only
             // the bottom touched). The outer cells' horizontal inset borders live in the cell sx.
+            // Asymmetric split because the 1px separator is drawn inside the bottom border, and the
+            // row background paints it ~1px above the row's bottom edge — 5/8 lands the pill visually
+            // centred with ~6px of clear space on each side of the line.
             '& .MuiTableBody-root .MuiTableCell-root': {
-              borderTop: '6px solid transparent',
-              borderBottom: '6px solid transparent',
+              borderTop: '5px solid transparent',
+              borderBottom: '8px solid transparent',
               backgroundClip: 'padding-box',
             },
             // Row separator, drawn as a 1px line at the bottom of the <tr> (keyed off data-divider,
@@ -325,8 +327,8 @@ const SafeAccountsTable = ({
                     sortDirection={sort.orderBy === column.sortKey ? sort.order : false}
                     className={cn(
                       'bg-muted',
-                      index === 0 && 'rounded-l-md',
-                      index === visibleColumns.length - 1 && 'rounded-r-md',
+                      index === 0 && 'rounded-l-lg',
+                      index === visibleColumns.length - 1 && 'rounded-r-lg',
                     )}
                     sx={{
                       ...headerSx,

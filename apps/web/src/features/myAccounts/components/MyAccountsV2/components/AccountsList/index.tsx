@@ -96,7 +96,7 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
       )}
 
       {pinnedSafes.length > 0 && (
-        <section data-testid="pinned-accounts" className="mb-4">
+        <section data-testid="pinned-accounts">
           <SafeAccountsTable
             items={pinnedSafes}
             onLinkClick={onLinkClick}
