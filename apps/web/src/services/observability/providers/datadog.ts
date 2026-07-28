@@ -23,6 +23,7 @@ import {
   DATADOG_RUM_TRACING_ENABLED,
   GATEWAY_URL_PRODUCTION,
   GATEWAY_URL_STAGING,
+  IS_TEST_E2E,
 } from '@/config/constants'
 
 type DatadogSite =
@@ -33,7 +34,12 @@ type DatadogSite =
   | 'ddog-gov.com'
   | 'ap1.datadoghq.com'
 
-export const isDatadogEnabled = Boolean(DATADOG_RUM_APPLICATION_ID) && Boolean(DATADOG_RUM_CLIENT_TOKEN)
+/**
+ * E2E runs are excluded: Cypress/Playwright drive a real browser against a local build, so their
+ * errors land in RUM as ordinary `session.type:user` traffic and can't be filtered out downstream.
+ * That inflated the top error issues by ~45% and made fixed bugs look alive.
+ */
+export const isDatadogEnabled = Boolean(DATADOG_RUM_APPLICATION_ID) && Boolean(DATADOG_RUM_CLIENT_TOKEN) && !IS_TEST_E2E
 
 const EXTENSION_URL_PATTERNS = [
   'chrome-extension://',
