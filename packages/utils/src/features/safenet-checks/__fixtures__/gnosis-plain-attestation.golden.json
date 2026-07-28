@@ -1,7 +1,8 @@
 {
-  "provenance": "Gnosis mainnet Safenet beta (chainId 100), non-oracle path — block 47435266, tx 0x3d2fb2daefcb9a1f3844cbc6c366294e90be5dd7ce10dbae3fb5ffeb9b8bbbe0, captured 2026-07-28",
+  "provenance": "Gnosis mainnet Safenet beta, non-oracle path — block 47435266, tx 0x3d2fb2daefcb9a1f3844cbc6c366294e90be5dd7ce10dbae3fb5ffeb9b8bbbe0, captured 2026-07-28. Re-capture: scan Consensus for a TransactionAttested (topic0 0x72272729e643703db011cc155474c30d652f1a68712d921cc263a881efd7bce6), then getEpochGroupId(epoch) -> groupKey(groupId).",
   "path": "non-oracle",
   "chainId": "100",
+  "chainIdNote": "chainId is the Safenet chain (Gnosis), which is what the EIP-712 domain uses. safeChainId is the chain the Safe lives on, as carried in the event — deriving the preimage with it fails verification.",
   "safeChainId": "42161",
   "consensus": "0x223624cBF099e5a8f8cD5aF22aFa424a1d1acEE9",
   "coordinator": "0xaE27021CEB45316f1efe69D8E362aC07ED3Bd7E4",

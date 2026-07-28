@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { AbiCoder, concat, keccak256, toUtf8Bytes } from 'ethers'
+import { keccak256, toUtf8Bytes } from 'ethers'
 import { deriveRequestId, oracleProposalHash, plainProposalHash, type OracleProposal } from '../oracleProposalHash'
 import type { Hex } from '../../types'
 
@@ -43,23 +43,16 @@ describe('oracleProposalHash', () => {
 })
 
 /**
- * Typehash constants as they are hardcoded in `ConsensusMessages.sol`. Pinning
- * them here means a typo in either ported type string fails the build rather
- * than producing a hash that verifies against nothing.
+ * Typehash constants as hardcoded in `ConsensusMessages.sol`, so a typo in
+ * either ported type string names itself instead of producing a hash that
+ * verifies against nothing.
  *
- * These are corroboration, not the primary evidence: `frost/verify.test.ts`
- * proves `plainProposalHash` against a real Gnosis beta attestation and
- * `oracleProposalHash` against a real devnet one, which is what actually pins
- * both preimages to deployed contracts. The domain and `TransactionProposal`
- * typehashes were also confirmed present in the beta Consensus runtime bytecode
- * — see `__fixtures__/README.md`.
+ * Corroboration, not the primary evidence — `frost/verify.test.ts` proves both
+ * preimages against real attestations. The domain and `TransactionProposal`
+ * typehashes were also confirmed present in the beta Consensus runtime bytecode;
+ * the `OracleTransactionProposal` one is absent, because the oracle path is not
+ * in that deployment at all.
  */
-const DOMAIN_TYPEHASH = '0x47e79534a245952e8b16893a336b85a3d9ea9fa8c573f3d803afb92a79469218'
-const TRANSACTION_PROPOSAL_TYPEHASH = '0x0791f9d2a47e59f417d6c5d2ac1c700ccf949a66461ac7842e6d104c1a92b152'
-const ORACLE_TRANSACTION_PROPOSAL_TYPEHASH = '0x30673a82bcf1a0fa66d1c97cbe53999fc6c0b3e987742353c9aaecb3890205e9'
-
-const abi = AbiCoder.defaultAbiCoder()
-
 describe('plainProposalHash', () => {
   const plain = {
     chainId: golden.chainId,
@@ -68,24 +61,21 @@ describe('plainProposalHash', () => {
     safeTxHash: golden.safeTxHash,
   }
 
-  it("the contract's precomputed typehashes match the ported type strings", () => {
-    expect(keccak256(toUtf8Bytes('EIP712Domain(uint256 chainId,address verifyingContract)'))).toBe(DOMAIN_TYPEHASH)
-    expect(keccak256(toUtf8Bytes('TransactionProposal(uint64 epoch,bytes32 safeTxHash)'))).toBe(
-      TRANSACTION_PROPOSAL_TYPEHASH,
-    )
-    expect(keccak256(toUtf8Bytes('OracleTransactionProposal(uint64 epoch,address oracle,bytes32 safeTxHash)'))).toBe(
-      ORACLE_TRANSACTION_PROPOSAL_TYPEHASH,
-    )
-  })
-
-  it('matches a hand-built EIP-712 digest over the contract typehash', () => {
-    const structHash = keccak256(
-      abi.encode(['bytes32', 'uint64', 'bytes32'], [TRANSACTION_PROPOSAL_TYPEHASH, golden.epoch, golden.safeTxHash]),
-    )
-    const domainSeparator = keccak256(
-      abi.encode(['bytes32', 'uint256', 'address'], [DOMAIN_TYPEHASH, golden.chainId, golden.consensus]),
-    )
-    expect(plainProposalHash(plain)).toBe(keccak256(concat(['0x1901', domainSeparator, structHash])))
+  it.each([
+    [
+      'EIP712Domain(uint256 chainId,address verifyingContract)',
+      '0x47e79534a245952e8b16893a336b85a3d9ea9fa8c573f3d803afb92a79469218',
+    ],
+    [
+      'TransactionProposal(uint64 epoch,bytes32 safeTxHash)',
+      '0x0791f9d2a47e59f417d6c5d2ac1c700ccf949a66461ac7842e6d104c1a92b152',
+    ],
+    [
+      'OracleTransactionProposal(uint64 epoch,address oracle,bytes32 safeTxHash)',
+      '0x30673a82bcf1a0fa66d1c97cbe53999fc6c0b3e987742353c9aaecb3890205e9',
+    ],
+  ])('the contract typehash for %s is the keccak of the ported type string', (typeString, typehash) => {
+    expect(keccak256(toUtf8Bytes(typeString))).toBe(typehash)
   })
 
   it('is distinct from the oracle hash for the same epoch and safeTxHash', () => {

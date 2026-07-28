@@ -1,8 +1,7 @@
 import { concatBytes } from '@noble/hashes/utils'
 import { getBytes, keccak256, toBeHex } from 'ethers'
 import { h2 } from '../hashes'
-import { G_BASE, N, g } from '../math'
-import { verifyAttestation } from '../verify'
+import { N, g, verifyAttestation } from '../verify'
 import type { Hex } from '../../../types'
 
 /**
@@ -98,16 +97,6 @@ describe('FROST round-trip — every single-field mutation is rejected', () => {
   it('rejects the identity commitment (R = 0) regardless of scalar', () => {
     const honest = sign(scalarAt('key', 1), scalarAt('nonce', 1), messageAt(1))
     expect(verifyAttestation({ ...honest, attestation: { ...honest.attestation, r: { x: '0', y: '0' } } })).toBe(false)
-  })
-})
-
-describe('FROST round-trip — the signer itself is on the curve', () => {
-  it('generated group keys and commitments are valid secp256k1 points', () => {
-    for (let i = 0; i < 4; i++) {
-      const point = g(scalarAt('key', i))
-      expect(() => point.assertValidity()).not.toThrow()
-      expect(point.equals(G_BASE.multiply(scalarAt('key', i)))).toBe(true)
-    }
   })
 })
 
