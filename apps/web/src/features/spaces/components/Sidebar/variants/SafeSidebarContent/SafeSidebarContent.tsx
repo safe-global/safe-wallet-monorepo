@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
-import { useCallback, useContext, useMemo } from 'react'
+import { useCallback, useContext, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
-import { safeMainNavigation, safeDefiGroup, safeDeveloperGroup } from '../../config'
+import { safeMainNavigation, safeDefiGroup, safeDeveloperGroup, FEATURE_FLAGS_ITEM_ID } from '../../config'
 import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
 import { SafeSidebarVariant } from '../SafeSidebarVariant'
 import { useQueuedTxsLength } from '@/hooks/useTxQueue'
@@ -10,7 +10,15 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { isRouteEnabled } from '@/utils/chains'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import type { SafeWorkspaceHeaderProps, SidebarItemConfig, SpaceItem, SidebarVariantContentProps } from '../../types'
+import type {
+  SafeWorkspaceHeaderProps,
+  SidebarItemConfig,
+  SpaceItem,
+  SidebarVariantContentProps,
+  ResolvedSidebarActionGroup,
+} from '../../types'
+// eslint-disable-next-line no-restricted-imports -- the loader IS the lazy boundary; going through the barrel (or useLoadFeature) would pull the dev-only editor graph into the production bundle, which importGraph.test.ts guards
+import { FeatureFlagEditorDialogLoader } from '@/features/feature-flags/components/FeatureFlagEditorDialogLoader'
 import { getQuerySpaceId } from '../../utils'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { useAppSelector } from '@/store'
@@ -109,50 +117,47 @@ export const SafeSidebarContent = ({
     })
   }, [visibleMainNavigation, queueSize])
 
+  const [isEditorOpen, setEditorOpen] = useState(false)
+
   // The Developer group is dev-only and carries a live override-count badge. The selector is
   // called unconditionally to respect the rules of hooks; it's trivial in production.
   const overrideCount = useAppSelector(selectOverrideCount)
-  const developerGroupConfig = useMemo(() => {
+  const developerGroup: ResolvedSidebarActionGroup | undefined = useMemo(() => {
     if (process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true') return undefined
     return {
-      ...safeDeveloperGroup,
-      items: safeDeveloperGroup.items.map((item) =>
-        item.href === AppRoutes.featureFlags && overrideCount > 0 ? { ...item, badge: overrideCount } : item,
-      ),
+      label: safeDeveloperGroup.label,
+      items: safeDeveloperGroup.items.map((item) => ({
+        icon: item.icon,
+        label: item.label,
+        id: item.id,
+        badge: item.id === FEATURE_FLAGS_ITEM_ID && overrideCount > 0 ? overrideCount : undefined,
+        isActive: false,
+        disabled: false,
+        testId: `sidebar-${item.id}-item`,
+        onSelect: () => setEditorOpen(true),
+      })),
     }
   }, [overrideCount])
 
-  const { mainNavItems, setupGroup, developerGroup } = useResolvedSidebarNav(
-    mainNavWithBadges,
-    visibleDefiGroup,
-    {
-      getLink,
-      isItemDisabled,
-      isItemActive,
-    },
-    developerGroupConfig,
-  )
-
-  // The sidebar's Developer group is an action group now. Until it owns a real callback, the
-  // resolved route is replayed through the router so behaviour is unchanged.
-  const developerActionGroup = developerGroup && {
-    label: developerGroup.label,
-    items: developerGroup.items.map(({ href, link, ...item }) => ({
-      ...item,
-      id: href,
-      onSelect: () => router.push(link),
-    })),
-  }
+  const { mainNavItems, setupGroup } = useResolvedSidebarNav(mainNavWithBadges, visibleDefiGroup, {
+    getLink,
+    isItemDisabled,
+    isItemActive,
+  })
 
   const workspaceHeader = buildWorkspaceHeader(selectedSpace, spaceInitial, spaces, onSpaceAdded)
 
   return (
-    <SafeSidebarVariant
-      workspaceHeader={workspaceHeader}
-      mainNavItems={mainNavItems}
-      defiGroup={setupGroup}
-      developerGroup={developerActionGroup}
-      isLoading={isLoading}
-    />
+    <>
+      <SafeSidebarVariant
+        workspaceHeader={workspaceHeader}
+        mainNavItems={mainNavItems}
+        defiGroup={setupGroup}
+        developerGroup={developerGroup}
+        isLoading={isLoading}
+      />
+
+      {developerGroup && <FeatureFlagEditorDialogLoader open={isEditorOpen} onOpenChange={setEditorOpen} />}
+    </>
   )
 }

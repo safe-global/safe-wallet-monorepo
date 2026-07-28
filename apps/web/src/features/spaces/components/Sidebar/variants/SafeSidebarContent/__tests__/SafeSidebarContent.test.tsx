@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { fireEvent, render } from '@testing-library/react'
 import { ArrowUpRight } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
@@ -46,9 +46,12 @@ jest.mock('@/store', () => ({
 }))
 
 jest.mock('../../../hooks/useResolvedSidebarNav', () => ({
-  useResolvedSidebarNav: jest.fn((main, setup, options, developerGroupConfig) =>
-    mockUseResolvedSidebarNav(main, setup, options, developerGroupConfig),
-  ),
+  useResolvedSidebarNav: jest.fn((main, setup, options) => mockUseResolvedSidebarNav(main, setup, options)),
+}))
+
+jest.mock('@/features/feature-flags/components/FeatureFlagEditorDialogLoader', () => ({
+  FeatureFlagEditorDialogLoader: ({ open }: { open: boolean }) =>
+    open ? <div data-testid="feature-flag-editor-dialog" /> : null,
 }))
 
 jest.mock('../../../config', () => {
@@ -67,8 +70,9 @@ jest.mock('../../../config', () => {
     },
     safeDeveloperGroup: {
       label: 'Developer',
-      items: [{ icon: Icon, label: 'Feature flags', href: AppRoutes.featureFlags }],
+      items: [{ icon: Icon, label: 'Feature flags', id: 'feature-flags' }],
     },
+    FEATURE_FLAGS_ITEM_ID: 'feature-flags',
   }
 })
 
@@ -81,7 +85,9 @@ jest.mock('../../SafeSidebarVariant', () => ({
       <div>
         Safe sidebar
         {props.developerGroup?.items.map((item) => (
-          <span key={item.id}>{item.label}</span>
+          <button key={item.id} onClick={item.onSelect}>
+            {item.label}
+          </button>
         ))}
       </div>
     )
@@ -98,7 +104,6 @@ type CallArgs = [
     isItemActive: (item: SidebarItemConfig, pathname: string) => boolean
     isItemDisabled: (item: SidebarItemConfig) => boolean
   },
-  SidebarGroupConfig | undefined,
 ]
 
 const getCallArgs = () => mockUseResolvedSidebarNav.mock.calls[0] as CallArgs
@@ -365,12 +370,6 @@ describe('SafeSidebarContent', () => {
   describe('developer group', () => {
     it('renders the dev-only Feature flags item', () => {
       // NEXT_PUBLIC_IS_PRODUCTION is not 'true' in the test env
-      mockUseResolvedSidebarNav.mockImplementation((main, setup, options, developerGroupConfig) => ({
-        mainNavItems: [],
-        setupGroup: { label: 'Defi', items: [] },
-        developerGroup: developerGroupConfig,
-      }))
-
       const { getByText } = render(<SafeSidebarContent {...defaultProps} />)
 
       expect(getByText('Feature flags')).toBeInTheDocument()
@@ -378,32 +377,45 @@ describe('SafeSidebarContent', () => {
 
     it('passes the override count as a badge on the Feature flags item', () => {
       mockUseAppSelector.mockReturnValue(3)
-      mockUseResolvedSidebarNav.mockImplementation((main, setup, options, developerGroupConfig) => ({
-        mainNavItems: [],
-        setupGroup: { label: 'Defi', items: [] },
-        developerGroup: developerGroupConfig,
-      }))
 
       render(<SafeSidebarContent {...defaultProps} />)
 
-      const [, , , developerGroupConfig] = getCallArgs()
-      const featureFlagsItem = developerGroupConfig?.items.find((item) => item.href === AppRoutes.featureFlags)
+      const { developerGroup } = mockSafeSidebarVariant.mock.calls.at(-1)![0] as SafeSidebarVariantProps
+      const featureFlagsItem = developerGroup?.items.find((item) => item.id === 'feature-flags')
       expect(featureFlagsItem?.badge).toBe(3)
+    })
+
+    it('leaves the badge unset when there are no overrides', () => {
+      mockUseAppSelector.mockReturnValue(0)
+
+      render(<SafeSidebarContent {...defaultProps} />)
+
+      const { developerGroup } = mockSafeSidebarVariant.mock.calls.at(-1)![0] as SafeSidebarVariantProps
+      const featureFlagsItem = developerGroup?.items.find((item) => item.id === 'feature-flags')
+      expect(featureFlagsItem?.badge).toBeUndefined()
+    })
+
+    it('opens the editor dialog when the Feature flags item is selected', () => {
+      mockUseAppSelector.mockReturnValue(0)
+
+      const { getByRole, queryByTestId } = render(<SafeSidebarContent {...defaultProps} />)
+      expect(queryByTestId('feature-flag-editor-dialog')).not.toBeInTheDocument()
+
+      fireEvent.click(getByRole('button', { name: 'Feature flags' }))
+
+      expect(queryByTestId('feature-flag-editor-dialog')).toBeInTheDocument()
     })
 
     it('hides the Feature flags item in production', () => {
       const originalIsProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION
       process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
-      mockUseResolvedSidebarNav.mockImplementation((main, setup, options, developerGroupConfig) => ({
-        mainNavItems: [],
-        setupGroup: { label: 'Defi', items: [] },
-        developerGroup: developerGroupConfig,
-      }))
 
       try {
         const { queryByText } = render(<SafeSidebarContent {...defaultProps} />)
 
         expect(queryByText('Feature flags')).not.toBeInTheDocument()
+        const { developerGroup } = mockSafeSidebarVariant.mock.calls.at(-1)![0] as SafeSidebarVariantProps
+        expect(developerGroup).toBeUndefined()
       } finally {
         process.env.NEXT_PUBLIC_IS_PRODUCTION = originalIsProduction
       }

@@ -21,7 +21,7 @@ import {
   FlaskConical,
 } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
-import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
+import type { SidebarItemConfig, SidebarGroupConfig, SidebarActionGroupConfig } from '../types'
 
 export const spacesMainNavigation: SidebarItemConfig[] = [
   {
@@ -130,13 +130,16 @@ export const safeDefiGroup: SidebarGroupConfig = {
   ],
 }
 
-export const safeDeveloperGroup: SidebarGroupConfig = {
+/** Identity for the dev-only feature-flag editor entry, which opens a dialog rather than navigating. */
+export const FEATURE_FLAGS_ITEM_ID = 'feature-flags'
+
+export const safeDeveloperGroup: SidebarActionGroupConfig = {
   label: 'Developer',
   items: [
     {
       icon: FlaskConical,
       label: 'Feature flags',
-      href: AppRoutes.featureFlags,
+      id: FEATURE_FLAGS_ITEM_ID,
     },
   ],
 }
