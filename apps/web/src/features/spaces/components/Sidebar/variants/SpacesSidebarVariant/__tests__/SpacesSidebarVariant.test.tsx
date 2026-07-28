@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { Home, FileText, Users, Shield } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { SpacesSidebarVariant } from '../SpacesSidebarVariant'
-import type { ResolvedSidebarItem, ResolvedSidebarGroup, SpaceItem } from '../../../types'
+import type { ResolvedSidebarNavItem, ResolvedSidebarGroup, SpaceItem } from '../../../types'
 
 jest.mock('@/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -67,7 +67,7 @@ describe('SpacesSidebarVariant', () => {
     { uuid: 'uuid-2', name: 'Space 2', safeCount: 0 },
   ]
 
-  const mockMainNavItems: ResolvedSidebarItem[] = [
+  const mockMainNavItems: ResolvedSidebarNavItem[] = [
     {
       icon: Home,
       label: 'Home',

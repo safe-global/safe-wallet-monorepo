@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { House } from 'lucide-react'
 import type { ReactElement, ReactNode } from 'react'
-import type { ResolvedSidebarItem } from '../../../types'
+import type { ResolvedSidebarItem, ResolvedSidebarActionItem } from '../../../types'
 import { NavItem } from '../NavItem'
 
 const mockTrackEvent = jest.fn()
@@ -378,6 +378,56 @@ describe('NavItem', () => {
         expect.objectContaining({ action: 'Open Earn', label: 'sidebar' }),
         undefined,
       )
+    })
+  })
+
+  const actionItem: ResolvedSidebarActionItem = {
+    icon: House,
+    label: 'Feature flags',
+    id: 'feature-flags',
+    isActive: false,
+    disabled: false,
+    onSelect: jest.fn(),
+  }
+
+  describe('action items', () => {
+    it('renders a button rather than a link', () => {
+      render(<NavItem item={{ ...actionItem, onSelect: jest.fn() }} />)
+
+      expect(screen.queryByRole('link')).not.toBeInTheDocument()
+      expect(screen.getByTestId('sidebar-list-item')).toHaveTextContent('Feature flags')
+    })
+
+    it('calls onSelect when clicked', () => {
+      const onSelect = jest.fn()
+      render(<NavItem item={{ ...actionItem, onSelect }} />)
+
+      fireEvent.click(screen.getByTestId('sidebar-list-item'))
+
+      expect(onSelect).toHaveBeenCalledTimes(1)
+    })
+
+    it('still tracks the sidebar click', () => {
+      render(<NavItem item={{ ...actionItem, onSelect: jest.fn() }} />)
+
+      fireEvent.click(screen.getByTestId('sidebar-list-item'))
+
+      expect(mockTrackEvent).toHaveBeenCalledWith({ action: 'Sidebar clicked' }, { sidebarElement: 'Feature flags' })
+    })
+
+    it('does not call onSelect when disabled', () => {
+      const onSelect = jest.fn()
+      render(<NavItem item={{ ...actionItem, onSelect, disabled: true }} />)
+
+      fireEvent.click(screen.getByTestId('sidebar-list-item'))
+
+      expect(onSelect).not.toHaveBeenCalled()
+    })
+
+    it('renders a badge', () => {
+      render(<NavItem item={{ ...actionItem, onSelect: jest.fn(), badge: 3 }} />)
+
+      expect(screen.getByLabelText('3 Feature flags notifications')).toHaveTextContent('3')
     })
   })
 })

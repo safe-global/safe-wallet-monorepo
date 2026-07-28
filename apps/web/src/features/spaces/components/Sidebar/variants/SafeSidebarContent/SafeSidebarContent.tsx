@@ -133,6 +133,17 @@ export const SafeSidebarContent = ({
     developerGroupConfig,
   )
 
+  // The sidebar's Developer group is an action group now. Until it owns a real callback, the
+  // resolved route is replayed through the router so behaviour is unchanged.
+  const developerActionGroup = developerGroup && {
+    label: developerGroup.label,
+    items: developerGroup.items.map(({ href, link, ...item }) => ({
+      ...item,
+      id: href,
+      onSelect: () => router.push(link),
+    })),
+  }
+
   const workspaceHeader = buildWorkspaceHeader(selectedSpace, spaceInitial, spaces, onSpaceAdded)
 
   return (
@@ -140,7 +151,7 @@ export const SafeSidebarContent = ({
       workspaceHeader={workspaceHeader}
       mainNavItems={mainNavItems}
       defiGroup={setupGroup}
-      developerGroup={developerGroup}
+      developerGroup={developerActionGroup}
       isLoading={isLoading}
     />
   )

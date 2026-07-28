@@ -69,10 +69,16 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
 
   const handleClick = () => {
     if (item.disabled) return
-    const customEvent = customNavEvents[item.href]
-    if (customEvent) {
-      trackEvent({ ...customEvent.event, label: customEvent.label }, customEvent.mixpanelParams)
+
+    if (item.onSelect) {
+      item.onSelect()
+    } else if (item.href) {
+      const customEvent = customNavEvents[item.href]
+      if (customEvent) {
+        trackEvent({ ...customEvent.event, label: customEvent.label }, customEvent.mixpanelParams)
+      }
     }
+
     trackEvent({ ...OVERVIEW_EVENTS.SIDEBAR_CLICKED }, { [MixpanelEventParams.SIDEBAR_ELEMENT]: item.label })
     if (isMobile || isTablet) {
       setOpenMobile(false)
@@ -85,7 +91,7 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
       isActive={item.isActive}
       disabled={item.disabled}
       className={`h-9 gap-3 ${css.sidebarInteractive} ${css.sidebarNavItem}`}
-      render={!item.disabled ? <Link href={item.link} /> : undefined}
+      render={!item.disabled && item.link ? <Link href={item.link} /> : undefined}
       data-testid={dataTestId}
       onClick={handleClick}
     >

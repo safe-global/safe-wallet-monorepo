@@ -5,7 +5,9 @@ import type {
   SafeWorkspaceHeaderBackToSpace,
   SafeWorkspaceHeaderAddToWorkspace,
   ResolvedSidebarItem,
+  ResolvedSidebarNavItem,
   ResolvedSidebarGroup,
+  ResolvedSidebarActionGroup,
 } from '../../../types'
 import { AppRoutes } from '@/config/routes'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
@@ -84,7 +86,11 @@ jest.mock('@/utils/colors', () => ({
 jest.mock('../../NavItem', () => ({
   NavItem: ({ item }: { item: ResolvedSidebarItem | null }) =>
     item ? (
-      <div data-testid={item.testId ?? `sidebar-item-${item.label.toLowerCase()}`} data-active={item.isActive}>
+      <div
+        data-key={'id' in item ? item.id : item.href}
+        data-testid={item.testId ?? `sidebar-item-${item.label.toLowerCase()}`}
+        data-active={item.isActive}
+      >
         {item.label}
         {!!item.badge && <span aria-label={`${item.badge} ${item.label} notifications`}>{item.badge}</span>}
         {item.indicator && <span aria-hidden />}
@@ -188,8 +194,8 @@ const createAddHeader = (
 
 const MockIcon = () => <div>Icon</div>
 
-const createMockNavItem = (overrides: Partial<ResolvedSidebarItem> = {}): ResolvedSidebarItem => ({
-  icon: MockIcon as unknown as ResolvedSidebarItem['icon'],
+const createMockNavItem = (overrides: Partial<ResolvedSidebarNavItem> = {}): ResolvedSidebarNavItem => ({
+  icon: MockIcon as unknown as ResolvedSidebarNavItem['icon'],
   label: 'Item',
   href: '/item',
   isActive: false,
@@ -199,7 +205,7 @@ const createMockNavItem = (overrides: Partial<ResolvedSidebarItem> = {}): Resolv
 })
 
 describe('SafeSidebarVariant', () => {
-  const mockMainNavItems: ResolvedSidebarItem[] = [
+  const mockMainNavItems: ResolvedSidebarNavItem[] = [
     createMockNavItem({ label: 'Overview', href: '/home', link: { pathname: '/home', query: { spaceId: null } } }),
     createMockNavItem({
       label: 'Transactions',
@@ -214,14 +220,17 @@ describe('SafeSidebarVariant', () => {
     items: [createMockNavItem({ label: 'Swap', href: '/swap', link: { pathname: '/swap', query: {} } })],
   }
 
-  const mockDeveloperGroup: ResolvedSidebarGroup = {
+  const mockDeveloperGroup: ResolvedSidebarActionGroup = {
     label: 'Developer',
     items: [
-      createMockNavItem({
+      {
+        icon: MockIcon as unknown as ResolvedSidebarNavItem['icon'],
         label: 'Feature flags',
-        href: '/feature-flags',
-        link: { pathname: '/feature-flags', query: {} },
-      }),
+        id: 'feature-flags',
+        isActive: false,
+        disabled: false,
+        onSelect: jest.fn(),
+      },
     ],
   }
 
@@ -289,7 +298,7 @@ describe('SafeSidebarVariant', () => {
   })
 
   it('renders all main navigation items', () => {
-    const allNavItems: ResolvedSidebarItem[] = [
+    const allNavItems: ResolvedSidebarNavItem[] = [
       createMockNavItem({ label: 'Overview', href: AppRoutes.home, link: { pathname: AppRoutes.home, query: {} } }),
       createMockNavItem({
         label: 'Assets',

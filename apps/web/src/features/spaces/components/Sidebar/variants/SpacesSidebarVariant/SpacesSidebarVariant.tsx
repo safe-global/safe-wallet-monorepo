@@ -9,13 +9,13 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import css from '../../styles.module.css'
-import type { SpaceSelectorProps, ResolvedSidebarItem, ResolvedSidebarGroup } from '../../types'
+import type { SpaceSelectorProps, ResolvedSidebarNavItem, ResolvedSidebarGroup } from '../../types'
 import { NavItem } from '../NavItem'
 import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
 import { containerVariants, itemVariants } from '../../constants'
 
 interface SpacesSidebarVariantProps extends SpaceSelectorProps {
-  mainNavItems: ResolvedSidebarItem[] | null
+  mainNavItems: ResolvedSidebarNavItem[] | null
   setupGroup: ResolvedSidebarGroup | null
   isLoading?: boolean
 }

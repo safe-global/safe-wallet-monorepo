@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import css from '../../styles.module.css'
-import type { ResolvedSidebarItem, SafeSidebarVariantProps } from '../../types'
+import type { ResolvedSidebarNavItem, SafeSidebarVariantProps } from '../../types'
 import { AppRoutes } from '@/config/routes'
 import { NavItem } from '../NavItem'
 import { SidebarActionButton } from '../../NewTransactionButton'
@@ -55,7 +55,7 @@ export const SafeSidebarVariant = ({
 
   // Settings lives in the main nav group but isn't config-driven: its outdated indicator and
   // active state depend on the current Safe. Render it through NavItem so styling stays in sync.
-  const settingsItem: ResolvedSidebarItem = {
+  const settingsItem: ResolvedSidebarNavItem = {
     icon: Settings,
     label: 'Settings',
     href: AppRoutes.settings.setup,
@@ -135,7 +135,7 @@ export const SafeSidebarVariant = ({
               <SidebarGroupContent>
                 <SidebarMenu className="gap-0">
                   {developerGroup?.items.map((item) => (
-                    <NavItem key={item.href} item={item} isLoading={isLoading} />
+                    <NavItem key={item.id} item={item} isLoading={isLoading} />
                   ))}
                 </SidebarMenu>
               </SidebarGroupContent>
