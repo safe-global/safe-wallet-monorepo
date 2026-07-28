@@ -16,7 +16,7 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { openGlobalSearch } from '@/features/global-search/store'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import { useHydratedSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
@@ -59,7 +59,9 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const isSpaceRoute = useIsSpaceRoute()
   const pathname = usePathname()
   const isWelcomeListRoute = pathname === AppRoutes.welcome.accounts || pathname === AppRoutes.welcome.spaces
-  const urlSafeAddress = useSafeAddressFromUrl()
+  // Hydration-safe: this picks between the compact logo and the wide safe selector below, so it must
+  // resolve the same way in the prerendered HTML and on the first client render.
+  const urlSafeAddress = useHydratedSafeAddressFromUrl()
   const isSettingsWithoutSafe = pathname?.startsWith(AppRoutes.settings.index) === true && !urlSafeAddress
   // Routes whose left content is the compact Safe logo rather than the wide safe selector.
   const showLogo = isSettingsWithoutSafe || isWelcomeListRoute

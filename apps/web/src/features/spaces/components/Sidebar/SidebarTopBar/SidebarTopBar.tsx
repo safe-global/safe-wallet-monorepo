@@ -3,13 +3,16 @@ import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import { cn } from '@/utils/cn'
 import { AppRoutes } from '@/config/routes'
 import SafeLogo from '@/components/common/SafeLogo'
-import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import { useHydratedSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 
 export const SidebarTopBar = (): ReactElement => {
   const { state } = useSidebar()
   const isCollapsed = state === 'collapsed'
-  const safeAddress = useSafeAddressFromUrl()
+  // Rendered by both SidebarSkeleton and EnhancedSidebar, i.e. on both sides of the sidebar's
+  // hydration gate, so it has to stay hydration-safe on its own: `showHomeLabel` swaps SafeLogo's
+  // whole subtree, which is a hydration mismatch if it flips on the first client render.
+  const safeAddress = useHydratedSafeAddressFromUrl()
   const isSpaceRoute = useIsSpaceRoute()
 
   // Inside a space or an individual safe the logo turns into a "Home" label pill that returns to the

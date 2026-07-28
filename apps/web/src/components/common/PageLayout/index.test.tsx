@@ -75,6 +75,7 @@ jest.mock('@/hooks/useTopbarElevation', () => ({
 const mockUseSafeAddressFromUrl = jest.fn<string, []>(() => '')
 jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   useSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
+  useHydratedSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
 }))
 
 const mockUseIsSignedIn = jest.fn(() => false)

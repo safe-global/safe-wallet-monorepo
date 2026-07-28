@@ -23,7 +23,8 @@ import { cn } from '@/utils/cn'
 import { useIsSignedIn } from '@/hooks/useIsSignedIn'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
-import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import { useHydratedSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 import SpaceChainSelector from './SpaceChainSelector'
@@ -150,7 +151,10 @@ function ManageTrustedFooter({ onManage }: { onManage: () => void }) {
 function SpaceSafeBar() {
   const pathname = usePathname()
   const router = useRouter()
-  const urlSafeAddress = useSafeAddressFromUrl()
+  const isHydrated = useIsHydrated()
+  // Hydration-safe: gates the `return null` below, which would otherwise drop the whole bar from the
+  // prerendered HTML on /settings/* and mount it on the first client render.
+  const urlSafeAddress = useHydratedSafeAddressFromUrl()
   const isSignedIn = useIsSignedIn()
   const {
     workspaceItems,
@@ -163,6 +167,10 @@ function SpaceSafeBar() {
     isInSpaceContext,
     hasWallet,
   } = useSpaceSafeSelectorItems()
+  // The selector's contents derive from the URL safe address, so before hydration they'd differ from
+  // the prerendered HTML. Reuse the existing loading skeleton for the first render instead of gating
+  // the underlying hooks — those must keep firing immediately to preserve the parallel initial fetch.
+  const showSelectorSkeleton = isLoading || !isHydrated
   const { space } = useSpaceBackLink()
   const [selectedTab, setSelectedTab] = useState<DropdownTab | null>(null)
   const [search, setSearch] = useState('')
@@ -293,7 +301,7 @@ function SpaceSafeBar() {
             listItems={listItems}
             selectedItemId={selectedItemId}
             onItemSelect={handleItemSelect}
-            isLoading={isLoading}
+            isLoading={showSelectorSkeleton}
             isError={isError}
             onRetry={refetch}
             header={dropdownHeader}
@@ -307,7 +315,7 @@ function SpaceSafeBar() {
           />
         </div>
         <SpaceNestedSafesButton />
-        <SpaceChainSelector isLoading={isLoading} />
+        <SpaceChainSelector isLoading={showSelectorSkeleton} />
       </div>
       <TrustedSafesModal modal={trustedSafesModal} />
       {renameTarget && (

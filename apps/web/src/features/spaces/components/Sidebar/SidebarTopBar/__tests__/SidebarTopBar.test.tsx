@@ -11,7 +11,7 @@ jest.mock('next/router', () => ({
 }))
 
 jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
-  useSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
+  useHydratedSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
 }))
 
 jest.mock('@/hooks/useIsSpaceRoute', () => ({
@@ -132,5 +132,18 @@ describe('SidebarTopBar', () => {
     render(<SidebarTopBar />)
 
     expect(screen.getByTestId('logo-container')).toHaveAttribute('data-home-label', 'false')
+  })
+
+  it('reads the safe address through the hydration-gated hook', () => {
+    // This component renders on both sides of the sidebar's hydration gate (SidebarSkeleton and
+    // EnhancedSidebar), so it must gate the URL read itself. `showHomeLabel` swaps SafeLogo's whole
+    // subtree, so an ungated read flips it on the first client render → React #418.
+    const { useHydratedSafeAddressFromUrl, useSafeAddressFromUrl } = require('@/hooks/useSafeAddressFromUrl')
+
+    render(<SidebarTopBar />)
+
+    expect(useHydratedSafeAddressFromUrl).toBeDefined()
+    expect(useSafeAddressFromUrl).toBeUndefined()
+    expect(mockUseSafeAddressFromUrl).toHaveBeenCalled()
   })
 })

@@ -1,6 +1,6 @@
 import { useRouter } from 'next/compat/router'
 import { renderHook } from '@/tests/test-utils'
-import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import { useSafeAddressFromUrl, useHydratedSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 
 // Mock useRouter from next/compat/router (returns null when router is not mounted)
 jest.mock('next/compat/router', () => ({
@@ -10,6 +10,11 @@ jest.mock('next/compat/router', () => ({
       safe: 'rin:0x0000000000000000000000000000000000000001',
     },
   })),
+}))
+
+const mockIsHydrated = jest.fn(() => true)
+jest.mock('@/hooks/useIsHydrated', () => ({
+  useIsHydrated: () => mockIsHydrated(),
 }))
 
 // Tests for the useSafeAddress hook
@@ -89,6 +94,58 @@ describe('useSafeAddress hook', () => {
     ;(useRouter as any).mockImplementation(() => null)
 
     const { result } = renderHook(() => useSafeAddressFromUrl())
+    expect(result.current).toBe('')
+  })
+})
+
+describe('useHydratedSafeAddressFromUrl', () => {
+  const originalLocation = window.location
+
+  beforeEach(() => {
+    mockIsHydrated.mockReturnValue(true)
+    ;(useRouter as any).mockImplementation(() => ({
+      pathname: '/safe/home',
+      query: { safe: 'eth:0x220866b1a2219f40e72f5c628b65d54268ca3a9d' },
+    }))
+    Object.defineProperty(window, 'location', {
+      value: { ...originalLocation, search: '' },
+      writable: true,
+    })
+  })
+
+  afterAll(() => {
+    Object.defineProperty(window, 'location', {
+      value: originalLocation,
+      writable: true,
+    })
+  })
+
+  it('returns the address once hydrated', () => {
+    const { result } = renderHook(() => useHydratedSafeAddressFromUrl())
+
+    expect(result.current).toBe('0x220866B1A2219f40e72f5c628B65D54268cA3A9D')
+  })
+
+  it('returns an empty address before hydration even when the URL has one', () => {
+    // Matches the prerendered HTML, which is built with no URL at all. Returning the address here is
+    // what produced the React #418 hydration mismatch across every Safe route.
+    mockIsHydrated.mockReturnValue(false)
+
+    const { result } = renderHook(() => useHydratedSafeAddressFromUrl())
+
+    expect(result.current).toBe('')
+  })
+
+  it('returns an empty address before hydration when the address only comes from location.search', () => {
+    mockIsHydrated.mockReturnValue(false)
+    ;(useRouter as any).mockImplementation(() => ({ pathname: '/safe/home', query: {} }))
+    Object.defineProperty(window, 'location', {
+      value: { ...originalLocation, search: '?safe=eth:0x220866b1a2219f40e72f5c628b65d54268ca3a9d' },
+      writable: true,
+    })
+
+    const { result } = renderHook(() => useHydratedSafeAddressFromUrl())
+
     expect(result.current).toBe('')
   })
 })

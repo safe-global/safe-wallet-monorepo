@@ -131,9 +131,11 @@ jest.mock('@/components/common/TrustedSafesModal/useTrustedSafesModal', () => ({
 
 jest.mock('@/hooks/useSafeInfo', () => () => ({ safeAddress: '0xSafe1' }))
 
-jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
-  useSafeAddressFromUrl: jest.fn(() => '0xSafe1'),
-}))
+jest.mock('@/hooks/useSafeAddressFromUrl', () => {
+  const useSafeAddressFromUrl = jest.fn(() => '0xSafe1')
+  // The component reads the hydration-gated variant; the ungated one stays for the data hooks.
+  return { useSafeAddressFromUrl, useHydratedSafeAddressFromUrl: useSafeAddressFromUrl }
+})
 
 jest.mock('@/hooks/useChainId', () => () => '1')
 

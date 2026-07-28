@@ -53,6 +53,7 @@ jest.mock('@/hooks/useSafeAddress', () => ({
 const mockUseSafeAddressFromUrl = jest.fn<string, []>(() => '')
 jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   useSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
+  useHydratedSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
 }))
 
 jest.mock('@/hooks/useIsSafeOwner', () => ({
