@@ -56,11 +56,15 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 
 let mockAllOwned: Record<string, string[]> = {}
+const mockUseAllOwnedSafes = jest.fn<readonly [Record<string, string[]>, boolean], [string]>(() => [
+  mockAllOwned,
+  false,
+])
 jest.mock('@/hooks/safes', () => {
   const actual = jest.requireActual('@/hooks/safes')
   return {
     ...actual,
-    useAllOwnedSafes: () => [mockAllOwned, false] as const,
+    useAllOwnedSafes: (address: string) => mockUseAllOwnedSafes(address),
     useSafesSearch: (safes: unknown) => safes,
   }
 })
@@ -103,6 +107,21 @@ describe('AddAccounts — wallet connection state', () => {
   it('shows trusted safes in the list', () => {
     render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
     expect(screen.getByTestId('safe-accounts-table')).toHaveAttribute('data-count', '1')
+  })
+
+  // Owned-safes enumeration (the captcha-protected owners endpoint) is deferred until the modal
+  // opens: while closed the hook is called with an empty address so the request is skipped.
+  it('does not enumerate owned safes while the modal is closed', () => {
+    render(<AddAccounts />)
+
+    expect(mockUseAllOwnedSafes).toHaveBeenCalledWith('')
+    expect(mockUseAllOwnedSafes).not.toHaveBeenCalledWith('0xWallet')
+  })
+
+  it('enumerates owned safes once the modal is open', () => {
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />)
+
+    expect(mockUseAllOwnedSafes).toHaveBeenCalledWith('0xWallet')
   })
 
   it('renders the "What are trusted Safe accounts?" info banner with a Manage list action', () => {
