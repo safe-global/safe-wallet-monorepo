@@ -1,16 +1,16 @@
 import { memo, useEffect, useMemo } from 'react'
-import { type AllSafeItems, type AllSafeItemsGrouped, useSafeOrderComparator, useSafesSearch } from '@/hooks/safes'
+import {
+  type AllSafeItems,
+  type AllSafeItemsGrouped,
+  useSafeOrderComparator,
+  useSafesSearch,
+  useSaveManualOrder,
+} from '@/hooks/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useAddressBook from '@/hooks/useAddressBook'
-import { useAppDispatch, useAppSelector } from '@/store'
-import {
-  OrderByOption,
-  selectOrderByPreference,
-  setManualOrder,
-  setOrderByPreference,
-  TRUSTED_ORDER_SCOPE,
-} from '@/store/orderByPreferenceSlice'
+import { useAppSelector } from '@/store'
+import { OrderByOption, selectOrderByPreference, TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
 import { Typography } from '@/components/ui/typography'
@@ -24,10 +24,9 @@ type AccountsListProps = {
 }
 
 const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) => {
-  const dispatch = useAppDispatch()
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = useSafeOrderComparator(TRUSTED_ORDER_SCOPE)
-  const isManualOrder = orderBy === OrderByOption.MANUAL
+  const saveManualOrder = useSaveManualOrder(TRUSTED_ORDER_SCOPE)
 
   const { safe: currentSafe, safeAddress } = useSafeInfo()
   const addressBook = useAddressBook()
@@ -103,12 +102,7 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
             sortableColumns={orderBy === OrderByOption.NAME}
             // Always reorderable: dragging saves the displayed order and switches the sort mode to
             // Manual, which then owns the order.
-            reorder={{
-              onReorder: (order) => {
-                dispatch(setManualOrder({ scope: TRUSTED_ORDER_SCOPE, order }))
-                if (!isManualOrder) dispatch(setOrderByPreference({ orderBy: OrderByOption.MANUAL }))
-              },
-            }}
+            reorder={{ onReorder: saveManualOrder }}
           />
         </section>
       )}

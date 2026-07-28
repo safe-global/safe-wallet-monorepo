@@ -110,7 +110,7 @@ const SafeListContextMenu = ({
         edge="end"
         size="small"
         onClick={handleOpenContextMenu}
-        sx={{ color: 'var(--muted-foreground, #737373)' }}
+        sx={{ color: 'var(--muted-foreground)' }}
       >
         <EllipsisVertical size={20} />
       </IconButton>

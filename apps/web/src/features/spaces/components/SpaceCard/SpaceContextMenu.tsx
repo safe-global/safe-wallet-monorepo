@@ -53,7 +53,7 @@ const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
         size="small"
         onClick={handleOpenContextMenu}
         data-testid="space-card-context-menu-button"
-        sx={{ color: 'var(--muted-foreground, #737373)' }}
+        sx={{ color: 'var(--muted-foreground)' }}
       >
         <EllipsisVertical size={20} />
       </IconButton>

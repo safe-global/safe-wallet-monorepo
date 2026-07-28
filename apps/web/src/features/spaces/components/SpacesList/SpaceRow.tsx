@@ -75,7 +75,7 @@ const SpaceRow = ({
                 size="small"
                 disabled
                 aria-label={MEMBER_NO_EDIT_MESSAGE}
-                sx={{ '&.Mui-disabled': { color: 'var(--muted-foreground, #737373)', opacity: 0.5 } }}
+                sx={{ '&.Mui-disabled': { color: 'var(--muted-foreground)', opacity: 0.5 } }}
               >
                 <EllipsisVertical size={20} />
               </IconButton>
