@@ -32,6 +32,7 @@ const injectedRtkApi = api
           params: {
             redirect_url: queryArg.redirectUrl,
             connection: queryArg.connection,
+            enroll: queryArg.enroll,
           },
         }),
         providesTags: ['auth'],
@@ -80,6 +81,8 @@ export type OidcAuthAuthorizeV1ApiArg = {
   redirectUrl?: string
   /** OIDC connection name to route to a specific identity provider. */
   connection?: string
+  /** When true, requests hosted enrollment of a new authenticator: the provider challenges an existing factor, then walks the user through enrolling the new one. */
+  enroll?: boolean
 }
 export type OidcAuthCallbackV1ApiResponse = unknown
 export type OidcAuthCallbackV1ApiArg = {
