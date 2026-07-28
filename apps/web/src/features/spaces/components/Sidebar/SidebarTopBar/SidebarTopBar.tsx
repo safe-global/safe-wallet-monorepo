@@ -5,17 +5,24 @@ import { AppRoutes } from '@/config/routes'
 import SafeLogo from '@/components/common/SafeLogo'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
+import { useSidebarHydrated } from '../hooks/useSidebarHydrated'
 
 export const SidebarTopBar = (): ReactElement => {
   const { state } = useSidebar()
   const isCollapsed = state === 'collapsed'
   const safeAddress = useSafeAddressFromUrl()
   const isSpaceRoute = useIsSpaceRoute()
+  const isHydrated = useSidebarHydrated()
 
   // Inside a space or an individual safe the logo turns into a "Home" label pill that returns to the
   // top-level accounts view; elsewhere it stays a plain logo linking to that same view.
+  //
+  // Gated on hydration because both inputs are client-only: the safe address lives in a query param
+  // the server can't see during SSG (useSafeAddressFromUrl falls back to `location.search`), and the
+  // collapsed state comes from a cookie the sidebar reads on mount. Deciding the variant on the
+  // first pass disagrees with the server HTML and trips React's hydration check.
   const isInSafeOrSpace = Boolean(safeAddress) || isSpaceRoute
-  const showHomeLabel = isInSafeOrSpace && !isCollapsed
+  const showHomeLabel = isHydrated && isInSafeOrSpace && !isCollapsed
   const logoHref = AppRoutes.welcome.accounts
 
   return (
