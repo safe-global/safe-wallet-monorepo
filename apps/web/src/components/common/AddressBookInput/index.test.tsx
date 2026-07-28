@@ -357,4 +357,62 @@ describe('AddressBookInput', () => {
     expect(groupEl.querySelector('.lucide-hard-drive')).toBeInTheDocument()
     expect(groupEl.querySelector('.lucide-building-2')).not.toBeInTheDocument()
   })
+
+  /**
+   * MUI's Autocomplete dismissed the suggestion list on Escape, on an outside click and when focus
+   * left the field. The hand-rolled replacement dropped all three, leaving the list open over the
+   * rest of the form — where a click meant for the next field instead selects a contact as the
+   * recipient.
+   */
+  describe('dismissing the suggestion list', () => {
+    const openList = async (utils: ReturnType<typeof setup>['utils'], input: HTMLInputElement) => {
+      act(() => {
+        fireEvent.mouseDown(input)
+        fireEvent.mouseUp(input)
+      })
+      await waitFor(() => expect(utils.getByRole('listbox')).toBeInTheDocument())
+    }
+
+    it('closes on Escape', async () => {
+      const { input, utils } = setup('', {
+        [checksumAddress(faker.finance.ethereumAddress())]: 'Alice',
+      })
+      await openList(utils, input)
+
+      act(() => {
+        fireEvent.keyDown(document, { key: 'Escape' })
+      })
+
+      await waitFor(() => expect(utils.queryByRole('listbox')).not.toBeInTheDocument())
+      expect(input).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    it('closes when pointing down outside the field', async () => {
+      const { input, utils } = setup('', {
+        [checksumAddress(faker.finance.ethereumAddress())]: 'Alice',
+      })
+      await openList(utils, input)
+
+      act(() => {
+        fireEvent.pointerDown(utils.getByText('Submit'))
+      })
+
+      await waitFor(() => expect(utils.queryByRole('listbox')).not.toBeInTheDocument())
+    })
+
+    it('closes when focus leaves the field, without selecting a contact', async () => {
+      const address = checksumAddress(faker.finance.ethereumAddress())
+      const { input, utils } = setup('', { [address]: 'Alice' })
+      await openList(utils, input)
+
+      const submit = utils.getByText('Submit')
+      act(() => {
+        fireEvent.focusOut(input, { relatedTarget: submit })
+      })
+
+      await waitFor(() => expect(utils.queryByRole('listbox')).not.toBeInTheDocument())
+      // The recipient must not have been silently populated by the dismissal.
+      expect(input).toHaveValue('')
+    })
+  })
 })

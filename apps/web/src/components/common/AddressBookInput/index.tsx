@@ -1,4 +1,4 @@
-import { type ReactElement, useState, useMemo } from 'react'
+import { type ReactElement, useEffect, useMemo, useRef, useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import AddressInput, { type AddressInputProps } from '../AddressInput'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -82,6 +82,45 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
     [allAddressBookEntries, addressValue],
   )
 
+  const wrapperRef = useRef<HTMLDivElement>(null)
+
+  // Restores the three dismissal paths MUI's Autocomplete provided. Without them the suggestion
+  // list stays open over the rest of the form, and a click aimed at the next field lands on a
+  // contact instead — silently writing it in as the recipient.
+  useEffect(() => {
+    if (!open) return
+
+    const wrapper = wrapperRef.current
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (wrapper && !wrapper.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpen(false)
+      }
+    }
+    // Options `preventDefault` on mousedown to keep focus, so selecting one never fires focusout —
+    // only genuinely leaving the field (tab away, focus elsewhere) closes the list here.
+    const onFocusOut = (event: FocusEvent) => {
+      const next = event.relatedTarget as Node | null
+      if (wrapper && (!next || !wrapper.contains(next))) {
+        setOpen(false)
+      }
+    }
+
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    wrapper?.addEventListener('focusout', onFocusOut)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+      wrapper?.removeEventListener('focusout', onFocusOut)
+    }
+  }, [open])
+
   const handleToggleAutocomplete = () => {
     setOpen((value) => !value)
   }
@@ -101,7 +140,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
 
   return (
     <>
-      <div className={css.wrapper}>
+      <div ref={wrapperRef} className={css.wrapper}>
         <AddressInput
           {...props}
           name={name}
