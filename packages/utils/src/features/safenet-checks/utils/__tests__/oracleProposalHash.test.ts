@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { keccak256, toUtf8Bytes } from 'ethers'
-import { deriveRequestId, oracleProposalHash, plainProposalHash, type OracleProposal } from '../oracleProposalHash'
+import { oracleProposalHash, plainProposalHash, type OracleProposal } from '../oracleProposalHash'
 import type { Hex } from '../../types'
 
 const golden: { chainId: string; consensus: string; epoch: string; oracle: string; safeTxHash: Hex; requestId: Hex } =
@@ -18,10 +18,6 @@ const proposal: OracleProposal = {
 describe('oracleProposalHash', () => {
   it('matches the onchain requestId captured live from the devnet (EIP-712 parity)', () => {
     expect(oracleProposalHash(proposal)).toBe(golden.requestId)
-  })
-
-  it('deriveRequestId is an alias producing the same hash', () => {
-    expect(deriveRequestId(proposal)).toBe(oracleProposalHash(proposal))
   })
 
   it('accepts string, number, and bigint chainId/epoch interchangeably', () => {

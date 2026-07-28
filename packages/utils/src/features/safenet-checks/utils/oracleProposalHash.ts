@@ -36,9 +36,6 @@ export const oracleProposalHash = ({ chainId, consensus, epoch, oracle, safeTxHa
     safeTxHash,
   }) as Hex
 
-/** Alias: the oracle-proposal hash IS the oracle request id. */
-export const deriveRequestId = oracleProposalHash
-
 /**
  * The EIP-712 message a **non-oracle** `TransactionAttested` signs — the
  * attestation produced when the validator set runs its own deterministic checks
