@@ -89,15 +89,34 @@ const isAnchorRender = (render: ButtonProps['render']): render is AnchorRenderEl
   return React.isValidElement<Record<string, unknown>>(render) && (render.type === 'a' || 'href' in render.props)
 }
 
-function Button({ className, variant = 'default', size = 'default', render, nativeButton, ...props }: ButtonProps) {
+const preventDisabledActivation = (event: React.MouseEvent<HTMLAnchorElement>) => event.preventDefault()
+
+function Button({
+  className,
+  variant = 'default',
+  size = 'default',
+  render,
+  nativeButton,
+  disabled,
+  focusableWhenDisabled,
+  ...props
+}: ButtonProps) {
   const buttonClassName = cn(buttonVariants({ variant, size, className }))
 
   if (isAnchorRender(render)) {
     const anchorProps = props as React.ComponentPropsWithoutRef<'a'>
+    // An `<a>` ignores `disabled`, so mirror base-ui's non-native button contract instead. Spread
+    // conditionally: cloneElement treats an explicit `undefined` as an override, which would wipe an
+    // `onClick` living on the render element itself.
+    const disabledAnchorProps = disabled
+      ? { 'aria-disabled': true, tabIndex: -1, onClick: preventDisabledActivation }
+      : undefined
+
     const clonedAnchorProps: AnchorButtonProps = {
       ...anchorProps,
       'data-slot': 'button',
       className: cn(buttonClassName, render.props.className),
+      ...disabledAnchorProps,
     }
 
     return React.cloneElement(render, clonedAnchorProps)
@@ -109,6 +128,8 @@ function Button({ className, variant = 'default', size = 'default', render, nati
       className={buttonClassName}
       render={render}
       nativeButton={nativeButton ?? !render}
+      disabled={disabled}
+      focusableWhenDisabled={focusableWhenDisabled}
       {...props}
     />
   )
