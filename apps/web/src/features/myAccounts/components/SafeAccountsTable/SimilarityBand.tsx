@@ -69,7 +69,7 @@ export const SimilarityWarningIcon = ({ warning }: { warning: SimilarWarning }) 
  * Full-width header row opening a similarity band. Tint + card borders live in the Table sx, keyed
  * off `data-band-header` / `data-highlighted`, so they compose with the hover/separator machinery.
  */
-export const SimilarityBandHeader = ({ colSpan }: { colSpan: number }) => (
+const SimilarityBandHeader = ({ colSpan }: { colSpan: number }) => (
   <TableRow data-band-header="">
     <TableCell colSpan={colSpan} sx={{ py: 0.75, px: 2 }}>
       {/* Warning accent flips with the theme: dark amber-yellow on the light band, coral on the dark band. */}
