@@ -34,8 +34,14 @@ and the `AddressInput` MUI holdover (out of scope — see Risk).
 ### input.tsx — `xl` size + `variant` skin (move `bg-*`/`px-*` out of base)
 
 ```ts
-inputSize: { sm:'h-8 px-3', default:'h-9 px-3', lg:'h-10 px-3', xl:'h-[66px] px-4 rounded-[calc(var(--radius)-2px)]' }
-variant:   { default:'bg-transparent dark:bg-input/30', surface:'bg-card dark:bg-card' }
+inputSize: { sm:'h-8 px-3', default:'h-9 px-3', lg:'h-10 px-3', hero:'h-[66px] px-4 rounded-[calc(var(--radius)-2px)]' }
+// Shipped: the sm/lg tiers exist on Input + InputGroup, and SelectTrigger gained a matching
+// `size` axis (sm/default/lg via data-[size=…]:min-h-*). They mirror Button's sm/default/lg so a
+// field, a select and a button on one row line up — pick the tier from the button beside it.
+variant:   { default:'bg-input', surface:'bg-card dark:bg-card', search:'bg-input border-transparent hover:ring-1 hover:ring-ring' }
+// `default` is the filled field (white light / translucent lift dark); `surface` is the opaque card
+// fill for backdrops where translucency shows through; `search` (InputGroup only) is filled +
+// borderless, used by the SearchInput preset.
 // defaultVariants { inputSize:'default', variant:'default' }
 ```
 
@@ -78,7 +84,7 @@ Collapses the whole leading-icon search cluster (SearchField, AddressBookSearchI
 | `spaces/.../ActivityLogFilters.tsx:58`          | `bg-card border-border w-40 rounded-lg [&~p]:…`                | `variant="surface"`; keep `w-40 [color-scheme] [&~p]:*`; `rounded-lg` grandfather; `border-border` redundant |
 | `spaces/.../ImportAddressBookDialog.tsx:140`    | `pl-9` + absolute icon                                         | `<SearchInput placeholder="Search" onChange/>` (drop manual icon/relative)                                   |
 | `nfts/.../NftGrid/index.tsx:168`                | `h-auto border-none bg-transparent py-0 pl-6 pr-0 shadow-none` | add borderless `variant="ghost"` OR grandfather (inline table-header filter)                                 |
-| `ui/sidebar.tsx:476` (SidebarInput)             | `bg-background w-full shadow-none` (inputSize sm)              | needs `bg-background` skin (surface=card) → add `variant="muted"` or grandfather `bg-background`             |
+| `ui/sidebar.tsx:476` (SidebarInput)             | ~~`bg-background w-full shadow-none`~~ — **closed**            | resolved: `variant="default"` is now the filled field skin, so the bespoke `bg-background` override is gone  |
 
 Clean: IdentitySection:76 (`max-w-md`), UpdateSpaceForm:39, DeleteSpaceDialog:102, MemberInviteRow:100, WcInput:95, AddCustomAppModal:99, AdvancedOptionsStep:206, PkModulePopup:37.
 

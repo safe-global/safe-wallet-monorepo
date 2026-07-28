@@ -479,8 +479,9 @@ function SidebarInput({ className, ...props }: ComponentProps<typeof Input>) {
     <Input
       data-slot="sidebar-input"
       data-sidebar="input"
-      // eslint-disable-next-line no-restricted-syntax -- sidebar search sits on the page (background) surface, not card; distinct skin with no matching variant
-      className={cn('bg-background w-full', className)}
+      // The Input `default` skin is now the filled field surface the sidebar search wants, so the
+      // former bespoke `bg-background` override is gone.
+      className={cn('w-full', className)}
       {...props}
     />
   )

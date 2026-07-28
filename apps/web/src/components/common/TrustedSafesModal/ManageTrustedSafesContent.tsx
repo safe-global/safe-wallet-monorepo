@@ -149,7 +149,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
               Select all · {selectedCount} of {totalSafesCount} selected
             </button>
             <div className="flex flex-1 items-center justify-end gap-3">
-              <InputGroup variant="surface" className="max-w-sm flex-1">
+              <InputGroup variant="search" className="max-w-sm flex-1">
                 <InputGroupAddon>
                   <Search className="size-4" />
                 </InputGroupAddon>

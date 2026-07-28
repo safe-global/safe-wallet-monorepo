@@ -15,6 +15,12 @@
       "port": 6010
     },
     {
+      "name": "storybook-alt",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["workspace", "@safe-global/web", "storybook", "-p", "6011"],
+      "port": 6011
+    },
+    {
       "name": "mobile",
       "runtimeExecutable": "yarn",
       "runtimeArgs": ["workspace", "@safe-global/mobile", "start"],

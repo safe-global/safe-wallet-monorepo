@@ -18,8 +18,9 @@ const AccountListFilters = ({ setSearchQuery }: { setSearchQuery: Dispatch<SetSt
 
   return (
     <div className="px-4 py-2">
-      <div className="flex w-full justify-between gap-2">
+      <div className="flex w-full items-center justify-between gap-2">
         <SearchInput
+          inputSize="sm"
           className="w-full"
           id="search-by-name"
           placeholder="Search by name, ENS, address, or chain"

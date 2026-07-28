@@ -3,11 +3,13 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { SearchInput } from './search-input'
 
 describe('SearchInput', () => {
-  it('renders a search input with the canonical surface group', () => {
+  it('renders a filled, borderless search group', () => {
     const { container } = render(<SearchInput className="w-full" placeholder="Search safes" />)
+    const group = container.querySelector('[data-slot="input-group"]')
 
     expect(screen.getByRole('searchbox')).toHaveAttribute('type', 'search')
-    expect(container.querySelector('[data-slot="input-group"]')).toHaveClass('h-9', 'w-full', 'bg-card')
+    expect(group).toHaveClass('h-9', 'w-full', 'bg-input', 'border-transparent')
+    expect(group).not.toHaveClass('border-border')
   })
 
   it('forwards change events to the underlying input', () => {

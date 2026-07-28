@@ -15,7 +15,7 @@ function SearchInput({
   inputClassName,
   iconClassName,
   inputSize,
-  variant = 'surface',
+  variant = 'search',
   ...props
 }: SearchInputProps) {
   return (

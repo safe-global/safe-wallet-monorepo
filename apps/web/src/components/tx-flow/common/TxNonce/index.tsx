@@ -257,7 +257,8 @@ const TxNonce = ({ canEdit = true }: { canEdit?: boolean } = {}) => {
         #
       </Typography>
       {nonce === undefined || recommendedNonce === undefined ? (
-        <Skeleton style={{ width: skeletonMinWidth }} className="h-[38px]" />
+        // h-9 matches the ComboboxInput/SelectTrigger it stands in for, so the row doesn't shift on load
+        <Skeleton style={{ width: skeletonMinWidth }} className="h-9" />
       ) : canEdit && !isReadOnly ? (
         <TxNonceForm nonce={nonce.toString()} recommendedNonce={recommendedNonce.toString()} />
       ) : (

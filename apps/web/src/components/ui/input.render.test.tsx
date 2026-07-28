@@ -9,6 +9,16 @@ describe('Input variants', () => {
     expect(screen.getByPlaceholderText('Amount')).toHaveClass('h-[66px]', 'px-4', 'bg-card')
   })
 
+  it.each([
+    ['sm', 'h-8'],
+    ['default', 'h-9'],
+    ['lg', 'h-10'],
+  ] as const)('matches the Button height tier at inputSize=%s', (inputSize, expected) => {
+    render(<Input inputSize={inputSize} placeholder={`field ${inputSize}`} />)
+
+    expect(screen.getByPlaceholderText(`field ${inputSize}`)).toHaveClass(expected, 'px-3')
+  })
+
   it('renders the explicit default size at h-9', () => {
     render(<Input inputSize="default" placeholder="Explicit default" />)
 
@@ -23,17 +33,17 @@ describe('Input variants', () => {
     expect(field).not.toHaveClass('h-8', 'h-10', 'h-[66px]')
   })
 
-  it('renders the default variant with a transparent surface', () => {
+  it('renders the default variant with a filled field surface', () => {
     render(<Input variant="default" placeholder="Default surface" />)
 
-    expect(screen.getByPlaceholderText('Default surface')).toHaveClass('bg-transparent', 'dark:bg-input/30')
+    expect(screen.getByPlaceholderText('Default surface')).toHaveClass('bg-input')
   })
 
-  it('locks the default variant to a transparent surface when no variant prop is provided', () => {
+  it('locks the default variant to a filled field surface when no variant prop is provided', () => {
     render(<Input placeholder="Implicit variant" />)
 
     const field = screen.getByPlaceholderText('Implicit variant')
-    expect(field).toHaveClass('bg-transparent', 'dark:bg-input/30')
-    expect(field).not.toHaveClass('bg-card')
+    expect(field).toHaveClass('bg-input')
+    expect(field).not.toHaveClass('bg-transparent', 'bg-card')
   })
 })

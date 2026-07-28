@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import type { ComponentProps, ReactElement } from 'react'
 
 import SearchField from '@/components/common/SearchField'
 import { cn } from '@/utils/cn'
@@ -9,6 +9,8 @@ interface AddressBookSearchInputProps {
   placeholder?: string
   className?: string
   'aria-label'?: string
+  /** Match the height of the buttons this search box shares a row with (e.g. `lg` next to `size="lg"`). */
+  inputSize?: ComponentProps<typeof SearchField>['inputSize']
 }
 
 const AddressBookSearchInput = ({
@@ -16,6 +18,7 @@ const AddressBookSearchInput = ({
   onChange,
   placeholder = 'Search for contacts',
   className,
+  inputSize,
   'aria-label': ariaLabel = 'Search contacts by name or address',
 }: AddressBookSearchInputProps): ReactElement => {
   return (
@@ -24,8 +27,8 @@ const AddressBookSearchInput = ({
       placeholder={placeholder}
       aria-label={ariaLabel}
       value={value}
+      inputSize={inputSize}
       onChange={(e) => onChange(e.target.value)}
-      inputClassName="dark:bg-white/10 hover:ring-1 hover:ring-ring"
     />
   )
 }

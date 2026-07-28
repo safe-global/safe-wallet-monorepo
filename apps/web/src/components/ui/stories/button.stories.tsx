@@ -69,8 +69,9 @@ export const AllVariants: Story = {
           for secondary actions. Used for Send/Receive/Swap, Confirm/Execute, Filter/Export, Save settings, etc.
           <br />
           Surface rule: filled <code>secondary</code> only reads on white/card surfaces (e.g. the dashboard). On the
-          muted page background (e.g. the transactions toolbar) use <code>variant=&quot;outline&quot;</code> so the
-          button stays visible.
+          muted page background (e.g. the transactions toolbar) use <code>variant=&quot;outline&quot;</code> — its fill
+          is transparent, so it reads via the border hairline and a translucent hover on any surface. When a secondary
+          action needs a real fill on a coloured or promo surface, use <code>variant=&quot;surface&quot;</code>.
         </p>
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="default" size="action">
@@ -222,7 +223,7 @@ export const Guidelines: Story = {
                   ],
                   [
                     'outline',
-                    'Secondary action on page/toolbar backgrounds; neutral button; dialog Cancel',
+                    'Secondary action on page/toolbar backgrounds; neutral button; dialog Cancel. Transparent fill — reads via its border + shadow',
                     <Button key="v-outline" variant="outline">
                       Outline
                     </Button>,
@@ -264,7 +265,8 @@ export const Guidelines: Story = {
         <p className="mt-2 text-sm text-muted-foreground">
           Rule of thumb: <strong>at most one filled primary (default) per surface or row</strong> — hierarchy comes from
           the variant, not from custom colours. Filled <code>secondary</code> only reads on white/card surfaces; on the
-          muted page background use <code>outline</code>.
+          muted page background use <code>outline</code> (transparent fill, border hairline). Use <code>surface</code>{' '}
+          when a secondary action must stay filled on a coloured or promo surface.
         </p>
       </div>
 

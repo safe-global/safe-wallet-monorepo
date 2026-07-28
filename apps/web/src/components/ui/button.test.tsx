@@ -8,8 +8,8 @@ describe('buttonVariants', () => {
   it('uses tokenized classes for the outline variant', () => {
     const className = buttonVariants({ variant: 'outline' })
 
-    expect(className).toContain('bg-background')
-    expect(className).toContain('hover:bg-muted')
+    expect(className).toContain('bg-transparent')
+    expect(className).toContain('hover:bg-foreground/[0.06]')
     expect(className).not.toContain('rgba')
     expect(className).not.toContain('unofficial')
   })

@@ -161,7 +161,9 @@ const TokenAmountInput = ({
               <Separator orientation="vertical" className="mx-1 h-8 data-[orientation=vertical]:self-center" />
               <div data-testid="token-selector" className={css.select}>
                 <Select name={tokenAddressField} value={tokenAddress} onValueChange={handleTokenChange} required>
-                  <SelectTrigger>
+                  {/* size="sm" lines the trigger up with the Max button and the h-8 divider beside it;
+                      min-h still lets it grow for the rich token row. */}
+                  <SelectTrigger size="sm">
                     <SelectValue>
                       {selectedBalance && (
                         <AutocompleteItem tokenInfo={selectedBalance.tokenInfo} balance={selectedBalance.balance} />

@@ -9,6 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../select'
+import { Input } from '../input'
+import { Button } from '../button'
 
 /**
  * Select Component Stories
@@ -22,6 +24,8 @@ const meta = {
     disabled: {
       control: 'boolean',
     },
+    // `size`/`variant` live on SelectTrigger, not on the Select root this meta points at — see the
+    // Sizes and Variants sections below.
   },
 } satisfies Meta<typeof Select>
 
@@ -42,7 +46,8 @@ export const AllVariants: Story = {
         <h3 className="mb-4 text-lg font-semibold">Variants</h3>
         <p className="text-muted-foreground mb-4 text-sm">
           <b>default</b> — bordered field on the page background. <b>ghost</b> — border/shadow/bg reset for
-          inline/embedded triggers. One height (min-h-9) that grows for rich multi-line values.
+          inline/embedded triggers. Heights use <code>min-h-*</code> so a trigger still grows for rich multi-line
+          values.
         </p>
         <div
           style={{
@@ -70,6 +75,36 @@ export const AllVariants: Story = {
               <SelectItem value="option-2">Option 2</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-1 text-lg font-semibold">Sizes</h3>
+        <p className="text-muted-foreground mb-4 text-sm">
+          Same tiers as <code>Button</code> and <code>Input</code>&apos;s <code>inputSize</code>: <code>sm</code>{' '}
+          (32px), <code>default</code> (36px), <code>lg</code> (40px). Pick the tier from the button or field on the
+          same row — padding lives on the size axis so <code>min-h-*</code> actually governs the height.
+        </p>
+        <div className="flex flex-col items-start gap-3">
+          {(['sm', 'default', 'lg'] as const).map((size) => (
+            <div key={size} className="flex items-center gap-2">
+              <Select defaultValue="option-1" items={OPTION_ITEMS}>
+                <SelectTrigger size={size} className="w-48">
+                  <SelectValue placeholder={size} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="option-1">Option 1</SelectItem>
+                  <SelectItem value="option-2">Option 2</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="w-52">
+                <Input inputSize={size} placeholder={`inputSize="${size}"`} />
+              </div>
+              <Button size={size} variant="outline">
+                {size}
+              </Button>
+            </div>
+          ))}
         </div>
       </div>
 

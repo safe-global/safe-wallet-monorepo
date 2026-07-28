@@ -1,3 +1,4 @@
+import type { ComponentProps } from 'react'
 import { ArrowDownUp, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -26,8 +27,16 @@ const labels: Record<OrderByOption, string> = {
  * @param className - Overrides the trigger's border/shadow. The default (`border-border
  *   shadow-none`) matches the search field inside the white dropdown/modal surfaces; page-level
  *   surfaces pass `border-border shadow-xs` so the trigger stays visible against the muted page.
+ * @param size - Match the other controls on the row (e.g. `lg` beside a `size="lg"` CTA and an
+ *   `inputSize="lg"` search field).
  */
-const SafeListSortToggle = ({ className }: { className?: string }) => {
+const SafeListSortToggle = ({
+  className,
+  size = 'default',
+}: {
+  className?: string
+  size?: ComponentProps<typeof Button>['size']
+}) => {
   const dispatch = useAppDispatch()
   const { orderBy } = useAppSelector(selectOrderByPreference)
 
@@ -37,9 +46,9 @@ const SafeListSortToggle = ({ className }: { className?: string }) => {
         render={
           <Button
             variant="outline"
-            // Match the adjacent search InputGroup: border-border, shadow-none (height/radius come from size="default").
+            // Match the adjacent search InputGroup: border-border, shadow-none (height/radius come from `size`).
             // Fixed width so the trigger doesn't grow/shrink between "Name" and "Last visited".
-            size="default"
+            size={size}
             className={cn(
               'w-[160px] shrink-0 justify-between gap-1.5 border-border shadow-none text-muted-foreground',
               className,

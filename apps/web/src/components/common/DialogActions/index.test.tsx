@@ -9,7 +9,7 @@ describe('DialogActions', () => {
     const cancel = screen.getByRole('button', { name: 'Cancel' })
     // confirm is the primary default variant, cancel the outline variant, both size="submit"
     expect(confirm).toHaveClass('bg-primary', 'min-w-[7rem]')
-    expect(cancel).toHaveClass('bg-background', 'min-w-[7rem]')
+    expect(cancel).toHaveClass('bg-transparent', 'min-w-[7rem]')
   })
 
   it('renders a confirm-only footer when no onCancel is given', () => {

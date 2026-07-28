@@ -151,7 +151,7 @@ const SpaceAddressBook = () => {
                 {isPrivateAddressBookEnabled && activeTab === 'mine' && <AddLocalContact />}
               </div>
               {(activeTab === 'workspace' ? addressBookItems.length > 0 : sortedLocalContacts.length > 0) && (
-                <AddressBookSearchInput value={searchQuery} onChange={setSearchQuery} />
+                <AddressBookSearchInput value={searchQuery} onChange={setSearchQuery} inputSize="lg" />
               )}
             </div>
           )}

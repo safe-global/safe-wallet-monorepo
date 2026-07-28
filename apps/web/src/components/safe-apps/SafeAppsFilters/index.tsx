@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { getUniqueTags } from '@/components/safe-apps/utils'
 import BatchIcon from '@/public/images/apps/batch-icon.svg'
-import { cn } from '@/utils/cn'
 import css from './styles.module.css'
 
 export type safeAppCatogoryOptionType = {
@@ -46,6 +45,7 @@ const SafeAppsFilters = ({
           placeholder="Search by name or category"
           aria-label="Search Safe App by name"
           autoComplete="off"
+          inputSize="lg"
           onChange={(e) => {
             onChangeQuery(e.target.value)
           }}
@@ -66,11 +66,10 @@ const SafeAppsFilters = ({
         >
           <SelectTrigger
             id="safe-app-category-selector"
-            className={cn(
-              'w-full pr-[18px] focus-visible:ring-1 focus-visible:ring-ring',
-              // eslint-disable-next-line no-restricted-syntax -- faithful css-module port of `.fieldControl`, pixel-identical; bespoke sizing/surface has no Select variant
-              'h-[var(--space-5)]! border-[var(--border)] bg-[var(--card)] shadow-none focus-visible:border-[var(--ring)]',
-            )}
+            size="lg"
+            // `size="lg"` (40px) replaces the old bespoke `h-[var(--space-5)]!` and matches the
+            // `inputSize="lg"` search field beside it in the grid row.
+            className="w-full pr-[18px] shadow-none focus-visible:border-[var(--ring)] focus-visible:ring-1 focus-visible:ring-ring"
           >
             <SelectValue className={selectedCategories.length === 0 ? css.selectPlaceholder : undefined}>
               {selectedCategories.length === 0 ? 'Select category' : `${selectedCategories.length} categories selected`}

@@ -82,7 +82,7 @@ const SpaceSafeAccounts = () => {
         )}
         {!isSpaceEmpty && !isSpaceSafesError && (
           <>
-            <InputGroup className="flex-1">
+            <InputGroup variant="search" inputSize="lg" className="flex-1">
               <InputGroupAddon>
                 <Search className="size-4" />
               </InputGroupAddon>
@@ -95,7 +95,7 @@ const SpaceSafeAccounts = () => {
                 data-testid="space-safe-accounts-search-input"
               />
             </InputGroup>
-            <SafeListSortToggle className="border-border shadow-xs" />
+            <SafeListSortToggle size="lg" className="border-border shadow-xs" />
           </>
         )}
       </div>

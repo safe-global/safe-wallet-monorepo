@@ -19,6 +19,46 @@ describe('SheetContent', () => {
     expect(content).not.toHaveClass('shadow-lg')
   })
 
+  /**
+   * Regression: a Sheet that mounts already open and closes in the same commit never runs its enter
+   * animation, so Base UI waits forever for an `animationend` and leaves the backdrop mounted at
+   * `opacity: 0` with `pointer-events: auto` — an invisible full-viewport shield that swallowed every
+   * click on the page, including the topbar's "Open sidebar menu" button below `md`. Both the panel
+   * and the backdrop must refuse pointer events while closed, however they got there.
+   */
+  it('never lets a closed panel or backdrop capture pointer events', () => {
+    const { container } = render(
+      <Sheet open={false}>
+        <SheetContent data-testid="content" showCloseButton={false}>
+          Body
+        </SheetContent>
+      </Sheet>,
+    )
+
+    const content = container.querySelector('[data-slot="sheet-content"]')
+    const overlay = container.querySelector('[data-slot="sheet-overlay"]')
+
+    // Both may legitimately be absent once Base UI unmounts them — the guard only has to hold
+    // while they are still in the DOM.
+    if (content) expect(content).toHaveClass('data-closed:pointer-events-none')
+    if (overlay) expect(overlay).toHaveClass('data-closed:pointer-events-none')
+  })
+
+  it('keeps the pointer-events guard on the open panel so it stays interactive', () => {
+    render(
+      <Sheet open>
+        <SheetContent data-testid="content" showCloseButton={false}>
+          Body
+        </SheetContent>
+      </Sheet>,
+    )
+
+    const content = screen.getByTestId('content')
+    // The guard is data-closed-scoped, so an open sheet is unaffected.
+    expect(content).toHaveClass('data-closed:pointer-events-none')
+    expect(content).not.toHaveClass('pointer-events-none')
+  })
+
   it('swaps the base bg-background surface for bg-card with surface="card"', () => {
     render(
       <Sheet open>

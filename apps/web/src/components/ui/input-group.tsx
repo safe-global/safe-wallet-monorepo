@@ -35,12 +35,22 @@ const inputGroupVariants = cva(
   {
     variants: {
       inputSize: {
+        // sm/lg pair with Button's sm (h-8) and lg/action/submit (h-10) so a field and a button line up
+        // on one row. Each tier also pins the nested control to the same height — which is exactly how
+        // `default` behaves implicitly (h-9 group + the Input's own h-9 default). NB `h-full` does NOT
+        // work here: against an indefinite flex cross-size it collapses to the 33px content height.
+        sm: 'h-8 [&_[data-slot=input-group-control]]:h-8',
         default: 'h-9',
+        lg: 'h-10 [&_[data-slot=input-group-control]]:h-10',
         hero: 'h-[66px] min-h-[66px] rounded-[calc(var(--radius)-2px)] px-4 [&_[data-slot=input-group-addon][data-align=inline-end]]:pr-0 [&_[data-slot=input-group-control]]:px-0 [&_[data-slot=input-group-control]]:shadow-none [&_[data-slot=input-group-control]]:focus-visible:ring-0',
       },
       variant: {
-        default: 'dark:bg-input/30',
+        default: 'bg-input',
         surface: 'bg-card shadow-none dark:bg-card',
+        // Search chrome: filled, no resting border. Keeps a 1px *transparent* border so the base
+        // `has-[…focus-visible]:border-ring` rule still paints and the box never shifts geometry on
+        // focus, and pairs the base `shadow-xs` with a hover ring as the affordance that replaces it.
+        search: 'bg-input border-transparent hover:ring-1 hover:ring-ring',
       },
     },
     defaultVariants: {

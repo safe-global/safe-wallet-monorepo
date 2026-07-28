@@ -84,11 +84,14 @@ Highlights so agents don't rediscover them:
   `OnboardingFooter`). Full decision matrix + Do/Don't: the **`UI/Button` → Guidelines** story.
 - **Input** — `inputSize` `default` (h-9, mirrors `SelectTrigger`'s default so a field and a select on one row line up) or `hero` (66px Safe-creation / big-filter field); named `inputSize`, not `size`, to dodge the native numeric `size` attr.
 - **Surface & token rules (bit you) :** filled `secondary` only reads on white/card surfaces — on the muted
-  page background use `variant="outline"`. `--input` is `#fff` in light mode, so a **visible field/button
-  border must use `border-border`, not `border-input`** (which also looks borderless in dark until you
-  switch it to `border-border`). The `Input`, `InputGroup`, and `SelectTrigger` primitives now default to
-  `border-border`, so you should not need to set a border color on a field — and never re-introduce
-  `border-input` or a hard-coded `border-gray-*`.
+  page background use `variant="outline"` (transparent fill; it reads via its border hairline and a
+  translucent hover), or `variant="surface"` when a secondary action must stay filled on a coloured surface.
+  `--input` is the **field fill** token (`#fff` light / 5% white dark), _not_ a border colour, so a
+  **visible field/button border must use `border-border`, not `border-input`**. The `Input`, `InputGroup`,
+  and `SelectTrigger` primitives default to `border-border` plus a `bg-input` fill, so you should not need
+  to set a border colour or a background on a field — and never re-introduce `border-input` or a
+  hard-coded `border-gray-*`. Search bars are the one intentionally borderless field: `SearchInput`
+  defaults to `variant="search"` (filled, `border-transparent`, hover ring).
 
 ## Core Patterns
 

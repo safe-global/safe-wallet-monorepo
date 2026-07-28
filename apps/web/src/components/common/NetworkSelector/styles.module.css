@@ -100,7 +100,7 @@
   width: 100%;
 }
 
-/* Mirrors the InputGroup default variant (h-9, border-border, rounded-md, shadow-xs,
+/* Mirrors the InputGroup default variant (h-9, bg-input, border-border, rounded-md, shadow-xs,
    focus ring) so the control matches the standard text fields in the same form. */
 .multiSelectControl {
   display: flex;
@@ -109,7 +109,7 @@
   gap: var(--space-1);
   min-height: 36px;
   padding: 3px 12px;
-  background-color: transparent;
+  background-color: var(--input);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);

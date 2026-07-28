@@ -94,7 +94,9 @@ const MemberInviteRow = ({
   }, [resolvedAddress, handleAddressResolved])
 
   return (
-    <div className="flex gap-2">
+    // items-center so the fixed-height remove button centres against the 44px field/select pair
+    // instead of top-aligning under the default `stretch`.
+    <div className="flex items-center gap-2">
       <div className="flex flex-1 flex-col gap-1">
         <div className="relative">
           <Input

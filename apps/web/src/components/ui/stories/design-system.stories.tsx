@@ -618,7 +618,7 @@ export const TextFields: Story = {
         </Swatch>
       </Row>
 
-      <Row label="Skins" note="surface for muted/coloured surfaces">
+      <Row label="Skins" note="default is the filled field (bg-input) · surface is the opaque card fill">
         <Swatch label="default">
           <div className="w-52">
             <Input placeholder="default" />
@@ -766,10 +766,15 @@ export const Search: Story = {
         </Swatch>
       </Row>
 
-      <Row label="Skins" note="surface (default) on lists · default on white/dialog">
-        <Swatch label="surface">
+      <Row label="Skins" note="search (default) is filled + borderless · surface / default keep a border">
+        <Swatch label="search">
           <div className="w-52">
             <SearchInput placeholder="Search" />
+          </div>
+        </Swatch>
+        <Swatch label="surface">
+          <div className="w-52">
+            <SearchInput variant="surface" placeholder="Search" />
           </div>
         </Swatch>
         <Swatch label="default">

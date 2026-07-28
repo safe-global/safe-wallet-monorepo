@@ -35,8 +35,13 @@ const buttonVariants = cva(
           // Disabled: solid muted pill in BOTH modes (light previously fell back to 50%-opacity
           // black, which read as a broken gray button next to the dark mode treatment).
           'bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground',
+        // Transparent fill: it reads via the `border-border` hairline + `shadow-xs`, so it works on
+        // the page background, cards and dialogs alike. Hover/open use a translucent `foreground`
+        // tint rather than `bg-muted` — `--muted` (#f5f5f5) is a 1-value delta from the page
+        // background (#f4f4f4) and identical to a `bg-muted` panel, so a surface-coloured hover
+        // would be invisible on exactly the surfaces this variant is meant for.
         outline:
-          'border-border bg-background hover:bg-muted hover:text-foreground dark:bg-input/30 dark:border-border dark:hover:bg-input/50 aria-expanded:bg-muted aria-expanded:text-foreground shadow-xs',
+          'border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs',
         secondary:
           'bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground',
         ghost:

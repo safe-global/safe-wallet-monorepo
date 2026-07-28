@@ -13,12 +13,11 @@ interface SidebarProps extends SpaceSelectorProps {
 }
 
 const SIDEBAR_CONTAINER_CLASSNAME = '!p-0 border-r-0 group-data-[side=left]:border-r-0'
-// Divider between the sidebar and the content: a real right border (border-sidebar-border, adapts
-// per theme) rather than the floating variant's ring. A ring is a box-shadow that renders low-contrast
-// here and gets clipped by overflow-hidden ancestors in the app layout, so the edge looked absent —
-// hence `ring-0` to drop it in favour of the unclippable border.
+// No divider between the sidebar and the content: the panel is delimited by its own surface colour
+// (--sidebar: white in light, #121312 in dark) against the page background. `ring-0` still cancels
+// the floating variant's ring in ui/sidebar.tsx so no edge comes back that way.
 const SIDEBAR_INNER_CLASSNAME =
-  'rounded-[0_8px_8px_0] group-data-[variant=floating]:rounded-[0_8px_8px_0] shadow-none border-r border-sidebar-border group-data-[variant=floating]:ring-0'
+  'rounded-[0_8px_8px_0] group-data-[variant=floating]:rounded-[0_8px_8px_0] shadow-none group-data-[variant=floating]:ring-0'
 
 export const EnhancedSidebar = ({
   type,

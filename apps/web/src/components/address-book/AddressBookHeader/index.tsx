@@ -93,6 +93,7 @@ function AddressBookHeader({
             value={searchQuery}
             onChange={onSearchQueryChange}
             placeholder="Search for contacts"
+            inputSize="lg"
           />
         )}
       </div>

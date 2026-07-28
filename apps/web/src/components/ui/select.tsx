@@ -53,30 +53,47 @@ function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
 }
 
 /**
- * SelectTrigger skin. One height (`min-h-9`) that grows for rich multi-line values (e.g. a token
- * row). The `data-size="default"` attribute is kept as a stable hook so a caller can still override
- * height via `data-[size=default]:h-*` (resolved through tailwind-merge).
+ * SelectTrigger skin. Heights use `min-h-*` so the trigger still grows for rich multi-line values
+ * (e.g. a token row), and mirror `Input`'s `inputSize` and `Button`'s `size` so a select, a field and
+ * a button on one row line up: `sm` (32px) · `default` (36px) · `lg` (40px, pairs with
+ * `size="lg"`/`"action"`/`"submit"`). The heights stay behind the `data-[size=…]` prefix so the
+ * documented `data-[size=…]:h-*` call-site escape hatch keeps out-specifying them.
  * - `default` — bordered field on the page background.
  * - `ghost`   — border/shadow/bg reset for inline/embedded triggers.
  */
 const selectTriggerVariants = cva(
-  "data-[placeholder]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 gap-2 text-sm transition-[color,box-shadow] focus-visible:ring-[3px] aria-invalid:ring-[3px] data-[size=default]:min-h-9 *:data-[slot=select-value]:flex *:data-[slot=select-value]:gap-2 [&_svg:not([class*='size-'])]:size-4 flex w-fit items-center justify-between whitespace-nowrap outline-none disabled:cursor-not-allowed disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:opacity-50 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:items-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "data-[placeholder]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 gap-2 text-sm transition-[color,box-shadow] focus-visible:ring-[3px] aria-invalid:ring-[3px] *:data-[slot=select-value]:flex *:data-[slot=select-value]:gap-2 [&_svg:not([class*='size-'])]:size-4 flex w-fit items-center justify-between whitespace-nowrap outline-none disabled:cursor-not-allowed disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:opacity-50 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:items-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default:
-          'border-border dark:bg-input/30 dark:hover:bg-input/50 rounded-md border bg-transparent px-3 py-2 shadow-xs',
+        // Filled like Input/InputGroup: a select and a text input share a row by design (see the
+        // `inputSize` note in input.tsx), so they must carry the same field surface.
+        default: 'border-border hover:bg-muted/50 rounded-md border bg-input px-3 shadow-xs',
         ghost:
-          'rounded-md border-0 bg-transparent px-0 py-0 shadow-none hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent',
+          'rounded-md border-0 bg-transparent px-0 shadow-none hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent',
+      },
+      // Padding belongs to the size axis, not the skin: `min-h-*` only wins when the content box is
+      // SHORTER than the tier. With the old `py-2`, a single text line measured 20+16+2 = 38px, so
+      // `min-h-9` never applied and every select rendered 38px — 2px off the h-9 field it is supposed
+      // to line up with, and `sm` would have been inert. Each tier now pads so `min-h-*` governs,
+      // while still growing for rich multi-line values.
+      size: {
+        sm: 'data-[size=sm]:min-h-8 py-1',
+        default: 'data-[size=default]:min-h-9 py-1.5',
+        lg: 'data-[size=lg]:min-h-10 py-2',
       },
     },
-    defaultVariants: { variant: 'default' },
+    // Order-independent guarantee that the inline `ghost` trigger keeps its padding reset, whichever
+    // size it is given (cva emits compound classes after all variant classes).
+    compoundVariants: [{ variant: 'ghost', class: 'py-0' }],
+    defaultVariants: { variant: 'default', size: 'default' },
   },
 )
 
 function SelectTrigger({
   className,
   variant,
+  size,
   iconWrapperClassName,
   children,
   ...props
@@ -87,8 +104,8 @@ function SelectTrigger({
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
-      data-size="default"
-      className={cn(selectTriggerVariants({ variant }), className)}
+      data-size={size ?? 'default'}
+      className={cn(selectTriggerVariants({ variant, size }), className)}
       {...props}
     >
       {children}

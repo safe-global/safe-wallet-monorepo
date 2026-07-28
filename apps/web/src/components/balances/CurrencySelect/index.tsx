@@ -24,11 +24,12 @@ const CurrencySelect = (): ReactElement => {
 
   return (
     <Select value={currency.toUpperCase()} onValueChange={handleChange} onOpenChange={handleOpenChange}>
+      {/* size="sm" matches the ManageTokensButton (size="sm") it shares the assets toolbar row with */}
       <SelectTrigger
         data-testid="currency-selector"
         id="currency"
-        // eslint-disable-next-line no-restricted-syntax -- bg-background is a deliberate flat/outline look (not the card surface); no variant matches
-        className="min-w-[72px] bg-background font-medium shadow-none"
+        size="sm"
+        className="min-w-[72px] font-medium shadow-none"
       >
         <SelectValue />
       </SelectTrigger>

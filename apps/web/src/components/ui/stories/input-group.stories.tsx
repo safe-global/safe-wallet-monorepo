@@ -21,11 +21,11 @@ const meta = {
   argTypes: {
     inputSize: {
       control: 'select',
-      options: ['default', 'hero'],
+      options: ['sm', 'default', 'lg', 'hero'],
     },
     variant: {
       control: 'select',
-      options: ['default', 'surface'],
+      options: ['default', 'surface', 'search'],
     },
   },
 } satisfies Meta<typeof InputGroup>
@@ -49,8 +49,18 @@ export const AllVariants: Story = {
           }}
         >
           <div style={{ width: '300px' }}>
+            <InputGroup inputSize="sm">
+              <InputGroupInput placeholder="sm (h-8)" />
+            </InputGroup>
+          </div>
+          <div style={{ width: '300px' }}>
             <InputGroup>
               <InputGroupInput placeholder="default (h-9)" />
+            </InputGroup>
+          </div>
+          <div style={{ width: '300px' }}>
+            <InputGroup inputSize="lg">
+              <InputGroupInput placeholder="lg (h-10)" />
             </InputGroup>
           </div>
           <div style={{ width: '300px' }}>
@@ -62,7 +72,7 @@ export const AllVariants: Story = {
       </div>
 
       <div style={{ marginBottom: '2rem' }}>
-        <h3 className="mb-4 text-lg font-semibold">Surface Search Preset</h3>
+        <h3 className="mb-4 text-lg font-semibold">Search Preset</h3>
         <div
           style={{
             display: 'grid',

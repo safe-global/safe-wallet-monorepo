@@ -19,7 +19,7 @@ const meta = {
     },
     inputSize: {
       control: 'select',
-      options: ['default', 'hero'],
+      options: ['sm', 'default', 'lg', 'hero'],
     },
     variant: {
       control: 'select',
@@ -49,22 +49,28 @@ export const AllVariants: Story = {
       <div style={{ marginBottom: '2rem' }}>
         <h3 className="mb-1 text-lg font-semibold">Sizes</h3>
         <p className="mb-4 text-sm text-muted-foreground">
-          Search boxes are a single height — <code>default</code> (h-9), mirroring <code>Input</code> /{' '}
-          <code>SelectTrigger</code>. The standard app search box is the <code>SearchField</code> preset.
+          Same tiers as <code>Input</code> / <code>SelectTrigger</code> — <code>sm</code> (h-8), <code>default</code>{' '}
+          (h-9), <code>lg</code> (h-10). Match the height of the buttons the search box shares a row with: a filter bar
+          with <code>size=&quot;lg&quot;</code> buttons (e.g. the address book header) wants{' '}
+          <code>inputSize=&quot;lg&quot;</code>. The standard app search box is the <code>SearchField</code> preset.
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 220px)', gap: '1.5rem', alignItems: 'end' }}>
+          <SearchInput inputSize="sm" placeholder="sm (h-8)" />
           <SearchInput inputSize="default" placeholder="default (h-9)" />
+          <SearchInput inputSize="lg" placeholder="lg (h-10)" />
         </div>
       </div>
 
       <div style={{ marginBottom: '2rem' }}>
         <h3 className="mb-1 text-lg font-semibold">Skins</h3>
         <p className="mb-4 text-sm text-muted-foreground">
-          <code>surface</code> (default) sits on muted / list backgrounds; <code>default</code> reads on white / dialog
-          surfaces.
+          <code>search</code> (default) is filled and borderless: <code>bg-input</code> with a transparent 1px border,{' '}
+          <code>shadow-xs</code>, and a hover ring. <code>surface</code> and <code>default</code> keep a visible{' '}
+          <code>border-border</code> for non-search fields.
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 220px)', gap: '1.5rem', alignItems: 'end' }}>
-          <SearchInput variant="surface" placeholder="surface (default)" />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 220px)', gap: '1.5rem', alignItems: 'end' }}>
+          <SearchInput placeholder="search (default)" />
+          <SearchInput variant="surface" placeholder="surface" />
           <SearchInput variant="default" placeholder="default" />
         </div>
       </div>
