@@ -49,6 +49,12 @@ export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: A
   return (
     <Combobox
       items={selectValues}
+      // `value` must be bound alongside `inputValue`: Base UI resets the input to the selected
+      // value when the popup closes, so leaving selection uncontrolled wipes a typed amount. It
+      // also feeds the default single-selection filter, which otherwise treats the typed amount as
+      // a search query and hides every preset.
+      value={value ?? ''}
+      onValueChange={(next) => handleInputChange(typeof next === 'string' ? next : '')}
       inputValue={value ?? ''}
       onInputValueChange={handleInputChange}
       readOnly={readOnly}
