@@ -81,7 +81,7 @@ jest.mock('../../SafeSidebarVariant', () => ({
       <div>
         Safe sidebar
         {props.developerGroup?.items.map((item) => (
-          <span key={item.href}>{item.label}</span>
+          <span key={item.id}>{item.label}</span>
         ))}
       </div>
     )

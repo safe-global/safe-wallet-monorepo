@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { House } from 'lucide-react'
 import type { ReactElement, ReactNode } from 'react'
-import type { ResolvedSidebarItem, ResolvedSidebarActionItem } from '../../../types'
+import type { ResolvedSidebarNavItem, ResolvedSidebarActionItem } from '../../../types'
 import { NavItem } from '../NavItem'
 
 const mockTrackEvent = jest.fn()
@@ -93,8 +93,18 @@ jest.mock('@/components/ui/sidebar', () => ({
       )
     }
 
+    // Disabled-ness is signalled with aria/data attributes rather than the native `disabled`
+    // prop: React suppresses onClick on natively-disabled elements, which would make the
+    // `item.disabled` guard in handleClick untestable.
     return (
-      <button data-testid={testId} className={className} data-active={isActive} disabled={disabled} onClick={onClick}>
+      <button
+        data-testid={testId}
+        className={className}
+        data-active={isActive}
+        data-disabled={disabled}
+        aria-disabled={disabled}
+        onClick={onClick}
+      >
         {children}
       </button>
     )
@@ -102,7 +112,7 @@ jest.mock('@/components/ui/sidebar', () => ({
 }))
 
 describe('NavItem', () => {
-  const baseItem: ResolvedSidebarItem = {
+  const baseItem: ResolvedSidebarNavItem = {
     icon: House,
     label: 'Home',
     href: '/home',
@@ -137,7 +147,8 @@ describe('NavItem', () => {
     render(<NavItem item={disabledItem} />)
 
     const button = screen.getByTestId('sidebar-list-item')
-    expect(button).toBeDisabled()
+    expect(button.tagName).toBe('BUTTON')
+    expect(button).toHaveAttribute('aria-disabled', 'true')
   })
 
   it('shows tooltip when disabled', () => {
@@ -394,8 +405,11 @@ describe('NavItem', () => {
     it('renders a button rather than a link', () => {
       render(<NavItem item={{ ...actionItem, onSelect: jest.fn() }} />)
 
+      const element = screen.getByTestId('sidebar-list-item')
+      expect(element.tagName).toBe('BUTTON')
+      expect(element).not.toHaveAttribute('href')
       expect(screen.queryByRole('link')).not.toBeInTheDocument()
-      expect(screen.getByTestId('sidebar-list-item')).toHaveTextContent('Feature flags')
+      expect(element).toHaveTextContent('Feature flags')
     })
 
     it('calls onSelect when clicked', () => {
