@@ -1,4 +1,5 @@
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { Typography } from '@/components/ui/typography'
 import { useRouter } from 'next/router'
 
@@ -99,7 +100,10 @@ const AdvancedCreateSafe = () => {
     threshold: 1,
     saltNonce: 0,
     safeVersion: getLatestSafeVersion(chain),
-    paymentReceiver: ECOSYSTEM_ID_ADDRESS,
+    // Checksummed because the advanced step validates this field with `validateAddress`, which
+    // rejects a non-checksummed address. NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS is injected per
+    // environment, so a lowercase value would otherwise open the step already-invalid.
+    paymentReceiver: checksumAddress(ECOSYSTEM_ID_ADDRESS),
   }
 
   const onClose = () => {

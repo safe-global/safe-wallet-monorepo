@@ -19,6 +19,7 @@ import layoutCss from '@/components/new-safe/create/styles.module.css'
 import { type SafeVersion } from '@safe-global/types-kit'
 import NumberField from '@/components/common/NumberField'
 import { useCurrentChain } from '@/hooks/useChains'
+import { validateAddress } from '@safe-global/utils/utils/validation'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { createNewUndeployedSafeWithoutSalt } from '../../logic'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -199,7 +200,11 @@ const AdvancedOptionsStep = ({ onSubmit, onBack, data, setStep }: StepRenderProp
             <Controller
               control={control}
               name={AdvancedOptionsFields.paymentReceiver}
-              rules={{ required: 'Payment receiver is required' }}
+              // Without a format check `required` alone accepts anything non-empty, so a garbage
+              // receiver keeps the form valid and Next enabled. predictAddressBasedOnReplayData then
+              // throws inside useAsync, whose error is discarded — leaving the "New Safe address"
+              // skeleton spinning forever with no explanation.
+              rules={{ required: 'Payment receiver is required', validate: validateAddress }}
               render={({ field, fieldState }) => {
                 const isInvalid = fieldState.invalid || Boolean(isDeployed)
 

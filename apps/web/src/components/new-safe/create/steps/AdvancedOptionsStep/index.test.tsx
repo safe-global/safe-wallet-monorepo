@@ -97,6 +97,36 @@ describe('AdvancedOptionsStep', () => {
     expect(await screen.findByText('Payment receiver is required')).toBeInTheDocument()
   })
 
+  it('rejects a payment receiver that is not an address', async () => {
+    renderStep()
+
+    await userEvent.clear(getReceiverField())
+    await userEvent.type(getReceiverField(), 'not-an-address')
+
+    expect(await screen.findByText('Invalid address format')).toBeInTheDocument()
+    expect(getReceiverField()).toHaveAttribute('aria-invalid', 'true')
+    // Without the format rule `required` alone kept the form valid here, so Next stayed enabled and
+    // address prediction failed silently behind the skeleton.
+    expect(screen.getByTestId('next-btn')).toBeDisabled()
+  })
+
+  it('rejects a non-checksummed payment receiver', async () => {
+    renderStep()
+
+    await userEvent.clear(getReceiverField())
+    await userEvent.type(getReceiverField(), '0xa77de01c5b6f829cbe4604cf71ddc8c4d608b000')
+
+    expect(await screen.findByText('Invalid address checksum')).toBeInTheDocument()
+    expect(screen.getByTestId('next-btn')).toBeDisabled()
+  })
+
+  it('accepts the checksummed default payment receiver', async () => {
+    renderStep()
+
+    expect(getReceiverField()).not.toHaveAttribute('aria-invalid', 'true')
+    await waitFor(() => expect(screen.getByTestId('next-btn')).toBeEnabled())
+  })
+
   it('marks the salt nonce invalid when it is cleared', async () => {
     renderStep()
 
