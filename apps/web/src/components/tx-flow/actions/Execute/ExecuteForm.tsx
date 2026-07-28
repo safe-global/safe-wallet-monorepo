@@ -9,6 +9,8 @@ import { trackError, Errors } from '@/services/exceptions'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSigner } from '@/hooks/wallets/useWallet'
+import useAsync from '@safe-global/utils/hooks/useAsync'
+import { isSmartContractWallet } from '@/utils/wallets'
 import { getTxOptions } from '@/utils/transactions'
 import useIsValidExecution from '@/hooks/useIsValidExecution'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -100,6 +102,18 @@ export const ExecuteForm = ({
     (isGtfChain && !!safeTx && safeTx.signatures.size === 0 && gtfPaymentMode === 'safe' && !!gtfSelectedGasToken) ||
     isNestedApproveHash
 
+  // Parent Safe as executor cannot pay gas from the (child) Safe. The relay path doesn't
+  // support this nested execution flow at this moment. Block Execute when both conditions hold so
+  // the user can't submit a tx that would dead end at sign time.
+  // `signer.isSafe` is only set for the in-app nested signer, so a parent Safe connected over
+  // WalletConnect looks like a plain wallet — fall back to an on-chain check of the signer address.
+  const signer = useSigner()
+  const [isSignerSmartAccount, , isSignerSmartAccountLoading] = useAsync(
+    () => (!signer || signer.isSafe ? undefined : isSmartContractWallet(signer.chainId, signer.address)),
+    [signer],
+  )
+  const blockSafePaysFromNestedExecutor = (signer?.isSafe === true || isSignerSmartAccount === true) && !!requiresRelay
+
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
 
@@ -150,8 +164,9 @@ export const ExecuteForm = ({
     canNoFeeCampaign &&
     executionMethod === ExecutionMethod.NO_FEE_CAMPAIGN
   )
-  // Wait for the async SC-wallet check to settle — `walletCanRelay` is undefined while loading.
-  const relayUnavailableForGtf = requiresRelay && !canRelay && !walletCanRelayLoading
+  // Wait for the async SC-wallet checks to settle — `walletCanRelay` and `isSignerSmartAccount` are
+  // undefined while loading, and a smart account signer gets its own, more specific error.
+  const relayUnavailableForGtf = requiresRelay && !canRelay && !walletCanRelayLoading && !isSignerSmartAccountLoading
 
   // Estimate gas limit
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)
@@ -229,12 +244,6 @@ export const ExecuteForm = ({
 
   const cannotPropose = !isOwner && !onlyExecute
 
-  // Parent Safe as executor cannot pay gas from the (child) Safe. The relay path doesn't
-  // support this nested execution flow at this moment. Block Execute when both conditions hold so
-  // the user can't submit a tx that would dead end at sign time.
-  const signer = useSigner()
-  const blockSafePaysFromNestedExecutor = signer?.isSafe === true && !!requiresRelay
-
   const submitDisabled =
     !safeTx ||
     isSubmitDisabled ||
@@ -292,13 +301,13 @@ export const ExecuteForm = ({
           <ErrorMessage>
             Cannot execute a transaction from the Safe account itself, please connect a different account.
           </ErrorMessage>
-        ) : relayUnavailableForGtf ? (
-          <ErrorMessage>Safe-paid fees require Gelato relay, which is currently unavailable.</ErrorMessage>
         ) : blockSafePaysFromNestedExecutor ? (
           <ErrorMessage level="info">
-            Can&apos;t pay gas from this Safe account when executing through a parent Safe account. Sign the
+            Can&apos;t pay gas from this Safe account when executing through a smart contract account. Sign the
             transaction, or switch to another signer to execute.
           </ErrorMessage>
+        ) : relayUnavailableForGtf ? (
+          <ErrorMessage>Safe-paid fees require Gelato relay, which is currently unavailable.</ErrorMessage>
         ) : !walletCanPay && !willRelay && !willNoFeeCampaign ? (
           <ErrorMessage level="info">
             Your connected wallet doesn&apos;t have enough funds to execute this transaction.

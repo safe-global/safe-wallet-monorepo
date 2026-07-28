@@ -14,6 +14,10 @@ import * as walletCanPay from '@/hooks/useWalletCanPay'
 import * as useValidateTxData from '@/hooks/useValidateTxData'
 import * as useRemainingRelays from '@/hooks/useRemainingRelays'
 import * as useChains from '@/hooks/useChains'
+import * as useWallet from '@/hooks/wallets/useWallet'
+import * as walletUtils from '@/utils/wallets'
+import { EthSafeTransaction } from '@safe-global/protocol-kit'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { chainBuilder } from '@/tests/builders/chains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { render } from '@/tests/test-utils'
@@ -150,39 +154,50 @@ describe('ExecuteForm', () => {
       operation: OperationType.Call,
     })
 
-  // Regression: a nested approveHash on a daily-limit relay chain (RELAYING, no GTF) still draws from the
-  // daily quota, so the "free transactions left today" counter must be shown. Previously the call site
-  // forced relays=undefined for every nested approveHash, suppressing the counter on daily-limit chains too.
-  it('shows the remaining-relays counter for a nested approveHash on a daily-limit chain', () => {
-    jest.spyOn(useWalletCanRelay, 'default').mockReturnValue([true, undefined, false])
-    jest.spyOn(relayUtils, 'hasRemainingRelays').mockReturnValue(true)
-    jest.spyOn(useRemainingRelays, 'useRelaysBySafe').mockReturnValue([{ remaining: 3, limit: 5 }, undefined, false])
-    // Daily-limit chain: relaying is available but it is NOT the sponsored/unlimited GTF relay.
-    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(
-      chainBuilder()
-        .with({ features: [FEATURES.RELAYING] })
-        .build(),
-    )
+  describe('nested approveHash relay quota', () => {
+    // `useHasFeature` calls the module-local `useCurrentChain`, so spying on that export alone does
+    // not reach it — it needs its own mock, restored so it doesn't leak into the other tests.
+    let hasFeatureSpy: jest.SpyInstance
 
-    const { getByText } = render(<ExecuteForm {...defaultProps} safeTx={nestedApproveHashTx()} />)
+    const mockChainFeature = (feature: FEATURES) => {
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(
+        chainBuilder()
+          .with({ features: [feature] })
+          .build(),
+      )
+      hasFeatureSpy = jest.spyOn(useChains, 'useHasFeature').mockImplementation((f) => f === feature)
+    }
 
-    expect(getByText(/free transactions left today/)).toBeInTheDocument()
-  })
+    beforeEach(() => {
+      jest.spyOn(useWalletCanRelay, 'default').mockReturnValue([true, undefined, false])
+      jest.spyOn(relayUtils, 'hasRemainingRelays').mockReturnValue(true)
+      jest.spyOn(useRemainingRelays, 'useRelaysBySafe').mockReturnValue([{ remaining: 3, limit: 5 }, undefined, false])
+    })
 
-  // A nested approveHash on a GTF (sponsored/unlimited) chain has no daily quota, so the counter stays hidden.
-  it('does not show the remaining-relays counter for a nested approveHash on a GTF chain', () => {
-    jest.spyOn(useWalletCanRelay, 'default').mockReturnValue([true, undefined, false])
-    jest.spyOn(relayUtils, 'hasRemainingRelays').mockReturnValue(true)
-    jest.spyOn(useRemainingRelays, 'useRelaysBySafe').mockReturnValue([{ remaining: 3, limit: 5 }, undefined, false])
-    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(
-      chainBuilder()
-        .with({ features: [FEATURES.GTF] })
-        .build(),
-    )
+    afterEach(() => {
+      hasFeatureSpy?.mockRestore()
+    })
 
-    const { queryByText } = render(<ExecuteForm {...defaultProps} safeTx={nestedApproveHashTx()} />)
+    // Regression: a nested approveHash on a daily-limit relay chain (RELAYING, no GTF) still draws from the
+    // daily quota, so the "free transactions left today" counter must be shown. Previously the call site
+    // forced relays=undefined for every nested approveHash, suppressing the counter on daily-limit chains too.
+    it('shows the remaining-relays counter on a daily-limit chain', () => {
+      // Daily-limit chain: relaying is available but it is NOT the sponsored/unlimited GTF relay.
+      mockChainFeature(FEATURES.RELAYING)
 
-    expect(queryByText(/free transactions left today/)).not.toBeInTheDocument()
+      const { getByText } = render(<ExecuteForm {...defaultProps} safeTx={nestedApproveHashTx()} />)
+
+      expect(getByText(/free transactions left today/)).toBeInTheDocument()
+    })
+
+    // A nested approveHash on a GTF (sponsored/unlimited) chain has no daily quota, so the counter stays hidden.
+    it('does not show the remaining-relays counter on a GTF chain', () => {
+      mockChainFeature(FEATURES.GTF)
+
+      const { queryByText } = render(<ExecuteForm {...defaultProps} safeTx={nestedApproveHashTx()} />)
+
+      expect(queryByText(/free transactions left today/)).not.toBeInTheDocument()
+    })
   })
 
   it('shows an execution validation error', () => {
@@ -365,6 +380,84 @@ describe('ExecuteForm', () => {
         expect.anything(),
         true,
       )
+    })
+  })
+
+  describe('Safe-paid execution from a smart account signer', () => {
+    // Non-zero gasPrice + baseGas + refundReceiver are what make the payload trigger
+    // `Safe.handlePayment()`, i.e. a Safe-paid tx that must be relayed.
+    const safePaidTx = () =>
+      new EthSafeTransaction({
+        to: '0x0000000000000000000000000000000000000001',
+        data: '0x',
+        operation: OperationType.Call,
+        value: '0',
+        baseGas: '21000',
+        gasPrice: '1000000000',
+        gasToken: ZERO_ADDRESS,
+        nonce: 0,
+        refundReceiver: '0x0000000000000000000000000000000000000Fee',
+        safeTxGas: '0',
+      })
+
+    const mockSigner = (address: string) =>
+      jest.spyOn(useWallet, 'useSigner').mockReturnValue({ address, chainId: '1', provider: null })
+
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
+    // Regression: a parent Safe connected via WalletConnect carries no `isSafe` marker (that is only
+    // set for the in-app nested signer), so this used to fall through to the generic Gelato error.
+    it('shows the smart account executor error for a WalletConnect-connected Safe', async () => {
+      mockSigner('0x0000000000000000000000000000000000000A11')
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(true)
+      jest.spyOn(useWalletCanRelay, 'default').mockReturnValue([false, undefined, false])
+
+      const { findByText, queryByText, getByText } = render(<ExecuteForm {...defaultProps} safeTx={safePaidTx()} />)
+
+      expect(await findByText(/pay gas from this Safe account/)).toBeInTheDocument()
+      expect(queryByText(/require Gelato relay/)).not.toBeInTheDocument()
+      expect(getByText('Execute')).toBeDisabled()
+    })
+
+    it('shows the smart account executor error for the in-app nested signer', async () => {
+      jest.spyOn(useWallet, 'useSigner').mockReturnValue({
+        address: '0x0000000000000000000000000000000000000A11',
+        chainId: '1',
+        provider: null,
+        isSafe: true,
+      })
+      jest.spyOn(useWalletCanRelay, 'default').mockReturnValue([false, undefined, false])
+
+      const { findByText } = render(<ExecuteForm {...defaultProps} safeTx={safePaidTx()} />)
+
+      expect(await findByText(/pay gas from this Safe account/)).toBeInTheDocument()
+    })
+
+    it('still shows the relay-unavailable error for an EOA signer', async () => {
+      mockSigner('0x0000000000000000000000000000000000000E0A')
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
+      jest.spyOn(useWalletCanRelay, 'default').mockReturnValue([false, undefined, false])
+
+      const { findByText, queryByText } = render(<ExecuteForm {...defaultProps} safeTx={safePaidTx()} />)
+
+      expect(await findByText(/require Gelato relay/)).toBeInTheDocument()
+      expect(queryByText(/pay gas from this Safe account/)).not.toBeInTheDocument()
+    })
+
+    it('does not block a relayable Safe-paid tx from an EOA signer', async () => {
+      mockSigner('0x0000000000000000000000000000000000000E0A')
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
+      jest.spyOn(useWalletCanRelay, 'default').mockReturnValue([true, undefined, false])
+
+      const { queryByText, getByText } = render(<ExecuteForm {...defaultProps} safeTx={safePaidTx()} />)
+
+      await waitFor(() => {
+        expect(getByText('Execute')).not.toBeDisabled()
+      })
+      expect(queryByText(/require Gelato relay/)).not.toBeInTheDocument()
+      expect(queryByText(/pay gas from this Safe account/)).not.toBeInTheDocument()
     })
   })
 })
