@@ -84,6 +84,36 @@ describe('DialogContent', () => {
     expect(content).toHaveClass('bg-[var(--color-background-paper)]')
     expect(content).not.toHaveClass('bg-dialog')
   })
+
+  it('routes overlayClassName to the backdrop and className to the popup', () => {
+    render(
+      <Dialog open>
+        <DialogContent data-testid="content" className="z-[1451]" overlayClassName="z-[1452]" showCloseButton={false}>
+          Body
+        </DialogContent>
+      </Dialog>,
+    )
+
+    const content = screen.getByTestId('content')
+    const overlay = document.querySelector('[data-slot="dialog-overlay"]')
+
+    expect(content).toHaveClass('z-[1451]')
+    expect(content).not.toHaveClass('z-[1452]')
+    expect(overlay).toHaveClass('z-[1452]')
+    expect(overlay).not.toHaveClass('z-[1451]')
+  })
+
+  it('leaves the backdrop untouched when no overlayClassName is given', () => {
+    render(
+      <Dialog open>
+        <DialogContent data-testid="content" showCloseButton={false}>
+          Body
+        </DialogContent>
+      </Dialog>,
+    )
+
+    expect(document.querySelector('[data-slot="dialog-overlay"]')).toHaveClass('z-[var(--z-overlay)]')
+  })
 })
 
 describe('DialogHeader', () => {

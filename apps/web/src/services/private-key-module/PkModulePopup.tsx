@@ -25,7 +25,13 @@ const PkModulePopup = () => {
   }
 
   return (
-    <ModalDialog dialogTitle="Connect with Private Key" onClose={onClose} open={isOpen}>
+    <ModalDialog
+      dialogTitle="Connect with Private Key"
+      onClose={onClose}
+      open={isOpen}
+      className="z-[var(--z-above-onboard)]"
+      overlayClassName="z-[var(--z-above-onboard)]"
+    >
       <div className="p-4">
         <Typography className="mb-6">
           Enter your signer private key. The key will be saved for the duration of this browser session.

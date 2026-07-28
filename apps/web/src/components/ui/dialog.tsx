@@ -35,7 +35,7 @@ import { XIcon } from 'lucide-react'
  * Key Props:
  * - DialogContent: `size` ('default' | 'xs' | 'sm' | 'md' | 'lg' | 'xl', default 'default' = max-w-[500px];
  *   mirrors ModalDialog's MAX_WIDTH_MAP), `padding` ('none' | 'md'; Content has no body padding by default),
- *   `surface` ('default' | 'card' | 'paper'), `showCloseButton`, `keepMounted`
+ *   `surface` ('default' | 'card' | 'paper'), `showCloseButton`, `keepMounted`, `overlayClassName`
  * - DialogHeader / DialogFooter: `divided` (true = full border, 'subtle' = border-border/50)
  *
  * Widths, padding, surface and header/footer dividers belong to these props, not raw `className` utilities.
@@ -120,6 +120,7 @@ function DialogOverlay({ className, ...props }: DialogPrimitive.Backdrop.Props) 
 
 function DialogContent({
   className,
+  overlayClassName,
   children,
   showCloseButton = true,
   keepMounted,
@@ -130,10 +131,11 @@ function DialogContent({
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean
   keepMounted?: boolean
+  overlayClassName?: string
 } & VariantProps<typeof dialogContentVariants>) {
   return (
     <DialogPortal keepMounted={keepMounted}>
-      <DialogOverlay />
+      <DialogOverlay className={overlayClassName} />
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(dialogContentVariants({ size, padding, surface }), className)}

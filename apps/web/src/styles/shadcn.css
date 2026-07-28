@@ -59,6 +59,9 @@
   --accent-success: #16a34a;
   --z-sidebar: 1300;
   --z-overlay: 1400;
+  /* Must beat onboard.css's --onboard-modal-z-index (1450) — for dialogs the wallet-connect modal
+     itself opens, such as the private key prompt. */
+  --z-above-onboard: 1451;
   --z-picker: 1500;
 }
 

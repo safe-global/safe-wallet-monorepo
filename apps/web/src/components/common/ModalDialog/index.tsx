@@ -23,6 +23,8 @@ interface ModalDialogProps {
   fullScreen?: boolean
   children?: ReactNode
   className?: string
+  /** Applied to the backdrop — needed when the dialog has to out-stack a third-party overlay. */
+  overlayClassName?: string
   /** MUI breakpoint key (e.g. `'sm'`) or a CSS width — applied as the popup's max-width. */
   maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | number | string | false
   /** @deprecated MUI `fullWidth` is a no-op after the shadcn migration; popups are full-width up to `maxWidth`. */
@@ -91,6 +93,7 @@ const ModalDialog = ({
   fullScreen = false,
   chainId,
   className,
+  overlayClassName,
   maxWidth,
   PaperProps,
   keepMounted,
@@ -137,6 +140,7 @@ const ModalDialog = ({
           isFullScreen && 'translate-x-0 translate-y-0',
           className,
         )}
+        overlayClassName={overlayClassName}
         style={{ ...(inlineMaxWidth != null ? { maxWidth: inlineMaxWidth } : {}), ...fullScreenStyle }}
         onClick={(e) => e.stopPropagation()}
       >
