@@ -43,10 +43,16 @@ describe('oracleProposalHash', () => {
 })
 
 /**
- * Typehash constants as they are hardcoded in the deployed
- * `ConsensusMessages.sol`. Pinning them here means a typo in either ported type
- * string fails the build rather than producing a hash that verifies against
- * nothing.
+ * Typehash constants as they are hardcoded in `ConsensusMessages.sol`. Pinning
+ * them here means a typo in either ported type string fails the build rather
+ * than producing a hash that verifies against nothing.
+ *
+ * These are corroboration, not the primary evidence: `frost/verify.test.ts`
+ * proves `plainProposalHash` against a real Gnosis beta attestation and
+ * `oracleProposalHash` against a real devnet one, which is what actually pins
+ * both preimages to deployed contracts. The domain and `TransactionProposal`
+ * typehashes were also confirmed present in the beta Consensus runtime bytecode
+ * — see `__fixtures__/README.md`.
  */
 const DOMAIN_TYPEHASH = '0x47e79534a245952e8b16893a336b85a3d9ea9fa8c573f3d803afb92a79469218'
 const TRANSACTION_PROPOSAL_TYPEHASH = '0x0791f9d2a47e59f417d6c5d2ac1c700ccf949a66461ac7842e6d104c1a92b152'

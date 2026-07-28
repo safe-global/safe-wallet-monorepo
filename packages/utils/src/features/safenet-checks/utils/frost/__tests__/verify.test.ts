@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { N } from '../math'
 import { verifyAttestation, type AttestationInput } from '../verify'
-import { deriveRequestId } from '../../oracleProposalHash'
+import { deriveRequestId, plainProposalHash } from '../../oracleProposalHash'
 import type { Hex } from '../../../types'
 
 type GoldenVector = {
@@ -45,6 +45,101 @@ describe('verifyAttestation — devnet golden vector (live-captured, real FROST 
     })
     expect(derived).toBe(golden.requestId)
     expect(derived).toBe(golden.oracleProposalHash)
+  })
+})
+
+type PlainVector = {
+  chainId: string
+  safeChainId: string
+  consensus: string
+  epoch: string
+  safeTxHash: Hex
+  groupKey: { x: string; y: string }
+  r: { x: string; y: string }
+  z: string
+}
+
+const plain: PlainVector = JSON.parse(
+  readFileSync(join(__dirname, '../../../__fixtures__/gnosis-plain-attestation.golden.json'), 'utf8'),
+)
+
+const plainMessage = (chainId: string): Hex =>
+  plainProposalHash({ chainId, consensus: plain.consensus, epoch: plain.epoch, safeTxHash: plain.safeTxHash })
+
+const plainParams = (chainId = plain.chainId): AttestationInput => ({
+  groupKey: { x: plain.groupKey.x, y: plain.groupKey.y },
+  attestation: { r: { x: plain.r.x, y: plain.r.y }, z: plain.z },
+  message: plainMessage(chainId),
+})
+
+describe('verifyAttestation — Gnosis beta non-oracle vector (live-captured, real FROST signature)', () => {
+  it('verifies a real mainnet attestation against the preimage plainProposalHash derives', () => {
+    expect(verifyAttestation(plainParams())).toBe(true)
+  })
+
+  it('uses the Safenet chain id for the EIP-712 domain, not the Safe transaction chain id', () => {
+    // The event carries chainId 42161 (the Safe is on Arbitrum); the domain is
+    // Gnosis (100), where Consensus is deployed. Reaching for the event's field
+    // derives a different preimage that verifies against nothing.
+    expect(plain.safeChainId).not.toBe(plain.chainId)
+    expect(plainMessage(plain.safeChainId)).not.toBe(plainMessage(plain.chainId))
+    expect(verifyAttestation(plainParams(plain.safeChainId))).toBe(false)
+  })
+
+  it('rejects the oracle preimage for a non-oracle attestation (paths never cross)', () => {
+    const crossed = deriveRequestId({
+      chainId: plain.chainId,
+      consensus: plain.consensus,
+      epoch: plain.epoch,
+      oracle: '0x0000000000000000000000000000000000000000',
+      safeTxHash: plain.safeTxHash,
+    })
+    expect(verifyAttestation({ ...plainParams(), message: crossed })).toBe(false)
+  })
+
+  it('rejects a tampered epoch, safeTxHash, or verifying contract', () => {
+    const base = plainParams()
+    const withMessage = (message: Hex) => verifyAttestation({ ...base, message })
+    expect(
+      withMessage(
+        plainProposalHash({
+          chainId: plain.chainId,
+          consensus: plain.consensus,
+          epoch: inc(plain.epoch),
+          safeTxHash: plain.safeTxHash,
+        }),
+      ),
+    ).toBe(false)
+    expect(
+      withMessage(
+        plainProposalHash({
+          chainId: plain.chainId,
+          consensus: '0x0000000000000000000000000000000000000000',
+          epoch: plain.epoch,
+          safeTxHash: plain.safeTxHash,
+        }),
+      ),
+    ).toBe(false)
+    expect(
+      withMessage(
+        plainProposalHash({
+          chainId: plain.chainId,
+          consensus: plain.consensus,
+          epoch: plain.epoch,
+          safeTxHash: `0x${'0'.repeat(64)}` as Hex,
+        }),
+      ),
+    ).toBe(false)
+  })
+
+  it('rejects a tampered signature scalar and commitment', () => {
+    const z = plainParams()
+    z.attestation.z = inc(z.attestation.z)
+    expect(verifyAttestation(z)).toBe(false)
+
+    const r = plainParams()
+    r.attestation.r.x = inc(r.attestation.r.x)
+    expect(verifyAttestation(r)).toBe(false)
   })
 })
 
