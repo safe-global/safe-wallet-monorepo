@@ -1,4 +1,4 @@
-import { Fragment, memo, type ReactElement, useContext, useMemo, useState, useEffect } from 'react'
+import { memo, type ReactElement, useContext, useMemo, useState, useEffect } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
 
@@ -6,7 +6,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import {
   Combobox,
+  ComboboxCollection,
   ComboboxContent,
+  ComboboxGroup,
   ComboboxInput,
   ComboboxItem,
   ComboboxLabel,
@@ -161,6 +163,10 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
         return (
           <Combobox
             items={options}
+            // `value` must be bound alongside `inputValue`: on close Base UI resets the input to the
+            // selected value, so leaving selection uncontrolled discards a typed nonce.
+            value={field.value}
+            onValueChange={(value) => field.onChange(_formatNumber(typeof value === 'string' ? value : ''))}
             inputValue={field.value}
             onInputValueChange={(value) => field.onChange(_formatNumber(value))}
             // Always surface the recommended/recent presets regardless of the typed value
@@ -205,14 +211,30 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
 
             <ComboboxContent>
               <ComboboxList>
-                {(option: string) => (
-                  <Fragment key={option}>
-                    {option === recommendedNonce && <ComboboxLabel>Recommended nonce</ComboboxLabel>}
-                    {option === previousNonces[0] && <ComboboxLabel className="pt-3">Replace existing</ComboboxLabel>}
-                    <ComboboxItem value={option}>
-                      <NonceFormOption nonce={option} />
-                    </ComboboxItem>
-                  </Fragment>
+                {/* Each label must live inside its own ComboboxGroup — Base UI's GroupLabel throws
+                    without a Group ancestor, which previously crashed the popup on open. */}
+                <ComboboxGroup items={[recommendedNonce]}>
+                  <ComboboxLabel>Recommended nonce</ComboboxLabel>
+                  <ComboboxCollection>
+                    {(option: string) => (
+                      <ComboboxItem key={option} value={option}>
+                        <NonceFormOption nonce={option} />
+                      </ComboboxItem>
+                    )}
+                  </ComboboxCollection>
+                </ComboboxGroup>
+
+                {previousNonces.length > 0 && (
+                  <ComboboxGroup items={previousNonces}>
+                    <ComboboxLabel className="pt-3">Replace existing</ComboboxLabel>
+                    <ComboboxCollection>
+                      {(option: string) => (
+                        <ComboboxItem key={option} value={option}>
+                          <NonceFormOption nonce={option} />
+                        </ComboboxItem>
+                      )}
+                    </ComboboxCollection>
+                  </ComboboxGroup>
                 )}
               </ComboboxList>
             </ComboboxContent>
