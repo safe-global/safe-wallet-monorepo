@@ -169,13 +169,13 @@ const AdvancedOptionsStep = ({ onSubmit, onBack, data, setStep }: StepRenderProp
                     return 'Salt nonce must be positive'
                   }
                 },
-                required: true,
+                required: 'Salt nonce is required',
               })}
               fullWidth
               label="Salt nonce"
               error={Boolean(formState.errors[AdvancedOptionsFields.saltNonce]) || Boolean(isDeployed)}
               helperText={
-                formState.errors[AdvancedOptionsFields.saltNonce]?.message ??
+                formState.errors[AdvancedOptionsFields.saltNonce]?.message ||
                 (Boolean(isDeployed) ? 'The Safe is already deployed. Use a different salt nonce.' : undefined)
               }
             />
@@ -199,25 +199,30 @@ const AdvancedOptionsStep = ({ onSubmit, onBack, data, setStep }: StepRenderProp
             <Controller
               control={control}
               name={AdvancedOptionsFields.paymentReceiver}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Field>
-                  <FieldLabel htmlFor="advanced-payment-receiver">Payment receiver</FieldLabel>
-                  <Input
-                    id="advanced-payment-receiver"
-                    name={field.name}
-                    value={field.value ?? ''}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    error={
-                      formState.errors[AdvancedOptionsFields.paymentReceiver]?.message ??
-                      (Boolean(isDeployed)
-                        ? 'The Safe is already deployed. Use a different payment receiver.'
-                        : undefined)
-                    }
-                  />
-                </Field>
-              )}
+              rules={{ required: 'Payment receiver is required' }}
+              render={({ field, fieldState }) => {
+                const isInvalid = fieldState.invalid || Boolean(isDeployed)
+
+                return (
+                  <Field data-invalid={isInvalid || undefined}>
+                    <FieldLabel htmlFor="advanced-payment-receiver">Payment receiver</FieldLabel>
+                    <Input
+                      id="advanced-payment-receiver"
+                      name={field.name}
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      aria-invalid={isInvalid || undefined}
+                      error={
+                        fieldState.error?.message ||
+                        (Boolean(isDeployed)
+                          ? 'The Safe is already deployed. Use a different payment receiver.'
+                          : undefined)
+                      }
+                    />
+                  </Field>
+                )
+              }}
             />
           </div>
 
