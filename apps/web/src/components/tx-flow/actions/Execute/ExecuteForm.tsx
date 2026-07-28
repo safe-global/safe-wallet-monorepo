@@ -30,6 +30,7 @@ import { isWalletRejection } from '@/utils/wallets'
 import css from './styles.module.css'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
+import useSafeInfo from '@/hooks/useSafeInfo'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
 import type { SlotComponentProps, SlotName } from '../../slots'
@@ -73,6 +74,7 @@ export const ExecuteForm = ({
 }): ReactElement => {
   // Hooks
   const currentChain = useCurrentChain()
+  const { safe } = useSafeInfo()
   const { executeTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
   const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
@@ -102,9 +104,6 @@ export const ExecuteForm = ({
     (isGtfChain && !!safeTx && safeTx.signatures.size === 0 && gtfPaymentMode === 'safe' && !!gtfSelectedGasToken) ||
     isNestedApproveHash
 
-  // Parent Safe as executor cannot pay gas from the (child) Safe. The relay path doesn't
-  // support this nested execution flow at this moment. Block Execute when both conditions hold so
-  // the user can't submit a tx that would dead end at sign time.
   // `signer.isSafe` is only set for the in-app nested signer, so a parent Safe connected over
   // WalletConnect looks like a plain wallet — fall back to an on-chain check of the signer address.
   const signer = useSigner()
@@ -112,7 +111,9 @@ export const ExecuteForm = ({
     () => (!signer || signer.isSafe ? undefined : isSmartContractWallet(signer.chainId, signer.address)),
     [signer],
   )
-  const blockSafePaysFromNestedExecutor = (signer?.isSafe === true || isSignerSmartAccount === true) && !!requiresRelay
+  const isFullySigned = !!safeTx && safeTx.signatures.size >= safe.threshold
+  const blockSafePaysFromNestedExecutor =
+    (signer?.isSafe === true || isSignerSmartAccount === true) && !!requiresRelay && !isFullySigned
 
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)

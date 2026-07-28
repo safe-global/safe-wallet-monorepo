@@ -16,8 +16,10 @@ import * as useRemainingRelays from '@/hooks/useRemainingRelays'
 import * as useChains from '@/hooks/useChains'
 import * as useWallet from '@/hooks/wallets/useWallet'
 import * as walletUtils from '@/utils/wallets'
-import { EthSafeTransaction } from '@safe-global/protocol-kit'
+import * as useSafeInfo from '@/hooks/useSafeInfo'
+import { EthSafeTransaction, generatePreValidatedSignature } from '@safe-global/protocol-kit'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { chainBuilder } from '@/tests/builders/chains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { render } from '@/tests/test-utils'
@@ -384,10 +386,12 @@ describe('ExecuteForm', () => {
   })
 
   describe('Safe-paid execution from a smart account signer', () => {
+    const SAFE_THRESHOLD = 2
+
     // Non-zero gasPrice + baseGas + refundReceiver are what make the payload trigger
     // `Safe.handlePayment()`, i.e. a Safe-paid tx that must be relayed.
-    const safePaidTx = () =>
-      new EthSafeTransaction({
+    const safePaidTx = (signatureCount = 0) => {
+      const tx = new EthSafeTransaction({
         to: '0x0000000000000000000000000000000000000001',
         data: '0x',
         operation: OperationType.Call,
@@ -400,8 +404,27 @@ describe('ExecuteForm', () => {
         safeTxGas: '0',
       })
 
+      Array.from({ length: signatureCount }, (_, i) =>
+        tx.addSignature(generatePreValidatedSignature(`0x${(i + 1).toString().padStart(40, '0')}`)),
+      )
+
+      return tx
+    }
+
     const mockSigner = (address: string) =>
       jest.spyOn(useWallet, 'useSigner').mockReturnValue({ address, chainId: '1', provider: null })
+
+    beforeEach(() => {
+      const safeAddress = '0x0000000000000000000000000000000000000C11'
+      jest.spyOn(useSafeInfo, 'default').mockReturnValue({
+        safeAddress,
+        safe: extendedSafeInfoBuilder()
+          .with({ address: { value: safeAddress }, threshold: SAFE_THRESHOLD })
+          .build(),
+        safeLoaded: true,
+        safeLoading: false,
+      })
+    })
 
     afterEach(() => {
       jest.restoreAllMocks()
@@ -458,6 +481,41 @@ describe('ExecuteForm', () => {
       })
       expect(queryByText(/require Gelato relay/)).not.toBeInTheDocument()
       expect(queryByText(/pay gas from this Safe account/)).not.toBeInTheDocument()
+    })
+
+    it('relays a fully signed Safe-paid tx for a WalletConnect-connected Safe', async () => {
+      mockSigner('0x0000000000000000000000000000000000000A11')
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(true)
+      jest.spyOn(useWalletCanRelay, 'default').mockReturnValue([true, undefined, false])
+      const mockExecuteTx = jest.fn().mockResolvedValue('0xexecuted')
+
+      const { queryByText, getByText } = render(
+        <ExecuteForm
+          {...defaultProps}
+          safeTx={safePaidTx(SAFE_THRESHOLD)}
+          txActions={{ ...defaultProps.txActions, executeTx: mockExecuteTx }}
+        />,
+      )
+
+      await waitFor(() => {
+        expect(getByText('Execute')).not.toBeDisabled()
+      })
+      expect(queryByText(/pay gas from this Safe account/)).not.toBeInTheDocument()
+      expect(queryByText(/require Gelato relay/)).not.toBeInTheDocument()
+
+      fireEvent.click(getByText('Execute'))
+
+      // Executed through the relay (`isRelayed` = true), not the connected wallet.
+      await waitFor(() => {
+        expect(mockExecuteTx).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+          undefined,
+          true,
+          false,
+        )
+      })
     })
   })
 })
