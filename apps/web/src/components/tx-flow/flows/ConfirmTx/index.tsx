@@ -26,11 +26,14 @@ const ConfirmTxFlow = ({ txSummary }: { txSummary: Transaction }) => {
       icon={isSwapOrder ? SwapIcon : undefined}
       subtitle={<>{text}&nbsp;</>}
       txId={txId}
+      txNonce={txNonce}
       isExecutable={canExecute}
       onlyExecute={!canSign}
       isRejection={isRejection}
       txSummary={txSummary}
-      ReviewTransactionComponent={(props) => <ConfirmProposedTx txNonce={txNonce} {...props} />}
+      // Must be a stable reference: TxFlow renders it as an element type, so a new identity per
+      // render would remount the review step (ConfirmProposedTx reads txNonce from TxFlowContext).
+      ReviewTransactionComponent={ConfirmProposedTx}
       eventCategory={TxFlowType.CONFIRM_TX}
     />
   )
