@@ -41,7 +41,7 @@ const buildSafeItem = (address: string, chainId = '1'): SafeItem =>
 const noop = () => {}
 
 const baseProps = {
-  flaggedOwnedAddresses: new Set<string>(),
+  flaggedAddresses: new Set<string>(),
   selectedKeys: new Set<string>(),
   onToggle: noop,
   isAtLimit: false,
@@ -77,35 +77,46 @@ describe('OnboardingSafesList', () => {
     expect(getByTestId('onboarding-owned-table')).toHaveTextContent('0xOwned')
   })
 
-  it('flags only the owned table, never the trusted table', () => {
+  it('passes the flag set to both the trusted and owned tables', () => {
     const { getByTestId } = render(
       <OnboardingSafesList
         trustedSafes={[buildSafeItem('0xTrusted')]}
         ownedSafes={[buildSafeItem('0xOwned')]}
         {...baseProps}
-        flaggedOwnedAddresses={new Set(['0xowned'])}
+        flaggedAddresses={new Set(['0xtrusted', '0xowned'])}
       />,
     )
 
-    expect(getByTestId('onboarding-trusted-table').dataset.flagged).toBe('')
-    expect(getByTestId('onboarding-owned-table').dataset.flagged).toBe('0xowned')
+    expect(getByTestId('onboarding-trusted-table').dataset.flagged).toBe('0xtrusted,0xowned')
+    expect(getByTestId('onboarding-owned-table').dataset.flagged).toBe('0xtrusted,0xowned')
   })
 
-  it('shows the security banner only when an owned safe is flagged', () => {
-    const { queryByTestId, rerender } = render(
-      <OnboardingSafesList trustedSafes={[]} ownedSafes={[buildSafeItem('0xOwned')]} {...baseProps} />,
+  it('shows a single security banner above the sections when any row is flagged', () => {
+    const { queryByTestId, queryAllByTestId, rerender } = render(
+      <OnboardingSafesList
+        trustedSafes={[buildSafeItem('0xTrusted')]}
+        ownedSafes={[buildSafeItem('0xOwned')]}
+        {...baseProps}
+      />,
     )
     expect(queryByTestId('security-banner')).not.toBeInTheDocument()
 
+    // Flagging only a trusted row must surface the banner too (WA-2912).
     rerender(
       <OnboardingSafesList
-        trustedSafes={[]}
+        trustedSafes={[buildSafeItem('0xTrusted')]}
         ownedSafes={[buildSafeItem('0xOwned')]}
         {...baseProps}
-        flaggedOwnedAddresses={new Set(['0xowned'])}
+        flaggedAddresses={new Set(['0xtrusted'])}
       />,
     )
-    expect(queryByTestId('security-banner')).toBeInTheDocument()
+    expect(queryAllByTestId('security-banner')).toHaveLength(1)
+    // Rendered above both section tables
+    const banner = queryByTestId('security-banner')
+    const trustedTable = queryByTestId('onboarding-trusted-table')
+    expect(banner && trustedTable && banner.compareDocumentPosition(trustedTable)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    )
   })
 
   it('passes isAtLimit down to both tables', () => {
