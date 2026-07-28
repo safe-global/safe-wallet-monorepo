@@ -75,7 +75,7 @@ const TransactionQueueBar = ({
         </Accordion>
       </div>
       {expanded && (
-        <div className="fixed inset-0 z-[var(--z-overlay)] bg-black/50" onClick={() => setExpanded(false)} />
+        <div data-testid="queue-bar-backdrop" className={styles.backdrop} onClick={() => setExpanded(false)} />
       )}
     </>
   )

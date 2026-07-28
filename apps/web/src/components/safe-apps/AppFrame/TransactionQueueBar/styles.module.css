@@ -10,3 +10,13 @@
   /*this rule is needed to prevent the bar from being expanded outside the screen without scrolling on mobile devices*/
   max-height: 90vh;
 }
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+
+  /* one below .barWrapper, or the scrim covers the bar and swallows every click inside it */
+  z-index: 1199;
+
+  background-color: rgb(0 0 0 / 0.5);
+}
