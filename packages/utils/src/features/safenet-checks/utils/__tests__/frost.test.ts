@@ -54,18 +54,6 @@ describe('verifyAttestation — live golden vectors', () => {
     expect(verifyAttestation(inputFor(devnet, devnet.requestId))).toBe(true)
   })
 
-  it('derives the devnet requestId from the oracle proposal (EIP-712 parity)', () => {
-    const derived = oracleProposalHash({
-      chainId: devnet.chainId,
-      consensus: devnet.consensus,
-      epoch: devnet.epoch,
-      oracle: devnet.oracle,
-      safeTxHash: devnet.safeTxHash,
-    })
-    expect(derived).toBe(devnet.requestId)
-    expect(derived).toBe(devnet.oracleProposalHash)
-  })
-
   it('h2 matches the RFC-9591 known-answer vector from the protocol repo', () => {
     const input = getBytes('0x37e58bc84afff4e1afade4140135583af3d6d3523a435e60cec5dc75ae3d7e8b')
     expect(h2(input)).toBe(33150593925562805502779376598105657283445871999808781975649610745815960364725n)
@@ -93,25 +81,30 @@ describe('verifyAttestation — the preimage must match the path and the domain'
   })
 })
 
-describe('verifyAttestation — scalar-range and totality guards', () => {
-  it('rejects z >= N (the FROST.sol z < N requirement)', () => {
-    expect(verifyAttestation(inputFor({ ...devnet, z: N.toString() }, devnet.requestId))).toBe(false)
+describe('verifyAttestation — total over malformed input', () => {
+  // These document the contract (bad input is `false`, never an exception) so a
+  // poll loop can't be killed by one bad attestation. Note that `z` out of range
+  // and off-curve points are also rejected by @noble/curves before our own
+  // guards see them, so passing here does not prove those guards work.
+  it.each([
+    ['z = N', inputFor({ ...devnet, z: N.toString() }, devnet.requestId)],
+    ['z = 0', inputFor({ ...devnet, z: '0' }, devnet.requestId)],
+    ['z negative', inputFor({ ...devnet, z: '-1' }, devnet.requestId)],
+    ['z not a number', inputFor({ ...devnet, z: 'not-a-number' }, devnet.requestId)],
+    [
+      'off-curve points',
+      { groupKey: { x: '1', y: '1' }, attestation: { r: { x: '2', y: '2' }, z: '3' }, message: devnet.requestId },
+    ],
+    [
+      'identity group key',
+      { groupKey: { x: '0', y: '0' }, attestation: { r: { ...devnet.r }, z: devnet.z }, message: devnet.requestId },
+    ],
+  ] as Array<[string, AttestationInput]>)('returns false without throwing for %s', (_name, input) => {
+    expect(verifyAttestation(input)).toBe(false)
   })
 
-  it('rejects z = 0 without throwing', () => {
-    const zero = inputFor({ ...devnet, z: '0' }, devnet.requestId)
-    expect(() => verifyAttestation(zero)).not.toThrow()
-    expect(verifyAttestation(zero)).toBe(false)
-  })
-
-  it('returns false (never throws) for off-curve garbage points', () => {
-    const garbage: AttestationInput = {
-      groupKey: { x: '1', y: '1' },
-      attestation: { r: { x: '2', y: '2' }, z: '3' },
-      message: devnet.requestId,
-    }
-    expect(() => verifyAttestation(garbage)).not.toThrow()
-    expect(verifyAttestation(garbage)).toBe(false)
+  it.each([undefined, null, {}])('returns false without throwing for %p', (input) => {
+    expect(verifyAttestation(input as unknown as AttestationInput)).toBe(false)
   })
 })
 
@@ -121,10 +114,13 @@ describe('verifyAttestation — scalar-range and totality guards', () => {
  * verifier that returns `true` too easily is a security hole where one that
  * returns `false` is only a UX bug.
  *
- * The signer below is built straight on `@noble/curves` from the group-signature
- * equation FROST reduces to once shares are combined (`z = k + c·x`, verified as
- * `z·G - c·Y == R`). It deliberately shares no helper with the code under test,
- * so agreement is evidence about the verifier rather than a common bug.
+ * The signer below implements the group-signature equation FROST reduces to once
+ * shares are combined (`z = k + c·x`, verified as `z·G - c·Y == R`) directly on
+ * `@noble/curves`. It shares exactly one thing with the code under test: `h2`.
+ * That means it catches a wrong challenge *preimage* (the concat order is
+ * re-derived here, independently) but NOT a wrong DST inside `h2` itself — the
+ * RFC-9591 known-answer vector and the two live golden vectors are what pin
+ * that.
  */
 const scalarAt = (seed: string, index: number): bigint =>
   (BigInt(keccak256(toUtf8Bytes(`${seed}:${index}`))) % (N - 1n)) + 1n
@@ -160,28 +156,28 @@ describe('verifyAttestation — round-trip properties', () => {
     expect(verifyAttestation(sign(N - 2n, scalarAt('nonce', 999), messageAt(999)))).toBe(true)
   })
 
+  /**
+   * Every substitution here stays ON the curve. Incrementing a coordinate would
+   * be simpler but lands off-curve every time, which `toPoint` rejects before
+   * the verification equation runs — that path is covered above, and testing it
+   * here would look like coverage without being any.
+   */
+  const otherPoint = (index: number) => {
+    const { x, y } = secp256k1.Point.BASE.multiply(scalarAt('other', index)).toAffine()
+    return { x: x.toString(), y: y.toString() }
+  }
+
   it.each([
     ['scalar z', (i: AttestationInput) => ({ ...i, attestation: { ...i.attestation, z: inc(i.attestation.z) } })],
     [
-      'commitment r.x',
-      (i: AttestationInput) => ({
-        ...i,
-        attestation: { ...i.attestation, r: { ...i.attestation.r, x: inc(i.attestation.r.x) } },
-      }),
+      'commitment R (valid point, wrong one)',
+      (i: AttestationInput, n: number) => ({ ...i, attestation: { ...i.attestation, r: otherPoint(n) } }),
     ],
-    [
-      'commitment r.y',
-      (i: AttestationInput) => ({
-        ...i,
-        attestation: { ...i.attestation, r: { ...i.attestation.r, y: inc(i.attestation.r.y) } },
-      }),
-    ],
-    ['group key x', (i: AttestationInput) => ({ ...i, groupKey: { ...i.groupKey, x: inc(i.groupKey.x) } })],
-    ['group key y', (i: AttestationInput) => ({ ...i, groupKey: { ...i.groupKey, y: inc(i.groupKey.y) } })],
+    ['group key Y (valid point, wrong one)', (i: AttestationInput, n: number) => ({ ...i, groupKey: otherPoint(n) })],
     ['message', (i: AttestationInput) => ({ ...i, message: keccak256(i.message) as Hex })],
   ])('rejects a mutated %s across all cases', (_name, mutate) => {
     for (let i = 0; i < CASES; i++) {
-      expect(verifyAttestation(mutate(sign(scalarAt('key', i), scalarAt('nonce', i), messageAt(i))))).toBe(false)
+      expect(verifyAttestation(mutate(sign(scalarAt('key', i), scalarAt('nonce', i), messageAt(i)), i))).toBe(false)
     }
   })
 

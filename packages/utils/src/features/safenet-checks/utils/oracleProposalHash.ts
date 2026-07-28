@@ -12,16 +12,17 @@ import type { Hex } from '../types'
  * free (verified live: it equals the onchain `requestId`).
  */
 export type OracleProposal = {
-  /** The Safenet chain id (feeds the EIP-712 domain). */
-  chainId: string | number | bigint
+  /** The chain Consensus is deployed to, which is what the domain uses — NOT the
+   * `chainId` carried in the event, which is the chain the Safe lives on. */
+  chainId: string
   /** The Consensus contract address — the EIP-712 `verifyingContract`. */
   consensus: string
-  epoch: string | number | bigint
+  epoch: string
   oracle: string
   safeTxHash: Hex
 }
 
-const ORACLE_PROPOSAL_TYPES = {
+export const ORACLE_PROPOSAL_TYPES = {
   OracleTransactionProposal: [
     { name: 'epoch', type: 'uint64' },
     { name: 'oracle', type: 'address' },
@@ -46,9 +47,9 @@ export const oracleProposalHash = ({ chainId, consensus, epoch, oracle, safeTxHa
  * (`TRANSACTION_PROPOSAL_TYPEHASH` = `keccak256("TransactionProposal(uint64
  * epoch,bytes32 safeTxHash)")`).
  */
-export type PlainProposal = Omit<OracleProposal, 'oracle'>
+export type PlainProposal = Omit<OracleProposal, 'oracle'> & { oracle?: never }
 
-const PLAIN_PROPOSAL_TYPES = {
+export const PLAIN_PROPOSAL_TYPES = {
   TransactionProposal: [
     { name: 'epoch', type: 'uint64' },
     { name: 'safeTxHash', type: 'bytes32' },

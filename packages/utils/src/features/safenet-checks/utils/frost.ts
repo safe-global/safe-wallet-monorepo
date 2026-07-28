@@ -55,8 +55,11 @@ export type AttestationInput = {
  * point — resolves to `false` rather than an exception, so a bad attestation can
  * never break a poll.
  */
-export const verifyAttestation = ({ groupKey, attestation, message }: AttestationInput): boolean => {
+export const verifyAttestation = (input: AttestationInput): boolean => {
   try {
+    // Destructured inside the try: at parameter position it would throw on a
+    // null/undefined argument, which the read layer polls in a loop.
+    const { groupKey, attestation, message } = input
     const z = BigInt(attestation.z)
     // FROST.sol enforces `z < N`, so state it here rather than inherit it.
     // `@noble/curves` also rejects out-of-range scalars today, which makes this
