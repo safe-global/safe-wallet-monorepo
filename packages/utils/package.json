@@ -5,6 +5,7 @@
   "version": "1.0.0",
   "scripts": {
     "test": "jest",
+    "test:integration": "jest --config jest.integration.config.js",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "type-check": "tsc --noEmit",
@@ -27,6 +28,8 @@
   },
   "dependencies": {
     "@cowprotocol/app-data": "^3.1.0",
+    "@noble/curves": "1.9.7",
+    "@noble/hashes": "1.8.0",
     "@testing-library/react": "^16.3.0",
     "date-fns": "^4.1.0",
     "jest-fixed-jsdom": "^0.0.10",
@@ -35,6 +38,7 @@
   "peerDependencies": {
     "@safe-global/protocol-kit": "^7.1.x",
     "@safe-global/store": "*",
-    "@safe-global/types-kit": "^3.1.x"
+    "@safe-global/types-kit": "^3.1.x",
+    "react-redux": "^9.1.2"
   }
 }
