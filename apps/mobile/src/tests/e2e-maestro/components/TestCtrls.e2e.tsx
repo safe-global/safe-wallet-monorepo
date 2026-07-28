@@ -26,6 +26,7 @@ import {
 import { setupHistory, setupTransactionHistory, setupTransactionHistoryDirect } from '../setup/historySetup'
 import {
   setupWcDappsBase,
+  seedWcSession,
   synthSessionProposalValid,
   synthSessionProposalUnverified,
   synthSessionProposalScam,
@@ -299,6 +300,7 @@ export function TestCtrls() {
           accessibilityRole="button"
           style={BTN}
         />
+        <Pressable testID="e2eWcSeedSession" onPress={() => seedWcSession()} accessibilityRole="button" style={BTN} />
         <Pressable
           testID="e2eWcSynthProposalValid"
           onPress={() => synthSessionProposalValid()}

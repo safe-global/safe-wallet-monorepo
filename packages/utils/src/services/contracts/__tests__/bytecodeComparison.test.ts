@@ -1,201 +1,154 @@
-import { compareWithSupportedL2Contracts, isSupportedL2Version } from '../bytecodeComparison'
+import { compareWithOfficialSingletons, isSupportedMigrationVersion } from '../bytecodeComparison'
 import * as safeDeployments from '@safe-global/safe-deployments'
 import { keccak256 } from 'ethers'
 
 jest.mock('@safe-global/safe-deployments', () => ({
+  getSafeSingletonDeployments: jest.fn(),
   getSafeL2SingletonDeployments: jest.fn(),
 }))
 
+const mockGetL1 = jest.mocked(safeDeployments.getSafeSingletonDeployments)
+const mockGetL2 = jest.mocked(safeDeployments.getSafeL2SingletonDeployments)
+
+type Deployment = ReturnType<typeof safeDeployments.getSafeSingletonDeployments>
+
+// Official singleton addresses (for realism — the comparison keys off codeHash, not address).
+const OFFICIAL_L1_130 = '0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552'
+const OFFICIAL_L1_141 = '0x41675C099F32341bf84BFc5382aF534df5C7461a'
+const OFFICIAL_L2_130 = '0x3E5c63644E683549055b9Be8653de26E0B4CD36E'
+
+const RECOMMENDED = '1.4.1'
+
+const mockBytecode =
+  '0x608060405234801561001057600080fd5b50600436106100365760003560e01c8063ffa1ad741461003b575b600080fd5b610043610059565b60405161005091906100a3565b60405180910390f35b6060604051806040016040528060058152602001'
+const mockBytecodeHash = keccak256(mockBytecode)
+
+const singleton = (version: string, variants: Record<string, { address: string; codeHash: string }>): Deployment =>
+  ({
+    released: true,
+    contractName: 'Safe',
+    version,
+    deployments: variants,
+    networkAddresses: {},
+  }) as unknown as Deployment
+
 describe('bytecodeComparison', () => {
-  describe('isSupportedL2Version', () => {
-    it('should return true for 1.3.0', () => {
-      expect(isSupportedL2Version('1.3.0')).toBe(true)
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockGetL1.mockReturnValue(undefined)
+    mockGetL2.mockReturnValue(undefined)
+  })
+
+  describe('isSupportedMigrationVersion', () => {
+    it.each(['1.3.0', '1.4.0', '1.4.1', '1.3.0+L2', '1.4.1+L2'])(
+      'returns true for %s within [1.3.0 .. recommended]',
+      (version) => {
+        expect(isSupportedMigrationVersion(version, RECOMMENDED)).toBe(true)
+      },
+    )
+
+    it.each(['1.1.1', '1.2.0', '1.5.0', '2.0.0'])('returns false for %s outside [1.3.0 .. recommended]', (version) => {
+      expect(isSupportedMigrationVersion(version, RECOMMENDED)).toBe(false)
     })
 
-    it('should return true for 1.4.1', () => {
-      expect(isSupportedL2Version('1.4.1')).toBe(true)
-    })
-
-    it('should return true for 1.3.0+L2', () => {
-      expect(isSupportedL2Version('1.3.0+L2')).toBe(true)
-    })
-
-    it('should return true for 1.4.1+L2', () => {
-      expect(isSupportedL2Version('1.4.1+L2')).toBe(true)
-    })
-
-    it('should return false for 1.1.1', () => {
-      expect(isSupportedL2Version('1.1.1')).toBe(false)
-    })
-
-    it('should return false for 1.2.0', () => {
-      expect(isSupportedL2Version('1.2.0')).toBe(false)
-    })
-
-    it('should return false for 1.4.0', () => {
-      expect(isSupportedL2Version('1.4.0')).toBe(false)
-    })
-
-    it('should return false for unsupported versions', () => {
-      expect(isSupportedL2Version('2.0.0')).toBe(false)
+    it('follows the recommended ceiling', () => {
+      expect(isSupportedMigrationVersion('1.5.0', '1.4.1')).toBe(false)
+      expect(isSupportedMigrationVersion('1.5.0', '1.5.0')).toBe(true)
+      expect(isSupportedMigrationVersion('1.4.1', '1.5.0')).toBe(true)
     })
   })
 
-  describe('compareWithSupportedL2Contracts', () => {
-    const mockBytecode =
-      '0x608060405234801561001057600080fd5b50600436106100365760003560e01c8063ffa1ad741461003b575b600080fd5b610043610059565b60405161005091906100a3565b60405180910390f35b60606040518060400160405280600581526020017f312e342e31000000000000000000000000000000000000000000000000000000815250905090565b600082825260208201905092915050565b60006100c2601f8361008e565b91506100cd82610158565b602082019050919050565b600060208201905081810360008301526100f1816100b5565b9050919050565b7f312e342e310000000000000000000000000000000000000000000000000000600082015250565b6000610131601f83610092565b915061013c826100f8565b602082019050919050565b6000602082019050818103600083015261016081610124565b9050919050565b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b'
-    const mockBytecodeHash = keccak256(mockBytecode)
+  describe('compareWithOfficialSingletons', () => {
+    it('matches an official L1 1.3.0 singleton', async () => {
+      mockGetL1.mockImplementation((filter) =>
+        filter?.version === '1.3.0'
+          ? singleton('1.3.0', { canonical: { address: OFFICIAL_L1_130, codeHash: mockBytecodeHash } })
+          : undefined,
+      )
 
-    it('should return isMatch: true when bytecode matches canonical deployment', async () => {
-      const chainId = '1'
+      const result = await compareWithOfficialSingletons(mockBytecode, RECOMMENDED)
 
-      jest.mocked(safeDeployments.getSafeL2SingletonDeployments).mockReturnValue({
-        released: true,
-        contractName: 'GnosisSafeL2',
-        version: '1.3.0',
-        deployments: {
-          canonical: {
-            address: '0x3E5c63644E683549055b9Be8653de26E0B4CD36E',
-            codeHash: mockBytecodeHash,
-          },
-        },
-        networkAddresses: {
-          '1': ['0x3E5c63644E683549055b9Be8653de26E0B4CD36E'],
-        },
-      } as any)
-
-      const result = await compareWithSupportedL2Contracts(mockBytecode, chainId)
-
-      expect(result.isMatch).toBe(true)
-      expect(result.matchedVersion).toBe('1.3.0')
+      expect(result).toEqual({ isMatch: true, matchedVersion: '1.3.0' })
     })
 
-    it('should return isMatch: true when bytecode matches eip155 deployment', async () => {
-      const chainId = '10'
+    it('matches an official L1 1.4.1 singleton', async () => {
+      mockGetL1.mockImplementation((filter) =>
+        filter?.version === '1.4.1'
+          ? singleton('1.4.1', { canonical: { address: OFFICIAL_L1_141, codeHash: mockBytecodeHash } })
+          : undefined,
+      )
 
-      jest.mocked(safeDeployments.getSafeL2SingletonDeployments).mockImplementation((filter) => {
-        const version = filter?.version
-        if (version === '1.4.1') {
-          return {
-            released: true,
-            contractName: 'GnosisSafeL2',
-            version: '1.4.1',
-            deployments: {
-              canonical: {
-                address: '0x3E5c63644E683549055b9Be8653de26E0B4CD36E',
-                codeHash: '0xdifferenthash',
-              },
-              eip155: {
-                address: '0xfb1bffC9d739B8D520DaF37dF666da4C687191EA',
-                codeHash: mockBytecodeHash,
-              },
-            },
-            networkAddresses: {
-              '10': ['0xfb1bffC9d739B8D520DaF37dF666da4C687191EA'],
-            },
-          } as any
-        }
-        return undefined as any
-      })
+      const result = await compareWithOfficialSingletons(mockBytecode, RECOMMENDED)
 
-      const result = await compareWithSupportedL2Contracts(mockBytecode, chainId)
-
-      expect(result.isMatch).toBe(true)
-      expect(result.matchedVersion).toBe('1.4.1')
+      expect(result).toEqual({ isMatch: true, matchedVersion: '1.4.1' })
     })
 
-    it('should return isMatch: false when bytecode does not match any deployment', async () => {
-      const chainId = '1'
-      const differentHash = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+    it('matches an official L2 singleton on its eip155 variant', async () => {
+      mockGetL2.mockImplementation((filter) =>
+        filter?.version === '1.3.0'
+          ? singleton('1.3.0', {
+              canonical: { address: OFFICIAL_L2_130, codeHash: '0xdifferenthash' },
+              eip155: { address: '0xfb1bffC9d739B8D520DaF37dF666da4C687191EA', codeHash: mockBytecodeHash },
+            })
+          : undefined,
+      )
 
-      jest.mocked(safeDeployments.getSafeL2SingletonDeployments).mockReturnValue({
-        released: true,
-        contractName: 'GnosisSafeL2',
-        version: '1.3.0',
-        deployments: {
-          canonical: {
-            address: '0x3E5c63644E683549055b9Be8653de26E0B4CD36E',
-            codeHash: differentHash,
-          },
-        },
-        networkAddresses: {
-          '1': ['0x3E5c63644E683549055b9Be8653de26E0B4CD36E'],
-        },
-      } as any)
+      const result = await compareWithOfficialSingletons(mockBytecode, RECOMMENDED)
 
-      const result = await compareWithSupportedL2Contracts(mockBytecode, chainId)
-
-      expect(result.isMatch).toBe(false)
-      expect(result.matchedVersion).toBeUndefined()
+      expect(result).toEqual({ isMatch: true, matchedVersion: '1.3.0' })
     })
 
-    it('should return isMatch: false when chain does not have the deployment', async () => {
-      const chainId = '999'
+    it('matches on codeHash even when no chain lists the singleton (chain gate removed)', async () => {
+      mockGetL2.mockImplementation((filter) =>
+        filter?.version === '1.3.0'
+          ? singleton('1.3.0', { canonical: { address: OFFICIAL_L2_130, codeHash: mockBytecodeHash } })
+          : undefined,
+      )
 
-      jest.mocked(safeDeployments.getSafeL2SingletonDeployments).mockReturnValue({
-        released: true,
-        contractName: 'GnosisSafeL2',
-        version: '1.3.0',
-        deployments: {
-          canonical: {
-            address: '0x3E5c63644E683549055b9Be8653de26E0B4CD36E',
-            codeHash: mockBytecodeHash,
-          },
-        },
-        networkAddresses: {
-          '1': ['0x3E5c63644E683549055b9Be8653de26E0B4CD36E'],
-        },
-      } as any)
+      const result = await compareWithOfficialSingletons(mockBytecode, RECOMMENDED)
 
-      const result = await compareWithSupportedL2Contracts(mockBytecode, chainId)
-
-      expect(result.isMatch).toBe(false)
-      expect(result.matchedVersion).toBeUndefined()
+      expect(result).toEqual({ isMatch: true, matchedVersion: '1.3.0' })
     })
 
-    it('should return isMatch: false when deployment is not found', async () => {
-      const chainId = '1'
+    it('iterates L1+L2 getters for the range [1.3.0 .. recommended] and no higher', async () => {
+      await compareWithOfficialSingletons(mockBytecode, RECOMMENDED)
 
-      jest.mocked(safeDeployments.getSafeL2SingletonDeployments).mockReturnValue(undefined as any)
-
-      const result = await compareWithSupportedL2Contracts(mockBytecode, chainId)
-
-      expect(result.isMatch).toBe(false)
-      expect(result.matchedVersion).toBeUndefined()
+      expect(mockGetL1).toHaveBeenCalledWith({ version: '1.3.0' })
+      expect(mockGetL1).toHaveBeenCalledWith({ version: '1.4.1' })
+      expect(mockGetL2).toHaveBeenCalledWith({ version: '1.3.0' })
+      expect(mockGetL2).toHaveBeenCalledWith({ version: '1.4.1' })
+      expect(mockGetL1).not.toHaveBeenCalledWith({ version: '1.5.0' })
+      expect(mockGetL2).not.toHaveBeenCalledWith({ version: '1.5.0' })
     })
 
-    it('should check both 1.3.0 and 1.4.1 versions', async () => {
-      const chainId = '1'
-      const getSpy = jest.mocked(safeDeployments.getSafeL2SingletonDeployments)
+    it('extends the range when recommended is 1.5.0', async () => {
+      await compareWithOfficialSingletons(mockBytecode, '1.5.0')
 
-      getSpy.mockImplementation((filter) => {
-        const version = filter?.version
-        if (version === '1.4.1') {
-          return {
-            released: true,
-            contractName: 'GnosisSafeL2',
-            version: '1.4.1',
-            deployments: {
-              canonical: {
-                address: '0x3E5c63644E683549055b9Be8653de26E0B4CD36E',
-                codeHash: mockBytecodeHash,
-              },
-            },
-            networkAddresses: {
-              '1': ['0x3E5c63644E683549055b9Be8653de26E0B4CD36E'],
-            },
-          } as any
-        }
-        return undefined as any
-      })
+      expect(mockGetL1).toHaveBeenCalledWith({ version: '1.5.0' })
+      expect(mockGetL2).toHaveBeenCalledWith({ version: '1.5.0' })
+    })
 
-      const result = await compareWithSupportedL2Contracts(mockBytecode, chainId)
+    it('returns isMatch: false for a third-party fork (no codeHash match)', async () => {
+      mockGetL1.mockImplementation((filter) =>
+        filter?.version === '1.3.0'
+          ? singleton('1.3.0', { canonical: { address: OFFICIAL_L1_130, codeHash: '0xnotamatch' } })
+          : undefined,
+      )
+      mockGetL2.mockImplementation((filter) =>
+        filter?.version === '1.4.1'
+          ? singleton('1.4.1', { canonical: { address: OFFICIAL_L2_130, codeHash: '0xalsonotamatch' } })
+          : undefined,
+      )
 
-      // Should be called for both versions
-      expect(getSpy).toHaveBeenCalledWith({ version: '1.3.0' })
-      expect(getSpy).toHaveBeenCalledWith({ version: '1.4.1' })
-      expect(result.isMatch).toBe(true)
-      expect(result.matchedVersion).toBe('1.4.1')
+      const result = await compareWithOfficialSingletons(mockBytecode, RECOMMENDED)
+
+      expect(result).toEqual({ isMatch: false })
+    })
+
+    it('returns isMatch: false when no official deployments are registered', async () => {
+      const result = await compareWithOfficialSingletons(mockBytecode, RECOMMENDED)
+
+      expect(result).toEqual({ isMatch: false })
     })
   })
 })
