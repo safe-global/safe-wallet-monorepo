@@ -20,6 +20,12 @@ const collectSourceFiles = (dir: string): Array<string> =>
 const readSpecifiers = (file: string): Array<string> =>
   [...readFileSync(file, 'utf8').matchAll(/from\s+'([^']+)'/g)].map(([, specifier]) => specifier)
 
+// Specifier matching only covers `from '…'`, so it misses relative paths, dynamic import(),
+// require() and double quotes. Every route to the editor has to name it, so also scan for the
+// identifier itself: `FeatureFlagEditorDialogLoader` is the only legal spelling anywhere.
+const readEditorMentions = (file: string): Array<string> =>
+  readFileSync(file, 'utf8').match(/FeatureFlagEditor[A-Za-z]*/g) ?? []
+
 describe('feature-flag editor static import graph', () => {
   it('reaches the feature only via the store and the guarded dialog loader', () => {
     const specifiers = collectSourceFiles(SIDEBAR_DIR).flatMap(readSpecifiers)
@@ -30,5 +36,14 @@ describe('feature-flag editor static import graph', () => {
     const featureFlagSpecifiers = [...new Set(specifiers.filter((s) => s.includes('features/feature-flags')))]
 
     expect(featureFlagSpecifiers.sort()).toEqual(ALLOWED_SPECIFIERS)
+  })
+
+  it('never names the editor other than through the guarded loader', () => {
+    const mentions = collectSourceFiles(SIDEBAR_DIR).flatMap(readEditorMentions)
+
+    // Guards against a vacuous pass: the loader import must be visible to this scan.
+    expect(mentions).toContain('FeatureFlagEditorDialogLoader')
+
+    expect([...new Set(mentions)]).toEqual(['FeatureFlagEditorDialogLoader'])
   })
 })
