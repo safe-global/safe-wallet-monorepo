@@ -14,6 +14,9 @@ type OrderByButtonProps = {
 const orderByLabels = {
   [OrderByOption.LAST_VISITED]: 'Last visited',
   [OrderByOption.NAME]: 'Name',
+  // Manual is only selectable on surfaces that support drag ordering; the label keeps the
+  // shared preference readable here (the legacy list falls back to A→Z under Manual).
+  [OrderByOption.MANUAL]: 'Manual',
 }
 
 const OrderByButton = ({ orderBy: orderBy, onOrderByChange: onOrderByChange }: OrderByButtonProps) => {

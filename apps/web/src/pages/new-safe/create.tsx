@@ -9,7 +9,7 @@ import { useCurrentSpaceId } from '@/features/spaces'
 
 const Open: NextPage = () => {
   const spaceId = useCurrentSpaceId()
-  const logoHref = spaceId ? `${AppRoutes.spaces.index}?spaceId=${spaceId}` : AppRoutes.welcome.index
+  const logoHref = spaceId ? `${AppRoutes.spaces.index}?spaceId=${spaceId}` : AppRoutes.index
 
   return (
     <main>

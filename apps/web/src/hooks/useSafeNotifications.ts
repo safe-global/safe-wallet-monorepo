@@ -1,4 +1,3 @@
-import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { useCallback, useEffect } from 'react'
 import { showNotification, closeNotification } from '@/store/notificationsSlice'
 import useSafeInfo from './useSafeInfo'
@@ -9,6 +8,7 @@ import useIsSafeOwner from './useIsSafeOwner'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { isValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
+import { getMastercopyAction } from '@safe-global/utils/services/contracts/safeContracts'
 import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
 
 const CLI_LINK = {
@@ -38,9 +38,15 @@ const useSafeNotifications = (): void => {
   const dispatch = useAppDispatch()
   const { query } = useRouter()
   const { safe, safeAddress } = useSafeInfo()
-  const { chainId, version, implementationVersionState } = safe
+  const { chainId, version } = safe
   const isOwner = useIsSafeOwner()
   const urlSafeAddress = useSafeAddress()
+
+  // Derived from the shared mastercopy decision. This notification intentionally
+  // ignores the deployer (unlike the dashboard/settings surfaces).
+  const mastercopyAction = getMastercopyAction(safe)
+  const isCriticalUpdate = !isNonCriticalUpdate(version)
+  const isSupportedVersion = isValidSafeVersion(version)
 
   const dismissUpdateNotification = useCallback(
     (groupKey: string) => {
@@ -85,9 +91,9 @@ const useSafeNotifications = (): void => {
 
     // Is Safe version outdated?
     // Non-critical Safe upgrades (versions >= '1.3.0') intentionally skip notifications
-    if (implementationVersionState !== ImplementationVersionState.OUTDATED || isNonCriticalUpdate(version)) return
+    if (mastercopyAction !== 'update' || !isCriticalUpdate) return
 
-    const isUnsupported = !isValidSafeVersion(version)
+    const isUnsupported = !isSupportedVersion
 
     const id = dispatch(
       showNotification({
@@ -117,7 +123,9 @@ const useSafeNotifications = (): void => {
     }
   }, [
     dispatch,
-    implementationVersionState,
+    mastercopyAction,
+    isCriticalUpdate,
+    isSupportedVersion,
     version,
     query.safe,
     isOwner,
@@ -131,7 +139,7 @@ const useSafeNotifications = (): void => {
 
   /**
    * Notification for unsupported master copy has been moved to the
-   * "Attention required" panel on the dashboard (UnsupportedMastercopyWarning component)
+   * "Attention required" panel on the dashboard (MastercopyWarning component)
    * to consolidate all warning banners in one place.
    */
 }

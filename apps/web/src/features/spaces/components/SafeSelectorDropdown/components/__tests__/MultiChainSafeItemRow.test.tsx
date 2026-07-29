@@ -1,5 +1,6 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { useChain } from '@/hooks/useChains'
 import MultiChainSafeItemRow from '../MultiChainSafeItemRow'
 import type { SafeItemData, SafeItemDataChain } from '../../types'
 
@@ -7,8 +8,19 @@ jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: () => 'Test Safe',
 }))
 
-jest.mock('../SafeInfoDisplay', () => {
-  const Mock = () => <div data-testid="safe-info-display" />
+// Per-chain rows resolve their own chain config; default to none so the icon/badge suites stay light.
+jest.mock('@/hooks/useChains', () => ({
+  useChain: jest.fn(() => undefined),
+}))
+
+// Surface the explorerLink the summary row is (or isn't) given — the multi-chain summary must never
+// receive one, since its chain would be arbitrary.
+jest.mock('@/components/common/AccountRow/SafeInfoDisplay', () => {
+  const Mock = ({ explorerLink }: { explorerLink?: { href: string } }) => (
+    <div data-testid="safe-info-display">
+      {explorerLink && <a data-testid="summary-explorer-link" href={explorerLink.href} />}
+    </div>
+  )
   Mock.displayName = 'SafeInfoDisplay'
   return { __esModule: true, default: Mock }
 })
@@ -80,6 +92,106 @@ describe('MultiChainSafeItemRow chain icon overflow badge', () => {
   })
 })
 
+describe('MultiChainSafeItemRow summary badges', () => {
+  it('renders an icon-only threshold pill (setup can differ per chain)', () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'], { threshold: 2, owners: 3 })} />)
+
+    const badge = screen.getByTestId('account-threshold')
+    expect(badge).toBeInTheDocument()
+    expect(badge).not.toHaveTextContent('2/3')
+  })
+
+  it('sums queued transactions across chains into one pending badge', () => {
+    render(
+      <MultiChainSafeItemRow item={createItem([makeChain('1', { queued: 2 }), makeChain('137', { queued: 1 })])} />,
+    )
+
+    expect(screen.getByTestId('account-pending')).toHaveTextContent('3')
+  })
+
+  it('keeps the pending column as whitespace when no chain has queued transactions', () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} />)
+
+    expect(screen.queryByTestId('account-pending')).not.toBeInTheDocument()
+    expect(screen.getByTestId('row-pending-column')).toBeInTheDocument()
+  })
+})
+
+describe('MultiChainSafeItemRow active-chain behaviour', () => {
+  it('expands by default when the group holds the active chain', () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} isSelected />)
+
+    // The per-chain rows are visible without the user expanding the group.
+    expect(screen.getByText('Chain 1')).toBeInTheDocument()
+    expect(screen.getByText('Chain 137')).toBeInTheDocument()
+  })
+
+  it('does not highlight the summary row even when it holds the active chain', () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} isSelected />)
+
+    // The highlight belongs to the active network row (via the Select value), not the summary trigger.
+    const trigger = screen.getByRole('button')
+    expect(trigger.className.split(/\s+/)).not.toContain('bg-muted')
+  })
+
+  it('stays collapsed when the group does not hold the active chain', () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} />)
+
+    expect(screen.queryByText('Chain 1')).not.toBeInTheDocument()
+    expect(screen.queryByText('Chain 137')).not.toBeInTheDocument()
+  })
+})
+
+describe('MultiChainSafeItemRow expanded per-chain rows', () => {
+  const expandRow = async () => {
+    await userEvent.click(screen.getByRole('button'))
+  }
+
+  it('shows each chain name once expanded', async () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} />)
+    await expandRow()
+
+    expect(screen.getByText('Chain 1')).toBeInTheDocument()
+    expect(screen.getByText('Chain 137')).toBeInTheDocument()
+  })
+
+  it('shows each chain row its own threshold/owners, not the parent aggregate', async () => {
+    // Parent aggregate is 2/3, but the chains have different setups — each row must show its own.
+    render(
+      <MultiChainSafeItemRow
+        item={createItem([makeChain('1', { threshold: 2, owners: 3 }), makeChain('137', { threshold: 3, owners: 5 })], {
+          threshold: 2,
+          owners: 3,
+        })}
+      />,
+    )
+    await expandRow()
+
+    // The collapsed summary badge stays icon-only; the expanded rows show each chain's own "2/3" and "3/5".
+    expect(screen.getByText('2/3')).toBeInTheDocument()
+    expect(screen.getByText('3/5')).toBeInTheDocument()
+  })
+
+  it('shows per-chain pending counts (not the summed total) on the expanded rows', async () => {
+    render(
+      <MultiChainSafeItemRow item={createItem([makeChain('1', { queued: 2 }), makeChain('137', { queued: 1 })])} />,
+    )
+    await expandRow()
+
+    // Summary row (3) + the two per-chain rows (2 and 1).
+    const pendingBadges = screen.getAllByTestId('account-pending').map((el) => el.textContent)
+    expect(pendingBadges).toEqual(expect.arrayContaining(['3', '2', '1']))
+  })
+
+  it('marks only the read-only chain row with a labelled read-only icon', async () => {
+    render(<MultiChainSafeItemRow item={createItem([makeChain('1', { isReadOnly: true }), makeChain('137')])} />)
+    await expandRow()
+
+    // The label moved into a hover tooltip, so the visible affordance is the aria-labelled icon.
+    expect(screen.getAllByLabelText('Read-only safe')).toHaveLength(1)
+  })
+})
+
 describe('MultiChainSafeItemRow undeployed status badge', () => {
   const expandRow = async () => {
     await userEvent.click(screen.getByRole('button'))
@@ -125,5 +237,40 @@ describe('MultiChainSafeItemRow undeployed status badge', () => {
     await expandRow()
 
     expect(screen.queryByTestId('not-activated-badge')).not.toBeInTheDocument()
+  })
+})
+
+describe('MultiChainSafeItemRow hover highlight', () => {
+  it('takes focus when the summary is hovered so base-ui does not strand the highlight on the previous row', () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} />)
+
+    const trigger = screen.getByRole('button')
+    expect(trigger).not.toHaveFocus()
+
+    fireEvent.mouseEnter(trigger)
+
+    expect(trigger).toHaveFocus()
+  })
+})
+
+describe('MultiChainSafeItemRow per-chain explorer links', () => {
+  beforeEach(() => {
+    jest.mocked(useChain).mockReturnValue({
+      blockExplorerUriTemplate: { address: 'https://etherscan.io/address/{{address}}' },
+    } as unknown as ReturnType<typeof useChain>)
+  })
+
+  afterEach(() => {
+    jest.mocked(useChain).mockReturnValue(undefined)
+  })
+
+  it('renders a per-chain explorer link on each network row and none on the summary', () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} isSelected />)
+
+    // One link per chain — the summary row (stubbed) never receives an explorerLink.
+    expect(screen.queryByTestId('summary-explorer-link')).not.toBeInTheDocument()
+    const links = screen.getAllByTestId('safe-item-row-explorer-link')
+    expect(links).toHaveLength(2)
+    expect(links[0]).toHaveAttribute('href', 'https://etherscan.io/address/0xaaa')
   })
 })

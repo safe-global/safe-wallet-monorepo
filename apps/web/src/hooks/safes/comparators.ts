@@ -2,18 +2,41 @@ import { OrderByOption } from '@/store/orderByPreferenceSlice'
 import type { SafeItem } from './useAllSafes'
 import type { MultiChainSafeItem } from './useAllSafesGrouped'
 
-export const nameComparator = (a: SafeItem | MultiChainSafeItem, b: SafeItem | MultiChainSafeItem) => {
-  // Put undefined names last
-  if (!a.name && !b.name) return 0
+type SortableSafe = SafeItem | MultiChainSafeItem
+
+const byAddress = (a: SortableSafe, b: SortableSafe) => a.address.toLowerCase().localeCompare(b.address.toLowerCase())
+
+export const nameComparator = (a: SortableSafe, b: SortableSafe) => {
+  // Named safes sort A→Z first; unnamed ones sort by address, always after the named ones.
+  if (!a.name && !b.name) return byAddress(a, b)
   if (!a.name) return 1
   if (!b.name) return -1
-  return a.name.localeCompare(b.name)
+  return a.name.localeCompare(b.name) || byAddress(a, b)
 }
 
-export const lastVisitedComparator = (a: SafeItem | MultiChainSafeItem, b: SafeItem | MultiChainSafeItem) => {
+export const lastVisitedComparator = (a: SortableSafe, b: SortableSafe) => {
   return b.lastVisited - a.lastVisited
 }
 
-export const getComparator = (orderBy: OrderByOption) => {
+/**
+ * Orders safes by an explicit, user-defined sequence of lowercased addresses. Addresses missing
+ * from the sequence (e.g. a Safe trusted after the order was saved) sink to the bottom, where they
+ * keep a stable A→Z order so the list never jumps around them.
+ */
+export const manualComparator = (order: string[]) => {
+  const rank = new Map(order.map((address, index) => [address.toLowerCase(), index]))
+  return (a: SortableSafe, b: SortableSafe) => {
+    const ai = rank.get(a.address.toLowerCase()) ?? Infinity
+    const bi = rank.get(b.address.toLowerCase()) ?? Infinity
+    if (ai !== bi) return ai - bi
+    return nameComparator(a, b)
+  }
+}
+
+export const getComparator = (orderBy: OrderByOption, manualOrder?: string[]) => {
+  if (orderBy === OrderByOption.MANUAL) {
+    // Without a saved order (or on a surface that defines none), Manual falls back to A→Z.
+    return manualOrder && manualOrder.length > 0 ? manualComparator(manualOrder) : nameComparator
+  }
   return orderBy === OrderByOption.NAME ? nameComparator : lastVisitedComparator
 }

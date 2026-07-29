@@ -8,8 +8,8 @@ import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 import NameInput from '@/components/common/NameInput'
 import { NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 
-const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => {
-  const { handleUpdate, error } = useUpdateSpace(space)
+const UpdateSpaceForm = ({ space, onClose }: { space: GetSpaceResponse | undefined; onClose?: () => void }) => {
+  const { handleUpdate, error } = useUpdateSpace(space, onClose)
   const isAdmin = useIsAdmin(space?.uuid)
 
   const formMethods = useForm<UpdateSpaceFormData>({

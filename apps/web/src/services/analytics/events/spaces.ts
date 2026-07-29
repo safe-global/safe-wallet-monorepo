@@ -47,6 +47,10 @@ export const SPACE_EVENTS = {
     action: 'Workspace member role changed',
     category: SPACE_CATEGORY,
   },
+  WORKSPACE_MEMBER_NAME_CHANGED: {
+    action: 'Workspace member name changed',
+    category: SPACE_CATEGORY,
+  },
   WORKSPACE_MEMBER_REMOVED: {
     action: 'Workspace member removed',
     category: SPACE_CATEGORY,

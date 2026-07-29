@@ -3,7 +3,6 @@ import { PopoverContent } from '@/components/ui/popover'
 import { Separator } from '@/components/ui/separator'
 import { LogOut } from 'lucide-react'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
-import { cn } from '@/utils/cn'
 import css from './styles.module.css'
 
 export interface ProfilePopoverContentProps {
@@ -14,26 +13,24 @@ export interface ProfilePopoverContentProps {
   /** Optional role line (e.g. "ADMIN"). */
   role?: string
   onSignOut: () => void
-  /** Extra classes appended to the popover container. */
-  className?: string
 }
 
 /**
- * Shared body of the signed-in profile popover (header, name/role, sign out).
- * Rendered by both the sidebar profile section and the workspace header account menu.
+ * Body of the signed-in profile popover (header, name/role, sign out), rendered
+ * by the top-bar account menu. Opens below the account icon and is right-aligned
+ * so its trailing edge lines up with the icon.
  */
 export const ProfilePopoverContent = ({
   avatarName,
   displayName,
   role,
   onSignOut,
-  className,
 }: ProfilePopoverContentProps): ReactElement => (
   <PopoverContent
-    side="top"
-    align="center"
+    side="bottom"
+    align="end"
     sideOffset={12}
-    className={cn(css.profilePopover, className)}
+    className={css.profilePopover}
     data-testid="sidebar-profile-popover"
   >
     <div className={css.profileHeader}>

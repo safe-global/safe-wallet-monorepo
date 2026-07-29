@@ -24,7 +24,7 @@ describe('useOnboardingSafes', () => {
 
     expect(result.current.trustedSafes).toEqual([])
     expect(result.current.ownedSafes).toEqual([])
-    expect(result.current.similarAddresses.size).toBe(0)
+    expect(result.current.flaggedAddresses.size).toBe(0)
   })
 
   it('returns trusted safes from addedSafes', () => {
@@ -132,7 +132,7 @@ describe('useOnboardingSafes', () => {
 
       const { result } = renderHook(() => useOnboardingSafes())
 
-      expect(result.current.similarAddresses.size).toBe(0)
+      expect(result.current.flaggedAddresses.size).toBe(0)
     })
 
     it('returns empty set when addresses are not similar', () => {
@@ -143,13 +143,13 @@ describe('useOnboardingSafes', () => {
 
       const { result } = renderHook(() => useOnboardingSafes())
 
-      expect(result.current.similarAddresses.size).toBe(0)
+      expect(result.current.flaggedAddresses.size).toBe(0)
     })
 
-    it('detects similar addresses across trusted and owned safes', () => {
+    it('flags both sides of a look-alike pair across trusted and owned lists', () => {
       // Same 6-char prefix and 4-char suffix, differ only in middle
-      const addr1 = '0x1234567890abcdef1234567890abcdef12345678'
-      const addr2 = '0x123456eeeeeeeeee1234567890abcdef12345678'
+      const addr1 = '0x1234567890abcdef1234567890abcdef12345678' // trusted
+      const addr2 = '0x123456eeeeeeeeee1234567890abcdef12345678' // owned look-alike
 
       const mockOwned = { '1': [addr2] }
       jest.spyOn(allOwnedSafes, 'default').mockReturnValue([mockOwned, undefined, false])
@@ -164,9 +164,30 @@ describe('useOnboardingSafes', () => {
         },
       })
 
-      // Both should be flagged
-      expect(result.current.similarAddresses.has(addr1.toLowerCase())).toBe(true)
-      expect(result.current.similarAddresses.has(addr2.toLowerCase())).toBe(true)
+      expect(result.current.flaggedAddresses.has(addr2.toLowerCase())).toBe(true)
+      expect(result.current.flaggedAddresses.has(addr1.toLowerCase())).toBe(true)
+    })
+
+    it('flags a look-alike pair even when both safes are pinned (WA-2912 regression)', () => {
+      // The poisoning scenario QA reproduced: the impostor was already pinned, so both rows
+      // sit in the trusted list — the flag must not go silent there.
+      const real = '0x92b44804CeB2021197F9Aa947dC29797000065c1'
+      const impostor = '0x92b452E85d06FAB52262202f212F6F79000065c1'
+
+      const { result } = renderHook(() => useOnboardingSafes(), {
+        initialReduxState: {
+          addedSafes: {
+            '1': {
+              [real]: { owners: [], threshold: 1 },
+              [impostor]: { owners: [], threshold: 1 },
+            },
+          },
+        },
+      })
+
+      expect(result.current.ownedSafes).toHaveLength(0)
+      expect(result.current.flaggedAddresses.has(real.toLowerCase())).toBe(true)
+      expect(result.current.flaggedAddresses.has(impostor.toLowerCase())).toBe(true)
     })
   })
 })

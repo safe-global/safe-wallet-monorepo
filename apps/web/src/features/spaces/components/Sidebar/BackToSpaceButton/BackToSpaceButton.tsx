@@ -20,10 +20,9 @@ export const BackToSpaceButton = ({ spaceName, spaceInitial }: SafeWorkspaceHead
       size="lg"
       tooltip="Back to workspace"
       data-testid="back-to-space-button"
-      className={css.backToSpace}
+      className={css.spaceSelector}
       onClick={handleBackToSpace}
     >
-      <icons.ChevronLeft className={`size-4 shrink-0 ${css.backToSpaceChevron}`} />
       <Avatar className={css.spaceSelectorAvatar}>
         <AvatarFallback
           className={css.spaceSelectorAvatarFallback}
@@ -36,6 +35,7 @@ export const BackToSpaceButton = ({ spaceName, spaceInitial }: SafeWorkspaceHead
         <span className={css.spaceSelectorName}>{spaceName}</span>
         <span className={css.spaceSelectorSubtitle}>Workspace</span>
       </div>
+      <icons.ChevronLeft className="ml-auto size-4 shrink-0" aria-hidden />
     </SidebarMenuButton>
   )
 }

@@ -9,7 +9,7 @@ import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 
 function SpaceChainSelectorSkeleton() {
   return (
-    <div className="self-stretch order-last flex items-center rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)] px-4">
+    <div className="self-stretch order-last flex items-center rounded-lg bg-muted px-4">
       <Skeleton className="size-6 rounded-full" />
     </div>
   )
@@ -52,10 +52,7 @@ function SpaceChainSelector({ isLoading }: { isLoading?: boolean }) {
   }
 
   return (
-    <div
-      className="self-stretch order-last flex items-stretch shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)] rounded-lg bg-card"
-      data-testid="space-chain-selector"
-    >
+    <div className="self-stretch order-last flex items-stretch rounded-lg bg-muted" data-testid="space-chain-selector">
       {isDisabled ? (
         <Tooltip>
           <TooltipTrigger render={<span className="inline-flex" />}>

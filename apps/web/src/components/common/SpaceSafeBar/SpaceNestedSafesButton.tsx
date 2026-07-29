@@ -48,7 +48,7 @@ function SpaceNestedSafesButton(): ReactElement | null {
 
   return (
     <>
-      <div className="flex self-stretch items-stretch order-1 rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+      <div className="flex self-stretch items-stretch order-1 rounded-lg bg-muted">
         <Tooltip>
           <TooltipTrigger
             render={
@@ -56,8 +56,8 @@ function SpaceNestedSafesButton(): ReactElement | null {
                 onClick={isDisabled ? undefined : onClick}
                 disabled={isDisabled}
                 className={cn(
-                  'relative flex items-center border-0 rounded-lg bg-transparent px-2 m-1 transition-colors',
-                  isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-muted/30',
+                  'relative flex items-center border-0 rounded-lg bg-transparent px-3 transition-colors',
+                  isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-muted-foreground/10',
                 )}
                 aria-label="Nested Safes"
                 data-testid="nested-safes-button"

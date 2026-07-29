@@ -87,6 +87,7 @@ export function useSafeItemData(safeItem: SafeItem, options?: UseSafeItemDataOpt
     name,
     href,
     safeOverview,
+    walletAddress,
 
     // Derived state
     isCurrentSafe,

@@ -1,9 +1,11 @@
 import semverLt from 'semver/functions/lt'
 import semverValid from 'semver/functions/valid'
-import { isValidMasterCopy, isMigrationToL2Possible } from '@safe-global/utils/services/contracts/safeContracts'
+import {
+  isUnsupportedMastercopyMigratable,
+  isValidMasterCopy,
+} from '@safe-global/utils/services/contracts/safeContracts'
 import { getSafeSingletonDeployments, getSafeL2SingletonDeployments } from '@safe-global/safe-deployments'
 import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
-import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { SecurityScanner } from './types'
 import { KNOWN_SAFE_VERSIONS, getSeverityFromScore } from './constants'
 
@@ -38,22 +40,24 @@ export const contractVersionScanner: SecurityScanner = {
       version,
       latestVersion,
       masterCopyDeployer,
-      nonce,
       chainId,
       creationInfo,
     } = ctx
     const now = new Date().toISOString()
     const versionLabel = version ?? 'Unknown'
 
-    // Unsupported mastercopy — same check as UnsupportedMastercopyWarning
+    // Unsupported mastercopy — same check as MastercopyWarning (via getMastercopyAction). No bytecode
+    // is available here, so this relies on the officiality address fallback.
     if (!isValidMasterCopy(implementationVersionState)) {
-      // isMigrationToL2Possible only reads nonce, chainId, and implementationVersionState
-      // from SafeState. We cast to satisfy the type, but only these 3 fields are accessed.
-      const canMigrateL2 = isMigrationToL2Possible({
-        nonce,
-        chainId,
-        implementationVersionState,
-      } as Pick<SafeState, 'nonce' | 'chainId' | 'implementationVersionState'> as SafeState)
+      const canMigrateL2 = isUnsupportedMastercopyMigratable(
+        {
+          implementationVersionState,
+          version,
+          chainId,
+          implementation: { value: implementationAddress },
+        },
+        { recommendedVersion: latestVersion },
+      )
 
       const score = 10
       return {
@@ -74,7 +78,7 @@ export const contractVersionScanner: SecurityScanner = {
     }
 
     // Outdated — flag any Gnosis-deployed Safe whose version is strictly older than
-    // the chain's latest recommended version. Unlike `OutdatedMastercopyWarning` we do
+    // the chain's latest recommended version. Unlike `MastercopyWarning`'s update branch we do
     // NOT short-circuit on `isNonCriticalUpdate` (`>= 1.3.0`): the Security Hub must
     // surface this independently of the dashboard banner, and the comparison must be
     // network-aware so that future bumps (e.g. 1.5.1) automatically downgrade older

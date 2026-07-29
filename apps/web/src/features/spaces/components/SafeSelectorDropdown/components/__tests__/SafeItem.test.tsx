@@ -6,7 +6,12 @@ jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: () => 'Test Safe',
 }))
 
-jest.mock('../SafeInfoDisplay', () => {
+// The explorer-link lookup goes through RTK Query; the row explorer action is covered in SafeInfoDisplay tests.
+jest.mock('@/hooks/useChains', () => ({
+  useChain: () => undefined,
+}))
+
+jest.mock('@/components/common/AccountRow/SafeInfoDisplay', () => {
   const Mock = () => <div data-testid="safe-info-display" />
   Mock.displayName = 'SafeInfoDisplay'
   return { __esModule: true, default: Mock }
@@ -73,5 +78,39 @@ describe('SafeItem undeployed state', () => {
     render(<SafeItem {...createItem(makeChain({ isUndeployed: true }))} />)
 
     expect(screen.getByTestId('row-end-column')).toContainElement(screen.getByTestId('not-activated-badge'))
+  })
+})
+
+describe('SafeItem row badges', () => {
+  it('renders the threshold pill with the safe setup', () => {
+    render(<SafeItem {...createItem(makeChain())} />)
+
+    expect(screen.getByTestId('account-threshold')).toHaveTextContent('1/2')
+  })
+
+  it('renders an icon-only threshold pill when the setup is unknown', () => {
+    render(<SafeItem {...createItem(makeChain())} threshold={0} owners={0} />)
+
+    expect(screen.getByTestId('account-threshold')).toHaveTextContent('')
+  })
+
+  it('renders the compact pending badge when the chain has queued transactions', () => {
+    render(<SafeItem {...createItem(makeChain({ queued: 3 }))} />)
+
+    expect(screen.getByTestId('account-pending')).toHaveTextContent('3')
+  })
+
+  it('keeps the pending column as whitespace when nothing is queued', () => {
+    render(<SafeItem {...createItem(makeChain())} />)
+
+    expect(screen.queryByTestId('account-pending')).not.toBeInTheDocument()
+    expect(screen.getByTestId('row-pending-column')).toBeInTheDocument()
+  })
+
+  it('renders the fixed threshold and networks columns', () => {
+    render(<SafeItem {...createItem(makeChain())} />)
+
+    expect(screen.getByTestId('row-threshold-column')).toBeInTheDocument()
+    expect(screen.getByTestId('row-networks-column')).toBeInTheDocument()
   })
 })

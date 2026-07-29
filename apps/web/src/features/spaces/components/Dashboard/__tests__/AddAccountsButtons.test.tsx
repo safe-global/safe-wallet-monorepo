@@ -80,9 +80,13 @@ jest.mock('@/features/spaces/components/AddAccountsChooser', () => ({
 
 const MOCK_SPACE_ID = '42'
 
-const AccountsWidgetStub = (props: { action?: ReactNode; emptyStateAction?: ReactNode }) => (
+const AccountsWidgetStub = (props: { onViewAll?: () => void; totalCount?: number; emptyStateAction?: ReactNode }) => (
   <div data-testid="accounts-widget">
-    {props.action && <div data-testid="action-slot">{props.action}</div>}
+    {props.onViewAll && (
+      <button data-testid="view-all-slot" onClick={props.onViewAll}>
+        View all {props.totalCount}
+      </button>
+    )}
     {props.emptyStateAction && <div data-testid="empty-state-action-slot">{props.emptyStateAction}</div>}
   </div>
 )
@@ -116,43 +120,39 @@ const stubAccountsWidget = () => {
   })
 }
 
-describe('SpaceDashboard – AddAccountsChooser button labels', () => {
+describe('SpaceDashboard – accounts widget header actions', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     stubAccountsWidget()
   })
 
-  it('passes "Manage accounts" as the buttonLabel for the populated action slot', () => {
+  it('wires a "View all" action carrying the total Safe-account count', () => {
+    restoreDefaultMocks([
+      { address: '0xaaaa', chainId: '1' },
+      { address: '0xbbbb', chainId: '1' },
+    ])
+
+    render(<SpaceDashboard />)
+
+    expect(screen.getByTestId('view-all-slot')).toHaveTextContent('View all 2')
+  })
+
+  it('no longer wires the "Manage accounts" chooser as the populated header action', () => {
     restoreDefaultMocks([{ address: '0xaaaa', chainId: '1' }])
 
     render(<SpaceDashboard />)
 
-    const actionSlot = screen.getByTestId('action-slot')
-    expect(actionSlot).toHaveTextContent('Manage accounts')
+    // The populated header action is now "View all"; the chooser only remains as the empty-state action.
+    expect(screen.getByTestId('view-all-slot')).toBeInTheDocument()
   })
 
-  it('passes "Manage accounts" as the buttonLabel for the empty state action slot', () => {
+  it('wires the "Manage accounts" chooser as the empty-state action with the dashboard entry point', () => {
     restoreDefaultMocks([])
 
     render(<SpaceDashboard />)
 
     const emptyStateSlot = screen.getByTestId('empty-state-action-slot')
     expect(emptyStateSlot).toHaveTextContent('Manage accounts')
-  })
-
-  it('passes entryPoint="dashboard" to the populated action slot', () => {
-    restoreDefaultMocks([{ address: '0xaaaa', chainId: '1' }])
-
-    render(<SpaceDashboard />)
-
-    expect(screen.getByTestId('action-slot').querySelector('[data-entry-point="dashboard"]')).not.toBeNull()
-  })
-
-  it('passes entryPoint="dashboard" to the empty state action slot', () => {
-    restoreDefaultMocks([])
-
-    render(<SpaceDashboard />)
-
-    expect(screen.getByTestId('empty-state-action-slot').querySelector('[data-entry-point="dashboard"]')).not.toBeNull()
+    expect(emptyStateSlot.querySelector('[data-entry-point="dashboard"]')).not.toBeNull()
   })
 })

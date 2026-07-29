@@ -33,9 +33,9 @@ describe('UpdateSpaceForm', () => {
   const mockSpace = spaceBuilder().with({ uuid: MOCK_SPACE_UUID, name: 'Test Space', members: [] }).build()
 
   // Helper functions to reduce code duplication
-  const setupForm = (space: GetSpaceResponse | undefined, isAdmin: boolean) => {
+  const setupForm = (space: GetSpaceResponse | undefined, isAdmin: boolean, onClose?: () => void) => {
     mockUseIsAdmin.mockReturnValue(isAdmin)
-    return renderWithStore(<UpdateSpaceForm space={space} />)
+    return renderWithStore(<UpdateSpaceForm space={space} onClose={onClose} />)
   }
 
   const getFormElements = () => ({
@@ -159,6 +159,37 @@ describe('UpdateSpaceForm', () => {
       expect(lastNotification.variant).toBe('success')
       expect(lastNotification.groupKey).toBe('space-update-name')
     })
+  })
+
+  it('should call onClose after a successful update', async () => {
+    mockUnwrap.mockResolvedValue({})
+    const onClose = jest.fn()
+    setupForm(mockSpace, true, onClose)
+
+    await changeSpaceNameAndAwaitValid('New Space Name')
+
+    const { saveButton } = getFormElements()
+    fireEvent.click(saveButton)
+
+    await waitFor(() => {
+      expect(onClose).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  it('should not call onClose when the update fails', async () => {
+    mockUnwrap.mockRejectedValue({ status: 422, data: { message: 'Name contains invalid characters' } })
+    const onClose = jest.fn()
+    setupForm(mockSpace, true, onClose)
+
+    await changeSpaceNameAndAwaitValid('New Space Name')
+
+    const { saveButton } = getFormElements()
+    fireEvent.click(saveButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Name contains invalid characters')).toBeInTheDocument()
+    })
+    expect(onClose).not.toHaveBeenCalled()
   })
 
   it('should display the backend error message when update fails', async () => {

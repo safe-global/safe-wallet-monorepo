@@ -12,9 +12,9 @@ import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { useAppDispatch } from '@/src/store/hooks'
 import { showToast } from '@/src/store/toastSlice'
-import { clearDraft, setDraftRedirect, type DraftTx } from '@/src/store/draftTxSlice'
-import { rekeyOutstandingRequest } from '@/src/features/WalletConnect/Wallet/store/walletKitSlice'
+import { type DraftTx } from '@/src/store/draftTxSlice'
 import { rebuildDraftWithApproval } from '@/src/services/tx/rebuildDraftWithApproval'
+import { redirectDraft } from '@/src/services/tx/draft'
 import { SafeInput } from '@/src/components/SafeInput'
 import { TokenIcon } from '@/src/components/TokenIcon/TokenIcon'
 import { SafeButton } from '@/src/components/SafeButton'
@@ -71,12 +71,7 @@ export const useEditApprovalForm = ({ draft, approval, safe }: EditApprovalFormA
       const newValue = unlimited ? PSEUDO_APPROVAL_VALUES.UNLIMITED : amount
       const newSafeTxHash = await rebuildDraftWithApproval({ draft, approval, newValue, safe, dispatch })
 
-      if (newSafeTxHash !== draft.safeTxHash) {
-        // Hand everything keyed by the old hash over to the new draft before dropping it
-        dispatch(rekeyOutstandingRequest({ fromSafeTxHash: draft.safeTxHash, toSafeTxHash: newSafeTxHash }))
-        dispatch(setDraftRedirect({ fromSafeTxHash: draft.safeTxHash, toSafeTxHash: newSafeTxHash }))
-        dispatch(clearDraft(draft.safeTxHash))
-      }
+      redirectDraft(dispatch, draft.safeTxHash, newSafeTxHash)
       // If the sheet was dismissed mid-rebuild, a second back() would pop the confirm screen
       if (navigation.isFocused()) {
         router.back()
@@ -226,7 +221,7 @@ export const EditApprovalFields = ({ approval }: { approval: ApprovalInfo & { ba
           <Text fontSize="$4" fontWeight={500} color="$color">
             Spender
           </Text>
-          <HashDisplay value={approval.spender} showExternalLink={false} textProps={{ color: '$color' }} />
+          <HashDisplay value={approval.spender} showExternalLink textProps={{ color: '$color' }} />
         </XStack>
       </YStack>
     </View>

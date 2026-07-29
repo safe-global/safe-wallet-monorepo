@@ -8,6 +8,7 @@ import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
+import { useRpcEndpointInfo } from '@/hooks/wallets/useRpcEndpointInfo'
 import { parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useChain } from '@/hooks/useChains'
@@ -17,6 +18,7 @@ export const useInitSafeCoreSDK = () => {
   const dispatch = useAppDispatch()
   const web3ReadOnly = useWeb3ReadOnly()
   const chain = useChain(safe.chainId)
+  const rpcInfo = useRpcEndpointInfo()
 
   const { query } = useRouter()
   const prefixedAddress = Array.isArray(query.safe) ? query.safe[0] : query.safe
@@ -53,7 +55,7 @@ export const useInitSafeCoreSDK = () => {
             detailedMessage: e.message,
           }),
         )
-        trackError(ErrorCodes._105, e.message)
+        trackError(ErrorCodes._105, e.message, rpcInfo)
       })
   }, [
     address,
@@ -68,5 +70,6 @@ export const useInitSafeCoreSDK = () => {
     safeLoaded,
     web3ReadOnly,
     undeployedSafe,
+    rpcInfo,
   ])
 }

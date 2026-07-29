@@ -6,7 +6,7 @@ import { WALLET_KEYS } from '@/hooks/wallets/consts'
 const EMPTY_DATA = '0x'
 import memoize from 'lodash/memoize'
 import { PRIVATE_KEY_MODULE_LABEL } from '@/services/private-key-module/constants'
-import { type JsonRpcProvider } from 'ethers'
+import { type Eip1193Provider, type JsonRpcProvider } from 'ethers'
 
 const WALLETCONNECT = 'WalletConnect'
 const WC_LEDGER = 'Ledger Wallet'
@@ -79,21 +79,43 @@ export const isSmartContractWallet = memoize(
   (chainId, address) => chainId + address,
 )
 
-/* Check if the wallet is unlocked. */
-export const isWalletUnlocked = async (walletName: string): Promise<boolean | undefined> => {
-  if ([PRIVATE_KEY_MODULE_LABEL, WALLETCONNECT].includes(walletName)) return true
+type Eip6963AnnounceProviderEvent = CustomEvent<{
+  info: { name: string }
+  provider: Eip1193Provider
+}>
 
-  const METAMASK_LIKE = ['MetaMask', 'Rabby Wallet', 'Zerion', 'Ambire']
+// With several wallet extensions installed, window.ethereum is owned by an arbitrary one,
+// so the saved wallet must be looked up by its EIP-6963 announced name
+const getInjectedProviderByLabel = (label: string): Eip1193Provider | undefined => {
+  const announced: Eip6963AnnounceProviderEvent['detail'][] = []
 
-  // Only MetaMask exposes a method to check if the wallet is unlocked
-  if (METAMASK_LIKE.includes(walletName)) {
-    if (typeof window === 'undefined' || !window.ethereum?._metamask) return false
-    try {
-      return await window.ethereum?._metamask.isUnlocked()
-    } catch {
-      return false
-    }
+  const onAnnounce = (event: Event) => {
+    announced.push((event as Eip6963AnnounceProviderEvent).detail)
   }
 
-  return false
+  // Announcements are dispatched synchronously in response to the request event
+  window.addEventListener('eip6963:announceProvider', onAnnounce)
+  window.dispatchEvent(new Event('eip6963:requestProvider'))
+  window.removeEventListener('eip6963:announceProvider', onAnnounce)
+
+  // No fallback to window.ethereum: it may be a different wallet than the saved one
+  return announced.find(({ info }) => info.name === label)?.provider
+}
+
+/* Check if the last-used wallet can be reconnected without prompting the user. */
+export const isWalletUnlocked = async (walletName: string): Promise<boolean> => {
+  if ([PRIVATE_KEY_MODULE_LABEL, WALLETCONNECT].includes(walletName)) return true
+
+  if (typeof window === 'undefined') return false
+
+  const provider = getInjectedProviderByLabel(walletName)
+  if (!provider) return false
+
+  try {
+    // eth_accounts never prompts; empty means locked or not authorized for this site
+    const accounts = await provider.request({ method: 'eth_accounts' })
+    return Array.isArray(accounts) && accounts.length > 0
+  } catch {
+    return false
+  }
 }

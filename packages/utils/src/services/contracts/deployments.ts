@@ -168,6 +168,31 @@ export const hasMatchingDeployment = (
   })
 }
 
+/**
+ * Checks whether an implementation address is an official Safe singleton for the
+ * given version. Matches against BOTH the L1 and L2 singleton tables and ALL
+ * deployment variants (canonical, eip155, zksync). Official singletons live at
+ * deterministic addresses, so this is chain-agnostic and needs no RPC.
+ */
+export const isOfficialMasterCopy = (implementation: string | undefined, version: string): boolean => {
+  if (!implementation) {
+    return false
+  }
+
+  const [clean] = version.split('+')
+  const singletonTables = [
+    getSafeSingletonDeployments({ version: clean }),
+    getSafeL2SingletonDeployments({ version: clean }),
+  ]
+
+  return singletonTables.some((deployment) => {
+    if (!deployment) {
+      return false
+    }
+    return Object.values(deployment.deployments).some((variant) => sameAddress(variant?.address, implementation))
+  })
+}
+
 export const _tryDeploymentVersions = (
   getDeployment: (filter?: DeploymentFilter) => SingletonDeployment | undefined,
   network: Chain,

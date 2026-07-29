@@ -2,7 +2,19 @@ import { renderHook, act } from '@testing-library/react'
 import useTrustedSafesModal from './useTrustedSafesModal'
 import * as store from '@/store'
 import * as useAllSafes from '@/hooks/safes/useAllSafes'
-import * as addressSimilarity from '@safe-global/utils/utils/addressSimilarity'
+import { OrderByOption, selectOrderByPreference } from '@/store/orderByPreferenceSlice'
+import { selectAllAddedSafes } from '@/store/addedSafesSlice'
+
+const mockSimilarityClusters = jest.fn(() => ({
+  flagged: new Set<string>(),
+  groupIdByAddress: new Map<string, string>(),
+}))
+jest.mock('@/features/address-poisoning', () => ({
+  useSimilarityClusters: () => {
+    const result = mockSimilarityClusters()
+    return { ...result, isAddressFlagged: (address: string) => result.flagged.has(address.toLowerCase()) }
+  },
+}))
 
 jest.mock('@/store', () => ({
   useAppDispatch: jest.fn(),
@@ -14,8 +26,16 @@ jest.mock('@/hooks/safes/useAllSafes', () => ({
   default: jest.fn(),
 }))
 
-jest.mock('@safe-global/utils/utils/addressSimilarity', () => ({
-  detectSimilarAddresses: jest.fn(),
+// Stub the Fuse search (covered by its own suite) with a deterministic substring filter.
+jest.mock('@/hooks/safes/useSafesSearch', () => ({
+  useSafesSearch: (items: Array<{ address: string; name?: string }>, query: string) =>
+    query
+      ? items.filter(
+          (item) =>
+            item.address.toLowerCase().includes(query.toLowerCase()) ||
+            (item.name ? item.name.toLowerCase().includes(query.toLowerCase()) : false),
+        )
+      : [],
 }))
 
 describe('useTrustedSafesModal', () => {
@@ -30,12 +50,7 @@ describe('useTrustedSafesModal', () => {
     ;(store.useAppDispatch as jest.Mock).mockReturnValue(mockDispatch)
     ;(store.useAppSelector as jest.Mock).mockReturnValue({})
     ;(useAllSafes.default as jest.Mock).mockReturnValue(mockSafes)
-    ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
-      groups: [],
-      addressToGroups: new Map(),
-      isFlagged: () => false,
-      getGroup: () => undefined,
-    })
+    mockSimilarityClusters.mockReturnValue({ flagged: new Set<string>(), groupIdByAddress: new Map<string, string>() })
   })
 
   it('should initialize with modal closed', () => {
@@ -53,6 +68,19 @@ describe('useTrustedSafesModal', () => {
     })
 
     expect(result.current.isOpen).toBe(true)
+  })
+
+  // The owned-safes enumeration must stay deferred until the modal is actually opened.
+  it('only enumerates safes while the modal is open', () => {
+    const { result } = renderHook(() => useTrustedSafesModal())
+
+    expect(useAllSafes.default).toHaveBeenLastCalledWith(false)
+
+    act(() => {
+      result.current.open()
+    })
+
+    expect(useAllSafes.default).toHaveBeenLastCalledWith(true)
   })
 
   it('should close modal', () => {
@@ -86,11 +114,9 @@ describe('useTrustedSafesModal', () => {
   })
 
   it('should show pending confirmation for flagged address', () => {
-    ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
-      groups: [],
-      addressToGroups: new Map(),
-      isFlagged: (addr: string) => addr === mockSafes[0].address,
-      getGroup: () => ({ bucketKey: 'test', addresses: [], hasKnownAddress: true, riskLevel: 'high' }),
+    mockSimilarityClusters.mockReturnValue({
+      flagged: new Set([mockSafes[0].address.toLowerCase()]),
+      groupIdByAddress: new Map([[mockSafes[0].address.toLowerCase(), 'test']]),
     })
 
     const { result } = renderHook(() => useTrustedSafesModal())
@@ -103,11 +129,9 @@ describe('useTrustedSafesModal', () => {
   })
 
   it('should confirm similar address', () => {
-    ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
-      groups: [],
-      addressToGroups: new Map(),
-      isFlagged: (addr: string) => addr === mockSafes[0].address,
-      getGroup: () => ({ bucketKey: 'test', addresses: [], hasKnownAddress: true, riskLevel: 'high' }),
+    mockSimilarityClusters.mockReturnValue({
+      flagged: new Set([mockSafes[0].address.toLowerCase()]),
+      groupIdByAddress: new Map([[mockSafes[0].address.toLowerCase(), 'test']]),
     })
 
     const { result } = renderHook(() => useTrustedSafesModal())
@@ -220,6 +244,37 @@ describe('useTrustedSafesModal', () => {
     )
   })
 
+  it('unpins a deselected safe pinned on a chain absent from the current list', () => {
+    // Pinned on chain 137, which is NOT among the safes returned by useAllSafes (config-scoped list).
+    const pinnedAddress = '0xfeed000000000000000000000000000000001234'
+    ;(store.useAppSelector as jest.Mock).mockReturnValue({
+      '137': { [pinnedAddress]: { owners: [], threshold: 1 } },
+    })
+
+    const { result } = renderHook(() => useTrustedSafesModal())
+
+    // Opens pre-selecting the pinned address (collected across all chains)…
+    act(() => {
+      result.current.open()
+    })
+    expect(result.current.selectedAddresses.has(pinnedAddress)).toBe(true)
+
+    // …deselecting and saving must still unpin it, even though it's not in `useAllSafes`.
+    act(() => {
+      result.current.toggleSelection(pinnedAddress)
+    })
+    act(() => {
+      result.current.submitSelection()
+    })
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'addedSafes/unpinSafe',
+        payload: { chainId: '137', address: pinnedAddress },
+      }),
+    )
+  })
+
   it('should select all safes when no similar addresses', () => {
     const { result } = renderHook(() => useTrustedSafesModal())
 
@@ -233,11 +288,9 @@ describe('useTrustedSafesModal', () => {
   })
 
   it('should show confirmation without changing selection when selecting all with similar addresses', () => {
-    ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
-      groups: [],
-      addressToGroups: new Map(),
-      isFlagged: (addr: string) => addr === mockSafes[0].address,
-      getGroup: () => ({ bucketKey: 'test', addresses: [], hasKnownAddress: true, riskLevel: 'high' }),
+    mockSimilarityClusters.mockReturnValue({
+      flagged: new Set([mockSafes[0].address.toLowerCase()]),
+      groupIdByAddress: new Map([[mockSafes[0].address.toLowerCase(), 'test']]),
     })
 
     const { result } = renderHook(() => useTrustedSafesModal())
@@ -251,11 +304,9 @@ describe('useTrustedSafesModal', () => {
   })
 
   it('should select all including similar when confirmed', () => {
-    ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
-      groups: [],
-      addressToGroups: new Map(),
-      isFlagged: (addr: string) => addr === mockSafes[0].address,
-      getGroup: () => ({ bucketKey: 'test', addresses: [], hasKnownAddress: true, riskLevel: 'high' }),
+    mockSimilarityClusters.mockReturnValue({
+      flagged: new Set([mockSafes[0].address.toLowerCase()]),
+      groupIdByAddress: new Map([[mockSafes[0].address.toLowerCase(), 'test']]),
     })
 
     const { result } = renderHook(() => useTrustedSafesModal())
@@ -275,11 +326,9 @@ describe('useTrustedSafesModal', () => {
   })
 
   it('should revert to the prior selection when select all cancelled', () => {
-    ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
-      groups: [],
-      addressToGroups: new Map(),
-      isFlagged: (addr: string) => addr === mockSafes[0].address,
-      getGroup: () => ({ bucketKey: 'test', addresses: [], hasKnownAddress: true, riskLevel: 'high' }),
+    mockSimilarityClusters.mockReturnValue({
+      flagged: new Set([mockSafes[0].address.toLowerCase()]),
+      groupIdByAddress: new Map([[mockSafes[0].address.toLowerCase(), 'test']]),
     })
 
     const { result } = renderHook(() => useTrustedSafesModal())
@@ -297,11 +346,9 @@ describe('useTrustedSafesModal', () => {
   })
 
   it('should select only non-similar safes when skipping similar addresses', () => {
-    ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
-      groups: [],
-      addressToGroups: new Map(),
-      isFlagged: (addr: string) => addr === mockSafes[0].address,
-      getGroup: () => ({ bucketKey: 'test', addresses: [], hasKnownAddress: true, riskLevel: 'high' }),
+    mockSimilarityClusters.mockReturnValue({
+      flagged: new Set([mockSafes[0].address.toLowerCase()]),
+      groupIdByAddress: new Map([[mockSafes[0].address.toLowerCase(), 'test']]),
     })
 
     const { result } = renderHook(() => useTrustedSafesModal())
@@ -440,6 +487,41 @@ describe('useTrustedSafesModal', () => {
 
       expect(result.current.selectedAddresses.has(pinnedAddress.toLowerCase())).toBe(true)
       expect(result.current.hasChanges).toBe(false)
+    })
+  })
+
+  describe('ordering', () => {
+    const orderedSafes = [
+      { chainId: '1', address: '0x1111111111111111111111111111111111111111', name: 'Zebra', lastVisited: 300 },
+      { chainId: '1', address: '0x2222222222222222222222222222222222222222', name: 'Alpha', lastVisited: 100 },
+      { chainId: '1', address: '0x3333333333333333333333333333333333333333', name: 'Mango', lastVisited: 200 },
+    ]
+
+    // Selector-aware mock so the global order preference can be varied per test.
+    const mockOrderBy = (orderBy: OrderByOption) => {
+      ;(store.useAppSelector as jest.Mock).mockImplementation((selector: unknown) => {
+        if (selector === selectOrderByPreference) return { orderBy }
+        if (selector === selectAllAddedSafes) return {}
+        return undefined
+      })
+    }
+
+    beforeEach(() => {
+      ;(useAllSafes.default as jest.Mock).mockReturnValue(orderedSafes)
+    })
+
+    it('sorts by name (A→Z) when the preference is Name', () => {
+      mockOrderBy(OrderByOption.NAME)
+      const { result } = renderHook(() => useTrustedSafesModal())
+
+      expect(result.current.availableItems.map((item) => item.name)).toEqual(['Alpha', 'Mango', 'Zebra'])
+    })
+
+    it('sorts by most recently visited when the preference is Last visited', () => {
+      mockOrderBy(OrderByOption.LAST_VISITED)
+      const { result } = renderHook(() => useTrustedSafesModal())
+
+      expect(result.current.availableItems.map((item) => item.name)).toEqual(['Zebra', 'Mango', 'Alpha'])
     })
   })
 

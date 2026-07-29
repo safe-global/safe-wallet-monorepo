@@ -2,14 +2,12 @@ import { type SafeItem, type MultiChainSafeItem, isMultiChainSafeItem } from '@/
 import RemoveSafeDialog from './RemoveSafeDialog'
 import { type MouseEvent, useState } from 'react'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-import { SvgIcon } from '@mui/material'
 import IconButton from '@mui/material/IconButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import MenuItem from '@mui/material/MenuItem'
+import { LogOut, Pencil } from 'lucide-react'
 import ContextMenu from '@/components/common/ContextMenu'
-import DeleteIcon from '@/public/images/common/delete.svg'
-import EditIcon from '@/public/images/common/edit.svg'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import { useAppSelector } from '@/store'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
@@ -74,7 +72,7 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
       <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu} autoFocus={false}>
         <MenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)}>
           <ListItemIcon>
-            <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="success" />
+            <Pencil className="size-5 text-muted-foreground" />
           </ListItemIcon>
           <ListItemText>Rename</ListItemText>
         </MenuItem>
@@ -82,9 +80,9 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
         {isAdmin && (
           <MenuItem onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
             <ListItemIcon>
-              <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" color="error" />
+              <LogOut className="size-5 text-muted-foreground" />
             </ListItemIcon>
-            <ListItemText>Remove</ListItemText>
+            <ListItemText>Remove from workspace</ListItemText>
           </MenuItem>
         )}
       </ContextMenu>

@@ -24,14 +24,14 @@ const PinnedSafes = ({ allSafes, onLinkClick, onOpenSelectionModal }: PinnedSafe
       <div className={css.listHeader}>
         <SvgIcon component={BookmarkIcon} inheritViewBox fontSize="small" sx={{ mt: '2px', mr: 1, strokeWidth: 2 }} />
         <Typography variant="h5" fontWeight={700} mb={2}>
-          Trusted Safes
+          My accounts
         </Typography>
       </div>
       <SafesList safes={pinnedSafes} onLinkClick={onLinkClick} />
       {onOpenSelectionModal && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
           <Button variant="outlined" size="small" onClick={onOpenSelectionModal} data-testid="add-more-safes-button">
-            Manage trusted Safes
+            Manage list
           </Button>
         </Box>
       )}

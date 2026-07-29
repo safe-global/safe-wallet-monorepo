@@ -24,4 +24,14 @@ describe('SafeListSortToggle', () => {
 
     expect(screen.getByTestId('safe-list-sort-toggle')).toHaveTextContent('Last visited')
   })
+
+  it('labels the manual sort as "Manual"', () => {
+    render(<SafeListSortToggle />, {
+      initialReduxState: {
+        orderByPreference: { orderBy: OrderByOption.MANUAL, resetVersion: ORDER_BY_RESET_VERSION },
+      },
+    })
+
+    expect(screen.getByTestId('safe-list-sort-toggle')).toHaveTextContent('Manual')
+  })
 })

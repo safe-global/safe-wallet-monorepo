@@ -19,8 +19,10 @@ import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { MIN_SAFE_VERSION_FOR_MULTICHAIN } from '../constants'
 
-// Re-export from shared hooks for backward compatibility
-export { isMultiChainSafeItem } from '@/hooks/safes'
+// Re-export from shared hooks for backward compatibility. Import the guard from its leaf module
+// (not the `@/hooks/safes` barrel) so this feature file doesn't re-enter the barrel during module
+// init — that cycle crashed Storybook's webpack module evaluation.
+export { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 
 export const getSafeSetups = (
   safes: SafeItem[],

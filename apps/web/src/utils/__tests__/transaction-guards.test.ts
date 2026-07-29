@@ -1,5 +1,6 @@
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
 import {
+  getOwnerAwaitingConfirmations,
   isExecTxData,
   isExecTxInfo,
   isOnChainConfirmationTxData,
@@ -7,6 +8,7 @@ import {
   isOnChainSignMessageTxData,
   isSafeUpdateTxData,
 } from '../transaction-guards'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { faker } from '@faker-js/faker'
 import { Safe__factory, Sign_message_lib__factory } from '@safe-global/utils/types/contracts'
 import { TransactionTokenType, TransferDirection } from '@safe-global/store/gateway/types'
@@ -345,6 +347,47 @@ describe('transaction-guards', () => {
         .build()
 
       expect(isOnChainSignMessageTxData(mockTxData, '1')).toBeFalsy()
+    })
+  })
+
+  describe('getOwnerAwaitingConfirmations', () => {
+    const walletAddress = faker.finance.ethereumAddress()
+
+    const overviewWith = (
+      awaitingConfirmation: number | null,
+      owners: string[],
+    ): Pick<SafeOverview, 'owners' | 'awaitingConfirmation'> => ({
+      awaitingConfirmation,
+      owners: owners.map((value) => ({ value })),
+    })
+
+    it('returns the count when the wallet is an owner', () => {
+      const overview = overviewWith(3, [faker.finance.ethereumAddress(), walletAddress])
+      expect(getOwnerAwaitingConfirmations(overview, walletAddress)).toBe(3)
+    })
+
+    it('matches owners case-insensitively', () => {
+      const overview = overviewWith(2, [walletAddress.toUpperCase()])
+      expect(getOwnerAwaitingConfirmations(overview, walletAddress.toLowerCase())).toBe(2)
+    })
+
+    it('returns 0 when the wallet is not an owner', () => {
+      const overview = overviewWith(3, [faker.finance.ethereumAddress()])
+      expect(getOwnerAwaitingConfirmations(overview, walletAddress)).toBe(0)
+    })
+
+    it('returns 0 when no wallet is connected', () => {
+      const overview = overviewWith(3, [walletAddress])
+      expect(getOwnerAwaitingConfirmations(overview, undefined)).toBe(0)
+    })
+
+    it('returns 0 when nothing is awaiting confirmation', () => {
+      expect(getOwnerAwaitingConfirmations(overviewWith(0, [walletAddress]), walletAddress)).toBe(0)
+      expect(getOwnerAwaitingConfirmations(overviewWith(null, [walletAddress]), walletAddress)).toBe(0)
+    })
+
+    it('returns 0 when there is no overview', () => {
+      expect(getOwnerAwaitingConfirmations(undefined, walletAddress)).toBe(0)
     })
   })
 })

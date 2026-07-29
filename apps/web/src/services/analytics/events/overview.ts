@@ -271,10 +271,8 @@ export enum TRUSTED_SAFE_LABELS {
 export enum OVERVIEW_LABELS {
   sidebar = 'sidebar',
   top_bar = 'top_bar',
-  welcome_page = 'welcome_page',
   login_page = 'login_page',
   settings = 'settings',
   space_list_page = 'space_list_page',
   space_page = 'space_page',
-  owned_safes_modal = 'owned_safes_modal',
 }

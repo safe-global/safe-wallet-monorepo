@@ -7,6 +7,7 @@ import { TransactionInfo } from './components/TransactionInfo'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import { ConfirmationView } from './components/ConfirmationView'
 import { ApprovalEditor } from './components/ApprovalEditor'
+import { NonceEditor } from './components/NonceEditor'
 import { Loader } from '@/src/components/Loader'
 import { Alert } from '@/src/components/Alert'
 import { ConfirmTxForm } from './components/ConfirmTxForm'
@@ -107,6 +108,7 @@ function ConfirmTxContainer() {
               <>
                 <View paddingHorizontal="$4">
                   <ConfirmationView txDetails={txDetails} />
+                  <NonceEditor txId={txId} />
                   <ApprovalEditor txId={txId} />
                 </View>
 

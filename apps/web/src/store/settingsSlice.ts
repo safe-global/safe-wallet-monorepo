@@ -245,3 +245,13 @@ export const selectIsCuratedNestedSafe = createSelector(
     )
   },
 )
+
+/**
+ * All curated nested-safe addresses across every parent, flattened, lowercased
+ * and deduped. Used as an explicit-trust anchor source for address-poisoning
+ * similarity detection (see `selectAnchorIndex`).
+ */
+export const selectAllCuratedNestedSafes = createSelector(selectSettings, (settings): string[] => {
+  const all = Object.values(settings.curatedNestedSafes ?? {}).flatMap((curation) => curation?.selectedAddresses ?? [])
+  return Array.from(new Set(all.map((addr) => addr.toLowerCase())))
+})

@@ -1,22 +1,23 @@
 // SafeSelectorDropdown (main bar)
 const safeSelectorBlock = '[data-testid="space-safes-navigation-block"]'
 const openSafesIcon = '[data-testid="open-safes-icon"]'
-const connectWalletBtn = '[data-testid="safe-selector-connect-wallet-btn"]'
+const connectWalletBtn = '[data-testid="dropdown-connect-wallet-body-btn"]'
 const safeIcon = '[data-testid="safe-icon"]'
 const safeSelectorTriggerName = '[data-testid="safe-selector-trigger-name"]'
 const safeSelectorTriggerDetails = '[data-testid="safe-selector-trigger-details"]'
 const copyAddressBtn = '[data-testid="copy-address-btn"]'
 const currencySection = '[data-testid="safe-selector-balance"]'
-const safeSelectorThreshold = '[data-testid="safe-selector-threshold"]'
+const safeSelectorThreshold = '[data-testid="account-threshold"]'
 const nestedSafesButton = '[data-testid="nested-safes-button"]'
 
 // SafeSelectorDropdown dropdown list
 const dropdownContent = '[data-slot="select-content"]'
 const dropdownRow = '[data-slot="select-item"]'
-const multichainItemSummary = '[data-testid="multichain-item-summary"]'
 const notActivatedBadge = '[data-testid="not-activated-badge"]'
-const pendingActivationChip = '[data-testid="pending-activation-chip"]'
-const subAccountsContainer = '[data-testid="subacounts-container"]'
+// The welcome accounts list now renders the shared SafeAccountsTable: a multichain safe is a `group`
+// row that expands to per-chain `child` rows; an undeployed chain shows the not-activated badge.
+const accountGroupRow = '[data-testid="account-table-row"][data-variant="group"]'
+const accountChildRow = '[data-testid="account-table-row"][data-variant="child"]'
 
 const balanceRegex = /\d/
 export const multichainSafePolygonLabel = 'Multichain polygon'
@@ -40,10 +41,12 @@ export function verifyDropdownContainsSafe(address) {
 }
 
 export function verifyMultichainSafeChainLogos(address, expectedCount) {
+  // Count only the summary-row logos: an active group expands by default, and each expanded network
+  // sub-row repeats its own chain logo, so scoping to the collapsible trigger keeps the count stable.
   cy.get(dropdownContent)
     .contains(address)
     .closest('[data-slot="collapsible"]')
-    .find('[data-testid="chain-logo"]')
+    .find('[data-slot="collapsible-trigger"] [data-testid="chain-logo"]')
     .should('have.length', expectedCount)
 }
 
@@ -69,7 +72,7 @@ export function verifyCurrencySection(text) {
 }
 
 export function verifySafeSelectorThreshold(threshold, owners) {
-  cy.get(safeSelectorThreshold).should('contain.text', `${threshold}/${owners}`)
+  cy.get(openSafesIcon).find(safeSelectorThreshold).should('contain.text', `${threshold}/${owners}`)
 }
 
 export function clickOnNestedSafesBtn() {
@@ -77,12 +80,12 @@ export function clickOnNestedSafesBtn() {
 }
 
 export function expandMultichainItem(index = 0) {
-  cy.get(multichainItemSummary).eq(index).click()
-  cy.get(subAccountsContainer).should('be.visible')
+  cy.get(accountGroupRow).eq(index).click()
+  cy.get(accountChildRow).should('be.visible')
 }
 
 export function verifyNotActivatedSafeExists() {
-  cy.get(subAccountsContainer).find(pendingActivationChip).should('exist')
+  cy.get(notActivatedBadge).should('exist')
 }
 
 export function verifyAddedSafesInDropdown(safes) {
