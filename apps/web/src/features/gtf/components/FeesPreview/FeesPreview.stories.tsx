@@ -1,12 +1,53 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { useContext, useState } from 'react'
 import FeesPreview from './index'
 import type { FeesPreviewData } from '../../hooks/useFeesPreview'
+import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import type { GtfPaymentMode } from '@/features/gtf/types'
+import { StoreDecorator } from '@/stories/storeDecorator'
+import { RouterDecorator } from '@/stories/routerDecorator'
+import { createInitialState } from '@/stories/mocks/defaults'
+import { safeFixtures } from '@safe-global/test/msw/fixtures'
+
+/**
+ * The panel reads the chain and the display currency from the store, and the payment mode from
+ * SafeTxContext — so the story holds that mode in state, which makes the "Pay fees from" selector
+ * actually switch between Safe-pays and signer-pays rather than snapping back.
+ */
+const PaymentModeHarness = (props: FeesPreviewData) => {
+  const defaults = useContext(SafeTxContext)
+  const [gtfPaymentMode, setGtfPaymentMode] = useState<GtfPaymentMode>('safe')
+
+  return (
+    <SafeTxContext.Provider value={{ ...defaults, gtfPaymentMode, setGtfPaymentMode }}>
+      <div className="w-[420px]">
+        <FeesPreview {...props} />
+      </div>
+    </SafeTxContext.Provider>
+  )
+}
 
 const meta = {
   title: 'Features/GTF/FeesPreview',
-  component: FeesPreview,
+  component: PaymentModeHarness,
+  parameters: { layout: 'centered' },
+  decorators: [
+    (Story, context) => (
+      <StoreDecorator
+        initialState={createInitialState({
+          safeData: safeFixtures.efSafe,
+          isDarkMode: context.globals?.theme === 'dark',
+        })}
+        context={context}
+      >
+        <RouterDecorator>
+          <Story />
+        </RouterDecorator>
+      </StoreDecorator>
+    ),
+  ],
   tags: ['autodocs'],
-} satisfies Meta<typeof FeesPreview>
+} satisfies Meta<typeof PaymentModeHarness>
 
 export default meta
 type Story = StoryObj<typeof meta>
