@@ -34,6 +34,9 @@ const useChains = (): { configs: Chain[]; error?: string; loading?: boolean } =>
 
   const configs = useMemo(() => {
     if (!data) return []
+    // Inlined env check so the bundler folds the override branch out of production builds
+    // (see applyFeatureOverrides — do NOT swap for the imported IS_PRODUCTION const).
+    if (process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true') return data.ids.map((id) => data.entities[id]!)
     return data.ids.map((id) => applyFeatureOverrides(data.entities[id]!, overrides))
   }, [data, overrides])
 
@@ -54,9 +57,10 @@ export const useChain = (chainId: string): Chain | undefined => {
   const overrides = useAppSelector(selectFeatureFlagOverrides)
 
   return useMemo(() => {
-    if (!data) return undefined
-    const chain = data.entities[chainId]
-    return chain ? applyFeatureOverrides(chain, overrides) : undefined
+    const chain = data?.entities[chainId]
+    if (!chain) return undefined
+    if (process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true') return chain
+    return applyFeatureOverrides(chain, overrides)
   }, [data, chainId, overrides])
 }
 

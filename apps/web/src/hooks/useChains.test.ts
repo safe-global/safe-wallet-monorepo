@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs'
+import path from 'path'
 import { renderHook } from '@/tests/test-utils'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -117,5 +119,27 @@ describe('overrides are global across chains', () => {
     expect(result.current.configs.some((chain) => chain.features.includes(FEATURES.EARN))).toBe(false)
     // Untouched flags survive per chain.
     expect(result.current.configs[1].features).toContain(FEATURES.BRIDGE)
+  })
+})
+
+/**
+ * The production short-circuits in `useChains` / `useChain` are a dead-code-elimination win, not a
+ * behaviour change: `applyFeatureOverrides` already returns the identical chain in production, so
+ * removing them changes nothing observable and no behavioural test can pin them.
+ *
+ * What must never regress is the *form* of the guard. `process.env.NEXT_PUBLIC_IS_PRODUCTION` is
+ * substituted as a literal at parse time, so the bundler folds the branch and drops the override
+ * path. The imported `IS_PRODUCTION` const behaves identically at runtime and would pass every
+ * other test here, while silently shipping the override code. Hence a source-text assertion.
+ */
+describe('production guard form', () => {
+  const source = readFileSync(path.join(__dirname, 'useChains.ts'), 'utf8')
+
+  it('guards on the inlined env check the bundler can fold', () => {
+    expect(source).toContain("process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true'")
+  })
+
+  it('never imports the IS_PRODUCTION const', () => {
+    expect(source).not.toMatch(/import\s*\{[^}]*\bIS_PRODUCTION\b[^}]*\}\s*from/)
   })
 })
