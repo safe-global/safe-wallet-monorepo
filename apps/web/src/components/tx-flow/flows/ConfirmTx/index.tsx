@@ -31,8 +31,6 @@ const ConfirmTxFlow = ({ txSummary }: { txSummary: Transaction }) => {
       onlyExecute={!canSign}
       isRejection={isRejection}
       txSummary={txSummary}
-      // Must be a stable reference: TxFlow renders it as an element type, so a new identity per
-      // render would remount the review step (ConfirmProposedTx reads txNonce from TxFlowContext).
       ReviewTransactionComponent={ConfirmProposedTx}
       eventCategory={TxFlowType.CONFIRM_TX}
     />

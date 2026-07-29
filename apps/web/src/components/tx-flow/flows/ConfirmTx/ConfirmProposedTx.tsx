@@ -6,10 +6,6 @@ import type { ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 
-// Reads txNonce/txId from TxFlowContext (like RejectTx) so ConfirmTxFlow can pass this component
-// to TxFlow by reference. An inline wrapper would change component identity on every render,
-// remounting the whole review step — re-running the effects below (tx-details fetch + setSafeTx)
-// and every mount-time estimation/scan in the subtree, in a loop.
 const ConfirmProposedTx = ({ children, ...props }: ReviewTransactionProps): ReactElement => {
   const chainId = useChainId()
   const { setSafeTx, setSafeTxError, setNonce } = useContext(SafeTxContext)

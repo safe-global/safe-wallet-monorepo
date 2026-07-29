@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { render } from '@/tests/test-utils'
 import { createExistingTx } from '@/services/tx/tx-sender'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
@@ -15,10 +16,11 @@ jest.mock('@/components/tx/ReviewTransactionV2', () => ({
 
 const mockCreateExistingTx = createExistingTx as jest.MockedFunction<typeof createExistingTx>
 
-const TX_ID = 'multisig_0x1000000000000000000000000000000000000001_0xabc'
+const TX_ID = `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 8 })}`
+const TX_NONCE = faker.number.int({ min: 1, max: 100000 })
 
 const renderWithContexts = (safeTxContext: Partial<SafeTxContextParams>) => {
-  const txFlowValue = { ...initialContext, txId: TX_ID, txNonce: 7 }
+  const txFlowValue = { ...initialContext, txId: TX_ID, txNonce: TX_NONCE }
   const safeTxValue: SafeTxContextParams = {
     setSafeTx: jest.fn(),
     setSafeMessage: jest.fn(),
@@ -54,7 +56,7 @@ describe('ConfirmProposedTx', () => {
   it('sets the nonce from TxFlowContext and creates the existing tx from its txId', () => {
     const { safeTxValue } = renderWithContexts({})
 
-    expect(safeTxValue.setNonce).toHaveBeenCalledWith(7)
+    expect(safeTxValue.setNonce).toHaveBeenCalledWith(TX_NONCE)
     expect(mockCreateExistingTx).toHaveBeenCalledTimes(1)
     expect(mockCreateExistingTx).toHaveBeenCalledWith(expect.any(String), TX_ID)
   })

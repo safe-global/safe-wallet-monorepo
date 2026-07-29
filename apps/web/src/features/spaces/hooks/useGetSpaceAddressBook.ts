@@ -7,8 +7,6 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 
-// Stable reference: `|| []` would mint a new array per render for every consumer (useAddressBook is
-// mounted per address row), invalidating the memo chains built on top of it.
 const EMPTY_ADDRESS_BOOK: SpaceAddressBookItemDto[] = []
 
 const useGetSpaceAddressBook = (): SpaceAddressBookItemDto[] => {
