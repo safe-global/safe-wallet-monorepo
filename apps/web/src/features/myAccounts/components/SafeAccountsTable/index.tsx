@@ -25,7 +25,7 @@ import { bandHeaderAt } from './SimilarityBand'
 import { orderGroupsBySimilarity } from './orderGroupsBySimilarity'
 import { weaveReorderedKeys } from '@/utils/reorder'
 import type { SimilarWarning } from '@/features/address-poisoning'
-import { bodyRowSx } from './tableStyles'
+import tableStyles from './tableStyles.module.css'
 import EntryDialog from '@/components/address-book/EntryDialog'
 
 /** Renaming a safe = editing its address-book entry across every chain it lives on. */
@@ -290,12 +290,12 @@ const SafeAccountsTable = ({
         }
       >
         <Table
+          className={tableStyles.body}
           sx={{
             tableLayout: 'fixed',
             minWidth: embedded ? undefined : minWidth,
             borderCollapse: 'separate',
             borderSpacing: 0,
-            ...bodyRowSx,
           }}
         >
           {/* Embedded (headerless) tables need a colgroup to keep fixed-layout column widths; the Name
