@@ -36,10 +36,12 @@ const alertVariants = cva(
         default: 'bg-card text-card-foreground',
         destructive:
           'text-destructive bg-card *:data-[slot=alert-description]:text-destructive/90 *:[svg]:text-current',
-        warning:
-          'bg-warning-subtle text-warning-strong border-warning-muted *:data-[slot=alert-description]:text-warning-strong *:[svg]:text-current',
-        success:
-          'bg-success-subtle text-success-strong border-success-muted *:data-[slot=alert-description]:text-success-strong *:[svg]:text-current',
+        // Body copy stays default foreground, as MUI's `<Alert severity>` did (text.primary). The
+        // tint and the icon carry the severity: `--color-*-dark` is identical in both themes, so as
+        // ink it dropped warning to 3.14:1 in dark and success to ~3.7:1 in both. It clears the 3:1
+        // graphics threshold as an icon, which is where it belongs.
+        warning: 'bg-warning-subtle text-foreground border-warning-muted *:[svg]:text-warning-strong',
+        success: 'bg-success-subtle text-foreground border-success-muted *:[svg]:text-success-strong',
       },
     },
     defaultVariants: {

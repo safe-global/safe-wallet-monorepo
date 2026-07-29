@@ -26,7 +26,7 @@ describe('TxStatusChip', () => {
     const badge = screen.getByText('Pending')
     expect(badge).toHaveAttribute('data-slot', 'badge')
     expect(badge).toHaveAttribute('data-variant', 'warning')
-    expect(badge).toHaveClass('bg-warning-subtle', 'text-warning-strong')
+    expect(badge).toHaveClass('bg-warning-subtle', 'text-foreground')
   })
 
   it('defaults to the primary Badge variant', () => {

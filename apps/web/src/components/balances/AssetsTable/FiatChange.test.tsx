@@ -28,7 +28,7 @@ describe('FiatChange', () => {
     render(<FiatChange balanceItem={mockBalance} />)
 
     expect(screen.getByText('5.00%')).toBeInTheDocument()
-    expect(getChip('5.00%')).toHaveClass('bg-success-subtle', 'text-success-strong')
+    expect(getChip('5.00%')).toHaveClass('bg-success-subtle', 'text-foreground')
   })
 
   it('renders negative change with red chip and down arrow', () => {
@@ -61,7 +61,7 @@ describe('FiatChange', () => {
     render(<FiatChange balanceItem={mockBalance} />)
 
     expect(screen.getByText('5.12%')).toBeInTheDocument()
-    expect(getChip('5.12%')).toHaveClass('bg-success-subtle', 'text-success-strong')
+    expect(getChip('5.12%')).toHaveClass('bg-success-subtle', 'text-foreground')
   })
 
   it('rounds correctly', () => {
@@ -72,7 +72,7 @@ describe('FiatChange', () => {
     render(<FiatChange balanceItem={mockBalance} />)
 
     expect(screen.getByText('4.27%')).toBeInTheDocument()
-    expect(getChip('4.27%')).toHaveClass('bg-success-subtle', 'text-success-strong')
+    expect(getChip('4.27%')).toHaveClass('bg-success-subtle', 'text-foreground')
   })
 
   it('uses change prop when provided instead of balanceItem', () => {

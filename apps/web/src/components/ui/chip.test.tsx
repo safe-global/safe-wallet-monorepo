@@ -47,7 +47,7 @@ describe('Chip', () => {
 
   it('applies the info variant classes', () => {
     render(<Chip variant="info">Info</Chip>)
-    expect(screen.getByText('Info')).toHaveClass('bg-info-subtle', 'text-info-strong')
+    expect(screen.getByText('Info')).toHaveClass('bg-info-subtle', 'text-foreground')
   })
 
   it('applies the success variant classes', () => {
@@ -69,7 +69,7 @@ describe('Chip', () => {
 describe('Badge', () => {
   it('applies the info variant classes', () => {
     render(<Badge variant="info">Info</Badge>)
-    expect(screen.getByText('Info')).toHaveClass('bg-info-subtle', 'text-info-strong')
+    expect(screen.getByText('Info')).toHaveClass('bg-info-subtle', 'text-foreground')
   })
 
   it('applies the success variant classes', () => {

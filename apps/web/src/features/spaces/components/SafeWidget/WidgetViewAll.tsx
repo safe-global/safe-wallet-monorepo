@@ -12,8 +12,10 @@ interface WidgetViewAllProps {
 
 const WidgetViewAll = ({ count, onClick, className }: WidgetViewAllProps): ReactElement => (
   <div className={cn('flex items-center gap-2', className)}>
+    {/* Default foreground, not `text-success-strong`: that token is an accent identical in both
+        themes and only reaches ~3.7:1 on this tint. */}
     {count !== undefined && count > 0 && (
-      <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-success-subtle px-1.5 text-xs font-semibold text-success-strong">
+      <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-success-subtle px-1.5 text-xs font-semibold text-foreground">
         +{count}
       </span>
     )}

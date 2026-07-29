@@ -36,12 +36,16 @@ const chipVariants = cva(
         // from `default` in light mode (10% black on near-black text).
         primary: 'bg-primary text-primary-foreground',
         // Semantic colour tints, kept at parity with Badge's variants.
-        warning: 'bg-warning-subtle text-warning-strong',
+        // Semantic tints carry the meaning in the BACKGROUND and keep default foreground text, as
+        // the MUI originals did. `--color-*-dark` is the same value in both themes — an accent, not
+        // an ink — so using it as text fails AA in one theme each (info 2.04:1 light, warning 3.14:1
+        // dark, success 3.99/3.65:1). Default foreground is 13.8–18.9:1 on the same tints.
+        warning: 'bg-warning-subtle text-foreground',
         success:
           'bg-accent-secondary text-accent-secondary-foreground dark:bg-accent-secondary/20 dark:text-accent-success',
         destructive: 'bg-destructive/10 text-destructive dark:bg-destructive/20',
-        info: 'bg-info-subtle text-info-strong',
-        positive: 'bg-success-subtle text-success-strong',
+        info: 'bg-info-subtle text-foreground',
+        positive: 'bg-success-subtle text-foreground',
         negative: 'bg-destructive/10 text-destructive dark:bg-destructive/20',
       },
       // Geometry lives on `size`/`shape`, never on a call-site className.
