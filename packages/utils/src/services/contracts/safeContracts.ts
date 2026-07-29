@@ -7,7 +7,7 @@ import { getSafeMigrationDeployments } from '@safe-global/safe-deployments'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import {
   getChainAgnosticAddress,
-  isCanonicalDeployment,
+  getDeploymentTypeForMasterCopy,
   isEraVmChain,
   isOfficialMasterCopy,
 } from '@safe-global/utils/services/contracts/deployments'
@@ -35,11 +35,15 @@ type MastercopySafe = Pick<SafeState, 'implementationVersionState' | 'version' |
  * false only for that stranded case — EVM Safes always have a canonical target.
  */
 export const canUpgradeInPlace = (safe: MastercopySafe, targetVersion: string): boolean => {
-  // Only zkSync EraVM Safes can be stranded: on an EraVM chain/version, running the
-  // EraVM singleton rather than the EVM (canonical) one.
+  // Only zkSync EraVM Safes can be stranded. The master-copy flavour decides: canonical
+  // and eip155 are both EVM bytecode, only the zksync variant is EraVM. Unrecognised
+  // implementations on an EraVM chain conservatively default to EraVM.
   const isEraVmSafe =
     isEraVmChain(safe.chainId, safe.version) &&
-    !isCanonicalDeployment(safe.implementation?.value ?? '', safe.chainId, safe.version)
+    getDeploymentTypeForMasterCopy(safe.implementation?.value, safe.version ?? '', {
+      deploymentType: 'zksync',
+      isL1: false,
+    }).deploymentType === 'zksync'
 
   // EVM Safes always have a canonical target; an EraVM Safe needs an EraVM singleton
   // at the target version too (1.5.0 ships EVM-only, so there is none).

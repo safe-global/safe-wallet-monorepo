@@ -24,6 +24,7 @@ const OFFICIAL_L2_130 = '0x3E5c63644E683549055b9Be8653de26E0B4CD36E'
 const OFFICIAL_L1_141_ZKSYNC = '0xC35F063962328aC65cED5D4c3fC5dEf8dec68dFa'
 const OFFICIAL_L2_141_ZKSYNC = '0x610fcA2e0279Fa1F8C00c8c2F71dF522AD469380'
 const OFFICIAL_L2_130_ZKSYNC = '0x1727c2c531cf966f902E5927b98490fDFb3b2b70'
+const OFFICIAL_L2_130_EIP155 = '0xfb1bffC9d739B8D520DaF37dF666da4C687191EA'
 const UNOFFICIAL = '0x000000000000000000000000000000000000dEaD'
 
 type MigratableSafe = Pick<SafeState, 'implementationVersionState' | 'version' | 'chainId' | 'implementation'>
@@ -268,6 +269,40 @@ describe('safeContracts', () => {
         })
         expect(canUpgradeInPlace(eraVmSafe, '1.5.0')).toBe(false)
       })
+
+      it('eip155 Safe on zkSync → EVM-only target (1.5.0): true (eip155 is EVM bytecode)', () => {
+        const eip155Safe = createSafe({
+          chainId: '324',
+          version: '1.3.0',
+          implementation: { value: OFFICIAL_L2_130_EIP155 },
+        })
+        expect(canUpgradeInPlace(eip155Safe, '1.5.0')).toBe(true)
+      })
+
+      it('unrecognised implementation on zkSync → EVM-only target (1.5.0): false (conservative EraVM default)', () => {
+        const unknownSafe = createSafe({
+          chainId: '324',
+          version: '1.3.0',
+          implementation: { value: UNOFFICIAL },
+        })
+        expect(canUpgradeInPlace(unknownSafe, '1.5.0')).toBe(false)
+      })
+    })
+
+    it('official eip155 1.3.0 master copy on zkSync targeting 1.5.0 → update/migrate, never redeploy', () => {
+      const outdated = createSafe({
+        implementationVersionState: ImplementationVersionState.OUTDATED,
+        chainId: '324',
+        version: '1.3.0',
+        implementation: { value: OFFICIAL_L2_130_EIP155 },
+      })
+      const unknown = createSafe({
+        chainId: '324',
+        version: '1.3.0',
+        implementation: { value: OFFICIAL_L2_130_EIP155 },
+      })
+      expect(getMastercopyAction(outdated, { recommendedVersion: '1.5.0' })).toBe('update')
+      expect(getMastercopyAction(unknown, { recommendedVersion: '1.5.0' })).toBe('migrate')
     })
 
     it('recognized outdated zkSync EraVM Safe targeting 1.5.0 → redeploy', () => {
