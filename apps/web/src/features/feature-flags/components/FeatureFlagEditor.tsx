@@ -28,10 +28,13 @@ export const FeatureFlagEditor = (): ReactElement => {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col" data-bundle-sentinel={EDITOR_BUNDLE_SENTINEL}>
-      <Alert variant="warning" className="mb-3 shrink-0">
-        <TriangleAlert />
-        <AlertTitle>Development tool.</AlertTitle>
-        <AlertDescription>
+      <Alert
+        variant="warning"
+        className="mb-4 dark:bg-[var(--color-warning-background)] dark:text-[var(--color-text-primary)]"
+      >
+        <TriangleAlert className="dark:text-[var(--color-warning-main)]" />
+        <AlertTitle className="font-bold">Development tool</AlertTitle>
+        <AlertDescription className="dark:text-current">
           These are local feature-flag overrides — they live only in this browser and never affect production, the
           config service, or other users. Available in dev &amp; staging builds only.
         </AlertDescription>
