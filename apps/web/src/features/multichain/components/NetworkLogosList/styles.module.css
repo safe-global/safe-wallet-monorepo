@@ -7,7 +7,6 @@
 
 .networks img {
   margin-left: -6px;
-  outline: 2px solid var(--color-background-paper);
   border-radius: 50%;
 }
 
@@ -16,10 +15,11 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background-color: var(--color-border-light);
-  outline: 2px solid var(--color-background-paper);
+  background-color: var(--muted, var(--color-background-main));
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-primary);
 }

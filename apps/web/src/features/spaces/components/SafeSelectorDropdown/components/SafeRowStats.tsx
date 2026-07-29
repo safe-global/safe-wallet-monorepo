@@ -66,7 +66,7 @@ const SafeRowStats = ({
             <StatTooltip
               key={chainItem.chainId}
               label={chainItem.chainName}
-              triggerClassName="size-6 rounded-full border-2 border-card overflow-hidden shrink-0 inline-flex items-center justify-center"
+              triggerClassName="size-6 rounded-full overflow-hidden shrink-0 inline-flex items-center justify-center"
               style={{ marginLeft: index > 0 ? '-8px' : '0' }}
             >
               <ChainLogo chainId={chainItem.chainId} />
@@ -75,7 +75,7 @@ const SafeRowStats = ({
           {overflowChains.length > 0 && (
             <StatTooltip
               label={overflowChains.map((chainItem) => chainItem.chainName).join(', ')}
-              triggerClassName="size-6 rounded-full border-2 border-card bg-muted shrink-0 inline-flex items-center justify-center text-[10px] leading-none text-muted-foreground select-none"
+              triggerClassName="size-6 rounded-full bg-muted shrink-0 inline-flex items-center justify-center text-xs leading-none font-semibold text-foreground select-none"
               style={{ marginLeft: '-8px' }}
             >
               +{overflowChains.length}

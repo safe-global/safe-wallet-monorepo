@@ -264,6 +264,62 @@ describe('useSpaceSafeSelectorItems', () => {
     })
   })
 
+  // ── read-only derived from overview owners (no owners-endpoint enumeration) ──
+
+  it('marks a safe read-only when the wallet is not among the overview owners', () => {
+    setupDefaults() // wallet 0xWallet, overview owners [0xOwner1]
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].chains[0].isReadOnly).toBe(true)
+  })
+
+  it('marks a safe writable when the wallet is among the overview owners', () => {
+    setupDefaults({
+      overviews: [
+        {
+          address: { value: '0xSafe1' },
+          chainId: '1',
+          fiatTotal: '5000',
+          threshold: 2,
+          owners: [{ value: '0xWallet' }],
+        },
+      ],
+    })
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].chains[0].isReadOnly).toBe(false)
+  })
+
+  it('treats a safe as read-only when no wallet is connected', () => {
+    setupDefaults({
+      overviews: [
+        {
+          address: { value: '0xSafe1' },
+          chainId: '1',
+          fiatTotal: '5000',
+          threshold: 2,
+          owners: [{ value: '0xWallet' }],
+        },
+      ],
+    })
+    ;(useWallet as jest.Mock).mockReturnValue(undefined)
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].chains[0].isReadOnly).toBe(true)
+  })
+
+  // Counterfactual safes have no overview; read-only falls back to the item's own flag, which stays
+  // correct without the owners enumeration.
+  it('falls back to the item read-only flag when no overview exists', () => {
+    setupDefaults({
+      allSafes: [{ ...singleChainSafe, isReadOnly: false }],
+      overviews: [],
+    })
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].chains[0].isReadOnly).toBe(false)
+  })
+
   // ── balance and threshold from overview ──
 
   it('uses overview data for balance and threshold of non-current safes', () => {
