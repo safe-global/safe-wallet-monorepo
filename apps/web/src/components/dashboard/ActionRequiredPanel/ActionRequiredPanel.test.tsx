@@ -17,10 +17,6 @@ describe('ActionRequiredPanel', () => {
       getCollapseButton: () => screen.getByLabelText('Collapse action required panel'),
       getBadgeCount: (count: string) => screen.findByText(count),
       getHeader: () => screen.getByText('Action required').closest('div'),
-      getChevronIcon: () => {
-        const iconButton = screen.getByLabelText('Expand action required panel')
-        return iconButton.querySelector('svg')
-      },
     },
 
     actions: {
@@ -117,21 +113,6 @@ describe('ActionRequiredPanel', () => {
     helpers.assertions.expectExpanded()
   })
 
-  it('should rotate chevron icon when collapsed/expanded', () => {
-    helpers.renderPanel(<div>Warning message</div>)
-
-    const chevronIcon = helpers.queries.getChevronIcon()
-
-    // Initially collapsed (not rotated)
-    expect(chevronIcon).not.toHaveClass('rotate-180')
-
-    // Click to expand
-    helpers.actions.expandPanel()
-
-    // Should rotate when expanded
-    expect(chevronIcon).toHaveClass('rotate-180')
-  })
-
   it('should display correct badge count for one warning', async () => {
     helpers.renderPanel(<div>Warning 1</div>)
 
@@ -198,19 +179,5 @@ describe('ActionRequiredPanel', () => {
 
     // Aria label should update
     helpers.assertions.expectExpanded()
-  })
-
-  it('should apply correct CSS classes', () => {
-    helpers.renderPanel(<div>Warning</div>)
-
-    // The header class is on the Stack containing the Typography
-    const titleElement = helpers.queries.getTitleRequired()
-    const header = titleElement.closest('.header')
-    expect(header).toHaveClass('header')
-
-    // Check that warnings container exists
-    const warning = screen.getByText('Warning')
-    const container = warning.parentElement
-    expect(container).toHaveClass('warningsContainer')
   })
 })

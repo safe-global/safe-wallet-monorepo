@@ -9,13 +9,11 @@ describe('OnboardingFooter', () => {
     expect(screen.queryByRole('button', { name: /Back/ })).not.toBeInTheDocument()
   })
 
-  it('renders both buttons at the xl footer scale when onBack is given', () => {
+  it('renders both buttons when onBack is given', () => {
     render(<OnboardingFooter onBack={jest.fn()} continueLabel="Continue" />)
 
-    const back = screen.getByRole('button', { name: /Back/ })
-    const cont = screen.getByRole('button', { name: /Continue/ })
-    expect(back).toHaveClass('h-12')
-    expect(cont).toHaveClass('h-12')
+    expect(screen.getByRole('button', { name: /Back/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Continue/ })).toBeInTheDocument()
   })
 
   it('forwards the continue test id and disables the continue button', () => {

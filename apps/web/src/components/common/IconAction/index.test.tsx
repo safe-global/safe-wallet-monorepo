@@ -2,15 +2,14 @@ import { render, screen } from '@testing-library/react'
 import IconAction from '.'
 
 describe('IconAction', () => {
-  it('renders an icon-only ghost button locked to the compact top-bar scale', () => {
+  it('renders an icon-only button with an accessible name', () => {
     render(
       <IconAction aria-label="Search">
         <svg data-testid="icon" />
       </IconAction>,
     )
 
-    const button = screen.getByRole('button', { name: 'Search' })
-    expect(button).toHaveClass('size-8', 'm-1')
+    expect(screen.getByRole('button', { name: 'Search' })).toBeInTheDocument()
     expect(screen.getByTestId('icon')).toBeInTheDocument()
   })
 

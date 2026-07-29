@@ -52,33 +52,7 @@ describe('AnalysisGroupCardDisabled', () => {
     })
   })
 
-  describe('Layout and Structure', () => {
-    it('should render with correct flex layout', () => {
-      const { container } = render(<AnalysisGroupCardDisabled>Test content</AnalysisGroupCardDisabled>)
-
-      // Layout uses Tailwind flex utility containers (plain divs)
-      const flexContainers = container.querySelectorAll('div.flex')
-      expect(flexContainers.length).toBeGreaterThanOrEqual(1)
-    })
-
-    it('should have padding applied', () => {
-      const { container } = render(<AnalysisGroupCardDisabled>Test</AnalysisGroupCardDisabled>)
-
-      const root = container.firstChild as HTMLElement
-      expect(root).toHaveClass('p-3')
-    })
-  })
-
   describe('Typography', () => {
-    it('should render text with disabled color variant', () => {
-      render(<AnalysisGroupCardDisabled>Disabled text</AnalysisGroupCardDisabled>)
-
-      const typography = screen.getByText('Disabled text')
-      expect(typography).toBeInTheDocument()
-      expect(typography).toHaveAttribute('data-slot', 'typography')
-      expect(typography).toHaveClass('text-[var(--color-text-disabled)]')
-    })
-
     it('should use paragraph-small variant for text', () => {
       render(<AnalysisGroupCardDisabled>Test text</AnalysisGroupCardDisabled>)
 

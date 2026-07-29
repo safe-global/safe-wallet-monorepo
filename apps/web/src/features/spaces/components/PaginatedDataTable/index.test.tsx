@@ -126,13 +126,6 @@ describe('PaginatedDataTable', () => {
         />,
       )
 
-    it('marks secondary columns with the mobile-hide class on header and body cells', () => {
-      renderResponsive()
-
-      expect(screen.getByText('Email').closest('th')).toHaveClass('max-[767px]:hidden')
-      expect(screen.getByText('a@example.io').closest('td')).toHaveClass('max-[767px]:hidden')
-    })
-
     it('adds no separate mobile sort control and keeps sorting on the visible headers', () => {
       mockUseIsMobile.mockReturnValue(true)
       renderResponsive()

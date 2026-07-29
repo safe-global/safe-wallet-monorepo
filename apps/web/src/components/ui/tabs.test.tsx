@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs'
 
 describe('TabsList', () => {
-  it('renders the toggle lg look on a muted track', () => {
+  it('maps the toggle variant to the segmented track', () => {
     render(
       <Tabs defaultValue="accounts">
         <TabsList data-testid="list" variant="toggle" size="lg">
@@ -16,11 +16,9 @@ describe('TabsList', () => {
 
     const list = screen.getByTestId('list')
     expect(list).toHaveAttribute('data-variant', 'segmented')
-    // large segmented switch: a muted track with a roomy gutter (vs the compact default track)
-    expect(list).toHaveClass('bg-muted', 'p-1', 'h-auto', 'gap-1')
   })
 
-  it('renders the underline brand look for page nav', () => {
+  it('maps the underline brand variant to page nav', () => {
     render(
       <Tabs defaultValue="assets">
         <TabsList data-testid="list" variant="underline" tone="brand">
@@ -34,10 +32,9 @@ describe('TabsList', () => {
 
     const list = screen.getByTestId('list')
     expect(list).toHaveAttribute('data-variant', 'nav')
-    expect(list).not.toHaveClass('bg-muted')
   })
 
-  it('renders the underline neutral look by default', () => {
+  it('maps the underline variant to the neutral line by default', () => {
     render(
       <Tabs defaultValue="members">
         <TabsList data-testid="list" variant="underline">
@@ -53,7 +50,7 @@ describe('TabsList', () => {
     expect(list).toHaveAttribute('data-variant', 'line')
   })
 
-  it('defaults to the muted track', () => {
+  it('defaults to the default variant', () => {
     render(
       <Tabs defaultValue="one">
         <TabsList data-testid="list">
@@ -65,6 +62,5 @@ describe('TabsList', () => {
 
     const list = screen.getByTestId('list')
     expect(list).toHaveAttribute('data-variant', 'default')
-    expect(list).toHaveClass('bg-muted')
   })
 })

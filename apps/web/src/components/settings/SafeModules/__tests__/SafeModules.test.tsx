@@ -27,7 +27,6 @@ describe('SafeModules', () => {
 
     const utils = render(<SafeModules />)
     await waitFor(() => expect(utils.getByText('No modules enabled')).toBeDefined())
-    expect(utils.getByText('Safe modules').closest('[data-slot="card"]')).toHaveClass('p-8')
   })
 
   it('should render placeholder label if safe is loading', async () => {

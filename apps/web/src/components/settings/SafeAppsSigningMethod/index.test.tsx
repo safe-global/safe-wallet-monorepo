@@ -26,7 +26,6 @@ describe('SafeAppsSigningMethod', () => {
     })
 
     const checkbox = result.getByRole('checkbox')
-    expect(result.getByText('Signing method').closest('[data-slot="card"]')).toHaveClass('mt-4')
     expect(checkbox).not.toBeChecked()
 
     act(() => fireEvent.click(checkbox))

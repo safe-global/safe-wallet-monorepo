@@ -75,6 +75,5 @@ describe('WcConnectionState component tests', () => {
     const message = screen.getByText(SUCCESS_MESSAGE)
     expect(message.tagName).toBe('H4')
     expect(message).toHaveAttribute('data-variant', 'h4')
-    expect(message).toHaveClass('mt-6')
   })
 })

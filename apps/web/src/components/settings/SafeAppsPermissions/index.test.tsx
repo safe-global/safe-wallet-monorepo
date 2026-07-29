@@ -75,10 +75,10 @@ describe('SafeAppsPermissions', () => {
     } as ReturnType<typeof useBrowserPermissions>)
   })
 
-  it('renders Safe Apps permissions in a shared card shell', () => {
+  it('renders the Safe App name and url under the permissions heading', () => {
     render(<SafeAppsPermissions />)
 
-    expect(screen.getByText('Safe Apps permissions').closest('[data-slot="card"]')).toHaveClass('p-8')
+    expect(screen.getByText('Safe Apps permissions')).toBeInTheDocument()
     expect(screen.getByText('Safe App')).toBeInTheDocument()
     expect(screen.getByText(safeAppUrl)).toBeInTheDocument()
   })

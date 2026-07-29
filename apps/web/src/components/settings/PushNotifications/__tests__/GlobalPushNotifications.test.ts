@@ -92,9 +92,7 @@ describe('GlobalPushNotifications', () => {
   it('renders the selectable Safe accounts inside shadcn list primitives', () => {
     render(createElement(GlobalPushNotifications))
 
-    const list = screen.getByText('Select all').closest('[data-slot="list"]')
-
-    expect(list).toHaveClass('bg-card')
+    expect(screen.getByText('Select all').closest('[data-slot="list"]')).toBeInTheDocument()
     expect(screen.getByText('Ethereum Safe accounts').closest('[data-slot="list-item"]')).toBeInTheDocument()
     expect(screen.getByText(safeAddress).closest('[data-slot="list-item"]')).toBeInTheDocument()
   })

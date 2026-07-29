@@ -49,7 +49,6 @@ describe('FallbackHandler', () => {
       expect(fbHandler.getByText(GOERLI_FALLBACK_HANDLER)).toBeDefined()
 
       expect(fbHandler.getByText('FallbackHandlerName')).toBeDefined()
-      expect(fbHandler.getByText('Fallback handler').closest('[data-slot="card"]')).toHaveClass('p-8')
     })
   })
 

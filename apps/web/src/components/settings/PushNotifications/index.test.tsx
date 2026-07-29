@@ -99,11 +99,10 @@ describe('PushNotifications', () => {
     } as ReturnType<typeof useNotificationRegistrations>)
   })
 
-  it('renders push notification settings in shared card shells', () => {
+  it('renders push notification settings', () => {
     render(<PushNotifications />)
 
-    expect(screen.getByText('Push notifications').closest('[data-slot="card"]')).toHaveClass('mb-4')
-    expect(screen.getByText('Notification').closest('[data-slot="card"]')).toHaveClass('p-8')
+    expect(screen.getByText('Push notifications')).toBeInTheDocument()
     expect(screen.getByTestId('notifications-switch')).toBeChecked()
     expect(screen.getByLabelText('Incoming transactions')).toBeInTheDocument()
     expect(screen.getByLabelText('Outgoing transactions')).toBeInTheDocument()

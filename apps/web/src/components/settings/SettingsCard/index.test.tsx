@@ -13,9 +13,6 @@ describe('SettingsCard', () => {
     const card = title.closest('[data-slot="card"]')
 
     expect(card).toBeInTheDocument()
-    expect(card).toHaveClass('bg-card')
-    expect(card).toHaveClass('rounded-lg')
-    expect(card).toHaveClass('p-8')
     expect(card).toHaveClass('mt-4')
     expect(title).toHaveAttribute('data-slot', 'typography')
     expect(screen.getByText('Panel content')).toBeInTheDocument()

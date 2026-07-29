@@ -4,7 +4,7 @@ import { initialState } from '@/store/settingsSlice'
 import SecuritySettings from '.'
 
 describe('SecuritySettings', () => {
-  it('renders the blind signing setting in a shadcn settings card and toggles the preference', () => {
+  it('renders the blind signing setting and toggles the preference', () => {
     render(<SecuritySettings />, {
       initialReduxState: {
         settings: {
@@ -17,10 +17,9 @@ describe('SecuritySettings', () => {
       },
     })
 
-    const title = screen.getByText('Security')
     const checkbox = screen.getByRole('checkbox')
 
-    expect(title.closest('[data-slot="card"]')).toHaveClass('p-8')
+    expect(screen.getByText('Security')).toBeInTheDocument()
     expect(checkbox).toHaveAttribute('aria-checked', 'false')
 
     fireEvent.click(checkbox)

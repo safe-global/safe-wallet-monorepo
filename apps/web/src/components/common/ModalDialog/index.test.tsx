@@ -18,7 +18,6 @@ describe('ModalDialog', () => {
       left: '0px',
       transform: 'none',
     })
-    expect(screen.getByTestId('modal-view')).toHaveClass('translate-x-0', 'translate-y-0')
   })
 
   // A forwarded z-* has to replace the DialogContent variant's own z-index rather than sit

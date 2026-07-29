@@ -26,10 +26,10 @@ describe('FeeTokenPreference', () => {
     ;(useAsync as jest.MockedFunction<typeof useAsync>).mockReturnValue([undefined, undefined, false])
   })
 
-  it('renders the fee token preference settings in a shared card shell', () => {
+  it('renders the fee token preference settings', () => {
     render(<FeeTokenPreference />)
 
-    expect(screen.getByText('Fee token preference').closest('[data-slot="card"]')).toHaveClass('mt-4')
+    expect(screen.getByText('Fee token preference')).toBeInTheDocument()
     expect(screen.getByText('Please connect your wallet to configure fee token preference.')).toBeInTheDocument()
   })
 

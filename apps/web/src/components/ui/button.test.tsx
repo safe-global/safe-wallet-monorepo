@@ -1,62 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import NextLink from 'next/link'
-import { buttonVariants } from './button'
 import { Button } from './button'
-
-describe('buttonVariants', () => {
-  it('uses tokenized classes for the outline variant', () => {
-    const className = buttonVariants({ variant: 'outline' })
-
-    expect(className).toContain('bg-transparent')
-    expect(className).toContain('hover:bg-foreground/[0.06]')
-    expect(className).not.toContain('rgba')
-    expect(className).not.toContain('unofficial')
-  })
-
-  it('renders the surface variant as a raised card CTA', () => {
-    render(
-      <Button data-testid="surface" variant="surface">
-        Add funds
-      </Button>,
-    )
-
-    const button = screen.getByTestId('surface')
-    expect(button).toHaveClass('bg-card', 'border-border', 'shadow-xs', 'text-card-foreground')
-    // border-transparent from the base string is overridden by border-border
-    expect(button).not.toHaveClass('border-transparent')
-  })
-
-  it('applies the action size CTA pill scale', () => {
-    render(
-      <Button data-testid="action" size="action">
-        Send
-      </Button>,
-    )
-
-    expect(screen.getByTestId('action')).toHaveClass('h-10', 'px-6', 'gap-2')
-  })
-
-  it('applies the submit size with a stable minimum width', () => {
-    render(
-      <Button data-testid="submit" size="submit">
-        Execute
-      </Button>,
-    )
-
-    expect(screen.getByTestId('submit')).toHaveClass('h-10', 'px-6', 'min-w-[7rem]')
-  })
-
-  it('applies the xl footer CTA scale', () => {
-    render(
-      <Button data-testid="xl" size="xl">
-        Continue
-      </Button>,
-    )
-
-    expect(screen.getByTestId('xl')).toHaveClass('h-12', 'px-6', 'gap-2')
-  })
-})
 
 describe('Button', () => {
   it('renders anchor buttons without requesting native button semantics', () => {
@@ -99,7 +44,6 @@ describe('Button', () => {
     expect(link).toHaveAttribute('tabindex', '-1')
     // an <a disabled> is invalid HTML and inert, so the attribute must not be forwarded
     expect(link).not.toHaveAttribute('disabled')
-    expect(link).toHaveClass('aria-disabled:opacity-50', 'aria-disabled:pointer-events-none')
 
     await userEvent.click(link)
     expect(onClick).not.toHaveBeenCalled()

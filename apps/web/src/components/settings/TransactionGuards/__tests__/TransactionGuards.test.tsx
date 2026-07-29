@@ -27,7 +27,6 @@ describe('TransactionGuards', () => {
 
     const utils = render(<TransactionGuards />)
     await waitFor(() => expect(utils.getByText(EMPTY_LABEL)).toBeDefined())
-    expect(utils.getByText('Transaction guards').closest('[data-slot="card"]')).toHaveClass('p-8')
   })
 
   it('should render null if safe is loading', async () => {

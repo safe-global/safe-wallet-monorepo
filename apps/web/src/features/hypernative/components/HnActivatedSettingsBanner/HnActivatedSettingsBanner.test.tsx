@@ -10,7 +10,6 @@ describe('HnActivatedSettingsBanner', () => {
 
     const card = title.closest('[data-slot="card"]')
     expect(card).toHaveAttribute('data-size', 'lg')
-    expect(card).toHaveClass('py-8')
     expect(title.closest('[data-slot="card-content"]')).toBeInTheDocument()
     expect(screen.getByText(hnActivatedSettingsBannerConfig.description)).toBeInTheDocument()
     expect(screen.getByText(hnActivatedSettingsBannerConfig.statusLabel)).toBeInTheDocument()

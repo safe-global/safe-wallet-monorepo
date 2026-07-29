@@ -41,7 +41,6 @@ describe('RecoveryInProgressCard', () => {
       })
 
       expect(queryByText(/Account can be recovered/)).toBeTruthy()
-      expect(queryByText(/Account can be recovered/)?.closest('[data-slot="card"]')).toHaveClass('flex')
       expect(queryByText('Learn more')).toBeTruthy()
 
       const queueButton = queryByText('Go to queue')

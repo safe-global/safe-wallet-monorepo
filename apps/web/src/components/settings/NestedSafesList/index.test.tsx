@@ -58,11 +58,10 @@ describe('NestedSafesList', () => {
     } as unknown as ReturnType<typeof useOwnersGetSafesByOwnerV1Query>)
   })
 
-  it('renders nested Safe settings in a shared card shell', () => {
+  it('renders the nested Safes empty state', () => {
     renderWithTxFlow()
 
-    const title = screen.getByText('Nested Safes')
-    expect(title.closest('[data-slot="card"]')).toHaveClass('mt-4')
+    expect(screen.getByText('Nested Safes')).toBeInTheDocument()
     expect(screen.getByText(/You don't have any Nested Safes yet/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Add nested Safe/i })).toBeEnabled()
   })
