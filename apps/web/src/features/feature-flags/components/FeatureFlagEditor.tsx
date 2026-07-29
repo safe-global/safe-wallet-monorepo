@@ -24,6 +24,7 @@ export const FeatureFlagEditor = (): ReactElement => {
 
   const filteredOverridden = useMemo(() => overridden.filter((row) => matchesSearch(row, search)), [overridden, search])
   const filteredRest = useMemo(() => rest.filter((row) => matchesSearch(row, search)), [rest, search])
+  const hasNoMatches = search !== '' && filteredOverridden.length === 0 && filteredRest.length === 0
 
   return (
     <div className="flex min-h-0 flex-1 flex-col" data-bundle-sentinel={EDITOR_BUNDLE_SENTINEL}>
@@ -49,8 +50,14 @@ export const FeatureFlagEditor = (): ReactElement => {
       </div>
 
       <div className={SCROLL_AREA}>
-        <FeatureFlagSection title="Local overrides" rows={filteredOverridden} />
-        <FeatureFlagSection title="All feature flags" rows={filteredRest} />
+        {hasNoMatches ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">No feature flags match your search.</p>
+        ) : (
+          <>
+            <FeatureFlagSection title="Local overrides" rows={filteredOverridden} />
+            <FeatureFlagSection title="All feature flags" rows={filteredRest} />
+          </>
+        )}
       </div>
     </div>
   )

@@ -33,6 +33,36 @@ describe('FeatureFlagEditor', () => {
     expect(queryByText(FEATURES.BRIDGE)).not.toBeInTheDocument()
   })
 
+  it('explains that a search matched nothing', () => {
+    mockData([], [row(FEATURES.EARN)])
+    const { getByLabelText, getByText, queryByText } = render(<FeatureFlagEditor />)
+
+    expect(queryByText('No feature flags match your search.')).not.toBeInTheDocument()
+
+    fireEvent.change(getByLabelText('Search flags'), { target: { value: 'nothing-matches-this' } })
+
+    expect(getByText('No feature flags match your search.')).toBeInTheDocument()
+    expect(queryByText('All feature flags')).not.toBeInTheDocument()
+  })
+
+  it('does not show the empty search message when there are simply no flags', () => {
+    mockData([], [])
+    const { queryByText } = render(<FeatureFlagEditor />)
+
+    expect(queryByText('No feature flags match your search.')).not.toBeInTheDocument()
+  })
+
+  it('keeps showing matches in one section when the other has none', () => {
+    mockData([row(FEATURES.EARN, true)], [row(FEATURES.BRIDGE)])
+    const { getByLabelText, getByText, queryByText } = render(<FeatureFlagEditor />)
+
+    fireEvent.change(getByLabelText('Search flags'), { target: { value: 'earn' } })
+
+    expect(getByText('Local overrides')).toBeInTheDocument()
+    expect(queryByText('All feature flags')).not.toBeInTheDocument()
+    expect(queryByText('No feature flags match your search.')).not.toBeInTheDocument()
+  })
+
   it('omits the local overrides section when there are none', () => {
     mockData([], [row(FEATURES.EARN)])
     const { queryByText } = render(<FeatureFlagEditor />)
