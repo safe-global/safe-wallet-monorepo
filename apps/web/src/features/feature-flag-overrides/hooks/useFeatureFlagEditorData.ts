@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import partition from 'lodash/partition'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
@@ -49,7 +50,7 @@ export const useFeatureFlagEditorData = (): FeatureFlagEditorData => {
     const chains = data ? data.ids.map((id) => data.entities[id]!) : []
     const currentChain = data?.entities[currentChainId]
 
-    // Built in sorted order, so the filtered partitions below stay sorted without re-sorting.
+    // Built in sorted order, and `partition` preserves it, so neither group needs re-sorting.
     const rows: FeatureFlagRowData[] = SORTED_FEATURES.map((feature) => {
       const configValue = currentChain ? hasFeature(currentChain, feature) : false
       const override = overrides[feature]
@@ -63,9 +64,7 @@ export const useFeatureFlagEditorData = (): FeatureFlagEditorData => {
       }
     })
 
-    return {
-      overridden: rows.filter((r) => r.override !== undefined),
-      rest: rows.filter((r) => r.override === undefined),
-    }
+    const [overridden, rest] = partition(rows, (row) => row.override !== undefined)
+    return { overridden, rest }
   }, [data, overrides, currentChainId])
 }
