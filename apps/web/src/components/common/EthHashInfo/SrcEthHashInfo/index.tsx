@@ -3,7 +3,7 @@ import type { ReactElement, ReactNode, SyntheticEvent } from 'react'
 import { isAddress } from 'ethers'
 import { Cloud } from 'lucide-react'
 import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
-import { useIsMobile } from '@/hooks/use-mobile'
+import { useIsBelowSm } from '@/hooks/useMediaQuery'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import Identicon from '../../Identicon'
 import CopyAddressButton from '../../CopyAddressButton'
@@ -58,7 +58,7 @@ const SrcEthHashInfo = ({
   badgeTooltip,
 }: EthHashInfoProps): ReactElement => {
   const shouldPrefix = isAddress(address)
-  const isMobile = useIsMobile()
+  const isMobile = useIsBelowSm()
   const identicon = <Identicon address={address} size={avatarSize} />
 
   const accountStylesWithBadge = badgeTooltip

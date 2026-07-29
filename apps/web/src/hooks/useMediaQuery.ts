@@ -29,4 +29,26 @@ export function useIsBelowMd(): boolean {
   return useMediaQuery(MD_DOWN_QUERY)
 }
 
+/**
+ * Legacy MUI `theme.breakpoints.down('sm')` === `(max-width:599.95px)`.
+ *
+ * Not the same as `useIsMobile` from `@/hooks/use-mobile`, which is shadcn's stock hook at 768px.
+ * Components that were on MUI's `sm` before the migration belong here — 768px would flip their
+ * layout 168px earlier than they were designed for.
+ */
+export const SM_DOWN_QUERY = '(max-width:599.95px)'
+
+/** True below the `sm` breakpoint (matches MUI's `breakpoints.down('sm')`). */
+export function useIsBelowSm(): boolean {
+  return useMediaQuery(SM_DOWN_QUERY)
+}
+
+/** Legacy MUI `theme.breakpoints.up('lg')` === `(min-width:1200px)`. */
+export const LG_UP_QUERY = '(min-width:1200px)'
+
+/** True at or above the `lg` breakpoint (matches MUI's `breakpoints.up('lg')`). */
+export function useIsAboveLg(): boolean {
+  return useMediaQuery(LG_UP_QUERY)
+}
+
 export default useMediaQuery

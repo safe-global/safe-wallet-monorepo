@@ -2,7 +2,7 @@ import { type ReactElement, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { useIsMobile } from '@/hooks/use-mobile'
+import { useIsBelowSm } from '@/hooks/useMediaQuery'
 import { cn } from '@/utils/cn'
 import ChainIndicator from '@/components/common/ChainIndicator'
 
@@ -99,7 +99,7 @@ const ModalDialog = ({
   keepMounted,
   'data-testid': dataTestid = 'modal-view',
 }: ModalDialogProps): ReactElement => {
-  const isSmallScreen = useIsMobile()
+  const isSmallScreen = useIsBelowSm()
   const isFullScreen = fullScreen || isSmallScreen
 
   // Breakpoint keys map onto the DialogContent `size` scale (class-based); arbitrary

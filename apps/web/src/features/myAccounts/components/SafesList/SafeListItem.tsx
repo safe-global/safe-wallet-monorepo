@@ -1,4 +1,4 @@
-import { useIsMobile } from '@/hooks/use-mobile'
+import { useIsBelowSm } from '@/hooks/useMediaQuery'
 import { AccountItem } from '../AccountItem'
 import { useSafeItemData } from '../../hooks/useSafeItemData'
 import css from '../AccountItems/styles.module.css'
@@ -15,7 +15,7 @@ export interface SafeListItemProps {
 
 export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: SafeListItemProps) => {
   const spaces = useLoadFeature(SpacesFeature)
-  const isMobile = useIsMobile()
+  const isMobile = useIsBelowSm()
 
   const {
     chain,

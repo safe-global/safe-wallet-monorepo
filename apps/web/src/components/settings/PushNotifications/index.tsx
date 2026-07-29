@@ -24,7 +24,7 @@ import CheckWalletWithPermission from '@/components/common/CheckWalletWithPermis
 import { useIsMac } from '@/hooks/useIsMac'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Permission } from '@/permissions/config'
-import { useIsMobile } from '@/hooks/use-mobile'
+import { useIsAboveLg } from '@/hooks/useMediaQuery'
 import SettingsCard from '@/components/settings/SettingsCard'
 
 import css from './styles.module.css'
@@ -38,7 +38,7 @@ export const PushNotifications = (): ReactElement => {
   const isMac = useIsMac()
   const [isRegistering, setIsRegistering] = useState(false)
   const [isUpdatingIndexedDb, setIsUpdatingIndexedDb] = useState(false)
-  const isMobile = useIsMobile()
+  const isLargeScreen = useIsAboveLg()
 
   const { updatePreferences, getPreferences, getAllPreferences } = useNotificationPreferences()
   const { unregisterSafeNotifications, unregisterDeviceNotifications, registerNotifications } =
@@ -117,7 +117,7 @@ export const PushNotifications = (): ReactElement => {
                 <EthHashInfo
                   address={safe.address.value}
                   showCopyButton
-                  shortAddress={isMobile}
+                  shortAddress={!isLargeScreen}
                   showName={true}
                   hasExplorer
                 />
