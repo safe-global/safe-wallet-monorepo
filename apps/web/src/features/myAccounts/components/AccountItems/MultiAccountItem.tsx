@@ -126,6 +126,11 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
       <Collapsible open={expanded} onOpenChange={toggleExpand}>
         <CollapsibleTrigger
           data-testid="multichain-item-summary"
+          // `nativeButton={false}` is required when rendering as a non-<button>: without it Base UI
+          // keeps its native-button path, emitting no `role="button"` and no Enter/Space handling, so
+          // keyboard users could focus this header but never expand it — locking every Safe in the
+          // group behind a mouse.
+          nativeButton={false}
           render={<div className="flex w-full cursor-pointer items-center p-2" />}
         >
           <div className="min-w-0 flex-1">
