@@ -1,8 +1,8 @@
 import { renderHook } from '@testing-library/react'
 import {
   type DelegatePage,
-  useDelegatesGetDelegatesV2Query,
-  useLazyDelegatesGetDelegatesV2Query,
+  useDelegatesGetDelegatesV3Query,
+  useLazyDelegatesGetDelegatesV3Query,
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { mockSafeInfo, mockWallet } from '@/tests/mocks/hooks'
 import { useGetIsWalletProposer, useIsWalletProposer } from '../useProposers'
@@ -10,15 +10,15 @@ import { useGetIsWalletProposer, useIsWalletProposer } from '../useProposers'
 jest.mock('@/hooks/useSafeInfo', () => ({ __esModule: true, default: jest.fn() }))
 jest.mock('@/hooks/wallets/useWallet', () => ({ __esModule: true, default: jest.fn() }))
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
-  useDelegatesGetDelegatesV2Query: jest.fn(),
-  useLazyDelegatesGetDelegatesV2Query: jest.fn(),
+  useDelegatesGetDelegatesV3Query: jest.fn(),
+  useLazyDelegatesGetDelegatesV3Query: jest.fn(),
 }))
 
-const mockUseDelegatesGetDelegatesV2Query = useDelegatesGetDelegatesV2Query as jest.MockedFunction<
-  typeof useDelegatesGetDelegatesV2Query
+const mockUseDelegatesGetDelegatesV3Query = useDelegatesGetDelegatesV3Query as jest.MockedFunction<
+  typeof useDelegatesGetDelegatesV3Query
 >
-const mockUseLazyDelegatesGetDelegatesV2Query = useLazyDelegatesGetDelegatesV2Query as jest.MockedFunction<
-  typeof useLazyDelegatesGetDelegatesV2Query
+const mockUseLazyDelegatesGetDelegatesV3Query = useLazyDelegatesGetDelegatesV3Query as jest.MockedFunction<
+  typeof useLazyDelegatesGetDelegatesV3Query
 >
 
 const proposerAddress = '0x1234567890000000000000000000000000000001'
@@ -31,8 +31,8 @@ const mockUnwrap = jest.fn()
 const mockFetchProposers = jest.fn(() => ({ unwrap: mockUnwrap }))
 
 const mockProposersData = (data?: DelegatePage) => {
-  mockUseDelegatesGetDelegatesV2Query.mockReturnValue({ data } as unknown as ReturnType<
-    typeof useDelegatesGetDelegatesV2Query
+  mockUseDelegatesGetDelegatesV3Query.mockReturnValue({ data } as unknown as ReturnType<
+    typeof useDelegatesGetDelegatesV3Query
   >)
 }
 
@@ -46,8 +46,8 @@ describe('useProposers', () => {
     mockProposersData(proposerPage)
     mockUnwrap.mockResolvedValue(proposerPage)
     mockFetchProposers.mockReturnValue({ unwrap: mockUnwrap })
-    mockUseLazyDelegatesGetDelegatesV2Query.mockReturnValue([mockFetchProposers] as unknown as ReturnType<
-      typeof useLazyDelegatesGetDelegatesV2Query
+    mockUseLazyDelegatesGetDelegatesV3Query.mockReturnValue([mockFetchProposers] as unknown as ReturnType<
+      typeof useLazyDelegatesGetDelegatesV3Query
     >)
   })
 

@@ -28,7 +28,6 @@ import type { PendingDelegation as PendingDelegationType } from '@/features/prop
 
 const SIGNING_ACTION_BY_DELEGATION: Record<PendingDelegationType['action'], DelegateAction> = {
   add: 'add',
-  edit: 'edit',
   remove: 'delete',
 }
 
