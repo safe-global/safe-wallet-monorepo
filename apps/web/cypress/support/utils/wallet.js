@@ -136,6 +136,6 @@ export function connectSignerViaStorage(signer, url, { extraStorage, waitForConn
   // connectLastWallet), so wait for the header's connected-wallet chip before proceeding;
   // otherwise the test can act while the wallet is still (briefly) disconnected.
   if (waitForConnection) {
-    cy.get('[data-testid="open-account-center"]', { timeout: 30000 }).should('exist')
+    cy.get('[data-testid="open-account-center"]').should('exist')
   }
 }

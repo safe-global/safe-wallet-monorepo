@@ -67,7 +67,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
   it('Verify that during the first connection to the safe "Proposal to recover account" modal is displayed for the guardian', () => {
     cy.visit(constants.securityUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
     cy.clearLocalStorage()
-    wallet.connectSigner(guardian)
+    wallet.connectSignerViaStorage(guardian)
     main.acceptCookies()
     recovery.verifyRecoveryProposalDialog(constants.elementExistanceStates.exist)
     navigation.clickOnWalletExpandMoreIcon()
@@ -77,7 +77,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
   it('Verify that "Account recovery" widget is displayed in the header for the Guardian', () => {
     cy.visit(constants.homeUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
     cy.clearLocalStorage()
-    wallet.connectSigner(guardian)
+    wallet.connectSignerViaStorage(guardian)
     main.acceptCookies()
     recovery.clickOnRecoverLaterBtn()
     dashboard.expandActionRequiredPanel()
@@ -89,7 +89,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
   it('Verify that recover later option is cached and "Proposal to account recovery" modal is not displayed on next safe opening', () => {
     cy.visit(constants.securityUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
     cy.clearLocalStorage()
-    wallet.connectSigner(guardian)
+    wallet.connectSignerViaStorage(guardian)
     main.acceptCookies()
     recovery.clickOnRecoverLaterBtn()
     cy.reload()
@@ -102,7 +102,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
   it('Verify that "Proposal to account recovery" modal is not displayed if the user is not guardian', () => {
     cy.visit(constants.securityUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
     cy.clearLocalStorage()
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     main.acceptCookies()
     recovery.verifyRecoveryProposalDialog(constants.elementExistanceStates.not_exist)
     navigation.clickOnWalletExpandMoreIcon()
@@ -112,7 +112,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
   it('Verify that the guardian can not delete recovery set up on Modules', () => {
     cy.visit(constants.modulesUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
     cy.clearLocalStorage()
-    wallet.connectSigner(guardian)
+    wallet.connectSignerViaStorage(guardian)
     main.acceptCookies()
     recovery.postponeRecovery()
     main.verifyElementsStatus([modules.moduleRemoveIcon], constants.enabledStates.disabled)
@@ -144,7 +144,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
   it('Verify that set up recovery flow can be canceled before submitting tx', () => {
     cy.visit(constants.securityUrl + staticSafes.SEP_STATIC_SAFE_13)
     cy.clearLocalStorage()
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     main.acceptCookies()
     recovery.clickOnSetupRecoveryBtn()
     recovery.clickOnNextBtn()
@@ -187,7 +187,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
   it('Verify that recovery tx is opened after clicking on "Start recovery" button in the widget', () => {
     cy.visit(constants.securityUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
     cy.clearLocalStorage()
-    wallet.connectSigner(guardian)
+    wallet.connectSignerViaStorage(guardian)
     main.acceptCookies()
     recovery.clickOnRecoverLaterBtn()
     cy.visit(constants.homeUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
