@@ -15,14 +15,17 @@ import { selectFeatureFlagOverrides, type FeatureFlagOverridesState } from '@/fe
  * IS_PRODUCTION const; cross-module constant propagation is not guaranteed).
  */
 export const applyFeatureOverrides = (chain: Chain, overrides: FeatureFlagOverridesState): Chain => {
-  if (process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true' || Object.keys(overrides).length === 0) return chain
+  if (process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true') return chain
 
-  const features = new Set(chain.features as string[])
-  for (const [feature, value] of Object.entries(overrides)) {
+  const entries = Object.entries(overrides)
+  if (entries.length === 0) return chain
+
+  const features = new Set(chain.features)
+  for (const [feature, value] of entries) {
     if (value) features.add(feature)
     else features.delete(feature)
   }
-  return { ...chain, features: Array.from(features) as Chain['features'] }
+  return { ...chain, features: Array.from(features) }
 }
 
 const useChains = (): { configs: Chain[]; error?: string; loading?: boolean } => {

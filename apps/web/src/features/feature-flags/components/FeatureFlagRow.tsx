@@ -75,6 +75,8 @@ export const FeatureFlagRow = ({ row }: { row: FeatureFlagRowData }): ReactEleme
                     data-testid="ff-match-indicator"
                     className="text-success-strong size-4 shrink-0"
                     style={row.matchesCurrentChain ? undefined : HIDDEN}
+                    role="img"
+                    aria-label={MATCH_LABEL}
                   />
                 }
               />

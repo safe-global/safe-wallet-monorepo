@@ -68,6 +68,15 @@ describe('FeatureFlagRow', () => {
     expect(getByTestId('ff-match-indicator')).toBeVisible()
   })
 
+  it('exposes the match indicator to assistive tech, not only as a hover tooltip', () => {
+    const { getByRole } = render(
+      <FeatureFlagRow
+        row={{ ...baseRow, override: true, configValue: true, effective: true, matchesCurrentChain: true }}
+      />,
+    )
+    expect(getByRole('img', { name: 'Matches config service setting for the current chain' })).toBeVisible()
+  })
+
   it('dispatches setOverride when the switch is toggled', () => {
     const { getByRole } = render(<FeatureFlagRow row={baseRow} />)
     fireEvent.click(getByRole('switch'))
