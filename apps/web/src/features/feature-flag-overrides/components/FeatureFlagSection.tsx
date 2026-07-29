@@ -8,10 +8,6 @@ import type { FeatureFlagRowData } from '../hooks/useFeatureFlagEditorData'
 export const FeatureFlagSection = ({
   title,
   rows,
-  /**
-   * Header for the switch column. Overridden rows show a local value; rows without an override
-   * show what the config service delivered, so the two sections label it differently.
-   */
   valueLabel,
 }: {
   title: string
