@@ -28,6 +28,30 @@ describe('ActionRequiredPanel defaultExpanded', () => {
     expect(getCollapse()).not.toBeInTheDocument()
   })
 
+  it('opens when defaultExpanded flips true after mount', async () => {
+    // The dashboard derives this prop from an async Zodiac check, so it is false on mount.
+    const { rerender } = render(<ActionRequiredPanel defaultExpanded={false}>{warning}</ActionRequiredPanel>)
+    expect(getExpand()).toBeInTheDocument()
+
+    rerender(<ActionRequiredPanel defaultExpanded>{warning}</ActionRequiredPanel>)
+
+    expect(await screen.findByLabelText('Collapse action required panel')).toBeInTheDocument()
+  })
+
+  it('does not re-open a user-collapsed panel when defaultExpanded flips true again', async () => {
+    const { rerender } = render(<ActionRequiredPanel defaultExpanded={false}>{warning}</ActionRequiredPanel>)
+    rerender(<ActionRequiredPanel defaultExpanded>{warning}</ActionRequiredPanel>)
+
+    fireEvent.click(await screen.findByLabelText('Collapse action required panel'))
+    expect(getExpand()).toBeInTheDocument()
+
+    rerender(<ActionRequiredPanel defaultExpanded={false}>{warning}</ActionRequiredPanel>)
+    rerender(<ActionRequiredPanel defaultExpanded>{warning}</ActionRequiredPanel>)
+
+    expect(getExpand()).toBeInTheDocument()
+    expect(getCollapse()).not.toBeInTheDocument()
+  })
+
   it('stays hidden when defaultExpanded is true but there are no warnings', () => {
     render(<ActionRequiredPanel defaultExpanded>{null}</ActionRequiredPanel>)
     const panel = screen.getByTestId('action-required-panel')

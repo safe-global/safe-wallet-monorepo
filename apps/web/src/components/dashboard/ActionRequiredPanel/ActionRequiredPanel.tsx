@@ -1,4 +1,4 @@
-import { useState, useRef, type ReactElement, type ReactNode } from 'react'
+import { useState, useRef, useEffect, type ReactElement, type ReactNode } from 'react'
 import { Typography } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
@@ -11,6 +11,11 @@ import css from './styles.module.css'
 
 export interface ActionRequiredPanelProps {
   children: ReactNode
+  /**
+   * Opens the panel once when this turns true (e.g. a critical item was detected).
+   * A manual user toggle always wins thereafter, so a late/again-true signal never
+   * re-opens a panel the user has collapsed.
+   */
   defaultExpanded?: boolean
 }
 
@@ -34,11 +39,20 @@ export interface ActionRequiredPanelProps {
  * ```
  */
 export const ActionRequiredPanel = ({ children, defaultExpanded = false }: ActionRequiredPanelProps): ReactElement => {
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded)
+  const [isExpanded, setIsExpanded] = useState(false)
+  const userToggledRef = useRef(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const warningCount = useWarningCount(containerRef)
 
+  // Open once when a critical item is detected, unless the user has already toggled the panel.
+  useEffect(() => {
+    if (defaultExpanded && !userToggledRef.current) {
+      setIsExpanded(true)
+    }
+  }, [defaultExpanded])
+
   const toggleExpanded = () => {
+    userToggledRef.current = true
     setIsExpanded((prev) => !prev)
   }
 
@@ -52,7 +66,10 @@ export const ActionRequiredPanel = ({ children, defaultExpanded = false }: Actio
   return (
     <Collapsible
       open={isExpanded}
-      onOpenChange={setIsExpanded}
+      onOpenChange={(open) => {
+        userToggledRef.current = true
+        setIsExpanded(open)
+      }}
       data-testid="action-required-panel"
       render={<section />}
       className={classnames(
