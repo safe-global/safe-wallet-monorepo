@@ -1,4 +1,5 @@
 import { Fragment, useMemo, useRef, type Dispatch, type ReactNode, type SetStateAction } from 'react'
+import partition from 'lodash/partition'
 import { createPortal } from 'react-dom'
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd'
 import Table from '@mui/material/Table'
@@ -85,8 +86,7 @@ const ReorderableBody = ({
 
   // Similarity clusters are pinned (non-draggable) at the top in Manual mode; only the rest reorder.
   const isClustered = (group: AccountGroup) => Boolean(similarityGroups?.get(group.parent.address.toLowerCase()))
-  const pinnedGroups = groups.filter(isClustered)
-  const draggableGroups = groups.filter((group) => !isClustered(group))
+  const [pinnedGroups, draggableGroups] = partition(groups, isClustered)
 
   const handleDragEnd = (result: DropResult) => {
     setExpanded(expandedBeforeDrag.current)
