@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useRef, type Dispatch, type ReactNode, type SetStateAction } from 'react'
+import { useMemo, useRef, type Dispatch, type ReactNode, type SetStateAction } from 'react'
 import partition from 'lodash/partition'
 import { createPortal } from 'react-dom'
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd'
@@ -45,6 +45,189 @@ export const toggleExpanded = (set: Set<string>, key: string): Set<string> => {
   if (next.has(key)) next.delete(key)
   else next.add(key)
   return next
+}
+
+/** Row wiring shared by every group row (parent or child), so each call site doesn't re-thread it. */
+type SharedRowProps = {
+  columns: SafeAccountColumn[]
+  similarWarnings?: Map<string, SimilarWarning>
+  expanded: Set<string>
+  setExpanded: Dispatch<SetStateAction<Set<string>>>
+  renderActions?: (line: AccountLine) => ReactNode
+  onRename?: (line: AccountLine) => void
+  onLinkClick?: (line: AccountLine) => void
+  getCheckbox?: (group: AccountGroup, line: AccountLine) => RowCheckbox
+  onSelectToggle?: (line: AccountLine, nextChecked: boolean) => void
+  onOverviewsLoaded: (overviews: SafeOverview[]) => void
+}
+
+/** The per-chain child rows of an expanded group — identical in both bodies bar the band tint. */
+const GroupChildRows = ({
+  group,
+  shared,
+  highlighted,
+  lastChildDivider,
+}: {
+  group: AccountGroup
+  shared: SharedRowProps
+  highlighted?: boolean
+  /** Whether the group itself draws a bottom divider — only its last child carries it. */
+  lastChildDivider: boolean
+}) => {
+  const { columns, similarWarnings, renderActions, onLinkClick, getCheckbox, onSelectToggle, onOverviewsLoaded } =
+    shared
+  return (
+    <>
+      {group.children.map((child, index) => (
+        <SafeAccountTableRow
+          key={child.key}
+          line={child}
+          columns={columns}
+          warning={similarWarnings?.get(child.address.toLowerCase())}
+          highlighted={highlighted}
+          renderActions={renderActions}
+          onLinkClick={onLinkClick}
+          checkbox={getCheckbox?.(group, child)}
+          onSelectToggle={onSelectToggle ? (next) => onSelectToggle(child, next) : undefined}
+          showDivider={lastChildDivider && index === group.children.length - 1}
+          onOverviewsLoaded={onOverviewsLoaded}
+        />
+      ))}
+    </>
+  )
+}
+
+/** One pinned (non-draggable) cluster group: its band header, highlighted parent, and children. */
+const PinnedGroupRows = ({
+  group,
+  index,
+  pinnedGroups,
+  hasDraggable,
+  similarityGroups,
+  shared,
+}: {
+  group: AccountGroup
+  index: number
+  pinnedGroups: AccountGroup[]
+  hasDraggable: boolean
+  similarityGroups?: Map<string, string>
+  shared: SharedRowProps
+}) => {
+  const { parent } = group
+  const {
+    columns,
+    similarWarnings,
+    expanded,
+    setExpanded,
+    renderActions,
+    onRename,
+    onLinkClick,
+    getCheckbox,
+    onSelectToggle,
+    onOverviewsLoaded,
+  } = shared
+  const isExpanded = group.children.length > 0 && expanded.has(parent.key)
+  const hasDivider = index < pinnedGroups.length - 1 || hasDraggable
+  const bandHeader = bandHeaderAt(
+    index,
+    (i) => similarityGroups?.get(pinnedGroups[i].parent.address.toLowerCase()),
+    columns.length,
+  )
+
+  return (
+    <>
+      {bandHeader}
+      <SafeAccountTableRow
+        line={parent}
+        columns={columns}
+        warning={similarWarnings?.get(parent.address.toLowerCase())}
+        highlighted
+        expanded={parent.expandable ? isExpanded : undefined}
+        onToggle={parent.expandable ? () => setExpanded((prev) => toggleExpanded(prev, parent.key)) : undefined}
+        renderActions={renderActions}
+        onRename={onRename}
+        onLinkClick={onLinkClick}
+        checkbox={getCheckbox?.(group, parent)}
+        onSelectToggle={onSelectToggle ? (next) => onSelectToggle(parent, next) : undefined}
+        showDivider={hasDivider && !isExpanded}
+        onOverviewsLoaded={onOverviewsLoaded}
+      />
+      {isExpanded && <GroupChildRows group={group} shared={shared} highlighted lastChildDivider={hasDivider} />}
+    </>
+  )
+}
+
+/** One draggable group: parent wrapped in a Draggable (portaled to <body> while dragging), then children. */
+const DraggableGroupRows = ({
+  group,
+  index,
+  count,
+  draggedRowWidth,
+  shared,
+}: {
+  group: AccountGroup
+  index: number
+  count: number
+  draggedRowWidth: number
+  shared: SharedRowProps
+}) => {
+  const { parent } = group
+  const {
+    columns,
+    similarWarnings,
+    expanded,
+    setExpanded,
+    renderActions,
+    onRename,
+    onLinkClick,
+    getCheckbox,
+    onSelectToggle,
+    onOverviewsLoaded,
+  } = shared
+  const isExpanded = group.children.length > 0 && expanded.has(parent.key)
+  const groupHasDivider = index < count - 1
+
+  return (
+    <>
+      <Draggable draggableId={parent.key} index={index}>
+        {(dragProvided, snapshot) => {
+          const row = (
+            <SafeAccountTableRow
+              line={parent}
+              columns={columns}
+              warning={similarWarnings?.get(parent.address.toLowerCase())}
+              expanded={parent.expandable ? isExpanded : undefined}
+              onToggle={parent.expandable ? () => setExpanded((prev) => toggleExpanded(prev, parent.key)) : undefined}
+              renderActions={renderActions}
+              onRename={onRename}
+              onLinkClick={onLinkClick}
+              checkbox={getCheckbox?.(group, parent)}
+              onSelectToggle={onSelectToggle ? (next) => onSelectToggle(parent, next) : undefined}
+              showDivider={groupHasDivider && !isExpanded}
+              rowRef={dragProvided.innerRef}
+              rowDraggableProps={dragProvided.draggableProps}
+              dragHandleProps={dragProvided.dragHandleProps}
+              isDragging={snapshot.isDragging}
+              onOverviewsLoaded={onOverviewsLoaded}
+            />
+          )
+
+          // dnd pins the dragged row with `position: fixed`; a transformed ancestor (the centered modal)
+          // would become its containing block and shove it sideways, so portal it to <body>. The wrapper
+          // table keeps the detached <tr> renderable.
+          return snapshot.isDragging
+            ? createPortal(
+                <Table sx={{ width: draggedRowWidth, borderCollapse: 'separate', borderSpacing: 0, margin: 0 }}>
+                  <TableBody>{row}</TableBody>
+                </Table>,
+                document.body,
+              )
+            : row
+        }}
+      </Draggable>
+      {isExpanded && <GroupChildRows group={group} shared={shared} lastChildDivider={groupHasDivider} />}
+    </>
+  )
 }
 
 /**
@@ -96,135 +279,47 @@ const ReorderableBody = ({
     onReorder(reorderByKey(draggableGroups, source.index, destination.index, (group) => group.parent.address))
   }
 
+  const shared: SharedRowProps = {
+    columns,
+    similarWarnings,
+    expanded,
+    setExpanded,
+    renderActions,
+    onRename,
+    onLinkClick,
+    getCheckbox,
+    onSelectToggle,
+    onOverviewsLoaded,
+  }
+
   return (
     <DragDropContext onBeforeCapture={handleBeforeCapture} onDragEnd={handleDragEnd}>
       <Droppable droppableId="safe-accounts-reorder">
         {(dropProvided) => (
           <TableBody ref={dropProvided.innerRef} {...dropProvided.droppableProps}>
             {/* Similarity bands are pinned on top and can't be split; only the rows below drag. */}
-            {pinnedGroups.map((group, index) => {
-              const { parent } = group
-              const isExpanded = group.children.length > 0 && expanded.has(parent.key)
-              const hasDivider = index < pinnedGroups.length - 1 || draggableGroups.length > 0
-              const bandHeader = bandHeaderAt(
-                index,
-                (i) => similarityGroups?.get(pinnedGroups[i].parent.address.toLowerCase()),
-                columns.length,
-              )
+            {pinnedGroups.map((group, index) => (
+              <PinnedGroupRows
+                key={group.parent.key}
+                group={group}
+                index={index}
+                pinnedGroups={pinnedGroups}
+                hasDraggable={draggableGroups.length > 0}
+                similarityGroups={similarityGroups}
+                shared={shared}
+              />
+            ))}
 
-              return (
-                <Fragment key={parent.key}>
-                  {bandHeader}
-                  <SafeAccountTableRow
-                    line={parent}
-                    columns={columns}
-                    warning={similarWarnings?.get(parent.address.toLowerCase())}
-                    highlighted
-                    expanded={parent.expandable ? isExpanded : undefined}
-                    onToggle={
-                      parent.expandable ? () => setExpanded((prev) => toggleExpanded(prev, parent.key)) : undefined
-                    }
-                    renderActions={renderActions}
-                    onRename={onRename}
-                    onLinkClick={onLinkClick}
-                    checkbox={getCheckbox?.(group, parent)}
-                    onSelectToggle={onSelectToggle ? (next) => onSelectToggle(parent, next) : undefined}
-                    showDivider={hasDivider && !isExpanded}
-                    onOverviewsLoaded={onOverviewsLoaded}
-                  />
-                  {isExpanded &&
-                    group.children.map((child, childIndex) => (
-                      <SafeAccountTableRow
-                        key={child.key}
-                        line={child}
-                        columns={columns}
-                        warning={similarWarnings?.get(child.address.toLowerCase())}
-                        highlighted
-                        renderActions={renderActions}
-                        onLinkClick={onLinkClick}
-                        checkbox={getCheckbox?.(group, child)}
-                        onSelectToggle={onSelectToggle ? (next) => onSelectToggle(child, next) : undefined}
-                        showDivider={hasDivider && childIndex === group.children.length - 1}
-                        onOverviewsLoaded={onOverviewsLoaded}
-                      />
-                    ))}
-                </Fragment>
-              )
-            })}
-
-            {draggableGroups.map((group, index) => {
-              const { parent } = group
-              const isExpanded = group.children.length > 0 && expanded.has(parent.key)
-              const groupHasDivider = index < draggableGroups.length - 1
-
-              return (
-                <Fragment key={parent.key}>
-                  <Draggable draggableId={parent.key} index={index}>
-                    {(dragProvided, snapshot) => {
-                      const row = (
-                        <SafeAccountTableRow
-                          line={parent}
-                          columns={columns}
-                          warning={similarWarnings?.get(parent.address.toLowerCase())}
-                          expanded={parent.expandable ? isExpanded : undefined}
-                          onToggle={
-                            parent.expandable
-                              ? () => setExpanded((prev) => toggleExpanded(prev, parent.key))
-                              : undefined
-                          }
-                          renderActions={renderActions}
-                          onRename={onRename}
-                          onLinkClick={onLinkClick}
-                          checkbox={getCheckbox?.(group, parent)}
-                          onSelectToggle={onSelectToggle ? (next) => onSelectToggle(parent, next) : undefined}
-                          showDivider={groupHasDivider && !isExpanded}
-                          rowRef={dragProvided.innerRef}
-                          rowDraggableProps={dragProvided.draggableProps}
-                          dragHandleProps={dragProvided.dragHandleProps}
-                          isDragging={snapshot.isDragging}
-                          onOverviewsLoaded={onOverviewsLoaded}
-                        />
-                      )
-
-                      // dnd pins the dragged row with `position: fixed`; a transformed ancestor (the
-                      // centered modal) would become its containing block and shove it sideways, so
-                      // portal it to <body>. The wrapper table keeps the detached <tr> renderable.
-                      return snapshot.isDragging
-                        ? createPortal(
-                            <Table
-                              sx={{
-                                width: draggedRowWidth,
-                                borderCollapse: 'separate',
-                                borderSpacing: 0,
-                                margin: 0,
-                              }}
-                            >
-                              <TableBody>{row}</TableBody>
-                            </Table>,
-                            document.body,
-                          )
-                        : row
-                    }}
-                  </Draggable>
-
-                  {isExpanded &&
-                    group.children.map((child, childIndex) => (
-                      <SafeAccountTableRow
-                        key={child.key}
-                        line={child}
-                        columns={columns}
-                        warning={similarWarnings?.get(child.address.toLowerCase())}
-                        renderActions={renderActions}
-                        onLinkClick={onLinkClick}
-                        checkbox={getCheckbox?.(group, child)}
-                        onSelectToggle={onSelectToggle ? (next) => onSelectToggle(child, next) : undefined}
-                        showDivider={groupHasDivider && childIndex === group.children.length - 1}
-                        onOverviewsLoaded={onOverviewsLoaded}
-                      />
-                    ))}
-                </Fragment>
-              )
-            })}
+            {draggableGroups.map((group, index) => (
+              <DraggableGroupRows
+                key={group.parent.key}
+                group={group}
+                index={index}
+                count={draggableGroups.length}
+                draggedRowWidth={draggedRowWidth}
+                shared={shared}
+              />
+            ))}
             {dropProvided.placeholder}
           </TableBody>
         )}
