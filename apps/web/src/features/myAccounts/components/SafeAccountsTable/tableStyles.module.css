@@ -87,14 +87,14 @@
     inset 1px 0 0 var(--band-border),
     inset 0 1px 0 var(--band-border),
     inset 0 -1px 0 var(--band-border);
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
+  border-top-left-radius: 16px;
+  border-bottom-left-radius: 16px;
 }
 .body :global(.MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root:last-of-type) {
   box-shadow:
     inset -1px 0 0 var(--band-border),
     inset 0 1px 0 var(--band-border),
     inset 0 -1px 0 var(--band-border);
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
+  border-top-right-radius: 16px;
+  border-bottom-right-radius: 16px;
 }
