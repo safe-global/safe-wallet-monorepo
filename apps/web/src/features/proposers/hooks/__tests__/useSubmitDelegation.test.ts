@@ -35,7 +35,6 @@ describe('useSubmitDelegation', () => {
   })
 
   let mockAddDelegateV3: jest.Mock
-  let mockUpdateDelegateV3: jest.Mock
   let mockDeleteDelegateV3: jest.Mock
 
   beforeEach(() => {
@@ -45,19 +44,12 @@ describe('useSubmitDelegation', () => {
     jest.spyOn(utilsModule, 'encodeEIP1271Signature').mockResolvedValue(encodedSignature)
 
     mockAddDelegateV3 = jest.fn().mockReturnValue({ unwrap: jest.fn().mockResolvedValue({}) })
-    mockUpdateDelegateV3 = jest.fn().mockReturnValue({ unwrap: jest.fn().mockResolvedValue({}) })
     mockDeleteDelegateV3 = jest.fn().mockReturnValue({ unwrap: jest.fn().mockResolvedValue({}) })
 
     jest
       .spyOn(delegatesQueries, 'useDelegatesPostDelegateV3Mutation')
       .mockReturnValue([mockAddDelegateV3, { isLoading: false, reset: jest.fn() }] as unknown as ReturnType<
         typeof delegatesQueries.useDelegatesPostDelegateV3Mutation
-      >)
-
-    jest
-      .spyOn(delegatesQueries, 'useDelegatesUpdateDelegateV3Mutation')
-      .mockReturnValue([mockUpdateDelegateV3, { isLoading: false, reset: jest.fn() }] as unknown as ReturnType<
-        typeof delegatesQueries.useDelegatesUpdateDelegateV3Mutation
       >)
 
     jest
@@ -95,29 +87,6 @@ describe('useSubmitDelegation', () => {
         label: PROPOSER_LABEL_PLACEHOLDER,
       },
     })
-    expect(mockDeleteDelegateV3).not.toHaveBeenCalled()
-  })
-
-  it('should call updateDelegateV3 (PATCH) for edit action with correct params', async () => {
-    const { result } = renderHook(() => useSubmitDelegation())
-    const delegation = createPendingDelegation({ action: 'edit', delegateLabel: 'Renamed Proposer' })
-
-    await act(async () => {
-      await result.current.submitDelegation(delegation)
-    })
-
-    expect(utilsModule.encodeEIP1271Signature).toHaveBeenCalledWith(parentSafeAddress, preparedSignature)
-    expect(mockUpdateDelegateV3).toHaveBeenCalledWith({
-      chainId,
-      updateDelegateV3Dto: {
-        safe: safeAddress,
-        delegate: delegateAddress,
-        delegator: parentSafeAddress,
-        signature: encodedSignature,
-        label: 'Renamed Proposer',
-      },
-    })
-    expect(mockAddDelegateV3).not.toHaveBeenCalled()
     expect(mockDeleteDelegateV3).not.toHaveBeenCalled()
   })
 

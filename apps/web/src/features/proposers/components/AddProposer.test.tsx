@@ -13,7 +13,7 @@ import AddProposer from './AddProposer'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useDelegatorSelection } from '../hooks/useDelegatorSelection'
 import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
-import { useDelegatesPostDelegateV2Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
+import { useDelegatesPostDelegateV3Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
 import { ZERO_ADDRESS, SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
 import { getStoreInstance } from '@/store'
@@ -24,7 +24,7 @@ jest.mock('@/services/tx/tx-sender/sdk')
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
   ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/delegates'),
   useDelegatesPostDelegateV1Mutation: jest.fn(),
-  useDelegatesPostDelegateV2Mutation: jest.fn(),
+  useDelegatesPostDelegateV3Mutation: jest.fn(),
 }))
 jest.mock('@/components/common/CheckWallet', () => ({
   __esModule: true,
@@ -88,11 +88,11 @@ describe('AddProposer signing logic', () => {
     const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>
     const mockUseDelegatorSelection = useDelegatorSelection as jest.MockedFunction<typeof useDelegatorSelection>
     const mockGetSigner = getAssertedChainSigner as jest.MockedFunction<typeof getAssertedChainSigner>
-    const mockUseAddDelegateV2 = useDelegatesPostDelegateV2Mutation as jest.MockedFunction<
-      typeof useDelegatesPostDelegateV2Mutation
+    const mockUseAddDelegateV3 = useDelegatesPostDelegateV3Mutation as jest.MockedFunction<
+      typeof useDelegatesPostDelegateV3Mutation
     >
 
-    const addDelegateV2 = jest.fn().mockReturnValue({ unwrap: () => Promise.resolve() })
+    const addDelegateV3 = jest.fn().mockReturnValue({ unwrap: () => Promise.resolve() })
 
     beforeEach(() => {
       mockUseWallet.mockReturnValue({
@@ -108,7 +108,7 @@ describe('AddProposer signing logic', () => {
       jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
       jest.spyOn(proposerUtils, 'signProposerTypedData').mockResolvedValue('0xsignature')
 
-      mockUseAddDelegateV2.mockReturnValue([addDelegateV2, {} as never])
+      mockUseAddDelegateV3.mockReturnValue([addDelegateV3, {} as never])
       useDelegatesPostDelegateV1Mutation.mockReturnValue([jest.fn(), {}])
     })
 
@@ -128,9 +128,9 @@ describe('AddProposer signing logic', () => {
         fireEvent.click(getByTestId('submit-proposer-btn'))
       })
 
-      await waitFor(() => expect(addDelegateV2).toHaveBeenCalled())
+      await waitFor(() => expect(addDelegateV3).toHaveBeenCalled())
 
-      const { label } = addDelegateV2.mock.calls[0][0].createDelegateDto
+      const { label } = addDelegateV3.mock.calls[0][0].createDelegateDto
       expect(label).toBe(PROPOSER_LABEL_PLACEHOLDER)
       expect(label).not.toContain('Foo')
     })
@@ -151,15 +151,15 @@ describe('AddProposer signing logic', () => {
         fireEvent.click(getByTestId('submit-proposer-btn'))
       })
 
-      await waitFor(() => expect(addDelegateV2).toHaveBeenCalled())
+      await waitFor(() => expect(addDelegateV3).toHaveBeenCalled())
       await waitFor(() => expect(addressBookName(address)).toBe('Foo-Bar'))
     })
 
     it('does not save the name locally when the delegate request fails', async () => {
       const failingAddDelegate = jest
         .fn()
-        .mockReturnValue({ unwrap: () => Promise.reject(new Error('Request failed with status 500')) })
-      mockUseAddDelegateV2.mockReturnValue([failingAddDelegate, {} as never])
+        .mockReturnValue({ unwrap: () => Promise.reject(new Error('delegate rejected')) })
+      mockUseAddDelegateV3.mockReturnValue([failingAddDelegate, {} as never])
 
       const { getByLabelText, getByTestId, findByText } = render(
         <AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
@@ -186,11 +186,11 @@ describe('AddProposer signing logic', () => {
   describe('smart contract address validation', () => {
     const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>
     const mockUseDelegatorSelection = useDelegatorSelection as jest.MockedFunction<typeof useDelegatorSelection>
-    const mockUseAddDelegateV2 = useDelegatesPostDelegateV2Mutation as jest.MockedFunction<
-      typeof useDelegatesPostDelegateV2Mutation
+    const mockUseAddDelegateV3 = useDelegatesPostDelegateV3Mutation as jest.MockedFunction<
+      typeof useDelegatesPostDelegateV3Mutation
     >
 
-    const addDelegateV2 = jest.fn().mockReturnValue({ unwrap: () => Promise.resolve() })
+    const addDelegateV3 = jest.fn().mockReturnValue({ unwrap: () => Promise.resolve() })
 
     beforeEach(() => {
       mockUseWallet.mockReturnValue({
@@ -202,7 +202,7 @@ describe('AddProposer signing logic', () => {
 
       mockUseDelegatorSelection.mockReturnValue(mockDelegatorSelection())
 
-      mockUseAddDelegateV2.mockReturnValue([addDelegateV2, {} as never])
+      mockUseAddDelegateV3.mockReturnValue([addDelegateV3, {} as never])
       useDelegatesPostDelegateV1Mutation.mockReturnValue([jest.fn(), {}])
     })
 
@@ -225,7 +225,7 @@ describe('AddProposer signing logic', () => {
 
       expect(await findByText('This proposer address is not valid')).toBeInTheDocument()
       expect(getByTestId('submit-proposer-btn')).toBeDisabled()
-      expect(addDelegateV2).not.toHaveBeenCalled()
+      expect(addDelegateV3).not.toHaveBeenCalled()
     })
 
     it('shows an error and keeps submit disabled when the address is a smart contract', async () => {
@@ -242,7 +242,7 @@ describe('AddProposer signing logic', () => {
 
       await findByText(SMART_CONTRACT_PROPOSER_ERROR, {}, { timeout: 3000 })
       expect(getByTestId('submit-proposer-btn')).toBeDisabled()
-      expect(addDelegateV2).not.toHaveBeenCalled()
+      expect(addDelegateV3).not.toHaveBeenCalled()
     })
 
     it('allows an EOA address', async () => {
