@@ -86,11 +86,7 @@ jest.mock('@/utils/colors', () => ({
 jest.mock('../../NavItem', () => ({
   NavItem: ({ item }: { item: ResolvedSidebarItem | null }) =>
     item ? (
-      <div
-        data-key={'id' in item ? item.id : item.href}
-        data-testid={item.testId ?? `sidebar-item-${item.label.toLowerCase()}`}
-        data-active={item.isActive}
-      >
+      <div data-testid={item.testId ?? `sidebar-item-${item.label.toLowerCase()}`} data-active={item.isActive}>
         {item.label}
         {!!item.badge && <span aria-label={`${item.badge} ${item.label} notifications`}>{item.badge}</span>}
         {item.indicator && <span aria-hidden />}
