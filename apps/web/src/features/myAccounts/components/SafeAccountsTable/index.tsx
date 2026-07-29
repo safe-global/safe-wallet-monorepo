@@ -136,18 +136,23 @@ export type SafeAccountsTableProps = {
 const headerSx = {
   textTransform: 'uppercase',
   fontSize: '12px',
-  fontWeight: 500,
-  letterSpacing: '0.04em',
+  fontWeight: 600,
+  lineHeight: '16px',
+  letterSpacing: 0,
   color: 'text.secondary',
   whiteSpace: 'nowrap',
   py: 1.25,
+  // Sort arrow: same grey as the label in every state (MUI defaults dim it to 50% on hover and
+  // darken the active label to text.primary), and snug against the word instead of 4px each side.
+  '& .MuiTableSortLabel-root:hover, & .MuiTableSortLabel-root.Mui-active': { color: 'text.secondary' },
+  '& .MuiTableSortLabel-root:hover .MuiTableSortLabel-icon': { opacity: 1 },
+  '& .MuiTableSortLabel-icon': { color: 'text.secondary', fontSize: '14px', ml: 0.25, mr: 0 },
   // Match the body cells' slim padding so labels align with their columns.
   px: 1,
-  // The grey bar sits inset 4px from the panel edges: transparent borders +
-  // padding-box clip shrink the painted background without moving the cells.
-  // `&&` outranks the theme's MuiTableCell-head border-bottom.
+  // Transparent borders inset the grey bar 4px from the panel's top and side edges (no bottom —
+  // the first row's top border provides that gap). `&&` outranks the theme's head border-bottom.
   backgroundClip: 'padding-box',
-  '&&': { border: '4px solid transparent', borderLeft: 'none', borderRight: 'none' },
+  '&&': { border: 'none', borderTop: '4px solid transparent' },
   '&&:first-of-type': { pl: 2, borderLeft: '4px solid transparent' },
   '&&:last-of-type': { pr: 2, borderRight: '4px solid transparent' },
 } as const
@@ -199,10 +204,6 @@ const SafeAccountsTable = ({
   const canRename = allowRenameInDialog || !selection
   const onRename = canRename ? (line: AccountLine) => setRenameTarget(toRenameTarget(line)) : undefined
 
-  // While reordering, the incoming (manual) order is authoritative: column-header sorting is
-  // suppressed and multi-chain groups collapse so each row is a single draggable account.
-  const reorderActive = Boolean(reorder)
-
   const visibleColumns = useMemo(() => {
     const base = columns ? SAFE_ACCOUNT_COLUMNS.filter((c) => columns.includes(c.id)) : SAFE_ACCOUNT_COLUMNS
     const withActions = actionsWidth ? base.map((c) => (c.id === 'actions' ? { ...c, width: actionsWidth } : c)) : base
@@ -218,10 +219,10 @@ const SafeAccountsTable = ({
   )
 
   const sortedGroups = useMemo(() => {
-    if (reorderActive || !sortableColumns || !sort.orderBy) return groups
+    if (!sortableColumns || !sort.orderBy) return groups
     const orderBy = sort.orderBy
     return [...groups].sort((a, b) => compareGroups(a, b, orderBy, sort.order))
-  }, [groups, sort, reorderActive, sortableColumns])
+  }, [groups, sort, sortableColumns])
 
   // When an external sort-mode control takes over ordering (Last visited / Manual), clear any active
   // column sort so a stale header arrow and order don't linger if column sorting re-enables.
@@ -277,9 +278,7 @@ const SafeAccountsTable = ({
             ? { width: '100%', overflowX: 'visible' }
             : {
                 width: '100%',
-                // Reorder mode floats the drag grip in the left gutter, outside the card — clipping it
-                // would hide the handle, so drop the horizontal scroll container while reordering.
-                overflowX: reorderActive ? 'visible' : 'auto',
+                overflowX: 'auto',
                 borderRadius: '16px',
                 backgroundColor: 'background.paper',
                 border: '1px solid',
@@ -320,9 +319,17 @@ const SafeAccountsTable = ({
                       index === 0 && 'rounded-l-lg',
                       index === visibleColumns.length - 1 && 'rounded-r-lg',
                     )}
-                    sx={{ ...headerSx, width: column.width, textAlign: column.align ?? 'left' }}
+                    sx={{
+                      ...headerSx,
+                      width: column.width,
+                      textAlign: column.align ?? 'left',
+                      // Indent the NAME label so it sits above the account name text, not the avatar.
+                      // A leading checkbox column already offsets the cell by 48px, so less is needed.
+                      // `&&&` matches `&&:first-of-type`'s specificity and comes later.
+                      ...(column.id === 'name' ? { '&&&': { pl: selection ? 7.5 : 10.5 } } : {}),
+                    }}
                   >
-                    {column.sortable && column.sortKey && !reorderActive && sortableColumns ? (
+                    {column.sortable && column.sortKey && sortableColumns ? (
                       <TableSortLabel
                         active={sort.orderBy === column.sortKey}
                         direction={sort.orderBy === column.sortKey ? sort.order : 'asc'}

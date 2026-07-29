@@ -17,27 +17,29 @@ export function WorkspaceAvatars({ spaces }: { spaces: GetSpaceResponse[] }) {
   const overflow = spaces.slice(MAX_VISIBLE_WORKSPACES)
 
   return (
-    <div data-testid="account-workspaces" className="flex -space-x-1.5">
-      {visible.map((space) => (
-        <Tooltip key={space.uuid} delay={TOOLTIP_DELAY_MS}>
-          <TooltipTrigger render={<span className="ring-background inline-flex rounded-full ring-2" />}>
-            <InitialsAvatar name={space.name} size="small" rounded />
-          </TooltipTrigger>
-          <TooltipContent>{space.name}</TooltipContent>
-        </Tooltip>
-      ))}
-      {overflow.length > 0 && (
-        <Tooltip delay={TOOLTIP_DELAY_MS}>
-          <TooltipTrigger
-            render={
-              <span className="bg-muted text-muted-foreground ring-background flex size-6 items-center justify-center rounded-full text-[10px] ring-2" />
-            }
-          >
-            +{overflow.length}
-          </TooltipTrigger>
-          <TooltipContent>{overflow.map((space) => space.name).join(', ')}</TooltipContent>
-        </Tooltip>
-      )}
+    <div data-testid="account-workspaces" className="bg-muted inline-flex items-center rounded-full p-0.5">
+      <div className="flex -space-x-2">
+        {visible.map((space) => (
+          <Tooltip key={space.uuid} delay={TOOLTIP_DELAY_MS}>
+            <TooltipTrigger render={<span className="inline-flex rounded-full" />}>
+              <InitialsAvatar name={space.name} size="small" rounded />
+            </TooltipTrigger>
+            <TooltipContent>{space.name}</TooltipContent>
+          </Tooltip>
+        ))}
+        {overflow.length > 0 && (
+          <Tooltip delay={TOOLTIP_DELAY_MS}>
+            <TooltipTrigger
+              render={
+                <span className="bg-muted text-foreground flex size-6 items-center justify-center rounded-full text-xs font-semibold" />
+              }
+            >
+              +{overflow.length}
+            </TooltipTrigger>
+            <TooltipContent>{overflow.map((space) => space.name).join(', ')}</TooltipContent>
+          </Tooltip>
+        )}
+      </div>
     </div>
   )
 }

@@ -25,19 +25,21 @@
   background-color: var(--muted);
 }
 .body :global(.MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root:first-of-type) {
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
+  border-top-left-radius: 16px;
+  border-bottom-left-radius: 16px;
 }
 .body :global(.MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root:last-of-type) {
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
+  border-top-right-radius: 16px;
+  border-bottom-right-radius: 16px;
 }
 
 /* Transparent borders + background-clip float the hover pill clear of the separators. Must live here:
-   the base theme forces cell borderBottom to `none` at a specificity per-cell sx can't beat. */
+   the base theme forces cell borderBottom to `none` at a specificity per-cell sx can't beat. Asymmetric
+   5/8 split: the 1px separator sits inside the bottom border and paints ~1px above the row's edge, so
+   5-top / 8-bottom lands the pill visually centred with ~6px clearance each side of the line. */
 .body :global(.MuiTableBody-root .MuiTableCell-root) {
-  border-top: 6px solid transparent;
-  border-bottom: 6px solid transparent;
+  border-top: 5px solid transparent;
+  border-bottom: 8px solid transparent;
   background-clip: padding-box;
 }
 
