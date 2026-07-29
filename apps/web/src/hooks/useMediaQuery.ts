@@ -1,4 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useSyncExternalStore } from 'react'
+
+/** Server render (and hydration) cannot know the viewport, so it assumes the query does not match. */
+const getServerSnapshot = () => false
 
 /**
  * Subscribe to a CSS media query and return whether it currently matches.
@@ -6,19 +9,24 @@ import { useEffect, useState } from 'react'
  * Drop-in replacement for MUI's `useMediaQuery` for the cases where a specific
  * pixel breakpoint is needed (e.g. the legacy `md` = 899.95px breakpoint that
  * `useIsMobile`'s 768px threshold does not cover).
+ *
+ * Reads the match through `useSyncExternalStore`, like MUI does, so components mounted after
+ * hydration get the right value on their first render instead of painting the desktop layout and
+ * snapping to mobile one frame later.
  */
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState<boolean>(false)
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      const mql = window.matchMedia?.(query)
+      mql?.addEventListener('change', onStoreChange)
+      return () => mql?.removeEventListener('change', onStoreChange)
+    },
+    [query],
+  )
 
-  useEffect(() => {
-    const mql = window.matchMedia(query)
-    const onChange = () => setMatches(mql.matches)
-    onChange()
-    mql.addEventListener('change', onChange)
-    return () => mql.removeEventListener('change', onChange)
-  }, [query])
+  const getSnapshot = useCallback(() => window.matchMedia?.(query).matches === true, [query])
 
-  return matches
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 }
 
 /** Legacy MUI `theme.breakpoints.down('md')` === `(max-width:899.95px)`. */
