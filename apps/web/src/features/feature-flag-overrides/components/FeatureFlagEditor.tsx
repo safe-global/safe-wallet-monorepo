@@ -58,8 +58,8 @@ export const FeatureFlagEditor = (): ReactElement => {
           <p className="py-8 text-center text-sm text-muted-foreground">No feature flags match your search.</p>
         ) : (
           <>
-            <FeatureFlagSection title="Local overrides" rows={filteredOverridden} />
-            <FeatureFlagSection title="All feature flags" rows={filteredRest} />
+            <FeatureFlagSection title="Local overrides" rows={filteredOverridden} valueLabel="Local value" />
+            <FeatureFlagSection title="All feature flags" rows={filteredRest} valueLabel="Remote value" />
           </>
         )}
       </div>

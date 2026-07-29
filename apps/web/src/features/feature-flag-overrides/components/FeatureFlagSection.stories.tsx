@@ -72,6 +72,7 @@ export const Overridden: Story = {
   args: {
     title: 'Overridden',
     rows: overriddenRows,
+    valueLabel: 'Local value',
   },
 }
 
@@ -79,6 +80,7 @@ export const AllFlags: Story = {
   args: {
     title: 'All flags',
     rows: restRows,
+    valueLabel: 'Remote value',
   },
 }
 
@@ -86,5 +88,6 @@ export const Empty: Story = {
   args: {
     title: 'Overridden',
     rows: [],
+    valueLabel: 'Local value',
   },
 }

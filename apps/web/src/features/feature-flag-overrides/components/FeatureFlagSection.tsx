@@ -8,9 +8,15 @@ import type { FeatureFlagRowData } from '../hooks/useFeatureFlagEditorData'
 export const FeatureFlagSection = ({
   title,
   rows,
+  /**
+   * Header for the switch column. Overridden rows show a local value; rows without an override
+   * show what the config service delivered, so the two sections label it differently.
+   */
+  valueLabel,
 }: {
   title: string
   rows: FeatureFlagRowData[]
+  valueLabel: string
 }): ReactElement | null => {
   if (rows.length === 0) return null
   return (
@@ -29,7 +35,7 @@ export const FeatureFlagSection = ({
         >
           <span>Feature flag</span>
           <span>Config service</span>
-          <span>Local value</span>
+          <span>{valueLabel}</span>
         </div>
 
         {rows.map((row) => (
