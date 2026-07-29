@@ -13,7 +13,7 @@ const AccountsSearch = ({ setSearchQuery }: AccountsSearchProps) => {
 
   return (
     <div className="w-full">
-      <InputGroup className="border-border bg-card px-3 rounded-lg">
+      <InputGroup className="border-border bg-card px-3 rounded-md">
         <InputGroupAddon align="inline-start">
           <Search />
         </InputGroupAddon>

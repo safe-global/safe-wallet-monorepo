@@ -1,5 +1,5 @@
 import { type MouseEvent, useState } from 'react'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
+import { EllipsisVertical } from 'lucide-react'
 import { SvgIcon } from '@mui/material'
 import IconButton from '@mui/material/IconButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
@@ -53,8 +53,9 @@ const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
         size="small"
         onClick={handleOpenContextMenu}
         data-testid="space-card-context-menu-button"
+        sx={{ color: 'var(--muted-foreground)' }}
       >
-        <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
+        <EllipsisVertical size={20} />
       </IconButton>
       <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
         <MenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)}>

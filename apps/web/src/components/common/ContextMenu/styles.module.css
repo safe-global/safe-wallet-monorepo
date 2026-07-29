@@ -19,10 +19,6 @@
   border-radius: 8px !important;
 }
 
-.menu :global .MuiMenuItem-root:hover {
-  background-color: var(--color-secondary-background);
-}
-
 .menu :global .MuiListItemIcon-root {
   min-width: 26px;
 }
