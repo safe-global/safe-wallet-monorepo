@@ -68,6 +68,7 @@ function PopoverHeaderAction({
             onClick={onManageClick}
             className="ml-2"
             data-testid="manage-nested-safes-button"
+            aria-label="Manage nested Safes"
           >
             <SettingsIcon className="size-4" />
           </Button>

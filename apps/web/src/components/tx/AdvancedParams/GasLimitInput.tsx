@@ -46,7 +46,13 @@ const GasLimitInput = ({ recommendedGasLimit }: { recommendedGasLimit?: string }
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <Button variant="ghost" size="icon-sm" onClick={onResetGasLimit} className="text-primary">
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={onResetGasLimit}
+                    className="text-primary"
+                    aria-label="Reset to recommended gas limit"
+                  >
                     <RotateCcw className="size-4" />
                   </Button>
                 }

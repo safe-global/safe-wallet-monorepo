@@ -77,7 +77,13 @@ function AccountItemPinButton(props: AccountItemPinButtonProps) {
     <Tooltip>
       <TooltipTrigger
         render={
-          <Button data-testid="bookmark-icon" variant="ghost" size="icon" onClick={handleClick}>
+          <Button
+            data-testid="bookmark-icon"
+            variant="ghost"
+            size="icon"
+            onClick={handleClick}
+            aria-label={isPinned ? 'Remove from my accounts' : 'Add to my accounts'}
+          >
             <PinIcon
               className={cn('size-4', isPinned ? 'fill-current text-primary' : 'text-[var(--color-border-main)]')}
             />

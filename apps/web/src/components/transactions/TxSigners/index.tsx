@@ -53,7 +53,7 @@ const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
       <Tooltip>
         <TooltipTrigger
           render={
-            <Button variant="ghost" size="icon-sm" className="text-inherit" disabled>
+            <Button variant="ghost" size="icon-sm" className="text-inherit" disabled aria-label="Copy transaction hash">
               <HashIcon className="size-5" />
             </Button>
           }
@@ -73,6 +73,9 @@ const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
             size="icon-sm"
             className="text-inherit"
             onClick={handleCopy}
+            // MUI's Tooltip put its `title` on the child as an aria-label; Base UI's wires no ARIA at
+            // all, so an icon-only trigger needs its own name or it announces as just "button".
+            aria-label="Copy transaction hash"
           >
             <HashIcon className="size-5" />
           </Button>
@@ -98,7 +101,13 @@ const TxAuditLogActions = ({
       <Tooltip>
         <TooltipTrigger
           render={
-            <Button data-testid="share-tx-link-btn" variant="ghost" size="icon-sm" className="text-inherit">
+            <Button
+              data-testid="share-tx-link-btn"
+              variant="ghost"
+              size="icon-sm"
+              className="text-inherit"
+              aria-label="Copy transaction link"
+            >
               <Copy className="size-5" />
             </Button>
           }
@@ -113,7 +122,7 @@ const TxAuditLogActions = ({
         <TooltipTrigger
           render={
             <span>
-              <Button variant="ghost" size="icon-sm" disabled>
+              <Button variant="ghost" size="icon-sm" disabled aria-label="View on block explorer">
                 <ExplorerFallbackIcon className="size-5" />
               </Button>
             </span>
