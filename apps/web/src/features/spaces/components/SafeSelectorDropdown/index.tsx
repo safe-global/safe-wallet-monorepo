@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { type MouseEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Select, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -95,6 +95,7 @@ function SafeSelectorDropdown({
   useEffect(() => setMounted(true), [])
 
   const variants = getSafeSelectorClassVariants(isSingleSafe)
+  const isPopupOpen = variants.canOpen && !isDisabled && dropdownOpen
   const safeSelectValue = selectedItemId ?? selectedItem?.id
   const safeItemSelect = onItemSelect ?? (() => {})
 
@@ -122,6 +123,25 @@ function SafeSelectorDropdown({
     handleOpenChange(open)
   }
 
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const wasOpenOnPressRef = useRef(false)
+
+  // The display layer sits on top of the full-bleed trigger and its tooltip triggers must keep pointer
+  // events (otherwise they never open on hover), so a press on the safe name or the balance lands on a
+  // <span> the trigger behind it never sees. Forward it — unless it hit one of the row's own controls,
+  // or base-ui already closed the popup on this same pointerdown, in which case forwarding reopens it.
+  // Capture phase is required: when the popup is open base-ui dismisses it mid-pointerdown, so by the
+  // bubble phase the state already reads closed and the guard below would let the click reopen it.
+  const rememberOpenStateOnPress = () => {
+    wasOpenOnPressRef.current = isPopupOpen
+  }
+
+  const forwardPressToTrigger = (event: MouseEvent<HTMLDivElement>) => {
+    if (wasOpenOnPressRef.current || isDisabled || !variants.canOpen) return
+    if (event.target instanceof Element && event.target.closest('a, button, [role="button"]')) return
+    triggerRef.current?.click()
+  }
+
   if (!mounted || !triggerItem) {
     if (isError && mounted) return <InlineRetryError message="Failed to load Safe data" onRetry={onRetry} />
     return <SafeSelectorDropdownSkeleton />
@@ -136,7 +156,7 @@ function SafeSelectorDropdown({
     <Select
       value={safeSelectValue}
       onValueChange={handleSafeChange}
-      open={variants.canOpen && !isDisabled ? dropdownOpen : false}
+      open={isPopupOpen}
       onOpenChange={isDisabled ? undefined : handleOpenChangeWithReset}
       // Deliberately not disabled: a disabled <button> blocks the inline address actions (copy,
       // explorer, env hint). Safe switching is prevented by the forced-closed `open` above instead.
@@ -153,6 +173,7 @@ function SafeSelectorDropdown({
         {/* The trigger is an invisible full-bleed overlay BEHIND the display content, so the inline
             copy/explorer actions render outside the trigger <button> (no interactive nesting). */}
         <SelectTrigger
+          ref={triggerRef}
           className={cn(
             // justify-end: the SelectValue is sr-only (out of flow), so the icon is the only flex
             // item and justify-between would park it at the left, behind the avatar.
@@ -168,7 +189,11 @@ function SafeSelectorDropdown({
         >
           <SelectValue className="sr-only">{triggerItem.address}</SelectValue>
         </SelectTrigger>
-        <div className="relative z-10 flex h-full w-full pointer-events-none [&_[data-slot=tooltip-trigger]]:pointer-events-auto [&_[role=button]]:pointer-events-auto [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
+        <div
+          onPointerDownCapture={rememberOpenStateOnPress}
+          onClick={forwardPressToTrigger}
+          className="relative z-10 flex h-full w-full pointer-events-none [&_[data-slot=tooltip-trigger]]:pointer-events-auto [&_[role=button]]:pointer-events-auto [&_a]:pointer-events-auto [&_button]:pointer-events-auto"
+        >
           <SafeSelectorTriggerContent
             selectedItem={triggerItem}
             selectedChainId={selectedChainId}

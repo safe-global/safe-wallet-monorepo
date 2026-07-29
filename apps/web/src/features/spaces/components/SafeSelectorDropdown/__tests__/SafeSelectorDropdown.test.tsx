@@ -1,4 +1,6 @@
 import React from 'react'
+import type * as ReactModule from 'react'
+import type * as ReactDomModule from 'react-dom'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/router'
@@ -8,6 +10,15 @@ import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import useChains from '@/hooks/useChains'
 import SafeSelectorDropdown from '../index'
 import type { SafeItemData } from '../types'
+
+/**
+ * base-ui dismisses an open Select popup part-way through the outside pointerdown, flushing the
+ * closed state before the event finishes bubbling (verified in a real browser: the trigger's
+ * aria-expanded reads `true` in the capture phase and `false` in the bubble phase of one press).
+ * The trigger-content mock replays that ordering so the delegation guard is exercised for real.
+ * `mock`-prefixed so babel-plugin-jest-hoist allows the jest.mock factories to reach it.
+ */
+const mockDismissOnPress: { current: (() => void) | null } = { current: null }
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
@@ -40,16 +51,41 @@ jest.mock('@/components/ui/tooltip', () => ({
   ),
 }))
 
-jest.mock('../components/SafeSelectorTriggerContent', () => ({
-  __esModule: true,
-  default: ({ selectedItem }: { selectedItem: { chains: Array<{ shortName: string }> } }) => (
-    <span data-testid="safe-selector-trigger-content" data-shortname={selectedItem.chains[0]?.shortName ?? ''}>
-      <a data-testid="safe-item-explorer-link" href="https://etherscan.io/address/0xabc">
-        View on explorer
-      </a>
-    </span>
-  ),
-}))
+jest.mock('../components/SafeSelectorTriggerContent', () => {
+  const { useEffect, useRef } = jest.requireActual<typeof ReactModule>('react')
+
+  const MockTriggerContent = ({ selectedItem }: { selectedItem: { chains: Array<{ shortName: string }> } }) => {
+    const inertRef = useRef<HTMLSpanElement>(null)
+
+    // A native listener, like base-ui's: it runs outside React's event batch, so its flushSync
+    // commits the closed state before React dispatches the bubble-phase handlers.
+    useEffect(() => {
+      const node = inertRef.current
+      if (!node) return
+      const dismiss = () => mockDismissOnPress.current?.()
+      node.addEventListener('pointerdown', dismiss)
+      return () => node.removeEventListener('pointerdown', dismiss)
+    }, [])
+
+    return (
+      <span data-testid="safe-selector-trigger-content" data-shortname={selectedItem.chains[0]?.shortName ?? ''}>
+        {/* Stands in for the tooltip-wrapped safe name and balance: display-only, pointer-events-auto */}
+        <span ref={inertRef} data-testid="inert-display-text">
+          Safe name
+        </span>
+        <a data-testid="safe-item-explorer-link" href="https://etherscan.io/address/0xabc">
+          View on explorer
+        </a>
+        <span role="button" data-testid="inline-copy-action">
+          copy
+        </span>
+      </span>
+    )
+  }
+  MockTriggerContent.displayName = 'SafeSelectorTriggerContent'
+
+  return { __esModule: true, default: MockTriggerContent }
+})
 
 jest.mock('../components/SafeDropdownContainer', () => ({
   __esModule: true,
@@ -62,6 +98,7 @@ jest.mock('../components/SafeDropdownContainer', () => ({
  * See SafeSelectorDropdown + SpaceSafeBar: selection is driven by the URL async.
  */
 jest.mock('@/components/ui/select', () => {
+  const { flushSync } = jest.requireActual<typeof ReactDomModule>('react-dom')
   const NEW_ID = '2:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
   const PREV_ID = '1:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 
@@ -76,42 +113,56 @@ jest.mock('@/components/ui/select', () => {
       children,
       value,
       onValueChange,
+      onOpenChange,
       disabled,
       open,
     }: {
       children?: React.ReactNode
       value?: string
       onValueChange?: (next: string | null, details: { reason: string; cancel: () => void }) => void
+      onOpenChange?: (open: boolean) => void
       disabled?: boolean
       open?: boolean
-    }) => (
-      <div
-        data-testid="mock-select-root"
-        data-mock-controlled-value={value}
-        data-mock-disabled={String(!!disabled)}
-        data-mock-open={String(!!open)}
-      >
-        <button
-          type="button"
-          data-testid="simulate-user-pick-new"
-          onClick={() => {
-            onValueChange?.(NEW_ID, itemPressDetails())
-          }}
+    }) => {
+      mockDismissOnPress.current = open && onOpenChange ? () => flushSync(() => onOpenChange(false)) : null
+      return (
+        <div
+          data-testid="mock-select-root"
+          data-mock-controlled-value={value}
+          data-mock-disabled={String(!!disabled)}
+          data-mock-open={String(!!open)}
         >
-          simulate user pick new
-        </button>
-        <button
-          type="button"
-          data-testid="simulate-base-ui-auto-reset"
-          onClick={() => {
-            onValueChange?.(PREV_ID, noneDetails())
-          }}
-        >
-          simulate base-ui auto-reset to initial value
-        </button>
-        {children}
-      </div>
-    ),
+          <button
+            type="button"
+            data-testid="simulate-user-pick-new"
+            onClick={() => {
+              onValueChange?.(NEW_ID, itemPressDetails())
+            }}
+          >
+            simulate user pick new
+          </button>
+          <button
+            type="button"
+            data-testid="simulate-base-ui-auto-reset"
+            onClick={() => {
+              onValueChange?.(PREV_ID, noneDetails())
+            }}
+          >
+            simulate base-ui auto-reset to initial value
+          </button>
+          <button
+            type="button"
+            data-testid="simulate-base-ui-open"
+            onClick={() => {
+              onOpenChange?.(true)
+            }}
+          >
+            simulate base-ui opening the popup
+          </button>
+          {children}
+        </div>
+      )
+    },
     SelectTrigger: ({
       children,
       iconWrapperClassName: _iconWrapperClassName,
@@ -370,6 +421,89 @@ describe('SafeSelectorDropdown', () => {
       await user.click(screen.getByTestId('simulate-base-ui-auto-reset'))
 
       expect(mockPush).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('click delegation from the display layer', () => {
+    const itemB = createItem({
+      id: '2:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+      name: 'Safe B',
+      address: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+      chains: [{ chainId: '2', chainName: 'Another', chainLogoUri: null, shortName: 'oeth' }],
+    })
+
+    const renderOpenable = () => {
+      const itemA = createItem()
+      render(<SafeSelectorDropdown items={[itemA, itemB]} selectedItemId={itemA.id} onItemSelect={jest.fn()} />)
+      const triggerClicks = jest.fn()
+      screen.getByTestId('open-safes-icon').addEventListener('click', triggerClicks)
+      return { triggerClicks }
+    }
+
+    it('forwards a click on inert trigger content to the select trigger', async () => {
+      const user = userEvent.setup()
+      const { triggerClicks } = renderOpenable()
+
+      await user.click(screen.getByTestId('inert-display-text'))
+
+      expect(triggerClicks).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not forward clicks that land on the row own controls', async () => {
+      const user = userEvent.setup()
+      const { triggerClicks } = renderOpenable()
+
+      await user.click(screen.getByTestId('inline-copy-action'))
+      await user.click(screen.getByTestId('safe-item-explorer-link'))
+
+      expect(triggerClicks).not.toHaveBeenCalled()
+    })
+
+    it('does not re-open the popup when the press closed it', async () => {
+      const user = userEvent.setup()
+      const { triggerClicks } = renderOpenable()
+
+      await user.click(screen.getByTestId('simulate-base-ui-open'))
+      expect(screen.getByTestId('mock-select-root').getAttribute('data-mock-open')).toBe('true')
+
+      // base-ui dismisses the popup mid-pointerdown; forwarding the trailing click would re-open it.
+      await user.click(screen.getByTestId('inert-display-text'))
+
+      expect(triggerClicks).not.toHaveBeenCalled()
+      expect(screen.getByTestId('mock-select-root').getAttribute('data-mock-open')).toBe('false')
+    })
+
+    it('does not forward clicks while the selector is disabled', async () => {
+      const user = userEvent.setup()
+      const itemA = createItem()
+      const value: TxModalContextType = {
+        txFlow: <div data-testid="active-tx-flow" />,
+        setTxFlow: jest.fn(),
+        setFullWidth: jest.fn(),
+      }
+      render(
+        <TxModalContext.Provider value={value}>
+          <SafeSelectorDropdown items={[itemA, itemB]} selectedItemId={itemA.id} onItemSelect={jest.fn()} />
+        </TxModalContext.Provider>,
+      )
+      const triggerClicks = jest.fn()
+      screen.getByTestId('open-safes-icon').addEventListener('click', triggerClicks)
+
+      await user.click(screen.getByTestId('inert-display-text'))
+
+      expect(triggerClicks).not.toHaveBeenCalled()
+    })
+
+    it('does not forward clicks when only one safe makes the row inert', async () => {
+      const user = userEvent.setup()
+      const itemA = createItem()
+      render(<SafeSelectorDropdown items={[itemA]} selectedItemId={itemA.id} onItemSelect={jest.fn()} />)
+      const triggerClicks = jest.fn()
+      screen.getByTestId('open-safes-icon').addEventListener('click', triggerClicks)
+
+      await user.click(screen.getByTestId('inert-display-text'))
+
+      expect(triggerClicks).not.toHaveBeenCalled()
     })
   })
 
