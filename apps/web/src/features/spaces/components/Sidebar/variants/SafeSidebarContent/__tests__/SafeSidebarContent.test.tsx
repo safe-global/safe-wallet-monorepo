@@ -382,6 +382,7 @@ describe('SafeSidebarContent', () => {
 
       const { developerGroup } = mockSafeSidebarVariant.mock.calls.at(-1)![0] as SafeSidebarVariantProps
       const featureFlagsItem = developerGroup?.items.find((item) => item.id === 'feature-flags')
+      expect(featureFlagsItem).toBeDefined()
       expect(featureFlagsItem?.badge).toBe(3)
     })
 
@@ -392,6 +393,7 @@ describe('SafeSidebarContent', () => {
 
       const { developerGroup } = mockSafeSidebarVariant.mock.calls.at(-1)![0] as SafeSidebarVariantProps
       const featureFlagsItem = developerGroup?.items.find((item) => item.id === 'feature-flags')
+      expect(featureFlagsItem).toBeDefined()
       expect(featureFlagsItem?.badge).toBeUndefined()
     })
 
