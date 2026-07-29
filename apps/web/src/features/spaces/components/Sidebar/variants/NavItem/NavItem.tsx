@@ -80,7 +80,10 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
     }
 
     trackEvent({ ...OVERVIEW_EVENTS.SIDEBAR_CLICKED }, { [MixpanelEventParams.SIDEBAR_ELEMENT]: item.label })
-    if (isMobile || isTablet) {
+
+    // The drawer only closes for navigation, so the destination isn't hidden behind it. Action
+    // items open UI mounted inside the drawer's own subtree, which dismissing would unmount.
+    if (!item.onSelect && (isMobile || isTablet)) {
       setOpenMobile(false)
     }
   }

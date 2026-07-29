@@ -443,5 +443,23 @@ describe('NavItem', () => {
 
       expect(screen.getByLabelText('3 Feature flags notifications')).toHaveTextContent('3')
     })
+
+    it('does not close the mobile drawer, which would unmount the UI it opens', () => {
+      mockSidebarState.isMobile = true
+      render(<NavItem item={{ ...actionItem, onSelect: jest.fn() }} />)
+
+      fireEvent.click(screen.getByTestId('sidebar-list-item'))
+
+      expect(mockSetOpenMobile).not.toHaveBeenCalled()
+    })
+
+    it('does not close the drawer on tablet either', () => {
+      mockSidebarState.isTablet = true
+      render(<NavItem item={{ ...actionItem, onSelect: jest.fn() }} />)
+
+      fireEvent.click(screen.getByTestId('sidebar-list-item'))
+
+      expect(mockSetOpenMobile).not.toHaveBeenCalled()
+    })
   })
 })
