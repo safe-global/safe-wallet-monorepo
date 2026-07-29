@@ -7,7 +7,7 @@ import UpsertProposer from './UpsertProposer'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useDelegatorSelection } from '../hooks/useDelegatorSelection'
 import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
-import { useDelegatesPostDelegateV2Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
+import { useDelegatesPostDelegateV3Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
 
 jest.mock('@/hooks/wallets/useWallet')
@@ -16,7 +16,7 @@ jest.mock('@/services/tx/tx-sender/sdk')
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
   ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/delegates'),
   useDelegatesPostDelegateV1Mutation: jest.fn(),
-  useDelegatesPostDelegateV2Mutation: jest.fn(),
+  useDelegatesPostDelegateV3Mutation: jest.fn(),
 }))
 jest.mock('@/components/common/CheckWallet', () => ({
   __esModule: true,
@@ -55,11 +55,11 @@ describe('UpsertProposer signing logic', () => {
     const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>
     const mockUseDelegatorSelection = useDelegatorSelection as jest.MockedFunction<typeof useDelegatorSelection>
     const mockGetSigner = getAssertedChainSigner as jest.MockedFunction<typeof getAssertedChainSigner>
-    const mockUseAddDelegateV2 = useDelegatesPostDelegateV2Mutation as jest.MockedFunction<
-      typeof useDelegatesPostDelegateV2Mutation
+    const mockUseAddDelegateV3 = useDelegatesPostDelegateV3Mutation as jest.MockedFunction<
+      typeof useDelegatesPostDelegateV3Mutation
     >
 
-    const addDelegateV2 = jest.fn().mockReturnValue({ unwrap: () => Promise.resolve() })
+    const addDelegateV3 = jest.fn().mockReturnValue({ unwrap: () => Promise.resolve() })
 
     beforeEach(() => {
       mockUseWallet.mockReturnValue({
@@ -84,7 +84,7 @@ describe('UpsertProposer signing logic', () => {
       mockGetSigner.mockResolvedValue({} as Awaited<ReturnType<typeof getAssertedChainSigner>>)
       jest.spyOn(proposerUtils, 'signProposerTypedData').mockResolvedValue('0xsignature')
 
-      mockUseAddDelegateV2.mockReturnValue([addDelegateV2, {} as never])
+      mockUseAddDelegateV3.mockReturnValue([addDelegateV3, {} as never])
       useDelegatesPostDelegateV1Mutation.mockReturnValue([jest.fn(), {}])
     })
 
@@ -105,7 +105,7 @@ describe('UpsertProposer signing logic', () => {
       })
 
       await waitFor(() =>
-        expect(addDelegateV2).toHaveBeenCalledWith(
+        expect(addDelegateV3).toHaveBeenCalledWith(
           expect.objectContaining({
             createDelegateDto: expect.objectContaining({ label: 'Foo-Bar' }),
           }),
@@ -129,8 +129,8 @@ describe('UpsertProposer signing logic', () => {
         fireEvent.click(getByTestId('submit-proposer-btn'))
       })
 
-      await waitFor(() => expect(addDelegateV2).toHaveBeenCalled())
-      const label = addDelegateV2.mock.calls[0][0].createDelegateDto.label
+      await waitFor(() => expect(addDelegateV3).toHaveBeenCalled())
+      const label = addDelegateV3.mock.calls[0][0].createDelegateDto.label
       expect(label).toBe(label.trim())
     })
   })
