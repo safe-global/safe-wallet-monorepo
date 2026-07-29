@@ -17,8 +17,7 @@ import type {
   SidebarVariantContentProps,
   ResolvedSidebarActionGroup,
 } from '../../types'
-// eslint-disable-next-line no-restricted-imports -- the loader IS the lazy boundary; going through the barrel (or useLoadFeature) would pull the dev-only editor graph into the production bundle, which importGraph.test.ts guards
-import { FeatureFlagEditorDialogLoader } from '@/features/feature-flags/components/FeatureFlagEditorDialogLoader'
+import { FeatureFlagEditorDialogLoader } from '@/features/feature-flags/FeatureFlagEditorDialogLoader'
 import { getQuerySpaceId } from '../../utils'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { useAppSelector } from '@/store'

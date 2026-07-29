@@ -49,7 +49,7 @@ jest.mock('../../../hooks/useResolvedSidebarNav', () => ({
   useResolvedSidebarNav: jest.fn((main, setup, options) => mockUseResolvedSidebarNav(main, setup, options)),
 }))
 
-jest.mock('@/features/feature-flags/components/FeatureFlagEditorDialogLoader', () => ({
+jest.mock('@/features/feature-flags/FeatureFlagEditorDialogLoader', () => ({
   FeatureFlagEditorDialogLoader: ({ open }: { open: boolean }) =>
     open ? <div data-testid="feature-flag-editor-dialog" /> : null,
 }))

@@ -2,7 +2,7 @@
  * Verifies that the feature-flag editor UI is dead-code-eliminated from a
  * production build. The editor is only reachable via the guarded dynamic
  * import in
- * `apps/web/src/features/feature-flags/components/FeatureFlagEditorDialogLoader.tsx`,
+ * `apps/web/src/features/feature-flags/FeatureFlagEditorDialogLoader.tsx`,
  * so it should never end up in an emitted production chunk.
  *
  * This test runs a full `next build`, which is slow and memory-hungry, so it

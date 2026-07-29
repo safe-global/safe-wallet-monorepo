@@ -18,7 +18,7 @@ describe('feature-flag editor static import graph', () => {
     expect(specifiers.length).toBeGreaterThan(0)
 
     expect(specifiers.filter((s) => s.includes('features/feature-flags')).sort()).toEqual([
-      '@/features/feature-flags/components/FeatureFlagEditorDialogLoader',
+      '@/features/feature-flags/FeatureFlagEditorDialogLoader',
       '@/features/feature-flags/store',
     ])
   })
