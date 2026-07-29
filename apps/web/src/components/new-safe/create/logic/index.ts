@@ -9,7 +9,7 @@ import { getReadOnlyProxyFactoryContract } from '@/services/contracts/safeContra
 import type { UrlObject } from 'url'
 import { AppRoutes } from '@/config/routes'
 import { SAFE_APPS_EVENTS, trackEvent } from '@/services/analytics'
-import Safe, { predictSafeAddress, SafeProvider } from '@safe-global/protocol-kit'
+import Safe from '@safe-global/protocol-kit'
 import type { PredictedSafeProps } from '@safe-global/protocol-kit'
 
 import { backOff } from 'exponential-backoff'
@@ -87,24 +87,6 @@ export const createNewSafe = async (
     txResponse = await activateReplayedSafe(chain, undeployedSafeProps, createWeb3(provider), options)
   }
   callback(txResponse.hash)
-}
-
-/**
- * Compute the new counterfactual Safe address before it is actually created
- */
-export const computeNewSafeAddress = async (
-  provider: Eip1193Provider | string,
-  props: PredictedSafeProps,
-  chain: Chain,
-): Promise<string> => {
-  const safeProvider = new SafeProvider({ provider })
-
-  return predictSafeAddress({
-    safeProvider,
-    chainId: BigInt(chain.chainId),
-    safeAccountConfig: props.safeAccountConfig,
-    safeDeploymentConfig: props.safeDeploymentConfig,
-  })
 }
 
 export const encodeSafeSetupCall = (safeAccountConfig: ReplayedSafeProps['safeAccountConfig']) => {

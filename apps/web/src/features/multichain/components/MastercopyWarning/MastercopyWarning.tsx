@@ -45,6 +45,17 @@ export const MastercopyWarning = ({ variant = 'dashboard' }: MastercopyWarningPr
     )
   }
 
+  if (action === 'redeploy') {
+    return (
+      <ActionCard
+        severity="warning"
+        title={`This Safe can't be upgraded to ${latestVersion} on this network `}
+        content="zkSync Safes created before the EVM upgrade can't move to the new contracts in place. To use the latest version, create a new Safe and transfer your assets to it."
+        testId="redeploy-mastercopy-warning"
+      />
+    )
+  }
+
   if (action === 'cli') {
     return (
       <ActionCard
