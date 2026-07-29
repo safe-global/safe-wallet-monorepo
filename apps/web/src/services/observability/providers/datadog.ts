@@ -76,18 +76,21 @@ const NON_USER_IMPACTING_SOURCES = new Set(['console', 'report'])
  * URL (the `@resource.url_path_group` facet is computed by Datadog and is not
  * available client-side) plus the status code.
  */
-const EXPECTED_RESOURCE_FAILURES: { urlIncludes: string; statuses: Set<number> }[] = [
-  // CGW returns 404 when the current user is not targeted for an outreach —
-  // polled on nearly every Safe load, so this dominates RUM resource volume.
-  { urlIncludes: '/v1/targeted-messaging/outreaches/', statuses: new Set([404]) },
+const EXPECTED_RESOURCE_FAILURES: { urlPattern: RegExp; statuses: Set<number> }[] = [
+  // CGW returns 404 from the "is this user targeted?" check when no outreach
+  // exists for the Safe — polled on nearly every Safe load, so this dominates
+  // RUM resource volume. Scoped to the exact outreaches/chains/safes route so
+  // sibling operations (e.g. /signers/{address}/submissions) keep reporting 404.
+  {
+    urlPattern: /\/v1\/targeted-messaging\/outreaches\/[^/]+\/chains\/[^/]+\/safes\/[^/?#]+/,
+    statuses: new Set([404]),
+  },
 ]
 
 const isExpectedResourceFailure = (event: RumResourceEvent): boolean => {
   const { url, status_code: status } = event.resource ?? {}
   if (!url || status === undefined) return false
-  return EXPECTED_RESOURCE_FAILURES.some(
-    ({ urlIncludes, statuses }) => url.includes(urlIncludes) && statuses.has(status),
-  )
+  return EXPECTED_RESOURCE_FAILURES.some(({ urlPattern, statuses }) => urlPattern.test(url) && statuses.has(status))
 }
 
 /**
