@@ -16,6 +16,7 @@ enum ErrorCodes {
   _107 = '107: Error connecting to the wallet',
   _108 = '108: Error disconnecting the wallet',
   _109 = '109: Error signing out',
+  _110 = '110: Failed to copy to clipboard',
 
   _200 = '200: Tenderly simulation failed',
   _201 = '201: Blockaid scan failed',
