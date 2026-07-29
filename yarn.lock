@@ -13757,6 +13757,8 @@ __metadata:
     "@cowprotocol/app-data": "npm:^3.1.0"
     "@eslint/js": "npm:^9.18.0"
     "@faker-js/faker": "npm:^9.0.3"
+    "@noble/curves": "npm:1.9.7"
+    "@noble/hashes": "npm:1.8.0"
     "@testing-library/react": "npm:^16.3.0"
     "@types/jest": "npm:^29.5.14"
     date-fns: "npm:^4.1.0"
