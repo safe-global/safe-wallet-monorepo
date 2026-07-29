@@ -1,7 +1,7 @@
 import { renderHook } from '@/tests/test-utils'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { applyFeatureOverrides, useHasFeature } from './useChains'
+import useChains, { applyFeatureOverrides, useHasFeature } from './useChains'
 import * as store from '@/store'
 import * as gateway from '@safe-global/store/gateway'
 import * as useChainIdModule from './useChainId'
@@ -80,5 +80,42 @@ describe('useHasFeature with overrides', () => {
     jest.spyOn(store, 'useAppSelector').mockReturnValue({ [FEATURES.EARN]: false })
     const { result } = renderHook(() => useHasFeature(FEATURES.EARN))
     expect(result.current).toBe(false)
+  })
+})
+
+// The editor's alert promises "every override is global: it applies to all chains, whatever
+// per-chain scope the config service reports". These pin that claim: one override, chains that
+// disagree with each other about the flag, and a uniform result either way.
+describe('overrides are global across chains', () => {
+  const chainWith = (chainId: string, features: string[]) => ({ chainId, features }) as unknown as Chain
+
+  const mockChains = (chains: Chain[]) => {
+    const ids = chains.map((c) => (c as unknown as { chainId: string }).chainId)
+    jest.spyOn(gateway, 'useGetChainsConfigV2Query').mockReturnValue({
+      data: { ids, entities: Object.fromEntries(ids.map((id, i) => [id, chains[i]])) },
+    } as unknown as ReturnType<typeof gateway.useGetChainsConfigV2Query>)
+  }
+
+  afterEach(() => jest.restoreAllMocks())
+
+  it('forces a flag on for every chain, including ones the config service excluded', () => {
+    mockChains([chainWith('1', [FEATURES.EARN]), chainWith('137', []), chainWith('10', [FEATURES.BRIDGE])])
+    jest.spyOn(store, 'useAppSelector').mockReturnValue({ [FEATURES.EARN]: true })
+
+    const { result } = renderHook(() => useChains())
+
+    expect(result.current.configs).toHaveLength(3)
+    expect(result.current.configs.every((chain) => chain.features.includes(FEATURES.EARN))).toBe(true)
+  })
+
+  it('forces a flag off for every chain, including ones the config service enabled', () => {
+    mockChains([chainWith('1', [FEATURES.EARN]), chainWith('137', [FEATURES.EARN, FEATURES.BRIDGE])])
+    jest.spyOn(store, 'useAppSelector').mockReturnValue({ [FEATURES.EARN]: false })
+
+    const { result } = renderHook(() => useChains())
+
+    expect(result.current.configs.some((chain) => chain.features.includes(FEATURES.EARN))).toBe(false)
+    // Untouched flags survive per chain.
+    expect(result.current.configs[1].features).toContain(FEATURES.BRIDGE)
   })
 })

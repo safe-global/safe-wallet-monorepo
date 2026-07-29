@@ -36,7 +36,8 @@ export const FeatureFlagEditor = (): ReactElement => {
         <AlertTitle className="font-bold">Development tool</AlertTitle>
         <AlertDescription className="dark:text-current">
           These are local feature-flag overrides — they live only in this browser and never affect production, the
-          config service, or other users. Available in dev &amp; staging builds only.
+          config service, or other users. Every override is global: it applies to all chains, whatever per-chain scope
+          the config service reports below. Available in dev &amp; staging builds only.
         </AlertDescription>
       </Alert>
 
