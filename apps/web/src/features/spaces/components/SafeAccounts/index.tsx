@@ -124,7 +124,7 @@ const SpaceSafeAccounts = () => {
           No Safe accounts match your search
         </Typography>
       ) : (
-        <>
+        <div className="flex flex-col gap-4">
           {similarAddresses.size > 0 && <SimilarAddressAlert />}
           <SafeAccountsTable
             items={visibleSafes}
@@ -140,7 +140,7 @@ const SpaceSafeAccounts = () => {
             // only the filtered subset.
             reorder={!debouncedSearchQuery && orderScope ? { onReorder: saveManualOrder } : undefined}
           />
-        </>
+        </div>
       )}
     </>
   )

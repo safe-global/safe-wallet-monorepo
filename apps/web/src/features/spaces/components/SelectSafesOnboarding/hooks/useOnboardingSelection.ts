@@ -11,16 +11,16 @@ interface Args {
   items: AllSafeItems
   control: Control<AddAccountsFormValues>
   setValue: UseFormSetValue<AddAccountsFormValues>
-  /** Lowercased owned addresses flagged as similar — selecting one requires confirmation. */
-  flaggedOwnedAddresses: Set<string>
+  /** Lowercased addresses flagged as look-alikes — selecting one requires confirmation. */
+  flaggedAddresses: Set<string>
 }
 
 /**
  * Bridges the accounts table's leaf-key selection model to the onboarding form's
  * `selectedSafes` record, reconciling multi-chain parent keys, and gates selection of
- * address-poisoning-flagged owned safes behind a confirmation dialog.
+ * address-poisoning-flagged safes behind a confirmation dialog.
  */
-const useOnboardingSelection = ({ items, control, setValue, flaggedOwnedAddresses }: Args) => {
+const useOnboardingSelection = ({ items, control, setValue, flaggedAddresses }: Args) => {
   const selectedSafes = useWatch({ control, name: 'selectedSafes' }) ?? {}
   const [pendingConfirmation, setPendingConfirmation] = useState<AccountLine | null>(null)
 
@@ -33,8 +33,8 @@ const useOnboardingSelection = ({ items, control, setValue, flaggedOwnedAddresse
     applySafeSelectionToggle(setValue, items, selectedSafes, line, nextChecked)
 
   const handleToggle = (line: AccountLine, nextChecked: boolean) => {
-    // Selecting a flagged owned safe needs explicit confirmation first (address-poisoning defence).
-    if (nextChecked && flaggedOwnedAddresses.has(line.address.toLowerCase())) {
+    // Selecting a flagged safe needs explicit confirmation first (address-poisoning defence).
+    if (nextChecked && flaggedAddresses.has(line.address.toLowerCase())) {
       setPendingConfirmation(line)
       return
     }

@@ -169,6 +169,18 @@ describe('useSafeWalletProvider', () => {
       expect(result.current?.getCreateCallTransaction).toBeDefined()
     })
 
+    it('threads the fetchOwnedSafes gate into useAllSafes', () => {
+      // Default keeps the owned enumeration on (unchanged behaviour for all other consumers).
+      renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'))
+      expect(mockedUseAllSafes).toHaveBeenCalledWith(true)
+
+      mockedUseAllSafes.mockClear()
+
+      // Gated off → useAllSafes skips the owned-safes enumeration.
+      renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000', false))
+      expect(mockedUseAllSafes).toHaveBeenCalledWith(false)
+    })
+
     it('should open signing window for off-chain messages', () => {
       jest.spyOn(router, 'useRouter').mockReturnValue({} as unknown as router.NextRouter)
       jest.spyOn(messages, 'isOffchainEIP1271Supported').mockReturnValue(true)
