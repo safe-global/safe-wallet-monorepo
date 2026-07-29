@@ -1,4 +1,4 @@
-import { Clock, Users } from 'lucide-react'
+import { Clock, User } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/utils/cn'
 
@@ -25,7 +25,7 @@ export function ThresholdBadge({
       data-testid="account-threshold"
       className="bg-muted text-muted-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
     >
-      <Users className="size-3.5" />
+      <User className="size-3.5" />
       {iconOnly ? null : `${threshold}/${owners}`}
     </span>
   )
