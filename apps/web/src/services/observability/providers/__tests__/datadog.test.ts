@@ -238,6 +238,44 @@ describe('DatadogProvider', () => {
       expect(filterRumEvent({ type: 'resource' } as any, {} as any)).toBe(true)
     })
 
+    const buildResourceEvent = (url: string, status_code: number): any => ({
+      type: 'resource',
+      resource: { url, status_code },
+    })
+
+    it('drops expected 404s from the targeted-messaging outreaches endpoint', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const event = buildResourceEvent(
+        'https://safe-client.safe.global/v1/targeted-messaging/outreaches/5/chains/1/safes/0xabc',
+        404,
+      )
+      expect(filterRumEvent(event, {} as any)).toBe(false)
+    })
+
+    it('keeps genuine failures (429, 500) on the same endpoint', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const base = 'https://safe-client.safe.global/v1/targeted-messaging/outreaches/5/chains/1/safes/0xabc'
+      expect(filterRumEvent(buildResourceEvent(base, 429), {} as any)).toBe(true)
+      expect(filterRumEvent(buildResourceEvent(base, 500), {} as any)).toBe(true)
+    })
+
+    it('keeps 404s from other endpoints', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const event = buildResourceEvent('https://safe-client.safe.global/v1/chains/1/safes/0xabc', 404)
+      expect(filterRumEvent(event, {} as any)).toBe(true)
+    })
+
+    it('keeps resource events missing url or status_code', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      expect(filterRumEvent({ type: 'resource', resource: {} } as any, {} as any)).toBe(true)
+      expect(
+        filterRumEvent(
+          { type: 'resource', resource: { url: '/v1/targeted-messaging/outreaches/x' } } as any,
+          {} as any,
+        ),
+      ).toBe(true)
+    })
+
     it('keeps application errors', async () => {
       const { filterRumEvent } = await import('../datadog')
       const event = buildErrorEvent({

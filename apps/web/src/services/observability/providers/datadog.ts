@@ -3,6 +3,7 @@ import {
   datadogRum,
   type RumEvent,
   type RumErrorEvent,
+  type RumResourceEvent,
   type RumEventDomainContext,
   type RumErrorEventDomainContext,
 } from '@datadog/browser-rum'
@@ -69,9 +70,32 @@ const isKnownNoise = (message: string | undefined): boolean => {
 const NON_USER_IMPACTING_SOURCES = new Set(['console', 'report'])
 
 /**
+ * Resource requests whose non-2xx responses are an expected part of normal
+ * operation, not failures. Dropped before dispatch to keep RUM ingestion and
+ * the Resource explorer free of predictable noise. Matched on the raw request
+ * URL (the `@resource.url_path_group` facet is computed by Datadog and is not
+ * available client-side) plus the status code.
+ */
+const EXPECTED_RESOURCE_FAILURES: { urlIncludes: string; statuses: Set<number> }[] = [
+  // CGW returns 404 when the current user is not targeted for an outreach —
+  // polled on nearly every Safe load, so this dominates RUM resource volume.
+  { urlIncludes: '/v1/targeted-messaging/outreaches/', statuses: new Set([404]) },
+]
+
+const isExpectedResourceFailure = (event: RumResourceEvent): boolean => {
+  const { url, status_code: status } = event.resource ?? {}
+  if (!url || status === undefined) return false
+  return EXPECTED_RESOURCE_FAILURES.some(
+    ({ urlIncludes, statuses }) => url.includes(urlIncludes) && statuses.has(status),
+  )
+}
+
+/**
  * Drop RUM error events that are demonstrably not caused by user-impacting
- * failures so the Error-Free Views SLO reflects real breakage. Non-error events
- * (views, actions, resources) pass through untouched.
+ * failures so the Error-Free Views SLO reflects real breakage, plus resource
+ * events for endpoints whose non-2xx responses are expected (see
+ * `EXPECTED_RESOURCE_FAILURES`). Views, actions and other resources pass
+ * through untouched.
  *
  * Sources we drop:
  * - `console`: the RUM SDK auto-instruments `console.error` via
@@ -89,6 +113,7 @@ const NON_USER_IMPACTING_SOURCES = new Set(['console', 'report'])
  * network failures (`network`).
  */
 export const filterRumEvent = (event: RumEvent, context: RumEventDomainContext): boolean => {
+  if (event.type === 'resource') return !isExpectedResourceFailure(event as RumResourceEvent)
   if (event.type !== 'error') return true
 
   const errorEvent = event as RumErrorEvent
