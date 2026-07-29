@@ -1,4 +1,5 @@
 import type * as ConstantsModule from '@/config/constants'
+import type { RumResourceEvent, RumEventDomainContext } from '@datadog/browser-rum'
 import type { ObservedError } from '../../types'
 
 const mockAddAction = jest.fn()
@@ -236,6 +237,44 @@ describe('DatadogProvider', () => {
       expect(filterRumEvent({ type: 'view' } as any, {} as any)).toBe(true)
       expect(filterRumEvent({ type: 'action' } as any, {} as any)).toBe(true)
       expect(filterRumEvent({ type: 'resource' } as any, {} as any)).toBe(true)
+    })
+
+    const resourceContext = {} as RumEventDomainContext
+
+    const buildResourceEvent = (url: string, status_code: number): RumResourceEvent =>
+      ({ type: 'resource', resource: { url, status_code } }) as unknown as RumResourceEvent
+
+    const OUTREACH_BASE = 'https://safe-client.safe.global/v1/targeted-messaging/outreaches/5/chains/1/safes/0xabc'
+
+    it('drops expected 404s from the targeted-messaging outreaches endpoint', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      expect(filterRumEvent(buildResourceEvent(OUTREACH_BASE, 404), resourceContext)).toBe(false)
+    })
+
+    it('keeps genuine failures (429, 500) on the same endpoint', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      expect(filterRumEvent(buildResourceEvent(OUTREACH_BASE, 429), resourceContext)).toBe(true)
+      expect(filterRumEvent(buildResourceEvent(OUTREACH_BASE, 500), resourceContext)).toBe(true)
+    })
+
+    it('keeps 404s on sibling outreaches operations (e.g. signer submissions)', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const url = 'https://safe-client.safe.global/v1/targeted-messaging/outreaches/5/signers/0xabc/submissions'
+      expect(filterRumEvent(buildResourceEvent(url, 404), resourceContext)).toBe(true)
+    })
+
+    it('keeps 404s from other endpoints', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const event = buildResourceEvent('https://safe-client.safe.global/v1/chains/1/safes/0xabc', 404)
+      expect(filterRumEvent(event, resourceContext)).toBe(true)
+    })
+
+    it('keeps resource events missing url or status_code', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const noResource = { type: 'resource', resource: {} } as unknown as RumResourceEvent
+      const noStatus = buildResourceEvent(OUTREACH_BASE, undefined as unknown as number)
+      expect(filterRumEvent(noResource, resourceContext)).toBe(true)
+      expect(filterRumEvent(noStatus, resourceContext)).toBe(true)
     })
 
     it('keeps application errors', async () => {
