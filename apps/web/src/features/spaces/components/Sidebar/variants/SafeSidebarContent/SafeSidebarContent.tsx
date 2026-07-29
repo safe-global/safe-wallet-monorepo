@@ -17,11 +17,11 @@ import type {
   SidebarVariantContentProps,
   ResolvedSidebarActionGroup,
 } from '../../types'
-import { FeatureFlagEditorDialogLoader } from '@/features/feature-flags/FeatureFlagEditorDialogLoader'
+import { FeatureFlagEditorDialogLoader } from '@/features/feature-flag-overrides/FeatureFlagEditorDialogLoader'
 import { getQuerySpaceId } from '../../utils'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { useAppSelector } from '@/store'
-import { selectOverrideCount } from '@/features/feature-flags/store'
+import { selectOverrideCount } from '@/features/feature-flag-overrides/store'
 
 const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.earn]
 

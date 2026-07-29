@@ -2,13 +2,13 @@
  * Verifies that the feature-flag editor UI is dead-code-eliminated from a
  * production build. The editor is only reachable via the guarded dynamic
  * import in
- * `apps/web/src/features/feature-flags/FeatureFlagEditorDialogLoader.tsx`,
+ * `apps/web/src/features/feature-flag-overrides/FeatureFlagEditorDialogLoader.tsx`,
  * so it should never end up in an emitted production chunk.
  *
  * This test runs a full `next build`, which is slow and memory-hungry, so it
  * is skipped in the default unit run. Run it explicitly with:
  *
- *   RUN_BUNDLE_TESTS=true yarn workspace @safe-global/web test src/features/feature-flags/__tests__/bundleExclusion.test.ts
+ *   RUN_BUNDLE_TESTS=true yarn workspace @safe-global/web test src/features/feature-flag-overrides/__tests__/bundleExclusion.test.ts
  */
 import { execSync } from 'child_process'
 import { existsSync, readdirSync, readFileSync } from 'fs'

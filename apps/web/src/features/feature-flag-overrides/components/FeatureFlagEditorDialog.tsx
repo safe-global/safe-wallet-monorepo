@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useAppDispatch } from '@/store'
-import { clearAllOverrides } from '@/features/feature-flags/store'
+import { clearAllOverrides } from '@/features/feature-flag-overrides/store'
 import { useFeatureFlagEditorData } from '../hooks/useFeatureFlagEditorData'
 import { FeatureFlagEditor } from './FeatureFlagEditor'
 

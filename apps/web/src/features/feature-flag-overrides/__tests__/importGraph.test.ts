@@ -7,7 +7,10 @@ import path from 'path'
 // always-on guard, and it covers the entire sidebar tree, not just the entry component.
 const SIDEBAR_DIR = path.resolve(__dirname, '../../spaces/components/Sidebar')
 
-const ALLOWED_SPECIFIERS = ['@/features/feature-flags/FeatureFlagEditorDialogLoader', '@/features/feature-flags/store']
+const ALLOWED_SPECIFIERS = [
+  '@/features/feature-flag-overrides/FeatureFlagEditorDialogLoader',
+  '@/features/feature-flag-overrides/store',
+]
 
 const collectSourceFiles = (dir: string): Array<string> =>
   readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -33,7 +36,7 @@ describe('feature-flag editor static import graph', () => {
     // Guards against a vacuous pass: a moved or renamed tree would yield no specifiers at all.
     expect(specifiers.length).toBeGreaterThan(0)
 
-    const featureFlagSpecifiers = [...new Set(specifiers.filter((s) => s.includes('features/feature-flags')))]
+    const featureFlagSpecifiers = [...new Set(specifiers.filter((s) => s.includes('features/feature-flag-overrides')))]
 
     expect(featureFlagSpecifiers.sort()).toEqual(ALLOWED_SPECIFIERS)
   })

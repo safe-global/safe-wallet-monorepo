@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { NetworkLogosList } from '@/features/multichain'
 import { cn } from '@/utils/cn'
 import { useAppDispatch } from '@/store'
-import { setOverride, clearOverride } from '@/features/feature-flags/store'
+import { setOverride, clearOverride } from '@/features/feature-flag-overrides/store'
 import type { FeatureFlagRowData } from '../hooks/useFeatureFlagEditorData'
 
 // Kept in the DOM but hidden so the controls column stays aligned across rows.

@@ -6,7 +6,7 @@ import { type FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { useAppSelector } from '@/store'
-import { selectFeatureFlagOverrides, type FeatureFlagOverridesState } from '@/features/feature-flags/store'
+import { selectFeatureFlagOverrides, type FeatureFlagOverridesState } from '@/features/feature-flag-overrides/store'
 
 /**
  * Applies local, dev-only feature-flag overrides to a chain's `features` array.
