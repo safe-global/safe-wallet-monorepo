@@ -93,9 +93,10 @@ jest.mock('@/components/ui/sidebar', () => ({
       )
     }
 
-    // Disabled-ness is signalled with aria/data attributes rather than the native `disabled`
-    // prop: React suppresses onClick on natively-disabled elements, which would make the
-    // `item.disabled` guard in handleClick untestable.
+    // `NavItem`'s `if (item.disabled) return` guard is defence-in-depth and unreachable through
+    // the real DOM path: the real SidebarMenuButton spreads native `disabled` onto a <button>,
+    // so React never fires onClick. This mock emits aria-disabled/data-disabled instead, which
+    // deliberately diverges from the primitive so the guard can be exercised at all.
     return (
       <button
         data-testid={testId}
@@ -442,6 +443,13 @@ describe('NavItem', () => {
       render(<NavItem item={{ ...actionItem, onSelect: jest.fn(), badge: 3 }} />)
 
       expect(screen.getByLabelText('3 Feature flags notifications')).toHaveTextContent('3')
+    })
+
+    it('shows the label tooltip when the sidebar is collapsed to icons', () => {
+      mockSidebarState.state = 'collapsed'
+      render(<NavItem item={{ ...actionItem, onSelect: jest.fn() }} />)
+
+      expect(screen.getByRole('tooltip')).toHaveTextContent('Feature flags')
     })
 
     it('does not close the mobile drawer, which would unmount the UI it opens', () => {
