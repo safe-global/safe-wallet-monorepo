@@ -8,10 +8,13 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import EditMemberDialog from './EditMemberDialog'
 import RemoveMemberDialog from './RemoveMemberDialog'
 import useRenewInvite from './useRenewInvite'
+import { getMemberDisplayName } from '../../hooks/useSpaceMembers'
 
 type MemberRowActionsMenuProps = {
   member: MemberDto
   disabled: boolean
+  // Edit stays enabled for the current user (to rename themselves) even when remove is disabled.
+  editDisabled: boolean
   isInvite: boolean
   canRenew: boolean
 }
@@ -20,7 +23,7 @@ type MemberRowActionsMenuProps = {
  * Mobile-only kebab that collapses the per-row member actions (edit / renew / remove)
  * into a single menu, replacing the desktop icon cluster on narrow viewports.
  */
-const MemberRowActionsMenu = ({ member, disabled, isInvite, canRenew }: MemberRowActionsMenuProps) => {
+const MemberRowActionsMenu = ({ member, disabled, editDisabled, isInvite, canRenew }: MemberRowActionsMenuProps) => {
   const [editOpen, setEditOpen] = useState(false)
   const [removeOpen, setRemoveOpen] = useState(false)
   const { renewInvite, isLoading } = useRenewInvite(member)
@@ -37,7 +40,7 @@ const MemberRowActionsMenu = ({ member, disabled, isInvite, canRenew }: MemberRo
         />
         <DropdownMenuContent align="end">
           {!isInvite && (
-            <DropdownMenuItem disabled={disabled} onClick={() => setEditOpen(true)}>
+            <DropdownMenuItem disabled={editDisabled} onClick={() => setEditOpen(true)}>
               Edit member
             </DropdownMenuItem>
           )}
@@ -63,7 +66,7 @@ const MemberRowActionsMenu = ({ member, disabled, isInvite, canRenew }: MemberRo
       {removeOpen && (
         <RemoveMemberDialog
           userId={member.user.id}
-          memberName={member.name}
+          memberName={getMemberDisplayName(member)}
           handleClose={() => setRemoveOpen(false)}
           isInvite={isInvite}
         />

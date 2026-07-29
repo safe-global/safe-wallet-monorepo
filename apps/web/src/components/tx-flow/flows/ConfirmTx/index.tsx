@@ -26,11 +26,12 @@ const ConfirmTxFlow = ({ txSummary }: { txSummary: Transaction }) => {
       icon={isSwapOrder ? SwapIcon : undefined}
       subtitle={<>{text}&nbsp;</>}
       txId={txId}
+      txNonce={txNonce}
       isExecutable={canExecute}
       onlyExecute={!canSign}
       isRejection={isRejection}
       txSummary={txSummary}
-      ReviewTransactionComponent={(props) => <ConfirmProposedTx txNonce={txNonce} {...props} />}
+      ReviewTransactionComponent={ConfirmProposedTx}
       eventCategory={TxFlowType.CONFIRM_TX}
     />
   )

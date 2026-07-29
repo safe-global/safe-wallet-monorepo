@@ -79,35 +79,3 @@ exports[`./CopyAddressButton.stories WithChildren 1`] = `
   </div>
 </div>
 `;
-
-exports[`./CopyAddressButton.stories WithPrefix 1`] = `
-<div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
->
-  <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
-  >
-    <span
-      aria-label="Copy to clipboard"
-      class=""
-      data-mui-internal-clone-element="true"
-      style="cursor: pointer;"
-    >
-      <button
-        aria-label="Copy to clipboard"
-        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-uneijd-MuiButtonBase-root-MuiIconButton-root"
-        tabindex="0"
-        type="button"
-      >
-        <mock-icon
-          aria-hidden=""
-          class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-gvpe62-MuiSvgIcon-root"
-          data-testid="copy-btn-icon"
-          focusable="false"
-        />
-      </button>
-    </span>
-  </div>
-</div>
-`;

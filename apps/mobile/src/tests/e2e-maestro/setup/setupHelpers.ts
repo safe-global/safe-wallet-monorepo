@@ -1,10 +1,11 @@
 import type { Dispatch } from '@reduxjs/toolkit'
+import type { Router } from 'expo-router'
 import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { cgwClient } from '@safe-global/store/gateway/cgwClient'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { store } from '@/src/store'
-import { SafeInfo } from '@/src/types/address'
+import { Address, SafeInfo } from '@/src/types/address'
 import { CONFIG_SERVICE_KEY } from '@/src/config/constants'
 import { updateSettings } from '@/src/store/settingsSlice'
 import { updatePromptAttempts } from '@/src/store/notificationsSlice'
@@ -16,6 +17,8 @@ import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { resetE2EState } from '@/src/store/resetE2EState'
 import { web3API } from '@/src/store/signersBalance'
 import { walletConnectE2eState } from '@/src/features/WalletConnect/Signer/context/walletConnectE2eState'
+import { walletKitE2eState } from '@/src/features/WalletConnect/Wallet/walletKitE2eState'
+import { mockedActiveAccount, mockedActiveSafeInfo } from './mockData'
 
 /**
  * Reset all e2e-relevant state (Redux slices + RTK Query caches +
@@ -43,6 +46,7 @@ export const resetReduxForE2E = (dispatch: Dispatch) => {
   dispatch(web3API.util.resetApiState())
   dispatch(hypernativeApi.util.resetApiState())
   walletConnectE2eState.reset()
+  walletKitE2eState.reset()
   store.dispatch(
     apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY, { forceRefetch: true }),
   )
@@ -54,6 +58,19 @@ export const resetReduxForE2E = (dispatch: Dispatch) => {
 export const setupBaseConfig = (dispatch: Dispatch) => {
   dispatch(updateSettings({ onboardingVersionSeen: 'v1' }))
   dispatch(updatePromptAttempts(1))
+}
+
+/** Onboard with the primary test Safe and navigate to the home tab. */
+export const onboardAndNavigate = (dispatch: Dispatch, router: Router) => {
+  dispatch(
+    addSafe({
+      address: mockedActiveSafeInfo.address.value as Address,
+      info: { [mockedActiveSafeInfo.chainId]: mockedActiveSafeInfo },
+    }),
+  )
+  dispatch(setActiveSafe(mockedActiveAccount))
+  dispatch(updatePromptAttempts(1))
+  router.replace('/(tabs)')
 }
 
 /**

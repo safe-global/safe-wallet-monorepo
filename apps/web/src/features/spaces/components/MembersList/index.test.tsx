@@ -38,6 +38,7 @@ jest.mock('@/components/common/Track', () => ({
 
 jest.mock('@/features/spaces', () => ({
   useIsAdmin: () => true,
+  getMemberDisplayName: (member: { alias?: string | null; name: string }) => member.alias || member.name,
   isAdmin: (member: { role: string }) => member.role === 'ADMIN',
   isActiveAdmin: (member: { role: string; status: string }) => member.role === 'ADMIN' && member.status === 'ACTIVE',
   isInviteExpired: (member: { status: string; inviteExpiresAt?: string | null }) =>

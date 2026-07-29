@@ -128,7 +128,7 @@ describe('SpaceSafeContextMenu', () => {
     fireEvent.click(menuButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Remove')).toBeInTheDocument()
+      expect(screen.getByText('Remove from workspace')).toBeInTheDocument()
     })
   })
 
@@ -139,7 +139,7 @@ describe('SpaceSafeContextMenu', () => {
     fireEvent.click(menuButton)
 
     await waitFor(() => {
-      expect(screen.queryByText('Remove')).not.toBeInTheDocument()
+      expect(screen.queryByText('Remove from workspace')).not.toBeInTheDocument()
     })
   })
 
@@ -167,7 +167,7 @@ describe('SpaceSafeContextMenu', () => {
     fireEvent.click(menuButton)
 
     await waitFor(() => {
-      const removeOption = screen.getByText('Remove')
+      const removeOption = screen.getByText('Remove from workspace')
       fireEvent.click(removeOption)
     })
 

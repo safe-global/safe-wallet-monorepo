@@ -132,7 +132,9 @@ function setupDefaults(
   } = {},
 ) {
   ;(useSafeBarSafes as jest.Mock).mockReturnValue({
-    dropdownSafes: overrides.allSafes ?? [singleChainSafe],
+    workspaceSafes: [],
+    localSafes: overrides.allSafes ?? [singleChainSafe],
+    isInSpaceContext: false,
   })
   ;(useCurrentSpaceId as jest.Mock).mockReturnValue(overrides.spaceId ?? '42')
   ;(useSafeInfo as jest.Mock).mockReturnValue({
@@ -260,6 +262,62 @@ describe('useSpaceSafeSelectorItems', () => {
       chainName: 'Ethereum',
       shortName: 'eth',
     })
+  })
+
+  // ── read-only derived from overview owners (no owners-endpoint enumeration) ──
+
+  it('marks a safe read-only when the wallet is not among the overview owners', () => {
+    setupDefaults() // wallet 0xWallet, overview owners [0xOwner1]
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].chains[0].isReadOnly).toBe(true)
+  })
+
+  it('marks a safe writable when the wallet is among the overview owners', () => {
+    setupDefaults({
+      overviews: [
+        {
+          address: { value: '0xSafe1' },
+          chainId: '1',
+          fiatTotal: '5000',
+          threshold: 2,
+          owners: [{ value: '0xWallet' }],
+        },
+      ],
+    })
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].chains[0].isReadOnly).toBe(false)
+  })
+
+  it('treats a safe as read-only when no wallet is connected', () => {
+    setupDefaults({
+      overviews: [
+        {
+          address: { value: '0xSafe1' },
+          chainId: '1',
+          fiatTotal: '5000',
+          threshold: 2,
+          owners: [{ value: '0xWallet' }],
+        },
+      ],
+    })
+    ;(useWallet as jest.Mock).mockReturnValue(undefined)
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].chains[0].isReadOnly).toBe(true)
+  })
+
+  // Counterfactual safes have no overview; read-only falls back to the item's own flag, which stays
+  // correct without the owners enumeration.
+  it('falls back to the item read-only flag when no overview exists', () => {
+    setupDefaults({
+      allSafes: [{ ...singleChainSafe, isReadOnly: false }],
+      overviews: [],
+    })
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].chains[0].isReadOnly).toBe(false)
   })
 
   // ── balance and threshold from overview ──
@@ -430,6 +488,34 @@ describe('useSpaceSafeSelectorItems', () => {
     expect(result.current.items[0].owners).toBe(4)
   })
 
+  it('populates each chain row with its own threshold/owners from that chain overview', () => {
+    setupDefaults({
+      allSafes: [multiChainSafe],
+      safeAddress: '0xDifferentSafe',
+      overviews: [
+        {
+          address: { value: '0xSafe2' },
+          chainId: '1',
+          fiatTotal: '100',
+          threshold: 2,
+          owners: [{ value: '0x1' }, { value: '0x2' }],
+        },
+        {
+          address: { value: '0xSafe2' },
+          chainId: '137',
+          fiatTotal: '200',
+          threshold: 3,
+          owners: [{ value: '0x1' }, { value: '0x2' }, { value: '0x3' }],
+        },
+      ],
+    })
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    const chains = result.current.items[0].chains
+    expect(chains.find((c) => c.chainId === '1')).toMatchObject({ threshold: 2, owners: 2 })
+    expect(chains.find((c) => c.chainId === '137')).toMatchObject({ threshold: 3, owners: 3 })
+  })
+
   // ── toChainInfo fallback when chain config not found ──
 
   it('falls back to chainId for chainName and shortName when chain config is missing', () => {
@@ -524,7 +610,11 @@ describe('useSpaceSafeSelectorItems', () => {
       safeAddress: '0xAbCdEf',
     })
     ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('0xabcdef') // lowercase vs mixed-case in item
-    ;(useSafeBarSafes as jest.Mock).mockReturnValue({ dropdownSafes: [mixedCaseSafe] })
+    ;(useSafeBarSafes as jest.Mock).mockReturnValue({
+      workspaceSafes: [],
+      localSafes: [mixedCaseSafe],
+      isInSpaceContext: false,
+    })
 
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
     // Should use live safe.threshold (3) not overview, proving case-insensitive match worked

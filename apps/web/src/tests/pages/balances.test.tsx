@@ -49,7 +49,7 @@ jest.mock('@/features/portfolio', () => ({
 jest.mock('@/features/stake', () => ({
   StakeFeature: {},
   useIsStakingPromoBannerVisible: () => false,
-  STAKING_PROMO_BANNER_HIDE_KEY: 'hideStakingPromoBanner',
+  STAKING_PROMO_BANNER_HIDE_KEY: 'hideStakingPromoBanner_v2',
 }))
 
 jest.mock('@/features/__core__', () => ({
@@ -64,7 +64,7 @@ const DEFAULT_SETTINGS = {
   currency: 'usd',
   hiddenTokens: {},
   tokenList: TOKEN_LISTS.TRUSTED,
-  shortName: { copy: true, qr: true },
+  shortName: { qr: true },
   theme: { darkMode: false },
   env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
   signing: { onChainSigning: false, blindSigning: false },

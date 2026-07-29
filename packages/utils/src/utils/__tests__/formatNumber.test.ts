@@ -12,6 +12,29 @@ describe('formatNumber', () => {
     it('should format a number with a defined precision', () => {
       expect(formatAmountPrecise(1234.5678, 2)).toBe('1,234.57')
     })
+
+    it('should preserve precision for high-precision decimal strings without float rounding', () => {
+      // 16000000000020475 wei formatted to 18 decimals. Round-tripping through a JS
+      // number (float64) would lose the last digit and yield ...20474.
+      expect(formatAmountPrecise('0.016000000000020475', 20)).toBe('0.016000000000020475')
+    })
+
+    it('should preserve precision for negative high-precision strings', () => {
+      expect(formatAmountPrecise('-0.016000000000020475', 20)).toBe('-0.016000000000020475')
+    })
+
+    it('should still format numeric string input', () => {
+      expect(formatAmountPrecise('1234.5678', 2)).toBe('1,234.57')
+    })
+
+    it('should return "NaN" for a non-numeric string', () => {
+      expect(formatAmountPrecise('not-a-number', 2)).toBe('NaN')
+    })
+
+    it('should return "NaN" for an empty or whitespace-only string', () => {
+      expect(formatAmountPrecise('', 2)).toBe('NaN')
+      expect(formatAmountPrecise('   ', 2)).toBe('NaN')
+    })
   })
 
   describe('formatAmount', () => {

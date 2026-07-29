@@ -17,12 +17,12 @@ const WcIcon = ({ sessionCount, sessionIcon, isError, onClick }: WcIconProps): R
 
   return (
     <Track {...WALLETCONNECT_EVENTS.POPUP_OPENED}>
-      <div className="relative flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+      <div className="relative flex items-center rounded-lg bg-muted">
         <Button
           variant="ghost"
           size="icon-sm"
           onClick={onClick}
-          className="cursor-pointer rounded-lg bg-transparent hover:bg-muted/30 transition-colors m-1"
+          className="size-10 cursor-pointer rounded-lg bg-transparent hover:bg-muted-foreground/10 transition-colors"
           aria-label="WalletConnect"
         >
           <WalletConnectIcon className="size-5 fill-current text-muted-foreground" />

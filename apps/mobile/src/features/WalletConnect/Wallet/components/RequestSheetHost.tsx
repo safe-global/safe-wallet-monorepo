@@ -167,6 +167,7 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
   return (
     <BottomSheetModal
       ref={ref}
+      accessible={false}
       enableDynamicSizing
       topInset={insets.top}
       onDismiss={onSheetDismiss}

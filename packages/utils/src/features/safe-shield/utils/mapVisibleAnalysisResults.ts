@@ -52,7 +52,24 @@ export const mapVisibleAnalysisResults = (
     return sortBySeverity(results.filter(Boolean))
   }
 
-  return mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
+  // ADDRESS_POISONING is per-address (each look-alike has its own entered/anchor pair), so keep the
+  // poisoning results individual and consolidate only the other groups.
+  const poisoningResults: AnalysisResult[] = []
+  const otherGroupsPerAddress: GroupedAnalysisResults[] = []
+
+  for (const groups of addressResults) {
+    const poisoning = groups[StatusGroup.ADDRESS_POISONING]
+    if (poisoning) {
+      poisoningResults.push(...poisoning)
+    }
+
+    const otherGroups = { ...groups }
+    delete otherGroups[StatusGroup.ADDRESS_POISONING]
+    otherGroupsPerAddress.push(otherGroups)
+  }
+
+  const consolidatedOtherGroups = mapConsolidatedAnalysisResults(addressesResultsMap, otherGroupsPerAddress)
+  return sortBySeverity([...poisoningResults, ...consolidatedOtherGroups])
 }
 
 export const isAddressChange = (result: AnalysisResult): result is MasterCopyChangeThreatAnalysisResult => {

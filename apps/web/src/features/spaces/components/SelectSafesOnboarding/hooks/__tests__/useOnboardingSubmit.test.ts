@@ -59,6 +59,19 @@ jest.mock('@/hooks/safes', () => ({
   isMultiChainSafeItem: (safe: SafeItem | MultiChainSafeItem) => 'safes' in safe,
 }))
 
+const mockDispatch = jest.fn()
+let mockAddedSafes: Record<string, Record<string, unknown>> = {}
+
+jest.mock('@/store', () => ({
+  useAppDispatch: () => mockDispatch,
+  useAppSelector: (selector: (state: unknown) => unknown) => selector(undefined),
+}))
+
+jest.mock('@/store/addedSafesSlice', () => ({
+  addOrUpdateSafe: (payload: unknown) => ({ type: 'addedSafes/addOrUpdateSafe', payload }),
+  selectAllAddedSafes: () => mockAddedSafes,
+}))
+
 const buildSafeItem = (chainId: string, address: string): SafeItem => ({ chainId, address }) as SafeItem
 
 const buildMultiChainSafeItem = (address: string, chainIds: string[]): MultiChainSafeItem =>
@@ -74,6 +87,7 @@ describe('useOnboardingSubmit', () => {
     jest.clearAllMocks()
     mockSpaceSafes = []
     mockRouterQuery = {}
+    mockAddedSafes = {}
     mockChains.splice(0, mockChains.length)
     mockAddSafesToSpace.mockResolvedValue({ data: {} })
     mockRemoveSafesFromSpace.mockResolvedValue({ data: {} })
@@ -133,6 +147,41 @@ describe('useOnboardingSubmit', () => {
       createSpaceSafesDto: { safes: [{ chainId: '1', address: '0xnew' }] },
     })
     expect(onSuccess).toHaveBeenCalled()
+  })
+
+  it('adds newly selected safes to the trusted list on submit', async () => {
+    const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess))
+
+    act(() => {
+      result.current.formMethods.setValue('selectedSafes', { '1:0xnew': true })
+    })
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'addedSafes/addOrUpdateSafe',
+      payload: expect.objectContaining({
+        safe: expect.objectContaining({ chainId: '1', address: { value: '0xnew' } }),
+      }),
+    })
+  })
+
+  it('does not re-trust safes already in the trusted list', async () => {
+    mockAddedSafes = { '1': { '0xnew': {} } }
+
+    const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess))
+
+    act(() => {
+      result.current.formMethods.setValue('selectedSafes', { '1:0xnew': true })
+    })
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockDispatch).not.toHaveBeenCalled()
   })
 
   it('should remove unselected safes on submit', async () => {

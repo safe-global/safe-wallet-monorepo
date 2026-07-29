@@ -1,6 +1,9 @@
 .container {
   position: fixed;
-  top: var(--header-height);
+  /* The top bar is taller than the legacy --header-height (56px): its action pills (40px) sit in a
+     card with py-4 padding, ~88px total. Offset by --space-4 so toasts clear the bar instead of
+     overlapping it. */
+  top: calc(var(--header-height) + var(--space-4));
   right: 0;
   z-index: 2000;
 }

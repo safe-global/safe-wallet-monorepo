@@ -64,7 +64,6 @@ describe('[SMOKE] Import Export Data tests', { defaultCommandTimeout: 20000 }, (
   })
 
   it('[SMOKE] Verify imported data in settings', () => {
-    const unchecked = [file.copyAddressStr]
     const checked = [file.darkModeStr]
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_13)
       .then(() => cy.wrap(null))
@@ -79,7 +78,6 @@ describe('[SMOKE] Import Export Data tests', { defaultCommandTimeout: 20000 }, (
       .then(() => {
         cy.reload()
         file.clickOnAppearenceBtn()
-        file.verifyCheckboxes(unchecked)
         file.verifyCheckboxes(checked, true)
       })
   })

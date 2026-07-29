@@ -1,7 +1,7 @@
 {
   "name": "@safe-global/mobile",
   "main": "index.js",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "doctor": {
     "reactNativeDirectoryCheck": {
       "enabled": true
@@ -73,7 +73,7 @@
     "@reown/appkit-ethers-react-native": "^2.0.3",
     "@reown/appkit-react-native": "^2.0.3",
     "@reown/walletkit": "^1.2.7",
-    "@safe-global/protocol-kit": "^8.0.3",
+    "@safe-global/protocol-kit": "^8.0.4",
     "@safe-global/store": "workspace:^",
     "@safe-global/theme": "workspace:^",
     "@safe-global/utils": "workspace:^",

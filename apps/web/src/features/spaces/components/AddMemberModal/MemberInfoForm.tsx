@@ -6,7 +6,17 @@ import { RoleMenuItem } from './index'
 import { MemberRole } from '@/features/spaces'
 import css from './styles.module.css'
 
-const MemberInfoForm = ({ isEdit = false }: { isEdit?: boolean }) => {
+const MemberInfoForm = ({
+  isEdit = false,
+  disableName = isEdit,
+  disableRole = false,
+  nameMaxLength = MEMBER_NAME_MAX_LENGTH,
+}: {
+  isEdit?: boolean
+  disableName?: boolean
+  disableRole?: boolean
+  nameMaxLength?: number
+}) => {
   const { control } = useFormContext()
 
   return (
@@ -16,10 +26,10 @@ const MemberInfoForm = ({ isEdit = false }: { isEdit?: boolean }) => {
         name="name"
         label="Name"
         required
-        disabled={isEdit}
+        disabled={disableName}
         validateCharset
         minLength={NAME_MIN_LENGTH}
-        maxLength={MEMBER_NAME_MAX_LENGTH}
+        maxLength={nameMaxLength}
       />
 
       <Controller
@@ -32,6 +42,7 @@ const MemberInfoForm = ({ isEdit = false }: { isEdit?: boolean }) => {
             value={value}
             onChange={onChange}
             required
+            disabled={disableRole}
             className={css.roleSelect}
             renderValue={(role) => <RoleMenuItem role={role as MemberRole} />}
           >

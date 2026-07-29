@@ -40,10 +40,6 @@ export const SETTINGS_EVENTS = {
     },
   },
   APPEARANCE: {
-    COPY_PREFIXES: {
-      action: 'Copy EIP-3770 prefixes',
-      category: SETTINGS_CATEGORY,
-    },
     DARK_MODE: {
       action: 'Dark mode',
       category: SETTINGS_CATEGORY,

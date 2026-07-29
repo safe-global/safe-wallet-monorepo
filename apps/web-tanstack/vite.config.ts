@@ -214,25 +214,6 @@ export default defineConfig(({ mode }) => {
           jsx: { runtime: 'automatic' },
         },
       }),
-      // Scoped `require()` polyfill. One reused apps/web file uses sync
-      // CommonJS require ('blo'). We can't use a global Vite
-      // `define` for `require` because it would rewrite Vite's own client
-      // code. Instead, prepend a module-local `const require = ...` only to
-      // that exact file so the call site resolves at runtime through
-      // `globalThis.__safeBrowserRequire` (installed by compat/require-shim.ts).
-      {
-        name: 'safe-scoped-require-shim',
-        enforce: 'pre',
-        transform(code, id) {
-          if (id.includes('apps/web/src/components/common/SpaceSafeBar/AccountsModal/shared.tsx')) {
-            return {
-              code: `const require = globalThis.__safeBrowserRequire;\n${code}`,
-              map: null,
-            }
-          }
-          return null
-        },
-      },
       // The worker is bundled by Vite, so the `define` block above (process.env,
       // __APP_VERSION__) and the `@/` resolve aliases apply to it.
       VitePWA({

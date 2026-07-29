@@ -11,7 +11,7 @@ export type UpdateSpaceFormData = {
   name: string
 }
 
-export const useUpdateSpace = (space: GetSpaceResponse | undefined) => {
+export const useUpdateSpace = (space: GetSpaceResponse | undefined, onSuccess?: () => void) => {
   const [error, setError] = useState<string>()
   const dispatch = useAppDispatch()
   const [updateSpace] = useSpacesUpdateV1Mutation()
@@ -33,6 +33,8 @@ export const useUpdateSpace = (space: GetSpaceResponse | undefined) => {
           groupKey: 'space-update-name',
         }),
       )
+
+      onSuccess?.()
     } catch (e) {
       console.error(e)
       setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))

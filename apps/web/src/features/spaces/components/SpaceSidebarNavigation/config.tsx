@@ -22,7 +22,7 @@ export type DynamicNavItem = {
 
 export const navItems: DynamicNavItem[] = [
   {
-    label: 'Home',
+    label: 'Dashboard',
     icon: <SvgIcon component={HomeIcon} inheritViewBox />,
     href: AppRoutes.spaces.index,
   },

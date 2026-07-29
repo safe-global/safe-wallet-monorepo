@@ -16,7 +16,7 @@ import {
   ConflictType,
   TransactionTokenType,
 } from '@safe-global/store/gateway/types'
-import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import type { SafeOverview, SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import type {
   ConflictHeaderQueuedItem,
@@ -100,6 +100,21 @@ export const isOwner = (safeOwners: AddressInfo[] | NamedAddress[] = [], walletA
   }
 
   return safeOwners.some((owner) => sameAddress(owner.address, walletAddress))
+}
+
+/**
+ * The CGW `awaitingConfirmation` count is keyed off the connected wallet regardless of whether that
+ * wallet is an owner, so gate it on the overview's owner list: a non-owner (or watch-only) wallet
+ * must never be told that transactions await its signature. Returns 0 when there is no wallet, the
+ * wallet is not an owner, or nothing is awaiting confirmation.
+ */
+export const getOwnerAwaitingConfirmations = (
+  overview: Pick<SafeOverview, 'owners' | 'awaitingConfirmation'> | null | undefined,
+  walletAddress: string | undefined,
+): number => {
+  const awaiting = overview?.awaitingConfirmation ?? 0
+  if (awaiting <= 0) return 0
+  return isOwner(overview?.owners, walletAddress) ? awaiting : 0
 }
 
 export const isMultisigDetailedExecutionInfo = (

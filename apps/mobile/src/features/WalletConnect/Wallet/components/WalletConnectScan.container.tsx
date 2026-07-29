@@ -8,6 +8,7 @@ import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useScannedAddressToSend } from '@/src/features/Send/hooks/useScannedAddressToSend'
 import { useWalletConnectScan, type ScanStatus } from '../hooks/useWalletConnectScan'
+import { E2eScanInjector } from './E2eScanInjector'
 
 const GRANTED_FOOTER = 'Scan an Ethereum wallet address or connect to a desktop app'
 
@@ -108,37 +109,41 @@ export function WalletConnectScanContainer({ isActive = true }: { isActive?: boo
     ) : undefined
 
   return (
-    <QrCamera
-      permission={permission}
-      isCameraActive={isCameraActive}
-      onScan={onScan}
-      onActivateCamera={onActivateCamera}
-      onRequestPermission={requestPermission}
-      onPressSettings={openSettings}
-      heading={granted ? null : headingForPermission(permission)}
-      lensTone={status === 'error' ? 'error' : 'neutral'}
-      dimLens={status !== 'scanning'}
-      centerOverlay={centerOverlay}
-      footer={
-        <YStack gap="$3">
-          <Text textAlign="center" color="$color">
-            {granted ? GRANTED_FOOTER : bodyForPermission(permission)}
-          </Text>
-          {__DEV__ && (
-            <View alignItems="center" marginTop="$5">
-              <SafeButton
-                secondary
-                size="$sm"
-                icon={<SafeFontIcon name="copy" size={18} />}
-                onPress={() => router.push('/wallet-connect-manual')}
-                testID="wc-enter-manually"
-              >
-                Enter manually
-              </SafeButton>
-            </View>
-          )}
-        </YStack>
-      }
-    />
+    <>
+      <QrCamera
+        permission={permission}
+        isCameraActive={isCameraActive}
+        onScan={onScan}
+        onActivateCamera={onActivateCamera}
+        onRequestPermission={requestPermission}
+        onPressSettings={openSettings}
+        heading={granted ? null : headingForPermission(permission)}
+        lensTone={status === 'error' ? 'error' : 'neutral'}
+        dimLens={status !== 'scanning'}
+        centerOverlay={centerOverlay}
+        footer={
+          <YStack gap="$3">
+            <Text textAlign="center" color="$color">
+              {granted ? GRANTED_FOOTER : bodyForPermission(permission)}
+            </Text>
+            {__DEV__ && (
+              <View alignItems="center" marginTop="$5">
+                <SafeButton
+                  secondary
+                  size="$sm"
+                  icon={<SafeFontIcon name="copy" size={18} />}
+                  onPress={() => router.push('/wallet-connect-manual')}
+                  testID="wc-enter-manually"
+                >
+                  Enter manually
+                </SafeButton>
+              </View>
+            )}
+          </YStack>
+        }
+      />
+      {/* No-op in production; the E2E build swaps in a URI injector that feeds onScan. */}
+      <E2eScanInjector onScan={onScan} />
+    </>
   )
 }

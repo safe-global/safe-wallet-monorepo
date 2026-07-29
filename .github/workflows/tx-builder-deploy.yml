@@ -221,6 +221,31 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
+      # Fail-open like the GitLab hook it replaced: a promotion-dispatch problem must not block the
+      # release publish above. If either step fails, dispatch tx-builder-production.yml manually in
+      # safe-production-promotions with this tag.
+      - name: Generate production promotion token
+        id: promotions_token
+        continue-on-error: true
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.PROMOTIONS_APP_ID }}
+          private-key: ${{ secrets.PROMOTIONS_APP_PRIVATE_KEY }}
+          repositories: ${{ secrets.PROMOTIONS_REPO }}
+          permission-actions: write
+
+      - name: Dispatch production promotion
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ steps.promotions_token.outputs.token }}
+          PROMOTIONS_REPO: ${{ github.repository_owner }}/${{ secrets.PROMOTIONS_REPO }}
+          TAG: ${{ steps.version.outputs.version }}
+        run: |
+          gh workflow run tx-builder-production.yml \
+            --repo "$PROMOTIONS_REPO" \
+            --ref main \
+            -f tag="$TAG"
+
       - name: Summary
         run: |
           echo "### tx-builder Release Ready" >> $GITHUB_STEP_SUMMARY
@@ -228,4 +253,5 @@ jobs:
           echo "**Version:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "**Artifact:** tx-builder-${{ steps.version.outputs.version_number }}.tar.gz" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Next step: provide this tag to DevOps for production deployment." >> $GITHUB_STEP_SUMMARY
+          echo "A production promotion was dispatched to safe-production-promotions and awaits reviewer approval." >> $GITHUB_STEP_SUMMARY
+          echo "If it is not queued there, the dispatch failed (fail-open): run tx-builder-production.yml manually with this tag." >> $GITHUB_STEP_SUMMARY

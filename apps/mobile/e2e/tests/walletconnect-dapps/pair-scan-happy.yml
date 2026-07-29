@@ -1,0 +1,68 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# Happy path: open scanner → inject a valid wc: URI → spinner → synthesise a
+# VALID session_proposal → proposal sheet → Connect → success toast → session
+# present in the slice (asserted via the connected-apps entry).
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+# Seed: onboard the test Safe, force-enable NATIVE_WALLETCONNECT, arm approveSession().
+- tapOn:
+    id: 'e2eWcDappsBase'
+- assertVisible:
+    id: 'home-tab'
+
+# Open the scanner from the header QR button.
+- tapOn:
+    id: 'navbar-qr-button'
+
+# Inject a valid wc: URI (camera can't be driven in E2E).
+# The Inject button sits above the keyboard, so tap it directly — no hideKeyboard
+# (the plain TextInput exposes no standard keyboard-dismiss accessory).
+#
+# The pairing spinner ("Connecting…") is asserted in pair-scan-timeout.yml: the
+# fake pair() resolves synchronously here, so the scanner dismisses before the
+# spinner is observable. Asserting it on this path would be racy.
+- tapOn:
+    id: 'e2e-scan-input'
+- inputText: 'wc:e2e-happy@2?relay-protocol=irn'
+- tapOn:
+    id: 'e2e-scan-submit'
+
+# pair() resolves (fake), scanner dismisses. Synthesise the proposal that the
+# relay would deliver, then assert the proposal sheet opens.
+- tapOn:
+    id: 'e2eWcSynthProposalValid'
+# Anchor on the Connect button (its own accessibility element); sheet text nodes
+# get merged into one grouped label, so testIDs are the reliable matcher.
+- extendedWaitUntil:
+    visible:
+      id: 'wc-proposal-connect'
+    timeout: 10000
+
+# Connect → success toast.
+- tapOn:
+    id: 'wc-proposal-connect'
+- extendedWaitUntil:
+    visible:
+      text: 'Connected to app'
+    timeout: 10000
+
+# Session is present in the slice: the connected-apps entry only renders when
+# count > 0, so its presence proves the session landed in the slice.
+- tapOn: 'Account, tab, 3 of 3'
+- extendedWaitUntil:
+    visible:
+      id: 'settings-connected-apps-entry'
+    timeout: 10000
+
+# Open the list and confirm the connected dApp row is shown.
+- tapOn:
+    id: 'settings-connected-apps-entry'
+- extendedWaitUntil:
+    visible:
+      id: 'connected-dapp-row'
+    timeout: 10000

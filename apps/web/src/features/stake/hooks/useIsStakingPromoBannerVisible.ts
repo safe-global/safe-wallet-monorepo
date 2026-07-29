@@ -3,7 +3,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useBalances from '@/hooks/useBalances'
 import useIsStakingBannerEnabled from './useIsStakingBannerEnabled'
 
-export const STAKING_PROMO_BANNER_HIDE_KEY = 'hideStakingPromoBanner'
+export const STAKING_PROMO_BANNER_HIDE_KEY = 'hideStakingPromoBanner_v2'
 
 /**
  * Visibility for the staking promo banner.
