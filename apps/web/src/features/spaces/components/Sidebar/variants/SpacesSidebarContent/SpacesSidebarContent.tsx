@@ -3,8 +3,10 @@ import { useCurrentSpaceId } from '../../../../hooks/useCurrentSpaceId'
 import { useIsActiveMember } from '../../../../hooks/useSpaceMembers'
 import { spacesMainNavigation, spacesSetupGroup } from '../../config'
 import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
+import { useSidebarDeveloperGroup } from '../../hooks/useSidebarDeveloperGroup'
 import type { SidebarItemConfig, SidebarVariantContentProps } from '../../types'
 import { SpacesSidebarVariant } from '../SpacesSidebarVariant'
+import { FeatureFlagEditorDialogLoader } from '@/features/feature-flag-overrides/FeatureFlagEditorDialogLoader'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
@@ -61,14 +63,21 @@ export const SpacesSidebarContent = ({
     isItemActive,
   })
 
+  const { developerGroup, isEditorOpen, setEditorOpen } = useSidebarDeveloperGroup()
+
   return (
-    <SpacesSidebarVariant
-      mainNavItems={mainNavItems}
-      setupGroup={setupGroup}
-      selectedSpace={selectedSpace}
-      spaces={spaces}
-      spaceInitial={spaceInitial}
-      isLoading={isLoading}
-    />
+    <>
+      <SpacesSidebarVariant
+        mainNavItems={mainNavItems}
+        setupGroup={setupGroup}
+        developerGroup={developerGroup}
+        selectedSpace={selectedSpace}
+        spaces={spaces}
+        spaceInitial={spaceInitial}
+        isLoading={isLoading}
+      />
+
+      {developerGroup && <FeatureFlagEditorDialogLoader open={isEditorOpen} onOpenChange={setEditorOpen} />}
+    </>
   )
 }
