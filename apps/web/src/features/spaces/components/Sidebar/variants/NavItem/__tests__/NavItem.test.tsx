@@ -62,8 +62,11 @@ const mockSidebarState: {
 // Mock sidebar UI components
 jest.mock('@/components/ui/sidebar', () => ({
   useSidebar: () => mockSidebarState,
+  // The real primitive is an <li>; keep that so assertions about what lives inside the item hold.
   SidebarMenuItem: ({ children, className }: { children: ReactNode; className?: string }) => (
-    <div className={className}>{children}</div>
+    <li className={className} data-testid="sidebar-menu-item">
+      {children}
+    </li>
   ),
   SidebarMenuButton: ({
     children,
@@ -468,6 +471,38 @@ describe('NavItem', () => {
       fireEvent.click(screen.getByTestId('sidebar-list-item'))
 
       expect(mockSetOpenMobile).not.toHaveBeenCalled()
+    })
+  })
+
+  // Items live in the menu's <ul>, so UI an item owns (e.g. the dialog it opens) has to be hosted in
+  // the item's own <li> rather than rendered as a sibling.
+  describe('children', () => {
+    it('hosts children inside the item list element', () => {
+      render(
+        <NavItem item={{ ...actionItem, onSelect: jest.fn() }}>
+          <div data-testid="owned-ui" />
+        </NavItem>,
+      )
+
+      const listItem = screen.getByTestId('sidebar-menu-item')
+      expect(listItem.tagName).toBe('LI')
+      expect(listItem).toContainElement(screen.getByTestId('owned-ui'))
+    })
+
+    it('keeps hosting children while the item is loading', () => {
+      render(
+        <NavItem item={{ ...actionItem, onSelect: jest.fn() }} isLoading>
+          <div data-testid="owned-ui" />
+        </NavItem>,
+      )
+
+      expect(screen.getByTestId('sidebar-menu-item')).toContainElement(screen.getByTestId('owned-ui'))
+    })
+
+    it('renders nothing extra when no children are passed', () => {
+      render(<NavItem item={{ ...actionItem, onSelect: jest.fn() }} />)
+
+      expect(screen.queryByTestId('owned-ui')).not.toBeInTheDocument()
     })
   })
 })

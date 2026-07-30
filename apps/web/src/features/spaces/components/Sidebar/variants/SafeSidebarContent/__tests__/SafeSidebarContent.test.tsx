@@ -39,12 +39,6 @@ jest.mock('@/hooks/useSafeInfo', () => ({
   default: () => mockUseSafeInfo(),
 }))
 
-const mockUseAppSelector = jest.fn()
-
-jest.mock('@/store', () => ({
-  useAppSelector: (...args: unknown[]) => mockUseAppSelector(...args),
-}))
-
 jest.mock('../../../hooks/useResolvedSidebarNav', () => ({
   useResolvedSidebarNav: jest.fn((main, setup, options) => mockUseResolvedSidebarNav(main, setup, options)),
 }))
@@ -102,7 +96,6 @@ describe('SafeSidebarContent', () => {
     mockIsRouteEnabled.mockReturnValue(true)
     mockUseQueuedTxsLength.mockReturnValue(2)
     mockUseSafeInfo.mockReturnValue({ safe: { deployed: true } })
-    mockUseAppSelector.mockReturnValue(0)
     mockRouterPathname.current = AppRoutes.home
     mockUseResolvedSidebarNav.mockReturnValue({
       mainNavItems: [],
