@@ -131,10 +131,9 @@ jest.mock('@/components/common/TrustedSafesModal/useTrustedSafesModal', () => ({
 
 jest.mock('@/hooks/useSafeInfo', () => () => ({ safeAddress: '0xSafe1' }))
 
-jest.mock('@/hooks/useSafeAddressFromUrl', () => {
-  const useSafeAddressFromUrl = jest.fn(() => '0xSafe1')
-  return { useSafeAddressFromUrl }
-})
+jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
+  useSafeAddressFromUrl: jest.fn(() => '0xSafe1'),
+}))
 
 jest.mock('@/hooks/useChainId', () => () => '1')
 
