@@ -127,8 +127,6 @@ describe('useHydratedSafeAddressFromUrl', () => {
   })
 
   it('returns an empty address before hydration even when the URL has one', () => {
-    // Matches the prerendered HTML, which is built with no URL at all. Returning the address here is
-    // what produced the React #418 hydration mismatch across every Safe route.
     mockIsHydrated.mockReturnValue(false)
 
     const { result } = renderHook(() => useHydratedSafeAddressFromUrl())

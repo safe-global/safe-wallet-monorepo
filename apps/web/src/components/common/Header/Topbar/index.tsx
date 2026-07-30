@@ -59,8 +59,6 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const isSpaceRoute = useIsSpaceRoute()
   const pathname = usePathname()
   const isWelcomeListRoute = pathname === AppRoutes.welcome.accounts || pathname === AppRoutes.welcome.spaces
-  // Hydration-safe: this picks between the compact logo and the wide safe selector below, so it must
-  // resolve the same way in the prerendered HTML and on the first client render.
   const urlSafeAddress = useHydratedSafeAddressFromUrl()
   const isSettingsWithoutSafe = pathname?.startsWith(AppRoutes.settings.index) === true && !urlSafeAddress
   // Routes whose left content is the compact Safe logo rather than the wide safe selector.

@@ -30,16 +30,12 @@ export const useSafeAddressFromUrl = (): string => {
 }
 
 /**
- * Render-safe variant of {@link useSafeAddressFromUrl}: `''` during the prerender and on the first
- * client render, the real address afterwards.
+ * `''` until mounted, then the address. Use it wherever the *rendered output* branches on the URL
+ * safe address: the app is a static export, so reading it on the first render diverges from the
+ * build-time HTML and throws React #418.
  *
- * Reading `location.search` while rendering diverges from the build-time HTML (the app is a static
- * export), so anything that *branches the rendered output* on the URL safe address must use this —
- * otherwise React throws a hydration mismatch (#418) and regenerates the subtree.
- *
- * Do NOT use this for data fetching or effects: `useLoadSafeInfo` skips its CGW query on an empty
- * address and `useEffectiveSafeParams` exists precisely to start requests before Redux has the safe,
- * so both need the address on the very first render. Those keep using the ungated hooks above.
+ * Not for data fetching — `useLoadSafeInfo` and `useEffectiveSafeParams` need the address on the
+ * first render and keep using {@link useSafeAddressFromUrl}.
  */
 export const useHydratedSafeAddressFromUrl = (): string => {
   const isHydrated = useIsHydrated()

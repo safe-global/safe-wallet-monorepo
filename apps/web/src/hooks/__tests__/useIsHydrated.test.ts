@@ -17,8 +17,6 @@ describe('useIsHydrated', () => {
       return isHydrated
     })
 
-    // The whole point of the hook: the first client render has to match the prerendered HTML, which
-    // is built without a URL or a window. Flipping to true only afterwards keeps that guarantee.
     expect(renders[0]).toBe(false)
     expect(renders[renders.length - 1]).toBe(true)
   })

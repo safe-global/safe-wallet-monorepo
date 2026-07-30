@@ -152,8 +152,6 @@ function SpaceSafeBar() {
   const pathname = usePathname()
   const router = useRouter()
   const isHydrated = useIsHydrated()
-  // Hydration-safe: gates the `return null` below, which would otherwise drop the whole bar from the
-  // prerendered HTML on /settings/* and mount it on the first client render.
   const urlSafeAddress = useHydratedSafeAddressFromUrl()
   const isSignedIn = useIsSignedIn()
   const {
@@ -167,9 +165,7 @@ function SpaceSafeBar() {
     isInSpaceContext,
     hasWallet,
   } = useSpaceSafeSelectorItems()
-  // The selector's contents derive from the URL safe address, so before hydration they'd differ from
-  // the prerendered HTML. Reuse the existing loading skeleton for the first render instead of gating
-  // the underlying hooks — those must keep firing immediately to preserve the parallel initial fetch.
+  // Skeleton on the first render: the contents derive from the URL address, which is empty until mounted.
   const showSelectorSkeleton = isLoading || !isHydrated
   const { space } = useSpaceBackLink()
   const [selectedTab, setSelectedTab] = useState<DropdownTab | null>(null)

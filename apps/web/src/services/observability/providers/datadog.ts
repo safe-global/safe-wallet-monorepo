@@ -34,11 +34,8 @@ type DatadogSite =
   | 'ddog-gov.com'
   | 'ap1.datadoghq.com'
 
-/**
- * E2E runs are excluded: Cypress/Playwright drive a real browser against a local build, so their
- * errors land in RUM as ordinary `session.type:user` traffic and can't be filtered out downstream.
- * That inflated the top error issues by ~45% and made fixed bugs look alive.
- */
+// E2E runs are excluded: they drive a real browser, so their errors reach RUM as `session.type:user`
+// traffic that `filterRumEvent` can't drop.
 export const isDatadogEnabled = Boolean(DATADOG_RUM_APPLICATION_ID) && Boolean(DATADOG_RUM_CLIENT_TOKEN) && !IS_TEST_E2E
 
 const EXTENSION_URL_PATTERNS = [

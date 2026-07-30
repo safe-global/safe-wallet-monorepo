@@ -135,9 +135,6 @@ describe('SidebarTopBar', () => {
   })
 
   it('reads the safe address through the hydration-gated hook', () => {
-    // This component renders on both sides of the sidebar's hydration gate (SidebarSkeleton and
-    // EnhancedSidebar), so it must gate the URL read itself. `showHomeLabel` swaps SafeLogo's whole
-    // subtree, so an ungated read flips it on the first client render → React #418.
     const { useHydratedSafeAddressFromUrl, useSafeAddressFromUrl } = require('@/hooks/useSafeAddressFromUrl')
 
     render(<SidebarTopBar />)

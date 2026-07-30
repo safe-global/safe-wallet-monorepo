@@ -9,9 +9,7 @@ import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 export const SidebarTopBar = (): ReactElement => {
   const { state } = useSidebar()
   const isCollapsed = state === 'collapsed'
-  // Rendered by both SidebarSkeleton and EnhancedSidebar, i.e. on both sides of the sidebar's
-  // hydration gate, so it has to stay hydration-safe on its own: `showHomeLabel` swaps SafeLogo's
-  // whole subtree, which is a hydration mismatch if it flips on the first client render.
+  // Renders on both sides of the sidebar's hydration gate, so it has to gate the URL read itself.
   const safeAddress = useHydratedSafeAddressFromUrl()
   const isSpaceRoute = useIsSpaceRoute()
 
