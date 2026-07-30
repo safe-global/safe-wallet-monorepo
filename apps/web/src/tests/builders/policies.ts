@@ -9,6 +9,7 @@ import {
   type RecoveryPolicy,
   type TokenWithdrawPolicy,
   type CosignerPolicy,
+  type AllowPolicy,
   type ActivePolicy,
   type PendingPolicy,
   type AvailablePolicy,
@@ -96,21 +97,34 @@ export const cosignerPolicyBuilder = (): IBuilder<CosignerPolicy> =>
     },
   })
 
+/** The guard's catch-all entry: no data, id is the zero hash on the wire. */
+export const allowPolicyBuilder = (): IBuilder<AllowPolicy> =>
+  Builder.new<AllowPolicy>().with({
+    id: `0x${'0'.repeat(64)}`,
+    type: PolicyType.Allow,
+    enabled: true,
+    enforcement: guardEnforced(),
+    data: {},
+  })
+
 export const activePolicyBuilder = (): IBuilder<ActivePolicy> => tokenWithdrawPolicyBuilder()
 
+/**
+ * A pending row as CGW returns it: request metadata wrapping the decoded change.
+ * `policy` is null for roots CGW cannot decode — pass one explicitly to model that.
+ */
 export const pendingPolicyBuilder = (): IBuilder<PendingPolicy> => {
-  const requestedAt = faker.date.recent().getTime() / 1000
-  const readyAt = requestedAt + 86_400
+  const requestedAt = Math.floor(faker.date.recent().getTime() / 1000)
   return Builder.new<PendingPolicy>().with({
-    ...tokenWithdrawPolicyBuilder().build(),
-    enabled: false,
     configureRoot: faker.string.hexadecimal({ length: 64 }),
-    requestedAt: Math.floor(requestedAt),
-    readyAt: Math.floor(readyAt),
+    requestedAt,
+    readyAt: requestedAt + 86_400,
     isReady: false,
+    policy: tokenWithdrawPolicyBuilder().with({ enabled: false }).build(),
   })
 }
 
+/** Catalogue entry. CGW reports `enforcement: null` when it has no wiring for the type. */
 export const availablePolicyBuilder = (): IBuilder<AvailablePolicy> =>
   Builder.new<AvailablePolicy>().with({
     type: PolicyType.TokenWithdraw,

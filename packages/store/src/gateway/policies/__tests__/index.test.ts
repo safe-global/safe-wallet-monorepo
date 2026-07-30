@@ -1,9 +1,18 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { policiesApi } from '../index'
 import { PolicyType } from '../types'
+import type { GetActivePoliciesResponse, GetPendingPoliciesResponse, GetPoliciesResponse } from '../types'
 import { setBaseUrl } from '../../cgwClient'
 
 const GATEWAY_URL = 'https://test-gateway.safe.global'
+
+const SPACE_ID = 'space-1'
+const CHAIN_ID = '1'
+const SAFE_ADDRESS = '0x1111111111111111111111111111111111111111'
+const POLICY_CONTRACT = '0x2222222222222222222222222222222222222222'
+const SAFE_POLICY_GUARD = '0x3333333333333333333333333333333333333333'
+const ZERO_HASH = `0x${'0'.repeat(64)}`
+const CONFIGURE_ROOT = `0x${'ab'.repeat(32)}`
 
 const makeStore = () =>
   configureStore({
@@ -11,133 +20,115 @@ const makeStore = () =>
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(policiesApi.middleware),
   })
 
-const arg = { spaceId: '42', chainId: '1', safeAddress: '0x1111111111111111111111111111111111111111' }
+const arg = { spaceId: SPACE_ID, chainId: CHAIN_ID, safeAddress: SAFE_ADDRESS }
 
-describe('policiesApi (mocked)', () => {
+/** The Safe reference CGW routes expect: `chainId:safeAddress`, with the colon encoded. */
+const SAFE_SEGMENT = `${CHAIN_ID}%3A${SAFE_ADDRESS}`
+const BASE = `${GATEWAY_URL}/v1/spaces/${SPACE_ID}/safes/${SAFE_SEGMENT}/policies`
+
+const guardEnforcement = {
+  via: 'guard' as const,
+  guards: { transactionGuard: { policyContract: POLICY_CONTRACT, safePolicyGuard: SAFE_POLICY_GUARD } },
+}
+
+const jsonResponse = (body: unknown) =>
+  new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json' } })
+
+const mockFetch = (body: unknown) => {
+  const fetchMock = jest.fn().mockResolvedValue(jsonResponse(body))
+  global.fetch = fetchMock as unknown as typeof fetch
+  return fetchMock
+}
+
+/** The request the base query actually issued. */
+const requestOf = (fetchMock: jest.Mock): Request => fetchMock.mock.calls[0][0] as Request
+
+describe('policiesApi', () => {
   let store: ReturnType<typeof makeStore>
 
   beforeAll(() => {
-    // The mocked endpoints use queryFn (no HTTP) but the base query still asserts a URL is set.
     setBaseUrl(GATEWAY_URL)
   })
 
   beforeEach(() => {
     store = makeStore()
+    jest.restoreAllMocks()
   })
 
-  describe('policiesGetPoliciesV1', () => {
-    it('returns all four available policy types with correct enforcement', async () => {
-      const result = await store.dispatch(policiesApi.endpoints.policiesGetPoliciesV1.initiate(arg))
+  it('requests the space-scoped catalogue and passes the payload through', async () => {
+    const items: GetPoliciesResponse['items'] = [
+      {
+        type: PolicyType.TokenWithdraw,
+        title: 'Token withdraw allowlist',
+        description: 'Restrict, per token, which addresses the Safe can send to.',
+        available: false,
+        configuredCount: 1,
+        // CGW reports no wiring for the catalogue entries.
+        enforcement: null,
+      },
+    ]
+    const fetchMock = mockFetch({ items })
 
-      expect(result.isSuccess).toBe(true)
-      const byType = Object.fromEntries(result.data!.items.map((i) => [i.type, i]))
-      expect(Object.keys(byType).sort()).toEqual(
-        [PolicyType.SpendingLimit, PolicyType.Recovery, PolicyType.TokenWithdraw, PolicyType.Cosigner].sort(),
-      )
+    const result = await store.dispatch(policiesApi.endpoints.policiesGetPoliciesV1.initiate(arg))
 
-      // Spending limit + recovery are enabled via a module (no guard).
-      for (const type of [PolicyType.SpendingLimit, PolicyType.Recovery]) {
-        const e = byType[type].enforcement
-        expect(e.via).toBe('module')
-        if (e.via === 'module') expect(e.moduleAddress).toMatch(/^0x[0-9a-fA-F]{40}$/)
-      }
-      // Token withdraw + cosigner are guard-enforced.
-      for (const type of [PolicyType.TokenWithdraw, PolicyType.Cosigner]) {
-        const e = byType[type].enforcement
-        expect(e.via).toBe('guard')
-        if (e.via === 'guard') {
-          expect(e.guards.transactionGuard!.policyContract).toMatch(/^0x[0-9a-fA-F]{40}$/)
-          expect(e.guards.transactionGuard!.safePolicyGuard).toMatch(/^0x[0-9a-fA-F]{40}$/)
-        }
-      }
-    })
-
-    it('returns the real Sepolia policy-engine deployment addresses on chain 11155111', async () => {
-      const onSepolia = await store.dispatch(
-        policiesApi.endpoints.policiesGetPoliciesV1.initiate({ ...arg, chainId: '11155111' }),
-      )
-      const tw = onSepolia.data!.items.find((i) => i.type === PolicyType.TokenWithdraw)!
-      expect(tw.available).toBe(true)
-      expect(tw.enforcement.via).toBe('guard')
-      if (tw.enforcement.via === 'guard') {
-        const { transactionGuard } = tw.enforcement.guards
-        expect(transactionGuard!.safePolicyGuard).toBe('0xde4c448904537EBBA654Ac3803E7D74A77C7a1a8')
-        expect(transactionGuard!.policyContract).toBe('0xec399EE72199DBc1f7DCf8b69cFa0290d1e06Fb7')
-      }
-    })
-
-    it('marks token-withdraw / cosigner unavailable on an unsupported chain', async () => {
-      const onUnsupported = await store.dispatch(
-        policiesApi.endpoints.policiesGetPoliciesV1.initiate({ ...arg, chainId: '999999' }),
-      )
-      const byType = Object.fromEntries(onUnsupported.data!.items.map((i) => [i.type, i.available]))
-
-      expect(byType[PolicyType.TokenWithdraw]).toBe(false)
-      expect(byType[PolicyType.Cosigner]).toBe(false)
-      // Module-enforced types stay available regardless of policy-engine deployment.
-      expect(byType[PolicyType.SpendingLimit]).toBe(true)
-      expect(byType[PolicyType.Recovery]).toBe(true)
-    })
+    expect(result.isSuccess).toBe(true)
+    expect(result.data).toEqual({ items })
+    expect(requestOf(fetchMock).url).toBe(BASE)
   })
 
-  describe('policiesGetActivePoliciesV1', () => {
-    it('returns active policies with the right enforcement mode per type', async () => {
-      const result = await store.dispatch(policiesApi.endpoints.policiesGetActivePoliciesV1.initiate(arg))
+  it('requests /active and keeps the AllowPolicy entry', async () => {
+    const items: GetActivePoliciesResponse['items'] = [
+      {
+        id: ZERO_HASH,
+        type: PolicyType.Allow,
+        enabled: true,
+        enforcement: guardEnforcement,
+        data: {},
+      },
+    ]
+    const fetchMock = mockFetch({ items })
 
-      expect(result.isSuccess).toBe(true)
-      const byType = Object.fromEntries(result.data!.items.map((i) => [i.type, i]))
+    const result = await store.dispatch(policiesApi.endpoints.policiesGetActivePoliciesV1.initiate(arg))
 
-      // A module-enforced policy (spending limit) has no guard.
-      expect(byType[PolicyType.SpendingLimit].enforcement.via).toBe('module')
-      // The token-withdraw policy (this plan's focus) is guard-enforced.
-      expect(byType[PolicyType.TokenWithdraw].enforcement.via).toBe('guard')
-    })
+    expect(result.data?.items[0].type).toBe(PolicyType.Allow)
+    expect(requestOf(fetchMock).url).toBe(`${BASE}/active`)
   })
 
-  describe('policiesGetPendingPoliciesV1', () => {
-    it('returns policy changes that are requested but not yet applied', async () => {
-      const result = await store.dispatch(policiesApi.endpoints.policiesGetPendingPoliciesV1.initiate(arg))
+  it('requests /pending and accepts items whose policy could not be decoded', async () => {
+    const items: GetPendingPoliciesResponse['items'] = [
+      {
+        configureRoot: CONFIGURE_ROOT,
+        requestedAt: 1_000,
+        readyAt: 1_000 + 86_400,
+        isReady: true,
+        policy: null,
+      },
+    ]
+    const fetchMock = mockFetch({ items })
 
-      expect(result.isSuccess).toBe(true)
-      expect(result.data!.items.length).toBeGreaterThan(0)
+    const result = await store.dispatch(policiesApi.endpoints.policiesGetPendingPoliciesV1.initiate(arg))
 
-      const pending = result.data!.items[0]
-      // Pending = requested-but-not-applied: disabled, carrying the delay metadata.
-      expect(pending.enabled).toBe(false)
-      expect(pending.isReady).toBe(false)
-      expect(pending.readyAt).toBe(pending.requestedAt + 86_400)
-      expect(pending.configureRoot).toMatch(/^0x[0-9a-fA-F]+$/)
-      // It's guard-enforced (the token-withdraw change).
-      expect(pending.enforcement.via).toBe('guard')
-    })
-
-    it('carries the real Sepolia deployment addresses on chain 11155111', async () => {
-      const onSepolia = await store.dispatch(
-        policiesApi.endpoints.policiesGetPendingPoliciesV1.initiate({ ...arg, chainId: '11155111' }),
-      )
-      const pending = onSepolia.data!.items[0]
-      if (pending.enforcement.via === 'guard') {
-        expect(pending.enforcement.guards.transactionGuard!.safePolicyGuard).toBe(
-          '0xde4c448904537EBBA654Ac3803E7D74A77C7a1a8',
-        )
-      }
-    })
+    expect(result.data?.items[0].policy).toBeNull()
+    expect(result.data?.items[0].isReady).toBe(true)
+    expect(requestOf(fetchMock).url).toBe(`${BASE}/pending`)
   })
 
-  it('caches by arg (same store + same arg → same cached data)', async () => {
+  // /v1/spaces is a credentialed route — CGW answers 403 without the session cookie.
+  it('sends credentials with policy requests', async () => {
+    const fetchMock = mockFetch({ items: [] })
+
+    await store.dispatch(policiesApi.endpoints.policiesGetActivePoliciesV1.initiate(arg))
+
+    expect(requestOf(fetchMock).credentials).toBe('include')
+  })
+
+  it('caches by arg (same store + same arg → one request)', async () => {
+    const fetchMock = mockFetch({ items: [] })
+
     const a = await store.dispatch(policiesApi.endpoints.policiesGetActivePoliciesV1.initiate(arg))
-    // RTK Query dedupes/caches by arg — a second subscribe with the same arg
-    // returns the cached result, not a freshly-generated one.
     const b = await store.dispatch(policiesApi.endpoints.policiesGetActivePoliciesV1.initiate(arg))
 
     expect(a.data).toEqual(b.data)
-  })
-
-  it('wires the `policies` cache tag', () => {
-    // The tag is declared via enhanceEndpoints; assert it is registered on the api.
-    // (providesTags: ['policies'] on both endpoints.)
-    expect(policiesApi.reducerPath).toBe('api')
-    expect(policiesApi.endpoints.policiesGetPoliciesV1).toBeDefined()
-    expect(policiesApi.endpoints.policiesGetActivePoliciesV1).toBeDefined()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 })

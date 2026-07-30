@@ -6,7 +6,7 @@ import type { Address } from 'viem'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import type { TokenInfo, AvailablePolicy } from '@safe-global/store/gateway/policies/types'
+import type { TokenInfo, AvailablePolicy, ActivePolicy } from '@safe-global/store/gateway/policies/types'
 import { PolicyType } from '@safe-global/store/gateway/policies/types'
 import { Coins, Plus } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
@@ -31,6 +31,7 @@ import { TokenSelector } from '../shared/TokenSelector'
 import { AddressSelectorList, type AddressEntry } from '../shared/AddressSelectorList'
 import { usePolicyGuard } from '../hooks/usePolicyGuard'
 import { useAvailablePolicies } from '../hooks/useAvailablePolicies'
+import { useActivePolicies } from '../hooks/useActivePolicies'
 import { savePolicyRequestApi } from '../policyRequestStore'
 import { POLICY_GUARD_DELAY_SEC } from '../shared/guardTx'
 import { tokensForChain } from '../SpendingLimitFlow/tokenList'
@@ -44,10 +45,31 @@ const STEPS = [
 ] as const
 type StepKey = (typeof STEPS)[number]['key']
 
-/** The token-withdraw AvailablePolicy for the selected safe, carrying the contract addresses. */
-const useWithdrawPolicyContracts = (chainId: string, safeAddress: string) => {
-  const { policies } = useAvailablePolicies(chainId, safeAddress)
-  return useMemo(() => policies.find((p: AvailablePolicy) => p.type === PolicyType.TokenWithdraw), [policies])
+/**
+ * The SafePolicyGuard + ERC20TransferPolicy addresses to build against.
+ *
+ * Preferred source is the catalogue entry, but CGW returns `enforcement: null` for
+ * catalogue entries it has no wiring to report, so we fall back to the Safe's active
+ * policy of the same type — which does carry the live addresses. Both empty means the
+ * policy engine isn't reachable for this Safe and the change can't be built.
+ */
+const useWithdrawPolicyContracts = (
+  chainId: string,
+  safeAddress: string,
+): { safePolicyGuard?: string; policyContract?: string } => {
+  const { policies: catalogue } = useAvailablePolicies(chainId, safeAddress)
+  const { policies: active } = useActivePolicies(chainId, safeAddress)
+
+  return useMemo(() => {
+    const enforcements = [
+      catalogue.find((p: AvailablePolicy) => p.type === PolicyType.TokenWithdraw)?.enforcement,
+      active.find((p: ActivePolicy) => p.type === PolicyType.TokenWithdraw)?.enforcement,
+    ]
+    const guardEnforcement = enforcements.find((enforcement) => enforcement?.via === 'guard')
+    const contracts = guardEnforcement?.via === 'guard' ? guardEnforcement.guards.transactionGuard : undefined
+
+    return { safePolicyGuard: contracts?.safePolicyGuard, policyContract: contracts?.policyContract }
+  }, [catalogue, active])
 }
 
 const ERC20TransferPolicyFlow = () => {
@@ -67,11 +89,9 @@ const ERC20TransferPolicyFlow = () => {
   const chainId = selectedSafe?.chainId ?? ''
   const safeAddress = selectedSafe?.address ?? ''
 
-  const available = useWithdrawPolicyContracts(chainId, safeAddress)
-  const guardAddress =
-    available?.enforcement.via === 'guard' ? available.enforcement.guards.transactionGuard?.safePolicyGuard : undefined
-  const policyContract =
-    available?.enforcement.via === 'guard' ? available.enforcement.guards.transactionGuard?.policyContract : undefined
+  const { safePolicyGuard: guardAddress, policyContract } = useWithdrawPolicyContracts(chainId, safeAddress)
+  // Nothing can be built without both addresses; Review says so instead of a dead Continue.
+  const hasPolicyContracts = !!guardAddress && !!policyContract
 
   const { currentGuard, isSet: isGuardSet, isUnknownGuard } = usePolicyGuard(chainId, safeAddress, guardAddress)
 
@@ -119,7 +139,7 @@ const ERC20TransferPolicyFlow = () => {
     if (step === 'apply-to') return !selectedSafe
     if (step === 'tokens') return selectedTokens.length === 0
     if (step === 'recipients') return validRecipients.length === 0
-    return false
+    return !hasPolicyContracts
   })()
 
   const goBack = () => {
@@ -287,6 +307,13 @@ const ERC20TransferPolicyFlow = () => {
               <Typography variant="h2" sx={{ fontSize: 22, fontWeight: 700 }}>
                 Review
               </Typography>
+
+              {!hasPolicyContracts && (
+                <Alert severity="error">
+                  The policy engine isn&apos;t available for this Safe&apos;s network yet, so this change can&apos;t be
+                  created.
+                </Alert>
+              )}
 
               {isUnknownGuard && (
                 <Alert severity="warning">

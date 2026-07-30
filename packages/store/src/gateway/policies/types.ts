@@ -10,6 +10,8 @@ export enum PolicyType {
   Recovery = 'recovery',
   TokenWithdraw = 'ERC20TransferPolicy',
   Cosigner = 'cosigner',
+  /** The SafePolicyGuard's unrestricted catch-all entry. Carries no data. */
+  Allow = 'AllowPolicy',
 }
 
 /**
@@ -101,25 +103,36 @@ export type CosignerPolicyData = {
 }
 export type CosignerPolicy = PolicyBase & { type: PolicyType.Cosigner; data: CosignerPolicyData }
 
+/* ---- 5. Allow (catch-all) ---- */
+/** The catch-all guard entry. CGW returns an empty `data` object for it. */
+export type AllowPolicyData = Record<string, never>
+export type AllowPolicy = PolicyBase & { type: PolicyType.Allow; data: AllowPolicyData }
+
 /** Discriminated union of all active-policy shapes (returned by getActivePolicies). */
-export type ActivePolicy = SpendingLimitPolicy | RecoveryPolicy | TokenWithdrawPolicy | CosignerPolicy
+export type ActivePolicy = SpendingLimitPolicy | RecoveryPolicy | TokenWithdrawPolicy | CosignerPolicy | AllowPolicy
 
 /**
  * A policy change that has been REQUESTED on-chain (`requestConfiguration`) but
  * not yet APPLIED — it sits out the SafePolicyGuard's DELAY before
  * `applyConfiguration` becomes valid. Returned by getPendingPolicies.
  *
- * Carries the same discriminated `data` as an active policy (the change being
- * made) plus the request metadata the apply step needs:
  *  - configureRoot: keccak256(abi.encode(Configuration[])) — the requested root.
  *  - requestedAt / readyAt: unix seconds; readyAt = requestedAt + DELAY.
  *  - isReady: whether the delay has elapsed (readyAt <= now) so it can be applied.
+ *  - policy: the decoded change, when CGW can resolve it from the root. It is
+ *    `null` for roots CGW cannot decode (only the request metadata is known),
+ *    so consumers must render from the metadata alone in that case.
+ *
+ * Note the wire format carries NO `Configuration[]`; `applyConfiguration` needs
+ * that array, so it has to come from the requester's local snapshot, matched on
+ * `configureRoot`.
  */
-export type PendingPolicy = ActivePolicy & {
+export type PendingPolicy = {
   configureRoot: string
   requestedAt: number
   readyAt: number
   isReady: boolean
+  policy: ActivePolicy | null
 }
 
 /**
@@ -134,7 +147,13 @@ export type AvailablePolicy = {
   description: string
   available: boolean // false - Disable related Policy Card or hide it
   configuredCount: number
-  enforcement: Enforcement
+  /**
+   * `null` when CGW has no wiring to report for this policy type on this chain
+   * (e.g. no policy-engine deployment). Builders must then source the contract
+   * addresses elsewhere — see the token-withdraw wizard, which falls back to the
+   * Safe's active policy of the same type.
+   */
+  enforcement: Enforcement | null
 }
 
 /* ---- request / response envelopes (space-scoped, credentialed routes) ---- */

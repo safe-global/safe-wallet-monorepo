@@ -2,10 +2,17 @@ import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
 import { Interface } from 'ethers'
 import * as spaces from '@/features/spaces'
 import { TxModalContext } from '@/components/tx-flow'
-import { PolicyType } from '@safe-global/store/gateway/policies/types'
+import { PolicyType, type PendingPolicy } from '@safe-global/store/gateway/policies/types'
+import { tokenWithdrawPolicyBuilder } from '@/tests/builders/policies'
 import { APPLY_CONFIGURATION_ABI } from '../shared/guardTx'
 import { savePolicyRequestApi, type PolicyRequest } from '../policyRequestStore'
+import { usePendingPolicies } from '../hooks/usePendingPolicies'
 import PendingPoliciesList from '../PendingPoliciesList'
+
+// Module-level (not spyOn): the `restoreAllMocks` in afterEach would otherwise swap the
+// real hook back in while an async update is still queued, changing the hook count.
+jest.mock('../hooks/usePendingPolicies')
+const mockedUsePendingPolicies = jest.mocked(usePendingPolicies)
 
 const SAFE = { chainId: '11155111', address: '0x1111111111111111111111111111111111111111', name: 'Ops Safe' }
 const GUARD = '0x2222222222222222222222222222222222222222'
@@ -47,6 +54,26 @@ const saveRequest = (overrides: Partial<PolicyRequest> = {}): PolicyRequest => {
   return req
 }
 
+/** Mock what CGW reports as pending. `policy: null` mirrors a root it can't decode. */
+const mockPending = (
+  items: Array<{ configureRoot: string; readyAt?: number; isReady?: boolean; policy?: PendingPolicy['policy'] }>,
+) => {
+  const refetch = jest.fn()
+  mockedUsePendingPolicies.mockReturnValue({
+    policies: items.map(({ configureRoot, readyAt, isReady, policy }) => ({
+      configureRoot,
+      requestedAt: 1000,
+      readyAt: readyAt ?? 1000 + 86_400,
+      isReady: isReady ?? false,
+      policy: policy ?? null,
+    })),
+    isLoading: false,
+    isError: false,
+    refetch,
+  })
+  return refetch
+}
+
 const renderList = (setTxFlow = jest.fn(), replace = jest.fn(() => Promise.resolve(true))) => {
   jest.spyOn(spaces, 'useSpaceSafes').mockReturnValue({
     allSafes: [SAFE],
@@ -66,6 +93,10 @@ const renderList = (setTxFlow = jest.fn(), replace = jest.fn(() => Promise.resol
 }
 
 describe('PendingPoliciesList', () => {
+  beforeEach(() => {
+    mockedUsePendingPolicies.mockReturnValue({ policies: [], isLoading: false, isError: false, refetch: jest.fn() })
+  })
+
   afterEach(() => {
     jest.restoreAllMocks()
     // Purge the module-level store (survives localStorage.clear on its own).
@@ -76,7 +107,8 @@ describe('PendingPoliciesList', () => {
   })
 
   it('renders the Safe, policy info and config root for a pending request', () => {
-    saveRequest()
+    const req = saveRequest()
+    mockPending([{ configureRoot: req.configureRoot }])
     renderList()
 
     expect(screen.getByText('Pending policies')).toBeInTheDocument()
@@ -86,7 +118,8 @@ describe('PendingPoliciesList', () => {
   })
 
   it('disables Apply and shows a countdown while the delay has not elapsed', () => {
-    saveRequest({ readyAt: Math.floor(Date.now() / 1000) + 3600 }) // 1h out
+    const req = saveRequest()
+    mockPending([{ configureRoot: req.configureRoot, readyAt: Math.floor(Date.now() / 1000) + 3600 }]) // 1h out
     renderList()
 
     expect(screen.getByRole('button', { name: /apply/i })).toBeDisabled()
@@ -94,7 +127,8 @@ describe('PendingPoliciesList', () => {
   })
 
   it('enables Apply once ready and hands an applyConfiguration tx to the tx-flow', async () => {
-    saveRequest({ readyAt: Math.floor(Date.now() / 1000) - 1 }) // already ready
+    const req = saveRequest()
+    mockPending([{ configureRoot: req.configureRoot, isReady: true }])
     const { setTxFlow, replace } = renderList()
 
     expect(screen.getByText(/ready to apply/i)).toBeInTheDocument()
@@ -121,8 +155,9 @@ describe('PendingPoliciesList', () => {
     ).not.toThrow()
   })
 
-  it('removes the pending request when the apply tx is submitted', async () => {
-    const req = saveRequest({ readyAt: Math.floor(Date.now() / 1000) - 1 })
+  it('removes the local snapshot and refetches when the apply tx is submitted', async () => {
+    const req = saveRequest()
+    const refetch = mockPending([{ configureRoot: req.configureRoot, isReady: true }])
     const { setTxFlow } = renderList()
 
     fireEvent.click(screen.getByRole('button', { name: /apply/i }))
@@ -132,5 +167,35 @@ describe('PendingPoliciesList', () => {
     setTxFlow.mock.calls[0][0].props.onSubmit({ txId: '0xtx' })
 
     expect(savePolicyRequestApi.get(req.chainId, req.safeAddress)).toEqual([])
+    expect(refetch).toHaveBeenCalled()
+  })
+
+  // Only CGW knows the root; the Configuration[] to replay lives with the requester.
+  it('renders a CGW row with no local snapshot but cannot apply it', () => {
+    mockPending([{ configureRoot: `0x${'ab'.repeat(32)}`, isReady: true }])
+    renderList()
+
+    expect(screen.getByText('Policy change')).toBeInTheDocument()
+    expect(screen.getByText(/ready to apply/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /apply/i })).toBeDisabled()
+  })
+
+  it('labels the row from the decoded policy when CGW resolves it', () => {
+    mockPending([
+      {
+        configureRoot: `0x${'cd'.repeat(32)}`,
+        policy: tokenWithdrawPolicyBuilder().build(),
+      },
+    ])
+    renderList()
+
+    expect(screen.getByText('Token withdraw allowlist')).toBeInTheDocument()
+  })
+
+  it('renders nothing for a Safe with no pending changes', () => {
+    mockPending([])
+    renderList()
+
+    expect(screen.queryByText('Ops Safe')).not.toBeInTheDocument()
   })
 })

@@ -1,5 +1,4 @@
 import { cgwClient as api } from '../cgwClient'
-import { buildMockAvailablePolicies, buildMockActivePolicies, buildMockPendingPolicies } from './mocks'
 import type {
   GetPoliciesResponse,
   GetActivePoliciesResponse,
@@ -7,28 +6,34 @@ import type {
   PolicyQueryArg,
 } from './types'
 
-// Hand-declared while the endpoint is mocked. Every other slice imports
-// `addTagTypes` from its AUTO_GENERATED sibling — once the real policies schema
-// is code-generated, import it from there and delete this local declaration.
+// Hand-declared because the policies schema isn't code-generated yet. Every other
+// slice imports `addTagTypes` from its AUTO_GENERATED sibling — once policies are
+// in the generated schema, import it from there and delete this declaration.
 export const addTagTypes = ['policies'] as const
 
 /**
- * Policy engine endpoints (space-scoped, credentialed once real). Currently
- * MOCKED via `queryFn` — see ./mocks. To go live, replace each `queryFn` with
- * `query: (arg) => ({ url: `/v1/spaces/${arg.spaceId}/safes/${arg.chainId}:${arg.safeAddress}/policies[/active|/pending]` })`.
+ * Base path for the space-scoped policy routes. The Safe is addressed as
+ * `chainId:safeAddress`, URL-encoded because the colon is a delimiter.
+ *
+ * These live under `/v1/spaces`, which `isCredentialRoute` matches, so the base
+ * query sends the session cookie automatically (CGW answers 403 without it).
  */
+const policiesPath = ({ spaceId, chainId, safeAddress }: PolicyQueryArg): string =>
+  `/v1/spaces/${spaceId}/safes/${encodeURIComponent(`${chainId}:${safeAddress}`)}/policies`
+
+/** Policy engine endpoints (space-scoped, credentialed). */
 export const policiesApi = api.enhanceEndpoints({ addTagTypes }).injectEndpoints({
   endpoints: (build) => ({
     policiesGetPoliciesV1: build.query<GetPoliciesResponse, PolicyQueryArg>({
-      queryFn: async (arg) => ({ data: buildMockAvailablePolicies(arg) }),
+      query: (arg) => ({ url: policiesPath(arg) }),
       providesTags: ['policies'],
     }),
     policiesGetActivePoliciesV1: build.query<GetActivePoliciesResponse, PolicyQueryArg>({
-      queryFn: async (arg) => ({ data: buildMockActivePolicies(arg) }),
+      query: (arg) => ({ url: `${policiesPath(arg)}/active` }),
       providesTags: ['policies'],
     }),
     policiesGetPendingPoliciesV1: build.query<GetPendingPoliciesResponse, PolicyQueryArg>({
-      queryFn: async (arg) => ({ data: buildMockPendingPolicies(arg) }),
+      query: (arg) => ({ url: `${policiesPath(arg)}/pending` }),
       providesTags: ['policies'],
     }),
   }),

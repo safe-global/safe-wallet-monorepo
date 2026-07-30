@@ -8,30 +8,9 @@ import { ChainLogo, SafeIdenticon } from '@/components/common/SpaceSafeBar/Accou
 import { useSpaceSafes } from '@/features/spaces'
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import { flattenSafes, safeRefKey, type SafeRef } from './safeRefs'
+import { labelOf, summarize } from './policyLabels'
 import { useActivePolicies } from './hooks/useActivePolicies'
 import PolicyDetailDrawer, { type PolicyDetail } from './PolicyDetailDrawer'
-
-const POLICY_LABEL: Record<PolicyType, string> = {
-  [PolicyType.SpendingLimit]: 'Spending limit',
-  [PolicyType.Recovery]: 'Account recovery',
-  [PolicyType.TokenWithdraw]: 'Token withdraw allowlist',
-  [PolicyType.Cosigner]: 'Cosigner',
-}
-
-const summarize = (policy: ActivePolicy): string => {
-  switch (policy.type) {
-    case PolicyType.SpendingLimit:
-      return `Spender ${shortenAddress(policy.data.beneficiary)} · ${policy.data.limits.length} token limit(s)`
-    case PolicyType.Recovery:
-      return `${policy.data.recoverers.length} recoverer(s)`
-    case PolicyType.TokenWithdraw: {
-      const recipients = policy.data.allowlist.reduce((n, entry) => n + entry.recipients.length, 0)
-      return `${policy.data.allowlist.length} token(s) · ${recipients} allowed recipient(s)`
-    }
-    case PolicyType.Cosigner:
-      return `${policy.data.rules.length} cosigner rule(s)`
-  }
-}
 
 /** Map an API active policy to the drawer's detail shape (best-effort per type). */
 const toDetail = (policy: ActivePolicy, safe: SafeRef): PolicyDetail | null => {
@@ -72,8 +51,11 @@ const toDetail = (policy: ActivePolicy, safe: SafeRef): PolicyDetail | null => {
           recipients: entry.recipients,
         })),
       }
-    // No dedicated drawer view for cosigner yet.
+    // No dedicated drawer view for cosigner or the catch-all allow entry.
     case PolicyType.Cosigner:
+    case PolicyType.Allow:
+      return null
+    default:
       return null
   }
 }
@@ -113,7 +95,7 @@ const PolicyRow = ({ policy, onOpen }: { policy: ActivePolicy; onOpen?: () => vo
         minWidth: 150,
       }}
     >
-      {POLICY_LABEL[policy.type]}
+      {labelOf(policy.type)}
     </Typography>
     <Typography sx={{ fontSize: 13, color: 'text.secondary', flex: 1 }}>{summarize(policy)}</Typography>
     {onOpen && (

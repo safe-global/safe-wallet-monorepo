@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import * as spaces from '@/features/spaces'
 import * as useActivePoliciesHook from '../hooks/useActivePolicies'
-import { spendingLimitPolicyBuilder, tokenWithdrawPolicyBuilder } from '@/tests/builders/policies'
+import { allowPolicyBuilder, spendingLimitPolicyBuilder, tokenWithdrawPolicyBuilder } from '@/tests/builders/policies'
 import ActivePoliciesList from '../ActivePoliciesList'
 
 const SAFE = { chainId: '1', address: '0x1111111111111111111111111111111111111111', name: 'Ops Safe' }
@@ -46,6 +46,18 @@ describe('ActivePoliciesList', () => {
     expect(screen.getByText('0x1111...1111')).toBeInTheDocument()
     expect(screen.getByText('Spending limit')).toBeInTheDocument()
     expect(screen.getByText('Token withdraw allowlist')).toBeInTheDocument()
+  })
+
+  // CGW returns an AllowPolicy (the guard's catch-all) alongside the real policies.
+  it('renders the catch-all allow entry without a summary or a detail drawer', () => {
+    mockSpaceSafes([SAFE])
+    mockActivePolicies({ policies: [allowPolicyBuilder().build()] })
+
+    render(<ActivePoliciesList />)
+
+    expect(screen.getByText('Allow policy')).toBeInTheDocument()
+    // No drawer for it, so the row isn't a button.
+    expect(screen.queryByRole('button', { name: /allow policy/i })).not.toBeInTheDocument()
   })
 
   it('does not render a card for a safe with no active policies', () => {

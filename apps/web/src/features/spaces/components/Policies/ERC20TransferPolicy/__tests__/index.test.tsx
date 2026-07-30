@@ -2,13 +2,14 @@ import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
 import { Interface, AbiCoder } from 'ethers'
 import * as spaces from '@/features/spaces'
 import * as availableHook from '../../hooks/useAvailablePolicies'
+import * as activeHook from '../../hooks/useActivePolicies'
 import * as guardHook from '../../hooks/usePolicyGuard'
 import * as balancesApi from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import * as tokenList from '../../SpendingLimitFlow/tokenList'
 import * as useChainsHook from '@/hooks/useChains'
 import { TxModalContext } from '@/components/tx-flow'
 import { PolicyType } from '@safe-global/store/gateway/policies/types'
-import { availablePolicyBuilder } from '@/tests/builders/policies'
+import { availablePolicyBuilder, tokenWithdrawPolicyBuilder } from '@/tests/builders/policies'
 import { SAFE_SET_GUARD_ABI, CONFIGURE_IMMEDIATELY_ABI, REQUEST_CONFIGURATION_ABI } from '../../shared/guardTx'
 import { ERC20_TRANSFER_SELECTOR, RECIPIENT_DATA_TYPE } from '../contracts'
 import ERC20TransferPolicyFlow from '../index'
@@ -19,7 +20,15 @@ const RECIPIENT = '0xdead00000000000000000000000000000000de01'
 const GUARD = '0x2222222222222222222222222222222222222222'
 const POLICY = '0x3333333333333333333333333333333333333333'
 
-const mockAll = (guardOverrides = {}) => {
+type MockOptions = {
+  /** CGW returns `enforcement: null` on catalogue entries it has no wiring for. */
+  catalogueEnforcement?: 'guard' | null
+  /** The Safe's active token-withdraw policy, which carries the live addresses. */
+  activeEnforcement?: 'guard' | null
+}
+
+const mockAll = (guardOverrides = {}, options: MockOptions = {}) => {
+  const { catalogueEnforcement = 'guard', activeEnforcement = null } = options
   jest.spyOn(spaces, 'useSpaceSafes').mockReturnValue({
     allSafes: [SAFE],
     isLoading: false,
@@ -28,18 +37,30 @@ const mockAll = (guardOverrides = {}) => {
     refetch: jest.fn(),
   } as never)
 
+  const guardEnforcement = {
+    via: 'guard' as const,
+    guards: { transactionGuard: { policyContract: POLICY, safePolicyGuard: GUARD } },
+  }
+
   jest.spyOn(availableHook, 'useAvailablePolicies').mockReturnValue({
     policies: [
       availablePolicyBuilder()
         .with({
           type: PolicyType.TokenWithdraw,
-          enforcement: {
-            via: 'guard',
-            guards: { transactionGuard: { policyContract: POLICY, safePolicyGuard: GUARD } },
-          },
+          enforcement: catalogueEnforcement === 'guard' ? guardEnforcement : null,
         })
         .build(),
     ],
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  })
+
+  jest.spyOn(activeHook, 'useActivePolicies').mockReturnValue({
+    policies:
+      activeEnforcement === 'guard'
+        ? [tokenWithdrawPolicyBuilder().with({ enforcement: guardEnforcement }).build()]
+        : [],
     isLoading: false,
     isError: false,
     refetch: jest.fn(),
@@ -224,6 +245,31 @@ describe('ERC20TransferPolicyFlow', () => {
     expect(screen.getByText('0xdead...de01')).toBeInTheDocument()
     expect(screen.getByText('Token')).toBeInTheDocument()
     expect(screen.getByText('Recipient')).toBeInTheDocument()
+  })
+
+  // CGW currently reports `enforcement: null` for every catalogue entry, so the addresses
+  // have to come from the Safe's active policy of the same type.
+  it('falls back to the active policy addresses when the catalogue reports no enforcement', async () => {
+    mockAll({}, { catalogueEnforcement: null, activeEnforcement: 'guard' })
+    const { setTxFlow } = renderFlow()
+    await advanceToReview()
+
+    expect(screen.getByRole('button', { name: /review/i })).toBeEnabled()
+    fireEvent.click(screen.getByRole('button', { name: /review/i }))
+
+    await waitFor(() => expect(setTxFlow).toHaveBeenCalled())
+    // Built against the guard from the active policy.
+    expect(setTxFlow.mock.calls[0][0].props.txs[1].to).toBe(GUARD)
+  })
+
+  it('blocks Review with an explanation when neither source has the policy contracts', async () => {
+    mockAll({}, { catalogueEnforcement: null, activeEnforcement: null })
+    const { setTxFlow } = renderFlow()
+    await advanceToReview()
+
+    expect(screen.getByText(/policy engine isn't available/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /review/i })).toBeDisabled()
+    expect(setTxFlow).not.toHaveBeenCalled()
   })
 })
 

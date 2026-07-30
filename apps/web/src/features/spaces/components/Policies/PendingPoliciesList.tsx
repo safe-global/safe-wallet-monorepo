@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import { Button, Chip, Paper, Stack, Tooltip, Typography } from '@mui/material'
 import type { Address } from 'viem'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import type { PendingPolicy } from '@safe-global/store/gateway/policies/types'
 import { ChainLogo, SafeIdenticon } from '@/components/common/SpaceSafeBar/AccountsModal/shared'
 import useChains from '@/hooks/useChains'
 import { useSpaceSafes } from '@/features/spaces'
@@ -11,20 +12,50 @@ import { TxModalContext } from '@/components/tx-flow'
 import PolicyBatchFlow from '@/components/tx-flow/flows/PolicyBatch'
 import { flattenSafes, safeRefKey, type SafeRef } from './safeRefs'
 import { usePolicyRequests, type PolicyRequest } from './policyRequestStore'
+import { usePendingPolicies } from './hooks/usePendingPolicies'
+import { labelOf, summarize } from './policyLabels'
 import { encodeApplyConfiguration } from './shared/guardTx'
 
-const guardOf = (request: PolicyRequest): string | undefined =>
-  request.enforcement.via === 'guard' ? request.enforcement.guards.transactionGuard?.safePolicyGuard : undefined
+/**
+ * A row = what CGW reports as pending, plus the requester's local snapshot when this
+ * browser is the one that requested it. The snapshot is the only source of the
+ * `Configuration[]` that `applyConfiguration` replays — CGW returns just the root.
+ */
+type PendingRow = { pending: PendingPolicy; local?: PolicyRequest }
 
-const summarize = (request: PolicyRequest): string => {
-  const recipients = request.data.allowlist.reduce((n, entry) => n + entry.recipients.length, 0)
-  return `${request.data.allowlist.length} token(s) · ${recipients} recipient(s)`
+const sameRoot = (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
+
+const guardOf = (row: PendingRow): string | undefined => {
+  const enforcement = row.local?.enforcement ?? row.pending.policy?.enforcement
+  return enforcement?.via === 'guard' ? enforcement.guards.transactionGuard?.safePolicyGuard : undefined
 }
 
-const RequestRow = ({ request, onApply }: { request: PolicyRequest; onApply: (request: PolicyRequest) => void }) => {
+const describe = (row: PendingRow): { label: string; summary: string } => {
+  if (row.pending.policy) {
+    return { label: labelOf(row.pending.policy.type), summary: summarize(row.pending.policy) }
+  }
+
+  // CGW couldn't decode the root — fall back to what the requester stored locally.
+  if (row.local) {
+    const recipients = row.local.data.allowlist.reduce((n, entry) => n + entry.recipients.length, 0)
+    return {
+      label: labelOf(row.local.type),
+      summary: `${row.local.data.allowlist.length} token(s) · ${recipients} recipient(s)`,
+    }
+  }
+
+  return { label: 'Policy change', summary: '' }
+}
+
+const RequestRow = ({ row, onApply }: { row: PendingRow; onApply: (row: PendingRow) => void }) => {
+  const { pending, local } = row
   const nowSec = Math.floor(Date.now() / 1000)
-  const isReady = nowSec >= request.readyAt
-  const hoursLeft = Math.max(0, Math.ceil((request.readyAt - nowSec) / 3600))
+  // Trust CGW's verdict, but let the clock catch up between polls.
+  const isReady = pending.isReady || nowSec >= pending.readyAt
+  const hoursLeft = Math.max(0, Math.ceil((pending.readyAt - nowSec) / 3600))
+  // Without the requester's Configuration[] there is nothing to replay on-chain.
+  const canApply = isReady && !!local?.configurations.length && !!guardOf(row)
+  const { label, summary } = describe(row)
 
   return (
     <Stack gap={1} sx={{ py: 1.5, borderTop: '1px solid rgba(0, 0, 0, 0.04)' }}>
@@ -39,17 +70,17 @@ const RequestRow = ({ request, onApply }: { request: PolicyRequest; onApply: (re
             minWidth: 150,
           }}
         >
-          Token withdraw allowlist
+          {label}
         </Typography>
-        <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>{summarize(request)}</Typography>
+        {summary && <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>{summary}</Typography>}
       </Stack>
 
       <Stack direction="row" alignItems="center" gap={1} justifyContent="space-between">
-        <Tooltip title={request.configureRoot}>
+        <Tooltip title={pending.configureRoot}>
           <Typography
             sx={{ fontSize: 12, color: 'text.secondary', fontVariantNumeric: 'tabular-nums', cursor: 'default' }}
           >
-            Root {shortenAddress(request.configureRoot)}
+            Root {shortenAddress(pending.configureRoot)}
           </Typography>
         </Tooltip>
 
@@ -59,9 +90,19 @@ const RequestRow = ({ request, onApply }: { request: PolicyRequest; onApply: (re
           ) : (
             <Chip size="small" variant="outlined" label={`Ready in ~${hoursLeft}h`} />
           )}
-          <Button size="small" variant="contained" disabled={!isReady} onClick={() => onApply(request)}>
-            Apply
-          </Button>
+          <Tooltip
+            title={
+              isReady && !canApply
+                ? 'This change was requested from another device. Apply it from there, or request it again here.'
+                : ''
+            }
+          >
+            <span>
+              <Button size="small" variant="contained" disabled={!canApply} onClick={() => onApply(row)}>
+                Apply
+              </Button>
+            </span>
+          </Tooltip>
         </Stack>
       </Stack>
     </Stack>
@@ -73,20 +114,31 @@ const SafePendingPolicies = ({ safe }: { safe: SafeRef }) => {
   const { configs: chains } = useChains()
   const { setTxFlow } = useContext(TxModalContext)
   const contact = useAddressBookItem(safe.address, safe.chainId)
+  const { policies: pending, refetch } = usePendingPolicies(safe.chainId, safe.address)
   const { requests, remove } = usePolicyRequests(safe.chainId, safe.address)
 
-  if (requests.length === 0) return null
+  const rows = useMemo<PendingRow[]>(
+    () =>
+      pending.map((item) => ({
+        pending: item,
+        local: requests.find((request) => sameRoot(request.configureRoot, item.configureRoot)),
+      })),
+    [pending, requests],
+  )
+
+  if (rows.length === 0) return null
 
   const name = contact?.name || safe.name
 
-  const onApply = async (request: PolicyRequest) => {
-    const guard = guardOf(request)
-    if (!guard) return
+  const onApply = async (row: PendingRow) => {
+    const guard = guardOf(row)
+    if (!guard || !row.local) return
 
-    const tx = encodeApplyConfiguration(guard as Address, request.configurations)
+    const tx = encodeApplyConfiguration(guard as Address, row.local.configurations)
 
     // Point the app at this Safe so the tx-flow SDK/useSafeInfo resolve it, then
-    // hand off the applyConfiguration tx. On success, drop the pending record.
+    // hand off the applyConfiguration tx. On success, drop the local snapshot and
+    // re-read the pending list from CGW.
     const chain = chains.find((c) => c.chainId === safe.chainId)
     if (chain) {
       await router.replace(
@@ -101,7 +153,9 @@ const SafePendingPolicies = ({ safe }: { safe: SafeRef }) => {
         txs={[tx]}
         subtitle="Apply token withdraw change"
         onSubmit={(args) => {
-          if (args?.txId) remove(request.id)
+          if (!args?.txId) return
+          if (row.local) remove(row.local.id)
+          refetch()
         }}
       />,
     )
@@ -118,19 +172,18 @@ const SafePendingPolicies = ({ safe }: { safe: SafeRef }) => {
         <ChainLogo chainId={safe.chainId} size={16} />
       </Stack>
 
-      {requests.map((request) => (
-        <RequestRow key={request.id} request={request} onApply={onApply} />
+      {rows.map((row) => (
+        <RequestRow key={row.pending.configureRoot} row={row} onApply={onApply} />
       ))}
     </Paper>
   )
 }
 
 /**
- * Pending policy changes across the space's Safes — requested on-chain but not
- * yet applied (waiting out the SafePolicyGuard delay). Backed by local storage
- * (savePolicyRequestApi) until the real CGW pending endpoint lands. Each row
- * shows the config root + policy info and an Apply button that builds the
- * applyConfiguration Safe transaction once the delay has elapsed.
+ * Pending policy changes across the space's Safes — requested on-chain but not yet
+ * applied (waiting out the SafePolicyGuard delay). Read from the CGW pending
+ * endpoint; the locally stored request snapshot supplies the `Configuration[]` the
+ * Apply transaction replays, matched to a CGW row by `configureRoot`.
  */
 const PendingPoliciesList = () => {
   const { allSafes } = useSpaceSafes()

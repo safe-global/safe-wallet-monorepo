@@ -7,7 +7,9 @@ import {
   recoveryPolicyBuilder,
   tokenWithdrawPolicyBuilder,
   cosignerPolicyBuilder,
+  allowPolicyBuilder,
   availablePolicyBuilder,
+  pendingPolicyBuilder,
 } from './policies'
 
 const isDecimalString = (v: string) => /^\d+$/.test(v)
@@ -74,15 +76,37 @@ describe('policy builders', () => {
     }
   })
 
+  it('allowPolicyBuilder: the catch-all entry carries no data', () => {
+    const p = allowPolicyBuilder().build()
+    expect(p.type).toBe(PolicyType.Allow)
+    expect(p.data).toEqual({})
+    expect(p.id).toBe(`0x${'0'.repeat(64)}`)
+  })
+
   it('availablePolicyBuilder: catalogue entry with guard enforcement', () => {
     const a = availablePolicyBuilder().build()
     expect(Object.values(PolicyType)).toContain(a.type)
-    expect(a.enforcement.via).toBe('guard')
-    if (a.enforcement.via === 'guard') {
+    expect(a.enforcement?.via).toBe('guard')
+    if (a.enforcement?.via === 'guard') {
       expect(isAddress(a.enforcement.guards.transactionGuard!.policyContract)).toBe(true)
       expect(isAddress(a.enforcement.guards.transactionGuard!.safePolicyGuard)).toBe(true)
     }
     expect(a.configuredCount).toBeGreaterThanOrEqual(0)
+  })
+
+  // CGW currently returns `enforcement: null` for every catalogue entry.
+  it('availablePolicyBuilder: enforcement can be null', () => {
+    const a = availablePolicyBuilder().with({ enforcement: null }).build()
+    expect(a.enforcement).toBeNull()
+  })
+
+  it('pendingPolicyBuilder: request metadata wrapping the decoded change', () => {
+    const p = pendingPolicyBuilder().build()
+    expect(p.readyAt).toBe(p.requestedAt + 86_400)
+    expect(p.isReady).toBe(false)
+    expect(p.policy?.type).toBe(PolicyType.TokenWithdraw)
+    // CGW returns policy: null for roots it cannot decode.
+    expect(pendingPolicyBuilder().with({ policy: null }).build().policy).toBeNull()
   })
 })
 
@@ -99,6 +123,8 @@ describe('ActivePolicy discriminated union narrows on `type`', () => {
         return `allowlist ${p.data.allowlist.length}` // data.allowlist only exists here
       case PolicyType.Cosigner:
         return `rules ${p.data.rules.length}`
+      case PolicyType.Allow:
+        return 'allow all' // data is empty on this branch
     }
   }
 
@@ -107,5 +133,6 @@ describe('ActivePolicy discriminated union narrows on `type`', () => {
     expect(describePolicy(recoveryPolicyBuilder().build())).toMatch(/^recoverers \d+$/)
     expect(describePolicy(tokenWithdrawPolicyBuilder().build())).toMatch(/^allowlist \d+$/)
     expect(describePolicy(cosignerPolicyBuilder().build())).toMatch(/^rules \d+$/)
+    expect(describePolicy(allowPolicyBuilder().build())).toBe('allow all')
   })
 })
