@@ -13,7 +13,18 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { Ban, ChevronDown, ChevronRight, LifeBuoy, Plus, Shield, WalletMinimal } from 'lucide-react'
+import {
+  Ban,
+  ChevronDown,
+  ChevronRight,
+  Coins,
+  LifeBuoy,
+  Plus,
+  Shield,
+  ShieldCheck,
+  ShieldOff,
+  WalletMinimal,
+} from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import {
@@ -46,12 +57,26 @@ const WIZARD_BY_TYPE: Partial<Record<PolicyType, string>> = {
   [PolicyType.SpendingLimit]: 'spendingLimit',
   [PolicyType.Recovery]: 'accountRecovery',
   [PolicyType.TokenWithdraw]: 'tokenWithdraw',
+  [PolicyType.Cosigner]: 'cosigner',
 }
 
 const ICON_BY_TYPE: Partial<Record<PolicyType, LucideIcon>> = {
   [PolicyType.SpendingLimit]: WalletMinimal,
   [PolicyType.Recovery]: LifeBuoy,
   [PolicyType.TokenWithdraw]: Ban,
+  [PolicyType.Allow]: ShieldCheck,
+  [PolicyType.Deny]: ShieldOff,
+  [PolicyType.NativeTransfer]: Coins,
+}
+
+/** Why a catalogue entry can't be configured right now, if it can't. */
+const blockedReason = (entry: AvailablePolicy): string => {
+  if (!entry.available) return 'This policy isn’t available on this network yet.'
+  // Without the guard/module addresses there is nothing to build the transaction against.
+  if (!entry.enforcement) return 'Enforcement details are missing for this policy, so it can’t be configured yet.'
+  if (!WIZARD_BY_TYPE[entry.type]) return 'Configuring this policy from the wallet is coming soon.'
+
+  return ''
 }
 
 /** Beyond a few, badges stop being a cue and start being noise. */
@@ -201,7 +226,7 @@ const PendingEntry = ({
   const hoursLeft = Math.max(0, Math.ceil((row.pending.readyAt - nowSec) / 3600))
   const blockedMessage = plan.canApply ? '' : APPLY_BLOCKED_MESSAGE[plan.reason]
 
-  const tokens = row.local?.data.allowlist.map((entry) => entry.token) ?? []
+  const tokens = row.local?.data?.allowlist.map((entry) => entry.token) ?? row.local?.tokens ?? []
   const scope = tokens.length > 0 ? tokens.map((token) => token.symbol).join(' · ') : 'Requested change'
 
   return (
@@ -361,7 +386,7 @@ type PolicyTypeBlockProps = {
 
 const PolicyTypeBlock = ({ safe, entry, active, pendingRows, onAdd, onOpenDetail, onApply }: PolicyTypeBlockProps) => {
   const Icon = ICON_BY_TYPE[entry.type] ?? Shield
-  const canConfigure = !!WIZARD_BY_TYPE[entry.type]
+  const blocked = blockedReason(entry)
   const isEmpty = active.length === 0 && pendingRows.length === 0
 
   return (
@@ -390,13 +415,13 @@ const PolicyTypeBlock = ({ safe, entry, active, pendingRows, onAdd, onOpenDetail
       }
       meta={<StateChip active={active.length} pending={pendingRows.length} />}
       action={
-        canConfigure ? (
-          <Button variant="outline" size="sm" onClick={() => onAdd(entry.type)}>
-            <Plus size={14} /> Add
-          </Button>
-        ) : (
-          <Chip size="small" variant="outlined" label="Coming soon" sx={{ height: 20, fontSize: 10 }} />
-        )
+        <Tooltip title={blocked}>
+          <span>
+            <Button variant="outline" size="sm" disabled={!!blocked} onClick={() => onAdd(entry.type)}>
+              <Plus size={14} /> Add
+            </Button>
+          </span>
+        </Tooltip>
       }
     >
       <Stack gap={1}>
@@ -420,7 +445,7 @@ const PolicyTypeBlock = ({ safe, entry, active, pendingRows, onAdd, onOpenDetail
 
         {isEmpty && (
           <Typography sx={{ fontSize: 12.5, color: 'text.secondary', fontStyle: 'italic' }}>
-            {canConfigure ? 'Not configured on this Safe yet.' : 'Not available yet.'}
+            {blocked || 'Not configured on this Safe yet.'}
           </Typography>
         )}
       </Stack>
@@ -430,16 +455,51 @@ const PolicyTypeBlock = ({ safe, entry, active, pendingRows, onAdd, onOpenDetail
 
 /* ------------------------------ Fallback block ---------------------------- */
 
+/** One option for the fallback slot: what it does, and whether it can be installed. */
+const FallbackChoiceRow = ({
+  entry,
+  onAdd,
+}: {
+  entry: AvailablePolicy
+  onAdd: (type: PolicyType) => void
+}): ReactElement => {
+  const Icon = ICON_BY_TYPE[entry.type] ?? Shield
+  const blocked = blockedReason(entry)
+
+  return (
+    <Stack direction="row" alignItems="center" gap={1.25} sx={{ py: 0.75, px: 1.25 }}>
+      <Icon size={15} color="#737373" />
+      <Typography sx={{ fontSize: 13, fontWeight: 600 }} noWrap>
+        {entry.title || labelOf(entry.type)}
+      </Typography>
+      <Typography sx={{ fontSize: 12.5, color: 'text.secondary', flex: 1, minWidth: 0 }} noWrap>
+        {entry.description}
+      </Typography>
+      <Tooltip title={blocked}>
+        <span>
+          <Button variant="outline" size="sm" disabled={!!blocked} onClick={() => onAdd(entry.type)}>
+            <Plus size={14} /> Add
+          </Button>
+        </span>
+      </Tooltip>
+    </Stack>
+  )
+}
+
 const FallbackBlock = ({
   safe,
+  catalogue,
   active,
   pendingRows,
+  onAdd,
   onOpenDetail,
   onApply,
 }: {
   safe: SafeRef
+  catalogue: AvailablePolicy[]
   active: ActivePolicy[]
   pendingRows: PendingRow[]
+  onAdd: (type: PolicyType) => void
   onOpenDetail: (open: OpenDetail) => void
   onApply: (row: PendingRow) => void
 }) => {
@@ -474,7 +534,7 @@ const FallbackBlock = ({
     >
       <Stack gap={1}>
         <Typography sx={{ fontSize: 12.5, color: 'text.secondary', mb: 0.5 }}>
-          Covers any transaction no other policy matches.
+          Covers any transaction no other policy matches. Installing one replaces the current fallback.
         </Typography>
 
         {active.map((policy) => (
@@ -496,6 +556,11 @@ const FallbackBlock = ({
             No fallback policy on this Safe.
           </Typography>
         )}
+
+        {/* The choices for this slot, from the catalogue's `isFallback` entries. */}
+        {catalogue.map((entry) => (
+          <FallbackChoiceRow key={entry.type} entry={entry} onAdd={onAdd} />
+        ))}
       </Stack>
     </Section>
   )
@@ -595,22 +660,26 @@ const SafePolicyCard = ({ safe, onOpenDetail }: { safe: SafeRef; onOpenDetail: (
             No policies are available on this network yet.
           </Typography>
         ) : (
-          catalogue.map((entry) => (
-            <PolicyTypeBlock
-              key={entry.type}
-              safe={safe}
-              entry={entry}
-              active={grouped.specificActive.filter((policy) => policy.type === entry.type)}
-              pendingRows={grouped.specificPending.filter((row) => pendingTypeOf(row) === entry.type)}
-              onAdd={onAdd}
-              onOpenDetail={onOpenDetail}
-              onApply={onApply}
-            />
-          ))
+          catalogue
+            .filter((entry) => !entry.isFallback)
+            .map((entry) => (
+              <PolicyTypeBlock
+                key={entry.type}
+                safe={safe}
+                entry={entry}
+                active={grouped.specificActive.filter((policy) => policy.type === entry.type)}
+                pendingRows={grouped.specificPending.filter((row) => pendingTypeOf(row) === entry.type)}
+                onAdd={onAdd}
+                onOpenDetail={onOpenDetail}
+                onApply={onApply}
+              />
+            ))
         )}
 
         <FallbackBlock
           safe={safe}
+          catalogue={catalogue.filter((entry) => entry.isFallback)}
+          onAdd={onAdd}
           active={grouped.fallbackActive}
           pendingRows={grouped.fallbackPending}
           onOpenDetail={onOpenDetail}

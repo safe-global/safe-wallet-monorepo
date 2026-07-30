@@ -7,12 +7,16 @@ describe('PolicyType (wire-format contract)', () => {
     expect(PolicyType.TokenWithdraw).toBe('ERC20TransferPolicy')
     expect(PolicyType.Cosigner).toBe('cosigner')
     expect(PolicyType.Allow).toBe('AllowPolicy')
+    expect(PolicyType.NativeTransfer).toBe('NativeTransferPolicy')
+    expect(PolicyType.Deny).toBe('DenyPolicy')
   })
 
   it('has exactly the known types', () => {
     expect(Object.values(PolicyType).sort()).toEqual([
       'AllowPolicy',
+      'DenyPolicy',
       'ERC20TransferPolicy',
+      'NativeTransferPolicy',
       'cosigner',
       'recovery',
       'spending-limit',

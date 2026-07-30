@@ -12,7 +12,9 @@ import { entryLabelOf, entrySummaryOf, labelOf, summarize, tokensOf } from '../p
 describe('labelOf', () => {
   it('names each known type', () => {
     expect(labelOf(PolicyType.TokenWithdraw)).toBe('Token withdraw allowlist')
-    expect(labelOf(PolicyType.Allow)).toBe('Allow policy')
+    expect(labelOf(PolicyType.Allow)).toBe('Allow by default')
+    expect(labelOf(PolicyType.Deny)).toBe('Deny by default')
+    expect(labelOf(PolicyType.NativeTransfer)).toBe('Native transfers')
   })
 
   it('falls back to the wire value for a type it does not know', () => {

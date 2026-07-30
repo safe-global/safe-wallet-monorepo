@@ -8,11 +8,18 @@
  * separately, and both are zero.
  */
 
+import { isFallbackAccessId } from './shared/accessSelector'
+
 const isZeroHex = (value: string | null | undefined): boolean => !!value && /^0x0*$/i.test(value)
 
 /** The fallback access, from a pending binding or a rebuilt configuration. */
 export const isFallbackAccess = ({ target, selector }: { target?: string | null; selector?: string | null }): boolean =>
   isZeroHex(target) && isZeroHex(selector)
 
-/** The fallback access, from an active policy's packed `id`. */
-export const isFallbackPolicyId = (id: string | null | undefined): boolean => isZeroHex(id)
+/**
+ * The fallback access, from an active policy's packed `id`.
+ *
+ * Decoded rather than string-matched: a DELEGATECALL fallback has its operation bit set,
+ * so it isn't an all-zero key.
+ */
+export const isFallbackPolicyId = (id: string | null | undefined): boolean => isFallbackAccessId(id)

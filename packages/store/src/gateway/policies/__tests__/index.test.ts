@@ -61,9 +61,10 @@ describe('policiesApi', () => {
         type: PolicyType.TokenWithdraw,
         title: 'Token withdraw allowlist',
         description: 'Restrict, per token, which addresses the Safe can send to.',
-        available: false,
+        available: true,
+        isFallback: false,
         configuredCount: 1,
-        // CGW reports no wiring for the catalogue entries.
+        // Module-enforced types have no wiring to report, so builders can't use them.
         enforcement: null,
       },
     ]

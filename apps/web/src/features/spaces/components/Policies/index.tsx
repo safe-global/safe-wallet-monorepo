@@ -4,6 +4,7 @@ import PoliciesBySafe from './PoliciesBySafe'
 import SpendingLimitFlow from './SpendingLimitFlow'
 import RecoveryFlow from './RecoveryFlow'
 import ERC20TransferPolicyFlow from './ERC20TransferPolicy'
+import CosignerPolicyFlow from './CosignerPolicy'
 
 /**
  * The space's policies, led by the Safe they apply to.
@@ -26,6 +27,10 @@ const SpacePolicies = () => {
 
   if (router.query.policy === 'tokenWithdraw') {
     return <ERC20TransferPolicyFlow />
+  }
+
+  if (router.query.policy === 'cosigner') {
+    return <CosignerPolicyFlow />
   }
 
   return (

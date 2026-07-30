@@ -11,6 +11,7 @@ import * as useChainsHook from '@/hooks/useChains'
 import { TxModalContext } from '@/components/tx-flow'
 import { PolicyType } from '@safe-global/store/gateway/policies/types'
 import { availablePolicyBuilder, tokenWithdrawPolicyBuilder } from '@/tests/builders/policies'
+import { accessId } from '../../shared/accessSelector'
 import { SAFE_SET_GUARD_ABI, CONFIGURE_IMMEDIATELY_ABI, REQUEST_CONFIGURATION_ABI } from '../../shared/guardTx'
 import { ERC20_TRANSFER_SELECTOR, RECIPIENT_DATA_TYPE } from '../contracts'
 import ERC20TransferPolicyFlow from '../index'
@@ -251,6 +252,33 @@ describe('ERC20TransferPolicyFlow', () => {
     expect(screen.getByText('0xdead...de01')).toBeInTheDocument()
     expect(screen.getByText('Token')).toBeInTheDocument()
     expect(screen.getByText('Recipient')).toBeInTheDocument()
+  })
+
+  // The guard keeps one policy per access, so an occupied access is replaced silently.
+  it('warns on Review when an active policy already covers the selected token', async () => {
+    mockAll({}, { catalogueEnforcement: 'guard', activeEnforcement: null })
+    jest.spyOn(activeHook, 'useActivePolicies').mockReturnValue({
+      policies: [
+        tokenWithdrawPolicyBuilder()
+          .with({ id: accessId({ target: USDC, selector: ERC20_TRANSFER_SELECTOR, operation: 0 }) })
+          .build(),
+      ],
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    })
+    renderFlow()
+    await advanceToReview()
+
+    expect(screen.getByText(/replaces a policy already active/i)).toBeInTheDocument()
+  })
+
+  it('does not warn when no active policy covers the selected token', async () => {
+    mockAll()
+    renderFlow()
+    await advanceToReview()
+
+    expect(screen.queryByText(/replaces a policy already active/i)).not.toBeInTheDocument()
   })
 
   // CGW currently reports `enforcement: null` for every catalogue entry, so the addresses

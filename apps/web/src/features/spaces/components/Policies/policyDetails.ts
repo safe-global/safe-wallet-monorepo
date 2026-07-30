@@ -54,15 +54,21 @@ export const toPolicyDetail = (policy: ActivePolicy, safe: SafeRef): PolicyDetai
   }
 }
 
-/** The token-withdraw view built from the requester's own snapshot of the change. */
-const toLocalDetail = (local: PolicyRequest, safe: SafeRef): PolicyDetail => ({
-  type: 'ERC20TransferPolicy',
-  safe,
-  allowlist: local.data.allowlist.map((entry) => ({
-    token: { address: entry.token.address, symbol: entry.token.symbol },
-    recipients: entry.recipients,
-  })),
-})
+/**
+ * The token-withdraw view built from the requester's own snapshot of the change.
+ * Only allowlist-shaped requests have one; others fall through to the bindings view.
+ */
+const toLocalDetail = (local: PolicyRequest, safe: SafeRef): PolicyDetail | null =>
+  local.data
+    ? {
+        type: 'ERC20TransferPolicy',
+        safe,
+        allowlist: local.data.allowlist.map((entry) => ({
+          token: { address: entry.token.address, symbol: entry.token.symbol },
+          recipients: entry.recipients,
+        })),
+      }
+    : null
 
 /**
  * The drawer content for a pending request, from the richest source available:
@@ -82,7 +88,8 @@ export const toPendingDetail = ({
   const decoded = pending.policy ? toPolicyDetail(pending.policy, safe) : null
   if (decoded) return decoded
 
-  if (local) return toLocalDetail(local, safe)
+  const fromLocal = local ? toLocalDetail(local, safe) : null
+  if (fromLocal) return fromLocal
 
   return { type: 'bindings', safe, bindings: pending.policies ?? [] }
 }

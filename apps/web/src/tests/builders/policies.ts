@@ -145,6 +145,15 @@ export const availablePolicyBuilder = (): IBuilder<AvailablePolicy> =>
     title: 'Token withdraw allowlist',
     description: faker.lorem.sentence(),
     available: true,
+    isFallback: false,
     configuredCount: faker.number.int({ min: 0, max: 5 }),
     enforcement: guardEnforced(),
+  })
+
+/** A catalogue entry for the guard's single fallback slot (Allow / Deny / native transfers). */
+export const fallbackPolicyBuilder = (): IBuilder<AvailablePolicy> =>
+  availablePolicyBuilder().with({
+    type: PolicyType.Allow,
+    title: 'Allow by default',
+    isFallback: true,
   })

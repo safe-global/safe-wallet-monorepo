@@ -32,6 +32,9 @@ import { flattenSafes } from '../safeRefs'
 import { TokenSelector } from '../shared/TokenSelector'
 import { AddressSelectorList, type AddressEntry } from '../shared/AddressSelectorList'
 import { usePolicyGuard } from '../hooks/usePolicyGuard'
+import { useReplacedPolicies } from '../hooks/useReplacedPolicies'
+import { ReplacedPolicyWarning } from '../shared/ReplacedPolicyWarning'
+import { ERC20_TRANSFER_SELECTOR } from './contracts'
 import { useStorePolicyRequest } from '../hooks/useStorePolicyRequest'
 import { useAvailablePolicies } from '../hooks/useAvailablePolicies'
 import { useActivePolicies } from '../hooks/useActivePolicies'
@@ -144,6 +147,23 @@ const ERC20TransferPolicyFlow = () => {
   const { setTxFlow } = useContext(TxModalContext)
   const dispatch = useAppDispatch()
   const storePolicyRequest = useStorePolicyRequest()
+
+  // The guard keeps one policy per access, so an occupied access is replaced silently.
+  const replaced = useReplacedPolicies(
+    chainId,
+    safeAddress,
+    useMemo(
+      () =>
+        selectedTokens.map((token) => ({
+          target: token.address,
+          selector: ERC20_TRANSFER_SELECTOR,
+          operation: 0,
+          policy: '',
+          data: '',
+        })),
+      [selectedTokens],
+    ),
+  )
 
   const validRecipients = recipients.filter((r) => isAddress(r.address))
 
@@ -339,6 +359,8 @@ const ERC20TransferPolicyFlow = () => {
               <Typography variant="h2" sx={{ fontSize: 22, fontWeight: 700 }}>
                 Review
               </Typography>
+
+              <ReplacedPolicyWarning policies={replaced} />
 
               {!hasPolicyContracts && (
                 <Alert severity="error">

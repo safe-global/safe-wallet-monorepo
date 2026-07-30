@@ -4,7 +4,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { PolicyType } from '@safe-global/store/gateway/policies/types'
 import * as spaces from '@/features/spaces'
 import { TxModalContext } from '@/components/tx-flow'
-import { availablePolicyBuilder, tokenWithdrawPolicyBuilder } from '@/tests/builders/policies'
+import { availablePolicyBuilder, fallbackPolicyBuilder, tokenWithdrawPolicyBuilder } from '@/tests/builders/policies'
 import { APPLY_CONFIGURATION_ABI, computeConfigureRoot } from '../shared/guardTx'
 import { savePolicyRequestApi, type PolicyRequest } from '../policyRequestStore'
 import { useActivePolicies } from '../hooks/useActivePolicies'
@@ -38,8 +38,23 @@ const CATALOGUE = [
   availablePolicyBuilder()
     .with({ type: PolicyType.TokenWithdraw, title: 'Token withdraw allowlist', description: 'Restrict recipients.' })
     .build(),
+  // Module-enforced: CGW reports no wiring, so it can't be built against.
+  availablePolicyBuilder()
+    .with({
+      type: PolicyType.SpendingLimit,
+      title: 'Spending limit',
+      description: 'Cap withdrawals.',
+      enforcement: null,
+    })
+    .build(),
   availablePolicyBuilder()
     .with({ type: PolicyType.Cosigner, title: 'Cosigner', description: 'Require a cosigner.' })
+    .build(),
+  fallbackPolicyBuilder()
+    .with({ type: PolicyType.Allow, title: 'Allow by default', description: 'Permit anything uncovered.' })
+    .build(),
+  fallbackPolicyBuilder()
+    .with({ type: PolicyType.Deny, title: 'Deny by default', description: 'Block anything uncovered.' })
     .build(),
 ]
 
@@ -115,11 +130,17 @@ describe('PoliciesBySafe', () => {
 
     expect(screen.getByText('Ops Safe')).toBeInTheDocument()
     expect(screen.getByText('0x1111...1111')).toBeInTheDocument()
-    // One section per catalogue entry, plus the fallback group.
+    // A section per non-fallback catalogue entry…
     expect(screen.getByText('Token withdraw allowlist')).toBeInTheDocument()
+    expect(screen.getByText('Spending limit')).toBeInTheDocument()
     expect(screen.getByText('Cosigner')).toBeInTheDocument()
+    // …and the fallback types grouped under one slot, listed once expanded.
     expect(screen.getByText('Fallback')).toBeInTheDocument()
     expect(screen.getByText('only one applies at a time')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('Fallback'))
+    expect(screen.getByText('Allow by default')).toBeInTheDocument()
+    expect(screen.getByText('Deny by default')).toBeInTheDocument()
   })
 
   it('offers Add for an unconfigured policy type, with no badge cluttering the row', () => {
@@ -127,23 +148,62 @@ describe('PoliciesBySafe', () => {
 
     // The Add button carries the message; an empty-state badge would only add noise.
     expect(screen.queryByText('Not configured')).not.toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: 'Add' })).toHaveLength(1)
+    // One per configurable catalogue entry, fallback choices included.
+    expect(screen.getAllByRole('button', { name: 'Add' }).length).toBeGreaterThan(1)
 
     fireEvent.click(screen.getByText('Token withdraw allowlist'))
     expect(screen.getByText('Not configured on this Safe yet.')).toBeInTheDocument()
   })
 
-  // Types without a builder can't be added yet, and shouldn't pretend otherwise.
-  it('shows Coming soon instead of Add for a type with no wizard', () => {
+  // CGW returns `enforcement: null` for policies whose wiring it can't report; without
+  // the addresses there is nothing to build a transaction against.
+  it('disables Add when the catalogue reports no enforcement', () => {
     renderPage()
 
-    expect(screen.getByText('Coming soon')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Fallback'))
+
+    const disabled = screen.getAllByRole('button', { name: 'Add' }).filter((row) => row.hasAttribute('disabled'))
+
+    // Spending limit (no enforcement reported) and both fallbacks (no builder yet).
+    // Cosigner has enforcement AND a builder, so it stays enabled.
+    expect(disabled).toHaveLength(3)
+  })
+
+  it('explains why an unconfigurable policy is disabled', () => {
+    renderPage()
+
+    fireEvent.click(screen.getByText('Spending limit'))
+    expect(screen.getByText(/Enforcement details are missing/)).toBeInTheDocument()
+  })
+
+  it('keeps Add enabled for a policy CGW can wire up', () => {
+    renderPage()
+
+    fireEvent.click(screen.getByText('Token withdraw allowlist'))
+    // The section with enforcement is configurable, so its Add is live.
+    const enabled = screen.getAllByRole('button', { name: 'Add' }).filter((row) => !row.hasAttribute('disabled'))
+    expect(enabled.length).toBeGreaterThan(0)
+  })
+
+  it('opens the cosigner builder, which the wallet now has', () => {
+    const { push } = renderPage()
+
+    fireEvent.click(screen.getByText('Cosigner'))
+    const adds = screen.getAllByRole('button', { name: 'Add' }).filter((row) => !row.hasAttribute('disabled'))
+    // Token withdraw and cosigner are both configurable.
+    expect(adds).toHaveLength(2)
+
+    fireEvent.click(adds[1])
+    expect(push).toHaveBeenCalledWith(
+      expect.objectContaining({ query: expect.objectContaining({ policy: 'cosigner' }) }),
+    )
   })
 
   it('opens the builder for the clicked Safe, so the wizard need not ask again', () => {
     const { push } = renderPage()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+    const [add] = screen.getAllByRole('button', { name: 'Add' }).filter((row) => !row.hasAttribute('disabled'))
+    fireEvent.click(add)
 
     expect(push).toHaveBeenCalledWith(
       expect.objectContaining({

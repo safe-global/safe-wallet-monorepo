@@ -1,7 +1,12 @@
 import { useCallback } from 'react'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { localItem } from '@/services/local-storage/local'
-import type { PolicyType, Enforcement, TokenWithdrawPolicyData } from '@safe-global/store/gateway/policies/types'
+import type {
+  PolicyType,
+  Enforcement,
+  TokenInfo,
+  TokenWithdrawPolicyData,
+} from '@safe-global/store/gateway/policies/types'
 import type { PolicyConfiguration } from './shared/guardTx'
 
 /**
@@ -16,8 +21,10 @@ export type PolicyRequest = {
   safeAddress: string
   type: PolicyType
   enforcement: Enforcement
-  /** Human-readable policy info (currently the token-withdraw allowlist). */
-  data: TokenWithdrawPolicyData
+  /** The token-withdraw allowlist, when that's the policy being changed. */
+  data?: TokenWithdrawPolicyData
+  /** Tokens the change is scoped to, for policies without an allowlist (e.g. cosigner). */
+  tokens?: TokenInfo[]
   /** The raw Configuration[] to replay in `applyConfiguration`. */
   configurations: PolicyConfiguration[]
   /** keccak256(abi.encode(configurations)) — matches the on-chain requested root. */

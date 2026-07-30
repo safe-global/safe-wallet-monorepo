@@ -12,6 +12,10 @@ export enum PolicyType {
   Cosigner = 'cosigner',
   /** The SafePolicyGuard's unrestricted catch-all entry. Carries no data. */
   Allow = 'AllowPolicy',
+  /** Governs plain value transfers, which carry no function selector. */
+  NativeTransfer = 'NativeTransferPolicy',
+  /** Blocks anything no other policy covers. */
+  Deny = 'DenyPolicy',
 }
 
 /**
@@ -108,8 +112,25 @@ export type CosignerPolicy = PolicyBase & { type: PolicyType.Cosigner; data: Cos
 export type AllowPolicyData = Record<string, never>
 export type AllowPolicy = PolicyBase & { type: PolicyType.Allow; data: AllowPolicyData }
 
+/* ---- 6. Types whose data shape we don't model yet ---- */
+/**
+ * CGW offers these in the catalogue, but no active one has been observed, so the
+ * payload is left unmodelled rather than guessed at. The UI falls back to the type's
+ * title for them.
+ */
+export type OpaquePolicy = PolicyBase & {
+  type: PolicyType.NativeTransfer | PolicyType.Deny
+  data: Record<string, unknown>
+}
+
 /** Discriminated union of all active-policy shapes (returned by getActivePolicies). */
-export type ActivePolicy = SpendingLimitPolicy | RecoveryPolicy | TokenWithdrawPolicy | CosignerPolicy | AllowPolicy
+export type ActivePolicy =
+  | SpendingLimitPolicy
+  | RecoveryPolicy
+  | TokenWithdrawPolicy
+  | CosignerPolicy
+  | AllowPolicy
+  | OpaquePolicy
 
 /**
  * One binding of a requested change, as CGW reports it on a pending item.
@@ -173,7 +194,12 @@ export type AvailablePolicy = {
   title: string
   description: string
   available: boolean // false - Disable related Policy Card or hide it
-  configuredCount: number
+  /**
+   * Whether this policy occupies the guard's catch-all access. Only one fallback
+   * applies at a time, so these are grouped apart from the specific policies.
+   */
+  isFallback: boolean
+  configuredCount?: number
   /**
    * `null` when CGW has no wiring to report for this policy type on this chain
    * (e.g. no policy-engine deployment). Builders must then source the contract

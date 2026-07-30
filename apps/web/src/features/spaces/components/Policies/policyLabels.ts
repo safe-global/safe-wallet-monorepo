@@ -6,7 +6,9 @@ const POLICY_LABEL: Record<PolicyType, string> = {
   [PolicyType.Recovery]: 'Account recovery',
   [PolicyType.TokenWithdraw]: 'Token withdraw allowlist',
   [PolicyType.Cosigner]: 'Cosigner',
-  [PolicyType.Allow]: 'Allow policy',
+  [PolicyType.Allow]: 'Allow by default',
+  [PolicyType.NativeTransfer]: 'Native transfers',
+  [PolicyType.Deny]: 'Deny by default',
 }
 
 /** Falls back to the raw wire value so a policy type we don't know yet still labels its row. */

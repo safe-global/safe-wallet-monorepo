@@ -134,6 +134,10 @@ describe('ActivePolicy discriminated union narrows on `type`', () => {
         return `rules ${p.data.rules.length}`
       case PolicyType.Allow:
         return 'allow all' // data is empty on this branch
+      // Types whose payload CGW hasn't shown yet share one opaque branch.
+      case PolicyType.NativeTransfer:
+      case PolicyType.Deny:
+        return 'opaque'
     }
   }
 
