@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import { ArrowUpRight } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
@@ -49,11 +49,6 @@ jest.mock('../../../hooks/useResolvedSidebarNav', () => ({
   useResolvedSidebarNav: jest.fn((main, setup, options) => mockUseResolvedSidebarNav(main, setup, options)),
 }))
 
-jest.mock('@/features/feature-flag-overrides/FeatureFlagEditorDialogLoader', () => ({
-  FeatureFlagEditorDialogLoader: ({ open }: { open: boolean }) =>
-    open ? <div data-testid="feature-flag-editor-dialog" /> : null,
-}))
-
 jest.mock('../../../config', () => {
   const { AppRoutes } = require('@/config/routes')
   const Icon = () => null
@@ -68,11 +63,6 @@ jest.mock('../../../config', () => {
         { icon: Icon, label: 'Stake', href: AppRoutes.stake },
       ],
     },
-    sidebarDeveloperGroup: {
-      label: 'Developer',
-      items: [{ icon: Icon, label: 'Feature flags', id: 'feature-flags' }],
-    },
-    FEATURE_FLAGS_ITEM_ID: 'feature-flags',
   }
 })
 
@@ -81,16 +71,7 @@ const mockSafeSidebarVariant = jest.fn()
 jest.mock('../../SafeSidebarVariant', () => ({
   SafeSidebarVariant: (props: SafeSidebarVariantProps) => {
     mockSafeSidebarVariant(props)
-    return (
-      <div>
-        Safe sidebar
-        {props.developerGroup?.items.map((item) => (
-          <button key={item.id} onClick={item.onSelect}>
-            {item.label}
-          </button>
-        ))}
-      </div>
-    )
+    return <div>Safe sidebar</div>
   },
 }))
 
@@ -364,63 +345,6 @@ describe('SafeSidebarContent', () => {
 
       const [mainNav] = getCallArgs()
       expect(findTxItem(mainNav)?.badge).toBe('')
-    })
-  })
-
-  describe('developer group', () => {
-    it('renders the dev-only Feature flags item', () => {
-      // NEXT_PUBLIC_IS_PRODUCTION is not 'true' in the test env
-      const { getByText } = render(<SafeSidebarContent {...defaultProps} />)
-
-      expect(getByText('Feature flags')).toBeInTheDocument()
-    })
-
-    it('passes the override count as a badge on the Feature flags item', () => {
-      mockUseAppSelector.mockReturnValue(3)
-
-      render(<SafeSidebarContent {...defaultProps} />)
-
-      const { developerGroup } = mockSafeSidebarVariant.mock.calls.at(-1)![0] as SafeSidebarVariantProps
-      const featureFlagsItem = developerGroup?.items.find((item) => item.id === 'feature-flags')
-      expect(featureFlagsItem).toBeDefined()
-      expect(featureFlagsItem?.badge).toBe(3)
-    })
-
-    it('leaves the badge unset when there are no overrides', () => {
-      mockUseAppSelector.mockReturnValue(0)
-
-      render(<SafeSidebarContent {...defaultProps} />)
-
-      const { developerGroup } = mockSafeSidebarVariant.mock.calls.at(-1)![0] as SafeSidebarVariantProps
-      const featureFlagsItem = developerGroup?.items.find((item) => item.id === 'feature-flags')
-      expect(featureFlagsItem).toBeDefined()
-      expect(featureFlagsItem?.badge).toBeUndefined()
-    })
-
-    it('opens the editor dialog when the Feature flags item is selected', () => {
-      mockUseAppSelector.mockReturnValue(0)
-
-      const { getByRole, queryByTestId } = render(<SafeSidebarContent {...defaultProps} />)
-      expect(queryByTestId('feature-flag-editor-dialog')).not.toBeInTheDocument()
-
-      fireEvent.click(getByRole('button', { name: 'Feature flags' }))
-
-      expect(queryByTestId('feature-flag-editor-dialog')).toBeInTheDocument()
-    })
-
-    it('hides the Feature flags item in production', () => {
-      const originalIsProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION
-      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
-
-      try {
-        const { queryByText } = render(<SafeSidebarContent {...defaultProps} />)
-
-        expect(queryByText('Feature flags')).not.toBeInTheDocument()
-        const { developerGroup } = mockSafeSidebarVariant.mock.calls.at(-1)![0] as SafeSidebarVariantProps
-        expect(developerGroup).toBeUndefined()
-      } finally {
-        process.env.NEXT_PUBLIC_IS_PRODUCTION = originalIsProduction
-      }
     })
   })
 })

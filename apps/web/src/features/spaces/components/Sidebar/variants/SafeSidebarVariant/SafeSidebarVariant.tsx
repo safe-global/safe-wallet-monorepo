@@ -34,7 +34,6 @@ export const SafeSidebarVariant = ({
   workspaceHeader,
   mainNavItems,
   defiGroup,
-  developerGroup,
   isLoading = false,
 }: SafeSidebarVariantProps): ReactElement => {
   const router = useRouter()
@@ -128,7 +127,7 @@ export const SafeSidebarVariant = ({
           </motion.div>
         )}
 
-        <SidebarDeveloperGroup group={developerGroup} isLoading={isLoading} />
+        <SidebarDeveloperGroup isLoading={isLoading} />
       </motion.div>
     </SidebarContent>
   )

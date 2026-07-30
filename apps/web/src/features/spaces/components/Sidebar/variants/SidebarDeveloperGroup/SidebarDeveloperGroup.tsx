@@ -2,30 +2,30 @@ import type { ReactElement } from 'react'
 import { motion } from 'motion/react'
 import { SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarMenu } from '@/components/ui/sidebar'
 import css from '../../styles.module.css'
-import type { ResolvedSidebarActionGroup } from '../../types'
-import { NavItem } from '../NavItem'
+import { sidebarDeveloperGroup } from '../../config'
+import { SidebarDeveloperItem } from './SidebarDeveloperItem'
 import { itemVariants } from '../../constants'
 
 interface SidebarDeveloperGroupProps {
-  group?: ResolvedSidebarActionGroup | null
   isLoading?: boolean
 }
 
-/** Renders the dev-only Developer group identically in both sidebar variants, or nothing at all. */
-export const SidebarDeveloperGroup = ({
-  group,
-  isLoading = false,
-}: SidebarDeveloperGroupProps): ReactElement | null => {
-  if (!group?.items.length) return null
+/**
+ * The dev-only Developer group, rendered identically by both sidebar variants. It owns the production
+ * guard so no caller can leak the group, and each entry resolves its own state.
+ */
+export const SidebarDeveloperGroup = ({ isLoading = false }: SidebarDeveloperGroupProps): ReactElement | null => {
+  if (process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true') return null
+  if (!sidebarDeveloperGroup.items.length) return null
 
   return (
     <motion.div variants={itemVariants}>
       <SidebarGroup className={css.sidebarGroup}>
-        <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+        <SidebarGroupLabel>{sidebarDeveloperGroup.label}</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu className="gap-0">
-            {group.items.map((item) => (
-              <NavItem key={item.id} item={item} isLoading={isLoading} />
+            {sidebarDeveloperGroup.items.map((config) => (
+              <SidebarDeveloperItem key={config.id} config={config} isLoading={isLoading} />
             ))}
           </SidebarMenu>
         </SidebarGroupContent>

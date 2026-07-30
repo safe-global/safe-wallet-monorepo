@@ -1,13 +1,16 @@
 import { render, screen } from '@testing-library/react'
-import { Home, FileText, Users, Shield, FlaskConical } from 'lucide-react'
+import { Home, FileText, Users, Shield } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { SpacesSidebarVariant } from '../SpacesSidebarVariant'
-import type {
-  ResolvedSidebarNavItem,
-  ResolvedSidebarGroup,
-  ResolvedSidebarActionGroup,
-  SpaceItem,
-} from '../../../types'
+import type { ResolvedSidebarNavItem, ResolvedSidebarGroup, SpaceItem } from '../../../types'
+
+jest.mock('../../SidebarDeveloperGroup', () => ({
+  SidebarDeveloperGroup: ({ isLoading }: { isLoading?: boolean }) => (
+    <div data-testid="developer-group" data-loading={isLoading}>
+      Developer group
+    </div>
+  ),
+}))
 
 jest.mock('@/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -174,52 +177,38 @@ describe('SpacesSidebarVariant', () => {
     expect(screen.getByRole('button', { name: /Security/i })).toBeDisabled()
   })
 
+  // The group is self-contained (it reads the config and owns the production guard), so its own tests
+  // cover what it renders. Here we only pin down that this variant mounts it, last.
   describe('Developer group', () => {
-    const mockDeveloperGroup: ResolvedSidebarActionGroup = {
-      label: 'Developer',
-      items: [
-        {
-          icon: FlaskConical,
-          label: 'Feature flags',
-          id: 'feature-flags',
-          isActive: false,
-          disabled: false,
-          testId: 'sidebar-feature-flags-item',
-          onSelect: jest.fn(),
-        },
-      ],
-    }
-
-    const renderVariant = (developerGroup?: ResolvedSidebarActionGroup | null) =>
-      render(
+    it('mounts the developer group after the Setup group', () => {
+      const { container } = render(
         <SpacesSidebarVariant
           mainNavItems={mockMainNavItems}
           setupGroup={mockSetupGroup}
-          developerGroup={developerGroup}
           selectedSpace={mockSpace}
           spaces={mockSpaces}
         />,
       )
 
-    it('renders the group after the Setup group when provided', () => {
-      renderVariant(mockDeveloperGroup)
+      const marker = screen.getByTestId('developer-group')
+      expect(marker).toBeInTheDocument()
 
-      expect(screen.getByText('Developer')).toBeInTheDocument()
-      expect(screen.getByTestId('sidebar-feature-flags-item')).toHaveTextContent('Feature flags')
-
-      const labels = screen.getAllByText(/^(Setup|Developer)$/).map((node) => node.textContent)
-      expect(labels).toEqual(['Setup', 'Developer'])
+      const text = container.textContent ?? ''
+      expect(text.indexOf('Developer group')).toBeGreaterThan(text.indexOf('Setup'))
     })
 
-    it.each([
-      ['not provided', undefined],
-      ['null', null],
-      ['empty', { label: 'Developer', items: [] }],
-    ])('renders nothing for the group when %s', (_case, value) => {
-      renderVariant(value)
+    it('forwards the loading state to the group', () => {
+      render(
+        <SpacesSidebarVariant
+          mainNavItems={mockMainNavItems}
+          setupGroup={mockSetupGroup}
+          selectedSpace={mockSpace}
+          spaces={mockSpaces}
+          isLoading
+        />,
+      )
 
-      expect(screen.queryByText('Developer')).not.toBeInTheDocument()
-      expect(screen.queryByTestId('sidebar-feature-flags-item')).not.toBeInTheDocument()
+      expect(screen.getByTestId('developer-group')).toHaveAttribute('data-loading', 'true')
     })
   })
 })

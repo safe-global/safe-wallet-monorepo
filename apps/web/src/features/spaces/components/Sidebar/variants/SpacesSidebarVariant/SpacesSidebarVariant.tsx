@@ -9,12 +9,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import css from '../../styles.module.css'
-import type {
-  SpaceSelectorProps,
-  ResolvedSidebarNavItem,
-  ResolvedSidebarGroup,
-  ResolvedSidebarActionGroup,
-} from '../../types'
+import type { SpaceSelectorProps, ResolvedSidebarNavItem, ResolvedSidebarGroup } from '../../types'
 import { NavItem } from '../NavItem'
 import { SidebarDeveloperGroup } from '../SidebarDeveloperGroup'
 import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
@@ -23,7 +18,6 @@ import { containerVariants, itemVariants } from '../../constants'
 interface SpacesSidebarVariantProps extends SpaceSelectorProps {
   mainNavItems: ResolvedSidebarNavItem[] | null
   setupGroup: ResolvedSidebarGroup | null
-  developerGroup?: ResolvedSidebarActionGroup | null
   isLoading?: boolean
 }
 
@@ -35,7 +29,6 @@ export const SpacesSidebarVariant = ({
   spaces,
   mainNavItems,
   setupGroup,
-  developerGroup,
   isLoading = false,
 }: SpacesSidebarVariantProps): ReactElement => {
   const displayMainNavItems = mainNavItems || Array(SPACES_MAIN_NAV_SKELETON_COUNT).fill(null)
@@ -91,7 +84,7 @@ export const SpacesSidebarVariant = ({
           </SidebarGroup>
         </motion.div>
 
-        <SidebarDeveloperGroup group={developerGroup} isLoading={isLoading} />
+        <SidebarDeveloperGroup isLoading={isLoading} />
       </motion.div>
     </SidebarContent>
   )

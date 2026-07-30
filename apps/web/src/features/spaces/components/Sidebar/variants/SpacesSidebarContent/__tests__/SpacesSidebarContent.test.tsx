@@ -25,15 +25,6 @@ jest.mock('../../../hooks/useResolvedSidebarNav', () => ({
   useResolvedSidebarNav: jest.fn((main, setup, options) => mockUseResolvedSidebarNav(main, setup, options)),
 }))
 
-// The Developer group has its own tests; this file is about nav resolution only.
-jest.mock('../../../hooks/useSidebarDeveloperGroup', () => ({
-  useSidebarDeveloperGroup: () => ({ developerGroup: undefined, isEditorOpen: false, setEditorOpen: jest.fn() }),
-}))
-
-jest.mock('@/features/feature-flag-overrides/FeatureFlagEditorDialogLoader', () => ({
-  FeatureFlagEditorDialogLoader: () => null,
-}))
-
 jest.mock('../../../config', () => ({
   spacesMainNavigation: [
     {

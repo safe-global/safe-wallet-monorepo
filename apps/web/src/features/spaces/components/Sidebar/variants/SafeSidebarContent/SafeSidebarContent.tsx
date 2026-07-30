@@ -3,7 +3,6 @@ import { useCallback, useContext, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { safeMainNavigation, safeDefiGroup } from '../../config'
 import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
-import { useSidebarDeveloperGroup } from '../../hooks/useSidebarDeveloperGroup'
 import { SafeSidebarVariant } from '../SafeSidebarVariant'
 import { useQueuedTxsLength } from '@/hooks/useTxQueue'
 import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
@@ -12,7 +11,6 @@ import { isRouteEnabled } from '@/utils/chains'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import type { SafeWorkspaceHeaderProps, SidebarItemConfig, SpaceItem, SidebarVariantContentProps } from '../../types'
-import { FeatureFlagEditorDialogLoader } from '@/features/feature-flag-overrides/FeatureFlagEditorDialogLoader'
 import { getQuerySpaceId } from '../../utils'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 
@@ -109,8 +107,6 @@ export const SafeSidebarContent = ({
     })
   }, [visibleMainNavigation, queueSize])
 
-  const { developerGroup, isEditorOpen, setEditorOpen } = useSidebarDeveloperGroup()
-
   const { mainNavItems, setupGroup } = useResolvedSidebarNav(mainNavWithBadges, visibleDefiGroup, {
     getLink,
     isItemDisabled,
@@ -120,16 +116,11 @@ export const SafeSidebarContent = ({
   const workspaceHeader = buildWorkspaceHeader(selectedSpace, spaceInitial, spaces, onSpaceAdded)
 
   return (
-    <>
-      <SafeSidebarVariant
-        workspaceHeader={workspaceHeader}
-        mainNavItems={mainNavItems}
-        defiGroup={setupGroup}
-        developerGroup={developerGroup}
-        isLoading={isLoading}
-      />
-
-      {developerGroup && <FeatureFlagEditorDialogLoader open={isEditorOpen} onOpenChange={setEditorOpen} />}
-    </>
+    <SafeSidebarVariant
+      workspaceHeader={workspaceHeader}
+      mainNavItems={mainNavItems}
+      defiGroup={setupGroup}
+      isLoading={isLoading}
+    />
   )
 }
