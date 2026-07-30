@@ -40,13 +40,13 @@ import { POLICY_GUARD_DELAY_SEC } from '../shared/guardTx'
 import { tokensForChain } from '../SpendingLimitFlow/tokenList'
 import { buildTokenWithdrawBatch, type TokenAllowlist } from './buildBatch'
 
-const STEPS = [
+const ALL_STEPS = [
   { key: 'apply-to', label: 'Select Safe' },
   { key: 'tokens', label: 'Select Tokens' },
   { key: 'recipients', label: 'Recipients' },
   { key: 'review', label: 'Review' },
 ] as const
-type StepKey = (typeof STEPS)[number]['key']
+type StepKey = (typeof ALL_STEPS)[number]['key']
 
 /**
  * The SafePolicyGuard + ERC20TransferPolicy addresses to build against.
@@ -81,8 +81,16 @@ const ERC20TransferPolicyFlow = () => {
   const { allSafes, isLoading: safesLoading } = useSpaceSafes()
   const safes = useMemo<SafeRowItem[]>(() => flattenSafes(allSafes), [allSafes])
 
+  // The policies page picks the Safe before opening the wizard, so the Safe step is
+  // dropped rather than shown pre-answered.
+  const preselectedKey = typeof router.query.policySafe === 'string' ? router.query.policySafe.toLowerCase() : ''
+  const STEPS = useMemo(
+    () => (preselectedKey ? ALL_STEPS.filter((step) => step.key !== 'apply-to') : ALL_STEPS),
+    [preselectedKey],
+  )
+
   const [stepIndex, setStepIndex] = useState(0)
-  const [selectedKey, setSelectedKey] = useState('')
+  const [selectedKey, setSelectedKey] = useState(preselectedKey)
   const [selectedTokens, setSelectedTokens] = useState<TokenInfo[]>([])
   const [customTokens, setCustomTokens] = useState<TokenInfo[]>([])
   const [customTokenInput, setCustomTokenInput] = useState('')

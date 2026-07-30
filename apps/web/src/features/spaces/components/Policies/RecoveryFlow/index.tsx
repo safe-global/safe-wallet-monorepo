@@ -30,7 +30,7 @@ import {
   type SafeRowItem,
 } from '../wizardCommon'
 
-const STEPS = [
+const ALL_STEPS = [
   { key: 'apply-to', label: 'Apply to' },
   { key: 'recoverer', label: 'Recoverer' },
   { key: 'cooldown', label: 'Cooldown' },
@@ -38,7 +38,7 @@ const STEPS = [
   { key: 'review', label: 'Review' },
 ] as const
 
-type StepKey = (typeof STEPS)[number]['key']
+type StepKey = (typeof ALL_STEPS)[number]['key']
 
 type CooldownKey = '24h' | '7d' | '14d' | '28d' | '60d' | 'custom'
 type ExpiryKey = 'never' | '6m' | '1y' | 'custom'
@@ -715,8 +715,16 @@ const RecoveryFlow = () => {
   const router = useRouter()
   const { allSafes, isLoading } = useSpaceSafes()
 
+  // The policies page picks the Safe before opening the wizard, so the Safe step is
+  // dropped rather than shown pre-answered.
+  const preselectedSafeKey = typeof router.query.policySafe === 'string' ? router.query.policySafe.toLowerCase() : ''
+  const STEPS = useMemo(
+    () => (preselectedSafeKey ? ALL_STEPS.filter((step) => step.key !== 'apply-to') : ALL_STEPS),
+    [preselectedSafeKey],
+  )
+
   const rawStep = router.query.step as string | undefined
-  const stepKey: StepKey = STEPS.some((s) => s.key === rawStep) ? (rawStep as StepKey) : 'apply-to'
+  const stepKey: StepKey = STEPS.some((s) => s.key === rawStep) ? (rawStep as StepKey) : STEPS[0].key
   const currentIndex = STEPS.findIndex((s) => s.key === stepKey)
 
   const safesList = useMemo<SafeRowItem[]>(() => {
@@ -733,7 +741,7 @@ const RecoveryFlow = () => {
     return out
   }, [allSafes])
 
-  const [selectedSafeKey, setSelectedSafeKey] = useState<string>('')
+  const [selectedSafeKey, setSelectedSafeKey] = useState<string>(preselectedSafeKey)
   const selectedSafe = useMemo<SafeRowItem | null>(
     () => safesList.find((s) => safeKey(s) === selectedSafeKey) ?? null,
     [safesList, selectedSafeKey],
@@ -793,7 +801,7 @@ const RecoveryFlow = () => {
 
   const goBack = () => {
     if (currentIndex <= 0) {
-      const { policy: _p, step: _s, ...rest } = router.query
+      const { policy: _p, step: _s, policySafe: _ps, ...rest } = router.query
       void router.replace({ pathname: AppRoutes.spaces.policies, query: rest })
       return
     }
@@ -879,7 +887,7 @@ const RecoveryFlow = () => {
                 }),
               )
             }
-            const { policy: _p, step: _s, safe: _sf, ...rest } = router.query
+            const { policy: _p, step: _s, safe: _sf, policySafe: _ps, ...rest } = router.query
             void router.replace({ pathname: AppRoutes.spaces.policies, query: rest })
           }}
         />,

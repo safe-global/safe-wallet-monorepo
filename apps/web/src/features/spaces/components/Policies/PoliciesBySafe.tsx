@@ -1,0 +1,706 @@
+import { Fragment, useId, useMemo, useState, type ReactElement, type ReactNode } from 'react'
+import { useRouter } from 'next/router'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Chip,
+  Collapse,
+  IconButton,
+  Paper,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material'
+import { Ban, ChevronDown, ChevronRight, LifeBuoy, Plus, Shield, WalletMinimal } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import {
+  PolicyType,
+  type ActivePolicy,
+  type AvailablePolicy,
+  type PendingPolicy,
+} from '@safe-global/store/gateway/policies/types'
+import { AppRoutes } from '@/config/routes'
+import { Button } from '@/components/ui/button'
+import { ChainLogo, SafeIdenticon } from '@/components/common/SpaceSafeBar/AccountsModal/shared'
+import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
+import { useSpaceSafes } from '@/features/spaces'
+import { flattenSafes, safeRefKey, type SafeRef } from './safeRefs'
+import { entryLabelOf, entrySummaryOf, labelOf, tokensOf } from './policyLabels'
+import { isFallbackAccess, isFallbackPolicyId } from './policyAccess'
+import { toPendingDetail, toPolicyDetail } from './policyDetails'
+import { useActivePolicies } from './hooks/useActivePolicies'
+import { useAvailablePolicies } from './hooks/useAvailablePolicies'
+import { usePendingPolicies } from './hooks/usePendingPolicies'
+import { applyPlanOf, useApplyPendingPolicy, type PendingRow } from './hooks/useApplyPendingPolicy'
+import { usePolicyRequests } from './policyRequestStore'
+import { APPLY_BLOCKED_MESSAGE } from './shared/applyPlan'
+import { FallbackBadge } from './shared/FallbackBadge'
+import { TokenBadge } from './shared/TokenBadge'
+import PolicyDetailDrawer, { type PendingRequestInfo, type PolicyDetail } from './PolicyDetailDrawer'
+
+/** The wizard each policy type opens. Types without one can't be configured yet. */
+const WIZARD_BY_TYPE: Partial<Record<PolicyType, string>> = {
+  [PolicyType.SpendingLimit]: 'spendingLimit',
+  [PolicyType.Recovery]: 'accountRecovery',
+  [PolicyType.TokenWithdraw]: 'tokenWithdraw',
+}
+
+const ICON_BY_TYPE: Partial<Record<PolicyType, LucideIcon>> = {
+  [PolicyType.SpendingLimit]: WalletMinimal,
+  [PolicyType.Recovery]: LifeBuoy,
+  [PolicyType.TokenWithdraw]: Ban,
+}
+
+/** Beyond a few, badges stop being a cue and start being noise. */
+const MAX_TOKEN_BADGES = 3
+
+type OpenDetail = { detail: PolicyDetail; request?: PendingRequestInfo; isFallback: boolean }
+
+const requestInfoOf = (pending: PendingPolicy): PendingRequestInfo => ({
+  configureRoot: pending.configureRoot,
+  requestedAt: pending.requestedAt,
+  readyAt: pending.readyAt,
+  isReady: pending.isReady,
+})
+
+/** Which policy type a pending row is about, when anything says so. */
+const pendingTypeOf = (row: PendingRow): PolicyType | undefined => row.pending.policy?.type ?? row.local?.type
+
+const hasFallbackAccess = (row: PendingRow): boolean => {
+  const bindings = row.pending.policies
+  if (bindings?.length) return bindings.some(isFallbackAccess)
+
+  return !!row.local?.configurations.some(isFallbackAccess)
+}
+
+/* ------------------------------- Entry rows ------------------------------- */
+
+const EntryRow = ({
+  ariaLabel,
+  label,
+  summary,
+  badges,
+  action,
+  onOpen,
+}: {
+  ariaLabel: string
+  label: ReactNode
+  summary?: string
+  badges?: ReactNode
+  action?: ReactNode
+  onOpen: () => void
+}) => (
+  <Stack
+    direction="row"
+    alignItems="center"
+    gap={1.25}
+    role="button"
+    tabIndex={0}
+    aria-label={`${ariaLabel} details`}
+    onClick={onOpen}
+    onKeyDown={(e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        onOpen()
+      }
+    }}
+    sx={{
+      py: 1.25,
+      px: 1.25,
+      borderRadius: '12px',
+      backgroundColor: 'background.main',
+      cursor: 'pointer',
+      transition: 'background-color 150ms ease',
+      '&:hover': { backgroundColor: 'secondary.background' },
+      '&:hover .entry-chevron': { transform: 'translateX(2px)' },
+    }}
+  >
+    <Box sx={{ minWidth: 0, maxWidth: '45%' }}>{label}</Box>
+    {badges}
+    {summary && (
+      <Typography sx={{ fontSize: 12.5, color: 'text.secondary', flex: 1, minWidth: 0 }} noWrap>
+        {summary}
+      </Typography>
+    )}
+    <Box sx={{ flex: summary ? 0 : 1 }} />
+    {action}
+    <ChevronRight size={16} className="entry-chevron" color="#A1A3A7" style={{ transition: 'transform 150ms ease' }} />
+  </Stack>
+)
+
+const ActiveEntry = ({
+  policy,
+  safe,
+  onOpenDetail,
+}: {
+  policy: ActivePolicy
+  safe: SafeRef
+  onOpenDetail: (open: OpenDetail) => void
+}) => {
+  const detail = toPolicyDetail(policy, safe)
+  const isFallback = isFallbackPolicyId(policy.id)
+  const tokens = tokensOf(policy)
+  const scope = entryLabelOf(policy)
+
+  return (
+    <EntryRow
+      ariaLabel={scope}
+      label={
+        tokens.length > 0 ? (
+          <Stack direction="row" alignItems="center" gap={1} sx={{ minWidth: 0 }}>
+            {tokens.slice(0, MAX_TOKEN_BADGES).map((token) => (
+              <TokenBadge key={token.address} token={token} />
+            ))}
+            {tokens.length > MAX_TOKEN_BADGES && (
+              <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+                +{tokens.length - MAX_TOKEN_BADGES}
+              </Typography>
+            )}
+          </Stack>
+        ) : (
+          <Typography sx={{ fontSize: 13, fontWeight: 700 }} noWrap>
+            {scope}
+          </Typography>
+        )
+      }
+      summary={entrySummaryOf(policy)}
+      badges={
+        <>
+          <Chip
+            size="small"
+            color="success"
+            variant="outlined"
+            label="Active"
+            sx={{ height: 18, fontSize: 10, fontWeight: 700 }}
+          />
+          {isFallback && <FallbackBadge />}
+        </>
+      }
+      onOpen={() => detail && onOpenDetail({ detail, isFallback })}
+    />
+  )
+}
+
+const PendingEntry = ({
+  row,
+  safe,
+  onOpenDetail,
+  onApply,
+}: {
+  row: PendingRow
+  safe: SafeRef
+  onOpenDetail: (open: OpenDetail) => void
+  onApply: (row: PendingRow) => void
+}) => {
+  const nowSec = Math.floor(Date.now() / 1000)
+  const plan = applyPlanOf(row, nowSec)
+  const isReady = row.pending.isReady || nowSec >= row.pending.readyAt
+  const hoursLeft = Math.max(0, Math.ceil((row.pending.readyAt - nowSec) / 3600))
+  const blockedMessage = plan.canApply ? '' : APPLY_BLOCKED_MESSAGE[plan.reason]
+
+  const tokens = row.local?.data.allowlist.map((entry) => entry.token) ?? []
+  const scope = tokens.length > 0 ? tokens.map((token) => token.symbol).join(' · ') : 'Requested change'
+
+  return (
+    <EntryRow
+      ariaLabel={scope}
+      label={
+        tokens.length > 0 ? (
+          <Stack direction="row" alignItems="center" gap={1} sx={{ minWidth: 0 }}>
+            {tokens.slice(0, MAX_TOKEN_BADGES).map((token) => (
+              <TokenBadge key={token.address} token={token} />
+            ))}
+          </Stack>
+        ) : (
+          <Typography sx={{ fontSize: 13, fontWeight: 700 }} noWrap>
+            {scope}
+          </Typography>
+        )
+      }
+      summary={`Root ${shortenAddress(row.pending.configureRoot)}`}
+      badges={
+        <>
+          <Chip
+            size="small"
+            color={isReady ? 'warning' : 'default'}
+            variant="outlined"
+            label={isReady ? 'Ready to apply' : `Ready in ~${hoursLeft}h`}
+            sx={{ height: 18, fontSize: 10 }}
+          />
+          {hasFallbackAccess(row) && <FallbackBadge />}
+        </>
+      }
+      action={
+        <Box onClick={(e) => e.stopPropagation()}>
+          <Tooltip title={blockedMessage}>
+            <span>
+              <Button size="sm" disabled={!plan.canApply} onClick={() => onApply(row)}>
+                Apply
+              </Button>
+            </span>
+          </Tooltip>
+        </Box>
+      }
+      onOpen={() =>
+        onOpenDetail({
+          detail: toPendingDetail({ pending: row.pending, local: row.local, safe }),
+          request: requestInfoOf(row.pending),
+          isFallback: hasFallbackAccess(row),
+        })
+      }
+    />
+  )
+}
+
+/* ------------------------------- Disclosure ------------------------------- */
+
+type SectionProps = {
+  icon: ReactNode
+  title: ReactNode
+  meta?: ReactNode
+  action?: ReactNode
+  defaultOpen?: boolean
+  children: ReactNode
+}
+
+/**
+ * A collapsible section whose header is a plain row, so it can hold its own buttons —
+ * an AccordionSummary is a button itself, and nesting Add inside one is invalid markup
+ * that also makes the button ambiguous to assistive tech.
+ */
+const Section = ({ icon, title, meta, action, defaultOpen = false, children }: SectionProps) => {
+  const [open, setOpen] = useState(defaultOpen)
+  const contentId = useId()
+
+  return (
+    <Box sx={{ borderTop: '1px solid rgba(0, 0, 0, 0.04)' }}>
+      <Stack
+        direction="row"
+        alignItems="center"
+        gap={1.5}
+        onClick={() => setOpen((v) => !v)}
+        sx={{ minHeight: 60, py: 0.5, cursor: 'pointer' }}
+      >
+        {icon}
+        {title}
+        {meta}
+
+        <Box sx={{ flex: 1 }} />
+
+        {action && <Box onClick={(e) => e.stopPropagation()}>{action}</Box>}
+
+        <IconButton
+          size="small"
+          aria-expanded={open}
+          aria-controls={contentId}
+          aria-label={open ? 'Collapse' : 'Expand'}
+          onClick={(e) => {
+            e.stopPropagation()
+            setOpen((v) => !v)
+          }}
+        >
+          <ChevronDown
+            size={16}
+            color="#A1A3A7"
+            style={{ transform: open ? 'rotate(180deg)' : undefined, transition: 'transform 150ms ease' }}
+          />
+        </IconButton>
+      </Stack>
+
+      <Collapse in={open} unmountOnExit>
+        {/* Indented to the section title, so entries read as belonging to it. */}
+        <Box id={contentId} sx={{ pb: 2.5, pl: { xs: 0, sm: 5.25 } }}>
+          {children}
+        </Box>
+      </Collapse>
+    </Box>
+  )
+}
+
+/* ---------------------------- Policy type block --------------------------- */
+
+/** Nothing configured needs no badge — the Add button is the signal. */
+const StateChip = ({ active, pending }: { active: number; pending: number }): ReactElement | null => {
+  if (active > 0) {
+    return (
+      <Chip
+        size="small"
+        color="success"
+        variant="outlined"
+        label={active === 1 ? 'Active' : `${active} active`}
+        sx={{ height: 20, fontSize: 10, fontWeight: 700 }}
+      />
+    )
+  }
+  if (pending > 0) {
+    return (
+      <Chip
+        size="small"
+        color="warning"
+        variant="outlined"
+        label={pending === 1 ? 'Pending' : `${pending} pending`}
+        sx={{ height: 20, fontSize: 10, fontWeight: 700 }}
+      />
+    )
+  }
+  return null
+}
+
+type PolicyTypeBlockProps = {
+  safe: SafeRef
+  entry: AvailablePolicy
+  active: ActivePolicy[]
+  pendingRows: PendingRow[]
+  onAdd: (type: PolicyType) => void
+  onOpenDetail: (open: OpenDetail) => void
+  onApply: (row: PendingRow) => void
+}
+
+const PolicyTypeBlock = ({ safe, entry, active, pendingRows, onAdd, onOpenDetail, onApply }: PolicyTypeBlockProps) => {
+  const Icon = ICON_BY_TYPE[entry.type] ?? Shield
+  const canConfigure = !!WIZARD_BY_TYPE[entry.type]
+  const isEmpty = active.length === 0 && pendingRows.length === 0
+
+  return (
+    <Section
+      defaultOpen={!isEmpty}
+      icon={
+        <Box
+          sx={{
+            width: 28,
+            height: 28,
+            borderRadius: '9px',
+            backgroundColor: 'secondary.background',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <Icon size={15} color="#1C5538" />
+        </Box>
+      }
+      title={
+        <Typography sx={{ fontSize: 14.5, fontWeight: 700, letterSpacing: '-0.1px' }} noWrap>
+          {entry.title || labelOf(entry.type)}
+        </Typography>
+      }
+      meta={<StateChip active={active.length} pending={pendingRows.length} />}
+      action={
+        canConfigure ? (
+          <Button variant="outline" size="sm" onClick={() => onAdd(entry.type)}>
+            <Plus size={14} /> Add
+          </Button>
+        ) : (
+          <Chip size="small" variant="outlined" label="Coming soon" sx={{ height: 20, fontSize: 10 }} />
+        )
+      }
+    >
+      <Stack gap={1}>
+        {entry.description && (
+          <Typography sx={{ fontSize: 12.5, color: 'text.secondary', mb: 0.5 }}>{entry.description}</Typography>
+        )}
+
+        {active.map((policy) => (
+          <ActiveEntry key={policy.id} policy={policy} safe={safe} onOpenDetail={onOpenDetail} />
+        ))}
+
+        {pendingRows.map((row) => (
+          <PendingEntry
+            key={row.pending.configureRoot}
+            row={row}
+            safe={safe}
+            onOpenDetail={onOpenDetail}
+            onApply={onApply}
+          />
+        ))}
+
+        {isEmpty && (
+          <Typography sx={{ fontSize: 12.5, color: 'text.secondary', fontStyle: 'italic' }}>
+            {canConfigure ? 'Not configured on this Safe yet.' : 'Not available yet.'}
+          </Typography>
+        )}
+      </Stack>
+    </Section>
+  )
+}
+
+/* ------------------------------ Fallback block ---------------------------- */
+
+const FallbackBlock = ({
+  safe,
+  active,
+  pendingRows,
+  onOpenDetail,
+  onApply,
+}: {
+  safe: SafeRef
+  active: ActivePolicy[]
+  pendingRows: PendingRow[]
+  onOpenDetail: (open: OpenDetail) => void
+  onApply: (row: PendingRow) => void
+}) => {
+  const isEmpty = active.length === 0 && pendingRows.length === 0
+
+  return (
+    <Section
+      defaultOpen={!isEmpty}
+      icon={
+        <Box
+          sx={{
+            width: 28,
+            height: 28,
+            borderRadius: '9px',
+            backgroundColor: 'background.main',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <Shield size={15} color="#737373" />
+        </Box>
+      }
+      title={<Typography sx={{ fontSize: 14.5, fontWeight: 700, letterSpacing: '-0.1px' }}>Fallback</Typography>}
+      meta={
+        <>
+          <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>only one applies at a time</Typography>
+          <StateChip active={active.length} pending={pendingRows.length} />
+        </>
+      }
+    >
+      <Stack gap={1}>
+        <Typography sx={{ fontSize: 12.5, color: 'text.secondary', mb: 0.5 }}>
+          Covers any transaction no other policy matches.
+        </Typography>
+
+        {active.map((policy) => (
+          <ActiveEntry key={policy.id} policy={policy} safe={safe} onOpenDetail={onOpenDetail} />
+        ))}
+
+        {pendingRows.map((row) => (
+          <PendingEntry
+            key={row.pending.configureRoot}
+            row={row}
+            safe={safe}
+            onOpenDetail={onOpenDetail}
+            onApply={onApply}
+          />
+        ))}
+
+        {isEmpty && (
+          <Typography sx={{ fontSize: 12.5, color: 'text.secondary', fontStyle: 'italic' }}>
+            No fallback policy on this Safe.
+          </Typography>
+        )}
+      </Stack>
+    </Section>
+  )
+}
+
+/* -------------------------------- Safe card ------------------------------- */
+
+const SafePolicyCard = ({ safe, onOpenDetail }: { safe: SafeRef; onOpenDetail: (open: OpenDetail) => void }) => {
+  const router = useRouter()
+  const contact = useAddressBookItem(safe.address, safe.chainId)
+  const { policies: catalogue, isLoading: catalogueLoading } = useAvailablePolicies(safe.chainId, safe.address)
+  const { policies: active } = useActivePolicies(safe.chainId, safe.address)
+  const { policies: pending, refetch } = usePendingPolicies(safe.chainId, safe.address)
+  const { requests } = usePolicyRequests(safe.chainId, safe.address)
+  const onApply = useApplyPendingPolicy(safe, refetch)
+
+  const pendingRows = useMemo<PendingRow[]>(
+    () =>
+      pending.map((item) => ({
+        pending: item,
+        local: requests.find((request) => request.configureRoot.toLowerCase() === item.configureRoot.toLowerCase()),
+      })),
+    [pending, requests],
+  )
+
+  const grouped = useMemo(() => {
+    const isFallbackActive = (policy: ActivePolicy) => isFallbackPolicyId(policy.id)
+
+    return {
+      fallbackActive: active.filter(isFallbackActive),
+      fallbackPending: pendingRows.filter(hasFallbackAccess),
+      specificActive: active.filter((policy) => !isFallbackActive(policy)),
+      specificPending: pendingRows.filter((row) => !hasFallbackAccess(row)),
+    }
+  }, [active, pendingRows])
+
+  // Anything CGW couldn't attribute to a policy type still has to be reachable.
+  const untypedPending = grouped.specificPending.filter((row) => !pendingTypeOf(row))
+
+  const onAdd = (type: PolicyType) => {
+    const flow = WIZARD_BY_TYPE[type]
+    if (!flow) return
+
+    void router.push({
+      pathname: AppRoutes.spaces.policies,
+      // `policySafe` preselects the Safe so the wizard can skip its Safe-picker step.
+      query: { ...router.query, policy: flow, policySafe: `${safe.chainId}:${safe.address}` },
+    })
+  }
+
+  const name = contact?.name || safe.name
+  const activeCount = active.length
+  const pendingCount = pendingRows.length
+
+  return (
+    <Accordion
+      defaultExpanded
+      disableGutters
+      elevation={0}
+      square
+      sx={{
+        borderRadius: '16px',
+        border: '1px solid rgba(0, 0, 0, 0.04)',
+        '&:before': { display: 'none' },
+        overflow: 'hidden',
+      }}
+    >
+      <AccordionSummary expandIcon={<ChevronDown size={20} color="#A1A3A7" />} sx={{ px: 2.5, minHeight: 76 }}>
+        <Stack direction="row" alignItems="center" gap={1.5} sx={{ flex: 1, minWidth: 0, pr: 2 }}>
+          <SafeIdenticon address={safe.address} size={36} />
+
+          <Stack sx={{ minWidth: 0 }}>
+            {name && (
+              <Typography sx={{ fontSize: 17, fontWeight: 700, letterSpacing: '-0.3px', lineHeight: 1.25 }} noWrap>
+                {name}
+              </Typography>
+            )}
+            <Stack direction="row" alignItems="center" gap={0.75}>
+              <Typography sx={{ fontSize: 13.5, color: 'text.secondary', fontVariantNumeric: 'tabular-nums' }} noWrap>
+                {shortenAddress(safe.address)}
+              </Typography>
+              <ChainLogo chainId={safe.chainId} size={14} />
+            </Stack>
+          </Stack>
+
+          <Box sx={{ flex: 1 }} />
+
+          <Typography sx={{ fontSize: 12.5, color: 'text.secondary', fontWeight: 600 }}>
+            {activeCount} active{pendingCount > 0 ? ` · ${pendingCount} pending` : ''}
+          </Typography>
+        </Stack>
+      </AccordionSummary>
+
+      <AccordionDetails sx={{ px: 2.5, pt: 0, pb: 1.5 }}>
+        {catalogue.length === 0 && !catalogueLoading ? (
+          <Typography sx={{ fontSize: 12.5, color: 'text.secondary', fontStyle: 'italic', py: 1 }}>
+            No policies are available on this network yet.
+          </Typography>
+        ) : (
+          catalogue.map((entry) => (
+            <PolicyTypeBlock
+              key={entry.type}
+              safe={safe}
+              entry={entry}
+              active={grouped.specificActive.filter((policy) => policy.type === entry.type)}
+              pendingRows={grouped.specificPending.filter((row) => pendingTypeOf(row) === entry.type)}
+              onAdd={onAdd}
+              onOpenDetail={onOpenDetail}
+              onApply={onApply}
+            />
+          ))
+        )}
+
+        <FallbackBlock
+          safe={safe}
+          active={grouped.fallbackActive}
+          pendingRows={grouped.fallbackPending}
+          onOpenDetail={onOpenDetail}
+          onApply={onApply}
+        />
+
+        {untypedPending.length > 0 && (
+          <Section
+            defaultOpen
+            icon={
+              <Box
+                sx={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '9px',
+                  backgroundColor: 'background.main',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Shield size={15} color="#737373" />
+              </Box>
+            }
+            title={
+              <Typography sx={{ fontSize: 14.5, fontWeight: 700, letterSpacing: '-0.1px' }}>
+                Other pending changes
+              </Typography>
+            }
+            meta={<StateChip active={0} pending={untypedPending.length} />}
+          >
+            <Stack gap={1}>
+              {untypedPending.map((row) => (
+                <PendingEntry
+                  key={row.pending.configureRoot}
+                  row={row}
+                  safe={safe}
+                  onOpenDetail={onOpenDetail}
+                  onApply={onApply}
+                />
+              ))}
+            </Stack>
+          </Section>
+        )}
+      </AccordionDetails>
+    </Accordion>
+  )
+}
+
+/**
+ * Policies, grouped the way they are enforced: per Safe.
+ *
+ * A policy applies to one Safe, and CGW reports the catalogue, the configured policies
+ * and the pending requests per Safe — so the page leads with the Safe and nests the
+ * policy types under it, instead of asking the user to pick a policy and then a Safe.
+ * Each type shows its state and its entries; the fallback access gets its own group
+ * because only one policy can occupy it.
+ */
+const PoliciesBySafe = (): ReactElement | null => {
+  const { allSafes, isLoading } = useSpaceSafes()
+  const safes = useMemo(() => flattenSafes(allSafes), [allSafes])
+  const [openDetail, setOpenDetail] = useState<OpenDetail | null>(null)
+
+  if (safes.length === 0) {
+    return (
+      <Paper elevation={0} sx={{ padding: '14px 18px', borderRadius: '14px', border: '1px dashed rgba(0,0,0,0.08)' }}>
+        <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>
+          {isLoading ? 'Loading Safes…' : 'Add a Safe to this space to configure policies.'}
+        </Typography>
+      </Paper>
+    )
+  }
+
+  return (
+    <Stack gap={2.5} sx={{ maxWidth: 1040 }}>
+      {safes.map((safe) => (
+        <Fragment key={safeRefKey(safe)}>
+          <SafePolicyCard safe={safe} onOpenDetail={setOpenDetail} />
+        </Fragment>
+      ))}
+
+      <PolicyDetailDrawer
+        policy={openDetail?.detail ?? null}
+        request={openDetail?.request}
+        isFallback={openDetail?.isFallback}
+        onClose={() => setOpenDetail(null)}
+      />
+    </Stack>
+  )
+}
+
+export default PoliciesBySafe
