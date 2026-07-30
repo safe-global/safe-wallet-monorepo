@@ -38,7 +38,7 @@ export function useThreatAnalysis(
   const txToAnalyze = overrideSafeTx || safeTx || safeMessage
 
   const safeTxToCheck = (txToAnalyze && 'data' in txToAnalyze ? txToAnalyze : undefined) as SafeTransaction | undefined
-  const { isNested, isNestedLoading } = useNestedTransaction(safeTxToCheck, chain)
+  const { isNested, isNestedLoading, nestedSafeInfo, nestedSafeTx } = useNestedTransaction(safeTxToCheck, chain)
 
   const mainTxProps = useMemo(
     () => ({
@@ -97,10 +97,11 @@ export function useThreatAnalysis(
     return [combinedResult, mainError || nestedError, mainLoading || nestedLoading]
   }, [threatAnalysis, nestedThreatAnalysis, isNested, isNestedLoading, eligibilityLoading])
 
-  return useThreatAnalysisWithGuard(combinedThreatAnalysis, {
-    safeTx: safeTxToCheck,
-    safeAddress,
-    safeVersion: version,
-    web3ReadOnly,
-  })
+  // A nested tx executes its setGuard on the nested Safe, so validate the guard against the nested
+  // tx and Safe; otherwise the outer execTransaction hides the setGuard and the check is skipped.
+  const guardCheckParams = isNested
+    ? { safeTx: nestedSafeTx, safeAddress: nestedSafeInfo?.address.value, safeVersion: nestedSafeInfo?.version }
+    : { safeTx: safeTxToCheck, safeAddress, safeVersion: version }
+
+  return useThreatAnalysisWithGuard(combinedThreatAnalysis, { ...guardCheckParams, web3ReadOnly })
 }

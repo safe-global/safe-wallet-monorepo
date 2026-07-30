@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { getAddress, isAddress, JsonRpcProvider, ZeroAddress } from 'ethers'
 import semverSatisfies from 'semver/functions/satisfies'
 import { decodeMultiSendData } from '@safe-global/protocol-kit'
-import type { SafeTransaction } from '@safe-global/types-kit'
+import { OperationType, type SafeTransaction } from '@safe-global/types-kit'
 import { ERC721__factory, Multi_send__factory, Safe__factory } from '@safe-global/utils/types/contracts'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { type AnalysisResult, Severity, ThreatStatus } from '../types'
@@ -54,7 +54,9 @@ export const decodeSetGuardTargets = (safeTx?: SafeTransaction, safeAddress?: st
     return [direct]
   }
 
-  if (data.startsWith(MULTI_SEND_SELECTOR)) {
+  // A genuine MultiSend batch is delegate-called; a plain call that merely starts with the
+  // selector cannot execute the inner setGuard, so ignore it to avoid false positives.
+  if (data.startsWith(MULTI_SEND_SELECTOR) && safeTx?.data.operation === OperationType.DelegateCall) {
     try {
       return decodeMultiSendData(data)
         .map((inner) => decodeGuardFromCall(inner.to, inner.data, safeAddress))
@@ -76,6 +78,14 @@ const buildInvalidGuardResult = (guardAddress: string): InvalidGuardResult => ({
   addresses: [{ address: guardAddress }],
 })
 
+// ethers reports a reverted call or an undecodable response (EOA / non-ERC-165 contract) with these
+// codes. Any other rejection (network down, timeout, rate limit) is a transport failure, not proof
+// the guard is invalid, so it must not raise a "bricked Safe" finding.
+const CONTRACT_REJECTION_CODES = new Set(['CALL_EXCEPTION', 'BAD_DATA'])
+
+const isContractRejection = (error: unknown): boolean =>
+  CONTRACT_REJECTION_CODES.has((error as { code?: string })?.code ?? '')
+
 const validateGuardInterface = async (
   guardAddress: string,
   web3ReadOnly: JsonRpcProvider,
@@ -86,9 +96,13 @@ const validateGuardInterface = async (
       GUARD_INTERFACE_ID,
     )
     return supportsGuardInterface ? undefined : buildInvalidGuardResult(guardAddress)
-  } catch {
+  } catch (error) {
     // EOA, non-contract, or a contract without ERC-165 — cannot be a valid guard.
-    return buildInvalidGuardResult(guardAddress)
+    if (isContractRejection(error)) {
+      return buildInvalidGuardResult(guardAddress)
+    }
+    // Inconclusive transport error: surface it via useAsync rather than crying wolf.
+    throw error
   }
 }
 
@@ -110,7 +124,7 @@ export const useGuardCheck = ({
 }): AsyncResult<InvalidGuardResult[]> => {
   const guardTargets = useMemo(
     // address(0) removes the guard, which is always safe.
-    () => decodeSetGuardTargets(safeTx, safeAddress).filter((addr) => getAddress(addr) !== ZeroAddress),
+    () => decodeSetGuardTargets(safeTx, safeAddress).filter((addr) => addr.toLowerCase() !== ZeroAddress),
     [safeTx, safeAddress],
   )
 

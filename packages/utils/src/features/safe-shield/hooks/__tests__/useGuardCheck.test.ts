@@ -28,18 +28,22 @@ const mockSupportsInterface = (impl: () => Promise<boolean>) => {
 
 const encodeSetGuard = (guard: string) => safeInterface.encodeFunctionData('setGuard', [guard])
 
-// The hook only reads safeTx.data.{to,data}; build a minimal transaction targeting `to`.
-const makeTx = (to: string, data: string): SafeTransaction =>
-  ({ data: { to, value: '0', data, operation: 0 } }) as unknown as SafeTransaction
+// Builds an ethers-shaped rejection so the hook can classify reverts vs. transport failures.
+const rpcError = (code: string): Error => Object.assign(new Error(code), { code })
+
+// The hook only reads safeTx.data.{to,data,operation}; build a minimal transaction targeting `to`.
+const makeTx = (to: string, data: string, operation = 0): SafeTransaction =>
+  ({ data: { to, value: '0', data, operation } }) as unknown as SafeTransaction
 
 const makeSetGuardTx = (guard: string, to: string): SafeTransaction => makeTx(to, encodeSetGuard(guard))
 
 // Wraps inner calls in a MultiSend batch (operation 1, delegatecall to the MultiSend contract).
-const makeMultiSendTx = (inner: Array<{ to: string; data: string }>): SafeTransaction => {
+const makeMultiSendTx = (inner: Array<{ to: string; data: string }>, operation = 1): SafeTransaction => {
   const transactions = encodeMultiSendData(inner.map(({ to, data }) => ({ to, value: '0', data, operation: 0 })))
   return makeTx(
     getAddress(faker.finance.ethereumAddress()),
     multiSendInterface.encodeFunctionData('multiSend', [transactions]),
+    operation,
   )
 }
 
@@ -65,6 +69,11 @@ describe('decodeSetGuardTargets', () => {
   it('ignores a nested setGuard targeting a different contract', () => {
     const other = getAddress(faker.finance.ethereumAddress())
     const tx = makeMultiSendTx([{ to: other, data: encodeSetGuard(guard) }])
+    expect(decodeSetGuardTargets(tx, safeAddress)).toEqual([])
+  })
+
+  it('ignores a MultiSend-shaped payload that is not a delegatecall', () => {
+    const tx = makeMultiSendTx([{ to: safeAddress, data: encodeSetGuard(guard) }], 0)
     expect(decodeSetGuardTargets(tx, safeAddress)).toEqual([])
   })
 
@@ -127,7 +136,7 @@ describe('useGuardCheck', () => {
   })
 
   it('flags a guard when the interface check reverts (EOA / no ERC-165)', async () => {
-    mockSupportsInterface(() => Promise.reject(new Error('call revert exception')))
+    mockSupportsInterface(() => Promise.reject(rpcError('BAD_DATA')))
 
     const { result } = renderGuardCheck({
       safeTx: makeSetGuardTx(guard, safeAddress),
@@ -138,6 +147,22 @@ describe('useGuardCheck', () => {
 
     await waitFor(() => expect(result.current[2]).toBe(false))
     expect(result.current[0]?.[0].type).toBe(ThreatStatus.INVALID_GUARD)
+  })
+
+  it('does not flag a guard when the interface check hits a transport error', async () => {
+    mockSupportsInterface(() => Promise.reject(rpcError('TIMEOUT')))
+
+    const { result } = renderGuardCheck({
+      safeTx: makeSetGuardTx(guard, safeAddress),
+      safeAddress,
+      safeVersion: '1.3.0',
+      web3ReadOnly,
+    })
+
+    await waitFor(() => expect(result.current[2]).toBe(false))
+    // Inconclusive failure surfaces as an error, never a false "bricked Safe" finding.
+    expect(result.current[0]).toBeUndefined()
+    expect(result.current[1]).toBeInstanceOf(Error)
   })
 
   it('does not flag a guard that implements the interface', async () => {
