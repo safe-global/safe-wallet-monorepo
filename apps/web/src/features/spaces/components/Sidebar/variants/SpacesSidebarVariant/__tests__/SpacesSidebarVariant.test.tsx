@@ -1,8 +1,13 @@
 import { render, screen } from '@testing-library/react'
-import { Home, FileText, Users, Shield } from 'lucide-react'
+import { Home, FileText, Users, Shield, FlaskConical } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { SpacesSidebarVariant } from '../SpacesSidebarVariant'
-import type { ResolvedSidebarNavItem, ResolvedSidebarGroup, SpaceItem } from '../../../types'
+import type {
+  ResolvedSidebarNavItem,
+  ResolvedSidebarGroup,
+  ResolvedSidebarActionGroup,
+  SpaceItem,
+} from '../../../types'
 
 jest.mock('@/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -167,5 +172,54 @@ describe('SpacesSidebarVariant', () => {
     )
 
     expect(screen.getByRole('button', { name: /Security/i })).toBeDisabled()
+  })
+
+  describe('Developer group', () => {
+    const mockDeveloperGroup: ResolvedSidebarActionGroup = {
+      label: 'Developer',
+      items: [
+        {
+          icon: FlaskConical,
+          label: 'Feature flags',
+          id: 'feature-flags',
+          isActive: false,
+          disabled: false,
+          testId: 'sidebar-feature-flags-item',
+          onSelect: jest.fn(),
+        },
+      ],
+    }
+
+    const renderVariant = (developerGroup?: ResolvedSidebarActionGroup | null) =>
+      render(
+        <SpacesSidebarVariant
+          mainNavItems={mockMainNavItems}
+          setupGroup={mockSetupGroup}
+          developerGroup={developerGroup}
+          selectedSpace={mockSpace}
+          spaces={mockSpaces}
+        />,
+      )
+
+    it('renders the group after the Setup group when provided', () => {
+      renderVariant(mockDeveloperGroup)
+
+      expect(screen.getByText('Developer')).toBeInTheDocument()
+      expect(screen.getByTestId('sidebar-feature-flags-item')).toHaveTextContent('Feature flags')
+
+      const labels = screen.getAllByText(/^(Setup|Developer)$/).map((node) => node.textContent)
+      expect(labels).toEqual(['Setup', 'Developer'])
+    })
+
+    it.each([
+      ['not provided', undefined],
+      ['null', null],
+      ['empty', { label: 'Developer', items: [] }],
+    ])('renders nothing for the group when %s', (_case, value) => {
+      renderVariant(value)
+
+      expect(screen.queryByText('Developer')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('sidebar-feature-flags-item')).not.toBeInTheDocument()
+    })
   })
 })
