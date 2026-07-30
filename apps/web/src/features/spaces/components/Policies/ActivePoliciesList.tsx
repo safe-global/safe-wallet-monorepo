@@ -9,6 +9,8 @@ import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import { flattenSafes, safeRefKey, type SafeRef } from './safeRefs'
 import { labelOf, summarize } from './policyLabels'
 import { toPolicyDetail } from './policyDetails'
+import { isFallbackPolicyId } from './policyAccess'
+import { FallbackBadge } from './shared/FallbackBadge'
 import { useActivePolicies } from './hooks/useActivePolicies'
 import PolicyDetailDrawer, { type PolicyDetail } from './PolicyDetailDrawer'
 
@@ -49,6 +51,7 @@ const PolicyRow = ({ policy, onOpen }: { policy: ActivePolicy; onOpen?: () => vo
     >
       {labelOf(policy.type)}
     </Typography>
+    {isFallbackPolicyId(policy.id) && <FallbackBadge />}
     <Typography sx={{ fontSize: 13, color: 'text.secondary', flex: 1 }}>{summarize(policy)}</Typography>
     {onOpen && (
       <ChevronRight

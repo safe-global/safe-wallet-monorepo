@@ -4,6 +4,7 @@ import * as spaces from '@/features/spaces'
 import { TxModalContext } from '@/components/tx-flow'
 import { PolicyType, type PendingPolicy } from '@safe-global/store/gateway/policies/types'
 import { tokenWithdrawPolicyBuilder } from '@/tests/builders/policies'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { APPLY_CONFIGURATION_ABI, computeConfigureRoot } from '../shared/guardTx'
 import { toConfigurations } from '../shared/applyPlan'
 import { savePolicyRequestApi, type PolicyRequest } from '../policyRequestStore'
@@ -277,6 +278,26 @@ describe('PendingPoliciesList', () => {
       expect(screen.getByRole('button', { name: /apply/i })).toBeDisabled()
     })
 
+    it('marks a request that touches the catch-all access', () => {
+      mockPending([
+        {
+          configureRoot: `0x${'cd'.repeat(32)}`,
+          isReady: true,
+          policies: [{ ...bindings[0], target: ZERO_ADDRESS, selector: '0x00000000' }],
+        },
+      ])
+      renderList()
+
+      expect(screen.getByText('Fallback')).toBeInTheDocument()
+    })
+
+    it('does not mark a request bound to a specific access', () => {
+      mockPending([{ configureRoot: rootOf(bindings), isReady: true, policies: bindings }])
+      renderList()
+
+      expect(screen.queryByText('Fallback')).not.toBeInTheDocument()
+    })
+
     it('blocks Apply while the delay has not elapsed', () => {
       mockPending([
         {
@@ -329,6 +350,23 @@ describe('PendingPoliciesList', () => {
       const drawer = within(await screen.findByRole('presentation'))
       expect(drawer.getByText('Token withdraw allowlist')).toBeInTheDocument()
       expect(drawer.getByText('USDC')).toBeInTheDocument()
+    })
+
+    it('describes a fallback rule as applying to any transaction', async () => {
+      mockPending([
+        {
+          configureRoot: `0x${'cd'.repeat(32)}`,
+          isReady: true,
+          policies: [{ ...binding, target: ZERO_ADDRESS, selector: '0x00000000' }],
+        },
+      ])
+      renderList()
+
+      fireEvent.click(screen.getByRole('button', { name: /details/i }))
+
+      const drawer = within(await screen.findByRole('presentation'))
+      expect(drawer.getByText('Any transaction')).toBeInTheDocument()
+      expect(drawer.getAllByText('Fallback').length).toBeGreaterThan(0)
     })
 
     it('says so when no payload is known for the request', async () => {

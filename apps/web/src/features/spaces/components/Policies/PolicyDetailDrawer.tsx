@@ -17,6 +17,8 @@ import { TxModalContext } from '@/components/tx-flow'
 import { RemoveSpendingLimitFlow } from '@/components/tx-flow/flows'
 import type { SpendingLimitState } from '@/features/spending-limits/types'
 import type { SafeRecoveryConfig } from './hooks/useSafeRecovery'
+import { isFallbackAccess } from './policyAccess'
+import { FallbackBadge } from './shared/FallbackBadge'
 
 const MotionBox = motion.create(Box)
 
@@ -75,6 +77,8 @@ type PolicyDetailDrawerProps = {
   policy: PolicyDetail | null
   /** Present for a pending request: adds the root and delay rows, and the Pending header. */
   request?: PendingRequestInfo
+  /** Marks a policy bound to the guard's catch-all access. */
+  isFallback?: boolean
   onClose: () => void
 }
 
@@ -290,7 +294,7 @@ const TokenRow = ({ limit, chainId, safe }: TokenRowProps) => {
 
 /* ------------------------------ The drawer ------------------------------- */
 
-const PolicyDetailDrawer = ({ policy, request, onClose }: PolicyDetailDrawerProps): ReactElement => {
+const PolicyDetailDrawer = ({ policy, request, isFallback, onClose }: PolicyDetailDrawerProps): ReactElement => {
   const beneficiary =
     policy?.type === 'spending-limit' ? policy.beneficiary : policy?.type === 'recovery' ? policy.recoverer : ''
   const contact = useAddressBookItem(beneficiary, policy?.safe.chainId)
@@ -364,6 +368,7 @@ const PolicyDetailDrawer = ({ policy, request, onClose }: PolicyDetailDrawerProp
                   <PolicyIcon type={policy.type} />
                 </Box>
                 <Typography sx={{ fontSize: 13, fontWeight: 700 }}>{POLICY_TITLE[policy.type]}</Typography>
+                {isFallback && <FallbackBadge />}
                 {request && (
                   <Chip
                     size="small"
@@ -536,15 +541,24 @@ const PolicyDetailDrawer = ({ policy, request, onClose }: PolicyDetailDrawerProp
                         label={`Rule ${index + 1}`}
                         value={
                           <Stack gap={0.5}>
-                            <Stack direction="row" alignItems="center" gap={0.75}>
-                              <Typography sx={{ fontSize: 13, fontWeight: 600 }}>Target</Typography>
-                              <ShortAddressWithTooltip address={binding.target} />
-                            </Stack>
-                            <Typography
-                              sx={{ fontSize: 12, color: 'text.secondary', fontFamily: 'ui-monospace, monospace' }}
-                            >
-                              {binding.selector} · {binding.operation}
-                            </Typography>
+                            {isFallbackAccess(binding) ? (
+                              <Stack direction="row" alignItems="center" gap={0.75}>
+                                <Typography sx={{ fontSize: 13, fontWeight: 600 }}>Any transaction</Typography>
+                                <FallbackBadge />
+                              </Stack>
+                            ) : (
+                              <Stack direction="row" alignItems="center" gap={0.75}>
+                                <Typography sx={{ fontSize: 13, fontWeight: 600 }}>Target</Typography>
+                                <ShortAddressWithTooltip address={binding.target} />
+                              </Stack>
+                            )}
+                            {!isFallbackAccess(binding) && (
+                              <Typography
+                                sx={{ fontSize: 12, color: 'text.secondary', fontFamily: 'ui-monospace, monospace' }}
+                              >
+                                {binding.selector} · {binding.operation}
+                              </Typography>
+                            )}
                             {binding.policyContract && (
                               <Stack direction="row" alignItems="center" gap={0.75}>
                                 <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>Policy</Typography>

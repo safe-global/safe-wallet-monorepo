@@ -16,6 +16,8 @@ import { usePolicyRequests, type PolicyRequest } from './policyRequestStore'
 import { usePendingPolicies } from './hooks/usePendingPolicies'
 import { labelOf, summarize } from './policyLabels'
 import { toPendingDetail } from './policyDetails'
+import { isFallbackAccess } from './policyAccess'
+import { FallbackBadge } from './shared/FallbackBadge'
 import PolicyDetailDrawer, { type PendingRequestInfo, type PolicyDetail } from './PolicyDetailDrawer'
 import { encodeApplyConfiguration } from './shared/guardTx'
 import { APPLY_BLOCKED_MESSAGE, resolveApplyPlan, type ApplyPlan } from './shared/applyPlan'
@@ -33,6 +35,17 @@ const sameRoot = (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
 /** The guard a locally-stored request was made against. */
 const localGuardOf = (local: PolicyRequest | undefined): string | undefined =>
   local?.enforcement.via === 'guard' ? local.enforcement.guards.transactionGuard?.safePolicyGuard : undefined
+
+/**
+ * Whether the requested change touches the guard's catch-all access. Read from CGW's
+ * bindings when it serves them, else from the requester's own configurations.
+ */
+const hasFallbackAccess = (row: PendingRow): boolean => {
+  const bindings = row.pending.policies
+  if (bindings?.length) return bindings.some(isFallbackAccess)
+
+  return !!row.local?.configurations.some(isFallbackAccess)
+}
 
 const describe = (row: PendingRow): { label: string; summary: string } => {
   if (row.pending.policy) {
@@ -119,6 +132,7 @@ const RequestRow = ({ row, onApply, onOpenDetail }: RequestRowProps) => {
         >
           {label}
         </Typography>
+        {hasFallbackAccess(row) && <FallbackBadge />}
         {summary && <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>{summary}</Typography>}
         <Box sx={{ flex: 1 }} />
         <ChevronRight
@@ -162,7 +176,7 @@ const SafePendingPolicies = ({
   onOpenDetail,
 }: {
   safe: SafeRef
-  onOpenDetail: (detail: PolicyDetail, request: PendingRequestInfo) => void
+  onOpenDetail: (detail: PolicyDetail, request: PendingRequestInfo, isFallback: boolean) => void
 }) => {
   const router = useRouter()
   const { configs: chains } = useChains()
@@ -236,12 +250,16 @@ const SafePendingPolicies = ({
           row={row}
           onApply={onApply}
           onOpenDetail={(clicked) =>
-            onOpenDetail(toPendingDetail({ pending: clicked.pending, local: clicked.local, safe }), {
-              configureRoot: clicked.pending.configureRoot,
-              requestedAt: clicked.pending.requestedAt,
-              readyAt: clicked.pending.readyAt,
-              isReady: clicked.pending.isReady,
-            })
+            onOpenDetail(
+              toPendingDetail({ pending: clicked.pending, local: clicked.local, safe }),
+              {
+                configureRoot: clicked.pending.configureRoot,
+                requestedAt: clicked.pending.requestedAt,
+                readyAt: clicked.pending.readyAt,
+                isReady: clicked.pending.isReady,
+              },
+              hasFallbackAccess(clicked),
+            )
           }
         />
       ))}
@@ -258,7 +276,11 @@ const SafePendingPolicies = ({
 const PendingPoliciesList = () => {
   const { allSafes } = useSpaceSafes()
   const flatSafes = useMemo(() => flattenSafes(allSafes), [allSafes])
-  const [openDetail, setOpenDetail] = useState<{ detail: PolicyDetail; request: PendingRequestInfo } | null>(null)
+  const [openDetail, setOpenDetail] = useState<{
+    detail: PolicyDetail
+    request: PendingRequestInfo
+    isFallback: boolean
+  } | null>(null)
 
   if (flatSafes.length === 0) return null
 
@@ -269,13 +291,17 @@ const PendingPoliciesList = () => {
       </Typography>
       {flatSafes.map((safe) => (
         <Fragment key={safeRefKey(safe)}>
-          <SafePendingPolicies safe={safe} onOpenDetail={(detail, request) => setOpenDetail({ detail, request })} />
+          <SafePendingPolicies
+            safe={safe}
+            onOpenDetail={(detail, request, isFallback) => setOpenDetail({ detail, request, isFallback })}
+          />
         </Fragment>
       ))}
 
       <PolicyDetailDrawer
         policy={openDetail?.detail ?? null}
         request={openDetail?.request}
+        isFallback={openDetail?.isFallback}
         onClose={() => setOpenDetail(null)}
       />
     </Stack>

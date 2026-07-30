@@ -60,6 +60,24 @@ describe('ActivePoliciesList', () => {
     expect(screen.queryByRole('button', { name: /allow policy/i })).not.toBeInTheDocument()
   })
 
+  // The all-zero id is the guard's catch-all access.
+  it('marks a policy bound to the catch-all access as the fallback', () => {
+    mockSpaceSafes([SAFE])
+    mockActivePolicies({
+      policies: [
+        allowPolicyBuilder().build(),
+        tokenWithdrawPolicyBuilder()
+          .with({ id: `0xa9059cbb${'0'.repeat(16)}${'1'.repeat(40)}` })
+          .build(),
+      ],
+    })
+
+    render(<ActivePoliciesList />)
+
+    // One badge only — the token withdraw row is bound to a specific access.
+    expect(screen.getAllByText('Fallback')).toHaveLength(1)
+  })
+
   it('does not render a card for a safe with no active policies', () => {
     mockSpaceSafes([SAFE])
     mockActivePolicies({ policies: [] })
