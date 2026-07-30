@@ -56,6 +56,9 @@ runs:
     - uses: ./.github/actions/build
       with:
         secrets: ${{ inputs.secrets }}
+        # E2E runs are served from localhost; without RUM credentials the app
+        # falls back to the no-op observability provider.
+        skip_datadog: 'true'
       env:
         NODE_ENV: cypress
         # `next build` overrides NODE_ENV to 'production' in client bundles, so

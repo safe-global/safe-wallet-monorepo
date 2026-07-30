@@ -1,3 +1,11 @@
+/**
+ * RUM never initializes on a local hostname, and the default jsdom URL is
+ * http://localhost/. These specs therefore run against a deployed-looking
+ * origin; the localhost bail-out is covered in datadog.localhost.test.ts.
+ *
+ * @jest-environment-options {"url": "https://app.safe.global/balances?safe=eth:0xb3b83bf204C458B461de9B0CD2739DB152b4fa5A"}
+ */
+
 import type * as ConstantsModule from '@/config/constants'
 import type { RumResourceEvent, RumEventDomainContext } from '@datadog/browser-rum'
 import type { ObservedError } from '../../types'
@@ -223,6 +231,27 @@ describe('DatadogProvider', () => {
       provider.captureError({ error, isUserFacing: false, tags: { code: 601 } })
 
       expect(mockAddError).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('isLocalHostname', () => {
+    it.each(['localhost', '127.0.0.1', '0.0.0.0', '[::1]', '::1', 'app.localhost'])(
+      'treats %s as local',
+      async (hostname) => {
+        const { isLocalHostname } = await import('../datadog')
+        expect(isLocalHostname(hostname)).toBe(true)
+      },
+    )
+
+    it.each([
+      'app.safe.global',
+      'safe-wallet-web.staging.5afe.dev',
+      'release--walletweb.review.5afe.dev',
+      'notlocalhost.com',
+      'localhost.attacker.com',
+    ])('treats %s as remote', async (hostname) => {
+      const { isLocalHostname } = await import('../datadog')
+      expect(isLocalHostname(hostname)).toBe(false)
     })
   })
 

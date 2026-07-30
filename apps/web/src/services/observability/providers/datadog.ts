@@ -36,6 +36,19 @@ type DatadogSite =
 
 export const isDatadogEnabled = Boolean(DATADOG_RUM_APPLICATION_ID) && Boolean(DATADOG_RUM_CLIENT_TOKEN)
 
+const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1', '0.0.0.0', '[::1]', '::1'])
+
+/**
+ * Local origins must never reach RUM. E2E runs (`yarn serve` on :8080) and dev
+ * servers report as `@session.type:user` and are indistinguishable from real
+ * traffic in the Error Explorer and the Error-Free Views SLO, while also
+ * consuming session quota. Withholding the credentials in CI is the first line
+ * of defence; this guard also covers a developer who copies deployed env vars
+ * into a local `.env`.
+ */
+export const isLocalHostname = (hostname: string): boolean =>
+  LOCAL_HOSTNAMES.has(hostname) || hostname.endsWith('.localhost')
+
 const EXTENSION_URL_PATTERNS = [
   'chrome-extension://',
   'moz-extension://',
@@ -139,6 +152,10 @@ export class DatadogProvider implements IObservabilityProvider {
   async init(): Promise<void> {
     const isClient = typeof window !== 'undefined'
     if (!isClient || !isDatadogEnabled || this.isInitialized) {
+      return
+    }
+
+    if (isLocalHostname(window.location.hostname)) {
       return
     }
 

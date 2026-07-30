@@ -11,6 +11,11 @@ inputs:
     description: 'Production build flag'
     required: false
 
+  skip_datadog:
+    description: 'Withhold Datadog RUM credentials and skip the sourcemap upload (for E2E test builds)'
+    required: false
+    default: 'false'
+
 runs:
   using: 'composite'
 
@@ -25,6 +30,7 @@ runs:
       shell: bash
       env:
         SECRETS_JSON: ${{ inputs.secrets }}
+        SKIP_DATADOG: ${{ inputs.skip_datadog }}
       run: |
         set -euo pipefail
 
@@ -32,9 +38,12 @@ runs:
         # New secrets with this prefix are picked up automatically.
         # Uses per-key heredoc delimiters to safely handle multi-line values
         # (e.g. NEXT_PUBLIC_FIREBASE_OPTIONS_* are JSON strings).
-        EXPORTED=$(echo "$SECRETS_JSON" | jq -r '
+        # NEXT_PUBLIC_DATADOG_* is withheld when skip_datadog is set, so E2E
+        # builds cannot ship RUM events from localhost.
+        EXPORTED=$(echo "$SECRETS_JSON" | jq -r --arg skipDatadog "$SKIP_DATADOG" '
           to_entries[]
           | select(.key | startswith("NEXT_PUBLIC_"))
+          | select($skipDatadog != "true" or (.key | startswith("NEXT_PUBLIC_DATADOG_") | not))
           | select(.value != null and .value != "")
           | "\(.key)<<EOF_\(.key)\n\(.value)\nEOF_\(.key)"
         ')
@@ -58,15 +67,17 @@ runs:
         # Datadog RUM env:
         # - can be overridden by setting NEXT_PUBLIC_DATADOG_RUM_ENV in repo secrets
         # - otherwise set to "production" or "development" based on prod flag
-        DATADOG_RUM_ENV="${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_ENV }}"
-        if [ -z "$DATADOG_RUM_ENV" ]; then
-          if [ "${{ inputs.prod }}" = "true" ]; then
-            DATADOG_RUM_ENV="production"
-          else
-            DATADOG_RUM_ENV="development"
+        if [ "${{ inputs.skip_datadog }}" != "true" ]; then
+          DATADOG_RUM_ENV="${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_ENV }}"
+          if [ -z "$DATADOG_RUM_ENV" ]; then
+            if [ "${{ inputs.prod }}" = "true" ]; then
+              DATADOG_RUM_ENV="production"
+            else
+              DATADOG_RUM_ENV="development"
+            fi
           fi
+          echo "NEXT_PUBLIC_DATADOG_RUM_ENV=$DATADOG_RUM_ENV" >> $GITHUB_ENV
         fi
-        echo "NEXT_PUBLIC_DATADOG_RUM_ENV=$DATADOG_RUM_ENV" >> $GITHUB_ENV
 
         if [ "${{ inputs.prod }}" = "true" ]; then
           echo "NEXT_PUBLIC_INFURA_TOKEN=${{ fromJSON(inputs.secrets).NEXT_PUBLIC_INFURA_TOKEN }}" >> $GITHUB_ENV
@@ -83,7 +94,10 @@ runs:
         NEXT_PUBLIC_IS_PRODUCTION: ${{ inputs.prod }}
 
     - name: Upload source maps to Datadog
-      if: ${{ fromJSON(inputs.secrets).DATADOG_API_KEY }}
+      # Skipped for E2E builds: they share the deploy build's service and
+      # release-version (commit SHA), so uploading would overwrite the
+      # sourcemaps that real production errors are symbolicated against.
+      if: ${{ inputs.skip_datadog != 'true' && fromJSON(inputs.secrets).DATADOG_API_KEY }}
       shell: bash
       working-directory: apps/web
       run: |
