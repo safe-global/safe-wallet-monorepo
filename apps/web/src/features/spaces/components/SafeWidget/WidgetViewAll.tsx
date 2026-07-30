@@ -13,7 +13,7 @@ interface WidgetViewAllProps {
 const WidgetViewAll = ({ count, onClick, className }: WidgetViewAllProps): ReactElement => (
   <div className={cn('flex items-center', className)}>
     {count !== undefined && count > 0 && (
-      <span className="flex h-8 min-w-8 items-center justify-center rounded-full bg-success-subtle px-1.5 text-xs font-semibold text-primary">
+      <span className="flex h-8 min-w-8 items-center justify-center rounded-full bg-accent px-1.5 text-xs font-semibold text-primary">
         +{count}
       </span>
     )}
