@@ -26,9 +26,8 @@ export const SidebarDeveloperItem = ({ config, isLoading = false }: SidebarDevel
   }
 
   return (
-    <>
-      <NavItem item={item} isLoading={isLoading} />
+    <NavItem item={item} isLoading={isLoading}>
       {dialog}
-    </>
+    </NavItem>
   )
 }

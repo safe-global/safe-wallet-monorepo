@@ -18,11 +18,9 @@ import {
   EllipsisVertical,
   Shield,
   History,
-  FlaskConical,
 } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
-import { useFeatureFlagsItem } from '../developerItems/useFeatureFlagsItem'
-import type { SidebarItemConfig, SidebarGroupConfig, SidebarDeveloperGroupConfig } from '../types'
+import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
 
 export const spacesMainNavigation: SidebarItemConfig[] = [
   {
@@ -127,23 +125,6 @@ export const safeDefiGroup: SidebarGroupConfig = {
       icon: TrendingUp,
       label: 'Stake',
       href: AppRoutes.stake,
-    },
-  ],
-}
-
-/**
- * Dev-only entries that run an action instead of navigating. Each one names the hook resolving its
- * own badge, action and dialog, so adding an entry means adding a line here plus its hook — nothing
- * downstream branches on which entry it is.
- */
-export const sidebarDeveloperGroup: SidebarDeveloperGroupConfig = {
-  label: 'Developer',
-  items: [
-    {
-      icon: FlaskConical,
-      label: 'Feature flags',
-      id: 'feature-flags',
-      useItemState: useFeatureFlagsItem,
     },
   ],
 }

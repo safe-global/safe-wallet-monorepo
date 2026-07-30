@@ -23,10 +23,7 @@ export interface SidebarGroupConfig {
 export interface SidebarDeveloperItemState {
   badge?: number | string
   onSelect: () => void
-  /**
-   * UI the entry owns and mounts beside itself, e.g. the dialog it opens. Entries render inside the
-   * menu's `ul`, so this must not render inline DOM — a dialog or another portal only.
-   */
+  /** UI the entry owns, e.g. the dialog it opens. Hosted inside the entry's own list element. */
   dialog?: ReactNode
 }
 
@@ -34,9 +31,7 @@ export interface SidebarDeveloperItemState {
  * A dev-only entry that runs an action instead of navigating. Its badge, action and dialog all come
  * from its own `useItemState` hook, so entries never share state and adding one is a config-only change.
  */
-export interface SidebarDeveloperItemConfig {
-  icon: LucideIcon
-  label: string
+export interface SidebarDeveloperItemConfig extends Pick<SidebarItemBase, 'icon' | 'label'> {
   /** Stable identity and test-id seed; developer entries have no route to be keyed by. */
   id: string
   useItemState: () => SidebarDeveloperItemState

@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import { motion } from 'motion/react'
 import { SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarMenu } from '@/components/ui/sidebar'
 import css from '../../styles.module.css'
-import { sidebarDeveloperGroup } from '../../config'
+import { sidebarDeveloperGroup } from '../../developerItems'
 import { SidebarDeveloperItem } from './SidebarDeveloperItem'
 import { itemVariants } from '../../constants'
 

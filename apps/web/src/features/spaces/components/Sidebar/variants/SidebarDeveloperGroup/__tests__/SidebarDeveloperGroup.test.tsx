@@ -12,20 +12,31 @@ jest.mock('@/components/ui/sidebar', () => ({
 }))
 
 jest.mock('../../NavItem', () => ({
-  NavItem: ({ item, isLoading }: { item: ResolvedSidebarItem | null; isLoading?: boolean }) =>
+  NavItem: ({
+    item,
+    isLoading,
+    children,
+  }: {
+    item: ResolvedSidebarItem | null
+    isLoading?: boolean
+    children?: ReactNode
+  }) =>
     isLoading ? (
-      <div data-testid="nav-item-skeleton" />
+      <div data-testid="nav-item-skeleton">{children}</div>
     ) : (
-      <button type="button" data-testid={item?.testId} onClick={item?.onSelect}>
-        {item?.label}
-        {item?.badge !== undefined && <span data-testid={`${item.testId}-badge`}>{item.badge}</span>}
-      </button>
+      <div>
+        <button type="button" data-testid={item?.testId} onClick={item?.onSelect}>
+          {item?.label}
+          {item?.badge !== undefined && <span data-testid={`${item.testId}-badge`}>{item.badge}</span>}
+        </button>
+        {children}
+      </div>
     ),
 }))
 
 // Two entries, each with its own hook and its own open state. The group must never reach into either:
 // clicking one entry has to leave the other untouched.
-jest.mock('../../../config', () => {
+jest.mock('../../../developerItems', () => {
   const { useState } = jest.requireActual('react') as typeof React
   const Icon = () => null
 
