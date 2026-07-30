@@ -50,7 +50,7 @@ jobs:
             ⏳ Building preview deployment...
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6.0.0
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
@@ -68,7 +68,7 @@ jobs:
         uses: ./.github/actions/branch-slug
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -104,7 +104,7 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6.0.0
 
       - uses: ./.github/actions/yarn
 
@@ -116,7 +116,7 @@ jobs:
           VITE_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ secrets.NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
           role-to-assume: ${{ secrets.TX_BUILDER_AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -138,7 +138,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6.0.0
         with:
           fetch-depth: 0
 
