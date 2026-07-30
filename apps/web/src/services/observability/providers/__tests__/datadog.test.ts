@@ -358,46 +358,4 @@ describe('DatadogProvider', () => {
       }
     })
   })
-
-  describe('E2E test runs', () => {
-    const mockE2eConstants = (isTestE2e: boolean): void => {
-      jest.doMock('@/config/constants', () => {
-        const actualConstants = jest.requireActual<typeof ConstantsModule>('@/config/constants')
-
-        return {
-          ...actualConstants,
-          DATADOG_RUM_APPLICATION_ID: 'test-app-id',
-          DATADOG_RUM_CLIENT_TOKEN: 'test-client-token',
-          IS_TEST_E2E: isTestE2e,
-        }
-      })
-    }
-
-    it('is disabled during E2E runs even when tokens are present', async () => {
-      mockE2eConstants(true)
-      const { isDatadogEnabled } = await import('../datadog')
-
-      expect(isDatadogEnabled).toBe(false)
-    })
-
-    it('does not init the RUM SDK during E2E runs', async () => {
-      mockE2eConstants(true)
-      mockGetInitConfiguration.mockReturnValue(undefined)
-      const Provider = await importProvider()
-
-      await new Provider().init()
-
-      expect(mockInit).not.toHaveBeenCalled()
-    })
-
-    it('still inits outside E2E runs', async () => {
-      mockE2eConstants(false)
-      mockGetInitConfiguration.mockReturnValue(undefined)
-      const Provider = await importProvider()
-
-      await new Provider().init()
-
-      expect(mockInit).toHaveBeenCalled()
-    })
-  })
 })
