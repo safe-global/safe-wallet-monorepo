@@ -4,4 +4,7 @@ output.defaults = {
   // WalletConnect tx-request flows: local UI/compose waits vs. signing + CGW round-trips.
   wcTxUiTimeout: '10000',
   wcTxNetworkTimeout: '30000',
+  // Draft-editor flows: local UI waits vs. compose/preview/rebuild network round-trips.
+  draftUiTimeout: '10000',
+  draftNetworkTimeout: '30000',
 }
