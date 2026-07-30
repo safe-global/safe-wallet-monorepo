@@ -17,7 +17,16 @@ export const useSafeQueryParam = (): string => {
   return safe ? (Array.isArray(safe) ? safe[0] : safe) : getLocationQuery().safe?.toString() || ''
 }
 
+/**
+ * The checksummed URL safe address, `''` until mounted. The app is a static export, so reading the
+ * address on the first render diverges from the build-time HTML — anything branching its output on
+ * it would throw React #418. The later swap is an ordinary React update.
+ *
+ * Data fetching pays one render pass for this. Use {@link useSafeQueryParam} to read the raw param
+ * without the gate.
+ */
 export const useSafeAddressFromUrl = (): string => {
+  const isHydrated = useIsHydrated()
   const fullAddress = useSafeQueryParam()
 
   const checksummedAddress = useMemo(() => {
@@ -26,20 +35,5 @@ export const useSafeAddressFromUrl = (): string => {
     return address
   }, [fullAddress])
 
-  return checksummedAddress
-}
-
-/**
- * `''` until mounted, then the address. Use it wherever the *rendered output* branches on the URL
- * safe address: the app is a static export, so reading it on the first render diverges from the
- * build-time HTML and throws React #418.
- *
- * Not for data fetching — `useLoadSafeInfo` and `useEffectiveSafeParams` need the address on the
- * first render and keep using {@link useSafeAddressFromUrl}.
- */
-export const useHydratedSafeAddressFromUrl = (): string => {
-  const isHydrated = useIsHydrated()
-  const address = useSafeAddressFromUrl()
-
-  return isHydrated ? address : ''
+  return isHydrated ? checksummedAddress : ''
 }

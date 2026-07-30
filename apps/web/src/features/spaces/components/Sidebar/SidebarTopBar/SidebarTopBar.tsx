@@ -3,14 +3,13 @@ import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import { cn } from '@/utils/cn'
 import { AppRoutes } from '@/config/routes'
 import SafeLogo from '@/components/common/SafeLogo'
-import { useHydratedSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 
 export const SidebarTopBar = (): ReactElement => {
   const { state } = useSidebar()
   const isCollapsed = state === 'collapsed'
-  // Renders on both sides of the sidebar's hydration gate, so it has to gate the URL read itself.
-  const safeAddress = useHydratedSafeAddressFromUrl()
+  const safeAddress = useSafeAddressFromUrl()
   const isSpaceRoute = useIsSpaceRoute()
 
   // Inside a space or an individual safe the logo turns into a "Home" label pill that returns to the

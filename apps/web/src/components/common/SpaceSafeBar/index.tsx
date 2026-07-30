@@ -23,7 +23,7 @@ import { cn } from '@/utils/cn'
 import { useIsSignedIn } from '@/hooks/useIsSignedIn'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
-import { useHydratedSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
@@ -152,7 +152,7 @@ function SpaceSafeBar() {
   const pathname = usePathname()
   const router = useRouter()
   const isHydrated = useIsHydrated()
-  const urlSafeAddress = useHydratedSafeAddressFromUrl()
+  const urlSafeAddress = useSafeAddressFromUrl()
   const isSignedIn = useIsSignedIn()
   const {
     workspaceItems,

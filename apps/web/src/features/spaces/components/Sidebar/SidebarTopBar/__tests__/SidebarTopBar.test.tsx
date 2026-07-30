@@ -11,7 +11,7 @@ jest.mock('next/router', () => ({
 }))
 
 jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
-  useHydratedSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
+  useSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
 }))
 
 jest.mock('@/hooks/useIsSpaceRoute', () => ({
@@ -134,13 +134,9 @@ describe('SidebarTopBar', () => {
     expect(screen.getByTestId('logo-container')).toHaveAttribute('data-home-label', 'false')
   })
 
-  it('reads the safe address through the hydration-gated hook', () => {
-    const { useHydratedSafeAddressFromUrl, useSafeAddressFromUrl } = require('@/hooks/useSafeAddressFromUrl')
-
+  it('reads the safe address from the URL', () => {
     render(<SidebarTopBar />)
 
-    expect(useHydratedSafeAddressFromUrl).toBeDefined()
-    expect(useSafeAddressFromUrl).toBeUndefined()
     expect(mockUseSafeAddressFromUrl).toHaveBeenCalled()
   })
 })

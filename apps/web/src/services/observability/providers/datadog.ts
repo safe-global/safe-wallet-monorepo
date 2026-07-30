@@ -23,7 +23,6 @@ import {
   DATADOG_RUM_TRACING_ENABLED,
   GATEWAY_URL_PRODUCTION,
   GATEWAY_URL_STAGING,
-  IS_TEST_E2E,
 } from '@/config/constants'
 
 type DatadogSite =
@@ -34,9 +33,7 @@ type DatadogSite =
   | 'ddog-gov.com'
   | 'ap1.datadoghq.com'
 
-// E2E runs are excluded: they drive a real browser, so their errors reach RUM as `session.type:user`
-// traffic that `filterRumEvent` can't drop.
-export const isDatadogEnabled = Boolean(DATADOG_RUM_APPLICATION_ID) && Boolean(DATADOG_RUM_CLIENT_TOKEN) && !IS_TEST_E2E
+export const isDatadogEnabled = Boolean(DATADOG_RUM_APPLICATION_ID) && Boolean(DATADOG_RUM_CLIENT_TOKEN)
 
 const EXTENSION_URL_PATTERNS = [
   'chrome-extension://',
