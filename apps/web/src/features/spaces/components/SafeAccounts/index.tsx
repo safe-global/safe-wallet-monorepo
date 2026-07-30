@@ -27,7 +27,7 @@ import { TriangleAlert, RotateCw, Search } from 'lucide-react'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_LABELS, SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
+import SecurityBanner from '@/components/common/TrustedSafesModal/SecurityBanner'
 import SpaceSafeContextMenu from './SpaceSafeContextMenu'
 
 const SpaceSafeAccounts = () => {
@@ -125,7 +125,7 @@ const SpaceSafeAccounts = () => {
         </Typography>
       ) : (
         <div className="flex flex-col gap-4">
-          {similarAddresses.size > 0 && <SimilarAddressAlert />}
+          {similarAddresses.size > 0 && <SecurityBanner title="Verify before you trust" />}
           <SafeAccountsTable
             items={visibleSafes}
             // Inside a workspace every Safe belongs to it, so the Workspaces column adds no information.
