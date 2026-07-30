@@ -4,6 +4,7 @@ import * as spaces from '@/features/spaces'
 import * as availableHook from '../../hooks/useAvailablePolicies'
 import * as activeHook from '../../hooks/useActivePolicies'
 import * as guardHook from '../../hooks/usePolicyGuard'
+import * as storeRequestHook from '../../hooks/useStorePolicyRequest'
 import * as balancesApi from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import * as tokenList from '../../SpendingLimitFlow/tokenList'
 import * as useChainsHook from '@/hooks/useChains'
@@ -66,6 +67,9 @@ const mockAll = (guardOverrides = {}, options: MockOptions = {}) => {
     refetch: jest.fn(),
   })
 
+  const storePolicyRequest = jest.fn().mockResolvedValue({ ok: true })
+  jest.spyOn(storeRequestHook, 'useStorePolicyRequest').mockReturnValue(storePolicyRequest)
+
   jest.spyOn(guardHook, 'usePolicyGuard').mockReturnValue({
     currentGuard: undefined,
     isSet: false,
@@ -83,6 +87,8 @@ const mockAll = (guardOverrides = {}, options: MockOptions = {}) => {
   jest.spyOn(useChainsHook, 'default').mockReturnValue({
     configs: [{ chainId: SAFE.chainId, shortName: 'eth' }],
   } as never)
+
+  return { storePolicyRequest }
 }
 
 const renderFlow = (setTxFlow = jest.fn()) => {
@@ -270,6 +276,64 @@ describe('ERC20TransferPolicyFlow', () => {
     expect(screen.getByText(/policy engine isn't available/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /review/i })).toBeDisabled()
     expect(setTxFlow).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * `requestConfiguration` publishes only the root, so the wallet has to hand CGW the
+ * Configuration[] — before the transaction is proposed, and without ever blocking it.
+ */
+describe('ERC20TransferPolicyFlow — storing the configuration in CGW', () => {
+  afterEach(() => jest.restoreAllMocks())
+
+  it('stores the configurations with the same root the tx commits to, before proposing', async () => {
+    // Guard already installed → the delayed request path, which creates a pending row.
+    const { storePolicyRequest } = mockAll({ currentGuard: GUARD, isSet: true })
+    const { setTxFlow } = renderFlow()
+    await advanceToReview()
+
+    fireEvent.click(screen.getByRole('button', { name: /review/i }))
+    await waitFor(() => expect(setTxFlow).toHaveBeenCalled())
+
+    expect(storePolicyRequest).toHaveBeenCalledTimes(1)
+    const stored = storePolicyRequest.mock.calls[0][0]
+    expect(stored).toEqual(
+      expect.objectContaining({ chainId: SAFE.chainId, safeAddress: SAFE.address, root: expect.any(String) }),
+    )
+    expect(stored.configurations.length).toBeGreaterThan(0)
+
+    // Same root in the stored row and in requestConfiguration — one value, used twice.
+    const [onChainRoot] = new Interface(REQUEST_CONFIGURATION_ABI).decodeFunctionData(
+      'requestConfiguration',
+      setTxFlow.mock.calls[0][0].props.txs[0].data,
+    )
+    expect(onChainRoot).toBe(stored.root)
+
+    // Stored before the tx-flow opened, i.e. before the tx is proposed.
+    expect(storePolicyRequest.mock.invocationCallOrder[0]).toBeLessThan(setTxFlow.mock.invocationCallOrder[0])
+  })
+
+  it('still proposes the transaction when the store call fails', async () => {
+    const { storePolicyRequest } = mockAll({ currentGuard: GUARD, isSet: true })
+    storePolicyRequest.mockResolvedValue({ ok: false, isCapReached: false })
+    const { setTxFlow } = renderFlow()
+    await advanceToReview()
+
+    fireEvent.click(screen.getByRole('button', { name: /review/i }))
+
+    await waitFor(() => expect(setTxFlow).toHaveBeenCalled())
+  })
+
+  // An immediate config takes effect in the same batch, so it never becomes a pending row.
+  it('does not store anything on the immediate path', async () => {
+    const { storePolicyRequest } = mockAll()
+    const { setTxFlow } = renderFlow()
+    await advanceToReview()
+
+    fireEvent.click(screen.getByRole('button', { name: /review/i }))
+    await waitFor(() => expect(setTxFlow).toHaveBeenCalled())
+
+    expect(storePolicyRequest).not.toHaveBeenCalled()
   })
 })
 

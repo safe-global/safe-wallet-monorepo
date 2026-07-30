@@ -122,6 +122,54 @@ describe('policiesApi', () => {
     expect(requestOf(fetchMock).credentials).toBe('include')
   })
 
+  describe('policiesCreateRequestV1', () => {
+    const configurations = [
+      {
+        target: POLICY_CONTRACT,
+        selector: '0xa9059cbb',
+        operation: 0 as const,
+        policy: SAFE_POLICY_GUARD,
+        data: '0x',
+      },
+    ]
+
+    it('POSTs the root and configurations to /requests', async () => {
+      const fetchMock = mockFetch({ configureRoot: CONFIGURE_ROOT })
+
+      const result = await store.dispatch(
+        policiesApi.endpoints.policiesCreateRequestV1.initiate({ ...arg, root: CONFIGURE_ROOT, configurations }),
+      )
+
+      expect(result.data).toEqual({ configureRoot: CONFIGURE_ROOT })
+
+      const request = requestOf(fetchMock)
+      expect(request.url).toBe(`${BASE}/requests`)
+      expect(request.method).toBe('POST')
+      // The route arg is not part of the body.
+      await expect(request.json()).resolves.toEqual({ root: CONFIGURE_ROOT, configurations })
+    })
+
+    it('sends credentials', async () => {
+      const fetchMock = mockFetch({ configureRoot: CONFIGURE_ROOT })
+
+      await store.dispatch(
+        policiesApi.endpoints.policiesCreateRequestV1.initiate({ ...arg, root: CONFIGURE_ROOT, configurations }),
+      )
+
+      expect(requestOf(fetchMock).credentials).toBe('include')
+    })
+
+    it('surfaces the status so the caller can tell a cap (400) from a client bug (422)', async () => {
+      global.fetch = jest.fn().mockResolvedValue(new Response('{}', { status: 422 })) as unknown as typeof fetch
+
+      const result = await store.dispatch(
+        policiesApi.endpoints.policiesCreateRequestV1.initiate({ ...arg, root: CONFIGURE_ROOT, configurations }),
+      )
+
+      expect(result.error).toEqual(expect.objectContaining({ status: 422 }))
+    })
+  })
+
   it('caches by arg (same store + same arg → one request)', async () => {
     const fetchMock = mockFetch({ items: [] })
 

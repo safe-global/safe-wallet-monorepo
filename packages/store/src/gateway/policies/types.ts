@@ -161,3 +161,33 @@ export type PolicyQueryArg = { spaceId: string; chainId: string; safeAddress: st
 export type GetPoliciesResponse = { items: AvailablePolicy[] }
 export type GetActivePoliciesResponse = { items: ActivePolicy[] }
 export type GetPendingPoliciesResponse = { items: PendingPolicy[] }
+
+/**
+ * One `Configuration` entry as the WRITE endpoint expects it.
+ *
+ * `operation` is numeric here (0 = CALL, 1 = DELEGATECALL), mirroring the on-chain
+ * encoding — the read endpoints serialize it as `"CALL"` / `"DELEGATECALL"`, so the
+ * two forms are not interchangeable. `data` is the raw policy payload (`0x` when the
+ * policy takes none) and a zero `policy` address removes that access's policy.
+ */
+export type PolicyConfigurationInput = {
+  target: string
+  selector: string
+  operation: 0 | 1
+  policy: string
+  data: string
+}
+
+/**
+ * Stores the `Configuration[]` behind a delayed request so CGW can explain what a
+ * pending root changes — `requestConfiguration` publishes only the root, and the
+ * wallet is the only party holding the payload at request time.
+ *
+ * Idempotent per `(chainId, safeAddress, root)`, so retries are free.
+ */
+export type CreatePolicyRequestArg = PolicyQueryArg & {
+  /** keccak256(abi.encode(configurations)) — must be the value requested on-chain. */
+  root: string
+  configurations: PolicyConfigurationInput[]
+}
+export type CreatePolicyRequestResponse = { configureRoot: string }

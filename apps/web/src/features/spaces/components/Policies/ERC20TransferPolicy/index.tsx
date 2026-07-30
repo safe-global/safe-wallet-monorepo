@@ -11,6 +11,8 @@ import { PolicyType } from '@safe-global/store/gateway/policies/types'
 import { Coins, Plus } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import useChains from '@/hooks/useChains'
+import { useAppDispatch } from '@/store'
+import { showNotification } from '@/store/notificationsSlice'
 import { useSpaceSafes } from '@/features/spaces'
 import { SafeIdenticon } from '@/components/common/SpaceSafeBar/AccountsModal/shared'
 import { Button } from '@/components/ui/button'
@@ -30,6 +32,7 @@ import { flattenSafes } from '../safeRefs'
 import { TokenSelector } from '../shared/TokenSelector'
 import { AddressSelectorList, type AddressEntry } from '../shared/AddressSelectorList'
 import { usePolicyGuard } from '../hooks/usePolicyGuard'
+import { useStorePolicyRequest } from '../hooks/useStorePolicyRequest'
 import { useAvailablePolicies } from '../hooks/useAvailablePolicies'
 import { useActivePolicies } from '../hooks/useActivePolicies'
 import { savePolicyRequestApi } from '../policyRequestStore'
@@ -131,6 +134,8 @@ const ERC20TransferPolicyFlow = () => {
   }
 
   const { setTxFlow } = useContext(TxModalContext)
+  const dispatch = useAppDispatch()
+  const storePolicyRequest = useStorePolicyRequest()
 
   const validRecipients = recipients.filter((r) => isAddress(r.address))
 
@@ -206,6 +211,25 @@ const ERC20TransferPolicyFlow = () => {
           })
         }
       : undefined
+
+    // Hand the Configuration[] to CGW before the tx is proposed: `requestConfiguration`
+    // publishes only the root, so this is what lets the Pending list say what the request
+    // changes. Only the delayed path produces a pending row — an `immediate` config takes
+    // effect in the same batch, so storing it would leave a row nothing ever surfaces.
+    // Non-blocking: a failure only costs the annotation, never the policy.
+    if (isRequest) {
+      const stored = await storePolicyRequest({ chainId, safeAddress, root: configureRoot, configurations })
+
+      if (!stored.ok && stored.isCapReached) {
+        dispatch(
+          showNotification({
+            message: 'This Safe has too many pending policy requests. Apply or cancel some to see this one’s details.',
+            variant: 'warning',
+            groupKey: 'policy-request-store-cap',
+          }),
+        )
+      }
+    }
 
     // Switch the URL's active Safe right before handing off — the tx-flow modal
     // reads it via useSafeInfo (and useInitSafeCoreSDK sets up the SDK). This is

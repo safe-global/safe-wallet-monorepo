@@ -106,6 +106,49 @@ describe('delayed configuration (request / apply)', () => {
       const second: PolicyConfiguration = { ...config, target: '0x5555555555555555555555555555555555555555' }
       expect(computeConfigureRoot([config, second])).not.toBe(computeConfigureRoot([second, config]))
     })
+
+    /**
+     * Shared vector: CGW hashes the same layout server-side and rejects a stored request
+     * whose configurations don't hash to the submitted root (422). Pinning the value here
+     * means a change to our encoding fails locally instead of at the API boundary.
+     *
+     * TODO: cross-check against CGW's policy-configuration-root vector and a real
+     * `requestConfiguration` root from a testnet once either is available.
+     */
+    it('matches the pinned cross-implementation vector', () => {
+      const vector: PolicyConfiguration = {
+        target: '0x1111111111111111111111111111111111111111',
+        selector: '0xa9059cbb',
+        operation: OPERATION_CALL,
+        policy: '0x2222222222222222222222222222222222222222',
+        data: '0x',
+      }
+
+      expect(computeConfigureRoot([vector])).toBe('0xc128daed580fc97a2e412f08624f96819b3f858303c0e27709a8f4a2c04dc8bd')
+    })
+
+    // Addresses hash as 20 bytes, so checksummed and lower-cased forms agree.
+    it('is insensitive to address casing', () => {
+      const lowercased: PolicyConfiguration = {
+        ...config,
+        target: config.target.toLowerCase(),
+        policy: config.policy.toLowerCase(),
+      }
+      expect(computeConfigureRoot([lowercased])).toBe(computeConfigureRoot([config]))
+    })
+
+    // A zero policy address removes that access's policy — it must still hash.
+    it('hashes a removal (zero policy address)', () => {
+      const removal: PolicyConfiguration = {
+        target: '0x1111111111111111111111111111111111111111',
+        selector: '0xa9059cbb',
+        operation: OPERATION_CALL,
+        policy: `0x${'0'.repeat(40)}`,
+        data: '0x',
+      }
+
+      expect(computeConfigureRoot([removal])).toBe('0x85796ed8cd1e6fc966e6779b4dd3059eea5a401bf8a900feaa77886961f57013')
+    })
   })
 
   describe('encodeRequestConfiguration', () => {

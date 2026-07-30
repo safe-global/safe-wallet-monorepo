@@ -4,6 +4,8 @@ import type {
   GetActivePoliciesResponse,
   GetPendingPoliciesResponse,
   PolicyQueryArg,
+  CreatePolicyRequestArg,
+  CreatePolicyRequestResponse,
 } from './types'
 
 // Hand-declared because the policies schema isn't code-generated yet. Every other
@@ -36,6 +38,14 @@ export const policiesApi = api.enhanceEndpoints({ addTagTypes }).injectEndpoints
       query: (arg) => ({ url: `${policiesPath(arg)}/pending` }),
       providesTags: ['policies'],
     }),
+    policiesCreateRequestV1: build.mutation<CreatePolicyRequestResponse, CreatePolicyRequestArg>({
+      query: ({ root, configurations, ...arg }) => ({
+        url: `${policiesPath(arg)}/requests`,
+        method: 'POST',
+        body: { root, configurations },
+      }),
+      invalidatesTags: ['policies'],
+    }),
   }),
   overrideExisting: false,
 })
@@ -44,4 +54,5 @@ export const {
   usePoliciesGetPoliciesV1Query,
   usePoliciesGetActivePoliciesV1Query,
   usePoliciesGetPendingPoliciesV1Query,
+  usePoliciesCreateRequestV1Mutation,
 } = policiesApi

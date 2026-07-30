@@ -90,13 +90,7 @@ const RequestRow = ({ row, onApply }: { row: PendingRow; onApply: (row: PendingR
           ) : (
             <Chip size="small" variant="outlined" label={`Ready in ~${hoursLeft}h`} />
           )}
-          <Tooltip
-            title={
-              isReady && !canApply
-                ? 'This change was requested from another device. Apply it from there, or request it again here.'
-                : ''
-            }
-          >
+          <Tooltip title={isReady && !canApply ? 'Cannot apply' : ''}>
             <span>
               <Button size="small" variant="contained" disabled={!canApply} onClick={() => onApply(row)}>
                 Apply
