@@ -3,62 +3,14 @@ import { Box, IconButton, Paper, Stack, Tooltip, Typography } from '@mui/materia
 import { ChevronRight, RefreshCw } from 'lucide-react'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { ActivePolicy } from '@safe-global/store/gateway/policies/types'
-import { PolicyType } from '@safe-global/store/gateway/policies/types'
 import { ChainLogo, SafeIdenticon } from '@/components/common/SpaceSafeBar/AccountsModal/shared'
 import { useSpaceSafes } from '@/features/spaces'
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import { flattenSafes, safeRefKey, type SafeRef } from './safeRefs'
 import { labelOf, summarize } from './policyLabels'
+import { toPolicyDetail } from './policyDetails'
 import { useActivePolicies } from './hooks/useActivePolicies'
 import PolicyDetailDrawer, { type PolicyDetail } from './PolicyDetailDrawer'
-
-/** Map an API active policy to the drawer's detail shape (best-effort per type). */
-const toDetail = (policy: ActivePolicy, safe: SafeRef): PolicyDetail | null => {
-  switch (policy.type) {
-    case PolicyType.SpendingLimit:
-      return {
-        type: 'spending-limit',
-        beneficiary: policy.data.beneficiary,
-        safe,
-        limits: policy.data.limits.map((l) => ({
-          beneficiary: policy.data.beneficiary,
-          token: { address: l.token.address, symbol: l.token.symbol, decimals: l.token.decimals },
-          amount: l.amount,
-          spent: l.spent,
-          nonce: l.nonce,
-          resetTimeMin: '0',
-          lastResetMin: '0',
-        })),
-      }
-    case PolicyType.Recovery:
-      return {
-        type: 'recovery',
-        recoverer: policy.data.recoverers[0] ?? '',
-        safe,
-        config: {
-          delayModifierAddress: policy.enforcement.via === 'module' ? policy.enforcement.moduleAddress : '',
-          recoverers: policy.data.recoverers,
-          cooldownSec: BigInt(policy.data.cooldownSec || '0'),
-          expirySec: BigInt(policy.data.expirySec || '0'),
-        },
-      }
-    case PolicyType.TokenWithdraw:
-      return {
-        type: 'ERC20TransferPolicy',
-        safe,
-        allowlist: policy.data.allowlist.map((entry) => ({
-          token: { address: entry.token.address, symbol: entry.token.symbol },
-          recipients: entry.recipients,
-        })),
-      }
-    // No dedicated drawer view for cosigner or the catch-all allow entry.
-    case PolicyType.Cosigner:
-    case PolicyType.Allow:
-      return null
-    default:
-      return null
-  }
-}
 
 const PolicyRow = ({ policy, onOpen }: { policy: ActivePolicy; onOpen?: () => void }) => (
   <Stack
@@ -140,7 +92,7 @@ const SafePolicies = ({ safe, onCountChange, onOpenDetail }: SafePoliciesProps) 
       </Stack>
 
       {policies.map((policy) => {
-        const detail = toDetail(policy, safe)
+        const detail = toPolicyDetail(policy, safe)
         return <PolicyRow key={policy.id} policy={policy} onOpen={detail ? () => onOpenDetail(detail) : undefined} />
       })}
     </Paper>

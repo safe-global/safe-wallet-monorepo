@@ -112,6 +112,28 @@ export type AllowPolicy = PolicyBase & { type: PolicyType.Allow; data: AllowPoli
 export type ActivePolicy = SpendingLimitPolicy | RecoveryPolicy | TokenWithdrawPolicy | CosignerPolicy | AllowPolicy
 
 /**
+ * One binding of a requested change, as CGW reports it on a pending item.
+ *
+ * Maps back to the on-chain `Configuration` struct mechanically — `operation`
+ * `'CALL' | 'DELEGATECALL'` → `0 | 1`, `policyContract ?? zeroAddress` → `policy` —
+ * and `data` is the payload exactly as hashed into the root (`0x` when the policy
+ * takes none). Rebuilding must preserve the array order: order fixes the hash.
+ */
+export type PolicyInfo = {
+  id: string
+  target: string
+  selector: string
+  operation: 'CALL' | 'DELEGATECALL'
+  policyContract: string | null
+  /**
+   * Absent on a CGW that doesn't serve the payload yet. Without it the bindings
+   * describe the request but cannot rebuild it, so consumers must check before
+   * hashing — a missing `data` is not an encodable empty payload.
+   */
+  data?: string | null
+}
+
+/**
  * A policy change that has been REQUESTED on-chain (`requestConfiguration`) but
  * not yet APPLIED — it sits out the SafePolicyGuard's DELAY before
  * `applyConfiguration` becomes valid. Returned by getPendingPolicies.
@@ -119,20 +141,25 @@ export type ActivePolicy = SpendingLimitPolicy | RecoveryPolicy | TokenWithdrawP
  *  - configureRoot: keccak256(abi.encode(Configuration[])) — the requested root.
  *  - requestedAt / readyAt: unix seconds; readyAt = requestedAt + DELAY.
  *  - isReady: whether the delay has elapsed (readyAt <= now) so it can be applied.
- *  - policy: the decoded change, when CGW can resolve it from the root. It is
- *    `null` for roots CGW cannot decode (only the request metadata is known),
- *    so consumers must render from the metadata alone in that case.
+ *  - safePolicyGuard: the guard holding the request — the `to` of apply and cancel.
+ *  - policies: the bindings of the requested change, in submitted order, or `null`
+ *    when CGW has no stored payload for the root (requested before the store
+ *    existed, or outside the wallet). Applying is impossible in that case; the
+ *    request can still be cancelled, which needs only the root.
  *
- * Note the wire format carries NO `Configuration[]`; `applyConfiguration` needs
- * that array, so it has to come from the requester's local snapshot, matched on
- * `configureRoot`.
+ * `safePolicyGuard` and `policies` arrive with the pending-details work; both are
+ * optional so the wallet keeps working against a CGW that predates it, where the
+ * requester's own local snapshot is the only source of the configurations.
  */
 export type PendingPolicy = {
   configureRoot: string
   requestedAt: number
   readyAt: number
   isReady: boolean
-  policy: ActivePolicy | null
+  safePolicyGuard?: string
+  policies?: PolicyInfo[] | null
+  /** Pre-details CGW: the decoded change, or `null`. Superseded by `policies`. */
+  policy?: ActivePolicy | null
 }
 
 /**

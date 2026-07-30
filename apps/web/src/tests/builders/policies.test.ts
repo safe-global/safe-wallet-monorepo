@@ -108,6 +108,15 @@ describe('policy builders', () => {
     // CGW returns policy: null for roots it cannot decode.
     expect(pendingPolicyBuilder().with({ policy: null }).build().policy).toBeNull()
   })
+
+  it('pendingPolicyBuilder: carries the guard and the bindings needed to apply', () => {
+    const p = pendingPolicyBuilder().build()
+    expect(isAddress(p.safePolicyGuard!)).toBe(true)
+    expect(p.policies).toHaveLength(1)
+    expect(p.policies![0].operation).toBe('CALL')
+    // Null bindings model a root CGW has no stored payload for.
+    expect(pendingPolicyBuilder().with({ policies: null }).build().policies).toBeNull()
+  })
 })
 
 describe('ActivePolicy discriminated union narrows on `type`', () => {

@@ -77,6 +77,7 @@ enum ErrorCodes {
   _820 = '820: Error signing or submitting delegation',
   _821 = '821: Untrusted gas-fee refundReceiver returned by CGW',
   _822 = '822: Failed to store the policy configuration for a pending request',
+  _823 = '823: Pending policy configurations do not hash to the requested root',
 
   _900 = '900: Error loading Safe App',
   _901 = '901: Error processing Safe Apps SDK request',

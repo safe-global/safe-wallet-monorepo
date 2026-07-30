@@ -11,6 +11,7 @@ import {
   type CosignerPolicy,
   type AllowPolicy,
   type ActivePolicy,
+  type PolicyInfo,
   type PendingPolicy,
   type AvailablePolicy,
 } from '@safe-global/store/gateway/policies/types'
@@ -97,6 +98,17 @@ export const cosignerPolicyBuilder = (): IBuilder<CosignerPolicy> =>
     },
   })
 
+/** One binding of a pending request, as CGW reports it. `data` is hashed into the root. */
+export const policyInfoBuilder = (): IBuilder<PolicyInfo> =>
+  Builder.new<PolicyInfo>().with({
+    id: faker.string.hexadecimal({ length: 64 }),
+    target: address(),
+    selector: '0xa9059cbb',
+    operation: 'CALL',
+    policyContract: address(),
+    data: '0x',
+  })
+
 /** The guard's catch-all entry: no data, id is the zero hash on the wire. */
 export const allowPolicyBuilder = (): IBuilder<AllowPolicy> =>
   Builder.new<AllowPolicy>().with({
@@ -120,6 +132,8 @@ export const pendingPolicyBuilder = (): IBuilder<PendingPolicy> => {
     requestedAt,
     readyAt: requestedAt + 86_400,
     isReady: false,
+    safePolicyGuard: address(),
+    policies: [policyInfoBuilder().build()],
     policy: tokenWithdrawPolicyBuilder().with({ enabled: false }).build(),
   })
 }

@@ -1,9 +1,9 @@
 import { useContext, type ReactElement, type ReactNode } from 'react'
-import { Box, Drawer, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Chip, Drawer, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Ban, CalendarClock, Clock, ExternalLink, LifeBuoy, ShieldCheck, Trash2, WalletMinimal, X } from 'lucide-react'
 import { safeFormatUnits, shortenAddress } from '@safe-global/utils/utils/formatters'
-import { relativeTime } from '@safe-global/utils/utils/date'
+import { formatDateTime, relativeTime } from '@safe-global/utils/utils/date'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import {
   ChainLogo,
@@ -45,12 +45,61 @@ type TokenWithdrawDetail = {
   }>
 }
 
-export type PolicyDetail = SpendingLimitDetail | RecoveryDetail | TokenWithdrawDetail
+/**
+ * A change described only by its on-chain bindings — what a pending request looks
+ * like when nothing decoded it into a known policy type.
+ */
+type PolicyBindingsDetail = {
+  type: 'bindings'
+  safe: SafeRef
+  bindings: Array<{
+    target: string
+    selector: string
+    operation: 'CALL' | 'DELEGATECALL'
+    policyContract: string | null
+    data?: string | null
+  }>
+}
+
+export type PolicyDetail = SpendingLimitDetail | RecoveryDetail | TokenWithdrawDetail | PolicyBindingsDetail
+
+/** Request metadata shown for a policy change that is requested but not yet applied. */
+export type PendingRequestInfo = {
+  configureRoot: string
+  requestedAt: number
+  readyAt: number
+  isReady: boolean
+}
 
 type PolicyDetailDrawerProps = {
   policy: PolicyDetail | null
+  /** Present for a pending request: adds the root and delay rows, and the Pending header. */
+  request?: PendingRequestInfo
   onClose: () => void
 }
+
+const POLICY_TITLE: Record<PolicyDetail['type'], string> = {
+  'spending-limit': 'Spending limit',
+  recovery: 'Account recovery',
+  ERC20TransferPolicy: 'Token withdraw allowlist',
+  bindings: 'Policy change',
+}
+
+const POLICY_ENFORCER: Record<PolicyDetail['type'], string> = {
+  'spending-limit': 'Safe Allowance Module',
+  recovery: 'Safe Delay Modifier',
+  ERC20TransferPolicy: 'Safe Policy Guard',
+  bindings: 'Safe Policy Guard',
+}
+
+const PolicyIcon = ({ type }: { type: PolicyDetail['type'] }): ReactElement => {
+  if (type === 'spending-limit') return <WalletMinimal size={13} />
+  if (type === 'recovery') return <LifeBuoy size={13} />
+  return <Ban size={13} />
+}
+
+/** CGW sends unix seconds; the date helpers take milliseconds. */
+const unixToLabel = (seconds: number): string => formatDateTime(seconds * 1000)
 
 const formatDuration = (sec: bigint): string => {
   const s = Number(sec)
@@ -241,7 +290,7 @@ const TokenRow = ({ limit, chainId, safe }: TokenRowProps) => {
 
 /* ------------------------------ The drawer ------------------------------- */
 
-const PolicyDetailDrawer = ({ policy, onClose }: PolicyDetailDrawerProps): ReactElement => {
+const PolicyDetailDrawer = ({ policy, request, onClose }: PolicyDetailDrawerProps): ReactElement => {
   const beneficiary =
     policy?.type === 'spending-limit' ? policy.beneficiary : policy?.type === 'recovery' ? policy.recoverer : ''
   const contact = useAddressBookItem(beneficiary, policy?.safe.chainId)
@@ -279,7 +328,7 @@ const PolicyDetailDrawer = ({ policy, onClose }: PolicyDetailDrawerProps): React
       <AnimatePresence mode="wait">
         {policy && (
           <MotionBox
-            key={`${policy.type}:${beneficiary}:${policy.safe.address}`}
+            key={`${policy.type}:${beneficiary}:${policy.safe.address}:${request?.configureRoot ?? ''}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -312,21 +361,17 @@ const PolicyDetailDrawer = ({ policy, onClose }: PolicyDetailDrawerProps): React
                     justifyContent: 'center',
                   }}
                 >
-                  {policy.type === 'spending-limit' ? (
-                    <WalletMinimal size={13} />
-                  ) : policy.type === 'recovery' ? (
-                    <LifeBuoy size={13} />
-                  ) : (
-                    <Ban size={13} />
-                  )}
+                  <PolicyIcon type={policy.type} />
                 </Box>
-                <Typography sx={{ fontSize: 13, fontWeight: 700 }}>
-                  {policy.type === 'spending-limit'
-                    ? 'Spending limit'
-                    : policy.type === 'recovery'
-                      ? 'Account recovery'
-                      : 'Token withdraw allowlist'}
-                </Typography>
+                <Typography sx={{ fontSize: 13, fontWeight: 700 }}>{POLICY_TITLE[policy.type]}</Typography>
+                {request && (
+                  <Chip
+                    size="small"
+                    variant="outlined"
+                    color={request.isReady ? 'success' : 'default'}
+                    label={request.isReady ? 'Ready to apply' : 'Pending'}
+                  />
+                )}
               </Stack>
               <IconButton onClick={onClose} size="small" aria-label="Close policy details">
                 <X size={16} />
@@ -474,6 +519,83 @@ const PolicyDetailDrawer = ({ policy, onClose }: PolicyDetailDrawerProps): React
                   </>
                 )}
 
+                {policy.type === 'bindings' &&
+                  (policy.bindings.length === 0 ? (
+                    <SummaryRow
+                      label="Change"
+                      value={
+                        <Typography sx={{ fontSize: 12.5, fontWeight: 500, color: 'text.secondary' }}>
+                          Details unavailable — the original payload wasn&apos;t stored for this request.
+                        </Typography>
+                      }
+                    />
+                  ) : (
+                    policy.bindings.map((binding, index) => (
+                      <SummaryRow
+                        key={`${binding.target}:${binding.selector}:${index}`}
+                        label={`Rule ${index + 1}`}
+                        value={
+                          <Stack gap={0.5}>
+                            <Stack direction="row" alignItems="center" gap={0.75}>
+                              <Typography sx={{ fontSize: 13, fontWeight: 600 }}>Target</Typography>
+                              <ShortAddressWithTooltip address={binding.target} />
+                            </Stack>
+                            <Typography
+                              sx={{ fontSize: 12, color: 'text.secondary', fontFamily: 'ui-monospace, monospace' }}
+                            >
+                              {binding.selector} · {binding.operation}
+                            </Typography>
+                            {binding.policyContract && (
+                              <Stack direction="row" alignItems="center" gap={0.75}>
+                                <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>Policy</Typography>
+                                <ShortAddressWithTooltip address={binding.policyContract} />
+                              </Stack>
+                            )}
+                          </Stack>
+                        }
+                      />
+                    ))
+                  ))}
+
+                {request && (
+                  <>
+                    <SummaryRow
+                      label="Root"
+                      value={
+                        <Tooltip title={request.configureRoot}>
+                          <Typography
+                            sx={{
+                              fontSize: 12.5,
+                              color: 'text.secondary',
+                              fontFamily: 'ui-monospace, monospace',
+                              cursor: 'default',
+                            }}
+                          >
+                            {shortenAddress(request.configureRoot)}
+                          </Typography>
+                        </Tooltip>
+                      }
+                    />
+                    <SummaryRow
+                      label="Requested"
+                      value={
+                        <Typography sx={{ fontSize: 13, fontWeight: 600 }}>
+                          {unixToLabel(request.requestedAt)}
+                        </Typography>
+                      }
+                    />
+                    <SummaryRow
+                      label={request.isReady ? 'Ready since' : 'Ready at'}
+                      value={
+                        <Stack direction="row" alignItems="center" gap={0.75}>
+                          <Clock size={13} color="#737373" />
+                          <Typography sx={{ fontSize: 13, fontWeight: 600 }}>{unixToLabel(request.readyAt)}</Typography>
+                        </Stack>
+                      }
+                    />
+                  </>
+                )}
+
                 {policy.type === 'ERC20TransferPolicy' &&
                   policy.allowlist.map((entry) => (
                     <SummaryRow
@@ -500,12 +622,7 @@ const PolicyDetailDrawer = ({ policy, onClose }: PolicyDetailDrawerProps): React
                 sx={{ mt: 1.5, px: 0.5, fontSize: 11.5, fontWeight: 600, color: 'text.secondary' }}
               >
                 <ShieldCheck size={12} color="#1C5538" />
-                Enforced by{' '}
-                {policy.type === 'spending-limit'
-                  ? 'Safe Allowance Module'
-                  : policy.type === 'recovery'
-                    ? 'Safe Delay Modifier'
-                    : 'Safe Policy Guard'}
+                Enforced by {POLICY_ENFORCER[policy.type]}
               </Stack>
 
               {/* CTAs */}
