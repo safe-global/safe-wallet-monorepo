@@ -21,6 +21,8 @@
     "verify:web": "node scripts/verify.mjs --workspace=web",
     "verify:changed": "node scripts/verify.mjs --changed",
     "verify:changed:web": "node scripts/verify.mjs --changed --workspace=web",
+    "knip": "knip",
+    "knip:exports:web": "knip --workspace apps/web --exports",
     "postinstall": "husky"
   },
   "resolutions": {
@@ -43,6 +45,7 @@
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
     "husky": "^9.1.6",
+    "knip": "^5.0.0",
     "lint-staged": "^16.2.7",
     "msw": "^2.7.3",
     "prettier": "^3.6.2",

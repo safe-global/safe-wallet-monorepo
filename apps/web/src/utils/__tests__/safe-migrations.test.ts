@@ -156,6 +156,37 @@ describe('createUpdateMigration', () => {
     expect(result.to).toBe(ZKSYNC_MIGRATION)
   })
 
+  it('migrates a zksync 1.3.0 master copy via the zksync 1.4.1 migration (EraVM → EraVM)', () => {
+    // Official L2 1.3.0 zksync-variant singleton
+    const OFFICIAL_L2_130_ZKSYNC = '0x1727c2c531cf966f902E5927b98490fDFb3b2b70'
+    const result = createUpdateMigration(zkChain, '1.3.0+L2', undefined, OFFICIAL_L2_130_ZKSYNC)
+
+    expect(result).toEqual({
+      operation: OperationType.DelegateCall,
+      data: SELECTORS.migrateL2WithFallbackHandler,
+      to: ZKSYNC_MIGRATION,
+      value: '0',
+    })
+  })
+
+  it('migrates a canonical L1 1.3.0 master copy on a zk chain via the CANONICAL migration (EVM → EVM)', () => {
+    // A Safe replayed from another network onto zkSync runs the canonical (EVM) singleton,
+    // so the master-copy flavour must override the chain's zk flag.
+    const OFFICIAL_L1_130 = '0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552'
+    const result = createUpdateMigration(zkChain, '1.3.0', undefined, OFFICIAL_L1_130)
+
+    expect(result.to).toBe(CANONICAL_MIGRATION)
+    expect(result.data).toBe(SELECTORS.migrateL2WithFallbackHandler)
+  })
+
+  it('migrates a canonical L2 1.3.0 master copy on a zk chain via the CANONICAL migration (EVM → EVM)', () => {
+    const OFFICIAL_L2_130 = '0x3E5c63644E683549055b9Be8653de26E0B4CD36E'
+    const result = createUpdateMigration(zkChain, '1.3.0+L2', undefined, OFFICIAL_L2_130)
+
+    expect(result.to).toBe(CANONICAL_MIGRATION)
+    expect(result.data).toBe(SELECTORS.migrateL2WithFallbackHandler)
+  })
+
   it('resolves an official eip155 master copy to the canonical migration address without throwing', () => {
     // SafeMigration ships no eip155 variant. Using an unregistered chain means the
     // lookup cannot fall back to networkAddresses[0], so an un-collapsed 'eip155'

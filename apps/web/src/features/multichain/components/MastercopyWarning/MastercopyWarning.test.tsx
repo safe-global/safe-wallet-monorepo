@@ -68,6 +68,18 @@ describe('MastercopyWarning', () => {
       expect(link).toBeInTheDocument()
       expect(link).toHaveAttribute('href', 'https://github.com/5afe/safe-cli')
     })
+
+    it("renders a text-only redeploy warning for the 'redeploy' action (no action button)", () => {
+      mockUseMastercopyMigration.mockReturnValue(
+        migration({ state: ImplementationVersionState.OUTDATED, action: 'redeploy' }),
+      )
+
+      render(<MastercopyWarning variant="settings" />)
+
+      expect(screen.getByTestId('redeploy-mastercopy-warning')).toBeInTheDocument()
+      expect(screen.getByText(/create a new Safe and transfer your assets/)).toBeInTheDocument()
+      expect(screen.queryByTestId('action-card-button')).not.toBeInTheDocument()
+    })
   })
 
   describe('dashboard variant update', () => {

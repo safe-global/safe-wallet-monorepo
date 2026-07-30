@@ -27,16 +27,24 @@ import { setupHistory, setupTransactionHistory, setupTransactionHistoryDirect } 
 import {
   setupWcDappsBase,
   seedWcSession,
+  setupWcDappsTx,
   synthSessionProposalValid,
   synthSessionProposalUnverified,
   synthSessionProposalScam,
   synthSessionDelete,
+  synthTxRequest,
+  synthTxBatch,
   setWcPairHang,
+  armProposeFailure,
 } from '../setup/walletConnectDappsSetup'
+import { installProposeFetchMock } from '../setup/proposeFetchMock'
+import { WcResponseIndicator } from './WcResponseIndicator'
 import { appUpdateE2eState } from '@/src/features/AppUpdate/hooks/appUpdateE2eState'
 import { walletKitE2eState } from '@/src/features/WalletConnect/Wallet/walletKitE2eState'
 
 LogBox.ignoreAllLogs()
+
+installProposeFetchMock()
 
 /**
  * This utility component is only included in the test simulator
@@ -97,6 +105,15 @@ function ClipboardVerificationContainer({
       </Pressable>
     </View>
   )
+}
+
+/** Surfaces setupWcDappsTx's async keychain outcome as e2e-wc-tx-setup-ready/-failed. */
+function WcTxSetupIndicator() {
+  const status = useSyncExternalStore(walletKitE2eState.subscribe, () => walletKitE2eState.get().txSetupStatus)
+  if (status === 'idle') {
+    return null
+  }
+  return <RNView testID={`e2e-wc-tx-setup-${status}`} style={styles.marker} />
 }
 
 /**
@@ -327,11 +344,36 @@ export function TestCtrls() {
         />
         <Pressable testID="e2eWcPairHang" onPress={() => setWcPairHang()} accessibilityRole="button" style={BTN} />
 
+        {/* WalletConnect dApp transaction-request scenarios */}
+        <Pressable
+          testID="e2eWcDappsTx"
+          onPress={() => {
+            setupWcDappsTx(dispatch, router).catch((e) => console.error('[E2E] setupWcDappsTx failed:', e))
+          }}
+          accessibilityRole="button"
+          style={BTN}
+        />
+        <Pressable
+          testID="e2eWcSynthTxRequest"
+          onPress={() => synthTxRequest()}
+          accessibilityRole="button"
+          style={BTN}
+        />
+        <Pressable testID="e2eWcSynthTxBatch" onPress={() => synthTxBatch()} accessibilityRole="button" style={BTN} />
+        <Pressable
+          testID="e2eWcArmProposeFailure"
+          onPress={() => armProposeFailure()}
+          accessibilityRole="button"
+          style={BTN}
+        />
+
         {/* Clipboard Verification Trigger */}
         <ClipboardVerificationTrigger onPress={() => setIsClipboardVisible(true)} />
 
-        {/* WalletConnect dApp reject side-channel */}
+        {/* WalletConnect dApp reject + tx-setup + tx-response side-channels */}
         <WcRejectIndicator />
+        <WcTxSetupIndicator />
+        <WcResponseIndicator />
       </View>
 
       {/* Clipboard Verification Container - rendered outside buttons View */}
