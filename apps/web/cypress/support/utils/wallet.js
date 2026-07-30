@@ -133,9 +133,9 @@ export function connectSignerViaStorage(signer, url, { extraStorage, waitForConn
   }
 
   // The last wallet reconnects asynchronously after the page loads (useOnboard ->
-  // connectLastWallet), so wait for the header's connected-wallet chip before proceeding;
-  // otherwise the test can act while the wallet is still (briefly) disconnected.
+  // connectLastWallet), so wait for the header's connected-wallet chip to be visible before
+  // proceeding; otherwise the test can act while the wallet is still (briefly) disconnected.
   if (waitForConnection) {
-    cy.get('[data-testid="open-account-center"]').should('exist')
+    cy.get('[data-testid="open-account-center"]').should('be.visible')
   }
 }
