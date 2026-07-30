@@ -133,7 +133,7 @@ export const safeDefiGroup: SidebarGroupConfig = {
 /** Identity for the dev-only feature-flag editor entry, which opens a dialog rather than navigating. */
 export const FEATURE_FLAGS_ITEM_ID = 'feature-flags'
 
-export const safeDeveloperGroup: SidebarActionGroupConfig = {
+export const sidebarDeveloperGroup: SidebarActionGroupConfig = {
   label: 'Developer',
   items: [
     {

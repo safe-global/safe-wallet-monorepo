@@ -68,7 +68,7 @@ jest.mock('../../../config', () => {
         { icon: Icon, label: 'Stake', href: AppRoutes.stake },
       ],
     },
-    safeDeveloperGroup: {
+    sidebarDeveloperGroup: {
       label: 'Developer',
       items: [{ icon: Icon, label: 'Feature flags', id: 'feature-flags' }],
     },

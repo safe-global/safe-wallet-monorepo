@@ -1,8 +1,9 @@
 import type { ReactElement } from 'react'
-import { useCallback, useContext, useMemo, useState } from 'react'
+import { useCallback, useContext, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { safeMainNavigation, safeDefiGroup, safeDeveloperGroup, FEATURE_FLAGS_ITEM_ID } from '../../config'
+import { safeMainNavigation, safeDefiGroup } from '../../config'
 import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
+import { useSidebarDeveloperGroup } from '../../hooks/useSidebarDeveloperGroup'
 import { SafeSidebarVariant } from '../SafeSidebarVariant'
 import { useQueuedTxsLength } from '@/hooks/useTxQueue'
 import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
@@ -10,18 +11,10 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { isRouteEnabled } from '@/utils/chains'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import type {
-  SafeWorkspaceHeaderProps,
-  SidebarItemConfig,
-  SpaceItem,
-  SidebarVariantContentProps,
-  ResolvedSidebarActionGroup,
-} from '../../types'
+import type { SafeWorkspaceHeaderProps, SidebarItemConfig, SpaceItem, SidebarVariantContentProps } from '../../types'
 import { FeatureFlagEditorDialogLoader } from '@/features/feature-flag-overrides/FeatureFlagEditorDialogLoader'
 import { getQuerySpaceId } from '../../utils'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
-import { useAppSelector } from '@/store'
-import { selectOverrideCount } from '@/features/feature-flag-overrides/store'
 
 const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.earn]
 
@@ -116,27 +109,7 @@ export const SafeSidebarContent = ({
     })
   }, [visibleMainNavigation, queueSize])
 
-  const [isEditorOpen, setEditorOpen] = useState(false)
-
-  // The Developer group is dev-only and carries a live override-count badge. The selector is
-  // called unconditionally to respect the rules of hooks; it's trivial in production.
-  const overrideCount = useAppSelector(selectOverrideCount)
-  const developerGroup: ResolvedSidebarActionGroup | undefined = useMemo(() => {
-    if (process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true') return undefined
-    return {
-      label: safeDeveloperGroup.label,
-      items: safeDeveloperGroup.items.map((item) => ({
-        icon: item.icon,
-        label: item.label,
-        id: item.id,
-        badge: item.id === FEATURE_FLAGS_ITEM_ID && overrideCount > 0 ? overrideCount : undefined,
-        isActive: false,
-        disabled: false,
-        testId: `sidebar-${item.id}-item`,
-        onSelect: () => setEditorOpen(true),
-      })),
-    }
-  }, [overrideCount])
+  const { developerGroup, isEditorOpen, setEditorOpen } = useSidebarDeveloperGroup()
 
   const { mainNavItems, setupGroup } = useResolvedSidebarNav(mainNavWithBadges, visibleDefiGroup, {
     getLink,
