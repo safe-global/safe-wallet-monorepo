@@ -61,6 +61,7 @@ export type StatusGroupType<T extends StatusGroup> = {
     | ThreatStatus.OWNERSHIP_CHANGE
     | ThreatStatus.MODULE_CHANGE
     | ThreatStatus.HYPERNATIVE_GUARD
+    | ThreatStatus.INVALID_GUARD
     | CommonSharedStatus.FAILED
   [StatusGroup.CUSTOM_CHECKS]: ThreatStatus.NO_THREAT | ThreatStatus.CUSTOM_CHECKS_FAILED
   [StatusGroup.DEADLOCK]:
@@ -108,6 +109,8 @@ export enum ThreatStatus {
   OWNERSHIP_CHANGE = 'OWNERSHIP_CHANGE', // 9F
   MODULE_CHANGE = 'MODULE_CHANGE', // 9G
   HYPERNATIVE_GUARD = 'HYPERNATIVE_GUARD', // used only for Safes with Hypernative Guard installed
+  // 9I — client-side check: setGuard target does not implement the Guard interface (bricks pre-1.4.1 Safes)
+  INVALID_GUARD = 'INVALID_GUARD',
 }
 
 export enum DeadlockStatus {

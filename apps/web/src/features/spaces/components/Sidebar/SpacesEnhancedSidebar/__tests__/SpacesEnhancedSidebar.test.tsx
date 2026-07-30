@@ -32,8 +32,8 @@ jest.mock('../../SidebarTopBar', () => ({
   SidebarTopBar: () => <div data-testid="sidebar-top-bar" />,
 }))
 
-jest.mock('../../hooks/useSidebarHydrated', () => ({
-  useSidebarHydrated: () => mockUseSidebarHydrated(),
+jest.mock('@/hooks/useIsHydrated', () => ({
+  useIsHydrated: () => mockUseSidebarHydrated(),
 }))
 
 jest.mock('@/store', () => ({

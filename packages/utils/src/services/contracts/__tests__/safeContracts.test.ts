@@ -1,4 +1,9 @@
-import { isUnsupportedMastercopyMigratable, getMastercopyAction, isValidMasterCopy } from '../safeContracts'
+import {
+  isUnsupportedMastercopyMigratable,
+  getMastercopyAction,
+  isValidMasterCopy,
+  canUpgradeInPlace,
+} from '../safeContracts'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import * as safeDeployments from '@safe-global/safe-deployments'
@@ -18,6 +23,8 @@ const OFFICIAL_L1_141 = '0x41675C099F32341bf84BFc5382aF534df5C7461a'
 const OFFICIAL_L2_130 = '0x3E5c63644E683549055b9Be8653de26E0B4CD36E'
 const OFFICIAL_L1_141_ZKSYNC = '0xC35F063962328aC65cED5D4c3fC5dEf8dec68dFa'
 const OFFICIAL_L2_141_ZKSYNC = '0x610fcA2e0279Fa1F8C00c8c2F71dF522AD469380'
+const OFFICIAL_L2_130_ZKSYNC = '0x1727c2c531cf966f902E5927b98490fDFb3b2b70'
+const OFFICIAL_L2_130_EIP155 = '0xfb1bffC9d739B8D520DaF37dF666da4C687191EA'
 const UNOFFICIAL = '0x000000000000000000000000000000000000dEaD'
 
 type MigratableSafe = Pick<SafeState, 'implementationVersionState' | 'version' | 'chainId' | 'implementation'>
@@ -209,6 +216,176 @@ describe('safeContracts', () => {
     it('recommended = 1.5.0 → an official 1.4.1 Safe is offered migrate (range extends with config)', () => {
       const safe = createSafe({ version: '1.4.1', implementation: { value: OFFICIAL_L1_141 } })
       expect(getMastercopyAction(safe, { recommendedVersion: '1.5.0' })).toBe('migrate')
+    })
+
+    // CGW derives OUTDATED from the raw config recommendation; the wallet caps the target
+    // at what safe-deployments registers on the chain. When the cap pulls the target back
+    // to the current version, no self-update must be offered.
+    it("OUTDATED but capped target equals the current version → 'none' (no self-update)", () => {
+      const safe = createSafe({
+        implementationVersionState: ImplementationVersionState.OUTDATED,
+        chainId: '324',
+        version: '1.4.1+L2',
+        implementation: { value: OFFICIAL_L2_141_ZKSYNC },
+      })
+      expect(getMastercopyAction(safe, { recommendedVersion: '1.4.1' })).toBe('none')
+    })
+
+    it("OUTDATED 1.4.1 with a real 1.5.0 target → 'update' (guard does not over-block)", () => {
+      const safe = createSafe({
+        implementationVersionState: ImplementationVersionState.OUTDATED,
+        chainId: '1',
+        version: '1.4.1',
+        implementation: { value: OFFICIAL_L1_141 },
+      })
+      expect(getMastercopyAction(safe, { recommendedVersion: '1.5.0' })).toBe('update')
+    })
+  })
+
+  // An EraVM (zkSync) proxy cannot delegatecall an EVM singleton, so an existing zkSync
+  // Safe stops being upgradable in place once the recommended version is EVM-only (1.5.0,
+  // which ships `canonical` only and is not registered on chain 324). It must redeploy.
+  describe('zkSync EraVM VM-stack strand', () => {
+    describe('canUpgradeInPlace', () => {
+      it('EVM Safe → any target: true (canonical target always exists)', () => {
+        const evmSafe = createSafe({ chainId: '1', version: '1.3.0', implementation: { value: OFFICIAL_L1_130 } })
+        expect(canUpgradeInPlace(evmSafe, '1.5.0')).toBe(true)
+      })
+
+      it('zkSync EraVM Safe → same-stack target (1.4.1): true', () => {
+        const eraVmSafe = createSafe({
+          chainId: '324',
+          version: '1.4.1',
+          implementation: { value: OFFICIAL_L2_141_ZKSYNC },
+        })
+        expect(canUpgradeInPlace(eraVmSafe, '1.4.1')).toBe(true)
+      })
+
+      it('zkSync EraVM Safe → EVM-only target (1.5.0): false', () => {
+        const eraVmSafe = createSafe({
+          chainId: '324',
+          version: '1.4.1',
+          implementation: { value: OFFICIAL_L2_141_ZKSYNC },
+        })
+        expect(canUpgradeInPlace(eraVmSafe, '1.5.0')).toBe(false)
+      })
+
+      it('eip155 Safe on zkSync → EVM-only target (1.5.0): true (eip155 is EVM bytecode)', () => {
+        const eip155Safe = createSafe({
+          chainId: '324',
+          version: '1.3.0',
+          implementation: { value: OFFICIAL_L2_130_EIP155 },
+        })
+        expect(canUpgradeInPlace(eip155Safe, '1.5.0')).toBe(true)
+      })
+
+      it('unrecognised implementation on zkSync → EVM-only target (1.5.0): false (conservative EraVM default)', () => {
+        const unknownSafe = createSafe({
+          chainId: '324',
+          version: '1.3.0',
+          implementation: { value: UNOFFICIAL },
+        })
+        expect(canUpgradeInPlace(unknownSafe, '1.5.0')).toBe(false)
+      })
+    })
+
+    it('official eip155 1.3.0 master copy on zkSync targeting 1.5.0 → update/migrate, never redeploy', () => {
+      const outdated = createSafe({
+        implementationVersionState: ImplementationVersionState.OUTDATED,
+        chainId: '324',
+        version: '1.3.0',
+        implementation: { value: OFFICIAL_L2_130_EIP155 },
+      })
+      const unknown = createSafe({
+        chainId: '324',
+        version: '1.3.0',
+        implementation: { value: OFFICIAL_L2_130_EIP155 },
+      })
+      expect(getMastercopyAction(outdated, { recommendedVersion: '1.5.0' })).toBe('update')
+      expect(getMastercopyAction(unknown, { recommendedVersion: '1.5.0' })).toBe('migrate')
+    })
+
+    it('recognized outdated zkSync EraVM Safe targeting 1.5.0 → redeploy', () => {
+      const safe = createSafe({
+        implementationVersionState: ImplementationVersionState.OUTDATED,
+        chainId: '324',
+        version: '1.4.1',
+        implementation: { value: OFFICIAL_L2_141_ZKSYNC },
+      })
+      expect(getMastercopyAction(safe, { recommendedVersion: '1.5.0' })).toBe('redeploy')
+    })
+
+    it('unknown-but-official zkSync EraVM Safe targeting 1.5.0 → redeploy (not migrate)', () => {
+      const safe = createSafe({
+        chainId: '324',
+        version: '1.4.1',
+        implementation: { value: OFFICIAL_L2_141_ZKSYNC },
+      })
+      expect(getMastercopyAction(safe, { recommendedVersion: '1.5.0' })).toBe('redeploy')
+      expect(isUnsupportedMastercopyMigratable(safe, { recommendedVersion: '1.5.0' })).toBe(false)
+    })
+
+    it('same zkSync EraVM Safe targeting 1.4.1 → migrate (same VM stack)', () => {
+      const safe = createSafe({
+        chainId: '324',
+        version: '1.4.1',
+        implementation: { value: OFFICIAL_L2_141_ZKSYNC },
+      })
+      expect(getMastercopyAction(safe, { recommendedVersion: '1.4.1' })).toBe('migrate')
+    })
+
+    it('unknown-but-official zksync 1.3.0 master copy targeting 1.4.1 → migrate (EraVM → EraVM)', () => {
+      const safe = createSafe({
+        chainId: '324',
+        version: '1.3.0',
+        implementation: { value: OFFICIAL_L2_130_ZKSYNC },
+      })
+      expect(getMastercopyAction(safe, { recommendedVersion: '1.4.1' })).toBe('migrate')
+    })
+
+    it('canonical 1.3.0 master copy replayed onto zkSync targeting 1.4.1 → migrate (EVM → EVM)', () => {
+      // A Safe re-deployed from another network runs the canonical (EVM) singleton on 324,
+      // so it is NOT stranded — it migrates to the canonical 1.4.1 singleton.
+      const l1OnZk = createSafe({ chainId: '324', version: '1.3.0', implementation: { value: OFFICIAL_L1_130 } })
+      const l2OnZk = createSafe({ chainId: '324', version: '1.3.0', implementation: { value: OFFICIAL_L2_130 } })
+      expect(getMastercopyAction(l1OnZk, { recommendedVersion: '1.4.1' })).toBe('migrate')
+      expect(getMastercopyAction(l2OnZk, { recommendedVersion: '1.4.1' })).toBe('migrate')
+    })
+
+    it('zksync 1.3.0 master copy targeting 1.5.0 → redeploy in every state (no update/migrate/cli path)', () => {
+      const outdated = createSafe({
+        implementationVersionState: ImplementationVersionState.OUTDATED,
+        chainId: '324',
+        version: '1.3.0',
+        implementation: { value: OFFICIAL_L2_130_ZKSYNC },
+      })
+      const unknown = createSafe({
+        chainId: '324',
+        version: '1.3.0',
+        implementation: { value: OFFICIAL_L2_130_ZKSYNC },
+      })
+      expect(getMastercopyAction(outdated, { recommendedVersion: '1.5.0' })).toBe('redeploy')
+      expect(getMastercopyAction(unknown, { recommendedVersion: '1.5.0' })).toBe('redeploy')
+    })
+
+    it('zkSync EraVM 1.3.0 → 1.4.1 stays an in-place update (EraVM → EraVM)', () => {
+      const safe = createSafe({
+        implementationVersionState: ImplementationVersionState.OUTDATED,
+        chainId: '324',
+        version: '1.3.0',
+        implementation: { value: UNOFFICIAL },
+      })
+      expect(getMastercopyAction(safe, { recommendedVersion: '1.4.1' })).toBe('update')
+    })
+
+    it('EVM Safe is never stranded, even targeting an EVM-only 1.5.0', () => {
+      const safe = createSafe({
+        implementationVersionState: ImplementationVersionState.OUTDATED,
+        chainId: '1',
+        version: '1.3.0',
+        implementation: { value: OFFICIAL_L1_130 },
+      })
+      expect(getMastercopyAction(safe, { recommendedVersion: '1.5.0' })).toBe('update')
     })
   })
 })

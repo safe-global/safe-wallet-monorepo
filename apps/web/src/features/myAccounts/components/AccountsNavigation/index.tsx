@@ -40,7 +40,7 @@ const AccountsNavigation = () => {
   return (
     <nav
       className={cn(
-        'shadcn-scope flex w-full max-w-[440px] items-center gap-1 rounded-2xl bg-[#fafafa] p-1 dark:bg-muted',
+        'shadcn-scope flex w-full max-w-[440px] items-center gap-1 rounded-lg bg-[#fafafa] p-1 dark:bg-muted',
         isDarkMode && 'dark',
       )}
     >
@@ -54,7 +54,7 @@ const AccountsNavigation = () => {
             onClick={handleClick(item)}
             aria-current={isActive ? 'page' : undefined}
             className={cn(
-              'inline-flex h-[38px] flex-1 items-center justify-center rounded-xl border border-transparent px-2.5 text-lg no-underline transition-all',
+              'inline-flex h-[38px] flex-1 items-center justify-center rounded-lg border border-transparent px-2.5 text-base no-underline transition-all',
               isActive
                 ? 'bg-background font-semibold text-foreground shadow-sm dark:border-input dark:bg-input/30 dark:text-foreground'
                 : 'font-normal text-muted-foreground hover:text-foreground',

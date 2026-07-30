@@ -9,11 +9,7 @@ const FiatBalance = ({ value }: { value: string | number | undefined }) => {
 
   if (value === undefined) return null
 
-  return (
-    <Typography variant="paragraph-small-medium" color="muted">
-      {formatCurrency(value, currency)}
-    </Typography>
-  )
+  return <Typography variant="paragraph-small-medium">{formatCurrency(value, currency)}</Typography>
 }
 
 export default FiatBalance

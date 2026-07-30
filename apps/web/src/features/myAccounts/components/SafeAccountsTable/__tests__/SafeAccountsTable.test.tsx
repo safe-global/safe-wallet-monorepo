@@ -209,8 +209,14 @@ describe('SafeAccountsTable — reorder mode', () => {
     expect(rowNames()).toEqual(['Bravo', 'Alpha', 'Group'])
   })
 
-  it('suppresses column-header sorting while reordering', () => {
+  it('keeps column-header sorting available while reordering (callers gate it via sortableColumns)', () => {
     render(<SafeAccountsTable items={items} reorder={{ onReorder: jest.fn() }} />)
+    expect(screen.getByTestId('account-sort-name')).toBeInTheDocument()
+    expect(screen.getByTestId('account-sort-threshold')).toBeInTheDocument()
+  })
+
+  it('suppresses column-header sorting while reordering when sortableColumns is off', () => {
+    render(<SafeAccountsTable items={items} sortableColumns={false} reorder={{ onReorder: jest.fn() }} />)
     expect(screen.queryByTestId('account-sort-name')).not.toBeInTheDocument()
     expect(screen.queryByTestId('account-sort-threshold')).not.toBeInTheDocument()
   })
