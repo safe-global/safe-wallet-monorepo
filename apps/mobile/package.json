@@ -38,7 +38,7 @@
     "ios": "expo run:ios"
   },
   "dependencies": {
-    "@cowprotocol/app-data": "^3.1.0",
+    "@cowprotocol/sdk-app-data": "5.3.2",
     "@datadog/mobile-react-native": "^3.1.2",
     "@ethersproject/shims": "^5.7.0",
     "@expo/vector-icons": "^15.1.1",

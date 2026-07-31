@@ -138,7 +138,7 @@
   "devDependencies": {
     "@argos-ci/cypress": "6.2.11",
     "@chromatic-com/storybook": "^4.1.2",
-    "@cowprotocol/app-data": "^3.1.0",
+    "@cowprotocol/sdk-app-data": "5.3.2",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.18.0",
     "@faker-js/faker": "^9.0.3",
