@@ -5,7 +5,7 @@ import TxSummary from '@/components/transactions/TxSummary'
 import TxDetails from '@/components/transactions/TxDetails'
 import CreateTxInfo from '@/components/transactions/SafeCreationTx'
 import { isCreationTxInfo } from '@/utils/transaction-guards'
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import { BatchExecuteHoverContext } from '@/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
 import css from './styles.module.css'
 import classNames from 'classnames'
@@ -32,11 +32,16 @@ const ExpandableTransactionItem = ({
   const isBatched = hoverContext.activeHover.includes(item.transaction.id)
   const isNestedListItem = isBulkGroup || isConflictGroup
 
+  // Mount the details on first expand, then keep them mounted. A constant `keepMounted` would
+  // instead mount every row's TxDetails upfront — one details request per list row.
+  const [hasExpanded, setHasExpanded] = useState(!!txDetails)
+
   return (
     <Accordion
       defaultValue={txDetails ? [ITEM_VALUE] : []}
       onValueChange={(value) => {
         if (value.includes(ITEM_VALUE)) {
+          setHasExpanded(true)
           trackEvent(TX_LIST_EVENTS.EXPAND_TRANSACTION)
         }
       }}
@@ -59,6 +64,7 @@ const ExpandableTransactionItem = ({
 
         <AccordionContent
           data-testid="accordion-details"
+          keepMounted={hasExpanded}
           className={classNames('px-4 pb-4 pt-0 sm:px-6', css.accordionContentSurface)}
         >
           {isCreationTxInfo(item.transaction.txInfo) ? (

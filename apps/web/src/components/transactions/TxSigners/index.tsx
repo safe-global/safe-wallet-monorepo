@@ -51,11 +51,21 @@ const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
   if (!txHash) {
     return (
       <Tooltip>
+        {/* A disabled button receives neither pointer nor focus events, so the tooltip has to hang
+            off a wrapper or the hint is unreachable by every input method. */}
         <TooltipTrigger
           render={
-            <Button variant="ghost" size="icon-sm" className="text-inherit" disabled aria-label="Copy transaction hash">
-              <HashIcon className="size-5" />
-            </Button>
+            <span tabIndex={0}>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="text-inherit"
+                disabled
+                aria-label="Copy transaction hash"
+              >
+                <HashIcon className="size-5" />
+              </Button>
+            </span>
           }
         />
         <TooltipContent side="top">Available after execution</TooltipContent>
@@ -121,7 +131,7 @@ const TxAuditLogActions = ({
       <Tooltip>
         <TooltipTrigger
           render={
-            <span>
+            <span tabIndex={0}>
               <Button variant="ghost" size="icon-sm" disabled aria-label="View on block explorer">
                 <ExplorerFallbackIcon className="size-5" />
               </Button>

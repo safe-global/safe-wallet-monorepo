@@ -77,7 +77,10 @@ const SingleTxDecoded = ({
     <>
       <AccordionTrigger
         data-testid="action-item"
-        render={<div role="button" tabIndex={0} />}
+        // The trigger hosts the `actions` slot below, so it cannot be a native <button>. Base UI
+        // only applies its Enter/Space fallback when told the element isn't one.
+        nativeButton={false}
+        render={<div />}
         className={cn(
           'flex min-h-12 items-center px-4 py-3 hover:no-underline',
           isGrouped ? css.groupedTrigger : css.outlinedTrigger,

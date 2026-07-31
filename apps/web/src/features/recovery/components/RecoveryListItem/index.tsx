@@ -25,7 +25,7 @@ function ProvidedRecoveryListItem({ item }: { item: RecoveryQueueItem }): ReactE
   return (
     <Accordion value={isExpanded ? ['recovery'] : []} onValueChange={onChange}>
       <AccordionItem value="recovery" className="border-b-0">
-        <AccordionTrigger render={<div role="button" tabIndex={0} />} className="justify-start gap-2 overflow-x-auto">
+        <AccordionTrigger nativeButton={false} render={<div />} className="justify-start gap-2 overflow-x-auto">
           <RecoverySummary item={item} />
         </AccordionTrigger>
 
