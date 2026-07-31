@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - apps/web/**
+      - apps/web-tanstack/**
       - packages/**
   push:
     branches:
@@ -11,6 +12,7 @@ on:
       - dev
     paths:
       - apps/web/**
+      - apps/web-tanstack/**
       - packages/**
 
 concurrency:
@@ -28,7 +30,7 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6.0.0
       - uses: ./.github/actions/yarn
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
@@ -55,7 +57,7 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6.0.0
       - uses: ./.github/actions/yarn
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
@@ -71,7 +73,7 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6.0.0
       - uses: ./.github/actions/yarn
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
@@ -87,13 +89,13 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6.0.0
       - uses: ./.github/actions/yarn
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
       - name: Check for unused exports
-        run: yarn turbo run knip:exports --filter=@safe-global/web
+        run: yarn turbo run knip:exports:web
 
   notify:
     if: failure() && github.event_name == 'push'

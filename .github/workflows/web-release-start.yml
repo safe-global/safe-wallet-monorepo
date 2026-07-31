@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6.0.0
         with:
           fetch-depth: 0
           token: ${{ secrets.RELEASE_BOT_TOKEN }}
@@ -256,7 +256,7 @@ jobs:
       - name: Sync release to Linear
         id: linear_sync
         continue-on-error: true
-        uses: linear/linear-release-action@c0cb8354a362c24c6d3e0948f37fd66d07588e3f # v0.14.5
+        uses: linear/linear-release-action@3858a5d7892435dc63302ac76b0cdb587435caa9 # v0.14.6
         with:
           access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
           command: sync
@@ -266,7 +266,7 @@ jobs:
 
       - name: Move Linear release to Code Freeze
         continue-on-error: true
-        uses: linear/linear-release-action@c0cb8354a362c24c6d3e0948f37fd66d07588e3f # v0.14.5
+        uses: linear/linear-release-action@3858a5d7892435dc63302ac76b0cdb587435caa9 # v0.14.6
         with:
           access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
           command: update

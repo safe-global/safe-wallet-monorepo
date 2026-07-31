@@ -27,6 +27,8 @@
   },
   "dependencies": {
     "@cowprotocol/app-data": "^3.1.0",
+    "@noble/curves": "1.9.7",
+    "@noble/hashes": "1.8.0",
     "@testing-library/react": "^16.3.0",
     "date-fns": "^4.1.0",
     "jest-fixed-jsdom": "^0.0.10",

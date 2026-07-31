@@ -11,8 +11,8 @@ if (!process.env.NEXT_PUBLIC_APP_VERSION || !process.env.NEXT_PUBLIC_APP_HOMEPAG
 
 const nextJest = require('next/jest')
 const createJestConfig = nextJest({
-  // Provide the path to your Next.js app to load next.config.js and .env files in your test environment
-  dir: './',
+  // Absolute path so this resolves correctly even when invoked from a different cwd (e.g. knip running from the repo root)
+  dir: __dirname,
 })
 
 // Add any custom config to be passed to Jest

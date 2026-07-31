@@ -1,0 +1,76 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "workspaces": {
+    "apps/web": {
+      "entry": ["src/pages/**/*.tsx", "src/features/**/feature.ts"],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignore": [
+        "**/*.test.{ts,tsx}",
+        "**/*.stories.{ts,tsx}",
+        "**/__tests__/**",
+        "src/types/contracts/**",
+        "src/components/common/Mui/index.tsx",
+        "src/services/contracts/ContractErrorCodes.ts",
+        "src/features/counterfactual/contract.ts",
+        "src/features/ledger/types.ts",
+        "src/features/multichain/types.ts",
+        "src/store/**/*Slice.ts",
+        "src/components/ui/**",
+        ".storybook/mocks/querystring.ts"
+      ],
+      "ignoreDependencies": [
+        "@storybook/*",
+        "storybook",
+        "cypress",
+        "jest",
+        "@testing-library/*",
+        "msw",
+        "@faker-js/faker"
+      ]
+    },
+    "apps/web-tanstack": {
+      "entry": [
+        "index.html",
+        "src/main.tsx",
+        "src/router.tsx",
+        "src/routes/**/*.tsx",
+        "vite.config.ts",
+        "plugins/vite-plugin-import-map-integrity.ts",
+        "plugins/vite-plugin-sw-assets.ts",
+        "src/service-worker/sw.ts",
+        "scripts/assert-sri.mjs"
+      ],
+      "project": ["src/**/*.{ts,tsx}", "plugins/**/*.ts"],
+      "ignore": ["**/*.test.{ts,tsx}", "dist/**"]
+    },
+    "packages/store": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"],
+      "ignore": ["src/gateway/AUTO_GENERATED/**", "src/**/__tests__/**"]
+    },
+    "packages/theme": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignore": ["src/**/__tests__/**"]
+    },
+    "packages/utils": {
+      "entry": ["src/**/*.ts"],
+      "project": ["src/**/*.ts"],
+      "ignore": ["src/types/contracts/**", "src/**/__tests__/**"]
+    },
+    "config/test": {
+      "entry": ["index.ts", "presets/jest-preset.js", "factories/index.ts", "msw/index.ts"],
+      "project": ["**/*.ts"]
+    }
+  },
+  "ignoreExportsUsedInFile": true,
+  "rules": {
+    "exports": "warn",
+    "types": "off",
+    "duplicates": "off",
+    "unlisted": "off",
+    "binaries": "off",
+    "dependencies": "off",
+    "devDependencies": "off"
+  }
+}
