@@ -1,5 +1,6 @@
 import { Plus, ShieldCheck, Smartphone } from 'lucide-react'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
@@ -44,10 +45,10 @@ const SwitchAuthenticatorSection = () => {
           Two-factor authentication
         </Typography>
         {authenticator && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-            <ShieldCheck className="h-3.5 w-3.5" />
+          <Badge variant="success">
+            <ShieldCheck />
             Active
-          </span>
+          </Badge>
         )}
       </div>
       <Typography variant="paragraph-small" color="muted" className="mb-4 block max-w-[560px]">
