@@ -26,6 +26,7 @@
     "postinstall": "husky"
   },
   "resolutions": {
+    "axios": "1.18.1",
     "motion": "12.34.0",
     "@ledgerhq/context-module/ethers": "6.17.0",
     "@gnosis.pm/zodiac/ethers": "6.17.0",
