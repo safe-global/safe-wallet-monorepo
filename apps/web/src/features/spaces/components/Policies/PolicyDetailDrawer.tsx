@@ -68,8 +68,10 @@ export type PolicyDetail = SpendingLimitDetail | RecoveryDetail | TokenWithdrawD
 /** Request metadata shown for a policy change that is requested but not yet applied. */
 export type PendingRequestInfo = {
   configureRoot: string
+  /** False while the `requestConfiguration` transaction is still waiting to execute. */
+  isRootConfigured?: boolean
   requestedAt: number
-  readyAt: number
+  readyAt: number | null
   isReady: boolean
 }
 
@@ -374,7 +376,13 @@ const PolicyDetailDrawer = ({ policy, request, isFallback, onClose }: PolicyDeta
                     size="small"
                     variant="outlined"
                     color={request.isReady ? 'success' : 'default'}
-                    label={request.isReady ? 'Ready to apply' : 'Pending'}
+                    label={
+                      request.isRootConfigured === false
+                        ? 'Not requested yet'
+                        : request.isReady
+                          ? 'Ready to apply'
+                          : 'Pending'
+                    }
                   />
                 )}
               </Stack>
@@ -603,7 +611,12 @@ const PolicyDetailDrawer = ({ policy, request, isFallback, onClose }: PolicyDeta
                       value={
                         <Stack direction="row" alignItems="center" gap={0.75}>
                           <Clock size={13} color="#737373" />
-                          <Typography sx={{ fontSize: 13, fontWeight: 600 }}>{unixToLabel(request.readyAt)}</Typography>
+                          <Typography sx={{ fontSize: 13, fontWeight: 600 }}>
+                            {/* No delay to report until the request is on-chain. */}
+                            {request.readyAt === null
+                              ? 'Once the request transaction is executed'
+                              : unixToLabel(request.readyAt)}
+                          </Typography>
                         </Stack>
                       }
                     />

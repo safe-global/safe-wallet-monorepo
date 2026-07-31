@@ -34,6 +34,26 @@ describe('PolicyDetailDrawer — token-withdraw variant', () => {
     expect(screen.getByText('0xdead...de02')).toBeInTheDocument()
   })
 
+  // CGW lists a request before its transaction executes; the delay hasn't started then.
+  it('marks a request that is not on-chain yet', () => {
+    render(
+      <PolicyDetailDrawer
+        policy={tokenWithdraw}
+        request={{
+          configureRoot: `0x${'ab'.repeat(32)}`,
+          isRootConfigured: false,
+          requestedAt: 1_700_000_000,
+          readyAt: null,
+          isReady: false,
+        }}
+        onClose={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByText('Not requested yet')).toBeInTheDocument()
+    expect(screen.getByText('Once the request transaction is executed')).toBeInTheDocument()
+  })
+
   it('renders nothing when policy is null', () => {
     const { container } = render(<PolicyDetailDrawer policy={null} onClose={jest.fn()} />)
     expect(screen.queryByText('Token withdraw allowlist')).not.toBeInTheDocument()

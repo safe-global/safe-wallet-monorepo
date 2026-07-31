@@ -47,6 +47,8 @@ export const matchesRoot = (configurations: PolicyConfiguration[], root: string)
 }
 
 export type ApplyBlockedReason =
+  /** The `requestConfiguration` transaction hasn't executed, so the guard has no root. */
+  | 'root-not-configured'
   /** The guard's delay hasn't elapsed. */
   | 'not-ready'
   /** Neither CGW nor this browser holds the payload behind the root. */
@@ -96,7 +98,13 @@ export type ResolveApplyPlanInput = {
  * transaction would revert on-chain, so the action is withheld rather than attempted.
  */
 export const resolveApplyPlan = ({ pending, local, nowSec }: ResolveApplyPlanInput): ApplyPlan => {
-  if (!pending.isReady && nowSec < pending.readyAt) {
+  // The root only reaches the guard when the request transaction executes; until then the
+  // delay hasn't started and applying would revert.
+  if (pending.isRootConfigured === false) {
+    return { canApply: false, reason: 'root-not-configured' }
+  }
+
+  if (!pending.isReady && (pending.readyAt === null || nowSec < pending.readyAt)) {
     return { canApply: false, reason: 'not-ready' }
   }
 
@@ -125,6 +133,7 @@ export const resolveApplyPlan = ({ pending, local, nowSec }: ResolveApplyPlanInp
 
 /** What to tell the user when Apply is unavailable. Empty when it is available. */
 export const APPLY_BLOCKED_MESSAGE: Record<ApplyBlockedReason, string> = {
+  'root-not-configured': 'The request transaction hasn’t been executed yet, so there is nothing to apply.',
   'not-ready': '',
   'no-configurations': "The original policy payload isn't available, so this request can't be applied.",
   'incomplete-configurations': "This request's details are incomplete, so it can't be applied yet.",

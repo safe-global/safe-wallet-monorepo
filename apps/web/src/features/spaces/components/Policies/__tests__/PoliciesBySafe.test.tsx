@@ -344,6 +344,25 @@ describe('PoliciesBySafe', () => {
       expect(refetch).toHaveBeenCalled()
     })
 
+    // CGW lists a request as soon as it is proposed; the root only lands when it executes.
+    it('says a request is not on-chain yet and withholds Apply', () => {
+      const request = saveRequest()
+      mockPending([
+        {
+          configureRoot: request.configureRoot,
+          isRootConfigured: false,
+          requestedAt: 1_000,
+          readyAt: null,
+          isReady: false,
+          policies: null,
+        },
+      ])
+      renderPage()
+
+      expect(screen.getByText('Not requested yet')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /apply/i })).toBeDisabled()
+    })
+
     it('blocks Apply when nothing holds the payload behind the root', () => {
       mockPending([
         {

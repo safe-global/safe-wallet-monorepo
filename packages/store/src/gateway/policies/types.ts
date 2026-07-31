@@ -160,7 +160,11 @@ export type PolicyInfo = {
  * `applyConfiguration` becomes valid. Returned by getPendingPolicies.
  *
  *  - configureRoot: keccak256(abi.encode(Configuration[])) — the requested root.
- *  - requestedAt / readyAt: unix seconds; readyAt = requestedAt + DELAY.
+ *  - isRootConfigured: whether `requestConfiguration(root)` has actually executed. While the
+ *    request transaction is still queued in the Safe the root isn't on the guard yet, so
+ *    there is no delay to wait out (`readyAt` is null) and nothing to apply.
+ *  - requestedAt / readyAt: unix seconds; readyAt = requestedAt + DELAY, null until the
+ *    request is on-chain.
  *  - isReady: whether the delay has elapsed (readyAt <= now) so it can be applied.
  *  - safePolicyGuard: the guard holding the request — the `to` of apply and cancel.
  *  - policies: the bindings of the requested change, in submitted order, or `null`
@@ -174,8 +178,10 @@ export type PolicyInfo = {
  */
 export type PendingPolicy = {
   configureRoot: string
+  /** Absent on a CGW that predates the flag, where every row is already on-chain. */
+  isRootConfigured?: boolean
   requestedAt: number
-  readyAt: number
+  readyAt: number | null
   isReady: boolean
   safePolicyGuard?: string
   policies?: PolicyInfo[] | null

@@ -166,26 +166,26 @@ const FallbackPolicyFlow = () => {
     const isRequest = mode === 'request'
     const subtitle = isRequest ? `Request ${copy.title.toLowerCase()}` : copy.title
 
-    const onSubmit = isRequest
-      ? () => {
-          const requestedAt = Math.floor(Date.now() / 1000)
-          savePolicyRequestApi.save({
-            id: configureRoot,
-            chainId,
-            safeAddress,
-            type: policyType,
-            enforcement: {
-              via: 'guard',
-              guards: { transactionGuard: { policyContract, safePolicyGuard: guardAddress } },
-            },
-            configurations,
-            configureRoot,
-            requestedAt,
-            readyAt: requestedAt + POLICY_GUARD_DELAY_SEC,
-            delaySec: POLICY_GUARD_DELAY_SEC,
-          })
-        }
-      : undefined
+    const saveSnapshot = () => {
+      const requestedAt = Math.floor(Date.now() / 1000)
+      savePolicyRequestApi.save({
+        id: configureRoot,
+        chainId,
+        safeAddress,
+        type: policyType,
+        enforcement: {
+          via: 'guard',
+          guards: { transactionGuard: { policyContract, safePolicyGuard: guardAddress } },
+        },
+        configurations,
+        configureRoot,
+        requestedAt,
+        readyAt: requestedAt + POLICY_GUARD_DELAY_SEC,
+        delaySec: POLICY_GUARD_DELAY_SEC,
+      })
+    }
+
+    if (isRequest) saveSnapshot()
 
     if (isRequest) {
       const stored = await storePolicyRequest({ chainId, safeAddress, root: configureRoot, configurations })
@@ -210,7 +210,7 @@ const FallbackPolicyFlow = () => {
       )
     }
 
-    setTxFlow(<PolicyBatchFlow txs={txs} subtitle={subtitle} onSubmit={onSubmit} />)
+    setTxFlow(<PolicyBatchFlow txs={txs} subtitle={subtitle} onSubmit={isRequest ? saveSnapshot : undefined} />)
   }
 
   return (

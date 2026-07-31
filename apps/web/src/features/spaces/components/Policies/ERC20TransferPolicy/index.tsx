@@ -215,34 +215,36 @@ const ERC20TransferPolicyFlow = () => {
     const isRequest = mode === 'request'
     const subtitle = isRequest ? 'Request token withdraw change' : 'Token withdraw allowlist'
 
-    // Snapshot the requested change so the Pending section can offer Apply once
-    // the delay has elapsed. Persisted only when the request tx is submitted.
-    const onSubmit = isRequest
-      ? () => {
-          const requestedAt = Math.floor(Date.now() / 1000)
-          savePolicyRequestApi.save({
-            id: configureRoot,
-            chainId,
-            safeAddress,
-            type: PolicyType.TokenWithdraw,
-            enforcement: {
-              via: 'guard',
-              guards: { transactionGuard: { policyContract, safePolicyGuard: guardAddress } },
-            },
-            data: {
-              allowlist: selectedTokens.map((token) => ({
-                token,
-                recipients: validRecipients.map((r) => ({ address: r.address, name: r.name ?? null })),
-              })),
-            },
-            configurations,
-            configureRoot,
-            requestedAt,
-            readyAt: requestedAt + POLICY_GUARD_DELAY_SEC,
-            delaySec: POLICY_GUARD_DELAY_SEC,
-          })
-        }
-      : undefined
+    // Snapshot the requested change. `requestConfiguration` publishes only the root, so
+    // this is what names the policies behind it in the review screen — and what lets the
+    // Pending section offer Apply once the delay has elapsed. Saved before the flow opens
+    // (de-duped by root) and again on submission, which stamps the real request time.
+    const saveSnapshot = () => {
+      const requestedAt = Math.floor(Date.now() / 1000)
+      savePolicyRequestApi.save({
+        id: configureRoot,
+        chainId,
+        safeAddress,
+        type: PolicyType.TokenWithdraw,
+        enforcement: {
+          via: 'guard',
+          guards: { transactionGuard: { policyContract, safePolicyGuard: guardAddress } },
+        },
+        data: {
+          allowlist: selectedTokens.map((token) => ({
+            token,
+            recipients: validRecipients.map((r) => ({ address: r.address, name: r.name ?? null })),
+          })),
+        },
+        configurations,
+        configureRoot,
+        requestedAt,
+        readyAt: requestedAt + POLICY_GUARD_DELAY_SEC,
+        delaySec: POLICY_GUARD_DELAY_SEC,
+      })
+    }
+
+    if (isRequest) saveSnapshot()
 
     // Hand the Configuration[] to CGW before the tx is proposed: `requestConfiguration`
     // publishes only the root, so this is what lets the Pending list say what the request
@@ -276,7 +278,7 @@ const ERC20TransferPolicyFlow = () => {
       )
     }
 
-    setTxFlow(<PolicyBatchFlow txs={txs} subtitle={subtitle} onSubmit={onSubmit} />)
+    setTxFlow(<PolicyBatchFlow txs={txs} subtitle={subtitle} onSubmit={isRequest ? saveSnapshot : undefined} />)
   }
 
   const step = STEPS[stepIndex].key as StepKey

@@ -89,6 +89,7 @@ type OpenDetail = { detail: PolicyDetail; request?: PendingRequestInfo; isFallba
 
 const requestInfoOf = (pending: PendingPolicy): PendingRequestInfo => ({
   configureRoot: pending.configureRoot,
+  isRootConfigured: pending.isRootConfigured,
   requestedAt: pending.requestedAt,
   readyAt: pending.readyAt,
   isReady: pending.isReady,
@@ -214,9 +215,12 @@ const PendingEntry = ({
 }) => {
   const nowSec = Math.floor(Date.now() / 1000)
   const plan = applyPlanOf(row, nowSec)
-  const isReady = row.pending.isReady || nowSec >= row.pending.readyAt
-  const hoursLeft = Math.max(0, Math.ceil((row.pending.readyAt - nowSec) / 3600))
+  const { isRootConfigured, readyAt } = row.pending
+  const isReady = row.pending.isReady || (readyAt !== null && nowSec >= readyAt)
+  const hoursLeft = readyAt === null ? 0 : Math.max(0, Math.ceil((readyAt - nowSec) / 3600))
   const blockedMessage = plan.canApply ? '' : APPLY_BLOCKED_MESSAGE[plan.reason]
+  // The delay only starts once the request transaction executes.
+  const status = isRootConfigured === false ? 'Not requested yet' : isReady ? 'Ready' : `~${hoursLeft}h left`
 
   const tokens = row.local?.data?.allowlist.map((entry) => entry.token) ?? row.local?.tokens ?? []
   const scope = tokens.length > 0 ? tokens.map((token) => token.symbol).join(' · ') : 'Requested change'
@@ -241,9 +245,7 @@ const PendingEntry = ({
       badges={hasFallbackAccess(row) ? <FallbackBadge /> : undefined}
       action={
         <Stack direction="row" alignItems="center" gap={1} onClick={(e) => e.stopPropagation()}>
-          <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
-            {isReady ? 'Ready' : `~${hoursLeft}h left`}
-          </Typography>
+          <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{status}</Typography>
           <Tooltip title={blockedMessage}>
             <span>
               <Button size="sm" disabled={!plan.canApply} onClick={() => onApply(row)}>

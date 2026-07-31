@@ -129,6 +129,7 @@ export const pendingPolicyBuilder = (): IBuilder<PendingPolicy> => {
   const requestedAt = Math.floor(faker.date.recent().getTime() / 1000)
   return Builder.new<PendingPolicy>().with({
     configureRoot: faker.string.hexadecimal({ length: 64 }),
+    isRootConfigured: true,
     requestedAt,
     readyAt: requestedAt + 86_400,
     isReady: false,

@@ -147,6 +147,27 @@ describe('resolveApplyPlan', () => {
     expect(resolveApplyPlan({ pending, nowSec: NOW })).toEqual({ canApply: false, reason: 'not-ready' })
   })
 
+  // The root reaches the guard only when the request transaction executes.
+  it('blocks while the request transaction has not executed', () => {
+    const pending = pendingFor([policyInfo()], { isRootConfigured: false, isReady: false, readyAt: null })
+
+    expect(resolveApplyPlan({ pending, nowSec: NOW })).toEqual({ canApply: false, reason: 'root-not-configured' })
+  })
+
+  // A CGW that predates the flag only ever lists requests that are already on-chain.
+  it('treats a missing isRootConfigured as configured', () => {
+    const pending = pendingFor([policyInfo()], { isRootConfigured: undefined })
+
+    expect(resolveApplyPlan({ pending, nowSec: NOW })).toMatchObject({ canApply: true })
+  })
+
+  // Without a readyAt there is no delay to compare against, so it can't be ready.
+  it('blocks when the delay is unknown', () => {
+    const pending = pendingFor([policyInfo()], { isReady: false, readyAt: null })
+
+    expect(resolveApplyPlan({ pending, nowSec: NOW })).toEqual({ canApply: false, reason: 'not-ready' })
+  })
+
   it('lets the local clock overrule a stale isReady: false', () => {
     const pending = pendingFor([policyInfo()], { isReady: false, readyAt: NOW - 1 })
 

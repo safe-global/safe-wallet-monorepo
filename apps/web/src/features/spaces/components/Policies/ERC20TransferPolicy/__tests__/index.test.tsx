@@ -14,6 +14,7 @@ import { availablePolicyBuilder, tokenWithdrawPolicyBuilder } from '@/tests/buil
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { accessId } from '../../shared/accessSelector'
 import { SAFE_SET_GUARD_ABI, CONFIGURE_IMMEDIATELY_ABI, REQUEST_CONFIGURATION_ABI } from '../../shared/guardTx'
+import { savePolicyRequestApi } from '../../policyRequestStore'
 import { ERC20_TRANSFER_SELECTOR, RECIPIENT_DATA_TYPE } from '../contracts'
 import ERC20TransferPolicyFlow from '../index'
 
@@ -343,7 +344,35 @@ describe('ERC20TransferPolicyFlow', () => {
  * Configuration[] — before the transaction is proposed, and without ever blocking it.
  */
 describe('ERC20TransferPolicyFlow — storing the configuration in CGW', () => {
-  afterEach(() => jest.restoreAllMocks())
+  afterEach(() => {
+    for (const request of savePolicyRequestApi.get(SAFE.chainId, SAFE.address)) {
+      savePolicyRequestApi.remove(SAFE.chainId, SAFE.address, request.id)
+    }
+    window.localStorage.clear()
+    jest.restoreAllMocks()
+  })
+
+  // CGW describes a pending request without its payload, so the review screen would say the
+  // policy data isn't available — for a change the requester just built. The snapshot has to
+  // exist by the time the flow opens, not only once it is submitted.
+  it('snapshots the request before the review screen opens', async () => {
+    mockAll({ currentGuard: GUARD, isSet: true })
+    const { setTxFlow } = renderFlow()
+    await advanceToReview()
+
+    fireEvent.click(screen.getByRole('button', { name: /review/i }))
+    await waitFor(() => expect(setTxFlow).toHaveBeenCalled())
+
+    const [onChainRoot] = new Interface(REQUEST_CONFIGURATION_ABI).decodeFunctionData(
+      'requestConfiguration',
+      setTxFlow.mock.calls[0][0].props.txs[0].data,
+    )
+
+    // Stored under the root the tx commits to, with the payload the review screen renders.
+    const [snapshot] = savePolicyRequestApi.get(SAFE.chainId, SAFE.address)
+    expect(snapshot.configureRoot).toBe(onChainRoot)
+    expect(snapshot.data?.allowlist[0].recipients[0].address).toBe(RECIPIENT)
+  })
 
   it('stores the configurations with the same root the tx commits to, before proposing', async () => {
     // Guard already installed → the delayed request path, which creates a pending row.
