@@ -48,8 +48,8 @@ jest.mock('@/features/counterfactual', () => ({
   useIsCounterfactualSafe: () => false,
 }))
 
-jest.mock('../../../hooks/useSidebarHydrated', () => ({
-  useSidebarHydrated: () => true,
+jest.mock('@/hooks/useIsHydrated', () => ({
+  useIsHydrated: () => true,
 }))
 
 jest.mock('../../../NewTransactionButton', () => ({
