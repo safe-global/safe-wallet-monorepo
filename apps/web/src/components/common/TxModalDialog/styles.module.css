@@ -6,6 +6,10 @@
   bottom: 0;
   z-index: 3;
   overflow-y: auto;
+  /* Keep scrolling inside the dialog: no chaining to the page behind and no rubber-band bounce past
+     the dialog's own content. `.dialog` is the scroll container now that it is the Base UI popup;
+     it used to be MUI's `.MuiDialog-container` wrapper. */
+  overscroll-behavior: none;
   display: flex;
   flex-direction: column;
   transition: left 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
@@ -14,29 +18,8 @@
   background-color: var(--color-border-background);
 }
 
-/* Keep scrolling inside the dialog: no chaining to the page behind and no
-   rubber-band bounce past the dialog's own content. */
-.dialog :global .MuiDialog-container {
-  overscroll-behavior: none;
-}
-
 .dialog.fullWidth {
   left: 0;
-}
-
-.dialog :global .MuiDialogActions-root {
-  border-top: 2px solid var(--color-border-light);
-  padding: var(--space-3);
-}
-
-.dialog :global .MuiDialogActions-root > :last-of-type:not(:first-of-type) {
-  order: 2;
-}
-
-.dialog :global .MuiDialogActions-root:after {
-  content: '';
-  order: 1;
-  flex: 1;
 }
 
 .title {
@@ -100,10 +83,6 @@
     left: 0;
     top: 0;
     z-index: 1300;
-  }
-
-  .dialog :global .MuiDialogActions-root {
-    padding: 0;
   }
 
   .title {

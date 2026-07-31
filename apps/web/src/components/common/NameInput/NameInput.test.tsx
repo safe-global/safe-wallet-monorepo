@@ -80,6 +80,34 @@ describe('NameInput', () => {
       expect(screen.getByText(DISALLOWED_CHARACTER_SHORT_MESSAGE)).toBeInTheDocument()
     })
 
+    it('announces the validation message and flags it as an error', async () => {
+      render(
+        <Wrapper>
+          <NameInput name="name" label="Name" validateCharset />
+        </Wrapper>,
+      )
+
+      const input = screen.getByRole('textbox', { name: 'Name' })
+      fireEvent.change(input, { target: { value: 'Alice~' } })
+
+      await waitFor(() => {
+        expect(input).toHaveAccessibleDescription(DISALLOWED_CHARACTER_SHORT_MESSAGE)
+      })
+      expect(screen.getByRole('alert')).toHaveTextContent(DISALLOWED_CHARACTER_SHORT_MESSAGE)
+    })
+
+    it('announces a plain helper text without flagging an error', async () => {
+      render(
+        <Wrapper>
+          <NameInput name="name" label="Name" validateCharset helperText="Visible to your space only" />
+        </Wrapper>,
+      )
+
+      const input = screen.getByRole('textbox', { name: 'Name' })
+      expect(input).toHaveAccessibleDescription('Visible to your space only')
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    })
+
     it('accepts a valid UTF-8 name', async () => {
       render(
         <Wrapper>

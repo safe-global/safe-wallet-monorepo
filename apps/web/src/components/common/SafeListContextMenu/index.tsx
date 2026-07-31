@@ -180,8 +180,9 @@ const SafeListContextMenu = ({
           defaultValues={{ name, address }}
           chainIds={[chainId]}
           disableAddressInput
-          // Above shadcn's overlay layer (--z-overlay: 1400) so Rename shows over the Trusted Safes modal
-          sx={{ zIndex: 1500 }}
+          // Above shadcn's overlay layer (--z-overlay) so Rename shows over the Trusted Safes modal
+          className="z-[var(--z-nested-overlay)]"
+          overlayClassName="z-[var(--z-nested-overlay)]"
         />
       )}
 

@@ -67,7 +67,7 @@ const TokenAmountInput = ({
   const tokenAddress = watchedTokenAddress || defaultTokenAddress || ''
   const watchedAmount = watch(amountField) || ''
 
-  const isAmountError = !!get(errors, tokenAddressField) || !!get(errors, amountField)
+  const isAmountError = !!get(errors, amountField)
 
   const fiatValue = useMemo(
     () => computeFiatValue(parseFloat(watchedAmount), selectedToken?.fiatConversion),
@@ -135,11 +135,7 @@ const TokenAmountInput = ({
       <div data-testid="token-amount-section" className="w-full">
         <NumberField
           data-testid="token-amount-field"
-          label={
-            get(errors, tokenAddressField)?.message?.toString() ||
-            get(errors, amountField)?.message?.toString() ||
-            'Amount'
-          }
+          label={get(errors, amountField)?.message?.toString() || 'Amount'}
           error={isAmountError}
           fullWidth
           inputSize="hero"

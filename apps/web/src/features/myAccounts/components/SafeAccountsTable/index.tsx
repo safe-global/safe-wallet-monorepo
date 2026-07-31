@@ -350,8 +350,9 @@ export default function SafeAccountsTable({
           handleClose={() => setRenameTarget(null)}
           defaultValues={{ name: renameTarget.name, address: renameTarget.address }}
           chainIds={renameTarget.chainIds}
-          // In a modal surface, sit above the shadcn Dialog (--z-overlay: 1400) instead of behind it.
-          sx={allowRenameInDialog ? { zIndex: 1450 } : undefined}
+          // In a modal surface, sit above the shadcn Dialog (--z-overlay) instead of behind it.
+          className={allowRenameInDialog ? 'z-[var(--z-nested-overlay)]' : undefined}
+          overlayClassName={allowRenameInDialog ? 'z-[var(--z-nested-overlay)]' : undefined}
         />
       )}
     </div>

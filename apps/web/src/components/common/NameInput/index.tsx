@@ -2,7 +2,7 @@ import { type ComponentProps, type ReactNode, useId } from 'react'
 import get from 'lodash/get'
 import { Controller, type FieldError, useFormContext } from 'react-hook-form'
 import { getNameValidationDisplay, sanitizeName, validateName } from '@safe-global/utils/validation/names'
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
+import { Field, FieldDescription, FieldError as FieldErrorText, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 
@@ -86,6 +86,8 @@ const NameInput = ({
         },
       }}
       render={({ field: { ref, onBlur, onChange, value, name: fieldName } }) => {
+        const helperTextId = resolvedHelperText ? `${id}-${fieldError ? 'error' : 'description'}` : undefined
+
         const inputProps = {
           ...props,
           id,
@@ -100,6 +102,7 @@ const NameInput = ({
           // Full charset-validation explanation as a native tooltip (short label goes in the description below).
           title: tooltip || undefined,
           'aria-invalid': Boolean(fieldError) || undefined,
+          'aria-describedby': helperTextId,
           onChange: (e: React.ChangeEvent<HTMLInputElement>) => onChange(e),
           onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
             onBlur()
@@ -119,7 +122,7 @@ const NameInput = ({
         )
 
         return (
-          <Field className={className}>
+          <Field className={className} data-invalid={Boolean(fieldError) || undefined}>
             {resolvedLabel != null && resolvedLabel !== '' && (
               <FieldLabel htmlFor={id} className={fieldError ? 'text-destructive' : undefined}>
                 {resolvedLabel}
@@ -128,7 +131,15 @@ const NameInput = ({
 
             {inputControl}
 
-            {resolvedHelperText ? <FieldDescription>{resolvedHelperText}</FieldDescription> : null}
+            {resolvedHelperText ? (
+              // In `validateCharset` mode the validation message lands here rather than in the label,
+              // so it has to go through the error slot to read as a failure and not as a hint.
+              fieldError ? (
+                <FieldErrorText id={helperTextId}>{resolvedHelperText}</FieldErrorText>
+              ) : (
+                <FieldDescription id={helperTextId}>{resolvedHelperText}</FieldDescription>
+              )
+            ) : null}
           </Field>
         )
       }}

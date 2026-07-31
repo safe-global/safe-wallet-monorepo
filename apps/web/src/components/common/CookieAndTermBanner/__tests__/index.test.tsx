@@ -1,4 +1,4 @@
-import { fireEvent, waitFor, screen, within, render as rtlRender } from '@testing-library/react'
+import { fireEvent, waitFor, screen, render as rtlRender } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Provider } from 'react-redux'
 import { makeStore } from '@/store'
@@ -26,14 +26,9 @@ const renderWithStore = (ui: React.ReactElement, preloadedState?: any) => {
   return { ...result, store }
 }
 
-// Base UI's Checkbox renders a <span role="checkbox"> and overrides the `id` it
-// is given, so the wrapping <label htmlFor> no longer associates a name with it.
-// Locate each checkbox by scoping to the label that contains its text instead.
-const getCheckboxByLabel = (label: string | RegExp): HTMLElement => {
-  const labelEl = screen.getByText(label).closest('label')
-  if (!labelEl) throw new Error(`No label found for ${label}`)
-  return within(labelEl).getByRole('checkbox')
-}
+// The visible control is a `span[role=checkbox]` named by `aria-label`, because Base UI moves the
+// given `id` onto its hidden native input (which is what the wrapping `<label htmlFor>` targets).
+const getCheckboxByLabel = (label: string): HTMLElement => screen.getByRole('checkbox', { name: label })
 
 describe('CookieAndTermBanner', () => {
   beforeEach(() => {
@@ -229,7 +224,6 @@ describe('CookieAndTermBanner', () => {
     it('should have proper labels for all checkboxes', () => {
       renderWithStore(<CookieAndTermBanner />)
 
-      // Each checkbox lives inside a <label> carrying its visible text.
       expect(getCheckboxByLabel('Necessary')).toBeInTheDocument()
       expect(getCheckboxByLabel('Beamer')).toBeInTheDocument()
       expect(getCheckboxByLabel('Analytics')).toBeInTheDocument()

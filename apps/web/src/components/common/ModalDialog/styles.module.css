@@ -9,25 +9,6 @@
   border-bottom: 1px solid var(--color-border-light);
 }
 
-.title + :global(.MuiDialogContent-root) {
-  padding-top: var(--space-3);
-}
-
-.dialog :global .MuiDialogActions-root {
-  border-top: 1px solid var(--color-border-light);
-  padding: var(--space-2) var(--space-3);
-}
-
-.dialog :global .MuiDialogActions-root > :last-of-type:not(:first-of-type) {
-  order: 2;
-}
-
-.dialog :global .MuiDialogActions-root:after {
-  content: '';
-  order: 1;
-  flex: 1;
-}
-
 .fullScreen {
   width: 100%;
   height: 100%;

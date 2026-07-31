@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode, SyntheticEvent } from 'react'
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import groupBy from 'lodash/groupBy'
 import { useAppDispatch, useAppSelector } from '@/store'
 import type { Notification } from '@/store/notificationsSlice'
@@ -71,6 +71,52 @@ export const NotificationLink = ({
   )
 }
 
+const AUTO_HIDE_MS = 5000
+
+const getAutoHideDuration = (
+  variant: NotificationVariant,
+  override: Notification['autoHideDuration'],
+): number | undefined => {
+  if (override !== undefined) return override ?? undefined
+  return variant === 'info' || variant === 'success' ? AUTO_HIDE_MS : undefined
+}
+
+/**
+ * Owns a toast's auto-hide countdown, and returns the handlers that pause it.
+ *
+ * `onHide` is read through a ref because the parent rebuilds it on every render: depending on it
+ * directly restarted the countdown each time anything else in the app re-rendered. Pointer or keyboard
+ * focus pauses the timer so a toast cannot disappear from under the cursor on its way to the link
+ * inside it, then resumes at half the duration — both what MUI's Snackbar did before the migration.
+ */
+const useAutoHide = (duration: number | undefined, onHide: () => void) => {
+  const onHideRef = useRef(onHide)
+  const wasPausedRef = useRef(false)
+  const [isPaused, setIsPaused] = useState(false)
+
+  useEffect(() => {
+    onHideRef.current = onHide
+  })
+
+  useEffect(() => {
+    if (duration === undefined || isPaused) {
+      return
+    }
+
+    const timer = setTimeout(() => onHideRef.current(), wasPausedRef.current ? duration / 2 : duration)
+    return () => clearTimeout(timer)
+  }, [duration, isPaused])
+
+  const pause = useCallback(() => {
+    wasPausedRef.current = true
+    setIsPaused(true)
+  }, [])
+
+  const resume = useCallback(() => setIsPaused(false), [])
+
+  return { onMouseEnter: pause, onMouseLeave: resume, onFocus: pause, onBlur: resume }
+}
+
 const Toast = ({
   title,
   message,
@@ -94,24 +140,10 @@ const Toast = ({
   }, [dispatch, id, onClose])
 
   // Auto-hide info/success toasts (or any toast with an explicit duration) without marking them as read
-  useEffect(() => {
-    const duration =
-      autoHideDurationOverride !== undefined
-        ? (autoHideDurationOverride ?? undefined)
-        : variant === 'info' || variant === 'success'
-          ? 5000
-          : undefined
-
-    if (duration === undefined) {
-      return
-    }
-
-    const timer = setTimeout(onClose, duration)
-    return () => clearTimeout(timer)
-  }, [variant, onClose, autoHideDurationOverride])
+  const autoHideProps = useAutoHide(getAutoHideDuration(variant, autoHideDurationOverride), onClose)
 
   return (
-    <Alert variant={variantToAlertVariant[variant]} className="w-[340px] shadow-lg">
+    <Alert variant={variantToAlertVariant[variant]} className="w-[340px] shadow-lg" {...autoHideProps}>
       {icon ? (icon as ReactNode) : null}
       <AlertAction>
         <Button variant="ghost" size="icon-xs" aria-label="Close" onClick={handleManualClose}>

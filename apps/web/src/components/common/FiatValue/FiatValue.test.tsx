@@ -35,6 +35,23 @@ describe('FiatValue', () => {
     expect(tooltip).toBeInTheDocument()
   })
 
+  it('exposes the full-precision value to assistive tech without hovering', () => {
+    const FiatValue = require('.').default
+    const { container } = render(<FiatValue value={100_285_367} />)
+
+    // The tooltip is hover-only, so the abbreviated figure alone would reach a screen reader.
+    expect(container).toHaveTextContent('$ 100,285,367.00')
+  })
+
+  it('does not repeat the value when the abbreviated and precise formats agree', () => {
+    const FiatValue = require('.').default
+    // Below $1 `formatCurrency` already shows both decimals, so there is no extra precision to
+    // announce — a second copy would duplicate the figure for text selection and `getByText`.
+    const { getByText } = render(<FiatValue value={0.35} />)
+
+    expect(getByText((content) => normalizer(content) === '$ 0.35', { normalizer })).toBeInTheDocument()
+  })
+
   it('should render fiat value with precise=true', () => {
     const FiatValue = require('.').default
     const { getByText } = render(<FiatValue value={100.35} precise />)

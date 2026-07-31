@@ -316,9 +316,10 @@ function SpaceSafeBar() {
           defaultValues={{ name: renameTarget.name, address: renameTarget.address }}
           chainIds={renameTarget.chainIds}
           disableAddressInput
-          // Above the safe-selector popup (shadcn --z-overlay: 1400) so the rename dialog layers on
+          // Above the safe-selector popup (shadcn --z-overlay) so the rename dialog layers on
           // top of the open dropdown instead of behind it.
-          sx={{ zIndex: 1450 }}
+          className="z-[var(--z-nested-overlay)]"
+          overlayClassName="z-[var(--z-nested-overlay)]"
         />
       )}
     </div>

@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactElement, BaseSyntheticEvent } from 'react'
+import type { ReactElement, BaseSyntheticEvent } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
 import AddressInput from '@/components/common/AddressInput'
@@ -24,14 +24,17 @@ function EntryDialog({
   disableAddressInput = false,
   chainIds,
   currentChainId,
-  sx,
+  className,
+  overlayClassName,
 }: {
   handleClose: () => void
   defaultValues?: AddressEntry
   disableAddressInput?: boolean
   chainIds?: string[]
   currentChainId?: string
-  sx?: ComponentProps<typeof ModalDialog>['sx']
+  /** Opened from inside another overlay? Pass `z-[var(--z-nested-overlay)]` to both of these. */
+  className?: string
+  overlayClassName?: string
 }): ReactElement {
   const chainId = useChainId()
   const actualChainId = currentChainId ?? chainId
@@ -63,7 +66,8 @@ function EntryDialog({
       dialogTitle={defaultValues.name ? 'Edit entry' : 'Create entry'}
       hideChainIndicator={chainIds && chainIds.length > 1}
       chainId={chainIds?.[0]}
-      sx={sx}
+      className={className}
+      overlayClassName={overlayClassName}
     >
       <FormProvider {...methods}>
         <form onSubmit={onSubmit}>

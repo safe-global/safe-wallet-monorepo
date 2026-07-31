@@ -59,6 +59,9 @@
   --accent-success: #16a34a;
   --z-sidebar: 1300;
   --z-overlay: 1400;
+  /* A dialog opened from inside another overlay (e.g. Rename from a modal or an open dropdown). Both
+     sit in the same portal container, so at equal z-index the winner would be whichever mounted last. */
+  --z-nested-overlay: 1450;
   /* Must beat onboard.css's --onboard-modal-z-index (1450) — for dialogs the wallet-connect modal
      itself opens, such as the private key prompt. */
   --z-above-onboard: 1451;

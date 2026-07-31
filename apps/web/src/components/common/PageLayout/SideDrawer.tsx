@@ -67,7 +67,11 @@ const SideDrawer = ({ isOpen, onToggle, onSidebarOpenChange }: SideDrawerProps):
     <>
       {isSmallScreen ? (
         // Below `md` the drawer is a temporary overlay with a backdrop / focus trap.
-        <Sheet open={isOpen} onOpenChange={onToggle}>
+        // `smDrawerHidden` is still true for the ~300ms after the viewport crosses below `md`, before
+        // the effect above has collapsed the drawer. The Sheet's backdrop is a portal sibling of its
+        // content, so it cannot be hidden with CSS the way the shared MUI Drawer was — keep the Sheet
+        // closed for that window instead.
+        <Sheet open={isOpen && !smDrawerHidden} onOpenChange={onToggle}>
           <SheetContent
             side="left"
             showCloseButton={false}
