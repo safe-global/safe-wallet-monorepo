@@ -2,6 +2,11 @@ import type { TransactionDetails, TransactionData } from '@safe-global/store/gat
 import { Fragment, useContext, useMemo, type ElementType, type ReactElement, type ReactNode } from 'react'
 import { Check } from 'lucide-react'
 import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import TokenIcon from '@/components/common/TokenIcon'
+import useBalances from '@/hooks/useBalances'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { cn } from '@/utils/cn'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { PaperViewToggle } from '../../common/PaperViewToggle'
@@ -45,6 +50,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
   const chain = useCurrentChain()
   const { safe, safeAddress } = useSafeInfo()
   const { safeTx, gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
+  const { balances } = useBalances()
   const operation = Number(safeTxData.operation) as Operation
 
   const ToWrapper: ElementType = grid ? 'div' : Fragment
@@ -60,6 +66,14 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
     gtfPaymentMode === 'safe' &&
     !!gtfSelectedGasToken
   const displayGasToken = shouldPreviewGtf ? gtfSelectedGasToken : safeTxData.gasToken
+  // Show which token actually pays the gas — the logo/symbol of the native currency or of the held
+  // ERC-20 — beside the bare address, which on its own says nothing about what is being spent.
+  const isNativeGasToken = displayGasToken === ZERO_ADDRESS
+  const heldToken = isNativeGasToken
+    ? undefined
+    : balances.items.find((b) => sameAddress(b.tokenInfo.address, displayGasToken))
+  const gasTokenLogo = isNativeGasToken ? chain?.nativeCurrency.logoUri : heldToken?.tokenInfo.logoUri
+  const gasTokenSymbol = isNativeGasToken ? chain?.nativeCurrency.symbol : heldToken?.tokenInfo.symbol
 
   const { data: previewData } = useGtfFeePreview({
     enabled: shouldPreviewGtf,
@@ -160,12 +174,23 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
                   <Typography variant="paragraph-small">
                     <EthHashInfo
                       address={displayGasToken}
-                      avatarSize={20}
+                      showAvatar={false}
                       showPrefix={false}
                       showName={false}
                       shortAddress
                       hasExplorer
-                    />
+                    >
+                      {gasTokenLogo && gasTokenSymbol && (
+                        <Tooltip>
+                          <TooltipTrigger render={<span className="inline-flex" />}>
+                            <TokenIcon logoUri={gasTokenLogo} tokenSymbol={gasTokenSymbol} size={16} />
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            The GasToken address is the address of the token used to pay gas fees.
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </EthHashInfo>
                   </Typography>
                 </TxDetailsRow>
 
