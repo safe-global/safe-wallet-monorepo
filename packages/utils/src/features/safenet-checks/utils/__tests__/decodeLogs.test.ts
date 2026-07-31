@@ -1,7 +1,18 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { decodeLogs, type RawLog } from '../decodeLogs'
-import { buildOracleProposedLog, buildV2NewRequestLog, resetLogCounter } from '../../builders/rawLogs'
+import {
+  buildDisputeResolvedLog,
+  buildOracleAttestedLog,
+  buildOracleProposedLog,
+  buildOracleResultLog,
+  buildV1CommittedLog,
+  buildV1NewRequestLog,
+  buildV2CommittedLog,
+  buildV2NewRequestLog,
+  buildV2RevealedLog,
+  resetLogCounter,
+} from '../../builders/rawLogs'
 import { CheckEventType, OracleGeneration, type NormalizedCheckEvent } from '../../types'
 
 const loadFixture = (name: string): { logs: RawLog[]; safeTxHash?: string } =>
@@ -13,8 +24,18 @@ const byType = <T extends NormalizedCheckEvent['type']>(
 ): Extract<NormalizedCheckEvent, { type: T }>[] =>
   events.filter((event): event is Extract<NormalizedCheckEvent, { type: T }> => event.type === type)
 
-describe('decodeLogs — V1 synthesized lifecycle', () => {
-  const events = decodeLogs(loadFixture('v1-lifecycle.synth.json').logs)
+describe('decodeLogs — V1 (direct-commit) lifecycle, built through the real fragments', () => {
+  const SAFE_TX_HASH = '0x1111111111111111111111111111111111111111111111111111111111111111'
+  const REQUEST_ID = '0x2222222222222222222222222222222222222222222222222222222222222222'
+  const events = decodeLogs([
+    buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 7n }),
+    buildV1NewRequestLog({ requestId: REQUEST_ID, deadline: 150n }),
+    buildV1CommittedLog({ requestId: REQUEST_ID, approved: true, position: 0n }),
+    buildV1CommittedLog({ requestId: REQUEST_ID, approved: false, position: 1n }),
+    buildOracleResultLog({ requestId: REQUEST_ID, approved: true }),
+    buildDisputeResolvedLog({ requestId: REQUEST_ID, outcome: 2, slashed: 42n }),
+    buildOracleAttestedLog({ safeTxHash: SAFE_TX_HASH, epoch: 7n }),
+  ])
 
   it('decodes every event in the sequence', () => {
     expect(events).toHaveLength(7)
@@ -58,8 +79,13 @@ describe('decodeLogs — V1 synthesized lifecycle', () => {
   })
 })
 
-describe('decodeLogs — V2 synthesized lifecycle', () => {
-  const events = decodeLogs(loadFixture('v2-lifecycle.synth.json').logs)
+describe('decodeLogs — V2 (commit-reveal) lifecycle, built through the real fragments', () => {
+  const REQUEST_ID = '0x3333333333333333333333333333333333333333333333333333333333333333'
+  const events = decodeLogs([
+    buildV2NewRequestLog({ requestId: REQUEST_ID, commitDeadline: 150n, revealDeadline: 160n }),
+    buildV2CommittedLog({ requestId: REQUEST_ID }),
+    buildV2RevealedLog({ requestId: REQUEST_ID, approved: true, reason: 'looks benign' }),
+  ])
 
   it('normalizes the V2 NewRequest deadlines (revealDeadline is the timeout block)', () => {
     const [request] = byType(events, CheckEventType.REQUEST_CREATED)

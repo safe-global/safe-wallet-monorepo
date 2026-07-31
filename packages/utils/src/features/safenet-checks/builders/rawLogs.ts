@@ -1,13 +1,20 @@
 import { faker } from '@faker-js/faker'
 import { ZeroAddress, type Interface } from 'ethers'
-import { consensusInterface, sharedOracleInterface, v1SentinelInterface, v2SentinelInterface } from '../abi'
+import {
+  consensusInterface,
+  consensusPlainInterface,
+  sharedOracleInterface,
+  v1SentinelInterface,
+  v2SentinelInterface,
+} from '../abi'
 import type { RawLog } from '../utils/decodeLogs'
 
 /**
  * Faker builders that ABI-encode the real event fragments into raw logs. Since
  * they encode through the exact `Interface`s the decoder uses, a decode of their
- * output round-trips the true onchain wire format — the same fixtures are used
- * to synthesize the checked-in JSON fixtures.
+ * output round-trips the true onchain wire format. These builders are the ONLY
+ * source of synthetic test data — the derived `checkEvents` factories decode
+ * their output, and the lifecycle tests build sequences from them directly.
  */
 
 let logCounter = 0
@@ -107,6 +114,52 @@ export const buildOracleAttestedLog = (
   )
 }
 
+// --- Consensus non-oracle (plain) pair — what live beta emits ------------------
+
+export const buildPlainProposedLog = (
+  spec: { safeTxHash?: string; chainId?: bigint; safe?: string; epoch?: bigint } = {},
+  meta: LogMeta = {},
+): RawLog => {
+  const chainId = spec.chainId ?? 100n
+  const safe = spec.safe ?? addr()
+  return encode(
+    consensusPlainInterface,
+    'TransactionProposed',
+    [spec.safeTxHash ?? hash(), chainId, safe, spec.epoch ?? 1n, txTuple(chainId, safe)],
+    meta,
+    CONSENSUS,
+  )
+}
+
+export const buildPlainAttestedLog = (
+  spec: {
+    safeTxHash?: string
+    chainId?: bigint
+    safe?: string
+    epoch?: bigint
+    signatureId?: string
+    r?: { x: bigint; y: bigint }
+    z?: bigint
+  } = {},
+  meta: LogMeta = {},
+): RawLog => {
+  const r = spec.r ?? { x: faker.number.bigInt(), y: faker.number.bigInt() }
+  return encode(
+    consensusPlainInterface,
+    'TransactionAttested',
+    [
+      spec.safeTxHash ?? hash(),
+      spec.chainId ?? 100n,
+      spec.safe ?? addr(),
+      spec.epoch ?? 1n,
+      spec.signatureId ?? hash(),
+      [[r.x, r.y], spec.z ?? faker.number.bigInt()],
+    ],
+    meta,
+    CONSENSUS,
+  )
+}
+
 // --- V1 sentinel --------------------------------------------------------------
 
 export const buildV1NewRequestLog = (
@@ -173,6 +226,36 @@ export const buildV2NewRequestLog = (
     ORACLE,
   )
 
+export const buildV2CommittedLog = (
+  spec: { requestId?: string; sentinel?: string; bondAmount?: bigint } = {},
+  meta: LogMeta = {},
+): RawLog =>
+  encode(
+    v2SentinelInterface,
+    'Committed',
+    [spec.requestId ?? hash(), spec.sentinel ?? addr(), spec.bondAmount ?? 5000n],
+    meta,
+    ORACLE,
+  )
+
+export const buildV2RevealedLog = (
+  spec: { requestId?: string; sentinel?: string; approved?: boolean; bondAmount?: bigint; reason?: string } = {},
+  meta: LogMeta = {},
+): RawLog =>
+  encode(
+    v2SentinelInterface,
+    'Revealed',
+    [
+      spec.requestId ?? hash(),
+      spec.sentinel ?? addr(),
+      spec.approved ?? true,
+      spec.bondAmount ?? 5000n,
+      spec.reason ?? '',
+    ],
+    meta,
+    ORACLE,
+  )
+
 // --- Shared oracle result / dispute -------------------------------------------
 
 export const buildOracleResultLog = (
@@ -187,12 +270,23 @@ export const buildOracleResultLog = (
     ORACLE,
   )
 
+export const buildDisputeResolvedLog = (
+  spec: { requestId?: string; outcome?: number; slashed?: bigint } = {},
+  meta: LogMeta = {},
+): RawLog =>
+  encode(
+    sharedOracleInterface,
+    'DisputeResolved',
+    [spec.requestId ?? hash(), spec.outcome ?? 0, spec.slashed ?? 0n],
+    meta,
+    ORACLE,
+  )
+
 // --- Lifecycle sequence -------------------------------------------------------
 
 /**
  * A full V1 (direct-commit) lifecycle: proposed → request → sentinel commit →
- * oracle result → attestation. The only sequence any test needs; the V2 and
- * dispute decode paths are covered by the checked-in JSON fixtures.
+ * oracle result → attestation.
  */
 export const buildV1Lifecycle = (
   opts: { safeTxHash?: string; requestId?: string; oracle?: string; epoch?: bigint; deadline?: bigint } = {},
@@ -206,6 +300,25 @@ export const buildV1Lifecycle = (
     buildOracleProposedLog({ safeTxHash, epoch, oracle }),
     buildV1NewRequestLog({ requestId, deadline: opts.deadline ?? 150n }),
     buildV1CommittedLog({ requestId, approved: true }),
+    buildOracleResultLog({ requestId, approved: true }),
+    buildOracleAttestedLog({ safeTxHash, epoch, oracle }),
+  ]
+}
+
+/** A full V2 (commit-reveal) lifecycle: proposed → request → commit → reveal → result → attestation. */
+export const buildV2Lifecycle = (
+  opts: { safeTxHash?: string; requestId?: string; oracle?: string; epoch?: bigint; revealDeadline?: bigint } = {},
+): RawLog[] => {
+  const safeTxHash = opts.safeTxHash ?? hash()
+  const requestId = opts.requestId ?? hash()
+  const oracle = opts.oracle ?? ORACLE
+  const epoch = opts.epoch ?? 1n
+
+  return [
+    buildOracleProposedLog({ safeTxHash, epoch, oracle }),
+    buildV2NewRequestLog({ requestId, revealDeadline: opts.revealDeadline ?? 160n }),
+    buildV2CommittedLog({ requestId }),
+    buildV2RevealedLog({ requestId, approved: true }),
     buildOracleResultLog({ requestId, approved: true }),
     buildOracleAttestedLog({ safeTxHash, epoch, oracle }),
   ]
