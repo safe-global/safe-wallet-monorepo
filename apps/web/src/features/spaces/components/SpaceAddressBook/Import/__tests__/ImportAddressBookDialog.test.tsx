@@ -7,13 +7,17 @@ import { render } from '@/tests/test-utils'
 import useChains from '@/hooks/useChains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import * as spacesRTK from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import * as notificationsSlice from '@/store/notificationsSlice'
+import { selectNotifications } from '@/store/notificationsSlice'
+import { getStoreInstance } from '@/store'
 
 jest.mock('@/hooks/useAllAddressBooks')
 jest.mock('@/hooks/useChains')
 const mockedUseAllAddressBooks = useAllAddressBooks as jest.MockedFunction<typeof useAllAddressBooks>
 const mockedUseChains = useChains as jest.MockedFunction<typeof useChains>
-const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
+const importMessages = () =>
+  selectNotifications(getStoreInstance().getState())
+    .filter((n) => n.groupKey === 'import-contacts-success')
+    .map((n) => ({ message: n.message, variant: n.variant }))
 const upsertionSpyFn = jest.fn()
 const upsertionSpy = jest
   .spyOn(spacesRTK, 'useAddressBooksUpsertAddressBookItemsV1Mutation')
@@ -23,7 +27,6 @@ describe('ImportAddressBookDialog', () => {
   beforeEach(() => {
     mockedUseChains.mockReturnValue({ configs: [{ chainId: '1' } as Chain, { chainId: '5' } as Chain] })
     upsertionSpyFn.mockReset()
-    showNotificationSpy.mockClear()
   })
 
   afterAll(() => {
@@ -156,9 +159,10 @@ describe('ImportAddressBookDialog', () => {
     await userEvent.click(screen.getByText(/Import contacts \(2\)/i))
 
     await waitFor(() => {
-      expect(showNotificationSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ message: '2 contacts imported to your workspace address book', variant: 'success' }),
-      )
+      expect(importMessages()).toContainEqual({
+        message: '2 contacts imported to your workspace address book',
+        variant: 'success',
+      })
     })
   })
 
@@ -177,13 +181,11 @@ describe('ImportAddressBookDialog', () => {
     await userEvent.click(screen.getByText(/Import contacts \(2\)/i))
 
     await waitFor(() => {
-      expect(showNotificationSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message:
-            '2 contacts imported to your workspace address book across 2 networks. Only contacts on the current network are shown here',
-          variant: 'success',
-        }),
-      )
+      expect(importMessages()).toContainEqual({
+        message:
+          '2 contacts imported to your workspace address book across 2 networks. Only contacts on the current network are shown here',
+        variant: 'success',
+      })
     })
   })
 

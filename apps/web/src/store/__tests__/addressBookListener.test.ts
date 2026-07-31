@@ -119,92 +119,138 @@ describe('addressBookListener', () => {
     expect(abMessages(store)).toEqual([])
   })
 
-  it('aggregates a single-network batch import into one notification', async () => {
-    const store = setup()
-    const notifyBatchId = 'imp1'
-
-    store.dispatch(
-      upsertAddressBookEntries({ chainIds: ['1'], address: '0xa', name: 'A', notify: true, notifyBatchId }),
-    )
-    store.dispatch(
-      upsertAddressBookEntries({ chainIds: ['1'], address: '0xb', name: 'B', notify: true, notifyBatchId }),
-    )
-    store.dispatch(
-      upsertAddressBookEntries({ chainIds: ['1'], address: '0xc', name: 'C', notify: true, notifyBatchId }),
-    )
-
-    await new Promise((resolve) => setTimeout(resolve, 400))
-
-    expect(abMessages(store)).toEqual([
-      { message: '3 contacts imported to your personal address book', variant: 'success' },
-    ])
-  })
-
-  it('calls out the network spread for a multi-network batch import', async () => {
-    const store = setup()
-    const notifyBatchId = 'imp2'
-    const chains = ['1', '137', '8217', '560048', '11155111']
-
-    // 10 rows: 2 addresses on each of 5 networks (mirrors the reported CSV).
-    chains.forEach((chainId) => {
-      store.dispatch(
-        upsertAddressBookEntries({
-          chainIds: [chainId],
-          address: '0xa',
-          name: 'CF local 1',
-          notify: true,
-          notifyBatchId,
-        }),
-      )
-      store.dispatch(
-        upsertAddressBookEntries({
-          chainIds: [chainId],
-          address: '0xb',
-          name: 'CF local 2',
-          notify: true,
-          notifyBatchId,
-        }),
-      )
+  describe('batch imports', () => {
+    // The debounce runs on timers; fake them so the 300ms wait is deterministic
+    // and instant instead of a real-clock sleep.
+    beforeEach(() => {
+      jest.useFakeTimers()
     })
 
-    await new Promise((resolve) => setTimeout(resolve, 400))
+    afterEach(() => {
+      jest.useRealTimers()
+    })
 
-    expect(abMessages(store)).toEqual([
-      {
-        message:
-          '10 contacts imported to your personal address book across 5 networks. Only contacts on the current network are shown here',
-        variant: 'success',
-      },
-    ])
-  })
+    // advanceTimersByTimeAsync flushes both the debounce timer and the
+    // microtasks that resume the listener's async effect afterwards.
+    const flushDebounce = () => jest.advanceTimersByTimeAsync(300)
 
-  it('keeps two sequential import batches independent (no count leakage via the shared map)', async () => {
-    const store = setup()
+    it('aggregates a single-network batch import into one notification', async () => {
+      const store = setup()
+      const notifyBatchId = 'imp1'
 
-    // First import: 2 contacts on one network.
-    store.dispatch(
-      upsertAddressBookEntries({ chainIds: ['1'], address: '0xa', name: 'A', notify: true, notifyBatchId: 'batch-1' }),
-    )
-    store.dispatch(
-      upsertAddressBookEntries({ chainIds: ['1'], address: '0xb', name: 'B', notify: true, notifyBatchId: 'batch-1' }),
-    )
-    await new Promise((resolve) => setTimeout(resolve, 400))
+      store.dispatch(
+        upsertAddressBookEntries({ chainIds: ['1'], address: '0xa', name: 'A', notify: true, notifyBatchId }),
+      )
+      store.dispatch(
+        upsertAddressBookEntries({ chainIds: ['1'], address: '0xb', name: 'B', notify: true, notifyBatchId }),
+      )
+      store.dispatch(
+        upsertAddressBookEntries({ chainIds: ['1'], address: '0xc', name: 'C', notify: true, notifyBatchId }),
+      )
 
-    // Second, separate import: 3 contacts on one network.
-    store.dispatch(
-      upsertAddressBookEntries({ chainIds: ['1'], address: '0xc', name: 'C', notify: true, notifyBatchId: 'batch-2' }),
-    )
-    store.dispatch(
-      upsertAddressBookEntries({ chainIds: ['1'], address: '0xd', name: 'D', notify: true, notifyBatchId: 'batch-2' }),
-    )
-    store.dispatch(
-      upsertAddressBookEntries({ chainIds: ['1'], address: '0xe', name: 'E', notify: true, notifyBatchId: 'batch-2' }),
-    )
-    await new Promise((resolve) => setTimeout(resolve, 400))
+      await flushDebounce()
 
-    expect(abMessages(store)).toEqual([
-      { message: '2 contacts imported to your personal address book', variant: 'success' },
-      { message: '3 contacts imported to your personal address book', variant: 'success' },
-    ])
+      expect(abMessages(store)).toEqual([
+        { message: '3 contacts imported to your personal address book', variant: 'success' },
+      ])
+    })
+
+    it('calls out the network spread for a multi-network batch import', async () => {
+      const store = setup()
+      const notifyBatchId = 'imp2'
+      const chains = ['1', '137', '8217', '560048', '11155111']
+
+      // 10 rows: 2 addresses on each of 5 networks (mirrors the reported CSV).
+      chains.forEach((chainId) => {
+        store.dispatch(
+          upsertAddressBookEntries({
+            chainIds: [chainId],
+            address: '0xa',
+            name: 'CF local 1',
+            notify: true,
+            notifyBatchId,
+          }),
+        )
+        store.dispatch(
+          upsertAddressBookEntries({
+            chainIds: [chainId],
+            address: '0xb',
+            name: 'CF local 2',
+            notify: true,
+            notifyBatchId,
+          }),
+        )
+      })
+
+      await flushDebounce()
+
+      expect(abMessages(store)).toEqual([
+        {
+          message:
+            '10 contacts imported to your personal address book across 5 networks. Only contacts on the current network are shown here',
+          variant: 'success',
+        },
+      ])
+    })
+
+    it('keeps two sequential import batches independent (no count leakage via the shared map)', async () => {
+      const store = setup()
+
+      // First import: 2 contacts on one network.
+      store.dispatch(
+        upsertAddressBookEntries({
+          chainIds: ['1'],
+          address: '0xa',
+          name: 'A',
+          notify: true,
+          notifyBatchId: 'batch-1',
+        }),
+      )
+      store.dispatch(
+        upsertAddressBookEntries({
+          chainIds: ['1'],
+          address: '0xb',
+          name: 'B',
+          notify: true,
+          notifyBatchId: 'batch-1',
+        }),
+      )
+      await flushDebounce()
+
+      // Second, separate import: 3 contacts on one network.
+      store.dispatch(
+        upsertAddressBookEntries({
+          chainIds: ['1'],
+          address: '0xc',
+          name: 'C',
+          notify: true,
+          notifyBatchId: 'batch-2',
+        }),
+      )
+      store.dispatch(
+        upsertAddressBookEntries({
+          chainIds: ['1'],
+          address: '0xd',
+          name: 'D',
+          notify: true,
+          notifyBatchId: 'batch-2',
+        }),
+      )
+      store.dispatch(
+        upsertAddressBookEntries({
+          chainIds: ['1'],
+          address: '0xe',
+          name: 'E',
+          notify: true,
+          notifyBatchId: 'batch-2',
+        }),
+      )
+      await flushDebounce()
+
+      expect(abMessages(store)).toEqual([
+        { message: '2 contacts imported to your personal address book', variant: 'success' },
+        { message: '3 contacts imported to your personal address book', variant: 'success' },
+      ])
+    })
   })
 })

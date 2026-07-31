@@ -18,6 +18,7 @@ import useChains from '@/hooks/useChains'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId, useGetSpaceAddressBook } from '@/features/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { getImportSuccessMessage } from '@/utils/addressBookNotifications'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
@@ -102,13 +103,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
 
       const contactCount = contactItems.length
       const networkCount = new Set(contactItems.flatMap((item) => item.chainIds)).size
-      const contactLabel = contactCount === 1 ? 'contact' : 'contacts'
-      // When the import spans more than one network, the list only shows the
-      // current one — call that out so users don't think contacts went missing.
-      const successMessage =
-        networkCount > 1
-          ? `${contactCount} ${contactLabel} imported to your workspace address book across ${networkCount} networks. Only contacts on the current network are shown here`
-          : `${contactCount} ${contactLabel} imported to your workspace address book`
+      const successMessage = getImportSuccessMessage({ count: contactCount, networkCount, scope: 'workspace' })
 
       dispatch(
         showNotification({

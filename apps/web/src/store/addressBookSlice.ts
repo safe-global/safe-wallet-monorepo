@@ -3,6 +3,7 @@ import { validateAddress } from '@safe-global/utils/utils/validation'
 import pickBy from 'lodash/pickBy'
 import type { RootState, listenerMiddlewareInstance } from '.'
 import { showNotification } from './notificationsSlice'
+import { getImportSuccessMessage } from '@/utils/addressBookNotifications'
 
 export type AddressBook = { [address: string]: string }
 
@@ -103,13 +104,7 @@ export const addressBookListener = (listenerMiddleware: typeof listenerMiddlewar
         const { count, chainIds: networks } = importBatches.get(notifyBatchId) ?? batch
         importBatches.delete(notifyBatchId)
 
-        // When the import spans more than one network, the list only shows the
-        // current one — call that out so users don't think rows went missing.
-        const networkCount = networks.size
-        const message =
-          networkCount > 1
-            ? `${count} contacts imported to your personal address book across ${networkCount} networks. Only contacts on the current network are shown here`
-            : `${count} contacts imported to your personal address book`
+        const message = getImportSuccessMessage({ count, networkCount: networks.size, scope: 'personal' })
 
         listenerApi.dispatch(
           showNotification({
