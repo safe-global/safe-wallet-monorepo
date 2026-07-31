@@ -3,6 +3,7 @@ import { faker } from '@faker-js/faker'
 import { getAllowanceModuleDeployment } from '@safe-global/safe-modules-deployments'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import * as useChainId from '@/hooks/useChainId'
+import { addressExBuilder, extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import useIsSpendingLimitSupported from '../useIsSpendingLimitSupported'
 
 // A chain that has the AllowanceModule registered in @safe-global/safe-modules-deployments
@@ -17,27 +18,27 @@ const FALLBACK_MODULE_ADDRESS = Object.values(
 
 const mockSafeInfo = ({
   chainId,
-  modules,
+  moduleAddresses = null,
   deployed = true,
 }: {
   chainId: string
-  modules: Array<{ value: string }> | null
+  moduleAddresses?: string[] | null
   deployed?: boolean
 }) => {
   jest.spyOn(useChainId, 'default').mockReturnValue(chainId)
-  jest.spyOn(useSafeInfo, 'default').mockReturnValue({
-    safe: {
-      address: { value: faker.finance.ethereumAddress() },
-      chainId,
-      modules,
-      deployed,
-      txHistoryTag: '0',
-    },
-    safeAddress: faker.finance.ethereumAddress(),
+
+  const modules = moduleAddresses?.map((value) => addressExBuilder().with({ value }).build()) ?? null
+  const safe = extendedSafeInfoBuilder().with({ chainId, modules, deployed }).build()
+
+  const safeInfo: ReturnType<typeof useSafeInfo.default> = {
+    safe,
+    safeAddress: safe.address.value,
     safeLoaded: true,
     safeLoading: false,
     safeError: undefined,
-  } as any)
+  }
+
+  jest.spyOn(useSafeInfo, 'default').mockReturnValue(safeInfo)
 }
 
 describe('useIsSpendingLimitSupported', () => {
@@ -46,7 +47,7 @@ describe('useIsSpendingLimitSupported', () => {
   })
 
   it('returns true on a chain with a registered deployment', () => {
-    mockSafeInfo({ chainId: SUPPORTED_CHAIN_ID, modules: null })
+    mockSafeInfo({ chainId: SUPPORTED_CHAIN_ID })
 
     const { result } = renderHook(() => useIsSpendingLimitSupported())
 
@@ -54,7 +55,7 @@ describe('useIsSpendingLimitSupported', () => {
   })
 
   it('returns false on a chain without a registered deployment and no enabled module', () => {
-    mockSafeInfo({ chainId: UNSUPPORTED_CHAIN_ID, modules: null })
+    mockSafeInfo({ chainId: UNSUPPORTED_CHAIN_ID })
 
     const { result } = renderHook(() => useIsSpendingLimitSupported())
 
@@ -62,7 +63,7 @@ describe('useIsSpendingLimitSupported', () => {
   })
 
   it('returns false when an unrelated module is enabled on an unsupported chain', () => {
-    mockSafeInfo({ chainId: UNSUPPORTED_CHAIN_ID, modules: [{ value: faker.finance.ethereumAddress() }] })
+    mockSafeInfo({ chainId: UNSUPPORTED_CHAIN_ID, moduleAddresses: [faker.finance.ethereumAddress()] })
 
     const { result } = renderHook(() => useIsSpendingLimitSupported())
 
@@ -70,7 +71,7 @@ describe('useIsSpendingLimitSupported', () => {
   })
 
   it('returns true when the AllowanceModule is already enabled on an unsupported chain', () => {
-    mockSafeInfo({ chainId: UNSUPPORTED_CHAIN_ID, modules: [{ value: FALLBACK_MODULE_ADDRESS }] })
+    mockSafeInfo({ chainId: UNSUPPORTED_CHAIN_ID, moduleAddresses: [FALLBACK_MODULE_ADDRESS] })
 
     const { result } = renderHook(() => useIsSpendingLimitSupported())
 

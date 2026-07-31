@@ -75,7 +75,7 @@ const SpendingLimitsSettings = () => {
                 </Typography>
               )}
 
-              {!spendingLimits.length && !spendingLimitsLoading && <NoSpendingLimits />}
+              {isSupported && !spendingLimits.length && !spendingLimitsLoading && <NoSpendingLimits />}
               {spendingLimits.length > 0 && (
                 <SpendingLimitsTable isLoading={spendingLimitsLoading} spendingLimits={spendingLimits} />
               )}
