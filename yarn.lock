@@ -13441,28 +13441,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@safe-global/protocol-kit@npm:^8.0.1":
-  version: 8.0.1
-  resolution: "@safe-global/protocol-kit@npm:8.0.1"
-  dependencies:
-    "@noble/curves": "npm:^1.6.0"
-    "@peculiar/asn1-schema": "npm:^2.3.13"
-    "@safe-global/safe-deployments": "npm:^1.37.57"
-    "@safe-global/safe-modules-deployments": "npm:^3.0.4"
-    "@safe-global/types-kit": "npm:^4.0.1"
-    abitype: "npm:^1.2.3"
-    semver: "npm:^7.8.0"
-    viem: "npm:^2.52.2"
-  dependenciesMeta:
-    "@noble/curves":
-      optional: true
-    "@peculiar/asn1-schema":
-      optional: true
-  checksum: 10/aaee5ec701a62c5a1afcf486dc69de789ac9cb28989920edc7d5cdd492a3e939a7079a0ae683a1b1d46c48d4dc02fa140cb045c9c6acfa472398aab6f3b98d30
-  languageName: node
-  linkType: hard
-
-"@safe-global/protocol-kit@npm:^8.0.4":
+"@safe-global/protocol-kit@npm:^8.0.1, @safe-global/protocol-kit@npm:^8.0.4":
   version: 8.0.4
   resolution: "@safe-global/protocol-kit@npm:8.0.4"
   dependencies:
@@ -13514,15 +13493,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-deployments@npm:^1.37.57":
-  version: 1.37.57
-  resolution: "@safe-global/safe-deployments@npm:1.37.57"
-  dependencies:
-    semver: "npm:^7.6.2"
-  checksum: 10/6188f703b786e4bfe10dae59fc251afa1f125486579aebe8c824e8c539aac009abae0dd1cd97f33aaa3e89e06d3a2c4f2cb0e70e7a6dd62f93e330d6092eb24c
-  languageName: node
-  linkType: hard
-
 "@safe-global/safe-deployments@npm:^1.37.60":
   version: 1.37.60
   resolution: "@safe-global/safe-deployments@npm:1.37.60"
@@ -13543,13 +13513,6 @@ __metadata:
   version: 3.22.4
   resolution: "@safe-global/safe-gateway-typescript-sdk@npm:3.22.4"
   checksum: 10/5b088499a01a0d0190b4ab6828bfb2df779b603bbcee7645c23ad8e420670aab4ce7ca39b858fc62ee03fded77b322c3f8a9b0203f41ecb779d08f47bd4bfe0c
-  languageName: node
-  linkType: hard
-
-"@safe-global/safe-modules-deployments@npm:^3.0.4":
-  version: 3.0.5
-  resolution: "@safe-global/safe-modules-deployments@npm:3.0.5"
-  checksum: 10/b0362d5ba1d75840f5a7710c5413e65da37b19d1e987b0d3a89a095716c21617bccf2755af0426357e7626e6892d06e0b90a5fb88500a6009d92b7f5c22d84ab
   languageName: node
   linkType: hard
 
@@ -13743,7 +13706,7 @@ __metadata:
     typescript: "npm:~5.9.2"
     typescript-eslint: "npm:^8.31.1"
   peerDependencies:
-    "@safe-global/protocol-kit": ^7.1.x
+    "@safe-global/protocol-kit": ^8.0.4
     "@safe-global/store": "*"
     "@safe-global/types-kit": ^3.1.x
   languageName: unknown
