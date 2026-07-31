@@ -5,40 +5,13 @@ import useChainId from './useChainId'
 import { type FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
-import { useAppSelector } from '@/store'
-import { selectFeatureFlagOverrides, type FeatureFlagOverridesState } from '@/features/feature-flag-overrides/store'
-
-/**
- * Applies local, dev-only feature-flag overrides to a chain's `features` array.
- * Hard no-op in production — the inlined env check lets the bundler fold the
- * override logic out of production builds (do NOT swap for the imported
- * IS_PRODUCTION const; cross-module constant propagation is not guaranteed).
- */
-export const applyFeatureOverrides = (chain: Chain, overrides: FeatureFlagOverridesState): Chain => {
-  if (process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true') return chain
-
-  const entries = Object.entries(overrides)
-  if (entries.length === 0) return chain
-
-  const features = new Set(chain.features)
-  for (const [feature, value] of entries) {
-    if (value) features.add(feature)
-    else features.delete(feature)
-  }
-  return { ...chain, features: Array.from(features) }
-}
+import { useChainWithOverrides, useChainsWithOverrides } from '@/features/feature-flag-overrides'
 
 const useChains = (): { configs: Chain[]; error?: string; loading?: boolean } => {
   const { data, error, isLoading } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
-  const overrides = useAppSelector(selectFeatureFlagOverrides)
 
-  const configs = useMemo(() => {
-    if (!data) return []
-    // Inlined env check so the bundler folds the override branch out of production builds
-    // (see applyFeatureOverrides — do NOT swap for the imported IS_PRODUCTION const).
-    if (process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true') return data.ids.map((id) => data.entities[id]!)
-    return data.ids.map((id) => applyFeatureOverrides(data.entities[id]!, overrides))
-  }, [data, overrides])
+  const rawConfigs = useMemo(() => (data ? data.ids.map((id) => data.entities[id]!) : []), [data])
+  const configs = useChainsWithOverrides(rawConfigs)
 
   return useMemo(
     () => ({
@@ -54,14 +27,8 @@ export default useChains
 
 export const useChain = (chainId: string): Chain | undefined => {
   const { data } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
-  const overrides = useAppSelector(selectFeatureFlagOverrides)
 
-  return useMemo(() => {
-    const chain = data?.entities[chainId]
-    if (!chain) return undefined
-    if (process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true') return chain
-    return applyFeatureOverrides(chain, overrides)
-  }, [data, chainId, overrides])
+  return useChainWithOverrides(data?.entities[chainId])
 }
 
 export const useCurrentChain = (): Chain | undefined => {
