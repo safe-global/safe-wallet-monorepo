@@ -180,6 +180,15 @@ describe('deriveCheckState — negative verdict outranks a verified attestation'
   })
 })
 
+describe('deriveCheckState — order independence', () => {
+  it('a reversed event set derives the same status (derive is a fold, not a replay)', () => {
+    const events = [proposedEvent(), request(), attestedEvent(), oracleResultEvent({ approved: false })]
+    const verified = verification(AttestationVerificationStatus.VERIFIED)
+    expect(derive([...events].reverse(), '140', verified)).toBe(derive(events, '140', verified))
+    expect(derive([...events].reverse(), '140', verified)).toBe(CheckStatus.MALICIOUS)
+  })
+})
+
 describe('deriveCheckState — live-captured beta logs through the real decoder', () => {
   // The checked-in live pair (an Arbitrum Safe checked on Gnosis beta): decode
   // the actual deployed bytes, then derive — the two slices composed on real data.

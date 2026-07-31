@@ -35,6 +35,12 @@ const deadlineBlockOf = (events: ReadonlyArray<NormalizedCheckEvent>): bigint | 
  * to arbitration which can still approve. Treating one dissent as final would
  * let any single sentinel permanently red-flag a transaction, and `MALICIOUS` is
  * terminal.
+ *
+ * Invariant (contract coupling): arbitrated rejections still reach this —
+ * `SentinelOracle.resolveDispute` emits an `OracleResult` alongside
+ * `DisputeResolved`. A hypothetical path emitting `DisputeResolved` WITHOUT its
+ * paired `OracleResult` would read as `IN_PROGRESS`/`TIMED_OUT` here, never
+ * `MALICIOUS`.
  */
 const hasNegativeVerdict = (events: ReadonlyArray<NormalizedCheckEvent>): boolean =>
   events.some((event) => event.type === CheckEventType.ORACLE_RESULT && event.approved === false)
@@ -73,6 +79,11 @@ const hasOracleActivity = (events: ReadonlyArray<NormalizedCheckEvent>): boolean
 export const deriveCheckState = ({ events, attestation, headBlock }: DeriveCheckStateInput): CheckStatus => {
   if (hasNegativeVerdict(events)) return CheckStatus.MALICIOUS
 
+  // The attested branches deliberately do NOT require the matching proposal
+  // event: an attestation is self-authenticating (its FROST signature commits
+  // to safeTxHash/epoch/consensus/chainId), and a targeted read window can
+  // catch the attestation while clipping the proposal. Gating on the proposal
+  // would degrade a VERIFIED check to UNAVAILABLE on such a partial fetch.
   const attested = events.some((event) => event.type === CheckEventType.ORACLE_ATTESTED)
   if (attested) {
     if (attestation.status === AttestationVerificationStatus.VERIFIED) return CheckStatus.BENIGN
