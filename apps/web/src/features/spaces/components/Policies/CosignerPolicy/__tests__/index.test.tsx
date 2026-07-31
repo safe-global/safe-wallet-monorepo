@@ -216,14 +216,14 @@ describe('CosignerPolicyFlow', () => {
     expect(screen.getByRole('button', { name: /continue/i })).toBeDisabled()
   })
 
-  // The guard reads the cosigner signature off the signatures tail, which the wallet
-  // can't append yet — the user has to know before signing.
-  it('warns that matching transfers will not be executable yet', async () => {
+  // The guard reads the cosigner's signature off the tail of the `signatures` bytes, so the
+  // user has to know a signature will be needed at execution before they sign this.
+  it('warns that a cosigner signature will be required at execution', async () => {
     mockAll()
     renderFlow()
     await advanceToReview()
 
-    expect(screen.getByText(/won't be executable from here/i)).toBeInTheDocument()
+    expect(screen.getByText(/signature will be required at execution/i)).toBeInTheDocument()
   })
 
   it('stores the configurations before proposing, and snapshots the request', async () => {

@@ -35,6 +35,7 @@ import { usePolicyGuard } from '../hooks/usePolicyGuard'
 import { useReplacedPolicies } from '../hooks/useReplacedPolicies'
 import { ReplacedPolicyWarning } from '../shared/ReplacedPolicyWarning'
 import { ERC20_TRANSFER_SELECTOR } from './contracts'
+import { isErc20Balance, isNativeTokenAddress } from '../shared/erc20'
 import { useStorePolicyRequest } from '../hooks/useStorePolicyRequest'
 import { useAvailablePolicies } from '../hooks/useAvailablePolicies'
 import { useActivePolicies } from '../hooks/useActivePolicies'
@@ -116,7 +117,9 @@ const ERC20TransferPolicyFlow = () => {
   )
   const [fallback = []] = useAsync(() => (chainId ? tokensForChain(chainId) : undefined), [chainId])
   const tokenOptions = useMemo<TokenInfo[]>(() => {
-    const held: TokenInfo[] = (balances?.items ?? []).map((b) => ({
+    // The native coin has no ERC-20 contract, so it can't be a target here — value
+    // transfers carry no `transfer` selector and belong to NativeTransferPolicy.
+    const held: TokenInfo[] = (balances?.items ?? []).filter(isErc20Balance).map((b) => ({
       address: b.tokenInfo.address,
       symbol: b.tokenInfo.symbol,
       decimals: b.tokenInfo.decimals,
@@ -125,13 +128,14 @@ const ERC20TransferPolicyFlow = () => {
     const merged = [...customTokens, ...held]
     const seen = new Set(merged.map((t) => t.address.toLowerCase()))
     const extra: TokenInfo[] = fallback
-      .filter((t) => !seen.has(t.address.toLowerCase()))
+      .filter((t) => !seen.has(t.address.toLowerCase()) && !isNativeTokenAddress(t.address))
       .map((t) => ({ address: t.address, symbol: t.symbol, decimals: t.decimals, logoUri: t.logoURI ?? null }))
     return [...merged, ...extra]
   }, [balances?.items, fallback, customTokens])
 
   const customTokenTrimmed = customTokenInput.trim()
-  const isCustomTokenValid = isAddress(customTokenTrimmed)
+  const isCustomTokenNative = isNativeTokenAddress(customTokenTrimmed)
+  const isCustomTokenValid = isAddress(customTokenTrimmed) && !isCustomTokenNative
   const isCustomTokenKnown =
     isCustomTokenValid && tokenOptions.some((t) => t.address.toLowerCase() === customTokenTrimmed.toLowerCase())
 
@@ -332,6 +336,13 @@ const ERC20TransferPolicyFlow = () => {
                     <Plus size={16} /> Add token
                   </Button>
                 </Stack>
+
+                {isCustomTokenNative && (
+                  <Typography sx={{ fontSize: 12, color: 'error.main' }}>
+                    That address is the native coin, which isn&apos;t an ERC-20. Use a native transfers policy for value
+                    transfers.
+                  </Typography>
+                )}
               </Stack>
 
               {tokenOptions.length > 0 && (

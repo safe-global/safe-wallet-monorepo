@@ -332,8 +332,8 @@ const CosignerPolicyFlow = () => {
               {/* The guard reads the cosigner's signature from the tail of the `signatures`
                   bytes, which this wallet doesn't append yet. */}
               <Alert severity="warning">
-                Transfers of these tokens will need the cosigner&apos;s signature attached at execution, which this
-                wallet can&apos;t do yet — they won&apos;t be executable from here until it can.
+                A cosigner&apos;s signature will be required at execution for the combination of (to, selector,
+                operation).
               </Alert>
 
               <ReplacedPolicyWarning policies={replaced} />

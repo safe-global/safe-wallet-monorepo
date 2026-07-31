@@ -11,6 +11,7 @@ import * as useChainsHook from '@/hooks/useChains'
 import { TxModalContext } from '@/components/tx-flow'
 import { PolicyType } from '@safe-global/store/gateway/policies/types'
 import { availablePolicyBuilder, tokenWithdrawPolicyBuilder } from '@/tests/builders/policies'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { accessId } from '../../shared/accessSelector'
 import { SAFE_SET_GUARD_ABI, CONFIGURE_IMMEDIATELY_ABI, REQUEST_CONFIGURATION_ABI } from '../../shared/guardTx'
 import { ERC20_TRANSFER_SELECTOR, RECIPIENT_DATA_TYPE } from '../contracts'
@@ -80,7 +81,13 @@ const mockAll = (guardOverrides = {}, options: MockOptions = {}) => {
   })
 
   jest.spyOn(balancesApi, 'useBalancesGetBalancesV1Query').mockReturnValue({
-    data: { items: [{ tokenInfo: { address: USDC, symbol: 'USDC', decimals: 6, logoUri: null } }] },
+    data: {
+      items: [
+        { tokenInfo: { address: USDC, symbol: 'USDC', decimals: 6, logoUri: null, type: 'ERC20' } },
+        // CGW always returns the native balance; it isn't an ERC-20.
+        { tokenInfo: { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: null, type: 'NATIVE_TOKEN' } },
+      ],
+    },
   } as never)
 
   jest.spyOn(tokenList, 'tokensForChain').mockResolvedValue([])
@@ -105,6 +112,30 @@ const renderFlow = (setTxFlow = jest.fn()) => {
 
 describe('ERC20TransferPolicyFlow', () => {
   afterEach(() => jest.restoreAllMocks())
+
+  // A value transfer carries no `transfer` selector, so the native coin can't be a target.
+  it('does not offer the native coin as a token', async () => {
+    mockAll()
+    renderFlow()
+
+    fireEvent.click(screen.getByText('Ops Safe'))
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }))
+
+    expect(await screen.findByText('USDC')).toBeInTheDocument()
+    expect(screen.queryByText('ETH')).not.toBeInTheDocument()
+  })
+
+  it('refuses a pasted native-coin address, saying why', async () => {
+    mockAll()
+    renderFlow()
+
+    fireEvent.click(screen.getByText('Ops Safe'))
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }))
+    fireEvent.change(await screen.findByLabelText('Custom token address'), { target: { value: ZERO_ADDRESS } })
+
+    expect(screen.getByText(/native coin, which isn't an ERC-20/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /add token/i })).toBeDisabled()
+  })
 
   it('starts on the Apply-to step listing the space safes; Continue disabled until a safe is picked', async () => {
     mockAll()
