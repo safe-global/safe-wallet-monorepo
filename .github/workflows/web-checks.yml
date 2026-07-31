@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - apps/web/**
+      - apps/web-tanstack/**
       - packages/**
   push:
     branches:
@@ -11,6 +12,7 @@ on:
       - dev
     paths:
       - apps/web/**
+      - apps/web-tanstack/**
       - packages/**
 
 concurrency:
@@ -93,7 +95,7 @@ jobs:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
       - name: Check for unused exports
-        run: yarn turbo run knip:exports --filter=@safe-global/web
+        run: yarn turbo run knip:exports:web
 
   notify:
     if: failure() && github.event_name == 'push'
