@@ -42,4 +42,10 @@ describe('WalletTwoFactorSection', () => {
     expect(screen.getByText('Two-factor authentication')).toBeInTheDocument()
     expect(screen.getByText('Not active for wallet sign-in')).toBeInTheDocument()
   })
+
+  it('tells wallet users to create a new email or Google account, not to sign in with one', () => {
+    render(<WalletTwoFactorSection />)
+
+    expect(screen.getByText(/create a new email or Google account instead/)).toBeInTheDocument()
+  })
 })
