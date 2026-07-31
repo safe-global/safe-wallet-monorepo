@@ -40,6 +40,7 @@ type Story = StoryObj<typeof meta>
 export const FullCoverage: Story = {
   args: {
     spaceId: '1',
+    isAdmin: true,
     members: [member(1, 'admin@example.com'), member(2, 'alice@example.com')],
   },
 }
@@ -47,10 +48,20 @@ export const FullCoverage: Story = {
 export const PartialCoverage: Story = {
   args: {
     spaceId: '1',
+    isAdmin: true,
+    members: [member(1, 'admin@example.com'), member(2, 'alice@example.com'), member(3, null)],
+  },
+}
+
+// A plain member can't manage anyone, so the CTA only offers to see the team
+export const AsNonAdmin: Story = {
+  args: {
+    spaceId: '1',
+    isAdmin: false,
     members: [member(1, 'admin@example.com'), member(2, 'alice@example.com'), member(3, null)],
   },
 }
 
 export const NoMembers: Story = {
-  args: { spaceId: '1', members: [] },
+  args: { spaceId: '1', isAdmin: true, members: [] },
 }

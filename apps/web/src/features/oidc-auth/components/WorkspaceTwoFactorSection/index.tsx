@@ -11,12 +11,21 @@ import { getTwoFactorCoverage } from '../../utils/twoFactor'
 
 /**
  * Two-factor authentication card on the workspace settings page. States the
- * always-on 2FA policy and how much of the workspace it covers, and points
- * admins at the Team page to manage the members it doesn't.
+ * always-on 2FA policy and how much of the workspace it covers, and points at
+ * the Team page — to manage the members it doesn't cover, or just to see them
+ * when the viewer isn't an admin.
  *
  * Gated behind the SWITCH_AUTHENTICATOR feature, like the account-level 2FA cards.
  */
-const WorkspaceTwoFactorSection = ({ members, spaceId }: { members: MemberDto[]; spaceId?: string }) => {
+const WorkspaceTwoFactorSection = ({
+  members,
+  spaceId,
+  isAdmin,
+}: {
+  members: MemberDto[]
+  spaceId?: string
+  isAdmin?: boolean
+}) => {
   const isSwitchAuthenticatorEnabled = useHasFeature(FEATURES.SWITCH_AUTHENTICATOR)
 
   if (!isSwitchAuthenticatorEnabled) {
@@ -54,7 +63,7 @@ const WorkspaceTwoFactorSection = ({ members, spaceId }: { members: MemberDto[];
           nativeButton={false}
           render={<NextLink href={{ pathname: AppRoutes.spaces.members, query: spaceId ? { spaceId } : undefined }} />}
         >
-          Manage members
+          {isAdmin ? 'Manage members' : 'See members'}
         </Button>
       </div>
     </section>

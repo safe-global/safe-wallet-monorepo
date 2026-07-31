@@ -2,10 +2,12 @@ import { render, screen } from '@/tests/test-utils'
 import GeneralPage from '../GeneralPage'
 
 const mockUseSpaceMembersByStatus = jest.fn()
+const mockUseIsAdmin = jest.fn()
 
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => 'space-uuid',
   useSpaceMembersByStatus: () => mockUseSpaceMembersByStatus(),
+  useIsAdmin: () => mockUseIsAdmin(),
 }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
@@ -28,21 +30,36 @@ jest.mock('../../sections/DangerZoneSection', () => ({
 }))
 
 jest.mock('@/features/oidc-auth', () => ({
-  WorkspaceTwoFactorSection: ({ members, spaceId }: { members: { id: number }[]; spaceId?: string }) => (
-    <div data-testid="workspace-2fa-section">{`${members.length}:${spaceId}`}</div>
-  ),
+  WorkspaceTwoFactorSection: ({
+    members,
+    spaceId,
+    isAdmin,
+  }: {
+    members: { id: number }[]
+    spaceId?: string
+    isAdmin?: boolean
+  }) => <div data-testid="workspace-2fa-section">{`${members.length}:${spaceId}:${isAdmin}`}</div>,
 }))
 
 describe('GeneralPage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseSpaceMembersByStatus.mockReturnValue({ activeMembers: [{ id: 1 }, { id: 2 }], invitedMembers: [] })
+    mockUseIsAdmin.mockReturnValue(true)
   })
 
   it('renders the workspace 2FA section with the active members of the current space', () => {
     render(<GeneralPage />)
 
-    expect(screen.getByTestId('workspace-2fa-section')).toHaveTextContent('2:space-uuid')
+    expect(screen.getByTestId('workspace-2fa-section')).toHaveTextContent('2:space-uuid:true')
+  })
+
+  it("passes the viewer's admin status through, so the CTA can adapt", () => {
+    mockUseIsAdmin.mockReturnValue(false)
+
+    render(<GeneralPage />)
+
+    expect(screen.getByTestId('workspace-2fa-section')).toHaveTextContent('2:space-uuid:false')
   })
 
   it('keeps the 2FA section between identity and appearance', () => {

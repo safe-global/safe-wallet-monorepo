@@ -65,4 +65,16 @@ describe('WorkspaceTwoFactorSection', () => {
       '/spaces/members?spaceId=space-uuid',
     )
   })
+
+  it('offers to manage members to an admin', () => {
+    render(<WorkspaceTwoFactorSection members={[oidcMember(1)]} isAdmin />)
+
+    expect(screen.getByTestId('workspace-2fa-manage-members')).toHaveTextContent('Manage members')
+  })
+
+  it('only offers to see members to a non-admin, who cannot manage anyone', () => {
+    render(<WorkspaceTwoFactorSection members={[oidcMember(1)]} isAdmin={false} />)
+
+    expect(screen.getByTestId('workspace-2fa-manage-members')).toHaveTextContent('See members')
+  })
 })
