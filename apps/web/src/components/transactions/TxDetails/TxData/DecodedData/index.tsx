@@ -9,6 +9,9 @@ import MethodCall from './MethodCall'
 import { useNativeTokenInfo } from '@/hooks/useNativeTokenInfo'
 import { DelegateCallWarning, UntrustedFallbackHandlerWarning } from '@/components/transactions/Warning'
 import { useSetsUntrustedFallbackHandler } from '@/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert'
+import { isPolicyTxMethod, policyTxMethodOf } from '@/features/spaces/services'
+import { SpacesFeature } from '@/features/spaces'
+import { useLoadFeature } from '@/features/__core__'
 
 interface Props {
   txData: TransactionDetails['txData']
@@ -25,6 +28,7 @@ const DecodedData = ({
 }: Props): ReactElement | null => {
   const nativeTokenInfo = useNativeTokenInfo()
   const setsUntrustedFallbackHandler = useSetsUntrustedFallbackHandler(txData)
+  const spaces = useLoadFeature(SpacesFeature)
 
   // nothing to render
   if (!txData) {
@@ -43,7 +47,16 @@ const DecodedData = ({
 
   const amountInWei = txData.value ?? '0'
   const toAddress = toInfo?.value || txData.to?.value
-  const method = txData.dataDecoded?.method || ''
+  // The gateway has no ABI for the policy guard on most chains, so `dataDecoded` is empty
+  // there; the selector identifies the call either way. Its own decode still wins when it
+  // reads the calldata as some other method.
+  const policyMethod = policyTxMethodOf(txData.hexData)
+  const decodedMethod = txData.dataDecoded?.method
+  // With the feature off (or broken) its component is a stub that renders null, so fall
+  // back to the generic view rather than showing nothing.
+  const canShowPolicies = !spaces.$isDisabled && !spaces.$error
+  const isPolicyTx = !!policyMethod && canShowPolicies && (!decodedMethod || isPolicyTxMethod(decodedMethod))
+  const method = decodedMethod || (isPolicyTx ? policyMethod : '') || ''
   const addressInfo = txData.addressInfoIndex?.[toAddress]
   const name = addressInfo?.name || toInfo?.name || txData.to?.name
   const avatar = addressInfo?.logoUri || toInfo?.logoUri || txData.to?.logoUri
@@ -61,7 +74,10 @@ const DecodedData = ({
 
       {amountInWei !== '0' && <SendAmountBlock title="Value" amountInWei={amountInWei} tokenInfo={nativeTokenInfo} />}
 
-      {txData.dataDecoded ? (
+      {isPolicyTx ? (
+        // A policy configuration reads as an array of structs otherwise; show the policies.
+        <spaces.PolicyTxDetails txData={txData} />
+      ) : txData.dataDecoded ? (
         <MethodDetails data={txData.dataDecoded} hexData={txData.hexData} addressInfoIndex={txData.addressInfoIndex} />
       ) : txData.hexData ? (
         <Typography data-testid="hexData" variant="body2" component="div">
