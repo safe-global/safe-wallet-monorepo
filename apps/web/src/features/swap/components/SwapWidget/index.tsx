@@ -1,5 +1,9 @@
 import { TradeType, type CowSwapWidgetParams } from '@cowprotocol/widget-lib'
-import { type OnTradeParamsPayload, type CowEventListeners, CowEvents } from '@cowprotocol/events'
+import {
+  type OnTradeParamsPayload,
+  type CowWidgetEventListeners as CowEventListeners,
+  CowWidgetEvents as CowEvents,
+} from '@cowprotocol/events'
 import { type MutableRefObject, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, useTheme } from '@mui/material'
 import { CowSwapWidget } from '@cowprotocol/widget-react'
@@ -23,6 +27,7 @@ import useChainId from '@/hooks/useChainId'
 import { SWAP_TITLE, SWAP_FEE_RECIPIENT } from '../../constants'
 import { calculateFeePercentageInBps } from '../../helpers/fee'
 import { UiOrderTypeToOrderType } from '../../helpers/utils'
+import { UiOrderType } from '@safe-global/utils/features/swap/types'
 import { useGetIsSanctionedQuery } from '@/store/api/ofac'
 import { skipToken } from '@reduxjs/toolkit/query/react'
 import { getKeyWithTrueValue } from '@/utils/helpers'
@@ -196,7 +201,8 @@ const SwapWidget = ({ sell }: Params) => {
       {
         event: CowEvents.ON_CHANGE_TRADE_PARAMS,
         handler: (newTradeParams: OnTradeParamsPayload) => {
-          const { orderType: tradeType, recipient, sellToken, buyToken } = newTradeParams
+          const { orderType, recipient, sellToken, buyToken } = newTradeParams
+          const tradeType = UiOrderType[orderType as keyof typeof UiOrderType] ?? UiOrderType.SWAP
 
           const newFeeBps = feeEnabled
             ? calculateFeePercentageInBps(newTradeParams, nativeCowSwapFeeV2Enabled, isEurcvBoostEnabled)
@@ -210,10 +216,10 @@ const SwapWidget = ({ sell }: Params) => {
               bps: newFeeBps,
             },
             sell: {
-              asset: sellToken?.address,
+              asset: sellToken?.address ?? '',
             },
             buy: {
-              asset: buyToken?.address,
+              asset: buyToken?.address ?? '',
             },
           }))
 
