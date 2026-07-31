@@ -1,42 +1,49 @@
 /*
- * Body-row styling for SafeAccountsTable: grey hover pill, inset separators, and the similarity band.
- * Applied via `className` on the <Table> — table-level because the base MUI theme pins row/cell styles
- * at a specificity only these selectors beat. Mui classes are wrapped in :global() so the CSS-module
- * compiler leaves them un-hashed. Rule order is load-bearing: band rules must follow the hover rule
- * (same specificity → later wins).
+ * SafeAccountsTable body rows: grey hover pill, inset separators, similarity band.
+ * Table-level (via <Table className>) because the MUI theme pins row/cell styles at a specificity
+ * per-cell sx can't beat; :global() keeps Mui classes un-hashed. Rule order is load-bearing:
+ * band rules must follow the hover rule (same specificity → later wins).
  */
 
 .body {
   /* Theme-adaptive band palette (light: yellow surface/border; dark: warning-brown/coral). */
   --band-surface: var(--color-yellow-50);
-  --band-border: var(--color-yellow-400);
+  --band-border: var(--color-yellow-500);
 }
 :global(.dark) .body {
   --band-surface: var(--color-warning-background);
   --band-border: var(--color-warning-main);
 }
 
-/* Suppress the theme's row hover tint (bleeds into the inset corners); paint a grey pill on the cells
-   instead — cell-level fill lets the transparent side borders inset it from the panel edges. */
+/* Hover: suppress the theme's row tint, paint a grey pill on the cells instead. */
 .body :global(.MuiTableBody-root .MuiTableRow-root:hover) {
   background-color: transparent;
 }
 .body :global(.MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root) {
   background-color: var(--muted);
 }
-.body :global(.MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root:first-of-type) {
+/* Pill rounding skips band rows — their fill must stay square (no corner notch). */
+.body
+  :global(
+    .MuiTableBody-root
+      .MuiTableRow-root:not([data-disabled]):not([data-band-header]):not([data-highlighted]):hover
+      .MuiTableCell-root:first-of-type
+  ) {
   border-top-left-radius: 16px;
   border-bottom-left-radius: 16px;
 }
-.body :global(.MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root:last-of-type) {
+.body
+  :global(
+    .MuiTableBody-root
+      .MuiTableRow-root:not([data-disabled]):not([data-band-header]):not([data-highlighted]):hover
+      .MuiTableCell-root:last-of-type
+  ) {
   border-top-right-radius: 16px;
   border-bottom-right-radius: 16px;
 }
 
-/* Transparent borders + background-clip float the hover pill clear of the separators. Must live here:
-   the base theme forces cell borderBottom to `none` at a specificity per-cell sx can't beat. Asymmetric
-   5/8 split: the 1px separator sits inside the bottom border and paints ~1px above the row's edge, so
-   5-top / 8-bottom lands the pill visually centred with ~6px clearance each side of the line. */
+/* Row spacing: transparent borders + background-clip. Asymmetric 5/8 because the 1px separator
+   paints inside the bottom border, so 5-top/8-bottom centres the pill (~6px clearance per side). */
 .body :global(.MuiTableBody-root .MuiTableCell-root) {
   border-top: 5px solid transparent;
   border-bottom: 8px solid transparent;
@@ -61,13 +68,16 @@
   background-image: none;
 }
 
-/* Band surface for header + member rows (incl. the inset borders) so the run reads as one block.
+/* Band surface: square continuous fill on the cells (rounded frames live on ::before below).
    Must sit AFTER the hover rule — same specificity, later wins. */
 .body :global(.MuiTableBody-root .MuiTableRow-root[data-band-header] .MuiTableCell-root),
 .body :global(.MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root) {
+  position: relative;
   background-color: var(--band-surface);
   border-top-color: var(--band-surface);
   border-bottom-color: var(--band-surface);
+  border-left-color: var(--band-surface);
+  border-right-color: var(--band-surface);
 }
 /* Keep the band surface on hover (beats the equal-specificity grey pill). */
 .body :global(.MuiTableBody-root .MuiTableRow-root[data-band-header]:hover .MuiTableCell-root),
@@ -75,26 +85,53 @@
   background-color: var(--band-surface);
 }
 
-/* Each band member is a rounded band-bordered card: inset box-shadows (sides only on the outer cells)
-   follow the cell radii without drawing internal vertical lines. */
-.body :global(.MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root) {
-  box-shadow:
-    inset 0 1px 0 var(--band-border),
-    inset 0 -1px 0 var(--band-border);
+/* Card frame: a ::before overlay so it carries its own radius while the cell fill stays square.
+   Top/bottom on every cell, sides only on the outer cells → one continuous per-row outline. */
+.body :global(.MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-top: 1px solid var(--band-border);
+  border-bottom: 1px solid var(--band-border);
 }
-.body :global(.MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root:first-of-type) {
-  box-shadow:
-    inset 1px 0 0 var(--band-border),
-    inset 0 1px 0 var(--band-border),
-    inset 0 -1px 0 var(--band-border);
+.body :global(.MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root:first-of-type)::before {
+  border-left: 1px solid var(--band-border);
   border-top-left-radius: 16px;
   border-bottom-left-radius: 16px;
 }
-.body :global(.MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root:last-of-type) {
-  box-shadow:
-    inset -1px 0 0 var(--band-border),
-    inset 0 1px 0 var(--band-border),
-    inset 0 -1px 0 var(--band-border);
+.body :global(.MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root:last-of-type)::before {
+  border-right: 1px solid var(--band-border);
   border-top-right-radius: 16px;
   border-bottom-right-radius: 16px;
+}
+
+/* Round only the block's four outer corners: top on the header, bottom on the last band member. */
+.body :global(.MuiTableBody-root .MuiTableRow-root[data-band-header] .MuiTableCell-root:first-of-type) {
+  border-top-left-radius: 16px;
+}
+.body :global(.MuiTableBody-root .MuiTableRow-root[data-band-header] .MuiTableCell-root:last-of-type) {
+  border-top-right-radius: 16px;
+}
+.body
+  :global(
+    .MuiTableBody-root
+      .MuiTableRow-root[data-highlighted]:not(:has(+ .MuiTableRow-root[data-highlighted]))
+      .MuiTableCell-root:first-of-type
+  ) {
+  border-bottom-left-radius: 16px;
+}
+.body
+  :global(
+    .MuiTableBody-root
+      .MuiTableRow-root[data-highlighted]:not(:has(+ .MuiTableRow-root[data-highlighted]))
+      .MuiTableCell-root:last-of-type
+  ) {
+  border-bottom-right-radius: 16px;
+}
+
+/* 3px transparent top gap on every band header: separates clusters from each other and from the
+   table head (which has no transparent borders of its own). */
+.body :global(.MuiTableBody-root .MuiTableRow-root[data-band-header] .MuiTableCell-root) {
+  border-top: 3px solid transparent;
 }
