@@ -5,7 +5,6 @@ import {
   AccordionDetails,
   AccordionSummary,
   Box,
-  Chip,
   Collapse,
   IconButton,
   Paper,
@@ -196,18 +195,7 @@ const ActiveEntry = ({
         )
       }
       summary={entrySummaryOf(policy)}
-      badges={
-        <>
-          <Chip
-            size="small"
-            color="success"
-            variant="outlined"
-            label="Active"
-            sx={{ height: 18, fontSize: 10, fontWeight: 700 }}
-          />
-          {isFallback && <FallbackBadge />}
-        </>
-      }
+      badges={isFallback ? <FallbackBadge /> : undefined}
       onOpen={() => detail && onOpenDetail({ detail, isFallback })}
     />
   )
@@ -250,20 +238,12 @@ const PendingEntry = ({
         )
       }
       summary={`Root ${shortenAddress(row.pending.configureRoot)}`}
-      badges={
-        <>
-          <Chip
-            size="small"
-            color={isReady ? 'warning' : 'default'}
-            variant="outlined"
-            label={isReady ? 'Ready to apply' : `Ready in ~${hoursLeft}h`}
-            sx={{ height: 18, fontSize: 10 }}
-          />
-          {hasFallbackAccess(row) && <FallbackBadge />}
-        </>
-      }
+      badges={hasFallbackAccess(row) ? <FallbackBadge /> : undefined}
       action={
-        <Box onClick={(e) => e.stopPropagation()}>
+        <Stack direction="row" alignItems="center" gap={1} onClick={(e) => e.stopPropagation()}>
+          <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+            {isReady ? 'Ready' : `~${hoursLeft}h left`}
+          </Typography>
           <Tooltip title={blockedMessage}>
             <span>
               <Button size="sm" disabled={!plan.canApply} onClick={() => onApply(row)}>
@@ -271,7 +251,7 @@ const PendingEntry = ({
               </Button>
             </span>
           </Tooltip>
-        </Box>
+        </Stack>
       }
       onOpen={() =>
         onOpenDetail({
@@ -352,32 +332,6 @@ const Section = ({ icon, title, meta, action, defaultOpen = false, children }: S
 /* ---------------------------- Policy type block --------------------------- */
 
 /** Nothing configured needs no badge — the Add button is the signal. */
-const StateChip = ({ active, pending }: { active: number; pending: number }): ReactElement | null => {
-  if (active > 0) {
-    return (
-      <Chip
-        size="small"
-        color="success"
-        variant="outlined"
-        label={active === 1 ? 'Active' : `${active} active`}
-        sx={{ height: 20, fontSize: 10, fontWeight: 700 }}
-      />
-    )
-  }
-  if (pending > 0) {
-    return (
-      <Chip
-        size="small"
-        color="warning"
-        variant="outlined"
-        label={pending === 1 ? 'Pending' : `${pending} pending`}
-        sx={{ height: 20, fontSize: 10, fontWeight: 700 }}
-      />
-    )
-  }
-  return null
-}
-
 type PolicyTypeBlockProps = {
   safe: SafeRef
   entry: AvailablePolicy
@@ -417,7 +371,6 @@ const PolicyTypeBlock = ({ safe, entry, active, pendingRows, onAdd, onOpenDetail
           {entry.title || labelOf(entry.type)}
         </Typography>
       }
-      meta={<StateChip active={active.length} pending={pendingRows.length} />}
       action={
         <Tooltip title={blocked}>
           <span>
@@ -532,7 +485,6 @@ const FallbackBlock = ({
       meta={
         <>
           <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>only one applies at a time</Typography>
-          <StateChip active={active.length} pending={pendingRows.length} />
         </>
       }
     >
@@ -622,8 +574,6 @@ const SafePolicyCard = ({ safe, onOpenDetail }: { safe: SafeRef; onOpenDetail: (
   }
 
   const name = contact?.name || safe.name
-  const activeCount = active.length
-  const pendingCount = pendingRows.length
 
   return (
     <Accordion
@@ -659,7 +609,8 @@ const SafePolicyCard = ({ safe, onOpenDetail }: { safe: SafeRef; onOpenDetail: (
           <Box sx={{ flex: 1 }} />
 
           <Typography sx={{ fontSize: 12.5, color: 'text.secondary', fontWeight: 600 }}>
-            {activeCount} active{pendingCount > 0 ? ` · ${pendingCount} pending` : ''}
+            {active.length} active {active.length === 1 ? 'policy' : 'policies'}
+            {pendingRows.length > 0 ? ` · ${pendingRows.length} pending` : ''}
           </Typography>
         </Stack>
       </AccordionSummary>
@@ -720,7 +671,6 @@ const SafePolicyCard = ({ safe, onOpenDetail }: { safe: SafeRef; onOpenDetail: (
                 Other pending changes
               </Typography>
             }
-            meta={<StateChip active={0} pending={untypedPending.length} />}
           >
             <Stack gap={1}>
               {untypedPending.map((row) => (

@@ -226,7 +226,8 @@ describe('PoliciesBySafe', () => {
     )
   })
 
-  it('lists an active policy under its type with a state chip', () => {
+  // The Safe header states the counts, so rows don't need Active/pending badges.
+  it('counts active policies in the Safe header instead of badging each row', () => {
     const policy = tokenWithdrawPolicyBuilder()
       .with({ id: `0xa9059cbb${'0'.repeat(16)}${'1'.repeat(40)}` })
       .build()
@@ -234,8 +235,28 @@ describe('PoliciesBySafe', () => {
 
     renderPage()
 
-    expect(screen.getAllByText('Active').length).toBeGreaterThan(0)
-    expect(screen.getByText('1 active')).toBeInTheDocument()
+    expect(screen.getByText('1 active policy')).toBeInTheDocument()
+    expect(screen.queryByText('Active')).not.toBeInTheDocument()
+  })
+
+  it('states both counts when changes are pending', () => {
+    const policy = tokenWithdrawPolicyBuilder()
+      .with({ id: `0xa9059cbb${'0'.repeat(16)}${'1'.repeat(40)}` })
+      .build()
+    mockedActive.mockReturnValue({ policies: [policy], isLoading: false, isError: false, refetch: jest.fn() })
+    mockPending([
+      { configureRoot: `0x${'ab'.repeat(32)}`, requestedAt: 1_000, readyAt: 1_001, isReady: true, policies: null },
+    ])
+
+    renderPage()
+
+    expect(screen.getByText('1 active policy · 1 pending')).toBeInTheDocument()
+  })
+
+  it('says zero when a Safe has nothing configured', () => {
+    renderPage()
+
+    expect(screen.getByText('0 active policies')).toBeInTheDocument()
   })
 
   // Regression: rows used to repeat their section's title, which told the reader nothing
@@ -305,7 +326,8 @@ describe('PoliciesBySafe', () => {
       ])
       const { setTxFlow } = renderPage()
 
-      expect(screen.getByText('Ready to apply')).toBeInTheDocument()
+      // Readiness reads as plain text beside the button, not as a badge.
+      expect(screen.getByText('Ready')).toBeInTheDocument()
 
       fireEvent.click(screen.getByRole('button', { name: /apply/i }))
       await waitFor(() => expect(setTxFlow).toHaveBeenCalled())
