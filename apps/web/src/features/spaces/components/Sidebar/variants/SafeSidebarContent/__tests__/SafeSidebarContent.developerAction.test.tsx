@@ -38,18 +38,20 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   useSafeQueryParam: () => '',
 }))
 
-// A single selector stub covers both consumers: the override count (0) in SafeSidebarContent and
-// the signed-in flag (falsy) in SafeSidebarVariant, which keeps the workspace header out of the way.
+// Selector-aware so real selectors run against a known slice: the override count resolves to 0 and
+// isAuthenticated to false (keeping the workspace header out of the way) without a blanket stub that
+// would also swallow any future store consumer in this tree.
 jest.mock('@/store', () => ({
-  useAppSelector: () => 0,
+  useAppSelector: (selector: (state: { featureFlagOverrides: Record<string, boolean>; auth: object }) => unknown) =>
+    selector({ featureFlagOverrides: {}, auth: {} }),
 }))
 
 jest.mock('@/features/counterfactual', () => ({
   useIsCounterfactualSafe: () => false,
 }))
 
-jest.mock('../../../hooks/useSidebarHydrated', () => ({
-  useSidebarHydrated: () => true,
+jest.mock('@/hooks/useIsHydrated', () => ({
+  useIsHydrated: () => true,
 }))
 
 jest.mock('../../../NewTransactionButton', () => ({

@@ -52,7 +52,10 @@ interface NavItemProps {
   isSpacesVariant?: boolean
   /** Show skeleton loading state instead of actual item content. */
   isLoading?: boolean
-  /** UI belonging to this item, e.g. a dialog it opens. Hosted in the item's own list element. */
+  /**
+   * UI belonging to this item, e.g. a dialog it opens. Hosted in the item's own list element, and
+   * kept mounted in the skeleton state so a loading flip can't tear down UI the user has open.
+   */
   children?: ReactNode
 }
 

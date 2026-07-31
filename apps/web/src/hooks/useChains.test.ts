@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs'
 import path from 'path'
 import { renderHook } from '@/tests/test-utils'
+import { setIsProduction } from '@/tests/env'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useChains, { applyFeatureOverrides, useHasFeature } from './useChains'
@@ -45,12 +46,12 @@ describe('applyFeatureOverrides', () => {
 
   it('is a no-op in production', () => {
     const prev = process.env.NEXT_PUBLIC_IS_PRODUCTION
-    process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+    setIsProduction('true')
     try {
       const chain = makeChain([])
       expect(applyFeatureOverrides(chain, { [FEATURES.EARN]: true })).toBe(chain)
     } finally {
-      process.env.NEXT_PUBLIC_IS_PRODUCTION = prev
+      setIsProduction(prev)
     }
   })
 })

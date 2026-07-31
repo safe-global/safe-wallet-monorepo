@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import type { ReactElement, ReactNode } from 'react'
 import { SpacesSidebarContent } from '../SpacesSidebarContent'
+import { setIsProduction } from '@/tests/env'
 
 // Companion to SpacesSidebarContent.test.tsx, which mocks SpacesSidebarVariant away. Here the real
 // SpacesSidebarVariant, the real developer-group hook and the real NavItem stay in place, so the
@@ -25,9 +26,11 @@ jest.mock('@/hooks/useChains', () => ({
   useHasFeature: () => true,
 }))
 
-// Stands in for the override-count selector read by useSidebarDeveloperGroup.
+// Selector-aware so real selectors run against a known slice, rather than every selector in the
+// tree silently resolving to the same value and masking a future store consumer.
 jest.mock('@/store', () => ({
-  useAppSelector: () => 0,
+  useAppSelector: (selector: (state: { featureFlagOverrides: Record<string, boolean>; auth: object }) => unknown) =>
+    selector({ featureFlagOverrides: {}, auth: {} }),
 }))
 
 jest.mock('../../SpaceSelectorDropdown', () => ({
@@ -132,7 +135,7 @@ describe('SpacesSidebarContent Developer action (real NavItem)', () => {
 
   it('renders neither the group nor the dialog in production', () => {
     const originalIsProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION
-    process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+    setIsProduction('true')
 
     try {
       renderContent()
@@ -141,7 +144,7 @@ describe('SpacesSidebarContent Developer action (real NavItem)', () => {
       expect(screen.queryByTestId('sidebar-feature-flags-item')).not.toBeInTheDocument()
       expect(screen.queryByTestId('feature-flag-editor-dialog')).not.toBeInTheDocument()
     } finally {
-      process.env.NEXT_PUBLIC_IS_PRODUCTION = originalIsProduction
+      setIsProduction(originalIsProduction)
     }
   })
 })

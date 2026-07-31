@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import type { ResolvedSidebarActionItem, SidebarDeveloperItemConfig } from '../../types'
+import { getSidebarActionItemTestId } from '../../utils'
 import { NavItem } from '../NavItem'
 
 interface SidebarDeveloperItemProps {
@@ -21,7 +22,7 @@ export const SidebarDeveloperItem = ({ config, isLoading = false }: SidebarDevel
     badge,
     isActive: false,
     disabled: false,
-    testId: `sidebar-${config.id}-item`,
+    testId: getSidebarActionItemTestId(config.id),
     onSelect,
   }
 

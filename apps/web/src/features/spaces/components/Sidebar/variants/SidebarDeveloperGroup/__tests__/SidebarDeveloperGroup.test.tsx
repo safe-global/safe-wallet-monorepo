@@ -3,6 +3,7 @@ import type * as React from 'react'
 import type { ReactNode } from 'react'
 import { SidebarDeveloperGroup } from '../SidebarDeveloperGroup'
 import type { ResolvedSidebarItem } from '../../../types'
+import { setIsProduction } from '@/tests/env'
 
 jest.mock('@/components/ui/sidebar', () => ({
   SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
@@ -100,7 +101,7 @@ describe('SidebarDeveloperGroup', () => {
 
   it('renders nothing in production', () => {
     const originalIsProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION
-    process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+    setIsProduction('true')
 
     try {
       const { container } = render(<SidebarDeveloperGroup />)
@@ -108,7 +109,7 @@ describe('SidebarDeveloperGroup', () => {
       expect(container).toBeEmptyDOMElement()
       expect(screen.queryByText('Developer')).not.toBeInTheDocument()
     } finally {
-      process.env.NEXT_PUBLIC_IS_PRODUCTION = originalIsProduction
+      setIsProduction(originalIsProduction)
     }
   })
 
