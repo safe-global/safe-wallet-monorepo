@@ -58,6 +58,10 @@ const WIZARD_BY_TYPE: Partial<Record<PolicyType, string>> = {
   [PolicyType.Recovery]: 'accountRecovery',
   [PolicyType.TokenWithdraw]: 'tokenWithdraw',
   [PolicyType.Cosigner]: 'cosigner',
+  // One flow for all three fallback policies; the type rides along in the query.
+  [PolicyType.Allow]: 'fallback',
+  [PolicyType.NativeTransfer]: 'fallback',
+  [PolicyType.Deny]: 'fallback',
 }
 
 const ICON_BY_TYPE: Partial<Record<PolicyType, LucideIcon>> = {
@@ -606,8 +610,14 @@ const SafePolicyCard = ({ safe, onOpenDetail }: { safe: SafeRef; onOpenDetail: (
 
     void router.push({
       pathname: AppRoutes.spaces.policies,
-      // `policySafe` preselects the Safe so the wizard can skip its Safe-picker step.
-      query: { ...router.query, policy: flow, policySafe: `${safe.chainId}:${safe.address}` },
+      query: {
+        ...router.query,
+        policy: flow,
+        // `policySafe` preselects the Safe so the wizard can skip its Safe-picker step.
+        policySafe: `${safe.chainId}:${safe.address}`,
+        // The fallback flow serves three policies, so it needs to know which.
+        ...(flow === 'fallback' ? { fallbackType: type } : {}),
+      },
     })
   }
 

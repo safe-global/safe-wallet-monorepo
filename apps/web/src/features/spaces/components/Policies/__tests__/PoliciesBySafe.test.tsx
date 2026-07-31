@@ -164,9 +164,9 @@ describe('PoliciesBySafe', () => {
 
     const disabled = screen.getAllByRole('button', { name: 'Add' }).filter((row) => row.hasAttribute('disabled'))
 
-    // Spending limit (no enforcement reported) and both fallbacks (no builder yet).
-    // Cosigner has enforcement AND a builder, so it stays enabled.
-    expect(disabled).toHaveLength(3)
+    // Only spending limit, whose enforcement CGW doesn't report. Every other type in this
+    // catalogue has both enforcement and a builder.
+    expect(disabled).toHaveLength(1)
   })
 
   it('explains why an unconfigurable policy is disabled', () => {
@@ -183,6 +183,20 @@ describe('PoliciesBySafe', () => {
     // The section with enforcement is configurable, so its Add is live.
     const enabled = screen.getAllByRole('button', { name: 'Add' }).filter((row) => !row.hasAttribute('disabled'))
     expect(enabled.length).toBeGreaterThan(0)
+  })
+
+  // One flow serves all three fallback policies, so it needs to know which was clicked.
+  it('opens the fallback builder with the chosen policy type', () => {
+    const { push } = renderPage()
+
+    fireEvent.click(screen.getByText('Fallback'))
+    fireEvent.click(screen.getAllByRole('button', { name: 'Add' }).at(-1)!)
+
+    expect(push).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({ policy: 'fallback', fallbackType: PolicyType.Deny }),
+      }),
+    )
   })
 
   it('opens the cosigner builder, which the wallet now has', () => {

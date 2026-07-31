@@ -5,6 +5,7 @@ import SpendingLimitFlow from './SpendingLimitFlow'
 import RecoveryFlow from './RecoveryFlow'
 import ERC20TransferPolicyFlow from './ERC20TransferPolicy'
 import CosignerPolicyFlow from './CosignerPolicy'
+import FallbackPolicyFlow from './FallbackPolicy'
 
 /**
  * The space's policies, led by the Safe they apply to.
@@ -31,6 +32,10 @@ const SpacePolicies = () => {
 
   if (router.query.policy === 'cosigner') {
     return <CosignerPolicyFlow />
+  }
+
+  if (router.query.policy === 'fallback') {
+    return <FallbackPolicyFlow />
   }
 
   return (
