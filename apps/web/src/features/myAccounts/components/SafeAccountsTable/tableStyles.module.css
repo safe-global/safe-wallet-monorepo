@@ -19,7 +19,12 @@
 .body :global(.MuiTableBody-root .MuiTableRow-root:hover) {
   background-color: transparent;
 }
-.body :global(.MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root) {
+.body
+  :global(
+    .MuiTableBody-root
+      .MuiTableRow-root:not([data-disabled]):not([data-band-header]):not([data-highlighted]):hover
+      .MuiTableCell-root
+  ) {
   background-color: var(--muted);
 }
 /* Pill rounding skips band rows — their fill must stay square (no corner notch). */
@@ -68,21 +73,13 @@
   background-image: none;
 }
 
-/* Band surface: square continuous fill on the cells (rounded frames live on ::before below).
-   Must sit AFTER the hover rule — same specificity, later wins. */
+/* Band surface: fill across the transparent borders (border-box clip) so it runs row-to-row.
+   Never via border colours — those miter diagonally into the side insets (spikes). */
 .body :global(.MuiTableBody-root .MuiTableRow-root[data-band-header] .MuiTableCell-root),
 .body :global(.MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root) {
   position: relative;
   background-color: var(--band-surface);
-  border-top-color: var(--band-surface);
-  border-bottom-color: var(--band-surface);
-  border-left-color: var(--band-surface);
-  border-right-color: var(--band-surface);
-}
-/* Keep the band surface on hover (beats the equal-specificity grey pill). */
-.body :global(.MuiTableBody-root .MuiTableRow-root[data-band-header]:hover .MuiTableCell-root),
-.body :global(.MuiTableBody-root .MuiTableRow-root[data-highlighted]:hover .MuiTableCell-root) {
-  background-color: var(--band-surface);
+  background-clip: border-box;
 }
 
 /* Card frame: a ::before overlay so it carries its own radius while the cell fill stays square.
@@ -106,12 +103,13 @@
   border-bottom-right-radius: 16px;
 }
 
-/* Round only the block's four outer corners: top on the header, bottom on the last band member. */
-.body :global(.MuiTableBody-root .MuiTableRow-root[data-band-header] .MuiTableCell-root:first-of-type) {
-  border-top-left-radius: 16px;
+/* 4px panel-edge inset + outer corner rounding via clip-path on the outer cells only
+   (border-radius can't round an inset fill); middle cells stay unclipped → continuous fill. */
+.body :global(.MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root:first-of-type) {
+  clip-path: inset(0 0 0 4px);
 }
-.body :global(.MuiTableBody-root .MuiTableRow-root[data-band-header] .MuiTableCell-root:last-of-type) {
-  border-top-right-radius: 16px;
+.body :global(.MuiTableBody-root .MuiTableRow-root[data-highlighted] .MuiTableCell-root:last-of-type) {
+  clip-path: inset(0 4px 0 0);
 }
 .body
   :global(
@@ -119,7 +117,7 @@
       .MuiTableRow-root[data-highlighted]:not(:has(+ .MuiTableRow-root[data-highlighted]))
       .MuiTableCell-root:first-of-type
   ) {
-  border-bottom-left-radius: 16px;
+  clip-path: inset(0 0 0 4px round 0 0 0 16px);
 }
 .body
   :global(
@@ -127,11 +125,17 @@
       .MuiTableRow-root[data-highlighted]:not(:has(+ .MuiTableRow-root[data-highlighted]))
       .MuiTableCell-root:last-of-type
   ) {
-  border-bottom-right-radius: 16px;
+  clip-path: inset(0 4px 0 0 round 0 0 16px 0);
 }
 
-/* 3px transparent top gap on every band header: separates clusters from each other and from the
-   table head (which has no transparent borders of its own). */
+/* Band header: 3px top gap (cluster/table-head separation), slim 2px bottom border so the
+   head zone hugs its label. */
 .body :global(.MuiTableBody-root .MuiTableRow-root[data-band-header] .MuiTableCell-root) {
   border-top: 3px solid transparent;
+  border-bottom: 2px solid transparent;
+}
+
+/* Header = a single full-span cell: both side insets + the top gap in one clip. */
+.body :global(.MuiTableBody-root .MuiTableRow-root[data-band-header] .MuiTableCell-root) {
+  clip-path: inset(3px 4px 0 4px round 16px 16px 0 0);
 }

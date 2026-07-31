@@ -71,13 +71,13 @@ export const SimilarityWarningIcon = ({ warning }: { warning: SimilarWarning }) 
  */
 const SimilarityBandHeader = ({ colSpan }: { colSpan: number }) => (
   <TableRow data-band-header="">
-    <TableCell colSpan={colSpan} sx={{ py: 0.75, px: 2 }}>
+    {/* pl aligns the label with the checkbox column; `&&` outranks the theme's tbody padding. */}
+    <TableCell colSpan={colSpan} sx={{ pr: 2, pl: 3.25, '&&': { pt: 1, pb: 0.25 } }}>
       {/* Warning accent flips with the theme: dark amber-yellow on the light band, coral on the dark band. */}
       <Box
         className="text-yellow-800 dark:text-[var(--color-warning-main)]"
         sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}
       >
-        <TriangleAlert size={16} aria-hidden />
         <Typography variant="caption" fontWeight={600} color="inherit">
           Address poisoning warning
         </Typography>
