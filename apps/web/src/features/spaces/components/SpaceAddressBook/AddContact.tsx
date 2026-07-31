@@ -15,7 +15,7 @@ const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
     <AddContactDialog
       triggerLabel={label}
       dialogTitle="Add contact"
-      successMessage="Added contact"
+      successMessage="Added contact to your workspace address book"
       successGroupKey="add-contact-success"
       validateCharset
       submit={(item, sid) =>

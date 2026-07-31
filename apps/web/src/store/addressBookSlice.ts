@@ -108,8 +108,8 @@ export const addressBookListener = (listenerMiddleware: typeof listenerMiddlewar
         const networkCount = networks.size
         const message =
           networkCount > 1
-            ? `${count} contacts imported across ${networkCount} networks. Only contacts on the current network are shown here`
-            : `${count} contacts imported to address book`
+            ? `${count} contacts imported to your personal address book across ${networkCount} networks. Only contacts on the current network are shown here`
+            : `${count} contacts imported to your personal address book`
 
         listenerApi.dispatch(
           showNotification({
@@ -135,7 +135,9 @@ export const addressBookListener = (listenerMiddleware: typeof listenerMiddlewar
         showNotification({
           variant: 'success',
           groupKey: ADDRESS_BOOK_GROUP_KEY,
-          message: existedSomewhere ? `${name} updated in address book` : `${name} added to address book`,
+          message: existedSomewhere
+            ? `Updated contact in your personal address book`
+            : `Added contact to your personal address book`,
         }),
       )
     },
@@ -160,7 +162,7 @@ export const addressBookListener = (listenerMiddleware: typeof listenerMiddlewar
         showNotification({
           variant: 'info',
           groupKey: ADDRESS_BOOK_GROUP_KEY,
-          message: 'Contact removed from address book',
+          message: 'Deleted contact from your personal address book',
         }),
       )
     },

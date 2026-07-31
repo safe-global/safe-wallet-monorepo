@@ -57,7 +57,7 @@ describe('AddContact', () => {
 
     expect(lastProps?.triggerLabel).toBe('Add shared contact')
     expect(lastProps?.dialogTitle).toBe('Add contact')
-    expect(lastProps?.successMessage).toBe('Added contact')
+    expect(lastProps?.successMessage).toBe('Added contact to your workspace address book')
     expect(lastProps?.successGroupKey).toBe('add-contact-success')
     expect(screen.getByTestId('dialog-stub')).toHaveTextContent('Add shared contact')
   })

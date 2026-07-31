@@ -100,9 +100,19 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
         return
       }
 
+      const contactCount = contactItems.length
+      const networkCount = new Set(contactItems.flatMap((item) => item.chainIds)).size
+      const contactLabel = contactCount === 1 ? 'contact' : 'contacts'
+      // When the import spans more than one network, the list only shows the
+      // current one — call that out so users don't think contacts went missing.
+      const successMessage =
+        networkCount > 1
+          ? `${contactCount} ${contactLabel} imported to your workspace address book across ${networkCount} networks. Only contacts on the current network are shown here`
+          : `${contactCount} ${contactLabel} imported to your workspace address book`
+
       dispatch(
         showNotification({
-          message: `Imported contact(s)`,
+          message: successMessage,
           variant: 'success',
           groupKey: 'import-contacts-success',
         }),

@@ -103,7 +103,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
 
       dispatch(
         showNotification({
-          message: `Updated contact`,
+          message: `Updated contact in your workspace address book`,
           variant: 'success',
           groupKey: 'update-contact-success',
         }),

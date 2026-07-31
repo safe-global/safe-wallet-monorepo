@@ -7,11 +7,13 @@ import { render } from '@/tests/test-utils'
 import useChains from '@/hooks/useChains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import * as spacesRTK from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import * as notificationsSlice from '@/store/notificationsSlice'
 
 jest.mock('@/hooks/useAllAddressBooks')
 jest.mock('@/hooks/useChains')
 const mockedUseAllAddressBooks = useAllAddressBooks as jest.MockedFunction<typeof useAllAddressBooks>
 const mockedUseChains = useChains as jest.MockedFunction<typeof useChains>
+const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
 const upsertionSpyFn = jest.fn()
 const upsertionSpy = jest
   .spyOn(spacesRTK, 'useAddressBooksUpsertAddressBookItemsV1Mutation')
@@ -21,6 +23,7 @@ describe('ImportAddressBookDialog', () => {
   beforeEach(() => {
     mockedUseChains.mockReturnValue({ configs: [{ chainId: '1' } as Chain, { chainId: '5' } as Chain] })
     upsertionSpyFn.mockReset()
+    showNotificationSpy.mockClear()
   })
 
   afterAll(() => {
@@ -137,6 +140,51 @@ describe('ImportAddressBookDialog', () => {
     expect(handleClose).toHaveBeenCalledTimes(1)
 
     jest.useRealTimers()
+  })
+
+  it('shows a single-network success notification with the contact count', async () => {
+    upsertionSpyFn.mockResolvedValue({ data: {} })
+
+    mockedUseAllAddressBooks.mockReturnValue({
+      '1': { '0x123': 'Alice', '0x456': 'Bob' },
+    })
+
+    render(<ImportAddressBookDialog handleClose={jest.fn()} />)
+
+    await userEvent.click(screen.getByText(/Alice/i))
+    await userEvent.click(screen.getByText(/Bob/i))
+    await userEvent.click(screen.getByText(/Import contacts \(2\)/i))
+
+    await waitFor(() => {
+      expect(showNotificationSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ message: '2 contacts imported to your workspace address book', variant: 'success' }),
+      )
+    })
+  })
+
+  it('calls out the network spread in the success notification for a multi-network import', async () => {
+    upsertionSpyFn.mockResolvedValue({ data: {} })
+
+    mockedUseAllAddressBooks.mockReturnValue({
+      '1': { '0x123': 'Alice' },
+      '5': { '0xABC': 'Charlie' },
+    })
+
+    render(<ImportAddressBookDialog handleClose={jest.fn()} />)
+
+    await userEvent.click(screen.getByText(/Alice/i))
+    await userEvent.click(screen.getByText(/Charlie/i))
+    await userEvent.click(screen.getByText(/Import contacts \(2\)/i))
+
+    await waitFor(() => {
+      expect(showNotificationSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message:
+            '2 contacts imported to your workspace address book across 2 networks. Only contacts on the current network are shown here',
+          variant: 'success',
+        }),
+      )
+    })
   })
 
   it('bubbles the backend error message inline when the mutation returns an error', async () => {

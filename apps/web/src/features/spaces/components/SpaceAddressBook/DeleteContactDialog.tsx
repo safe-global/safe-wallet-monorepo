@@ -43,7 +43,7 @@ const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContact
 
       dispatch(
         showNotification({
-          message: `Deleted contact`,
+          message: `Deleted contact from your workspace address book`,
           variant: 'success',
           groupKey: 'delete-contact-success',
         }),

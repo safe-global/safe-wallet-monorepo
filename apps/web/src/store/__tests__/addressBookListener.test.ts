@@ -1,4 +1,4 @@
-import { makeStore } from '@/store'
+import { makeStore, listenerMiddlewareInstance } from '@/store'
 import { upsertAddressBookEntries, removeAddressBookEntry } from '@/store/addressBookSlice'
 import { selectNotifications } from '@/store/notificationsSlice'
 
@@ -8,8 +8,13 @@ type AddressBookState = Parameters<typeof makeStore>[0] extends infer S
     : never
   : never
 
-const setup = (preloadedAddressBook: AddressBookState = {}) =>
-  makeStore({ addressBook: preloadedAddressBook }, { skipBroadcast: true })
+const setup = (preloadedAddressBook: AddressBookState = {}) => {
+  // makeStore re-registers every listener onto the shared module-level
+  // listenerMiddlewareInstance, so without clearing first each test would
+  // stack another live copy of the listener and fire it N times.
+  listenerMiddlewareInstance.clearListeners()
+  return makeStore({ addressBook: preloadedAddressBook }, { skipBroadcast: true })
+}
 
 const abMessages = (store: ReturnType<typeof setup>) =>
   selectNotifications(store.getState())
@@ -22,7 +27,7 @@ describe('addressBookListener', () => {
 
     store.dispatch(upsertAddressBookEntries({ chainIds: ['1'], address: '0xabc', name: 'Alice', notify: true }))
 
-    expect(abMessages(store)).toEqual([{ message: 'Alice added to address book', variant: 'success' }])
+    expect(abMessages(store)).toEqual([{ message: 'Added contact to your personal address book', variant: 'success' }])
   })
 
   it('notifies "updated" when renaming an existing entry', () => {
@@ -30,7 +35,9 @@ describe('addressBookListener', () => {
 
     store.dispatch(upsertAddressBookEntries({ chainIds: ['1'], address: '0xabc', name: 'Alice 2', notify: true }))
 
-    expect(abMessages(store)).toEqual([{ message: 'Alice 2 updated in address book', variant: 'success' }])
+    expect(abMessages(store)).toEqual([
+      { message: 'Updated contact in your personal address book', variant: 'success' },
+    ])
   })
 
   it('does not notify when the name is unchanged', () => {
@@ -49,12 +56,43 @@ describe('addressBookListener', () => {
     expect(abMessages(store)).toEqual([])
   })
 
+  it('does not notify for an empty or whitespace-only name', () => {
+    const store = setup()
+
+    store.dispatch(upsertAddressBookEntries({ chainIds: ['1'], address: '0xabc', name: '   ', notify: true }))
+
+    expect(abMessages(store)).toEqual([])
+  })
+
+  it('uses the shared "address-book" groupKey so toasts collapse', () => {
+    const store = setup()
+
+    store.dispatch(upsertAddressBookEntries({ chainIds: ['1'], address: '0xabc', name: 'Alice', notify: true }))
+
+    const groupKeys = selectNotifications(store.getState()).map((n) => n.groupKey)
+    expect(groupKeys).toContain('address-book')
+  })
+
+  it('classifies a partial multi-chain upsert (new on one chain, renamed on another) as "updated"', () => {
+    // Present as "Alice" on chain 1, absent on chain 137. A single upsert to
+    // "Alice 2" on both chains renames one and adds the other.
+    const store = setup({ '1': { '0xabc': 'Alice' } })
+
+    store.dispatch(
+      upsertAddressBookEntries({ chainIds: ['1', '137'], address: '0xabc', name: 'Alice 2', notify: true }),
+    )
+
+    expect(abMessages(store)).toEqual([
+      { message: 'Updated contact in your personal address book', variant: 'success' },
+    ])
+  })
+
   it('emits a single notification for a multi-chain new entry', () => {
     const store = setup()
 
     store.dispatch(upsertAddressBookEntries({ chainIds: ['1', '137'], address: '0xabc', name: 'Alice', notify: true }))
 
-    expect(abMessages(store)).toEqual([{ message: 'Alice added to address book', variant: 'success' }])
+    expect(abMessages(store)).toEqual([{ message: 'Added contact to your personal address book', variant: 'success' }])
   })
 
   it('notifies "removed" on delete with notify:true', () => {
@@ -62,7 +100,7 @@ describe('addressBookListener', () => {
 
     store.dispatch(removeAddressBookEntry({ chainId: '1', address: '0xabc', notify: true }))
 
-    expect(abMessages(store)).toEqual([{ message: 'Contact removed from address book', variant: 'info' }])
+    expect(abMessages(store)).toEqual([{ message: 'Deleted contact from your personal address book', variant: 'info' }])
   })
 
   it('does not notify on delete without the flag', () => {
@@ -97,7 +135,9 @@ describe('addressBookListener', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 400))
 
-    expect(abMessages(store)).toEqual([{ message: '3 contacts imported to address book', variant: 'success' }])
+    expect(abMessages(store)).toEqual([
+      { message: '3 contacts imported to your personal address book', variant: 'success' },
+    ])
   })
 
   it('calls out the network spread for a multi-network batch import', async () => {
@@ -131,9 +171,40 @@ describe('addressBookListener', () => {
 
     expect(abMessages(store)).toEqual([
       {
-        message: '10 contacts imported across 5 networks. Only contacts on the current network are shown here',
+        message:
+          '10 contacts imported to your personal address book across 5 networks. Only contacts on the current network are shown here',
         variant: 'success',
       },
+    ])
+  })
+
+  it('keeps two sequential import batches independent (no count leakage via the shared map)', async () => {
+    const store = setup()
+
+    // First import: 2 contacts on one network.
+    store.dispatch(
+      upsertAddressBookEntries({ chainIds: ['1'], address: '0xa', name: 'A', notify: true, notifyBatchId: 'batch-1' }),
+    )
+    store.dispatch(
+      upsertAddressBookEntries({ chainIds: ['1'], address: '0xb', name: 'B', notify: true, notifyBatchId: 'batch-1' }),
+    )
+    await new Promise((resolve) => setTimeout(resolve, 400))
+
+    // Second, separate import: 3 contacts on one network.
+    store.dispatch(
+      upsertAddressBookEntries({ chainIds: ['1'], address: '0xc', name: 'C', notify: true, notifyBatchId: 'batch-2' }),
+    )
+    store.dispatch(
+      upsertAddressBookEntries({ chainIds: ['1'], address: '0xd', name: 'D', notify: true, notifyBatchId: 'batch-2' }),
+    )
+    store.dispatch(
+      upsertAddressBookEntries({ chainIds: ['1'], address: '0xe', name: 'E', notify: true, notifyBatchId: 'batch-2' }),
+    )
+    await new Promise((resolve) => setTimeout(resolve, 400))
+
+    expect(abMessages(store)).toEqual([
+      { message: '2 contacts imported to your personal address book', variant: 'success' },
+      { message: '3 contacts imported to your personal address book', variant: 'success' },
     ])
   })
 })
