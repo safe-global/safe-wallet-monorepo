@@ -26,6 +26,9 @@ import EditMemberDialog from './EditMemberDialog'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import PaginatedDataTable, { type DataTableColumn } from '../PaginatedDataTable'
+import { getMemberTwoFactorStatus, MemberTwoFactorBadge } from '@/features/oidc-auth'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
 
 const EditButton = ({ member, disabled }: { member: MemberDto; disabled: boolean }) => {
   const [open, setOpen] = useState(false)
@@ -105,6 +108,7 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
   const isMobile = useIsMobile()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
+  const isTwoFactorEnabled = useHasFeature(FEATURES.SWITCH_AUTHENTICATOR)
 
   if (!members.length) {
     return null
@@ -128,11 +132,22 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
     return { isDeclined, isExpired, isInvite, isDisabled, editDisabled, canRenew, memberEmail }
   }
 
+  // The 2FA column takes its share from name and email so the widths still total 100%
+  const twoFactorColumn: DataTableColumn<MemberDto> = {
+    id: 'twoFactor',
+    header: '2FA',
+    width: '15%',
+    minWidth: 130,
+    cellTestId: 'table-cell-2fa',
+    sortValue: (m) => getMemberTwoFactorStatus(m),
+    cell: (member) => <MemberTwoFactorBadge member={member} />,
+  }
+
   const columns: DataTableColumn<MemberDto>[] = [
     {
       id: 'name',
       header: 'Name',
-      width: '40%',
+      width: isTwoFactorEnabled ? '35%' : '40%',
       sticky: true,
       minWidth: 200,
       cellTestId: 'table-cell-name',
@@ -157,7 +172,7 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
     {
       id: 'email',
       header: 'Email',
-      width: '30%',
+      width: isTwoFactorEnabled ? '20%' : '30%',
       priority: 'secondary',
       minWidth: 180,
       cellTestId: 'table-cell-email',
@@ -170,6 +185,7 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
           </Tooltip>
         ) : null,
     },
+    ...(isTwoFactorEnabled ? [twoFactorColumn] : []),
     {
       id: 'role',
       header: 'Role',

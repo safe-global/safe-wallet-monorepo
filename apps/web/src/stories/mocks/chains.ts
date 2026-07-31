@@ -16,6 +16,7 @@ export const DEFAULT_FEATURES: Required<FeatureFlags> = {
   earn: false,
   spaces: false,
   oidcAuth: false,
+  switchAuthenticator: false,
 }
 
 /**
@@ -30,6 +31,7 @@ const FEATURE_MAP: Record<keyof FeatureFlags, string> = {
   earn: 'EARN',
   spaces: 'SPACES',
   oidcAuth: 'OIDC_AUTH',
+  switchAuthenticator: 'SWITCH_AUTHENTICATOR',
 }
 
 /**

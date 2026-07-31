@@ -14,6 +14,7 @@ import { useIsBelowMd } from '@/hooks/useMediaQuery'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { openGlobalSearch } from '@/features/global-search/store'
+import { useWalletName } from '@/hooks/wallets/useWalletName'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
@@ -58,6 +59,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
     handleClick: handleWalletClick,
     handleClose: handleWalletClose,
   } = useWalletPopover()
+  const walletName = useWalletName(wallet)
   const { WalletPopover } = useLoadFeature(WalletFeature)
   const { GlobalSearchModal, GlobalSearchInput } = useLoadFeature(GlobalSearchFeature)
   const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
@@ -151,7 +153,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
 
           <HeaderNavigation
             walletAddress={wallet?.address ?? ''}
-            walletEns={wallet?.ens}
+            walletEns={walletName}
             isConnected={Boolean(wallet)}
             walletIcon={wallet?.icon}
             walletLabel={wallet?.label}

@@ -31,6 +31,9 @@ jest.mock('./MemberRowActionsMenu', () => ({
 const mockUseIsMobile = jest.fn(() => false)
 jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 
+const mockUseHasFeature = jest.fn(() => true)
+jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
+
 jest.mock('@/components/common/Track', () => ({
   __esModule: true,
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -56,6 +59,7 @@ jest.mock('@/features/spaces', () => ({
 describe('MembersList', () => {
   beforeEach(() => {
     mockUseIsMobile.mockReturnValue(false)
+    mockUseHasFeature.mockReturnValue(true)
   })
 
   it('renders member email and leaves empty email cells blank', () => {
@@ -199,5 +203,60 @@ describe('MembersList', () => {
 
     const nameCell = screen.getByTestId('table-cell-name')
     expect(within(nameCell).getByText('alice@example.com')).toBeInTheDocument()
+  })
+
+  describe('2FA column', () => {
+    const twoFactorMembers = [
+      // Email/Google sign-in — always enrolled
+      memberBuilder()
+        .with({ id: 1, name: 'Alice', user: memberUserBuilder().with({ email: 'alice@example.com' }).build() })
+        .build(),
+      // Wallet (SIWE) sign-in — never enrolled
+      memberBuilder()
+        .with({ id: 2, name: 'Bob', user: memberUserBuilder().with({ id: 12, email: null }).build() })
+        .build(),
+      // Pending invite — no 2FA state yet, even with an email
+      memberBuilder()
+        .with({
+          id: 3,
+          status: 'INVITED',
+          name: 'Carol',
+          user: memberUserBuilder().with({ id: 13, status: 'PENDING', email: 'carol@example.com' }).build(),
+        })
+        .build(),
+      // Declined invite — no badge at all
+      memberBuilder()
+        .with({
+          id: 4,
+          status: 'DECLINED',
+          name: 'Dave',
+          user: memberUserBuilder().with({ id: 14, status: 'PENDING' }).build(),
+        })
+        .build(),
+    ]
+
+    it('renders a 2FA status per member', () => {
+      render(<MembersList members={twoFactorMembers} />)
+
+      expect(screen.getByText('2FA')).toBeInTheDocument()
+
+      const cells = screen.getAllByTestId('table-cell-2fa')
+      expect(cells).toHaveLength(4)
+      expect(within(cells[0]!).getByText('Active')).toBeInTheDocument()
+      expect(within(cells[1]!).getByText('Wallet sign-in')).toBeInTheDocument()
+      expect(within(cells[2]!).getByText('Invite pending')).toBeInTheDocument()
+      expect(within(cells[3]!).queryByTestId('member-2fa-badge')).not.toBeInTheDocument()
+    })
+
+    it('hides the column when the feature is disabled', () => {
+      mockUseHasFeature.mockReturnValue(false)
+
+      render(<MembersList members={twoFactorMembers} />)
+
+      expect(screen.queryByText('2FA')).not.toBeInTheDocument()
+      expect(screen.queryAllByTestId('table-cell-2fa')).toHaveLength(0)
+      // The other columns still render
+      expect(screen.getByText('Email')).toBeInTheDocument()
+    })
   })
 })

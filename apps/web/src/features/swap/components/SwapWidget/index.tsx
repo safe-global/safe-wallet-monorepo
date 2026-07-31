@@ -1,5 +1,9 @@
 import { TradeType, type CowSwapWidgetParams } from '@cowprotocol/widget-lib'
-import { type OnTradeParamsPayload, type CowEventListeners, CowEvents } from '@cowprotocol/events'
+import {
+  type OnTradeParamsPayload,
+  type CowWidgetEventListeners as CowEventListeners,
+  CowWidgetEvents as CowEvents,
+} from '@cowprotocol/events'
 import { type MutableRefObject, useEffect, useMemo, useRef, useState } from 'react'
 import { CowSwapWidget } from '@cowprotocol/widget-react'
 import { SafeAppAccessPolicyTypes, SafeAppFeatures } from '@safe-global/store/gateway/types'
@@ -21,7 +25,7 @@ import { setSwapOrder } from '@/store/swapOrderSlice'
 import useChainId from '@/hooks/useChainId'
 import { SWAP_TITLE, SWAP_FEE_RECIPIENT } from '../../constants'
 import { calculateFeePercentageInBps } from '../../helpers/fee'
-import { UiOrderTypeToOrderType } from '../../helpers/utils'
+import { UiOrderTypeToOrderType, parseCowTradeParams } from '../../helpers/utils'
 import { useGetIsSanctionedQuery } from '@/store/api/ofac'
 import { skipToken } from '@reduxjs/toolkit/query/react'
 import { getKeyWithTrueValue } from '@/utils/helpers'
@@ -197,7 +201,8 @@ const SwapWidget = ({ sell }: Params) => {
       {
         event: CowEvents.ON_CHANGE_TRADE_PARAMS,
         handler: (newTradeParams: OnTradeParamsPayload) => {
-          const { orderType: tradeType, recipient, sellToken, buyToken } = newTradeParams
+          const { recipient } = newTradeParams
+          const { uiOrderType: tradeType, sellAsset, buyAsset } = parseCowTradeParams(newTradeParams)
 
           const newFeeBps = feeEnabled
             ? calculateFeePercentageInBps(newTradeParams, nativeCowSwapFeeV2Enabled, isEurcvBoostEnabled)
@@ -211,10 +216,10 @@ const SwapWidget = ({ sell }: Params) => {
               bps: newFeeBps,
             },
             sell: {
-              asset: sellToken?.address,
+              asset: sellAsset,
             },
             buy: {
-              asset: buyToken?.address,
+              asset: buyAsset,
             },
           }))
 

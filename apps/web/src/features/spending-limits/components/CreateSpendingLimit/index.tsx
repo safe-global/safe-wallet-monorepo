@@ -16,6 +16,8 @@ import TokenAmountInput from '@/components/common/TokenAmountInput'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../types'
+import useIsSpendingLimitSupported from '../../hooks/useIsSpendingLimitSupported'
+import SpendingLimitNotSupported from './SpendingLimitNotSupported'
 
 export const _validateSpendingLimit = (val: string, decimals?: number | null) => {
   // Allowance amount is uint96 https://github.com/safe-global/safe-modules/blob/main/modules/allowances/contracts/AllowanceModule.sol#L52
@@ -29,6 +31,7 @@ export const _validateSpendingLimit = (val: string, decimals?: number | null) =>
 
 const CreateSpendingLimit = () => {
   const chainId = useChainId()
+  const isSupported = useIsSpendingLimitSupported()
   const { balances } = useVisibleBalances()
   const { onNext, data } = useContext<TxFlowContextType<NewSpendingLimitFlowProps>>(TxFlowContext)
 
@@ -60,6 +63,10 @@ const CreateSpendingLimit = () => {
     },
     [selectedToken?.tokenInfo.decimals],
   )
+
+  if (!isSupported) {
+    return <SpendingLimitNotSupported />
+  }
 
   return (
     <TxCard>

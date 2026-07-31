@@ -22,8 +22,7 @@ describe('Happy path Proposers tests', { defaultCommandTimeout: 30000 }, () => {
   })
 
   it('Verify that editing a proposer is only possible for the proposer created by the creator', () => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
-    wallet.connectSigner(signer3)
+    wallet.connectSignerViaStorage(signer3, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
     proposer.verifyEditProposerBtnDisabled(proposerAddress)
 
@@ -41,8 +40,7 @@ describe('Happy path Proposers tests', { defaultCommandTimeout: 30000 }, () => {
   })
 
   it('Verify a proposer can be added', () => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_32)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_32)
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
     navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
     proposer.deleteAllProposers()

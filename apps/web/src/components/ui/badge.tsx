@@ -35,10 +35,11 @@ const badgeVariants = cva(
         destructive:
           'bg-destructive/10 [a]:hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 text-destructive dark:bg-destructive/20 border-transparent',
         outline: 'border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground',
-        // See the note in chip.tsx: the tint carries the meaning, the text stays default foreground.
-        // `--color-*-dark` is an accent that is identical in both themes, so as ink it fails AA in
-        // one theme each.
-        warning: 'bg-warning-subtle text-foreground border-transparent',
+        // Warning is the one tint with a theme-flipping ink pair (warning1), so it can colour its
+        // own text and still clear AA. For the rest the tint carries the meaning and the text stays
+        // default foreground — see the note in chip.tsx: `--color-*-dark` is a single accent reused
+        // in both themes, so as ink on its own tint it fails AA (success 3.7:1, info 2.0:1).
+        warning: 'bg-warning-subtle text-warning-strong border-transparent',
         success:
           'bg-accent-secondary text-accent-secondary-foreground border-transparent dark:bg-accent-secondary/20 dark:text-accent-success',
         info: 'bg-info-subtle text-foreground border-transparent',

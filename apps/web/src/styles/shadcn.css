@@ -156,9 +156,13 @@
   --color-success-subtle: var(--color-success-background);
   --color-success-muted: var(--color-success-light);
   --color-success-strong: var(--color-success-dark);
-  --color-warning-subtle: var(--color-warning-background);
+  /* Amber pairing. `warning1` is the amber scale; `warning` proper is the coral alert colour.
+     Unlike `--color-warning-dark` — one fixed accent reused in both themes — the warning1 pair
+     flips per theme, so it clears AA as ink on its own tint either way (8.9:1 light, 9.4:1 dark).
+     The success and info tints have no such pair, which is why those variants keep `text-foreground`. */
+  --color-warning-subtle: var(--color-warning1-main);
   --color-warning-muted: var(--color-warning-light);
-  --color-warning-strong: var(--color-warning-dark);
+  --color-warning-strong: var(--color-warning1-text);
   --color-info-subtle: var(--color-info-background);
   --color-info-muted: var(--color-info-light);
   --color-info-strong: var(--color-info-dark);

@@ -863,6 +863,7 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     earn: features.earn ?? false,
     spaces: features.spaces ?? false,
     oidcAuth: features.oidcAuth ?? false,
+    switchAuthenticator: features.switchAuthenticator ?? false,
   }
 
   // Build handlers array
