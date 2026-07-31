@@ -51,7 +51,10 @@ export function useSafeBarSafes() {
   const safeAddress = urlSafeAddress || reduxSafeAddress
   const currentChainId = useChainId()
 
-  const allSafeItems = useAllSafes()
+  // Skip the owned-safes enumeration (the captcha-protected owners endpoint): the bar's lists are the
+  // space safes (overview-derived) and the trusted/pinned safes (added-safes state), neither of which
+  // needs it. Per-row read-only is derived from the overviews in useSpaceSafeSelectorItems instead.
+  const allSafeItems = useAllSafes(false)
 
   const spaceId = useCurrentSpaceId()
   // Trusted (pinned) lists honour the trusted custom order; space lists honour that space's order.
@@ -60,8 +63,10 @@ export function useSafeBarSafes() {
 
   const pinnedItems = useMemo(() => allSafeItems?.filter((s) => s.isPinned) ?? [], [allSafeItems])
 
-  const pinnedGrouped = useAllSafesGrouped(pinnedItems)
-  const allGrouped = useAllSafesGrouped(allSafeItems ?? [])
+  // Pass fetchOwnedSafes=false too: useAllSafesGrouped still calls useAllSafes internally even when
+  // customSafes is supplied, so without this it would re-trigger the owners endpoint.
+  const pinnedGrouped = useAllSafesGrouped(pinnedItems, false)
+  const allGrouped = useAllSafesGrouped(allSafeItems ?? [], false)
 
   const pinnedSafes = useMemo<AllSafeItems>(() => {
     const multiChainSafes = pinnedGrouped.allMultiChainSafes ?? []

@@ -115,9 +115,10 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
         'after:bg-foreground after:absolute after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5',
         'group-data-[variant=line]/tabs-list:after:bottom-[-5px] group-data-[variant=line]/tabs-list:data-active:after:opacity-100',
         'group-data-[variant=nav]/tabs-list:after:bottom-0 group-data-[variant=nav]/tabs-list:after:bg-[var(--color-primary-main)] group-data-[variant=nav]/tabs-list:data-active:after:opacity-100',
-        // segmented pill: large rounded pills on a muted track; the active pill is a raised paper surface
-        // (matches the pre-migration welcome switch). Idle triggers are normal-weight muted text.
-        'group-data-[variant=segmented]/tabs-list:h-[38px] group-data-[variant=segmented]/tabs-list:px-2.5 group-data-[variant=segmented]/tabs-list:text-lg group-data-[variant=segmented]/tabs-list:font-normal group-data-[variant=segmented]/tabs-list:text-muted-foreground group-data-[variant=segmented]/tabs-list:hover:text-foreground',
+        // segmented pill: large rounded pills on a muted track; the active pill is a raised paper surface.
+        // Geometry and type scale follow the welcome switch as redesigned in dev#8366 (rounded-lg pills,
+        // text-base), not the older pre-migration switch. Idle triggers are normal-weight muted text.
+        'group-data-[variant=segmented]/tabs-list:h-[38px] group-data-[variant=segmented]/tabs-list:rounded-lg group-data-[variant=segmented]/tabs-list:px-2.5 group-data-[variant=segmented]/tabs-list:text-base group-data-[variant=segmented]/tabs-list:font-normal group-data-[variant=segmented]/tabs-list:text-muted-foreground group-data-[variant=segmented]/tabs-list:hover:text-foreground',
         'group-data-[variant=segmented]/tabs-list:data-active:bg-background group-data-[variant=segmented]/tabs-list:data-active:font-semibold group-data-[variant=segmented]/tabs-list:data-active:text-foreground group-data-[variant=segmented]/tabs-list:data-active:shadow-sm dark:group-data-[variant=segmented]/tabs-list:data-active:border-input dark:group-data-[variant=segmented]/tabs-list:data-active:bg-input/30 dark:group-data-[variant=segmented]/tabs-list:data-active:text-foreground',
         className,
       )}

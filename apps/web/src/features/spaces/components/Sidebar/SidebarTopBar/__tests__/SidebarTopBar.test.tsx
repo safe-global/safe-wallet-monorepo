@@ -129,4 +129,10 @@ describe('SidebarTopBar', () => {
 
     expect(screen.getByTestId('logo-container')).toHaveAttribute('data-home-label', 'false')
   })
+
+  it('reads the safe address from the URL', () => {
+    render(<SidebarTopBar />)
+
+    expect(mockUseSafeAddressFromUrl).toHaveBeenCalled()
+  })
 })

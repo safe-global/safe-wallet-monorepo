@@ -50,7 +50,7 @@ const SafeListSortToggle = ({
             // Fixed width so the trigger doesn't grow/shrink between "Name" and "Last visited".
             size={size}
             className={cn(
-              'w-[160px] shrink-0 justify-between gap-1.5 border-border shadow-none text-muted-foreground',
+              'w-[160px] shrink-0 justify-between gap-1.5 border-border shadow-none text-foreground',
               className,
             )}
             data-testid="safe-list-sort-toggle"

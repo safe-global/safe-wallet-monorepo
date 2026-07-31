@@ -38,7 +38,7 @@ const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
             <Button
               variant="ghost"
               size="icon-sm"
-              className={`${css.spaceActions} text-[var(--color-border-main)]`}
+              className={`${css.spaceActions} text-muted-foreground`}
               onClick={(e) => e.stopPropagation()}
               aria-label="Open space actions"
               data-testid="space-card-context-menu-button"

@@ -23,12 +23,9 @@ import { useLoadFeature } from '@/features/__core__'
 export interface SafeSelectorTriggerContentProps {
   selectedItem: SafeItemData
   selectedChainId: string
-  /** True when the safe exists on more than one chain — the owner computes this across all items,
-   * since the trigger item itself can be a chain-scoped entry for the current safe. */
-  isMultiChain?: boolean
 }
 
-function SafeSelectorTriggerContent({ selectedItem, selectedChainId, isMultiChain }: SafeSelectorTriggerContentProps) {
+function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelectorTriggerContentProps) {
   const selectedChain = selectedItem.chains.find((c) => c.chainId === selectedChainId) ?? selectedItem.chains[0]
   const isUndeployed = Boolean(selectedChain?.isUndeployed)
   const isActivating = Boolean(selectedChain?.isActivating)
@@ -83,12 +80,9 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId, isMultiChai
         // flex (not inline): the inline-flex badge would otherwise sit on the wrapper's text
         // baseline and render a couple of px above the vertical middle of the chip.
         <span className="flex shrink-0 items-center max-sm:hidden">
-          {/* Multi-chain setups can differ per chain, so the count would be misleading — icon only. */}
-          <ThresholdBadge
-            threshold={selectedItem.threshold}
-            owners={selectedItem.owners}
-            iconOnly={isMultiChain ?? selectedItem.chains.length > 1}
-          />
+          {/* The trigger always reflects the active safe on the active chain, so it shows that chain's
+              threshold — even for a multi-chain safe (the dropdown group summary stays icon-only). */}
+          <ThresholdBadge threshold={selectedItem.threshold} owners={selectedItem.owners} />
         </span>
       )}
       {isUndeployed ? (

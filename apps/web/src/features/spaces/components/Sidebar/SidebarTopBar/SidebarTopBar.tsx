@@ -5,14 +5,14 @@ import { AppRoutes } from '@/config/routes'
 import SafeLogo from '@/components/common/SafeLogo'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
-import { useSidebarHydrated } from '../hooks/useSidebarHydrated'
+import { useIsHydrated } from '@/hooks/useIsHydrated'
 
 export const SidebarTopBar = (): ReactElement => {
   const { state } = useSidebar()
   const isCollapsed = state === 'collapsed'
   const safeAddress = useSafeAddressFromUrl()
   const isSpaceRoute = useIsSpaceRoute()
-  const isHydrated = useSidebarHydrated()
+  const isHydrated = useIsHydrated()
 
   // Inside a space or an individual safe the logo turns into a "Home" label pill that returns to the
   // top-level accounts view; elsewhere it stays a plain logo linking to that same view.

@@ -25,7 +25,7 @@ export const SpaceSummary = ({
 }) => {
   return (
     <div className={css.spaceInfo}>
-      <Typography variant="paragraph-small-bold" data-testid="org-name">
+      <Typography variant="paragraph-bold" data-testid="org-name">
         {name}
       </Typography>
 

@@ -338,6 +338,43 @@ describe('create/logic', () => {
       })
     })
 
+    it('creates zksync-flavour (EraVM) Safes on a zk-flagged chain, even with multichain creation on', () => {
+      // Production CGW sets `zk: false` for zkSync Era, so real zkSync creations resolve the
+      // canonical (EVM) contracts — EraVM Safes cannot upgrade past 1.4.1 (no zksync flavour
+      // from 1.5.0). This documents the EraVM path for any chain still flagged `zk: true`.
+      const safeSetup = {
+        owners: [faker.finance.ethereumAddress()],
+        threshold: 1,
+      }
+      const zkChain = chainBuilder()
+        .with({ chainId: '324' })
+        .with({ features: [FEATURES.COUNTERFACTUAL, FEATURES.MULTI_CHAIN_SAFE_CREATION] as any })
+        .with({ recommendedMasterCopyVersion: '1.4.1' })
+        .with({ l2: true })
+        .with({ zk: true })
+        .build()
+
+      const ZKSYNC_L1_141 = '0xC35F063962328aC65cED5D4c3fC5dEf8dec68dFa'
+      const ZKSYNC_L2_141 = '0x610fcA2e0279Fa1F8C00c8c2F71dF522AD469380'
+      const ZKSYNC_SETUP_TO_L2 = '0x199A9df0224031c20Cc27083A4164c9c8F1Bcb39'
+      const ZKSYNC_FALLBACK_HANDLER = '0x9301E98DD367135f21bdF66f342A249c9D5F9069'
+      const ZKSYNC_PROXY_FACTORY = '0xc329D02fd8CB2fc13aa919005aF46320794a8629'
+      const safeToL2SetupInterface = Safe_to_l2_setup__factory.createInterface()
+
+      expect(createNewUndeployedSafeWithoutSalt('1.4.1', safeSetup, zkChain)).toEqual({
+        safeAccountConfig: {
+          ...safeSetup,
+          fallbackHandler: ZKSYNC_FALLBACK_HANDLER,
+          to: ZKSYNC_SETUP_TO_L2,
+          data: safeToL2SetupInterface.encodeFunctionData('setupToL2', [ZKSYNC_L2_141]),
+          paymentReceiver: ECOSYSTEM_ID_ADDRESS,
+        },
+        safeVersion: '1.4.1',
+        masterCopy: ZKSYNC_L1_141,
+        factoryAddress: ZKSYNC_PROXY_FACTORY,
+      })
+    })
+
     it('prefers canonical address when not first in networkAddresses', () => {
       const chain = chainBuilder()
         .with({ chainId: '1' })

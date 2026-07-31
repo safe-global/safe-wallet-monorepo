@@ -3,13 +3,8 @@ import EmptySafeAccounts from './EmptySafeAccounts'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Typography } from '@/components/ui/typography'
 import { useMemo, useState } from 'react'
-import { useAppDispatch, useAppSelector } from '@/store'
-import {
-  getSpaceOrderScope,
-  OrderByOption,
-  selectOrderByPreference,
-  setManualOrder,
-} from '@/store/orderByPreferenceSlice'
+import { useAppSelector } from '@/store'
+import { getSpaceOrderScope, OrderByOption, selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import {
   type AllSafeItems,
   type SafeItem,
@@ -17,9 +12,10 @@ import {
   flattenSafeItems,
   useSafeOrderComparator,
   useSafesSearch,
+  useSaveManualOrder,
 } from '@/hooks/safes'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
-import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
+import { useSimilarityClusters } from '@/features/address-poisoning'
 import { useSpaceSafes, useIsInvited, useIsAdmin, useCurrentSpaceId } from '@/features/spaces'
 import { SafeAccountsTable } from '@/features/myAccounts'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
@@ -35,24 +31,21 @@ const SpaceSafeAccounts = () => {
   const { allSafes, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()
   const isInvited = useIsInvited()
   const isAdmin = useIsAdmin()
-  const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
   const orderScope = spaceId ? getSpaceOrderScope(spaceId) : undefined
 
   // Use same organization logic as onboarding
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = useSafeOrderComparator(orderScope)
-  const isManualOrder = orderBy === OrderByOption.MANUAL
+  const saveManualOrder = useSaveManualOrder(orderScope)
 
   // useSpaceSafes already resolves names via the merged (workspace-priority, local fallback) address
   // book, so flatten those items rather than rebuilding them — rebuilding via buildSafeItem would
   // re-derive the name from the local address book only and drop the workspace name.
   const spaceSafeItems = useMemo<SafeItem[]>(() => flattenSafeItems(allSafes ?? []), [allSafes])
 
-  const similarAddresses = useMemo<Set<string>>(
-    () => getFlaggedSimilarAddressSet(spaceSafeItems.map((s) => s.address)),
-    [spaceSafeItems],
-  )
+  const spaceSafeAddresses = useMemo(() => spaceSafeItems.map((s) => s.address), [spaceSafeItems])
+  const similarAddresses = useSimilarityClusters(spaceSafeAddresses).flagged
 
   // Group and sort
   const displaySafes = useMemo<AllSafeItems>(
@@ -125,7 +118,7 @@ const SpaceSafeAccounts = () => {
           No Safe accounts match your search
         </Typography>
       ) : (
-        <>
+        <div className="flex flex-col gap-4">
           {similarAddresses.size > 0 && <SimilarAddressAlert />}
           <SafeAccountsTable
             items={visibleSafes}
@@ -137,13 +130,11 @@ const SpaceSafeAccounts = () => {
             renderActions={(line) =>
               line.variant === 'child' ? null : <SpaceSafeContextMenu safeItem={line.source} />
             }
-            reorder={
-              isManualOrder && !debouncedSearchQuery && orderScope
-                ? { onReorder: (order) => dispatch(setManualOrder({ scope: orderScope, order })) }
-                : undefined
-            }
+            // Reorderable in every sort mode; suppressed while searching, where a drop would persist
+            // only the filtered subset.
+            reorder={!debouncedSearchQuery && orderScope ? { onReorder: saveManualOrder } : undefined}
           />
-        </>
+        </div>
       )}
     </>
   )

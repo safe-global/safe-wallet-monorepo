@@ -41,6 +41,7 @@ const baseMockModal: UseTrustedSafesModalReturn = {
   pendingConfirmation: null,
   pendingSelectAllConfirmation: false,
   similarAddressesForSelectAll: [],
+  flagged: new Set<string>(),
   searchQuery: '',
   isLoading: false,
   hasChanges: false,

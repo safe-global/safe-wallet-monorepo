@@ -45,7 +45,10 @@ const SpaceRow = ({
 
   return (
     <>
-      <div data-testid="space-row" className="relative">
+      <div
+        data-testid="space-row"
+        className="relative isolate before:absolute before:-inset-x-3 before:inset-y-1 before:-z-10 before:rounded-md hover:before:bg-muted"
+      >
         <Link
           href={{ pathname: AppRoutes.spaces.index, query: { spaceId: space.uuid } }}
           onClick={handleOpenWorkspace}

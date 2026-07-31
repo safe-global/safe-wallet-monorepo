@@ -24,6 +24,7 @@ import { useIsSignedIn } from '@/hooks/useIsSignedIn'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 import SpaceChainSelector from './SpaceChainSelector'
@@ -150,6 +151,7 @@ function ManageTrustedFooter({ onManage }: { onManage: () => void }) {
 function SpaceSafeBar() {
   const pathname = usePathname()
   const router = useRouter()
+  const isHydrated = useIsHydrated()
   const urlSafeAddress = useSafeAddressFromUrl()
   const isSignedIn = useIsSignedIn()
   const {
@@ -163,6 +165,8 @@ function SpaceSafeBar() {
     isInSpaceContext,
     hasWallet,
   } = useSpaceSafeSelectorItems()
+  // Skeleton on the first render: the contents derive from the URL address, which is empty until mounted.
+  const showSelectorSkeleton = isLoading || !isHydrated
   const { space } = useSpaceBackLink()
   const [selectedTab, setSelectedTab] = useState<DropdownTab | null>(null)
   const [search, setSearch] = useState('')
@@ -293,7 +297,7 @@ function SpaceSafeBar() {
           listItems={listItems}
           selectedItemId={selectedItemId}
           onItemSelect={handleItemSelect}
-          isLoading={isLoading}
+          isLoading={showSelectorSkeleton}
           isError={isError}
           onRetry={refetch}
           header={dropdownHeader}
@@ -306,7 +310,7 @@ function SpaceSafeBar() {
           keepOpen={renameTarget !== null}
         />
         <SpaceNestedSafesButton />
-        <SpaceChainSelector isLoading={isLoading} />
+        <SpaceChainSelector isLoading={showSelectorSkeleton} />
       </div>
       <TrustedSafesModal modal={trustedSafesModal} />
       {renameTarget && (

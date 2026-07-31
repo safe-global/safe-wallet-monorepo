@@ -1,4 +1,6 @@
 import type * as ConstantsModule from '@/config/constants'
+import type { RumResourceEvent, RumEventDomainContext } from '@datadog/browser-rum'
+import type { ObservedError } from '../../types'
 
 const mockAddAction = jest.fn()
 const mockAddError = jest.fn()
@@ -23,7 +25,7 @@ interface DatadogProviderInstance {
     error: (message: string, context?: Record<string, unknown>) => void
     debug: (message: string, context?: Record<string, unknown>) => void
   }
-  captureException: (error: Error, context?: Record<string, unknown>) => void
+  captureError: (error: ObservedError) => void
 }
 
 type DatadogProviderConstructor = new () => DatadogProviderInstance
@@ -127,19 +129,19 @@ describe('DatadogProvider', () => {
     logger.warn('test')
     logger.error('test')
     logger.debug('test')
-    provider.captureException(new Error('test'))
+    provider.captureError({ error: new Error('test'), isUserFacing: true })
 
     expect(mockAddAction).not.toHaveBeenCalled()
     expect(mockAddError).not.toHaveBeenCalled()
   })
 
-  it('should not throw when calling captureException before initialization', () => {
+  it('should not throw when calling captureError before initialization', () => {
     mockDisabledDatadogConstants()
     const Provider = require('../datadog').DatadogProvider as DatadogProviderConstructor
     const provider = new Provider()
     const error = new Error('test error')
 
-    expect(() => provider.captureException(error)).not.toThrow()
+    expect(() => provider.captureError({ error, isUserFacing: true })).not.toThrow()
   })
 
   it('should handle logger methods with context', () => {
@@ -155,14 +157,14 @@ describe('DatadogProvider', () => {
     expect(() => logger.debug('test', context)).not.toThrow()
   })
 
-  it('should handle captureException with context', () => {
+  it('should handle captureError with tags', () => {
     mockDisabledDatadogConstants()
     const Provider = require('../datadog').DatadogProvider as DatadogProviderConstructor
     const provider = new Provider()
     const error = new Error('test error')
-    const context = { componentStack: 'test' }
+    const tags = { componentStack: 'test' }
 
-    expect(() => provider.captureException(error, context)).not.toThrow()
+    expect(() => provider.captureError({ error, isUserFacing: true, tags })).not.toThrow()
   })
 
   describe('after initialization', () => {
@@ -204,14 +206,23 @@ describe('DatadogProvider', () => {
       })
     })
 
-    it('should call addError for captureException', async () => {
+    it('should call addError for a user-facing captureError', async () => {
       const provider = await createInitializedProvider()
       const error = new Error('captured error')
-      const context = { componentStack: 'test' }
+      const tags = { componentStack: 'test' }
 
-      provider.captureException(error, context)
+      provider.captureError({ error, isUserFacing: true, tags })
 
-      expect(mockAddError).toHaveBeenCalledWith(error, context)
+      expect(mockAddError).toHaveBeenCalledWith(error, tags)
+    })
+
+    it('does not call addError for a non-user-facing captureError (kept off the SLO)', async () => {
+      const provider = await createInitializedProvider()
+      const error = new Error('background error')
+
+      provider.captureError({ error, isUserFacing: false, tags: { code: 601 } })
+
+      expect(mockAddError).not.toHaveBeenCalled()
     })
   })
 
@@ -226,6 +237,44 @@ describe('DatadogProvider', () => {
       expect(filterRumEvent({ type: 'view' } as any, {} as any)).toBe(true)
       expect(filterRumEvent({ type: 'action' } as any, {} as any)).toBe(true)
       expect(filterRumEvent({ type: 'resource' } as any, {} as any)).toBe(true)
+    })
+
+    const resourceContext = {} as RumEventDomainContext
+
+    const buildResourceEvent = (url: string, status_code: number): RumResourceEvent =>
+      ({ type: 'resource', resource: { url, status_code } }) as unknown as RumResourceEvent
+
+    const OUTREACH_BASE = 'https://safe-client.safe.global/v1/targeted-messaging/outreaches/5/chains/1/safes/0xabc'
+
+    it('drops expected 404s from the targeted-messaging outreaches endpoint', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      expect(filterRumEvent(buildResourceEvent(OUTREACH_BASE, 404), resourceContext)).toBe(false)
+    })
+
+    it('keeps genuine failures (429, 500) on the same endpoint', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      expect(filterRumEvent(buildResourceEvent(OUTREACH_BASE, 429), resourceContext)).toBe(true)
+      expect(filterRumEvent(buildResourceEvent(OUTREACH_BASE, 500), resourceContext)).toBe(true)
+    })
+
+    it('keeps 404s on sibling outreaches operations (e.g. signer submissions)', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const url = 'https://safe-client.safe.global/v1/targeted-messaging/outreaches/5/signers/0xabc/submissions'
+      expect(filterRumEvent(buildResourceEvent(url, 404), resourceContext)).toBe(true)
+    })
+
+    it('keeps 404s from other endpoints', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const event = buildResourceEvent('https://safe-client.safe.global/v1/chains/1/safes/0xabc', 404)
+      expect(filterRumEvent(event, resourceContext)).toBe(true)
+    })
+
+    it('keeps resource events missing url or status_code', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const noResource = { type: 'resource', resource: {} } as unknown as RumResourceEvent
+      const noStatus = buildResourceEvent(OUTREACH_BASE, undefined as unknown as number)
+      expect(filterRumEvent(noResource, resourceContext)).toBe(true)
+      expect(filterRumEvent(noStatus, resourceContext)).toBe(true)
     })
 
     it('keeps application errors', async () => {

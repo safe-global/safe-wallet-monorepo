@@ -34,7 +34,7 @@ const SelectSafesOnboarding = (): ReactElement => {
   const wallet = useWallet()
   const totalSteps = useOnboardingStepCount()
   const { spaceId, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
-  const { trustedSafes, ownedSafes, flaggedOwnedAddresses, handleSearch, hasNoSafes } = useOnboardingSafes()
+  const { trustedSafes, ownedSafes, flaggedAddresses, handleSearch, hasNoSafes } = useOnboardingSafes()
   const allSafes = useMemo<AllSafeItems>(() => [...trustedSafes, ...ownedSafes], [trustedSafes, ownedSafes])
   const { formMethods, onSubmit, selectedSafesLength, error, isSubmitting } = useOnboardingSubmit(
     spaceId,
@@ -44,7 +44,7 @@ const SelectSafesOnboarding = (): ReactElement => {
 
   const { control, setValue } = formMethods
   const { selectedKeys, isAtLimit, handleToggle, pendingConfirmation, confirmPending, cancelPending } =
-    useOnboardingSelection({ items: allSafes, control, setValue, flaggedOwnedAddresses })
+    useOnboardingSelection({ items: allSafes, control, setValue, flaggedAddresses })
 
   const { data: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
   const { allSafes: spaceSafes } = useSpaceSafes()
@@ -124,7 +124,7 @@ const SelectSafesOnboarding = (): ReactElement => {
               <OnboardingSafesList
                 trustedSafes={trustedSafes}
                 ownedSafes={ownedSafes}
-                flaggedOwnedAddresses={flaggedOwnedAddresses}
+                flaggedAddresses={flaggedAddresses}
                 selectedKeys={selectedKeys}
                 onToggle={handleToggle}
                 isAtLimit={isAtLimit}

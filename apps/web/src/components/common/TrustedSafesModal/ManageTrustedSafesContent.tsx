@@ -11,13 +11,9 @@ import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useAppDispatch, useAppSelector } from '@/store'
-import {
-  OrderByOption,
-  selectOrderByPreference,
-  setManualOrder,
-  TRUSTED_ORDER_SCOPE,
-} from '@/store/orderByPreferenceSlice'
+import { useAppSelector } from '@/store'
+import { OrderByOption, selectOrderByPreference, TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
+import { useSaveManualOrder } from '@/hooks/safes'
 import SecurityBanner from './SecurityBanner'
 import SimilarityConfirmDialog from './SimilarityConfirmDialog'
 import SelectAllConfirmDialog from './SelectAllConfirmDialog'
@@ -49,6 +45,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
     pendingConfirmation,
     pendingSelectAllConfirmation,
     similarAddressesForSelectAll,
+    flagged: flaggedAddresses,
     searchQuery,
     isLoading,
     hasChanges,
@@ -69,8 +66,8 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
 
   const wallet = useWallet()
   const isDarkMode = useDarkMode()
-  const dispatch = useAppDispatch()
   const { orderBy } = useAppSelector(selectOrderByPreference)
+  const saveManualOrder = useSaveManualOrder(TRUSTED_ORDER_SCOPE)
 
   // Rendering hundreds of account rows takes ~1s and blocks the dialog's first paint. Defer the table
   // past one painted frame (double rAF) so the shell + spinner show immediately, then the rows fill in.
@@ -86,10 +83,11 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
     }
   }, [])
 
-  // Reordering shares the trusted list's Manual order (same scope as the workspace accounts list).
-  // Suppressed while searching: a drop then would persist only the filtered subset, dropping the
-  // hidden addresses from the saved order.
-  const canReorder = orderBy === OrderByOption.MANUAL && !searchQuery
+  // Reordering shares the trusted list's Manual order (same scope as the workspace accounts list)
+  // and is offered in every sort mode — dragging switches the mode to Manual. Suppressed while
+  // searching: a drop then would persist only the filtered subset, dropping the hidden addresses
+  // from the saved order.
+  const canReorder = !searchQuery
 
   const pendingItem = pendingConfirmation
     ? availableItems.find((s) => s.address.toLowerCase() === pendingConfirmation)
@@ -109,11 +107,6 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
     }
     return keys
   }, [availableItems])
-
-  const flaggedAddresses = useMemo(
-    () => new Set(availableItems.filter((item) => item.similarityGroup).map((item) => item.address.toLowerCase())),
-    [availableItems],
-  )
 
   const someSelected = selectedCount > 0
 
@@ -190,11 +183,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
                 selectedKeys,
                 onToggle: (line: AccountLine) => toggleSelection(line.address),
               }}
-              reorder={
-                canReorder
-                  ? { onReorder: (order) => dispatch(setManualOrder({ scope: TRUSTED_ORDER_SCOPE, order })) }
-                  : undefined
-              }
+              reorder={canReorder ? { onReorder: saveManualOrder } : undefined}
             />
           </div>
         )}

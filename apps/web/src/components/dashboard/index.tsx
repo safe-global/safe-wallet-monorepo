@@ -9,11 +9,7 @@ import ExplorePossibleWidget from '@/components/dashboard/ExplorePossibleWidget'
 import { useIsRecoverySupported } from '@/features/recovery'
 import { useHasFeature } from '@/hooks/useChains'
 import css from './styles.module.css'
-import {
-  InconsistentSignerSetupWarning,
-  OutdatedMastercopyWarning,
-  UnsupportedMastercopyWarning,
-} from '@/features/multichain'
+import { InconsistentSignerSetupWarning, MastercopyWarning } from '@/features/multichain'
 import { MyAccountsFeature } from '@/features/myAccounts'
 import { ActionRequiredPanel } from './ActionRequiredPanel'
 import { VulnerableModuleWarning } from './ActionRequiredPanel/VulnerableModuleWarning'
@@ -90,8 +86,7 @@ const Dashboard = (): ReactElement => {
             <VulnerableModuleWarning isVulnerable={isVulnerableSafe} />
             {supportsRecovery && <RecoveryHeader />}
             <InconsistentSignerSetupWarning />
-            <OutdatedMastercopyWarning />
-            <UnsupportedMastercopyWarning />
+            <MastercopyWarning />
             <NonPinnedWarning />
           </ActionRequiredPanel>
 

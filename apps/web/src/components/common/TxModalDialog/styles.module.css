@@ -1,7 +1,7 @@
 /* The elevated topbar (z-index 99) paints over this dialog, so the dialog starts below it
-   to keep the close button visible and clickable. `--topbar-height` is measured from the
-   real topbar (PageLayout's ResizeObserver), so it already tracks the extra rows the header
-   wraps onto on narrower viewports — no width-banded offsets to keep in sync. */
+   to keep the close button visible and clickable. `--topbar-height` is measured live from
+   the real topbar element (see useTopbarHeight), so it already tracks the extra rows the
+   header wraps onto below 1148px — no width-banded offsets to keep in sync. */
 .dialog {
   position: fixed;
   top: var(--topbar-height);

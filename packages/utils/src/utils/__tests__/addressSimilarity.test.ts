@@ -1,13 +1,13 @@
 import {
   detectSimilarAddresses,
   getBucketKey,
-  getFlaggedSimilarAddressSet,
   normalizeAddress,
   longestCommonPrefixLen,
   longestCommonSuffixLen,
   buildSimilarityIndex,
-  detectListSimilarities,
+  detectAnchorMatches,
   getCommonAffixLengths,
+  detectIntraListClusters,
 } from '../addressSimilarity'
 import { Severity } from '../../features/safe-shield/types'
 
@@ -127,29 +127,6 @@ describe('addressSimilarity', () => {
       expect(result.isFlagged(legitimateAddress)).toBe(true)
       expect(result.isFlagged(maliciousAddress)).toBe(true)
       expect(result.groups.length).toBe(1)
-    })
-  })
-
-  describe('getFlaggedSimilarAddressSet', () => {
-    it('returns empty set when there are fewer than two distinct addresses', () => {
-      expect(getFlaggedSimilarAddressSet([])).toEqual(new Set())
-      expect(getFlaggedSimilarAddressSet(['0x1234567890abcdef1234567890abcdef12345678'])).toEqual(new Set())
-      const addr = '0x1234567890abcdef1234567890abcdef12345678'
-      expect(getFlaggedSimilarAddressSet([addr, addr.toLowerCase()])).toEqual(new Set())
-    })
-
-    it('returns lowercase flagged addresses when a pair is similar', () => {
-      const a = '0x1234567890abcdef1234567890abcdef12345678'
-      const b = '0x123456eeeeeeeeee1234567890abcdef12345678'
-      const set = getFlaggedSimilarAddressSet([a, b])
-      expect(set.size).toBe(2)
-      expect(set.has(a.toLowerCase())).toBe(true)
-      expect(set.has(b.toLowerCase())).toBe(true)
-    })
-
-    it('returns empty set when addresses are not similar', () => {
-      const addresses = ['0x1234567890abcdef1234567890abcdef12345678', '0xffffff7890abcdef1234567890abcdef12345678']
-      expect(getFlaggedSimilarAddressSet(addresses)).toEqual(new Set())
     })
   })
 })
@@ -299,12 +276,12 @@ describe('addressSimilarity (anchor engine)', () => {
     })
   })
 
-  describe('detectListSimilarities (Mode B)', () => {
+  describe('detectAnchorMatches (Mode B)', () => {
     it('annotates impostors against anchors and leaves anchors/unrelated unmarked', () => {
       const idx = buildSimilarityIndex([TRUSTED])
       const impostor = '0xa1b2ffffffffffffffffffffffffffffffff5678'
       const unrelated = '0x7f3e9a01bc4d2e8f00112233445566778899aabb'
-      const result = detectListSimilarities([TRUSTED, impostor, unrelated], idx)
+      const result = detectAnchorMatches([TRUSTED, impostor, unrelated], idx)
 
       expect(result.get(TRUSTED)?.match).toBeUndefined() // an anchor is never an impostor
       expect(result.get(impostor)?.match?.severity).toBe(Severity.CRITICAL)
@@ -314,7 +291,7 @@ describe('addressSimilarity (anchor engine)', () => {
     it('keys annotations by lowercased address while preserving the original on .address', () => {
       const idx = buildSimilarityIndex([TRUSTED])
       const impostorMixed = '0xA1B2FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5678'
-      const result = detectListSimilarities([impostorMixed], idx)
+      const result = detectAnchorMatches([impostorMixed], idx)
 
       expect(result.get(impostorMixed.toLowerCase())?.match?.severity).toBe(Severity.CRITICAL)
       expect(result.get(impostorMixed.toLowerCase())?.address).toBe(impostorMixed)
@@ -333,6 +310,38 @@ describe('addressSimilarity (anchor engine)', () => {
       const a = '0x1111111111111111111111111111111111111111'
       const b = '0x2222222222222222222222222222222222222222'
       expect(getCommonAffixLengths(a, b)).toEqual({ prefixLen: 0, suffixLen: 0 })
+    })
+  })
+
+  describe('detectIntraListClusters', () => {
+    const A = '0x1234' + 'a'.repeat(32) + '5678' // front 1234, back 5678
+    const B = '0x1234' + 'b'.repeat(32) + '9999' // shares front 1234 with A
+    const C = '0xcccc' + 'd'.repeat(32) + '5678' // shares back 5678 with A (chains via A)
+    const D = '0xdead' + 'e'.repeat(32) + 'beef' // unrelated
+
+    it('clusters addresses that share front-4 OR back-4 (union-find over the OR relation)', () => {
+      const { flagged, groupIdByAddress } = detectIntraListClusters([A, B, C, D])
+
+      expect(flagged.has(A.toLowerCase())).toBe(true)
+      expect(flagged.has(B.toLowerCase())).toBe(true)
+      expect(flagged.has(C.toLowerCase())).toBe(true)
+      expect(flagged.has(D.toLowerCase())).toBe(false)
+
+      // A, B and C are one connected component; D is on its own.
+      const groupId = groupIdByAddress.get(A.toLowerCase())
+      expect(groupId).toBeDefined()
+      expect(groupIdByAddress.get(B.toLowerCase())).toBe(groupId)
+      expect(groupIdByAddress.get(C.toLowerCase())).toBe(groupId)
+      expect(groupIdByAddress.has(D.toLowerCase())).toBe(false)
+    })
+
+    it('does not flag a single address listed several times (identical addresses are deduped)', () => {
+      expect(detectIntraListClusters([A, A, A]).flagged.size).toBe(0)
+    })
+
+    it('returns nothing for fewer than two distinct addresses', () => {
+      expect(detectIntraListClusters([A]).flagged.size).toBe(0)
+      expect(detectIntraListClusters([]).flagged.size).toBe(0)
     })
   })
 })

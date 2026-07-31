@@ -171,10 +171,6 @@ export default function SafeAccountsTable({
   const canRename = allowRenameInDialog || !selection
   const onRename = canRename ? (line: AccountLine) => setRenameTarget(toRenameTarget(line)) : undefined
 
-  // While reordering, the incoming (manual) order is authoritative: column-header sorting is
-  // suppressed and multi-chain groups collapse so each row is a single draggable account.
-  const reorderActive = Boolean(reorder)
-
   const visibleColumns = useMemo(() => {
     const base = columns ? SAFE_ACCOUNT_COLUMNS.filter((c) => columns.includes(c.id)) : SAFE_ACCOUNT_COLUMNS
     const withActions = actionsWidth ? base.map((c) => (c.id === 'actions' ? { ...c, width: actionsWidth } : c)) : base
@@ -190,10 +186,10 @@ export default function SafeAccountsTable({
   )
 
   const sortedGroups = useMemo(() => {
-    if (reorderActive || !sortableColumns || !sort.orderBy) return groups
+    if (!sortableColumns || !sort.orderBy) return groups
     const orderBy = sort.orderBy
     return [...groups].sort((a, b) => compareGroups(a, b, orderBy, sort.order))
-  }, [groups, sort, reorderActive, sortableColumns])
+  }, [groups, sort, sortableColumns])
 
   // When an external sort-mode control takes over ordering (Last visited / Manual), clear any active
   // column sort so a stale header arrow and order don't linger if column sorting re-enables.
@@ -227,16 +223,11 @@ export default function SafeAccountsTable({
   return (
     <div data-testid={testId} className="w-full">
       <div
-        className={cn(
-          'w-full',
-          // Reorder mode floats the drag grip in the left gutter, outside the card — clipping it
-          // would hide the handle, so use a visible (non-scrolling) container while reordering.
-          embedded || reorderActive ? 'overflow-x-visible' : 'overflow-x-auto',
-          !embedded && tableCss.container,
-        )}
+        className={cn('w-full', embedded ? 'overflow-x-visible' : 'overflow-x-auto', !embedded && tableCss.container)}
       >
-        {/* Raw <table> instead of the ui <Table> wrapper: its fixed overflow-x-auto container would
-            clip the reorder grip in the gutter. The shadcn table sub-components are used throughout. */}
+        {/* Raw <table> instead of the ui <Table> wrapper: we own the horizontal-scroll container
+            above so `embedded` tables can opt out of it. The shadcn table sub-components are used
+            throughout. */}
         <table
           className={cn('w-full caption-bottom text-sm', tableCss.table)}
           style={{
@@ -261,13 +252,17 @@ export default function SafeAccountsTable({
               <TableRow className="border-0 hover:bg-transparent">
                 {visibleColumns.map((column, index) => {
                   const active = sort.orderBy === column.sortKey
-                  const canSort = column.sortable && column.sortKey && !reorderActive && sortableColumns
+                  const canSort = column.sortable && column.sortKey && sortableColumns
                   return (
                     <TableHead
                       key={column.id}
                       aria-sort={active ? (sort.order === 'asc' ? 'ascending' : 'descending') : undefined}
+                      // Indents the NAME label so it sits above the account name text rather than the
+                      // avatar (see styles.module.css) — a leading checkbox column already offsets the
+                      // cell, so it needs less.
+                      data-name-head={column.id === 'name' ? (selection ? 'selection' : 'default') : undefined}
                       className={cn(
-                        'bg-muted whitespace-nowrap px-2 py-2.5 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground',
+                        'bg-muted whitespace-nowrap px-2 py-2.5 text-xs font-semibold uppercase leading-4 tracking-normal text-muted-foreground',
                         index === 0 && 'rounded-l-lg',
                         index === visibleColumns.length - 1 && 'rounded-r-lg',
                       )}

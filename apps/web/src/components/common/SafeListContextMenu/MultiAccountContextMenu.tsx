@@ -57,7 +57,7 @@ const MultiAccountContextMenu = ({
               size="icon-sm"
               data-testid="safe-options-btn"
               onClick={(e) => e.stopPropagation()}
-              className="text-[var(--color-border-main)]"
+              className="text-muted-foreground"
             />
           }
         >
@@ -71,7 +71,7 @@ const MultiAccountContextMenu = ({
           }}
         >
           <DropdownMenuItem onClick={handleOpenModal(ModalType.RENAME, OVERVIEW_EVENTS.SIDEBAR_RENAME)}>
-            <EditIcon className="text-[var(--color-success-main)]" />
+            <EditIcon className="text-foreground" />
             <span data-testid="rename-btn">Rename</span>
           </DropdownMenuItem>
           {addNetwork && (

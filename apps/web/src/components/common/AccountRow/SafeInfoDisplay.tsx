@@ -106,7 +106,8 @@ const SafeInfoDisplay = ({
                 setAddressTooltipOpen(shouldOpenTooltip(nextOpen, details.reason, addressMiddleRef.current))
               }
             >
-              <TooltipTrigger render={<span />} className="flex min-w-0">
+              {/* data-address-tooltip lets click-through hosts (see NameCell) keep this tooltip hoverable */}
+              <TooltipTrigger render={<span data-address-tooltip="" />} className="flex min-w-0">
                 <FullAddress address={address} middleRef={addressMiddleRef} data-testid="safe-item-address" />
               </TooltipTrigger>
               <TooltipContent className="pointer-events-none select-none">{address}</TooltipContent>

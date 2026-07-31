@@ -1,8 +1,9 @@
-import type { ILogger, IObservabilityProvider } from '../types'
+import type { ILogger, IObservabilityProvider, ObservedError } from '../types'
 import {
   datadogRum,
   type RumEvent,
   type RumErrorEvent,
+  type RumResourceEvent,
   type RumEventDomainContext,
   type RumErrorEventDomainContext,
 } from '@datadog/browser-rum'
@@ -69,9 +70,35 @@ const isKnownNoise = (message: string | undefined): boolean => {
 const NON_USER_IMPACTING_SOURCES = new Set(['console', 'report'])
 
 /**
+ * Resource requests whose non-2xx responses are an expected part of normal
+ * operation, not failures. Dropped before dispatch to keep RUM ingestion and
+ * the Resource explorer free of predictable noise. Matched on the raw request
+ * URL (the `@resource.url_path_group` facet is computed by Datadog and is not
+ * available client-side) plus the status code.
+ */
+const EXPECTED_RESOURCE_FAILURES: { urlPattern: RegExp; statuses: Set<number> }[] = [
+  // CGW returns 404 from the "is this user targeted?" check when no outreach
+  // exists for the Safe — polled on nearly every Safe load, so this dominates
+  // RUM resource volume. Scoped to the exact outreaches/chains/safes route so
+  // sibling operations (e.g. /signers/{address}/submissions) keep reporting 404.
+  {
+    urlPattern: /\/v1\/targeted-messaging\/outreaches\/[^/]+\/chains\/[^/]+\/safes\/[^/?#]+/,
+    statuses: new Set([404]),
+  },
+]
+
+const isExpectedResourceFailure = (event: RumResourceEvent): boolean => {
+  const { url, status_code: status } = event.resource ?? {}
+  if (!url || status === undefined) return false
+  return EXPECTED_RESOURCE_FAILURES.some(({ urlPattern, statuses }) => urlPattern.test(url) && statuses.has(status))
+}
+
+/**
  * Drop RUM error events that are demonstrably not caused by user-impacting
- * failures so the Error-Free Views SLO reflects real breakage. Non-error events
- * (views, actions, resources) pass through untouched.
+ * failures so the Error-Free Views SLO reflects real breakage, plus resource
+ * events for endpoints whose non-2xx responses are expected (see
+ * `EXPECTED_RESOURCE_FAILURES`). Views, actions and other resources pass
+ * through untouched.
  *
  * Sources we drop:
  * - `console`: the RUM SDK auto-instruments `console.error` via
@@ -89,6 +116,7 @@ const NON_USER_IMPACTING_SOURCES = new Set(['console', 'report'])
  * network failures (`network`).
  */
 export const filterRumEvent = (event: RumEvent, context: RumEventDomainContext): boolean => {
+  if (event.type === 'resource') return !isExpectedResourceFailure(event as RumResourceEvent)
   if (event.type !== 'error') return true
 
   const errorEvent = event as RumErrorEvent
@@ -176,9 +204,12 @@ export class DatadogProvider implements IObservabilityProvider {
     }
   }
 
-  captureException(error: Error, context?: Record<string, unknown>): void {
-    if (this.isInitialized) {
-      datadogRum.addError(error, context)
+  captureError({ error, isUserFacing, tags }: ObservedError): void {
+    // Only user-facing failures become RUM errors (addError) so background /
+    // logged errors don't count against the Error-Free Views SLO — those are
+    // already recorded as warn-level actions via getLogger().warn.
+    if (this.isInitialized && isUserFacing) {
+      datadogRum.addError(error, tags)
     }
   }
 }

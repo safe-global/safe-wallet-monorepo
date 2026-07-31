@@ -14,11 +14,11 @@
   padding-bottom: 8px;
 }
 
-/* Header: labels sit on a grey bar (bg-muted, set via className) inset 4px from the panel edges —
-   transparent borders + a padding-box clip shrink the painted background without moving the cells. */
+/* Header: labels sit on a grey bar (bg-muted, set via className) inset from the panel's top and side
+   edges — transparent borders + a padding-box clip shrink the painted background without moving the
+   cells. No bottom inset: the first row's own top border already provides that gap. */
 .table thead th {
   border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
   background-clip: padding-box;
 }
 .table thead th:first-of-type {
@@ -29,17 +29,35 @@
   padding-right: 16px;
   border-right: 4px solid transparent;
 }
+/* Indent the NAME label so it sits above the account name text rather than the avatar. A leading
+   checkbox column already offsets the cell by 48px, so it needs correspondingly less. Declared after
+   the `:first-of-type` rule above — equal specificity, so the later rule wins whether or not the
+   Name column leads. */
+.table thead th[data-name-head='default'] {
+  padding-left: 84px;
+}
+.table thead th[data-name-head='selection'] {
+  padding-left: 60px;
+}
 
-/* Body cells: transparent 6px top/bottom borders (with clip) inset the hover pill vertically so it
-   floats clear of the row separator; the outer cells add a 4px horizontal inset. */
+/* Body cells: transparent top/bottom borders (with clip) inset the hover pill vertically so it floats
+   clear of the row separator; the outer cells add a 4px horizontal inset. The 5/8 split is asymmetric
+   because the 1px separator is drawn inside the bottom border and the row background paints it ~1px
+   above the row's bottom edge — 5/8 lands the pill visually centred, with ~6px of clear space either
+   side of the line. */
 .table tbody td {
-  border-top: 6px solid transparent;
-  border-bottom: 6px solid transparent;
+  border-top: 5px solid transparent;
+  border-bottom: 8px solid transparent;
   background-clip: padding-box;
 }
 .table tbody td:first-of-type {
   padding-left: 16px;
   border-left: 4px solid transparent;
+}
+/* While reordering, the Name cell hosts the always-visible grip (28px wide, anchored to the cell's
+   left edge). Widen the cell so the avatar starts after the grip instead of underneath it. */
+.table tbody td:first-of-type[data-hosts-handle] {
+  padding-left: 28px;
 }
 .table tbody td:last-of-type {
   padding-right: 16px;
@@ -61,12 +79,12 @@
   background-color: var(--muted);
 }
 .table tbody tr:not([data-disabled]):hover td:first-of-type {
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
+  border-top-left-radius: 16px;
+  border-bottom-left-radius: 16px;
 }
 .table tbody tr:not([data-disabled]):hover td:last-of-type {
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
+  border-top-right-radius: 16px;
+  border-bottom-right-radius: 16px;
 }
 
 /* Row separator: a 1px line at the row's bottom, inset 4px each side to line up with the pill.

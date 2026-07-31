@@ -106,7 +106,7 @@ const SafeListContextMenu = ({
                 e.stopPropagation()
                 e.preventDefault()
               }}
-              className="text-[var(--color-border-main)]"
+              className="text-muted-foreground"
             />
           }
         >
@@ -137,7 +137,7 @@ const SafeListContextMenu = ({
 
           {rename && (
             <DropdownMenuItem onClick={handleOpenModal(ModalType.RENAME, OVERVIEW_EVENTS.SIDEBAR_RENAME)}>
-              <EditIcon className="text-[var(--color-success-main)]" />
+              <EditIcon className="text-foreground" />
               <span data-testid="rename-btn">{hasName ? 'Rename' : 'Give name'}</span>
             </DropdownMenuItem>
           )}

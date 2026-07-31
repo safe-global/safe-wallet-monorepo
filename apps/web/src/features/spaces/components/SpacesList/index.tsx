@@ -254,7 +254,7 @@ const SpacesList = () => {
 
             {pendingInviteBanners}
 
-            <div className="rounded-2xl border border-border bg-card px-4 py-1" data-testid="org-list">
+            <div className="rounded-lg border border-border bg-card px-4 py-1" data-testid="org-list">
               {activeSpaces.map((space, index) => (
                 <SpaceRow
                   key={space.uuid}

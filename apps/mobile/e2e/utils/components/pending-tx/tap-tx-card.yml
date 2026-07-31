@@ -8,17 +8,33 @@ tags:
 # Waits for and taps on a pending transaction card, then verifies Confirm transaction screen
 #
 # Environment variables:
+#   TAP_ID: Card testID to tap (e.g. "tx-card-multisig_0xSafe..._0xHash...").
+#           Preferred — immune to queue reordering. When set, WAIT_FOR/TAP_TEXT/TAP_INDEX are ignored.
 #   WAIT_FOR: Text pattern to wait for (e.g., ".*addOwnerWithThreshold.*", ".*0\.001 MATIC.*")
 #   TAP_TEXT: Text to tap on (e.g., "Settings change", ".*0\.001 MATIC.*")
 #   TAP_INDEX: Optional index if multiple matches (default: 0)
 
-- extendedWaitUntil:
-    visible:
-      text: '${WAIT_FOR}'
-    timeout: 10000
+- evalScript: '${output.useTapId = (typeof TAP_ID !== "undefined" && TAP_ID.trim() !== "")}'
 
-- evalScript: '${output.tapIndex = (typeof TAP_INDEX !== "undefined") ? parseInt(TAP_INDEX) : 0}'
+- runFlow:
+    when:
+      true: ${output.useTapId}
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: '${TAP_ID}'
+      - tapOn:
+          id: '${TAP_ID}'
 
-- tapOn:
-    text: '${TAP_TEXT}'
-    index: ${output.tapIndex}
+- runFlow:
+    when:
+      true: ${!output.useTapId}
+    commands:
+      - extendedWaitUntil:
+          visible:
+            text: '${WAIT_FOR}'
+          timeout: 10000
+      - evalScript: '${output.tapIndex = (typeof TAP_INDEX !== "undefined") ? parseInt(TAP_INDEX) : 0}'
+      - tapOn:
+          text: '${TAP_TEXT}'
+          index: ${output.tapIndex}
