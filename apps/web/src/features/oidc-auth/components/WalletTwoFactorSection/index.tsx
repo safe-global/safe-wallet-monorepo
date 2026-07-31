@@ -37,7 +37,7 @@ const WalletTwoFactorSection = () => {
 
       <Typography variant="paragraph-small" color="muted" className="block max-w-[560px]">
         You&apos;re signed in with your wallet — your signature is your key. 2FA currently protects email and Google
-        sign-ins. If you want 2FA today, sign in with a Google or email account instead.
+        sign-ins. If you want 2FA today, create a new email or Google account instead.
       </Typography>
     </section>
   )
