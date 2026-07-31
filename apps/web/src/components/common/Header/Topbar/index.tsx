@@ -28,6 +28,16 @@ import SpaceSafeBar from '@/components/common/SpaceSafeBar'
 import SafenetStakingButton from './SafenetStakingButton'
 import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { TxModalContext } from '@/components/tx-flow'
+import { cn } from '@/utils/cn'
+
+// The safe selector and the search input are wide, so below the header's 1100px container query
+// (which accounts for the sidebar and the route) the context group drops onto its own full-width
+// row beneath the actions — right-aligned below md where the sidebar is hidden, left-aligned above
+// it, where the actions give up `ml-auto` to line up with the row underneath. The logo variant is
+// 24px and always fits, so it opts out of both. Named so the Topbar tests can assert which
+// left-slot variant opts in without restating the utility list.
+export const WIDE_CONTEXT_WRAP = '@max-[1100px]:order-1 @max-[1100px]:basis-full max-[899px]:justify-end'
+export const WIDE_ACTIONS_WRAP = '@max-[1100px]:min-[900px]:ml-0'
 
 interface TopbarProps {
   /** When provided, shows a menu button on mobile to open the sidebar */
@@ -86,12 +96,21 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const unreadCount = useMemo(() => notifications.filter(({ isRead }) => !isRead).length, [notifications])
   const showMenuButton = Boolean(onMenuToggle && isBelowMd)
 
+  // Routes with no Safe context show the bare logo on the left instead of the safe selector or
+  // the search input. It's a 24px mark that always fits beside the actions, so it opts out of
+  // the wrapping the two wide variants need — logo left, actions right, at every width.
+  const showLogo = isSettingsWithoutSafe || isWelcomeListRoute
+
   return (
     <>
       <header
-        className={`@container flex flex-wrap ${isSettingsWithoutSafe ? 'items-center' : 'items-start'} gap-y-2 px-6 py-4 bg-secondary dark:bg-background ${
-          showMenuButton ? 'pl-2' : ''
-        }`}
+        className={cn(
+          '@container flex flex-wrap gap-y-2 px-6 py-4 bg-secondary dark:bg-background',
+          // The logo row is short, so center it against the taller actions card. The wide
+          // variants keep their own top alignment.
+          showLogo ? 'items-center' : 'items-start',
+          showMenuButton && 'pl-2',
+        )}
       >
         {showMenuButton ? (
           <Button
@@ -105,11 +124,9 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
         ) : null}
 
         {/* Left content (context): the safe selector must not shrink so its children stay on
-            one line. When the header (container query — accounts for sidebar + route) is too
-            narrow to fit both groups, this drops onto its own full-width row below the actions.
-            Below md (sidebar hidden) the wrapped rows align right; at/above md they align left. */}
-        <div className="shrink-0 flex items-center @max-[1100px]:order-1 @max-[1100px]:basis-full max-[899px]:justify-end">
-          {isSettingsWithoutSafe || isWelcomeListRoute ? (
+            one line. See WIDE_CONTEXT_WRAP for how the wide variants wrap. */}
+        <div className={cn('shrink-0 flex items-center', !showLogo && WIDE_CONTEXT_WRAP)}>
+          {showLogo ? (
             <SafeLogo />
           ) : showSpaceSafeBar ? (
             <SpaceSafeBar />
@@ -118,11 +135,15 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
           )}
         </div>
 
-        {/* Right content (actions): ml-auto pushes it right (page padding) on one row. When the
-            header wraps at/above md (sidebar shown) ml-0 left-aligns it with the context below;
-            below md (sidebar hidden) it keeps ml-auto so the wrapped rows hug the right edge.
-            One 56px card holding the muted action chips, matching the safe-selector pill. */}
-        <div className="flex items-center gap-1 shrink-0 ml-auto @max-[1100px]:min-[900px]:ml-0 rounded-xl bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+        {/* Right content (actions): ml-auto pushes it to the right page padding. One 56px card
+            holding the muted action chips, matching the safe-selector pill. See WIDE_ACTIONS_WRAP
+            for how it gives that up when the wide context variants wrap below it. */}
+        <div
+          className={cn(
+            'flex items-center gap-1 shrink-0 ml-auto rounded-xl bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]',
+            !showLogo && WIDE_ACTIONS_WRAP,
+          )}
+        >
           {showSafeToken && (
             <div className="hidden sm:block">
               <SafenetStakingButton />

@@ -9,6 +9,13 @@ describe('getSafeSelectorClassVariants', () => {
     expect(variants.iconWrapperClass).not.toContain('hidden')
   })
 
+  it('pads the chevron past the trigger overshoot so it is not flush with the pill', () => {
+    // The trigger is `absolute inset-0` in a `-m-4` wrapper, so its right edge sits 8px outside
+    // the pill. `pr-4` spends 8px covering that and leaves 8px visible — the same gap the network
+    // chip beside it gets from its `px-2`. `pr-2.5` left 2px and read as flush.
+    expect(getSafeSelectorClassVariants(false).iconWrapperClass).toContain('pr-4')
+  })
+
   it('keeps the single-safe trigger inset without a chevron zone', () => {
     const variants = getSafeSelectorClassVariants(true)
 

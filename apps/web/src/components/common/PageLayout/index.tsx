@@ -116,6 +116,12 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
             ref={topbarRef}
             className={classnames(css.topbar, {
               [css.topbarElevated]: isTopbarElevated,
+              // The topbar is absolutely positioned, so it can't inherit `.main`'s sidebar
+              // offset — it has to reproduce it. Keep these conditions identical to the
+              // `mainNoSidebar` / `mainSidebarCollapsed` ones below or the header drifts out
+              // of alignment with the page content underneath it.
+              [css.topbarNoSidebar]: !isSidebarVisible || !isSidebarRoute,
+              [css.topbarCollapsed]: isSidebarRoute && isSidebarVisible && !isSidebarExpanded,
             })}
           >
             <Topbar onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} />

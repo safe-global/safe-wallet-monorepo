@@ -36,13 +36,19 @@
   margin-right: var(--space-2);
   padding: var(--space-1);
   padding-left: 0;
-  /* Notch over the connector line — must match the tx-flow page surface (--background),
-     not --color-background-main, or it shows as a gray square behind each icon.
-     position/z-index lift the icon above the absolutely-positioned .status::before line
-     so the line renders behind the icons (the background then hides it at each step). */
-  background-color: var(--background);
+  /* Notch over the connector line: position/z-index lift the icon above the absolutely
+     positioned .status::before line so the line renders behind it, and this background then
+     hides the segment it would otherwise draw through the icon. Only ever rendered inside
+     TxModalDialog, so it has to be that dialog's surface in both themes — any other colour
+     stops reading as a gap and becomes a visible block behind every step. TxStatusWidget's
+     styles.test.ts pins it to the dialog. */
+  background-color: var(--color-background-main);
   position: relative;
   z-index: 1;
+}
+
+[data-theme='dark'] .itemIcon {
+  background-color: var(--background);
 }
 
 [data-theme='light'] .itemIcon {

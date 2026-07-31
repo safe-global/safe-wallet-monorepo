@@ -286,26 +286,25 @@ function SpaceSafeBar() {
       {/* One pill: safe selector + nested safes + network selector render as muted chips
           sharing a single white card (see Figma topbar). */}
       <div className="flex flex-wrap items-stretch gap-2 rounded-xl bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
-        {/* Under 430px the safe selector drops to its own full-width row below the nested/network controls. */}
-        <div className="contents max-[429px]:block max-[429px]:order-[10000] max-[429px]:min-w-0 max-[429px]:basis-full">
-          <SafeSelectorDropdown
-            items={unionItems}
-            listItems={listItems}
-            selectedItemId={selectedItemId}
-            onItemSelect={handleItemSelect}
-            isLoading={isLoading}
-            isError={isError}
-            onRetry={refetch}
-            header={dropdownHeader}
-            footer={dropdownFooter}
-            emptyStateOverride={emptyStateOverride}
-            searchValue={search}
-            onSearchValueChange={setSearch}
-            onItemRename={setRenameTarget}
-            onReorder={handleReorder}
-            keepOpen={renameTarget !== null}
-          />
-        </div>
+        {/* The selector is `w-full` below sm, so it claims the first row on its own and the
+            nested/network chips wrap underneath it — the address stays on top at every width. */}
+        <SafeSelectorDropdown
+          items={unionItems}
+          listItems={listItems}
+          selectedItemId={selectedItemId}
+          onItemSelect={handleItemSelect}
+          isLoading={isLoading}
+          isError={isError}
+          onRetry={refetch}
+          header={dropdownHeader}
+          footer={dropdownFooter}
+          emptyStateOverride={emptyStateOverride}
+          searchValue={search}
+          onSearchValueChange={setSearch}
+          onItemRename={setRenameTarget}
+          onReorder={handleReorder}
+          keepOpen={renameTarget !== null}
+        />
         <SpaceNestedSafesButton />
         <SpaceChainSelector isLoading={isLoading} />
       </div>

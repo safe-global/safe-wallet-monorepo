@@ -1,4 +1,4 @@
-import Topbar from './index'
+import Topbar, { WIDE_ACTIONS_WRAP, WIDE_CONTEXT_WRAP } from './index'
 import * as contracts from '@/features/__core__'
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
@@ -245,6 +245,56 @@ describe('Topbar', () => {
       mockUsePathname.mockReturnValue('/welcome/accounts')
       render(<Topbar />)
       expect(screen.getByTestId('header-account-info')).toBeInTheDocument()
+    })
+  })
+
+  // jsdom loads no CSS, so these check which layout branch the left slot took, not the resulting
+  // geometry: the logo variant must not inherit the wrapping the wide variants need, or it drops
+  // onto a second row below the actions and (below md) right-aligns there. Real widths were
+  // measured in a browser; see the Playwright gap noted in the PR.
+  describe('single-row layout on logo routes', () => {
+    const groups = (container: HTMLElement) => {
+      const header = container.querySelector('header')
+      if (!header) throw new Error('header not found')
+      const [context, actions] = [...header.children].slice(-2)
+      return { header, context, actions }
+    }
+
+    const LOGO_ROUTES = [['/welcome/accounts'], ['/welcome/spaces'], ['/settings/appearance']]
+
+    it.each(LOGO_ROUTES)('keeps the logo and the actions on one row on %s', (pathname) => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue(pathname)
+
+      const { context, actions } = groups(render(<Topbar />).container)
+
+      expect(context).toContainElement(screen.getByTestId('logo-image'))
+      expect(context.className).not.toContain(WIDE_CONTEXT_WRAP)
+      expect(actions.className).not.toContain(WIDE_ACTIONS_WRAP)
+      // Nothing left to push the actions off the right edge.
+      expect(actions.className).toContain('ml-auto')
+    })
+
+    it.each(LOGO_ROUTES)('centers the short logo row against the actions card on %s', (pathname) => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue(pathname)
+
+      const { header } = groups(render(<Topbar />).container)
+
+      expect(header.className).toMatch(/items-center/)
+      expect(header.className).not.toMatch(/items-start/)
+    })
+
+    it('keeps the wrapping for the wide safe-selector variant', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/home')
+
+      const { header, context, actions } = groups(render(<Topbar />).container)
+
+      expect(context).toContainElement(screen.getByTestId('space-safe-bar'))
+      expect(context.className).toContain(WIDE_CONTEXT_WRAP)
+      expect(actions.className).toContain(WIDE_ACTIONS_WRAP)
+      expect(header.className).toMatch(/items-start/)
     })
   })
 
