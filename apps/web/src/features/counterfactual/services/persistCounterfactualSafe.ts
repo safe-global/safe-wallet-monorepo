@@ -73,9 +73,9 @@ export const persistCounterfactualSafe = async ({
   provider,
   dispatch,
 }: PersistArgs): Promise<PersistResult> => {
-  // 0. Never store an already-deployed Safe as counterfactual — it would show as
-  //    "Not activated". Skip without a chain-specific provider; fail open on error.
-  if (provider) {
+  // Client-side deploy check, unauth path only — authed users get a 409 from the
+  // backend instead (handled below). Skip without a provider; fail open on error.
+  if (provider && !isUserAuthenticated) {
     let isDeployed = false
     try {
       isDeployed = await isSmartContract(safeAddress, provider)
@@ -84,21 +84,7 @@ export const persistCounterfactualSafe = async ({
     }
 
     if (isDeployed) {
-      // Add it to My accounts as a regular deployed Safe (not the undeployed
-      // slice, which shows "Not activated"), and drop any stale undeployed entry.
-      dispatch(
-        addOrUpdateSafe({
-          safe: {
-            ...defaultSafeInfo,
-            chainId,
-            address: { value: safeAddress, name },
-            threshold: Number(props.safeAccountConfig.threshold),
-            owners: props.safeAccountConfig.owners.map((owner) => ({ value: owner })),
-          },
-        }),
-      )
-      dispatch(removeUndeployedSafe({ chainId, address: safeAddress }))
-      return { ok: true, skipped: 'already-deployed' }
+      return recoverAlreadyDeployed({ chainId, safeAddress, props, name, dispatch })
     }
   }
 
@@ -113,6 +99,12 @@ export const persistCounterfactualSafe = async ({
       }),
     )
     if ('error' in userResult) {
+      // CGW rejects an already-deployed Safe with 409. Treat it like the client
+      // guard: add the Safe to My accounts as deployed and skip CF creation,
+      // rather than surfacing it as a hard failure.
+      if (isConflict(userResult.error)) {
+        return recoverAlreadyDeployed({ chainId, safeAddress, props, name, dispatch })
+      }
       return { ok: false, error: toPersistError(userResult.error) }
     }
 
@@ -203,11 +195,44 @@ export const persistCounterfactualSafe = async ({
   return { ok: true }
 }
 
-// Shown on backend 409 (conflict) — the Safe likely already exists or is deployed.
-const CONFLICT_MESSAGE =
-  "This Safe can't be created as a counterfactual account — it may already exist or be deployed. Try adding it as a regular Safe account instead."
+/**
+ * The Safe is already deployed, so store it as a regular deployed Safe in My
+ * accounts (not counterfactual, which shows "Not activated") and drop any stale
+ * undeployed entry.
+ */
+function recoverAlreadyDeployed({
+  chainId,
+  safeAddress,
+  props,
+  name,
+  dispatch,
+}: {
+  chainId: string
+  safeAddress: string
+  props: ReplayedSafeProps
+  name: string
+  dispatch: AppDispatch
+}): PersistResult {
+  dispatch(
+    addOrUpdateSafe({
+      safe: {
+        ...defaultSafeInfo,
+        chainId,
+        address: { value: safeAddress, name },
+        threshold: Number(props.safeAccountConfig.threshold),
+        owners: props.safeAccountConfig.owners.map((owner) => ({ value: owner })),
+      },
+    }),
+  )
+  dispatch(removeUndeployedSafe({ chainId, address: safeAddress }))
+  return { ok: true, skipped: 'already-deployed' }
+}
 
 type BackendError = { status?: number; data?: { message?: string } }
+
+function isConflict(error: unknown): boolean {
+  return (error as BackendError)?.status === 409
+}
 
 function toSpaceError(error: unknown): Error {
   return new Error((error as BackendError)?.data?.message || 'Failed to add Safe account to workspace')
@@ -221,8 +246,8 @@ function isLimitRejection(error: unknown): boolean {
 }
 
 function toPersistError(error: unknown): Error {
-  if ((error as BackendError)?.status === 409) {
-    return new Error(CONFLICT_MESSAGE)
-  }
-  return new Error('Failed to save Safe account to backend')
+  // 409 (already deployed) is handled upstream via recoverAlreadyDeployed, so it
+  // never reaches here — any error at this point is a genuine persist failure.
+  const message = (error as BackendError)?.data?.message
+  return new Error(message || 'Failed to save Safe account to backend')
 }

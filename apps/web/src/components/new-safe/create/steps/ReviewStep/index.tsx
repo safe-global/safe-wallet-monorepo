@@ -64,6 +64,7 @@ import NetworkWarning from '../../NetworkWarning'
 import { useAllSafes } from '@/hooks/safes'
 import uniq from 'lodash/uniq'
 import { selectRpc } from '@/store/settingsSlice'
+import { showNotification } from '@/store/notificationsSlice'
 import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
 import { useIsAdmin, useSpaceSafeCount } from '@/features/spaces'
 import { normalizeSpaceId } from '@/utils/spaces'
@@ -320,6 +321,19 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
             networks: awaitingChains.map((r) => r.chain),
           })
         }
+
+        // Acknowledge chains where the Safe was already deployed — otherwise the
+        // user lands on the account with no explanation of why nothing activated.
+        const deployedChains = successfulChains.filter((r) => r.alreadyDeployed)
+        if (deployedChains.length > 0) {
+          dispatch(
+            showNotification({
+              variant: 'info',
+              groupKey: 'cf-safe-already-deployed',
+              message: `This account is already deployed on ${deployedChains.map((r) => r.chain.chainName).join(', ')}`,
+            }),
+          )
+        }
       }
     } catch (err) {
       console.error(err)
@@ -370,7 +384,12 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           provider,
           dispatch,
         })
-        if (!result.ok) throw result.error
+        if (!result.ok) {
+          // Surface the backend's message (e.g. conflict guidance) instead of the
+          // generic wallet-error fallback in the catch below.
+          setSubmitError(result.error.message)
+          return { chain, safeAddress, success: false }
+        }
 
         const alreadyDeployed = result.skipped === 'already-deployed'
         // Don't report a creation for Safes that were already deployed.

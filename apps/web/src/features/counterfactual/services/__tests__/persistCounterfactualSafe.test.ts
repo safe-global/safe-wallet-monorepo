@@ -162,7 +162,26 @@ describe('persistCounterfactualSafe', () => {
     if (!result.ok) expect(result.error.message).toMatch(/backend/i)
   })
 
-  it('returns a conflict message when the backend responds 409', async () => {
+  it('surfaces the backend message when the user-endpoint POST fails with a non-409 error', async () => {
+    const backendMessage = 'Safe account name is too long'
+    const dispatch = jest.fn((action) => {
+      if (action.type === 'user-create-thunk') return { error: { status: 422, data: { message: backendMessage } } }
+      return action
+    }) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: null,
+      isUserAuthenticated: true,
+      dispatch,
+    })
+
+    expect(replayImpl).not.toHaveBeenCalled()
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error.message).toBe(backendMessage)
+  })
+
+  it('recovers as already-deployed (no error) when the backend responds 409', async () => {
     const dispatch = jest.fn((action) => {
       if (action.type === 'user-create-thunk') return { error: { status: 409 } }
       return action
@@ -175,33 +194,19 @@ describe('persistCounterfactualSafe', () => {
       dispatch,
     })
 
-    expect(result.ok).toBe(false)
-    if (!result.ok) {
-      expect(result.error.message).toMatch(/counterfactual account/i)
-    }
-  })
-
-  it('skips the POST and undeployed add and reports skipped when the Safe is already deployed', async () => {
-    isSmartContractImpl.mockResolvedValue(true)
-    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
-
-    const result = await persistCounterfactualSafe({
-      ...baseArgs,
-      spaceId: MOCK_SPACE_UUID,
-      isUserAuthenticated: true,
-      dispatch,
-    })
-
-    expect(userInitiate).not.toHaveBeenCalled()
+    // 409 => the Safe is already deployed. Recover instead of surfacing a hard
+    // failure: skip CF creation and add it to My accounts as deployed.
     expect(spaceInitiate).not.toHaveBeenCalled()
     expect(replayImpl).not.toHaveBeenCalled()
     expect(result.ok).toBe(true)
     if (result.ok) expect(result.skipped).toBe('already-deployed')
   })
 
-  it('adds the already-deployed Safe to My accounts and clears any stale undeployed entry', async () => {
-    isSmartContractImpl.mockResolvedValue(true)
-    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+  it('adds the Safe to My accounts and clears the stale undeployed entry on a backend 409', async () => {
+    const dispatch = jest.fn((action) => {
+      if (action.type === 'user-create-thunk') return { error: { status: 409 } }
+      return action
+    }) as unknown as AppDispatch
 
     await persistCounterfactualSafe({
       ...baseArgs,
@@ -223,13 +228,14 @@ describe('persistCounterfactualSafe', () => {
     expect(dispatch).toHaveBeenCalledWith(removeUndeployedSafe({ chainId: '100', address: '0xSafe' }))
   })
 
-  it('skips the deployment check and persists when no provider is passed', async () => {
+  it('does NOT run the client-side deployment check for authenticated users (relies on the backend 409)', async () => {
+    // Authed users hit the CGW `create` guard, so the extra on-chain RPC check
+    // is skipped even when a provider is present and the Safe is deployed.
     isSmartContractImpl.mockResolvedValue(true)
     const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
 
     const result = await persistCounterfactualSafe({
       ...baseArgs,
-      provider: undefined,
       spaceId: null,
       isUserAuthenticated: true,
       dispatch,
@@ -239,38 +245,82 @@ describe('persistCounterfactualSafe', () => {
     expect(userInitiate).toHaveBeenCalledTimes(1)
     expect(replayImpl).toHaveBeenCalled()
     expect(result.ok).toBe(true)
+  })
+
+  it('runs the client-side deployment check for unauthenticated users and reports skipped when deployed', async () => {
+    isSmartContractImpl.mockResolvedValue(true)
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: null,
+      isUserAuthenticated: false,
+      dispatch,
+    })
+
+    expect(isSmartContractImpl).toHaveBeenCalledWith('0xSafe', mockProvider)
+    expect(userInitiate).not.toHaveBeenCalled()
+    expect(replayImpl).not.toHaveBeenCalled()
+    expect(result.ok).toBe(true)
+    if (result.ok) expect(result.skipped).toBe('already-deployed')
+  })
+
+  it('adds the already-deployed Safe to My accounts and clears any stale undeployed entry (unauth path)', async () => {
+    isSmartContractImpl.mockResolvedValue(true)
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: null,
+      isUserAuthenticated: false,
+      dispatch,
+    })
+
+    expect(dispatch).toHaveBeenCalledWith(
+      addOrUpdateSafe({
+        safe: expect.objectContaining({
+          chainId: '100',
+          address: { value: '0xSafe', name: 'MySafe' },
+          threshold: 1,
+          owners: [{ value: '0xabc' }],
+        }),
+      }),
+    )
+    expect(dispatch).toHaveBeenCalledWith(removeUndeployedSafe({ chainId: '100', address: '0xSafe' }))
+  })
+
+  it('skips the unauth deployment check and persists locally when no provider is passed', async () => {
+    isSmartContractImpl.mockResolvedValue(true)
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      provider: undefined,
+      spaceId: null,
+      isUserAuthenticated: false,
+      dispatch,
+    })
+
+    expect(isSmartContractImpl).not.toHaveBeenCalled()
+    expect(replayImpl).toHaveBeenCalled()
+    expect(result.ok).toBe(true)
     if (result.ok) expect(result.skipped).toBeUndefined()
   })
 
-  it('proceeds with the persist when the deployment check fails (fail-open)', async () => {
+  it('proceeds with the persist when the unauth deployment check fails (fail-open)', async () => {
     isSmartContractImpl.mockRejectedValue(new Error('rpc down'))
     const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
 
     const result = await persistCounterfactualSafe({
       ...baseArgs,
       spaceId: null,
-      isUserAuthenticated: true,
+      isUserAuthenticated: false,
       dispatch,
     })
 
-    expect(userInitiate).toHaveBeenCalledTimes(1)
+    expect(isSmartContractImpl).toHaveBeenCalled()
     expect(replayImpl).toHaveBeenCalled()
     expect(result.ok).toBe(true)
-  })
-
-  it('passes the provided provider to the deployment check', async () => {
-    const provider = { getCode: jest.fn() } as unknown as Parameters<typeof persistCounterfactualSafe>[0]['provider']
-    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
-
-    await persistCounterfactualSafe({
-      ...baseArgs,
-      spaceId: null,
-      isUserAuthenticated: true,
-      provider,
-      dispatch,
-    })
-
-    expect(isSmartContractImpl).toHaveBeenCalledWith('0xSafe', provider)
   })
 
   it('rolls back the user-level POST and skips Redux add when space-endpoint POST fails', async () => {
