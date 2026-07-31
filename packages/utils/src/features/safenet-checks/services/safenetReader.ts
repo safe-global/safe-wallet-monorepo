@@ -1,5 +1,5 @@
-import { JsonRpcProvider } from 'ethers'
-import { CONSENSUS_TOPIC0S, SENTINEL_TOPIC0S } from '../abi'
+import { Contract, isCallException, JsonRpcProvider } from 'ethers'
+import { CONSENSUS_READ_ABI, CONSENSUS_TOPIC0S, COORDINATOR_READ_ABI, SENTINEL_TOPIC0S } from '../abi'
 import {
   BLOCK_ESTIMATE_MAX_REFINEMENTS,
   BLOCK_ESTIMATE_TOLERANCE_SECONDS,
@@ -9,20 +9,26 @@ import {
   PROVIDER_BATCH_MAX_COUNT,
   SAFENET_CHAIN_ID,
   SAFENET_CONSENSUS_ADDRESS,
+  SAFENET_COORDINATOR_ADDRESS,
   SAFENET_ORACLE_ADDRESSES,
   SAFENET_RPC_URLS,
   TARGETED_WINDOW_BACK_BLOCKS,
 } from '../constants'
 import {
+  AttestationVerificationStatus,
   CheckEventType,
   OracleGeneration,
+  type AttestationVerification,
   type Hex,
   type NormalizedCheckEvent,
+  type OracleAttestedEvent,
   type OracleProposedEvent,
+  type PlainAttestedEvent,
 } from '../types'
 import { decodeLogs, type RawLog } from '../utils/decodeLogs'
 import { deadlineBlockOf } from '../utils/deriveCheckState'
-import { oracleProposalHash } from '../utils/oracleProposalHash'
+import { isValidPoint, verifyAttestation as verifyFrostAttestation } from '../utils/frost'
+import { oracleProposalHash, plainProposalHash } from '../utils/oracleProposalHash'
 
 /**
  * Everything one poll reads off-chain for a single check, before the query layer
@@ -68,6 +74,8 @@ export type SafenetReaderConfig = {
   /** Feeds BOTH the provider network AND the EIP-712 request-id domain. */
   chainId: string
   consensus: string
+  /** FROSTCoordinator the epoch group keys are read from. */
+  coordinator: string
   /** Allowlisted sentinel-oracle addresses. Empty = the oracle path is skipped. */
   oracles: string[]
 }
@@ -77,6 +85,7 @@ export const readerConfigFromEnv = (): SafenetReaderConfig => ({
   rpcUrls: SAFENET_RPC_URLS,
   chainId: SAFENET_CHAIN_ID,
   consensus: SAFENET_CONSENSUS_ADDRESS,
+  coordinator: SAFENET_COORDINATOR_ADDRESS,
   oracles: SAFENET_ORACLE_ADDRESSES,
 })
 
@@ -107,24 +116,28 @@ const chunkRanges = (from: number, to: number, size: number): Array<[number, num
 }
 
 /**
- * Chain reader for a check's Safenet lifecycle. Owns a pinned-endpoint provider,
- * rotated on failure. Construct with {@link readerConfigFromEnv} in production;
- * pass an explicit config in tests.
+ * Chain reader for a check's Safenet lifecycle. Owns a pinned-endpoint provider
+ * (rotated on failure) and a per-epoch FROST group-key cache. Construct with
+ * {@link readerConfigFromEnv} in production; pass an explicit config in tests.
  */
 export class SafenetReader {
   private readonly rpcUrls: string[]
   private readonly chainId: string
   private readonly consensus: string
+  private readonly coordinator: string
   private readonly oracles: readonly string[]
 
   private urlIndex = 0
   private currentProvider: JsonRpcProvider | null = null
   private chainIdChecked = false
+  /** Epoch → FROST group public key. The binding is immutable once staged. */
+  private readonly groupKeyCache = new Map<string, { x: string; y: string }>()
 
   constructor(config: SafenetReaderConfig) {
     this.rpcUrls = config.rpcUrls
     this.chainId = config.chainId
     this.consensus = config.consensus
+    this.coordinator = config.coordinator
     this.oracles = config.oracles.map((address) => address.toLowerCase())
   }
 
@@ -164,6 +177,14 @@ export class SafenetReader {
         return await op(provider)
       } catch (error) {
         lastError = error
+        // A deterministic contract revert (e.g. `groupKey` for an epoch the
+        // coordinator has not seen) is not an endpoint failure. Rotating and
+        // retrying every URL would repeat it N times and tear down the shared
+        // provider under concurrent reads. Only revert DATA proves a revert,
+        // though: ethers turns every JSON-RPC error on an eth_call into a
+        // CALL_EXCEPTION, so a data-less one may just be a rate limit or pruned
+        // state on this endpoint, and the next endpoint deserves a try.
+        if (isCallException(error) && error.data != null) throw error
         this.rotate(provider)
       }
     }
@@ -428,6 +449,105 @@ export class SafenetReader {
         deadlineBlock: deadline === null ? null : deadline.toString(),
       }
     })
+  }
+
+  /**
+   * Resolve an epoch's FROST group public key: `getEpochGroupId(epoch)` →
+   * `coordinator.groupKey(groupId)`. Cached by epoch — the epoch→group binding
+   * is immutable once staged. Throws on RPC failure (including an epoch the
+   * coordinator has not seen yet: `groupKey` reverts rather than returning
+   * zeros) AND on an off-curve response, so {@link verifyAttestation} can treat
+   * both as retryable (`PENDING`) — a corrupt response from a flaky endpoint
+   * must never be cached, where it would terminalize every attestation in the
+   * epoch as INVALID.
+   */
+  async loadGroupKey(epoch: string): Promise<{ x: string; y: string }> {
+    const cached = this.groupKeyCache.get(epoch)
+    if (cached) return cached
+    // Derived OUTSIDE the provider op: a malformed epoch is not an endpoint
+    // failure and must not burn a rotation through the URL list.
+    const epochValue = BigInt(epoch)
+
+    return this.withProvider(async (provider) => {
+      const consensus = new Contract(this.consensus, [...CONSENSUS_READ_ABI], provider)
+      const groupId: string = await consensus.getEpochGroupId(epochValue)
+      const coordinator = new Contract(this.coordinator, [...COORDINATOR_READ_ABI], provider)
+      const key = await coordinator.groupKey(groupId)
+      const point = { x: key.x.toString(), y: key.y.toString() }
+      if (!isValidPoint(point)) {
+        throw new Error(`Safenet reader: coordinator returned an off-curve group key for epoch ${epoch}`)
+      }
+      this.groupKeyCache.set(epoch, point)
+      return point
+    })
+  }
+
+  /**
+   * Verify an attested event's FROST signature against its epoch group key.
+   * A group-key fetch failure is retryable (`PENDING`); a signature that does
+   * not verify is terminal (`INVALID`) and must never render as BENIGN.
+   * Deliberately uncached: once the epoch's group key is cached, a re-verify
+   * is a pure local computation.
+   */
+  async verifyAttestation(attested: OracleAttestedEvent | PlainAttestedEvent): Promise<AttestationVerification> {
+    // The two paths sign different EIP-712 preimages. Deriving it here, from the
+    // event we actually decoded, is the only place that knows which is which —
+    // callers cannot pair the wrong hash with the wrong attestation.
+    const message =
+      attested.type === CheckEventType.ORACLE_ATTESTED
+        ? oracleProposalHash({
+            chainId: this.chainId,
+            consensus: this.consensus,
+            epoch: attested.epoch,
+            oracle: attested.oracle,
+            safeTxHash: attested.safeTxHash,
+          })
+        : plainProposalHash({
+            chainId: this.chainId,
+            consensus: this.consensus,
+            epoch: attested.epoch,
+            safeTxHash: attested.safeTxHash,
+          })
+
+    let groupKey: { x: string; y: string }
+    try {
+      groupKey = await this.loadGroupKey(attested.epoch)
+    } catch {
+      return { status: AttestationVerificationStatus.PENDING, signatureId: attested.signatureId, message }
+    }
+
+    const verified = verifyFrostAttestation({ groupKey, attestation: attested.attestation, message })
+    return {
+      status: verified ? AttestationVerificationStatus.VERIFIED : AttestationVerificationStatus.INVALID,
+      signatureId: attested.signatureId,
+      message,
+    }
+  }
+
+  /**
+   * Wall-clock time of a block in milliseconds. Used to date the attestation in
+   * the audit log.
+   *
+   * `eth_getLogs` responses carry no timestamps, so this is a separate header
+   * read. Call it only once a check has an attestation. The value cannot change
+   * afterwards and polling stops at that point, so it costs one extra RPC per
+   * settled check rather than one per poll.
+   *
+   * Returns `null` on failure. A missing date leaves one column of the audit log
+   * empty, which is a smaller cost than failing a read whose verdict verified.
+   */
+  async blockTimeMs(blockNumber: number): Promise<number | null> {
+    try {
+      return await this.withProvider(async (provider) => {
+        const block = await provider.getBlock(blockNumber)
+        // Thrown so the failure reaches withProvider: a header this endpoint
+        // cannot serve may still be served by the next one.
+        if (!block) throw new Error(`Safenet reader: no header for block ${blockNumber}`)
+        return block.timestamp * 1000
+      })
+    } catch {
+      return null
+    }
   }
 }
 

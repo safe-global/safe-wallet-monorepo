@@ -5,6 +5,7 @@
   "version": "1.0.0",
   "scripts": {
     "test": "jest",
+    "test:integration": "jest --config jest.integration.config.js",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "type-check": "tsc --noEmit",
