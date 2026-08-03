@@ -112,7 +112,7 @@
   --color-background-sheet: #121312;
   --color-background-paper: #1c1c1c;
   --color-background-light: #1b2a22;
-  --color-background-light-hover: #233529;
+  --color-background-light-hover: #12ff801a;
   --color-background-secondary: #303033;
   --color-background-skeleton: rgba(255, 255, 255, 0.04);
   --color-background-disabled: #7878801f;
@@ -171,7 +171,7 @@
     --color-background-sheet: #121312;
     --color-background-paper: #1c1c1c;
     --color-background-light: #1b2a22;
-    --color-background-light-hover: #233529;
+    --color-background-light-hover: #12ff801a;
     --color-background-secondary: #303033;
     --color-background-skeleton: rgba(255, 255, 255, 0.04);
     --color-background-disabled: #7878801f;
