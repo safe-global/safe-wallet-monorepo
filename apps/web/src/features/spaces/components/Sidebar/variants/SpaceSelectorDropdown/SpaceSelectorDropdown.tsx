@@ -199,25 +199,6 @@ export const SpaceSelectorDropdown = ({
         data-testid="space-selector-menu"
       >
         <div className={cn(css.groupLabel, 'mb-1')}>Workspaces</div>
-        {selectedSpace && (
-          <div className="flex items-center gap-2 px-2 py-1.5">
-            <Avatar className={css.spaceSelectorAvatar}>
-              <AvatarFallback
-                className={css.spaceSelectorAvatarFallback}
-                style={{ backgroundColor: selectedSpaceColor }}
-              >
-                {initial}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <div className={css.textSmallBold}>{selectedSpace.name}</div>
-              <div className={css.textMini}>Workspace</div>
-            </div>
-          </div>
-        )}
-
-        {triggerVariant === 'default' ? <DropdownMenuSeparator /> : null}
-
         {spaces.map((space) => renderSpaceMenuItem(space))}
 
         <DropdownMenuSeparator className="my-1" />

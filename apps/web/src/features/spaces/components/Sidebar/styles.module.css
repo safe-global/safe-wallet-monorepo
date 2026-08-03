@@ -249,18 +249,6 @@
   padding: 8px 12px;
 }
 
-.textSmallBold {
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 600;
-}
-
-.textMini {
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 400;
-}
-
 .footerHelp {
   font-size: 0.875rem;
   line-height: 1.25rem;
