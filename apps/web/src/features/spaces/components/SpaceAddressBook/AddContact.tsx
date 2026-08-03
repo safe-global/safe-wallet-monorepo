@@ -1,8 +1,7 @@
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId, useGetSpaceAddressBook } from '@/features/spaces'
-import { useWorkspaceAddressBookLabel } from '@/features/spaces/hooks/useWorkspaceAddressBookLabel'
+import { useCurrentSpaceId, useGetSpaceAddressBook, useWorkspaceAddressBookLabel } from '@/features/spaces'
 import { getContactAddedMessage } from '@/utils/addressBookNotifications'
 import AddContactDialog from './AddContactDialog'
 

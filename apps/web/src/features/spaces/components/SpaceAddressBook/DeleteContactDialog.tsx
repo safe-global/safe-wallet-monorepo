@@ -8,12 +8,11 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { ChainIndicatorList } from '@/features/multichain'
 import { useAddressBooksDeleteByAddressV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId, useWorkspaceAddressBookLabel } from '@/features/spaces'
 import { useState } from 'react'
 import { Alert, CircularProgress } from '@mui/material'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
-import { useWorkspaceAddressBookLabel } from '@/features/spaces/hooks/useWorkspaceAddressBookLabel'
 import { getContactRemovedMessage } from '@/utils/addressBookNotifications'
 
 type DeleteContactDialogProps = {

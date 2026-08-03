@@ -15,12 +15,11 @@ import {
   useAddressBooksUpsertAddressBookItemsV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { showNotification } from '@/store/notificationsSlice'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId, useWorkspaceAddressBookLabel } from '@/features/spaces'
 import { useAppDispatch } from '@/store'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import { useWorkspaceAddressBookLabel } from '@/features/spaces/hooks/useWorkspaceAddressBookLabel'
 import { getContactUpdatedMessage } from '@/utils/addressBookNotifications'
 
 type EditContactDialogProps = {
