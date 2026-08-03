@@ -158,7 +158,7 @@ export const addressBookListener = (listenerMiddleware: typeof listenerMiddlewar
 
       listenerApi.dispatch(
         showNotification({
-          variant: 'info',
+          variant: 'success',
           groupKey: ADDRESS_BOOK_GROUP_KEY,
           message: getContactRemovedMessage(PERSONAL_ADDRESS_BOOK_LABEL),
         }),

@@ -96,7 +96,7 @@ describe('addressBookListener', () => {
 
     store.dispatch(removeAddressBookEntry({ chainId: '1', address: '0xabc', notify: true }))
 
-    expect(abMessages(store)).toEqual([{ message: 'Contact removed from your address book', variant: 'info' }])
+    expect(abMessages(store)).toEqual([{ message: 'Contact removed from your address book', variant: 'success' }])
   })
 
   it('does not notify on delete without the flag', () => {
