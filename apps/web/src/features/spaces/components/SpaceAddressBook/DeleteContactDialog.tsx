@@ -13,6 +13,8 @@ import { useState } from 'react'
 import { Alert, CircularProgress } from '@mui/material'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
+import { useWorkspaceAddressBookLabel } from '@/features/spaces/hooks/useWorkspaceAddressBookLabel'
+import { getContactRemovedMessage } from '@/utils/addressBookNotifications'
 
 type DeleteContactDialogProps = {
   name: string
@@ -26,6 +28,7 @@ const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContact
   const [isSubmitting, setIsSubmitting] = useState(false)
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
+  const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
   const [deleteEntry] = useAddressBooksDeleteByAddressV1Mutation()
 
   const handleConfirm = async () => {
@@ -43,7 +46,7 @@ const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContact
 
       dispatch(
         showNotification({
-          message: `Deleted contact from your workspace address book`,
+          message: getContactRemovedMessage(workspaceAddressBookLabel),
           variant: 'success',
           groupKey: 'delete-contact-success',
         }),

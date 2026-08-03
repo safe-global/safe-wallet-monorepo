@@ -22,11 +22,18 @@ const upsertionSpyFn = jest.fn()
 const upsertionSpy = jest
   .spyOn(spacesRTK, 'useAddressBooksUpsertAddressBookItemsV1Mutation')
   .mockReturnValue([upsertionSpyFn, { reset: jest.fn() }])
+const spaceQuerySpy = jest
+  .spyOn(spacesRTK, 'useSpacesGetOneV1Query')
+  .mockReturnValue({ currentData: { name: 'Acme' } } as unknown as ReturnType<typeof spacesRTK.useSpacesGetOneV1Query>)
 
 describe('ImportAddressBookDialog', () => {
   beforeEach(() => {
     mockedUseChains.mockReturnValue({ configs: [{ chainId: '1' } as Chain, { chainId: '5' } as Chain] })
     upsertionSpyFn.mockReset()
+  })
+
+  afterAll(() => {
+    spaceQuerySpy.mockRestore()
   })
 
   afterAll(() => {
@@ -160,7 +167,7 @@ describe('ImportAddressBookDialog', () => {
 
     await waitFor(() => {
       expect(importMessages()).toContainEqual({
-        message: '2 contacts imported to your workspace address book',
+        message: '2 contacts imported to Acme address book',
         variant: 'success',
       })
     })
@@ -183,7 +190,7 @@ describe('ImportAddressBookDialog', () => {
     await waitFor(() => {
       expect(importMessages()).toContainEqual({
         message:
-          '2 contacts imported to your workspace address book across 2 networks. Only contacts on the current network are shown here',
+          '2 contacts imported to Acme address book across 2 networks. Only contacts on the current network are shown here',
         variant: 'success',
       })
     })

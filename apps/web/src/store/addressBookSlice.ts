@@ -3,7 +3,13 @@ import { validateAddress } from '@safe-global/utils/utils/validation'
 import pickBy from 'lodash/pickBy'
 import type { RootState, listenerMiddlewareInstance } from '.'
 import { showNotification } from './notificationsSlice'
-import { getImportSuccessMessage } from '@/utils/addressBookNotifications'
+import {
+  getContactAddedMessage,
+  getContactRemovedMessage,
+  getContactUpdatedMessage,
+  getImportSuccessMessage,
+  PERSONAL_ADDRESS_BOOK_LABEL,
+} from '@/utils/addressBookNotifications'
 
 export type AddressBook = { [address: string]: string }
 
@@ -71,15 +77,13 @@ export const selectAddressBookByChain = createSelector(
   },
 )
 
-// Per-batch accumulator for CSV imports: notifyBatchId -> running tally of
-// how many rows were imported and which distinct networks they span.
+// Per-import tally, keyed by notifyBatchId: row count + the networks they span.
 type ImportBatch = { count: number; chainIds: Set<string> }
 const importBatches = new Map<string, ImportBatch>()
 
 const ADDRESS_BOOK_GROUP_KEY = 'address-book'
 
 export const addressBookListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
-  // Single adds/updates + batched imports
   listenerMiddleware.startListening({
     actionCreator: upsertAddressBookEntries,
     effect: async (action, listenerApi) => {
@@ -90,7 +94,6 @@ export const addressBookListener = (listenerMiddleware: typeof listenerMiddlewar
         return
       }
 
-      // Batch import path: aggregate every row into a single toast.
       if (notifyBatchId) {
         const batch = importBatches.get(notifyBatchId) ?? { count: 0, chainIds: new Set<string>() }
         batch.count += 1
@@ -104,7 +107,11 @@ export const addressBookListener = (listenerMiddleware: typeof listenerMiddlewar
         const { count, chainIds: networks } = importBatches.get(notifyBatchId) ?? batch
         importBatches.delete(notifyBatchId)
 
-        const message = getImportSuccessMessage({ count, networkCount: networks.size, scope: 'personal' })
+        const message = getImportSuccessMessage({
+          count,
+          networkCount: networks.size,
+          bookLabel: PERSONAL_ADDRESS_BOOK_LABEL,
+        })
 
         listenerApi.dispatch(
           showNotification({
@@ -115,13 +122,10 @@ export const addressBookListener = (listenerMiddleware: typeof listenerMiddlewar
         )
         return
       }
-
-      // Single add/update: classify against the pre-action state.
       const original = listenerApi.getOriginalState()
       const existedSomewhere = chainIds.some((chainId) => original.addressBook[chainId]?.[address] !== undefined)
       const changedSomewhere = chainIds.some((chainId) => original.addressBook[chainId]?.[address] !== name)
 
-      // No-op re-save (same name on every target chain): skip.
       if (!changedSomewhere) {
         return
       }
@@ -131,14 +135,13 @@ export const addressBookListener = (listenerMiddleware: typeof listenerMiddlewar
           variant: 'success',
           groupKey: ADDRESS_BOOK_GROUP_KEY,
           message: existedSomewhere
-            ? `Updated contact in your personal address book`
-            : `Added contact to your personal address book`,
+            ? getContactUpdatedMessage(PERSONAL_ADDRESS_BOOK_LABEL)
+            : getContactAddedMessage(PERSONAL_ADDRESS_BOOK_LABEL),
         }),
       )
     },
   })
 
-  // Deletes
   listenerMiddleware.startListening({
     actionCreator: removeAddressBookEntry,
     effect: (action, listenerApi) => {
@@ -157,7 +160,7 @@ export const addressBookListener = (listenerMiddleware: typeof listenerMiddlewar
         showNotification({
           variant: 'info',
           groupKey: ADDRESS_BOOK_GROUP_KEY,
-          message: 'Deleted contact from your personal address book',
+          message: getContactRemovedMessage(PERSONAL_ADDRESS_BOOK_LABEL),
         }),
       )
     },

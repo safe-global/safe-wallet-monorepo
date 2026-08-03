@@ -18,6 +18,10 @@ jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '42',
 }))
 
+jest.mock('@/features/spaces/hooks/useWorkspaceAddressBookLabel', () => ({
+  useWorkspaceAddressBookLabel: () => 'Acme address book',
+}))
+
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
@@ -109,6 +113,23 @@ describe('EditContactDialog', () => {
     await submitForm()
 
     expect(await screen.findByText(/Something went wrong \(500\)/)).toBeInTheDocument()
+  })
+
+  it('dispatches a workspace-labeled "updated" notification on success', async () => {
+    mockUpsertAddressBook.mockResolvedValue({ data: {} })
+
+    render(<EditContactDialog entry={entry} onClose={jest.fn()} />)
+    await submitForm()
+
+    await waitFor(() =>
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'notifications/show',
+        payload: expect.objectContaining({
+          message: 'Contact updated in Acme address book',
+          variant: 'success',
+        }),
+      }),
+    )
   })
 
   it('treats a name that sanitizes back to the saved name as unchanged', async () => {

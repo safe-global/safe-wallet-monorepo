@@ -27,7 +27,7 @@ describe('addressBookListener', () => {
 
     store.dispatch(upsertAddressBookEntries({ chainIds: ['1'], address: '0xabc', name: 'Alice', notify: true }))
 
-    expect(abMessages(store)).toEqual([{ message: 'Added contact to your personal address book', variant: 'success' }])
+    expect(abMessages(store)).toEqual([{ message: 'Contact added to your address book', variant: 'success' }])
   })
 
   it('notifies "updated" when renaming an existing entry', () => {
@@ -35,9 +35,7 @@ describe('addressBookListener', () => {
 
     store.dispatch(upsertAddressBookEntries({ chainIds: ['1'], address: '0xabc', name: 'Alice 2', notify: true }))
 
-    expect(abMessages(store)).toEqual([
-      { message: 'Updated contact in your personal address book', variant: 'success' },
-    ])
+    expect(abMessages(store)).toEqual([{ message: 'Contact updated in your address book', variant: 'success' }])
   })
 
   it('does not notify when the name is unchanged', () => {
@@ -82,9 +80,7 @@ describe('addressBookListener', () => {
       upsertAddressBookEntries({ chainIds: ['1', '137'], address: '0xabc', name: 'Alice 2', notify: true }),
     )
 
-    expect(abMessages(store)).toEqual([
-      { message: 'Updated contact in your personal address book', variant: 'success' },
-    ])
+    expect(abMessages(store)).toEqual([{ message: 'Contact updated in your address book', variant: 'success' }])
   })
 
   it('emits a single notification for a multi-chain new entry', () => {
@@ -92,7 +88,7 @@ describe('addressBookListener', () => {
 
     store.dispatch(upsertAddressBookEntries({ chainIds: ['1', '137'], address: '0xabc', name: 'Alice', notify: true }))
 
-    expect(abMessages(store)).toEqual([{ message: 'Added contact to your personal address book', variant: 'success' }])
+    expect(abMessages(store)).toEqual([{ message: 'Contact added to your address book', variant: 'success' }])
   })
 
   it('notifies "removed" on delete with notify:true', () => {
@@ -100,7 +96,7 @@ describe('addressBookListener', () => {
 
     store.dispatch(removeAddressBookEntry({ chainId: '1', address: '0xabc', notify: true }))
 
-    expect(abMessages(store)).toEqual([{ message: 'Deleted contact from your personal address book', variant: 'info' }])
+    expect(abMessages(store)).toEqual([{ message: 'Contact removed from your address book', variant: 'info' }])
   })
 
   it('does not notify on delete without the flag', () => {
@@ -150,9 +146,7 @@ describe('addressBookListener', () => {
 
       await flushDebounce()
 
-      expect(abMessages(store)).toEqual([
-        { message: '3 contacts imported to your personal address book', variant: 'success' },
-      ])
+      expect(abMessages(store)).toEqual([{ message: '3 contacts imported to your address book', variant: 'success' }])
     })
 
     it('calls out the network spread for a multi-network batch import', async () => {
@@ -187,7 +181,7 @@ describe('addressBookListener', () => {
       expect(abMessages(store)).toEqual([
         {
           message:
-            '10 contacts imported to your personal address book across 5 networks. Only contacts on the current network are shown here',
+            '10 contacts imported to your address book across 5 networks. Only contacts on the current network are shown here',
           variant: 'success',
         },
       ])
@@ -248,8 +242,8 @@ describe('addressBookListener', () => {
       await flushDebounce()
 
       expect(abMessages(store)).toEqual([
-        { message: '2 contacts imported to your personal address book', variant: 'success' },
-        { message: '3 contacts imported to your personal address book', variant: 'success' },
+        { message: '2 contacts imported to your address book', variant: 'success' },
+        { message: '3 contacts imported to your address book', variant: 'success' },
       ])
     })
   })

@@ -19,6 +19,7 @@ import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/st
 import { useCurrentSpaceId, useGetSpaceAddressBook } from '@/features/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getImportSuccessMessage } from '@/utils/addressBookNotifications'
+import { useWorkspaceAddressBookLabel } from '@/features/spaces/hooks/useWorkspaceAddressBookLabel'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
@@ -42,6 +43,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
   const { configs } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
+  const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
 
   const allAddressBooks = useAllAddressBooks()
@@ -103,7 +105,11 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
 
       const contactCount = contactItems.length
       const networkCount = new Set(contactItems.flatMap((item) => item.chainIds)).size
-      const successMessage = getImportSuccessMessage({ count: contactCount, networkCount, scope: 'workspace' })
+      const successMessage = getImportSuccessMessage({
+        count: contactCount,
+        networkCount,
+        bookLabel: workspaceAddressBookLabel,
+      })
 
       dispatch(
         showNotification({

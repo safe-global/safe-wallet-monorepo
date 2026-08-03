@@ -26,6 +26,10 @@ jest.mock('@/features/spaces', () => ({
   useGetSpaceAddressBook: () => [{ id: 1 }, { id: 2 }],
 }))
 
+jest.mock('@/features/spaces/hooks/useWorkspaceAddressBookLabel', () => ({
+  useWorkspaceAddressBookLabel: () => 'Acme address book',
+}))
+
 type CapturedProps = {
   triggerLabel: string
   dialogTitle: string
@@ -57,7 +61,7 @@ describe('AddContact', () => {
 
     expect(lastProps?.triggerLabel).toBe('Add shared contact')
     expect(lastProps?.dialogTitle).toBe('Add contact')
-    expect(lastProps?.successMessage).toBe('Added contact to your workspace address book')
+    expect(lastProps?.successMessage).toBe('Contact added to Acme address book')
     expect(lastProps?.successGroupKey).toBe('add-contact-success')
     expect(screen.getByTestId('dialog-stub')).toHaveTextContent('Add shared contact')
   })
