@@ -16,7 +16,18 @@ export type RpcConfig = {
   chainId?: string
   head?: number
   headTimestamp?: number
+  /** Seconds between consecutive blocks (default 5, the nominal Gnosis cadence). */
+  blockTimeSeconds?: number
+  /** Nonlinear cadence: unix timestamp for block `n`. Wins over `blockTimeSeconds`. */
+  timestampAt?: (blockNumber: number) => number
   logs?: RawLog[]
+  /**
+   * How numeric `eth_getBlockByNumber` probes fail. `'null'` answers "block not
+   * found". `'error'` answers a JSON-RPC error, which is what a load-balanced
+   * node returns for an old header it cannot serve, and which rejects in ethers
+   * rather than resolving to null.
+   */
+  failBlockProbes?: 'null' | 'error'
   failEverything?: boolean
 }
 
@@ -41,6 +52,12 @@ export const makeEndpoint = (config: RpcConfig) => {
   const getLogsCalls: GetLogsFilter[] = []
   const methods: string[] = []
 
+  const blockTimestamp = (number: number): number => {
+    if (config.timestampAt) return config.timestampAt(number)
+    const head = config.head ?? 0
+    return Math.max(0, (config.headTimestamp ?? 1_000_000) - (head - number) * (config.blockTimeSeconds ?? 5))
+  }
+
   const respondOne = (req: { id: number; method: string; params: unknown[] }) => {
     methods.push(req.method)
     if (config.failEverything) {
@@ -52,12 +69,16 @@ export const makeEndpoint = (config: RpcConfig) => {
     switch (req.method) {
       case 'eth_chainId':
         return ok('0x' + Number(config.chainId ?? '100').toString(16))
-      // The reader only ever asks for 'latest' in this slice.
       case 'eth_getBlockByNumber': {
-        const number = config.head ?? 0
+        const head = config.head ?? 0
+        const tag = req.params[0] as string
+        if (tag !== 'latest' && config.failBlockProbes) {
+          return config.failBlockProbes === 'error' ? err('missing trie node') : ok(null)
+        }
+        const number = tag === 'latest' ? head : hexToNum(tag)
         return ok({
           number: '0x' + number.toString(16),
-          timestamp: '0x' + (config.headTimestamp ?? 1_000_000).toString(16),
+          timestamp: '0x' + blockTimestamp(number).toString(16),
           hash: '0x' + '22'.repeat(32),
           parentHash: '0x' + '33'.repeat(32),
           nonce: '0x0000000000000000',
