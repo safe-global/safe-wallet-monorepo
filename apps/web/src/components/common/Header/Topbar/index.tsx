@@ -93,7 +93,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   return (
     <>
       <header
-        className={`@container flex flex-wrap ${showLogo ? 'items-center' : 'items-start'} gap-y-2 px-6 py-4 bg-secondary dark:bg-background ${
+        className={`@container flex flex-wrap ${showLogo ? 'items-center' : 'items-start'} gap-y-2 px-6 pt-6 pb-4 bg-secondary dark:bg-background ${
           showMenuButton ? 'pl-2' : ''
         }`}
       >
