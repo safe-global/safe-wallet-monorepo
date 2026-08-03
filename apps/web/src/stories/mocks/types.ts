@@ -37,6 +37,8 @@ export interface FeatureFlags {
   spaces?: boolean
   /** OIDC_AUTH - OIDC-based login for email and Google (default: false) */
   oidcAuth?: boolean
+  /** SWITCH_AUTHENTICATOR - 2FA management surfaces (default: false) */
+  switchAuthenticator?: boolean
 }
 
 /**

@@ -323,8 +323,10 @@ export const localStorageKeys = {
   SAFE_v2__pendingCfDeletes: 'SAFE_v2__pendingCfDeletes',
   SAFE_v2__visitedSafes: 'SAFE_v2__visitedSafes',
   SAFE_v2__auth: 'SAFE_v2__auth',
+  SAFE_v2__lastWallet: 'SAFE_v2__lastWallet',
 }
 
 export const sessionStorageKeys = {
   SAFE_v2__classicViewEnabled: 'SAFE_v2__classicViewEnabled',
+  SAFE_v2__privateKeyModulePK: 'SAFE_v2__privateKeyModulePK',
 }
