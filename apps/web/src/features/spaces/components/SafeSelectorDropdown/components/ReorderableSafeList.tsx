@@ -16,6 +16,12 @@ interface ReorderableSafeListProps {
   onRename?: (target: SafeRenameTarget) => void
   /** Fired on drop with the reordered top-level addresses, in display order. */
   onReorder: (orderedAddresses: string[]) => void
+  /**
+   * Disables dragging and hides the grips — used while a search query is active, where a drop would
+   * persist a partial (filtered) order. The list stays mounted so filtering never swaps it out for a
+   * different component (which would remount the base-ui rows and steal focus from the search input).
+   */
+  isDragDisabled?: boolean
 }
 
 /**
@@ -28,7 +34,14 @@ interface ReorderableSafeListProps {
  * Auto-scroll works within the dropdown's scroll container, so lists longer than the fold reorder too.
  * The dragged row is portaled to <body> so the Select popup's positioning transform can't offset it.
  */
-const ReorderableSafeList = ({ items, selectedItemId, onSelect, onRename, onReorder }: ReorderableSafeListProps) => {
+const ReorderableSafeList = ({
+  items,
+  selectedItemId,
+  onSelect,
+  onRename,
+  onReorder,
+  isDragDisabled = false,
+}: ReorderableSafeListProps) => {
   const handleDragEnd = ({ source, destination }: DropResult) => {
     if (!destination || destination.index === source.index) return
     onReorder(reorderByKey(items, source.index, destination.index, (item) => item.address))
@@ -40,10 +53,14 @@ const ReorderableSafeList = ({ items, selectedItemId, onSelect, onRename, onReor
         {(dropProvided) => (
           <div ref={dropProvided.innerRef} {...dropProvided.droppableProps} data-testid="safe-selector-reorder-list">
             {items.map((item, index) => (
-              <Draggable key={item.address} draggableId={item.address} index={index}>
+              <Draggable key={item.address} draggableId={item.address} index={index} isDragDisabled={isDragDisabled}>
                 {(dragProvided, snapshot) => {
                   const isCurrent = item.id === selectedItemId
-                  const dragHandle = <DragHandle dragHandleProps={dragProvided.dragHandleProps} />
+                  // No grip while dragging is disabled (search) — dnd allows a missing handle only when
+                  // the draggable is disabled, and an inert grip would wrongly signal "draggable".
+                  const dragHandle = isDragDisabled ? null : (
+                    <DragHandle dragHandleProps={dragProvided.dragHandleProps} />
+                  )
                   // Multi-chain groups keep their expand/collapse behaviour (grip lives in the summary row);
                   // single-chain rows stay a flat, click-to-navigate row.
                   const row =
