@@ -28,6 +28,7 @@
   "resolutions": {
     "axios": "1.18.1",
     "protobufjs": "7.6.5",
+    "postcss": "8.5.23",
     "motion": "12.34.0",
     "@ledgerhq/context-module/ethers": "6.17.0",
     "@gnosis.pm/zodiac/ethers": "6.17.0",
