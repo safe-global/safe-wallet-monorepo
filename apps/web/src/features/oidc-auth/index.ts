@@ -44,3 +44,11 @@ export { useAuthenticators } from './hooks/useAuthenticators'
 // handle does not apply there.
 export { default as SwitchAuthenticatorSection } from './components/SwitchAuthenticatorSection'
 export { default as WalletTwoFactorSection } from './components/WalletTwoFactorSection'
+export { default as WorkspaceTwoFactorSection } from './components/WorkspaceTwoFactorSection'
+export { default as MemberTwoFactorBadge } from './components/MemberTwoFactorBadge'
+
+// ─────────────────────────────────────────────────────────────────
+// 2FA STATUS DERIVATION (shared with the spaces Team page)
+// ─────────────────────────────────────────────────────────────────
+
+export { getMemberTwoFactorStatus, getTwoFactorCoverage, MemberTwoFactorStatus } from './utils/twoFactor'
