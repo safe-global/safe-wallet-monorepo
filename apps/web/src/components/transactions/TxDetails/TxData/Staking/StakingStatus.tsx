@@ -1,5 +1,5 @@
 import { NativeStakingStatus } from '@safe-global/store/gateway/types'
-import type { SVGProps } from 'react'
+import type { SvgrComponent } from '@/components/common/icons/types'
 import CheckIcon from '@/public/images/common/circle-check.svg'
 import ClockIcon from '@/public/images/common/clock.svg'
 import SlashShield from '@/public/images/common/shield-off.svg'
@@ -11,7 +11,7 @@ const ColorIcons: Record<
   NativeStakingStatus,
   | {
       color: TxStatusChipProps['color']
-      icon?: React.ComponentType<SVGProps<SVGSVGElement>>
+      icon?: SvgrComponent
       text: string
     }
   | undefined

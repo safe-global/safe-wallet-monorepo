@@ -1,5 +1,5 @@
-import type { ComponentType, SVGProps } from 'react'
 import classNames from 'classnames'
+import type { SvgrComponent } from '../types'
 import css from './styles.module.css'
 
 type BadgeColor = 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
@@ -18,7 +18,7 @@ const CircularIcon = ({
   size = 40,
   badgeColor,
 }: {
-  icon: ComponentType<SVGProps<SVGSVGElement>>
+  icon: SvgrComponent
   badgeColor?: BadgeColor
   size?: number
 }) => {

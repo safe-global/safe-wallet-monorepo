@@ -6,6 +6,7 @@ import BlockIcon from '@/public/images/common/block.svg'
 import SignatureIcon from '@/public/images/common/document_signature.svg'
 import CircleIPartialFillcon from '@/public/images/common/circle-partial-fill.svg'
 import TxStatusChip, { type TxStatusChipProps } from '@/components/transactions/TxStatusChip'
+import type { SvgrComponent } from '@/components/common/icons/types'
 
 type CustomOrderStatuses = OrderStatuses | 'partiallyFilled'
 type Props = {
@@ -15,7 +16,7 @@ type Props = {
 type StatusProps = {
   label: string
   color: TxStatusChipProps['color']
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
+  icon: SvgrComponent
 }
 
 const statusMap: Record<CustomOrderStatuses, StatusProps> = {
