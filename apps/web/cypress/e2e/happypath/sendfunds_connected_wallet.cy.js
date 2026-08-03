@@ -79,7 +79,7 @@ describe('Send funds with connected signer happy path tests', { defaultCommandTi
 
     function executeTransactionFlow(fromSafe, toSafe) {
       return cy.visit(constants.balanceNftsUrl + fromSafe).then(() => {
-        wallet.connectSigner(signer)
+        wallet.connectSignerViaStorage(signer)
         nfts.selectNFTs(1)
         nfts.sendNFT()
         nfts.typeRecipientAddress(toSafe)
@@ -113,7 +113,7 @@ describe('Send funds with connected signer happy path tests', { defaultCommandTi
     const targetSafe = safesData.SEP_FUNDS_SAFE_12.substring(4)
     function executeTransactionFlow(fromSafe, toSafe, tokenAmount) {
       visit(constants.BALANCE_URL + fromSafe)
-      wallet.connectSigner(signer)
+      wallet.connectSignerViaStorage(signer)
       assets.clickOnSendBtn(0)
       loadsafe.inputOwnerAddress(0, toSafe)
       assets.checkSelectedToken(constants.tokenAbbreviation.sep)
@@ -169,7 +169,7 @@ describe('Send funds with connected signer happy path tests', { defaultCommandTi
 
     function executeTransactionFlow(fromSafe, toSafe) {
       visit(constants.BALANCE_URL + fromSafe)
-      wallet.connectSigner(signer)
+      wallet.connectSignerViaStorage(signer)
       assets.toggleShowAllTokens(true)
       assets.toggleHideDust(false)
       assets.clickOnSendBtn(1)

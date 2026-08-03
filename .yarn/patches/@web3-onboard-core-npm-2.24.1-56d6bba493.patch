@@ -1,0 +1,12 @@
+diff --git a/dist/index-6ae5acf7.js b/dist/index-6ae5acf7.js
+index 2a629f8f1fa428c0d475551b706be3fdcf7594d3..8d483466e2bd65cd2829105220e8869997a79342 100644
+--- a/dist/index-6ae5acf7.js
++++ b/dist/index-6ae5acf7.js
+@@ -2951,6 +2951,7 @@ function trackWallet(provider, label) {
+     });
+ }
+ async function getEns(address, chain) {
++    return null; // disabled: the app resolves ENS via useAddressResolver
+     // chain we don't recognize and don't have a rpcUrl for requests
+     if (!chain)
+         return null;
