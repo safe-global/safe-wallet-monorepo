@@ -23,7 +23,7 @@ export function ThresholdBadge({
   return (
     <span
       data-testid="account-threshold"
-      className="bg-muted text-muted-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
+      className="bg-foreground/5 text-muted-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
     >
       <User className="size-3.5" />
       {iconOnly ? null : `${threshold}/${owners}`}
@@ -62,7 +62,7 @@ export function PendingBadge({
     <span
       data-testid="account-pending"
       className={cn(
-        'bg-muted text-muted-foreground inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-xs',
+        'bg-foreground/5 text-muted-foreground inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-xs',
         compact && 'gap-1',
         needsConfirmation && 'relative',
       )}
@@ -79,7 +79,7 @@ export function PendingBadge({
         <span
           data-testid="account-awaiting-confirmation"
           aria-label={`${awaitingConfirmation} awaiting your confirmation`}
-          className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-[var(--color-warning-main)] ring-1 ring-card"
+          className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-[var(--color-warning-main)] ring-1 ring-white/50"
         />
       )}
     </span>

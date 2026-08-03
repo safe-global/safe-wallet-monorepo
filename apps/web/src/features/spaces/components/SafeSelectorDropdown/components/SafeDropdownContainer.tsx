@@ -219,7 +219,7 @@ const SafeDropdownContainer = ({
       alignItemWithTrigger={false}
       // outline-hidden: base-ui focuses the popup on open; typing in the search field makes that
       // :focus-visible and would otherwise draw the browser's blue outline around the whole popup.
-      className="w-[543px] max-w-[calc(100vw-2rem)] overflow-hidden bg-card border-0 ring-0 outline-hidden rounded-2xl [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
+      className="w-[543px] max-w-[calc(100vw-2rem)] overflow-hidden bg-card border-0 ring-0 outline-hidden rounded-lg [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
       sideOffset={20}
       alignOffset={9}
       collisionAvoidance={{ side: 'none', align: 'shift' }}
@@ -230,7 +230,7 @@ const SafeDropdownContainer = ({
         {(header || showSearch) && (
           <div className="shrink-0 bg-card">
             {showSearch && (
-              <div className="flex items-center gap-2 px-3 pb-1 pt-3">
+              <div className="flex items-center gap-2 px-2 py-2">
                 <InputGroup className="flex-1 rounded-md border-gray-100 shadow-none">
                   <InputGroupAddon>
                     <Search className="size-4" />
@@ -258,7 +258,7 @@ const SafeDropdownContainer = ({
         <div
           ref={attachScrollArea}
           data-testid="dropdown-scroll-area"
-          className="min-h-0 flex-1 overflow-y-auto overscroll-y-none px-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
+          className="min-h-0 flex-1 overflow-y-auto overscroll-y-none px-2 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
         >
           {renderContent()}
         </div>
