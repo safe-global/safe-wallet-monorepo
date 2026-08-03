@@ -84,6 +84,14 @@ export const addSafeToSpace = async ({
   if ('error' in spaceResult) {
     const error = toSpaceError(spaceResult.error)
 
+    // The Safe is already in this space (e.g. a leftover counterfactual record at
+    // the same predicted address, a retry, or a co-admin adding it concurrently).
+    // That is the end state we wanted, so report success — surfacing an error here
+    // would also make the counterfactual caller roll back a perfectly good Safe.
+    if (isDuplicateRejection(spaceResult.error)) {
+      return { status: 'added' }
+    }
+
     // Use case: another admin added Safes to the same workspace in the meantime.
     // The cached count was stale and the backend returned 400.
     if (isLimitRejection(spaceResult.error)) {
@@ -107,6 +115,14 @@ type BackendError = { status?: number; data?: { message?: string } }
 
 function toSpaceError(error: unknown): Error {
   return new Error((error as BackendError)?.data?.message || 'Failed to add Safe account to workspace')
+}
+
+/** True when the backend rejected the add because the Safe is already in the space.
+ *  CGW answers 409, but a duplicate-key violation can also surface as a 5xx with the
+ *  constraint text, so the message is matched independently of the status code. */
+function isDuplicateRejection(error: unknown): boolean {
+  const { status, data } = (error as BackendError) ?? {}
+  return status === 409 || (typeof data?.message === 'string' && /already exists/i.test(data.message))
 }
 
 /** Matches the CGW limit message, e.g. "This space only allows a maximum of 40 safe accounts...".

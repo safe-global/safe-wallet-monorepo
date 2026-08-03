@@ -132,6 +132,30 @@ describe('addSafeToSpace', () => {
     )
   })
 
+  // The Safe already being in the space is the end state we wanted, so it must not
+  // surface as an error — and must never trigger the caller's rollback.
+  it.each([
+    [
+      'the CGW duplicate-key message',
+      {
+        status: 409,
+        data: {
+          message:
+            'A SpaceSafe with the same chainId and address already exists: Key (chain_id, address_index, space_id)=(11155111, pBOVCziYoTCLdLXj2sLEMOZhzts9AuWXWZLa-7UGtvY, 131) already exists.',
+        },
+      },
+    ],
+    ['a bare 409', { status: 409 }],
+    ['a duplicate reported as a 500', { status: 500, data: { message: 'SpaceSafe already exists' } }],
+  ])('treats %s as success', async (_label, error) => {
+    const dispatch = jest.fn(() => ({ error })) as unknown as AppDispatch
+
+    const result = await addSafeToSpace({ ...baseArgs, spaceId: MOCK_SPACE_UUID, dispatch })
+
+    expect(result).toEqual({ status: 'added' })
+    expect(showNotificationImpl).not.toHaveBeenCalled()
+  })
+
   it('reports other failures without notifying, leaving the caller to decide', async () => {
     const dispatch = jest.fn(() => ({ error: { status: 500 } })) as unknown as AppDispatch
 

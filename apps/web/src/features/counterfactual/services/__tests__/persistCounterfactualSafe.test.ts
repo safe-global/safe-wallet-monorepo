@@ -193,6 +193,33 @@ describe('persistCounterfactualSafe', () => {
     if (!result.ok) expect(result.error.message).toMatch(/space/i)
   })
 
+  it('keeps the safe and succeeds when the space already contains it (no rollback)', async () => {
+    const dispatch = jest.fn((action) => {
+      if (action.type === 'space-create-thunk') {
+        return {
+          error: {
+            status: 409,
+            data: { message: 'A SpaceSafe with the same chainId and address already exists' },
+          },
+        }
+      }
+      return action
+    }) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      dispatch,
+    })
+
+    // The safe is in the space already — deleting it would destroy a good record.
+    expect(userDeleteInitiate).not.toHaveBeenCalled()
+    expect(replayImpl).toHaveBeenCalled()
+    expect(showNotificationImpl).not.toHaveBeenCalled()
+    expect(result).toEqual({ ok: true })
+  })
+
   it('keeps the user-level safe and shows the backend message as a toast when the space POST fails with a 400 (stale-snapshot limit)', async () => {
     const backendMessage = 'This space only allows a maximum of 40 safe accounts'
     const dispatch = jest.fn((action) => {
