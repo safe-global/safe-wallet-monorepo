@@ -202,9 +202,12 @@ const SafeDropdownContainer = ({
           // base-ui moves DOM focus to the hovered/keyboard-active row, so `focus:bg-muted` is the grey
           // hover highlight (it also overrides ui/select's base `focus:bg-accent`); `data-selected`
           // marks the open safe with a subtle green highlight, persistent while it isn't focused.
+          // Hovering the selected row deepens that green instead of going grey — the
+          // [&[data-selected]:focus] arbitrary variant outranks both single-variant rules by
+          // specificity, so it doesn't depend on utility order.
           // [&>span.absolute]:hidden suppresses the built-in checkmark on the selected row (it
           // overlaps the balance column); the green highlight marks the current safe instead.
-          className="group/row h-auto py-3 px-3 rounded-lg my-0.5 cursor-pointer focus:bg-muted data-[selected]:bg-[var(--color-background-light)] [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden"
+          className="group/row h-auto py-3 px-3 rounded-lg my-0.5 cursor-pointer focus:bg-muted data-[selected]:bg-[var(--color-background-light)] [&[data-selected]:focus]:bg-[var(--color-background-light-hover)] [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden"
         >
           <SafeItem {...item} onRename={handleRename} />
         </SelectItem>

@@ -16,9 +16,7 @@ const BalanceDisplay = ({ balance, isLoading }: BalanceDisplayProps) => (
       (isLoading ? (
         <Skeleton className="h-4 w-14 rounded" />
       ) : (
-        <Typography variant="paragraph-mini-medium" color="muted">
-          {balance}
-        </Typography>
+        <Typography variant="paragraph-small-medium">{balance}</Typography>
       ))}
   </RowEndColumn>
 )
