@@ -207,7 +207,7 @@ const SafeDropdownContainer = ({
           // specificity, so it doesn't depend on utility order.
           // [&>span.absolute]:hidden suppresses the built-in checkmark on the selected row (it
           // overlaps the balance column); the green highlight marks the current safe instead.
-          className="group/row h-auto py-3 px-3 rounded-lg my-0.5 cursor-pointer focus:bg-muted data-[selected]:bg-[var(--color-background-light)] [&[data-selected]:focus]:bg-[var(--color-background-light-hover)] [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden"
+          className="group/row h-auto py-3 px-3 rounded-lg my-0.5 cursor-pointer focus:bg-muted data-[selected]:bg-sidebar-accent [&[data-selected]:focus]:bg-[var(--color-background-light-hover)] [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden"
         >
           <SafeItem {...item} onRename={handleRename} />
         </SelectItem>
@@ -220,6 +220,7 @@ const SafeDropdownContainer = ({
       align="start"
       side="bottom"
       alignItemWithTrigger={false}
+      showBackdrop
       // outline-hidden: base-ui focuses the popup on open; typing in the search field makes that
       // :focus-visible and would otherwise draw the browser's blue outline around the whole popup.
       className="w-[543px] max-w-[calc(100vw-2rem)] overflow-hidden bg-card border-0 ring-0 outline-hidden rounded-lg [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
