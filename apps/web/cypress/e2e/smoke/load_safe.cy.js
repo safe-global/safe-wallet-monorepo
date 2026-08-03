@@ -38,7 +38,7 @@ describe('[SMOKE] Load Safe tests', { defaultCommandTimeout: 30000 }, () => {
 
   it('[SMOKE] Verify ENS name is translated to a valid address', () => {
     safe.inputAddress(constants.ENS_TEST_SEPOLIA)
-    safe.verifyAddressInputValue(staticSafes.SEP_STATIC_SAFE_6)
+    safe.verifyAddressInputValue(constants.ENS_TEST_SEPOLIA_ADDRESS)
     safe.verifyNextButtonStatus('be.enabled')
   })
 
