@@ -142,6 +142,7 @@ export const dispatchOnChainSigning = async (
   chainId: SafeState['chainId'],
   signerAddress: string,
   safeAddress: string,
+  isSafeSigner: boolean,
   executed: boolean,
 ) => {
   const sdk = await getSafeSDKWithSigner(provider)
@@ -173,15 +174,17 @@ export const dispatchOnChainSigning = async (
 
   txDispatch(TxEvent.ONCHAIN_SIGNATURE_SUCCESS, eventParams)
 
-  // On-chain signing is only used by smart-account signers, and it always creates an approveHash
-  // tx in the signer Safe (executed immediately for a threshold-1 nested signer, otherwise queued).
-  txDispatch(TxEvent.NESTED_SAFE_TX_CREATED, {
-    ...eventParams,
-    txHashOrParentSafeTxHash,
-    parentSafeAddress: signerAddress,
-    executed,
-    method: 'approveHash',
-  })
+  // On-chain signing runs for any smart-account signer, but only a Safe signer creates an
+  // approveHash tx we can surface and deep-link to. Non-Safe smart accounts keep the plain flow.
+  if (isSafeSigner) {
+    txDispatch(TxEvent.NESTED_SAFE_TX_CREATED, {
+      ...eventParams,
+      txHashOrParentSafeTxHash,
+      parentSafeAddress: signerAddress,
+      executed,
+      method: 'approveHash',
+    })
+  }
 
   // Until the on-chain signature is/has been executed, the safeTx is not
   // signed so we don't return it

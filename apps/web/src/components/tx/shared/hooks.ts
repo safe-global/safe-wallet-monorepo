@@ -138,19 +138,30 @@ export const useTxActions = (): TxActions => {
 
       safeTx = await withGtfFeeParams(safeTx)
 
-      // Smart contract wallets (nested Safe or a Safe connected via WalletConnect) must sign via
-      // an on-chain approveHash tx
-      const isSmartAccount = Boolean(signer.isSafe) || (await isSmartContractWallet(signer.chainId, signer.address))
+      // Any smart contract wallet must sign via an on-chain approveHash tx (they can't sign
+      // off-chain). Only a Safe signer (in-app nested or a Safe connected via WalletConnect) gets
+      // the nested success screen; other smart accounts keep the plain flow.
+      const isSafeSigner = Boolean(signer.isSafe) || Boolean(signer.isConnectedSafe)
+      const isSmartAccount = isSafeSigner || (await isSmartContractWallet(signer.chainId, signer.address))
       if (isSmartAccount) {
         // If the first signature is a smart contract wallet, we have to propose w/o signatures
         // Otherwise the backend won't pick up the tx
         // The signature will be added once the on-chain signature is indexed
         const id = txId || (await _propose(signer.address, safeTx, txId, origin)).txId
-        // The on-chain signature executes immediately only for the in-app nested signer with
-        // threshold 1; otherwise it is queued in the signer Safe and returns a safeTxHash.
+        // Only the in-app nested signer executes the approveHash synchronously (threshold 1);
+        // a connected Safe always queues it and returns a safeTxHash.
         const executed = Boolean(signer.isSafe) && signer.threshold === 1
-        await dispatchOnChainSigning(safeTx, id, signer.provider, chainId, signer.address, safeAddress, executed)
-        return { txId: id, isNestedSigning: true }
+        await dispatchOnChainSigning(
+          safeTx,
+          id,
+          signer.provider,
+          chainId,
+          signer.address,
+          safeAddress,
+          isSafeSigner,
+          executed,
+        )
+        return { txId: id, isNestedSigning: isSafeSigner }
       }
 
       // Otherwise, sign off-chain
@@ -203,14 +214,13 @@ export const useTxActions = (): TxActions => {
         return { txId, isExecuted: true }
       }
 
-      const isSmartAccount = Boolean(signer.isSafe) || (await isSmartContractWallet(signer.chainId, signer.address))
-      // A smart-contract-wallet executor (nested Safe via the signer dropdown, or a Safe connected
-      // through WalletConnect) submits to its own Safe and gets back a safeTxHash, not an on-chain
-      // tx hash — UNLESS it's the in-app nested signer with threshold 1, which executes immediately
-      // and returns a real hash. In every other smart-account case the tx is only queued.
-      // Note: this assumes a smart-account executor is a Safe; a non-Safe smart account that
-      // executes immediately would be mislabelled as queued.
-      const executed = !isSmartAccount || (Boolean(signer.isSafe) && signer.threshold === 1)
+      const isSafeSigner = Boolean(signer.isSafe) || Boolean(signer.isConnectedSafe)
+      const isSmartAccount = isSafeSigner || (await isSmartContractWallet(signer.chainId, signer.address))
+      // A Safe executor submits to its own Safe and gets back a safeTxHash, not an on-chain tx hash
+      // — UNLESS it's the in-app nested signer at threshold 1, which executes immediately and
+      // returns a real hash. EOAs and non-Safe smart accounts execute directly (real hash / their
+      // own semantics), so treat them as executed and keep the plain processing flow.
+      const executed = !isSafeSigner || (Boolean(signer.isSafe) && signer.threshold === 1)
       await dispatchTxExecution(
         safe.chainId,
         safeTx,
@@ -234,6 +244,7 @@ export const useTxActions = (): TxActions => {
     signer?.address,
     signer?.chainId,
     signer?.isSafe,
+    signer?.isConnectedSafe,
     signer?.threshold,
     addTxToBatch,
     onboard,

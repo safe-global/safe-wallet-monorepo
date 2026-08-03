@@ -650,7 +650,7 @@ describe('txSender', () => {
 
       const safeTx = await createTx({ to: '0x123', value: '1', data: '0x0', nonce: 1 })
 
-      await dispatchOnChainSigning(safeTx, 'tx_id_123', MockEip1193Provider, '1', PARENT_SAFE, CHILD_SAFE, false)
+      await dispatchOnChainSigning(safeTx, 'tx_id_123', MockEip1193Provider, '1', PARENT_SAFE, CHILD_SAFE, true, false)
 
       expect(txEvents.txDispatch).toHaveBeenCalledWith(
         'NESTED_SAFE_TX_CREATED',
@@ -671,7 +671,7 @@ describe('txSender', () => {
 
       const safeTx = await createTx({ to: '0x123', value: '1', data: '0x0', nonce: 1 })
 
-      await dispatchOnChainSigning(safeTx, 'tx_id_123', MockEip1193Provider, '1', PARENT_SAFE, CHILD_SAFE, true)
+      await dispatchOnChainSigning(safeTx, 'tx_id_123', MockEip1193Provider, '1', PARENT_SAFE, CHILD_SAFE, true, true)
 
       expect(txEvents.txDispatch).toHaveBeenCalledWith(
         'NESTED_SAFE_TX_CREATED',
@@ -681,6 +681,19 @@ describe('txSender', () => {
           executed: true,
         }),
       )
+    })
+
+    it('dispatchOnChainSigning does NOT emit NESTED_SAFE_TX_CREATED for a non-Safe smart-account signer', async () => {
+      jest.spyOn(sdk, 'prepareApproveTxHash').mockResolvedValue('0xapprovehashdata')
+      ;(MockEip1193Provider.request as jest.Mock).mockResolvedValue(zeroPadValue('0x05', 32))
+
+      const safeTx = await createTx({ to: '0x123', value: '1', data: '0x0', nonce: 1 })
+
+      // isSafeSigner = false → non-Safe smart account (e.g. Argent/AA): keeps the plain flow.
+      await dispatchOnChainSigning(safeTx, 'tx_id_123', MockEip1193Provider, '1', PARENT_SAFE, CHILD_SAFE, false, false)
+
+      expect(txEvents.txDispatch).toHaveBeenCalledWith('ONCHAIN_SIGNATURE_SUCCESS', expect.anything())
+      expect(txEvents.txDispatch).not.toHaveBeenCalledWith('NESTED_SAFE_TX_CREATED', expect.anything())
     })
 
     it('dispatchTxExecution emits NESTED_SAFE_TX_CREATED instead of PROCESSING when a smart-account executor only queues the execTransaction', async () => {
