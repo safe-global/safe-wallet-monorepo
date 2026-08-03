@@ -202,6 +202,18 @@ describe('SafeAccountsTable', () => {
     expect(screen.queryByTestId('account-sort-threshold')).not.toBeInTheDocument()
   })
 
+  it('draws the card outline by default and drops it with bordered={false}, keeping the header', () => {
+    const container = () => screen.getByTestId('safe-accounts-table').firstElementChild as HTMLElement
+
+    const { rerender } = render(<SafeAccountsTable items={items} />)
+    expect(container()).toHaveStyle({ borderTopStyle: 'solid' })
+
+    rerender(<SafeAccountsTable items={items} bordered={false} />)
+    expect(container()).not.toHaveStyle({ borderTopStyle: 'solid' })
+    // Unlike embedded mode, the borderless table keeps its column header.
+    expect(screen.getByTestId('account-sort-name')).toBeInTheDocument()
+  })
+
   it('draws dividers between groups, but not after the last row', () => {
     render(<SafeAccountsTable items={items} />)
     const dividers = screen.getAllByTestId('row').map((row) => row.hasAttribute('data-divider'))
