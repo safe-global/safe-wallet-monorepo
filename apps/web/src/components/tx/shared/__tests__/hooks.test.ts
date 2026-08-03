@@ -286,11 +286,11 @@ describe('SignOrExecute hooks', () => {
       const id = await signTx(createSafeTx())
       expect(signSpy).toHaveBeenCalled()
       expect(onchainSignSpy).not.toHaveBeenCalled()
-      expect(id).toBe('123')
+      expect(id.txId).toBe('123')
 
       const id2 = await signTx(createSafeTx(), '456')
       expect(signSpy).toHaveBeenCalled()
-      expect(id2).toBe('123')
+      expect(id2.txId).toBe('123')
     })
 
     it('should sign a tx on-chain', async () => {
@@ -322,7 +322,7 @@ describe('SignOrExecute hooks', () => {
 
       const id = await signTx(createSafeTx(), '456')
       expect(signSpy).toHaveBeenCalled()
-      expect(id).toBe('456')
+      expect(id.txId).toBe('456')
     })
 
     it('should execute a tx without a txId (immediate execution)', async () => {
@@ -355,7 +355,7 @@ describe('SignOrExecute hooks', () => {
       const id = await executeTx({ gasPrice: 1 }, createSafeTx())
       expect(proposeSpy).toHaveBeenCalled()
       expect(executeSpy).toHaveBeenCalled()
-      expect(id).toEqual('123')
+      expect(id.txId).toEqual('123')
     })
 
     it('should execute a tx with an id (existing tx)', async () => {
@@ -388,7 +388,7 @@ describe('SignOrExecute hooks', () => {
       const id = await executeTx({ gasPrice: 1 }, createSafeTx(), '455')
       expect(proposeSpy).not.toHaveBeenCalled()
       expect(executeSpy).toHaveBeenCalled()
-      expect(id).toEqual('455')
+      expect(id.txId).toEqual('455')
     })
 
     it('should throw an error if the tx is undefined', async () => {
@@ -454,7 +454,7 @@ describe('SignOrExecute hooks', () => {
       const id = await executeTx({ gasPrice: 1 }, tx, '123', 'origin.com', true)
       expect(proposeSpy).not.toHaveBeenCalled()
       expect(relaySpy).toHaveBeenCalled()
-      expect(id).toEqual('123')
+      expect(id.txId).toEqual('123')
     })
 
     it('should sign a not fully signed tx when relaying', async () => {
@@ -508,7 +508,7 @@ describe('SignOrExecute hooks', () => {
       expect(proposeSpy).toHaveBeenCalled()
       expect(signSpy).toHaveBeenCalled()
       expect(relaySpy).toHaveBeenCalled()
-      expect(id).toEqual('123')
+      expect(id.txId).toEqual('123')
     })
 
     it('should throw when relaying an unsigned tx as a smart contract wallet', async () => {

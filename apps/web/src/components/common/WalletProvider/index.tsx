@@ -13,6 +13,9 @@ export type SignerWallet = {
   address: string
   chainId: string
   isSafe?: boolean
+  // Threshold of the nested (parent) Safe when `isSafe` is true; used to tell whether the
+  // parent executes an on-chain signature/execution immediately (threshold 1) or only queues it.
+  threshold?: number
 }
 
 export type WalletContextType = {

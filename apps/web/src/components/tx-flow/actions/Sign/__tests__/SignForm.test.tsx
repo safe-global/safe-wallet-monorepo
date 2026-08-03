@@ -105,7 +105,7 @@ describe('SignForm', () => {
   })
 
   it('signs a transaction', async () => {
-    const mockSignTx = jest.fn()
+    const mockSignTx = jest.fn().mockResolvedValue({ txId: '0x123', isNestedSigning: false })
 
     const { getByText } = render(
       <SignForm

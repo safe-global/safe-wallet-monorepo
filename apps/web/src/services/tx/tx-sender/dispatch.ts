@@ -142,7 +142,7 @@ export const dispatchOnChainSigning = async (
   chainId: SafeState['chainId'],
   signerAddress: string,
   safeAddress: string,
-  isNestedSafe: boolean,
+  executed: boolean,
 ) => {
   const sdk = await getSafeSDKWithSigner(provider)
   const safeTxHash = await sdk.getTransactionHash(safeTx)
@@ -173,13 +173,15 @@ export const dispatchOnChainSigning = async (
 
   txDispatch(TxEvent.ONCHAIN_SIGNATURE_SUCCESS, eventParams)
 
-  if (isNestedSafe) {
-    txDispatch(TxEvent.NESTED_SAFE_TX_CREATED, {
-      ...eventParams,
-      txHashOrParentSafeTxHash,
-      parentSafeAddress: signerAddress,
-    })
-  }
+  // On-chain signing is only used by smart-account signers, and it always creates an approveHash
+  // tx in the signer Safe (executed immediately for a threshold-1 nested signer, otherwise queued).
+  txDispatch(TxEvent.NESTED_SAFE_TX_CREATED, {
+    ...eventParams,
+    txHashOrParentSafeTxHash,
+    parentSafeAddress: signerAddress,
+    executed,
+    method: 'approveHash',
+  })
 
   // Until the on-chain signature is/has been executed, the safeTx is not
   // signed so we don't return it
@@ -290,6 +292,7 @@ export const dispatchTxExecution = async (
   signerAddress: string,
   safeAddress: string,
   isSmartAccount: boolean,
+  executed: boolean,
 ): Promise<string> => {
   const sdk = await getSafeSDKWithSigner(provider)
   const eventParams = { txId, nonce: safeTx.data.nonce, chainId, safeAddress }
@@ -314,11 +317,28 @@ export const dispatchTxExecution = async (
     } else {
       result = await sdk.executeTransaction(safeTx, txOptions)
     }
-    txDispatch(TxEvent.EXECUTING, { ...eventParams })
   } catch (error) {
     txDispatch(TxEvent.FAILED, { ...eventParams, error: asError(error) })
     throw error
   }
+
+  // A smart-contract-wallet executor (a nested parent Safe, or a Safe connected via WalletConnect)
+  // that doesn't execute immediately only queues the execTransaction in that Safe; nothing executes
+  // here yet, and `result.hash` is the executor Safe's safeTxHash, not an on-chain tx hash. Treat it
+  // like nested signing instead of a processing/executed tx.
+  if (isSmartAccount && !executed) {
+    txDispatch(TxEvent.NESTED_SAFE_TX_CREATED, {
+      ...eventParams,
+      txHashOrParentSafeTxHash: result.hash,
+      parentSafeAddress: signerAddress,
+      executed: false,
+      method: 'execTransaction',
+    })
+
+    return result.hash
+  }
+
+  txDispatch(TxEvent.EXECUTING, { ...eventParams })
 
   txDispatch(TxEvent.PROCESSING, {
     ...eventParams,
