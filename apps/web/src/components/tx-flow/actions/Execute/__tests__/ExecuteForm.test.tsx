@@ -168,7 +168,7 @@ describe('ExecuteForm', () => {
   })
 
   it('execute the tx when the submit button is clicked', async () => {
-    const mockExecuteTx = jest.fn()
+    const mockExecuteTx = jest.fn().mockResolvedValue({ txId: '0x123', isExecuted: true })
 
     const { getByText } = render(
       <ExecuteForm
@@ -274,7 +274,7 @@ describe('ExecuteForm', () => {
     const mockExecuteTx = jest
       .fn()
       .mockRejectedValueOnce(new RelaySimulationError('INDETERMINATE_SIMULATION', 'service down'))
-      .mockResolvedValueOnce('0xnewtx')
+      .mockResolvedValueOnce({ txId: '0xnewtx', isExecuted: true })
 
     const { getByText, getByTestId } = render(
       <ExecuteForm

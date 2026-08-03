@@ -299,7 +299,7 @@ describe('SignOrExecute hooks', () => {
       expect(onchainSignSpy).not.toHaveBeenCalled()
       expect(proposeSpy).toHaveBeenCalledTimes(1)
       expect(confirmSpy).not.toHaveBeenCalled()
-      expect(id).toBe('123')
+      expect(id.txId).toBe('123')
 
       // Subsequent signature: the tx already has an id, so only the signature is added
       const id2 = await signTx(createSafeTx(), '456')
@@ -313,7 +313,7 @@ describe('SignOrExecute hooks', () => {
           chainId: '1',
         }),
       )
-      expect(id2).toBe('456')
+      expect(id2.txId).toBe('456')
     })
 
     it('should sign a tx on-chain', async () => {
@@ -345,7 +345,7 @@ describe('SignOrExecute hooks', () => {
 
       const id = await signTx(createSafeTx(), '456')
       expect(signSpy).toHaveBeenCalled()
-      expect(id).toBe('456')
+      expect(id.txId).toBe('456')
     })
 
     it('should execute a tx without a txId (immediate execution)', async () => {
@@ -378,7 +378,7 @@ describe('SignOrExecute hooks', () => {
       const id = await executeTx({ gasPrice: 1 }, createSafeTx())
       expect(proposeSpy).toHaveBeenCalled()
       expect(executeSpy).toHaveBeenCalled()
-      expect(id).toEqual('123')
+      expect(id.txId).toEqual('123')
     })
 
     it('should execute a tx with an id (existing tx)', async () => {
@@ -411,7 +411,7 @@ describe('SignOrExecute hooks', () => {
       const id = await executeTx({ gasPrice: 1 }, createSafeTx(), '455')
       expect(proposeSpy).not.toHaveBeenCalled()
       expect(executeSpy).toHaveBeenCalled()
-      expect(id).toEqual('455')
+      expect(id.txId).toEqual('455')
     })
 
     it('should block the broadcast when a GS026 pre-check fails', async () => {
@@ -517,7 +517,7 @@ describe('SignOrExecute hooks', () => {
       const id = await executeTx({ gasPrice: 1 }, tx, '123', 'origin.com', true)
       expect(proposeSpy).not.toHaveBeenCalled()
       expect(relaySpy).toHaveBeenCalled()
-      expect(id).toEqual('123')
+      expect(id.txId).toEqual('123')
     })
 
     it('should sign a not fully signed tx when relaying', async () => {
@@ -575,7 +575,7 @@ describe('SignOrExecute hooks', () => {
       expect(proposeSpy).not.toHaveBeenCalled()
       expect(confirmSpy).toHaveBeenCalledWith(expect.objectContaining({ txId: '123', safeTx: tx }))
       expect(relaySpy).toHaveBeenCalled()
-      expect(id).toEqual('123')
+      expect(id.txId).toEqual('123')
     })
 
     it('should throw when relaying an unsigned tx as a smart contract wallet', async () => {
