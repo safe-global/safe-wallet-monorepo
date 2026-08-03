@@ -40,7 +40,20 @@ describe('weaveReorderedKeys', () => {
     expect(weaveReorderedKeys(['a', 'b'], [], () => true)).toEqual(['a', 'b'])
   })
 
-  it('keeps the original key when the movable queue runs short', () => {
-    expect(weaveReorderedKeys(['a', 'b', 'c'], ['c'], (key) => key === 'a')).toEqual(['a', 'c', 'c'])
+  it('fills unmentioned movable keys in stored order when the queue runs short — never duplicates', () => {
+    expect(weaveReorderedKeys(['a', 'b', 'c'], ['c'], (key) => key === 'a')).toEqual(['a', 'c', 'b'])
+  })
+
+  it('drops duplicate and unknown entries from a drifted reorder', () => {
+    expect(weaveReorderedKeys(['a', 'b', 'c'], ['stale', 'c', 'c', 'b'], () => false)).toEqual(['c', 'b', 'a'])
+  })
+
+  it('drops entries that became fixed since the reorder was computed', () => {
+    expect(weaveReorderedKeys(['a', 'b', 'c'], ['c', 'a', 'b'], (key) => key === 'c')).toEqual(['a', 'b', 'c'])
+  })
+
+  it('always emits a permutation of allKeys', () => {
+    const result = weaveReorderedKeys(['a', 'b', 'c', 'd'], ['d', 'd', 'x', 'b'], (key) => key === 'a')
+    expect([...result].sort()).toEqual(['a', 'b', 'c', 'd'])
   })
 })

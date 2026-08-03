@@ -1,8 +1,9 @@
 /*
  * SafeAccountsTable body rows: grey hover pill, inset separators, similarity band.
  * Table-level (via <Table className>) because the MUI theme pins row/cell styles at a specificity
- * per-cell sx can't beat; :global() keeps Mui classes un-hashed. Rule order is load-bearing:
- * band rules must follow the hover rule (same specificity → later wins).
+ * per-cell sx can't beat; :global() keeps Mui classes un-hashed. Rule order is load-bearing in
+ * one place only: the [data-highlighted] divider suppression must stay after the [data-divider]
+ * rule (same specificity → later wins); everything else wins by specificity.
  */
 
 .body {
