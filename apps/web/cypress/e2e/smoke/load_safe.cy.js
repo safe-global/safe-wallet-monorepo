@@ -36,7 +36,13 @@ describe('[SMOKE] Load Safe tests', { defaultCommandTimeout: 30000 }, () => {
     safe.verifyNameLengthErrorMessage()
   })
 
-  it('[SMOKE] Verify ENS name is translated to a valid address', () => {
+  // Skipped since the e2etestsafe.eth fixture expired (2025-11-28): this flow
+  // additionally validates the resolved address IS a deployed Safe, so it needs
+  // an ENS name pointing at SEP_STATIC_SAFE_6 — nick.eth (the replacement used
+  // by the other ENS smoke specs) is an EOA. Re-enable once the team registers
+  // a Sepolia name it controls for that Safe. ENS *resolution* stays covered by
+  // create_tx.cy.js and spending_limits.cy.js.
+  it.skip('[SMOKE] Verify ENS name is translated to a valid address', () => {
     safe.inputAddress(constants.ENS_TEST_SEPOLIA)
     safe.verifyAddressInputValue(constants.ENS_TEST_SEPOLIA_ADDRESS)
     safe.verifyNextButtonStatus('be.enabled')
