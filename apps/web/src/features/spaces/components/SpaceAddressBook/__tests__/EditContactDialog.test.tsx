@@ -16,9 +16,6 @@ jest.mock('@/store/notificationsSlice', () => ({
 
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '42',
-}))
-
-jest.mock('@/features/spaces/hooks/useWorkspaceAddressBookLabel', () => ({
   useWorkspaceAddressBookLabel: () => 'Acme address book',
 }))
 
