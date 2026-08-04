@@ -104,22 +104,23 @@ export const addressBookListener = (listenerMiddleware: typeof listenerMiddlewar
         listenerApi.cancelActiveListeners()
         await listenerApi.delay(300)
 
-        const { count, chainIds: networks } = importBatches.get(notifyBatchId) ?? batch
-        importBatches.delete(notifyBatchId)
+        try {
+          const { count, chainIds: networks } = importBatches.get(notifyBatchId) ?? batch
 
-        const message = getImportSuccessMessage({
-          count,
-          networkCount: networks.size,
-          bookLabel: PERSONAL_ADDRESS_BOOK_LABEL,
-        })
-
-        listenerApi.dispatch(
-          showNotification({
-            variant: 'success',
-            groupKey: ADDRESS_BOOK_GROUP_KEY,
-            message,
-          }),
-        )
+          listenerApi.dispatch(
+            showNotification({
+              variant: 'success',
+              groupKey: ADDRESS_BOOK_GROUP_KEY,
+              message: getImportSuccessMessage({
+                count,
+                networkCount: networks.size,
+                bookLabel: PERSONAL_ADDRESS_BOOK_LABEL,
+              }),
+            }),
+          )
+        } finally {
+          importBatches.delete(notifyBatchId)
+        }
         return
       }
       const original = listenerApi.getOriginalState()
