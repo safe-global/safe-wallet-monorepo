@@ -60,7 +60,7 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
     const [, ...entries] = csvData.data
 
     // One id shared by all rows so the listener collapses them into a single toast.
-    const notifyBatchId = Math.random().toString(32).slice(2)
+    const notifyBatchId = crypto.randomUUID()
 
     for (const entry of entries) {
       const [address, name, chainId] = entry

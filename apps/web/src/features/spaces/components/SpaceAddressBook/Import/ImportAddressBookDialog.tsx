@@ -96,9 +96,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
       })
 
       if (result.error) {
-        const message = getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError)
-        setError(message)
-        dispatch(showNotification({ message, variant: 'error', groupKey: 'import-contacts-error' }))
+        setError(getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError))
         return
       }
 
@@ -122,9 +120,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
 
       setIsSuccess(true)
     } catch (e) {
-      const message = getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError)
-      setError(message)
-      dispatch(showNotification({ message, variant: 'error', groupKey: 'import-contacts-error' }))
+      setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
     } finally {
       setIsSubmitting(false)
     }

@@ -27,13 +27,13 @@ describe('useWorkspaceAddressBookLabel', () => {
     expect(result.current).toBe('Acme address book')
   })
 
-  it('falls back to "this workspace\'s" when the name is not yet loaded', () => {
+  it('falls back to a name-agnostic label when the name is not yet loaded', () => {
     spaceQuerySpy.mockReturnValue({ currentData: undefined } as unknown as ReturnType<
       typeof spacesRTK.useSpacesGetOneV1Query
     >)
 
     const { result } = renderHook(() => useWorkspaceAddressBookLabel())
 
-    expect(result.current).toBe("this workspace's address book")
+    expect(result.current).toBe('the workspace address book')
   })
 })
