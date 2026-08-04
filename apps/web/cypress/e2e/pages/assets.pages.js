@@ -58,22 +58,25 @@ const tokenBalanceCell = '[data-testid="token-balance"]'
 
 export const fiatRegex = new RegExp(`\\$?(([0-9]{1,3},)*[0-9]{1,3}(\\.[0-9]{2})?|0)`)
 
+// The switch is a Base UI control: the test id sits on the `role="switch"` element itself and the
+// state lives in `aria-checked`. It renders a native `input[type="checkbox"]` only when given a
+// `name`, and even then it is visually hidden — so read and click the switch element directly.
+function setSwitchState(switchSelector, shouldBeOn) {
+  cy.get(switchSelector).then(($switch) => {
+    const isOn = $switch.attr('aria-checked') === 'true'
+    if (isOn !== shouldBeOn) {
+      cy.wrap($switch).click()
+    }
+  })
+}
+
 export function toggleShowAllTokens(shouldShow) {
   cy.get(manageTokensButton).click()
 
   cy.get(manageTokensMenu)
     .should('be.visible')
     .within(() => {
-      cy.get(showAllTokensSwitch)
-        .find('input[type="checkbox"]')
-        .then(($checkbox) => {
-          const isChecked = $checkbox.is(':checked')
-          if (shouldShow && !isChecked) {
-            cy.wrap($checkbox).click({ force: true })
-          } else if (!shouldShow && isChecked) {
-            cy.wrap($checkbox).click({ force: true })
-          }
-        })
+      setSwitchState(showAllTokensSwitch, shouldShow)
     })
 
   cy.get('body').click(0, 0)
@@ -86,16 +89,7 @@ export function toggleHideDust(shouldHide) {
   cy.get(manageTokensMenu)
     .should('be.visible')
     .within(() => {
-      cy.get(hideSmallBalancesSwitch)
-        .find('input[type="checkbox"]')
-        .then(($checkbox) => {
-          const isChecked = $checkbox.is(':checked')
-          if (shouldHide && !isChecked) {
-            cy.wrap($checkbox).click({ force: true })
-          } else if (!shouldHide && isChecked) {
-            cy.wrap($checkbox).click({ force: true })
-          }
-        })
+      setSwitchState(hideSmallBalancesSwitch, shouldHide)
     })
 
   cy.get('body').click(0, 0)

@@ -48,7 +48,9 @@ export const timePeriodOptions = {
   oneHr: '1 hour',
 }
 
-const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input').first()
+// AddressBookInput spreads its props straight onto the underlying input, so `beneficiarySection`
+// is the input element itself rather than a wrapper to search inside.
+const getBeneficiaryInput = () => cy.get(beneficiarySection)
 const automationOwner = ls.addressBookData.sepoliaAddress2[11155111]['0xC16Db0251654C0a72E91B190d81eAD367d2C6fED']
 
 export const actionNames = {
@@ -104,7 +106,6 @@ export function checkMaxValue() {
 
   main.extractDigitsToArray(tokenSelector, maxValue)
   cy.get(tokenAmountFld)
-    .find('input')
     .invoke('val')
     .then((value) => {
       expect(maxValue).to.contain(value)
@@ -187,7 +188,7 @@ export function clickOnNewSpendingLimitBtn() {
 }
 
 export function enterSpendingLimitAmount(amount) {
-  cy.get(tokenAmountFld).find('input').clear().type(amount)
+  cy.get(tokenAmountFld).clear().type(amount)
 }
 
 export function enterBeneficiaryAddress(address) {
@@ -203,7 +204,9 @@ export function checkBeneficiaryENS(ens) {
 }
 
 export function verifyValidAddressShowsNoErrors() {
+  // The label is a sibling of the input inside the Field wrapper, not a descendant of it.
   cy.get(beneficiarySection)
+    .closest('[data-slot="field"]')
     .find('label')
     .should('not.contain', invalidAddressFormatErrorMsg)
     .and('not.contain', invalidCharErrorStr)
@@ -218,7 +221,7 @@ export function verifyCharErrorValidation() {
 }
 
 export function verifyNumberAmountEntered(amount) {
-  cy.get(tokenAmountFld).find('input').should('have.value', amount)
+  cy.get(tokenAmountFld).should('have.value', amount)
 }
 
 export function verifyActionCount(count) {
