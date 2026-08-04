@@ -25,7 +25,7 @@ export const AccountInfo = ({ profileName = '', displayName = '' }: MembershipPr
         className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg outline-none transition-colors hover:bg-muted-foreground/10 focus-visible:ring-2 focus-visible:ring-ring"
         aria-label="Account menu"
       >
-        <User className="size-5 text-muted-foreground" aria-hidden="true" />
+        <User className="size-5 text-green-500" aria-hidden="true" />
       </PopoverTrigger>
 
       <ProfilePopoverContent avatarName={profileName} displayName={displayName} onSignOut={handleSignOut} />

@@ -9,6 +9,7 @@ import SafeDropdownContainer from './components/SafeDropdownContainer'
 import InlineRetryError from '@/components/common/InlineRetryError'
 import { useSafeSelectorState } from './hooks/useSafeSelectorState'
 import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
+import { useTopbarOverlayElevation } from '@/hooks/useTopbarElevation'
 import useChains from '@/hooks/useChains'
 import { getSafeSelectorClassVariants } from './utils/classVariants'
 import type { SafeItemData, SafeSelectorDropdownProps } from './types'
@@ -98,6 +99,10 @@ function SafeSelectorDropdown({
   const safeSelectValue = selectedItemId ?? selectedItem?.id
   const safeItemSelect = onItemSelect ?? (() => {})
 
+  // The dropdown's backdrop dims the whole page; lift the topbar above it so the trigger stays lit.
+  const isDropdownActuallyOpen = variants.canOpen && !isDisabled && dropdownOpen
+  useTopbarOverlayElevation('safe-selector', isDropdownActuallyOpen)
+
   const { configs: chainConfigs } = useChains()
   const fallbackSelectedItem = useMemo(
     () => (selectedItem ? null : buildFallbackSafeItem(selectedItemId, chainConfigs)),
@@ -128,7 +133,7 @@ function SafeSelectorDropdown({
     <Select
       value={safeSelectValue}
       onValueChange={handleSafeChange}
-      open={variants.canOpen && !isDisabled ? dropdownOpen : false}
+      open={isDropdownActuallyOpen}
       onOpenChange={isDisabled ? undefined : handleOpenChangeWithReset}
       // Deliberately not disabled: a disabled <button> blocks the inline address actions (copy,
       // explorer, env hint). Safe switching is prevented by the forced-closed `open` above instead.
