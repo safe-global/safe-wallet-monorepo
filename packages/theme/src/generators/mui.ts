@@ -288,7 +288,11 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
         },
       },
       MuiMenu: {
-        styleOverrides: { paper: ({ theme }) => ({ borderRadius: theme.shape.borderRadius }) },
+        styleOverrides: {
+          // The MuiPopover paper override sets `overflow: visible`, which would
+          // otherwise disable scrolling on menus taller than their max-height
+          paper: ({ theme }) => ({ borderRadius: theme.shape.borderRadius, overflowY: 'auto' }),
+        },
       },
       MuiAutocomplete: {
         styleOverrides: { paper: ({ theme }) => ({ borderRadius: theme.shape.borderRadius }) },
