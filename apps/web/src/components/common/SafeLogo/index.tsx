@@ -36,7 +36,7 @@ const SafeLogo = ({
         href={href}
         data-testid={testId}
         className={cn(
-          'flex items-center gap-2 rounded-2xl bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground transition-opacity hover:opacity-80',
+          'flex items-center gap-2 rounded-lg bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground transition-opacity hover:opacity-80',
           className,
         )}
       >

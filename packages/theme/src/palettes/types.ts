@@ -73,6 +73,8 @@ export interface ColorPalette {
     sheet: string
     paper: string
     light: string
+    /** Hover state of `light` (e.g. hovering the selected safe row) */
+    lightHover: string
     secondary: string
     skeleton: string
     disabled: string

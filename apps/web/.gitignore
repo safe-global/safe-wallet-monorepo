@@ -23,5 +23,6 @@ storybook-static
 # Generated build-time data
 src/config/__generated__/
 public/version.json
+public/robots.txt
 
 docs/superpowers/

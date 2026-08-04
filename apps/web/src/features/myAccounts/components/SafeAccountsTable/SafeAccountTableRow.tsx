@@ -223,7 +223,7 @@ const CellContent = ({ column, line }: { column: SafeAccountColumn; line: Accoun
       // The grey pill lives here, not in the shared ChainBadge — other surfaces (sidebar list,
       // multi-account items) render the bare logos.
       return (
-        <span className="bg-muted inline-flex items-center rounded-full p-0.5">
+        <span className="bg-foreground/5 inline-flex items-center rounded-full p-0.75">
           {line.networks ? (
             <BaseAccountItem.ChainBadge safes={line.networks} />
           ) : (
