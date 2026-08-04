@@ -15,7 +15,7 @@ describe('ConnectWalletHint', () => {
   it('renders the hint copy and a Connect button with the given test id', () => {
     render(<ConnectWalletHint testId="my-connect-button" />)
 
-    expect(screen.getByText('Connect a wallet to discover accounts you own or sign for')).toBeInTheDocument()
+    expect(screen.getByText('Connect a wallet to discover accounts you own')).toBeInTheDocument()
     expect(screen.getByTestId('my-connect-button')).toBeInTheDocument()
   })
 
