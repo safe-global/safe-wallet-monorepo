@@ -1,57 +1,69 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./index.stories BlockedAddress 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="container"
+    class="shadcn-scope"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-15brele-MuiPaper-root"
-      style="--Paper-shadow: none;"
+      class="container"
     >
       <div
-        class="MuiStack-root mui-style-1ogap9g-MuiStack-root"
+        class="max-w-[500px] rounded-lg bg-[var(--color-background-paper)]"
       >
-        <p
-          class="MuiTypography-root MuiTypography-body1 mui-style-10q7br5-MuiTypography-root"
-        >
-          0xD3a484faEa53313eF85b5916C9302a3E304ae622
-        </p>
         <div
-          class="iconCircle MuiBox-root mui-style-0"
+          class="flex flex-col items-center gap-4 border-b border-[var(--color-border-light)] p-[var(--space-3)]"
         >
-          <mock-icon
-            aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
-            focusable="false"
+          <p
+            class="m-0 text-base leading-6 font-normal text-[var(--color-text-secondary)]"
+            data-slot="typography"
+            data-variant="paragraph"
+          >
+            0xD3a484faEa53313eF85b5916C9302a3E304ae622
+          </p>
+          <div
+            class="iconCircle"
+          >
+            <mock-icon
+              class="size-6"
+            />
+          </div>
+          <h3
+            class="m-0 scroll-m-20 text-2xl leading-[28.8px] tracking-normal font-bold"
+            data-slot="typography"
+            data-variant="h3"
+          >
+            Blocked Address
+          </h3>
+          <span
+            class="m-0 text-sm leading-5 font-normal"
+            data-slot="typography"
+            data-variant="paragraph-small"
+          >
+            This signer address is blocked by the Safe interface, due to being associated with the blocked activities by the U.S. Department of Treasury in the Specially Designated Nationals (SDN) list.
+          </span>
+          <div
+            aria-orientation="horizontal"
+            class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch"
+            data-orientation="horizontal"
+            data-slot="separator"
+            role="separator"
           />
         </div>
-        <h3
-          class="MuiTypography-root MuiTypography-h3 mui-style-w6xv8j-MuiTypography-root"
+        <div
+          class="flex justify-center pt-6 pb-4"
         >
-          Blocked Address
-        </h3>
-        <p
-          class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
-        >
-          This signer address is blocked by the Safe interface, due to being associated with the blocked activities by the U.S. Department of Treasury in the Specially Designated Nationals (SDN) list.
-        </p>
-        <hr
-          class="MuiDivider-root MuiDivider-fullWidth mui-style-1facvfi-MuiDivider-root"
-        />
-      </div>
-      <div
-        class="MuiBox-root mui-style-fbqrg1"
-      >
-        <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary mui-style-ykbk5m-MuiButtonBase-root-MuiButton-root"
-          tabindex="0"
-          type="button"
-        >
-          Got it
-        </button>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Got it
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -63,104 +75,134 @@ exports[`./index.stories LegalDisclaimer 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="container"
+    class="shadcn-scope"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-15brele-MuiPaper-root"
-      style="--Paper-shadow: none;"
+      class="container"
     >
       <div
-        class="MuiStack-root mui-style-1ogap9g-MuiStack-root"
+        class="max-w-[500px] rounded-lg bg-[var(--color-background-paper)]"
       >
         <div
-          class="iconCircle MuiBox-root mui-style-0"
-        >
-          <mock-icon
-            aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
-            focusable="false"
-          />
-        </div>
-        <h3
-          class="MuiTypography-root MuiTypography-h3 mui-style-w6xv8j-MuiTypography-root"
-        >
-          Legal Disclaimer
-        </h3>
-        <p
-          class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
+          class="flex flex-col items-center gap-4 border-b border-[var(--color-border-light)] p-[var(--space-3)]"
         >
           <div
-            class="disclaimerContainer"
+            class="iconCircle"
+          >
+            <mock-icon
+              class="size-6"
+            />
+          </div>
+          <h3
+            class="m-0 scroll-m-20 text-2xl leading-[28.8px] tracking-normal font-bold"
+            data-slot="typography"
+            data-variant="h3"
+          >
+            Legal Disclaimer
+          </h3>
+          <span
+            class="m-0 text-sm leading-5 font-normal"
+            data-slot="typography"
+            data-variant="paragraph-small"
           >
             <div
-              class="disclaimerInner"
+              class="disclaimerContainer"
             >
-              <p
-                class="MuiTypography-root MuiTypography-body1 mui-style-1hsdx29-MuiTypography-root"
+              <div
+                class="disclaimerInner"
               >
-                You are now accessing 
-                third-party apps
-                , which we do not own, control, maintain or audit. We are not liable for any loss you may suffer in connection with interacting with the
-                 
-                apps
-                , which is at your own risk.
-              </p>
-              <p
-                class="MuiTypography-root MuiTypography-body1 mui-style-1hsdx29-MuiTypography-root"
-              >
-                You must read our Terms, which contain more detailed provisions binding on you relating to the
-                 
-                apps
-                .
-              </p>
-              <p
-                class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-              >
-                I have read and understood the
-                 
-                <a
-                  class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-ey0kse-MuiTypography-root-MuiLink-root"
-                  href="/terms"
-                  rel="noreferrer noopener"
-                  target="_blank"
+                <p
+                  class="m-0 text-base leading-6 font-normal mb-8"
+                  data-slot="typography"
+                  data-variant="paragraph"
                 >
-                  <span
-                    class="MuiBox-root mui-style-u9xrjn"
+                  You are now accessing 
+                  third-party apps
+                  , which we do not own, control, maintain or audit. We are not liable for any loss you may suffer in connection with interacting with the
+                   
+                  apps
+                  , which is at your own risk.
+                </p>
+                <p
+                  class="m-0 text-base leading-6 font-normal mb-8"
+                  data-slot="typography"
+                  data-variant="paragraph"
+                >
+                  You must read our Terms, which contain more detailed provisions binding on you relating to the
+                   
+                  apps
+                  .
+                </p>
+                <p
+                  class="m-0 text-base leading-6 font-normal"
+                  data-slot="typography"
+                  data-variant="paragraph"
+                >
+                  I have read and understood the
+                   
+                  <a
+                    class="underline-offset-4 transition-colors outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 text-primary decoration-primary/40 hover:decoration-current no-underline hover:no-underline"
+                    data-slot="link"
+                    data-variant="default"
+                    href="/terms"
+                    rel="noreferrer noopener"
+                    target="_blank"
                   >
-                    Terms
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon mui-style-tqxw8e-MuiSvgIcon-root"
-                      data-testid="OpenInNewRoundedIcon"
-                      focusable="false"
-                      viewBox="0 0 24 24"
+                    <span
+                      class="inline-flex cursor-pointer items-center gap-0.5"
                     >
-                      <path
-                        d="M18 19H6c-.55 0-1-.45-1-1V6c0-.55.45-1 1-1h5c.55 0 1-.45 1-1s-.45-1-1-1H5c-1.11 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-6c0-.55-.45-1-1-1s-1 .45-1 1v5c0 .55-.45 1-1 1M14 4c0 .55.45 1 1 1h2.59l-9.13 9.13c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0L19 6.41V9c0 .55.45 1 1 1s1-.45 1-1V4c0-.55-.45-1-1-1h-5c-.55 0-1 .45-1 1"
-                      />
-                    </svg>
-                  </span>
-                </a>
-                 
-                and this Disclaimer, and agree to be bound by them.
-              </p>
+                      Terms
+                      <svg
+                        aria-hidden="true"
+                        class="lucide lucide-external-link external-link-icon size-4"
+                        fill="none"
+                        height="24"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M15 3h6v6"
+                        />
+                        <path
+                          d="M10 14 21 3"
+                        />
+                        <path
+                          d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+                        />
+                      </svg>
+                    </span>
+                  </a>
+                   
+                  and this Disclaimer, and agree to be bound by them.
+                </p>
+              </div>
             </div>
-          </div>
-        </p>
-        <hr
-          class="MuiDivider-root MuiDivider-fullWidth mui-style-1facvfi-MuiDivider-root"
-        />
-      </div>
-      <div
-        class="MuiBox-root mui-style-fbqrg1"
-      >
-        <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary mui-style-ykbk5m-MuiButtonBase-root-MuiButton-root"
-          tabindex="0"
-          type="button"
+          </span>
+          <div
+            aria-orientation="horizontal"
+            class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch"
+            data-orientation="horizontal"
+            data-slot="separator"
+            role="separator"
+          />
+        </div>
+        <div
+          class="flex justify-center pt-6 pb-4"
         >
-          Continue
-        </button>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Continue
+          </button>
+        </div>
       </div>
     </div>
   </div>

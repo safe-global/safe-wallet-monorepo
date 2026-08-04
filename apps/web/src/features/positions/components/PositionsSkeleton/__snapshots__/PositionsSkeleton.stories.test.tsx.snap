@@ -1,153 +1,184 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./PositionsSkeleton.stories Default 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1bxarir"
+    class="shadcn-scope"
   >
     <div
-      class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
+      class="max-w-[800px]"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1e0hdwf-MuiPaper-root-MuiCard-root"
-        style="--Paper-shadow: none;"
+        class="flex flex-col gap-4"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded Mui-expanded mui-style-1bceubf-MuiPaper-root-MuiAccordion-root"
-          style="--Paper-shadow: none;"
+          class="overflow-hidden rounded-xl border border-border bg-card"
         >
-          <h3
-            class="MuiAccordion-heading mui-style-cy7rkm-MuiAccordion-heading"
-          >
-            <button
-              aria-expanded="true"
-              class="MuiButtonBase-root MuiAccordionSummary-root Mui-expanded mui-style-1wczrn0-MuiButtonBase-root-MuiAccordionSummary-root"
-              tabindex="0"
-              type="button"
-            >
-              <span
-                class="MuiAccordionSummary-content Mui-expanded mui-style-pp67k-MuiAccordionSummary-content"
-              >
-                <div
-                  class="MuiStack-root mui-style-1ele3rf-MuiStack-root"
-                >
-                  <span
-                    class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                    style="width: 40px; height: 40px;"
-                  />
-                  <div
-                    class="MuiBox-root mui-style-1rr4qq7"
-                  >
-                    <p
-                      class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                    >
-                      <span
-                        class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                        style="width: 120px;"
-                      />
-                    </p>
-                    <p
-                      class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
-                    >
-                      <span
-                        class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                        style="width: 80px;"
-                      />
-                    </p>
-                  </div>
-                  <p
-                    class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                  >
-                    <span
-                      class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                      style="width: 60px;"
-                    />
-                  </p>
-                </div>
-              </span>
-              <span
-                class="MuiAccordionSummary-expandIconWrapper Mui-expanded mui-style-1wqf3nl-MuiAccordionSummary-expandIconWrapper"
-              >
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-                  data-testid="ExpandMoreIcon"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M16.59 8.59 12 13.17 7.41 8.59 6 10l6 6 6-6z"
-                  />
-                </svg>
-              </span>
-            </button>
-          </h3>
           <div
-            class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-            style="min-height: 0px;"
+            class="flex w-full flex-col"
+            data-orientation="vertical"
+            data-slot="accordion"
+            dir="ltr"
+            role="region"
           >
             <div
-              class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+              class="not-last:border-b border-b-0"
+              data-index="0"
+              data-open=""
+              data-orientation="vertical"
+              data-slot="accordion-item"
             >
-              <div
-                class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+              <h3
+                class="flex"
+                data-index="0"
+                data-open=""
+                data-orientation="vertical"
               >
-                <div
-                  class="MuiAccordion-region"
-                  role="region"
+                <button
+                  aria-controls="base-ui-_r_1_"
+                  aria-disabled="false"
+                  aria-expanded="true"
+                  class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium hover:underline focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 justify-between border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 items-center overflow-x-auto px-6 py-4"
+                  data-orientation="vertical"
+                  data-panel-open=""
+                  data-slot="accordion-trigger"
+                  data-value="skeleton"
+                  id="base-ui-_r_2_"
+                  tabindex="0"
+                  type="button"
                 >
                   <div
-                    class="MuiAccordionDetails-root mui-style-o4cswg-MuiAccordionDetails-root"
+                    class="flex w-full items-center gap-4"
                   >
                     <div
-                      class="MuiBox-root mui-style-0"
+                      class="bg-muted animate-pulse size-10 rounded-md"
+                      data-slot="skeleton"
+                    />
+                    <div
+                      class="flex-1"
                     >
                       <div
-                        class="MuiBox-root mui-style-dzaqf9"
+                        class="bg-muted rounded-md animate-pulse h-6 w-[120px]"
+                        data-slot="skeleton"
+                      />
+                      <div
+                        class="bg-muted rounded-md animate-pulse h-5 w-[80px]"
+                        data-slot="skeleton"
+                      />
+                    </div>
+                    <div
+                      class="bg-muted rounded-md animate-pulse h-6 w-[60px]"
+                      data-slot="skeleton"
+                    />
+                  </div>
+                  <svg
+                    aria-hidden="true"
+                    class="lucide lucide-chevron-down pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
+                    data-slot="accordion-trigger-icon"
+                    fill="none"
+                    height="24"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="m6 9 6 6 6-6"
+                    />
+                  </svg>
+                  <svg
+                    aria-hidden="true"
+                    class="lucide lucide-chevron-up pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
+                    data-slot="accordion-trigger-icon"
+                    fill="none"
+                    height="24"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="m18 15-6-6-6 6"
+                    />
+                  </svg>
+                </button>
+              </h3>
+              <div
+                aria-labelledby="base-ui-_r_2_"
+                class="data-open:animate-accordion-down data-closed:animate-accordion-up text-sm overflow-hidden"
+                data-index="0"
+                data-open=""
+                data-orientation="vertical"
+                data-slot="accordion-content"
+                id="base-ui-_r_1_"
+                role="region"
+                style="--accordion-panel-height: auto; --accordion-panel-width: auto;"
+              >
+                <div
+                  class="[&_a]:hover:text-foreground h-(--accordion-panel-height) data-ending-style:h-0 data-starting-style:h-0 [&_a]:underline [&_a]:underline-offset-3 [&_p:not(:last-child)]:mb-4 px-6 pb-4 pt-0"
+                >
+                  <div>
+                    <div
+                      class="mb-4 w-full"
+                    >
+                      <div
+                        class="w-full overflow-x-auto bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
+                        data-testid="table-container"
                       >
                         <div
-                          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-aapmsc-MuiPaper-root-MuiTableContainer-root"
-                          data-testid="table-container"
-                          style="--Paper-shadow: none;"
+                          class="relative w-full overflow-x-auto"
+                          data-slot="table-container"
                         >
                           <table
                             aria-labelledby="tableTitle"
-                            class="MuiTable-root compactTable mui-style-14ipoqq-MuiTable-root"
+                            class="w-full caption-bottom text-sm compactTable"
+                            data-slot="table"
                           >
                             <thead
-                              class="MuiTableHead-root mui-style-1bxxo5-MuiTableHead-root"
+                              class="[&_tr]:border-b"
+                              data-slot="table-header"
                             >
                               <tr
-                                class="MuiTableRow-root MuiTableRow-head mui-style-ee4r5n-MuiTableRow-root"
+                                class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                                data-slot="table-row"
                               >
                                 <th
-                                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-16mkdhd-MuiTableCell-root"
-                                  scope="col"
+                                  class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                                  data-slot="table-head"
+                                  style="width: 25%;"
                                 >
                                   <span
-                                    class="MuiBox-root mui-style-1kuy7z7"
+                                    class="text-sm"
                                   >
                                     Loading...
                                   </span>
                                 </th>
                                 <th
-                                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-14qoodj-MuiTableCell-root"
-                                  scope="col"
+                                  class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                                  data-slot="table-head"
+                                  style="width: 35%; text-align: right;"
                                 >
                                   <span
-                                    class="MuiBox-root mui-style-1kuy7z7"
+                                    class="text-sm"
                                   >
                                     Balance
                                   </span>
                                 </th>
                                 <th
-                                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-1lpfb9u-MuiTableCell-root"
-                                  scope="col"
+                                  class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                                  data-slot="table-head"
+                                  style="width: 40%; text-align: right;"
                                 >
                                   <span
-                                    class="MuiBox-root mui-style-1kuy7z7"
+                                    class="text-sm"
                                   >
                                     Value
                                   </span>
@@ -155,352 +186,230 @@ exports[`./PositionsSkeleton.stories Default 1`] = `
                               </tr>
                             </thead>
                             <tbody
-                              class="MuiTableBody-root tableBody mui-style-hvwm6q-MuiTableBody-root"
+                              class="[&_tr:last-child]:border-0 tableBody"
+                              data-slot="table-body"
                             >
                               <tr
-                                class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
+                                class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                                data-slot="table-row"
                                 data-testid="table-row"
                                 tabindex="-1"
                               >
                                 <td
-                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                                  data-slot="table-cell"
                                   data-testid="table-cell-name"
                                 >
                                   <div
-                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                                    style="min-height: 0px;"
+                                    class="overflow-hidden transition-all"
                                   >
                                     <div
-                                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                                      class="flex items-center gap-2"
                                     >
                                       <div
-                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                                      >
+                                        class="bg-muted animate-pulse size-8 rounded-md"
+                                        data-slot="skeleton"
+                                      />
+                                      <div>
                                         <div
-                                          class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
-                                        >
-                                          <span
-                                            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                            style="width: 32px; height: 32px;"
-                                          />
-                                          <div
-                                            class="MuiBox-root mui-style-0"
-                                          >
-                                            <p
-                                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                                            >
-                                              <span
-                                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                                style="width: 100px;"
-                                              />
-                                            </p>
-                                            <p
-                                              class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
-                                            >
-                                              <span
-                                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                                style="width: 80px;"
-                                              />
-                                            </p>
-                                          </div>
-                                        </div>
+                                          class="bg-muted rounded-md animate-pulse h-6 w-[100px]"
+                                          data-slot="skeleton"
+                                        />
+                                        <div
+                                          class="bg-muted rounded-md animate-pulse h-5 w-[80px]"
+                                          data-slot="skeleton"
+                                        />
                                       </div>
                                     </div>
                                   </div>
                                 </td>
                                 <td
-                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                                  data-slot="table-cell"
                                   data-testid="table-cell-balance"
                                 >
                                   <div
-                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                                    style="min-height: 0px;"
+                                    class="overflow-hidden transition-all"
                                   >
                                     <div
-                                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                                      class="text-right"
                                     >
                                       <div
-                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                                      >
-                                        <p
-                                          class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
-                                        >
-                                          <span
-                                            class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                            style="width: 60px;"
-                                          />
-                                        </p>
-                                      </div>
+                                        class="bg-muted rounded-md animate-pulse ml-auto h-6 w-[60px]"
+                                        data-slot="skeleton"
+                                      />
                                     </div>
                                   </div>
                                 </td>
                                 <td
-                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                                  data-slot="table-cell"
                                   data-testid="table-cell-value"
                                 >
                                   <div
-                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                                    style="min-height: 0px;"
+                                    class="overflow-hidden transition-all"
                                   >
                                     <div
-                                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                                      class="text-right"
                                     >
                                       <div
-                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                                      >
-                                        <div
-                                          class="MuiBox-root mui-style-s2uf1z"
-                                        >
-                                          <p
-                                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                                          >
-                                            <span
-                                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                              style="width: 50px;"
-                                            />
-                                          </p>
-                                          <span
-                                            class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
-                                          >
-                                            <span
-                                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                              style="width: 40px;"
-                                            />
-                                          </span>
-                                        </div>
-                                      </div>
+                                        class="bg-muted rounded-md animate-pulse ml-auto h-6 w-[50px]"
+                                        data-slot="skeleton"
+                                      />
+                                      <div
+                                        class="bg-muted rounded-md animate-pulse ml-auto h-4 w-[40px]"
+                                        data-slot="skeleton"
+                                      />
                                     </div>
                                   </div>
                                 </td>
                               </tr>
                               <tr
-                                class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
+                                class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                                data-slot="table-row"
                                 data-testid="table-row"
                                 tabindex="-1"
                               >
                                 <td
-                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                                  data-slot="table-cell"
                                   data-testid="table-cell-name"
                                 >
                                   <div
-                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                                    style="min-height: 0px;"
+                                    class="overflow-hidden transition-all"
                                   >
                                     <div
-                                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                                      class="flex items-center gap-2"
                                     >
                                       <div
-                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                                      >
+                                        class="bg-muted animate-pulse size-8 rounded-md"
+                                        data-slot="skeleton"
+                                      />
+                                      <div>
                                         <div
-                                          class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
-                                        >
-                                          <span
-                                            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                            style="width: 32px; height: 32px;"
-                                          />
-                                          <div
-                                            class="MuiBox-root mui-style-0"
-                                          >
-                                            <p
-                                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                                            >
-                                              <span
-                                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                                style="width: 100px;"
-                                              />
-                                            </p>
-                                            <p
-                                              class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
-                                            >
-                                              <span
-                                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                                style="width: 80px;"
-                                              />
-                                            </p>
-                                          </div>
-                                        </div>
+                                          class="bg-muted rounded-md animate-pulse h-6 w-[100px]"
+                                          data-slot="skeleton"
+                                        />
+                                        <div
+                                          class="bg-muted rounded-md animate-pulse h-5 w-[80px]"
+                                          data-slot="skeleton"
+                                        />
                                       </div>
                                     </div>
                                   </div>
                                 </td>
                                 <td
-                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                                  data-slot="table-cell"
                                   data-testid="table-cell-balance"
                                 >
                                   <div
-                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                                    style="min-height: 0px;"
+                                    class="overflow-hidden transition-all"
                                   >
                                     <div
-                                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                                      class="text-right"
                                     >
                                       <div
-                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                                      >
-                                        <p
-                                          class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
-                                        >
-                                          <span
-                                            class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                            style="width: 60px;"
-                                          />
-                                        </p>
-                                      </div>
+                                        class="bg-muted rounded-md animate-pulse ml-auto h-6 w-[60px]"
+                                        data-slot="skeleton"
+                                      />
                                     </div>
                                   </div>
                                 </td>
                                 <td
-                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                                  data-slot="table-cell"
                                   data-testid="table-cell-value"
                                 >
                                   <div
-                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                                    style="min-height: 0px;"
+                                    class="overflow-hidden transition-all"
                                   >
                                     <div
-                                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                                      class="text-right"
                                     >
                                       <div
-                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                                      >
-                                        <div
-                                          class="MuiBox-root mui-style-s2uf1z"
-                                        >
-                                          <p
-                                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                                          >
-                                            <span
-                                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                              style="width: 50px;"
-                                            />
-                                          </p>
-                                          <span
-                                            class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
-                                          >
-                                            <span
-                                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                              style="width: 40px;"
-                                            />
-                                          </span>
-                                        </div>
-                                      </div>
+                                        class="bg-muted rounded-md animate-pulse ml-auto h-6 w-[50px]"
+                                        data-slot="skeleton"
+                                      />
+                                      <div
+                                        class="bg-muted rounded-md animate-pulse ml-auto h-4 w-[40px]"
+                                        data-slot="skeleton"
+                                      />
                                     </div>
                                   </div>
                                 </td>
                               </tr>
                               <tr
-                                class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
+                                class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                                data-slot="table-row"
                                 data-testid="table-row"
                                 tabindex="-1"
                               >
                                 <td
-                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                                  data-slot="table-cell"
                                   data-testid="table-cell-name"
                                 >
                                   <div
-                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                                    style="min-height: 0px;"
+                                    class="overflow-hidden transition-all"
                                   >
                                     <div
-                                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                                      class="flex items-center gap-2"
                                     >
                                       <div
-                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                                      >
+                                        class="bg-muted animate-pulse size-8 rounded-md"
+                                        data-slot="skeleton"
+                                      />
+                                      <div>
                                         <div
-                                          class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
-                                        >
-                                          <span
-                                            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                            style="width: 32px; height: 32px;"
-                                          />
-                                          <div
-                                            class="MuiBox-root mui-style-0"
-                                          >
-                                            <p
-                                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                                            >
-                                              <span
-                                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                                style="width: 100px;"
-                                              />
-                                            </p>
-                                            <p
-                                              class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
-                                            >
-                                              <span
-                                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                                style="width: 80px;"
-                                              />
-                                            </p>
-                                          </div>
-                                        </div>
+                                          class="bg-muted rounded-md animate-pulse h-6 w-[100px]"
+                                          data-slot="skeleton"
+                                        />
+                                        <div
+                                          class="bg-muted rounded-md animate-pulse h-5 w-[80px]"
+                                          data-slot="skeleton"
+                                        />
                                       </div>
                                     </div>
                                   </div>
                                 </td>
                                 <td
-                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                                  data-slot="table-cell"
                                   data-testid="table-cell-balance"
                                 >
                                   <div
-                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                                    style="min-height: 0px;"
+                                    class="overflow-hidden transition-all"
                                   >
                                     <div
-                                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                                      class="text-right"
                                     >
                                       <div
-                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                                      >
-                                        <p
-                                          class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
-                                        >
-                                          <span
-                                            class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                            style="width: 60px;"
-                                          />
-                                        </p>
-                                      </div>
+                                        class="bg-muted rounded-md animate-pulse ml-auto h-6 w-[60px]"
+                                        data-slot="skeleton"
+                                      />
                                     </div>
                                   </div>
                                 </td>
                                 <td
-                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                                  data-slot="table-cell"
                                   data-testid="table-cell-value"
                                 >
                                   <div
-                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                                    style="min-height: 0px;"
+                                    class="overflow-hidden transition-all"
                                   >
                                     <div
-                                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                                      class="text-right"
                                     >
                                       <div
-                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                                      >
-                                        <div
-                                          class="MuiBox-root mui-style-s2uf1z"
-                                        >
-                                          <p
-                                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                                          >
-                                            <span
-                                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                              style="width: 50px;"
-                                            />
-                                          </p>
-                                          <span
-                                            class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
-                                          >
-                                            <span
-                                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                              style="width: 40px;"
-                                            />
-                                          </span>
-                                        </div>
-                                      </div>
+                                        class="bg-muted rounded-md animate-pulse ml-auto h-6 w-[50px]"
+                                        data-slot="skeleton"
+                                      />
+                                      <div
+                                        class="bg-muted rounded-md animate-pulse ml-auto h-4 w-[40px]"
+                                        data-slot="skeleton"
+                                      />
                                     </div>
                                   </div>
                                 </td>
