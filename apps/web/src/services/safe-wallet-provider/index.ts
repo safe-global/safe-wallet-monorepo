@@ -382,7 +382,8 @@ export class SafeWalletProvider {
       throw new RpcError(RpcErrorCode.INVALID_PARAMS, 'Invalid transaction hash')
     }
 
-    // An unknown hash is not an error: it may be a transaction submitted outside of this Safe
+    // A 404 here only means the hash isn't a Safe tx, so we fall through to the RPC. Not logged:
+    // apps poll these methods in a loop, so it would fire on every poll.
     const resolvedTx = await this.sdk.getBySafeTxHash(txHash).catch(() => undefined)
     const resolvedHash = resolvedTx?.txHash || txHash
 
@@ -399,6 +400,7 @@ export class SafeWalletProvider {
       throw new RpcError(RpcErrorCode.INVALID_PARAMS, 'Invalid transaction hash')
     }
 
+    // Swallowed for the same reason as in eth_getTransactionByHash above
     const resolvedTx = await this.sdk.getBySafeTxHash(txHash).catch(() => undefined)
 
     // A Safe transaction that is not on-chain yet has no receipt
