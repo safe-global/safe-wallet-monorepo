@@ -7,6 +7,7 @@ import {
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuItem,
+  SidebarSeparator,
 } from '@/components/ui/sidebar'
 import css from '../../styles.module.css'
 import type { SpaceSelectorProps, ResolvedSidebarItem, ResolvedSidebarGroup } from '../../types'
@@ -36,7 +37,7 @@ export const SpacesSidebarVariant = ({
   return (
     <SidebarContent>
       <motion.div variants={containerVariants} initial="hidden" animate="visible">
-        <motion.div variants={itemVariants} className="mb-2">
+        <motion.div variants={itemVariants} className="mb-6 group-data-[collapsible=icon]:mb-4">
           <SidebarGroup className={css.sidebarGroup}>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -67,7 +68,10 @@ export const SpacesSidebarVariant = ({
         {/* Setup Group */}
         <motion.div variants={itemVariants}>
           <SidebarGroup className={css.sidebarGroup}>
-            <SidebarGroupLabel>{setupGroup?.label ?? ''}</SidebarGroupLabel>
+            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+              {setupGroup?.label ?? ''}
+            </SidebarGroupLabel>
+            <SidebarSeparator className="my-2 mx-0 px-[18px] hidden group-data-[collapsible=icon]:block group-data-[collapsible=icon]:self-stretch" />
             <SidebarGroupContent>
               <SidebarMenu className="gap-0">
                 {displaySetupItems.map((item, index) => (

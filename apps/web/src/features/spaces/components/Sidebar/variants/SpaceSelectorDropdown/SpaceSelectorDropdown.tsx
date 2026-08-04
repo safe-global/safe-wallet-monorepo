@@ -186,7 +186,7 @@ export const SpaceSelectorDropdown = ({
               )}
               <span className={css.spaceSelectorSubtitle}>Workspace</span>
             </div>
-            <ChevronsUpDown className="ml-auto size-4 shrink-0" aria-hidden />
+            <ChevronsUpDown className="ml-auto size-4 shrink-0 group-data-[collapsible=icon]:hidden" aria-hidden />
           </>
         )}
       </DropdownMenuTrigger>

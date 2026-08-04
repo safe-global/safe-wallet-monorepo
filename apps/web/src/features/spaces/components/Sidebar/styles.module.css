@@ -1,5 +1,9 @@
 .sidebarInteractive {
   cursor: pointer;
+  border-radius: var(--rounded-lg, 12px);
+}
+
+:global(.group[data-collapsible='icon']) .sidebarInteractive {
   border-radius: var(--rounded-md, 8px);
 }
 
@@ -26,7 +30,7 @@
   /* 12px inset aligns the avatar with the back-arrow pill in the top bar; !important beats the
      base menu-button's p-2 (equal specificity). Collapsed mode still wins via its own p-0!. */
   padding: 8px 12px !important;
-  border-radius: 8px;
+  border-radius: 16px;
   cursor: pointer;
   /* Persistent grey "active" background (per Figma) for the workspace switcher and the
      back-to-workspace button, instead of the sidebar's green accent. */
@@ -85,7 +89,7 @@
   width: 32px;
   height: 32px;
   flex-shrink: 0;
-  border-radius: var(--rounded-md, 8px);
+  border-radius: var(--rounded-lg, 12px);
   overflow: hidden;
 }
 
@@ -188,9 +192,28 @@
   height: 12px;
 }
 
+:global(.group[data-collapsible='icon']) .spaceSelector {
+  background-color: transparent;
+  min-height: 32px;
+  padding: 0 !important;
+  border-radius: var(--rounded-lg, 12px);
+  /* Re-center the avatar: the base rule's flex-start !important would otherwise pin it to the
+     left edge of the (slightly wider) collapsed button. */
+  justify-content: center !important;
+}
+
 :global(.group[data-collapsible='icon']) .spaceSelector .spaceSelectorAvatar {
   width: 32px;
   height: 32px;
+  transition: opacity 0.15s ease;
+}
+
+:global(.group[data-collapsible='icon']) .spaceSelector:hover {
+  background-color: transparent !important;
+}
+
+:global(.group[data-collapsible='icon']) .spaceSelector:hover .spaceSelectorAvatar {
+  filter: brightness(1.1);
 }
 
 :global(.group[data-collapsible='icon']) .transactionsBadge {
