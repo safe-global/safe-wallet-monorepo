@@ -7,23 +7,32 @@ export type { SpendingLimitState } from './store/spendingLimitsSlice'
 // Form fields for creating spending limits
 enum SpendingLimitFormFields {
   beneficiary = 'beneficiary',
+  limits = 'limits',
   resetTime = 'resetTime',
 }
 
 export const SpendingLimitFields = { ...SpendingLimitFormFields, ...TokenAmountFields }
 
-export type NewSpendingLimitFlowProps = {
-  [SpendingLimitFields.beneficiary]: string
+export type SpendingLimitRowValues = {
   [SpendingLimitFields.tokenAddress]: string
   [SpendingLimitFields.amount]: string
   [SpendingLimitFields.resetTime]: string
 }
 
+export type NewSpendingLimitFlowProps = {
+  [SpendingLimitFields.beneficiary]: string
+  [SpendingLimitFields.limits]: SpendingLimitRowValues[]
+}
+
 export type NewSpendingLimitData = {
   beneficiary: string
-  tokenAddress: string
-  amount: string
-  resetTime: string
+  limits: {
+    tokenAddress: string
+    amount: string
+    resetTime: string
+    // Resolved by the review screen from the balances list
+    decimals?: number | null
+  }[]
 }
 
 export type SpendingLimitTxParams = {

@@ -22,6 +22,17 @@ import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { didRevert } from '@/utils/ethers-utils'
 import { getUncheckedSigner } from '@/services/tx/tx-sender/sdk'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+
+export const findExistingSpendingLimit = (
+  spendingLimits: SpendingLimitState[],
+  beneficiary: string,
+  tokenAddress: string,
+): SpendingLimitState | undefined =>
+  spendingLimits.find(
+    (spendingLimit) =>
+      sameAddress(spendingLimit.beneficiary, beneficiary) && sameAddress(spendingLimit.token.address, tokenAddress),
+  )
 
 export const createNewSpendingLimitTx = async (
   data: NewSpendingLimitData,
@@ -30,8 +41,6 @@ export const createNewSpendingLimitTx = async (
   chain: Chain,
   safeModules: SafeState['modules'],
   deployed: boolean,
-  tokenDecimals?: number | null,
-  existingSpendingLimit?: SpendingLimitState,
 ) => {
   const sdk = getSafeSDK()
   if (!sdk) return
@@ -73,25 +82,32 @@ export const createNewSpendingLimitTx = async (
     }
   }
 
-  const existingDelegate = spendingLimits.find((spendingLimit) => spendingLimit.beneficiary === data.beneficiary)
+  // addDelegate is per beneficiary, not per token, so it is only ever needed once
+  const existingDelegate = spendingLimits.find((spendingLimit) =>
+    sameAddress(spendingLimit.beneficiary, data.beneficiary),
+  )
   if (!existingDelegate) {
     txs.push(createAddDelegateTx(data.beneficiary, spendingLimitAddress))
   }
 
-  if (existingSpendingLimit && existingSpendingLimit.spent !== '0') {
-    txs.push(createResetAllowanceTx(data.beneficiary, data.tokenAddress, spendingLimitAddress))
-  }
+  data.limits.forEach(({ tokenAddress, amount, resetTime, decimals }) => {
+    // setAllowance does not clear the spent amount, so an already-spent allowance has to be reset first
+    const existingSpendingLimit = findExistingSpendingLimit(spendingLimits, data.beneficiary, tokenAddress)
+    if (existingSpendingLimit && existingSpendingLimit.spent !== '0') {
+      txs.push(createResetAllowanceTx(data.beneficiary, tokenAddress, spendingLimitAddress))
+    }
 
-  const tx = createSetAllowanceTx(
-    data.beneficiary,
-    data.tokenAddress,
-    parseUnits(data.amount, tokenDecimals ?? undefined).toString(),
-    parseInt(data.resetTime),
-    data.resetTime !== '0' ? currentMinutes() - 30 : 0,
-    spendingLimitAddress,
-  )
-
-  txs.push(tx)
+    txs.push(
+      createSetAllowanceTx(
+        data.beneficiary,
+        tokenAddress,
+        parseUnits(amount, decimals ?? undefined).toString(),
+        parseInt(resetTime),
+        resetTime !== '0' ? currentMinutes() - 30 : 0,
+        spendingLimitAddress,
+      ),
+    )
+  })
 
   return createMultiSendCallOnlyTx(txs)
 }

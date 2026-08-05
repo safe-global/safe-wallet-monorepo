@@ -1,66 +1,48 @@
-import { useCallback, useContext, useMemo } from 'react'
-import { Controller, FormProvider, useForm } from 'react-hook-form'
-import { Button, CardActions, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material'
-import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
-import { parseUnits, AbiCoder } from 'ethers'
+import { useContext, useMemo } from 'react'
+import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
+import { Button, CardActions, Divider, FormControl, Stack, SvgIcon, Typography } from '@mui/material'
 
+import AddIcon from '@/public/images/common/add.svg'
 import AddressBookInput from '@/components/common/AddressBookInput'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
-import useChainId from '@/hooks/useChainId'
-import { getResetTimeOptions } from '../../constants'
-import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import TxCard from '@/components/tx-flow/common/TxCard'
-import css from '@/components/tx/ExecuteCheckbox/styles.module.css'
-import TokenAmountInput from '@/components/common/TokenAmountInput'
-import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
+import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../types'
 import useIsSpendingLimitSupported from '../../hooks/useIsSpendingLimitSupported'
 import SpendingLimitNotSupported from './SpendingLimitNotSupported'
+import LimitRow from './LimitRow'
 
-export const _validateSpendingLimit = (val: string, decimals?: number | null) => {
-  // Allowance amount is uint96 https://github.com/safe-global/safe-modules/blob/main/modules/allowances/contracts/AllowanceModule.sol#L52
-  try {
-    const amount = parseUnits(val, decimals ?? 'Gwei')
-    AbiCoder.defaultAbiCoder().encode(['int96'], [amount])
-  } catch (e) {
-    return Number(val) > 1 ? 'Amount is too big' : 'Amount is too small'
-  }
-}
+export { _validateSpendingLimit } from './validation'
+
+const MAX_LIMITS = 5
 
 const CreateSpendingLimit = () => {
-  const chainId = useChainId()
   const isSupported = useIsSpendingLimitSupported()
   const { balances } = useVisibleBalances()
   const { onNext, data } = useContext<TxFlowContextType<NewSpendingLimitFlowProps>>(TxFlowContext)
-
-  const resetTimeOptions = useMemo(() => getResetTimeOptions(chainId), [chainId])
 
   const formMethods = useForm<NewSpendingLimitFlowProps>({
     defaultValues: data,
     mode: 'onChange',
   })
 
-  const { handleSubmit, watch, control } = formMethods
+  const { handleSubmit, watch, control, formState } = formMethods
 
-  const tokenAddress = watch(SpendingLimitFields.tokenAddress)
   const beneficiary = watch(SpendingLimitFields.beneficiary)
 
   // Copilot address-poisoning check for the beneficiary
   useSafeShieldForAddressPoisoning([beneficiary])
-  const selectedToken = tokenAddress
-    ? balances.items.find((item) => item.tokenInfo.address === tokenAddress)
-    : undefined
 
-  const validateSpendingLimit = useCallback(
-    (value: string) => {
-      return (
-        validateAmount(value) ||
-        validateDecimalLength(value, selectedToken?.tokenInfo.decimals) ||
-        _validateSpendingLimit(value, selectedToken?.tokenInfo.decimals)
-      )
-    },
-    [selectedToken?.tokenInfo.decimals],
+  const { fields: limitFields, append, remove } = useFieldArray({ control, name: SpendingLimitFields.limits })
+
+  const canAddMoreLimits = limitFields.length < MAX_LIMITS
+
+  // Changing one row's token can make another row a duplicate, so all rows re-validate together
+  const amountFieldNames = useMemo(
+    () => limitFields.map((_, index) => `${SpendingLimitFields.limits}.${index}.${SpendingLimitFields.amount}`),
+    [limitFields],
   )
 
   if (!isSupported) {
@@ -79,44 +61,48 @@ const CreateSpendingLimit = () => {
             />
           </FormControl>
 
-          <TokenAmountInput balances={balances.items} selectedToken={selectedToken} validate={validateSpendingLimit} />
+          <Typography variant="h4" fontWeight={700}>
+            Limits
+          </Typography>
+          <Typography mb={2}>
+            Set an allowance per token. Each token refills automatically after its own reset time period.
+          </Typography>
 
-          <Typography variant="h4" fontWeight={700} mt={3}>
-            Reset Timer
-          </Typography>
-          <Typography>
-            Set a reset time so the allowance automatically refills after the defined time period.
-          </Typography>
-          <FormControl fullWidth className={css.select}>
-            <InputLabel shrink={false}>Time Period</InputLabel>
-            <Controller
-              rules={{ required: true }}
-              control={control}
-              name={SpendingLimitFields.resetTime}
-              render={({ field }) => (
-                <Select
-                  data-testid="time-period-section"
-                  {...field}
-                  sx={{ textAlign: 'right', fontWeight: 700 }}
-                  IconComponent={ExpandMoreRoundedIcon}
-                >
-                  {resetTimeOptions.map((resetTime) => (
-                    <MenuItem
-                      data-testid="time-period-item"
-                      key={resetTime.value}
-                      value={resetTime.value}
-                      sx={{ overflow: 'hidden' }}
-                    >
-                      {resetTime.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              )}
-            />
-          </FormControl>
+          <Stack spacing={4}>
+            {limitFields.map((field, index) => (
+              <LimitRow
+                key={field.id}
+                index={index}
+                balances={balances.items}
+                removable={limitFields.length > 1}
+                onRemove={remove}
+                amountFieldNames={amountFieldNames}
+              />
+            ))}
+          </Stack>
+
+          <Stack direction="row" alignItems="center" justifyContent="space-between" mt={3}>
+            <Button
+              data-testid="add-limit-btn"
+              variant="text"
+              onClick={() => append({ tokenAddress: ZERO_ADDRESS, amount: '', resetTime: '0' })}
+              disabled={!canAddMoreLimits}
+              startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
+              size="large"
+            >
+              Add token
+            </Button>
+            <Typography
+              data-testid="limits-count"
+              variant="body2"
+              color={canAddMoreLimits ? 'primary' : 'error.main'}
+            >{`${limitFields.length}/${MAX_LIMITS}`}</Typography>
+          </Stack>
+
+          <Divider sx={{ mt: 2 }} />
 
           <CardActions>
-            <Button data-testid="next-btn" variant="contained" type="submit">
+            <Button data-testid="next-btn" variant="contained" type="submit" disabled={!formState.isValid}>
               Next
             </Button>
           </CardActions>
