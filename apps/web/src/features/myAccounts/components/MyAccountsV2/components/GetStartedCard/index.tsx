@@ -6,7 +6,7 @@ import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
 import { useNewSafeNextParam } from '@/components/new-safe/getReturnUrl'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@/utils/cn'
@@ -56,16 +56,13 @@ const GetStartedCard = () => {
           </div>
 
           <Track {...OVERVIEW_EVENTS.ADD_TO_WATCHLIST} label={OVERVIEW_LABELS.login_page}>
-            <Button
-              variant="ghost"
-              size="lg"
-              className="h-12 w-full text-[15px]"
+            <NextLink
+              href={{ pathname: AppRoutes.newSafe.load, query: { next } }}
               data-testid="watch-account-button"
-              nativeButton={false}
-              render={<NextLink href={{ pathname: AppRoutes.newSafe.load, query: { next } }} />}
+              className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }), 'h-12 w-full text-[15px]')}
             >
               Watch any account
-            </Button>
+            </NextLink>
           </Track>
         </div>
       </div>

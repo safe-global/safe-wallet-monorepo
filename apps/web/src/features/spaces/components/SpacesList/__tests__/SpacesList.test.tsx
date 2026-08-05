@@ -144,9 +144,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
     render(<SpacesList />)
 
     expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
-    // The "Create workspace" CTA is an anchor exposed with role="button" (Base UI
-    // Button + NextLink composition with nativeButton={false}).
-    const cta = screen.getByRole('button', { name: /create workspace/i })
+    const cta = screen.getByRole('link', { name: /create workspace/i })
     expect(cta).toHaveAttribute('href')
 
     // Sign in card must NOT render in this branch.

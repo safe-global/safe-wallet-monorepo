@@ -19,7 +19,7 @@ import { APP_HOMEPAGE, APP_VERSION } from '@/config/version'
 import { BRAND_NAME } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
 import { useLoadFeature } from '@/features/__core__'
@@ -244,15 +244,15 @@ const AboutPage = () => {
               </Typography>
             </span>
           </span>
-          <Button
-            variant="outline"
-            size="sm"
-            nativeButton={false}
-            render={<a href={APP_HOMEPAGE} target="_blank" rel="noreferrer noopener" />}
+          <a
+            href={APP_HOMEPAGE}
+            target="_blank"
+            rel="noreferrer noopener"
+            className={buttonVariants({ variant: 'outline', size: 'sm' })}
           >
             <ArrowUpRight className="h-3.5 w-3.5" />
             GitHub
-          </Button>
+          </a>
         </div>
       </section>
 
