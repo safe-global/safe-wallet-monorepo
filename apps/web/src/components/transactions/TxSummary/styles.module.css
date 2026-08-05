@@ -95,6 +95,13 @@
   .status {
     margin: 0 var(--space-1);
   }
+
+  /* A queue row needs ~863px for its eight columns, so below this it has to wrap. Keeping the
+     confirmations/status/actions cluster against the right edge preserves the column order the
+     grid conveys — without it every cell packs left and the row reads as a jumble. */
+  .gridContainer .confirmations {
+    margin-left: auto;
+  }
 }
 
 /* History and bulk-group rows have fewer columns (no confirmations/actions) and still fit as a

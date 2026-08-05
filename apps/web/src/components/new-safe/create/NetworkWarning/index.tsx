@@ -11,10 +11,7 @@ const NetworkWarning = ({ action }: { action?: string }) => {
   if (!chain || !isWrongChain) return null
 
   return (
-    <Alert
-      variant="warning"
-      className="border-transparent bg-[var(--color-warning-background)] *:[svg]:text-[var(--color-warning-main)]"
-    >
+    <Alert variant="warning">
       <TriangleAlert />
       <AlertTitle className="font-bold">Change your wallet network</AlertTitle>
       <AlertDescription>

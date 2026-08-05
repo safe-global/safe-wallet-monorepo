@@ -17,10 +17,6 @@
   padding-right: 18px;
 }
 
-.divider {
-  height: 1rem;
-}
-
 .compact {
   display: flex;
   flex-direction: column;

@@ -40,7 +40,10 @@ const alertVariants = cva(
         // tint and the icon carry the severity: `--color-*-dark` is identical in both themes, so as
         // ink it dropped warning to 3.14:1 in dark and success to ~3.7:1 in both. It clears the 3:1
         // graphics threshold as an icon, which is where it belongs.
-        warning: 'bg-warning-subtle text-foreground border-warning-muted *:[svg]:text-warning-strong',
+        // `--color-warning-background` (the coral-tinted tint) with a coral icon, not the amber
+        // `warning-subtle`/`warning1` scale — and no border, matching the rest of our surfaces.
+        warning:
+          'bg-[var(--color-warning-background)] text-foreground border-transparent *:[svg]:text-[var(--color-warning-main)]',
         success: 'bg-success-subtle text-foreground border-success-muted *:[svg]:text-success-strong',
       },
     },

@@ -5,7 +5,6 @@ import type { Dispatch, ReactElement, SetStateAction, SyntheticEvent } from 'rea
 import SingleTxDecoded from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
 import css from './styles.module.css'
 import classnames from 'classnames'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -43,7 +42,6 @@ export const MultisendActionsHeader = ({
         <Button data-testid="expande-all-btn" onClick={onClickAll(true)} variant="ghost">
           Expand all
         </Button>
-        <Separator orientation="vertical" className={css.divider} />
         <Button data-testid="collapse-all-btn" onClick={onClickAll(false)} variant="ghost">
           Collapse all
         </Button>

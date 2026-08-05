@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./index.stories CustomRecipient 1`] = `
 <div
@@ -511,7 +511,7 @@ exports[`./index.stories CustomRecipient 1`] = `
         </div>
         <div>
           <div
-            class="grid gap-0.5 rounded-lg border px-4 py-3 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-18 has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2.5 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert bg-warning-subtle text-foreground border-warning-muted *:[svg]:text-warning-strong"
+            class="grid gap-0.5 rounded-lg border px-4 py-3 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-18 has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2.5 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert bg-[var(--color-warning-background)] text-foreground border-transparent *:[svg]:text-[var(--color-warning-main)]"
             data-slot="alert"
             data-testid="recipient-alert"
             role="alert"
