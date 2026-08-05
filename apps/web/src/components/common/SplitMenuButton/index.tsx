@@ -67,9 +67,16 @@ export default function SplitMenuButton({
               onClick={handleClick}
               type="submit"
               disabled={disabled}
+              // Corner reset carries the same `in-data-[slot=button-group]` variant as Button's own
+              // `rounded-md`, otherwise that variant outranks a bare `rounded-r-none` and the halves
+              // meet on two 12px curves instead of a flat seam.
               // eslint-disable-next-line no-restricted-syntax -- split-button halves flatten inner corners at the join and fill the button-group row height
-              className="h-full w-full rounded-r-none"
-              style={{ minWidth: `${maxCharLen}ch` }}
+              className="h-full min-w-0 flex-1 shrink in-data-[slot=button-group]:rounded-r-none"
+              // The floor keeps the button from resizing as the selected option's label changes, but
+              // an unconditional `${maxCharLen}ch` outgrew narrow rows and shoved the dropdown half
+              // outside the group, where TxCard's overflow-hidden clipped it off. Capping it against
+              // the space left after that half (3rem = its max-w-12) keeps both inside at any width.
+              style={{ minWidth: `min(${maxCharLen}ch, 100% - 3rem)` }}
             />
           }
         >
@@ -87,7 +94,7 @@ export default function SplitMenuButton({
                 disabled={loading}
                 data-testid="combo-submit-dropdown"
                 // eslint-disable-next-line no-restricted-syntax -- split-button halves flatten inner corners at the join and fill the button-group row height
-                className="h-full max-w-12 rounded-l-none border-l border-l-[var(--color-border-light)] px-3"
+                className="h-full max-w-12 border-l border-l-[var(--color-border-light)] px-3 in-data-[slot=button-group]:rounded-l-none"
               />
             }
           >
