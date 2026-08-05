@@ -225,8 +225,10 @@ describe('ActionsTray geoblocking', () => {
       const user = userEvent.setup()
       renderTray({ isBlockedCountry: false, variant: 'safe' })
 
-      const buildTxControl = screen.getByRole('link', { name: /transaction builder/i })
+      // Base UI applies role="button" to the rendered link when nativeButton is false
+      const buildTxControl = screen.getByRole('button', { name: /transaction builder/i })
       expect(buildTxControl).toBeEnabled()
+      expect(buildTxControl).toHaveAttribute('href')
 
       const tooltipTrigger = buildTxControl.parentElement
       expect(tooltipTrigger).toBeTruthy()

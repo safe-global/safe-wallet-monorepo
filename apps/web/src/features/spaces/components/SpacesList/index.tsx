@@ -54,6 +54,7 @@ const AddSpaceButton = ({
         size === 'lg' && 'h-full rounded-lg px-6 py-3 text-base',
         disabled && 'cursor-not-allowed opacity-50 grayscale',
       )}
+      nativeButton={false}
       render={disabled ? <span /> : <NextLink href={AppRoutes.welcome.createSpace} />}
       disabled={disabled}
       onClick={disabled ? undefined : onClick}

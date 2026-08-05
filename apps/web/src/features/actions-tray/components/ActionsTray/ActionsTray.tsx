@@ -172,6 +172,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
                           className={cn('px-6 hover:bg-secondary-hover dark:border-border')}
                           data-testid="overview-swap-btn"
                           disabled={swapDisabled}
+                          nativeButton={swapDisabled}
                           render={
                             !swapDisabled ? (
                               <Link href={{ pathname: AppRoutes.swap, query: router.query }} />
@@ -209,6 +210,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
                 size="icon"
                 className="rounded-lg hover:bg-secondary-hover dark:border-border"
                 disabled={!isOk}
+                nativeButton={!isOk}
                 render={isOk ? <Link href={txBuilderLink} /> : undefined}
                 aria-label="Transaction builder"
               >

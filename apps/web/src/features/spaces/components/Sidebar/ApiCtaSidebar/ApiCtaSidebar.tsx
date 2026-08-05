@@ -87,6 +87,7 @@ export const ApiCtaSidebar = (): ReactElement => {
           variant="outline"
           size="sm"
           className="w-auto self-start !bg-background hover:!bg-muted"
+          nativeButton={false}
           render={<a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer" />}
         >
           Get API key

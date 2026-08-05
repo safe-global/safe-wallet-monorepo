@@ -161,7 +161,7 @@ describe('AboutPage', () => {
 
     it('GitHub button links to APP_HOMEPAGE', () => {
       renderWithStore()
-      const link = screen.getByRole('link', { name: /GitHub/i })
+      const link = screen.getByRole('button', { name: /GitHub/i })
       expect(link).toHaveAttribute('href', APP_HOMEPAGE)
     })
   })

@@ -247,6 +247,7 @@ const AboutPage = () => {
           <Button
             variant="outline"
             size="sm"
+            nativeButton={false}
             render={<a href={APP_HOMEPAGE} target="_blank" rel="noreferrer noopener" />}
           >
             <ArrowUpRight className="h-3.5 w-3.5" />

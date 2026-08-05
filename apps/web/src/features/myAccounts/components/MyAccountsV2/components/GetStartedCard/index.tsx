@@ -61,6 +61,7 @@ const GetStartedCard = () => {
               size="lg"
               className="h-12 w-full text-[15px]"
               data-testid="watch-account-button"
+              nativeButton={false}
               render={<NextLink href={{ pathname: AppRoutes.newSafe.load, query: { next } }} />}
             >
               Watch any account

@@ -144,8 +144,10 @@ describe('SpacesList — auth/expiry state rendering', () => {
     render(<SpacesList />)
 
     expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
-    // The "Create workspace" CTA link is rendered (Button + NextLink composition).
-    expect(screen.getByRole('link', { name: /create workspace/i })).toBeInTheDocument()
+    // The "Create workspace" CTA is an anchor exposed with role="button" (Base UI
+    // Button + NextLink composition with nativeButton={false}).
+    const cta = screen.getByRole('button', { name: /create workspace/i })
+    expect(cta).toHaveAttribute('href')
 
     // Sign in card must NOT render in this branch.
     expect(screen.queryByTestId('sign-in-options')).not.toBeInTheDocument()
@@ -316,7 +318,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
     render(<SpacesList />)
 
     const button = screen.getByTestId('create-space-button')
-    expect(button).toHaveAttribute('disabled')
+    expect(button).toHaveAttribute('aria-disabled', 'true')
 
     await userEvent.hover(button)
     expect(await screen.findByText(/limit of 10 workspaces reached/i)).toBeInTheDocument()
