@@ -8319,11 +8319,11 @@ __metadata:
   linkType: hard
 
 "@hono/node-server@npm:^1.19.9":
-  version: 1.19.14
-  resolution: "@hono/node-server@npm:1.19.14"
+  version: 1.19.17
+  resolution: "@hono/node-server@npm:1.19.17"
   peerDependencies:
     hono: ^4
-  checksum: 10/618dd95feeb3fd11ec8502e088879cd86529523788de19602edebd16892dd61899e73564d6e3d00875cc5a49488a908ddb2aa425d28f9cdeb7f22cfecabf022c
+  checksum: 10/b3fb8f627e59caafdcf49b463d5263931ccc404cb2d58999b9863636e68dcf01e919a73a449761db07349bd39dc91983b68a9f549b4c9927fde8c2de7e498689
   languageName: node
   linkType: hard
 
@@ -30394,9 +30394,9 @@ __metadata:
   linkType: hard
 
 "hono@npm:^4.11.4":
-  version: 4.12.30
-  resolution: "hono@npm:4.12.30"
-  checksum: 10/fe927b1379f6ceb2c299bf9996082819ac68baa523c0b4e6edc51f39b4baf27fd13061732f88d326c156e864add9103e4505c8a995ae4fa49b15d1aa39f06a8c
+  version: 4.12.32
+  resolution: "hono@npm:4.12.32"
+  checksum: 10/82fe817b875553bb35a2d02df1e2801e09feaa5b33685bde95dbee5f9f32f5948cf8e65d1ecf132d399b8a94d44999adea2e978a8cef971a57646e680bbfdda3
   languageName: node
   linkType: hard
 
@@ -45308,9 +45308,9 @@ __metadata:
   linkType: hard
 
 "undici@npm:^6.19.5":
-  version: 6.27.0
-  resolution: "undici@npm:6.27.0"
-  checksum: 10/30c18cdb235edf4dd36f8aa3ace1ffaf44060289a7d62ad44c33180d2d74a224015d25574812f62ce9c625b5beb1b0b766495b650fedf356aca11eed7ce2c816
+  version: 6.28.0
+  resolution: "undici@npm:6.28.0"
+  checksum: 10/672a7a53bd1f6c80edb73b357ab36e98ef9e474024c442aab2b8ea2bc32f1103cab05525c78661ae724f3e1340e23d03efb9730fba28e76218ab0ec52e15d75a
   languageName: node
   linkType: hard
 

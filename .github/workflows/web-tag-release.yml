@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
           fetch-depth: 0
@@ -106,7 +106,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
           fetch-depth: 0
@@ -125,7 +125,7 @@ jobs:
 
       - name: Create GitHub release (draft)
         if: needs.tag.outputs.version
-        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
         id: create_release
         with:
           draft: true
@@ -165,13 +165,13 @@ jobs:
         working-directory: apps/web
 
       - name: Upload archive as release asset
-        uses: shogo82148/actions-upload-release-asset@ee2ae851dc5d938b90075b3ef12c540abfd1ee72 # v1.10.1
+        uses: shogo82148/actions-upload-release-asset@394b3c11c3cfc038b5396ad265c074065cf875c3 # v1.10.2
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}.tar.gz
 
       - name: Upload checksum as release asset
-        uses: shogo82148/actions-upload-release-asset@ee2ae851dc5d938b90075b3ef12c540abfd1ee72 # v1.10.1
+        uses: shogo82148/actions-upload-release-asset@394b3c11c3cfc038b5396ad265c074065cf875c3 # v1.10.2
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}-sha256-checksum.txt
