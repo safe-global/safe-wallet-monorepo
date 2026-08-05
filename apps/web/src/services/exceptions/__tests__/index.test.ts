@@ -220,6 +220,63 @@ describe('CodedException', () => {
       )
     })
 
+    it('extracts the HTTP status from the thrown error into the Datadog tags', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._805, new Error('CGW error - 422: Invalid transaction'))
+      expect(mockCaptureError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: expect.objectContaining({ http_status: 422 }),
+          context: expect.objectContaining({ httpStatus: 422 }),
+        }),
+      )
+    })
+
+    it('extracts a structural status property from the thrown error', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._805, Object.assign(new Error('proposal failed'), { status: 404 }))
+      expect(mockCaptureError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: expect.objectContaining({ http_status: 404 }),
+        }),
+      )
+    })
+
+    it('lets an explicit call-site httpStatus override the extracted one', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._805, new Error('CGW error - 422: Invalid transaction'), { httpStatus: 400 })
+      expect(mockCaptureError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: expect.objectContaining({ http_status: 400 }),
+        }),
+      )
+    })
+
+    it('omits the HTTP status tag when not provided', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._805, 'proposal failed')
+      expect(mockCaptureError.mock.calls[0][0].tags).not.toHaveProperty('http_status')
+    })
+
     it('omits RPC tags when no endpoint context is provided', async () => {
       process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
       const mockCaptureError = jest.fn()
@@ -242,6 +299,63 @@ describe('CodedException', () => {
       const err = trackError(Errors._100)
       expect(mockCaptureError).not.toHaveBeenCalled()
       expect(console.error).toHaveBeenCalledWith(err)
+    })
+  })
+
+  describe('User-driven outcomes (WA-2950)', () => {
+    it('downgrades a tracked user rejection to an info action (no error, no Error Surfaced)', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      const mockInfo = jest.fn()
+      const mockWarn = jest.fn()
+      const mockError = jest.fn()
+      mockObservability(mockCaptureError, { info: mockInfo, warn: mockWarn, error: mockError, debug: jest.fn() })
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._804, 'user rejected the request')
+
+      expect(mockInfo).toHaveBeenCalledWith(
+        expect.stringContaining('804'),
+        expect.objectContaining({ error_type: ErrorType.USER_REJECTED }),
+      )
+      expect(mockWarn).not.toHaveBeenCalled()
+      expect(mockError).not.toHaveBeenCalled()
+      expect(mockCaptureError).not.toHaveBeenCalled()
+      expect(console.error).not.toHaveBeenCalled()
+    })
+
+    it('downgrades a tracked WalletConnect expiry to an info action', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      const mockInfo = jest.fn()
+      const mockError = jest.fn()
+      mockObservability(mockCaptureError, { info: mockInfo, warn: jest.fn(), error: mockError, debug: jest.fn() })
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._804, 'Request expired. Please try again.')
+
+      expect(mockInfo).toHaveBeenCalledWith(
+        expect.stringContaining('804'),
+        expect.objectContaining({ error_type: ErrorType.EXPIRED }),
+      )
+      expect(mockError).not.toHaveBeenCalled()
+      expect(mockCaptureError).not.toHaveBeenCalled()
+    })
+
+    it('keeps a genuine execution failure on the error path', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      const mockError = jest.fn()
+      mockObservability(mockCaptureError, { info: jest.fn(), warn: jest.fn(), error: mockError, debug: jest.fn() })
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._804, 'execution reverted GS013')
+
+      expect(mockCaptureError).toHaveBeenCalledWith(expect.objectContaining({ isUserFacing: true }))
+      expect(mockError).toHaveBeenCalled()
     })
   })
 
