@@ -1,4 +1,5 @@
 import type { ILogger, IObservabilityProvider, ObservedError } from '../types'
+import { matchUserOutcome } from '@safe-global/utils/services/exceptions/normalizeError'
 import {
   datadogRum,
   type RumEvent,
@@ -124,6 +125,17 @@ export const filterRumEvent = (event: RumEvent, context: RumEventDomainContext):
   if (NON_USER_IMPACTING_SOURCES.has(errorEvent.error.source)) return false
   if (isKnownNoise(errorEvent.error.message)) return false
   if (originatesFromExtension(errorEvent.error.stack)) return false
+
+  // User-driven outcomes surfaced as unhandled errors by third-party SDKs
+  // (WalletConnect TTL expiry, a wallet's bare "Rejected" reply) never pass
+  // through trackError/the normalizer. Re-emit them as info-level actions —
+  // kept queryable as an approval-flow drop-off signal — and drop the RUM
+  // error so they stay off the Error-Free Views SLO (WA-2950).
+  const userOutcome = matchUserOutcome(errorEvent.error.message)
+  if (userOutcome) {
+    datadogRum.addAction(errorEvent.error.message, { level: 'info', error_type: userOutcome })
+    return false
+  }
 
   // context.error is the raw value originally passed to addError/captureException
   const { error: rawError } = context as RumErrorEventDomainContext
