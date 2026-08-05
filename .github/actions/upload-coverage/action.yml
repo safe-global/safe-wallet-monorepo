@@ -25,11 +25,14 @@ runs:
     - name: Upload coverage to Datadog
       shell: bash
       continue-on-error: true
-      run: |
-        npx @datadog/datadog-ci coverage upload \
-          --flags "${{ inputs.flag }}" \
-          --base-path "${{ inputs.base-path }}" \
-          "${{ inputs.coverage-path }}"
       env:
         DD_API_KEY: ${{ inputs.api-key }}
         DD_SITE: ${{ inputs.site }}
+        COVERAGE_FLAG: ${{ inputs.flag }}
+        COVERAGE_BASE_PATH: ${{ inputs.base-path }}
+        COVERAGE_PATH: ${{ inputs.coverage-path }}
+      run: |
+        npx @datadog/datadog-ci coverage upload \
+          --flags "${COVERAGE_FLAG}" \
+          --base-path "${COVERAGE_BASE_PATH}" \
+          "${COVERAGE_PATH}"

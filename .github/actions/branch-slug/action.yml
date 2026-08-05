@@ -19,7 +19,9 @@ runs:
     - name: Slugify branch name
       id: slugify
       shell: bash
+      env:
+        MAX_LENGTH: ${{ inputs.max-length }}
       run: |
         raw="$(echo "$GITHUB_HEAD_REF" | sed 's|refs/heads/||')"
-        safe="$(echo "$raw" | sed 's/[^a-zA-Z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//' | sed 's/[A-Z]/\L&/g' | cut -c1-${{ inputs.max-length }} | sed 's/-$//')"
-        echo "slug=$safe" >> $GITHUB_OUTPUT
+        safe="$(echo "$raw" | sed 's/[^a-zA-Z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//' | sed 's/[A-Z]/\L&/g' | cut -c1-"${MAX_LENGTH}" | sed 's/-$//')"
+        echo "slug=$safe" >> "$GITHUB_OUTPUT"

@@ -29,9 +29,12 @@ runs:
     - name: Export Turbo remote cache env
       if: inputs.turbo-token != ''
       shell: bash
+      env:
+        INPUT_TURBO_TOKEN: ${{ inputs.turbo-token }}
+        INPUT_TURBO_TEAM: ${{ inputs.turbo-team }}
       run: |
-        echo "TURBO_TOKEN=${{ inputs.turbo-token }}" >> "$GITHUB_ENV"
-        echo "TURBO_TEAM=${{ inputs.turbo-team }}" >> "$GITHUB_ENV"
+        echo "TURBO_TOKEN=${INPUT_TURBO_TOKEN}" >> "$GITHUB_ENV"
+        echo "TURBO_TEAM=${INPUT_TURBO_TEAM}" >> "$GITHUB_ENV"
         echo "TURBO_REMOTE_ONLY=false" >> "$GITHUB_ENV"
 
     - name: Restore Yarn Cache & Types
