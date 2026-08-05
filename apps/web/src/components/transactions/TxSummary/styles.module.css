@@ -47,6 +47,19 @@
   text-overflow: ellipsis;
 }
 
+.typeRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  overflow: hidden;
+}
+
+.typeLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .gridContainer.history {
   grid-template-columns: var(--grid-nonce) var(--grid-type) var(--grid-info) var(--grid-date) var(--grid-status);
   grid-template-areas: 'nonce type info date status';
@@ -144,30 +157,40 @@
   }
 }
 
-/* Phones: four columns no longer fit, so unwind to a stack with the action row last. The nonce keeps
-   a column of its own — sharing it with the confirmations badge sized that column to the badge,
-   indenting every row by ~70px and stranding the badge in the left gutter. Only the nonce lives in
-   column 1 now, so it stays ~20px wide and the badge sits beside the button where it belongs. */
+/* Phones: rather than stacking five lines, strip the row to what a scanning user needs — nonce,
+   direction, amount, and the action — and keep it on one line. Everything hidden here is either
+   redundant with an adjacent glyph or repeated in the expanded panel:
+     - the "Send" label, because the direction arrow beside it already says so (the img keeps its alt)
+     - the note, the token logo and the relative time
+   The label and note stay in the accessibility tree (out of flow, so their tracks still collapse);
+   the token logo is decorative and the amount text names the symbol anyway. */
 @media (max-width: 599.95px) {
   .gridContainer.queue {
-    row-gap: var(--space-1);
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    grid-template-areas:
-      'nonce type          type'
-      'nonce info          info'
-      'nonce date          date'
-      'nonce confirmations actions';
-    align-items: start;
+    column-gap: var(--space-1);
+    grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+    grid-template-areas: 'nonce type info confirmations actions';
+    align-items: center;
   }
 
-  .gridContainer.queue .actions {
-    justify-self: end;
+  .gridContainer.queue .typeLabel,
+  .gridContainer.queue .note {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
-  /* The action row is the only one that needs its cells vertically centred on each other. */
-  .gridContainer.queue .confirmations,
-  .gridContainer.queue .actions {
-    align-self: center;
+  /* !important because TokenIcon sets `display: block` inline on the iframe, which a stylesheet rule
+     cannot otherwise beat. */
+  .gridContainer.queue .info iframe,
+  .gridContainer.queue .info img {
+    display: none !important;
+  }
+
+  .gridContainer.queue .date {
+    display: none;
   }
 }
 

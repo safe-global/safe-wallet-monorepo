@@ -8,7 +8,7 @@ import css from './styles.module.css'
 import DateTime from '@/components/common/DateTime'
 import TxInfo from '@/components/transactions/TxInfo'
 import { isMultisigExecutionInfo, isTxQueued } from '@/utils/transaction-guards'
-import TxType from '@/components/transactions/TxType'
+import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
 import classNames from 'classnames'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
 import MaliciousTxWarning from '../MaliciousTxWarning'
@@ -81,16 +81,27 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
       )}
 
       <div data-testid="tx-type" className={css.type} style={{ gridArea: 'type' }}>
-        <TxType tx={tx} />
+        {/* Composed from TxType's icon and text rather than the combined export, so this file owns the
+            label's class and can drop it on phones while keeping the icon. */}
+        <div className={css.typeRow}>
+          <TxTypeIcon tx={tx} />
+          <span className={css.typeLabel}>
+            <TxTypeText tx={tx} />
+          </span>
+        </div>
 
         {tx.note && (
-          <Typography variant="paragraph-small" className="text-[var(--color-text-secondary)]" title={tx.note}>
+          <Typography
+            variant="paragraph-small"
+            className={classNames('text-[var(--color-text-secondary)]', css.note)}
+            title={tx.note}
+          >
             {ellipsis(tx.note, 25)}
           </Typography>
         )}
       </div>
 
-      <div data-testid="tx-info" style={{ gridArea: 'info' }}>
+      <div data-testid="tx-info" className={css.info} style={{ gridArea: 'info' }}>
         <TxInfo info={tx.txInfo} />
       </div>
 
