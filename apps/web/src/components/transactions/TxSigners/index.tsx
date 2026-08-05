@@ -264,7 +264,7 @@ const TxSigners = ({
         </Alert>
       )}
 
-      {isExpired && (
+      {isExpired && !executor && (
         <Alert severity="warning" sx={{ mt: 2, py: 0.5 }}>
           This order has expired. Reject this transaction and try again.
         </Alert>
