@@ -20,8 +20,7 @@ describe(
 
     beforeEach(() => {
       mockVisualTestApis()
-      cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_10)
-      wallet.connectSigner(signer)
+      wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_10)
       createtx.clickOnNewtransactionBtn()
       createtx.clickOnSendTokensBtn()
       main.awaitVisualStability()

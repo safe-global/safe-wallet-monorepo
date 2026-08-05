@@ -24,6 +24,13 @@
   z-index: 99;
 }
 
+/* While a shadcn overlay-layer popup (e.g. the safe-selector dropdown) is open, drop the
+   topbar's own stacking context so the SpaceSafeBar inside it can elevate itself above the
+   backdrop (--z-overlay) on its own — the rest of the topbar stays below and gets dimmed. */
+.topbarAboveOverlay {
+  z-index: auto;
+}
+
 .main {
   background-color: var(--color-background-main);
   padding-left: 230px;

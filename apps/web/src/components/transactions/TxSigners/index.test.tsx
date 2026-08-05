@@ -240,6 +240,59 @@ describe('TxSigners (Audit Log)', () => {
     expect(screen.queryByText('Can be executed once the threshold is reached.')).not.toBeInTheDocument()
   })
 
+  it('shows the expired warning for a queued expired order', () => {
+    const { confirmations } = buildConfirmations(1, 2)
+    const txDetails = transactionDetailsBuilder()
+      .with({
+        detailedExecutionInfo: multisigExecutionDetailsBuilder()
+          .with({ confirmations, confirmationsRequired: 2, executor: null })
+          .build(),
+        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+      })
+      .build()
+    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+
+    render(
+      <TxSigners
+        txDetails={txDetails}
+        txSummary={txSummary}
+        isTxFromProposer={false}
+        proposer={ownerAddress}
+        isExpired
+      />,
+    )
+
+    expect(screen.getByText('This order has expired. Reject this transaction and try again.')).toBeInTheDocument()
+  })
+
+  it('hides the expired warning once the transaction has been executed', () => {
+    const executor = addressExBuilder().build()
+    const { confirmations } = buildConfirmations(2, 2)
+    const txDetails = transactionDetailsBuilder()
+      .with({
+        detailedExecutionInfo: multisigExecutionDetailsBuilder()
+          .with({ confirmations, confirmationsRequired: 2, executor })
+          .build(),
+        txStatus: TransactionStatus.SUCCESS,
+        executedAt: Date.now(),
+        txHash: faker.string.hexadecimal({ length: 64 }),
+      })
+      .build()
+    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
+
+    render(
+      <TxSigners
+        txDetails={txDetails}
+        txSummary={txSummary}
+        isTxFromProposer={false}
+        proposer={ownerAddress}
+        isExpired
+      />,
+    )
+
+    expect(screen.queryByText('This order has expired. Reject this transaction and try again.')).not.toBeInTheDocument()
+  })
+
   it('shows proposer banner even after threshold is reached but not executed', () => {
     const { confirmations } = buildConfirmations(2, 2)
     const txDetails = transactionDetailsBuilder()

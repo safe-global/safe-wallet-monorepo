@@ -1,7 +1,7 @@
 import type { OrderTransactionInfo as SwapOrder } from '@safe-global/store/gateway/types'
 import type { DataDecoded } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatUnits } from 'ethers'
-import type { AnyAppDataDocVersion, latest } from '@cowprotocol/app-data'
+import type { AnyAppDataDocVersion, cowAppDataLatestScheme as latest } from '@cowprotocol/sdk-app-data'
 
 import { TradeType, UiOrderType } from '@safe-global/utils/features/swap/types'
 import { getOrderFeeBps as getOrderFeeBpsHelper } from '@safe-global/utils/features/swap/helpers/fee'

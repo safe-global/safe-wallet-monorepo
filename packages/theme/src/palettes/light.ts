@@ -70,6 +70,7 @@ const lightPalette: ColorPalette = {
     sheet: '#F4F4F4',
     paper: '#FFFFFF',
     light: '#EFFFF4',
+    lightHover: '#E7FFF2',
     secondary: '#DDDEE0',
     skeleton: 'rgba(0, 0, 0, 0.04)',
     disabled: '#7878801F',

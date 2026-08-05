@@ -22,180 +22,177 @@ describe('Spending limits tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  beforeEach(() => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8)
-    cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
+  describe('Connected on the default safe', () => {
+    beforeEach(() => {
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8)
+      cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
+    })
+
+    it('Verify resetAllowance and setAllowance actions are shown if a part of allowance was used', () => {
+      spendinglimit.clickOnNewSpendingLimitBtn()
+      spendinglimit.enterBeneficiaryAddress(signerAddress)
+      spendinglimit.enterSpendingLimitAmount(0.1)
+      spendinglimit.clickOnNextBtn()
+      spendinglimit.verifyActionCount(2)
+      spendinglimit.verifyActionNames([
+        spendinglimit.actionNames.resetAllowance,
+        spendinglimit.actionNames.setAllowance,
+      ])
+    })
+
+    // Added to prod
+    it('Verify that the Review step shows beneficiary, amount allowed, reset time', () => {
+      //Assume that default reset time is set to One time
+      spendinglimit.clickOnNewSpendingLimitBtn()
+      spendinglimit.enterBeneficiaryAddress(getMockAddress())
+      spendinglimit.enterSpendingLimitAmount(0.1)
+      spendinglimit.clickOnNextBtn()
+      spendinglimit.checkReviewData(
+        tokenAmount,
+        getMockAddress(),
+        spendinglimit.timePeriodOptions.oneTime.split(' ').join('-'),
+      )
+    })
+
+    // Added to prod
+    it('Verify Spending limit option is available when selecting the corresponding token', () => {
+      navigation.clickOnNewTxBtn()
+      tx.clickOnSendTokensBtn()
+      spendinglimit.verifyTxOptionExist([spendinglimit.spendingLimitTxOption])
+    })
+
+    it('Verify spending limit option shows available amount', () => {
+      navigation.clickOnNewTxBtn()
+      tx.clickOnSendTokensBtn()
+      spendinglimit.verifySpendingOptionShowsBalance([spendingLimitBalance])
+    })
+
+    it('Verify when owner is a delegate, standard tx and spending limit tx are present', () => {
+      navigation.clickOnNewTxBtn()
+      tx.clickOnSendTokensBtn()
+      spendinglimit.verifyTxOptionExist([spendinglimit.spendingLimitTxOption, spendinglimit.standardTx])
+    })
+
+    it('Verify when spending limit is selected the nonce field is removed', () => {
+      navigation.clickOnNewTxBtn()
+      tx.clickOnSendTokensBtn()
+      spendinglimit.selectSpendingLimitOption()
+      spendinglimit.verifyNonceState(constants.elementExistanceStates.not_exist)
+    })
+
+    it('Verify "Max" button value set to be no more than the allowed amount', () => {
+      navigation.clickOnNewTxBtn()
+      tx.clickOnSendTokensBtn()
+      spendinglimit.clickOnMaxBtn()
+      spendinglimit.checkMaxValue()
+    })
+
+    it('Verify selecting a native token from the dropdown in new tx', () => {
+      navigation.clickOnNewTxBtn()
+      tx.clickOnSendTokensBtn()
+      spendinglimit.selectToken(constants.tokenNames.sepoliaEther)
+    })
+
+    it('Verify that when replacing spending limit for the same owner, previous values are displayed in red', () => {
+      spendinglimit.clickOnNewSpendingLimitBtn()
+      spendinglimit.enterBeneficiaryAddress(constants.DEFAULT_OWNER_ADDRESS)
+      spendinglimit.enterSpendingLimitAmount(newTokenAmount)
+      spendinglimit.clickOnTimePeriodDropdown()
+      spendinglimit.selectTimePeriod(spendinglimit.timePeriodOptions.fiveMin)
+      tx.clickOnNextBtn()
+      spendinglimit.verifyOldValuesAreDisplayed()
+    })
+
+    it('Verify that when editing spending limit for owner who used some of it, relevant actions are displayed', () => {
+      spendinglimit.clickOnNewSpendingLimitBtn()
+      spendinglimit.enterBeneficiaryAddress(constants.SPENDING_LIMIT_ADDRESS_2)
+      spendinglimit.enterSpendingLimitAmount(newTokenAmount)
+      spendinglimit.clickOnTimePeriodDropdown()
+      spendinglimit.selectTimePeriod(spendinglimit.timePeriodOptions.oneTime)
+      tx.clickOnNextBtn()
+      spendinglimit.verifyActionNamesAreDisplayed([
+        constants.TXActionNames.resetAllowance,
+        constants.TXActionNames.setAllowance,
+      ])
+    })
   })
 
-  it('Verify resetAllowance and setAllowance actions are shown if a part of allowance was used', () => {
-    wallet.connectSigner(signer)
-    spendinglimit.clickOnNewSpendingLimitBtn()
-    spendinglimit.enterBeneficiaryAddress(signerAddress)
-    spendinglimit.enterSpendingLimitAmount(0.1)
-    spendinglimit.clickOnNextBtn()
-    spendinglimit.verifyActionCount(2)
-    spendinglimit.verifyActionNames([spendinglimit.actionNames.resetAllowance, spendinglimit.actionNames.setAllowance])
+  describe('Disconnected on the default safe', () => {
+    beforeEach(() => {
+      cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8)
+      cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
+    })
+
+    // Added to prod
+    it('Verify values and trash icons are displayed in Beneficiary table', () => {
+      spendinglimit.verifyBeneficiaryTable()
+    })
+
+    it('Verify explorer links contain Sepolia link', () => {
+      tx.verifyNumberOfExternalLinks(3)
+    })
   })
 
-  it('Verify only setAllowance action is shown if allowance was not used', () => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_23)
-    wallet.connectSigner(signer)
-    spendinglimit.clickOnNewSpendingLimitBtn()
-    spendinglimit.enterBeneficiaryAddress(signerAddress)
-    spendinglimit.enterSpendingLimitAmount(0.1)
-    spendinglimit.clickOnNextBtn()
-    spendinglimit.verifyActionCount(0)
-    spendinglimit.verifyDecodedTxSummary([spendinglimit.actionNames.setAllowance])
-  })
+  describe('Other safes and pre-seeded data', () => {
+    it('Verify only setAllowance action is shown if allowance was not used', () => {
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_23)
+      cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
+      spendinglimit.clickOnNewSpendingLimitBtn()
+      spendinglimit.enterBeneficiaryAddress(signerAddress)
+      spendinglimit.enterSpendingLimitAmount(0.1)
+      spendinglimit.clickOnNextBtn()
+      spendinglimit.verifyActionCount(0)
+      spendinglimit.verifyDecodedTxSummary([spendinglimit.actionNames.setAllowance])
+    })
 
-  // Added to prod
-  it('Verify that the Review step shows beneficiary, amount allowed, reset time', () => {
-    //Assume that default reset time is set to One time
-    wallet.connectSigner(signer)
-    spendinglimit.clickOnNewSpendingLimitBtn()
-    spendinglimit.enterBeneficiaryAddress(getMockAddress())
-    spendinglimit.enterSpendingLimitAmount(0.1)
-    spendinglimit.clickOnNextBtn()
-    spendinglimit.checkReviewData(
-      tokenAmount,
-      getMockAddress(),
-      spendinglimit.timePeriodOptions.oneTime.split(' ').join('-'),
-    )
-  })
-
-  // Added to prod
-  it('Verify values and trash icons are displayed in Beneficiary table', () => {
-    spendinglimit.verifyBeneficiaryTable()
-  })
-
-  // Added to prod
-  it('Verify Spending limit option is available when selecting the corresponding token', () => {
-    wallet.connectSigner(signer)
-    navigation.clickOnNewTxBtn()
-    tx.clickOnSendTokensBtn()
-    spendinglimit.verifyTxOptionExist([spendinglimit.spendingLimitTxOption])
-  })
-
-  it('Verify spending limit option shows available amount', () => {
-    wallet.connectSigner(signer)
-    navigation.clickOnNewTxBtn()
-    tx.clickOnSendTokensBtn()
-    spendinglimit.verifySpendingOptionShowsBalance([spendingLimitBalance])
-  })
-
-  it('Verify when owner is a delegate, standard tx and spending limit tx are present', () => {
-    wallet.connectSigner(signer)
-    navigation.clickOnNewTxBtn()
-    tx.clickOnSendTokensBtn()
-    spendinglimit.verifyTxOptionExist([spendinglimit.spendingLimitTxOption, spendinglimit.standardTx])
-  })
-
-  it('Verify when spending limit is selected the nonce field is removed', () => {
-    wallet.connectSigner(signer)
-    navigation.clickOnNewTxBtn()
-    tx.clickOnSendTokensBtn()
-    spendinglimit.selectSpendingLimitOption()
-    spendinglimit.verifyNonceState(constants.elementExistanceStates.not_exist)
-  })
-
-  it('Verify "Max" button value set to be no more than the allowed amount', () => {
-    wallet.connectSigner(signer)
-    navigation.clickOnNewTxBtn()
-    tx.clickOnSendTokensBtn()
-    spendinglimit.clickOnMaxBtn()
-    spendinglimit.checkMaxValue()
-  })
-
-  it('Verify selecting a native token from the dropdown in new tx', () => {
-    wallet.connectSigner(signer)
-    navigation.clickOnNewTxBtn()
-    tx.clickOnSendTokensBtn()
-    spendinglimit.selectToken(constants.tokenNames.sepoliaEther)
-  })
-
-  it('Verify that when replacing spending limit for the same owner, previous values are displayed in red', () => {
-    wallet.connectSigner(signer)
-    spendinglimit.clickOnNewSpendingLimitBtn()
-    spendinglimit.enterBeneficiaryAddress(constants.DEFAULT_OWNER_ADDRESS)
-    spendinglimit.enterSpendingLimitAmount(newTokenAmount)
-    spendinglimit.clickOnTimePeriodDropdown()
-    spendinglimit.selectTimePeriod(spendinglimit.timePeriodOptions.fiveMin)
-    tx.clickOnNextBtn()
-    spendinglimit.verifyOldValuesAreDisplayed()
-  })
-
-  it('Verify that when editing spending limit for owner who used some of it, relevant actions are displayed', () => {
-    wallet.connectSigner(signer)
-    spendinglimit.clickOnNewSpendingLimitBtn()
-    spendinglimit.enterBeneficiaryAddress(constants.SPENDING_LIMIT_ADDRESS_2)
-    spendinglimit.enterSpendingLimitAmount(newTokenAmount)
-    spendinglimit.clickOnTimePeriodDropdown()
-    spendinglimit.selectTimePeriod(spendinglimit.timePeriodOptions.oneTime)
-    tx.clickOnNextBtn()
-    spendinglimit.verifyActionNamesAreDisplayed([
-      constants.TXActionNames.resetAllowance,
-      constants.TXActionNames.setAllowance,
-    ])
-  })
-
-  it('Verify that when multiple assets are available, they are displayed in token dropdown', () => {
-    main.setupSafeSettingsWithAllTokens().then(() => {
-      cy.reload()
-      wallet.connectSigner(signer)
+    it('Verify that when multiple assets are available, they are displayed in token dropdown', () => {
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8, {
+        extraStorage: { [constants.localStorageKeys.SAFE_v2__settings]: ls.safeSettings.slimitSettings },
+      })
+      cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
       navigation.clickOnNewTxBtn()
       tx.clickOnSendTokensBtn()
       spendinglimit.clickOnTokenDropdown()
       spendinglimit.verifyMandatoryTokensExist()
     })
-  })
 
-  it('Verify that beneficiary can be retried from address book', () => {
-    cy.wrap(null)
-      .then(() =>
-        main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sepoliaAddress2),
-      )
-      .then(() =>
-        main.isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sepoliaAddress2),
-      )
-      .then(() => {
-        cy.reload()
-        wallet.connectSigner(signer)
-        spendinglimit.clickOnNewSpendingLimitBtn()
-        spendinglimit.enterBeneficiaryAddress(constants.DEFAULT_OWNER_ADDRESS.substring(30))
-        spendinglimit.selectRecipient(constants.DEFAULT_OWNER_ADDRESS)
+    it('Verify that beneficiary can be retried from address book', () => {
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8, {
+        extraStorage: { [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.sepoliaAddress2 },
       })
-  })
+      cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
+      spendinglimit.clickOnNewSpendingLimitBtn()
+      spendinglimit.enterBeneficiaryAddress(constants.DEFAULT_OWNER_ADDRESS.substring(30))
+      spendinglimit.selectRecipient(constants.DEFAULT_OWNER_ADDRESS)
+    })
 
-  it('Verify explorer links contain Sepolia link', () => {
-    tx.verifyNumberOfExternalLinks(3)
-  })
-
-  it('Verify that the enableModule action shows the correct AllowanceModule address for Sepolia', () => {
-    spendinglimit.visitSpendingLimitsPage(staticSafes.SEP_STATIC_SAFE_47)
-    wallet.connectSigner(signer)
-    spendinglimit.clickOnNewSpendingLimitBtn()
-    spendinglimit.enterBeneficiaryAddress(signerAddress)
-    spendinglimit.enterSpendingLimitAmount(1)
-    spendinglimit.clickOnNextBtn()
-
-    spendinglimit.verifyActionNames([spendinglimit.actionNames.enableModule])
-    spendinglimit.verifyEnableModuleAddress(constants.ALLOWANCE_MODULE_V0_1_0)
-  })
-
-  it('Verify that the enableModule action shows the correct AllowanceModule address for Polygon', () => {
-    // setupSafeSettingsWithAllTokens is required: the Polygon safe has near-zero MATIC balance
-    // which triggers the "hide small tokens" filter, leaving the token selector empty
-    spendinglimit.visitSpendingLimitsPage(staticSafes.MATIC_STATIC_SAFE_34)
-    main.setupSafeSettingsWithAllTokens().then(() => {
-      spendinglimit.visitSpendingLimitsPage(staticSafes.MATIC_STATIC_SAFE_34)
-      wallet.connectSigner(signer)
+    it('Verify that the enableModule action shows the correct AllowanceModule address for Sepolia', () => {
+      spendinglimit.visitSpendingLimitsPage(staticSafes.SEP_STATIC_SAFE_47)
+      wallet.connectSignerViaStorage(signer)
       spendinglimit.clickOnNewSpendingLimitBtn()
       spendinglimit.enterBeneficiaryAddress(signerAddress)
       spendinglimit.enterSpendingLimitAmount(1)
       spendinglimit.clickOnNextBtn()
 
       spendinglimit.verifyActionNames([spendinglimit.actionNames.enableModule])
-      spendinglimit.verifyEnableModuleAddress(constants.ALLOWANCE_MODULE_V0_1_1)
+      spendinglimit.verifyEnableModuleAddress(constants.ALLOWANCE_MODULE_V0_1_0)
+    })
+
+    it('Verify that the enableModule action shows the correct AllowanceModule address for Polygon', () => {
+      // setupSafeSettingsWithAllTokens is required: the Polygon safe has near-zero MATIC balance
+      // which triggers the "hide small tokens" filter, leaving the token selector empty
+      spendinglimit.visitSpendingLimitsPage(staticSafes.MATIC_STATIC_SAFE_34)
+      main.setupSafeSettingsWithAllTokens().then(() => {
+        spendinglimit.visitSpendingLimitsPage(staticSafes.MATIC_STATIC_SAFE_34)
+        wallet.connectSignerViaStorage(signer)
+        spendinglimit.clickOnNewSpendingLimitBtn()
+        spendinglimit.enterBeneficiaryAddress(signerAddress)
+        spendinglimit.enterSpendingLimitAmount(1)
+        spendinglimit.clickOnNextBtn()
+
+        spendinglimit.verifyActionNames([spendinglimit.actionNames.enableModule])
+        spendinglimit.verifyEnableModuleAddress(constants.ALLOWANCE_MODULE_V0_1_1)
+      })
     })
   })
 })

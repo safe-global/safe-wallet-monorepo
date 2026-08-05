@@ -1,0 +1,28 @@
+import type { AttestationVerification, CheckStatus } from './status'
+import type { Hex, NormalizedCheckEvent, OracleGeneration } from './events'
+
+/**
+ * The full read-layer view of one check at one poll. Everything numeric is a
+ * decimal `string` so the snapshot is safe to hold in Redux. Recomputed from
+ * scratch each poll from the sorted event set (idempotent, reorg-self-healing);
+ * the monotonic merge is applied on top separately.
+ */
+export type SafenetCheckSnapshot = {
+  safeTxHash: Hex
+  /** The Safenet chain the Consensus contract lives on (e.g. Gnosis '100'). */
+  chainId: string
+  status: CheckStatus
+  /** Which oracle generation drove this check, once known. */
+  generation: OracleGeneration | null
+  /** The oracle request id (equals the oracle-proposal hash), once known. */
+  requestId: Hex | null
+  epoch: string | null
+  oracle: string | null
+  /** Block the check times out at (V1 `deadline` / V2 `revealDeadline`). */
+  deadlineBlock: string | null
+  /** Chain head observed at snapshot time — the deadline is compared to this. */
+  headBlock: string | null
+  attestation: AttestationVerification
+  /** All decoded lifecycle events, sorted ascending by (block, logIndex). */
+  events: NormalizedCheckEvent[]
+}

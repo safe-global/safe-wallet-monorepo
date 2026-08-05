@@ -8,8 +8,7 @@ const owner = walletCredentials.OWNER_1_PRIVATE_KEY
 
 describe('Spaces dashboard tests', () => {
   beforeEach(() => {
-    cy.visit(constants.spacesUrl)
-    wallet.connectSigner(owner)
+    wallet.connectSignerViaStorage(owner, constants.spacesUrl)
     space.clickOnSignInBtn()
     space.waitForSpacesWelcomeReady()
     space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.uuid)
@@ -160,8 +159,7 @@ Safe Selector through Spaces empty dashboard: commented out; remove this block c
 
 describe('Spaces empty dashboard tests', () => {
   beforeEach(() => {
-    cy.visit(constants.spacesUrl)
-    wallet.connectSigner(owner)
+    wallet.connectSignerViaStorage(owner, constants.spacesUrl)
     space.clickOnSignInBtn()
     space.visitSpaceDashboard(staticSpaces.emptyGettingStarted.uuid)
   })

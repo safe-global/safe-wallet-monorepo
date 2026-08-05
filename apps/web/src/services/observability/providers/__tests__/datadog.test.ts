@@ -66,6 +66,19 @@ describe('DatadogProvider', () => {
     })
   }
 
+  const mockE2EDatadogConstants = (): void => {
+    jest.doMock('@/config/constants', () => {
+      const actualConstants = jest.requireActual<typeof ConstantsModule>('@/config/constants')
+
+      return {
+        ...actualConstants,
+        DATADOG_RUM_APPLICATION_ID: 'test-app-id',
+        DATADOG_RUM_CLIENT_TOKEN: 'test-client-token',
+        IS_TEST_E2E: true,
+      }
+    })
+  }
+
   const importProvider = async () => {
     const { DatadogProvider } = await import('../datadog')
     return DatadogProvider as unknown as DatadogProviderConstructor
@@ -165,6 +178,39 @@ describe('DatadogProvider', () => {
     const tags = { componentStack: 'test' }
 
     expect(() => provider.captureError({ error, isUserFacing: true, tags })).not.toThrow()
+  })
+
+  describe('E2E test builds', () => {
+    it('should report Datadog as disabled even when credentials are present', async () => {
+      mockE2EDatadogConstants()
+      const { isDatadogEnabled } = await import('../datadog')
+
+      expect(isDatadogEnabled).toBe(false)
+    })
+
+    it('should not initialize the RUM SDK', async () => {
+      mockE2EDatadogConstants()
+      mockGetInitConfiguration.mockReturnValue(undefined)
+      const Provider = await importProvider()
+
+      await new Provider().init()
+
+      expect(mockInit).not.toHaveBeenCalled()
+    })
+
+    it('should not send events through the logger or captureError', async () => {
+      mockE2EDatadogConstants()
+      mockGetInitConfiguration.mockReturnValue(undefined)
+      const Provider = await importProvider()
+      const provider = new Provider()
+      await provider.init()
+
+      provider.getLogger().error('e2e error')
+      provider.captureError({ error: new Error('e2e error'), isUserFacing: true })
+
+      expect(mockAddError).not.toHaveBeenCalled()
+      expect(mockAddAction).not.toHaveBeenCalled()
+    })
   })
 
   describe('after initialization', () => {
