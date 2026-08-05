@@ -29,7 +29,7 @@ import { AppRoutes } from '@/config/routes'
 import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
-import { SPACES_LIMIT } from '../Sidebar/constants'
+import { SPACES_LIMIT } from '@/features/spaces/constants'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import WelcomeContentCard from '@/components/common/WelcomeContentCard'
 
