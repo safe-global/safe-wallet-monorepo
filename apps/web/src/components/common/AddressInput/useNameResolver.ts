@@ -1,14 +1,10 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { useChain, useCurrentChain } from '@/hooks/useChains'
-import { useAppSelector } from '@/store'
-import { selectRpc } from '@/store/settingsSlice'
+import { useCurrentChain } from '@/hooks/useChains'
+import { useEnsHubProvider } from '@/hooks/useEnsHubProvider'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { isDomain, resolveNameForChain } from '@/services/ens'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
-import { getEnsHubChainId } from '@safe-global/utils/utils/ens'
 
 // Shown when the user enters an ENS-style name that can't be resolved to an address on the chain it
 // was looked up for — either because that chain has no domain lookup hub, or the name isn't set.
@@ -20,24 +16,13 @@ const useNameResolver = (
   value?: string,
   chain?: Chain,
 ): { address: string | undefined; name: string | undefined; resolverError?: Error; resolving: boolean } => {
-  const globalProvider = useWeb3ReadOnly()
   const currentChain = useCurrentChain()
-  const customRpc = useAppSelector(selectRpc)
 
   // Target chain whose address record we want (e.g. Base Safe, or mainnet for Spaces contacts).
+  // ENSv2: resolution always starts on the hub (Mainnet / Sepolia Universal Resolver), not the L2
+  // RPC. When the hub chain is unavailable, no provider is returned and resolution stays off.
   const targetChain = chain ?? currentChain
-  const hubChainId = targetChain ? getEnsHubChainId(!!targetChain.isTestnet) : undefined
-  const hubChain = useChain(hubChainId || '')
-
-  // ENSv2: resolution always starts on the hub (Mainnet / Sepolia Universal Resolver), not the L2 RPC.
-  const needsOwnProvider = !!hubChain && hubChain.chainId !== currentChain?.chainId
-  const ownProvider = useMemo(
-    () => (needsOwnProvider && hubChain ? createWeb3ReadOnly(hubChain, customRpc?.[hubChain.chainId]) : undefined),
-    [needsOwnProvider, hubChain, customRpc],
-  )
-  useEffect(() => () => ownProvider?.destroy(), [ownProvider])
-
-  const ethersProvider = needsOwnProvider ? ownProvider : globalProvider
+  const { provider: ethersProvider } = useEnsHubProvider(targetChain)
   const debouncedValue = useDebounce((value || '').trim(), 200)
   const targetChainId = targetChain ? Number(targetChain.chainId) : undefined
 

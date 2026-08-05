@@ -1,5 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import useNameResolver, { getEnsNotAvailableError } from './useNameResolver'
+import { _clearEnsHubProviders } from '@/hooks/useEnsHubProvider'
 import { chainBuilder } from '@/tests/builders/chains'
 import { FEATURES } from '@safe-global/store/gateway/types'
 
@@ -44,6 +45,7 @@ const baseChain = chainBuilder().with({ chainId: '8453', shortName: 'base', isTe
 describe('useNameResolver', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    _clearEnsHubProviders()
     mockUseCurrentChain.mockReturnValue(currentChain)
     mockUseChain.mockImplementation((chainId: string) => (chainId === '1' ? mainnetChain : undefined))
   })
@@ -95,13 +97,28 @@ describe('useNameResolver', () => {
     expect(result.current.address).toBeUndefined()
   })
 
-  it('tears down the dedicated hub provider on unmount', async () => {
-    const { unmount } = renderHook(() => useNameResolver('vitalik.eth', mainnetChain))
+  it('reuses one shared hub provider across hook instances', async () => {
+    const first = renderHook(() => useNameResolver('vitalik.eth'))
+    await waitFor(() => expect(first.result.current.address).toBeDefined())
 
-    await waitFor(() => expect(mockCreateWeb3ReadOnly).toHaveBeenCalled())
+    const second = renderHook(() => useNameResolver('safe.eth'))
+    await waitFor(() => expect(second.result.current.address).toBeDefined())
 
-    unmount()
+    expect(mockCreateWeb3ReadOnly).toHaveBeenCalledTimes(1)
+    expect(dedicatedProvider.destroy).not.toHaveBeenCalled()
+  })
 
-    expect(dedicatedProvider.destroy).toHaveBeenCalled()
+  it('does not resolve when the hub chain is not in the loaded config', async () => {
+    mockUseChain.mockReturnValue(undefined)
+
+    const { result } = renderHook(() => useNameResolver('vitalik.eth'))
+
+    // Debounce window plus a tick — resolution must never start without a hub provider
+    await new Promise((resolve) => setTimeout(resolve, 300))
+
+    expect(mockResolveNameForChain).not.toHaveBeenCalled()
+    expect(mockCreateWeb3ReadOnly).not.toHaveBeenCalled()
+    expect(result.current.address).toBeUndefined()
+    expect(result.current.resolving).toBe(false)
   })
 })

@@ -5,6 +5,7 @@ import * as domains from '@/services/ens'
 import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import * as web3 from '@/hooks/wallets/web3'
 import * as useChains from '@/hooks/useChains'
+import { _clearEnsHubProviders } from '@/hooks/useEnsHubProvider'
 import { renderHook, waitFor, act } from '@/tests/test-utils'
 import { JsonRpcProvider } from 'ethers'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -27,6 +28,7 @@ const createChain = (overrides: Partial<Chain>): Chain =>
 describe('useAddressResolver', () => {
   beforeEach(() => {
     jest.resetAllMocks()
+    _clearEnsHubProviders()
     jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockImplementation(() => mockProvider)
     jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue(mockHubProvider)
     jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(createChain({ chainId: '1' }))

@@ -1,40 +1,27 @@
 import useAddressBook from '@/hooks/useAddressBook'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { lookupAddress } from '@/services/ens'
 import { useEffect, useMemo } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
-import { useChain, useCurrentChain } from './useChains'
+import { useCurrentChain } from './useChains'
+import { useEnsHubProvider } from './useEnsHubProvider'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import useChainId from './useChainId'
-import { useAppSelector } from '@/store'
-import { selectRpc } from '@/store/settingsSlice'
-import { ETH_COIN_TYPE, getEnsHubChainId } from '@safe-global/utils/utils/ens'
+import { ETH_COIN_TYPE } from '@safe-global/utils/utils/ens'
 
 const cache: Record<string, Record<string, string>> = {}
 
 export const useAddressResolver = (address?: string) => {
   const addressBook = useAddressBook()
-  const globalProvider = useWeb3ReadOnly()
   const currentChain = useCurrentChain()
-  const customRpc = useAppSelector(selectRpc)
   const debouncedValue = useDebounce(address, 200)
   const addressBookName = address && addressBook[address]
   const chainId = useChainId()
 
-  const hubChainId = currentChain ? getEnsHubChainId(!!currentChain.isTestnet) : undefined
-  const hubChain = useChain(hubChainId || '')
+  // ENSv2: reverse lookups run on the shared hub provider (Mainnet/Sepolia Universal Resolver)
+  const { hubChain, provider: ethersProvider } = useEnsHubProvider(currentChain)
   const isDomainLookupEnabled = !!hubChain && hasFeature(hubChain, FEATURES.DOMAIN_LOOKUP)
 
-  const needsOwnProvider = !!hubChain && hubChain.chainId !== currentChain?.chainId
-  const ownProvider = useMemo(
-    () => (needsOwnProvider && hubChain ? createWeb3ReadOnly(hubChain, customRpc?.[hubChain.chainId]) : undefined),
-    [needsOwnProvider, hubChain, customRpc],
-  )
-  useEffect(() => () => ownProvider?.destroy(), [ownProvider])
-
-  const ethersProvider = needsOwnProvider ? ownProvider : globalProvider
   const shouldResolve = address && !addressBookName && isDomainLookupEnabled && !!ethersProvider && !!debouncedValue
 
   const [ens, _, isResolving] = useAsync<string | undefined>(() => {
