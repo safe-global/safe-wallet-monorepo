@@ -56,17 +56,22 @@ const TransferTxInfo = ({ txInfo, txStatus, trusted, imitation }: TransferTxInfo
         <Typography variant="paragraph-small-bold" className="min-w-10 whitespace-nowrap">
           {directionLabel}
         </Typography>
-        <NamedAddressInfo
-          address={address.value}
-          name={address.name}
-          customAvatar={address.logoUri}
-          shortAddress={false}
-          hasExplorer
-          showCopyButton
-          trusted={trusted && !imitation}
-        >
-          <TransferActions address={address.value} txInfo={txInfo} trusted={trusted} />
-        </NamedAddressInfo>
+        {/* min-w-0 so the address yields to the label beside it. Without it this block kept its full
+            content width and the row overflowed by exactly the label + gap (48px), pushing the
+            trailing actions menu outside the panel. The address ellipsizes instead. */}
+        <div className="min-w-0 flex-1">
+          <NamedAddressInfo
+            address={address.value}
+            name={address.name}
+            customAvatar={address.logoUri}
+            shortAddress={false}
+            hasExplorer
+            showCopyButton
+            trusted={trusted && !imitation}
+          >
+            <TransferActions address={address.value} txInfo={txInfo} trusted={trusted} />
+          </NamedAddressInfo>
+        </div>
       </div>
       {imitation && <ImitationTransactionWarning />}
     </div>
