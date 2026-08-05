@@ -165,13 +165,13 @@ jobs:
         working-directory: apps/web
 
       - name: Upload archive as release asset
-        uses: shogo82148/actions-upload-release-asset@ee2ae851dc5d938b90075b3ef12c540abfd1ee72 # v1.10.1
+        uses: shogo82148/actions-upload-release-asset@394b3c11c3cfc038b5396ad265c074065cf875c3 # v1.10.2
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}.tar.gz
 
       - name: Upload checksum as release asset
-        uses: shogo82148/actions-upload-release-asset@ee2ae851dc5d938b90075b3ef12c540abfd1ee72 # v1.10.1
+        uses: shogo82148/actions-upload-release-asset@394b3c11c3cfc038b5396ad265c074065cf875c3 # v1.10.2
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}-sha256-checksum.txt
