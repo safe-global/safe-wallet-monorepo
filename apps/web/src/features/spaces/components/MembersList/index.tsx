@@ -31,6 +31,7 @@ import PaginatedDataTable, { type DataTableColumn } from '../PaginatedDataTable'
 import { getMemberTwoFactorStatus, MemberTwoFactorBadge } from '@/features/oidc-auth'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
+import { Typography } from '@mui/material'
 
 type MembersListVariant = 'active' | 'pending'
 
