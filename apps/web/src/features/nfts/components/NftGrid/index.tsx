@@ -13,6 +13,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  type TableCellProps,
   TableContainer,
   TableHead,
   TableRow,
@@ -40,7 +41,15 @@ interface NftsTableProps {
 const PAGE_SIZE = 10
 const INITIAL_SKELETON_SIZE = 3
 
-const headCells = [
+interface HeadCell {
+  id: string
+  label: string
+  width: string
+  xsHidden?: boolean
+  align?: TableCellProps['align']
+}
+
+const headCells: HeadCell[] = [
   {
     id: 'collection',
     label: 'Collection',
@@ -61,7 +70,7 @@ const headCells = [
     id: 'checkbox',
     label: '',
     width: '7%',
-    textAlign: 'right',
+    align: 'right',
   },
 ]
 
@@ -172,12 +181,11 @@ const NftGrid = ({
               {headCells.map((headCell) => (
                 <TableCell
                   key={headCell.id}
-                  align="left"
+                  align={headCell.align ?? 'left'}
                   padding="normal"
                   sx={{
                     display: headCell.xsHidden ? { xs: 'none', sm: 'table-cell' } : undefined,
                     width: headCell.width,
-                    'text-align': headCell.textAlign,
                   }}
                 >
                   {headCell.id === 'collection' ? (
