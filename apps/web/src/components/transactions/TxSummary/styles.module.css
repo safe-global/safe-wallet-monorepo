@@ -144,21 +144,30 @@
   }
 }
 
-/* Phones: four columns no longer fit, so unwind to a single stack with the action row last and
-   pinned right. The nonce keeps its own column so rows stay aligned down the list. */
+/* Phones: four columns no longer fit, so unwind to a stack with the action row last. The nonce keeps
+   a column of its own — sharing it with the confirmations badge sized that column to the badge,
+   indenting every row by ~70px and stranding the badge in the left gutter. Only the nonce lives in
+   column 1 now, so it stays ~20px wide and the badge sits beside the button where it belongs. */
 @media (max-width: 599.95px) {
   .gridContainer.queue {
-    grid-template-columns: auto minmax(0, 1fr);
+    row-gap: var(--space-1);
+    grid-template-columns: auto minmax(0, 1fr) auto;
     grid-template-areas:
-      'nonce type'
-      'nonce info'
-      'nonce date'
-      'confirmations actions';
+      'nonce type          type'
+      'nonce info          info'
+      'nonce date          date'
+      'nonce confirmations actions';
     align-items: start;
   }
 
   .gridContainer.queue .actions {
     justify-self: end;
+  }
+
+  /* The action row is the only one that needs its cells vertically centred on each other. */
+  .gridContainer.queue .confirmations,
+  .gridContainer.queue .actions {
+    align-self: center;
   }
 }
 

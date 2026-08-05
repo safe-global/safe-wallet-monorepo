@@ -138,10 +138,15 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
 
         {/* Right content (actions): ml-auto pushes it to the right page padding. One 56px card
             holding the muted action chips, matching the safe-selector pill. See WIDE_ACTIONS_WRAP
-            for how it gives that up when the wide context variants wrap below it. */}
+            for how it gives that up when the wide context variants wrap below it.
+
+            `flex-wrap min-w-0` and no `shrink-0`: the chips add up to ~403px, so on a 375px screen the
+            cluster ran 36px past the header. `shrink-0` was why — it stopped the card ever narrowing
+            enough for the chips to wrap, so they just spilled. Letting it shrink means they reflow
+            onto a second row inside the card instead. */}
         <div
           className={cn(
-            'flex items-center gap-1 shrink-0 ml-auto rounded-xl bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]',
+            'flex min-w-0 flex-wrap items-center gap-1 ml-auto rounded-xl bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]',
             !showLogo && WIDE_ACTIONS_WRAP,
           )}
         >
