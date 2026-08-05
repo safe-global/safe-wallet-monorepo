@@ -61,6 +61,19 @@ describe('trackErrorSurfaced', () => {
     })
   })
 
+  it('maps the HTTP status context to a Mixpanel property', () => {
+    trackErrorSurfaced({
+      code: 805,
+      message: 'Code 805: Error proposing (CGW error - 422: Invalid transaction)',
+      isUserFacing: true,
+      context: { httpStatus: 422 },
+    })
+
+    expect(mockedTrack.mock.calls[0][1]).toMatchObject({
+      [MixpanelEventParams.HTTP_STATUS]: 422,
+    })
+  })
+
   it('maps RPC endpoint context (kind + host) to Mixpanel properties', () => {
     trackErrorSurfaced({
       code: 105,
@@ -90,6 +103,25 @@ describe('trackErrorSurfaced', () => {
     expect(mockedTrack.mock.calls[0][1]).toMatchObject({
       [MixpanelEventParams.IS_USER_FACING]: false,
       [MixpanelEventParams.ERROR_DOMAIN]: ErrorDomain.DATA_LOADING,
+    })
+  })
+
+  describe('user-driven outcomes (WA-2950)', () => {
+    it.each([
+      'Code 804: Error executing a transaction (user rejected the request)',
+      'Code 804: Error executing a transaction (Rejected)',
+      'Request expired. Please try again.',
+      'Proposal expired',
+    ])('does not emit Error Surfaced for %p', (message) => {
+      trackErrorSurfaced({ code: 804, message, isUserFacing: true })
+
+      expect(mockedTrack).not.toHaveBeenCalled()
+    })
+
+    it('still emits Error Surfaced for a genuine execution failure', () => {
+      trackErrorSurfaced({ code: 804, message: 'Code 804: execution reverted GS013', isUserFacing: true })
+
+      expect(mockedTrack).toHaveBeenCalledTimes(1)
     })
   })
 })

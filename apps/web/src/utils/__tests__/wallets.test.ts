@@ -8,6 +8,7 @@ import {
   isEIP7702DelegatedAccount,
   EIP_7702_DELEGATED_ACCOUNT_PREFIX,
   isWalletUnlocked,
+  isWalletRejection,
 } from '@/utils/wallets'
 import { PRIVATE_KEY_MODULE_LABEL } from '@/services/private-key-module/constants'
 
@@ -86,6 +87,33 @@ describe('wallets', () => {
 
       expect(await isWalletUnlocked('MetaMask')).toBe(false)
       expect(braveRequest).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('isWalletRejection', () => {
+    it('detects an ethers ACTION_REJECTED error', () => {
+      const err = Object.assign(new Error('user rejected action'), { code: 'ACTION_REJECTED' })
+      expect(isWalletRejection(err)).toBe(true)
+    })
+
+    it('detects a lowercase rejection message', () => {
+      expect(isWalletRejection(new Error('user rejected the request'))).toBe(true)
+    })
+
+    it('does not detect a bare capitalised "Rejected" (handled downstream by the error normalizer, WA-2950)', () => {
+      expect(isWalletRejection(new Error('Rejected'))).toBe(false)
+    })
+
+    it('detects a WalletConnect "User rejected." reply', () => {
+      expect(isWalletRejection(new Error('User rejected.'))).toBe(true)
+    })
+
+    it('does not flag unrelated errors', () => {
+      expect(isWalletRejection(new Error('insufficient funds for gas'))).toBe(false)
+    })
+
+    it('does not flag genuine failures that merely contain a capitalised "Rejected"', () => {
+      expect(isWalletRejection(new Error('Transaction Rejected by guard'))).toBe(false)
     })
   })
 
