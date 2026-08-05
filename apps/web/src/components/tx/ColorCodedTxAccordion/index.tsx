@@ -24,13 +24,12 @@ const TX_INFO_LEVEL = {
   [ColorLevel.success]: ['Transfer', 'SwapTransfer', 'TwapOrder', 'NativeStakingDeposit'],
 }
 
-const TxInfoColors: Record<ColorLevel, { main: string; mainDark?: string; background: string }> = {
-  [ColorLevel.info]: { main: 'info.dark', background: 'info.background' },
-  [ColorLevel.warning]: { main: 'warning.main', background: 'warning.background' },
+const TxInfoColors: Record<ColorLevel, { main: string; mainDark?: string }> = {
+  [ColorLevel.info]: { main: 'info.dark' },
+  [ColorLevel.warning]: { main: 'warning.main' },
   [ColorLevel.success]: {
     main: 'success.main',
     mainDark: 'primary.main',
-    background: 'background.light',
   },
 }
 
@@ -69,8 +68,9 @@ const ColorCodedTxAccordion = ({ txInfo, txData, children, defaultExpanded }: De
       ? 'native transfer'
       : decodedData?.method
 
+  // Same colour the method chip uses, so the border and the chip read as one signal.
   const accordionVars = {
-    '--accordion-bg-active': toCssVar(colors.background),
+    '--accordion-border-active': toCssVar(isDarkMode ? (colors.mainDark ?? colors.main) : colors.main),
   } as CSSProperties
 
   return (

@@ -4,13 +4,16 @@
   padding-bottom: 0;
   overflow: hidden;
   border-radius: var(--radius-lg);
-  background-color: var(--accordion-bg-active);
+  /* The tx-type colour coding rides on the border, not a full tint: the fill stays the card surface
+     so this panel reads like every other card instead of washing the whole block in colour. */
+  background-color: var(--card);
+  border: 1px solid var(--accordion-border-active);
   box-shadow: none;
   transition: background-color 0.2s ease;
 }
 
 .item:hover {
-  background-color: color-mix(in srgb, var(--accordion-bg-active) 88%, var(--foreground) 12%);
+  background-color: color-mix(in srgb, var(--card) 96%, var(--foreground) 4%);
 }
 
 .trigger {
