@@ -11,6 +11,7 @@ import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
 import ReorderableSafeList from './ReorderableSafeList'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
+import { cn } from '@/utils/cn'
 import { matchesSafeSearch } from '../utils'
 import type { SafeItemData, SafeRenameTarget } from '../types'
 
@@ -112,6 +113,9 @@ const SafeDropdownContainer = ({
 
   // A controlled search spans both tabs, so it stays visible even when the active tab has no rows.
   const showSearch = !isError && (searchValue !== undefined || items.length > 0)
+
+  // Rows/skeletons get the min-width wrapper below (scroll on narrow screens).
+  const showRows = !isError && (filteredItems.length > 0 || (isLoading && !query))
 
   // Bottom-fade scroll hint, shown only while more rows lie below the fold.
   const { setScrollNode, showFade: showScrollHint } = useBottomScrollFade([filteredItems.length, isLoading, isError])
@@ -256,9 +260,11 @@ const SafeDropdownContainer = ({
         <div
           ref={attachScrollArea}
           data-testid="dropdown-scroll-area"
-          className="min-h-0 flex-1 overflow-y-auto overscroll-y-none px-2 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
+          className="min-h-0 flex-1 overflow-y-auto overflow-x-auto overscroll-y-none px-2 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
         >
-          {renderContent()}
+          {/* 527px = the 543px popup minus px-2 gutters: rows keep their full-width layout and
+              scroll horizontally when the popup shrinks. */}
+          <div className={cn(showRows && 'min-w-[527px]')}>{renderContent()}</div>
         </div>
 
         {footer && (
