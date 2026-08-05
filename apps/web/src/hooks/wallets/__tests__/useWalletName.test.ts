@@ -7,6 +7,7 @@ import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import * as useChains from '@/hooks/useChains'
 import * as ens from '@/services/ens'
 import * as web3 from '@/hooks/wallets/web3'
+import { ETH_COIN_TYPE } from '@safe-global/utils/utils/ens'
 
 const VITALIK = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
 
@@ -27,18 +28,19 @@ describe('useWalletName', () => {
     jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue(mockProvider)
   })
 
-  it("resolves the wallet's ENS name on the wallet's chain", async () => {
+  it("resolves the wallet's ENS primary name on Ethereum mainnet", async () => {
     jest.spyOn(useChains, 'useChain').mockReturnValue(createChain([FEATURES.DOMAIN_LOOKUP]))
     const lookup = jest.spyOn(ens, 'lookupAddress').mockResolvedValue('vitalik.eth')
 
-    const { result } = renderHook(() => useWalletName(createWallet('1')))
+    const { result } = renderHook(() => useWalletName(createWallet('8453')))
 
     await waitFor(() => expect(result.current).toBe('vitalik.eth'))
-    expect(lookup).toHaveBeenCalledWith(mockProvider, VITALIK)
+    expect(useChains.useChain).toHaveBeenCalledWith('1')
+    expect(lookup).toHaveBeenCalledWith(mockProvider, VITALIK, ETH_COIN_TYPE)
     expect(mockProvider.destroy).toHaveBeenCalled()
   })
 
-  it('does not resolve when domain lookup is unsupported on the chain', async () => {
+  it('does not resolve when domain lookup is unsupported on mainnet', async () => {
     jest.spyOn(useChains, 'useChain').mockReturnValue(createChain([]))
     const lookup = jest.spyOn(ens, 'lookupAddress').mockResolvedValue('vitalik.eth')
 

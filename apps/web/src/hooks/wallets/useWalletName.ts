@@ -5,13 +5,10 @@ import { useAppSelector } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
 import { lookupAddress } from '@/services/ens'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
-
-// ENS primary names live on Ethereum mainnet, so the connected wallet's name always resolves there
-// regardless of which chain the wallet or the currently viewed Safe is on.
-const ENS_CHAIN_ID = '1'
+import { ETH_COIN_TYPE, getEnsHubChainId } from '@safe-global/utils/utils/ens'
 
 /**
- * Resolves the connected wallet's ENS name against Ethereum mainnet.
+ * Resolves the connected wallet's ENS primary name against the ENS hub (Ethereum mainnet).
  *
  * Unlike `useAddressResolver`, this does not depend on the currently viewed Safe/route (the wallet
  * chip renders even when no Safe is open) nor on the wallet's connected chain (a testnet/L2 wallet
@@ -19,7 +16,8 @@ const ENS_CHAIN_ID = '1'
  * resolution fails (handled by `lookupAddress`).
  */
 export const useWalletName = (wallet?: ConnectedWallet | null): string | undefined => {
-  const chain = useChain(ENS_CHAIN_ID)
+  // Wallet primary names are production ENS records on mainnet, not testnet hubs.
+  const chain = useChain(getEnsHubChainId(false))
   const customRpc = useAppSelector(selectRpc)
   const address = wallet?.address
   const canResolve = !!chain && !!address && hasFeature(chain, FEATURES.DOMAIN_LOOKUP)
@@ -33,7 +31,7 @@ export const useWalletName = (wallet?: ConnectedWallet | null): string | undefin
     if (!provider) return undefined
 
     try {
-      return await lookupAddress(provider, address)
+      return await lookupAddress(provider, address, ETH_COIN_TYPE)
     } finally {
       provider.destroy()
     }

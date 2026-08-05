@@ -13,19 +13,25 @@ import userEvent from '@testing-library/user-event'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 
 const mockChain = chainBuilder()
-  .with({ features: [FEATURES.DOMAIN_LOOKUP] })
+  .with({ features: [FEATURES.DOMAIN_LOOKUP], isTestnet: true })
   .with({ chainId: '11155111' })
   .build()
 
 const mockMainnetChain = chainBuilder()
-  .with({ features: [FEATURES.DOMAIN_LOOKUP] })
+  .with({ features: [FEATURES.DOMAIN_LOOKUP], isTestnet: false })
   .with({ chainId: '1', shortName: 'eth' })
   .build()
 
-// mock useCurrentChain
+const mockUseChain = jest.fn((chainId: string) => {
+  if (chainId === '1') return mockMainnetChain
+  if (chainId === '11155111') return mockChain
+  return undefined
+})
+
+// mock useCurrentChain / useChain
 jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: jest.fn(() => mockChain),
-  useChain: jest.fn(() => mockChain),
+  useChain: (chainId: string) => mockUseChain(chainId),
   useHasFeature: jest.fn(() => false),
 }))
 
@@ -104,6 +110,11 @@ describe('AddressInput tests', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
+    mockUseChain.mockImplementation((chainId: string) => {
+      if (chainId === '1') return mockMainnetChain
+      if (chainId === '11155111') return mockChain
+      return undefined
+    })
     jest.spyOn(addressBook, 'default').mockReturnValue({})
   })
 
@@ -237,11 +248,12 @@ describe('AddressInput tests', () => {
 
   it('should resolve ENS names against the given chain even if the current chain lacks the feature', async () => {
     // The Spaces address book is chain-agnostic, so it passes mainnet to resolve .eth names while
-    // the connected/current chain (here without DOMAIN_LOOKUP) would otherwise gate resolution off.
+    // the connected/current chain would otherwise not be the ENS hub.
     ;(useCurrentChain as jest.Mock).mockImplementation(() => ({
       shortName: 'gno',
       chainId: '100',
       chainName: 'Gnosis Chain',
+      isTestnet: false,
       features: [],
     }))
 
@@ -269,13 +281,17 @@ describe('AddressInput tests', () => {
     await waitFor(() => expect(utils.getByLabelText(`Failed to resolve`, { exact: false })).toBeDefined())
   })
 
-  it('should not resolve ENS names if this feature is disabled', async () => {
+  it('should not resolve ENS names if hub domain lookup is disabled', async () => {
     ;(useCurrentChain as jest.Mock).mockImplementation(() => ({
-      shortName: 'gor',
-      chainId: '5',
-      chainName: 'Goerli',
+      shortName: 'base',
+      chainId: '8453',
+      chainName: 'Base',
+      isTestnet: false,
       features: [],
     }))
+    mockUseChain.mockImplementation((chainId: string) =>
+      chainId === '1' ? { ...mockMainnetChain, features: [] } : undefined,
+    )
 
     const { input, utils } = setup('')
 
@@ -286,9 +302,7 @@ describe('AddressInput tests', () => {
 
     expect(useNameResolver).toHaveBeenCalledWith('', undefined)
     await waitFor(() => expect(input.value).toBe('zero.eth'))
-    await waitFor(() =>
-      expect(utils.getByLabelText('ENS name not available on Goerli', { exact: false })).toBeDefined(),
-    )
+    await waitFor(() => expect(utils.getByLabelText('ENS name not available on Base', { exact: false })).toBeDefined())
   })
 
   it('shows a domain-specific error when an ENS name cannot be resolved on the chain', async () => {
