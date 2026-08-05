@@ -127,7 +127,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
             </div>
           )}
 
-          <div className="mb-3 mx-1 flex items-center gap-3">
+          <div className="mb-3 mx-1 block items-center gap-3">
             <button
               type="button"
               role="checkbox"
