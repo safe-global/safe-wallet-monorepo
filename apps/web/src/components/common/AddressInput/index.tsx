@@ -15,7 +15,7 @@ import {
 } from '@mui/material'
 import { useFormContext, useWatch, type Validate, get } from 'react-hook-form'
 import { validatePrefixedAddress } from '@safe-global/utils/utils/validation'
-import { useChain, useCurrentChain } from '@/hooks/useChains'
+import { useCurrentChain } from '@/hooks/useChains'
 import useNameResolver, { getEnsNotAvailableError } from './useNameResolver'
 import { isDomain } from '@/services/ens'
 import { cleanInputValue, parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
@@ -26,8 +26,7 @@ import classnames from 'classnames'
 import css from './styles.module.css'
 import inputCss from '@/styles/inputs.module.css'
 import Identicon from '../Identicon'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-import { getEnsHubChainId } from '@safe-global/utils/utils/ens'
+import { useEnsHubProvider } from '@/hooks/useEnsHubProvider'
 
 export type AddressInputProps = TextFieldProps & {
   name: string
@@ -77,9 +76,7 @@ const AddressInput = ({
   // Target chain for the addr record (e.g. mainnet for Spaces contacts, otherwise the current Safe).
   // ENSv2 gates on the hub (Mainnet/Sepolia) having DOMAIN_LOOKUP, not the L2.
   const ensChain = chain ?? currentChain
-  const hubChainId = ensChain ? getEnsHubChainId(!!ensChain.isTestnet) : undefined
-  const hubChain = useChain(hubChainId || '')
-  const isDomainLookupEnabled = !!hubChain && hasFeature(hubChain, FEATURES.DOMAIN_LOOKUP)
+  const { isDomainLookupEnabled } = useEnsHubProvider(ensChain)
   const {
     address,
     name: resolvedName,

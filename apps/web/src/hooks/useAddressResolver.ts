@@ -5,7 +5,6 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { useCurrentChain } from './useChains'
 import { useEnsHubProvider } from './useEnsHubProvider'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import useChainId from './useChainId'
 import { ETH_COIN_TYPE } from '@safe-global/utils/utils/ens'
 
@@ -19,8 +18,7 @@ export const useAddressResolver = (address?: string) => {
   const chainId = useChainId()
 
   // ENSv2: reverse lookups run on the shared hub provider (Mainnet/Sepolia Universal Resolver)
-  const { hubChain, provider: ethersProvider } = useEnsHubProvider(currentChain)
-  const isDomainLookupEnabled = !!hubChain && hasFeature(hubChain, FEATURES.DOMAIN_LOOKUP)
+  const { provider: ethersProvider, isDomainLookupEnabled } = useEnsHubProvider(currentChain)
 
   const shouldResolve = address && !addressBookName && isDomainLookupEnabled && !!ethersProvider && !!debouncedValue
 

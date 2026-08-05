@@ -76,34 +76,11 @@ describe('domains', () => {
   })
 
   describe('resolveNameForChain', () => {
-    it('resolves with the chain-specific coin type', async () => {
-      const address = await resolveNameForChain(rpcProvider, 'test.eth', 8453)
-
-      expect(address).toBe('0x0000000000000000000000000000000000000001')
-      expect(rpcProvider.resolveName).toHaveBeenCalledWith('test.eth', (0x80000000 | 8453) >>> 0)
-      expect(rpcProvider.resolveName).toHaveBeenCalledTimes(1)
-    })
-
-    it('falls back to ETH coin type when the chain-specific record is missing', async () => {
-      ;(rpcProvider.resolveName as jest.Mock)
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce('0x0000000000000000000000000000000000000001')
-
-      const address = await resolveNameForChain(rpcProvider, 'test.eth', 8453)
-
-      expect(address).toBe('0x0000000000000000000000000000000000000001')
-      expect(rpcProvider.resolveName).toHaveBeenNthCalledWith(1, 'test.eth', (0x80000000 | 8453) >>> 0)
-      expect(rpcProvider.resolveName).toHaveBeenNthCalledWith(2, 'test.eth', ETH_COIN_TYPE)
-    })
-
-    it('does not fall back when resolving mainnet', async () => {
-      ;(rpcProvider.resolveName as jest.Mock).mockResolvedValueOnce(null)
-
-      const address = await resolveNameForChain(rpcProvider, 'test.eth', 1)
-
-      expect(address).toBeUndefined()
-      expect(rpcProvider.resolveName).toHaveBeenCalledTimes(1)
-      expect(rpcProvider.resolveName).toHaveBeenCalledWith('test.eth', ETH_COIN_TYPE)
+    // Coin-type / fallback behavior is covered in packages/utils; this wrapper only adds error logging.
+    it('should return undefined and log on error', async () => {
+      const address = await resolveNameForChain(badRpcProvider, 'safe.eth', 8453)
+      expect(address).toBe(undefined)
+      expect(logError).toHaveBeenCalledWith('101: Failed to resolve the address', 'bad resolveName')
     })
   })
 })

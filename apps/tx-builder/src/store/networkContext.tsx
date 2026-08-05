@@ -5,7 +5,7 @@ import { getChainConfig } from '@safe-global/safe-gateway-typescript-sdk'
 import InterfaceRepository, { InterfaceRepo } from '../lib/interfaceRepository'
 import { useSafeAppsSDK } from '@safe-global/safe-apps-react-sdk'
 import { SafeAppProvider } from '@safe-global/safe-apps-provider'
-import { getEnsHubChainId, resolveNameForChain } from '../utils/ens'
+import { getEnsHubChainId, resolveNameForChain } from '@safe-global/utils/utils/ens'
 
 type NetworkContextProps = {
   sdk: SafeAppsSDK

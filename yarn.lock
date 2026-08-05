@@ -13766,6 +13766,7 @@ __metadata:
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
     "@safe-global/safe-deployments": "npm:^1.37.60"
     "@safe-global/safe-gateway-typescript-sdk": "npm:^3.22.9"
+    "@safe-global/utils": "workspace:^"
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:^16.2.0"

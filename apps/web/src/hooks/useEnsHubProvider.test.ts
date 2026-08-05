@@ -1,6 +1,7 @@
 import { renderHook } from '@testing-library/react'
 import { useEnsHubProvider, _clearEnsHubProviders } from './useEnsHubProvider'
 import { chainBuilder } from '@/tests/builders/chains'
+import { FEATURES } from '@safe-global/store/gateway/types'
 
 const globalProvider = { id: 'global' }
 const sharedProvider = { id: 'shared' }
@@ -27,9 +28,13 @@ jest.mock('@/store', () => ({
   useAppSelector: () => mockUseAppSelector(),
 }))
 
-const mainnetChain = chainBuilder().with({ chainId: '1', shortName: 'eth', isTestnet: false }).build()
-const sepoliaChain = chainBuilder().with({ chainId: '11155111', shortName: 'sep', isTestnet: true }).build()
-const baseChain = chainBuilder().with({ chainId: '8453', shortName: 'base', isTestnet: false }).build()
+const mainnetChain = chainBuilder()
+  .with({ chainId: '1', shortName: 'eth', isTestnet: false, features: [FEATURES.DOMAIN_LOOKUP] })
+  .build()
+const sepoliaChain = chainBuilder()
+  .with({ chainId: '11155111', shortName: 'sep', isTestnet: true, features: [] })
+  .build()
+const baseChain = chainBuilder().with({ chainId: '8453', shortName: 'base', isTestnet: false, features: [] }).build()
 
 describe('useEnsHubProvider', () => {
   beforeEach(() => {
@@ -88,6 +93,15 @@ describe('useEnsHubProvider', () => {
     expect(result.current.hubChain).toBeUndefined()
     expect(result.current.provider).toBeUndefined()
     expect(mockCreateWeb3ReadOnly).not.toHaveBeenCalled()
+  })
+
+  it('gates domain lookup on the hub chain feature flag', () => {
+    // Mainnet hub has DOMAIN_LOOKUP, Sepolia hub (for testnets) does not
+    const production = renderHook(() => useEnsHubProvider(baseChain))
+    expect(production.result.current.isDomainLookupEnabled).toBe(true)
+
+    const testnet = renderHook(() => useEnsHubProvider(sepoliaChain))
+    expect(testnet.result.current.isDomainLookupEnabled).toBe(false)
   })
 
   it('returns no provider without a target chain', () => {

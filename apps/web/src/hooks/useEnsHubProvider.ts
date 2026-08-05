@@ -6,6 +6,7 @@ import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { useChain, useCurrentChain } from '@/hooks/useChains'
 import { useAppSelector } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { getEnsHubChainId } from '@safe-global/utils/utils/ens'
 
 // One provider per hub RPC, shared by every consumer for the session. Idle JsonRpcProviders hold
@@ -28,14 +29,15 @@ export const _clearEnsHubProviders = (): void => {
 }
 
 /**
- * Returns the ENSv2 hub chain (Mainnet/Sepolia Universal Resolver) for a target chain, and a
- * read-only provider for it. Reuses the app's global provider when the current chain is the hub.
+ * Returns the ENSv2 hub chain (Mainnet/Sepolia Universal Resolver) for a target chain, a
+ * read-only provider for it, and whether the hub has DOMAIN_LOOKUP enabled. Reuses the app's
+ * global provider when the current chain is the hub.
  * Fails closed: when the hub chain is not in the loaded config, no provider is returned — ENS
  * resolution must not fall back to another chain's RPC.
  */
 export const useEnsHubProvider = (
   targetChain?: Chain,
-): { hubChain: Chain | undefined; provider: JsonRpcProvider | undefined } => {
+): { hubChain: Chain | undefined; provider: JsonRpcProvider | undefined; isDomainLookupEnabled: boolean } => {
   const globalProvider = useWeb3ReadOnly()
   const currentChain = useCurrentChain()
   const customRpc = useAppSelector(selectRpc)
@@ -49,5 +51,7 @@ export const useEnsHubProvider = (
     return getSharedHubProvider(hubChain, customRpc?.[hubChain.chainId])
   }, [hubChain, currentChain?.chainId, globalProvider, customRpc])
 
-  return useMemo(() => ({ hubChain, provider }), [hubChain, provider])
+  const isDomainLookupEnabled = !!hubChain && hasFeature(hubChain, FEATURES.DOMAIN_LOOKUP)
+
+  return useMemo(() => ({ hubChain, provider, isDomainLookupEnabled }), [hubChain, provider, isDomainLookupEnabled])
 }

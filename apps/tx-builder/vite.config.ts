@@ -1,8 +1,14 @@
+import { fileURLToPath } from 'node:url'
 import { defineConfig, Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import svgr from 'vite-plugin-svgr'
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@safe-global/utils': fileURLToPath(new URL('../../packages/utils/src', import.meta.url)),
+    },
+  },
   plugins: [
     react(),
     svgr({
