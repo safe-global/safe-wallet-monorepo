@@ -48,6 +48,9 @@ jest.mock('@/features/multichain', () => ({
       {trigger}
     </span>
   ),
+  NetworkLogosPill: ({ networks }: { networks: { chainId: string }[] }) => (
+    <span data-testid="network-logos-pill" data-count={networks.length} />
+  ),
 }))
 jest.mock('@/components/common/ChainIndicator', () => {
   const ChainIndicator = () => <span data-testid="chain-indicator" />
