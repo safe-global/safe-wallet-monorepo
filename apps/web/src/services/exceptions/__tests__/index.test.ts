@@ -220,17 +220,48 @@ describe('CodedException', () => {
       )
     })
 
-    it('merges the HTTP status from call-site context into the Datadog tags', async () => {
+    it('extracts the HTTP status from the thrown error into the Datadog tags', async () => {
       process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
       const mockCaptureError = jest.fn()
       mockObservability(mockCaptureError)
 
       const { trackError, Errors } = await import('..')
 
-      trackError(Errors._805, 'CGW error - 422: Invalid transaction', { httpStatus: 422 })
+      trackError(Errors._805, new Error('CGW error - 422: Invalid transaction'))
       expect(mockCaptureError).toHaveBeenCalledWith(
         expect.objectContaining({
           tags: expect.objectContaining({ http_status: 422 }),
+          context: expect.objectContaining({ httpStatus: 422 }),
+        }),
+      )
+    })
+
+    it('extracts a structural status property from the thrown error', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._805, Object.assign(new Error('proposal failed'), { status: 404 }))
+      expect(mockCaptureError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: expect.objectContaining({ http_status: 404 }),
+        }),
+      )
+    })
+
+    it('lets an explicit call-site httpStatus override the extracted one', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._805, new Error('CGW error - 422: Invalid transaction'), { httpStatus: 400 })
+      expect(mockCaptureError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: expect.objectContaining({ http_status: 400 }),
         }),
       )
     })

@@ -1,6 +1,6 @@
 import { IS_PRODUCTION } from '@/config/constants'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
-import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { asError, getHttpStatusFromError } from '@safe-global/utils/services/exceptions/utils'
 import { normalizeError } from '@safe-global/utils/services/exceptions/normalizeError'
 import { logger, captureError } from '../observability'
 import type { ErrorContext } from '../observability/types'
@@ -12,6 +12,8 @@ export type { ErrorContext }
 export class CodedException extends Error {
   public readonly code: number
   public readonly content: string
+  /** HTTP status of the wrapped request failure, when one is recoverable from `thrown`. */
+  public readonly httpStatus?: number
 
   private getCode(content: ErrorCodes): number {
     const codePrefix = content.split(':')[0]
@@ -29,6 +31,17 @@ export class CodedException extends Error {
     this.message = `Code ${content}${extraInfo}`
     this.code = this.getCode(content)
     this.content = content
+    this.httpStatus = getHttpStatusFromError(thrown)
+  }
+
+  /**
+   * Call-site context enriched with the HTTP status extracted from the thrown
+   * error, so every `trackError`/`logError` site gets the facet for free. An
+   * explicit `context.httpStatus` wins over the extracted one.
+   */
+  private withHttpStatus(context?: ErrorContext): ErrorContext | undefined {
+    if (this.httpStatus === undefined) return context
+    return { httpStatus: this.httpStatus, ...context }
   }
 
   /**
@@ -71,9 +84,10 @@ export class CodedException extends Error {
     console.warn(IS_PRODUCTION ? this.message : this)
 
     if (IS_PRODUCTION) {
-      const tags = this.getObservabilityContext(context)
+      const enrichedContext = this.withHttpStatus(context)
+      const tags = this.getObservabilityContext(enrichedContext)
       logger.warn(this.message, tags)
-      captureError({ error: this, isUserFacing: false, code: this.code, tags, context })
+      captureError({ error: this, isUserFacing: false, code: this.code, tags, context: enrichedContext })
     }
   }
 
@@ -85,7 +99,7 @@ export class CodedException extends Error {
     if (!isUserFacing) {
       console.info(IS_PRODUCTION ? this.message : this)
       if (IS_PRODUCTION) {
-        logger.info(this.message, this.getObservabilityContext(context))
+        logger.info(this.message, this.getObservabilityContext(this.withHttpStatus(context)))
       }
       return
     }
@@ -93,9 +107,10 @@ export class CodedException extends Error {
     console.error(IS_PRODUCTION ? this.message : this)
 
     if (IS_PRODUCTION) {
-      const tags = this.getObservabilityContext(context)
+      const enrichedContext = this.withHttpStatus(context)
+      const tags = this.getObservabilityContext(enrichedContext)
       logger.error(this.message, tags)
-      captureError({ error: this, isUserFacing: true, code: this.code, tags, context })
+      captureError({ error: this, isUserFacing: true, code: this.code, tags, context: enrichedContext })
     }
   }
 }
