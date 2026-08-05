@@ -52,6 +52,7 @@ export class CodedException extends Error {
       error_layer: layer,
       ...(context?.rpcEndpointKind && { rpc_endpoint_kind: context.rpcEndpointKind }),
       ...(context?.rpcHost && { rpc_host: context.rpcHost }),
+      ...(context?.httpStatus && { http_status: context.httpStatus }),
     }
   }
 
@@ -77,6 +78,18 @@ export class CodedException extends Error {
   }
 
   public track(context?: ErrorContext): void {
+    // User-driven outcomes (rejection, approval-prompt expiry) are expected
+    // behaviour, not failures: recorded as info-level Datadog actions only —
+    // no RUM error, no Error Surfaced analytics event (WA-2950).
+    const { isUserFacing } = normalizeError({ code: this.code, message: this.message, isUserFacing: true })
+    if (!isUserFacing) {
+      console.info(IS_PRODUCTION ? this.message : this)
+      if (IS_PRODUCTION) {
+        logger.info(this.message, this.getObservabilityContext(context))
+      }
+      return
+    }
+
     console.error(IS_PRODUCTION ? this.message : this)
 
     if (IS_PRODUCTION) {

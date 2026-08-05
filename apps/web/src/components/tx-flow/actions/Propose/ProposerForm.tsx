@@ -10,7 +10,7 @@ import { useTxActions } from '@/components/tx/shared/hooks'
 import type { SignOrExecuteProps } from '@/components/tx/shared/types'
 import useWallet from '@/hooks/wallets/useWallet'
 import { Errors, trackError } from '@/services/exceptions'
-import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { asError, getHttpStatusFromError } from '@safe-global/utils/services/exceptions/utils'
 import madProps from '@/utils/mad-props'
 import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
@@ -54,7 +54,7 @@ export const ProposerForm = ({
       if (isWalletRejection(err)) {
         setIsRejectedByUser(true)
       } else {
-        trackError(Errors._805, err)
+        trackError(Errors._805, err, { httpStatus: getHttpStatusFromError(err) })
       }
       setIsSubmittable(true)
       return
