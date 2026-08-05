@@ -43,7 +43,9 @@ const SignTxButton = ({ txSummary, compact = false }: { txSummary: Transaction; 
                 onClick={onClick}
                 variant={compact ? 'outline' : 'default'}
                 disabled={!isOk || isDisabled}
-                size={compact ? 'sm' : 'action'}
+                // Matches ExecuteTxButton — both sit in the same queue row slot, so a different height
+                // here would make Confirm and Execute rows inconsistent.
+                size={compact ? 'default' : 'action'}
               >
                 Confirm
               </Button>

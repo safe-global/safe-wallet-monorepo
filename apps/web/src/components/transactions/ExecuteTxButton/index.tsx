@@ -63,7 +63,9 @@ const ExecuteTxButton = ({
               onMouseLeave={onMouseLeave}
               variant="default"
               disabled={!isOk || isDisabled}
-              size={compact ? 'sm' : 'action'}
+              // `default` rather than `sm` in a queue row: this is the row's primary action, so it gets
+              // the app's standard 36px control height instead of the 32px small one.
+              size={compact ? 'default' : 'action'}
             >
               Execute
             </Button>
