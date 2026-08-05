@@ -24,12 +24,15 @@ const TX_INFO_LEVEL = {
   [ColorLevel.success]: ['Transfer', 'SwapTransfer', 'TwapOrder', 'NativeStakingDeposit'],
 }
 
-const TxInfoColors: Record<ColorLevel, { main: string; mainDark?: string }> = {
-  [ColorLevel.info]: { main: 'info.dark' },
-  [ColorLevel.warning]: { main: 'warning.main' },
+/** `main` inks the method chip; `border` outlines the panel and uses the palette's `*-light` tier,
+ * which is our border weight everywhere else (shadcn.css maps `--color-*-muted` to it). */
+const TxInfoColors: Record<ColorLevel, { main: string; mainDark?: string; border: string }> = {
+  [ColorLevel.info]: { main: 'info.dark', border: 'info.light' },
+  [ColorLevel.warning]: { main: 'warning.main', border: 'warning.light' },
   [ColorLevel.success]: {
     main: 'success.main',
     mainDark: 'primary.main',
+    border: 'success.light',
   },
 }
 
@@ -68,9 +71,8 @@ const ColorCodedTxAccordion = ({ txInfo, txData, children, defaultExpanded }: De
       ? 'native transfer'
       : decodedData?.method
 
-  // Same colour the method chip uses, so the border and the chip read as one signal.
   const accordionVars = {
-    '--accordion-border-active': toCssVar(isDarkMode ? (colors.mainDark ?? colors.main) : colors.main),
+    '--accordion-border-active': toCssVar(colors.border),
   } as CSSProperties
 
   return (

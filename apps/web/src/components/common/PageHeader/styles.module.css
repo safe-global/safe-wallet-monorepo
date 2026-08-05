@@ -1,5 +1,7 @@
 .container {
-  padding: var(--space-4) var(--space-3) 0;
+  /* Bottom padding, not 0: the tabs used to sit flush against the scrolling content, so the sticky
+     bar read as a cramped strip once pinned. */
+  padding: var(--space-4) var(--space-3) var(--space-3);
   display: flex;
   flex-direction: column;
   justify-content: space-between;

@@ -9,12 +9,10 @@
   background-color: var(--card);
   border: 1px solid var(--accordion-border-active);
   box-shadow: none;
-  transition: background-color 0.2s ease;
 }
 
-.item:hover {
-  background-color: color-mix(in srgb, var(--card) 96%, var(--foreground) 4%);
-}
+/* No hover fill: greying the panel made the nested "Advanced details" block blend into it. The
+   border already marks the region, and the trigger itself is the affordance. */
 
 .trigger {
   min-height: 56px;
