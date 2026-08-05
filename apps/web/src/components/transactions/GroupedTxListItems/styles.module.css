@@ -48,7 +48,7 @@
   margin-top: var(--space-2);
   padding: 0;
   border-radius: var(--radius-lg);
-  background-color: var(--muted);
+  background-color: var(--surface-sunken);
   overflow: hidden;
 }
 

@@ -107,7 +107,9 @@ const TxLayoutBase = ({
   return (
     <div className={classnames('flex flex-wrap', css.container)}>
       {!isReplacement && !isSmallScreen && (
-        <div className="w-[200px] pt-10">
+        /* Icons-only below 1200px (see StatusLabel) — the rail gives its 200px back to the card
+           rather than squeezing it, since the card is what the user is actually filling in. */
+        <div className="w-14 pt-10 min-[1200px]:w-[200px]">
           <aside>
             <div className="fixed flex flex-col gap-6">
               <TxStatusWidget
@@ -125,7 +127,7 @@ const TxLayoutBase = ({
           so it never wraps below the fixed-width status rail when a step's content is wide — otherwise
           the card jumps horizontally and resizes between steps. The 900px breakpoint matches the CSS
           module and useIsBelowMd so the layout switches in one place, not across two mismatched ones. */}
-      <div className="w-full min-w-0 flex-grow min-[900px]:flex-1 min-[900px]:px-10">
+      <div className="w-full min-w-0 flex-grow min-[900px]:flex-1 min-[900px]:px-4 min-[1200px]:px-10">
         <div className={classnames('mx-auto w-full max-w-[1200px]', css.contentContainer)}>
           {/* min-[900px]:flex-nowrap keeps the SafeShield sidebar beside the card (its 37.5% / lg:320px
               slot) instead of wrapping below it when a step's content is tall enough to add a scrollbar —
@@ -142,13 +144,9 @@ const TxLayoutBase = ({
 
               <div
                 data-testid="modal-header"
-                className={classnames(
-                  'overflow-hidden rounded-t-xl border border-b-0 border-border bg-card',
-                  css.header,
-                  {
-                    'rounded-t-2xl': hideProgress,
-                  },
-                )}
+                className={classnames('overflow-hidden rounded-t-xl bg-card', css.header, {
+                  'rounded-t-2xl': hideProgress,
+                })}
               >
                 {!hideProgress && (
                   <div className={css.progressBar}>

@@ -21,8 +21,10 @@
   background-color: transparent;
 }
 
+/* Interior of the card, not a surface of its own — matches ExpandableMsgItem's panel and the
+   pre-shadcn behaviour, where the details area simply inherited the card fill. */
 .accordionContentSurface {
-  background-color: var(--muted);
+  background-color: var(--card);
 }
 
 .listItem:hover,

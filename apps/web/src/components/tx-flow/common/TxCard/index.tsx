@@ -9,8 +9,7 @@ type DeprecatedSx = object
 const TxCard = ({ children, sx = {} }: { children: ReactNode; sx?: DeprecatedSx }) => {
   void sx
   return (
-    // eslint-disable-next-line no-restricted-syntax -- stacked tx-card drops its top border (border-t-0) to butt against the header above; structural, not a variant
-    <Card variant="outlined" size="none" className="txCardRoot my-4 border-t-0">
+    <Card size="none" className="txCardRoot my-4">
       <CardContent data-testid="card-content" className={css.cardContent}>
         {children}
       </CardContent>

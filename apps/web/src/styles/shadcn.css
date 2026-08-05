@@ -31,6 +31,11 @@
   --secondary-hover: var(--border);
   --muted: #f5f5f5;
   --muted-foreground: #737373;
+  /* A well sunk *into* a card, holding sibling rows (nested items of a bulk/conflict group).
+     `--muted` can't express this: it sits darker than `--card` in light mode but lighter in dark, so
+     the recess would read as a raised block in one theme. Pinning it to the page floor keeps the
+     card-above-surface relationship pointing the same way in both. */
+  --surface-sunken: var(--color-background-main);
   --accent: #f5f5f5;
   --accent-foreground: #171717;
   --destructive: #dc2626;
@@ -85,6 +90,7 @@
   --secondary-hover: rgba(255, 255, 255, 0.12);
   --muted: #262626;
   --muted-foreground: #a3a3a3;
+  --surface-sunken: var(--color-background-main);
   --accent: #12ff8033;
   --accent-foreground: #f5f5f5;
   /* Brand dark error.main (packages/theme dark palette) — the old #9e4042 was sub-AA as text
@@ -131,6 +137,7 @@
   --color-secondary-hover: var(--secondary-hover);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-surface-sunken: var(--surface-sunken);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);

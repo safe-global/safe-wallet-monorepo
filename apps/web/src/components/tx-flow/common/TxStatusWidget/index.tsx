@@ -13,8 +13,16 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 
+/* Between 900px and 1200px the rail collapses to icons only so the transaction card — the point of
+   the screen — keeps its width instead of the header wrapping mid-word. `sr-only` rather than
+   `hidden` so the step names stay in the accessibility tree at every width. Below 900px
+   TxLayoutBase drops the rail entirely. */
 const StatusLabel = ({ children, className }: { children: ReactNode; className?: string }) => (
-  <span className={cn('truncate text-xs leading-4 font-normal', className)}>{children}</span>
+  <span
+    className={cn('sr-only min-[1200px]:not-sr-only min-[1200px]:truncate text-xs leading-4 font-normal', className)}
+  >
+    {children}
+  </span>
 )
 
 const TxStatusWidget = ({

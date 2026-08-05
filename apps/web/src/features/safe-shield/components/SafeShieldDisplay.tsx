@@ -80,7 +80,9 @@ export const SafeShieldDisplay = ({
 
   return (
     <div className="flex flex-col gap-2" data-testid="safe-shield-widget">
-      <div className="overflow-hidden rounded-xl bg-card">
+      {/* Radius pairs with the inner header/list: 16px outer − 4px inset (px-1) = 12px inner, so the
+          two curves stay concentric instead of the inner corner cutting inside the outer one. */}
+      <div className="overflow-hidden rounded-lg bg-card">
         <SafeShieldHeader
           recipient={recipient}
           contract={contract}

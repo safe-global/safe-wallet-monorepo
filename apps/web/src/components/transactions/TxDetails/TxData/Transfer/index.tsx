@@ -28,30 +28,34 @@ const TransferTxInfoMain = ({ txInfo, txStatus, trusted, imitation }: TransferTx
   const fiatValue = useTransferFiatValue(txInfo.transferInfo, isQueued)
 
   return (
-    <div className="flex flex-row items-center gap-2">
-      {direction === TransferDirection.INCOMING ? 'Received' : isQueued ? 'Send' : 'Sent'}{' '}
-      <b>
-        <TransferTx info={txInfo} omitSign preciseAmount />
-      </b>
+    <div className="flex flex-row items-center gap-2 [&_b]:font-normal">
+      <Typography variant="paragraph-small-bold" className="min-w-10">
+        {direction === TransferDirection.INCOMING ? 'Received' : isQueued ? 'Send' : 'Sent'}
+      </Typography>
+      <TransferTx info={txInfo} omitSign preciseAmount iconSize={32} />
       {fiatValue != null && (
         <Typography variant="paragraph-small" className="text-muted-foreground">
           (<FiatValue value={fiatValue} />)
         </Typography>
       )}
-      {direction === TransferDirection.INCOMING ? ' from' : ' to'}
       {!trusted && !imitation && <MaliciousTxWarning />}
     </div>
   )
 }
 
 const TransferTxInfo = ({ txInfo, txStatus, trusted, imitation }: TransferTxInfoProps) => {
-  const address = txInfo.direction.toUpperCase() === TransferDirection.INCOMING ? txInfo.sender : txInfo.recipient
+  const { direction } = txInfo
+  const address = direction.toUpperCase() === TransferDirection.INCOMING ? txInfo.sender : txInfo.recipient
+  const directionLabel = direction === TransferDirection.INCOMING ? 'From' : 'To'
 
   return (
     <div className="flex flex-col gap-2">
       <TransferTxInfoMain txInfo={txInfo} txStatus={txStatus} trusted={trusted} imitation={imitation} />
 
-      <div className="flex w-full items-center">
+      <div className="flex w-full items-center gap-2 [&_.ethHashInfo-name]:font-bold">
+        <Typography variant="paragraph-small-bold" className="min-w-10 whitespace-nowrap">
+          {directionLabel}
+        </Typography>
         <NamedAddressInfo
           address={address.value}
           name={address.name}

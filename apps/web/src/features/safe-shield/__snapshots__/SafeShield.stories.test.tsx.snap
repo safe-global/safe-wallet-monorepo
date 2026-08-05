@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./SafeShield.stories ChecksPassed 1`] = `
 <div
@@ -18,13 +18,13 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -40,7 +40,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="[&>div]:border-t [&>div]:border-[var(--color-background-main)]"
@@ -349,13 +349,13 @@ exports[`./SafeShield.stories Empty 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -371,7 +371,7 @@ exports[`./SafeShield.stories Empty 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <span
                   class="m-0 text-sm leading-5 font-normal w-full text-center block p-4 text-[var(--color-text-secondary)]"
@@ -433,13 +433,13 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -455,7 +455,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="[&>div]:border-t [&>div]:border-[var(--color-background-main)]"
@@ -745,13 +745,13 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -767,7 +767,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="[&>div]:border-t [&>div]:border-[var(--color-background-main)]"
@@ -979,13 +979,13 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -1001,7 +1001,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="[&>div]:border-t [&>div]:border-[var(--color-background-main)]"
@@ -1213,13 +1213,13 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -1235,7 +1235,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="[&>div]:border-t [&>div]:border-[var(--color-background-main)]"
@@ -1661,13 +1661,13 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -1683,7 +1683,7 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="[&>div]:border-t [&>div]:border-[var(--color-background-main)]"
@@ -1857,13 +1857,13 @@ exports[`./SafeShield.stories Loading 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -1879,7 +1879,7 @@ exports[`./SafeShield.stories Loading 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="absolute top-0 left-0 z-[2] w-full"
@@ -1996,13 +1996,13 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -2018,7 +2018,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="[&>div]:border-t [&>div]:border-[var(--color-background-main)]"
@@ -2522,13 +2522,13 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -2544,7 +2544,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="[&>div]:border-t [&>div]:border-[var(--color-background-main)]"
@@ -2870,13 +2870,13 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -2892,7 +2892,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="[&>div]:border-t [&>div]:border-[var(--color-background-main)]"
@@ -3202,13 +3202,13 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -3224,7 +3224,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="[&>div]:border-t [&>div]:border-[var(--color-background-main)]"
@@ -3514,13 +3514,13 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -3536,7 +3536,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="[&>div]:border-t [&>div]:border-[var(--color-background-main)]"
@@ -5120,13 +5120,13 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -5142,7 +5142,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="[&>div]:border-t [&>div]:border-[var(--color-background-main)]"
@@ -5598,13 +5598,13 @@ exports[`./SafeShield.stories OverflowFindings 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -5620,7 +5620,7 @@ exports[`./SafeShield.stories OverflowFindings 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="[&>div]:border-t [&>div]:border-[var(--color-background-main)]"
@@ -5852,13 +5852,13 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -5874,7 +5874,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="[&>div]:border-t [&>div]:border-[var(--color-background-main)]"
@@ -6164,13 +6164,13 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -6186,7 +6186,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="[&>div]:border-t [&>div]:border-[var(--color-background-main)]"
@@ -6645,13 +6645,13 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -6667,7 +6667,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="[&>div]:border-t [&>div]:border-[var(--color-background-main)]"
@@ -6976,13 +6976,13 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -6998,7 +6998,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="[&>div]:border-t [&>div]:border-[var(--color-background-main)]"
@@ -7286,13 +7286,13 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
           data-testid="safe-shield-widget"
         >
           <div
-            class="overflow-hidden rounded-xl bg-card"
+            class="overflow-hidden rounded-lg bg-card"
           >
             <div
               class="px-1 pt-1"
             >
               <div
-                class="flex flex-row rounded-t-lg px-4 py-2"
+                class="flex flex-row rounded-t-md px-4 py-2"
                 data-testid="safe-shield-status"
               >
                 <span
@@ -7308,7 +7308,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
               class="px-1 pb-1"
             >
               <div
-                class="relative overflow-hidden rounded-b-lg border border-t-0 border-[var(--color-background-main)]"
+                class="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]"
               >
                 <div
                   class="[&>div]:border-t [&>div]:border-[var(--color-background-main)]"
