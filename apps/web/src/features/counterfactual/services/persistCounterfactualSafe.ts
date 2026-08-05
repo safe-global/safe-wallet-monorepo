@@ -2,13 +2,10 @@ import type { AppDispatch } from '@/store'
 import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { cgwApi as counterfactualSafesApi } from '@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes'
-import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { toBackendDto } from './counterfactualSafeMapper'
 import { replayCounterfactualSafeDeployment } from './safeDeployment'
 import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
-import { showNotification } from '@/store/notificationsSlice'
-import { normalizeSpaceId } from '@/utils/spaces'
-import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/constants'
+import { addSafeToSpace } from '@/features/spaces/services'
 
 type PersistArgs = {
   chainId: string
@@ -78,82 +75,39 @@ export const persistCounterfactualSafe = async ({
       return { ok: false, error: toPersistError(userResult.error) }
     }
 
-    // Guard against persisted/legacy lastUsedSpace values that are empty or
-    // whitespace-only — pass any non-empty string through unchanged.
-    const resolvedSpaceId = normalizeSpaceId(spaceId)
-    if (resolvedSpaceId !== null) {
-      if (!isAdminOfActiveSpace) {
-        // Backend gates this endpoint on admin role and would 403. Inform the
-        // user — the safe is still persisted at the user level above.
-        dispatch(
-          showNotification({
-            variant: 'info',
-            groupKey: 'cf-safe-space-skipped',
-            message: 'Safe added to your accounts — ask an admin to add it to the workspace',
+    const spaceResult = await addSafeToSpace({
+      chainId,
+      safeAddress,
+      spaceId,
+      isAdminOfActiveSpace,
+      spaceSafeCount,
+      dispatch,
+    })
+
+    if (spaceResult.status === 'failed') {
+      // A limit rejection means another admin filled the space in the meantime.
+      // The Safe itself was still created, so a single-chain creation keeps it
+      // and succeeds (the user has already been warned). In a multi-chain batch
+      // the safe genuinely wasn't attached on this chain, so roll back and
+      // report failure — otherwise the caller records this chain as created.
+      const shouldRollBack = !spaceResult.isLimitRejection || isMultiChainCreation === true
+
+      if (shouldRollBack) {
+        // Roll back the user-level entry so the backend doesn't end up with a
+        // safe that the user "created" but failed to associate with their
+        // active space.
+        const rollbackResult = await dispatch(
+          counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
+            deleteCounterfactualSafesDto: { safes: [{ chainId, address: safeAddress }] },
           }),
         )
-      } else if (spaceSafeCount !== undefined && spaceSafeCount >= SAFE_ACCOUNTS_LIMIT) {
-        // Space is full — the backend would reject the add. Skip it and keep the
-        // user-level safe so creation still succeeds, but tell the user it
-        // wasn't added to the workspace.
-        dispatch(
-          showNotification({
-            variant: 'info',
-            groupKey: 'cf-safe-space-limit',
-            message: `Safe created. This workspace is full (${SAFE_ACCOUNTS_LIMIT} Safes), so it wasn't added — switch to another workspace to add it there`,
-          }),
-        )
-      } else {
-        const spaceResult = await dispatch(
-          spacesApi.endpoints.spaceSafesCreateV1.initiate({
-            spaceId: resolvedSpaceId,
-            createSpaceSafesDto: { safes: [{ chainId, address: safeAddress }] },
-          }),
-        )
-        if ('error' in spaceResult) {
-          // Use case: another admin added Safes to the same workspace in the meantime.
-          // The cached count was stale and the backend returned 400.
-          // The Safe itself was still created, so keep it and show the warning.
-          if (isLimitRejection(spaceResult.error)) {
-            dispatch(
-              showNotification({
-                variant: 'info',
-                groupKey: 'cf-safe-space-limit',
-                message: toSpaceError(spaceResult.error).message,
-              }),
-            )
-            // In a multi-chain batch the safe genuinely wasn't attached on this
-            // chain. Roll back the user-level entry and report failure so the
-            // caller doesn't record this chain as successfully created.
-            if (isMultiChainCreation) {
-              const rollbackResult = await dispatch(
-                counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
-                  deleteCounterfactualSafesDto: { safes: [{ chainId, address: safeAddress }] },
-                }),
-              )
-              if ('error' in rollbackResult) {
-                dispatch(enqueuePendingCfDelete({ chainId, address: safeAddress }))
-              }
-              return { ok: false, error: toSpaceError(spaceResult.error) }
-            }
-          } else {
-            // Roll back the user-level entry so the backend doesn't end up with
-            // a safe that the user "created" but failed to associate with their
-            // active space.
-            const rollbackResult = await dispatch(
-              counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
-                deleteCounterfactualSafesDto: { safes: [{ chainId, address: safeAddress }] },
-              }),
-            )
-            if ('error' in rollbackResult) {
-              // Rollback also failed — orphan now exists server-side. Queue the
-              // cleanup so the next sign-in's sync flushes it, otherwise the GET
-              // would re-surface the orphan locally as "Not activated".
-              dispatch(enqueuePendingCfDelete({ chainId, address: safeAddress }))
-            }
-            return { ok: false, error: toSpaceError(spaceResult.error) }
-          }
+        if ('error' in rollbackResult) {
+          // Rollback also failed — orphan now exists server-side. Queue the
+          // cleanup so the next sign-in's sync flushes it, otherwise the GET
+          // would re-surface the orphan locally as "Not activated".
+          dispatch(enqueuePendingCfDelete({ chainId, address: safeAddress }))
         }
+        return { ok: false, error: spaceResult.error }
       }
     }
   }
@@ -169,17 +123,6 @@ const CONFLICT_MESSAGE =
   'A counterfactual Safe with these parameters already exists on this chain. Please contact support if this is unexpected.'
 
 type BackendError = { status?: number; data?: { message?: string } }
-
-function toSpaceError(error: unknown): Error {
-  return new Error((error as BackendError)?.data?.message || 'Failed to add Safe account to workspace')
-}
-
-/** Matches the CGW limit message, e.g. "This space only allows a maximum of 40 safe accounts...".
- *  Other 400s (validation, malformed payload) must keep the rollback path. */
-function isLimitRejection(error: unknown): boolean {
-  const { status, data } = (error as BackendError) ?? {}
-  return status === 400 && typeof data?.message === 'string' && /maximum of \d+/i.test(data.message)
-}
 
 function toPersistError(error: unknown): Error {
   if ((error as BackendError)?.status === 409) {

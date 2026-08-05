@@ -66,6 +66,8 @@ import uniq from 'lodash/uniq'
 import { selectRpc } from '@/store/settingsSlice'
 import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
 import { useIsAdmin, useSpaceSafeCount } from '@/features/spaces'
+import { addSafeToSpace } from '@/features/spaces/services'
+import { showNotification } from '@/store/notificationsSlice'
 import { normalizeSpaceId } from '@/utils/spaces'
 import { AppRoutes } from '@/config/routes'
 import type { CreateSafeResult, ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
@@ -396,6 +398,32 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'deployment', category: CREATE_SAFE_CATEGORY })
 
         onSubmit(data)
+
+        // Attach to the active workspace, same as the counterfactual path does.
+        // Runs last so it never delays the status screen: the transaction is
+        // already broadcast, so a failure here cannot abort creation — the user
+        // is warned and keeps the Safe.
+        if (isUserAuthenticated) {
+          const spaceResult = await addSafeToSpace({
+            chainId: chain.chainId,
+            safeAddress,
+            spaceId,
+            isAdminOfActiveSpace,
+            spaceSafeCount,
+            dispatch,
+          })
+
+          // Limit rejections already notify the user inside the service.
+          if (spaceResult.status === 'failed' && !spaceResult.isLimitRejection) {
+            dispatch(
+              showNotification({
+                variant: 'warning',
+                groupKey: 'safe-space-add-error',
+                message: `Safe created, but it couldn't be added to the workspace: ${spaceResult.error.message}`,
+              }),
+            )
+          }
+        }
       }
 
       if (willRelay) {
