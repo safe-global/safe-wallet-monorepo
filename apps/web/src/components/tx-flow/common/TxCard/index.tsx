@@ -9,7 +9,9 @@ type DeprecatedSx = object
 const TxCard = ({ children, sx = {} }: { children: ReactNode; sx?: DeprecatedSx }) => {
   void sx
   return (
-    <Card size="none" className="txCardRoot my-4">
+    /* radius="xl" (24px) matches TxLayoutBase's header above and the rest of the app's cards —
+       Card's own `lg` default left the bottom corners flatter than the top. */
+    <Card size="none" radius="xl" className="txCardRoot my-4">
       <CardContent data-testid="card-content" className={css.cardContent}>
         {children}
       </CardContent>

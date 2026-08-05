@@ -144,9 +144,9 @@ const TxLayoutBase = ({
 
               <div
                 data-testid="modal-header"
-                className={classnames('overflow-hidden rounded-t-xl bg-card', css.header, {
-                  'rounded-t-2xl': hideProgress,
-                })}
+                /* 24px is the app-wide card radius (every dashboard card computes to it). TxCard
+                   below must use `radius="xl"` to match, or the bottom reads flatter than the top. */
+                className={classnames('overflow-hidden rounded-t-xl bg-card', css.header)}
               >
                 {!hideProgress && (
                   <div className={css.progressBar}>

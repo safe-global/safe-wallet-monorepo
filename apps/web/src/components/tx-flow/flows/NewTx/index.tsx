@@ -29,7 +29,9 @@ const NewTxFlow = () => {
           <ChainIndicator inline className={css.chain} />
 
           <div
-            className={`relative grid grid-cols-1 rounded-xl border border-border bg-card shadow-sm md:grid-cols-12 ${css.surface}`}
+            /* overflow-hidden so the square-ended ProgressBar is clipped to the corner radius, as
+               TxLayoutBase's header does — without it the bar juts past the rounded top-left. */
+            className={`relative grid grid-cols-1 overflow-hidden rounded-xl bg-card shadow-sm md:grid-cols-12 ${css.surface}`}
           >
             <div className={`md:col-span-12 ${css.progressBar}`}>
               <ProgressBar value={progress} />

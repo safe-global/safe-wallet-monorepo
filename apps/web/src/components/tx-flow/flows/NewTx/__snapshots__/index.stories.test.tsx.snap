@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./index.stories Default 1`] = `
 <div
@@ -42,7 +42,7 @@ exports[`./index.stories Default 1`] = `
                   </div>
                 </span>
                 <div
-                  class="relative grid grid-cols-1 rounded-xl border border-border bg-card shadow-sm md:grid-cols-12 surface"
+                  class="relative grid grid-cols-1 overflow-hidden rounded-xl bg-card shadow-sm md:grid-cols-12 surface"
                 >
                   <div
                     class="md:col-span-12 progressBar"
@@ -193,7 +193,7 @@ exports[`./index.stories SendTokensJourney 1`] = `
                   </div>
                 </span>
                 <div
-                  class="relative grid grid-cols-1 rounded-xl border border-border bg-card shadow-sm md:grid-cols-12 surface"
+                  class="relative grid grid-cols-1 overflow-hidden rounded-xl bg-card shadow-sm md:grid-cols-12 surface"
                 >
                   <div
                     class="md:col-span-12 progressBar"
