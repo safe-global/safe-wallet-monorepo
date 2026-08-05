@@ -165,11 +165,24 @@
    The label and note stay in the accessibility tree (out of flow, so their tracks still collapse);
    the token logo is decorative and the amount text names the symbol anyway. */
 @media (max-width: 599.95px) {
+  /* The amount wants 74px but only had 49px of the 291px row, so it ellipsized to "-0.00…". Three
+     reclaims cover the 25px shortfall: a 4px gap instead of 8px across four gaps (16px), zeroing the
+     token container's own gap now that its logo is hidden (8px), and letting the nonce size to "12"
+     rather than the 30px floor the tablet rules set (6px). */
   .gridContainer.queue {
-    column-gap: var(--space-1);
+    column-gap: 4px;
     grid-template-columns: auto auto minmax(0, 1fr) auto auto;
     grid-template-areas: 'nonce type info confirmations actions';
     align-items: center;
+  }
+
+  .gridContainer.queue .nonce {
+    min-width: 0;
+  }
+
+  /* TokenAmount lays its logo and value out in a flex row; with the logo hidden its gap is dead space. */
+  .gridContainer.queue .info > span {
+    gap: 0;
   }
 
   .gridContainer.queue .typeLabel,
