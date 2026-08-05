@@ -31,14 +31,19 @@ import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { TxModalContext } from '@/components/tx-flow'
 import { cn } from '@/utils/cn'
 
-// The safe selector and the search input are wide, so below the header's 1100px container query
-// (which accounts for the sidebar and the route) the context group drops onto its own full-width
-// row beneath the actions — right-aligned below md where the sidebar is hidden, left-aligned above
-// it, where the actions give up `ml-auto` to line up with the row underneath. The logo variant is
-// 24px and always fits, so it opts out of both. Named so the Topbar tests can assert which
-// left-slot variant opts in without restating the utility list.
-export const WIDE_CONTEXT_WRAP = '@max-[1100px]:order-1 @max-[1100px]:basis-full max-[899px]:justify-end'
-export const WIDE_ACTIONS_WRAP = '@max-[1100px]:min-[900px]:ml-0'
+// The safe selector and the actions card need ~1250px to sit side by side, so below a 1260px header
+// container (a container query, so it accounts for the sidebar and the route) each takes its own
+// full-width row — same order and same left edge at every width.
+//
+// The previous rules moved things around instead: `order-1` flipped the two groups at 1100px, so the
+// actions jumped above the selector, and `ml-auto` stayed in force between 1100px and the width where
+// they actually stopped fitting, leaving the selector top-left and the actions bottom-right on a
+// diagonal. `min-[900px]` also mixed a viewport breakpoint into a container-driven rule.
+//
+// The logo variant is 24px and always fits, so it opts out of both. Named so the Topbar tests can
+// assert which left-slot variant opts in without restating the utility list.
+export const WIDE_CONTEXT_WRAP = '@max-[1260px]:basis-full max-[899px]:justify-end'
+export const WIDE_ACTIONS_WRAP = '@max-[1260px]:basis-full @max-[1260px]:ml-0'
 
 interface TopbarProps {
   /** When provided, shows a menu button on mobile to open the sidebar */
