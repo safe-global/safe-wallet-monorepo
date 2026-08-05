@@ -1,3 +1,5 @@
+import type { JsonRpcProvider } from "ethers"
+
 /** SLIP-44 coin type for Ethereum (ENSIP-9). */
 export const ETH_COIN_TYPE = 60
 
@@ -23,4 +25,23 @@ export const convertChainIdToCoinType = (chainId: number): number => {
  */
 export const getEnsHubChainId = (isTestnet: boolean): string => {
   return isTestnet ? ENS_HUB_SEPOLIA : ENS_HUB_MAINNET
+}
+
+/**
+ * Forward-resolve an ENS name for a target chain via a hub provider (Mainnet/Sepolia).
+ * Tries the chain-specific coin type first, then falls back to ETH (60) so names that only
+ * set a mainnet addr record still work on L2s.
+ */
+export const resolveNameForChain = async (
+  hubProvider: Pick<JsonRpcProvider, 'resolveName'>,
+  name: string,
+  targetChainId: number,
+): Promise<string | null> => {
+  const coinType = convertChainIdToCoinType(targetChainId)
+  const address = await hubProvider.resolveName(name, coinType)
+  if (address || coinType === ETH_COIN_TYPE) {
+    return address
+  }
+
+  return hubProvider.resolveName(name, ETH_COIN_TYPE)
 }

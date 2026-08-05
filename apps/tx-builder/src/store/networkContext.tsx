@@ -5,7 +5,7 @@ import { getChainConfig } from '@safe-global/safe-gateway-typescript-sdk'
 import InterfaceRepository, { InterfaceRepo } from '../lib/interfaceRepository'
 import { useSafeAppsSDK } from '@safe-global/safe-apps-react-sdk'
 import { SafeAppProvider } from '@safe-global/safe-apps-provider'
-import { convertChainIdToCoinType, ENS_HUB_SEPOLIA, ETH_COIN_TYPE, getEnsHubChainId } from '../utils/ens'
+import { getEnsHubChainId, resolveNameForChain } from '../utils/ens'
 
 type NetworkContextProps = {
   sdk: SafeAppsSDK
@@ -20,23 +20,17 @@ type NetworkContextProps = {
 
 export const NetworkContext = createContext<NetworkContextProps | null>(null)
 
-const resolveOnHub = async (name: string, targetChainId: number, isTestnet: boolean): Promise<string | null> => {
-  const hubChainId = getEnsHubChainId(isTestnet)
-  const hubConfig = await getChainConfig(hubChainId)
+// The hub RPC (Mainnet/Sepolia Universal Resolver) is settled once from the gateway config.
+// While it is unknown (config still loading or unavailable) names are left unresolved rather
+// than being resolved against a guessed hub.
+const createEnsHubProvider = async (chainId: string): Promise<JsonRpcProvider | undefined> => {
+  const config = await getChainConfig(chainId)
+  const hubChainId = getEnsHubChainId(!!config.isTestnet)
+  const hubConfig = hubChainId === chainId ? config : await getChainConfig(hubChainId)
   const rpcUrl = hubConfig.publicRpcUri?.value || hubConfig.rpcUri?.value
-  if (!rpcUrl) return null
+  if (!rpcUrl) return undefined
 
-  const hubProvider = new JsonRpcProvider(rpcUrl, Number(hubChainId), { staticNetwork: true })
-  try {
-    const coinType = convertChainIdToCoinType(targetChainId)
-    const address = await hubProvider.resolveName(name, coinType)
-    if (address) return address
-    if (coinType === ETH_COIN_TYPE) return null
-
-    return (await hubProvider.resolveName(name, ETH_COIN_TYPE)) ?? null
-  } finally {
-    hubProvider.destroy()
-  }
+  return new JsonRpcProvider(rpcUrl, Number(hubChainId), { staticNetwork: true })
 }
 
 const NetworkProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -44,7 +38,7 @@ const NetworkProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [provider, setProvider] = useState<BrowserProvider | undefined>()
   const [chainInfo, setChainInfo] = useState<ChainInfo>()
   const [interfaceRepo, setInterfaceRepo] = useState<InterfaceRepository | undefined>()
-  const [isTestnet, setIsTestnet] = useState(false)
+  const [ensHubProvider, setEnsHubProvider] = useState<JsonRpcProvider | undefined>()
 
   useEffect(() => {
     if (!chainInfo) {
@@ -65,12 +59,10 @@ const NetworkProvider: React.FC<PropsWithChildren> = ({ children }) => {
         const chainInfo = await sdk.safe.getChainInfo()
         setChainInfo(chainInfo)
 
-        // Safe Apps ChainInfo may not include isTestnet; fall back to gateway config.
         try {
-          const config = await getChainConfig(chainInfo.chainId)
-          setIsTestnet(!!config.isTestnet)
-        } catch {
-          setIsTestnet(chainInfo.chainId === ENS_HUB_SEPOLIA)
+          setEnsHubProvider(await createEnsHubProvider(chainInfo.chainId))
+        } catch (error) {
+          console.error('Unable to configure the ENS hub provider:', error)
         }
       } catch (error) {
         console.error('Unable to get chain info:', error)
@@ -80,21 +72,23 @@ const NetworkProvider: React.FC<PropsWithChildren> = ({ children }) => {
     getChainInfo()
   }, [sdk.safe])
 
+  useEffect(() => () => ensHubProvider?.destroy(), [ensHubProvider])
+
   const networkPrefix = chainInfo?.shortName || ''
 
   const nativeCurrencySymbol = chainInfo?.nativeCurrency.symbol
 
   const getAddressFromDomain = useCallback(
     async (name: string): Promise<string> => {
-      if (!chainInfo) return name
+      if (!chainInfo || !ensHubProvider) return name
       try {
-        const address = await resolveOnHub(name, Number(chainInfo.chainId), isTestnet)
+        const address = await resolveNameForChain(ensHubProvider, name, Number(chainInfo.chainId))
         return address ?? name
       } catch {
         return name
       }
     },
-    [chainInfo, isTestnet],
+    [chainInfo, ensHubProvider],
   )
 
   return (
