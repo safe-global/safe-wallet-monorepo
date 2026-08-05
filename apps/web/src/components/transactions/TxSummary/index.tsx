@@ -58,6 +58,8 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
     <div
       data-testid="transaction-item"
       className={classNames(css.gridContainer, {
+        // Top-level queue rows carry the most cells, so they get their own narrow-width template.
+        [css.queue]: isQueue && !isConflictGroup && !isBulkGroup,
         [css.history]: !isQueue,
         [css.conflictGroup]: isConflictGroup,
         [css.bulkGroup]: isBulkGroup,
@@ -78,7 +80,7 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
         </div>
       )}
 
-      <div data-testid="tx-type" style={{ gridArea: 'type' }}>
+      <div data-testid="tx-type" className={css.type} style={{ gridArea: 'type' }}>
         <TxType tx={tx} />
 
         {tx.note && (
@@ -122,7 +124,7 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
       )}
 
       {isQueue && !expiredSwap && (
-        <div style={{ gridArea: 'actions' }}>
+        <div className={css.actions} style={{ gridArea: 'actions' }}>
           <QueueActions tx={tx} />
         </div>
       )}

@@ -1,12 +1,22 @@
+/* Minimums are deliberately tight — they set how far down the row survives as a single line, which
+   is what we want for as long as possible. Each is the real rendered width of its content (an
+   Execute button, a "1/1" badge, a "-0.001 ETH" amount) rather than a round number, and the text
+   cells ellipsize instead of forcing a wrap. Together they come to ~510px, so the one-line grid
+   holds until the 900px fallback below. */
 .gridContainer {
-  --grid-nonce: minmax(45px, 0.25fr);
-  --grid-type: minmax(130px, 3fr);
-  --grid-info: minmax(170px, 3fr);
-  --grid-date: minmax(170px, 3fr);
-  --grid-confirmations: minmax(100px, 1fr);
+  --grid-nonce: minmax(32px, 0.25fr);
+  --grid-type: minmax(88px, 2fr);
+  /* The amount is the row's payload — its minimum fits icon + a 4-decimal value so it never
+     ellipsizes, and it takes the largest share of any slack. */
+  --grid-info: minmax(140px, 3fr);
+  /* Relative time is the most expendable cell, so it is the one that truncates first. */
+  --grid-date: minmax(76px, 2fr);
+  --grid-confirmations: minmax(56px, 1fr);
   --grid-assessment: 0;
-  --grid-status: minmax(100px, 1fr);
-  --grid-actions: minmax(100px, 1fr);
+  /* `auto`, not a fixed minimum: queue rows only render a status for pending/expired transactions, so
+     a hard min reserved ~72px of dead width on every ordinary row and forced the wrap sooner. */
+  --grid-status: auto;
+  --grid-actions: minmax(84px, 1fr);
 
   width: 100%;
   display: grid;
@@ -24,8 +34,17 @@
   --grid-assessment: minmax(80px, 1.5fr);
 }
 
+/* min-width: 0 lets a cell shrink below its content so the row can hold one line; without it a long
+   name or timestamp would force the grid wider than the card. */
 .gridContainer > * {
   max-width: 100%;
+  min-width: 0;
+}
+
+.gridContainer .type,
+.gridContainer .date {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .gridContainer.history {
@@ -77,7 +96,9 @@
   color: var(--color-text-secondary);
 }
 
-@media (max-width: 1350px) {
+/* 900px, not 1350px: with the tightened minimums above the one-line grid fits far lower than it used
+   to, and this matches the breakpoint where the sidebar collapses. */
+@media (max-width: 900px) {
   .gridContainer {
     gap: var(--space-1);
     display: flex;
@@ -96,17 +117,54 @@
     margin: 0 var(--space-1);
   }
 
-  /* A queue row needs ~863px for its eight columns, so below this it has to wrap. Keeping the
-     confirmations/status/actions cluster against the right edge preserves the column order the
-     grid conveys — without it every cell packs left and the row reads as a jumble. */
-  .gridContainer .confirmations {
-    margin-left: auto;
+  /* A queue row's columns need ~863px, so below this it cannot stay one line. Rather than let flex
+     pack every cell to the left, give it an explicit two-row template: identity on top (nonce, type,
+     amount), timing and the action beneath. The nonce spans both rows, the `1fr` middle column
+     absorbs the slack, and confirmations/actions land against the right edge — so the row keeps the
+     reading order the wide grid conveys. */
+  .gridContainer.queue {
+    display: grid;
+    gap: var(--space-1) var(--space-2);
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      'nonce type info info'
+      'nonce date confirmations actions';
+    align-items: center;
+  }
+
+  /* Undo the flex-era rules: in the grid the middle column does the pushing. */
+  .gridContainer.queue .date,
+  .gridContainer.queue .confirmations {
+    width: auto;
+    margin-left: 0;
+  }
+
+  .gridContainer.queue .status {
+    margin: 0;
   }
 }
 
-/* History and bulk-group rows have fewer columns (no confirmations/actions) and still fit as a
-   single grid row well below the generic 1350px stacking fallback needed by queue rows. */
-@media (max-width: 1350px) and (min-width: 1000px) {
+/* Phones: four columns no longer fit, so unwind to a single stack with the action row last and
+   pinned right. The nonce keeps its own column so rows stay aligned down the list. */
+@media (max-width: 599.95px) {
+  .gridContainer.queue {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'nonce type'
+      'nonce info'
+      'nonce date'
+      'confirmations actions';
+    align-items: start;
+  }
+
+  .gridContainer.queue .actions {
+    justify-self: end;
+  }
+}
+
+/* History and bulk-group rows have fewer columns (no confirmations/actions, ~424px of minimums), so
+   they hold one line well below the 900px fallback that queue rows need. */
+@media (max-width: 900px) and (min-width: 600px) {
   .gridContainer.history,
   .gridContainer.bulkGroup {
     display: grid;
