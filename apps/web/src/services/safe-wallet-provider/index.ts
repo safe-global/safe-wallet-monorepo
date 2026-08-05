@@ -400,7 +400,6 @@ export class SafeWalletProvider {
       throw new RpcError(RpcErrorCode.INVALID_PARAMS, 'Invalid transaction hash')
     }
 
-    // Swallowed for the same reason as in eth_getTransactionByHash above
     const resolvedTx = await this.sdk.getBySafeTxHash(txHash).catch(() => undefined)
 
     // A Safe transaction that is not on-chain yet has no receipt
