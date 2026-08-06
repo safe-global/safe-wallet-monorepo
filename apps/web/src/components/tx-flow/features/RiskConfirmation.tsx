@@ -1,6 +1,5 @@
 import { useContext } from 'react'
 import { SlotName, withSlot } from '../slots'
-import { FEATURES } from '@/utils/featureToggled'
 import { Card } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
@@ -53,7 +52,6 @@ const RiskConfirmationSlot = withSlot({
   Component: RiskConfirmation,
   slotName: SlotName.Footer,
   id: 'riskConfirmation',
-  feature: FEATURES.RISK_MITIGATION,
   useSlotCondition,
 })
 

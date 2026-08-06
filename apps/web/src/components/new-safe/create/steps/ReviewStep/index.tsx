@@ -68,6 +68,7 @@ import NetworkWarning from '../../NetworkWarning'
 import { useAllSafes } from '@/hooks/safes'
 import uniq from 'lodash/uniq'
 import { selectRpc } from '@/store/settingsSlice'
+import { showNotification } from '@/store/notificationsSlice'
 import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
 import { useIsAdmin, useSpaceSafeCount } from '@/features/spaces'
 import { normalizeSpaceId } from '@/utils/spaces'
@@ -306,11 +307,29 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           pathname: AppRoutes.home,
           query: { safe: `${successfulChains[0].chain.shortName}:${safeAddress}` },
         })
-        safeCreationDispatch(SafeCreationEvent.AWAITING_EXECUTION, {
-          groupKey: CF_TX_GROUP_KEY,
-          safeAddress,
-          networks: successfulChains.map((r) => r.chain),
-        })
+
+        // Only counterfactual chains are awaiting activation.
+        const awaitingChains = successfulChains.filter((r) => !r.alreadyDeployed)
+        if (awaitingChains.length > 0) {
+          safeCreationDispatch(SafeCreationEvent.AWAITING_EXECUTION, {
+            groupKey: CF_TX_GROUP_KEY,
+            safeAddress,
+            networks: awaitingChains.map((r) => r.chain),
+          })
+        }
+
+        // Acknowledge chains where the Safe was already deployed — otherwise the
+        // user lands on the account with no explanation of why nothing activated.
+        const deployedChains = successfulChains.filter((r) => r.alreadyDeployed)
+        if (deployedChains.length > 0) {
+          dispatch(
+            showNotification({
+              variant: 'info',
+              groupKey: 'cf-safe-already-deployed',
+              message: `This account is already deployed on ${deployedChains.map((r) => r.chain.chainName).join(', ')}`,
+            }),
+          )
+        }
       }
     } catch (err) {
       console.error(err)
@@ -325,28 +344,28 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
     gtmSetChainId(chain.chainId)
 
-    trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE, {
-      [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
-      [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
-      [MixpanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
-      [MixpanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
-      [MixpanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
-      [MixpanelEventParams.DEPLOYMENT_TYPE]: getDeploymentType(isCounterfactualEnabled, effectivePayMethod),
-      [MixpanelEventParams.PAYMENT_METHOD]: getPaymentMethodLabel(
-        isCounterfactualEnabled,
-        effectivePayMethod,
-        willRelay,
-      ),
-    })
+    const trackCreatedSafe = () =>
+      trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE, {
+        [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+        [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
+        [MixpanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
+        [MixpanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
+        [MixpanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
+        [MixpanelEventParams.DEPLOYMENT_TYPE]: getDeploymentType(isCounterfactualEnabled, effectivePayMethod),
+        [MixpanelEventParams.PAYMENT_METHOD]: getPaymentMethodLabel(
+          isCounterfactualEnabled,
+          effectivePayMethod,
+          willRelay,
+        ),
+      })
 
     try {
       if (isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater) {
         gtmSetSafeAddress(safeAddress)
 
-        trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
-
         // Single code path for backend persist + Redux add — shared with the
         // "Add another network" flow to keep the write path consistent.
+        const provider = createWeb3ReadOnly(chain, customRpc[chain.chainId])
         const result = await persistCounterfactualSafe({
           chainId: chain.chainId,
           safeAddress,
@@ -358,12 +377,27 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           isAdminOfActiveSpace,
           spaceSafeCount,
           isMultiChainCreation: isMultiChainDeployment,
+          provider,
           dispatch,
         })
-        if (!result.ok) throw result.error
+        if (!result.ok) {
+          // Surface the backend's message (e.g. conflict guidance) instead of the
+          // generic wallet-error fallback in the catch below.
+          setSubmitError(result.error.message)
+          return { chain, safeAddress, success: false }
+        }
 
-        return { chain, safeAddress, success: true }
+        const alreadyDeployed = result.skipped === 'already-deployed'
+        // Don't report a creation for Safes that were already deployed.
+        if (!alreadyDeployed) {
+          trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
+          trackCreatedSafe()
+        }
+
+        return { chain, safeAddress, success: true, alreadyDeployed }
       }
+
+      trackCreatedSafe()
 
       const options: TransactionOptions = buildTransactionOptions(
         !!isEIP1559,

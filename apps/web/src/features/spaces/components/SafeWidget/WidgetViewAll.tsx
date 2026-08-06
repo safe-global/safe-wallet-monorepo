@@ -11,26 +11,23 @@ interface WidgetViewAllProps {
 }
 
 const WidgetViewAll = ({ count, onClick, className }: WidgetViewAllProps): ReactElement => (
-  <div className={cn('flex items-center gap-2', className)}>
-    {/* Default foreground, not `text-success-strong`: that token is an accent identical in both
-        themes and only reaches ~3.7:1 on this tint. */}
+  <div className={cn('flex items-center', className)}>
     {count !== undefined && count > 0 && (
-      <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-success-subtle px-1.5 text-xs font-semibold text-foreground">
+      <span className="flex h-8 min-w-8 items-center justify-center rounded-full bg-accent px-1.5 text-xs font-semibold text-primary">
         +{count}
       </span>
     )}
-    {/* eslint-disable no-restricted-syntax -- bespoke muted, tight inline "view all" link styling from dev's #8271 redesign */}
     <Button
-      className="gap-1 px-2 mx-[-15px] font-normal text-muted-foreground"
       variant="ghost"
       size="sm"
       onClick={onClick}
+      // eslint-disable-next-line no-restricted-syntax -- tight inline "view all" link: sits flush with the widget's `+N` pill, so it drops the size's default horizontal padding
+      className="gap-1 px-2 font-normal text-primary"
       data-testid="widget-view-all"
     >
       View all
       <ChevronRight className="size-4" />
     </Button>
-    {/* eslint-enable no-restricted-syntax */}
   </div>
 )
 

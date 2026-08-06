@@ -111,8 +111,9 @@ export type SafeAccountsTableProps = {
   /** Fired when a row's link is clicked; receives the clicked line so callers can track the safe. */
   onLinkClick?: (line: AccountLine) => void
   /**
-   * Renders the table flush inside a card: no column header, no bordered container, and the Name
-   * column flexes to fill the available width instead of being fixed. Used by the dashboard widget.
+   * Renders the table flush inside a card: no column header, no bordered container, no row
+   * dividers, and the Name column flexes to fill the available width instead of being fixed.
+   * Used by the dashboard widget.
    */
   embedded?: boolean
   'data-testid'?: string
@@ -331,7 +332,7 @@ export default function SafeAccountsTable({
                   onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
                   onToggle={line.expandable ? () => toggle(groupKey) : undefined}
                   onLinkClick={onLinkClick}
-                  showDivider={index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}
+                  showDivider={!embedded && index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}
                   onOverviewsLoaded={handleOverviewsLoaded}
                 />
               ))}

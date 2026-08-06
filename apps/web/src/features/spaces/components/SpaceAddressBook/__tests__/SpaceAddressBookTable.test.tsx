@@ -28,6 +28,9 @@ jest.mock('@/features/multichain', () => ({
   NetworkLogosTooltip: ({ networks, maxVisible }: { networks: { chainId: string }[]; maxVisible?: number }) => (
     <span data-testid="network-logos" data-max-visible={maxVisible} data-count={networks.length} />
   ),
+  NetworkLogosPill: ({ networks }: { networks: { chainId: string }[] }) => (
+    <span data-testid="network-logos" data-count={networks.length} />
+  ),
 }))
 jest.mock('@/components/common/ChainIndicator', () => {
   const ChainIndicator = () => <span data-testid="chain-indicator" />
@@ -92,12 +95,12 @@ describe('SpaceAddressBookTable', () => {
     expect(screen.getByTestId('local-actions')).toBeInTheDocument()
   })
 
-  it('renders the network logos tooltip with maxVisible=3 for chain logos', () => {
+  it('renders the network logos pill with all chain logos', () => {
     const chainIds = ['1', '137', '10', '42161', '8453']
     render(<SpaceAddressBookTable entries={[entryBuilder().with({ chainIds }).build()]} />)
 
+    // The 3-logo cap and +N indicator live inside NetworkLogosPill (see its own stories/tests).
     const logosList = screen.getByTestId('network-logos')
-    expect(logosList).toHaveAttribute('data-max-visible', '3')
     expect(logosList).toHaveAttribute('data-count', '5')
   })
 

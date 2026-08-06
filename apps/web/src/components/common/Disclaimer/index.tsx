@@ -30,7 +30,11 @@ const Disclaimer = ({
           <Typography variant="h3" className="font-bold">
             {title}
           </Typography>
-          <Typography variant="paragraph-small">{content}</Typography>
+          {/* `content` is a ReactNode that callers fill with block-level markup (WidgetDisclaimer
+              renders a div of paragraphs), so it can't sit in the span this variant maps to. */}
+          <Typography variant="paragraph-small" as="div">
+            {content}
+          </Typography>
           <Separator />
         </div>
         <div className="flex justify-center pt-6 pb-4">

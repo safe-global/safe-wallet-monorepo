@@ -61,3 +61,38 @@ export const ManyNetworksWithoutHasMore: Story = {
     showHasMore: false,
   },
 }
+
+/**
+ * The accounts-table badge configuration: 22px logos capped at 3 with a +N indicator, inside the
+ * grey pill. Exercises the `--network-logo-size` mask geometry and the transparent +N indicator.
+ */
+export const InsideAccountBadgePill: Story = {
+  args: {
+    networks: [
+      { chainId: '1' },
+      { chainId: '137' },
+      { chainId: '10' },
+      { chainId: '42161' },
+      { chainId: '8453' },
+      { chainId: '100' },
+    ],
+    showHasMore: true,
+    maxVisible: 3,
+    imageSize: 22,
+  },
+  decorators: [
+    (Story) => (
+      <span
+        style={{
+          backgroundColor: 'rgba(0, 0, 0, 0.05)',
+          borderRadius: '9999px',
+          padding: '3px',
+          display: 'inline-flex',
+          alignItems: 'center',
+        }}
+      >
+        <Story />
+      </span>
+    ),
+  ],
+}

@@ -9,6 +9,7 @@ import SafeDropdownContainer from './components/SafeDropdownContainer'
 import InlineRetryError from '@/components/common/InlineRetryError'
 import { useSafeSelectorState } from './hooks/useSafeSelectorState'
 import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
+import { useTopbarOverlayElevation } from '@/hooks/useTopbarElevation'
 import useChains from '@/hooks/useChains'
 import { getSafeSelectorClassVariants } from './utils/classVariants'
 import type { SafeItemData, SafeSelectorDropdownProps } from './types'
@@ -98,6 +99,9 @@ function SafeSelectorDropdown({
   const isPopupOpen = variants.canOpen && !isDisabled && dropdownOpen
   const safeSelectValue = selectedItemId ?? selectedItem?.id
   const safeItemSelect = onItemSelect ?? (() => {})
+
+  // The dropdown's backdrop dims the whole page; lift the topbar above it so the trigger stays lit.
+  useTopbarOverlayElevation('safe-selector', isPopupOpen)
 
   const { configs: chainConfigs } = useChains()
   const fallbackSelectedItem = useMemo(

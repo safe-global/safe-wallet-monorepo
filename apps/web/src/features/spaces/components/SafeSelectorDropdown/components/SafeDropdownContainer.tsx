@@ -202,9 +202,12 @@ const SafeDropdownContainer = ({
           // base-ui moves DOM focus to the hovered/keyboard-active row, so `focus:bg-muted` is the grey
           // hover highlight (it also overrides ui/select's base `focus:bg-accent`); `data-selected`
           // marks the open safe with a subtle green highlight, persistent while it isn't focused.
+          // Hovering the selected row deepens that green instead of going grey — the
+          // [&[data-selected]:focus] arbitrary variant outranks both single-variant rules by
+          // specificity, so it doesn't depend on utility order.
           // [&>span.absolute]:hidden suppresses the built-in checkmark on the selected row (it
           // overlaps the balance column); the green highlight marks the current safe instead.
-          className="group/row h-auto py-3 px-3 rounded-lg my-0.5 cursor-pointer focus:bg-muted data-[selected]:bg-[var(--color-background-light)] [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden"
+          className="group/row h-auto py-3 px-3 rounded-lg my-0.5 cursor-pointer focus:bg-muted data-[selected]:bg-sidebar-accent [&[data-selected]:focus]:bg-[var(--color-background-light-hover)] [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden"
         >
           <SafeItem {...item} onRename={handleRename} />
         </SelectItem>
@@ -217,9 +220,10 @@ const SafeDropdownContainer = ({
       align="start"
       side="bottom"
       alignItemWithTrigger={false}
+      showBackdrop
       // outline-hidden: base-ui focuses the popup on open; typing in the search field makes that
       // :focus-visible and would otherwise draw the browser's blue outline around the whole popup.
-      className="w-[543px] max-w-[calc(100vw-2rem)] overflow-hidden bg-card border-0 ring-0 outline-hidden rounded-2xl [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
+      className="w-[543px] max-w-[calc(100vw-2rem)] overflow-hidden bg-card border-0 ring-0 outline-hidden rounded-lg [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
       sideOffset={20}
       alignOffset={9}
       collisionAvoidance={{ side: 'none', align: 'shift' }}
@@ -230,7 +234,7 @@ const SafeDropdownContainer = ({
         {(header || showSearch) && (
           <div className="shrink-0 bg-card">
             {showSearch && (
-              <div className="flex items-center gap-2 px-3 pb-1 pt-3">
+              <div className="flex items-center gap-2 px-2 py-2">
                 <SearchInput
                   className="flex-1"
                   placeholder="by name, address or network"
@@ -254,7 +258,7 @@ const SafeDropdownContainer = ({
         <div
           ref={attachScrollArea}
           data-testid="dropdown-scroll-area"
-          className="min-h-0 flex-1 overflow-y-auto overscroll-y-none px-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
+          className="min-h-0 flex-1 overflow-y-auto overscroll-y-none px-2 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
         >
           {renderContent()}
         </div>

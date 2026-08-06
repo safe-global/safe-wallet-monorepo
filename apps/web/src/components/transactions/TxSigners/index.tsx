@@ -309,7 +309,7 @@ const TxSigners = ({
         </Alert>
       )}
 
-      {isExpired && (
+      {isExpired && !executor && (
         <Alert variant="warning" className="mt-4 py-1">
           This order has expired. Reject this transaction and try again.
         </Alert>

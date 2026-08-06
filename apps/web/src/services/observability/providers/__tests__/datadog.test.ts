@@ -403,5 +403,42 @@ describe('DatadogProvider', () => {
         expect(filterRumEvent(event, {} as any)).toBe(true)
       }
     })
+
+    describe('user-driven outcomes (WA-2950)', () => {
+      it('reclassifies unhandled WalletConnect TTL expiries as warn actions instead of errors', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        for (const message of ['Request expired. Please try again.', 'Proposal expired']) {
+          const event = buildErrorEvent({ source: 'source', message })
+          expect(filterRumEvent(event, {} as any)).toBe(false)
+          expect(mockAddAction).toHaveBeenCalledWith(
+            message,
+            expect.objectContaining({ level: 'info', error_type: 'expired' }),
+          )
+        }
+      })
+
+      it('reclassifies unhandled user rejections as warn actions instead of errors', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        for (const message of ['Rejected', 'Error: Rejected', 'User rejected.']) {
+          const event = buildErrorEvent({ source: 'source', message })
+          expect(filterRumEvent(event, {} as any)).toBe(false)
+          expect(mockAddAction).toHaveBeenCalledWith(
+            message,
+            expect.objectContaining({ level: 'info', error_type: 'user_rejected' }),
+          )
+        }
+      })
+
+      it('keeps errors that merely contain the word rejected', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        const event = buildErrorEvent({
+          source: 'source',
+          message: 'Transaction rejected by guard module',
+          stack: 'at handler (https://app.safe.global/_next/static/chunks/main.js:1:1)',
+        })
+        expect(filterRumEvent(event, {} as any)).toBe(true)
+        expect(mockAddAction).not.toHaveBeenCalled()
+      })
+    })
   })
 })

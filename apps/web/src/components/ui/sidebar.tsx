@@ -23,7 +23,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useIsTablet } from '@/hooks/use-tablet'
-import { PanelLeftIcon } from 'lucide-react'
+import { PanelRightIcon } from 'lucide-react'
 
 /**
  * Sidebar Component
@@ -430,7 +430,7 @@ function SidebarTrigger({ className, onClick, ...props }: ComponentProps<typeof 
       }}
       {...props}
     >
-      <PanelLeftIcon />
+      <PanelRightIcon />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )
@@ -492,7 +492,7 @@ function SidebarHeader({ className, ...props }: ComponentProps<'div'>) {
     <div
       data-slot="sidebar-header"
       data-sidebar="header"
-      className={cn('gap-2 p-2 flex flex-col group-data-[collapsible=icon]:items-center', className)}
+      className={cn('gap-3 px-2 py-4 flex flex-col group-data-[collapsible=icon]:items-center', className)}
       {...props}
     />
   )

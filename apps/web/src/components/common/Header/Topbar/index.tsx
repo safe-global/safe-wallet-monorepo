@@ -111,7 +111,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
     <>
       <header
         className={cn(
-          '@container flex flex-wrap gap-y-2 px-6 py-4 bg-secondary dark:bg-background',
+          '@container flex flex-wrap gap-y-2 px-6 pt-6 pb-4 bg-secondary dark:bg-background',
           // The logo row is short, so center it against the taller actions card. The wide
           // variants keep their own top alignment.
           showLogo ? 'items-center' : 'items-start',
@@ -130,14 +130,15 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
         ) : null}
 
         {/* Left content (context): the safe selector must not shrink so its children stay on
-            one line. See WIDE_CONTEXT_WRAP for how the wide variants wrap. */}
-        <div className={cn('shrink-0 flex items-center', !showLogo && WIDE_CONTEXT_WRAP)}>
+            one line. See WIDE_CONTEXT_WRAP for how the wide variants wrap. `h-14` matches the
+            actions card's 56px height and gives the search input's `h-full` a definite parent. */}
+        <div className={cn('shrink-0 flex items-center', !showLogo && cn('h-14', WIDE_CONTEXT_WRAP))}>
           {showLogo ? (
             <SafeLogo />
           ) : showSpaceSafeBar ? (
             <SpaceSafeBar />
           ) : (
-            <GlobalSearchInput className="w-64 md:w-80" />
+            <GlobalSearchInput className="h-full w-64 rounded-3xl md:w-80" />
           )}
         </div>
 

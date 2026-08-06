@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { useIsSignedIn } from '@/hooks/useIsSignedIn'
+import { useIsTopbarAboveOverlay } from '@/hooks/useTopbarElevation'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
@@ -61,11 +62,11 @@ function DropdownTabs({
 }) {
   const tabClass = (tab: DropdownTab) =>
     cn(
-      'min-w-0 flex-1 truncate rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+      'min-w-0 flex-1 truncate rounded-[9.5px] px-2 py-1 text-sm font-medium transition-colors',
       activeTab === tab ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
     )
   return (
-    <div className="mx-3 mb-1 mt-2 flex gap-1 rounded-lg bg-muted p-1">
+    <div className="flex items-center mx-2 mb-2 p-1 gap-1 rounded-md bg-muted">
       <button
         type="button"
         className={tabClass('workspace')}
@@ -173,6 +174,7 @@ function SpaceSafeBar() {
   const [renameTarget, setRenameTarget] = useState<SafeRenameTarget | null>(null)
   const connectWallet = useConnectWallet()
   const trustedSafesModal = useTrustedSafesModal()
+  const isAboveOverlay = useIsTopbarAboveOverlay()
   const resolveName = useSafeNameResolver()
   const dispatch = useAppDispatch()
   const { orderBy } = useAppSelector(selectOrderByPreference)
@@ -286,7 +288,13 @@ function SpaceSafeBar() {
     ) : undefined
 
   return (
-    <div data-testid="safe-level-navigation" className="flex max-[899px]:justify-end">
+    <div
+      data-testid="safe-level-navigation"
+      // While the safe-selector dropdown is open its backdrop dims the page; the bar lifts itself
+      // above that backdrop so it stays lit (the topbar drops its stacking context — see
+      // PageLayout's .topbarAboveOverlay).
+      className={cn('flex max-[899px]:justify-end', isAboveOverlay && 'relative z-[calc(var(--z-overlay)+1)]')}
+    >
       {/* One pill: safe selector + nested safes + network selector render as muted chips
           sharing a single white card (see Figma topbar). */}
       <div className="flex flex-wrap items-stretch gap-2 rounded-xl bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">

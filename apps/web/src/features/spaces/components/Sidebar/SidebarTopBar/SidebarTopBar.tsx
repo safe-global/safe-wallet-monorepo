@@ -35,13 +35,20 @@ export const SidebarTopBar = (): ReactElement => {
         href={logoHref}
         showHomeLabel={showHomeLabel}
         data-testid="logo-container"
-        className={showHomeLabel ? 'absolute left-0 top-1/2 z-10 -translate-y-1/2' : 'absolute left-3 top-3 z-10'}
+        className={cn(
+          'absolute z-10 top-1/2 -translate-y-1/2',
+          showHomeLabel
+            ? 'left-0'
+            : isCollapsed
+              ? 'left-1/2 top-0 -translate-x-1/2 translate-y-0 size-10 rounded-md bg-sidebar-accent'
+              : 'left-3',
+        )}
       />
       <SidebarTrigger
         className={cn(
           'absolute z-10 shrink-0 cursor-pointer text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent',
           'transition-[left,transform] duration-200 ease-linear',
-          isCollapsed ? 'left-1/2 top-10 -translate-x-1/2' : 'left-[calc(100%-2rem)] top-3',
+          isCollapsed ? 'left-1/2 top-11 -translate-x-1/2' : 'left-[calc(100%-2rem)] top-0',
         )}
         data-testid="sidebar-trigger"
       />
