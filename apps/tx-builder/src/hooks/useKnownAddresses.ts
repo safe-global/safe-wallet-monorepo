@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { AddressBookItem } from '@safe-global/safe-apps-sdk'
 import { useSafeAppsSDK } from '@safe-global/safe-apps-react-sdk'
 
@@ -37,9 +37,13 @@ export const useKnownAddresses = () => {
     request.then(setAddressBookItems)
   }, [sdk, chainId, safeAddress])
 
-  const knownAddresses = addressBookItems
-    .filter((item) => item.chainId === String(chainId) && isValidAddress(item.address))
-    .map(({ address, name }) => ({ address, name }))
+  const knownAddresses = useMemo(
+    () =>
+      addressBookItems
+        .filter((item) => item.chainId === String(chainId) && isValidAddress(item.address))
+        .map(({ address, name }) => ({ address, name })),
+    [addressBookItems, chainId],
+  )
 
   return { knownAddresses, loadAddressBook }
 }
