@@ -50,13 +50,11 @@
   background-color: var(--secondary-hover) !important;
 }
 
-/* Collapsed (icon-only) sidebar: the row is nothing but the 32px avatar, so it has to become a
-   32px square at the avatar's own radius. Two things went wrong without this:
-   `min-height: 40px` beat the collapsed `size-8!` (min-height always wins over height), leaving a
-   32x40 button with the avatar centred and 4px of grey showing above and below it; and the
-   expanded 16px radius is half of 32px, so the button rounded into a blob behind the squarer
-   avatar. 12px matches the logo and the sidebar trigger it shares the top chrome with, rather than
-   the 8px of the nav list below. */
+/* Collapsed (icon-only) sidebar: the row is nothing but the avatar, so it becomes a square at the
+   rail's shared size. `min-height: 0` is what lets the icon-mode `size-9!` apply at all — a
+   min-height always wins over a height, so the 40px floor above left a 36x40 button with the avatar
+   centred and grey showing above and below it. The radius drops to 12px because the expanded 16px is
+   nearly half of 36px and rounded the button into a blob behind the squarer avatar. */
 :global([data-collapsible='icon']) .spaceSelector {
   min-height: 0;
   border-radius: var(--radius-md);
@@ -215,9 +213,12 @@
   height: 12px;
 }
 
+/* Collapsed, the avatar IS the button, so it fills it edge to edge rather than carrying its own
+   size. It was a fixed 32px, which happened to match while the rail was 32px squares; once those
+   became 36px it left a 2px ring of button showing around the avatar. */
 :global(.group[data-collapsible='icon']) .spaceSelector .spaceSelectorAvatar {
-  width: 32px;
-  height: 32px;
+  width: 100%;
+  height: 100%;
 }
 
 :global(.group[data-collapsible='icon']) .transactionsBadge {

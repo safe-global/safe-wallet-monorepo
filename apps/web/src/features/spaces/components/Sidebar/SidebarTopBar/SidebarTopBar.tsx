@@ -45,6 +45,9 @@ export const SidebarTopBar = (): ReactElement => {
         )}
       />
       <SidebarTrigger
+        // `icon` (36px) rather than the shadcn default `icon-sm` (32px): collapsed, this sits in the
+        // same column as the nav items, and the rail reads as ragged if one square is 4px smaller.
+        size="icon"
         className={cn(
           'absolute z-10 shrink-0 cursor-pointer text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent',
           'transition-[left,transform] duration-200 ease-linear',
