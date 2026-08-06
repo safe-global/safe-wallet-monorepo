@@ -9,7 +9,8 @@ interface AddressBookSearchInputProps {
   placeholder?: string
   className?: string
   'aria-label'?: string
-  /** Match the height of the buttons this search box shares a row with (e.g. `lg` next to `size="lg"`). */
+  /** Match the height of the buttons this search box shares a row with — `default` beside
+   * `size="action"`/`submit`/`default` (h-9), `lg` only beside `size="lg"` (h-10). */
   inputSize?: ComponentProps<typeof SearchField>['inputSize']
 }
 

@@ -158,7 +158,9 @@ const SpaceAddressBook = () => {
                 </div>
               ) : null}
               {(activeTab === 'workspace' ? addressBookItems.length > 0 : sortedLocalContacts.length > 0) && (
-                <AddressBookSearchInput value={searchQuery} onChange={setSearchQuery} inputSize="lg" />
+                // `default` (h-9), not `lg`: the Add contact / Import buttons on this row are
+                // `size="action"`, which is h-9.
+                <AddressBookSearchInput value={searchQuery} onChange={setSearchQuery} inputSize="default" />
               )}
             </div>
           )}

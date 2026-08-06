@@ -35,10 +35,11 @@ const inputGroupVariants = cva(
   {
     variants: {
       inputSize: {
-        // sm/lg pair with Button's sm (h-8) and lg/action/submit (h-10) so a field and a button line up
-        // on one row. Each tier also pins the nested control to the same height — which is exactly how
-        // `default` behaves implicitly (h-9 group + the Input's own h-9 default). NB `h-full` does NOT
-        // work here: against an indefinite flex cross-size it collapses to the 33px content height.
+        // Pair with Button so a field and a button line up on one row: `sm` with Button's `sm` (h-8),
+        // `default` with `default`/`action`/`submit` (all h-9), `lg` with `lg` (h-10). Each tier also
+        // pins the nested control to the same height — which is exactly how `default` behaves
+        // implicitly (h-9 group + the Input's own h-9 default). NB `h-full` does NOT work here:
+        // against an indefinite flex cross-size it collapses to the 33px content height.
         sm: 'h-8 [&_[data-slot=input-group-control]]:h-8',
         default: 'h-9',
         lg: 'h-10 [&_[data-slot=input-group-control]]:h-10',
