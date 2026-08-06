@@ -30,7 +30,8 @@ const createEnsHubProvider = async (chainId: string): Promise<JsonRpcProvider | 
   const rpcUrl = hubConfig.publicRpcUri?.value || hubConfig.rpcUri?.value
   if (!rpcUrl) return undefined
 
-  return new JsonRpcProvider(rpcUrl, Number(hubChainId), { staticNetwork: true })
+  // Match web's createWeb3ReadOnly: Infura and similar RPCs reject large batches.
+  return new JsonRpcProvider(rpcUrl, Number(hubChainId), { staticNetwork: true, batchMaxCount: 3 })
 }
 
 const NetworkProvider: React.FC<PropsWithChildren> = ({ children }) => {

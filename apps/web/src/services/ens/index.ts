@@ -42,7 +42,8 @@ export const lookupAddress = async (
 
 /**
  * Forward-resolve an ENS name for a target chain via a hub provider (Mainnet/Sepolia).
- * Delegates to the shared coin-type fallback logic; failures are logged and swallowed.
+ * Delegates to the shared chain-specific coin-type lookup (no ETH fallback); failures are
+ * logged and swallowed.
  */
 export const resolveNameForChain = async (
   hubProvider: Provider,
