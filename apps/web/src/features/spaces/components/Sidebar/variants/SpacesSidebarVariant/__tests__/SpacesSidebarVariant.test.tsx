@@ -4,6 +4,14 @@ import type { ReactNode } from 'react'
 import { SpacesSidebarVariant } from '../SpacesSidebarVariant'
 import type { ResolvedSidebarNavItem, ResolvedSidebarGroup, SpaceItem } from '../../../types'
 
+jest.mock('../../SidebarDeveloperGroup', () => ({
+  SidebarDeveloperGroup: ({ isLoading }: { isLoading?: boolean }) => (
+    <div data-testid="developer-group" data-loading={isLoading}>
+      Developer group
+    </div>
+  ),
+}))
+
 jest.mock('@/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({ children, className }: { children: ReactNode; className?: string }) => (
@@ -167,5 +175,40 @@ describe('SpacesSidebarVariant', () => {
     )
 
     expect(screen.getByRole('button', { name: /Security/i })).toBeDisabled()
+  })
+
+  // The group is self-contained (it reads the config and owns the production guard), so its own tests
+  // cover what it renders. Here we only pin down that this variant mounts it, last.
+  describe('Developer group', () => {
+    it('mounts the developer group after the Setup group', () => {
+      const { container } = render(
+        <SpacesSidebarVariant
+          mainNavItems={mockMainNavItems}
+          setupGroup={mockSetupGroup}
+          selectedSpace={mockSpace}
+          spaces={mockSpaces}
+        />,
+      )
+
+      const marker = screen.getByTestId('developer-group')
+      expect(marker).toBeInTheDocument()
+
+      const text = container.textContent ?? ''
+      expect(text.indexOf('Developer group')).toBeGreaterThan(text.indexOf('Setup'))
+    })
+
+    it('forwards the loading state to the group', () => {
+      render(
+        <SpacesSidebarVariant
+          mainNavItems={mockMainNavItems}
+          setupGroup={mockSetupGroup}
+          selectedSpace={mockSpace}
+          spaces={mockSpaces}
+          isLoading
+        />,
+      )
+
+      expect(screen.getByTestId('developer-group')).toHaveAttribute('data-loading', 'true')
+    })
   })
 })

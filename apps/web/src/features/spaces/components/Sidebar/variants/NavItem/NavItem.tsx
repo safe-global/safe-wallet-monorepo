@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import Link from 'next/link'
 import { SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
@@ -52,15 +52,21 @@ interface NavItemProps {
   isSpacesVariant?: boolean
   /** Show skeleton loading state instead of actual item content. */
   isLoading?: boolean
+  /**
+   * UI belonging to this item, e.g. a dialog it opens. Hosted in the item's own list element, and
+   * kept mounted in the skeleton state so a loading flip can't tear down UI the user has open.
+   */
+  children?: ReactNode
 }
 
-export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: NavItemProps): ReactElement => {
+export const NavItem = ({ item, isSpacesVariant = false, isLoading = false, children }: NavItemProps): ReactElement => {
   const { state, isMobile, isTablet, setOpenMobile } = useSidebar()
 
   if (isLoading || !item) {
     return (
       <SidebarMenuItem>
         <NavItemSkeleton />
+        {children}
       </SidebarMenuItem>
     )
   }
@@ -142,6 +148,7 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
           <span className={css.transactionsBadgeDot} aria-hidden />
         </>
       )}
+      {children}
     </SidebarMenuItem>
   )
 }

@@ -1,65 +1,40 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import type { ReactElement, ReactNode } from 'react'
-import { SafeSidebarContent } from '../SafeSidebarContent'
+import { SpacesSidebarContent } from '../SpacesSidebarContent'
+import { setIsProduction } from '@/tests/env'
 
-// Companion to SafeSidebarContent.test.tsx, which mocks SafeSidebarVariant away. Here the real
-// SafeSidebarVariant and the real NavItem stay in place, so the Feature flags entry is exercised
-// the way a user hits it: config -> action group -> NavItem -> onSelect -> dialog. Only leaf
-// concerns (sidebar/tooltip primitives, analytics, data hooks, the dialog itself) are stubbed.
+// Companion to SpacesSidebarContent.test.tsx, which mocks SpacesSidebarVariant away. Here the real
+// SpacesSidebarVariant, the real developer-group hook and the real NavItem stay in place, so the
+// Feature flags entry is exercised the way a user hits it on a space route: hook -> action group ->
+// NavItem -> onSelect -> dialog. Only leaf concerns are stubbed.
 
 const mockPush = jest.fn()
 
 jest.mock('next/router', () => ({
-  useRouter: () => ({ query: {}, pathname: '/home', push: mockPush }),
+  useRouter: () => ({ query: { spaceId: '1' }, pathname: '/spaces', push: mockPush }),
 }))
 
-jest.mock('@/hooks/useTxQueue', () => ({
-  useQueuedTxsLength: () => '',
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+  useCurrentSpaceId: () => '1',
+}))
+
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+  useIsActiveMember: () => true,
 }))
 
 jest.mock('@/hooks/useChains', () => ({
-  useCurrentChain: () => ({ chainId: '1' }),
+  useHasFeature: () => true,
 }))
 
-jest.mock('@/utils/chains', () => ({
-  isRouteEnabled: () => true,
-}))
-
-jest.mock('@safe-global/utils/utils/chains', () => ({
-  isNonCriticalUpdate: () => false,
-}))
-
-jest.mock('@/hooks/useSafeInfo', () => ({
-  __esModule: true,
-  default: () => ({ safe: { deployed: true, implementationVersionState: 'UP_TO_DATE', version: '1.4.1' } }),
-}))
-
-jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
-  useSafeQueryParam: () => '',
-}))
-
-// Selector-aware so real selectors run against a known slice: the override count resolves to 0 and
-// isAuthenticated to false (keeping the workspace header out of the way) without a blanket stub that
-// would also swallow any future store consumer in this tree.
+// Selector-aware so real selectors run against a known slice, rather than every selector in the
+// tree silently resolving to the same value and masking a future store consumer.
 jest.mock('@/store', () => ({
   useAppSelector: (selector: (state: { featureFlagOverrides: Record<string, boolean>; auth: object }) => unknown) =>
     selector({ featureFlagOverrides: {}, auth: {} }),
 }))
 
-jest.mock('@/features/counterfactual', () => ({
-  useIsCounterfactualSafe: () => false,
-}))
-
-jest.mock('@/hooks/useIsHydrated', () => ({
-  useIsHydrated: () => true,
-}))
-
-jest.mock('../../../NewTransactionButton', () => ({
-  SidebarActionButton: () => <button type="button">New transaction</button>,
-}))
-
-jest.mock('../../SafeSidebarWorkspaceHeader', () => ({
-  SafeSidebarWorkspaceHeader: () => null,
+jest.mock('../../SpaceSelectorDropdown', () => ({
+  SpaceSelectorDropdown: () => null,
 }))
 
 const mockTrackEvent = jest.fn()
@@ -117,22 +92,30 @@ jest.mock('@/features/feature-flag-overrides/FeatureFlagEditorDialogLoader', () 
     open ? <div data-testid="feature-flag-editor-dialog" /> : null,
 }))
 
-describe('SafeSidebarContent Developer action (real NavItem)', () => {
+const renderContent = () => render(<SpacesSidebarContent spaceInitial="T" spaces={[]} />)
+
+describe('SpacesSidebarContent Developer action (real NavItem)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
+  it('renders the Developer group with the Feature flags entry', () => {
+    renderContent()
+
+    expect(screen.getByText('Developer')).toBeInTheDocument()
+    expect(screen.getByTestId('sidebar-feature-flags-item')).toHaveTextContent('Feature flags')
+  })
+
   it('renders the Feature flags entry as a button, not a navigation link', () => {
-    render(<SafeSidebarContent spaceInitial="S" spaces={[]} />)
+    renderContent()
 
     const item = screen.getByTestId('sidebar-feature-flags-item')
     expect(item.tagName).toBe('BUTTON')
     expect(item).not.toHaveAttribute('href')
-    expect(item).toHaveTextContent('Feature flags')
   })
 
   it('opens the editor dialog on click without routing anywhere', () => {
-    render(<SafeSidebarContent spaceInitial="S" spaces={[]} />)
+    renderContent()
 
     expect(screen.queryByTestId('feature-flag-editor-dialog')).not.toBeInTheDocument()
 
@@ -144,9 +127,24 @@ describe('SafeSidebarContent Developer action (real NavItem)', () => {
     expect(mockTrackEvent).toHaveBeenCalledWith({ action: 'Sidebar clicked' }, { sidebarElement: 'Feature flags' })
   })
 
-  it('keeps regular nav items as links so the action item is genuinely the odd one out', () => {
-    render(<SafeSidebarContent spaceInitial="S" spaces={[]} />)
+  it('keeps the space nav items as links so the action item is genuinely the odd one out', () => {
+    renderContent()
 
     expect(screen.getAllByRole('link').length).toBeGreaterThan(0)
+  })
+
+  it('renders neither the group nor the dialog in production', () => {
+    const originalIsProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION
+    setIsProduction('true')
+
+    try {
+      renderContent()
+
+      expect(screen.queryByText('Developer')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('sidebar-feature-flags-item')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('feature-flag-editor-dialog')).not.toBeInTheDocument()
+    } finally {
+      setIsProduction(originalIsProduction)
+    }
   })
 })

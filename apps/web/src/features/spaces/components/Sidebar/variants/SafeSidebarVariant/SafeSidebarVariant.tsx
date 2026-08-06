@@ -14,6 +14,7 @@ import css from '../../styles.module.css'
 import type { ResolvedSidebarNavItem, SafeSidebarVariantProps } from '../../types'
 import { AppRoutes } from '@/config/routes'
 import { NavItem } from '../NavItem'
+import { SidebarDeveloperGroup } from '../SidebarDeveloperGroup'
 import { SidebarActionButton } from '../../NewTransactionButton'
 import { SafeSidebarWorkspaceHeader } from '../SafeSidebarWorkspaceHeader'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -33,7 +34,6 @@ export const SafeSidebarVariant = ({
   workspaceHeader,
   mainNavItems,
   defiGroup,
-  developerGroup,
   isLoading = false,
 }: SafeSidebarVariantProps): ReactElement => {
   const router = useRouter()
@@ -127,21 +127,7 @@ export const SafeSidebarVariant = ({
           </motion.div>
         )}
 
-        {/* Developer Group */}
-        {(developerGroup?.items?.length ?? 0) > 0 && (
-          <motion.div variants={itemVariants}>
-            <SidebarGroup className={css.sidebarGroup}>
-              <SidebarGroupLabel>{developerGroup?.label ?? ''}</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu className="gap-0">
-                  {developerGroup?.items.map((item) => (
-                    <NavItem key={item.id} item={item} isLoading={isLoading} />
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </motion.div>
-        )}
+        <SidebarDeveloperGroup isLoading={isLoading} />
       </motion.div>
     </SidebarContent>
   )

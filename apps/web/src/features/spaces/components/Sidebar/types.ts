@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import type { SpaceMemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
@@ -13,20 +14,32 @@ export interface SidebarItemConfig extends SidebarItemBase {
   activeMemberOnly?: boolean
 }
 
-/** A config entry that runs an action instead of navigating (e.g. a dev-only dialog). */
-export interface SidebarActionItemConfig extends SidebarItemBase {
-  /** Stable identity and test-id seed; action items have no route to be keyed by. */
-  id: string
-}
-
 export interface SidebarGroupConfig {
   label: string
   items: SidebarItemConfig[]
 }
 
-export interface SidebarActionGroupConfig {
+/** Everything a developer entry resolves for itself on each render. */
+export interface SidebarDeveloperItemState {
+  badge?: number | string
+  onSelect: () => void
+  /** UI the entry owns, e.g. the dialog it opens. Hosted inside the entry's own list element. */
+  dialog?: ReactNode
+}
+
+/**
+ * A dev-only entry that runs an action instead of navigating. Its badge, action and dialog all come
+ * from its own `useItemState` hook, so entries never share state and adding one is a config-only change.
+ */
+export interface SidebarDeveloperItemConfig extends Pick<SidebarItemBase, 'icon' | 'label'> {
+  /** Stable identity and test-id seed; developer entries have no route to be keyed by. */
+  id: string
+  useItemState: () => SidebarDeveloperItemState
+}
+
+export interface SidebarDeveloperGroupConfig {
   label: string
-  items: SidebarActionItemConfig[]
+  items: SidebarDeveloperItemConfig[]
 }
 
 interface ResolvedSidebarItemBase extends SidebarItemBase {
@@ -56,11 +69,6 @@ export type ResolvedSidebarItem = ResolvedSidebarNavItem | ResolvedSidebarAction
 export interface ResolvedSidebarGroup {
   label: string
   items: ResolvedSidebarNavItem[]
-}
-
-export interface ResolvedSidebarActionGroup {
-  label: string
-  items: ResolvedSidebarActionItem[]
 }
 
 export interface SpaceItem {
@@ -102,6 +110,5 @@ export interface SafeSidebarVariantProps {
   workspaceHeader: SafeWorkspaceHeaderProps
   mainNavItems: ResolvedSidebarNavItem[] | null
   defiGroup: ResolvedSidebarGroup | null
-  developerGroup?: ResolvedSidebarActionGroup | null
   isLoading?: boolean
 }

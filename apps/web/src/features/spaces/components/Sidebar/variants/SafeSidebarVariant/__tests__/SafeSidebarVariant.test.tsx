@@ -7,7 +7,6 @@ import type {
   ResolvedSidebarItem,
   ResolvedSidebarNavItem,
   ResolvedSidebarGroup,
-  ResolvedSidebarActionGroup,
 } from '../../../types'
 import { AppRoutes } from '@/config/routes'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
@@ -162,6 +161,14 @@ jest.mock('../../../config', () => ({
   },
 }))
 
+jest.mock('../../SidebarDeveloperGroup', () => ({
+  SidebarDeveloperGroup: ({ isLoading }: { isLoading?: boolean }) => (
+    <div data-testid="developer-group" data-loading={isLoading}>
+      Developer group
+    </div>
+  ),
+}))
+
 jest.mock('../../SpaceSelectorDropdown', () => ({
   SpaceSelectorDropdown: ({ triggerVariant }: { triggerVariant?: 'default' | 'addToWorkspace' }) =>
     triggerVariant === 'addToWorkspace' ? (
@@ -214,20 +221,6 @@ describe('SafeSidebarVariant', () => {
   const mockDefiGroup: ResolvedSidebarGroup = {
     label: 'Defi',
     items: [createMockNavItem({ label: 'Swap', href: '/swap', link: { pathname: '/swap', query: {} } })],
-  }
-
-  const mockDeveloperGroup: ResolvedSidebarActionGroup = {
-    label: 'Developer',
-    items: [
-      {
-        icon: MockIcon as unknown as ResolvedSidebarNavItem['icon'],
-        label: 'Feature flags',
-        id: 'feature-flags',
-        isActive: false,
-        disabled: false,
-        onSelect: jest.fn(),
-      },
-    ],
   }
 
   beforeEach(() => {
@@ -707,57 +700,35 @@ describe('SafeSidebarVariant', () => {
     })
   })
 
+  // The group is self-contained (it reads the config and owns the production guard), so its own tests
+  // cover what it renders. Here we only pin down that this variant mounts it, last.
   describe('Developer group', () => {
-    it('renders the Developer group label and its items when provided', () => {
-      render(
+    it('mounts the developer group after the DeFi group', () => {
+      const { container } = render(
         <SafeSidebarVariant
           workspaceHeader={createBackHeader()}
           mainNavItems={mockMainNavItems}
           defiGroup={mockDefiGroup}
-          developerGroup={mockDeveloperGroup}
         />,
       )
 
-      expect(screen.getByText('Developer')).toBeInTheDocument()
-      expect(screen.getByText('Feature flags')).toBeInTheDocument()
+      expect(screen.getByTestId('developer-group')).toBeInTheDocument()
+
+      const text = container.textContent ?? ''
+      expect(text.indexOf('Developer group')).toBeGreaterThan(text.indexOf('Defi'))
     })
 
-    it('renders nothing for the Developer group when not provided', () => {
+    it('forwards the loading state to the group', () => {
       render(
         <SafeSidebarVariant
           workspaceHeader={createBackHeader()}
           mainNavItems={mockMainNavItems}
           defiGroup={mockDefiGroup}
+          isLoading
         />,
       )
 
-      expect(screen.queryByText('Developer')).not.toBeInTheDocument()
-    })
-
-    it('renders nothing for the Developer group when null', () => {
-      render(
-        <SafeSidebarVariant
-          workspaceHeader={createBackHeader()}
-          mainNavItems={mockMainNavItems}
-          defiGroup={mockDefiGroup}
-          developerGroup={null}
-        />,
-      )
-
-      expect(screen.queryByText('Developer')).not.toBeInTheDocument()
-    })
-
-    it('renders nothing for the Developer group when items array is empty', () => {
-      render(
-        <SafeSidebarVariant
-          workspaceHeader={createBackHeader()}
-          mainNavItems={mockMainNavItems}
-          defiGroup={mockDefiGroup}
-          developerGroup={{ label: 'Developer', items: [] }}
-        />,
-      )
-
-      expect(screen.queryByText('Developer')).not.toBeInTheDocument()
+      expect(screen.getByTestId('developer-group')).toHaveAttribute('data-loading', 'true')
     })
   })
 })

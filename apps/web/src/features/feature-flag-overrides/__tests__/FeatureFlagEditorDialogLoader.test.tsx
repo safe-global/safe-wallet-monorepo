@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs'
 import path from 'path'
 import { render } from '@/tests/test-utils'
+import { setIsProduction } from '@/tests/env'
 import { FeatureFlagEditorDialogLoader } from '../FeatureFlagEditorDialogLoader'
 
 const LOADER = path.resolve(__dirname, '../FeatureFlagEditorDialogLoader.tsx')
@@ -9,7 +10,7 @@ describe('FeatureFlagEditorDialogLoader', () => {
   const originalIsProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION
 
   afterEach(() => {
-    process.env.NEXT_PUBLIC_IS_PRODUCTION = originalIsProduction
+    setIsProduction(originalIsProduction)
   })
 
   // Only the bundler can tell the inlined process.env check from an imported IS_PRODUCTION
@@ -26,7 +27,7 @@ describe('FeatureFlagEditorDialogLoader', () => {
   })
 
   it('renders nothing in production', async () => {
-    process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+    setIsProduction('true')
 
     // The guard runs once, when the module is evaluated, so the loader has to be re-imported into
     // a fresh registry to see the production env. next/dynamic is stood in for by a component that

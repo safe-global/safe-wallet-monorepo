@@ -6,6 +6,7 @@ import path from 'path'
 // `bundleExclusion` proves this properly but only runs under RUN_BUNDLE_TESTS; this is the
 // always-on guard, and it covers the entire sidebar tree, not just the entry component.
 const SIDEBAR_DIR = path.resolve(__dirname, '../../spaces/components/Sidebar')
+const BARREL = path.resolve(__dirname, '../index.ts')
 
 const ALLOWED_SPECIFIERS = [
   '@/features/feature-flag-overrides/FeatureFlagEditorDialogLoader',
@@ -48,5 +49,19 @@ describe('feature-flag editor static import graph', () => {
     expect(mentions).toContain('FeatureFlagEditorDialogLoader')
 
     expect([...new Set(mentions)]).toEqual(['FeatureFlagEditorDialogLoader'])
+  })
+})
+
+// `useChains` imports the barrel, which puts it on the static import path of ~300 files including
+// the sidebar. Anything the barrel re-exports ships on every route, so a component export here
+// would defeat the guarded dynamic import and ship the whole dev-only editor UI to production.
+//
+// A barrel can only pull in a module by naming it in a `from '…'` clause, so — unlike the sidebar
+// scan above — the specifier list is exhaustive here and needs no identifier fallback. Asserted as
+// an exact list rather than a components/ denylist so that widening the barrel at all has to be a
+// deliberate edit to this test.
+describe('feature-flag overrides barrel', () => {
+  it('re-exports nothing but the override hooks', () => {
+    expect(readSpecifiers(BARREL)).toEqual(['./hooks/useChainOverrides'])
   })
 })

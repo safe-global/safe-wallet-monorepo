@@ -11,6 +11,7 @@ import {
 import css from '../../styles.module.css'
 import type { SpaceSelectorProps, ResolvedSidebarNavItem, ResolvedSidebarGroup } from '../../types'
 import { NavItem } from '../NavItem'
+import { SidebarDeveloperGroup } from '../SidebarDeveloperGroup'
 import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
 import { containerVariants, itemVariants } from '../../constants'
 
@@ -82,6 +83,8 @@ export const SpacesSidebarVariant = ({
             </SidebarGroupContent>
           </SidebarGroup>
         </motion.div>
+
+        <SidebarDeveloperGroup isLoading={isLoading} />
       </motion.div>
     </SidebarContent>
   )
