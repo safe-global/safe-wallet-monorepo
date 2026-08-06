@@ -242,18 +242,34 @@ export function clickOnReviewOrderBtn() {
   cy.get(reviewTwapBtn).should('be.enabled').click()
 }
 
-export function placeTwapOrder() {
+export function placeTwapOrder(attempt = 0) {
+  const maxAttempts = 5
   cy.wait(3000)
+
+  // The quote auto-refreshes (~every 30s) and re-disables "Place TWAP order" behind a
+  // "Price Updated" -> "Accept" prompt. Accept the refreshed quote, then place the order;
+  // if the quote refreshes again before we click, retry.
   cy.get('button')
     .contains(acceptStrBtn)
     .should(() => {})
-    .then(($button) => {
-      if (!$button.length) {
-        return
+    .then(($accept) => {
+      if ($accept.length) {
+        cy.wrap($accept).click()
       }
-      cy.wrap($button).click()
     })
-  cy.get('button').contains(placeTwapOrderStrBtn).should('be.enabled').click()
+
+  cy.get('button')
+    .contains(placeTwapOrderStrBtn)
+    .then(($button) => {
+      if ($button.is(':disabled')) {
+        if (attempt >= maxAttempts) {
+          throw new Error('"Place TWAP order" stayed disabled after accepting refreshed quotes')
+        }
+        placeTwapOrder(attempt + 1)
+      } else {
+        cy.wrap($button).click()
+      }
+    })
 }
 
 export function confirmPriceImpact() {
@@ -264,6 +280,16 @@ export function confirmPriceImpact() {
     .then(($checkbox) => {
       if ($checkbox.length) {
         cy.wrap($checkbox).click()
+      }
+    })
+
+  // High price-impact orders now require typing "confirm" before the order can proceed.
+  cy.get(confirmPriceImpactInput)
+    .should(() => {})
+    .then(($input) => {
+      if ($input.length) {
+        cy.wrap($input).clear().type('confirm')
+        cy.get(confirmPriceImpactBtn).should('be.enabled').click()
       }
     })
 }

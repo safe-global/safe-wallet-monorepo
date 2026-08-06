@@ -105,7 +105,7 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
 
   // CoW enforces a live per-part minimum ($10); the title's "200 USD" is a stale 2024 assumption.
   // 4 parts keeps 1 COW under the floor regardless of price; 2 parts flaked in CI.
-  it.only('Verify "Sell amount too small" is shown when the per-part sell amount is below CoW\'s minimum', () => {
+  it('Verify "Sell amount too small" is shown when the per-part sell amount is below CoW\'s minimum', () => {
     swaps.acceptLegalDisclaimer()
     cy.wait(4000)
     main.getIframeBody(iframeSelector).within(() => {
