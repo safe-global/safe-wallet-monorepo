@@ -299,7 +299,7 @@ function SpaceSafeBar() {
           sharing a single white card (see Figma topbar). */}
       <div className="flex flex-wrap items-stretch gap-2 rounded-xl bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
         {/* Under 430px the safe selector drops to its own full-width row below the nested/network controls. */}
-        <div className="contents max-[429px]:block max-[429px]:order-[10000] max-[429px]:min-w-0 max-[429px]:basis-full">
+        <div className="contents max-[430px]:block max-[430px]:order-[10000] max-[430px]:min-w-0 max-[430px]:basis-full">
           <SafeSelectorDropdown
             items={unionItems}
             listItems={listItems}

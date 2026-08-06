@@ -18,6 +18,11 @@ const appInfo = {
   url: 'test',
 }
 
+const safeTxHash = `0x${'11'.repeat(32)}`
+const onChainTxHash = `0x${'22'.repeat(32)}`
+// A signature is what apps mistakenly poll a receipt with; 65 bytes instead of 32
+const signature = `0x${'33'.repeat(65)}`
+
 describe('SafeWalletProvider', () => {
   beforeEach(() => {
     jest.resetAllMocks()
@@ -435,17 +440,18 @@ describe('SafeWalletProvider', () => {
   describe('eth_getTransactionByHash', () => {
     it('should return the transaction when the method is eth_getTransactionByHash', async () => {
       const sdk = {
-        getBySafeTxHash: jest.fn().mockResolvedValue({ txHash: '0x777' }),
+        getBySafeTxHash: jest.fn().mockResolvedValue({ txHash: onChainTxHash }),
         proxy: jest.fn().mockResolvedValue({ hash: '0x999' }),
       }
       const safeWalletProvider = new SafeWalletProvider(safe, sdk as any)
 
       const result = await safeWalletProvider.request(
         1,
-        { method: 'eth_getTransactionByHash', params: ['0x123'] } as any,
+        { method: 'eth_getTransactionByHash', params: [safeTxHash] } as any,
         appInfo,
       )
 
+      expect(sdk.proxy).toHaveBeenCalledWith('eth_getTransactionByHash', [onChainTxHash])
       expect(result).toEqual({
         id: 1,
         jsonrpc: '2.0',
@@ -453,10 +459,47 @@ describe('SafeWalletProvider', () => {
       })
     })
 
+    it('should proxy the hash as given when it is unknown to the Safe', async () => {
+      const sdk = {
+        getBySafeTxHash: jest.fn().mockRejectedValue(new Error('Not found')),
+        proxy: jest.fn().mockResolvedValue({ hash: '0x999' }),
+      }
+      const safeWalletProvider = new SafeWalletProvider(safe, sdk as any)
+
+      await safeWalletProvider.request(
+        1,
+        { method: 'eth_getTransactionByHash', params: [onChainTxHash] } as any,
+        appInfo,
+      )
+
+      expect(sdk.proxy).toHaveBeenCalledWith('eth_getTransactionByHash', [onChainTxHash])
+    })
+
+    it('should reject a hash that is not 32 bytes without calling the RPC', async () => {
+      const sdk = {
+        getBySafeTxHash: jest.fn(),
+        proxy: jest.fn(),
+      }
+      const safeWalletProvider = new SafeWalletProvider(safe, sdk as any)
+
+      const result = await safeWalletProvider.request(
+        1,
+        { method: 'eth_getTransactionByHash', params: [signature] } as any,
+        appInfo,
+      )
+
+      expect(result).toEqual({
+        id: 1,
+        jsonrpc: '2.0',
+        error: { code: RpcErrorCode.INVALID_PARAMS, message: 'Invalid transaction hash' },
+      })
+      expect(sdk.proxy).not.toHaveBeenCalled()
+    })
+
     it('should send a transaction and return the transaction when it is in the submitted transactions', async () => {
       const sdk = {
-        send: jest.fn().mockResolvedValue({ safeTxHash: '0x777' }),
-        getBySafeTxHash: jest.fn().mockResolvedValue({ txHash: '0x777' }),
+        send: jest.fn().mockResolvedValue({ safeTxHash }),
+        getBySafeTxHash: jest.fn().mockResolvedValue({ txHash: null }),
         proxy: jest.fn().mockResolvedValue({ hash: '0x999' }),
       }
       const safeWalletProvider = new SafeWalletProvider(safe, sdk as any)
@@ -475,7 +518,7 @@ describe('SafeWalletProvider', () => {
 
       const result = await safeWalletProvider.request(
         1,
-        { method: 'eth_getTransactionByHash', params: ['0x777'] } as any,
+        { method: 'eth_getTransactionByHash', params: [safeTxHash] } as any,
         appInfo,
       )
 
@@ -488,7 +531,7 @@ describe('SafeWalletProvider', () => {
           from: safe.safeAddress,
           gas: 0,
           gasPrice: '0x00',
-          hash: '0x777',
+          hash: safeTxHash,
           input: '0x',
           nonce: 0,
           to: toAddress,
@@ -502,22 +545,103 @@ describe('SafeWalletProvider', () => {
   describe('eth_getTransactionReceipt', () => {
     it('should return the transaction receipt when the method is eth_getTransactionReceipt', async () => {
       const sdk = {
-        getBySafeTxHash: jest.fn().mockResolvedValue({ txHash: '0x777' }),
+        getBySafeTxHash: jest.fn().mockResolvedValue({ txHash: onChainTxHash }),
         proxy: jest.fn().mockResolvedValue({ hash: '0x999' }),
       }
       const safeWalletProvider = new SafeWalletProvider(safe, sdk as any)
 
       const result = await safeWalletProvider.request(
         1,
-        { method: 'eth_getTransactionReceipt', params: ['0x123'] } as any,
+        { method: 'eth_getTransactionReceipt', params: [safeTxHash] } as any,
+        appInfo,
+      )
+
+      expect(sdk.proxy).toHaveBeenCalledWith('eth_getTransactionReceipt', [onChainTxHash])
+      expect(result).toEqual({
+        id: 1,
+        jsonrpc: '2.0',
+        result: { hash: '0x999' },
+      })
+    })
+
+    it('should return null when the Safe transaction is not on-chain yet', async () => {
+      const sdk = {
+        getBySafeTxHash: jest.fn().mockResolvedValue({ txHash: null }),
+        proxy: jest.fn(),
+      }
+      const safeWalletProvider = new SafeWalletProvider(safe, sdk as any)
+
+      const result = await safeWalletProvider.request(
+        1,
+        { method: 'eth_getTransactionReceipt', params: [safeTxHash] } as any,
         appInfo,
       )
 
       expect(result).toEqual({
         id: 1,
         jsonrpc: '2.0',
-        result: { hash: '0x999' },
+        result: null,
       })
+      expect(sdk.proxy).not.toHaveBeenCalled()
+    })
+
+    it('should proxy the hash as given when it is unknown to the Safe', async () => {
+      const sdk = {
+        getBySafeTxHash: jest.fn().mockRejectedValue(new Error('Not found')),
+        proxy: jest.fn().mockResolvedValue({ hash: '0x999' }),
+      }
+      const safeWalletProvider = new SafeWalletProvider(safe, sdk as any)
+
+      await safeWalletProvider.request(
+        1,
+        { method: 'eth_getTransactionReceipt', params: [onChainTxHash] } as any,
+        appInfo,
+      )
+
+      expect(sdk.proxy).toHaveBeenCalledWith('eth_getTransactionReceipt', [onChainTxHash])
+    })
+
+    it('should reject a signature passed as a hash without calling the RPC', async () => {
+      const sdk = {
+        getBySafeTxHash: jest.fn(),
+        proxy: jest.fn(),
+      }
+      const safeWalletProvider = new SafeWalletProvider(safe, sdk as any)
+
+      const result = await safeWalletProvider.request(
+        1,
+        { method: 'eth_getTransactionReceipt', params: [signature] } as any,
+        appInfo,
+      )
+
+      expect(result).toEqual({
+        id: 1,
+        jsonrpc: '2.0',
+        error: { code: RpcErrorCode.INVALID_PARAMS, message: 'Invalid transaction hash' },
+      })
+      expect(sdk.proxy).not.toHaveBeenCalled()
+      expect(sdk.getBySafeTxHash).not.toHaveBeenCalled()
+    })
+
+    it('should reject a missing hash without calling the RPC', async () => {
+      const sdk = {
+        getBySafeTxHash: jest.fn(),
+        proxy: jest.fn(),
+      }
+      const safeWalletProvider = new SafeWalletProvider(safe, sdk as any)
+
+      const result = await safeWalletProvider.request(
+        1,
+        { method: 'eth_getTransactionReceipt', params: [null] } as any,
+        appInfo,
+      )
+
+      expect(result).toEqual({
+        id: 1,
+        jsonrpc: '2.0',
+        error: { code: RpcErrorCode.INVALID_PARAMS, message: 'Invalid transaction hash' },
+      })
+      expect(sdk.proxy).not.toHaveBeenCalled()
     })
   })
 

@@ -11,10 +11,12 @@ const LogoMark = (): ReactElement => (
       alt="Safe"
       width={24}
       height={24}
-      className="size-6 dark:hidden"
+      className="size-6 group-data-[collapsible=icon]:size-4.5 dark:hidden"
       data-testid="logo-image"
     />
-    <span className={`hidden dark:block size-6 shrink-0 rounded-[2px] ${css.logoPrimaryFill}`} />
+    <span
+      className={`hidden dark:block size-6 group-data-[collapsible=icon]:size-4.5 shrink-0 rounded-[2px] ${css.logoPrimaryFill}`}
+    />
   </>
 )
 

@@ -31,6 +31,13 @@ export interface ErrorContext {
   rpcEndpointKind?: RpcEndpointKind
   /** Host of the failing RPC endpoint (no token/path), e.g. `mainnet.infura.io`. */
   rpcHost?: string
+  /**
+   * HTTP status of the failed request, when the error wraps one (see
+   * `getHttpStatusFromError`). Recorded as a queryable facet so client-caused
+   * responses (4xx) can be distinguished from server failures (5xx) in
+   * dashboards before any reclassification decision is made.
+   */
+  httpStatus?: number
 }
 
 /**
