@@ -22,12 +22,17 @@
   transition: background-color 100ms linear;
 }
 
-/* A tint, not a grey. The row's action buttons hover to `--muted` themselves, so a `--muted` row
-   left the two identical and the buttons gave no hover feedback at all once the row was lit.
-   `--color-background-light` is the same mint the app uses for other hover surfaces, and unlike
-   `--accent` it is declared at `:root`, so it resolves even outside `.shadcn-scope`. */
 .container tbody tr:hover {
-  background-color: var(--color-background-light);
+  background-color: var(--muted);
+}
+
+/* The controls invert against the lit row instead of matching it. Their own `hover:bg-muted` is the
+   same fill the row takes, so button hover used to vanish the moment the row was hovered — and a
+   button is only ever hovered while its row is. `--card` is the table's resting surface, so they read
+   as lifting out of the row, and it stays darker-on-lighter in dark mode (#171717 on #262626). */
+.container tbody tr button:hover,
+.container tbody tr a:hover {
+  background-color: var(--card);
 }
 
 .container td:last-of-type button {
