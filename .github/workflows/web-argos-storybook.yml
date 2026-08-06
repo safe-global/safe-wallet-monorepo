@@ -9,8 +9,7 @@ name: Web Argos Storybook
 
 on:
   # Runs automatically on web PRs so visual regressions surface in review instead of
-  # being discovered by hand (see SHADCN_MIGRATION_ISSUES.md ISSUE-050 for the incident
-  # that motivated this). Fork PRs without ARGOS_TOKEN_STORYBOOK skip the upload step.
+  # being discovered by hand. Fork PRs without ARGOS_TOKEN_STORYBOOK skip the upload step.
   pull_request:
     paths:
       - 'apps/web/**'
