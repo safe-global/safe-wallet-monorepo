@@ -47,6 +47,18 @@
   background-color: var(--secondary-hover) !important;
 }
 
+/* Collapsed (icon-only) sidebar: the row is nothing but the 32px avatar, so it has to become a
+   32px square at the avatar's own radius. Two things went wrong without this:
+   `min-height: 40px` beat the collapsed `size-8!` (min-height always wins over height), leaving a
+   32x40 button with the avatar centred and 4px of grey showing above and below it; and the
+   expanded 16px radius is half of 32px, so the button rounded into a blob behind the squarer
+   avatar. 12px matches the logo and the sidebar trigger it shares the top chrome with, rather than
+   the 8px of the nav list below. */
+:global([data-collapsible='icon']) .spaceSelector {
+  min-height: 0;
+  border-radius: var(--radius-md);
+}
+
 /* Match dropdown panel width to sidebar when open (same as expanded sidebar) */
 .spaceSelectorDropdownContent {
   min-width: var(--sidebar-width, 230px) !important;
@@ -89,16 +101,20 @@
   text-align: left;
 }
 
+/* Must stay equal to the collapsed `.spaceSelector` radius above: there the avatar fills the button
+   exactly, so a tighter radius here would poke its corners out past the button's curve.
+   These two read `var(--rounded-md, 8px)` — a token that exists under no name — so they had always
+   been silently running on that 8px fallback. `--radius-md` is the real one. */
 .spaceSelectorAvatar {
   width: 32px;
   height: 32px;
   flex-shrink: 0;
-  border-radius: var(--rounded-md, 8px);
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 
 .spaceSelectorAvatarFallback {
-  border-radius: var(--rounded-md, 8px);
+  border-radius: var(--radius-md);
   background-color: var(--primary);
   color: var(--primary-foreground);
 }

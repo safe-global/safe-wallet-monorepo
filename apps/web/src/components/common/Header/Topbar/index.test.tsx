@@ -328,16 +328,21 @@ describe('Topbar', () => {
       expect(actions.className).not.toContain('basis-full')
     })
 
-    it('starts both wrapped rows on the same edge', () => {
+    it('keeps the account card on the top row and on the right when the two stack', () => {
       mockIsSpaceRoute.mockReturnValue(false)
       mockUsePathname.mockReturnValue('/home')
 
       const { context, actions } = groups(render(<Topbar />).container)
 
-      // A justify-end on the context right-aligned it inside its full-width slot while the actions
-      // stayed left, putting the two rows on a diagonal.
+      // The account chrome is the header's fixed point: it takes the top row via order-first...
+      expect(actions.className).toMatch(/order-first/)
+      // ...and keeps `ml-auto`, so it holds the right edge instead of sliding left. An `ml-0` here
+      // dropped it to the left edge and left a wide gap where the card had been.
+      expect(actions.className).toMatch(/ml-auto/)
+      expect(actions.className).not.toMatch(/ml-0/)
+      // The search starts on the page's left padding rather than being right-aligned inside its
+      // full-width slot, which used to put the rows on a diagonal.
       expect(context.className).not.toMatch(/justify-end/)
-      expect(actions.className).toMatch(/ml-0/)
     })
 
     it('keeps the sidebar burger inside the context slot so it shares that row', () => {

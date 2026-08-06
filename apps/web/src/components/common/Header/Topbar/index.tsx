@@ -32,28 +32,26 @@ import { TxModalContext } from '@/components/tx-flow'
 import { cn } from '@/utils/cn'
 
 // The safe selector and the actions card need ~1250px to sit side by side, so below a 1260px header
-// container (a container query, so it accounts for the sidebar and the route) each takes its own
-// full-width row — same order and same left edge at every width.
+// container (a container query, so it accounts for the sidebar and the route) they stack.
 //
-// The previous rules moved things around instead: `order-1` flipped the two groups at 1100px, so the
-// actions jumped above the selector, and `ml-auto` stayed in force between 1100px and the width where
-// they actually stopped fitting, leaving the selector top-left and the actions bottom-right on a
-// diagonal. `min-[900px]` also mixed a viewport breakpoint into a container-driven rule.
+// The account chrome is the fixed point of the header, so it does not move when they stack: it takes
+// the top row and keeps the right-hand position it holds on one row, with the context dropping
+// underneath it. `order-first` on the actions does the reordering, and dropping the old `ml-0` is
+// what leaves `ml-auto` in force so the card stays right rather than sliding to the left edge.
 //
-// The logo variant is 24px and always fits, so it opts out of both. Named so the Topbar tests can
-// assert which left-slot variant opts in without restating the utility list.
+// Only the context slot gets `basis-full` — that alone consumes its line, which is what pushes the
+// two apart. The actions must NOT repeat it: `flex-basis: 100%` sets a flex item's *width*, and
+// unlike the invisible context slot the actions are a painted card, so it stretched across the whole
+// row with its chips (~295px) marooned at the left of ~650px of empty white.
 //
-// Only the context slot gets `basis-full` — that alone consumes the line and pushes the actions onto
-// the next one. The actions must NOT repeat it: `flex-basis: 100%` sets a flex item's *width*, and
-// unlike the invisible context slot the actions are a painted card, so it stretched to the full row
-// with its chips (~295px) marooned at the left of ~950px of empty white. It only needs `ml-0` to
-// drop the `ml-auto` that right-aligns it while the two share a row.
+// No `justify-end` on the context either: it right-aligned the search inside its full-width slot,
+// which put the rows on a diagonal back when the actions were pinned left. The search now starts on
+// the page's left padding at every width.
 //
-// No `justify-end` below md either: it right-aligned the context inside its full-width slot while the
-// actions stayed left, putting the two wrapped rows on a diagonal. The stretched card used to hide
-// that. Both rows now start on the page's left padding at every width.
+// The logo variant is 24px and always fits beside the actions, so it opts out of both. Named so the
+// Topbar tests can assert which left-slot variant opts in without restating the utility list.
 export const WIDE_CONTEXT_WRAP = '@max-[1260px]:basis-full'
-export const WIDE_ACTIONS_WRAP = '@max-[1260px]:ml-0'
+export const WIDE_ACTIONS_WRAP = '@max-[1260px]:order-first'
 
 interface TopbarProps {
   /** When provided, shows a menu button on mobile to open the sidebar */
