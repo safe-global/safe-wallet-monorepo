@@ -73,7 +73,10 @@ function EntryDialog({
         <form onSubmit={onSubmit}>
           <div className="p-6">
             <div className="mb-4">
-              <NameInput data-testid="name-input" label="Name" autoFocus name="name" required />
+              {/* `hero` (66px) to match the AddressInput below, whose wrapper is min-height 66px —
+                  the same pairing SetAddressStep already uses. The default h-9 left this field
+                  noticeably shorter than the address box it sits above. */}
+              <NameInput data-testid="name-input" label="Name" autoFocus name="name" required inputSize="hero" />
             </div>
 
             <div>

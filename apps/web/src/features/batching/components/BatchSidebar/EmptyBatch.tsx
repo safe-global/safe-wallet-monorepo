@@ -8,7 +8,12 @@ import { Typography } from '@/components/ui/typography'
 
 const EmptyBatch = ({ children }: { children: ReactNode }) => (
   <div className="flex w-full max-w-full flex-col items-center px-2 py-6 text-center sm:px-4">
-    <EmptyBatchIcon className="size-[110px]" />
+    {/* fill-current restores what MUI's SvgIcon used to supply. Three of this illustration's six
+        paths carry no fill of their own, and the file's root is `fill="none"` — under SvgIcon they
+        inherited its `fill: currentColor`, but rendered bare they came out invisible, so the parcel,
+        ring and sparkle around the arrow simply vanished. A class beats the attribute, and the three
+        paths that do set `illustration-*-fill` keep their own colours. */}
+    <EmptyBatchIcon className="size-[110px] fill-current text-[var(--color-border-main)]" />
 
     <Typography variant="h4" className="mt-4 font-bold">
       Add an initial transaction to the batch

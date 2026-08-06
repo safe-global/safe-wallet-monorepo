@@ -134,6 +134,8 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
                   <AddressInputReadOnly address={entry.address} chainId={entry.chainIds[0]} />
                 </div>
 
+                {/* `hero` (66px) to match the AddressInputReadOnly above, whose wrapper is
+                    min-height 66px — the default h-9 left the two fields visibly uneven. */}
                 <NameInput
                   name="name"
                   label="Name"
@@ -141,6 +143,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
                   validateCharset
                   minLength={NAME_MIN_LENGTH}
                   maxLength={ADDRESS_BOOK_NAME_MAX_LENGTH}
+                  inputSize="hero"
                 />
 
                 <div>

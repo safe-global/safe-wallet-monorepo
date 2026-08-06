@@ -151,6 +151,8 @@ const AddContactDialog = ({
                 <div className="flex flex-col gap-6">
                   {intro && <p className="text-muted-foreground text-sm">{intro}</p>}
 
+                  {/* `hero` (66px) to match the AddressInput below, whose wrapper is min-height
+                      66px — the default h-9 left the two fields visibly uneven. */}
                   <NameInput
                     name="name"
                     label="Name"
@@ -158,6 +160,7 @@ const AddContactDialog = ({
                     validateCharset={validateCharset}
                     minLength={validateCharset ? NAME_MIN_LENGTH : undefined}
                     maxLength={validateCharset ? ADDRESS_BOOK_NAME_MAX_LENGTH : undefined}
+                    inputSize="hero"
                   />
                   <AddressInput name="address" label="Address or ENS" required showPrefix={false} chain={ensChain} />
 
