@@ -4,6 +4,7 @@ on:
     paths:
       - apps/web/**
       - packages/**
+      - config/**
       - yarn.lock
 
   push:
@@ -13,6 +14,7 @@ on:
     paths:
       - apps/web/**
       - packages/**
+      - config/**
       - yarn.lock
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -34,11 +36,33 @@ jobs:
 
       - uses: ./.github/actions/yarn
 
-      # Experiment: run only tests affected by the diff instead of the
-      # coverage-report action, which ran the full suite twice (head + base).
-      - name: Run affected tests
+      # Experiment: replace the coverage-report action, which ran the full
+      # suite twice per PR (head + base). Jest's --changedSince only maps
+      # dependencies inside apps/web (its jest root), so diffs touching
+      # packages/, config/, lockfiles, or the jest environment fall back to
+      # a full run. Verified: a packages/utils edit selects 0 tests via
+      # --listTests --changedSince; an apps/web/src edit selects 564.
+      - name: Determine test scope
         if: github.event_name == 'pull_request'
+        id: scope
+        run: |
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          if echo "$CHANGED" | grep -qE '^(packages/|config/|yarn\.lock$|package\.json$)|^apps/web/(jest\.config\.cjs|jest\.setup\.js|package\.json|next\.config\.mjs|tsconfig\.json|mocks/|src/tests/)'; then
+            echo "full=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "full=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run affected tests
+        if: github.event_name == 'pull_request' && steps.scope.outputs.full == 'false'
         run: yarn test --ci --silent --watchAll=false --changedSince=origin/${{ github.base_ref }} --passWithNoTests
+        working-directory: apps/web
+        env:
+          NEXT_PUBLIC_IS_OFFICIAL_HOST: true
+
+      - name: Run full suite (out-of-root changes)
+        if: github.event_name == 'pull_request' && steps.scope.outputs.full == 'true'
+        run: yarn test --ci --silent --watchAll=false
         working-directory: apps/web
         env:
           NEXT_PUBLIC_IS_OFFICIAL_HOST: true

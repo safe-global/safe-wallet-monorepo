@@ -14,6 +14,7 @@ on:
     paths:
       - apps/web/**
       - packages/**
+      - yarn.lock
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

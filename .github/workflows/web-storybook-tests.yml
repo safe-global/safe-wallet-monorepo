@@ -8,6 +8,7 @@ on:
     paths:
       - apps/web/**
       - packages/**
+      - config/**
       - yarn.lock
       - .github/workflows/web-storybook-tests.yml
 
@@ -17,6 +18,7 @@ on:
     paths:
       - apps/web/**
       - packages/**
+      - config/**
       - yarn.lock
       - .github/workflows/web-storybook-tests.yml
 
