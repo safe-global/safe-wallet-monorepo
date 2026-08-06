@@ -9,6 +9,7 @@ import {
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuItem,
+  SidebarSeparator,
 } from '@/components/ui/sidebar'
 import css from '../../styles.module.css'
 import type { ResolvedSidebarItem, SafeSidebarVariantProps } from '../../types'
@@ -76,7 +77,7 @@ export const SafeSidebarVariant = ({
     <SidebarContent>
       <motion.div variants={containerVariants} initial="hidden" animate="visible">
         {shouldRenderWorkspaceHeaderGroup && (
-          <motion.div variants={itemVariants} className="mb-2">
+          <motion.div variants={itemVariants} className="mb-4">
             <SidebarGroup className={css.sidebarGroup}>
               <SidebarMenu>
                 <SidebarMenuItem>
@@ -88,7 +89,7 @@ export const SafeSidebarVariant = ({
         )}
 
         {/* Action Button */}
-        <motion.div variants={itemVariants} className="mb-2">
+        <motion.div variants={itemVariants} className="mb-4">
           <SidebarGroup className={css.sidebarGroup}>
             <SidebarGroupContent>
               <SidebarActionButton />
@@ -114,7 +115,10 @@ export const SafeSidebarVariant = ({
         {(defiGroup?.items?.length ?? 0) > 0 && (
           <motion.div variants={itemVariants}>
             <SidebarGroup className={css.sidebarGroup}>
-              <SidebarGroupLabel>{defiGroup?.label ?? ''}</SidebarGroupLabel>
+              <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+                {defiGroup?.label ?? ''}
+              </SidebarGroupLabel>
+              <SidebarSeparator className="my-2 mx-0 px-[18px] hidden group-data-[collapsible=icon]:block group-data-[collapsible=icon]:self-stretch" />
               <SidebarGroupContent>
                 <SidebarMenu className="gap-0">
                   {displayDefiItems.map((item, index) => (

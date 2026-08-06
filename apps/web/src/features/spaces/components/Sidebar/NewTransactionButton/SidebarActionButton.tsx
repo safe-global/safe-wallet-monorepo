@@ -34,7 +34,7 @@ export const SidebarActionButton = (): ReactElement => {
           variant="outline"
           size="lg"
           disabled={!isOk}
-          className="w-full font-semibold py-0 hover:bg-sidebar-accent dark:border-border dark:hover:bg-sidebar-accent group-data-[collapsible=icon]:w-9 group-data-[collapsible=icon]:px-0"
+          className="w-full font-semibold py-0 hover:bg-sidebar-accent dark:border-border dark:hover:bg-sidebar-accent group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:rounded-md group-data-[collapsible=icon]:bg-muted group-data-[collapsible=icon]:border-none group-data-[collapsible=icon]:shadow-none"
         >
           <Plus className="size-4 shrink-0" />
           <span className="group-data-[collapsible=icon]:hidden">New transaction</span>

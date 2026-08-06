@@ -104,7 +104,7 @@ describe('SelectSafesOnboarding — selection wiring', () => {
   it('shows a selected-count of the per-workspace cap instead of a select-all control', () => {
     render(<SelectSafesOnboarding />)
 
-    expect(screen.getByText(/0 of 10 selected/i)).toBeInTheDocument()
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('0 of 10 selected')
     expect(screen.queryByTestId('select-all-trusted')).not.toBeInTheDocument()
     expect(screen.queryByTestId('select-all-owned')).not.toBeInTheDocument()
   })
@@ -128,7 +128,7 @@ describe('SelectSafesOnboarding — selection wiring', () => {
     const onToggle = capturedListProps.onToggle as (line: unknown, checked: boolean) => void
     act(() => onToggle({ key: '1:0xA', variant: 'single', address: '0xA', source: makeSafe('1', '0xA') }, true))
 
-    expect(screen.getByText(/1 of 10 selected/i)).toBeInTheDocument()
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('1 of 10 selected')
   })
 })
 

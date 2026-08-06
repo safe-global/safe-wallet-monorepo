@@ -117,7 +117,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
             The compact logo (welcome/settings) is exempt — it stays inline beside the actions. */}
         <div
           className={`shrink-0 flex items-center max-[899px]:justify-end ${
-            showLogo ? '' : 'h-14 @max-[1100px]:order-1 @max-[1100px]:basis-full'
+            showLogo ? '' : 'min-h-14 @max-[1100px]:order-1 @max-[1100px]:basis-full'
           }`}
         >
           {showLogo ? (
