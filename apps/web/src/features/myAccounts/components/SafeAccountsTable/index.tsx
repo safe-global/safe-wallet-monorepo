@@ -21,6 +21,11 @@ import {
 } from './useSafeAccountRows'
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
 import ReorderableBody, { toggleExpanded } from './ReorderableBody'
+import { bandHeaderAt } from './SimilarityBand'
+import { orderGroupsBySimilarity } from './orderGroupsBySimilarity'
+import { weaveReorderedKeys } from '@/utils/reorder'
+import type { SimilarWarning } from '@/features/address-poisoning'
+import tableStyles from './tableStyles.module.css'
 import EntryDialog from '@/components/address-book/EntryDialog'
 
 /** Renaming a safe = editing its address-book entry across every chain it lives on. */
@@ -94,8 +99,12 @@ export type SafeAccountsTableProps = {
   actionsWidth?: string
   /** Replaces the default context-menu actions cell for each row (e.g. an "Add to workspace" button). */
   renderActions?: (line: AccountLine) => ReactNode
-  /** Lowercased addresses to flag with a "High similarity" warning badge. */
-  flaggedAddresses?: Set<string>
+  /** Lowercased address → cross-list look-alike peers; drives the inline ⚠️ + tooltip. */
+  similarWarnings?: Map<string, SimilarWarning>
+  /** Lowercased address → cluster id; contiguous same-cluster rows render inside a warning band. */
+  similarityGroups?: Map<string, string>
+  /** Lowercased vetted/pinned addresses — ordering-only: a band opens at its anchor's slot, anchor first. */
+  anchorAddresses?: Set<string>
   /** Enables a leading checkbox column and makes rows selectable. */
   selection?: SafeAccountsSelection
   /**
@@ -160,7 +169,9 @@ const SafeAccountsTable = ({
   columns,
   actionsWidth,
   renderActions,
-  flaggedAddresses,
+  similarWarnings,
+  similarityGroups,
+  anchorAddresses,
   selection,
   allowRenameInDialog = false,
   reorder,
@@ -227,9 +238,26 @@ const SafeAccountsTable = ({
     if (!sortableColumns) setSort({ orderBy: null, order: 'asc' })
   }, [sortableColumns])
 
+  // Pull similarity clusters together (non-reorder body) so each renders as one contiguous band.
+  const displayGroups = useMemo(
+    () => orderGroupsBySimilarity(sortedGroups, similarityGroups, anchorAddresses),
+    [sortedGroups, similarityGroups, anchorAddresses],
+  )
+
+  // Weave the dropped (non-clustered) rows into the stored order: the clusters' pin-to-top is
+  // display-only and must not rewrite the user's manual arrangement (it would outlive the cluster).
+  const handleReorder = useCallback(
+    (reorderedDraggable: string[]) => {
+      const storedOrder = sortedGroups.map((group) => group.parent.address)
+      const isClustered = (address: string) => Boolean(similarityGroups?.get(address.toLowerCase()))
+      reorder?.onReorder(weaveReorderedKeys(storedOrder, reorderedDraggable, isClustered))
+    },
+    [reorder, sortedGroups, similarityGroups],
+  )
+
   const lines = useMemo<Array<{ line: AccountLine; groupKey: string; group: AccountGroup }>>(() => {
     const result: Array<{ line: AccountLine; groupKey: string; group: AccountGroup }> = []
-    for (const group of sortedGroups) {
+    for (const group of displayGroups) {
       result.push({ line: group.parent, groupKey: group.parent.key, group })
       if (group.children.length > 0 && expanded.has(group.parent.key)) {
         for (const child of group.children) {
@@ -238,7 +266,7 @@ const SafeAccountsTable = ({
       }
     }
     return result
-  }, [sortedGroups, expanded])
+  }, [displayGroups, expanded])
 
   const handleSort = (column: SafeSortColumn) =>
     setSort((prev) => ({
@@ -268,51 +296,12 @@ const SafeAccountsTable = ({
         }
       >
         <Table
+          className={tableStyles.body}
           sx={{
             tableLayout: 'fixed',
             minWidth: embedded ? undefined : minWidth,
             borderCollapse: 'separate',
             borderSpacing: 0,
-            // The base theme tints every MuiTableRow green on hover; suppress it on the <tr> (otherwise
-            // it bleeds green into the inset corners) and instead paint a grey pill (the same --muted as
-            // the safe-selector dropdown) on the row's cells — inset and rounded like the dropdown rows.
-            // Painting the cells (not the <tr>) lets the first/last cells' transparent side borders inset
-            // the fill from the panel edges. Locked rows stay un-hovered.
-            '& .MuiTableBody-root .MuiTableRow-root:hover': { backgroundColor: 'transparent' },
-            '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root': {
-              backgroundColor: 'var(--muted)',
-            },
-            '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root:first-of-type': {
-              borderTopLeftRadius: '16px',
-              borderBottomLeftRadius: '16px',
-            },
-            '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root:last-of-type': {
-              borderTopRightRadius: '16px',
-              borderBottomRightRadius: '16px',
-            },
-            // Transparent top/bottom borders (with background-clip) inset the hover pill vertically so it
-            // floats clear of the separators. Set here — not per-cell — because the base theme forces
-            // cell borderBottom to `none` at a specificity a per-cell sx can't beat (which is why only
-            // the bottom touched). The outer cells' horizontal inset borders live in the cell sx.
-            // Asymmetric split because the 1px separator is drawn inside the bottom border, and the
-            // row background paints it ~1px above the row's bottom edge — 5/8 lands the pill visually
-            // centred with ~6px of clear space on each side of the line.
-            '& .MuiTableBody-root .MuiTableCell-root': {
-              borderTop: '5px solid transparent',
-              borderBottom: '8px solid transparent',
-              backgroundClip: 'padding-box',
-            },
-            // Row separator, drawn as a 1px line at the bottom of the <tr> (keyed off data-divider,
-            // absent on the last row). It lives on the row — not the cells — so the cells' transparent
-            // top/bottom borders can inset the hover pill clear of the separator. Inset 4px each side to
-            // line up with the pill.
-            '& .MuiTableBody-root .MuiTableRow-root[data-divider]': {
-              backgroundImage:
-                'linear-gradient(to right, transparent 4px, var(--color-border-light) 4px, var(--color-border-light) calc(100% - 4px), transparent calc(100% - 4px))',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'bottom',
-              backgroundSize: '100% 1px',
-            },
           }}
         >
           {/* Embedded (headerless) tables need a colgroup to keep fixed-layout column widths; the Name
@@ -367,9 +356,10 @@ const SafeAccountsTable = ({
 
           {reorder ? (
             <ReorderableBody
-              groups={sortedGroups}
+              groups={displayGroups}
               columns={visibleColumns}
-              flaggedAddresses={flaggedAddresses}
+              similarWarnings={similarWarnings}
+              similarityGroups={similarityGroups}
               expanded={expanded}
               setExpanded={setExpanded}
               renderActions={renderActions}
@@ -377,28 +367,40 @@ const SafeAccountsTable = ({
               onLinkClick={onLinkClick}
               getCheckbox={selection ? (group, line) => getRowCheckbox(group, line, selection) : undefined}
               onSelectToggle={selection ? (line, next) => selection.onToggle(line, next) : undefined}
-              onReorder={reorder.onReorder}
+              onReorder={handleReorder}
               onOverviewsLoaded={handleOverviewsLoaded}
             />
           ) : (
             <TableBody>
-              {lines.map(({ line, groupKey, group }, index) => (
-                <SafeAccountTableRow
-                  key={line.key}
-                  line={line}
-                  columns={visibleColumns}
-                  expanded={line.expandable ? expanded.has(groupKey) : undefined}
-                  isFlagged={flaggedAddresses?.has(line.address.toLowerCase())}
-                  renderActions={renderActions}
-                  onRename={onRename}
-                  checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
-                  onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
-                  onToggle={line.expandable ? () => toggle(groupKey) : undefined}
-                  onLinkClick={onLinkClick}
-                  showDivider={!embedded && index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}
-                  onOverviewsLoaded={handleOverviewsLoaded}
-                />
-              ))}
+              {lines.flatMap(({ line, groupKey, group }, index) => {
+                const clusterId = similarityGroups?.get(line.address.toLowerCase())
+                const bandHeader = bandHeaderAt(
+                  index,
+                  (i) => similarityGroups?.get(lines[i].line.address.toLowerCase()),
+                  visibleColumns.length,
+                )
+
+                const row = (
+                  <SafeAccountTableRow
+                    key={line.key}
+                    line={line}
+                    columns={visibleColumns}
+                    expanded={line.expandable ? expanded.has(groupKey) : undefined}
+                    warning={similarWarnings?.get(line.address.toLowerCase())}
+                    highlighted={Boolean(clusterId)}
+                    renderActions={renderActions}
+                    onRename={onRename}
+                    checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
+                    onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
+                    onToggle={line.expandable ? () => toggle(groupKey) : undefined}
+                    onLinkClick={onLinkClick}
+                    showDivider={!embedded && index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}
+                    onOverviewsLoaded={handleOverviewsLoaded}
+                  />
+                )
+
+                return bandHeader ? [bandHeader, row] : [row]
+              })}
             </TableBody>
           )}
         </Table>

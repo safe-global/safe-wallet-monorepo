@@ -34,7 +34,16 @@ const SelectSafesOnboarding = (): ReactElement => {
   const wallet = useWallet()
   const totalSteps = useOnboardingStepCount()
   const { spaceId, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
-  const { trustedSafes, ownedSafes, flaggedAddresses, handleSearch, hasNoSafes } = useOnboardingSafes()
+  const {
+    trustedSafes,
+    ownedSafes,
+    flaggedAddresses,
+    trustedSimilarityGroups,
+    ownedSimilarityGroups,
+    similarWarnings,
+    handleSearch,
+    hasNoSafes,
+  } = useOnboardingSafes()
   const allSafes = useMemo<AllSafeItems>(() => [...trustedSafes, ...ownedSafes], [trustedSafes, ownedSafes])
   const { formMethods, onSubmit, selectedSafesLength, error, isSubmitting } = useOnboardingSubmit(
     spaceId,
@@ -134,6 +143,9 @@ const SelectSafesOnboarding = (): ReactElement => {
                 trustedSafes={trustedSafes}
                 ownedSafes={ownedSafes}
                 flaggedAddresses={flaggedAddresses}
+                trustedSimilarityGroups={trustedSimilarityGroups}
+                ownedSimilarityGroups={ownedSimilarityGroups}
+                similarWarnings={similarWarnings}
                 selectedKeys={selectedKeys}
                 onToggle={handleToggle}
                 isAtLimit={isAtLimit}

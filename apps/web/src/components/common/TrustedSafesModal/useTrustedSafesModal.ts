@@ -62,8 +62,12 @@ export interface UseTrustedSafesModalReturn {
   pendingSelectAllConfirmation: boolean
   /** Addresses flagged as similar that would be selected by "Select All" */
   similarAddressesForSelectAll: SelectableItem[]
-  /** Look-alike addresses over the FULL list (not just the filtered view), shared by badge and confirm-gate. */
+  /** Look-alike addresses over the FULL list, driving the poison-confirm gate and Select-All. */
   flagged: Set<string>
+  /** Lowercased address → similarity-cluster id, for rendering the "Address poisoning warning" band. */
+  similarityGroups: Map<string, string>
+  /** Pinned (vetted) addresses — lead their band as the "real" anchor. */
+  anchorAddresses: Set<string>
   /** Current search query */
   searchQuery: string
   /** Whether safes are loading */
@@ -111,8 +115,14 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     return allSafes?.map((safe) => safe.address) ?? []
   }, [allSafes])
 
-  // `groupIdByAddress` → visual grouping; `flagged` → row badge, confirm-gate and Select-All.
-  const { flagged: flaggedAll, groupIdByAddress, isAddressFlagged } = useSimilarityClusters(addresses)
+  // Pinned cluster members are vetted anchors: they stay in the band but never flag or prompt confirm.
+  const { flagged: flaggedAll, groupIdByAddress } = useSimilarityClusters(addresses)
+  const pinnedAddresses = useMemo(() => collectPinnedAddresses(addedSafes), [addedSafes])
+  const flagged = useMemo(
+    () => new Set([...flaggedAll].filter((address) => !pinnedAddresses.has(address))),
+    [flaggedAll, pinnedAddresses],
+  )
+  const isAddressFlagged = useCallback((address: string) => flagged.has(address.toLowerCase()), [flagged])
 
   // Full list without selection state, rebuilt only when the safes, pins, or similarity change.
   const structuralItems = useMemo<SelectableItem[]>(() => {
@@ -381,7 +391,9 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     pendingConfirmation,
     pendingSelectAllConfirmation,
     similarAddressesForSelectAll,
-    flagged: flaggedAll,
+    flagged,
+    similarityGroups: groupIdByAddress,
+    anchorAddresses: pinnedAddresses,
     searchQuery,
     isLoading: !allSafes || !allMultiChainSafes || !allSingleSafes,
     hasChanges,
