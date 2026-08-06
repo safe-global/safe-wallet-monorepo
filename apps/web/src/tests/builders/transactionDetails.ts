@@ -15,7 +15,7 @@ import {
   TransactionTokenType,
 } from '@safe-global/store/gateway/types'
 
-import { Builder, type IBuilder } from '../Builder'
+import { Builder, type IBuilder } from '@safe-global/utils/tests/Builder'
 
 const addressInfoBuilder = (): IBuilder<AddressInfo> => {
   return Builder.new<AddressInfo>().with({

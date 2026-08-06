@@ -4,7 +4,7 @@ import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactu
 import { faker } from '@faker-js/faker'
 import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import {
   getSafeSingletonDeployments,

@@ -16,7 +16,7 @@ import { AbiCoder, encodeBytes32String } from 'ethers'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import ExecuteThroughRoleForm from '../index'
 import * as hooksModule from '../hooks'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 

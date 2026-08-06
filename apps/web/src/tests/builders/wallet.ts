@@ -1,6 +1,6 @@
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { faker } from '@faker-js/faker'
-import { Builder, type IBuilder } from '../Builder'
+import { Builder, type IBuilder } from '@safe-global/utils/tests/Builder'
 import { eip1193ProviderBuilder } from './eip1193Provider'
 
 const walletNames = ['MetaMask', 'Wallet Connect', 'Rainbow']

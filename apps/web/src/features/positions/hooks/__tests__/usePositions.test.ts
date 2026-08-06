@@ -8,7 +8,7 @@ import * as positionsQueries from '@safe-global/store/gateway/AUTO_GENERATED/pos
 import * as store from '@/store'
 import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSlice'
 import * as useBalances from '@/hooks/useBalances'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { toBeHex } from 'ethers'

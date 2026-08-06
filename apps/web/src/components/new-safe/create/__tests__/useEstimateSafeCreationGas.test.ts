@@ -15,7 +15,7 @@ import { type EIP1193Provider } from '@web3-onboard/core'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { faker } from '@faker-js/faker'
 import * as useChains from '@/hooks/useChains'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 
 const mockProps: ReplayedSafeProps = {
   safeAccountConfig: {

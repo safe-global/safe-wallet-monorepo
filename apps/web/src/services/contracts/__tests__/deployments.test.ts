@@ -2,7 +2,7 @@ import * as safeDeployments from '@safe-global/safe-deployments'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import * as deployments from '@safe-global/utils/services/contracts/deployments'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 jest.mock('@safe-global/safe-deployments', () => ({

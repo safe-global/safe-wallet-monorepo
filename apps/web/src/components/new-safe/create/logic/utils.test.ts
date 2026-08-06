@@ -1,6 +1,6 @@
 import { getAvailableSaltNonce } from '@/components/new-safe/create/logic/utils'
 import { faker } from '@faker-js/faker'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import * as web3Hooks from '@/hooks/wallets/web3'
 import { type JsonRpcProvider, id } from 'ethers'

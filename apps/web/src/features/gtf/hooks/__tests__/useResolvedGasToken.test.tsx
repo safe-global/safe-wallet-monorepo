@@ -7,7 +7,7 @@ import * as useChainsModule from '@/hooks/useChains'
 import * as useSafeInfoModule from '@/hooks/useSafeInfo'
 import { getNonces } from '@/services/tx/tx-sender/recommendedNonce'
 import * as gatewayApi from '@/store/api/gateway'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 

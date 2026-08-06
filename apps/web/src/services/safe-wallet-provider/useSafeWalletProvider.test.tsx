@@ -16,7 +16,7 @@ import { Interface } from 'ethers'
 import { getCreateCallDeployment } from '@safe-global/safe-deployments'
 import * as chainHooks from '@/hooks/useChains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { useAllSafes, useGetHref } from '@/hooks/safes'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 

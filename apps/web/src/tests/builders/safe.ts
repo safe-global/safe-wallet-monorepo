@@ -6,10 +6,10 @@ import {
   type AddressInfo as AddressEx,
 } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
-import { Builder } from '../Builder'
+import { Builder } from '@safe-global/utils/tests/Builder'
 import { generateRandomArray } from './utils'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
-import type { IBuilder } from '../Builder'
+import type { IBuilder } from '@safe-global/utils/tests/Builder'
 
 const MAX_OWNERS_LENGTH = 10
 

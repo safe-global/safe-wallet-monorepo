@@ -1,6 +1,6 @@
 import { getRandomAdjective, useMnemonicSafeName } from '.'
 import { renderHook } from '@/tests/test-utils'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 
 const mockChain = chainBuilder().build()
 

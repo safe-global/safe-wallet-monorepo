@@ -3,7 +3,7 @@ import { render } from '@/tests/test-utils'
 import MessagesPage from '@/pages/transactions/messages'
 import { AppRoutes } from '@/config/routes'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 
 const mockReplace = jest.fn()
 jest.mock('next/router', () => ({

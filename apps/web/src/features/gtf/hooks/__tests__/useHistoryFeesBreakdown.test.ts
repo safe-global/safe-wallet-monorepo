@@ -6,7 +6,7 @@ import * as useBalancesModule from '@/hooks/useBalances'
 import * as web3Module from '@/hooks/wallets/web3'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'

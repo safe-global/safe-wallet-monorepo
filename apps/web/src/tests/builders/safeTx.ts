@@ -6,7 +6,7 @@ import type {
   TransactionData,
   CustomTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Builder, type IBuilder } from '@/tests/Builder'
+import { Builder, type IBuilder } from '@safe-global/utils/tests/Builder'
 import { faker } from '@faker-js/faker'
 import { type SafeTransactionData, type SafeSignature, type SafeTransaction } from '@safe-global/types-kit'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'

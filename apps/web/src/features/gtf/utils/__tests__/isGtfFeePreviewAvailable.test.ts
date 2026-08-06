@@ -1,7 +1,7 @@
 import type { Relayer } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { isGtfFeePreviewAvailable } from '../isGtfFeePreviewAvailable'
 
 const relayer = (type: Relayer['type']): Relayer => ({

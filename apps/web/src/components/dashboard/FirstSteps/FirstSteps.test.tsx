@@ -5,7 +5,7 @@ import * as useChains from '@/hooks/useChains'
 import * as useSafeInfoModule from '@/hooks/useSafeInfo'
 import * as hypernative from '@/features/hypernative'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { balancesBuilder, balanceBuilder } from '@/tests/builders/balances'
 import FirstSteps from '.'
 

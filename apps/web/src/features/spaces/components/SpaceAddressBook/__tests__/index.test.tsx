@@ -4,7 +4,7 @@ import { useIsAdmin, useIsInvited, useAddressBookSearch, useGetSpaceAddressBook 
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
 import { useHasFeature } from '@/hooks/useChains'
-import { Builder } from '@/tests/Builder'
+import { Builder } from '@safe-global/utils/tests/Builder'
 import type { UserWithWallets, UserWallet } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { faker } from '@faker-js/faker'
 

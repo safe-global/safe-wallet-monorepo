@@ -2,7 +2,7 @@ import { fakerChecksummedAddress, renderHook, waitFor } from '@/tests/test-utils
 import { useSafeCreationData } from '../useSafeCreationData'
 import { faker } from '@faker-js/faker'
 import { PendingSafeStatus, type UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import * as sdk from '@/services/tx/tx-sender/sdk'
 import * as transactionUtils from '@/utils/transactions'
 import * as web3 from '@/hooks/wallets/web3'

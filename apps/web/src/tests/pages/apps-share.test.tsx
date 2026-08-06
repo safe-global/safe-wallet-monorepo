@@ -12,7 +12,7 @@ import { GATEWAY_URL } from '@/config/gateway'
 import crypto from 'crypto'
 import type { EIP1193Provider } from '@web3-onboard/core'
 import * as useChains from '@/hooks/useChains'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 
 const TX_BUILDER = 'https://apps-portal.safe.global/tx-builder'
 

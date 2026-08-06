@@ -2,7 +2,7 @@ import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 
 /**

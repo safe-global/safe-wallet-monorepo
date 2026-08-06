@@ -6,7 +6,7 @@ import {
   getRedirect,
   createNewUndeployedSafeWithoutSalt,
 } from '@/components/new-safe/create/logic/index'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { faker } from '@faker-js/faker'
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'

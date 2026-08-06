@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import type * as ReactModule from 'react'
 import type { ReactElement, ReactNode } from 'react'
 import { faker } from '@faker-js/faker'
-import { Builder } from '@/tests/Builder'
+import { Builder } from '@safe-global/utils/tests/Builder'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceAddressBookActions from '../SpaceAddressBookActions'
 

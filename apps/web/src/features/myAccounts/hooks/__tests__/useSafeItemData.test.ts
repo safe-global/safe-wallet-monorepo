@@ -1,7 +1,7 @@
 import { renderHook } from '@/tests/test-utils'
 import { useSafeItemData } from '../useSafeItemData'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { OVERVIEW_LABELS } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
 import type { RootState } from '@/store'

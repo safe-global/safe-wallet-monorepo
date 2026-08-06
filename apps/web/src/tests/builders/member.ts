@@ -1,6 +1,6 @@
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
-import { Builder, type IBuilder } from '../Builder'
+import { Builder, type IBuilder } from '@safe-global/utils/tests/Builder'
 
 type MemberUser = MemberDto['user']
 

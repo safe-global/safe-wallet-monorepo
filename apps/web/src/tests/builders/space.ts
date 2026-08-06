@@ -1,6 +1,6 @@
 import type { GetSpaceResponse, SpaceMemberDto, UserDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
-import { Builder, type IBuilder } from '../Builder'
+import { Builder, type IBuilder } from '@safe-global/utils/tests/Builder'
 import { faker } from '@faker-js/faker'
 
 export function spaceMemberUserBuilder(): IBuilder<UserDto> {

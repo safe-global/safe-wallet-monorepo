@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import useNameResolver, { getEnsNotAvailableError } from './useNameResolver'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { FEATURES } from '@safe-global/store/gateway/types'
 
 const globalProvider = { id: 'global' }

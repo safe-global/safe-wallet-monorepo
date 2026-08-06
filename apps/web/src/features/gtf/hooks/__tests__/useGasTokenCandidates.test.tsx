@@ -6,7 +6,7 @@ import type { FeePreviewTx } from '../useResolvedGasToken'
 import * as useChainsModule from '@/hooks/useChains'
 import * as useSafeInfoModule from '@/hooks/useSafeInfo'
 import * as useTrustedTokenBalancesModule from '@/hooks/loadables/useTrustedTokenBalances'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
 const ETH_ADDRESS = '0x0000000000000000000000000000000000000000'

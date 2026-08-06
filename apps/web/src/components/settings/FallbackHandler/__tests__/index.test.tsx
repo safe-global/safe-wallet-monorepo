@@ -1,5 +1,5 @@
 import { TWAP_FALLBACK_HANDLER } from '@/features/swap'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { render, waitFor, createAppNameRegex } from '@/tests/test-utils'
 
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'

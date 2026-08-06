@@ -7,7 +7,7 @@ import {
   hasFeature,
 } from '@safe-global/utils/utils/chains'
 import { CONFIG_SERVICE_CHAINS } from '@/tests/mocks/chains'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { getChainConfig } from '@/utils/chains'
 import { makeStore, setStoreInstance } from '@/store'
 import type * as SafeDeploymentsModule from '@safe-global/safe-deployments'

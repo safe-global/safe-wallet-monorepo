@@ -7,7 +7,7 @@ import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/bala
 import * as portfolioQueries from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import * as useCounterfactualBalances from '@/features/counterfactual'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TokenType } from '@safe-global/store/gateway/types'

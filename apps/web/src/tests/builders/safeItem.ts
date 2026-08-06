@@ -1,5 +1,5 @@
 import type { SafeItem } from '@/hooks/safes'
-import { Builder, type IBuilder } from '@/tests/Builder'
+import { Builder, type IBuilder } from '@safe-global/utils/tests/Builder'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { faker } from '@faker-js/faker'
 

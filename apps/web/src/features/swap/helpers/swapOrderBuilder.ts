@@ -1,6 +1,6 @@
 import type { TransactionInfoType, OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import type { TokenInfo, SwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Builder, type IBuilder } from '@/tests/Builder'
+import { Builder, type IBuilder } from '@safe-global/utils/tests/Builder'
 import { faker } from '@faker-js/faker'
 
 // Seed faker for deterministic values in stories/tests

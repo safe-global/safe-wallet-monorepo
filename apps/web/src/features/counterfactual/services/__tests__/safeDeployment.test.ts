@@ -1,6 +1,6 @@
 import { getCounterfactualBalance, getUndeployedSafeInfo } from '../safeDeployment'
 import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { faker } from '@faker-js/faker'
 import type { PredictedSafeProps } from '@safe-global/protocol-kit'
 import { TokenType } from '@safe-global/store/gateway/types'

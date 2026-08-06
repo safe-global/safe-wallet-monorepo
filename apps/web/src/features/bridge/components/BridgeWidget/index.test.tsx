@@ -1,5 +1,5 @@
 import { _getAppData } from './'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 
 describe('BridgeWidget', () => {
   describe('getAppData', () => {

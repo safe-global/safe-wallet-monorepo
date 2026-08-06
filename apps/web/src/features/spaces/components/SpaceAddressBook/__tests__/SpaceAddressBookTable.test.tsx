@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import SpaceAddressBookTable from '../SpaceAddressBookTable'
 import type { AddressBookEntry } from '../SpaceAddressBookTable'
-import { Builder } from '@/tests/Builder'
+import { Builder } from '@safe-global/utils/tests/Builder'
 import { faker } from '@faker-js/faker'
 
 const mockUseIsMobile = jest.fn(() => false)

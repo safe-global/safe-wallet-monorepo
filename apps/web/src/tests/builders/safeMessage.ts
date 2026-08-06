@@ -1,5 +1,5 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { Builder, type IBuilder } from '@/tests/Builder'
+import { Builder, type IBuilder } from '@safe-global/utils/tests/Builder'
 import { faker } from '@faker-js/faker'
 
 export function safeMsgBuilder(): IBuilder<MessageItem> {

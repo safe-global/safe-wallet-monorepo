@@ -1,7 +1,7 @@
 import { renderHook } from '@/tests/test-utils'
 import useSafeCardData from '../useSafeCardData'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import type { RootState } from '@/store'
 import type { MultiChainSafeItem } from '@/hooks/safes'
 import * as gatewayApi from '@/store/api/gateway'

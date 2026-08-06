@@ -21,7 +21,7 @@ import {
 } from '../hooks'
 import * as recommendedNonce from '@/services/tx/tx-sender/recommendedNonce'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import * as useChains from '@/hooks/useChains'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
 import { type SignerWallet } from '@/components/common/WalletProvider'

@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 
-import { Builder, type IBuilder } from '../Builder'
+import { Builder, type IBuilder } from '@safe-global/utils/tests/Builder'
 
 export const collectibleBuilder = (): IBuilder<Collectible> => {
   return Builder.new<Collectible>().with({

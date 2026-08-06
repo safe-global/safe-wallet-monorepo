@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, mockClipboard } from '@/tests/test-utils'
 import SafeCardReadOnly from '../SafeCardReadOnly'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import type { RootState } from '@/store'
 import * as gatewayApi from '@/store/api/gateway'
 import * as gatewaySlices from '@/store/slices'

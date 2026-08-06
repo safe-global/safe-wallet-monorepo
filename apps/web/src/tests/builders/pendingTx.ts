@@ -1,6 +1,6 @@
 import { PendingStatus } from '@/store/pendingTxsSlice'
 import type { PendingTx } from '@/store/pendingTxsSlice'
-import { Builder, type IBuilder } from '@/tests/Builder'
+import { Builder, type IBuilder } from '@safe-global/utils/tests/Builder'
 import { faker } from '@faker-js/faker'
 
 export function pendingTxBuilder(): IBuilder<PendingTx> {

@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { Balance, Balances, NativeToken, Erc20Token } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
-import { Builder, type IBuilder } from '../Builder'
+import { Builder, type IBuilder } from '@safe-global/utils/tests/Builder'
 
 export const nativeTokenBuilder = (): IBuilder<NativeToken> => {
   return Builder.new<NativeToken>().with({

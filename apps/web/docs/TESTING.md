@@ -82,7 +82,7 @@ const safe = extendedSafeInfoBuilder().with({ threshold: 2, deployed: true }).bu
 Available builders:
 
 - `@/tests/builders/safe` — `safeInfoBuilder`, `extendedSafeInfoBuilder`, `addressExBuilder`
-- `@/tests/builders/chains` — `chainBuilder`
+- `@safe-global/utils/tests/builders/chains` — `chainBuilder` (shared with packages/utils)
 - `@/tests/builders/wallet` — `connectedWalletBuilder`
 - `@/tests/builders/safeTx` — Safe transaction builders
 - `@/tests/builders/balances` — `tokenInfoBuilder`, `balanceBuilder`, `balancesBuilder`

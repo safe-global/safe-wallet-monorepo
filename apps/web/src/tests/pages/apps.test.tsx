@@ -24,7 +24,7 @@ import CustomSafeAppsPage from '@/pages/apps/custom'
 import * as safeAppsService from '@/services/safe-apps/manifest'
 import { LS_NAMESPACE } from '@/config/constants'
 import * as chainHooks from '@/hooks/useChains'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),

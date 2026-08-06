@@ -4,7 +4,7 @@ import type { WalletKitTypes } from '@reown/walletkit'
 import { useCompatibilityWarning } from '../useCompatibilityWarning'
 import * as wcUtils from '../../../services/utils'
 import * as useChains from '@/hooks/useChains'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 
 describe('useCompatibilityWarning', () => {
   const mockEthereumChain = chainBuilder().with({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' }).build()

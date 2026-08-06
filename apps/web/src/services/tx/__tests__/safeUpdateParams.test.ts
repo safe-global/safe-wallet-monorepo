@@ -11,7 +11,7 @@ import { Interface, JsonRpcProvider } from 'ethers'
 import { createUpdateSafeTxs, extractTargetVersionFromUpdateSafeTx } from '../safeUpdateParams'
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import * as web3 from '@/hooks/wallets/web3'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 const MOCK_SAFE_ADDRESS = '0x0000000000000000000000000000000000005AFE'

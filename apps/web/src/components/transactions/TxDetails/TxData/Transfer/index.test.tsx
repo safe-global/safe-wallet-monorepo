@@ -8,7 +8,7 @@ import { render } from '@/tests/test-utils'
 import TransferTxInfo from '.'
 import { faker } from '@faker-js/faker'
 import { parseUnits } from 'ethers'
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import * as useTransferFiatValueModule from './useTransferFiatValue'
 
 jest.mock('@/hooks/useChains', () => ({

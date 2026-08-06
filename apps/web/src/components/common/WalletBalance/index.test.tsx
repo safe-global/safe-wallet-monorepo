@@ -1,4 +1,4 @@
-import { chainBuilder } from '@/tests/builders/chains'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { render } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import { parseEther } from 'ethers'

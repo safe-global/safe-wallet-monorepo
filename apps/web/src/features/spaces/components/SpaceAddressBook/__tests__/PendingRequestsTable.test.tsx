@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { faker } from '@faker-js/faker'
 import PendingRequestsTable from '../PendingRequestsTable'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { Builder } from '@/tests/Builder'
+import { Builder } from '@safe-global/utils/tests/Builder'
 
 jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => false }))
 jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
