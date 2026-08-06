@@ -19,7 +19,7 @@ export const assetsSwapBtn = '[data-testid="swap-btn"]'
 export const dashboardSwapBtn = '[data-testid="overview-swap-btn"]'
 export const customRecipient = 'div[id="recipient"]'
 const recipientToggle = 'span[id="toggle-recipient-mode-button"]'
-const twapsAddressToggle = 'button[class*="Toggle__Wrapper"]'
+const twapsCustomRecipientStr = 'Custom Recipient'
 const explorerBtn = '[data-testid="explorer-btn"]'
 const limitPriceFld = '[data-testid="limit-price"]'
 const expiryFld = '[data-testid="expiry"]'
@@ -419,8 +419,8 @@ export function outputInputIsNotEmpty() {
 }
 
 export function enableTwapCustomRecipient(option) {
-  main.verifyMinimumElementsCount(twapsAddressToggle, 1)
-  if (!option) cy.get(twapsAddressToggle).eq(0).click()
+  cy.contains(twapsCustomRecipientStr).should('be.visible')
+  if (!option) cy.contains(twapsCustomRecipientStr).click()
 }
 
 export function enableCustomRecipient(option) {
