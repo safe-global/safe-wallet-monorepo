@@ -312,6 +312,47 @@ describe('Topbar', () => {
       expect(actions.className).toContain(WIDE_ACTIONS_WRAP)
       expect(header.className).toMatch(/items-start/)
     })
+
+    // The three below pin the *shape* of the wrap rules, not just that the named constants are
+    // applied — asserting the constants alone passed while all three of these were broken.
+    it('does not give the actions card a full-basis, which would stretch it across the wrapped row', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/home')
+
+      const { context, actions } = groups(render(<Topbar />).container)
+
+      // The context slot's basis-full already consumes the line and pushes the actions below it.
+      expect(context.className).toContain('basis-full')
+      // Repeating it on the actions set the painted card's *width* to the whole row, leaving its
+      // chips at the left of a wide empty white area.
+      expect(actions.className).not.toContain('basis-full')
+    })
+
+    it('starts both wrapped rows on the same edge', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/home')
+
+      const { context, actions } = groups(render(<Topbar />).container)
+
+      // A justify-end on the context right-aligned it inside its full-width slot while the actions
+      // stayed left, putting the two rows on a diagonal.
+      expect(context.className).not.toMatch(/justify-end/)
+      expect(actions.className).toMatch(/ml-0/)
+    })
+
+    it('keeps the sidebar burger inside the context slot so it shares that row', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/home')
+      mockUseIsBelowMd.mockReturnValue(true)
+
+      const { header, context } = groups(render(<Topbar onMenuToggle={jest.fn()} />).container)
+      const burger = screen.getByRole('button', { name: 'Open sidebar menu' })
+
+      // As a sibling of the basis-full context it could never share that line, so it was stranded
+      // on a row of its own and the header grew by a whole row on mobile.
+      expect(context).toContainElement(burger)
+      expect(header.children).toHaveLength(2)
+    })
   })
 
   describe('search button visibility', () => {

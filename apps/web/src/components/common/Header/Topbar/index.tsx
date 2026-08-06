@@ -42,8 +42,18 @@ import { cn } from '@/utils/cn'
 //
 // The logo variant is 24px and always fits, so it opts out of both. Named so the Topbar tests can
 // assert which left-slot variant opts in without restating the utility list.
-export const WIDE_CONTEXT_WRAP = '@max-[1260px]:basis-full max-[899px]:justify-end'
-export const WIDE_ACTIONS_WRAP = '@max-[1260px]:basis-full @max-[1260px]:ml-0'
+//
+// Only the context slot gets `basis-full` — that alone consumes the line and pushes the actions onto
+// the next one. The actions must NOT repeat it: `flex-basis: 100%` sets a flex item's *width*, and
+// unlike the invisible context slot the actions are a painted card, so it stretched to the full row
+// with its chips (~295px) marooned at the left of ~950px of empty white. It only needs `ml-0` to
+// drop the `ml-auto` that right-aligns it while the two share a row.
+//
+// No `justify-end` below md either: it right-aligned the context inside its full-width slot while the
+// actions stayed left, putting the two wrapped rows on a diagonal. The stretched card used to hide
+// that. Both rows now start on the page's left padding at every width.
+export const WIDE_CONTEXT_WRAP = '@max-[1260px]:basis-full'
+export const WIDE_ACTIONS_WRAP = '@max-[1260px]:ml-0'
 
 interface TopbarProps {
   /** When provided, shows a menu button on mobile to open the sidebar */
@@ -118,21 +128,24 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
           showMenuButton && 'pl-2',
         )}
       >
-        {showMenuButton ? (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onMenuToggle?.((open) => !open)}
-            aria-label="Open sidebar menu"
-          >
-            <Menu className="size-5" />
-          </Button>
-        ) : null}
-
         {/* Left content (context): the safe selector must not shrink so its children stay on
             one line. See WIDE_CONTEXT_WRAP for how the wide variants wrap. `h-14` matches the
-            actions card's 56px height and gives the search input's `h-full` a definite parent. */}
-        <div className={cn('shrink-0 flex items-center', !showLogo && cn('h-14', WIDE_CONTEXT_WRAP))}>
+            actions card's 56px height and gives the search input's `h-full` a definite parent.
+
+            The burger lives in here rather than beside it: the wide variants are `basis-full`, so a
+            sibling burger could never share their line and got stranded on a row of its own. */}
+        <div className={cn('shrink-0 flex items-center gap-2', !showLogo && cn('h-14', WIDE_CONTEXT_WRAP))}>
+          {showMenuButton ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onMenuToggle?.((open) => !open)}
+              aria-label="Open sidebar menu"
+            >
+              <Menu className="size-5" />
+            </Button>
+          ) : null}
+
           {showLogo ? (
             <SafeLogo />
           ) : showSpaceSafeBar ? (
