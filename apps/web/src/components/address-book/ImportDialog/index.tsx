@@ -59,9 +59,12 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
 
     const [, ...entries] = csvData.data
 
+    // One id shared by all rows so the listener collapses them into a single toast.
+    const notifyBatchId = crypto.randomUUID()
+
     for (const entry of entries) {
       const [address, name, chainId] = entry
-      dispatch(upsertAddressBookEntries({ address, name, chainIds: [chainId.trim()] }))
+      dispatch(upsertAddressBookEntries({ address, name, chainIds: [chainId.trim()], notify: true, notifyBatchId }))
     }
 
     trackEvent({ ...ADDRESS_BOOK_EVENTS.IMPORT, label: entries.length })
