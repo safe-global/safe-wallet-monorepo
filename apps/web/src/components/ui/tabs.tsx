@@ -60,7 +60,14 @@ const tabsListVariants = cva(
         nav: 'h-auto gap-6 rounded-none bg-transparent p-0',
         // group-data-horizontal:h-auto overrides the base's horizontal h-9 (same variant prefix so
         // twMerge collapses them) — the track must grow around the h-9 pills plus the p-1 gutter.
-        segmented: 'h-auto group-data-horizontal/tabs:h-auto gap-1 bg-muted p-1',
+        //
+        // The light track is a deliberate literal — do NOT "tidy" it to `bg-muted`. This look only
+        // ever sits on the page background, and `--muted` (#f5f5f5) is a single value away from it
+        // (#f4f4f4), so a muted track is invisible there and the switch reads as having no
+        // background at all. #fafafa goes the other way, giving page -> track -> white active pill
+        // as three distinct steps; it is the value the pre-migration switch uses. Dark mode has no
+        // such clash (`--muted` #262626 on a #121312 page), so it keeps the token.
+        segmented: 'h-auto group-data-horizontal/tabs:h-auto gap-1 bg-[#fafafa] dark:bg-muted p-1',
       },
     },
     defaultVariants: {

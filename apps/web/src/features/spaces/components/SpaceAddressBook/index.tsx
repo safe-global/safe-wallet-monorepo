@@ -138,18 +138,25 @@ const SpaceAddressBook = () => {
           </TabsList>
 
           {(activeTab === 'workspace' || activeTab === 'mine') && (
-            <div className="mt-6 flex items-center gap-2">
-              <div className="flex shrink-0 gap-2">
-                {isAdmin && activeTab === 'workspace' && (
-                  <>
-                    <Track {...SPACE_EVENTS.ADD_ADDRESS}>
-                      <AddContact label="Add shared contact" />
-                    </Track>
-                    <ImportAddressBook />
-                  </>
-                )}
-                {isPrivateAddressBookEnabled && activeTab === 'mine' && <AddLocalContact />}
-              </div>
+            // mb-4 on top of the Tabs root's own gap-2: 8px alone left the search almost touching
+            // the table card below it.
+            <div className="mt-6 mb-4 flex items-center gap-2">
+              {/* Only rendered when it holds an action. An always-present wrapper is still a flex
+                  item when empty, so the row's gap-2 pushed the search 8px right of the table card
+                  it sits above — three different left edges for viewers without admin rights. */}
+              {(isAdmin && activeTab === 'workspace') || (isPrivateAddressBookEnabled && activeTab === 'mine') ? (
+                <div className="flex shrink-0 gap-2">
+                  {isAdmin && activeTab === 'workspace' && (
+                    <>
+                      <Track {...SPACE_EVENTS.ADD_ADDRESS}>
+                        <AddContact label="Add shared contact" />
+                      </Track>
+                      <ImportAddressBook />
+                    </>
+                  )}
+                  {isPrivateAddressBookEnabled && activeTab === 'mine' && <AddLocalContact />}
+                </div>
+              ) : null}
               {(activeTab === 'workspace' ? addressBookItems.length > 0 : sortedLocalContacts.length > 0) && (
                 <AddressBookSearchInput value={searchQuery} onChange={setSearchQuery} inputSize="lg" />
               )}

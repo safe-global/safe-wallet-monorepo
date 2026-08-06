@@ -161,7 +161,13 @@ function SafeSelectorDropdown({
         className={cn(
           // The wrapper's overflow-hidden clips this focus-visible ring into stray top/bottom bars,
           // so the native control stays visually hidden behind the display content.
-          '-m-4 flex-1 border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-6 hover:bg-transparent dark:hover:bg-transparent relative',
+          //
+          // min-w-0: `flex-1` alone still floors a flex item at its min-content width, and this one's
+          // display content plus `pl-6`/`pr-12` came to more than the selector's fixed box — so it
+          // overflowed ~19px to the right. The trigger inside lays its chevron out with
+          // `justify-end`, so the chevron rode that overflow out past the box and into the gap, its
+          // padding ending up under the nested-safes button. Letting it shrink keeps both inside.
+          '-m-4 min-w-0 flex-1 border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-6 hover:bg-transparent dark:hover:bg-transparent relative',
           variants.triggerClass,
           isDisabled && 'cursor-not-allowed opacity-50',
         )}
