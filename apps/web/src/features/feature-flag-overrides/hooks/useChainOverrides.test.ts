@@ -2,6 +2,7 @@ import { readFileSync } from 'fs'
 import path from 'path'
 import * as React from 'react'
 import { renderHook } from '@testing-library/react'
+import { faker } from '@faker-js/faker'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { setIsProduction } from '@/tests/env'
@@ -16,6 +17,14 @@ const mockOverrides = jest.fn<FeatureFlagOverridesState, []>()
 jest.mock('@/store', () => ({ useAppSelector: () => mockOverrides() }))
 
 const makeChain = (features: string[], chainId = '1'): Chain => ({ chainId, features }) as unknown as Chain
+
+/**
+ * Nothing here branches on *which* flag is toggled, so the flags are drawn fresh per test instead of
+ * being pinned to two hardcoded ones: `overridden` is the flag under override, `untouched` the
+ * bystander that must survive it. Distinct by construction — `arrayElements` samples without
+ * replacement.
+ */
+const pickFeatures = (): FEATURES[] => faker.helpers.arrayElements(Object.values(FEATURES), 2)
 
 /**
  * Re-imports the module into a fresh registry with a production env. The guard is a module-local
@@ -48,28 +57,29 @@ beforeEach(() => {
 
 describe('applyFeatureOverrides', () => {
   it('returns the chain unchanged when there are no overrides', () => {
-    const chain = makeChain([FEATURES.EARN])
+    const [overridden] = pickFeatures()
+    const chain = makeChain([overridden])
     expect(applyFeatureOverrides(chain, {})).toBe(chain)
   })
 
   it('adds a forced-on feature', () => {
-    const chain = makeChain([])
-    const result = applyFeatureOverrides(chain, { [FEATURES.EARN]: true })
-    expect(result.features).toContain(FEATURES.EARN)
+    const [overridden] = pickFeatures()
+    const result = applyFeatureOverrides(makeChain([]), { [overridden]: true })
+    expect(result.features).toContain(overridden)
   })
 
   it('removes a forced-off feature', () => {
-    const chain = makeChain([FEATURES.EARN, FEATURES.BRIDGE])
-    const result = applyFeatureOverrides(chain, { [FEATURES.EARN]: false })
-    expect(result.features).not.toContain(FEATURES.EARN)
-    expect(result.features).toContain(FEATURES.BRIDGE)
+    const [overridden, untouched] = pickFeatures()
+    const result = applyFeatureOverrides(makeChain([overridden, untouched]), { [overridden]: false })
+    expect(result.features).not.toContain(overridden)
+    expect(result.features).toContain(untouched)
   })
 
   it('applies simultaneous force-on and force-off overrides', () => {
-    const chain = makeChain([FEATURES.EARN])
-    const result = applyFeatureOverrides(chain, { [FEATURES.EARN]: false, [FEATURES.BRIDGE]: true })
-    expect(result.features).not.toContain(FEATURES.EARN)
-    expect(result.features).toContain(FEATURES.BRIDGE)
+    const [forcedOff, forcedOn] = pickFeatures()
+    const result = applyFeatureOverrides(makeChain([forcedOff]), { [forcedOff]: false, [forcedOn]: true })
+    expect(result.features).not.toContain(forcedOff)
+    expect(result.features).toContain(forcedOn)
   })
 
   it('handles an override key that is not a known feature (string cast)', () => {
@@ -82,9 +92,10 @@ describe('applyFeatureOverrides', () => {
   // The production policy lives in the hooks, not here. Pinning the purity keeps the guard from
   // creeping back in and re-splitting the check across two places.
   it('is pure: still applies overrides when loaded in a production build', () => {
+    const [overridden] = pickFeatures()
     const { applyFeatureOverrides: applyInProduction } = loadInProduction()
-    const result = applyInProduction(makeChain([]), { [FEATURES.EARN]: true })
-    expect(result.features).toContain(FEATURES.EARN)
+    const result = applyInProduction(makeChain([]), { [overridden]: true })
+    expect(result.features).toContain(overridden)
   })
 })
 
@@ -93,30 +104,33 @@ describe('applyFeatureOverrides', () => {
 // disagree with each other about the flag, and a uniform result either way.
 describe('useChainsWithOverrides', () => {
   it('forces a flag on for every chain, including ones the config service excluded', () => {
-    mockOverrides.mockReturnValue({ [FEATURES.EARN]: true })
-    const chains = [makeChain([FEATURES.EARN], '1'), makeChain([], '137'), makeChain([FEATURES.BRIDGE], '10')]
+    const [overridden, untouched] = pickFeatures()
+    mockOverrides.mockReturnValue({ [overridden]: true })
+    const chains = [makeChain([overridden], '1'), makeChain([], '137'), makeChain([untouched], '10')]
 
     const { result } = renderHook(() => useChainsWithOverrides(chains))
 
     expect(result.current).toHaveLength(3)
-    expect(result.current.every((chain) => chain.features.includes(FEATURES.EARN))).toBe(true)
+    expect(result.current.every((chain) => chain.features.includes(overridden))).toBe(true)
   })
 
   it('forces a flag off for every chain, including ones the config service enabled', () => {
-    mockOverrides.mockReturnValue({ [FEATURES.EARN]: false })
-    const chains = [makeChain([FEATURES.EARN], '1'), makeChain([FEATURES.EARN, FEATURES.BRIDGE], '137')]
+    const [overridden, untouched] = pickFeatures()
+    mockOverrides.mockReturnValue({ [overridden]: false })
+    const chains = [makeChain([overridden], '1'), makeChain([overridden, untouched], '137')]
 
     const { result } = renderHook(() => useChainsWithOverrides(chains))
 
-    expect(result.current.some((chain) => chain.features.includes(FEATURES.EARN))).toBe(false)
+    expect(result.current.some((chain) => chain.features.includes(overridden))).toBe(false)
     // Untouched flags survive per chain.
-    expect(result.current[1].features).toContain(FEATURES.BRIDGE)
+    expect(result.current[1].features).toContain(untouched)
   })
 
   // ~300 files reach chain configs through this hook, many with `configs` in a dependency array, so
   // a fresh array on every render would ripple out as spurious re-renders and effect re-runs.
   it('keeps the same reference across re-renders while its inputs are unchanged', () => {
-    mockOverrides.mockReturnValue({ [FEATURES.EARN]: true })
+    const [overridden] = pickFeatures()
+    mockOverrides.mockReturnValue({ [overridden]: true })
     const chains = [makeChain([])]
 
     const { result, rerender } = renderHook(() => useChainsWithOverrides(chains))
@@ -127,14 +141,15 @@ describe('useChainsWithOverrides', () => {
   })
 
   it('returns the chains untouched in a production build', () => {
-    mockOverrides.mockReturnValue({ [FEATURES.EARN]: true })
+    const [overridden] = pickFeatures()
+    mockOverrides.mockReturnValue({ [overridden]: true })
     const { useChainsWithOverrides: useInProduction } = loadInProduction()
     const chains = [makeChain([])]
 
     const { result } = renderHook(() => useInProduction(chains))
 
     expect(result.current).toBe(chains)
-    expect(result.current[0].features).not.toContain(FEATURES.EARN)
+    expect(result.current[0].features).not.toContain(overridden)
   })
 })
 
@@ -142,15 +157,17 @@ describe('useChainsWithOverrides', () => {
 // single-chain shape is pinned here rather than in a second entry point.
 describe('useChainsWithOverrides with a single chain', () => {
   it('reflects an override on a one-element array', () => {
-    mockOverrides.mockReturnValue({ [FEATURES.EARN]: true })
+    const [overridden] = pickFeatures()
+    mockOverrides.mockReturnValue({ [overridden]: true })
 
     const { result } = renderHook(() => useChainsWithOverrides([makeChain([])]))
 
-    expect(result.current[0].features).toContain(FEATURES.EARN)
+    expect(result.current[0].features).toContain(overridden)
   })
 
   it('leaves an empty array empty, so a not-yet-loaded chain stays undefined', () => {
-    mockOverrides.mockReturnValue({ [FEATURES.EARN]: true })
+    const [overridden] = pickFeatures()
+    mockOverrides.mockReturnValue({ [overridden]: true })
 
     const { result } = renderHook(() => useChainsWithOverrides([]))
 

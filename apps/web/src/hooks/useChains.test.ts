@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs'
 import path from 'path'
+import { faker } from '@faker-js/faker'
 import { renderHook } from '@/tests/test-utils'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -26,6 +27,10 @@ describe('useChains override wiring', () => {
 
   const chainWith = (chainId: string, features: string[]) => ({ chainId, features }) as unknown as Chain
 
+  // Which flag is overridden is irrelevant to the wiring under test, so it is drawn per test rather
+  // than hardcoded.
+  const pickFeature = (): FEATURES => faker.helpers.arrayElement(Object.values(FEATURES))
+
   beforeEach(() => {
     jest.spyOn(useChainIdModule, 'default').mockReturnValue(CHAIN_ID)
     mockChains([chainWith(CHAIN_ID, [])])
@@ -34,25 +39,28 @@ describe('useChains override wiring', () => {
   afterEach(() => jest.restoreAllMocks())
 
   it('applies overrides to the configs array', () => {
+    const overridden = pickFeature()
     mockChains([chainWith(CHAIN_ID, []), chainWith('137', [])])
-    jest.spyOn(store, 'useAppSelector').mockReturnValue({ [FEATURES.EARN]: true })
+    jest.spyOn(store, 'useAppSelector').mockReturnValue({ [overridden]: true })
 
     const { result } = renderHook(() => useChains())
 
     expect(result.current.configs).toHaveLength(2)
-    expect(result.current.configs.every((chain) => chain.features.includes(FEATURES.EARN))).toBe(true)
+    expect(result.current.configs.every((chain) => chain.features.includes(overridden))).toBe(true)
   })
 
   it('reflects a forced-on override', () => {
-    jest.spyOn(store, 'useAppSelector').mockReturnValue({ [FEATURES.EARN]: true })
-    const { result } = renderHook(() => useHasFeature(FEATURES.EARN))
+    const overridden = pickFeature()
+    jest.spyOn(store, 'useAppSelector').mockReturnValue({ [overridden]: true })
+    const { result } = renderHook(() => useHasFeature(overridden))
     expect(result.current).toBe(true)
   })
 
   it('reflects a forced-off override', () => {
-    mockChains([chainWith(CHAIN_ID, [FEATURES.EARN])])
-    jest.spyOn(store, 'useAppSelector').mockReturnValue({ [FEATURES.EARN]: false })
-    const { result } = renderHook(() => useHasFeature(FEATURES.EARN))
+    const overridden = pickFeature()
+    mockChains([chainWith(CHAIN_ID, [overridden])])
+    jest.spyOn(store, 'useAppSelector').mockReturnValue({ [overridden]: false })
+    const { result } = renderHook(() => useHasFeature(overridden))
     expect(result.current).toBe(false)
   })
 
@@ -60,7 +68,7 @@ describe('useChains override wiring', () => {
   // the two things that wrapping could get wrong: a missing chain must not become a truthy element,
   // and the array must not be rebuilt per render or every downstream memo would be invalidated.
   it('returns undefined for a chain the config service does not know', () => {
-    jest.spyOn(store, 'useAppSelector').mockReturnValue({ [FEATURES.EARN]: true })
+    jest.spyOn(store, 'useAppSelector').mockReturnValue({ [pickFeature()]: true })
 
     const { result } = renderHook(() => useChain('137'))
 
@@ -68,7 +76,7 @@ describe('useChains override wiring', () => {
   })
 
   it('keeps the same chain reference across re-renders', () => {
-    jest.spyOn(store, 'useAppSelector').mockReturnValue({ [FEATURES.EARN]: true })
+    jest.spyOn(store, 'useAppSelector').mockReturnValue({ [pickFeature()]: true })
 
     const { result, rerender } = renderHook(() => useChain(CHAIN_ID))
     const first = result.current
