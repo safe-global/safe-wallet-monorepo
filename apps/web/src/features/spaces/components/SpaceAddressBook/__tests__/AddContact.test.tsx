@@ -24,6 +24,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '11111111-1111-1111-1111-111111111111',
   useGetSpaceAddressBook: () => [{ id: 1 }, { id: 2 }],
+  useWorkspaceAddressBookLabel: () => 'Acme address book',
 }))
 
 type CapturedProps = {
@@ -57,7 +58,7 @@ describe('AddContact', () => {
 
     expect(lastProps?.triggerLabel).toBe('Add shared contact')
     expect(lastProps?.dialogTitle).toBe('Add contact')
-    expect(lastProps?.successMessage).toBe('Added contact')
+    expect(lastProps?.successMessage).toBe('Contact added to Acme address book')
     expect(lastProps?.successGroupKey).toBe('add-contact-success')
     expect(screen.getByTestId('dialog-stub')).toHaveTextContent('Add shared contact')
   })

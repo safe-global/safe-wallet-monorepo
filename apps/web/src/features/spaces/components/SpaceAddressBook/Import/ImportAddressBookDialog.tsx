@@ -16,8 +16,9 @@ import { useContactSearch } from '../useContactSearch'
 import { createContactItems, flattenAddressBook } from '../utils'
 import useChains from '@/hooks/useChains'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId, useGetSpaceAddressBook } from '@/features/spaces'
+import { useCurrentSpaceId, useGetSpaceAddressBook, useWorkspaceAddressBookLabel } from '@/features/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { getImportSuccessMessage } from '@/utils/addressBookNotifications'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
@@ -41,6 +42,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
   const { configs } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
+  const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
 
   const allAddressBooks = useAllAddressBooks()
@@ -94,15 +96,21 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
       })
 
       if (result.error) {
-        const message = getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError)
-        setError(message)
-        dispatch(showNotification({ message, variant: 'error', groupKey: 'import-contacts-error' }))
+        setError(getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError))
         return
       }
 
+      const contactCount = contactItems.length
+      const networkCount = new Set(contactItems.flatMap((item) => item.chainIds)).size
+      const successMessage = getImportSuccessMessage({
+        count: contactCount,
+        networkCount,
+        bookLabel: workspaceAddressBookLabel,
+      })
+
       dispatch(
         showNotification({
-          message: `Imported contact(s)`,
+          message: successMessage,
           variant: 'success',
           groupKey: 'import-contacts-success',
         }),
@@ -112,9 +120,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
 
       setIsSuccess(true)
     } catch (e) {
-      const message = getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError)
-      setError(message)
-      dispatch(showNotification({ message, variant: 'error', groupKey: 'import-contacts-error' }))
+      setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
     } finally {
       setIsSubmitting(false)
     }

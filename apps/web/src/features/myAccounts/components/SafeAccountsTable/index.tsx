@@ -121,6 +121,12 @@ export type SafeAccountsTableProps = {
    * Used by the dashboard widget.
    */
   embedded?: boolean
+  /**
+   * Whether the standalone container draws its 1px outline. Defaults to `true`. The space
+   * "Safe accounts" page passes `false` to sit flush on the page background while keeping the
+   * card fill, header and dividers.
+   */
+  bordered?: boolean
   'data-testid'?: string
 }
 
@@ -161,6 +167,7 @@ const SafeAccountsTable = ({
   sortableColumns = true,
   onLinkClick,
   embedded = false,
+  bordered = true,
   'data-testid': testId = 'safe-accounts-table',
 }: SafeAccountsTableProps) => {
   const [overviewsByKey, setOverviewsByKey] = useState<Map<string, SafeOverview>>(new Map())
@@ -254,8 +261,7 @@ const SafeAccountsTable = ({
                 overflowX: 'auto',
                 borderRadius: '16px',
                 backgroundColor: 'background.paper',
-                border: '1px solid',
-                borderColor: 'border.light',
+                ...(bordered && { border: '1px solid', borderColor: 'border.light' }),
                 // Keep the last row off the rounded bottom edge (the header already insets from the top).
                 pb: 1,
               }

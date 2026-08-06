@@ -42,7 +42,7 @@ function buildFallbackSafeItem(selectedItemId: string | undefined, chainConfigs:
 
 function SafeSelectorDropdownSkeleton() {
   return (
-    <div className="w-full sm:w-[515px] h-10 flex items-center gap-4 rounded-lg py-0.5 pl-1.5 pr-2 bg-muted">
+    <div className="w-full min-[430px]:w-auto min-[430px]:flex-1 min-[430px]:min-w-0 min-[430px]:max-w-[515px] h-10 flex items-center gap-4 rounded-lg py-0.5 pl-1.5 pr-2 bg-muted">
       <Skeleton className="size-8 shrink-0 rounded-full" />
       <div className="flex flex-1 flex-col gap-1.5">
         <Skeleton className="h-3.5 w-24 rounded-full" />
@@ -144,7 +144,7 @@ function SafeSelectorDropdown({
           // so suppress it — the card shows no focus ring by design (wrapper sets focus:ring-0).
           // min-w-0 (trigger + value slot): without it a long safe name can't shrink/truncate and
           // pushes the balance and chevron out of the clipped card.
-          '-m-4 flex-1 min-w-0 border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-4 hover:bg-transparent dark:hover:bg-transparent data-[state=open]:bg-transparent focus-visible:ring-0 focus-visible:border-0 [&_[data-slot=select-value]]:pr-0 [&_[data-slot=select-value]]:min-w-0 relative',
+          '-m-4 flex-1 min-w-0 w-full border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-4 hover:bg-transparent dark:hover:bg-transparent data-[state=open]:bg-transparent focus-visible:ring-0 focus-visible:border-0 [&_[data-slot=select-value]]:pr-0 [&_[data-slot=select-value]]:min-w-0 relative',
           variants.triggerClass,
           isDisabled && 'cursor-not-allowed opacity-50',
         )}
@@ -183,7 +183,7 @@ function SafeSelectorDropdown({
   // A muted 40px chip: the SpaceSafeBar pill that groups this with the nested-safes and
   // network controls carries the white card and its shadow.
   const wrapperClassName = cn(
-    'group relative w-full sm:w-[515px] h-10 flex items-center rounded-lg py-0.5 pl-1.5 pr-2 overflow-hidden bg-muted focus:ring-0',
+    'group relative w-full min-[430px]:w-auto min-[430px]:flex-1 min-[430px]:min-w-0 min-[430px]:max-w-[515px] h-10 flex items-center rounded-lg py-0.5 pl-1.5 pr-2 overflow-hidden bg-muted focus:ring-0',
     variants.wrapperClass,
   )
 

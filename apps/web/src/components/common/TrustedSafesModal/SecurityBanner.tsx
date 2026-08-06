@@ -26,7 +26,7 @@ const SecurityBanner = ({ title, className }: SecurityBannerProps) => {
         <ExternalLink
           href={HelpCenterArticle.ADDRESS_POISONING}
           noIcon
-          sx={{ '& span': { textDecoration: 'underline' }, '.dark &': { color: 'inherit' } }}
+          sx={{ '& span': { textDecoration: 'underline' }, color: 'inherit' }}
         >
           Learn more
         </ExternalLink>

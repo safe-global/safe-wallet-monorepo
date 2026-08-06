@@ -128,6 +128,8 @@ const SpaceSafeAccounts = () => {
           {similarAddresses.size > 0 && <SimilarAddressAlert />}
           <SafeAccountsTable
             items={visibleSafes}
+            // The table sits directly on the page background here, so the card outline is dropped.
+            bordered={false}
             // Inside a workspace every Safe belongs to it, so the Workspaces column adds no information.
             columns={['name', 'threshold', 'networks', 'pending', 'balance', 'actions']}
             flaggedAddresses={similarAddresses}
