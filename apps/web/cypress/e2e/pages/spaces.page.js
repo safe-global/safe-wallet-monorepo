@@ -285,6 +285,9 @@ export function openSpaceByName(name) {
   // if a single-space account may have auto-redirected into a dashboard).
   cy.contains(spaceCard, name, { timeout: 30000 }).should('be.visible').click()
   cy.url({ timeout: 30000 }).should('include', constants.spaceDashboardUrl).and('include', 'spaceId=')
+  // The URL flips before the dashboard hydrates; the sidebar keeps re-rendering until it settles.
+  // Wait for dashboard content so later sidebar clicks don't detach mid-click on slower CI.
+  cy.get(spaceDashboardTotalValue, { timeout: 30000 }).should('be.visible')
 }
 
 export function clickOnSpaceSelector(spaceName) {

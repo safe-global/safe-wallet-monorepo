@@ -121,7 +121,7 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
     })
   })
 
-  it.only(
+  it(
     'Verify entering a blocked address in the custom recipient input blocks the form',
     { defaultCommandTimeout: 60000 },
     () => {
