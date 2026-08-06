@@ -13,6 +13,11 @@
   display: flex;
   justify-content: flex-end;
   word-break: break-word;
+  /* MUI's Snackbar carried `margin: 1` (8px) and it was the only thing holding a toast off the
+     viewport's right edge — `.container` is pinned at `right: 0`. Replacing the Snackbar with a bare
+     Alert dropped that margin, leaving toasts flush against the edge. `.container` is a block box,
+     so adjacent rows' vertical margins collapse into one 8px gap between stacked toasts. */
+  margin: var(--space-1);
 }
 
 .link {
