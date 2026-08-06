@@ -14,19 +14,6 @@ export function isDomain(domain: string): boolean {
   return DOMAIN_RE.test(domain)
 }
 
-export const resolveName = async (
-  rpcProvider: Provider,
-  name: string,
-  coinType?: BigNumberish,
-): Promise<string | undefined> => {
-  try {
-    return (await rpcProvider.resolveName(name, coinType)) || undefined
-  } catch (e) {
-    const err = e as EthersError
-    logError(ErrorCodes._101, err.reason || err.message)
-  }
-}
-
 export const lookupAddress = async (
   rpcProvider: Provider,
   address: string,

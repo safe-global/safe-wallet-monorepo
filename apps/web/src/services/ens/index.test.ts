@@ -1,5 +1,5 @@
 import type { JsonRpcProvider } from 'ethers'
-import { resolveName, lookupAddress, isDomain, resolveNameForChain } from '.'
+import { lookupAddress, isDomain, resolveNameForChain } from '.'
 import { logError } from '../exceptions'
 import { ETH_COIN_TYPE } from '@safe-global/utils/utils/ens'
 
@@ -38,23 +38,6 @@ describe('domains', () => {
     })
   })
 
-  describe('resolveName', () => {
-    it('should resolve names', async () => {
-      expect(await resolveName(rpcProvider, 'test.eth')).toBe('0x0000000000000000000000000000000000000001')
-    })
-
-    it('should pass coinType through to the provider', async () => {
-      await resolveName(rpcProvider, 'test.eth', ETH_COIN_TYPE)
-      expect(rpcProvider.resolveName).toHaveBeenCalledWith('test.eth', ETH_COIN_TYPE)
-    })
-
-    it('should return undefined and log on error', async () => {
-      const address = await resolveName(badRpcProvider, 'safe.eth')
-      expect(address).toBe(undefined)
-      expect(logError).toHaveBeenCalledWith('101: Failed to resolve the address', 'bad resolveName')
-    })
-  })
-
   describe('lookupAddress', () => {
     it('look up addresses', async () => {
       expect(await lookupAddress(rpcProvider, '0x0000000000000000000000000000000000000000')).toBe('safe.eth')
@@ -76,7 +59,7 @@ describe('domains', () => {
   })
 
   describe('resolveNameForChain', () => {
-    // Coin-type / fallback behavior is covered in packages/utils; this wrapper only adds error logging.
+    // Coin-type behavior is covered in packages/utils; this wrapper only adds error logging.
     it('should return undefined and log on error', async () => {
       const address = await resolveNameForChain(badRpcProvider, 'safe.eth', 8453)
       expect(address).toBe(undefined)
