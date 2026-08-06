@@ -44,7 +44,8 @@ const InfoWidget = ({ title, steps, variant, startExpanded = false }: InfoWidget
 
   return (
     <Card variant="outlined" className={styles.card}>
-      <div className={css.cardHeader}>
+      {/* px-6 mirrors the body below so the title pill starts on the card's normal left inset. */}
+      <div className="px-6">
         <div className={`${css.title} ${styles.pill}`}>
           <LightbulbIcon className={css.titleIcon} />
           <Typography variant="paragraph-mini-bold">{title}</Typography>
@@ -66,7 +67,10 @@ const InfoWidget = ({ title, steps, variant, startExpanded = false }: InfoWidget
           }}
         >
           {steps.map(({ title, text }) => (
-            <AccordionItem key={title} value={title} className={css.tipAccordion}>
+            // `not-last:border-b-0` replaces (via tailwind-merge) the AccordionItem's own
+            // `not-last:border-b`: these tips are one tinted block, not a divided list. A plain
+            // `border-none` would lose to the two-class `not-last:` selector.
+            <AccordionItem key={title} value={title} className={`${css.tipAccordion} not-last:border-b-0`}>
               <AccordionTrigger>{title}</AccordionTrigger>
               <AccordionContent>
                 <Typography variant="paragraph-small">{text}</Typography>

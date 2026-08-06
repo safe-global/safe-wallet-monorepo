@@ -75,7 +75,11 @@ const OwnerRow = ({
   const walletIsOwner = owner.address === wallet?.address
   return (
     <div
-      className={classNames('mb-6 grid grid-cols-12 items-end gap-6 max-md:flex-wrap', {
+      // `items-start`: both columns are label-above-control fields of the same 66px box height, so
+      // aligning their tops puts the labels on one baseline and the boxes level. Bottom-aligning
+      // them instead pushed the address field down by the height of the name field's
+      // "Your connected wallet" caption.
+      className={classNames('mb-6 grid grid-cols-12 items-start gap-6', {
         [css.helper]: walletIsOwner,
       })}
     >
@@ -100,7 +104,9 @@ const OwnerRow = ({
           />
         </div>
       </div>
-      <div className={classNames('col-span-11 md:col-span-7', readOnly && largeFormFieldRowClassName)}>
+      {/* `self-end` in read-only mode: the address readout carries no label of its own, so it can't
+          share the row's top baseline — it has to hang off the bottom to sit level with the name box. */}
+      <div className={classNames('col-span-11 md:col-span-7', readOnly && `${largeFormFieldRowClassName} self-end`)}>
         {readOnly ? (
           <EthHashInfo address={owner.address} shortAddress hasExplorer showCopyButton />
         ) : (

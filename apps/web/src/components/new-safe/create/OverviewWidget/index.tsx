@@ -35,14 +35,16 @@ const OverviewWidget = ({ safeName, networks }: { safeName: string; networks: Ch
           <Typography variant="h4">Your Safe account preview</Typography>
         </div>
         {wallet ? (
-          rows.map((row) => (
-            <div key={row.title} className={css.row}>
-              <Typography variant="paragraph-small">{row.title}</Typography>
-              {row.component}
-            </div>
-          ))
+          <div className={css.rows}>
+            {rows.map((row) => (
+              <div key={row.title} className={css.row}>
+                <Typography variant="paragraph-small">{row.title}</Typography>
+                {row.component}
+              </div>
+            ))}
+          </div>
         ) : (
-          <div className="p-4">
+          <div className={css.rows}>
             <Typography
               variant="paragraph-small"
               align="center"

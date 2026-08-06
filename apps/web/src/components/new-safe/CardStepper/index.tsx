@@ -14,7 +14,10 @@ export function CardStepper<StepperData>(props: TxStepperProps<StepperData>) {
   const progress = ((activeStep + 1) / steps.length) * 100
 
   return (
-    <Card>
+    // `size="none"`: the progress track is a top-edge bar, so the card must not pad or gap above it —
+    // the card's own `overflow-hidden` + radius is what clips the track's square corners. The header
+    // and content below own their padding (see styles.module.css).
+    <Card size="none">
       <div className="h-1 w-full overflow-hidden bg-[var(--color-background-main)]">
         <div
           className="h-full transition-all"

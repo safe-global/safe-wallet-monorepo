@@ -126,7 +126,9 @@ const PayNowPayLater = ({
               aria-label="Pay now"
               disabled={isMultiChain}
             />
-            <span>
+            {/* flex-col: the subtitle belongs on its own line under the label. `paragraph-small`
+                renders an inline <span>, so without this it can run on after the title. */}
+            <span className="flex flex-col items-start">
               <Typography className={css.radioTitle}>Pay now</Typography>
               {isMultiChain ? (
                 <Typography className={css.radioSubtitle} variant="paragraph-small" color="muted">
@@ -161,8 +163,8 @@ const PayNowPayLater = ({
               disabled={signingIn}
               aria-label="Pay later"
             />
-            <span>
-              <Typography className={classnames(css.radioTitle, 'inline-flex items-center')}>
+            <span className="flex flex-col items-start">
+              <Typography className={classnames(css.radioTitle, 'flex items-center')}>
                 Pay later {signingIn && <Spinner className="ml-1 size-3.5" />}
               </Typography>
               <Typography className={css.radioSubtitle} variant="paragraph-small" color="muted">
