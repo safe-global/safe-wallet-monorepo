@@ -76,7 +76,7 @@ exports[`./NetworkLogosList.stories InsideAccountBadgePill 1`] = `
       style="background-color: rgba(0, 0, 0, 0.05); border-radius: 9999px; padding: 3px; display: inline-flex; align-items: center;"
     >
       <div
-        class="networks MuiBox-root mui-style-0"
+        class="networks capped MuiBox-root mui-style-0"
         style="--network-logo-size: 22px;"
       >
         <span
@@ -138,7 +138,7 @@ exports[`./NetworkLogosList.stories ManyNetworksWithHasMore 1`] = `
     style="--Paper-shadow: none;"
   >
     <div
-      class="networks MuiBox-root mui-style-0"
+      class="networks capped MuiBox-root mui-style-0"
     >
       <span
         class="inlineIndicator withLogo onlyLogo"
