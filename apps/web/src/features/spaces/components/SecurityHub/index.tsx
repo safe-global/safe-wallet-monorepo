@@ -17,7 +17,7 @@ const shieldLogoOnHover = [
   '[&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill]',
   'hover:[&_.shield-bg]:fill-[var(--color-background-secondary)]',
   'hover:[&_.shield-img]:fill-[var(--color-static-text-brand)]',
-  'hover:[&_.shield-lines]:fill-[#121312]', // consistent between dark/light modes
+  'hover:[&_.shield-lines]:fill-[var(--color-static-main)]', // static token: same value in both themes
   'hover:[&_.shield-text]:fill-[var(--color-text-primary)]',
 ].join(' ')
 
