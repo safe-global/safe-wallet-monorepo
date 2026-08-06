@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./NetworkLogosPill.stories FewNetworks 1`] = `
 <div
@@ -20,7 +20,7 @@ exports[`./NetworkLogosPill.stories FewNetworks 1`] = `
           id="base-ui-_r_1_"
         >
           <div
-            class="networks"
+            class="networks capped"
             style="--network-logo-size: 22px;"
           >
             <span
@@ -79,7 +79,7 @@ exports[`./NetworkLogosPill.stories WithOverflow 1`] = `
           id="base-ui-_r_3_"
         >
           <div
-            class="networks"
+            class="networks capped"
             style="--network-logo-size: 22px;"
           >
             <span

@@ -22,6 +22,7 @@ import {
   txQueueListener,
   authListener,
   counterfactualSyncListener,
+  addressBookListener,
 } from './slices'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
@@ -117,6 +118,7 @@ const listeners = [
   swapOrderStatusListener,
   authListener,
   counterfactualSyncListener,
+  addressBookListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {

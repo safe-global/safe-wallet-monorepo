@@ -54,14 +54,14 @@ const SpaceMembers = () => {
 
           <TableCard className="mt-6">
             <TabsContent value="members">
-              <MembersList members={activeMembers} />
+              <MembersList members={activeMembers} variant="active" />
             </TabsContent>
 
             <TabsContent value="pending">
               {invitedMembers.length === 0 ? (
                 <p className="text-muted-foreground text-sm">No pending members.</p>
               ) : (
-                <MembersList members={invitedMembers} />
+                <MembersList members={invitedMembers} variant="pending" />
               )}
             </TabsContent>
           </TableCard>

@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import ChainIndicator from '@/components/common/ChainIndicator'
+import { cn } from '@/utils/cn'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import css from './styles.module.css'
 
@@ -19,7 +20,7 @@ const NetworkLogosList = ({
   const maskSizeVar = imageSize ? ({ '--network-logo-size': `${imageSize}px` } as CSSProperties) : undefined
 
   return (
-    <div className={css.networks} style={maskSizeVar}>
+    <div className={cn(css.networks, showHasMore && css.capped)} style={maskSizeVar}>
       {visibleChains.map((chain) => (
         <ChainIndicator key={chain.chainId} chainId={chain.chainId} onlyLogo inline imageSize={imageSize} />
       ))}

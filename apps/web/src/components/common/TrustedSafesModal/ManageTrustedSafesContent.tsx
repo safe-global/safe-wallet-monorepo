@@ -45,7 +45,8 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
     pendingConfirmation,
     pendingSelectAllConfirmation,
     similarAddressesForSelectAll,
-    flagged: flaggedAddresses,
+    similarityGroups,
+    anchorAddresses,
     searchQuery,
     isLoading,
     hasChanges,
@@ -127,7 +128,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
             </div>
           )}
 
-          <div className="mb-3 flex items-center gap-3">
+          <div className="mb-3 mx-1 block items-center gap-3">
             <button
               type="button"
               role="checkbox"
@@ -136,7 +137,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
               onClick={() => (allSelected ? deselectAll() : selectAll())}
               disabled={isLoading || totalSafesCount === 0}
               data-testid="manage-trusted-select-all"
-              className="flex shrink-0 items-center gap-2 rounded-md px-2 py-1 text-sm text-muted-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex shrink-0 items-center gap-2 rounded-md py-1 pl-[21px] pr-2 text-sm text-muted-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} tabIndex={-1} aria-hidden />
               Select all · {selectedCount} of {totalSafesCount} selected
@@ -175,7 +176,8 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
             <SafeAccountsTable
               items={items}
               columns={MANAGE_COLUMNS}
-              flaggedAddresses={flaggedAddresses}
+              similarityGroups={similarityGroups}
+              anchorAddresses={anchorAddresses}
               allowRenameInDialog
               // Column sorting is only offered in Name mode; Last visited / Manual own the order.
               sortableColumns={orderBy === OrderByOption.NAME}

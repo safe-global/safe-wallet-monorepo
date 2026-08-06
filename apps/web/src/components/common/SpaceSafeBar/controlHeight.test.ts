@@ -39,9 +39,10 @@ const heightsIn = (classLists: string[], prefix: '' | 'min-'): number[] =>
     [...classList.matchAll(new RegExp(`(?:^|\\s)${prefix}h-(\\d+)(?=\\s|$)`, 'g'))].map(([, value]) => Number(value)),
   )
 
-// `sm:w-[515px]` is the selector chip's own width; `self-stretch` marks a chip that borrows its
-// height from the flex line.
-const selectorHeights = heightsIn(classListsContaining(SELECTOR_SOURCE, 'sm:w-[515px]'), '')
+// `max-w-[515px]` is the selector chip's own width cap — unique to it, and present on both the real
+// wrapper and its loading skeleton; `self-stretch` marks a chip that borrows its height from the
+// flex line.
+const selectorHeights = heightsIn(classListsContaining(SELECTOR_SOURCE, 'max-w-[515px]'), '')
 
 describe('SpaceSafeBar control height', () => {
   it('sets one consistent height across the safe selector and its loading state', () => {

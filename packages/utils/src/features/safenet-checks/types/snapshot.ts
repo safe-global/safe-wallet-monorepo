@@ -12,9 +12,15 @@ export type SafenetCheckSnapshot = {
   /** The Safenet chain the Consensus contract lives on (e.g. Gnosis '100'). */
   chainId: string
   status: CheckStatus
-  /** Which oracle generation drove this check, once known. */
+  /** Which oracle generation drove the active request, once a sentinel event lands. */
   generation: OracleGeneration | null
-  /** The oracle request id (equals the oracle-proposal hash), once known. */
+  /**
+   * Correlation for the latest allowlisted proposal, once known.
+   *
+   * Proposals are permissionless, so an attacker can become the proposal these
+   * describe. Do not render them as provenance ("proposed by …") and do not
+   * branch a verdict on them. Use `status` for that.
+   */
   requestId: Hex | null
   epoch: string | null
   oracle: string | null

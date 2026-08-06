@@ -24,7 +24,7 @@ import { TriangleAlert, RotateCw, Search } from 'lucide-react'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_LABELS, SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
+import SecurityBanner from '@/components/common/TrustedSafesModal/SecurityBanner'
 import SpaceSafeContextMenu from './SpaceSafeContextMenu'
 
 const SpaceSafeAccounts = () => {
@@ -45,7 +45,7 @@ const SpaceSafeAccounts = () => {
   const spaceSafeItems = useMemo<SafeItem[]>(() => flattenSafeItems(allSafes ?? []), [allSafes])
 
   const spaceSafeAddresses = useMemo(() => spaceSafeItems.map((s) => s.address), [spaceSafeItems])
-  const similarAddresses = useSimilarityClusters(spaceSafeAddresses).flagged
+  const { flagged: similarAddresses, groupIdByAddress: similarityGroups } = useSimilarityClusters(spaceSafeAddresses)
 
   // Group and sort
   const displaySafes = useMemo<AllSafeItems>(
@@ -119,12 +119,14 @@ const SpaceSafeAccounts = () => {
         </Typography>
       ) : (
         <div className="flex flex-col gap-4">
-          {similarAddresses.size > 0 && <SimilarAddressAlert />}
+          {similarAddresses.size > 0 && <SecurityBanner title="Verify before you trust" />}
           <SafeAccountsTable
             items={visibleSafes}
+            // The table sits directly on the page background here, so the card outline is dropped.
+            bordered={false}
             // Inside a workspace every Safe belongs to it, so the Workspaces column adds no information.
             columns={['name', 'threshold', 'networks', 'pending', 'balance', 'actions']}
-            flaggedAddresses={similarAddresses}
+            similarityGroups={similarityGroups}
             // Column sorting is only offered in Name mode; Last visited / Manual own the order.
             sortableColumns={orderBy === OrderByOption.NAME}
             renderActions={(line) =>

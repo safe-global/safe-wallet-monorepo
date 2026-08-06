@@ -40,6 +40,9 @@
   .indicator {
     min-width: 35px;
   }
+  .onlyLogo {
+    min-width: 0;
+  }
   .responsive {
     min-width: 0;
   }

@@ -34,7 +34,16 @@ const SelectSafesOnboarding = (): ReactElement => {
   const wallet = useWallet()
   const totalSteps = useOnboardingStepCount()
   const { spaceId, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
-  const { trustedSafes, ownedSafes, flaggedAddresses, handleSearch, hasNoSafes } = useOnboardingSafes()
+  const {
+    trustedSafes,
+    ownedSafes,
+    flaggedAddresses,
+    trustedSimilarityGroups,
+    ownedSimilarityGroups,
+    similarWarnings,
+    handleSearch,
+    hasNoSafes,
+  } = useOnboardingSafes()
   const allSafes = useMemo<AllSafeItems>(() => [...trustedSafes, ...ownedSafes], [trustedSafes, ownedSafes])
   const { formMethods, onSubmit, selectedSafesLength, error, isSubmitting } = useOnboardingSubmit(
     spaceId,
@@ -93,12 +102,17 @@ const SelectSafesOnboarding = (): ReactElement => {
         <>
           <div className="flex shrink-0 items-center gap-3">
             <div
+              data-testid="selected-count"
               className={cn(
                 'flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm',
                 isAtLimit ? 'font-semibold text-yellow-700' : 'text-muted-foreground',
               )}
             >
-              {selectedKeys.size} of {SAFE_ACCOUNTS_LIMIT} selected
+              <span>
+                {/* Fixed-width, right-aligned digit cell so the row doesn't shift when the count changes width. */}
+                <span className="inline-block min-w-[2ch] text-right tabular-nums">{selectedKeys.size}</span> of{' '}
+                {SAFE_ACCOUNTS_LIMIT} selected
+              </span>
               <Tooltip>
                 <TooltipTrigger render={<span className="inline-flex cursor-help" />}>
                   <Info className="size-4" />
@@ -125,6 +139,9 @@ const SelectSafesOnboarding = (): ReactElement => {
                 trustedSafes={trustedSafes}
                 ownedSafes={ownedSafes}
                 flaggedAddresses={flaggedAddresses}
+                trustedSimilarityGroups={trustedSimilarityGroups}
+                ownedSimilarityGroups={ownedSimilarityGroups}
+                similarWarnings={similarWarnings}
                 selectedKeys={selectedKeys}
                 onToggle={handleToggle}
                 isAtLimit={isAtLimit}

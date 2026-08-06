@@ -16,6 +16,10 @@ import {
 } from './useSafeAccountRows'
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
 import ReorderableBody, { toggleExpanded } from './ReorderableBody'
+import { bandHeaderAt } from './SimilarityBand'
+import { orderGroupsBySimilarity } from './orderGroupsBySimilarity'
+import { weaveReorderedKeys } from '@/utils/reorder'
+import type { SimilarWarning } from '@/features/address-poisoning'
 import EntryDialog from '@/components/address-book/EntryDialog'
 
 /** Renaming a safe = editing its address-book entry across every chain it lives on. */
@@ -89,8 +93,12 @@ export type SafeAccountsTableProps = {
   actionsWidth?: string
   /** Replaces the default context-menu actions cell for each row (e.g. an "Add to workspace" button). */
   renderActions?: (line: AccountLine) => ReactNode
-  /** Lowercased addresses to flag with a "High similarity" warning badge. */
-  flaggedAddresses?: Set<string>
+  /** Lowercased address → cross-list look-alike peers; drives the inline ⚠️ + tooltip. */
+  similarWarnings?: Map<string, SimilarWarning>
+  /** Lowercased address → cluster id; contiguous same-cluster rows render inside a warning band. */
+  similarityGroups?: Map<string, string>
+  /** Lowercased vetted/pinned addresses — ordering-only: a band opens at its anchor's slot, anchor first. */
+  anchorAddresses?: Set<string>
   /** Enables a leading checkbox column and makes rows selectable. */
   selection?: SafeAccountsSelection
   /**
@@ -116,6 +124,12 @@ export type SafeAccountsTableProps = {
    * Used by the dashboard widget.
    */
   embedded?: boolean
+  /**
+   * Whether the standalone container draws its 1px outline. Defaults to `true`. The space
+   * "Safe accounts" page passes `false` to sit flush on the page background while keeping the
+   * card fill, header and dividers.
+   */
+  bordered?: boolean
   'data-testid'?: string
 }
 
@@ -132,13 +146,16 @@ export default function SafeAccountsTable({
   columns,
   actionsWidth,
   renderActions,
-  flaggedAddresses,
+  similarWarnings,
+  similarityGroups,
+  anchorAddresses,
   selection,
   allowRenameInDialog = false,
   reorder,
   sortableColumns = true,
   onLinkClick,
   embedded = false,
+  bordered = true,
   'data-testid': testId = 'safe-accounts-table',
 }: SafeAccountsTableProps) {
   const [overviewsByKey, setOverviewsByKey] = useState<Map<string, SafeOverview>>(new Map())
@@ -198,9 +215,26 @@ export default function SafeAccountsTable({
     if (!sortableColumns) setSort({ orderBy: null, order: 'asc' })
   }, [sortableColumns])
 
+  // Pull similarity clusters together (non-reorder body) so each renders as one contiguous band.
+  const displayGroups = useMemo(
+    () => orderGroupsBySimilarity(sortedGroups, similarityGroups, anchorAddresses),
+    [sortedGroups, similarityGroups, anchorAddresses],
+  )
+
+  // Weave the dropped (non-clustered) rows into the stored order: the clusters' pin-to-top is
+  // display-only and must not rewrite the user's manual arrangement (it would outlive the cluster).
+  const handleReorder = useCallback(
+    (reorderedDraggable: string[]) => {
+      const storedOrder = sortedGroups.map((group) => group.parent.address)
+      const isClustered = (address: string) => Boolean(similarityGroups?.get(address.toLowerCase()))
+      reorder?.onReorder(weaveReorderedKeys(storedOrder, reorderedDraggable, isClustered))
+    },
+    [reorder, sortedGroups, similarityGroups],
+  )
+
   const lines = useMemo<Array<{ line: AccountLine; groupKey: string; group: AccountGroup }>>(() => {
     const result: Array<{ line: AccountLine; groupKey: string; group: AccountGroup }> = []
-    for (const group of sortedGroups) {
+    for (const group of displayGroups) {
       result.push({ line: group.parent, groupKey: group.parent.key, group })
       if (group.children.length > 0 && expanded.has(group.parent.key)) {
         for (const child of group.children) {
@@ -209,7 +243,7 @@ export default function SafeAccountsTable({
       }
     }
     return result
-  }, [sortedGroups, expanded])
+  }, [displayGroups, expanded])
 
   const handleSort = (column: SafeSortColumn) =>
     setSort((prev) => ({
@@ -224,7 +258,13 @@ export default function SafeAccountsTable({
   return (
     <div data-testid={testId} className="w-full">
       <div
-        className={cn('w-full', embedded ? 'overflow-x-visible' : 'overflow-x-auto', !embedded && tableCss.container)}
+        className={cn(
+          'w-full',
+          embedded ? 'overflow-x-visible' : 'overflow-x-auto',
+          !embedded && tableCss.container,
+          // `bordered={false}` drops the panel's edge — for tables nested in something that draws its own.
+          !embedded && !bordered && tableCss.containerBorderless,
+        )}
       >
         {/* Raw <table> instead of the ui <Table> wrapper: we own the horizontal-scroll container
             above so `embedded` tables can opt out of it. The shadcn table sub-components are used
@@ -304,9 +344,10 @@ export default function SafeAccountsTable({
 
           {reorder ? (
             <ReorderableBody
-              groups={sortedGroups}
+              groups={displayGroups}
               columns={visibleColumns}
-              flaggedAddresses={flaggedAddresses}
+              similarWarnings={similarWarnings}
+              similarityGroups={similarityGroups}
               expanded={expanded}
               setExpanded={setExpanded}
               renderActions={renderActions}
@@ -314,28 +355,40 @@ export default function SafeAccountsTable({
               onLinkClick={onLinkClick}
               getCheckbox={selection ? (group, line) => getRowCheckbox(group, line, selection) : undefined}
               onSelectToggle={selection ? (line, next) => selection.onToggle(line, next) : undefined}
-              onReorder={reorder.onReorder}
+              onReorder={handleReorder}
               onOverviewsLoaded={handleOverviewsLoaded}
             />
           ) : (
             <TableBody>
-              {lines.map(({ line, groupKey, group }, index) => (
-                <SafeAccountTableRow
-                  key={line.key}
-                  line={line}
-                  columns={visibleColumns}
-                  expanded={line.expandable ? expanded.has(groupKey) : undefined}
-                  isFlagged={flaggedAddresses?.has(line.address.toLowerCase())}
-                  renderActions={renderActions}
-                  onRename={onRename}
-                  checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
-                  onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
-                  onToggle={line.expandable ? () => toggle(groupKey) : undefined}
-                  onLinkClick={onLinkClick}
-                  showDivider={!embedded && index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}
-                  onOverviewsLoaded={handleOverviewsLoaded}
-                />
-              ))}
+              {lines.flatMap(({ line, groupKey, group }, index) => {
+                const clusterId = similarityGroups?.get(line.address.toLowerCase())
+                const bandHeader = bandHeaderAt(
+                  index,
+                  (i) => similarityGroups?.get(lines[i].line.address.toLowerCase()),
+                  visibleColumns.length,
+                )
+
+                const row = (
+                  <SafeAccountTableRow
+                    key={line.key}
+                    line={line}
+                    columns={visibleColumns}
+                    expanded={line.expandable ? expanded.has(groupKey) : undefined}
+                    warning={similarWarnings?.get(line.address.toLowerCase())}
+                    highlighted={Boolean(clusterId)}
+                    renderActions={renderActions}
+                    onRename={onRename}
+                    checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
+                    onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
+                    onToggle={line.expandable ? () => toggle(groupKey) : undefined}
+                    onLinkClick={onLinkClick}
+                    showDivider={!embedded && index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}
+                    onOverviewsLoaded={handleOverviewsLoaded}
+                  />
+                )
+
+                return bandHeader ? [bandHeader, row] : [row]
+              })}
             </TableBody>
           )}
         </table>

@@ -3,7 +3,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { ChainIndicatorList } from '@/features/multichain'
 import { useAddressBooksDeleteByAddressV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId, useWorkspaceAddressBookLabel } from '@/features/spaces'
 import { useState } from 'react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,7 @@ import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
+import { getContactRemovedMessage } from '@/utils/addressBookNotifications'
 
 type DeleteContactDialogProps = {
   name: string
@@ -27,6 +28,7 @@ const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContact
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
   const isDarkMode = useDarkMode()
+  const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
   const [deleteEntry] = useAddressBooksDeleteByAddressV1Mutation()
 
   const handleConfirm = async () => {
@@ -44,7 +46,7 @@ const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContact
 
       dispatch(
         showNotification({
-          message: `Deleted contact`,
+          message: getContactRemovedMessage(workspaceAddressBookLabel),
           variant: 'success',
           groupKey: 'delete-contact-success',
         }),

@@ -433,6 +433,23 @@ describe('SafeDropdownContainer', () => {
     })
   })
 
+  describe('horizontal scroll (narrow screens)', () => {
+    it('renders rows inside a min-width wrapper so they scroll horizontally instead of squeezing', () => {
+      render(<SafeDropdownContainer items={[createItem()]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
+
+      const scrollArea = screen.getByTestId('dropdown-scroll-area')
+      expect(scrollArea).toHaveClass('overflow-x-auto')
+      expect(scrollArea.firstElementChild).toHaveClass('min-w-[527px]')
+    })
+
+    it('does not constrain the empty state to the row min-width', () => {
+      render(<SafeDropdownContainer items={[]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
+
+      const scrollArea = screen.getByTestId('dropdown-scroll-area')
+      expect(scrollArea.firstElementChild).not.toHaveClass('min-w-[527px]')
+    })
+  })
+
   describe('reorder (Manual sort)', () => {
     const itemA = createItem({ id: '1:0xaaaa', name: 'Alpha', address: '0xaaaa' })
     const itemB = createItem({ id: '137:0xbbbb', name: 'Beta', address: '0xbbbb' })

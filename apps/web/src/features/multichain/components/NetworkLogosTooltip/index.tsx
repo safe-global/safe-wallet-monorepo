@@ -32,8 +32,12 @@ const NetworkLogosTooltip = ({
     <TooltipTrigger render={triggerRender}>
       {trigger ?? <NetworkLogosList networks={networks} showHasMore maxVisible={maxVisible} imageSize={imageSize} />}
     </TooltipTrigger>
-    <TooltipContent>
-      <div data-testid={contentTestId} className="flex flex-col gap-1">
+    <TooltipContent className="bg-popover text-popover-foreground ring-foreground/10 shadow-md ring-1 [&>[data-side]]:hidden">
+      <div
+        data-testid={contentTestId}
+        className="no-scrollbar flex flex-col gap-1 overflow-y-auto overscroll-contain"
+        style={{ maxHeight: 'calc(var(--available-height) - 0.75rem)' }}
+      >
         {networks.map((network) => (
           <ChainIndicator key={network.chainId} chainId={network.chainId} imageSize={contentImageSize} />
         ))}

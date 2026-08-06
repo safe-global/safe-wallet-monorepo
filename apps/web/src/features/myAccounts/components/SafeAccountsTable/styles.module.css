@@ -14,6 +14,12 @@
   padding-bottom: 8px;
 }
 
+/* `bordered={false}`: the panel sits inside something that already draws an edge. Transparent rather
+   than `border: none` so the 1px does not come out of the box and shift every column by half a pixel. */
+.containerBorderless {
+  border-color: transparent;
+}
+
 /* Header: labels sit on a grey bar (bg-muted, set via className) inset from the panel's top and side
    edges — transparent borders + a padding-box clip shrink the painted background without moving the
    cells. No bottom inset: the first row's own top border already provides that gap. */
@@ -74,15 +80,16 @@
 }
 
 /* Hover pill: painted on the cells (not the <tr>) so the inset borders float it clear of the panel
-   edges and round the outer corners. Locked rows (data-disabled) stay un-hovered. */
-.table tbody tr:not([data-disabled]):hover td {
+   edges and round the outer corners. Locked rows (data-disabled) stay un-hovered, and band rows opt
+   out entirely — their own square fill must not be notched by a rounded pill. */
+.table tbody tr:not([data-disabled]):not([data-band-header]):not([data-highlighted]):hover td {
   background-color: var(--muted);
 }
-.table tbody tr:not([data-disabled]):hover td:first-of-type {
+.table tbody tr:not([data-disabled]):not([data-band-header]):not([data-highlighted]):hover td:first-of-type {
   border-top-left-radius: 16px;
   border-bottom-left-radius: 16px;
 }
-.table tbody tr:not([data-disabled]):hover td:last-of-type {
+.table tbody tr:not([data-disabled]):not([data-band-header]):not([data-highlighted]):hover td:last-of-type {
   border-top-right-radius: 16px;
   border-bottom-right-radius: 16px;
 }
@@ -100,4 +107,80 @@
   background-repeat: no-repeat;
   background-position: bottom;
   background-size: 100% 1px;
+}
+
+/* ---------------------------------------------------------------------------
+   Address-poisoning similarity band. Ported from the MUI-era tableStyles.module.css, whose
+   `:global(.MuiTableRow-root…)` selectors matched nothing once this table became a plain <table> —
+   the feature would have rendered untinted. Same palette and geometry, keyed off the same
+   `data-band-header` / `data-highlighted` attributes the rows already set.
+   --------------------------------------------------------------------------- */
+
+.table {
+  /* Theme-adaptive band palette (light: yellow surface/border; dark: warning-brown/coral). */
+  --band-surface: var(--color-yellow-50);
+  --band-border: var(--color-yellow-500);
+}
+:global(.dark) .table {
+  --band-surface: var(--color-warning-background);
+  --band-border: var(--color-warning-main);
+}
+
+/* Must stay after the [data-divider] rule — equal specificity, later wins. Band cards separate
+   themselves, so the grey divider inside a band is suppressed. */
+.table tbody tr[data-highlighted] {
+  background-image: none;
+}
+
+/* Band surface: fills across the transparent borders (border-box clip) so it runs row to row.
+   Never via border colours — those miter diagonally into the side insets and show as spikes. */
+.table tbody tr[data-band-header] td,
+.table tbody tr[data-highlighted] td {
+  position: relative;
+  background-color: var(--band-surface);
+  background-clip: border-box;
+}
+
+/* Card frame as a ::before overlay, so it carries its own radius while the cell fill stays square.
+   Top/bottom on every cell, sides only on the outer ones → one continuous per-row outline. */
+.table tbody tr[data-highlighted] td::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-top: 1px solid var(--band-border);
+  border-bottom: 1px solid var(--band-border);
+}
+.table tbody tr[data-highlighted] td:first-of-type::before {
+  border-left: 1px solid var(--band-border);
+  border-top-left-radius: 16px;
+  border-bottom-left-radius: 16px;
+}
+.table tbody tr[data-highlighted] td:last-of-type::before {
+  border-right: 1px solid var(--band-border);
+  border-top-right-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+/* 4px panel-edge inset, with the outer corners rounded via clip-path on the outer cells only
+   (border-radius cannot round an inset fill); middle cells stay unclipped for a continuous fill. */
+.table tbody tr[data-highlighted] td:first-of-type {
+  clip-path: inset(0 0 0 4px);
+}
+.table tbody tr[data-highlighted] td:last-of-type {
+  clip-path: inset(0 4px 0 0);
+}
+.table tbody tr[data-highlighted]:not(:has(+ tr[data-highlighted])) td:first-of-type {
+  clip-path: inset(0 0 0 4px round 0 0 0 16px);
+}
+.table tbody tr[data-highlighted]:not(:has(+ tr[data-highlighted])) td:last-of-type {
+  clip-path: inset(0 4px 0 0 round 0 0 16px 0);
+}
+
+/* Band header: 3px top gap (separates the cluster from the table head or the row above), slim 2px
+   bottom border so the head zone hugs its label. Both side insets and the top gap in one clip. */
+.table tbody tr[data-band-header] td {
+  border-top: 3px solid transparent;
+  border-bottom: 2px solid transparent;
+  clip-path: inset(3px 4px 0 4px round 16px 16px 0 0);
 }

@@ -1,5 +1,4 @@
 import {
-  House,
   ArrowRightLeft,
   WalletCards,
   BookUser,
@@ -24,7 +23,7 @@ import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
 
 export const spacesMainNavigation: SidebarItemConfig[] = [
   {
-    icon: House,
+    icon: LayoutGrid,
     label: 'Dashboard',
     href: AppRoutes.spaces.index,
   },

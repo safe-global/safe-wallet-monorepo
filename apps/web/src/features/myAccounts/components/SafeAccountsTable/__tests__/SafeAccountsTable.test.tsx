@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import type { AllSafeItems } from '@/hooks/safes'
 import SafeAccountsTable from '../index'
@@ -44,7 +44,8 @@ jest.mock('../SafeAccountTableRow', () => ({
     >
       <td>
         {dragHandleProps !== undefined && (
-          <button data-testid={`drag-${line.key}`} {...dragHandleProps} type="button" aria-label="drag" />
+          // A <span> like the real ReorderHandle — dnd refuses to lift from interactive elements (e.g. <button>).
+          <span data-testid={`drag-${line.key}`} {...dragHandleProps} aria-label="drag" />
         )}
         {checkbox && (
           <button
@@ -200,6 +201,22 @@ describe('SafeAccountsTable', () => {
     // ...but the sortable column header is gone (no header row to click).
     expect(screen.queryByTestId('account-sort-name')).not.toBeInTheDocument()
     expect(screen.queryByTestId('account-sort-threshold')).not.toBeInTheDocument()
+  })
+
+  it('draws the card outline by default and drops it with bordered={false}, keeping the header', () => {
+    const container = () => screen.getByTestId('safe-accounts-table').firstElementChild as HTMLElement
+
+    // Asserted on the classes, not on computed style: the outline moved from an MUI `sx` prop to the
+    // colocated CSS module, and jsdom does not evaluate CSS modules — `toHaveStyle` would fail even
+    // when the border renders. `containerBorderless` is what zeroes it.
+    const { rerender } = render(<SafeAccountsTable items={items} />)
+    expect(container().className).toContain('container')
+    expect(container().className).not.toContain('containerBorderless')
+
+    rerender(<SafeAccountsTable items={items} bordered={false} />)
+    expect(container().className).toContain('containerBorderless')
+    // Unlike embedded mode, the borderless table keeps its column header.
+    expect(screen.getByTestId('account-sort-name')).toBeInTheDocument()
   })
 
   it('draws dividers between groups, but not after the last row', () => {
@@ -393,5 +410,64 @@ describe('SafeAccountsTable — selection mode', () => {
     )
     fireEvent.click(screen.getByTestId('rename-0xB'))
     expect(screen.getByTestId('entry-dialog')).toBeInTheDocument()
+  })
+})
+
+describe('SafeAccountsTable — reorder mode with pinned similarity clusters', () => {
+  const clusteredGroups: AccountGroup[] = [
+    {
+      parent: line({ key: '0xB', displayName: 'Bravo', address: '0xB' }),
+      children: [],
+      sort: { name: 'bravo', threshold: 2, owners: 3, networks: 'ethereum', workspaces: 0 },
+    },
+    {
+      parent: line({ key: '0xA', displayName: 'Alpha', address: '0xA' }),
+      children: [],
+      sort: { name: 'alpha', threshold: 5, owners: 7, networks: 'ethereum', workspaces: 2 },
+    },
+    {
+      parent: line({ key: '0xG', displayName: 'Golf', address: '0xG' }),
+      children: [],
+      sort: { name: 'golf', threshold: 3, owners: 5, networks: 'gnosis', workspaces: 1 },
+    },
+  ]
+  // Alpha is in a similarity cluster → pinned on top, excluded from dragging.
+  const similarityGroups = new Map([['0xa', 'cluster-1']])
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockUseSafeAccountRows.mockReturnValue({ groups: clusteredGroups, isLoading: false })
+  })
+
+  it('pins the clustered row on top under a single band header, without a drag handle', () => {
+    render(<SafeAccountsTable items={items} reorder={{ onReorder: jest.fn() }} similarityGroups={similarityGroups} />)
+
+    expect(rowNames()).toEqual(['Alpha', 'Bravo', 'Golf'])
+    expect(screen.getAllByText('Address poisoning warning')).toHaveLength(1)
+    expect(screen.queryByTestId('drag-0xA')).not.toBeInTheDocument()
+    expect(screen.getByTestId('drag-0xB')).toBeInTheDocument()
+    expect(screen.getByTestId('drag-0xG')).toBeInTheDocument()
+  })
+
+  it('reports the woven stored order after a drop: pinned keeps its slot, only draggables move', async () => {
+    const onReorder = jest.fn()
+    render(<SafeAccountsTable items={items} reorder={{ onReorder }} similarityGroups={similarityGroups} />)
+
+    // hello-pangea keyboard drag: lift Bravo (space), move one position down, drop (space). The
+    // lift/move work is async (dimension collection in animation frames), so gate each step on the
+    // dnd screen-reader announcement instead of firing blind.
+    const announcement = () => document.querySelector('[id^="rfd-announcement"]')?.textContent ?? ''
+    const handle = screen.getByTestId('drag-0xB')
+    handle.focus()
+    fireEvent.keyDown(handle, { keyCode: 32 })
+    await waitFor(() => expect(announcement()).toContain('lifted'))
+    // The lifted row is portaled to <body>, detaching `handle`; the in-drag key bindings live on
+    // window and ignore the event target, so fire the remaining keys there.
+    fireEvent.keyDown(window, { keyCode: 40 })
+    await waitFor(() => expect(announcement()).toContain('moved'))
+    fireEvent.keyDown(window, { keyCode: 32 })
+
+    // Draggables were [Bravo, Golf] → [Golf, Bravo]; Alpha (pinned) keeps stored slot #2.
+    await waitFor(() => expect(onReorder).toHaveBeenCalledWith(['0xG', '0xA', '0xB']))
   })
 })

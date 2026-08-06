@@ -6,8 +6,9 @@ import { TableCell, TableRow } from '@/components/ui/table'
 import type { SafeItem } from '@/hooks/safes'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useRowOverviews } from './useRowOverviews'
-import { Badge } from '@/components/ui/badge'
-import { GripVertical, TriangleAlert } from 'lucide-react'
+import { GripVertical } from 'lucide-react'
+import { SimilarityWarningIcon } from './SimilarityBand'
+import type { SimilarWarning } from '@/features/address-poisoning'
 import Identicon from '@/components/common/Identicon'
 import { SafeInfoDisplay } from '@/components/common/AccountRow'
 import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
@@ -42,8 +43,10 @@ type SafeAccountTableRowProps = {
   expanded?: boolean
   /** Draw a bottom divider — only true at the boundary between top-level accounts, not within a group. */
   showDivider?: boolean
-  /** Flags the row with a "High similarity" warning (address-poisoning defence). */
-  isFlagged?: boolean
+  /** When set, shows the inline look-alike ⚠️ (with a peers tooltip) after the name — cross-list only. */
+  warning?: SimilarWarning
+  /** Tints the row (warning background) as a member of an address-poisoning similarity group. */
+  highlighted?: boolean
   /** Replaces the default context-menu actions cell (e.g. an "Add to workspace" button). */
   renderActions?: (line: AccountLine) => ReactNode
   /** When set, adds the hover rename pencil to the identity cell (non-modal surfaces). */
@@ -62,25 +65,18 @@ type SafeAccountTableRowProps = {
   onOverviewsLoaded: (overviews: SafeOverview[]) => void
 }
 
-const HighSimilarityBadge = () => (
-  <Badge variant="warning" className="-ml-px self-start">
-    <TriangleAlert data-icon="inline-start" />
-    High similarity
-  </Badge>
-)
-
 // Shares the dropdown's row identity cell: clip-gated name/address tooltips and copy/explorer icons
 // revealed on row hover. Single/parent rows lead with the blockie identicon; per-chain child rows
 // carry no icon (the chain is already named beside them) — a blank icon-width spacer keeps their name
 // aligned under the parent's. `onRename`, when set, adds the hover rename pencil (non-modal surfaces).
 const NameCellContent = ({
   line,
-  isFlagged,
+  warning,
   onRename,
   nameLink,
 }: {
   line: AccountLine
-  isFlagged?: boolean
+  warning?: SimilarWarning
   onRename?: () => void
   /** When set, only the name text becomes a navigation link — see SafeInfoDisplay's `nameLink`. */
   nameLink?: { href: LinkProps['href']; onClick?: () => void; testId?: string }
@@ -104,7 +100,7 @@ const NameCellContent = ({
       hideAddress={!line.showAddress}
       explorerLink={explorerLink}
       onRename={onRename}
-      badge={isFlagged ? <HighSimilarityBadge /> : undefined}
+      nameAdornment={warning ? <SimilarityWarningIcon warning={warning} /> : undefined}
       nameVariant="paragraph-bold"
       className="min-w-0"
       nameLink={nameLink}
@@ -115,7 +111,7 @@ const NameCellContent = ({
 const NameCell = ({
   line,
   expanded,
-  isFlagged,
+  warning,
   disableLink,
   onToggle,
   onLinkClick,
@@ -123,7 +119,7 @@ const NameCell = ({
 }: {
   line: AccountLine
   expanded?: boolean
-  isFlagged?: boolean
+  warning?: SimilarWarning
   /** In selection mode the row itself toggles the checkbox, so the name never navigates. */
   disableLink?: boolean
   onToggle?: () => void
@@ -139,7 +135,9 @@ const NameCell = ({
       ? { href: line.href, onClick: onLinkClick, testId: 'account-row-link' }
       : undefined
 
-  const content = <NameCellContent line={line} isFlagged={isFlagged} onRename={onRename} nameLink={nameLink} />
+  // `warning` replaces the old boolean `isFlagged`: it carries the look-alike peers, so the cell can
+  // render the ⚠️ adornment with them listed rather than just tinting the row.
+  const content = <NameCellContent line={line} warning={warning} onRename={onRename} nameLink={nameLink} />
 
   if (line.expandable) {
     return (
@@ -340,7 +338,8 @@ const SafeAccountTableRow = ({
   columns,
   expanded,
   showDivider,
-  isFlagged,
+  warning,
+  highlighted,
   renderActions,
   onRename,
   checkbox,
@@ -399,7 +398,7 @@ const SafeAccountTableRow = ({
     <NameCell
       line={line}
       expanded={expanded}
-      isFlagged={isFlagged}
+      warning={warning}
       // Per-chain child rows can't be renamed on their own — only the whole safe (single/group).
       onRename={onRename && line.variant !== 'child' ? () => onRename(line) : undefined}
       disableLink={Boolean(checkbox)}
@@ -418,6 +417,8 @@ const SafeAccountTableRow = ({
       data-disabled={checkbox?.disabledReason ? '' : undefined}
       // Draws the row separator (via the Table sx override); false only at the last row of a group/list.
       data-divider={showDivider ? '' : undefined}
+      // Band membership marker — the card styling lives in the Table sx, keyed off this attribute.
+      data-highlighted={highlighted && !isDragging ? '' : undefined}
       // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover.
       // The row border + row-level hover are neutralised in styles.module.css (we paint the hover pill
       // on the cells and draw our own data-divider separator); the lifted-while-dragging chrome is here.
