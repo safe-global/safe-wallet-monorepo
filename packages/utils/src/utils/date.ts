@@ -17,6 +17,15 @@ export const relativeTime = (baseTimeMin: string, resetTimeMin: string): string 
 
 export const formatWithSchema = (timestamp: number, schema: string): string => format(timestamp, schema)
 
+export const formatDate = (timestamp: number): string => formatWithSchema(timestamp, 'MMM d, yyyy')
+
+// `format` throws on invalid dates, so resolve to a timestamp only when the value parses.
+export const parseTimestamp = (value: string | null | undefined): number | null => {
+  if (!value) return null
+  const timestamp = new Date(value).getTime()
+  return Number.isFinite(timestamp) ? timestamp : null
+}
+
 export const formatTime = (timestamp: number): string => formatWithSchema(timestamp, 'h:mm a')
 
 export const formatDateTime = (timestamp: number): string => formatWithSchema(timestamp, 'MMM d, yyyy - h:mm:ss a')

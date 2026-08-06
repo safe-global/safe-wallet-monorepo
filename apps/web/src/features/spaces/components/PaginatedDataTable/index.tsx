@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
@@ -28,6 +28,7 @@ const tableCellVariants = cva('', {
 // Desktop column widths bounded to a shared scale (applied at md+; mobile auto-sizes).
 // A new width is a deliberate addition here, not an arbitrary class at the call site.
 const COLUMN_WIDTHS = {
+  '10%': 'md:w-[10%]',
   '15%': 'md:w-[15%]',
   '20%': 'md:w-[20%]',
   '30%': 'md:w-[30%]',
@@ -41,8 +42,11 @@ export type DataTableColumn<T> = {
   /** Stable identifier used as the React key and for sort state */
   id: string
   header?: ReactNode
-  /** Renders the content of this column's cell; the table owns the `<TableCell>` wrapper */
-  cell: (row: T) => ReactNode
+  /**
+   * Renders the content of this column's cell; the table owns the `<TableCell>` wrapper.
+   * `context.isCompact` is true when the table renders its compact (mobile-style) layout.
+   */
+  cell: (row: T, context: { isCompact: boolean }) => ReactNode
   /** `data-testid` applied to the column's body `<TableCell>` */
   cellTestId?: string
   /** Horizontal alignment of the header and cell content */
@@ -55,7 +59,7 @@ export type DataTableColumn<T> = {
   priority?: 'essential' | 'secondary'
   /** Pins the column to the left while horizontally scrolling on mobile */
   sticky?: boolean
-  /** Minimum column width in px, applied on desktop (md+) only; mobile auto-sizes to content */
+  /** Lowest acceptable width in px; the summed minimums are the floor below which the table goes compact */
   minWidth?: number
   /** When provided, the column header becomes sortable using this comparable value */
   sortValue?: (row: T) => string | number | null | undefined
@@ -125,6 +129,17 @@ function PaginatedDataTable<T>({
   const [page, setPage] = useState(0)
   const [sort, setSort] = useState<SortState | null>(null)
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set())
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [containerWidth, setContainerWidth] = useState<number | null>(null)
+
+  // Guarded for environments without ResizeObserver (jsdom) — there compact mode is viewport-only
+  useEffect(() => {
+    const element = containerRef.current
+    if (!element || typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(([entry]) => setContainerWidth(entry.contentRect.width))
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
 
   // Jump back to the first page when the data set changes (e.g. a new search/filter)
   useEffect(() => {
@@ -155,10 +170,17 @@ function PaginatedDataTable<T>({
   const currentPage = Math.min(page, totalPages - 1)
   const paginatedRows = sortedRows.slice(currentPage * pageSize, (currentPage + 1) * pageSize)
 
-  // Secondary columns (and their sort headers) are hidden on mobile; sorting there
-  // happens via the visible column headers, so no separate mobile sort control is needed.
-  const showDetailToggle = isMobile && Boolean(renderRowDetail)
-  const totalColumns = columns.length + (showDetailToggle ? 1 : 0)
+  // Fixed table layout ignores `min-width` on cells, so below this floor the full column set
+  // cannot render without columns overlapping.
+  const tableMinWidth = columns.reduce((total, column) => total + (column.minWidth ?? 0), 0)
+
+  // Compact = the full column set doesn't fit: render the mobile presentation
+  // — secondary columns fold into the row detail.
+  const isCompact = isMobile || (containerWidth !== null && containerWidth < tableMinWidth)
+  const visibleColumns = isCompact ? columns.filter((column) => column.priority !== 'secondary') : columns
+
+  const showDetailToggle = isCompact && Boolean(renderRowDetail)
+  const totalColumns = visibleColumns.length + (showDetailToggle ? 1 : 0)
 
   const toggleExpanded = (key: string) =>
     setExpanded((current) => {
@@ -169,26 +191,26 @@ function PaginatedDataTable<T>({
     })
 
   return (
-    <>
-      {/* Fixed layout on desktop preserves column proportions and lets `truncate` cells clip;
-          on mobile the table falls back to auto layout so sticky/min-width columns size to content. */}
-      <Table className="md:table-fixed">
+    <div ref={containerRef}>
+      {/* Fixed layout on regular desktop preserves column proportions and lets `truncate` cells
+          clip; compact mode falls back to auto layout so the remaining columns size to content. */}
+      <Table className={cn(!isCompact && 'md:table-fixed')}>
         <TableHeader>
           <TableRow>
-            {columns.map((column) => {
+            {visibleColumns.map((column) => {
               const direction = sort?.id === column.id ? sort.direction : undefined
 
               return (
                 <TableHead
                   key={column.id}
                   aria-sort={column.sortValue ? ariaSortValue(direction) : undefined}
-                  style={minWidthStyle(column)}
+                  style={isCompact ? undefined : minWidthStyle(column)}
                   className={cn(
                     tableHeadVariants({ align: column.align }),
                     hideClass(column),
                     stickyClass(column),
-                    minWidthClass(column),
-                    column.width && COLUMN_WIDTHS[column.width],
+                    !isCompact && minWidthClass(column),
+                    !isCompact && column.width && COLUMN_WIDTHS[column.width],
                   )}
                 >
                   {column.sortValue ? (
@@ -219,19 +241,19 @@ function PaginatedDataTable<T>({
             return (
               <Fragment key={key}>
                 <TableRow className={getRowClassName?.(row)}>
-                  {columns.map((column) => (
+                  {visibleColumns.map((column) => (
                     <TableCell
                       key={column.id}
                       data-testid={column.cellTestId}
-                      style={minWidthStyle(column)}
+                      style={isCompact ? undefined : minWidthStyle(column)}
                       className={cn(
                         tableCellVariants({ align: column.align, emphasis: column.emphasis }),
                         hideClass(column),
                         stickyClass(column),
-                        minWidthClass(column),
+                        !isCompact && minWidthClass(column),
                       )}
                     >
-                      {column.cell(row)}
+                      {column.cell(row, { isCompact })}
                     </TableCell>
                   ))}
                   {showDetailToggle && (
@@ -291,7 +313,7 @@ function PaginatedDataTable<T>({
           </div>
         </div>
       )}
-    </>
+    </div>
   )
 }
 

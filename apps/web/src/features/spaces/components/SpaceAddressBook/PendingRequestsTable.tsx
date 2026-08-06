@@ -142,9 +142,9 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     {
       id: 'name',
       header: 'Name',
-      width: '20%',
+      width: '15%',
       sticky: true,
-      minWidth: 140,
+      minWidth: 120,
       emphasis: 'strong',
       cell: (req) => (
         <span className="inline-flex min-w-0 items-center gap-2 overflow-hidden">
@@ -162,12 +162,12 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
       id: 'address',
       header: 'Address',
       width: '30%',
-      minWidth: 360,
-      cell: (req) => (
+      minWidth: 240,
+      cell: (req, { isCompact }) => (
         <div className="text-[0.8em] font-mono">
           <EthHashInfo
             address={req.address}
-            shortAddress={false}
+            shortAddress={isCompact}
             showPrefix={false}
             showName={false}
             highlight4bytes
@@ -181,17 +181,17 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     {
       id: 'chains',
       header: 'Chains',
-      width: '15%',
+      width: '20%',
       priority: 'secondary',
-      minWidth: 100,
+      minWidth: 90,
       cell: renderChains,
     },
     {
       id: 'requestedBy',
       header: 'Requested by',
-      width: '30%',
+      width: '20%',
       priority: 'secondary',
-      minWidth: 300,
+      minWidth: 140,
       cell: (req) => (req.requestedBy ? <RequestedBy requestedBy={req.requestedBy} /> : null),
     },
     {

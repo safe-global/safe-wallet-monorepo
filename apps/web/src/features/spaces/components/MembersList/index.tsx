@@ -1,17 +1,16 @@
 import { type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { formatTimeInWords, formatWithSchema } from '@safe-global/utils/utils/date'
+import { formatDate, formatTimeInWords, parseTimestamp } from '@safe-global/utils/utils/date'
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/utils/cn'
 import MemberName from './MemberName'
 import RemoveMemberDialog from './RemoveMemberDialog'
 import RenewInviteButton from './RenewInviteButton'
 import MemberRowActionsMenu from './MemberRowActionsMenu'
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import {
   useIsAdmin,
   isAdmin as checkIsAdmin,
@@ -35,68 +34,37 @@ import { Typography } from '@mui/material'
 
 type MembersListVariant = 'active' | 'pending'
 
-const DATE_FORMAT = 'MMM d, yyyy'
-
-const formatDate = (timestamp: number) => formatWithSchema(timestamp, DATE_FORMAT)
-
-// `format` throws on invalid dates, so resolve to a timestamp only when the value parses.
-const toTimestamp = (value: string | null | undefined): number | null => {
-  if (!value) return null
-  const timestamp = new Date(value).getTime()
-  return Number.isFinite(timestamp) ? timestamp : null
-}
-
-type DateCell = { rawValue: string | number | null; content: ReactNode }
-
-// Sorts on the raw timestamp; renders a dash when there's no date. `formatDate` gives an absolute
-// date (join / invite date), `formatTimeInWords` a relative one ("in 6 days" / "5 days ago") so an
-// invite's remaining lifetime is readable at a glance instead of looking like its creation date.
-const dateCell = (timestamp: number | null, render: (timestamp: number) => string): DateCell => ({
-  rawValue: timestamp,
-  content: (
-    <Typography variant="body2" color="text.secondary" noWrap>
-      {timestamp !== null ? render(timestamp) : '–'}
-    </Typography>
-  ),
+// Sorts on the raw timestamp; renders a dash when there's no date.
+const dateColumn = (
+  id: string,
+  header: string,
+  getDate: (member: MemberDto) => string | null | undefined,
+  render: (timestamp: number) => string,
+): DataTableColumn<MemberDto> => ({
+  id,
+  header,
+  width: '15%',
+  minWidth: 110,
+  // Hidden on mobile — surfaced in the expandable row detail instead
+  priority: 'secondary',
+  cellTestId: `table-cell-${id}`,
+  sortValue: (member) => parseTimestamp(getDate(member)),
+  cell: (member) => {
+    const timestamp = parseTimestamp(getDate(member))
+    return (
+      <Typography variant="body2" fontSize={12} color="text.secondary" noWrap>
+        {timestamp !== null ? render(timestamp) : '–'}
+      </Typography>
+    )
+  },
 })
 
-const getHeadCells = (variant: MembersListVariant) => [
-  {
-    id: 'name',
-    label: 'Name',
-    width: variant === 'pending' ? '22%' : '28%',
-  },
-  {
-    id: 'email',
-    label: 'Email',
-    width: variant === 'pending' ? '22%' : '26%',
-  },
-  {
-    id: 'role',
-    label: 'Role',
-    width: variant === 'pending' ? '12%' : '14%',
-  },
-  // Active members show when they joined; pending invites show when they were invited plus how
-  // long the invite has left.
-  ...(variant === 'pending'
-    ? [
-        { id: 'invitedOn', label: 'Invited on', width: '16%' },
-        { id: 'expires', label: 'Expires', width: '16%' },
-      ]
-    : [{ id: 'memberSince', label: 'Member since', width: '20%' }]),
-  {
-    id: 'actions',
-    label: '',
-    width: '12%',
-    sticky: true,
-  },
-]
-
-// Precompute per variant — the column set only depends on `variant`, so there's no need to rebuild
-// it on every render.
-const HEAD_CELLS: Record<MembersListVariant, ReturnType<typeof getHeadCells>> = {
-  active: getHeadCells('active'),
-  pending: getHeadCells('pending'),
+const DATE_COLUMNS: Record<MembersListVariant, DataTableColumn<MemberDto>[]> = {
+  active: [dateColumn('memberSince', 'Member since', (member) => member.createdAt, formatDate)],
+  pending: [
+    dateColumn('invitedOn', 'Invited on', (member) => member.createdAt, formatDate),
+    dateColumn('expires', 'Expires', (member) => member.inviteExpiresAt, formatTimeInWords),
+  ],
 }
 
 const EditButton = ({ member, disabled }: { member: MemberDto; disabled: boolean }) => {
@@ -164,7 +132,6 @@ export const RemoveMemberButton = ({
 const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; variant?: MembersListVariant }) => {
   const isAdmin = useIsAdmin()
   const adminCount = useAdminCount(members)
-  const isMobile = useIsMobile()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const isTwoFactorEnabled = useHasFeature(FEATURES.SWITCH_AUTHENTICATOR)
@@ -188,22 +155,17 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
     // Contract: Email invites can always be renewed (resending the email);
     // wallet invites are only renewed once they have expired.
     const canRenew = isPendingInvite && (Boolean(memberEmail) || isExpired)
-    const createdTimestamp = toTimestamp(member.createdAt)
-    const dateCells: Record<string, DateCell> =
-      variant === 'pending'
-        ? {
-            invitedOn: dateCell(createdTimestamp, formatDate),
-            expires: dateCell(toTimestamp(member.inviteExpiresAt), formatTimeInWords),
-          }
-        : { memberSince: dateCell(createdTimestamp, formatDate) }
     return { isDeclined, isExpired, isInvite, isDisabled, editDisabled, canRenew, memberEmail }
   }
 
-  // The 2FA column takes its share from name and email so the widths still total 100%
+  // Widths must sum to 100% per configuration (variant × 2FA flag) — `table-fixed` overflows otherwise.
+  const isCondensed = isTwoFactorEnabled && variant === 'pending'
+  const badgeWidth = isCondensed ? '10%' : '15%'
+
   const twoFactorColumn: DataTableColumn<MemberDto> = {
     id: 'twoFactor',
     header: '2FA',
-    width: '15%',
+    width: badgeWidth,
     minWidth: 130,
     cellTestId: 'table-cell-2fa',
     sortValue: (m) => getMemberTwoFactorStatus(m),
@@ -214,12 +176,12 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
     {
       id: 'name',
       header: 'Name',
-      width: isTwoFactorEnabled ? '35%' : '40%',
+      width: isTwoFactorEnabled || variant === 'pending' ? '20%' : '35%',
       sticky: true,
       minWidth: 200,
       cellTestId: 'table-cell-name',
       sortValue: (m) => getMemberDisplayName(m),
-      cell: (member) => {
+      cell: (member, { isCompact }) => {
         const { isDeclined, isExpired, memberEmail } = memberFlags(member)
         return (
           <div className="flex flex-col gap-0.5">
@@ -228,8 +190,8 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
               {isDeclined && <Badge variant="destructive">Declined</Badge>}
               {isExpired && <Badge variant="warning">Expired</Badge>}
             </div>
-            {/* The email column is hidden on mobile — surface it under the name instead */}
-            {isMobile && memberEmail && (
+            {/* The email column is hidden in the compact layout — surface it under the name instead */}
+            {isCompact && memberEmail && (
               <span className="text-muted-foreground truncate pl-9 text-xs">{memberEmail}</span>
             )}
           </div>
@@ -239,7 +201,7 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
     {
       id: 'email',
       header: 'Email',
-      width: isTwoFactorEnabled ? '20%' : '30%',
+      width: isCondensed ? '15%' : '20%',
       priority: 'secondary',
       minWidth: 180,
       cellTestId: 'table-cell-email',
@@ -256,22 +218,23 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
     {
       id: 'role',
       header: 'Role',
-      width: '15%',
+      width: badgeWidth,
       minWidth: 90,
       cellTestId: 'table-cell-role',
       sortValue: (m) => m.role,
       cell: (member) => <Badge variant="secondary">{checkIsAdmin(member) ? 'Admin' : 'Member'}</Badge>,
     },
+    ...DATE_COLUMNS[variant],
     {
       id: 'actions',
       width: '15%',
       align: 'end',
       cellTestId: 'table-cell-actions',
       minWidth: 80,
-      cell: (member) => {
+      cell: (member, { isCompact }) => {
         if (!isAdmin) return null
         const { isInvite, isDisabled, editDisabled, canRenew } = memberFlags(member)
-        return isMobile ? (
+        return isCompact ? (
           <MemberRowActionsMenu
             member={member}
             disabled={isDisabled}
@@ -290,8 +253,26 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
     },
   ]
 
-  return <PaginatedDataTable columns={columns} rows={members} getRowKey={(member) => String(member.id)} />
-  // return <EnhancedTable rows={rows} headCells={HEAD_CELLS[variant]} fixedLayout />
+  // Surfaces the date columns hidden on mobile (same pattern as the address book tables)
+  const renderRowDetail = (member: MemberDto) => (
+    <div className="flex flex-col gap-2 text-sm">
+      {DATE_COLUMNS[variant].map((column) => (
+        <div key={column.id} className="flex flex-wrap items-center gap-2">
+          <span className="text-muted-foreground w-24 shrink-0">{column.header}</span>
+          {column.cell(member, { isCompact: true })}
+        </div>
+      ))}
+    </div>
+  )
+
+  return (
+    <PaginatedDataTable
+      columns={columns}
+      rows={members}
+      getRowKey={(member) => String(member.id)}
+      renderRowDetail={renderRowDetail}
+    />
+  )
 }
 
 export default MembersList

@@ -1,4 +1,4 @@
-import { render, screen, within } from '@/tests/test-utils'
+import { fireEvent, render, screen, within } from '@/tests/test-utils'
 import type { ReactNode } from 'react'
 import { formatTimeInWords, formatWithSchema } from '@safe-global/utils/utils/date'
 import { memberBuilder, memberUserBuilder } from '@/tests/builders/member'
@@ -314,6 +314,38 @@ describe('MembersList', () => {
         formatTimeInWords(new Date(inviteExpiresAt).getTime()),
       ),
     ).toBeInTheDocument()
+  })
+
+  it('surfaces the join date in a collapsible row detail on mobile', () => {
+    mockUseIsMobile.mockReturnValue(true)
+    const createdAt = '2026-04-22T12:00:00.000Z'
+
+    render(<MembersList variant="active" members={[memberBuilder().with({ name: 'Alice', createdAt }).build()]} />)
+
+    // The date column is dropped from the compact table — it only lives in the row detail
+    expect(screen.queryByText(formatDate(createdAt))).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Show details' }))
+    expect(screen.getByText(formatDate(createdAt))).toBeInTheDocument()
+    expect(screen.getByText('Member since')).toBeInTheDocument()
+  })
+
+  it('surfaces both invite dates in the row detail on mobile for the pending variant', () => {
+    mockUseIsMobile.mockReturnValue(true)
+    const createdAt = '2026-04-22T12:00:00.000Z'
+    const inviteExpiresAt = '2999-01-01T12:00:00.000Z'
+
+    render(
+      <MembersList
+        variant="pending"
+        members={[memberBuilder().with({ status: 'INVITED', name: 'Bob', createdAt, inviteExpiresAt }).build()]}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show details' }))
+    expect(screen.getByText(formatDate(createdAt))).toBeInTheDocument()
+    expect(screen.getByText(formatTimeInWords(new Date(inviteExpiresAt).getTime()))).toBeInTheDocument()
+    expect(screen.getByText('Invited on')).toBeInTheDocument()
+    expect(screen.getByText('Expires')).toBeInTheDocument()
   })
 
   it('renders a dash in the Expires column when a pending invite has no expiry', () => {

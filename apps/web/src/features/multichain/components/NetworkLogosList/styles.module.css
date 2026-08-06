@@ -5,6 +5,11 @@
   row-gap: 4px;
 }
 
+/* Capped lists (logos + "+N") are a fixed-size cluster — never break the +N onto its own row */
+.capped {
+  flex-wrap: nowrap;
+}
+
 .networks img {
   margin-left: -6px;
   border-radius: 50%;

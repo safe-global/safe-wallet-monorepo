@@ -6,9 +6,6 @@ import { Builder } from '@/tests/Builder'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceAddressBookActions from '../SpaceAddressBookActions'
 
-const mockUseIsMobile = jest.fn(() => false)
-jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
-
 const mockUseIsAdmin = jest.fn(() => true)
 jest.mock('@/features/spaces', () => ({ useIsAdmin: () => mockUseIsAdmin() }))
 
@@ -70,7 +67,6 @@ const buildEntry = () =>
 describe('SpaceAddressBookActions', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseIsMobile.mockReturnValue(false)
     mockUseIsAdmin.mockReturnValue(true)
   })
 
@@ -82,15 +78,14 @@ describe('SpaceAddressBookActions', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('does not render the kebab on desktop', () => {
+  it('does not render the kebab in the regular layout', () => {
     render(<SpaceAddressBookActions entry={buildEntry()} />)
 
     expect(screen.queryByRole('button', { name: 'Contact actions' })).not.toBeInTheDocument()
   })
 
-  it('opens the edit dialog from the mobile kebab', () => {
-    mockUseIsMobile.mockReturnValue(true)
-    render(<SpaceAddressBookActions entry={buildEntry()} />)
+  it('opens the edit dialog from the compact-layout kebab', () => {
+    render(<SpaceAddressBookActions entry={buildEntry()} isCompact />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Contact actions' }))
     fireEvent.click(screen.getByRole('button', { name: 'Edit entry' }))
@@ -98,9 +93,8 @@ describe('SpaceAddressBookActions', () => {
     expect(screen.getByTestId('edit-contact-dialog')).toBeInTheDocument()
   })
 
-  it('opens the delete dialog from the mobile kebab', () => {
-    mockUseIsMobile.mockReturnValue(true)
-    render(<SpaceAddressBookActions entry={buildEntry()} />)
+  it('opens the delete dialog from the compact-layout kebab', () => {
+    render(<SpaceAddressBookActions entry={buildEntry()} isCompact />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Contact actions' }))
     fireEvent.click(screen.getByRole('button', { name: 'Delete entry' }))
