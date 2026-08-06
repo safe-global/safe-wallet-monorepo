@@ -36,7 +36,7 @@ const EditProposerDialog = ({ proposer }: { proposer: Delegate }) => {
                 onClick={() => setOpen(true)}
                 disabled={!isOk || !canEdit}
               >
-                <EditIcon className="size-4 text-border" />
+                <EditIcon className="size-4 text-[var(--color-border-main)]" />
               </Button>
             </span>
           )

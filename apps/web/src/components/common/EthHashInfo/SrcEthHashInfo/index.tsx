@@ -114,9 +114,9 @@ const SrcEthHashInfo = ({
                   <Tooltip>
                     <TooltipTrigger render={<span style={{ lineHeight: 0 }} />}>
                       {addressBookNameSource === ContactSource.local ? (
-                        <AddressBookIcon className="size-5 text-border" />
+                        <AddressBookIcon className="size-5 text-[var(--color-border-main)]" />
                       ) : (
-                        <Cloud className="size-5 text-border" />
+                        <Cloud className="size-5 text-[var(--color-border-main)]" />
                       )}
                     </TooltipTrigger>
                     <TooltipContent>
@@ -145,7 +145,7 @@ const SrcEthHashInfo = ({
           {showCopyButton && <CopyAddressButton address={address} trusted={trusted} />}
 
           {hasExplorer && ExplorerButtonProps && (
-            <div className="text-border">
+            <div className="text-[var(--color-border-main)]">
               <ExplorerButton {...ExplorerButtonProps} onClick={stopPropagation} />
             </div>
           )}

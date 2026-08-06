@@ -73,7 +73,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
             </button>
           </span>
           <div
-            class="text-border"
+            class="text-[var(--color-border-main)]"
           />
         </div>
       </div>
@@ -151,7 +151,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
             </button>
           </span>
           <div
-            class="text-border"
+            class="text-[var(--color-border-main)]"
           />
         </div>
       </div>
@@ -240,7 +240,7 @@ exports[`SettingsChange should display the SettingsChange component with owner d
             </button>
           </span>
           <div
-            class="text-border"
+            class="text-[var(--color-border-main)]"
           />
         </div>
       </div>

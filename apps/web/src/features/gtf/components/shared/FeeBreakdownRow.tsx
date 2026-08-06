@@ -37,7 +37,7 @@ export const FeeBreakdownRow = ({
       {tooltip && (
         <Tooltip>
           <TooltipTrigger render={<span className={css.tooltipIcon} />}>
-            <InfoIcon className="size-4 text-border" />
+            <InfoIcon className="size-4 text-[var(--color-border-main)]" />
           </TooltipTrigger>
           <TooltipContent>{tooltip}</TooltipContent>
         </Tooltip>

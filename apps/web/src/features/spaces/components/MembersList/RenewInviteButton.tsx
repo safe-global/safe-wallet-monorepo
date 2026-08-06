@@ -16,7 +16,7 @@ const RenewInviteButton = ({ member }: { member: MemberDto }) => {
           <span>
             <Track {...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_RENEWED} label={SPACE_LABELS.invite_list}>
               <Button variant="ghost" size="icon-sm" onClick={handleRenew} disabled={isLoading}>
-                <Send className="size-4 translate-x-[-0.8px] translate-y-[0.5px] fill-none text-border" />
+                <Send className="size-4 translate-x-[-0.8px] translate-y-[0.5px] fill-none text-[var(--color-border-main)]" />
               </Button>
             </Track>
           </span>

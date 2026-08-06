@@ -75,7 +75,7 @@ const SpendingLimitRow = ({
                   <TooltipTrigger
                     render={
                       <span>
-                        <InfoIcon className="text-border ml-1 inline-block size-4 align-middle" />
+                        <InfoIcon className="text-[var(--color-border-main)] ml-1 inline-block size-4 align-middle" />
                       </span>
                     }
                   />
@@ -103,7 +103,7 @@ const SpendingLimitRow = ({
                   <TooltipTrigger
                     render={
                       <span>
-                        <InfoIcon className="text-border ml-1 inline-block size-4 align-middle" />
+                        <InfoIcon className="text-[var(--color-border-main)] ml-1 inline-block size-4 align-middle" />
                       </span>
                     }
                   />

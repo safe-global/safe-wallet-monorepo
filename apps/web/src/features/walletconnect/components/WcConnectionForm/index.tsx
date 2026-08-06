@@ -41,7 +41,7 @@ const WcConnectionForm = ({ sessions, uri }: { sessions: SessionTypes.Struct[]; 
               <span className="inline-flex">
                 <Track {...(showHints ? WALLETCONNECT_EVENTS.HINTS_HIDE : WALLETCONNECT_EVENTS.HINTS_SHOW)}>
                   <Button variant="ghost" size="icon" onClick={onToggle} className={css.infoIcon}>
-                    <InfoIcon className="size-6 text-border" />
+                    <InfoIcon className="size-6 text-[var(--color-border-main)]" />
                   </Button>
                 </Track>
               </span>

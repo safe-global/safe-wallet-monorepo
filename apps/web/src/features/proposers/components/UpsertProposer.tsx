@@ -313,7 +313,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
                       <TooltipTrigger
                         render={
                           <span tabIndex={0} className="inline-flex">
-                            <InfoIcon className="size-4 text-border" />
+                            <InfoIcon className="size-4 text-[var(--color-border-main)]" />
                           </span>
                         }
                       />

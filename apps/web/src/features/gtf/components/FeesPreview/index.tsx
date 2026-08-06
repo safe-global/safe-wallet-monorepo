@@ -33,7 +33,7 @@ const paymentSourceLabel = (source: GtfPaymentMode) => (source === 'safe' ? 'Saf
 const SignerFeeTooltip = (): ReactElement => (
   <Tooltip>
     <TooltipTrigger render={<span className={css.tooltipIcon} />}>
-      <InfoIcon className="size-4 text-border" />
+      <InfoIcon className="size-4 text-[var(--color-border-main)]" />
     </TooltipTrigger>
     <TooltipContent side="top">{SIGNER_FEE_TOOLTIP}</TooltipContent>
   </Tooltip>
