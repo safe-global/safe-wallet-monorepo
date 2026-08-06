@@ -19,7 +19,6 @@ export const formatWithSchema = (timestamp: number, schema: string): string => f
 
 export const formatDate = (timestamp: number): string => formatWithSchema(timestamp, 'MMM d, yyyy')
 
-// `format` throws on invalid dates, so resolve to a timestamp only when the value parses.
 export const parseTimestamp = (value: string | null | undefined): number | null => {
   if (!value) return null
   const timestamp = new Date(value).getTime()
