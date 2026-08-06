@@ -4,6 +4,12 @@
     {
       "name": "web",
       "runtimeExecutable": "yarn",
+      "runtimeArgs": ["workspace", "@safe-global/web-tanstack", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "web-next",
+      "runtimeExecutable": "yarn",
       "runtimeArgs": ["workspace", "@safe-global/web", "dev"],
       "port": 3000,
       "autoPort": true
