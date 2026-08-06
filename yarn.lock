@@ -13788,6 +13788,7 @@ __metadata:
     jest: "npm:^29.7.0"
     jest-environment-jsdom: "npm:^29.7.0"
     localforage: "npm:^1.10.0"
+    lucide-react: "npm:^0.563.0"
     msw: "npm:^2.7.3"
     prettier: "npm:^3.6.2"
     react: "npm:19.2.0"

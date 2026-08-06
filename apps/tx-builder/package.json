@@ -32,6 +32,7 @@
     "ethers": "6.17.0",
     "evm-proxy-detection": "^1.0.0",
     "localforage": "^1.10.0",
+    "lucide-react": "^0.563.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-hook-form": "^7.54.2",
