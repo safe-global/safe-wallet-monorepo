@@ -16,7 +16,11 @@ import * as useChainIdModule from './useChainId'
  * `useChain`/`useCurrentChain`/`useHasFeature` chain — actually run through those hooks.
  */
 describe('useChains override wiring', () => {
-  const CHAIN_ID = '1'
+  // The wiring is chain-agnostic; all these ids have to be is different from each other. Drawn from
+  // disjoint ranges so that holds by construction rather than by luck — `OTHER_CHAIN_ID` is the
+  // second entry in the configs array, and the id the config service was never told about.
+  const CHAIN_ID = faker.number.int({ min: 1, max: 999 }).toString()
+  const OTHER_CHAIN_ID = faker.number.int({ min: 1000, max: 1999 }).toString()
 
   const mockChains = (chains: Chain[]) => {
     const ids = chains.map((chain) => (chain as unknown as { chainId: string }).chainId)
@@ -40,7 +44,7 @@ describe('useChains override wiring', () => {
 
   it('applies overrides to the configs array', () => {
     const overridden = pickFeature()
-    mockChains([chainWith(CHAIN_ID, []), chainWith('137', [])])
+    mockChains([chainWith(CHAIN_ID, []), chainWith(OTHER_CHAIN_ID, [])])
     jest.spyOn(store, 'useAppSelector').mockReturnValue({ [overridden]: true })
 
     const { result } = renderHook(() => useChains())
@@ -70,7 +74,7 @@ describe('useChains override wiring', () => {
   it('returns undefined for a chain the config service does not know', () => {
     jest.spyOn(store, 'useAppSelector').mockReturnValue({ [pickFeature()]: true })
 
-    const { result } = renderHook(() => useChain('137'))
+    const { result } = renderHook(() => useChain(OTHER_CHAIN_ID))
 
     expect(result.current).toBeUndefined()
   })
