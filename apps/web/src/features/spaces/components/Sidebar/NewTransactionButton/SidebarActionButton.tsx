@@ -34,8 +34,12 @@ export const SidebarActionButton = (): ReactElement => {
           variant="outline"
           size="lg"
           disabled={!isOk}
+          // Collapsed: `size-8!` (32px square), matching the workspace switcher and the
+          // back-to-workspace button it stacks with in the icon rail. A `w-9` alone left the size's
+          // `h-10` in place, so it sat 36x40 — wider and taller than everything around it. The `!` is
+          // what beats `h-10`, the same way SidebarMenuButton's own icon-mode sizing does.
           // eslint-disable-next-line no-restricted-syntax -- sidebar action button: sidebar-accent hover + dark border + collapsible icon-mode sizing
-          className="w-full font-semibold py-0 hover:bg-sidebar-accent dark:border-border dark:hover:bg-sidebar-accent group-data-[collapsible=icon]:w-9 group-data-[collapsible=icon]:px-0"
+          className="w-full font-semibold py-0 hover:bg-sidebar-accent dark:border-border dark:hover:bg-sidebar-accent group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:px-0"
         >
           <Plus className="size-4 shrink-0" />
           <span className="group-data-[collapsible=icon]:hidden">New transaction</span>

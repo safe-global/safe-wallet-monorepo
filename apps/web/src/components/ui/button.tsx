@@ -62,12 +62,17 @@ const buttonVariants = cva(
         // (Send/Receive/Swap, Confirm/Execute, Save settings, Filter/Export). Pair
         // with variant="default" for the primary action and variant="secondary" for
         // secondary actions so they share one height, padding, and icon size.
-        action: "h-10 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5",
+        //
+        // `h-9` on purpose — the same height as `default`; the wider px-6 and larger icon are what
+        // set an action apart, not a taller box. Only the deliberate exceptions run at 40px (`lg`)
+        // or 48px (`xl`), so reach for those rather than overriding a height here.
+        action: "h-9 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5",
         // Modal / flow / settings submit button: the action pill plus a stable minimum width so
         // the label can swap (e.g. "Execute" → spinner) without the button resizing. Replaces the
         // per-call magic min-w-[82/112/114/122px]. Pair with a `w-full lg:w-auto` wrapper for the
-        // full-width-on-mobile flow submit pattern.
-        submit: "h-10 gap-2 px-6 min-w-[7rem] [&_svg:not([class*='size-'])]:size-5",
+        // full-width-on-mobile flow submit pattern. Same `h-9` as `action` — a dialog footer should
+        // not be taller than the CTA it mirrors on the page.
+        submit: "h-9 gap-2 px-6 min-w-[7rem] [&_svg:not([class*='size-'])]:size-5",
         // Full-screen onboarding / flow footer CTA: the taller 48px scale used by the Spaces
         // onboarding Back/Continue buttons. Use via the OnboardingFooter preset; pair with a
         // `w-full xl:flex-1` wrapper for the stacked-mobile → row-on-xl layout.

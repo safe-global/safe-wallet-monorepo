@@ -1,6 +1,9 @@
 .sidebarInteractive {
   cursor: pointer;
-  border-radius: var(--rounded-md, 8px);
+  /* `--rounded-md` is not a token under any name, so this had always fallen back to the literal 8px
+     and quietly overrode the base menu-button's own `rounded-md`. `--radius-md` is the real one (12px),
+     which is what the New transaction button above these items already renders at. */
+  border-radius: var(--radius-md);
 }
 
 .sidebarNavItem {

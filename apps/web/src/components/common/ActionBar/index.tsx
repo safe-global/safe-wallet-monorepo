@@ -21,7 +21,7 @@ type ActionButtonProps = Omit<ComponentProps<typeof Button>, 'size' | 'className
 
 /**
  * ActionButton — a Button locked to the prominent `size="action"` CTA pill
- * (h-10, px-6). The `variant` carries the emphasis: `default` for the one
+ * (h-9, px-6). The `variant` carries the emphasis: `default` for the one
  * primary action, `secondary` (white/card surfaces) or `outline` (page/toolbar
  * backgrounds) for the rest. It does not take a styling `className`.
  */
