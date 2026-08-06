@@ -14,7 +14,7 @@ import { getSeverityFromScore } from './constants'
 import { TWAP_FALLBACK_HANDLER, TWAP_FALLBACK_HANDLER_NETWORKS } from '@/features/swap/helpers/utils'
 
 // Only 1.3.0+ has the CompatibilityFallbackHandler; older versions used different handler contracts
-const COMPATIBILITY_HANDLER_VERSIONS: SafeVersion[] = ['1.3.0', '1.4.1']
+const COMPATIBILITY_HANDLER_VERSIONS: SafeVersion[] = ['1.3.0', '1.4.1', '1.5.0']
 
 /** Check if address matches an ExtensibleFallbackHandler deployment (v1.5.0+, not in SafeVersion type yet). */
 const isExtensibleFallbackHandler = (address: string, chainId: string): boolean => {

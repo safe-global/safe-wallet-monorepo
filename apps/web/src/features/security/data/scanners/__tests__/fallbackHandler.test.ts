@@ -28,6 +28,18 @@ describe('fallbackHandlerScanner', () => {
     expect(result.score).toBe(100)
   })
 
+  it('returns clear for the official 1.5.0 fallback handler', async () => {
+    // CompatibilityFallbackHandler v1.5.0 on Ethereum mainnet
+    const result = await fallbackHandlerScanner.scan(
+      createMockContext({
+        chainId: '1',
+        fallbackHandler: { value: '0x3EfCBb83A4A7AfcB4F68D501E2c2203a38be77f4' },
+      }),
+    )
+    expect(result.status).toBe('clear')
+    expect(result.score).toBe(100)
+  })
+
   it('returns issue for an unrecognized fallback handler', async () => {
     const result = await fallbackHandlerScanner.scan(
       createMockContext({
