@@ -4,6 +4,7 @@ on:
     paths:
       - apps/web/**
       - packages/**
+      - yarn.lock
 
   push:
     branches:
@@ -12,6 +13,7 @@ on:
     paths:
       - apps/web/**
       - packages/**
+      - yarn.lock
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -22,25 +24,22 @@ jobs:
   test:
     permissions:
       contents: read
-      checks: write
-      pull-requests: write
 
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
       - uses: ./.github/actions/yarn
 
-      - name: Annotations and coverage report
+      # Experiment: run only tests affected by the diff instead of the
+      # coverage-report action, which ran the full suite twice (head + base).
+      - name: Run affected tests
         if: github.event_name == 'pull_request'
-        uses: ArtiomTr/jest-coverage-report-action@262a7bb0b20c4d1d6b6b026af0f008f78da72788 # v2.3.1
-        with:
-          skip-step: install
-          annotations: failed-tests
-          package-manager: yarn
-          test-script: yarn test:ci
-          working-directory: apps/web
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        run: yarn test --ci --silent --watchAll=false --changedSince=origin/${{ github.base_ref }} --passWithNoTests
+        working-directory: apps/web
         env:
           NEXT_PUBLIC_IS_OFFICIAL_HOST: true
 

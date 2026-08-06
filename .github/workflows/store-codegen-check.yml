@@ -16,6 +16,7 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -39,6 +40,11 @@ jobs:
 
       - uses: ./.github/actions/yarn
         if: steps.check-files.outputs.should_validate == 'true'
+
+      # Cheap local hash check; previously ran as a jest test in every web unit run
+      - name: Check AUTO_GENERATED files are in sync with schema.json
+        if: steps.check-files.outputs.should_validate == 'true'
+        run: yarn workspace @safe-global/store check-sync
 
       - name: Run codegen
         if: steps.check-files.outputs.should_validate == 'true'

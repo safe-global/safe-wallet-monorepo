@@ -2,6 +2,10 @@ name: Web Deploy to dev/staging
 
 on:
   pull_request:
+    paths:
+      - apps/web/**
+      - packages/**
+      - yarn.lock
 
   push:
     branches:
@@ -20,6 +24,7 @@ permissions: {}
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     permissions:
       contents: read
       pull-requests: write
