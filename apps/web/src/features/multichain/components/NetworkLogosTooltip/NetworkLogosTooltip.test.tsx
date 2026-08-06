@@ -4,7 +4,11 @@ import NetworkLogosTooltip from './index'
 jest.mock('@/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   TooltipTrigger: ({ children }: { children: React.ReactNode }) => <div data-testid="trigger">{children}</div>,
-  TooltipContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  TooltipContent: ({ children, className }: { children: React.ReactNode; className?: string }) => (
+    <div data-testid="tooltip-content" className={className}>
+      {children}
+    </div>
+  ),
 }))
 jest.mock('../NetworkLogosList', () => {
   const NetworkLogosList = ({ maxVisible }: { maxVisible?: number }) => (
@@ -55,7 +59,18 @@ describe('NetworkLogosTooltip', () => {
     render(<NetworkLogosTooltip networks={networks(['1'])} contentTestId="multichain-tooltip" />)
 
     const content = screen.getByTestId('multichain-tooltip')
-    expect(content).toHaveClass('overflow-y-auto', 'overscroll-contain')
+    expect(content).toHaveClass('overflow-y-auto', 'overscroll-contain', 'no-scrollbar')
     expect(content).toHaveStyle({ maxHeight: 'calc(var(--available-height) - 0.75rem)' })
+  })
+
+  it('uses theme-aware popover colors and elevation so the list separates from the page', () => {
+    render(<NetworkLogosTooltip networks={networks(['1'])} />)
+
+    expect(screen.getByTestId('tooltip-content')).toHaveClass(
+      'bg-popover',
+      'text-popover-foreground',
+      'shadow-md',
+      'ring-1',
+    )
   })
 })
