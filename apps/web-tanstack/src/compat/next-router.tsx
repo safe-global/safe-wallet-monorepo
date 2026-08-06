@@ -11,6 +11,14 @@ import { parseNextQuery, toNavigateOptions, type Url } from './next-url'
 // next router push/replace/prefetch accept (url, as?, options?).
 type TransitionOptions = { shallow?: boolean; locale?: string | false; scroll?: boolean }
 
+/**
+ * Mirrors Next's `NextHistoryState`, which its `beforePopState` callback receives. Typing the
+ * callback as argument-less made reused apps/web code that reads the destination —
+ * `beforePopState(({ url }) => …)` in usePreventNavigation — a type error here while compiling
+ * clean against the real router in apps/web.
+ */
+type NextHistoryStateLike = { url: string; as: string; options?: TransitionOptions }
+
 export interface NextRouterLike {
   pathname: string
   asPath: string
@@ -26,7 +34,7 @@ export interface NextRouterLike {
   forward: () => void
   reload: () => void
   prefetch: (url: Url, as?: Url, options?: TransitionOptions) => Promise<void>
-  beforePopState: (cb: () => boolean) => void
+  beforePopState: (cb: (state: NextHistoryStateLike) => boolean) => void
   events: {
     on: (event: string, handler: (...args: unknown[]) => void) => void
     off: (event: string, handler: (...args: unknown[]) => void) => void
