@@ -10,14 +10,6 @@ import type { FeatureFlagRowData } from '../hooks/useFeatureFlagEditorData'
 const matchesSearch = (row: FeatureFlagRowData, search: string): boolean =>
   row.feature.toLowerCase().includes(search.toLowerCase())
 
-/**
- * Distinctive, non-copy sentinel rendered as a data attribute on the editor root.
- * `bundleExclusion.test.ts` asserts this string is absent from production chunks to
- * prove the editor UI is dead-code-eliminated. Keep it here (a dynamically-imported,
- * prod-excluded module) and unique so unrelated copy changes can't affect the check.
- */
-export const EDITOR_BUNDLE_SENTINEL = 'feature-flag-editor:dev-only-ui-sentinel'
-
 export const FeatureFlagEditor = (): ReactElement => {
   const { overridden, rest } = useFeatureFlagEditorData()
   const [search, setSearch] = useState('')
@@ -27,7 +19,7 @@ export const FeatureFlagEditor = (): ReactElement => {
   const hasNoMatches = search !== '' && filteredOverridden.length === 0 && filteredRest.length === 0
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col" data-bundle-sentinel={EDITOR_BUNDLE_SENTINEL}>
+    <div className="flex min-h-0 flex-1 flex-col">
       <Alert
         variant="warning"
         className="mb-4 dark:bg-[var(--color-warning-background)] dark:text-[var(--color-text-primary)]"

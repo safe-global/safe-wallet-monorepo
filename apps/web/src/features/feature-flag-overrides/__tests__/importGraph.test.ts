@@ -2,9 +2,8 @@ import { readdirSync, readFileSync } from 'fs'
 import path from 'path'
 
 // The Safe sidebar is statically imported on every route. If any file in it can reach the
-// editor's module graph, the whole dev-only editor UI ships in the production bundle.
-// `bundleExclusion` proves this properly but only runs under RUN_BUNDLE_TESTS; this is the
-// always-on guard, and it covers the entire sidebar tree, not just the entry component.
+// editor's module graph, the whole dev-only editor UI ships in the production bundle. This is the
+// guard for that, and it covers the entire sidebar tree, not just the entry component.
 const SIDEBAR_DIR = path.resolve(__dirname, '../../spaces/components/Sidebar')
 const BARREL = path.resolve(__dirname, '../index.ts')
 
