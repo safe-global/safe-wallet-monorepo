@@ -74,7 +74,7 @@ const AddressInput = ({
   const isReadOnly = Boolean(addressBook[watchedValue]) || Boolean(props.disabled)
 
   // Target chain for the addr record (e.g. mainnet for Spaces contacts, otherwise the current Safe).
-  // ENSv2 gates on the hub (Mainnet/Sepolia) having DOMAIN_LOOKUP, not the L2.
+  // DOMAIN_LOOKUP is hub-only (Mainnet/Sepolia); L2 chain flags are ignored.
   const ensChain = chain ?? currentChain
   const { isDomainLookupEnabled } = useEnsHubProvider(ensChain)
   const {

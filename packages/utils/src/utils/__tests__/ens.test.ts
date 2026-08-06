@@ -1,4 +1,12 @@
-import { convertChainIdToCoinType, ETH_COIN_TYPE, getEnsHubChainId, resolveNameForChain } from '../ens'
+import { FEATURES } from '../chains'
+import {
+  convertChainIdToCoinType,
+  ETH_COIN_TYPE,
+  getEnsHubChainId,
+  hasHubDomainLookup,
+  isEnsHubChainId,
+  resolveNameForChain,
+} from '../ens'
 
 const ADDRESS = '0x0000000000000000000000000000000000000001'
 
@@ -30,6 +38,27 @@ describe('ens utils', () => {
 
     it('returns Sepolia for testnets', () => {
       expect(getEnsHubChainId(true)).toBe('11155111')
+    })
+  })
+
+  describe('isEnsHubChainId / hasHubDomainLookup', () => {
+    it('recognizes only Mainnet and Sepolia as ENS hubs', () => {
+      expect(isEnsHubChainId('1')).toBe(true)
+      expect(isEnsHubChainId('11155111')).toBe(true)
+      expect(isEnsHubChainId('8453')).toBe(false)
+      expect(isEnsHubChainId('137')).toBe(false)
+    })
+
+    it('enables DOMAIN_LOOKUP only when set on a hub chain', () => {
+      expect(hasHubDomainLookup({ chainId: '1', features: [FEATURES.DOMAIN_LOOKUP] })).toBe(true)
+      expect(hasHubDomainLookup({ chainId: '11155111', features: [FEATURES.DOMAIN_LOOKUP] })).toBe(true)
+      expect(hasHubDomainLookup({ chainId: '1', features: [] })).toBe(false)
+    })
+
+    it('ignores DOMAIN_LOOKUP on non-hub chains', () => {
+      expect(hasHubDomainLookup({ chainId: '8453', features: [FEATURES.DOMAIN_LOOKUP] })).toBe(false)
+      expect(hasHubDomainLookup({ chainId: '137', features: [FEATURES.DOMAIN_LOOKUP] })).toBe(false)
+      expect(hasHubDomainLookup(undefined)).toBe(false)
     })
   })
 

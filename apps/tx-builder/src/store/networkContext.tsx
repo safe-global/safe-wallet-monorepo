@@ -5,7 +5,7 @@ import { getChainConfig } from '@safe-global/safe-gateway-typescript-sdk'
 import InterfaceRepository, { InterfaceRepo } from '../lib/interfaceRepository'
 import { useSafeAppsSDK } from '@safe-global/safe-apps-react-sdk'
 import { SafeAppProvider } from '@safe-global/safe-apps-provider'
-import { getEnsHubChainId, resolveNameForChain } from '@safe-global/utils/utils/ens'
+import { getEnsHubChainId, hasHubDomainLookup, resolveNameForChain } from '@safe-global/utils/utils/ens'
 
 type NetworkContextProps = {
   sdk: SafeAppsSDK
@@ -27,6 +27,10 @@ const createEnsHubProvider = async (chainId: string): Promise<JsonRpcProvider | 
   const config = await getChainConfig(chainId)
   const hubChainId = getEnsHubChainId(!!config.isTestnet)
   const hubConfig = hubChainId === chainId ? config : await getChainConfig(hubChainId)
+
+  // DOMAIN_LOOKUP is hub-only — ignore the Safe's chain flag and require it on Mainnet/Sepolia.
+  if (!hasHubDomainLookup(hubConfig)) return undefined
+
   const rpcUrl = hubConfig.publicRpcUri?.value || hubConfig.rpcUri?.value
   if (!rpcUrl) return undefined
 

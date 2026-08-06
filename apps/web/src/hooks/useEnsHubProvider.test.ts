@@ -95,13 +95,29 @@ describe('useEnsHubProvider', () => {
     expect(mockCreateWeb3ReadOnly).not.toHaveBeenCalled()
   })
 
-  it('gates domain lookup on the hub chain feature flag', () => {
+  it('gates domain lookup on the hub chain feature flag only', () => {
     // Mainnet hub has DOMAIN_LOOKUP, Sepolia hub (for testnets) does not
     const production = renderHook(() => useEnsHubProvider(baseChain))
     expect(production.result.current.isDomainLookupEnabled).toBe(true)
 
     const testnet = renderHook(() => useEnsHubProvider(sepoliaChain))
     expect(testnet.result.current.isDomainLookupEnabled).toBe(false)
+  })
+
+  it('ignores DOMAIN_LOOKUP on the target L2 chain', () => {
+    const baseWithFlag = chainBuilder()
+      .with({ chainId: '8453', shortName: 'base', isTestnet: false, features: [FEATURES.DOMAIN_LOOKUP] })
+      .build()
+    // Hub (mainnet) lacks the flag — L2 having it must not enable ENS
+    mockUseChain.mockImplementation((chainId: string) => {
+      if (chainId === '1') return { ...mainnetChain, features: [] }
+      return undefined
+    })
+
+    const { result } = renderHook(() => useEnsHubProvider(baseWithFlag))
+
+    expect(result.current.hubChain?.chainId).toBe('1')
+    expect(result.current.isDomainLookupEnabled).toBe(false)
   })
 
   it('returns no provider without a target chain', () => {

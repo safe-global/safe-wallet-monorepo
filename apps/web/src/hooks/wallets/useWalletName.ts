@@ -1,11 +1,10 @@
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { useChain } from '@/hooks/useChains'
 import { useAppSelector } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
 import { lookupAddress } from '@/services/ens'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import { ETH_COIN_TYPE, getEnsHubChainId } from '@safe-global/utils/utils/ens'
+import { ETH_COIN_TYPE, getEnsHubChainId, hasHubDomainLookup } from '@safe-global/utils/utils/ens'
 
 /**
  * Resolves the connected wallet's ENS primary name against the ENS hub (Ethereum mainnet).
@@ -20,7 +19,7 @@ export const useWalletName = (wallet?: ConnectedWallet | null): string | undefin
   const chain = useChain(getEnsHubChainId(false))
   const customRpc = useAppSelector(selectRpc)
   const address = wallet?.address
-  const canResolve = !!chain && !!address && hasFeature(chain, FEATURES.DOMAIN_LOOKUP)
+  const canResolve = hasHubDomainLookup(chain) && !!address
 
   const [ens] = useAsync<string | undefined>(async () => {
     if (!canResolve || !chain || !address) return undefined

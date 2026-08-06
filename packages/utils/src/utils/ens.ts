@@ -1,4 +1,5 @@
 import type { JsonRpcProvider } from 'ethers'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 /** SLIP-44 coin type for Ethereum (ENSIP-9). */
 export const ETH_COIN_TYPE = 60
@@ -8,6 +9,26 @@ export const ETH_COIN_TYPE = 60
 const MAINNET_CHAIN_ID = 1
 export const ENS_HUB_MAINNET = '1'
 export const ENS_HUB_SEPOLIA = '11155111'
+
+/**
+ * ENS resolution is hub-scoped: only Mainnet (production) and Sepolia (testnets) host the
+ * Universal Resolver. `DOMAIN_LOOKUP` on any other chain is ignored.
+ */
+export const isEnsHubChainId = (chainId: string): boolean => {
+  return chainId === ENS_HUB_MAINNET || chainId === ENS_HUB_SEPOLIA
+}
+
+/**
+ * Whether ENS is enabled for a hub chain config. Returns false for non-hub chains even if they
+ * list `DOMAIN_LOOKUP` in features — L2 flags must not control ENS.
+ */
+export const hasHubDomainLookup = (chain?: { chainId: string; features: readonly string[] }): boolean => {
+  if (!chain || !isEnsHubChainId(chain.chainId)) {
+    return false
+  }
+
+  return chain.features.includes(FEATURES.DOMAIN_LOOKUP)
+}
 
 // ENSIP-11 reserves the most significant bit as the EVM marker, so only chain ids
 // below 0x80000000 can be represented as a coin type

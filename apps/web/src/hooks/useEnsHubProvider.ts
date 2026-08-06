@@ -6,8 +6,7 @@ import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { useChain, useCurrentChain } from '@/hooks/useChains'
 import { useAppSelector } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-import { getEnsHubChainId } from '@safe-global/utils/utils/ens'
+import { getEnsHubChainId, hasHubDomainLookup } from '@safe-global/utils/utils/ens'
 
 // One provider per hub RPC, shared by every consumer for the session. Idle JsonRpcProviders hold
 // no timers or connections, so keeping them alive is cheaper than one provider per mounted hook.
@@ -30,10 +29,13 @@ export const _clearEnsHubProviders = (): void => {
 
 /**
  * Returns the ENSv2 hub chain (Mainnet/Sepolia Universal Resolver) for a target chain, a
- * read-only provider for it, and whether the hub has DOMAIN_LOOKUP enabled. Reuses the app's
- * global provider when the current chain is the hub.
- * Fails closed: when the hub chain is not in the loaded config, no provider is returned — ENS
- * resolution must not fall back to another chain's RPC.
+ * read-only provider for it, and whether ENS is enabled on that hub.
+ *
+ * `DOMAIN_LOOKUP` is hub-only: production Safes follow Mainnet’s flag, testnet Safes follow
+ * Sepolia’s. A `DOMAIN_LOOKUP` entry on an L2 chain config is ignored.
+ *
+ * Reuses the app's global provider when the current chain is the hub. Fails closed when the hub
+ * chain is not in the loaded config — ENS must not fall back to another chain's RPC.
  */
 export const useEnsHubProvider = (
   targetChain?: Chain,
@@ -51,7 +53,7 @@ export const useEnsHubProvider = (
     return getSharedHubProvider(hubChain, customRpc?.[hubChain.chainId])
   }, [hubChain, currentChain?.chainId, globalProvider, customRpc])
 
-  const isDomainLookupEnabled = !!hubChain && hasFeature(hubChain, FEATURES.DOMAIN_LOOKUP)
+  const isDomainLookupEnabled = hasHubDomainLookup(hubChain)
 
   return useMemo(() => ({ hubChain, provider, isDomainLookupEnabled }), [hubChain, provider, isDomainLookupEnabled])
 }
