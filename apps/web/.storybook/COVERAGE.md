@@ -463,7 +463,6 @@ Mid-level view - components grouped by directory.
 | Swap            | pages/swap               | 1          | —     | —       |
 | Terms           | pages/terms              | 1          | —     | —       |
 | Transactions    | pages/transactions       | 6          | —     | —       |
-| User-settings   | pages/user-settings      | 1          | —     | —       |
 | Wc              | pages/wc                 | 1          | —     | —       |
 | Welcome         | pages/welcome            | 3          | —     | —       |
 
@@ -680,7 +679,6 @@ Mid-level view - components grouped by directory.
 | SpaceSidebarSelector | features/spaces/components/SpaceSidebarSelector    | 1          | ↑ group (Spaces)             | —                                    |
 | SpacesList           | features/spaces/components/SpacesList              | 1          | ↑ group (Spaces)             | —                                    |
 | UnauthorizedState    | features/spaces/components/UnauthorizedState       | 1          | ↑ group (Spaces)             | —                                    |
-| UserSettings         | features/spaces/components/UserSettings            | 1          | ↑ group (Spaces)             | —                                    |
 
 </details>
 
@@ -1725,7 +1723,6 @@ Detailed view - every component with its coverage status.
 | UpsertRecoveryFlowIntro          | other       | components/tx-flow/flows/UpsertRecovery/UpsertRecoveryFlowIntro.tsx                          | Group (Tx-flow)                       |
 | UpsertRecoveryFlowReview         | other       | components/tx-flow/flows/UpsertRecovery/UpsertRecoveryFlowReview.tsx                         | Group (Tx-flow)                       |
 | UpsertRecoveryFlowSettings       | other       | components/tx-flow/flows/UpsertRecovery/UpsertRecoveryFlowSettings.tsx                       | Group (Tx-flow)                       |
-| UserSettings                     | other       | features/spaces/components/UserSettings/index.tsx                                            | Group (Spaces)                        |
 | useTxStepper                     | other       | components/tx-flow/useTxStepper.tsx                                                          | Family (Tx-flow)                      |
 | Value                            | transaction | components/transactions/TxDetails/TxData/DecodedData/ValueArray/index.tsx                    | Group (Transactions)                  |
 | VaultDepositConfirmation         | other       | features/earn/components/VaultDepositConfirmation/index.tsx                                  | Family (VaultDepositConfirmation)     |
@@ -1819,7 +1816,6 @@ Detailed view - every component with its coverage status.
 | SingleTransaction        | transaction | pages/transactions/msg.tsx                      | 5              |
 | Queue                    | transaction | pages/transactions/queue.tsx                    | 5              |
 | SingleTransaction        | transaction | pages/transactions/tx.tsx                       | 5              |
-| UserSettingsPage         | other       | pages/user-settings.tsx                         | 5              |
 | WcPage                   | other       | pages/wc.tsx                                    | 5              |
 | Accounts                 | other       | pages/welcome/accounts.tsx                      | 5              |
 | Welcome                  | other       | pages/welcome/index.tsx                         | 5              |

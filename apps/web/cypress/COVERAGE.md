@@ -2,7 +2,7 @@
 
 > **Maintenance:** This file is manually maintained. Update it when adding, removing, or changing visual test files in `e2e/visual/`. Cross-reference with `.storybook/COVERAGE.md` for component-level gaps.
 
-**67 tests** across **33 test files** — each test captures an Argos screenshot automatically.
+**65 tests** across **32 test files** — each test captures an Argos screenshot automatically.
 
 Screenshots are captured via a global `afterEach` hook in `cypress/support/e2e.js`.
 
@@ -53,7 +53,6 @@ Screenshots are captured via a global `afterEach` hook in `cypress/support/e2e.j
 | `/spaces/members`                 | spaces.cy.js                 | 1     | Yes (auth + API) | No      |
 | `/spaces/safe-accounts`           | spaces.cy.js                 | 1     | Yes (auth + API) | No      |
 | `/spaces/address-book`            | spaces.cy.js                 | 1     | Yes (auth + API) | No      |
-| `/user-settings`                  | user_settings.cy.js          | 1     | Yes (auth + API) | No      |
 | Send tx form (modal)              | create_tx_flow.cy.js         | 4     | No               | Yes     |
 | Add owner form (modal)            | owner_management.cy.js       | 2     | No               | Yes     |
 | Replace owner dialog (modal)      | owner_management.cy.js       | 1     | No               | Yes     |
