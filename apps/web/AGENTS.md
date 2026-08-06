@@ -118,12 +118,12 @@ Cross-cutting unit-test conventions live in the root [AGENTS.md](../../AGENTS.md
 
 Located in [cypress/e2e/](cypress/e2e/). Full conventions and patterns: [cypress/CLAUDE.md](cypress/CLAUDE.md).
 
-| Category   | Folder            | CI                           | Purpose                                    |
-| ---------- | ----------------- | ---------------------------- | ------------------------------------------ |
-| Smoke      | `e2e/smoke/`      | Every PR                     | Critical path functional tests             |
-| Visual     | `e2e/visual/`     | Manual (`workflow_dispatch`) | Chromatic visual regression (light + dark) |
-| Regression | `e2e/regression/` | On-demand                    | Feature tests                              |
-| Happy path | `e2e/happypath/`  | On-demand                    | User journey tests                         |
+| Category   | Folder            | CI                           | Purpose                              |
+| ---------- | ----------------- | ---------------------------- | ------------------------------------ |
+| Smoke      | `e2e/smoke/`      | Every PR                     | Critical path functional tests       |
+| Visual     | `e2e/visual/`     | Manual (`workflow_dispatch`) | Argos visual regression (mocked CGW) |
+| Regression | `e2e/regression/` | On-demand                    | Feature tests                        |
+| Happy path | `e2e/happypath/`  | On-demand                    | User journey tests                   |
 
 ```bash
 yarn workspace @safe-global/web cypress:open   # interactive
@@ -355,21 +355,6 @@ export const Empty: Story = (() => {
     decorators: [setup.decorator], // ✅ Only decorator, no stacking
   }
 })()
-```
-
-### Chromatic Visual Regression Testing
-
-Chromatic is integrated for visual regression testing. It automatically captures snapshots of all stories in both light and dark themes.
-
-- **Workflow**: Runs automatically on PRs affecting `apps/web/**` or `packages/**`
-- **TurboSnap**: Only stories affected by code changes are re-snapshotted
-- **Theme modes**: Both light and dark themes are captured automatically
-- **PR checks**: Chromatic posts status checks with links to visual diffs
-
-To run locally (set `CHROMATIC_PROJECT_TOKEN` in `.env.local`):
-
-```bash
-yarn workspace @safe-global/web chromatic
 ```
 
 ## Web-specific common pitfalls
