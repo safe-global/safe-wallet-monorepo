@@ -5,4 +5,4 @@
 // `components/` — that would pull the whole dev-only editor UI into the production bundle. The
 // editor is reachable ONLY through the guarded dynamic import in `FeatureFlagEditorDialogLoader`.
 // `__tests__/importGraph.test.ts` enforces this.
-export { useChainsWithOverrides, useChainWithOverrides } from './hooks/useChainOverrides'
+export { useChainsWithOverrides } from './hooks/useChainOverrides'

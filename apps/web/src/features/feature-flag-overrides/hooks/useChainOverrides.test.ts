@@ -6,7 +6,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { setIsProduction } from '@/tests/env'
 import type { FeatureFlagOverridesState } from '@/features/feature-flag-overrides/store'
-import { applyFeatureOverrides, useChainWithOverrides, useChainsWithOverrides } from './useChainOverrides'
+import { applyFeatureOverrides, useChainsWithOverrides } from './useChainOverrides'
 import type * as ChainOverridesModule from './useChainOverrides'
 
 const mockOverrides = jest.fn<FeatureFlagOverridesState, []>()
@@ -138,39 +138,23 @@ describe('useChainsWithOverrides', () => {
   })
 })
 
-describe('useChainWithOverrides', () => {
-  it('reflects a forced-on override', () => {
+// `useChain` has no hook of its own: it passes a one-element array through this same hook, so the
+// single-chain shape is pinned here rather than in a second entry point.
+describe('useChainsWithOverrides with a single chain', () => {
+  it('reflects an override on a one-element array', () => {
     mockOverrides.mockReturnValue({ [FEATURES.EARN]: true })
 
-    const { result } = renderHook(() => useChainWithOverrides(makeChain([])))
+    const { result } = renderHook(() => useChainsWithOverrides([makeChain([])]))
 
-    expect(result.current?.features).toContain(FEATURES.EARN)
+    expect(result.current[0].features).toContain(FEATURES.EARN)
   })
 
-  it('reflects a forced-off override', () => {
-    mockOverrides.mockReturnValue({ [FEATURES.EARN]: false })
-
-    const { result } = renderHook(() => useChainWithOverrides(makeChain([FEATURES.EARN])))
-
-    expect(result.current?.features).not.toContain(FEATURES.EARN)
-  })
-
-  it('passes undefined through so a not-yet-loaded chain stays undefined', () => {
+  it('leaves an empty array empty, so a not-yet-loaded chain stays undefined', () => {
     mockOverrides.mockReturnValue({ [FEATURES.EARN]: true })
 
-    const { result } = renderHook(() => useChainWithOverrides(undefined))
+    const { result } = renderHook(() => useChainsWithOverrides([]))
 
-    expect(result.current).toBeUndefined()
-  })
-
-  it('returns the chain untouched in a production build', () => {
-    mockOverrides.mockReturnValue({ [FEATURES.EARN]: true })
-    const { useChainWithOverrides: useInProduction } = loadInProduction()
-    const chain = makeChain([])
-
-    const { result } = renderHook(() => useInProduction(chain))
-
-    expect(result.current).toBe(chain)
+    expect(result.current[0]).toBeUndefined()
   })
 })
 

@@ -30,7 +30,12 @@ export const applyFeatureOverrides = (chain: Chain, overrides: FeatureFlagOverri
   return { ...chain, features: Array.from(features) }
 }
 
-/** Amends the chains from `useChains` with the local overrides. Identity in production. */
+/**
+ * Amends the chains from `useChains` with the local overrides. Identity in production.
+ *
+ * The single-chain callers (`useChain`) pass a one-element array rather than getting their own hook:
+ * one entry point keeps the production guard and the memoisation in one place.
+ */
 export const useChainsWithOverrides = (chains: Chain[]): Chain[] => {
   const overrides = useAppSelector(selectFeatureFlagOverrides)
 
@@ -38,14 +43,4 @@ export const useChainsWithOverrides = (chains: Chain[]): Chain[] => {
     if (IS_PRODUCTION_BUILD) return chains
     return chains.map((chain) => applyFeatureOverrides(chain, overrides))
   }, [chains, overrides])
-}
-
-/** Amends a single chain from `useChain` with the local overrides. Identity in production. */
-export const useChainWithOverrides = (chain: Chain | undefined): Chain | undefined => {
-  const overrides = useAppSelector(selectFeatureFlagOverrides)
-
-  return useMemo(() => {
-    if (IS_PRODUCTION_BUILD || !chain) return chain
-    return applyFeatureOverrides(chain, overrides)
-  }, [chain, overrides])
 }
