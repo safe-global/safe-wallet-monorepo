@@ -24,7 +24,7 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - Alert: `variant` ('default' | 'destructive' | 'warning' | 'success')
+ * - Alert: `variant` ('default' | 'destructive' | 'warning' | 'success' | 'info')
  * - AlertAction: for action buttons (positioned top-right)
  */
 
@@ -45,6 +45,11 @@ const alertVariants = cva(
         warning:
           'bg-[var(--color-warning-background)] text-foreground border-transparent *:[svg]:text-[var(--color-warning-main)]',
         success: 'bg-success-subtle text-foreground border-success-muted *:[svg]:text-success-strong',
+        // Info tint with no border: the fill and the icon carry the meaning, like `warning` above.
+        // The icon takes `info-strong` (= `--color-info-dark`) rather than `info-main` because it is
+        // the darker of the two info accents — 2.04:1 vs 1.51:1 on the pale light-mode tint. Neither
+        // is dark enough to serve as body copy, hence `text-foreground` (see semanticContrast.test.ts).
+        info: 'bg-info-subtle text-foreground border-transparent *:[svg]:text-info-strong',
       },
     },
     defaultVariants: {

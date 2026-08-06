@@ -59,8 +59,10 @@ function DateFilter({
         id={id}
         type="date"
         variant="surface"
-        // eslint-disable-next-line no-restricted-syntax -- date filter keeps its 8px radius (rounded-lg) to match the adjacent selects; w-40/color-scheme/[&~p] are layout
-        className="w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark] [&~p]:w-40 [&~p]:text-xs"
+        // No radius/height utilities here on purpose: Input's defaults (rounded-md, h-9) are the same
+        // as SelectTrigger's, which is what keeps this field flush with the selects on the same row.
+        // The rest is layout plus the colour scheme the native date picker needs per theme.
+        className="w-40 [color-scheme:light] dark:[color-scheme:dark] [&~p]:w-40 [&~p]:text-xs"
         value={value}
         min={min}
         max={max}

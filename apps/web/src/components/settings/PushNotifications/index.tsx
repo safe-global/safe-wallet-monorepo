@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Link as ShadcnLink } from '@/components/ui/link'
 import NextLink from 'next/link'
+import { Info } from 'lucide-react'
 import { useState } from 'react'
 import type { ReactElement } from 'react'
 
@@ -95,7 +96,8 @@ export const PushNotifications = (): ReactElement => {
           </Typography>
 
           {shouldShowMacHelper && (
-            <Alert className={css.macOsInfo}>
+            <Alert variant="info">
+              <Info />
               <AlertDescription>
                 <Typography variant="paragraph-small-bold" className="mb-2 block">
                   For macOS users
