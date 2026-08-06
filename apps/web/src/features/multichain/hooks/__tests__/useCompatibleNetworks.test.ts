@@ -185,6 +185,47 @@ describe('useCompatibleNetworks', () => {
     }
   })
 
+  it('should mark only zkSync as available for zksync-flavour (EraVM) Safes', () => {
+    const callData = {
+      owners: [faker.finance.ethereumAddress()],
+      threshold: 1,
+      to: ZERO_ADDRESS,
+      data: EMPTY_DATA,
+      fallbackHandler: ZERO_ADDRESS,
+      paymentToken: ZERO_ADDRESS,
+      payment: 0,
+      paymentReceiver: ECOSYSTEM_ID_ADDRESS,
+    }
+
+    // 1.3.0 zksync flavour — EraVM bytecode exists only on zk chains
+    {
+      const creationData: ReplayedSafeProps = {
+        factoryAddress: PROXY_FACTORY_130_DEPLOYMENTS?.zksync?.address!,
+        masterCopy: L2_130_MASTERCOPY_DEPLOYMENTS?.zksync?.address!,
+        saltNonce: '0',
+        safeAccountConfig: { ...callData, fallbackHandler: FALLBACK_HANDLER_130_DEPLOYMENTS?.zksync?.address! },
+        safeVersion: '1.3.0',
+      }
+      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
+      expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
+      expect(result.current.map((chain) => chain.available)).toEqual([false, false, false, true, false, false])
+    }
+
+    // 1.4.1 zksync flavour
+    {
+      const creationData: ReplayedSafeProps = {
+        factoryAddress: PROXY_FACTORY_141_DEPLOYMENTS?.zksync?.address!,
+        masterCopy: L2_141_MASTERCOPY_DEPLOYMENTS?.zksync?.address!,
+        saltNonce: '0',
+        safeAccountConfig: { ...callData, fallbackHandler: FALLBACK_HANDLER_141_DEPLOYMENTS?.zksync?.address! },
+        safeVersion: '1.4.1',
+      }
+      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
+      expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
+      expect(result.current.map((chain) => chain.available)).toEqual([false, false, false, true, false, false])
+    }
+  })
+
   it('should set everything to not available for 1.1.1 Safes', () => {
     const callData = {
       owners: [faker.finance.ethereumAddress()],

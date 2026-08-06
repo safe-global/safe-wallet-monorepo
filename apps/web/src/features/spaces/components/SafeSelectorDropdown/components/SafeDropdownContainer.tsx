@@ -11,6 +11,7 @@ import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
 import ReorderableSafeList from './ReorderableSafeList'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
+import { cn } from '@/utils/cn'
 import { matchesSafeSearch } from '../utils'
 import type { SafeItemData, SafeRenameTarget } from '../types'
 
@@ -113,6 +114,9 @@ const SafeDropdownContainer = ({
   // A controlled search spans both tabs, so it stays visible even when the active tab has no rows.
   const showSearch = !isError && (searchValue !== undefined || items.length > 0)
 
+  // Rows/skeletons get the min-width wrapper below (scroll on narrow screens).
+  const showRows = !isError && (filteredItems.length > 0 || (isLoading && !query))
+
   // Bottom-fade scroll hint, shown only while more rows lie below the fold.
   const { setScrollNode, showFade: showScrollHint } = useBottomScrollFade([filteredItems.length, isLoading, isError])
 
@@ -197,14 +201,11 @@ const SafeDropdownContainer = ({
           value={item.id}
           // Scroll anchor for the open-to-current-safe behaviour (see the scrollIntoView effect).
           data-current-safe={item.id === selectedItemId ? 'true' : undefined}
-          // [&>div]:min-w-0/shrink relax the built-in ItemText wrapper (shrink-0, min-width:auto in
-          // ui/select.tsx) so the name column can truncate instead of overflowing the popup.
-          // base-ui moves DOM focus to the hovered/keyboard-active row, so `focus:bg-muted` is the grey
-          // hover highlight (it also overrides ui/select's base `focus:bg-accent`); `data-selected`
-          // marks the open safe with a subtle green highlight, persistent while it isn't focused.
-          // [&>span.absolute]:hidden suppresses the built-in checkmark on the selected row (it
-          // overlaps the balance column); the green highlight marks the current safe instead.
-          className="group/row h-auto py-3 px-3 rounded-lg my-0.5 cursor-pointer focus:bg-muted data-[selected]:bg-[var(--color-background-light)] [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden"
+          // base-ui focuses the hovered/active row, so focus:bg-muted is the hover grey; data-selected
+          // keeps the open safe green, and [&[data-selected]:focus] deepens it on hover (wins by
+          // specificity). [&>div]:min-w-0/shrink let the name column truncate; [&>span.absolute]:hidden
+          // drops the built-in checkmark that would overlap the balance column.
+          className="group/row h-auto py-3 px-3 rounded-lg my-0.5 cursor-pointer focus:bg-muted data-[selected]:bg-sidebar-accent [&[data-selected]:focus]:bg-[var(--color-background-light-hover)] [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden"
         >
           <SafeItem {...item} onRename={handleRename} />
         </SelectItem>
@@ -217,9 +218,10 @@ const SafeDropdownContainer = ({
       align="start"
       side="bottom"
       alignItemWithTrigger={false}
+      showBackdrop
       // outline-hidden: base-ui focuses the popup on open; typing in the search field makes that
       // :focus-visible and would otherwise draw the browser's blue outline around the whole popup.
-      className="w-[543px] max-w-[calc(100vw-2rem)] overflow-hidden bg-card border-0 ring-0 outline-hidden rounded-2xl [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
+      className="w-[543px] max-w-[calc(100vw-2rem)] overflow-hidden bg-card border-0 ring-0 outline-hidden rounded-lg [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
       sideOffset={20}
       alignOffset={9}
       collisionAvoidance={{ side: 'none', align: 'shift' }}
@@ -230,7 +232,7 @@ const SafeDropdownContainer = ({
         {(header || showSearch) && (
           <div className="shrink-0 bg-card">
             {showSearch && (
-              <div className="flex items-center gap-2 px-3 pb-1 pt-3">
+              <div className="flex items-center gap-2 px-2 py-2">
                 <InputGroup className="flex-1 rounded-md border-gray-100 shadow-none">
                   <InputGroupAddon>
                     <Search className="size-4" />
@@ -258,9 +260,11 @@ const SafeDropdownContainer = ({
         <div
           ref={attachScrollArea}
           data-testid="dropdown-scroll-area"
-          className="min-h-0 flex-1 overflow-y-auto overscroll-y-none px-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
+          className="min-h-0 flex-1 overflow-y-auto overflow-x-auto overscroll-y-none px-2 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
         >
-          {renderContent()}
+          {/* 527px = the 543px popup minus px-2 gutters: rows keep their full-width layout and
+              scroll horizontally when the popup shrinks. */}
+          <div className={cn(showRows && 'min-w-[527px]')}>{renderContent()}</div>
         </div>
 
         {footer && (

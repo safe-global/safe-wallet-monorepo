@@ -11,13 +11,9 @@ import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useAppDispatch, useAppSelector } from '@/store'
-import {
-  OrderByOption,
-  selectOrderByPreference,
-  setManualOrder,
-  TRUSTED_ORDER_SCOPE,
-} from '@/store/orderByPreferenceSlice'
+import { useAppSelector } from '@/store'
+import { OrderByOption, selectOrderByPreference, TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
+import { useSaveManualOrder } from '@/hooks/safes'
 import SecurityBanner from './SecurityBanner'
 import SimilarityConfirmDialog from './SimilarityConfirmDialog'
 import SelectAllConfirmDialog from './SelectAllConfirmDialog'
@@ -70,8 +66,8 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
 
   const wallet = useWallet()
   const isDarkMode = useDarkMode()
-  const dispatch = useAppDispatch()
   const { orderBy } = useAppSelector(selectOrderByPreference)
+  const saveManualOrder = useSaveManualOrder(TRUSTED_ORDER_SCOPE)
 
   // Rendering hundreds of account rows takes ~1s and blocks the dialog's first paint. Defer the table
   // past one painted frame (double rAF) so the shell + spinner show immediately, then the rows fill in.
@@ -87,10 +83,11 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
     }
   }, [])
 
-  // Reordering shares the trusted list's Manual order (same scope as the workspace accounts list).
-  // Suppressed while searching: a drop then would persist only the filtered subset, dropping the
-  // hidden addresses from the saved order.
-  const canReorder = orderBy === OrderByOption.MANUAL && !searchQuery
+  // Reordering shares the trusted list's Manual order (same scope as the workspace accounts list)
+  // and is offered in every sort mode — dragging switches the mode to Manual. Suppressed while
+  // searching: a drop then would persist only the filtered subset, dropping the hidden addresses
+  // from the saved order.
+  const canReorder = !searchQuery
 
   const pendingItem = pendingConfirmation
     ? availableItems.find((s) => s.address.toLowerCase() === pendingConfirmation)
@@ -130,7 +127,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
             </div>
           )}
 
-          <div className="mb-3 flex items-center gap-3">
+          <div className="mb-3 mx-1 block items-center gap-3">
             <button
               type="button"
               role="checkbox"
@@ -139,7 +136,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
               onClick={() => (allSelected ? deselectAll() : selectAll())}
               disabled={isLoading || totalSafesCount === 0}
               data-testid="manage-trusted-select-all"
-              className="flex shrink-0 items-center gap-2 rounded-md px-2 py-1 text-sm text-muted-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex shrink-0 items-center gap-2 rounded-md py-1 pl-[21px] pr-2 text-sm text-muted-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} tabIndex={-1} aria-hidden />
               Select all · {selectedCount} of {totalSafesCount} selected
@@ -186,11 +183,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
                 selectedKeys,
                 onToggle: (line: AccountLine) => toggleSelection(line.address),
               }}
-              reorder={
-                canReorder
-                  ? { onReorder: (order) => dispatch(setManualOrder({ scope: TRUSTED_ORDER_SCOPE, order })) }
-                  : undefined
-              }
+              reorder={canReorder ? { onReorder: saveManualOrder } : undefined}
             />
           </div>
         )}

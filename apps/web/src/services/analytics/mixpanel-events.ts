@@ -129,6 +129,7 @@ export enum MixpanelEventParams {
   TX_HASH = 'Transaction Hash',
   RPC_ENDPOINT_KIND = 'RPC Endpoint Kind',
   RPC_HOST = 'RPC Host',
+  HTTP_STATUS = 'HTTP Status',
 }
 
 export enum AuthLoginMethod {

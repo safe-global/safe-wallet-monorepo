@@ -22,9 +22,8 @@ describe('Proposers 2 tests', () => {
   })
 
   it('Verify a proposers is capable of propose transactions', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_33)
+    wallet.connectSignerViaStorage(signer2, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_33)
     assets.toggleHideDust(false)
-    wallet.connectSigner(signer2)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
     createtx.typeRecipientAddress(getMockAddress())
@@ -34,27 +33,23 @@ describe('Proposers 2 tests', () => {
   })
 
   it('Verify a proposers cannot confirm a transaction', () => {
-    cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_31)
-    wallet.connectSigner(signer2)
+    wallet.connectSignerViaStorage(signer2, constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_31)
     tx.verifyTxConfirmBtnDisabled()
   })
 
   it('Verify a proposer cannot edit himself', () => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
-    wallet.connectSigner(signer2)
+    wallet.connectSignerViaStorage(signer2, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
     proposer.verifyEditProposerBtnDisabled(proposerAddress)
   })
 
   it('Verify a proposer cannot edit or remove other proposers', () => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_33)
-    wallet.connectSigner(signer2)
+    wallet.connectSignerViaStorage(signer2, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_33)
     proposer.verifyEditProposerBtnDisabled(proposerAddress_2)
     proposer.verifyDeleteProposerBtnIsDisabled(proposerAddress_2)
   })
 
   it('Verify that deleting a proposer is only possible by creator', () => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_33)
-    wallet.connectSigner(signer3)
+    wallet.connectSignerViaStorage(signer3, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_33)
     proposer.verifyEditProposerBtnDisabled(proposerAddress_2)
     proposer.verifyDeleteProposerBtnIsDisabled(proposerAddress_2)
     proposer.verifyEditProposerBtnDisabled(proposerAddress)

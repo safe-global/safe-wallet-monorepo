@@ -23,6 +23,7 @@ jest.mock('../SafeAccountTableRow', () => ({
     dragHandleProps,
     rowRef,
     rowDraggableProps,
+    showDivider,
   }: {
     line: { key: string; displayName: string }
     onToggle?: () => void
@@ -32,8 +33,15 @@ jest.mock('../SafeAccountTableRow', () => ({
     dragHandleProps?: object | null
     rowRef?: (el: HTMLElement | null) => void
     rowDraggableProps?: object
+    showDivider?: boolean
   }) => (
-    <tr data-testid="row" data-key={line.key} ref={rowRef} {...rowDraggableProps}>
+    <tr
+      data-testid="row"
+      data-key={line.key}
+      data-divider={showDivider ? '' : undefined}
+      ref={rowRef}
+      {...rowDraggableProps}
+    >
       <td>
         {dragHandleProps !== undefined && (
           <button data-testid={`drag-${line.key}`} {...dragHandleProps} type="button" aria-label="drag" />
@@ -193,6 +201,30 @@ describe('SafeAccountsTable', () => {
     expect(screen.queryByTestId('account-sort-name')).not.toBeInTheDocument()
     expect(screen.queryByTestId('account-sort-threshold')).not.toBeInTheDocument()
   })
+
+  it('draws the card outline by default and drops it with bordered={false}, keeping the header', () => {
+    const container = () => screen.getByTestId('safe-accounts-table').firstElementChild as HTMLElement
+
+    const { rerender } = render(<SafeAccountsTable items={items} />)
+    expect(container()).toHaveStyle({ borderTopStyle: 'solid' })
+
+    rerender(<SafeAccountsTable items={items} bordered={false} />)
+    expect(container()).not.toHaveStyle({ borderTopStyle: 'solid' })
+    // Unlike embedded mode, the borderless table keeps its column header.
+    expect(screen.getByTestId('account-sort-name')).toBeInTheDocument()
+  })
+
+  it('draws dividers between groups, but not after the last row', () => {
+    render(<SafeAccountsTable items={items} />)
+    const dividers = screen.getAllByTestId('row').map((row) => row.hasAttribute('data-divider'))
+    expect(dividers).toEqual([true, true, false])
+  })
+
+  it('draws no dividers in embedded mode', () => {
+    render(<SafeAccountsTable items={items} embedded columns={['name', 'threshold', 'networks', 'balance']} />)
+    const dividers = screen.getAllByTestId('row').map((row) => row.hasAttribute('data-divider'))
+    expect(dividers).toEqual([false, false, false])
+  })
 })
 
 describe('SafeAccountsTable — reorder mode', () => {
@@ -209,8 +241,14 @@ describe('SafeAccountsTable — reorder mode', () => {
     expect(rowNames()).toEqual(['Bravo', 'Alpha', 'Group'])
   })
 
-  it('suppresses column-header sorting while reordering', () => {
+  it('keeps column-header sorting available while reordering (callers gate it via sortableColumns)', () => {
     render(<SafeAccountsTable items={items} reorder={{ onReorder: jest.fn() }} />)
+    expect(screen.getByTestId('account-sort-name')).toBeInTheDocument()
+    expect(screen.getByTestId('account-sort-threshold')).toBeInTheDocument()
+  })
+
+  it('suppresses column-header sorting while reordering when sortableColumns is off', () => {
+    render(<SafeAccountsTable items={items} sortableColumns={false} reorder={{ onReorder: jest.fn() }} />)
     expect(screen.queryByTestId('account-sort-name')).not.toBeInTheDocument()
     expect(screen.queryByTestId('account-sort-threshold')).not.toBeInTheDocument()
   })

@@ -15,6 +15,7 @@ import { useTheme } from '@mui/material/styles'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { openGlobalSearch } from '@/features/global-search/store'
+import { useWalletName } from '@/hooks/wallets/useWalletName'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
@@ -50,6 +51,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
     handleClick: handleWalletClick,
     handleClose: handleWalletClose,
   } = useWalletPopover()
+  const walletName = useWalletName(wallet)
   const { WalletPopover } = useLoadFeature(WalletFeature)
   const { GlobalSearchModal, GlobalSearchInput } = useLoadFeature(GlobalSearchFeature)
   const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
@@ -93,7 +95,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   return (
     <>
       <header
-        className={`@container flex flex-wrap ${showLogo ? 'items-center' : 'items-start'} gap-y-2 px-6 py-4 bg-secondary dark:bg-background ${
+        className={`@container flex flex-wrap ${showLogo ? 'items-center' : 'items-start'} gap-y-2 px-6 pt-6 pb-4 bg-secondary dark:bg-background ${
           showMenuButton ? 'pl-2' : ''
         }`}
       >
@@ -115,7 +117,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
             The compact logo (welcome/settings) is exempt — it stays inline beside the actions. */}
         <div
           className={`shrink-0 flex items-center max-[899px]:justify-end ${
-            showLogo ? '' : '@max-[1100px]:order-1 @max-[1100px]:basis-full'
+            showLogo ? '' : 'min-h-14 @max-[1100px]:order-1 @max-[1100px]:basis-full'
           }`}
         >
           {showLogo ? (
@@ -123,7 +125,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
           ) : showSpaceSafeBar ? (
             <SpaceSafeBar />
           ) : (
-            <GlobalSearchInput className="w-64 md:w-80" />
+            <GlobalSearchInput className="h-full w-64 rounded-3xl md:w-80" />
           )}
         </div>
 
@@ -145,7 +147,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
 
           <HeaderNavigation
             walletAddress={wallet?.address ?? ''}
-            walletEns={wallet?.ens}
+            walletEns={walletName}
             isConnected={Boolean(wallet)}
             walletIcon={wallet?.icon}
             walletLabel={wallet?.label}

@@ -112,8 +112,10 @@ const AddAccounts = ({
   const { configs } = useChains()
   const allChainIds = useMemo(() => configs.map((c) => c.chainId), [configs])
 
-  // Get safe data
-  const [allOwned = {}] = useAllOwnedSafes(walletAddress)
+  // Get safe data. Only enumerate owned safes (the captcha-protected owners endpoint) once the modal
+  // is open: the trusted list itself is built from added safes, so `allOwned` only feeds the per-row
+  // read-only flag — which nothing needs while the dialog is closed and this trigger sits mounted.
+  const [allOwned = {}] = useAllOwnedSafes(isOpen ? walletAddress : '')
   const allAdded = useAppSelector(selectAllAddedSafes)
   const allUndeployed = useAppSelector(selectUndeployedSafes)
   const allVisitedSafes = useAppSelector(selectAllVisitedSafes)

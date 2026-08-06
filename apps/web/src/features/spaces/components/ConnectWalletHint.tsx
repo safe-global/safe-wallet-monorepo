@@ -15,11 +15,18 @@ const ConnectWalletHint = ({ testId, onConnect }: { testId?: string; onConnect?:
   const connectWallet = useConnectWallet()
 
   return (
-    <Alert variant="success" className="shrink-0 items-center rounded-md py-4">
+    <Alert variant="default" className="shrink-0 items-center rounded-md py-3">
       <Wallet className="!translate-y-0" />
-      <AlertDescription className="flex w-full items-center gap-3">
-        <span className="min-w-0 flex-1">Connect a wallet to discover accounts you own or sign for</span>
-        <Button type="button" size="sm" onClick={onConnect ?? connectWallet} data-testid={testId} className="shrink-0">
+      <AlertDescription className="flex w-full items-center gap-3 text-foreground">
+        <span className="min-w-0 flex-1">Connect a wallet to discover accounts you own</span>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={onConnect ?? connectWallet}
+          data-testid={testId}
+          className="shrink-0 rounded-md"
+        >
           Connect
         </Button>
       </AlertDescription>

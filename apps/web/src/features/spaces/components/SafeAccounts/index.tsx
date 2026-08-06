@@ -4,13 +4,8 @@ import { Stack } from '@mui/material'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Typography } from '@/components/ui/typography'
 import { useMemo, useState } from 'react'
-import { useAppDispatch, useAppSelector } from '@/store'
-import {
-  getSpaceOrderScope,
-  OrderByOption,
-  selectOrderByPreference,
-  setManualOrder,
-} from '@/store/orderByPreferenceSlice'
+import { useAppSelector } from '@/store'
+import { getSpaceOrderScope, OrderByOption, selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import {
   type AllSafeItems,
   type SafeItem,
@@ -18,6 +13,7 @@ import {
   flattenSafeItems,
   useSafeOrderComparator,
   useSafesSearch,
+  useSaveManualOrder,
 } from '@/hooks/safes'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { useSimilarityClusters } from '@/features/address-poisoning'
@@ -38,7 +34,6 @@ const SpaceSafeAccounts = () => {
   const { allSafes, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()
   const isInvited = useIsInvited()
   const isAdmin = useIsAdmin()
-  const dispatch = useAppDispatch()
   const isDarkMode = useDarkMode()
   const spaceId = useCurrentSpaceId()
   const orderScope = spaceId ? getSpaceOrderScope(spaceId) : undefined
@@ -46,7 +41,7 @@ const SpaceSafeAccounts = () => {
   // Use same organization logic as onboarding
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = useSafeOrderComparator(orderScope)
-  const isManualOrder = orderBy === OrderByOption.MANUAL
+  const saveManualOrder = useSaveManualOrder(orderScope)
 
   // useSpaceSafes already resolves names via the merged (workspace-priority, local fallback) address
   // book, so flatten those items rather than rebuilding them — rebuilding via buildSafeItem would
@@ -129,10 +124,12 @@ const SpaceSafeAccounts = () => {
           No Safe accounts match your search
         </Typography>
       ) : (
-        <>
+        <div className="flex flex-col gap-4">
           {similarAddresses.size > 0 && <SimilarAddressAlert />}
           <SafeAccountsTable
             items={visibleSafes}
+            // The table sits directly on the page background here, so the card outline is dropped.
+            bordered={false}
             // Inside a workspace every Safe belongs to it, so the Workspaces column adds no information.
             columns={['name', 'threshold', 'networks', 'pending', 'balance', 'actions']}
             flaggedAddresses={similarAddresses}
@@ -141,13 +138,11 @@ const SpaceSafeAccounts = () => {
             renderActions={(line) =>
               line.variant === 'child' ? null : <SpaceSafeContextMenu safeItem={line.source} />
             }
-            reorder={
-              isManualOrder && !debouncedSearchQuery && orderScope
-                ? { onReorder: (order) => dispatch(setManualOrder({ scope: orderScope, order })) }
-                : undefined
-            }
+            // Reorderable in every sort mode; suppressed while searching, where a drop would persist
+            // only the filtered subset.
+            reorder={!debouncedSearchQuery && orderScope ? { onReorder: saveManualOrder } : undefined}
           />
-        </>
+        </div>
       )}
     </>
   )

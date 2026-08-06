@@ -32,6 +32,7 @@ const injectedRtkApi = api
           params: {
             redirect_url: queryArg.redirectUrl,
             connection: queryArg.connection,
+            enroll: queryArg.enroll,
           },
         }),
         providesTags: ['auth'],
@@ -46,6 +47,13 @@ const injectedRtkApi = api
             error_description: queryArg.errorDescription,
           },
         }),
+        providesTags: ['auth'],
+      }),
+      oidcAuthListAuthenticatorsV1: build.query<
+        OidcAuthListAuthenticatorsV1ApiResponse,
+        OidcAuthListAuthenticatorsV1ApiArg
+      >({
+        query: () => ({ url: `/v1/auth/oidc/mfa/authenticators` }),
         providesTags: ['auth'],
       }),
     }),
@@ -73,6 +81,8 @@ export type OidcAuthAuthorizeV1ApiArg = {
   redirectUrl?: string
   /** OIDC connection name to route to a specific identity provider. */
   connection?: string
+  /** When true, requests hosted enrollment of a new authenticator: the provider challenges an existing factor, then walks the user through enrolling the new one. */
+  enroll?: boolean
 }
 export type OidcAuthCallbackV1ApiResponse = unknown
 export type OidcAuthCallbackV1ApiArg = {
@@ -85,6 +95,8 @@ export type OidcAuthCallbackV1ApiArg = {
   /** Description of the error returned by the OIDC provider (if failed) */
   errorDescription?: string
 }
+export type OidcAuthListAuthenticatorsV1ApiResponse = /** status 200 MFA authentication methods */ Authenticator[]
+export type OidcAuthListAuthenticatorsV1ApiArg = void
 export type UserSession = {
   id: string
   authMethod: 'siwe' | 'oidc'
@@ -104,6 +116,16 @@ export type LogoutDto = {
   /** Post-logout redirect URL (must be same-origin as pre-configured URL) */
   redirect_url?: string
 }
+export type Authenticator = {
+  /** Auth0 authentication method identifier (e.g. totp|...) */
+  id: string
+  /** Authentication method type (e.g. totp) */
+  type: string
+  /** User-visible authenticator name */
+  name?: string
+  /** ISO 8601 timestamp of when the method was enrolled */
+  createdAt?: string
+}
 export const {
   useAuthGetMeV1Query,
   useLazyAuthGetMeV1Query,
@@ -116,4 +138,6 @@ export const {
   useLazyOidcAuthAuthorizeV1Query,
   useOidcAuthCallbackV1Query,
   useLazyOidcAuthCallbackV1Query,
+  useOidcAuthListAuthenticatorsV1Query,
+  useLazyOidcAuthListAuthenticatorsV1Query,
 } = injectedRtkApi

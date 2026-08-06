@@ -70,6 +70,7 @@ jest.mock('@/hooks/useKeyboardObserver', () => ({
 
 jest.mock('@/hooks/useTopbarElevation', () => ({
   useIsTopbarElevated: jest.fn(() => false),
+  useIsTopbarAboveOverlay: jest.fn(() => false),
 }))
 
 const mockUseSafeAddressFromUrl = jest.fn<string, []>(() => '')

@@ -38,8 +38,23 @@
       "outputs": [],
       "outputLogs": "new-only"
     },
-    "knip:exports": {
-      "inputs": ["src/**", "knip.{js,ts,json}", "package.json"],
+    "//#knip:exports:web": {
+      "inputs": [
+        "knip.json",
+        "apps/web/src/**",
+        "apps/web/package.json",
+        "apps/web-tanstack/src/**",
+        "apps/web-tanstack/plugins/**",
+        "apps/web-tanstack/package.json",
+        "packages/store/src/**",
+        "packages/store/package.json",
+        "packages/theme/src/**",
+        "packages/theme/package.json",
+        "packages/utils/src/**",
+        "packages/utils/package.json",
+        "config/test/**/*.ts",
+        "config/test/package.json"
+      ],
       "outputs": [],
       "outputLogs": "new-only"
     }

@@ -9,7 +9,7 @@ import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { Box, Card, Link, Stack, Typography } from '@mui/material'
 import { Check } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import { Typography as ShadcnTypography } from '@/components/ui/typography'
 import { type GetSpaceResponse, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
@@ -45,19 +45,14 @@ const AddSpaceButton = ({
   variant?: 'default' | 'outline'
   label?: string
 }) => {
-  const button = (
-    <Button
-      data-testid="create-space-button"
-      variant={variant}
-      size={size}
-      className={cn(
-        size === 'lg' && 'h-full rounded-lg px-6 py-3 text-base',
-        disabled && 'cursor-not-allowed opacity-50 grayscale',
-      )}
-      render={disabled ? <span /> : <NextLink href={AppRoutes.welcome.createSpace} />}
-      disabled={disabled}
-      onClick={disabled ? undefined : onClick}
-    >
+  const className = cn(
+    buttonVariants({ variant, size }),
+    size === 'lg' && 'h-full rounded-lg px-6 py-3 text-base',
+    disabled && 'cursor-not-allowed opacity-50 grayscale',
+  )
+
+  const content = (
+    <>
       <AddIcon
         className={cn(
           variant === 'default' ? 'fill-primary-foreground' : 'fill-foreground',
@@ -65,14 +60,29 @@ const AddSpaceButton = ({
         )}
       />
       {label}
-    </Button>
+    </>
   )
 
-  if (!disabled) return button
+  if (!disabled) {
+    return (
+      <NextLink
+        data-testid="create-space-button"
+        href={AppRoutes.welcome.createSpace}
+        className={className}
+        onClick={onClick}
+      >
+        {content}
+      </NextLink>
+    )
+  }
 
   return (
     <Tooltip>
-      <TooltipTrigger render={<div className="inline-flex" />}>{button}</TooltipTrigger>
+      <TooltipTrigger render={<div className="inline-flex" />}>
+        <span data-testid="create-space-button" aria-disabled="true" className={className}>
+          {content}
+        </span>
+      </TooltipTrigger>
       <TooltipContent>Limit of {SPACES_LIMIT} workspaces reached</TooltipContent>
     </Tooltip>
   )
@@ -251,7 +261,7 @@ const SpacesList = () => {
 
             {pendingInviteBanners}
 
-            <div className="rounded-2xl border border-border bg-card px-4 py-1" data-testid="org-list">
+            <div className="rounded-lg border border-border bg-card px-4 py-1" data-testid="org-list">
               {activeSpaces.map((space, index) => (
                 <SpaceRow
                   key={space.uuid}

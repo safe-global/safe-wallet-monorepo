@@ -76,7 +76,6 @@ import { Route as StakeRoute } from './routes/stake'
 import { Route as SwapRoute } from './routes/swap'
 import { Route as ShareSafeAppRoute } from './routes/share/safe-app'
 import { Route as WcRoute } from './routes/wc'
-import { Route as UserSettingsRoute } from './routes/user-settings'
 import { Route as HypernativeOauthCallbackRoute } from './routes/hypernative/oauth-callback'
 
 const routeTree = RootRoute.addChildren([
@@ -149,7 +148,6 @@ const routeTree = RootRoute.addChildren([
   SwapRoute,
   ShareSafeAppRoute,
   WcRoute,
-  UserSettingsRoute,
   HypernativeOauthCallbackRoute,
 ])
 
