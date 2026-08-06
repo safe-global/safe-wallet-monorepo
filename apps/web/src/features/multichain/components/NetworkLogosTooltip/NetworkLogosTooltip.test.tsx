@@ -50,4 +50,12 @@ describe('NetworkLogosTooltip', () => {
 
     expect(screen.getByTestId('multichain-tooltip')).toBeInTheDocument()
   })
+
+  it('caps the content height and scrolls internally so long lists do not overflow the viewport', () => {
+    render(<NetworkLogosTooltip networks={networks(['1'])} contentTestId="multichain-tooltip" />)
+
+    const content = screen.getByTestId('multichain-tooltip')
+    expect(content).toHaveClass('overflow-y-auto', 'overscroll-contain')
+    expect(content).toHaveStyle({ maxHeight: 'calc(var(--available-height) - 0.75rem)' })
+  })
 })
