@@ -15,8 +15,8 @@ export type DeriveCheckStateInput = {
   headBlock: string | null
 }
 
-/** Highest deadline block across the check's request events, or null. */
-const deadlineBlockOf = (events: ReadonlyArray<NormalizedCheckEvent>): bigint | null => {
+/** Highest deadline block across the check's request events, or null. Shared with the reader. */
+export const deadlineBlockOf = (events: ReadonlyArray<NormalizedCheckEvent>): bigint | null => {
   let deadline: bigint | null = null
   for (const event of events) {
     if (event.type === CheckEventType.REQUEST_CREATED) {
