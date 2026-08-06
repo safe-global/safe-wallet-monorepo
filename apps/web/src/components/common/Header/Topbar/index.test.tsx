@@ -360,24 +360,25 @@ describe('Topbar', () => {
       expect(actions.className).not.toContain('basis-full')
     })
 
-    it('keeps the account card on the top row and on the right when the two stack', () => {
+    it('stacks the account card above the context with both rows on the left edge', () => {
       mockIsSpaceRoute.mockReturnValue(false)
       mockUsePathname.mockReturnValue('/home')
 
       const { context, actions } = groups(render(<Topbar />).container)
 
-      // The account chrome is the header's fixed point: it takes the top row via order-first...
-      expect(actions.className).toMatch(/order-first/)
-      // ...and keeps `ml-auto`, so it holds the right edge instead of sliding left. An `ml-0` here
-      // dropped it to the left edge and left a wide gap where the card had been.
-      expect(actions.className).toMatch(/ml-auto/)
-      expect(actions.className).not.toMatch(/ml-0/)
-      // The search starts on the page's left padding rather than being right-aligned inside its
-      // full-width slot, which used to put the rows on a diagonal.
+      // The context is what moves, not the actions — reordering from the actions' side put them
+      // ahead of the burger and pushed it onto a row of its own.
+      expect(context.className).toMatch(/order-last/)
+      expect(actions.className).not.toMatch(/order-first/)
+      // `ml-0` drops the `ml-auto` that right-aligns the card while the two share a row, so both
+      // wrapped rows start on the page's left padding.
+      expect(actions.className).toMatch(/ml-0/)
+      // And the search is not right-aligned inside its full-width slot, which would put the two
+      // rows on a diagonal.
       expect(context.className).not.toMatch(/justify-end/)
     })
 
-    it('keeps the sidebar burger inside the context slot so it shares that row', () => {
+    it('leaves the sidebar burger first in the header so it holds the top row', () => {
       mockIsSpaceRoute.mockReturnValue(false)
       mockUsePathname.mockReturnValue('/home')
       mockUseIsBelowMd.mockReturnValue(true)
@@ -385,10 +386,12 @@ describe('Topbar', () => {
       const { header, context } = groups(render(<Topbar onMenuToggle={jest.fn()} />).container)
       const burger = screen.getByRole('button', { name: 'Open sidebar menu' })
 
-      // As a sibling of the basis-full context it could never share that line, so it was stranded
-      // on a row of its own and the header grew by a whole row on mobile.
-      expect(context).toContainElement(burger)
-      expect(header.children).toHaveLength(2)
+      // First child and carrying no order class of its own, so nothing can push it below the fold:
+      // the context reorders around it. Inside the context slot it travelled down with it instead.
+      expect(header.firstElementChild).toBe(burger)
+      expect(context).not.toContainElement(burger)
+      // Anchored to a class boundary — an unanchored /order-/ also matches `border-*`.
+      expect(burger.className).not.toMatch(/(?:^|\s)(?:@\S+:)?order-/)
     })
   })
 

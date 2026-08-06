@@ -47,22 +47,25 @@ import { cn } from '@/utils/cn'
 // makes flexbox do it unprompted — and then `order-first` never applies, so the context lands on top
 // and the account is no longer the fixed element. Measured that at a 1000px safe-route threshold.
 //
-// The account chrome is the fixed point of the header, so it does not move when they stack: it takes
-// the top row and keeps the right-hand position it holds on one row, with the context dropping
-// underneath it. `order-first` on the actions does the reordering, and leaving `ml-auto` in force
-// (rather than an `ml-0`) is what keeps the card on the right instead of sliding to the left edge.
+// Stacked, the burger and the account card share the top row and the context drops underneath, with
+// both rows starting on the page's left padding. That falls out of `order-last` on the CONTEXT: the
+// DOM order is burger, context, actions, so moving just the context to the end leaves row 1 as
+// burger + actions without having to renumber the other two. (Reordering from the actions' side
+// instead — `order-first` there — put them ahead of the burger and pushed it down a row.) Its
+// partner is `ml-0` on the actions, which drops the `ml-auto` that right-aligns them while the two
+// share a row.
 //
 // Only the context slot gets `basis-full` — that alone consumes its line, which is what pushes the
 // two apart. The actions must NOT repeat it: `flex-basis: 100%` sets a flex item's *width*, and
 // unlike the invisible context slot the actions are a painted card, so it stretched across the whole
 // row with its chips (~295px) marooned at the left of ~650px of empty white.
 //
-// No `justify-end` on the context either: it right-aligned the search inside its full-width slot,
-// which put the rows on a diagonal back when the actions were pinned left. The search now starts on
-// the page's left padding at every width.
+// No `justify-end` on the context either: it right-aligned the search inside its full-width slot
+// while the actions sat left, putting the two rows on a diagonal.
 //
 // The logo variant is 24px and always fits beside the actions, so it opts out entirely. Named so the
 // Topbar tests can assert which left-slot variant opts in without restating the utility list.
+//
 // The slot height is per variant too. The search input sizes itself with `h-full`, which needs a
 // definite parent, so that variant is pinned to `h-14` (56px, matching the actions card). The safe
 // bar must NOT be: it wraps internally at narrow widths (to 104px measured), and against a fixed
@@ -70,10 +73,10 @@ import { cn } from '@/utils/cn'
 // actions card above. `min-h-14` keeps the 56px floor while letting it grow.
 export const SEARCH_CONTEXT_HEIGHT = 'h-14'
 export const SAFE_BAR_CONTEXT_HEIGHT = 'min-h-14'
-export const SEARCH_CONTEXT_WRAP = '@max-[660px]:basis-full'
-export const SEARCH_ACTIONS_WRAP = '@max-[660px]:order-first'
-export const SAFE_BAR_CONTEXT_WRAP = '@max-[1260px]:basis-full'
-export const SAFE_BAR_ACTIONS_WRAP = '@max-[1260px]:order-first'
+export const SEARCH_CONTEXT_WRAP = '@max-[660px]:order-last @max-[660px]:basis-full'
+export const SEARCH_ACTIONS_WRAP = '@max-[660px]:ml-0'
+export const SAFE_BAR_CONTEXT_WRAP = '@max-[1260px]:order-last @max-[1260px]:basis-full'
+export const SAFE_BAR_ACTIONS_WRAP = '@max-[1260px]:ml-0'
 
 interface TopbarProps {
   /** When provided, shows a menu button on mobile to open the sidebar */
@@ -153,24 +156,25 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
           showMenuButton && 'pl-2',
         )}
       >
+        {/* First in the DOM and never reordered, so it holds the top-left corner at every width: the
+            context is what moves (`order-last`) when the two groups stack, leaving the burger up here
+            beside the account card. */}
+        {showMenuButton ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="mr-2"
+            onClick={() => onMenuToggle?.((open) => !open)}
+            aria-label="Open sidebar menu"
+          >
+            <Menu className="size-5" />
+          </Button>
+        ) : null}
+
         {/* Left content (context): the safe selector must not shrink so its children stay on one
             line. See the *_CONTEXT_WRAP / *_CONTEXT_HEIGHT constants for how each wide variant wraps
-            and how tall its slot is.
-
-            The burger lives in here rather than beside it: the wide variants are `basis-full`, so a
-            sibling burger could never share their line and got stranded on a row of its own. */}
-        <div className={cn('shrink-0 flex items-center gap-2', contextHeight, contextWrap)}>
-          {showMenuButton ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onMenuToggle?.((open) => !open)}
-              aria-label="Open sidebar menu"
-            >
-              <Menu className="size-5" />
-            </Button>
-          ) : null}
-
+            and how tall its slot is. */}
+        <div className={cn('shrink-0 flex items-center', contextHeight, contextWrap)}>
           {showLogo ? (
             <SafeLogo />
           ) : showSpaceSafeBar ? (
