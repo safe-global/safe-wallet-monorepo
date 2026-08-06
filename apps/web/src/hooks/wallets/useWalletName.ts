@@ -1,10 +1,12 @@
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { useChain } from '@/hooks/useChains'
-import { useAppSelector } from '@/store'
-import { selectRpc } from '@/store/settingsSlice'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { lookupAddress } from '@/services/ens'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import { ETH_COIN_TYPE, getEnsHubChainId, hasHubDomainLookup } from '@safe-global/utils/utils/ens'
+import { useEnsHubProvider } from '@/hooks/useEnsHubProvider'
+import { ENS_HUB_MAINNET, ETH_COIN_TYPE } from '@safe-global/utils/utils/ens'
+
+// Wallet primary names are production ENS records on mainnet, not testnet hubs.
+const MAINNET_ENS_TARGET = { chainId: ENS_HUB_MAINNET, isTestnet: false } as Chain
 
 /**
  * Resolves the connected wallet's ENS primary name against the ENS hub (Ethereum mainnet).
@@ -15,26 +17,14 @@ import { ETH_COIN_TYPE, getEnsHubChainId, hasHubDomainLookup } from '@safe-globa
  * resolution fails (handled by `lookupAddress`).
  */
 export const useWalletName = (wallet?: ConnectedWallet | null): string | undefined => {
-  // Wallet primary names are production ENS records on mainnet, not testnet hubs.
-  const chain = useChain(getEnsHubChainId(false))
-  const customRpc = useAppSelector(selectRpc)
+  const { provider, isDomainLookupEnabled } = useEnsHubProvider(MAINNET_ENS_TARGET)
   const address = wallet?.address
-  const canResolve = hasHubDomainLookup(chain) && !!address
+  const canResolve = isDomainLookupEnabled && !!provider && !!address
 
-  const [ens] = useAsync<string | undefined>(async () => {
-    if (!canResolve || !chain || !address) return undefined
-
-    // Dynamic import to keep ethers out of the main bundle
-    const { createWeb3ReadOnly } = await import('@/hooks/wallets/web3')
-    const provider = createWeb3ReadOnly(chain, customRpc?.[chain.chainId])
-    if (!provider) return undefined
-
-    try {
-      return await lookupAddress(provider, address, ETH_COIN_TYPE)
-    } finally {
-      provider.destroy()
-    }
-  }, [canResolve, chain, customRpc, address])
+  const [ens] = useAsync<string | undefined>(() => {
+    if (!canResolve || !provider || !address) return
+    return lookupAddress(provider, address, ETH_COIN_TYPE)
+  }, [canResolve, provider, address])
 
   return ens
 }
