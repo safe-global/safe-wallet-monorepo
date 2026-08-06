@@ -85,7 +85,7 @@ exports[`./SettingsChange.stories AddOwner 1`] = `
                 </button>
               </span>
               <div
-                class="text-border"
+                class="text-[var(--color-border-main)]"
               >
                 <a
                   aria-label="View on rinkeby.etherscan.io"
@@ -231,7 +231,7 @@ exports[`./SettingsChange.stories SwapOwner 1`] = `
                 </button>
               </span>
               <div
-                class="text-border"
+                class="text-[var(--color-border-main)]"
               >
                 <a
                   aria-label="View on rinkeby.etherscan.io"

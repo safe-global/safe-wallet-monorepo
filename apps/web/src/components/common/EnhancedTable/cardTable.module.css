@@ -22,8 +22,12 @@
   transition: background-color 100ms linear;
 }
 
+/* A tint, not a grey. The row's action buttons hover to `--muted` themselves, so a `--muted` row
+   left the two identical and the buttons gave no hover feedback at all once the row was lit.
+   `--color-background-light` is the same mint the app uses for other hover surfaces, and unlike
+   `--accent` it is declared at `:root`, so it resolves even outside `.shadcn-scope`. */
 .container tbody tr:hover {
-  background-color: var(--muted);
+  background-color: var(--color-background-light);
 }
 
 .container td:last-of-type button {

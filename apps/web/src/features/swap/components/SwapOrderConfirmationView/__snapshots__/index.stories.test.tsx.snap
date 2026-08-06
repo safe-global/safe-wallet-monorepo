@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./index.stories CustomRecipient 1`] = `
 <div
@@ -404,7 +404,7 @@ exports[`./index.stories CustomRecipient 1`] = `
                       </span>
                     </div>
                     <div
-                      class="text-border"
+                      class="text-[var(--color-border-main)]"
                     >
                       <a
                         aria-label="View on rinkeby.etherscan.io"
@@ -486,7 +486,7 @@ exports[`./index.stories CustomRecipient 1`] = `
                       </span>
                     </div>
                     <div
-                      class="text-border"
+                      class="text-[var(--color-border-main)]"
                     >
                       <a
                         aria-label="View on rinkeby.etherscan.io"
@@ -949,7 +949,7 @@ exports[`./index.stories Default 1`] = `
                       </span>
                     </div>
                     <div
-                      class="text-border"
+                      class="text-[var(--color-border-main)]"
                     >
                       <a
                         aria-label="View on rinkeby.etherscan.io"

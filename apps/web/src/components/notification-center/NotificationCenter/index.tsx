@@ -123,7 +123,9 @@ const NotificationCenter = (): ReactElement => {
       >
         <PopoverContent anchor={anchorEl} side="bottom" align="start" className={`${css.popoverContainer} gap-0 p-0`}>
           <div className={css.popoverHeader}>
-            <div>
+            {/* flex, so the count centres on the heading's box. As inline boxes the two sat on a
+                shared text baseline, which put the small badge low against a 20px/24px heading. */}
+            <div className="flex items-center">
               <Typography data-testid="notifications-title" variant="h4" className="inline font-bold">
                 Notifications
               </Typography>
