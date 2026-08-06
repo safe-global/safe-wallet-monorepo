@@ -14,8 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     name: Cypress Full Regression on demand tests
-    permissions:
-      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -43,7 +41,7 @@ jobs:
       - name: Install junitparser
         if: always()
         run: |
-          pip install 'junitparser==5.0.1'
+          pip install junitparser
 
       - name: Merge JUnit reports for TestRail
         if: always()
@@ -52,20 +50,16 @@ jobs:
 
       - name: TestRail CLI upload results
         if: always()
-        env:
-          TESTRAIL_USERNAME: ${{ secrets.TESTRAIL_USERNAME }}
-          TESTRAIL_PASSWORD: ${{ secrets.TESTRAIL_PASSWORD }}
-          TESTRAIL_RUN_DESCRIPTION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          pip install 'trcli==1.15.2'
+          pip install trcli
           if ! trcli -y \
           -h https://gno.testrail.io/ \
           --project "Safe- Web App" \
-          --username "$TESTRAIL_USERNAME" \
-          --password "$TESTRAIL_PASSWORD" \
+          --username ${{ secrets.TESTRAIL_USERNAME }} \
+          --password ${{ secrets.TESTRAIL_PASSWORD }} \
           parse_junit \
           --title "Full Regression Automated Tests, branch: ${GITHUB_REF_NAME}" \
-          --run-description "$TESTRAIL_RUN_DESCRIPTION" \
+          --run-description ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} \
           -f "apps/web/reports/junit-report.xml"; then
             echo -e "\e[41;32mTestRail upload failed. Pipeline will continue, please check the upload process.\e[0m"
           fi
