@@ -49,6 +49,17 @@ describe('useHasUntrustedFallbackHandler', () => {
       expect(result.current).toBe(false)
     })
 
+    it('if the provided fallback handler is the official 1.5.0 one', () => {
+      const fallbackHandler150Address = getCompatibilityFallbackHandlerDeployment({
+        network: '1',
+        version: '1.5.0',
+      })?.defaultAddress!
+
+      const { result } = renderHook(() => useHasUntrustedFallbackHandler(fallbackHandler150Address))
+
+      expect(result.current).toBe(false)
+    })
+
     it('if the provided fallback handler is the TWAPFallbackHandler', () => {
       const { result } = renderHook(() => useHasUntrustedFallbackHandler(TWAP_FALLBACK_HANDLER))
 
