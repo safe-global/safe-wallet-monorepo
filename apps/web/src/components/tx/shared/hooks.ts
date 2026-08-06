@@ -169,6 +169,7 @@ export const useTxActions = (): TxActions => {
           safeAddress,
           viaSafe,
           executesImmediately(signer),
+          safe.version,
         )
         return { txId: id, isNestedSigning: viaSafe }
       }

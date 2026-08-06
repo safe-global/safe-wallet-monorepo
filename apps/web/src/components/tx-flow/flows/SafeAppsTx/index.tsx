@@ -8,6 +8,7 @@ import { type ReviewTransactionContentProps } from '@/components/tx/ReviewTransa
 import { dispatchSafeAppsTx } from '@/services/tx/tx-sender'
 import { trackSafeAppTxCount } from '@/services/safe-apps/track-app-usage-count'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
+import type { NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
 
 export type SafeAppsTxParams = {
   appId?: string
@@ -15,6 +16,8 @@ export type SafeAppsTxParams = {
   requestId: RequestId
   txs: BaseTransaction[]
   params?: SendTransactionRequestParams
+  // Verified child tx carried by a nested-Safe approveHash envelope, for display fallback
+  nestedChildTx?: NestedTxEnvelope
 }
 
 const SafeAppsTxFlow = ({
