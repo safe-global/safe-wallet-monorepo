@@ -32,7 +32,9 @@
   /* 12px inset aligns the avatar with the back-arrow pill in the top bar; !important beats the
      base menu-button's p-2 (equal specificity). Collapsed mode still wins via its own p-0!. */
   padding: 8px 12px !important;
-  border-radius: 8px;
+  /* The design system's base radius (--radius), matching the Home pill directly above. A literal
+     8px here read as barely-rounded on a 48px row — that's the scale for the 36px nav items. */
+  border-radius: var(--radius-lg);
   cursor: pointer;
   /* Persistent grey "active" background (per Figma) for the workspace switcher and the
      back-to-workspace button, instead of the sidebar's green accent. */
