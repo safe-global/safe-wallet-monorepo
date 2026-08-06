@@ -369,6 +369,25 @@ export function setOutputValue(value) {
   })
 }
 
+export function setNumberOfParts(parts) {
+  cy.get('span')
+    .contains(numberOfPartsStr)
+    .next()
+    .find('input')
+    .should('be.visible')
+    .clear()
+    .invoke('val', '')
+    .trigger('input')
+    .then(($input) => {
+      if ($input.val() !== '') {
+        cy.wrap($input).clear().invoke('val', '').trigger('input')
+      }
+    })
+    .should('have.value', '')
+    .type(parts, { force: true })
+    .should('have.value', String(parts))
+}
+
 export function outputInputIsNotEmpty() {
   cy.get(outputCurrencyInput).find('input').invoke('val').should('not.be.empty')
 }
