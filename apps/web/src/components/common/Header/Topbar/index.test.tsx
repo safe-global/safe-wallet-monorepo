@@ -1,4 +1,4 @@
-import Topbar, { WIDE_ACTIONS_WRAP, WIDE_CONTEXT_WRAP } from './index'
+import Topbar, { SAFE_BAR_ACTIONS_WRAP, SAFE_BAR_CONTEXT_WRAP, SEARCH_ACTIONS_WRAP, SEARCH_CONTEXT_WRAP } from './index'
 import * as contracts from '@/features/__core__'
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
@@ -285,8 +285,9 @@ describe('Topbar', () => {
       const { context, actions } = groups(render(<Topbar />).container)
 
       expect(context).toContainElement(screen.getByTestId('logo-image'))
-      expect(context.className).not.toContain(WIDE_CONTEXT_WRAP)
-      expect(actions.className).not.toContain(WIDE_ACTIONS_WRAP)
+      // The logo opts out of both variants' thresholds — it always fits beside the actions.
+      expect(context.className).not.toMatch(/basis-full/)
+      expect(actions.className).not.toMatch(/order-first/)
       // Nothing left to push the actions off the right edge.
       expect(actions.className).toContain('ml-auto')
     })
@@ -301,16 +302,32 @@ describe('Topbar', () => {
       expect(header.className).not.toMatch(/items-start/)
     })
 
-    it('keeps the wrapping for the wide safe-selector variant', () => {
+    it('uses the wider safe-bar threshold for the safe-selector variant', () => {
       mockIsSpaceRoute.mockReturnValue(false)
       mockUsePathname.mockReturnValue('/home')
 
       const { header, context, actions } = groups(render(<Topbar />).container)
 
       expect(context).toContainElement(screen.getByTestId('space-safe-bar'))
-      expect(context.className).toContain(WIDE_CONTEXT_WRAP)
-      expect(actions.className).toContain(WIDE_ACTIONS_WRAP)
+      expect(context.className).toContain(SAFE_BAR_CONTEXT_WRAP)
+      expect(actions.className).toContain(SAFE_BAR_ACTIONS_WRAP)
       expect(header.className).toMatch(/items-start/)
+    })
+
+    // The search input is ~335px narrower than the safe bar, so sharing the safe bar's threshold
+    // stranded it on its own row while ~600px of the header was still empty.
+    it('uses the narrower search threshold for the global-search variant', () => {
+      mockIsSpaceRoute.mockReturnValue(true)
+      mockUsePathname.mockReturnValue('/spaces')
+
+      const { context, actions } = groups(render(<Topbar />).container)
+
+      // The search variant is the one the safe bar is NOT in (GlobalSearchInput is stubbed to null
+      // by the feature mock, so there is no element of its own to assert on).
+      expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
+      expect(context.className).toContain(SEARCH_CONTEXT_WRAP)
+      expect(actions.className).toContain(SEARCH_ACTIONS_WRAP)
+      expect(context.className).not.toContain(SAFE_BAR_CONTEXT_WRAP)
     })
 
     // The three below pin the *shape* of the wrap rules, not just that the named constants are

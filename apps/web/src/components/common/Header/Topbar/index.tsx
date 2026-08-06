@@ -31,13 +31,26 @@ import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { TxModalContext } from '@/components/tx-flow'
 import { cn } from '@/utils/cn'
 
-// The safe selector and the actions card need ~1250px to sit side by side, so below a 1260px header
-// container (a container query, so it accounts for the sidebar and the route) they stack.
+// The context and the actions card share one row until they genuinely stop fitting, then the actions
+// take the top row and the context drops underneath. Where that happens depends on WHICH context is
+// showing, so the threshold is per variant rather than shared — the two differ by ~335px, and one
+// threshold sized for the widest of them broke the narrowest ~600px early, stranding the search on
+// its own row with most of the header empty.
+//
+// Measured, with the header's px-6 excluded because a container query on `inline-size` resolves
+// against the content box (verified: a 1268px content box sits on one row under a 1260px rule, a
+// 1218px one wraps). The actions card is not one width either — a Safe route carries more chips
+// (batch, Safe token) than a space route:
+//   space route  search 320 + actions 315 =  635  ->  break under 660
+//   safe route   bar    655 + actions 479 = 1134  ->  break under 1260
+// Keep the slack. Setting a threshold BELOW what the pair needs does not avoid the wrap, it just
+// makes flexbox do it unprompted — and then `order-first` never applies, so the context lands on top
+// and the account is no longer the fixed element. Measured that at a 1000px safe-route threshold.
 //
 // The account chrome is the fixed point of the header, so it does not move when they stack: it takes
 // the top row and keeps the right-hand position it holds on one row, with the context dropping
-// underneath it. `order-first` on the actions does the reordering, and dropping the old `ml-0` is
-// what leaves `ml-auto` in force so the card stays right rather than sliding to the left edge.
+// underneath it. `order-first` on the actions does the reordering, and leaving `ml-auto` in force
+// (rather than an `ml-0`) is what keeps the card on the right instead of sliding to the left edge.
 //
 // Only the context slot gets `basis-full` — that alone consumes its line, which is what pushes the
 // two apart. The actions must NOT repeat it: `flex-basis: 100%` sets a flex item's *width*, and
@@ -48,10 +61,12 @@ import { cn } from '@/utils/cn'
 // which put the rows on a diagonal back when the actions were pinned left. The search now starts on
 // the page's left padding at every width.
 //
-// The logo variant is 24px and always fits beside the actions, so it opts out of both. Named so the
+// The logo variant is 24px and always fits beside the actions, so it opts out entirely. Named so the
 // Topbar tests can assert which left-slot variant opts in without restating the utility list.
-export const WIDE_CONTEXT_WRAP = '@max-[1260px]:basis-full'
-export const WIDE_ACTIONS_WRAP = '@max-[1260px]:order-first'
+export const SEARCH_CONTEXT_WRAP = '@max-[660px]:basis-full'
+export const SEARCH_ACTIONS_WRAP = '@max-[660px]:order-first'
+export const SAFE_BAR_CONTEXT_WRAP = '@max-[1260px]:basis-full'
+export const SAFE_BAR_ACTIONS_WRAP = '@max-[1260px]:order-first'
 
 interface TopbarProps {
   /** When provided, shows a menu button on mobile to open the sidebar */
@@ -100,6 +115,10 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   // swap in the SpaceSafeBar so the user can see the Safe they're transacting against.
   const showSpaceSafeBar = !isSpaceRoute || Boolean(txFlow)
 
+  // Which wrap threshold applies follows the context variant's width — see the constants above.
+  const contextWrap = showLogo ? undefined : showSpaceSafeBar ? SAFE_BAR_CONTEXT_WRAP : SEARCH_CONTEXT_WRAP
+  const actionsWrap = showLogo ? undefined : showSpaceSafeBar ? SAFE_BAR_ACTIONS_WRAP : SEARCH_ACTIONS_WRAP
+
   const showBatchButton = Boolean(safeAddress && (!isProposer || isSafeOwner))
 
   const handleWalletSwitch = () => {
@@ -127,12 +146,12 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
         )}
       >
         {/* Left content (context): the safe selector must not shrink so its children stay on
-            one line. See WIDE_CONTEXT_WRAP for how the wide variants wrap. `h-14` matches the
+            one line. See the *_CONTEXT_WRAP constants for how the wide variants wrap. `h-14` matches the
             actions card's 56px height and gives the search input's `h-full` a definite parent.
 
             The burger lives in here rather than beside it: the wide variants are `basis-full`, so a
             sibling burger could never share their line and got stranded on a row of its own. */}
-        <div className={cn('shrink-0 flex items-center gap-2', !showLogo && cn('h-14', WIDE_CONTEXT_WRAP))}>
+        <div className={cn('shrink-0 flex items-center gap-2', !showLogo && 'h-14', contextWrap)}>
           {showMenuButton ? (
             <Button
               variant="ghost"
@@ -154,7 +173,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
         </div>
 
         {/* Right content (actions): ml-auto pushes it to the right page padding. One 56px card
-            holding the muted action chips, matching the safe-selector pill. See WIDE_ACTIONS_WRAP
+            holding the muted action chips, matching the safe-selector pill. See the *_ACTIONS_WRAP constants
             for how it gives that up when the wide context variants wrap below it.
 
             `flex-wrap min-w-0` and no `shrink-0`: the chips add up to ~403px, so on a 375px screen the
@@ -164,7 +183,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
         <div
           className={cn(
             'flex min-w-0 flex-wrap items-center gap-1 ml-auto rounded-xl bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]',
-            !showLogo && WIDE_ACTIONS_WRAP,
+            actionsWrap,
           )}
         >
           {showSafeToken && (
