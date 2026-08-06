@@ -30,7 +30,6 @@ import PaginatedDataTable, { type DataTableColumn } from '../PaginatedDataTable'
 import { getMemberTwoFactorStatus, MemberTwoFactorBadge } from '@/features/oidc-auth'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
-import { Typography } from '@mui/material'
 
 type MembersListVariant = 'active' | 'pending'
 
@@ -52,9 +51,9 @@ const dateColumn = (
   cell: (member) => {
     const timestamp = parseTimestamp(getDate(member))
     return (
-      <Typography variant="body2" fontSize={12} color="text.secondary" noWrap>
+      <span className="text-muted-foreground block truncate text-xs">
         {timestamp !== null ? render(timestamp) : '–'}
-      </Typography>
+      </span>
     )
   },
 })

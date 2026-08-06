@@ -55,7 +55,7 @@ export type DataTableColumn<T> = {
   emphasis?: 'default' | 'strong'
   /** Desktop column width, bounded to the shared scale (mobile auto-sizes) */
   width?: ColumnWidth
-  /** `secondary` columns are hidden below the mobile breakpoint (768px) */
+  /** `secondary` columns are dropped in the compact layout (mobile viewport or too-narrow container) */
   priority?: 'essential' | 'secondary'
   /** Pins the column to the left while horizontally scrolling on mobile */
   sticky?: boolean
@@ -80,7 +80,8 @@ type PaginatedDataTableProps<T> = {
   pageSize?: number
 }
 
-// Secondary columns drop out below 768px (matches useIsMobile's breakpoint)
+// Flash guard: hides secondary columns on small viewports during the first render,
+// before useIsMobile resolves and compact mode drops them from the DOM.
 const hideClass = <T,>(column: DataTableColumn<T>) =>
   column.priority === 'secondary' ? 'max-[767px]:hidden md:table-cell' : ''
 

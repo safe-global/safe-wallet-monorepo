@@ -1,10 +1,10 @@
 import { fireEvent, render, screen, within } from '@/tests/test-utils'
 import type { ReactNode } from 'react'
-import { formatTimeInWords, formatWithSchema } from '@safe-global/utils/utils/date'
+import { formatDate as formatDateUtil, formatTimeInWords } from '@safe-global/utils/utils/date'
 import { memberBuilder, memberUserBuilder } from '@/tests/builders/member'
 import MembersList from './index'
 
-const formatDate = (iso: string) => formatWithSchema(new Date(iso).getTime(), 'MMM d, yyyy')
+const formatDate = (iso: string) => formatDateUtil(new Date(iso).getTime())
 
 jest.mock('./MemberName', () => ({
   __esModule: true,
