@@ -15,11 +15,12 @@ import {
   useAddressBooksUpsertAddressBookItemsV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { showNotification } from '@/store/notificationsSlice'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId, useWorkspaceAddressBookLabel } from '@/features/spaces'
 import { useAppDispatch } from '@/store'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { getContactUpdatedMessage } from '@/utils/addressBookNotifications'
 
 type EditContactDialogProps = {
   entry: SpaceAddressBookItemDto
@@ -32,6 +33,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
   const { configs } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
+  const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
 
   const defaultNetworks = entry.chainIds
@@ -103,7 +105,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
 
       dispatch(
         showNotification({
-          message: `Updated contact`,
+          message: getContactUpdatedMessage(workspaceAddressBookLabel),
           variant: 'success',
           groupKey: 'update-contact-success',
         }),

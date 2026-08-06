@@ -18,7 +18,7 @@ const RemoveDialog = ({ handleClose, address }: { handleClose: () => void; addre
   const name = addressBook?.[address]
 
   const handleConfirm = () => {
-    dispatch(removeAddressBookEntry({ chainId, address }))
+    dispatch(removeAddressBookEntry({ chainId, address, notify: true }))
     handleClose()
   }
 
