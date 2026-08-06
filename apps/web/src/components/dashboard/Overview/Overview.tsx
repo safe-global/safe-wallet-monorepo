@@ -26,18 +26,25 @@ const Overview = (): ReactElement => {
 
   return (
     <section className="overflow-hidden rounded-3xl bg-[var(--color-background-paper)] px-6 pb-3 pt-5">
-      {/* Refresh hint pinned to the top, actions to the bottom (aligned with the balance) via a
-          stretched `justify-between` column — keeps the original look while making it impossible for
-          the hint to overlap the actions when they wrap onto a second row on narrow widths. */}
+      {/* Refresh hint pinned to the top, actions to the bottom so they line up with the balance,
+          which keeps the hint from overlapping them when they wrap onto a second row. */}
       <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-stretch">
         <div className="flex items-end">
           <TotalAssetValue fiatTotal={balances.fiatTotal} size="lg" title="Total balance" />
         </div>
 
-        <div className="flex flex-col items-start gap-4 md:items-end md:justify-between">
+        <div className="flex flex-col items-start gap-4 md:items-end">
           {!portfolio.$isDisabled && <portfolio.PortfolioRefreshHint entryPoint="Dashboard" />}
 
-          {safe.deployed && <ActionsTray noAssets={noAssets} />}
+          {/* `mt-auto` rather than a `justify-between` on the column: that only reaches the bottom
+              while the hint above is also rendered, and the hint is conditional — with the actions
+              alone in the column they sat at the top, level with the balance's label instead of its
+              figure. */}
+          {safe.deployed && (
+            <div className="md:mt-auto">
+              <ActionsTray noAssets={noAssets} />
+            </div>
+          )}
         </div>
       </div>
     </section>

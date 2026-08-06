@@ -107,23 +107,19 @@ const TxAuditLogActions = ({
 }) => (
   <>
     <CopyTxHashButton txHash={txHash} />
+    {/* No Tooltip of its own: TxShareLinkWrapper wraps this in CopyTooltip, which already supplies a
+        TooltipTrigger and its own "Copy the transaction URL" content. A second one nested inside
+        opened two tooltips at once on hover. The aria-label carries the accessible name. */}
     <TxShareLinkWrapper id={txId} eventLabel={CopyDeeplinkLabels.shareBlock}>
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <Button
-              data-testid="share-tx-link-btn"
-              variant="ghost"
-              size="icon-sm"
-              className="text-inherit"
-              aria-label="Copy transaction link"
-            >
-              <Copy className="size-5" />
-            </Button>
-          }
-        />
-        <TooltipContent side="top">Copy transaction link</TooltipContent>
-      </Tooltip>
+      <Button
+        data-testid="share-tx-link-btn"
+        variant="ghost"
+        size="icon-sm"
+        className="text-inherit"
+        aria-label="Copy transaction link"
+      >
+        <Copy className="size-5" />
+      </Button>
     </TxShareLinkWrapper>
     {explorerLink ? (
       <ExplorerButton {...explorerLink} isCompact />
