@@ -14,9 +14,13 @@ const Amount = ({ value, token }: { value: string; token: TokenInfo }) => (
 )
 
 const OnlyToken = ({ token }: { token: TokenInfo }) => (
-  <span className="flex items-center gap-2 font-bold">
-    <TokenIcon tokenSymbol={token.symbol} logoUri={token.logoUri ?? undefined} />
-    {token.symbol}
+  // min-w-0 so the symbol can shrink far enough for its own ellipsis to engage; the icon keeps its
+  // size (shrink-0) because a squashed logo reads as a rendering fault rather than truncation.
+  <span className="flex min-w-0 items-center gap-2 font-bold">
+    <span className="shrink-0">
+      <TokenIcon tokenSymbol={token.symbol} logoUri={token.logoUri ?? undefined} />
+    </span>
+    <span className="overflow-hidden text-ellipsis whitespace-nowrap">{token.symbol}</span>
   </span>
 )
 
@@ -33,9 +37,14 @@ export const SwapTx = ({ info }: { info: OrderTransactionInfo }): ReactElement =
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-1 overflow-hidden text-ellipsis whitespace-nowrap font-bold">
+    // A swap names two tokens where every other tx type names one, so this is the widest `info` cell
+    // in the list. It must still resolve to a single line: `flex-wrap` let it break instead, which
+    // grew the row taller than its neighbours and knocked the queue grid out of alignment. Nowrap
+    // plus min-w-0 hands the overflow to the children, whose own `text-overflow` truncates it —
+    // `text-ellipsis` on this flex container never applied, since text-overflow needs a block box.
+    <div className="flex min-w-0 items-center gap-1 overflow-hidden font-bold whitespace-nowrap">
       {from}
-      <span className="mx-1">&nbsp;to&nbsp;</span>
+      <span className="mx-1 shrink-0">&nbsp;to&nbsp;</span>
       {to}
     </div>
   )
