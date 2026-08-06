@@ -197,11 +197,11 @@ const AssetsTable = ({
               rawValue: rawFiatValue,
               content: (
                 <Box textAlign="right">
-                  <Typography>
+                  <Typography component="div">
                     <FiatBalance balanceItem={item} />
                   </Typography>
                   {item.fiatBalance24hChange && (
-                    <Typography variant="body2">
+                    <Typography variant="body2" component="div">
                       <FiatChange balanceItem={item} inline />
                     </Typography>
                   )}

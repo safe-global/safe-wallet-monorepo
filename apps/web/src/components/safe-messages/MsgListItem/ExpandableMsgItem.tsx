@@ -16,6 +16,7 @@ const ExpandableMsgItem = ({ msg, expanded = false }: { msg: MessageItem; expand
         data-testid="message-item"
         expandIcon={<ExpandMoreIcon />}
         sx={{ justifyContent: 'flex-start', overflowX: 'auto' }}
+        component="div"
       >
         <MsgSummary msg={msg} />
       </AccordionSummary>

@@ -21,6 +21,7 @@ import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { cn } from '@/utils/cn'
 import { AccountItem as BaseAccountItem } from '../AccountItem'
+import { NetworkLogosPill } from '@/features/multichain'
 import type { AccountLine } from './useSafeAccountRows'
 import type { SafeAccountColumn } from './columns'
 import { PendingBadge, ThresholdBadge, formatPendingLabel } from '@/components/common/AccountBadges'
@@ -224,16 +225,14 @@ const CellContent = ({ column, line }: { column: SafeAccountColumn; line: Accoun
         />
       )
     case 'networks':
-      // The grey pill lives here, not in the shared ChainBadge — other surfaces (sidebar list,
-      // multi-account items) render the bare logos.
       return (
-        <span className="bg-muted inline-flex items-center rounded-full p-0.5">
+        <NetworkLogosPill>
           {line.networks ? (
             <BaseAccountItem.ChainBadge safes={line.networks} />
           ) : (
             <BaseAccountItem.ChainBadge chainId={line.chainId} />
           )}
-        </span>
+        </NetworkLogosPill>
       )
     case 'workspaces':
       return <WorkspaceAvatars spaces={line.workspaces} />

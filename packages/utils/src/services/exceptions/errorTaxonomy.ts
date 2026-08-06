@@ -39,6 +39,7 @@ export enum ErrorType {
   NONCE_CONFLICT = 'nonce_conflict',
   SLIPPAGE_EXCEEDED = 'slippage_exceeded',
   ORDER_EXPIRED = 'order_expired',
+  EXPIRED = 'expired',
   INSUFFICIENT_FUNDS = 'insufficient_funds',
   ON_CHAIN_REVERT = 'on_chain_revert',
   // Per-code defaults (from ERROR_CODE_MAP)

@@ -6,7 +6,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import Identicon from '@/components/common/Identicon'
-import { NetworkLogosTooltip } from '@/features/multichain'
+import { NetworkLogosPill, NetworkLogosTooltip } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import {
@@ -126,13 +126,17 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     }
   }
 
-  const renderChains = (req: AddressBookRequestItemDto) => (
-    <NetworkLogosTooltip
-      networks={req.chainIds.map((chainId) => ({ chainId }))}
-      maxVisible={3}
-      trigger={chains.configs.length === req.chainIds.length ? <Badge variant="secondary">All</Badge> : undefined}
-    />
-  )
+  // The "All" badge stands on its own; logo stacks get the standard grey pill.
+  const renderChains = (req: AddressBookRequestItemDto) =>
+    chains.configs.length === req.chainIds.length ? (
+      <NetworkLogosTooltip
+        networks={req.chainIds.map((chainId) => ({ chainId }))}
+        maxVisible={3}
+        trigger={<Badge variant="secondary">All</Badge>}
+      />
+    ) : (
+      <NetworkLogosPill networks={req.chainIds.map((chainId) => ({ chainId }))} />
+    )
 
   const columns: DataTableColumn<AddressBookRequestItemDto>[] = [
     {

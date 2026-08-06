@@ -1,4 +1,4 @@
-import { normalizeError } from '@safe-global/utils/services/exceptions/normalizeError'
+import { matchUserOutcome, normalizeError } from '@safe-global/utils/services/exceptions/normalizeError'
 import type { ErrorContext, SurfacedError } from '../../types'
 import { MixpanelEvent, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { mixpanelTrack } from '@/services/analytics/mixpanel'
@@ -7,7 +7,7 @@ import { mixpanelTrack } from '@/services/analytics/mixpanel'
  * Maps the analytics-agnostic `ErrorContext` to Mixpanel event properties.
  * Only present keys are emitted, so events stay compact and free of `undefined`.
  */
-const mapContext = (context?: ErrorContext): Record<string, string> => {
+const mapContext = (context?: ErrorContext): Record<string, string | number> => {
   if (!context) return {}
   return {
     ...(context.txHash && { [MixpanelEventParams.TX_HASH]: context.txHash }),
@@ -15,6 +15,7 @@ const mapContext = (context?: ErrorContext): Record<string, string> => {
     ...(context.transactionType && { [MixpanelEventParams.TRANSACTION_TYPE]: context.transactionType }),
     ...(context.rpcEndpointKind && { [MixpanelEventParams.RPC_ENDPOINT_KIND]: context.rpcEndpointKind }),
     ...(context.rpcHost && { [MixpanelEventParams.RPC_HOST]: context.rpcHost }),
+    ...(context.httpStatus && { [MixpanelEventParams.HTTP_STATUS]: context.httpStatus }),
   }
 }
 
@@ -27,6 +28,12 @@ const mapContext = (context?: ErrorContext): Record<string, string> => {
  * Wallet Label) are attached automatically as Mixpanel super-properties.
  */
 export const trackErrorSurfaced = ({ code, message, isUserFacing, context }: SurfacedError): void => {
+  // User-driven outcomes (rejection, approval-prompt expiry) are not errors —
+  // they never surface as an Error Surfaced event (WA-2950).
+  if (matchUserOutcome(message)) {
+    return
+  }
+
   const normalized = normalizeError({ code, message, isUserFacing })
 
   mixpanelTrack(MixpanelEvent.ERROR_SURFACED, {

@@ -226,7 +226,7 @@ describe('ActionsTray geoblocking', () => {
       renderTray({ isBlockedCountry: false, variant: 'safe' })
 
       const buildTxControl = screen.getByRole('link', { name: /transaction builder/i })
-      expect(buildTxControl).toBeEnabled()
+      expect(buildTxControl).toHaveAttribute('href')
 
       const tooltipTrigger = buildTxControl.parentElement
       expect(tooltipTrigger).toBeTruthy()

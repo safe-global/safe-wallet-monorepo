@@ -19,6 +19,16 @@ const isVulnerableModuleName = (name?: string | null): boolean => {
   return VULNERABLE_MODULE_NAMES.some((fragment) => lower.includes(fragment))
 }
 
+// Unsupported Zodiac mastercopies enabled directly as a module (the module address is the
+// mastercopy, not a per-Safe proxy) — flagged Critical by address, without the name/API checks.
+// A recovery Delay Modifier is a unique per-Safe proxy, so it never matches. Add addresses here.
+const UNSUPPORTED_ZODIAC_MASTERCOPIES = new Set(
+  ['0x01F8cabB808D7dE0dF4202D4B60C8310d2f1339b'].map((address) => address.toLowerCase()), // Delay Modifier v1.1.0
+)
+
+const isUnsupportedZodiacMastercopy = (address: string): boolean =>
+  UNSUPPORTED_ZODIAC_MASTERCOPIES.has(address.toLowerCase())
+
 /** Safe Allowance Module deployment versions to check against. */
 const ALLOWANCE_MODULE_VERSIONS = ['0.1.0', '0.1.1']
 
@@ -120,12 +130,17 @@ export const modulesScanner: SecurityScanner = {
       }
     }
 
-    // Critical: a known-vulnerable Zodiac module (Delay v1.1.0 / Roles v2.1.0, all
-    // mastercopies) is flagged by the server-side Zodiac security-check. This takes
-    // precedence over the trust tiers below — it is always Critical. Fails closed.
+    // Critical (takes precedence over the trust tiers below): a module matches the unsupported
+    // mastercopy ruleset, or the server-side check flags the Safe as affected (which also covers
+    // the nested "affected via a related account" case). Fails closed.
+    const flaggedByAddress = activeModules.filter((m) => isUnsupportedZodiacMastercopy(m.value))
     const isAffected = await isSafeAffectedByZodiacVulnerability(chainId, safeAddress)
-    if (isAffected) {
-      const vulnerable = activeModules.filter((m) => isVulnerableModuleName(m.name))
+    if (flaggedByAddress.length > 0 || isAffected) {
+      // Removable modules: address-matched plus (when affected) name-matched, de-duped.
+      const nameMatched = isAffected ? activeModules.filter((m) => isVulnerableModuleName(m.name)) : []
+      const vulnerable = [...flaggedByAddress, ...nameMatched].filter(
+        (m, i, arr) => arr.findIndex((o) => sameAddress(o.value, m.value)) === i,
+      )
       const score = 0
       const hasRemovable = vulnerable.length > 0
       return {

@@ -98,11 +98,11 @@ export const AssetRowContent = ({
       </div>
       {showMobileValue && (
         <Box className={css.mobileValue}>
-          <Typography>
+          <Typography component="div">
             <FiatBalance balanceItem={item} />
           </Typography>
           {item.fiatBalance24hChange && (
-            <Typography variant="caption">
+            <Typography variant="caption" component="div">
               <FiatChange balanceItem={item} inline />
             </Typography>
           )}

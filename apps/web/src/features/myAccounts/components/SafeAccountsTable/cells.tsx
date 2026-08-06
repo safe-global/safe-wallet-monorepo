@@ -17,7 +17,7 @@ export function WorkspaceAvatars({ spaces }: { spaces: GetSpaceResponse[] }) {
   const overflow = spaces.slice(MAX_VISIBLE_WORKSPACES)
 
   return (
-    <div data-testid="account-workspaces" className="bg-muted inline-flex items-center rounded-full p-0.5">
+    <div data-testid="account-workspaces" className="bg-foreground/5 inline-flex items-center rounded-full p-0.5">
       <div className="flex -space-x-2">
         {visible.map((space) => (
           <Tooltip key={space.uuid} delay={TOOLTIP_DELAY_MS}>
