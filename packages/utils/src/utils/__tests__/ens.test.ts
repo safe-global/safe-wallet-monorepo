@@ -42,28 +42,27 @@ describe('ens utils', () => {
       expect(resolveName).toHaveBeenCalledWith('test.eth', (0x80000000 | 8453) >>> 0)
     })
 
-    it('falls back to the ETH coin type when the chain-specific record is missing', async () => {
-      const resolveName = jest.fn().mockResolvedValueOnce(null).mockResolvedValueOnce(ADDRESS)
-
-      expect(await resolveNameForChain({ resolveName }, 'test.eth', 8453)).toBe(ADDRESS)
-      expect(resolveName).toHaveBeenNthCalledWith(1, 'test.eth', (0x80000000 | 8453) >>> 0)
-      expect(resolveName).toHaveBeenNthCalledWith(2, 'test.eth', ETH_COIN_TYPE)
-    })
-
-    it('does not fall back when resolving for mainnet', async () => {
+    it('does not fall back to the ETH coin type when the chain-specific record is missing', async () => {
       const resolveName = jest.fn().mockResolvedValue(null)
 
-      expect(await resolveNameForChain({ resolveName }, 'test.eth', 1)).toBeNull()
+      expect(await resolveNameForChain({ resolveName }, 'test.eth', 8453)).toBeNull()
+      expect(resolveName).toHaveBeenCalledTimes(1)
+      expect(resolveName).toHaveBeenCalledWith('test.eth', (0x80000000 | 8453) >>> 0)
+    })
+
+    it('resolves mainnet with the ETH coin type', async () => {
+      const resolveName = jest.fn().mockResolvedValue(ADDRESS)
+
+      expect(await resolveNameForChain({ resolveName }, 'test.eth', 1)).toBe(ADDRESS)
       expect(resolveName).toHaveBeenCalledTimes(1)
       expect(resolveName).toHaveBeenCalledWith('test.eth', ETH_COIN_TYPE)
     })
 
-    it('skips the chain-specific lookup for chain ids without an ENSIP-11 coin type', async () => {
+    it('returns null for chain ids without an ENSIP-11 coin type', async () => {
       const resolveName = jest.fn().mockResolvedValue(ADDRESS)
 
-      expect(await resolveNameForChain({ resolveName }, 'test.eth', 11297108109)).toBe(ADDRESS)
-      expect(resolveName).toHaveBeenCalledTimes(1)
-      expect(resolveName).toHaveBeenCalledWith('test.eth', ETH_COIN_TYPE)
+      expect(await resolveNameForChain({ resolveName }, 'test.eth', 11297108109)).toBeNull()
+      expect(resolveName).not.toHaveBeenCalled()
     })
   })
 })

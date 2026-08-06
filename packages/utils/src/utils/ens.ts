@@ -40,8 +40,7 @@ export const getEnsHubChainId = (isTestnet: boolean): string => {
 
 /**
  * Forward-resolve an ENS name for a target chain via a hub provider (Mainnet/Sepolia).
- * Tries the chain-specific coin type first, then falls back to ETH (60) so names that only
- * set a mainnet addr record still work on L2s (or whose chain id has no ENSIP-11 coin type).
+ * Looks up only that chain's coin type — no fallback to the ETH (60) record.
  */
 export const resolveNameForChain = async (
   hubProvider: Pick<JsonRpcProvider, 'resolveName'>,
@@ -49,10 +48,9 @@ export const resolveNameForChain = async (
   targetChainId: number,
 ): Promise<string | null> => {
   const coinType = convertChainIdToCoinType(targetChainId)
-  const address = coinType === undefined ? null : await hubProvider.resolveName(name, coinType)
-  if (address || coinType === ETH_COIN_TYPE) {
-    return address
+  if (coinType === undefined) {
+    return null
   }
 
-  return hubProvider.resolveName(name, ETH_COIN_TYPE)
+  return hubProvider.resolveName(name, coinType)
 }
