@@ -1,4 +1,11 @@
-import Topbar, { SAFE_BAR_ACTIONS_WRAP, SAFE_BAR_CONTEXT_WRAP, SEARCH_ACTIONS_WRAP, SEARCH_CONTEXT_WRAP } from './index'
+import Topbar, {
+  SAFE_BAR_ACTIONS_WRAP,
+  SAFE_BAR_CONTEXT_HEIGHT,
+  SAFE_BAR_CONTEXT_WRAP,
+  SEARCH_ACTIONS_WRAP,
+  SEARCH_CONTEXT_HEIGHT,
+  SEARCH_CONTEXT_WRAP,
+} from './index'
 import * as contracts from '@/features/__core__'
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
@@ -312,6 +319,10 @@ describe('Topbar', () => {
       expect(context.className).toContain(SAFE_BAR_CONTEXT_WRAP)
       expect(actions.className).toContain(SAFE_BAR_ACTIONS_WRAP)
       expect(header.className).toMatch(/items-start/)
+      // A floor, not a fixed height: the bar wraps internally at narrow widths, and against a fixed
+      // h-14 the slot's items-center centred the overflow — half of it spilling up into the actions.
+      expect(context.className).toContain(SAFE_BAR_CONTEXT_HEIGHT)
+      expect(context.className).not.toMatch(/(?:^|\s)h-14(?:\s|$)/)
     })
 
     // The search input is ~335px narrower than the safe bar, so sharing the safe bar's threshold
@@ -328,6 +339,10 @@ describe('Topbar', () => {
       expect(context.className).toContain(SEARCH_CONTEXT_WRAP)
       expect(actions.className).toContain(SEARCH_ACTIONS_WRAP)
       expect(context.className).not.toContain(SAFE_BAR_CONTEXT_WRAP)
+      // This variant keeps the FIXED height: the search input sizes itself with `h-full`, which
+      // needs a definite parent — a min-height would leave it collapsed to its content.
+      expect(context.className).toContain(SEARCH_CONTEXT_HEIGHT)
+      expect(context.className).not.toContain(SAFE_BAR_CONTEXT_HEIGHT)
     })
 
     // The three below pin the *shape* of the wrap rules, not just that the named constants are

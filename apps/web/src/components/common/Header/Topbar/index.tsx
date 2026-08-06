@@ -63,6 +63,13 @@ import { cn } from '@/utils/cn'
 //
 // The logo variant is 24px and always fits beside the actions, so it opts out entirely. Named so the
 // Topbar tests can assert which left-slot variant opts in without restating the utility list.
+// The slot height is per variant too. The search input sizes itself with `h-full`, which needs a
+// definite parent, so that variant is pinned to `h-14` (56px, matching the actions card). The safe
+// bar must NOT be: it wraps internally at narrow widths (to 104px measured), and against a fixed
+// 56px slot `items-center` centred the overflow — half of it spilling *upwards*, 24px into the
+// actions card above. `min-h-14` keeps the 56px floor while letting it grow.
+export const SEARCH_CONTEXT_HEIGHT = 'h-14'
+export const SAFE_BAR_CONTEXT_HEIGHT = 'min-h-14'
 export const SEARCH_CONTEXT_WRAP = '@max-[660px]:basis-full'
 export const SEARCH_ACTIONS_WRAP = '@max-[660px]:order-first'
 export const SAFE_BAR_CONTEXT_WRAP = '@max-[1260px]:basis-full'
@@ -115,9 +122,10 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   // swap in the SpaceSafeBar so the user can see the Safe they're transacting against.
   const showSpaceSafeBar = !isSpaceRoute || Boolean(txFlow)
 
-  // Which wrap threshold applies follows the context variant's width — see the constants above.
+  // Which wrap threshold and slot height apply follow the context variant — see the constants above.
   const contextWrap = showLogo ? undefined : showSpaceSafeBar ? SAFE_BAR_CONTEXT_WRAP : SEARCH_CONTEXT_WRAP
   const actionsWrap = showLogo ? undefined : showSpaceSafeBar ? SAFE_BAR_ACTIONS_WRAP : SEARCH_ACTIONS_WRAP
+  const contextHeight = showLogo ? undefined : showSpaceSafeBar ? SAFE_BAR_CONTEXT_HEIGHT : SEARCH_CONTEXT_HEIGHT
 
   const showBatchButton = Boolean(safeAddress && (!isProposer || isSafeOwner))
 
@@ -145,13 +153,13 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
           showMenuButton && 'pl-2',
         )}
       >
-        {/* Left content (context): the safe selector must not shrink so its children stay on
-            one line. See the *_CONTEXT_WRAP constants for how the wide variants wrap. `h-14` matches the
-            actions card's 56px height and gives the search input's `h-full` a definite parent.
+        {/* Left content (context): the safe selector must not shrink so its children stay on one
+            line. See the *_CONTEXT_WRAP / *_CONTEXT_HEIGHT constants for how each wide variant wraps
+            and how tall its slot is.
 
             The burger lives in here rather than beside it: the wide variants are `basis-full`, so a
             sibling burger could never share their line and got stranded on a row of its own. */}
-        <div className={cn('shrink-0 flex items-center gap-2', !showLogo && 'h-14', contextWrap)}>
+        <div className={cn('shrink-0 flex items-center gap-2', contextHeight, contextWrap)}>
           {showMenuButton ? (
             <Button
               variant="ghost"
