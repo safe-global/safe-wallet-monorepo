@@ -23,7 +23,7 @@ const mockUseGetSpaceAddressBook = useGetSpaceAddressBook as jest.MockedFunction
 const spaceContactBuilder = (overrides: Partial<SpaceAddressBookItemDto> = {}): SpaceAddressBookItemDto => ({
   name: 'Server Contact',
   address: checksumAddress(faker.finance.ethereumAddress()),
-  chainIds: ['4'],
+  chainIds: ['1'],
   createdBy: '',
   createdByUserId: 0,
   lastUpdatedBy: '',
@@ -36,8 +36,8 @@ const spaceContactBuilder = (overrides: Partial<SpaceAddressBookItemDto> = {}): 
 // We use Rinkeby and chainId 4 here as this is our default url chain (see jest.setup.js)
 const mockChain = chainBuilder()
   .with({ features: [FEATURES.DOMAIN_LOOKUP] })
-  .with({ chainId: '4' })
-  .with({ shortName: 'rin' })
+  .with({ chainId: '1' })
+  .with({ shortName: 'eth' })
   .build()
 
 // mock useNameResolver

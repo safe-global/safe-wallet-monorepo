@@ -22,6 +22,11 @@ export const createSafeTx = (data = '0x'): SafeTransaction => {
       data,
       operation: 0,
       nonce: 100,
+      safeTxGas: '0',
+      baseGas: '0',
+      gasPrice: '0',
+      gasToken: ZERO_ADDRESS,
+      refundReceiver: ZERO_ADDRESS,
     },
     signatures: new Map([]),
     addSignature: function (sig: SafeSignature): void {

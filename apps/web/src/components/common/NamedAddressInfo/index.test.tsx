@@ -67,7 +67,7 @@ describe('NamedAddressInfo', () => {
       expect(result.getByText('Resolved Test Name')).toBeVisible()
     })
 
-    expect(useGetContractQueryMock).toHaveBeenCalledWith({ chainId: '4', contractAddress: address }, { skip: false })
+    expect(useGetContractQueryMock).toHaveBeenCalledWith({ chainId: '1', contractAddress: address }, { skip: false })
   })
 
   it('should show "This Safe account" when address matches Safe address', async () => {
@@ -140,7 +140,7 @@ describe('useAddressName', () => {
       })
     })
 
-    expect(useGetContractQueryMock).toHaveBeenCalledWith({ chainId: '4', contractAddress: address }, { skip: false })
+    expect(useGetContractQueryMock).toHaveBeenCalledWith({ chainId: '1', contractAddress: address }, { skip: false })
   })
 
   it('should mark contract without ABI as unverified', async () => {

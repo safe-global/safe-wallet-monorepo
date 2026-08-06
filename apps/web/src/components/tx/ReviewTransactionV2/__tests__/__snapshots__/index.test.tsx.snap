@@ -64,6 +64,10 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                           data-mui-internal-clone-element="true"
                           style="cursor: pointer;"
                         >
+                          <b>
+                            eth
+                            :
+                          </b>
                           <span>
                             0xE20CcFf2c38Ef3b64109361D7b7691ff2c7D5f67
                           </span>
@@ -91,7 +95,24 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                       </span>
                       <div
                         class="MuiBox-root css-yjghm1"
-                      />
+                      >
+                        <a
+                          aria-label="View on etherscan.io"
+                          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                          data-mui-internal-clone-element="true"
+                          data-testid="explorer-btn"
+                          href="https://etherscan.io/address/0xE20CcFf2c38Ef3b64109361D7b7691ff2c7D5f67"
+                          rel="noreferrer"
+                          tabindex="0"
+                          target="_blank"
+                        >
+                          <mock-icon
+                            aria-hidden=""
+                            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                            focusable="false"
+                          />
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -355,7 +376,24 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                                             </div>
                                             <div
                                               class="MuiBox-root css-yjghm1"
-                                            />
+                                            >
+                                              <a
+                                                aria-label="View on etherscan.io"
+                                                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                                data-mui-internal-clone-element="true"
+                                                data-testid="explorer-btn"
+                                                href="https://etherscan.io/address/0x0000000000000000000000000000000000000000"
+                                                rel="noreferrer"
+                                                tabindex="0"
+                                                target="_blank"
+                                              >
+                                                <mock-icon
+                                                  aria-hidden=""
+                                                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                                                  focusable="false"
+                                                />
+                                              </a>
+                                            </div>
                                           </div>
                                         </div>
                                       </div>
@@ -461,6 +499,11 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                                   >
                                     SafeTxGas
                                   </p>
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+                                  >
+                                    0
+                                  </p>
                                 </div>
                                 <hr
                                   class="MuiDivider-root MuiDivider-fullWidth css-1facvfi-MuiDivider-root"
@@ -473,6 +516,11 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                                   >
                                     BaseGas
                                   </p>
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+                                  >
+                                    0
+                                  </p>
                                 </div>
                                 <hr
                                   class="MuiDivider-root MuiDivider-fullWidth css-1facvfi-MuiDivider-root"
@@ -484,6 +532,11 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                                     class="MuiTypography-root MuiTypography-body2 css-1korokw-MuiTypography-root"
                                   >
                                     GasPrice
+                                  </p>
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+                                  >
+                                    0
                                   </p>
                                 </div>
                                 <hr
@@ -518,12 +571,31 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                                               data-mui-internal-clone-element="true"
                                               style="cursor: pointer;"
                                             >
-                                              <span />
+                                              <span>
+                                                0x0000...0000
+                                              </span>
                                             </span>
                                           </div>
                                           <div
                                             class="MuiBox-root css-yjghm1"
-                                          />
+                                          >
+                                            <a
+                                              aria-label="View on etherscan.io"
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                              data-mui-internal-clone-element="true"
+                                              data-testid="explorer-btn"
+                                              href="https://etherscan.io/address/0x0000000000000000000000000000000000000000"
+                                              rel="noreferrer"
+                                              tabindex="0"
+                                              target="_blank"
+                                            >
+                                              <mock-icon
+                                                aria-hidden=""
+                                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                                                focusable="false"
+                                              />
+                                            </a>
+                                          </div>
                                         </div>
                                       </div>
                                     </div>
@@ -561,12 +633,31 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                                               data-mui-internal-clone-element="true"
                                               style="cursor: pointer;"
                                             >
-                                              <span />
+                                              <span>
+                                                0x0000...0000
+                                              </span>
                                             </span>
                                           </div>
                                           <div
                                             class="MuiBox-root css-yjghm1"
-                                          />
+                                          >
+                                            <a
+                                              aria-label="View on etherscan.io"
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                              data-mui-internal-clone-element="true"
+                                              data-testid="explorer-btn"
+                                              href="https://etherscan.io/address/0x0000000000000000000000000000000000000000"
+                                              rel="noreferrer"
+                                              tabindex="0"
+                                              target="_blank"
+                                            >
+                                              <mock-icon
+                                                aria-hidden=""
+                                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                                                focusable="false"
+                                              />
+                                            </a>
+                                          </div>
                                           <svg
                                             aria-hidden="true"
                                             aria-label="The RefundReceiver address is the one that will be reimbursed for the gas costs of executing this transaction."

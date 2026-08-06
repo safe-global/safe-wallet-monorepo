@@ -35,7 +35,7 @@ const customJestConfig = {
   testEnvironment: 'jest-fixed-jsdom',
 
   testEnvironmentOptions: {
-    url: 'http://localhost/balances?safe=rin:0xb3b83bf204C458B461de9B0CD2739DB152b4fa5A',
+    url: 'http://localhost/balances?safe=eth:0xb3b83bf204C458B461de9B0CD2739DB152b4fa5A',
     // https://github.com/mswjs/msw/issues/1786#issuecomment-2426900455
     // without this line 4 tests related to firefox fail
     customExportConditions: ['node'],

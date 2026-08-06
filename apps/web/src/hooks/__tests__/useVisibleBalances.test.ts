@@ -46,7 +46,7 @@ describe('useVisibleBalances', () => {
           theme: {
             darkMode: false,
           },
-          hiddenTokens: { ['4']: [hiddenTokenAddress] },
+          hiddenTokens: { ['1']: [hiddenTokenAddress] },
         },
         chains: { data: [], error: undefined, loading: false, loaded: true },
       } as unknown as store.RootState),
@@ -109,7 +109,7 @@ describe('useVisibleBalances', () => {
           theme: {
             darkMode: false,
           },
-          hiddenTokens: { ['4']: [hiddenTokenAddress] },
+          hiddenTokens: { ['1']: [hiddenTokenAddress] },
         },
         chains: { data: [], error: undefined, loading: false, loaded: true },
       } as unknown as store.RootState),
@@ -186,7 +186,7 @@ describe('useVisibleBalances', () => {
           theme: {
             darkMode: false,
           },
-          hiddenTokens: { ['4']: [hiddenTokenAddress] },
+          hiddenTokens: { ['1']: [hiddenTokenAddress] },
         },
         chains: { data: [], error: undefined, loading: false, loaded: true },
       } as unknown as store.RootState),
@@ -250,7 +250,7 @@ describe('useVisibleBalances', () => {
           theme: {
             darkMode: false,
           },
-          hiddenTokens: { ['4']: [hiddenTokenAddress] },
+          hiddenTokens: { ['1']: [hiddenTokenAddress] },
         },
         chains: { data: [], error: undefined, loading: false, loaded: true },
       } as unknown as store.RootState),
@@ -309,7 +309,7 @@ describe('useVisibleBalances', () => {
           currency: 'USD',
           shortName: { qr: true, show: true },
           theme: { darkMode: false },
-          hiddenTokens: { ['4']: [] },
+          hiddenTokens: { ['1']: [] },
           hideDust: true,
         },
         chains: { data: [], error: undefined, loading: false, loaded: true },
@@ -369,7 +369,7 @@ describe('useVisibleBalances', () => {
           currency: 'USD',
           shortName: { qr: true, show: true },
           theme: { darkMode: false },
-          hiddenTokens: { ['4']: [] },
+          hiddenTokens: { ['1']: [] },
           hideDust: false,
         },
         chains: { data: [], error: undefined, loading: false, loaded: true },
