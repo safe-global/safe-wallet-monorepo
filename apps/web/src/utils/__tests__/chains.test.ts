@@ -6,7 +6,7 @@ import {
   NATIVE_TOKEN_DISPLAY_DEFAULT,
   hasFeature,
 } from '@safe-global/utils/utils/chains'
-import { CONFIG_SERVICE_CHAINS } from '@/tests/mocks/chains'
+import { chainFixtures } from '@safe-global/test/msw/fixtures'
 import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { getChainConfig } from '@/utils/chains'
 import { makeStore, setStoreInstance } from '@/store'
@@ -30,14 +30,14 @@ describe('chains', () => {
 
   describe('hasFeature', () => {
     it('returns true for a feature that exists', () => {
-      expect(hasFeature(CONFIG_SERVICE_CHAINS[0], FEATURES.ERC721)).toBe(true)
+      expect(hasFeature(chainFixtures.mainnet, FEATURES.ERC721)).toBe(true)
     })
 
     it("returns false for a feature that doesn't exists", () => {
       expect(
         hasFeature(
           {
-            ...CONFIG_SERVICE_CHAINS[0],
+            ...chainFixtures.mainnet,
             features: [],
           },
           FEATURES.DOMAIN_LOOKUP,
@@ -84,7 +84,7 @@ describe('chains', () => {
 
   describe('getExplorerLink', () => {
     it('returns the correct link for an address', () => {
-      expect(getBlockExplorerLink(CONFIG_SERVICE_CHAINS[0], '0x123')).toEqual({
+      expect(getBlockExplorerLink(chainFixtures.mainnet, '0x123')).toEqual({
         href: 'https://etherscan.io/address/0x123',
         title: 'View on etherscan.io',
       })
@@ -92,7 +92,7 @@ describe('chains', () => {
 
     it('returns the correct link for a transaction', () => {
       expect(
-        getBlockExplorerLink(CONFIG_SERVICE_CHAINS[0], '0x123436456456754735474574575475675435353453465645645656'),
+        getBlockExplorerLink(chainFixtures.mainnet, '0x123436456456754735474574575475675435353453465645645656'),
       ).toEqual({
         href: 'https://etherscan.io/tx/0x123436456456754735474574575475675435353453465645645656',
         title: 'View on etherscan.io',

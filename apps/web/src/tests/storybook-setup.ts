@@ -6,7 +6,7 @@ import * as previewAnnotations from '../../.storybook/preview'
 import { faker } from '@faker-js/faker'
 import * as formatters from '@safe-global/utils/utils/formatters'
 import * as chainHooks from '@/hooks/useChains'
-import { CONFIG_SERVICE_CHAINS } from '@/tests/mocks/chains'
+import { chainFixtures } from '@safe-global/test/msw/fixtures'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 jest.mock(
@@ -33,28 +33,8 @@ jest.spyOn(formatters, 'formatPercentage').mockImplementation((value: number, hi
   }).format(value)
 })
 
-const STORY_CHAINS: Chain[] = CONFIG_SERVICE_CHAINS.map((chain) => {
-  if (chain.chainId === '1') {
-    return {
-      ...chain,
-      chainLogoUri: 'https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png',
-      theme: {
-        ...chain.theme,
-        backgroundColor: '#627EEA',
-        textColor: '#FFFFFF',
-      },
-    }
-  }
-
-  if (chain.chainId === '137') {
-    return {
-      ...chain,
-      chainLogoUri: 'https://safe-transaction-assets.staging.5afe.dev/chains/137/chain_logo.png',
-    }
-  }
-
-  return chain
-})
+// Real staging chain configs (schema-validated fixtures): mainnet, Hoodi, Polygon, Sepolia
+const STORY_CHAINS: Chain[] = chainFixtures.all.results
 
 jest.spyOn(chainHooks, 'default').mockImplementation(() => ({
   configs: STORY_CHAINS,

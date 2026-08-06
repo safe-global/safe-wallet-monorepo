@@ -1,5 +1,5 @@
 import { SettingsHeader } from '@/components/settings/SettingsHeader/index'
-import { CONFIG_SERVICE_CHAINS } from '@/tests/mocks/chains'
+import { chainFixtures } from '@safe-global/test/msw/fixtures'
 import * as safeAddress from '@/hooks/useSafeAddress'
 
 import { render } from '@/tests/test-utils'
@@ -19,7 +19,7 @@ describe('SettingsHeader', () => {
     })
 
     it('displays safe specific preferences if on a safe', () => {
-      const result = render(<SettingsHeader safeAddress="0x1234" chain={CONFIG_SERVICE_CHAINS[0]} />)
+      const result = render(<SettingsHeader safeAddress="0x1234" chain={chainFixtures.mainnet} />)
 
       expect(result.getByText('Setup')).toBeInTheDocument()
     })
@@ -29,7 +29,7 @@ describe('SettingsHeader', () => {
         <SettingsHeader
           safeAddress="0x1234"
           chain={{
-            ...CONFIG_SERVICE_CHAINS[0],
+            ...chainFixtures.mainnet,
             features: [FEATURES.PUSH_NOTIFICATIONS] as unknown as Chain['features'],
           }}
         />,
@@ -46,7 +46,7 @@ describe('SettingsHeader', () => {
     })
 
     it('displays general preferences if no safe is open', () => {
-      const result = render(<SettingsHeader safeAddress="" chain={CONFIG_SERVICE_CHAINS[0]} />)
+      const result = render(<SettingsHeader safeAddress="" chain={chainFixtures.mainnet} />)
 
       expect(result.getByText('Cookies')).toBeInTheDocument()
       expect(result.getByText('Appearance')).toBeInTheDocument()
@@ -59,7 +59,7 @@ describe('SettingsHeader', () => {
         <SettingsHeader
           safeAddress=""
           chain={{
-            ...CONFIG_SERVICE_CHAINS[0],
+            ...chainFixtures.mainnet,
             features: [FEATURES.PUSH_NOTIFICATIONS] as unknown as Chain['features'],
           }}
         />,
