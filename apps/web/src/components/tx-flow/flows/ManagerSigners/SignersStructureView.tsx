@@ -140,7 +140,7 @@ function Threshold({ formMethods, newOwners }: Pick<Props, 'formMethods' | 'newO
 
               return (
                 <Select value={field.value} onValueChange={onChange}>
-                  <SelectTrigger>
+                  <SelectTrigger data-testid="threshold-selector">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

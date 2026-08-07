@@ -67,6 +67,7 @@ const TransferActions = ({
     <>
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger
+          data-testid="transfer-actions-btn"
           render={<Button variant="ghost" size="icon-sm" className="ml-1 text-[var(--color-border-main)]" />}
         >
           <Ellipsis />
