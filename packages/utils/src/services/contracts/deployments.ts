@@ -144,6 +144,14 @@ export const getChainAgnosticAddress = (
 }
 
 /**
+ * Safe versions whose canonical companion deployments (CompatibilityFallbackHandler,
+ * MultiSend, SignMessageLib, …) the app trusts. Only 1.3.0+ is listed — earlier
+ * versions shipped different or no canonical companion contracts. Extend this when
+ * a new Safe version's contracts are rolled out.
+ */
+export const TRUSTED_DEPLOYMENT_VERSIONS: SafeVersion[] = ['1.3.0', '1.4.1', '1.5.0']
+
+/**
  * Checks if any of the deployments returned by the `getDeployments` function for the given `network` and `versions` contain a deployment for the `contractAddress`
  *
  * @param getDeployments function to get the contract deployments

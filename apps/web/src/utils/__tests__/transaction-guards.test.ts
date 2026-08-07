@@ -382,9 +382,9 @@ describe('transaction-guards', () => {
   })
 
   describe('isMigrateToL2TxData', () => {
-    const buildMigrationViaMultiSend = (multiSendAddress: string) => {
+    const buildMigrationViaMultiSend = (multiSendAddress: string, l2SingletonVersion: string) => {
       const migrationAddress = getSafeToL2MigrationDeployment()?.defaultAddress!
-      const l2SingletonAddress = getSafeL2SingletonDeployment({ version: '1.4.1' })?.defaultAddress!
+      const l2SingletonAddress = getSafeL2SingletonDeployment({ version: l2SingletonVersion })?.defaultAddress!
       const migrationInterface = Safe_to_l2_migration__factory.createInterface()
 
       const multiSendData = encodeMultiSendData([
@@ -411,17 +411,17 @@ describe('transaction-guards', () => {
     it('should return true for a migrateToL2 batch sent to the 1.4.1 MultiSend', () => {
       const multiSendAddress = getMultiSendDeployment({ version: '1.4.1' })?.defaultAddress!
 
-      expect(isMigrateToL2TxData(buildMigrationViaMultiSend(multiSendAddress), '1')).toBeTruthy()
+      expect(isMigrateToL2TxData(buildMigrationViaMultiSend(multiSendAddress, '1.4.1'), '1')).toBeTruthy()
     })
 
     it('should return true for a migrateToL2 batch sent to the 1.5.0 MultiSend', () => {
       const multiSendAddress = getMultiSendDeployment({ version: '1.5.0' })?.defaultAddress!
 
-      expect(isMigrateToL2TxData(buildMigrationViaMultiSend(multiSendAddress), '1')).toBeTruthy()
+      expect(isMigrateToL2TxData(buildMigrationViaMultiSend(multiSendAddress, '1.5.0'), '1')).toBeTruthy()
     })
 
     it('should return false for a migrateToL2 batch sent to an unknown MultiSend address', () => {
-      expect(isMigrateToL2TxData(buildMigrationViaMultiSend(faker.finance.ethereumAddress()), '1')).toBeFalsy()
+      expect(isMigrateToL2TxData(buildMigrationViaMultiSend(faker.finance.ethereumAddress(), '1.4.1'), '1')).toBeFalsy()
     })
   })
 

@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useTWAPFallbackHandlerAddress } from '@/features/swap'
-import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
+import { hasMatchingDeployment, TRUSTED_DEPLOYMENT_VERSIONS } from '@safe-global/utils/services/contracts/deployments'
 import { getCompatibilityFallbackHandlerDeployments } from '@safe-global/safe-deployments'
 
 /**
@@ -26,11 +26,12 @@ export const useHasUntrustedFallbackHandler = (fallbackHandler?: string | string
     (fallbackHandlerAddress: string) => {
       return (
         !sameAddress(fallbackHandlerAddress, twapFallbackHandler) &&
-        !hasMatchingDeployment(getCompatibilityFallbackHandlerDeployments, fallbackHandlerAddress, safe.chainId, [
-          '1.3.0',
-          '1.4.1',
-          '1.5.0',
-        ])
+        !hasMatchingDeployment(
+          getCompatibilityFallbackHandlerDeployments,
+          fallbackHandlerAddress,
+          safe.chainId,
+          TRUSTED_DEPLOYMENT_VERSIONS,
+        )
       )
     },
     [safe.chainId, twapFallbackHandler],

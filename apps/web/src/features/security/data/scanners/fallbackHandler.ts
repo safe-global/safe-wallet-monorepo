@@ -2,19 +2,15 @@ import {
   getCompatibilityFallbackHandlerDeployments,
   getExtensibleFallbackHandlerDeployments,
 } from '@safe-global/safe-deployments'
-import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
+import { hasMatchingDeployment, TRUSTED_DEPLOYMENT_VERSIONS } from '@safe-global/utils/services/contracts/deployments'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import type { SafeVersion } from '@safe-global/types-kit'
 import type { SecurityScanner } from './types'
 import { getSeverityFromScore } from './constants'
 // Import directly from helpers/utils (not from '@/features/swap') to avoid pulling
 // the swap feature handle (via createFeatureHandle) into the scanner module graph —
 // that creates a circular dependency with @/features/__core__ in test environments.
 import { TWAP_FALLBACK_HANDLER, TWAP_FALLBACK_HANDLER_NETWORKS } from '@/features/swap/helpers/utils'
-
-// Only 1.3.0+ has the CompatibilityFallbackHandler; older versions used different handler contracts
-const COMPATIBILITY_HANDLER_VERSIONS: SafeVersion[] = ['1.3.0', '1.4.1', '1.5.0']
 
 /** Check if address matches an ExtensibleFallbackHandler deployment (v1.5.0+, not in SafeVersion type yet). */
 const isExtensibleFallbackHandler = (address: string, chainId: string): boolean => {
@@ -29,9 +25,7 @@ const isExtensibleFallbackHandler = (address: string, chainId: string): boolean 
 type HandlerMatch = 'compatibility' | 'extensible' | 'twap' | null
 
 const identifyFallbackHandler = (address: string, chainId: string): HandlerMatch => {
-  if (
-    hasMatchingDeployment(getCompatibilityFallbackHandlerDeployments, address, chainId, COMPATIBILITY_HANDLER_VERSIONS)
-  )
+  if (hasMatchingDeployment(getCompatibilityFallbackHandlerDeployments, address, chainId, TRUSTED_DEPLOYMENT_VERSIONS))
     return 'compatibility'
   if (isExtensibleFallbackHandler(address, chainId)) return 'extensible'
   if (TWAP_FALLBACK_HANDLER_NETWORKS.includes(chainId) && sameAddress(address, TWAP_FALLBACK_HANDLER)) return 'twap'
