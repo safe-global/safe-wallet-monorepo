@@ -5,7 +5,7 @@ export const newTxBtn = '[data-testid="new-tx-btn"]'
 const modalCloseIcon = '[data-testid="CloseIcon"]'
 export const expandMoreIcon = 'svg[data-testid="ExpandMoreIcon"]'
 const expandWalletBtn = '[data-testid="open-account-center"]'
-const sentinelStart = 'div[data-testid="sentinelStart"]'
+const popoverContent = '[data-slot="popover-content"]'
 
 const disconnectBtnStr = 'Disconnect'
 const notConnectedStatus = 'Connect'
@@ -35,7 +35,7 @@ export function clickOnWalletExpandMoreIcon() {
 
 export function clickOnExpandWalletBtn() {
   cy.get(expandWalletBtn).should('be.visible').click()
-  cy.get(sentinelStart).next().should('exist')
+  cy.get(popoverContent).should('be.visible')
 }
 
 export function clickOnDisconnectBtn() {

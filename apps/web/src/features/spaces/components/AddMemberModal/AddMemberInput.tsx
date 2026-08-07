@@ -9,7 +9,7 @@ import { useAddressBookSearch } from '@/features/spaces'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import Identicon from '@/components/common/Identicon'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
-import { Combobox, ComboboxContent, ComboboxInput, ComboboxItem, ComboboxList } from '@/components/ui/combobox'
+import { Autocomplete, ComboboxContent, ComboboxInput, ComboboxItem, ComboboxList } from '@/components/ui/combobox'
 import { InputGroupAddon, InputGroupButton } from '@/components/ui/input-group'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -91,21 +91,16 @@ const AddMemberInput = ({ error, inputProps, onSelectAddress, value }: AddMember
         {!error && <span className="text-destructive"> *</span>}
       </Label>
 
-      <Combobox<InviteeIdentifierOption>
+      <Autocomplete
         items={options}
         // Options are already searched/sliced via useAddressBookSearch.
         filter={() => true}
-        itemToStringValue={(option) => option.address}
-        inputValue={value}
-        onInputValueChange={(newValue, details) => {
-          if (details.reason === 'input-change') {
+        itemToStringValue={(option: InviteeIdentifierOption) => option.address}
+        value={value}
+        onValueChange={(newValue, details) => {
+          // 'input-change' = typing; 'item-press' = a suggestion filling in its address
+          if (details.reason === 'input-change' || details.reason === 'item-press') {
             inputProps.onChange({ target: { name: inputProps.name, value: newValue } })
-          }
-        }}
-        onValueChange={(option) => {
-          if (option) {
-            onSelectAddress(option.address, option.name)
-            setIsOpen(false)
           }
         }}
         open={isOpen && showOptions}
@@ -150,7 +145,7 @@ const AddMemberInput = ({ error, inputProps, onSelectAddress, value }: AddMember
             )}
           </ComboboxList>
         </ComboboxContent>
-      </Combobox>
+      </Autocomplete>
     </div>
   )
 }
