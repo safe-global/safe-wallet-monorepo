@@ -168,8 +168,9 @@ export function clickNetworkSelector(networkName) {
 
 function selectNetwork(networkName) {
   cy.get(networkSelectorItem).contains(networkName).click()
-  // The select popup can stay open after choosing a network (selection navigates via a link),
-  // so dismiss it before interacting with the form underneath
+  // Cypress-only: synthetic clicks skip the pointermove that highlights a Base UI select item,
+  // so the select never commits/closes and only the item's embedded link navigates. Real user
+  // clicks close the popup; here we dismiss it before interacting with the form underneath.
   cy.get('body').type('{esc}')
   cy.get(selectContent).should('not.be.visible')
   cy.get(safeDataForm).contains(networkName)

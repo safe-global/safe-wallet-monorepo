@@ -787,12 +787,15 @@ export function selectCurrentWallet() {
 
 export function verifyRelayerAttemptsAvailable() {
   // GTF (unlimited relay) chains hide the execution-method selector and the
-  // "free transactions left today" counter in the execute flow, so assert the loaded
-  // execute screen instead and only check the counter when the relay option is rendered.
+  // "free transactions left today" counter in the execute flow. Assert one of the two
+  // valid states explicitly: relay option with its counter, or no selector at all —
+  // a rendered selector without the relay option would be a real bug, not GTF.
   cy.contains(estimatedFeeStr).should('be.visible')
   cy.get('body').then(($body) => {
     if ($body.find(relayExecMethod).length) {
       cy.contains(transactionsPerHrStr).should('exist')
+    } else {
+      cy.get(connectedWalletExecMethod).should('not.exist')
     }
   })
 }

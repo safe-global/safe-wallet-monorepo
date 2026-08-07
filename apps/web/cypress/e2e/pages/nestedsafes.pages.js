@@ -114,6 +114,7 @@ const nestedSafeList = '[data-testid="nested-safe-list"]'
 const cancelManageBtn = '[data-testid="cancel-manage-nested-safes"]'
 const saveManageBtn = '[data-testid="save-manage-nested-safes"]'
 const safeListItem = '[data-testid="safe-list-item"]'
+const safeItemCheckbox = '[data-testid^="safe-item-checkbox-"]'
 const reviewNestedSafesBtn = '[data-testid="review-nested-safes-button"]'
 const moreNestedSafesIndicator = '[data-testid="more-nested-safes-indicator"]'
 const closePopoverBtn = '[data-testid="modal-dialog-close-btn"]'
@@ -232,9 +233,13 @@ export function verifyShowAllNestedSafesNotVisible() {
   cy.contains(showAllNestedSafesStr).should('not.exist')
 }
 
-// The checkbox is decorative — the toggle handler lives on the list row.
 export function clickFirstValidSafeCheckbox() {
-  cy.get(nestedSafeList).find(safeListItem).filter(`:not(:has(${suspiciousWarningIcon}))`).first().click()
+  cy.get(nestedSafeList)
+    .find(safeListItem)
+    .filter(`:not(:has(${suspiciousWarningIcon}))`)
+    .first()
+    .find(safeItemCheckbox)
+    .click()
 }
 
 export function selectAllValidSafes() {
@@ -256,7 +261,12 @@ export function selectAllSafes() {
 }
 
 export function clickFirstSuspiciousSafeCheckbox() {
-  cy.get(nestedSafeList).find(safeListItem).filter(`:has(${suspiciousWarningIcon})`).first().click()
+  cy.get(nestedSafeList)
+    .find(safeListItem)
+    .filter(`:has(${suspiciousWarningIcon})`)
+    .first()
+    .find(safeItemCheckbox)
+    .click()
 }
 
 export function waitForNestedSafeListToLoad() {
@@ -293,7 +303,7 @@ export function completeIntroScreenSelectAll() {
   cy.get(reviewNestedSafesBtn).should('be.visible').click()
   // Wait for manage mode to load
   cy.get(saveManageBtn).should('be.visible')
-  // Select all safes — the checkbox is decorative, the toggle handler lives on the list row
+  // Select all safes — clicking the row toggles selection (the checkbox inside works too)
   cy.get(nestedSafeList)
     .find(safeListItem)
     .each(($item) => {
@@ -311,8 +321,8 @@ export function completeIntroScreenSelectValid() {
   cy.get(reviewNestedSafesBtn).should('be.visible').click()
   // Wait for manage mode to load
   cy.get(saveManageBtn).should('be.visible')
-  // Select only valid safes (without warning icon). The checkbox is decorative — the
-  // toggle handler lives on the list row.
+  // Select only valid safes (without warning icon) — clicking the row toggles selection
+  // (the checkbox inside works too).
   cy.get(nestedSafeList)
     .find(safeListItem)
     .filter(`:not(:has(${suspiciousWarningIcon}))`)
