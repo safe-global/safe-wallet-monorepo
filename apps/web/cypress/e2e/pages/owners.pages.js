@@ -10,7 +10,6 @@ const replaceOwnerBtn = 'span[data-track="settings: Replace owner"] > span > but
 const changeThresholdBtn = 'span[data-track="settings: Change threshold"] > button'
 const tooltip = 'div[role="tooltip"]'
 const expandMoreIcon = 'svg[data-testid="ExpandMoreIcon"]'
-const sentinelStart = 'div[data-testid="sentinelStart"]'
 const addNewSigner = '[data-testid="add-new-signer"]'
 const newOwnerName = 'input[name="newOwner.name"]'
 const newOwnerAddress = 'input[name="newOwner.address"]'

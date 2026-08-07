@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Combobox as ComboboxPrimitive } from '@base-ui/react'
+import { Autocomplete as AutocompletePrimitive } from '@base-ui/react/autocomplete'
 
 import { cn } from '@/utils/cn'
 import { usePortalContainer } from '@/components/ui/ShadcnProvider'
@@ -31,9 +32,19 @@ import { ChevronDownIcon, XIcon, CheckIcon } from 'lucide-react'
  * Key Props:
  * - Root: `items`, `value`, `onValueChange`, `multiple`, `itemToStringValue`
  * - Input: `showTrigger`, `showClear` — see Base UI
+ *
+ * Two roots share these parts:
+ * `Combobox` selects an item from a list (typed text is only a filter);
+ * `Autocomplete` is for free text the user may submit as-is, with optional suggestions.
  */
 
 const Combobox = ComboboxPrimitive.Root
+
+/**
+ * Free-text root: `value`/`onValueChange` control the input text, which suggestions fill in
+ * but never clear. All Combobox* parts below work unchanged inside it.
+ */
+const Autocomplete = AutocompletePrimitive.Root
 
 function ComboboxValue({ ...props }: ComboboxPrimitive.Value.Props) {
   return <ComboboxPrimitive.Value data-slot="combobox-value" {...props} />
@@ -272,6 +283,7 @@ function useComboboxAnchor() {
 }
 
 export {
+  Autocomplete,
   Combobox,
   ComboboxInput,
   ComboboxContent,
