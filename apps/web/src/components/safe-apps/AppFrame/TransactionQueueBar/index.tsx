@@ -54,12 +54,17 @@ const TransactionQueueBar = ({
                 {barTitle}
               </Typography>
             </AccordionTrigger>
+            {/* Centred on the header strip, not the item: this is positioned against the
+                AccordionItem (the nearest `relative` ancestor), which grows to include the panel
+                once expanded — so `top-1/2` put the ✕ halfway down the open queue instead of in
+                the bar. Half of TRANSACTION_BAR_HEIGHT pins it to the header in both states. */}
             <Button
               variant="ghost"
               size="icon-sm"
               onClick={onDismiss}
               aria-label="dismiss transaction queue bar"
-              className="absolute right-2 top-1/2 -translate-y-1/2"
+              className="absolute right-2 -translate-y-1/2"
+              style={{ top: `calc(${TRANSACTION_BAR_HEIGHT} / 2)` }}
             >
               <X />
             </Button>
