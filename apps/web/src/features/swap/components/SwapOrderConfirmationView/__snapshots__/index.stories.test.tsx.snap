@@ -511,14 +511,14 @@ exports[`./index.stories CustomRecipient 1`] = `
         </div>
         <div>
           <div
-            class="grid gap-0.5 rounded-lg border px-4 py-3 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-18 has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2.5 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert bg-[var(--color-warning-background)] text-foreground border-transparent *:[svg]:text-[var(--color-warning-main)]"
+            class="grid gap-0.5 rounded-md border px-4 py-3 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-24 has-[>svg]:grid-cols-[auto_minmax(0,1fr)] has-[>svg]:gap-x-3 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert text-warning-strong *:data-[slot=alert-description]:text-warning-strong *:[svg]:text-warning-accent bg-card"
             data-slot="alert"
             data-testid="recipient-alert"
             role="alert"
           >
             <mock-icon />
             <div
-              class="text-muted-foreground text-sm text-balance md:text-pretty [&_p:not(:last-child)]:mb-4 [&_a]:hover:text-foreground [&_a]:underline [&_a]:underline-offset-3"
+              class="text-muted-foreground text-sm font-normal break-words min-w-0 text-balance md:text-pretty [&_p:not(:last-child)]:mb-4 [&_a]:hover:text-foreground [&_a]:underline [&_a]:underline-offset-3"
               data-slot="alert-description"
             >
               <span
