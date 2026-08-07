@@ -223,6 +223,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
           <span
             aria-label="Please connect your wallet"
             data-slot="tooltip-trigger"
+            data-testid="check-wallet-tooltip-trigger"
             id="base-ui-_r_c_"
           >
             <button
