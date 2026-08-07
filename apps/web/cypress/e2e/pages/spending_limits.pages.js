@@ -48,9 +48,7 @@ export const timePeriodOptions = {
   oneHr: '1 hour',
 }
 
-// AddressBookInput spreads its props straight onto the underlying input, so `beneficiarySection`
-// is the input element itself rather than a wrapper to search inside.
-const getBeneficiaryInput = () => cy.get(beneficiarySection)
+const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input')
 const automationOwner = ls.addressBookData.sepoliaAddress2[11155111]['0xC16Db0251654C0a72E91B190d81eAD367d2C6fED']
 
 export const actionNames = {

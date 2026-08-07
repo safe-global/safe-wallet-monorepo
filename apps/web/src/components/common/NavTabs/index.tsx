@@ -8,6 +8,10 @@ const NavTabs = ({ tabs }: { tabs: NavItem[] }) => {
   const activeHref = tabs.map((tab) => tab.href).includes(router.pathname) ? router.pathname : tabs[0]?.href
   const query = router.query.safe ? { safe: router.query.safe } : undefined
 
+  // Mounting Tabs with value=undefined (tabs still loading) locks Base UI into uncontrolled mode
+  // and the active tab is never highlighted once the tabs arrive.
+  if (!tabs.length) return null
+
   return (
     <Tabs value={activeHref}>
       <TabsList variant="underline" tone="brand" className="overflow-x-auto overflow-y-hidden">
