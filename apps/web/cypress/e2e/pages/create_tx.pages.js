@@ -311,7 +311,8 @@ export function verifyBulkExecuteBtnIsEnabled(txs) {
 }
 
 export function verifyEnabledBulkExecuteBtnTooltip() {
-  cy.get('button').contains(bulkExecuteBtnStr).trigger('mouseover', { force: true })
+  // Base UI tooltips open on a native mouseenter on the trigger (mouseover/mousemove don't open them)
+  cy.get('button').contains(bulkExecuteBtnStr).trigger('mouseenter', { force: true })
   cy.contains(enabledBulkExecuteBtnTooltip).should('exist')
 }
 
@@ -1064,7 +1065,7 @@ export function verifyBulkTxHistoryBlock(order, tx, actions) {
 
 export function verifyBulkExecuteBtnIsDisabled() {
   cy.get('button').contains(bulkExecuteBtnStr).should('be.disabled')
-  cy.get('button').contains(bulkExecuteBtnStr).trigger('mouseover', { force: true })
+  cy.get('button').contains(bulkExecuteBtnStr).parent().trigger('mouseenter', { force: true })
   cy.contains(disabledBultExecuteBtnTooltip).should('exist')
 }
 
