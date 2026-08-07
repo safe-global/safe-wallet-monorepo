@@ -57,6 +57,7 @@ const filterClearBtn = '[data-testid="clear-btn"]'
 export const addressItem = '[data-testid="address-book-input"]'
 const radioSelector = 'div[role="radiogroup"]'
 const rejectTxBtn = '[data-testid="reject-btn"]'
+const checkWalletTooltipTrigger = '[data-testid="check-wallet-tooltip-trigger"]'
 const rejectChoiceBtn = '[data-track="reject-tx: Reject onchain button"]'
 const replaceChoiceBtn = '[data-track="reject-tx: Replace tx button"]'
 export const deleteChoiceBtn = '[data-track="reject-tx: Delete offchain button"]'
@@ -221,7 +222,8 @@ export function clickOnRejectBtn() {
 }
 
 export function hoverOverRejectBtnBtn() {
-  getRejectButton().trigger('mouseover', { force: true })
+  // Base UI tooltips open on a native mouseenter on the trigger span (CheckWallet wrapper), not the disabled button
+  getRejectButton().closest(checkWalletTooltipTrigger).trigger('mouseenter', { force: true })
 }
 
 export function verifyRejectBtnDisabled() {
@@ -280,7 +282,7 @@ export function checkNoteRecordedNote(note) {
 }
 
 export function checkNoteCreator(creator) {
-  cy.get(txNoteTooltip).trigger('mouseover', { force: true })
+  cy.get(txNoteTooltip).trigger('mouseenter', { force: true })
   cy.get(noteCreator).should('be.visible').invoke('text').should('include', creator)
 }
 
@@ -587,8 +589,9 @@ export function clickOnExpandAllActionsBtn() {
 
 export function collapseAllActions(data) {
   cy.get(collapseAllBtn).click()
+  // Collapsed accordion panels are unmounted, so the rows are removed from the DOM entirely
   data.forEach((action) => {
-    cy.get(txRowTitle).contains(action).should('have.css', 'visibility', 'hidden')
+    cy.contains(txRowTitle, action).should('not.exist')
   })
 }
 

@@ -96,7 +96,15 @@ const CheckWallet = ({
 
   return (
     <Tooltip>
-      <TooltipTrigger render={<span aria-label={message} onClick={wallet ? undefined : connectWallet} />}>
+      <TooltipTrigger
+        render={
+          <span
+            data-testid="check-wallet-tooltip-trigger"
+            aria-label={message}
+            onClick={wallet ? undefined : connectWallet}
+          />
+        }
+      >
         {children(false)}
       </TooltipTrigger>
       <TooltipContent>{message}</TooltipContent>

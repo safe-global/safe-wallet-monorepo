@@ -79,45 +79,45 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
       const altText = orderClass === 'limit' ? 'Limit order' : 'Swap order'
 
       return {
-        icon: <SwapIcon className="size-5" />,
+        icon: <SwapIcon className="size-5" alt={altText} />,
         text: altText,
       }
     }
     case TransactionInfoType.TWAP_ORDER: {
       return {
-        icon: <SwapIcon className="size-5" />,
+        icon: <SwapIcon className="size-5" alt="Twap Order" />,
         text: TWAP_ORDER_TITLE,
       }
     }
     case TransactionInfoType.NATIVE_STAKING_DEPOSIT: {
       return {
-        icon: <StakeIcon className="size-5" />,
+        icon: <StakeIcon className="size-5" alt="Stake" />,
         text: 'Stake',
       }
     }
     case TransactionInfoType.NATIVE_STAKING_VALIDATORS_EXIT: {
       return {
-        icon: <StakeIcon className="size-5" />,
+        icon: <StakeIcon className="size-5" alt="Withdraw request" />,
         text: 'Withdraw request',
       }
     }
     case TransactionInfoType.NATIVE_STAKING_WITHDRAW: {
       return {
-        icon: <StakeIcon className="size-5" />,
+        icon: <StakeIcon className="size-5" alt="Claim" />,
         text: 'Claim',
       }
     }
     // @ts-ignore TODO: Add types to old SDK or switch to auto-generated
     case 'VaultDeposit': {
       return {
-        icon: <EarnIcon className="size-5" />,
+        icon: <EarnIcon className="size-5" alt="Deposit icon" />,
         text: 'Deposit',
       }
     }
     // @ts-ignore TODO: Add types to old SDK or switch to auto-generated
     case 'VaultRedeem': {
       return {
-        icon: <EarnIcon className="size-5" />,
+        icon: <EarnIcon className="size-5" alt="Withdraw icon" />,
         text: 'Withdraw',
       }
     }
@@ -125,7 +125,7 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
     // @ts-ignore TODO: Add types to old SDK or switch to auto-generated
     case 'SwapAndBridge': {
       return {
-        icon: <BridgeIcon className="size-5" />,
+        icon: <BridgeIcon className="size-5" alt="Swap and Bridge" />,
         text: 'Bridge',
       }
     }
@@ -133,7 +133,7 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
     // @ts-ignore TODO: Add types to old SDK or switch to auto-generated
     case 'Swap': {
       return {
-        icon: <SwapIcon className="size-5" />,
+        icon: <SwapIcon className="size-5" alt="Swap" />,
         text: 'Swap',
       }
     }
@@ -148,7 +148,7 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
 
       if (isMultiSendTxInfo(tx.txInfo)) {
         return {
-          icon: <BatchIcon className="size-5" />,
+          icon: <BatchIcon className="size-5" alt="Batch" />,
           text: 'Batch',
         }
       }
@@ -169,7 +169,7 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
 
       if (isNestedConfirmationTxInfo(tx.txInfo)) {
         return {
-          icon: <NestedSafeIcon className="size-5" />,
+          icon: <NestedSafeIcon className="size-5" alt="Nested Safe" />,
           text: `Nested Safe${addressBookName ? `: ${addressBookName}` : ''}`,
         }
       }
