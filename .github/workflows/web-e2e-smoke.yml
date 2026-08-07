@@ -5,6 +5,8 @@ on:
     paths:
       - apps/web/**
       - packages/**
+      - .github/workflows/web-e2e-smoke.yml
+      - .github/actions/**
   push:
     branches:
       - main
@@ -12,6 +14,8 @@ on:
     paths:
       - apps/web/**
       - packages/**
+      - .github/workflows/web-e2e-smoke.yml
+      - .github/actions/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
