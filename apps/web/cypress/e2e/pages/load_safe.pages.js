@@ -17,6 +17,8 @@ const sideBarIcon = '[data-testid="ChevronRightIcon"]'
 const sidebarCheckIcon = '[data-testid="CheckIcon"]'
 const addressStepNextBtn = '[data-testid="load-safe-next-btn"]'
 const ownerName = '[data-testid="owner-name"]'
+const networkSelectorItem = '[data-testid="network-selector-item"]'
+const selectContent = '[data-slot="select-content"]'
 const addressSection = '[data-testid="address-section"]'
 const addBtnStr = 'Add'
 const settingsBtnStr = 'Settings'
@@ -30,7 +32,11 @@ export const addSafeStr = 'Add existing Safe account'
 const mandatoryNetworks = [constants.networks.sepolia, constants.networks.polygon, constants.networks.ethereum]
 
 export function verifyAddresFormatIsValid() {
-  cy.get(addressSection).find('label').contains(constants.addressBookErrrMsg.invalidFormat).should('not.exist')
+  cy.get(addressSection)
+    .closest('[data-slot="field"]')
+    .find('label')
+    .contains(constants.addressBookErrrMsg.invalidFormat)
+    .should('not.exist')
 }
 
 function getOwnerNameInput(index) {
@@ -144,7 +150,7 @@ export function checkMainNetworkSelected(network) {
 }
 
 export function verifyMandatoryNetworksExist() {
-  main.verifyValuesExist('ul li', mandatoryNetworks)
+  main.verifyValuesExist(networkSelectorItem, mandatoryNetworks)
 }
 
 export function verifyQRCodeErrorMsg() {
@@ -160,24 +166,29 @@ export function clickNetworkSelector(networkName) {
   cy.get(safeDataForm).contains(networkName).click()
 }
 
+function selectNetwork(networkName) {
+  cy.get(networkSelectorItem).contains(networkName).click()
+  // The select popup can stay open after choosing a network (selection navigates via a link),
+  // so dismiss it before interacting with the form underneath
+  cy.get('body').type('{esc}')
+  cy.get(selectContent).should('not.be.visible')
+  cy.get(safeDataForm).contains(networkName)
+}
+
 export function selectGoerli() {
-  cy.get('ul li').contains(constants.networks.goerli).click()
-  cy.contains('span', constants.networks.goerli)
+  selectNetwork(constants.networks.goerli)
 }
 
 export function selectSepolia() {
-  cy.get('ul li').contains(constants.networks.sepolia).click()
-  cy.contains('span', constants.networks.sepolia)
+  selectNetwork(constants.networks.sepolia)
 }
 
 export function selectEth() {
-  cy.get('ul li').contains(constants.networks.ethereum).click()
-  cy.contains('span', constants.networks.ethereum)
+  selectNetwork(constants.networks.ethereum)
 }
 
 export function selectPolygon() {
-  cy.get('ul li').contains(constants.networks.polygon).click()
-  cy.contains('span', constants.networks.polygon)
+  selectNetwork(constants.networks.polygon)
 }
 
 export function inputNameAndAddress(name, address) {
