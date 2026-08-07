@@ -27,8 +27,8 @@ const TokenMenu = ({
     <Sticky>
       <div className={css.wrapper}>
         <div className={css.hideTokensHeader}>
-          <EyeOff />
-          <Typography variant="paragraph-small" className="leading-[inherit]">
+          <EyeOff data-testid="hidden-token-icon" />
+          <Typography data-testid="hidden-token-count" variant="paragraph-small" className="leading-[inherit]">
             {selectedAssetCount} {selectedAssetCount === 1 ? 'token' : 'tokens'} selected
           </Typography>
         </div>
