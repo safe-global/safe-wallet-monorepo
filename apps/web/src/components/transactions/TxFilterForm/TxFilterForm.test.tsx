@@ -1,5 +1,5 @@
 import React from 'react'
-import { screen, fireEvent } from '@testing-library/react'
+import { screen, fireEvent, within } from '@testing-library/react'
 import { act, render } from '@/tests/test-utils'
 import '@testing-library/jest-dom'
 import TxFilterForm from './index'
@@ -99,7 +99,8 @@ describe('TxFilterForm Component Tests', () => {
 
     const token = '694urt5'
 
-    const tokenInput = screen.getByTestId('token-input') as HTMLInputElement
+    // AddressInput puts the testid on its wrapper box; the typable input is inside
+    const tokenInput = within(screen.getByTestId('token-input')).getByRole<HTMLInputElement>('textbox')
 
     expect(tokenInput).toBeInTheDocument()
 
