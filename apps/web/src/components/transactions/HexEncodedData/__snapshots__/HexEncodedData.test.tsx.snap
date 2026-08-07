@@ -26,6 +26,7 @@ exports[`HexEncodedData should not cut the text in case the limit option is high
         data-testid="tx-hexData"
       >
         <span
+          aria-label="Copy to clipboard"
           class="inline-flex cursor-pointer"
           data-slot="tooltip-trigger"
           id="base-ui-_r_b_"
@@ -75,6 +76,7 @@ exports[`HexEncodedData should not highlight the data if highlight option is fal
         data-testid="tx-hexData"
       >
         <span
+          aria-label="Copy to clipboard"
           class="inline-flex cursor-pointer"
           data-slot="tooltip-trigger"
           id="base-ui-_r_9_"
@@ -118,6 +120,7 @@ exports[`HexEncodedData should render the default component markup 1`] = `
         data-testid="tx-hexData"
       >
         <span
+          aria-label="Copy to clipboard"
           class="inline-flex cursor-pointer"
           data-popup-open=""
           data-slot="tooltip-trigger"

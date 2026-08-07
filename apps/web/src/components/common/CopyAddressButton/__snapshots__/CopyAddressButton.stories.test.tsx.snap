@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./CopyAddressButton.stories Default 1`] = `
 <div
@@ -11,6 +11,7 @@ exports[`./CopyAddressButton.stories Default 1`] = `
       class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
       <span
+        aria-label="Copy to clipboard"
         class="inline-flex cursor-pointer"
         data-slot="tooltip-trigger"
         id="base-ui-_r_1_"
@@ -44,6 +45,7 @@ exports[`./CopyAddressButton.stories Untrusted 1`] = `
       class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
       <span
+        aria-label="Copy to clipboard"
         class="inline-flex cursor-pointer"
         data-slot="tooltip-trigger"
         id="base-ui-_r_3_"
@@ -72,6 +74,7 @@ exports[`./CopyAddressButton.stories WithChildren 1`] = `
       class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
       <span
+        aria-label="Copy to clipboard"
         class="inline-flex cursor-pointer"
         data-slot="tooltip-trigger"
         id="base-ui-_r_7_"

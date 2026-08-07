@@ -56,7 +56,10 @@ const CopyTooltip = ({
   return (
     <>
       <Tooltip open={showTooltip} onOpenChange={setShowTooltip}>
-        <TooltipTrigger render={<span className="inline-flex cursor-pointer" onClick={handleCopy} />}>
+        {/* The tooltip alone is not an accessible name — keep the copy affordance labelled. */}
+        <TooltipTrigger
+          render={<span className="inline-flex cursor-pointer" aria-label={initialToolTipText} onClick={handleCopy} />}
+        >
           {children}
         </TooltipTrigger>
         <TooltipContent side="top">{tooltipText}</TooltipContent>

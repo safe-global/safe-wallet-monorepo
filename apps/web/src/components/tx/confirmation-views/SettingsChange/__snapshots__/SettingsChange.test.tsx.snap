@@ -45,6 +45,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
             class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
           >
             <span
+              aria-label="Copy to clipboard"
               class="inline-flex cursor-pointer"
               data-slot="tooltip-trigger"
               id="base-ui-_r_5_"
@@ -55,6 +56,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
             </span>
           </div>
           <span
+            aria-label="Copy to clipboard"
             class="inline-flex cursor-pointer"
             data-slot="tooltip-trigger"
             id="base-ui-_r_7_"
@@ -123,6 +125,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
             class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
           >
             <span
+              aria-label="Copy to clipboard"
               class="inline-flex cursor-pointer"
               data-slot="tooltip-trigger"
               id="base-ui-_r_9_"
@@ -133,6 +136,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
             </span>
           </div>
           <span
+            aria-label="Copy to clipboard"
             class="inline-flex cursor-pointer"
             data-slot="tooltip-trigger"
             id="base-ui-_r_b_"
@@ -212,6 +216,7 @@ exports[`SettingsChange should display the SettingsChange component with owner d
             class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
           >
             <span
+              aria-label="Copy to clipboard"
               class="inline-flex cursor-pointer"
               data-slot="tooltip-trigger"
               id="base-ui-_r_1_"
@@ -222,6 +227,7 @@ exports[`SettingsChange should display the SettingsChange component with owner d
             </span>
           </div>
           <span
+            aria-label="Copy to clipboard"
             class="inline-flex cursor-pointer"
             data-slot="tooltip-trigger"
             id="base-ui-_r_3_"

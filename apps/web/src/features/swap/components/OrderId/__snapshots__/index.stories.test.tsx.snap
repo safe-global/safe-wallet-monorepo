@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./index.stories Default 1`] = `
 <div
@@ -17,6 +17,7 @@ exports[`./index.stories Default 1`] = `
           1282e32a
         </span>
         <span
+          aria-label="Copy to clipboard"
           class="inline-flex cursor-pointer"
           data-slot="tooltip-trigger"
           id="base-ui-_r_1_"

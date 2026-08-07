@@ -62,6 +62,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                         class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
                       >
                         <span
+                          aria-label="Copy to clipboard"
                           class="inline-flex cursor-pointer"
                           data-slot="tooltip-trigger"
                           id="base-ui-_r_3_"
@@ -72,6 +73,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                         </span>
                       </div>
                       <span
+                        aria-label="Copy to clipboard"
                         class="inline-flex cursor-pointer"
                         data-slot="tooltip-trigger"
                         id="base-ui-_r_5_"

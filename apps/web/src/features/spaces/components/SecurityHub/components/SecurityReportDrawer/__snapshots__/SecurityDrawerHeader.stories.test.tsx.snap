@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./SecurityDrawerHeader.stories WithName 1`] = `
 <div
@@ -39,6 +39,7 @@ exports[`./SecurityDrawerHeader.stories WithName 1`] = `
               0xA77D...98b6
             </span>
             <span
+              aria-label="Copy to clipboard"
               class="inline-flex cursor-pointer"
               data-slot="tooltip-trigger"
               id="base-ui-_r_1_"
@@ -129,6 +130,7 @@ exports[`./SecurityDrawerHeader.stories WithoutName 1`] = `
               0xA77D...98b6
             </span>
             <span
+              aria-label="Copy to clipboard"
               class="inline-flex cursor-pointer"
               data-slot="tooltip-trigger"
               id="base-ui-_r_3_"

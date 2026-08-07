@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./index.stories Default 1`] = `
 <div
@@ -31,6 +31,7 @@ exports[`./index.stories Default 1`] = `
               class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
             >
               <span
+                aria-label="Copy to clipboard"
                 class="inline-flex cursor-pointer"
                 data-slot="tooltip-trigger"
                 id="base-ui-_r_1_"
@@ -90,6 +91,7 @@ exports[`./index.stories WithAvatar 1`] = `
               class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
             >
               <span
+                aria-label="Copy to clipboard"
                 class="inline-flex cursor-pointer"
                 data-slot="tooltip-trigger"
                 id="base-ui-_r_3_"
@@ -148,6 +150,7 @@ exports[`./index.stories WithName 1`] = `
               class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
             >
               <span
+                aria-label="Copy to clipboard"
                 class="inline-flex cursor-pointer"
                 data-slot="tooltip-trigger"
                 id="base-ui-_r_5_"

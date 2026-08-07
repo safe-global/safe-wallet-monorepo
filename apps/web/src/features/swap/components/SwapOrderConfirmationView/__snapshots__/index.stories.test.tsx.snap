@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./index.stories CustomRecipient 1`] = `
 <div
@@ -269,6 +269,7 @@ exports[`./index.stories CustomRecipient 1`] = `
                   170e4a48
                 </span>
                 <span
+                  aria-label="Copy to clipboard"
                   class="inline-flex cursor-pointer"
                   data-slot="tooltip-trigger"
                   id="base-ui-_r_5_"
@@ -390,6 +391,7 @@ exports[`./index.stories CustomRecipient 1`] = `
                       class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
                     >
                       <span
+                        aria-label="Copy to clipboard"
                         class="inline-flex cursor-pointer"
                         data-slot="tooltip-trigger"
                         id="base-ui-_r_b_"
@@ -472,6 +474,7 @@ exports[`./index.stories CustomRecipient 1`] = `
                       class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
                     >
                       <span
+                        aria-label="Copy to clipboard"
                         class="inline-flex cursor-pointer"
                         data-slot="tooltip-trigger"
                         id="base-ui-_r_f_"
@@ -814,6 +817,7 @@ exports[`./index.stories Default 1`] = `
                   170e4a48
                 </span>
                 <span
+                  aria-label="Copy to clipboard"
                   class="inline-flex cursor-pointer"
                   data-slot="tooltip-trigger"
                   id="base-ui-_r_n_"
@@ -935,6 +939,7 @@ exports[`./index.stories Default 1`] = `
                       class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
                     >
                       <span
+                        aria-label="Copy to clipboard"
                         class="inline-flex cursor-pointer"
                         data-slot="tooltip-trigger"
                         id="base-ui-_r_t_"

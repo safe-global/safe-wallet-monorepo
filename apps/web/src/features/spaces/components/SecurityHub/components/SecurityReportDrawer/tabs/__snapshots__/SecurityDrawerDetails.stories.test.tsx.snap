@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./SecurityDrawerDetails.stories Default 1`] = `
 <div
@@ -42,6 +42,7 @@ exports[`./SecurityDrawerDetails.stories Default 1`] = `
                 0x7a2b...09f0
               </span>
               <span
+                aria-label="Copy to clipboard"
                 class="inline-flex cursor-pointer"
                 data-slot="tooltip-trigger"
                 id="base-ui-_r_1_"
@@ -94,6 +95,7 @@ exports[`./SecurityDrawerDetails.stories Default 1`] = `
                 0x3c1d...ab42
               </span>
               <span
+                aria-label="Copy to clipboard"
                 class="inline-flex cursor-pointer"
                 data-slot="tooltip-trigger"
                 id="base-ui-_r_3_"
@@ -146,6 +148,7 @@ exports[`./SecurityDrawerDetails.stories Default 1`] = `
                 0xb0b0...0c0c
               </span>
               <span
+                aria-label="Copy to clipboard"
                 class="inline-flex cursor-pointer"
                 data-slot="tooltip-trigger"
                 id="base-ui-_r_5_"
@@ -198,6 +201,7 @@ exports[`./SecurityDrawerDetails.stories Default 1`] = `
                 0x4444...4444
               </span>
               <span
+                aria-label="Copy to clipboard"
                 class="inline-flex cursor-pointer"
                 data-slot="tooltip-trigger"
                 id="base-ui-_r_7_"
@@ -250,6 +254,7 @@ exports[`./SecurityDrawerDetails.stories Default 1`] = `
                 0x5555...5555
               </span>
               <span
+                aria-label="Copy to clipboard"
                 class="inline-flex cursor-pointer"
                 data-slot="tooltip-trigger"
                 id="base-ui-_r_9_"
@@ -302,6 +307,7 @@ exports[`./SecurityDrawerDetails.stories Default 1`] = `
                 0x6666...6666
               </span>
               <span
+                aria-label="Copy to clipboard"
                 class="inline-flex cursor-pointer"
                 data-slot="tooltip-trigger"
                 id="base-ui-_r_b_"

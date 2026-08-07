@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./SettingsChange.stories AddOwner 1`] = `
 <div
@@ -53,6 +53,7 @@ exports[`./SettingsChange.stories AddOwner 1`] = `
                 class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
               >
                 <span
+                  aria-label="Copy to clipboard"
                   class="inline-flex cursor-pointer"
                   data-slot="tooltip-trigger"
                   id="base-ui-_r_1_"
@@ -67,6 +68,7 @@ exports[`./SettingsChange.stories AddOwner 1`] = `
                 </span>
               </div>
               <span
+                aria-label="Copy to clipboard"
                 class="inline-flex cursor-pointer"
                 data-slot="tooltip-trigger"
                 id="base-ui-_r_3_"
@@ -203,6 +205,7 @@ exports[`./SettingsChange.stories SwapOwner 1`] = `
                 class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
               >
                 <span
+                  aria-label="Copy to clipboard"
                   class="inline-flex cursor-pointer"
                   data-slot="tooltip-trigger"
                   id="base-ui-_r_7_"
@@ -213,6 +216,7 @@ exports[`./SettingsChange.stories SwapOwner 1`] = `
                 </span>
               </div>
               <span
+                aria-label="Copy to clipboard"
                 class="inline-flex cursor-pointer"
                 data-slot="tooltip-trigger"
                 id="base-ui-_r_9_"
