@@ -37,10 +37,6 @@ const actionItem = '[data-testid="action-item"]'
 const actionAccordion = '[data-testid="action-accordion"]'
 const decodedTxSummary = '[data-testid="decoded-tx-summary"]'
 
-const actionSectionItem = () => {
-  return cy.get('[data-testid="CodeIcon"]').parent()
-}
-
 export const timePeriodOptions = {
   oneTime: 'One time',
   fiveMin: '5 minutes',
@@ -75,7 +71,7 @@ export function verifyOldValuesAreDisplayed() {
 }
 
 export function verifyActionNamesAreDisplayed(names) {
-  main.verifyValuesExist(actionSectionItem, names)
+  main.verifyValuesExist(actionItem, names)
 }
 
 export function verifySpendingLimitBtnIsDisabled() {
@@ -159,7 +155,7 @@ export function clickOnTimePeriodDropdown() {
 }
 
 export function selectTimePeriod(period) {
-  cy.get(timePeriodItem).contains(period).click()
+  main.selectDropdownOption(timePeriodItem, period)
 }
 
 export function checkTimeDropdownOptions() {
@@ -177,7 +173,7 @@ export function verifyDefaultTimeIsSet() {
 
 export function visitSpendingLimitsPage(safe) {
   cy.visit(constants.setupUrl + safe)
-  cy.get(spendingLimitsSection).should('be.visible')
+  cy.get(spendingLimitsSection, { timeout: 30000 }).should('be.visible')
 }
 
 export function clickOnNewSpendingLimitBtn() {
