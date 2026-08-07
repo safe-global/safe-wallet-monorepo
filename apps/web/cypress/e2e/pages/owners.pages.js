@@ -107,7 +107,8 @@ export function selectThresholdOption(index) {
 export function verifyThresholdLimit(startValue, endValue) {
   cy.get('p').contains(`out of ${endValue} signer${endValue > 1 ? 's' : ''}`)
   clickOnThresholdDropdown()
-  getThresholdOptions().eq(0).should('have.text', startValue).click()
+  getThresholdOptions().eq(0).should('have.text', startValue)
+  selectThresholdOption(0)
 }
 
 export function verifyRemoveBtnIsEnabled() {
