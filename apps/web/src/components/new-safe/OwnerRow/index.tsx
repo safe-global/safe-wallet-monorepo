@@ -95,10 +95,7 @@ const OwnerRow = ({
             placeholder={ens || `Signer ${index + 1}`}
             helperText={walletIsOwner && 'Your connected wallet'}
             InputProps={{
-              // Always render the adornment container: NameInput switches between InputGroup and a
-              // bare Input based on adornment presence, and that structural swap remounts the input
-              // element — dropping focus (and in-flight keystrokes) when `resolving` flips.
-              endAdornment: <div className="flex items-center">{resolving && <Spinner className="size-5" />}</div>,
+              endAdornment: resolving && <Spinner className="size-5" />,
             }}
           />
         </div>
