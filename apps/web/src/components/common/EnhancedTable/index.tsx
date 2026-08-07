@@ -256,6 +256,7 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
                 variant="ghost"
                 size="icon"
                 aria-label="Go to previous page"
+                data-testid="prev-page-btn"
                 disabled={isFirstPage}
                 onClick={() => handleChangePage(page - 1)}
               >
@@ -265,6 +266,7 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
                 variant="ghost"
                 size="icon"
                 aria-label="Go to next page"
+                data-testid="next-page-btn"
                 disabled={isLastPage}
                 onClick={() => handleChangePage(page + 1)}
               >
