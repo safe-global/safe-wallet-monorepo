@@ -31,6 +31,7 @@ const makeReader = (over: Partial<SafenetReaderConfig> = {}, url = 'http://rpc.t
     rpcUrls: [url],
     chainId: CHAIN_ID,
     consensus: CONSENSUS,
+    coordinator: ORACLE,
     oracles: [],
     ...over,
   })
@@ -144,6 +145,7 @@ describe('SafenetReader.fetchCheckState', () => {
       rpcUrls: ['http://rpc.test/1', 'http://rpc.test/2'],
       chainId: CHAIN_ID,
       consensus: CONSENSUS,
+      coordinator: ORACLE,
       oracles: [],
     })
     const result = await reader.fetchCheckState(SAFE_TX_HASH)
@@ -164,6 +166,7 @@ describe('SafenetReader.fetchCheckState', () => {
       rpcUrls: ['http://rpc.test/1', 'http://rpc.test/2', 'http://rpc.test/3'],
       chainId: CHAIN_ID,
       consensus: CONSENSUS,
+      coordinator: ORACLE,
       oracles: [],
     })
     const results = await Promise.all([

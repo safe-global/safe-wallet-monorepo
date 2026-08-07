@@ -57,13 +57,9 @@ export const SHARED_ORACLE_EVENT_FRAGMENTS = [
 /**
  * Read (view) functions the reader calls with `ethers.Contract`. Copied from the
  * protocol explorer's `consensus`/`coordinator` ABIs. `getEpochGroupId` maps an
- * epoch to its FROST group id; `groupKey` returns that group's public key;
- * `getCoordinator` discovers the FROSTCoordinator when no override is configured.
+ * epoch to its FROST group id; `groupKey` returns that group's public key.
  */
-export const CONSENSUS_READ_ABI = [
-  'function getCoordinator() view returns (address)',
-  'function getEpochGroupId(uint64 epoch) view returns (bytes32 groupId)',
-] as const
+export const CONSENSUS_READ_ABI = ['function getEpochGroupId(uint64 epoch) view returns (bytes32 groupId)'] as const
 
 export const COORDINATOR_READ_ABI = [
   'function groupKey(bytes32 gid) view returns ((uint256 x, uint256 y) key)',
