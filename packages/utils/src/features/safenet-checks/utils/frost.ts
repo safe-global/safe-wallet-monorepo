@@ -38,6 +38,16 @@ const toPoint = (x: bigint, y: bigint) => {
   return point
 }
 
+/** True when (x, y) parses as a valid, non-identity secp256k1 point. */
+export const isValidPoint = (point: { x: string; y: string }): boolean => {
+  try {
+    toPoint(BigInt(point.x), BigInt(point.y))
+    return true
+  } catch {
+    return false
+  }
+}
+
 export type AttestationInput = {
   /** Epoch group public key, affine coordinates as decimal strings. */
   groupKey: { x: string; y: string }

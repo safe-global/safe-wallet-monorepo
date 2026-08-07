@@ -38,6 +38,15 @@ export const SAFENET_CONSENSUS_ADDRESS =
   '0x223624cBF099e5a8f8cD5aF22aFa424a1d1acEE9'
 
 /**
+ * FROSTCoordinator the epoch group keys are read from. Default: Gnosis beta
+ * deployment (the coordinator the beta Consensus was deployed against).
+ */
+export const SAFENET_COORDINATOR_ADDRESS =
+  process.env.NEXT_PUBLIC_SAFENET_COORDINATOR_ADDRESS ||
+  process.env.EXPO_PUBLIC_SAFENET_COORDINATOR_ADDRESS ||
+  '0xaE27021CEB45316f1efe69D8E362aC07ED3Bd7E4'
+
+/**
  * Sentinel-oracle allowlist (csv). Security-critical, and empty by default.
  *
  * `Consensus.proposeOracleTransaction` is permissionless and takes the oracle
@@ -100,3 +109,30 @@ export const BLOCK_ESTIMATE_MAX_REFINEMENTS = 2
  * every head-relative read into two.
  */
 export const PROVIDER_BATCH_MAX_COUNT = 3
+
+// --- Polling tuning -------------------------------------------------------
+
+/** Poll interval before the deadline block. */
+export const POLL_INTERVAL_FAST_MS = 6_000
+
+/** Poll interval in the post-deadline late window (a late BENIGN can still land). */
+export const POLL_INTERVAL_LATE_MS = 30_000
+
+/**
+ * How many blocks past the deadline the reader keeps polling before giving up.
+ * ~1h at Gnosis' ~5s block time, so a late attestation replacing a TIMED_OUT
+ * verdict has time to materialize.
+ */
+export const LATE_WINDOW_BLOCKS = 720
+
+/**
+ * Deadline substitute for checks that never get an on-chain deadline — the
+ * plain (non-oracle) path emits no `NewRequest`, so `deadlineBlock` is null
+ * for everything live beta produces. An attestation is expected within this
+ * many blocks of the check's first observed event (~20 min at Gnosis cadence;
+ * beta attests within ~5 blocks). Past it the late window applies, then
+ * polling stops — without this, a proposed-but-never-attested check (a
+ * rejected transaction, on the plain path) would poll a public RPC at the
+ * fast interval forever, once per rendered row.
+ */
+export const PLAIN_DEADLINE_BLOCKS = 240
