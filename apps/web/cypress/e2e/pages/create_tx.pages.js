@@ -20,7 +20,7 @@ const walletNonceInput = '[name="userNonce"]'
 const gasLimitInput = '[name="gasLimit"]'
 const maxPriorityFee = '[name="maxPriorityFeePerGas"]'
 const maxFee = '[name="maxFeePerGas"]'
-const rotateLeftIcon = '[data-testid="RotateLeftIcon"]'
+const gasLimitResetBtn = 'button[aria-label="Reset to recommended gas limit"]'
 export const transactionItem = '[data-testid="transaction-item"]'
 export const connectedWalletExecMethod = '[data-testid="connected-wallet-execution-method"]'
 export const relayExecMethod = '[data-testid="relay-execution-method"]'
@@ -775,11 +775,26 @@ export function verifyTooltipMessage(message) {
 }
 
 export function selectCurrentWallet() {
-  cy.get(connectedWalletExecMethod).click()
+  // GTF (unlimited relay) chains hide the execution-method selector in the execute flow and the
+  // connected wallet is the implicit executor, so only click the option when it is rendered.
+  cy.contains(estimatedFeeStr).should('be.visible')
+  cy.get('body').then(($body) => {
+    if ($body.find(connectedWalletExecMethod).length) {
+      cy.get(connectedWalletExecMethod).click()
+    }
+  })
 }
 
 export function verifyRelayerAttemptsAvailable() {
-  cy.contains(transactionsPerHrStr).should('exist')
+  // GTF (unlimited relay) chains hide the execution-method selector and the
+  // "free transactions left today" counter in the execute flow, so assert the loaded
+  // execute screen instead and only check the counter when the relay option is rendered.
+  cy.contains(estimatedFeeStr).should('be.visible')
+  cy.get('body').then(($body) => {
+    if ($body.find(relayExecMethod).length) {
+      cy.contains(transactionsPerHrStr).should('exist')
+    }
+  })
 }
 
 export function clickOnTokenselectorAndSelectSepoliaEth() {
@@ -859,7 +874,9 @@ export function displayAdvancedDetails() {
 
 export function openExecutionParamsModal() {
   displayAdvancedDetails()
-  cy.contains(editBtnStr).click()
+  // The Edit link stays a skeleton until gas estimation and gas price settle; estimation
+  // retries on the safe-info polling cycle, so allow it extra time under RPC load.
+  cy.contains(editBtnStr, { timeout: 60000 }).click()
 }
 
 export function verifyAndSubmitExecutionParams() {
@@ -871,13 +888,24 @@ export function verifyAndSubmitExecutionParams() {
     advancedParametersInputNames.gasLimit,
   ]
   arrayNames.forEach((element) => {
-    cy.get('@Paramsform').find('label').contains(`${element}`).next().find('input').should('not.be.disabled')
+    cy.get('@Paramsform')
+      .find('label')
+      .contains(`${element}`)
+      .closest('[data-slot="field"]')
+      .find('input')
+      .should('not.be.disabled')
   })
 
   cy.get('@Paramsform').find(gasLimitInput).clear().type('100').invoke('prop', 'value').should('equal', '100')
   cy.contains(gasLimit21000).should('be.visible')
   cy.get('@Paramsform').find(gasLimitInput).clear().type('300000').invoke('prop', 'value').should('equal', '300000')
-  cy.get('@Paramsform').find(gasLimitInput).parent('div').find(rotateLeftIcon).click()
+  // The reset adornment only renders once the recommended gas limit estimation is available,
+  // which can lag behind the modal opening under RPC load.
+  cy.get('@Paramsform')
+    .find(gasLimitInput)
+    .closest('[data-slot="field"]')
+    .find(gasLimitResetBtn, { timeout: 60000 })
+    .click()
   cy.get('@Paramsform').submit()
 }
 
