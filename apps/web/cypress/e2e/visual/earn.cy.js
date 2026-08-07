@@ -5,7 +5,7 @@ import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
 let staticSafes = []
 
-describe('[VISUAL] Swap page screenshots', { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT }, () => {
+describe('[VISUAL] Earn page screenshots', { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
@@ -14,8 +14,8 @@ describe('[VISUAL] Swap page screenshots', { defaultCommandTimeout: 60000, ...co
     mockVisualTestApis()
   })
 
-  it('[VISUAL] Screenshot swap page', () => {
-    cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_2)
+  it('[VISUAL] Screenshot earn page', () => {
+    cy.visit(constants.earnUrl + staticSafes.SEP_STATIC_SAFE_2)
     main.acceptWidgetDisclaimer()
     main.awaitVisualStability()
   })
