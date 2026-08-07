@@ -11,10 +11,10 @@ export const tableContainer = main.tableContainer
 const tokenNameLink = 'a[href*="sepolia.etherscan.io"]'
 const balanceSingleRow = '[aria-labelledby="tableTitle"] > tbody tr'
 const currencyDropdown = '[id="currency"]'
-const currencyDropdownList = 'ul[role="listbox"]'
-const currencyDropdownListSelected = 'ul[role="listbox"] li[aria-selected="true"]'
+const currencyDropdownList = '[role="listbox"]'
 const hideAssetCheckbox = '[data-testid="hide-asset-checkbox"]'
-const hiddenTokenCheckbox = 'input[type="checkbox"]'
+const hiddenTokenCheckbox = '[data-testid="hide-asset-checkbox"]'
+const hiddenTokenCheckboxInput = 'input[type="checkbox"]'
 const rowsPerPageSelect = '[data-testid="rows-per-page"]'
 const paginationPageList = '[data-slot="select-item"]'
 export const tokenListTable = 'table[aria-labelledby="tableTitle"]'
@@ -28,7 +28,8 @@ export const tablePaginationContainer = '[data-testid="table-pagination"]'
 const hiddenTokenSaveBtn = 'span[data-track="assets: Save hide dialog"]'
 const hiddenTokenCancelBtn = 'span[data-track="assets: Cancel hide dialog"]'
 const hiddenTokenDeselectAllBtn = 'span[data-track="assets: Deselect all hide dialog"]'
-const hiddenTokenIcon = 'svg[data-testid="VisibilityOffOutlinedIcon"]'
+const hiddenTokenIcon = 'svg[data-testid="hidden-token-icon"]'
+const hiddenTokenCounter = '[data-testid="hidden-token-count"]'
 const currencySelector = '[data-testid="currency-selector"]'
 const currencyItem = '[data-testid="currency-item"]'
 const tokenAmountFld = '[data-testid="token-amount-field"]'
@@ -257,11 +258,7 @@ export function cancelSaveHiddenTokenSelection() {
 }
 
 export function checkTokenCounter(value) {
-  cy.get(hiddenTokenIcon)
-    .parent()
-    .within(() => {
-      cy.get('p').should('include.text', value)
-    })
+  cy.get(hiddenTokenCounter).should('include.text', value)
 }
 
 export function checkHiddenTokenBtnCounter(value) {
@@ -280,7 +277,7 @@ export function verifyEachRowHasCheckbox(state) {
     cy.get('tbody').within(() => {
       cy.get(assetsTableRow).each(($row) => {
         if (state) {
-          cy.wrap($row).find(assetsTableActionsCell).find(hiddenTokenCheckbox).should('exist').should(state)
+          cy.wrap($row).find(assetsTableActionsCell).find(hiddenTokenCheckboxInput).should('exist').should(state)
           return
         }
         cy.wrap($row).find(assetsTableActionsCell).find(hiddenTokenCheckbox).should('exist')
@@ -365,13 +362,14 @@ export function clickOnCurrencyDropdown() {
 }
 
 export function selectCurrency(currency) {
-  cy.get(currencyDropdownList).findByText(currency).click({ force: true })
-  cy.get(currencyDropdownList)
-    .findByText(currency)
-    .click({ force: true })
-    .then(() => {
-      cy.get(currencyDropdownListSelected).should('contain', currency)
-    })
+  // Base UI select items only commit a click while highlighted: hover the item first,
+  // wait for the highlight to land (tabindex=0), then click.
+  // Center scroll keeps the item clear of the sticky scroll arrows.
+  cy.get(currencyItem).contains(currency).closest(currencyItem).as('currencyOption')
+  cy.get('@currencyOption').trigger('mousemove', { scrollBehavior: 'center' })
+  cy.get('@currencyOption').should('have.attr', 'tabindex', '0')
+  cy.get('@currencyOption').click({ scrollBehavior: 'center' })
+  cy.get(currencySelector).should('contain', currency)
 }
 
 export function hideAsset(asset) {
@@ -384,11 +382,7 @@ export function openHiddenTokensFromManageMenu() {
   cy.get(manageTokensButton).click()
   cy.get(hideTokensMenuItem).should('be.visible').click()
   main.verifyElementsExist([hiddenTokenSaveBtn, hiddenTokenCancelBtn, hiddenTokenDeselectAllBtn, hiddenTokenIcon])
-  cy.get(hiddenTokenIcon)
-    .parent()
-    .within(() => {
-      cy.get('p')
-    })
+  cy.get(hiddenTokenCounter).should('be.visible')
 }
 
 export function clickOnTokenCheckbox(token) {
