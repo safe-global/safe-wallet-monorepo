@@ -16,7 +16,7 @@ describe('[VISUAL] Welcome page screenshots', { defaultCommandTimeout: 60000, ..
 
   it('[VISUAL] Screenshot spaces welcome signed-out page', () => {
     cy.visit(constants.spacesUrl)
-    cy.contains('Sign in to your workspace', { timeout: 30000 }).should('be.visible')
+    cy.contains('Sign in to your workspace').should('be.visible')
     main.awaitVisualStability()
   })
 })
