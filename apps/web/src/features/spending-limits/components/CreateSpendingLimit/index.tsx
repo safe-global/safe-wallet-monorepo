@@ -95,7 +95,7 @@ const CreateSpendingLimit = () => {
               control={control}
               name={SpendingLimitFields.resetTime}
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select items={resetTimeOptions} value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger data-testid="time-period-section" className="font-bold">
                     <SelectValue />
                   </SelectTrigger>
