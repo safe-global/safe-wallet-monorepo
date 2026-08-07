@@ -196,8 +196,6 @@ export function addEntry(name, address) {
 }
 
 export function clickOnEditEntryBtn() {
-  // Both mobile and desktop layouts are always in the DOM (CSS-hidden by breakpoint), so scope
-  // through the desktop-only table row instead of filtering the duplicated buttons by visibility.
   cy.get(main.tableRow).eq(0).find(editEntryBtn).click()
 }
 

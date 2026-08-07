@@ -65,7 +65,10 @@ export function waitForConnectionMsgDisappear() {
   cy.contains(noWalletConnectedMsg).should('not.exist')
 }
 export function checkNotificationsSwitchIs(status) {
-  cy.get(notificationsSwitch).find('input').should(`be.${status}`)
+  cy.get(notificationsSwitch).should(
+    status === constants.enabledStates.disabled ? 'have.attr' : 'not.have.attr',
+    'data-disabled',
+  )
 }
 
 export function clickOnActivateAccountBtn(index) {
@@ -77,11 +80,16 @@ export function clickOnFinalActivateAccountBtn(index) {
 }
 
 export function clickOnQRCodeSwitch() {
-  cy.get(qrCodeSwitch).click()
+  // Force: the dialog overlay covers the switch while the open animation settles
+  cy.get(qrCodeSwitch).click({ force: true })
 }
 
 export function checkQRCodeSwitchStatus(state) {
-  cy.get(qrCodeSwitch).find('input').should(state)
+  cy.get(qrCodeSwitch).should(
+    'have.attr',
+    'aria-checked',
+    state === constants.checkboxStates.checked ? 'true' : 'false',
+  )
 }
 
 export function checkInitialStepsDisplayed() {
@@ -176,7 +184,6 @@ export function verifyNextBtnIsEnabled() {
 export function clickOnCreateNewSafeBtn() {
   // Open the "Add accounts" chooser, then pick "Create new" to enter the create-safe flow.
   cy.get(addAccountsChooserBtn).should('be.visible').click()
-  // A re-render while the accounts list loads can close the menu right after it opens — reopen it once.
   cy.wait(1000)
   cy.get('body').then(($body) => {
     if (!$body.find(`${createNewAccountOption}:visible`).length) {
