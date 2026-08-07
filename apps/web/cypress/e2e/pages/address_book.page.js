@@ -12,7 +12,7 @@ const beamerInput = 'input[id="beamer"]'
 const exportModalBtn = '[data-testid="export-modal-btn"]'
 export const editEntryBtn = 'button[aria-label="Edit entry"]'
 export const deleteEntryBtn = 'button[aria-label="Delete entry"]'
-export const deleteEntryModalBtnSection = '.MuiDialogActions-root'
+export const deleteEntryModalBtnSection = '[data-testid="modal-view"]'
 const importBtn = '[data-testid="import-btn"]'
 const uploadErrorMsg = '[data-testid="error-message"]'
 const modalSummaryMessage = '[data-testid="summary-message"]'
@@ -76,7 +76,7 @@ export function verifyRecipientData(data) {
 }
 
 export function clickOnSendBtn() {
-  cy.get(sendBtn).click()
+  cy.get(sendBtn).filter(':visible').should('be.enabled').click()
 }
 
 export function clickOnMoreActionsBtn() {
@@ -214,7 +214,7 @@ export function clickDeleteEntryButton() {
 }
 
 export function clickDeleteEntryModalDeleteButton() {
-  cy.get(deleteEntryModalBtnSection).contains(delteEntryModaldeleteBtn).click()
+  cy.get(deleteEntryModalBtnSection).contains('button', delteEntryModaldeleteBtn).click()
 }
 
 export function verifyEditedNameNotExists(name) {
