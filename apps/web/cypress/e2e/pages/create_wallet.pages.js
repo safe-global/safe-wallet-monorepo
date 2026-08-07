@@ -69,11 +69,30 @@ export function checkNotificationsSwitchIs(status) {
 }
 
 export function clickOnActivateAccountBtn(index) {
-  cy.get(activateAccountBtn).eq(index).click()
+  // Wallet checks gate this button; it starts disabled and a click then is a silent no-op.
+  cy.get(activateAccountBtn).eq(index).should('be.enabled').click()
 }
 
-export function clickOnFinalActivateAccountBtn(index) {
-  cy.get(activateFlowAccountBtn).click()
+const submitErrorMsg = 'Error submitting the transaction. Please try again.'
+
+export function clickOnFinalActivateAccountBtn(retriesLeft = 2) {
+  cy.get(activateFlowAccountBtn).should('be.enabled').click()
+  // Wait for the submission to resolve: on success the tx-flow modal closes; on RPC
+  // throttling (429) the app shows a retryable submission error and re-enables the button.
+  cy.get('body', { timeout: 180000 }).should(($body) => {
+    const flowStillOpen = $body.find(activateFlowAccountBtn).length > 0
+    const hasSubmitError = $body.text().includes(submitErrorMsg)
+    expect(!flowStillOpen || hasSubmitError, 'deployment submitted or retryable error shown').to.be.true
+  })
+  cy.get('body').then(($body) => {
+    const needsRetry = $body.find(activateFlowAccountBtn).length > 0 && $body.text().includes(submitErrorMsg)
+    if (!needsRetry) return
+    if (retriesLeft === 0) {
+      throw new Error('Safe activation kept failing to submit — likely RPC rate limiting (429)')
+    }
+    cy.wait(10000)
+    clickOnFinalActivateAccountBtn(retriesLeft - 1)
+  })
 }
 
 export function clickOnQRCodeSwitch() {
@@ -137,7 +156,9 @@ export function clickOnReviewStepNextBtn() {
 }
 
 export function clickOnLetsGoBtn() {
-  cy.get(creationModalLetsGoBtn).click()
+  // After activation the modal only opens once the deployment is mined and indexed, which can
+  // take well over a minute on Sepolia when the RPC is throttled.
+  cy.get(creationModalLetsGoBtn, { timeout: 180000 }).click()
   return cy.get(creationModalLetsGoBtn, { timeout: 60000 }).should('not.exist')
 }
 

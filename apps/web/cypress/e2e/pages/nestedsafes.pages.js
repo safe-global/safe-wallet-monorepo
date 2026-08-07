@@ -95,15 +95,17 @@ export function clickOnAddNextBtn() {
 }
 
 export function clickOnAddNestedSafeBtn() {
-  cy.get(addNestedSafeBtn).click()
+  // Wallet checks gate this button; it starts disabled and a click then is a silent no-op.
+  cy.get(addNestedSafeBtn).should('be.enabled').click()
 }
 
+// The testid lands directly on the <input> element of the shadcn field.
 export function typeName(name) {
-  cy.get(`${nestedSafeNameInput} input`).clear().type(name).should('have.value', name)
+  cy.get(nestedSafeNameInput).clear().type(name).should('have.value', name)
 }
 
 export function nameInputHasPlaceholder() {
-  cy.get(`${nestedSafeNameInput} input`).should('have.attr', 'placeholder').and('not.be.empty')
+  cy.get(nestedSafeNameInput).should('have.attr', 'placeholder').and('not.be.empty')
 }
 
 // Nested safes curation (hide/show) functions
@@ -173,7 +175,12 @@ export function clickOnSafeCheckbox(address) {
 }
 
 export function verifySafeCheckboxState(address, checked) {
-  cy.get(`[data-testid="safe-item-checkbox-${address}"]`).should(checked ? 'be.checked' : 'not.be.checked')
+  // Base UI checkboxes are non-native elements; checked state is exposed via aria-checked.
+  cy.get(`[data-testid="safe-item-checkbox-${address}"]`).should(
+    'have.attr',
+    'aria-checked',
+    checked ? 'true' : 'false',
+  )
 }
 
 // Warning icon selector for suspicious safes
@@ -225,13 +232,9 @@ export function verifyShowAllNestedSafesNotVisible() {
   cy.contains(showAllNestedSafesStr).should('not.exist')
 }
 
+// The checkbox is decorative — the toggle handler lives on the list row.
 export function clickFirstValidSafeCheckbox() {
-  cy.get(nestedSafeList)
-    .find(safeListItem)
-    .filter(`:not(:has(${suspiciousWarningIcon}))`)
-    .first()
-    .find('input[type="checkbox"]')
-    .click()
+  cy.get(nestedSafeList).find(safeListItem).filter(`:not(:has(${suspiciousWarningIcon}))`).first().click()
 }
 
 export function selectAllValidSafes() {
@@ -239,7 +242,7 @@ export function selectAllValidSafes() {
     .find(safeListItem)
     .filter(`:not(:has(${suspiciousWarningIcon}))`)
     .each(($item) => {
-      cy.wrap($item).find('input[type="checkbox"]').click()
+      cy.wrap($item).click()
     })
 }
 
@@ -248,17 +251,12 @@ export function selectAllSafes() {
   cy.get(nestedSafeList)
     .find(safeListItem)
     .each(($item) => {
-      cy.wrap($item).find('input[type="checkbox"]').click()
+      cy.wrap($item).click()
     })
 }
 
 export function clickFirstSuspiciousSafeCheckbox() {
-  cy.get(nestedSafeList)
-    .find(safeListItem)
-    .filter(`:has(${suspiciousWarningIcon})`)
-    .first()
-    .find('input[type="checkbox"]')
-    .click()
+  cy.get(nestedSafeList).find(safeListItem).filter(`:has(${suspiciousWarningIcon})`).first().click()
 }
 
 export function waitForNestedSafeListToLoad() {
@@ -295,11 +293,11 @@ export function completeIntroScreenSelectAll() {
   cy.get(reviewNestedSafesBtn).should('be.visible').click()
   // Wait for manage mode to load
   cy.get(saveManageBtn).should('be.visible')
-  // Select all safes
+  // Select all safes — the checkbox is decorative, the toggle handler lives on the list row
   cy.get(nestedSafeList)
     .find(safeListItem)
     .each(($item) => {
-      cy.wrap($item).find('input[type="checkbox"]').click()
+      cy.wrap($item).click()
     })
   cy.get(saveManageBtn).click()
   // Wait for normal view to load after save
@@ -313,12 +311,13 @@ export function completeIntroScreenSelectValid() {
   cy.get(reviewNestedSafesBtn).should('be.visible').click()
   // Wait for manage mode to load
   cy.get(saveManageBtn).should('be.visible')
-  // Select only valid safes (without warning icon)
+  // Select only valid safes (without warning icon). The checkbox is decorative — the
+  // toggle handler lives on the list row.
   cy.get(nestedSafeList)
     .find(safeListItem)
     .filter(`:not(:has(${suspiciousWarningIcon}))`)
     .each(($item) => {
-      cy.wrap($item).find('input[type="checkbox"]').click()
+      cy.wrap($item).click()
     })
   cy.get(saveManageBtn).click()
   // Wait for normal view to load after save

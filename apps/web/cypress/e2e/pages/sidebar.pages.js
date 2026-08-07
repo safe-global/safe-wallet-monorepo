@@ -85,9 +85,10 @@ export function checkSafesCountInPopverList(number) {
 }
 
 export function clickOnSafeInPopover(safe) {
-  cy.get(nestedSafeListPopover).within(() => {
-    cy.contains(safe).click()
-  })
+  // Rows are overlay links: the text sits in a pointer-events-none layer and clicks fall
+  // through to the row's covering anchor, so click the row (over its icon area — the center
+  // can land on the re-enabled copy button) rather than the text node.
+  cy.get(nestedSafeListPopover).contains('[data-testid="safe-list-item"]', safe).click('left')
 }
 
 export function clickOnParentSafeInBreadcrumb() {

@@ -982,8 +982,29 @@ export function waitForProposeRequest() {
   cy.wait('@ProposeTx')
 }
 
-export function clickViewTransaction() {
-  cy.contains(viewTransactionBtn).click()
+const submitTxErrorMsg = 'Error submitting the transaction. Please try again.'
+
+export function clickViewTransaction(retriesLeft = 2) {
+  // Wait for the submitted-tx success screen. Transient RPC/CGW throttling (429) surfaces a
+  // retryable submission error with the sign button re-enabled instead — retry like a user would.
+  cy.get('body', { timeout: 60000 }).should(($body) => {
+    const hasSuccess = $body.text().includes(viewTransactionBtn)
+    const hasSubmitError = $body.text().includes(submitTxErrorMsg)
+    expect(hasSuccess || hasSubmitError, 'success screen or retryable submission error shown').to.be.true
+  })
+  cy.get('body').then(($body) => {
+    const needsRetry = !$body.text().includes(viewTransactionBtn) && $body.text().includes(submitTxErrorMsg)
+    if (!needsRetry) {
+      cy.contains(viewTransactionBtn).click()
+      return
+    }
+    if (retriesLeft === 0 || !$body.find(signBtn).length) {
+      throw new Error('Transaction kept failing to submit — likely RPC rate limiting (429)')
+    }
+    cy.wait(5000)
+    cy.get(signBtn).should('be.enabled').click()
+    clickViewTransaction(retriesLeft - 1)
+  })
 }
 
 export function verifySingleTxPage() {
