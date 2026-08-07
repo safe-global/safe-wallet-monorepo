@@ -72,7 +72,7 @@ export function verifyCurrencySection(text) {
 }
 
 export function verifySafeSelectorThreshold(threshold, owners) {
-  cy.get(openSafesIcon).find(safeSelectorThreshold).should('contain.text', `${threshold}/${owners}`)
+  cy.get(safeSelectorThreshold).first().should('contain.text', `${threshold}/${owners}`)
 }
 
 export function clickOnNestedSafesBtn() {
