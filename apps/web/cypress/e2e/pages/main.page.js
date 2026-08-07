@@ -74,6 +74,16 @@ export function checkElementBackgroundColor(element, color) {
   cy.get(element).should('have.css', 'background-color', color)
 }
 
+// Base UI select items only commit a click while highlighted: hover the item first,
+// wait for the highlight to land (tabindex=0), then click.
+// Center scroll keeps the item clear of the sticky scroll arrows.
+export function selectDropdownOption(itemSelector, text) {
+  cy.get(itemSelector).contains(text).closest(itemSelector).as('dropdownOption')
+  cy.get('@dropdownOption').trigger('mousemove', { scrollBehavior: 'center' })
+  cy.get('@dropdownOption').should('have.attr', 'tabindex', '0')
+  cy.get('@dropdownOption').click({ scrollBehavior: 'center' })
+}
+
 export function clickOnExecuteBtn() {
   cy.get('button').contains(executeStr).click()
 }
