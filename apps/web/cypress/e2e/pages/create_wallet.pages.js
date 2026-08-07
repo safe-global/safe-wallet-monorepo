@@ -220,7 +220,8 @@ export function selectMultiNetwork(index, network) {
 }
 
 export function clickOnNetwrokCheckbox() {
-  cy.get(networkCheckbox).eq(0).click()
+  // The checkbox itself is decorative (pointer-events: none); the click handler is on the option row.
+  cy.get(networkCheckbox).eq(0).closest('li[role="option"]').click()
 }
 export function enterNetwork(index, network) {
   cy.get('input').eq(index).type(network)

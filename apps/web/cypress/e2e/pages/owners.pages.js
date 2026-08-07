@@ -96,6 +96,12 @@ export function getThresholdOptions() {
   return cy.get(thresholdList).find(thresholdOption)
 }
 
+export function selectThresholdOption(index) {
+  // Base UI select items only commit a click once highlighted; hover first so the
+  // highlight renders before the click lands.
+  getThresholdOptions().eq(index).trigger('mousemove').click()
+}
+
 export function verifyThresholdLimit(startValue, endValue) {
   cy.get('p').contains(`out of ${endValue} signer${endValue > 1 ? 's' : ''}`)
   clickOnThresholdDropdown()

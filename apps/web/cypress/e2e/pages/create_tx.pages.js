@@ -229,7 +229,8 @@ export function verifyRejectBtnDisabled() {
 }
 
 export function verifyPayNowOptionIsDisabled() {
-  cy.get(payNowExecMethod).find('input').should('be.disabled')
+  // Base UI radios are non-native elements; disabled state is exposed via data-disabled.
+  cy.get(payNowExecMethod).find('[data-slot="radio-group-item"]').should('have.attr', 'data-disabled')
 }
 
 export function verifyTxRejectModalVisible() {
