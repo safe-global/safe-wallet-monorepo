@@ -362,13 +362,7 @@ export function clickOnCurrencyDropdown() {
 }
 
 export function selectCurrency(currency) {
-  // Base UI select items only commit a click while highlighted: hover the item first,
-  // wait for the highlight to land (tabindex=0), then click.
-  // Center scroll keeps the item clear of the sticky scroll arrows.
-  cy.get(currencyItem).contains(currency).closest(currencyItem).as('currencyOption')
-  cy.get('@currencyOption').trigger('mousemove', { scrollBehavior: 'center' })
-  cy.get('@currencyOption').should('have.attr', 'tabindex', '0')
-  cy.get('@currencyOption').click({ scrollBehavior: 'center' })
+  main.selectDropdownOption(currencyItem, currency)
   cy.get(currencySelector).should('contain', currency)
 }
 

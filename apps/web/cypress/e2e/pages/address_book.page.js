@@ -23,7 +23,7 @@ const sendBtn = '[data-testid="send-btn"]'
 export const entryDialog = '[data-testid="entry-dialog"]'
 
 const moreActionsBtn = '[data-testid="transfer-actions-btn"]'
-const dropdownMenuItem = '[data-slot="dropdown-menu-item"]'
+const addToAddressBookBtn = '[data-testid="add-to-address-book-btn"]'
 
 export const acceptSelection = main.acceptSelectionStr
 export const addressBook = 'Address book'
@@ -37,7 +37,6 @@ const headerImportBtnStr = 'Import'
 const mandatoryNameStr = 'Name *'
 const nameSortBtn = 'Name'
 const addressortBtn = 'Address'
-const addToAddressBookStr = 'Add to address book'
 
 export const emptyCSVFile = '../fixtures/address_book_empty_test.csv'
 export const nonCSVFile = '../fixtures/balances.json'
@@ -84,7 +83,7 @@ export function clickOnMoreActionsBtn() {
 }
 
 export function clickOnAddToAddressBookBtn() {
-  cy.get(dropdownMenuItem).contains(addToAddressBookStr).click()
+  cy.get(addToAddressBookBtn).click()
 }
 
 export function verifyExportMessage(count) {
@@ -197,7 +196,7 @@ export function addEntry(name, address) {
 }
 
 export function clickOnEditEntryBtn() {
-  cy.get(editEntryBtn).filter(':visible').click({ force: true })
+  cy.get(main.tableRow).eq(0).find(editEntryBtn).click()
 }
 
 export function typeInNameInput(name) {
@@ -210,7 +209,7 @@ export function verifyNameWasChanged(name, editedName) {
 }
 
 export function clickDeleteEntryButton() {
-  cy.get(deleteEntryBtn).filter(':visible').click({ force: true })
+  cy.get(main.tableRow).eq(0).find(deleteEntryBtn).click()
 }
 
 export function clickDeleteEntryModalDeleteButton() {

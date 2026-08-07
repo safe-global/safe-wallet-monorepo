@@ -89,7 +89,10 @@ const TransferActions = ({
             </CheckWallet>
           )}
 
-          <DropdownMenuItem onClick={handleOpenModal(ModalType.ADD_TO_AB, TX_LIST_EVENTS.ADDRESS_BOOK)}>
+          <DropdownMenuItem
+            data-testid="add-to-address-book-btn"
+            onClick={handleOpenModal(ModalType.ADD_TO_AB, TX_LIST_EVENTS.ADDRESS_BOOK)}
+          >
             Add to address book
           </DropdownMenuItem>
         </DropdownMenuContent>
