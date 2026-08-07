@@ -4,7 +4,7 @@ import type { Approval } from '@safe-global/utils/services/security/modules/Appr
 import { Box, Stack, Typography } from '@mui/material'
 import { TokenType } from '@safe-global/store/gateway/types'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'
-import { PSEUDO_APPROVAL_VALUES } from './utils/approvals'
+import { PSEUDO_APPROVAL_VALUES } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { formatAmountPrecise } from '@safe-global/utils/utils/formatNumber'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
+import SafeLogo from '@/components/common/SafeLogo'
 
 // Rewrite the URL to put the Safe address into the query.
 export const _getRedirectUrl = (location: Location): string | undefined => {
@@ -45,7 +46,14 @@ const Custom404: NextPage = () => {
     }
   }, [router])
 
-  return <main>{!isRedirecting && <h1 style={{ fontSize: '2rem', fontWeight: 700 }}>404 – Page not found</h1>}</main>
+  return (
+    <main>
+      <div className="fixed top-0 left-0 z-[1300] flex items-center px-6" style={{ height: 'var(--header-height)' }}>
+        <SafeLogo />
+      </div>
+      {!isRedirecting && <h1 style={{ fontSize: '2rem', fontWeight: 700 }}>404 – Page not found</h1>}
+    </main>
+  )
 }
 
 export default Custom404

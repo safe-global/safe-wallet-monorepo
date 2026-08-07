@@ -33,6 +33,10 @@ export const HYPERNATIVE_EVENTS = {
     action: 'Hypernative Connected',
     category: HYPERNATIVE_CATEGORY,
   },
+  HYPERNATIVE_FULL_REPORT_CLICKED: {
+    action: 'Hypernative Full Report Clicked',
+    category: HYPERNATIVE_CATEGORY,
+  },
 }
 
 export enum HYPERNATIVE_SOURCE {
@@ -41,6 +45,5 @@ export enum HYPERNATIVE_SOURCE {
   NewTransaction = 'New transaction',
   Tutorial = 'Tutorial',
   Queue = 'Queue',
-  History = 'History',
   Copilot = 'Copilot',
 }

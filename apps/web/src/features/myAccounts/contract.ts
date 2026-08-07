@@ -28,7 +28,6 @@ import type SafesList from './components/SafesList'
 import type AccountsNavigation from './components/AccountsNavigation'
 import type MyAccounts from './components/MyAccounts'
 import type MyAccountsV2 from './components/MyAccountsV2'
-import type SafeSelectionModal from './components/SafeSelectionModal'
 import type NonPinnedWarning from './components/NonPinnedWarning'
 import type AccountsWidget from './components/AccountsWidget/AccountsWidget'
 
@@ -56,6 +55,5 @@ export interface MyAccountsContract {
   AccountsWidget: typeof AccountsWidget
 
   // Address safety components
-  SafeSelectionModal: typeof SafeSelectionModal
   NonPinnedWarning: typeof NonPinnedWarning
 }

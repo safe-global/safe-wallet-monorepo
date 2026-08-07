@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 
 import NavTabs from '@/components/common/NavTabs'
 import PageHeader from '@/components/common/PageHeader'
-import { generalSettingsNavItems, settingsNavItems } from '@/components/sidebar/SidebarNavigation/config'
+import { generalSettingsNavItems, settingsNavItems } from '@/components/common/NavTabs/navItemsConfig'
 import css from '@/components/common/PageHeader/styles.module.css'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useCurrentChain } from '@/hooks/useChains'

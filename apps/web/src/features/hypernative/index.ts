@@ -52,7 +52,10 @@ export { useIsHypernativeGuard } from './hooks/useIsHypernativeGuard'
 export type { HypernativeGuardCheckResult } from './hooks/useIsHypernativeGuard'
 
 // Feature flag hooks
-export { useIsHypernativeFeature as useIsHypernativeFeatureEnabled } from './hooks/useIsHypernativeFeature'
+export {
+  useIsHypernativeFeature,
+  useIsHypernativeFeature as useIsHypernativeFeatureEnabled,
+} from './hooks/useIsHypernativeFeature'
 export { useIsHypernativeQueueScanFeature } from './hooks/useIsHypernativeQueueScanFeature'
 
 // Assessment-related hooks
@@ -64,17 +67,11 @@ export { useShowHypernativeAssessment } from './hooks/useShowHypernativeAssessme
 // Auth token hook (used by safe-shield context)
 export { useAuthToken } from './hooks/useAuthToken'
 
-// Banner visibility hooks (used by dashboard, queue, history pages)
+// Banner visibility hooks (used by dashboard)
 export { useBannerVisibility, BannerType } from './hooks/useBannerVisibility'
 
-// Banner components for carousel/pages (used by dashboard, queue, history pages)
-export {
-  HnBannerForCarousel,
-  hnBannerID,
-  HnBannerForQueue,
-  HnBannerForHistory,
-  HnBannerForSettings,
-} from './components/HnBanner'
+// Banner components for carousel/settings (used by dashboard, settings pages)
+export { HnBannerForCarousel, HnBannerForSettings } from './components/HnBanner'
 
 // Dashboard banner variant (used by FirstSteps)
 export { HnDashboardBannerWithNoBalanceCheck } from './components/HnDashboardBanner'
@@ -82,6 +79,15 @@ export { HnDashboardBannerWithNoBalanceCheck } from './components/HnDashboardBan
 // Queue assessment components (used by TxSummary, queue page)
 export { HnQueueAssessment } from './components/HnQueueAssessment'
 export { HnQueueAssessmentProvider } from './components/HnQueueAssessmentProvider'
+
+// Header tooltip component (used by sidebar)
+export { SafeHeaderHnTooltip } from './components/SafeHeaderHnTooltip'
+
+// Analysis overflow row (used by safe-shield ThreatAnalysis)
+export { HnViewMoreOnHypernativeRow } from './components/HnViewMoreOnHypernativeRow'
+
+// Signup flow component (used by spaces SecurityHub)
+export { HnSignupFlow } from './components/HnSignupFlow'
 
 // OAuth config (used by oauth-callback page)
 export { HYPERNATIVE_OAUTH_CONFIG, getRedirectUri } from './config/oauth'

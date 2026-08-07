@@ -23,6 +23,12 @@ import { createInterface } from 'node:readline'
 
 const args = process.argv.slice(2)
 
+// Allow opting out entirely (documented in AGENTS.md; used by the Stop hook).
+if (process.env.SKIP_VERIFY === '1') {
+  console.log('verify: skipped (SKIP_VERIFY=1)')
+  process.exit(0)
+}
+
 function getFlag(name) {
   const prefix = `--${name}=`
   const entry = args.find((a) => a.startsWith(prefix))

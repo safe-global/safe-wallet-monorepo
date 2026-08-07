@@ -2,8 +2,7 @@ import { useState, type ReactElement } from 'react'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import type { SafeAnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import { SeverityIcon } from '../SeverityIcon'
-import AddTrustedSafeDialog from '@/features/myAccounts/components/NonPinnedWarning/AddTrustedSafeDialog'
-import { useSimilarAddressDetection } from '@/features/myAccounts'
+import { AddTrustedSafeDialog, useSimilarAddressDetection } from '@/features/myAccounts'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectAddressBookByChain } from '@/store/addressBookSlice'
@@ -62,7 +61,7 @@ const UntrustedSafeWarning = ({ safeAnalysis, onAddToTrustedList }: UntrustedSaf
                 onClick={handleOpenConfirmDialog}
                 sx={{ alignSelf: 'flex-start', mt: 1 }}
               >
-                Trust this Safe
+                Add to my accounts
               </Button>
             </Stack>
           </Stack>

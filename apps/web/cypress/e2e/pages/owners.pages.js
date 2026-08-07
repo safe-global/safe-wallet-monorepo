@@ -40,8 +40,8 @@ const removeOwnerStr = 'Remove signer'
 const selectedOwnerStr = 'Signers'
 const changeThresholdStr = 'Change threshold'
 
-export const safeAccountNonceStr = 'Safe Account nonce'
-export const nonOwnerErrorMsg = 'Your connected wallet is not a signer of this Safe Account'
+export const safeAccountNonceStr = 'Safe account nonce'
+export const nonOwnerErrorMsg = 'Your connected wallet is not a signer of this Safe account'
 export const disconnectedUserErrorMsg = 'Please connect your wallet'
 
 export function checkExistingSignerCount(count) {

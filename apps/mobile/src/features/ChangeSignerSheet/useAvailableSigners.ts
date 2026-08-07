@@ -4,23 +4,18 @@ import { useAppSelector } from '@/src/store/hooks'
 import { selectSigners } from '@/src/store/signersSlice'
 import { RootState } from '@/src/store'
 import { selectChainById } from '@/src/store/chains'
-import {
-  MultisigExecutionDetails,
-  useTransactionsGetTransactionByIdV1Query,
-} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { extractAppSigners } from '@/src/features/ConfirmTx/utils'
 import { useGetBalancesQuery } from '@/src/store/signersBalance'
 import { ActionType } from '@/src/features/ChangeSignerSheet/utils'
+import { useTransactionData } from '@/src/features/ConfirmTx/hooks/useTransactionData'
 
 const useAvailableSigners = (txId: string, actionType: ActionType) => {
   const activeSafe = useDefinedActiveSafe()
   const signers = useAppSelector(selectSigners)
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
 
-  const { data: txDetails, isLoading: isLoadingTxDetails } = useTransactionsGetTransactionByIdV1Query({
-    chainId: activeSafe.chainId,
-    id: txId,
-  })
+  const { data: txDetails, isLoading: isLoadingTxDetails } = useTransactionData(txId)
 
   const detailedExecutionInfo = txDetails?.detailedExecutionInfo as MultisigExecutionDetails
 

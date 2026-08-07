@@ -1,0 +1,73 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# Cancel path: open the confirm sheet via the 3-dots menu, then dismiss it
+# without confirming. The shipped sheet has no Cancel button — cancellation is
+# a swipe-down/backdrop dismissal. The row must survive, no toast may appear,
+# and the settings count must stay at 1.
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eWcDappsBase'
+- assertVisible:
+    id: 'home-tab'
+
+- tapOn:
+    id: 'e2eWcSeedSession'
+
+# Open the connected-apps list.
+- tapOn: 'Account, tab, 3 of 3'
+- extendedWaitUntil:
+    visible:
+      id: 'settings-connected-apps-entry'
+    timeout: 10000
+- tapOn:
+    id: 'settings-connected-apps-entry'
+- extendedWaitUntil:
+    visible:
+      id: 'connected-dapp-row'
+    timeout: 10000
+
+# Menu → Disconnect → confirm sheet opens.
+- tapOn:
+    id: 'connected-dapp-menu-e2e-session-topic'
+- extendedWaitUntil:
+    visible:
+      text: 'Disconnect'
+    timeout: 5000
+- tapOn:
+    text: 'Disconnect'
+- extendedWaitUntil:
+    visible:
+      id: 'disconnect-confirm-button'
+    timeout: 10000
+
+# Swipe the sheet down to dismiss (cancel). Coordinate swipe from the sheet
+# body past the bottom, same pattern as pair-proposal-reject.yml.
+- swipe:
+    start: 50%, 60%
+    end: 50%, 95%
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Sheet gone, row untouched, no disconnect toast.
+- assertNotVisible:
+    id: 'disconnect-confirm-button'
+- assertVisible:
+    id: 'connected-dapp-row'
+- assertNotVisible:
+    text: 'Uniswap disconnected'
+
+# Slice unchanged: back on settings the entry still counts 1 session.
+- tapOn:
+    id: 'go-back'
+- extendedWaitUntil:
+    visible:
+      id: 'settings-connected-apps-entry'
+    timeout: 10000
+- assertVisible:
+    id: 'connected-apps-count'
+    text: '1'

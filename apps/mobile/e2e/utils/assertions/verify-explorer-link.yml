@@ -2,10 +2,11 @@ appId: ${APP_ID}
 tags:
   - util
 ---
+# The button is a single accessibility element: its label is exposed on the element
+# itself (as "View on Explorer, " with the link icon), not as a descendant text node.
 - assertVisible:
     id: 'view-on-explorer-button'
-    containsDescendants:
-      - text: 'View on Explorer'
+    text: 'View on Explorer.*'
 
 - tapOn:
     id: 'view-on-explorer-button'

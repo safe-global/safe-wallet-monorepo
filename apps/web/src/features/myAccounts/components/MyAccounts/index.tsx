@@ -24,7 +24,11 @@ const MyAccounts = ({ safes, onLinkClick, isSidebar = false }: MyAccountsProps) 
 
   return (
     <Box data-testid="sidebar-safe-container" className={css.container}>
-      <Box className={classNames(css.myAccounts, { [css.sidebarAccounts]: isSidebar })}>
+      <Box
+        className={classNames(css.myAccounts, {
+          [css.sidebarAccounts]: isSidebar,
+        })}
+      >
         <AccountsHeader isSidebar={isSidebar} onLinkClick={onLinkClick} />
 
         <Paper sx={{ padding: 0 }}>

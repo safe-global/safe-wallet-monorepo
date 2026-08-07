@@ -1,8 +1,8 @@
 import { type MouseEvent, useState } from 'react'
 import { MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import DeleteSpaceDialog from '@/features/spaces/components/SpaceSettings/DeleteSpaceDialog'
-import UpdateSpaceDialog from '@/features/spaces/components/SpaceSettings/UpdateSpaceDialog'
+import DeleteSpaceDialog from '../SpaceSettings/DeleteSpaceDialog'
+import UpdateSpaceDialog from '../SpaceSettings/UpdateSpaceDialog'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { Button } from '@/components/ui/button'
@@ -44,7 +44,7 @@ const SpaceContextMenuNew = ({ space }: { space: GetSpaceResponse }) => {
           }
         >
           <MoreVertical className="size-4 text-border" />
-          <span className="sr-only">Space actions</span>
+          <span className="sr-only">Workspace actions</span>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)} onSelect={(e) => e.stopPropagation()}>

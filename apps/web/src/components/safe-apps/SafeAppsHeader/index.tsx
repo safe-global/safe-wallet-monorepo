@@ -4,7 +4,7 @@ import type { ReactElement } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 
 import NavTabs from '@/components/common/NavTabs'
-import { safeAppsNavItems } from '@/components/sidebar/SidebarNavigation/config'
+import { safeAppsNavItems } from '@/components/common/NavTabs/navItemsConfig'
 import css from './styles.module.css'
 
 const SafeAppsHeader = (): ReactElement => {
@@ -19,7 +19,7 @@ const SafeAppsHeader = (): ReactElement => {
 
         {/* Safe Apps Subtitle */}
         <Typography className={css.subtitle}>
-          Connect to your favourite web3 applications with your Safe Account, securely and efficiently.
+          Connect to your favourite web3 applications with your Safe account, securely and efficiently.
         </Typography>
       </Box>
 

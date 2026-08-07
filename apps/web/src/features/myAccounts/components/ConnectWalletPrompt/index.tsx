@@ -13,7 +13,7 @@ const ConnectWalletPrompt = () => {
     <Alert severity="info" icon={<AccountBalanceWalletIcon />} data-testid="connect-wallet-prompt" sx={{ mb: 2 }}>
       <AlertTitle>Connect your wallet</AlertTitle>
       <Typography variant="body2" sx={{ mb: 2 }}>
-        Connect your wallet to view and manage your Safe Accounts.
+        Connect your wallet to view and manage your Safe accounts.
       </Typography>
       <Box>
         <Button

@@ -1,11 +1,9 @@
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
-import { setAuthenticated, setUnauthenticated } from '@/store/authSlice'
+import { setAuthenticated, setUnauthenticated, SESSION_LIFETIME_MS } from '@/store/authSlice'
 import type { AppDispatch } from '@/store'
 
 export type ReconcileResult = 'authenticated' | 'unauthenticated' | 'error'
-
-const ONE_DAY_MS = 24 * 60 * 60 * 1000
 
 const isUnauthorized = (error: unknown): boolean =>
   typeof error === 'object' && error !== null && 'status' in error && (error as FetchBaseQueryError).status === 403
@@ -19,7 +17,7 @@ const isUnauthorized = (error: unknown): boolean =>
 const reconcileAuth = async (dispatch: AppDispatch): Promise<ReconcileResult> => {
   try {
     await dispatch(cgwApi.endpoints.authGetMeV1.initiate()).unwrap()
-    dispatch(setAuthenticated(Date.now() + ONE_DAY_MS))
+    dispatch(setAuthenticated(Date.now() + SESSION_LIFETIME_MS))
     return 'authenticated'
   } catch (error) {
     if (isUnauthorized(error)) {

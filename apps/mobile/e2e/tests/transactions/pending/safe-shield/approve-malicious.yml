@@ -5,7 +5,7 @@ tags:
   - safe-shield
 ---
 # ===========================================
-# SafeShield: Approve (Malicious - PoS Dai Stablecoin)
+# SafeShield: Approve (Malicious - Polygon PoS Bridged DAI)
 # ===========================================
 # Safe: 0x65e1Ff7e0901055B3bea7D8b3AF457a659714013 (Polygon)
 # Expected widget: Risk detected (CRITICAL)
@@ -26,8 +26,8 @@ tags:
 - runFlow:
     file: ../../../../utils/components/pending-tx/tap-tx-card.yml
     env:
-      WAIT_FOR: '.*Dai Stablecoin.*'
-      TAP_TEXT: '.*Dai Stablecoin.*'
+      WAIT_FOR: '.*Polygon PoS Bridged DAI.*'
+      TAP_TEXT: '.*Polygon PoS Bridged DAI.*'
 
 - assertVisible: 'Confirm transaction'
 

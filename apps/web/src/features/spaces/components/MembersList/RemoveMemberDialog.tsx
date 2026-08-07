@@ -8,7 +8,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
-import { useCurrentMemberProfile } from '@/features/spaces/hooks/useSpaceMembers'
+import { useCurrentMemberProfile } from '../../hooks/useSpaceMembers'
 
 const RemoveMemberDialog = ({
   userId,
@@ -31,7 +31,7 @@ const RemoveMemberDialog = ({
     setErrorMessage('')
     trackEvent({ ...SPACE_EVENTS.REMOVE_MEMBER, label: isInvite ? SPACE_LABELS.invite_list : SPACE_LABELS.member_list })
     try {
-      const { error } = await deleteMember({ spaceId: Number(spaceId), userId })
+      const { error } = await deleteMember({ spaceId: spaceId ?? '', userId })
 
       if (error) {
         throw error

@@ -76,7 +76,7 @@ describe('create.ts', () => {
       }
 
       await expect(createTx(txParams)).rejects.toThrow(
-        'The Safe SDK could not be initialized. Please be aware that we only support v1.0.0 Safe Accounts and up.',
+        'The Safe SDK could not be initialized. Please be aware that we only support v1.0.0 Safe accounts and up.',
       )
     })
 

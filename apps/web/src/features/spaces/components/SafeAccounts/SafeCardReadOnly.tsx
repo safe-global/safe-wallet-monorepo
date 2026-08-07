@@ -1,17 +1,18 @@
 import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { AccountItem } from '@/features/myAccounts/components/AccountItem'
+import { AccountItem } from '@/features/myAccounts'
 import Identicon from '@/components/common/Identicon'
+import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { TriangleAlert, Copy, Check, RotateCw } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { TriangleAlert, RotateCw } from 'lucide-react'
+import { useMemo, type ReactNode } from 'react'
 import { Tooltip } from '@mui/material'
-import FiatBalance from '../SelectSafesOnboarding/components/FiatBalance'
-import ThresholdBadge from '../SelectSafesOnboarding/components/ThresholdBadge'
+import FiatBalance from '@/components/common/FiatBalance'
+import { ThresholdBadge } from '@/components/common/AccountBadges'
 import useSafeCardData from '../SelectSafesOnboarding/hooks/useSafeCardData'
 import { useLoadFeature } from '@/features/__core__'
-import { SpacesFeature } from '@/features/spaces'
+import { SpacesFeature } from '../../SpacesFeature'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
@@ -21,6 +22,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { cn } from '@/utils/cn'
+import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
 
 interface SafeCardReadOnlyProps {
   safe: SafeItem | MultiChainSafeItem
@@ -31,6 +33,8 @@ interface SafeCardReadOnlyProps {
   onClick?: () => void
   disabled?: boolean
   disabledTooltip?: string
+  /** Optional trailing action (e.g. "Add to workspace") rendered before the context menu. */
+  action?: ReactNode
 }
 
 const SafeCardReadOnly = ({
@@ -42,11 +46,11 @@ const SafeCardReadOnly = ({
   hideContextMenu = false,
   disabled = false,
   disabledTooltip,
+  action,
 }: SafeCardReadOnlyProps) => {
-  const [copied, setCopied] = useState(false)
   const router = useRouter()
   const isMultiChain = isMultiChainSafeItem(safe)
-  const { name, fiatValue, threshold, ownersCount, elementRef } = useSafeCardData(safe)
+  const { name, fiatValue, threshold, ownersCount, elementRef, isUndeployed, isActivating } = useSafeCardData(safe)
   const safes = useMemo<SafeItem[]>(
     () => (isMultiChain ? (safe as MultiChainSafeItem).safes : [safe as SafeItem]),
     [isMultiChain, safe],
@@ -75,13 +79,6 @@ const SafeCardReadOnly = ({
 
   const isClickable = Boolean(singleSafe) && !disabled
   const tooltipTitle = disabled ? (disabledTooltip ?? '') : !singleSafe ? 'Safe data is not available' : ''
-
-  const handleCopyAddress = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    navigator.clipboard.writeText(safe.address)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
 
   const handleCardClick = () => {
     if (!singleSafe || !chain?.shortName) return
@@ -139,20 +136,7 @@ const SafeCardReadOnly = ({
                   shortenAddress(safe.address)
                 )}
               </span>
-              <Tooltip title={copied ? 'Copied!' : 'Copy address'} placement="top">
-                <button
-                  onClick={handleCopyAddress}
-                  className="shrink-0 p-0.5 rounded hover:bg-muted transition-colors cursor-pointer"
-                  aria-label="Copy address"
-                  type="button"
-                >
-                  {copied ? (
-                    <Check className="size-3.5 text-green-600" />
-                  ) : (
-                    <Copy className="size-3.5 text-muted-foreground hover:text-foreground" />
-                  )}
-                </button>
-              </Tooltip>
+              <CopyAddressIconButton address={safe.address} />
             </div>
           </div>
         </div>
@@ -195,12 +179,20 @@ const SafeCardReadOnly = ({
           <AccountItem.ChainBadge safes={safes} className="justify-end" />
         </div>
 
-        <div className="flex min-w-0 shrink-0 flex-col items-end gap-2 pl-1 sm:min-w-16 sm:pl-0">
-          <FiatBalance value={fiatValue} />
+        <div
+          data-testid="balance-column"
+          className="flex min-w-0 shrink-0 flex-col items-end gap-2 pl-1 sm:min-w-16 sm:pl-0"
+        >
+          {isUndeployed ? (
+            <NotActivatedBadge isActivating={isActivating} data-testid="pending-activation-chip" />
+          ) : (
+            <FiatBalance value={fiatValue} />
+          )}
           {threshold > 0 && <ThresholdBadge threshold={threshold} owners={ownersCount} />}
         </div>
 
         <div className="flex shrink-0 items-center gap-2 pl-2" onClick={(e) => e.stopPropagation()}>
+          {action}
           {spaces?.SpaceSafeContextMenu && !hideContextMenu && <spaces.SpaceSafeContextMenu safeItem={safe} />}
         </div>
       </div>

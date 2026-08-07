@@ -307,7 +307,7 @@ describe('useSessionExpiryGuard', () => {
       message: SESSION_EXPIRED_MESSAGE,
       link: { href: '/welcome/spaces', title: SESSION_EXPIRED_SIGN_IN_LABEL },
     })
-    expect(SESSION_EXPIRED_MESSAGE).toBe('Your session has expired. Please sign in to Spaces again.')
+    expect(SESSION_EXPIRED_MESSAGE).toBe('Your session has expired. Please sign in to workspaces again.')
   })
 
   it('runs once after the store hydrates from a partial preloaded state', async () => {

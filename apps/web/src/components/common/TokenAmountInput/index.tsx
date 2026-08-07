@@ -31,6 +31,7 @@ type TokenAmountInputProps = {
   fieldArray?: { name: FieldArrayPath<FieldValues>; index: number }
   deps?: string[]
   defaultTokenAddress?: string
+  onMaxClick?: () => void
 }
 
 const TokenAmountInput = ({
@@ -41,6 +42,7 @@ const TokenAmountInput = ({
   fieldArray,
   deps,
   defaultTokenAddress,
+  onMaxClick,
 }: TokenAmountInputProps) => {
   const {
     formState: { errors, defaultValues },
@@ -100,8 +102,9 @@ const TokenAmountInput = ({
       shouldValidate: true,
     })
 
+    onMaxClick?.()
     trigger(deps)
-  }, [maxAmount, selectedToken, setValue, amountField, trigger, deps])
+  }, [maxAmount, selectedToken, setValue, amountField, trigger, deps, onMaxClick])
 
   const onChangeToken = useCallback(() => {
     const amountDefaultValue = get(

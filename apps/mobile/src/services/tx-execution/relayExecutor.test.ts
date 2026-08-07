@@ -1,5 +1,6 @@
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { executeRelayTx } from './relayExecutor'
+import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 import {
   generateChecksummedAddress,
   createMockChain,
@@ -14,6 +15,7 @@ const mockCreateTx = jest.fn()
 const mockAddSignaturesToTx = jest.fn()
 const mockGetReadOnlyCurrentGnosisSafeContract = jest.fn()
 const mockGetLatestSafeVersion = jest.fn()
+const mockGetTransactionHash = jest.fn()
 
 jest.mock('@/src/services/tx/fetchTransactionDetails', () => ({
   fetchTransactionDetails: (...args: unknown[]) => mockFetchTransactionDetails(...args),
@@ -31,6 +33,10 @@ jest.mock('@/src/services/tx/tx-sender/create', () => ({
 
 jest.mock('@/src/services/contracts/safeContracts', () => ({
   getReadOnlyCurrentGnosisSafeContract: (...args: unknown[]) => mockGetReadOnlyCurrentGnosisSafeContract(...args),
+}))
+
+jest.mock('@/src/hooks/coreSDK/safeCoreSDK', () => ({
+  getSafeSDK: () => ({ getTransactionHash: (...args: unknown[]) => mockGetTransactionHash(...args) }),
 }))
 
 jest.mock('@safe-global/utils/utils/chains', () => ({
@@ -92,6 +98,7 @@ describe('executeRelayTx', () => {
     mockCreateTx.mockResolvedValue(mockSafeTx)
     mockGetReadOnlyCurrentGnosisSafeContract.mockResolvedValue({ encode: mockEncode })
     mockGetLatestSafeVersion.mockReturnValue('1.4.1')
+    mockGetTransactionHash.mockResolvedValue('0xSafeTxHash')
     mockRelayMutation.mockResolvedValue({ taskId: 'task456' })
   })
 
@@ -116,12 +123,15 @@ describe('executeRelayTx', () => {
         mockTxParams.refundReceiver,
         '0xEncodedSignatures',
       ])
+      expect(mockGetTransactionHash).toHaveBeenCalledWith(mockSafeTx)
       expect(mockRelayMutation).toHaveBeenCalledWith({
         chainId: '1',
         relayDto: {
           to: mockActiveSafe.address,
           data: '0xEncodedExecTransaction',
           version: '1.3.0',
+          safeTxHash: '0xSafeTxHash',
+          acceptUnverifiedSimulation: undefined,
         },
       })
 
@@ -161,6 +171,19 @@ describe('executeRelayTx', () => {
       })
 
       expect(mockGetLatestSafeVersion).toHaveBeenCalledWith(mockChain)
+    })
+
+    it('should forward acceptUnverifiedSimulation when provided', async () => {
+      await executeRelayTx({ ...defaultParams, acceptUnverifiedSimulation: true })
+
+      expect(mockRelayMutation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          relayDto: expect.objectContaining({
+            safeTxHash: '0xSafeTxHash',
+            acceptUnverifiedSimulation: true,
+          }),
+        }),
+      )
     })
   })
 
@@ -218,6 +241,27 @@ describe('executeRelayTx', () => {
       mockRelayMutation.mockRejectedValue(relayError)
 
       await expect(executeRelayTx(defaultParams)).rejects.toThrow('Relay service unavailable')
+    })
+
+    it('should rethrow a RelaySimulationError on a 422 simulation response', async () => {
+      mockRelayMutation.mockRejectedValue({
+        status: 422,
+        data: { code: 'SIMULATION_FAILED', message: 'Insufficient gas-token balance' },
+      })
+
+      await expect(executeRelayTx(defaultParams)).rejects.toMatchObject({
+        name: 'RelaySimulationError',
+        code: 'SIMULATION_FAILED',
+      })
+    })
+
+    it('should rethrow INDETERMINATE_SIMULATION as a RelaySimulationError', async () => {
+      mockRelayMutation.mockRejectedValue({
+        status: 422,
+        data: { code: 'INDETERMINATE_SIMULATION', message: 'Could not simulate' },
+      })
+
+      await expect(executeRelayTx(defaultParams)).rejects.toBeInstanceOf(RelaySimulationError)
     })
   })
 

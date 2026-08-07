@@ -209,4 +209,101 @@ describe('useMultiAccountItemData', () => {
       expect(result.current.sortedSafes).toHaveLength(2)
     })
   })
+
+  describe('isFullyUndeployed and isActivating', () => {
+    it('returns isFullyUndeployed=false when at least one safe in the group is deployed', () => {
+      const multiSafeItem = buildMultiChainSafeItem({
+        safes: [
+          safeItemBuilder().with({ chainId: '1', address: '0xABC123' }).build(),
+          safeItemBuilder().with({ chainId: '137', address: '0xABC123' }).build(),
+        ],
+      })
+
+      const { result } = renderHook(() => useMultiAccountItemData(multiSafeItem), {
+        initialReduxState: {
+          undeployedSafes: {
+            '137': {
+              '0xABC123': {
+                status: { status: 'AWAITING_EXECUTION' },
+                props: { safeAccountConfig: { owners: ['0x111'], threshold: 1 } },
+              },
+            },
+          },
+        } as unknown as Partial<RootState>,
+      })
+
+      expect(result.current.isFullyUndeployed).toBe(false)
+      expect(result.current.isActivating).toBe(false)
+    })
+
+    it('returns isFullyUndeployed=true when every safe in the group is undeployed', () => {
+      const multiSafeItem = buildMultiChainSafeItem({
+        safes: [
+          safeItemBuilder().with({ chainId: '1', address: '0xABC123' }).build(),
+          safeItemBuilder().with({ chainId: '137', address: '0xABC123' }).build(),
+        ],
+      })
+
+      const { result } = renderHook(() => useMultiAccountItemData(multiSafeItem), {
+        initialReduxState: {
+          undeployedSafes: {
+            '1': {
+              '0xABC123': {
+                status: { status: 'AWAITING_EXECUTION' },
+                props: { safeAccountConfig: { owners: ['0x111'], threshold: 1 } },
+              },
+            },
+            '137': {
+              '0xABC123': {
+                status: { status: 'AWAITING_EXECUTION' },
+                props: { safeAccountConfig: { owners: ['0x111'], threshold: 1 } },
+              },
+            },
+          },
+        } as unknown as Partial<RootState>,
+      })
+
+      expect(result.current.isFullyUndeployed).toBe(true)
+      expect(result.current.isActivating).toBe(false)
+    })
+
+    it('returns isActivating=true when any undeployed safe is past AWAITING_EXECUTION', () => {
+      const multiSafeItem = buildMultiChainSafeItem({
+        safes: [
+          safeItemBuilder().with({ chainId: '1', address: '0xABC123' }).build(),
+          safeItemBuilder().with({ chainId: '137', address: '0xABC123' }).build(),
+        ],
+      })
+
+      const { result } = renderHook(() => useMultiAccountItemData(multiSafeItem), {
+        initialReduxState: {
+          undeployedSafes: {
+            '1': {
+              '0xABC123': {
+                status: { status: 'AWAITING_EXECUTION' },
+                props: { safeAccountConfig: { owners: ['0x111'], threshold: 1 } },
+              },
+            },
+            '137': {
+              '0xABC123': {
+                status: { status: 'PROCESSING' },
+                props: { safeAccountConfig: { owners: ['0x111'], threshold: 1 } },
+              },
+            },
+          },
+        } as unknown as Partial<RootState>,
+      })
+
+      expect(result.current.isFullyUndeployed).toBe(true)
+      expect(result.current.isActivating).toBe(true)
+    })
+
+    it('returns isFullyUndeployed=false for an empty group', () => {
+      const multiSafeItem = buildMultiChainSafeItem({ safes: [] })
+
+      const { result } = renderHook(() => useMultiAccountItemData(multiSafeItem))
+
+      expect(result.current.isFullyUndeployed).toBe(false)
+    })
+  })
 })

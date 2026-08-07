@@ -1,0 +1,18 @@
+appId: ${APP_ID}
+tags:
+  - app-update
+  - suite
+---
+# App Update Test Suite
+# Both tests load an onboarded account (e2eOnboardedAccount) and trigger an update
+# scenario via a hidden test control. First test does a clean start; the rest
+# preserve state.
+
+# First test: clean start
+- runFlow:
+    file: ./soft-update.yml
+
+- runFlow:
+    file: ./force-update.yml
+    env:
+      SKIP_CLEAN_START: 'true'

@@ -27,7 +27,7 @@ export const HnQueueAssessmentProvider = ({ children }: HnQueueAssessmentProvide
   const [pages, setPages] = useState<QueuedItemPage[]>([])
   const showAssessment = useShowHypernativeAssessment()
 
-  // Reset the pages and clear assessments cache when the Safe Account or chain changes
+  // Reset the pages and clear assessments cache when the Safe account or chain changes
   useEffect(() => {
     pagesSourcesRef.current = new Map()
     setPages([])

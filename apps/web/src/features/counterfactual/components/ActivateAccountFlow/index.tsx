@@ -161,7 +161,7 @@ const ActivateAccountFlow = () => {
     <TxLayout title="Activate account" hideNonce hideSafeShield>
       <TxCard>
         <Typography>
-          You&apos;re about to deploy this Safe Account and will have to confirm the transaction with your connected
+          You&apos;re about to deploy this Safe account and will have to confirm the transaction with your connected
           wallet.
         </Typography>
 

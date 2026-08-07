@@ -1,0 +1,177 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./SecurityDrawerHeader.stories WithName 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="flex items-start justify-between gap-3 px-6 pt-6"
+  >
+    <div
+      class="flex min-w-0 items-center gap-3"
+    >
+      <div
+        class="icon"
+        style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjI2IDc1JSA0NCUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCg3MCA1NyUgNTYlKSIgZD0iTTAsMGgxdjFoLTF6TTcsMGgxdjFoLTF6TTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTAsMmgxdjFoLTF6TTcsMmgxdjFoLTF6TTEsMmgxdjFoLTF6TTYsMmgxdjFoLTF6TTIsMmgxdjFoLTF6TTUsMmgxdjFoLTF6TTMsMmgxdjFoLTF6TTQsMmgxdjFoLTF6TTEsM2gxdjFoLTF6TTYsM2gxdjFoLTF6TTAsNGgxdjFoLTF6TTcsNGgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTEsNmgxdjFoLTF6TTYsNmgxdjFoLTF6TTIsNmgxdjFoLTF6TTUsNmgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDMzMSA4NiUgNDglKSIgZD0iTTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6Ii8+PC9zdmc+); width: 28px; height: 28px;"
+      />
+      <div
+        class="min-w-0 leading-tight"
+      >
+        <span
+          class="m-0 text-sm font-semibold truncate leading-tight"
+          data-slot="typography"
+          data-variant="paragraph-small-bold"
+          title="Rewards vault"
+        >
+          Rewards vault
+        </span>
+        <div
+          class="flex items-center gap-1 leading-none text-muted-foreground"
+        >
+          <span
+            class="m-0 font-normal text-[10px] text-muted-foreground"
+            data-slot="typography"
+            data-variant="paragraph-mini"
+          >
+            0xA77D...98b6
+          </span>
+          <span
+            aria-label="Copy to clipboard"
+            class=""
+            data-mui-internal-clone-element="true"
+            style="cursor: pointer;"
+          >
+            <button
+              aria-label="Copy to clipboard"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall !p-0.5 text-muted-foreground [&_svg]:!size-3 mui-style-uneijd-MuiButtonBase-root-MuiIconButton-root"
+              tabindex="0"
+              type="button"
+            >
+              <mock-icon
+                aria-hidden=""
+                class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-gvpe62-MuiSvgIcon-root"
+                data-testid="copy-btn-icon"
+                focusable="false"
+              />
+            </button>
+          </span>
+        </div>
+      </div>
+    </div>
+    <button
+      aria-label="Close security report"
+      class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-card text-foreground shadow-sm transition-colors hover:bg-muted"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-x size-4"
+        fill="none"
+        height="24"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M18 6 6 18"
+        />
+        <path
+          d="m6 6 12 12"
+        />
+      </svg>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`./SecurityDrawerHeader.stories WithoutName 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="flex items-start justify-between gap-3 px-6 pt-6"
+  >
+    <div
+      class="flex min-w-0 items-center gap-3"
+    >
+      <div
+        class="icon"
+        style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjI2IDc1JSA0NCUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCg3MCA1NyUgNTYlKSIgZD0iTTAsMGgxdjFoLTF6TTcsMGgxdjFoLTF6TTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTAsMmgxdjFoLTF6TTcsMmgxdjFoLTF6TTEsMmgxdjFoLTF6TTYsMmgxdjFoLTF6TTIsMmgxdjFoLTF6TTUsMmgxdjFoLTF6TTMsMmgxdjFoLTF6TTQsMmgxdjFoLTF6TTEsM2gxdjFoLTF6TTYsM2gxdjFoLTF6TTAsNGgxdjFoLTF6TTcsNGgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTEsNmgxdjFoLTF6TTYsNmgxdjFoLTF6TTIsNmgxdjFoLTF6TTUsNmgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDMzMSA4NiUgNDglKSIgZD0iTTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6Ii8+PC9zdmc+); width: 28px; height: 28px;"
+      />
+      <div
+        class="min-w-0 leading-tight"
+      >
+        <span
+          class="m-0 text-sm font-semibold truncate leading-tight"
+          data-slot="typography"
+          data-variant="paragraph-small-bold"
+          title="0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6"
+        >
+          0xA77D...98b6
+        </span>
+        <div
+          class="flex items-center gap-1 leading-none text-muted-foreground"
+        >
+          <span
+            class="m-0 font-normal text-[10px] text-muted-foreground"
+            data-slot="typography"
+            data-variant="paragraph-mini"
+          >
+            0xA77D...98b6
+          </span>
+          <span
+            aria-label="Copy to clipboard"
+            class=""
+            data-mui-internal-clone-element="true"
+            style="cursor: pointer;"
+          >
+            <button
+              aria-label="Copy to clipboard"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall !p-0.5 text-muted-foreground [&_svg]:!size-3 mui-style-uneijd-MuiButtonBase-root-MuiIconButton-root"
+              tabindex="0"
+              type="button"
+            >
+              <mock-icon
+                aria-hidden=""
+                class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-gvpe62-MuiSvgIcon-root"
+                data-testid="copy-btn-icon"
+                focusable="false"
+              />
+            </button>
+          </span>
+        </div>
+      </div>
+    </div>
+    <button
+      aria-label="Close security report"
+      class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-card text-foreground shadow-sm transition-colors hover:bg-muted"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-x size-4"
+        fill="none"
+        height="24"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M18 6 6 18"
+        />
+        <path
+          d="m6 6 12 12"
+        />
+      </svg>
+    </button>
+  </div>
+</div>
+`;

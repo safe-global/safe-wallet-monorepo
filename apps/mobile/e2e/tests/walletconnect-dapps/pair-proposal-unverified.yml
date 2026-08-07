@@ -1,0 +1,36 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# Unverified: synthesise a session_proposal with UNKNOWN verify status → open the
+# permissions/details panel via the domain pill → assert the red banner copy and
+# the "Only continue if you trust the source." warning line.
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eWcDappsBase'
+- assertVisible:
+    id: 'home-tab'
+
+- tapOn:
+    id: 'e2eWcSynthProposalUnverified'
+- extendedWaitUntil:
+    visible:
+      id: 'wc-proposal-connect'
+    timeout: 10000
+
+# Open the permissions panel via the domain pill (the URL info affordance).
+- tapOn:
+    id: 'wc-proposal-domain'
+
+# The (red) verification banner renders for the unverified variant. These copy
+# lines are individual Text nodes in the panel (not a merged label), so assert
+# them directly to pin the unverified variant — not just that a banner exists.
+- extendedWaitUntil:
+    visible:
+      id: 'wc-permissions-banner'
+    timeout: 5000
+- assertVisible: 'This domain could not be verified.'
+- assertVisible: 'Only continue if you trust the source.'

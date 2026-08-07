@@ -130,12 +130,13 @@ export type EnhancedTableProps = {
   headCells: EnhancedHeadCell[]
   mobileVariant?: boolean
   compact?: boolean
+  fixedLayout?: boolean
   footer?: ReactNode
 }
 
 const pageSizes = [10, 25, 100]
 
-function EnhancedTable({ rows, headCells, mobileVariant, compact, footer }: EnhancedTableProps) {
+function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, footer }: EnhancedTableProps) {
   const [order, setOrder] = useState<'asc' | 'desc'>('asc')
   const [orderBy, setOrderBy] = useState<string>('')
   const [page, setPage] = useState<number>(0)
@@ -174,7 +175,11 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, footer }: Enha
       >
         <Table
           aria-labelledby="tableTitle"
-          className={classNames({ [css.mobileColumn]: mobileVariant, [css.compactTable]: compact })}
+          className={classNames({
+            [css.mobileColumn]: mobileVariant,
+            [css.compactTable]: compact,
+            [css.fixedLayout]: fixedLayout,
+          })}
         >
           <EnhancedTableHead headCells={headCells} order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
           <TableBody className={css.tableBody}>

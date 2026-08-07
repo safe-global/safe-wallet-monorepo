@@ -34,7 +34,7 @@ export function LedgerImportError() {
               <LargeHeaderTitle textAlign="center">Ledger address couldn't be imported</LargeHeaderTitle>
 
               <Text textAlign="center" fontSize="$4">
-                This Ledger address does not belong to any signer of this Safe Account. Double-check that you are using
+                This Ledger address does not belong to any signer of this Safe account. Double-check that you are using
                 an address that belongs to a Safe signer and try to import again.
               </Text>
             </View>

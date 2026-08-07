@@ -4,8 +4,6 @@ import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import type { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 import { HYPERNATIVE_EVENTS, HYPERNATIVE_CATEGORY } from '@/services/analytics/events/hypernative'
 
-export const hnBannerID = 'hnBanner'
-
 export interface HnBannerProps extends WithHnSignupFlowProps {
   onDismiss?: () => void
   label?: HYPERNATIVE_SOURCE

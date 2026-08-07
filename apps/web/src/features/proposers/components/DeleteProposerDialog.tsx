@@ -6,8 +6,8 @@ import {
   signProposerTypedData,
   signProposerTypedDataForSafe,
 } from '@/features/proposers/utils/utils'
-import { useParentSafeThreshold } from '@/features/proposers/hooks/useParentSafeThreshold'
-import { buildDelegationOrigin, createDelegationMessage } from '@/features/proposers/services/delegationMessages'
+import { useParentSafeThreshold } from '../hooks/useParentSafeThreshold'
+import { buildDelegationOrigin, createDelegationMessage } from '../services/delegationMessages'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import useWallet from '@/hooks/wallets/useWallet'
 import DeleteIcon from '@/public/images/common/delete.svg'

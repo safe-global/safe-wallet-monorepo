@@ -5,9 +5,9 @@ import {
   SafeCreationEvent,
   replayCounterfactualSafeDeployment,
   activateReplayedSafe,
+  persistCounterfactualSafe,
 } from '@/features/counterfactual/services'
-import { PayNowPayLater } from '@/features/counterfactual/components'
-import { CF_TX_GROUP_KEY } from '@/features/counterfactual'
+import { CF_TX_GROUP_KEY, PayNowPayLater } from '@/features/counterfactual'
 import { NetworkLogosList, predictAddressBasedOnReplayData } from '@/features/multichain'
 
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
@@ -21,6 +21,7 @@ import { getAvailableSaltNonce } from '@/components/new-safe/create/logic/utils'
 import {
   buildTransactionOptions,
   getDeploymentType,
+  getEffectivePayMethod,
   getNetworkLabel,
   getPaymentMethodLabel,
   getThresholdLabel,
@@ -63,6 +64,10 @@ import NetworkWarning from '../../NetworkWarning'
 import { useAllSafes } from '@/hooks/safes'
 import uniq from 'lodash/uniq'
 import { selectRpc } from '@/store/settingsSlice'
+import { showNotification } from '@/store/notificationsSlice'
+import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
+import { useIsAdmin, useSpaceSafeCount } from '@/features/spaces'
+import { normalizeSpaceId } from '@/utils/spaces'
 import { AppRoutes } from '@/config/routes'
 import type { CreateSafeResult, ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
@@ -187,6 +192,10 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   const [isCreating, setIsCreating] = useState<boolean>(false)
   const [submitError, setSubmitError] = useState<string>()
   const isCounterfactualEnabled = useHasFeature(FEATURES.COUNTERFACTUAL)
+  const isUserAuthenticated = useAppSelector(isAuthenticated)
+  const spaceId = useAppSelector(lastUsedSpace)
+  const isAdminOfActiveSpace = useIsAdmin(normalizeSpaceId(spaceId) ?? undefined)
+  const spaceSafeCount = useSpaceSafeCount(spaceId)
   const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
   const { showGasFeeEstimation, showInsufficientFundsWarning, showFeeInConfirmationText } = chain
     ? getNativeTokenDisplay(chain)
@@ -241,6 +250,14 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
   const customRPCs = useAppSelector(selectRpc)
 
+  // Derive effective pay method synchronously to avoid one-render gap.
+  const effectivePayMethod = getEffectivePayMethod(
+    isMultiChainDeployment,
+    isUserAuthenticated,
+    payMethod,
+    isCounterfactualEnabled,
+  )
+
   const handleBack = () => {
     onBack(data)
   }
@@ -287,20 +304,40 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
       gtmSetChainId(chain.chainId)
 
-      if (isCounterfactualEnabled && payMethod === PayMethod.PayLater) {
+      if (isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater) {
+        if (successfulChains.length === 0) return
+
         await router?.push({
           pathname: AppRoutes.home,
-          query: { safe: `${data.networks[0].shortName}:${safeAddress}` },
+          query: { safe: `${successfulChains[0].chain.shortName}:${safeAddress}` },
         })
-        safeCreationDispatch(SafeCreationEvent.AWAITING_EXECUTION, {
-          groupKey: CF_TX_GROUP_KEY,
-          safeAddress,
-          networks: data.networks,
-        })
+
+        // Only counterfactual chains are awaiting activation.
+        const awaitingChains = successfulChains.filter((r) => !r.alreadyDeployed)
+        if (awaitingChains.length > 0) {
+          safeCreationDispatch(SafeCreationEvent.AWAITING_EXECUTION, {
+            groupKey: CF_TX_GROUP_KEY,
+            safeAddress,
+            networks: awaitingChains.map((r) => r.chain),
+          })
+        }
+
+        // Acknowledge chains where the Safe was already deployed — otherwise the
+        // user lands on the account with no explanation of why nothing activated.
+        const deployedChains = successfulChains.filter((r) => r.alreadyDeployed)
+        if (deployedChains.length > 0) {
+          dispatch(
+            showNotification({
+              variant: 'info',
+              groupKey: 'cf-safe-already-deployed',
+              message: `This account is already deployed on ${deployedChains.map((r) => r.chain.chainName).join(', ')}`,
+            }),
+          )
+        }
       }
     } catch (err) {
       console.error(err)
-      setSubmitError('Error creating the Safe Account. Please try again later.')
+      setSubmitError('Error creating the Safe account. Please try again later.')
     } finally {
       setIsCreating(false)
     }
@@ -311,25 +348,60 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
     gtmSetChainId(chain.chainId)
 
-    trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE, {
-      [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
-      [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
-      [MixpanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
-      [MixpanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
-      [MixpanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
-      [MixpanelEventParams.DEPLOYMENT_TYPE]: getDeploymentType(isCounterfactualEnabled, payMethod),
-      [MixpanelEventParams.PAYMENT_METHOD]: getPaymentMethodLabel(isCounterfactualEnabled, payMethod, willRelay),
-    })
+    const trackCreatedSafe = () =>
+      trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE, {
+        [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+        [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
+        [MixpanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
+        [MixpanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
+        [MixpanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
+        [MixpanelEventParams.DEPLOYMENT_TYPE]: getDeploymentType(isCounterfactualEnabled, effectivePayMethod),
+        [MixpanelEventParams.PAYMENT_METHOD]: getPaymentMethodLabel(
+          isCounterfactualEnabled,
+          effectivePayMethod,
+          willRelay,
+        ),
+      })
 
     try {
-      if (isCounterfactualEnabled && payMethod === PayMethod.PayLater) {
+      if (isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater) {
         gtmSetSafeAddress(safeAddress)
 
-        trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
-        replayCounterfactualSafeDeployment(chain.chainId, safeAddress, props, data.name, dispatch, payMethod)
+        // Single code path for backend persist + Redux add — shared with the
+        // "Add another network" flow to keep the write path consistent.
+        const provider = createWeb3ReadOnly(chain, customRpc[chain.chainId])
+        const result = await persistCounterfactualSafe({
+          chainId: chain.chainId,
+          safeAddress,
+          props,
+          name: data.name,
+          payMethod: effectivePayMethod,
+          spaceId,
+          isUserAuthenticated,
+          isAdminOfActiveSpace,
+          spaceSafeCount,
+          isMultiChainCreation: isMultiChainDeployment,
+          provider,
+          dispatch,
+        })
+        if (!result.ok) {
+          // Surface the backend's message (e.g. conflict guidance) instead of the
+          // generic wallet-error fallback in the catch below.
+          setSubmitError(result.error.message)
+          return { chain, safeAddress, success: false }
+        }
 
-        return { chain, safeAddress, success: true }
+        const alreadyDeployed = result.skipped === 'already-deployed'
+        // Don't report a creation for Safes that were already deployed.
+        if (!alreadyDeployed) {
+          trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
+          trackCreatedSafe()
+        }
+
+        return { chain, safeAddress, success: true, alreadyDeployed }
       }
+
+      trackCreatedSafe()
 
       const options: TransactionOptions = buildTransactionOptions(
         !!isEIP1559,
@@ -340,7 +412,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
       const onSubmitCallback = async (taskId?: string, txHash?: string) => {
         // Create a counterfactual Safe
-        replayCounterfactualSafeDeployment(chain.chainId, safeAddress, props, data.name, dispatch, payMethod)
+        replayCounterfactualSafeDeployment(chain.chainId, safeAddress, props, data.name, dispatch, effectivePayMethod)
 
         if (taskId) {
           safeCreationDispatch(SafeCreationEvent.RELAYING, { groupKey: CF_TX_GROUP_KEY, taskId, safeAddress })
@@ -380,7 +452,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
       const error = asError(_err)
       const submitError = isWalletRejection(error)
         ? 'User rejected signing.'
-        : 'Error creating the Safe Account. Please try again later.'
+        : 'Error creating the Safe account. Please try again later.'
       setSubmitError(submitError)
 
       if (isWalletRejection(error)) {
@@ -395,13 +467,18 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
   const showNetworkWarning = shouldShowNetworkWarning(
     isWrongChain,
-    payMethod,
+    effectivePayMethod,
     willRelay,
     isMultiChainDeployment,
     isCounterfactualEnabled,
   )
 
-  const isDisabled = showNetworkWarning || isCreating
+  // Pay later persists counterfactual data to the backend, so it requires an
+  // authenticated session. This only blocks multichain (where Pay now is
+  // disabled and Pay later is forced); single-chain Pay later falls back to
+  // Pay now when not signed in, so effectivePayMethod is never PayLater there.
+  const requiresSignIn = effectivePayMethod === PayMethod.PayLater && !isUserAuthenticated
+  const isDisabled = showNetworkWarning || isCreating || requiresSignIn
 
   return (
     <>
@@ -414,13 +491,14 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           <Box data-testid="pay-now-later-message-box" className={layoutCss.row}>
             <PayNowPayLater
               totalFee={totalFee}
+              willRelay={willRelay}
               isMultiChain={isMultiChainDeployment}
-              canRelay={canRelay}
-              payMethod={payMethod}
+              payMethod={effectivePayMethod}
               setPayMethod={setPayMethod}
+              isUserAuthenticated={isUserAuthenticated}
             />
 
-            {canRelay && payMethod === PayMethod.PayNow && (
+            {canRelay && effectivePayMethod === PayMethod.PayNow && (
               <>
                 <Grid
                   container
@@ -444,11 +522,11 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
             {showNetworkWarning && (
               <Box sx={{ '&:not(:empty)': { mt: 3 } }}>
-                <NetworkWarning action="create a Safe Account" />
+                <NetworkWarning action="create a Safe account" />
               </Box>
             )}
 
-            {payMethod === PayMethod.PayNow && (
+            {effectivePayMethod === PayMethod.PayNow && (
               <Grid item>
                 <Typography
                   component="div"
@@ -522,7 +600,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
               </Grid>
             )}
 
-            {showNetworkWarning && <NetworkWarning action="create a Safe Account" />}
+            {showNetworkWarning && <NetworkWarning action="create a Safe account" />}
 
             {!walletCanPay && !willRelay && showInsufficientFundsWarning && (
               <ErrorMessage>

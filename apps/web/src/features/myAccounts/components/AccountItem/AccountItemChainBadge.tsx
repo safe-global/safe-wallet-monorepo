@@ -1,8 +1,10 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { NetworkLogosList } from '@/features/multichain'
+import { NetworkLogosTooltip } from '@/features/multichain'
 import type { SafeItem } from '@/hooks/safes'
 import { cn } from '@/utils/cn'
+
+/** Logo size inside the badge — matches the 22px logos of the safe-selector dropdown's SafeRowStats. */
+const STACKED_LOGO_SIZE = 22
 
 export interface AccountItemChainBadgeProps {
   /** Single chain mode */
@@ -18,21 +20,14 @@ function AccountItemChainBadge({ chainId, safes, className, imageSize = 24 }: Ac
   if (safes && safes.length > 0) {
     return (
       <div className={cn('flex shrink-0 justify-end', className)}>
-        <Tooltip>
-          <TooltipTrigger render={<span />} tabIndex={0} className="flex items-center">
-            <NetworkLogosList networks={safes} showHasMore />
-          </TooltipTrigger>
-          <TooltipContent>
-            <div data-testid="multichain-tooltip">
-              <p className="text-sm">Multichain account on:</p>
-              {safes.map((safeItem) => (
-                <div key={safeItem.chainId} className="py-1">
-                  <ChainIndicator imageSize={imageSize} chainId={safeItem.chainId} />
-                </div>
-              ))}
-            </div>
-          </TooltipContent>
-        </Tooltip>
+        <NetworkLogosTooltip
+          networks={safes}
+          maxVisible={3}
+          imageSize={STACKED_LOGO_SIZE}
+          contentImageSize={imageSize}
+          triggerRender={<span tabIndex={0} className="flex items-center" />}
+          contentTestId="multichain-tooltip"
+        />
       </div>
     )
   }
@@ -41,7 +36,7 @@ function AccountItemChainBadge({ chainId, safes, className, imageSize = 24 }: Ac
   if (chainId) {
     return (
       <div className="shrink-0">
-        <ChainIndicator chainId={chainId} responsive onlyLogo className="justify-end" />
+        <ChainIndicator chainId={chainId} responsive onlyLogo imageSize={STACKED_LOGO_SIZE} className="justify-end" />
       </div>
     )
   }

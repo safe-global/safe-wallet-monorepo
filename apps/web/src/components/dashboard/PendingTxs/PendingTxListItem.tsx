@@ -34,12 +34,12 @@ const PendingTx = ({ transaction }: PendingTxType): ReactElement => {
   return (
     <NextLink data-testid="tx-pending-item" href={url} passHref>
       <Box className={css.container}>
-        <Stack direction="row" gap={1.5} alignItems="center">
+        <Stack direction="row" gap={1.5} alignItems="center" sx={{ minWidth: 0 }}>
           <Box className={css.iconWrapper}>
             <TxTypeIcon tx={transaction} />
           </Box>
-          <Box>
-            <Typography className={css.txDescription}>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography component="div" className={css.txDescription}>
               <TxTypeText tx={transaction} />
               <TxInfo info={transaction.txInfo} />
             </Typography>

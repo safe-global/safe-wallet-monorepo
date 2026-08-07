@@ -2,6 +2,9 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import SpacesList from '../index'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 
 const mockUseAppSelector = jest.fn()
 const mockUseSpacesGetV1Query = jest.fn()
@@ -28,6 +31,10 @@ jest.mock('@/components/welcome/WelcomeLogin/hooks/useSignInRedirect', () => ({
   useSignInRedirect: (...args: unknown[]) => mockUseSignInRedirect(...args),
 }))
 
+jest.mock('@/hooks/useDarkMode', () => ({
+  useDarkMode: jest.fn(() => false),
+}))
+
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: () => ({ AccountsNavigation: () => <nav data-testid="accounts-nav" /> }),
   createFeatureHandle: () => ({}),
@@ -42,8 +49,9 @@ jest.mock('@/features/spaces', () => ({
 }))
 
 jest.mock('@/features/spaces/utils', () => ({
-  filterSpacesByStatus: (_user: unknown, spaces: unknown[], status: string) =>
-    status === 'INVITED' ? [] : ((spaces as Array<{ name: string; status?: string }>) ?? []),
+  filterSpacesByStatus: (_user: unknown, spaces: Array<{ memberStatus?: string }>, status: string) =>
+    (spaces ?? []).filter((space) => (space.memberStatus ?? 'ACTIVE') === status),
+  getInvitedByName: () => undefined,
 }))
 
 jest.mock('../../SignInOptions', () => ({
@@ -51,9 +59,9 @@ jest.mock('../../SignInOptions', () => ({
   default: () => <div data-testid="sign-in-options" />,
 }))
 
-jest.mock('../../SpaceCard', () => ({
+jest.mock('../SpaceRow', () => ({
   __esModule: true,
-  default: () => <div data-testid="space-card" />,
+  default: () => <div data-testid="space-row" />,
 }))
 
 jest.mock('../../InviteBanner', () => ({
@@ -68,7 +76,14 @@ jest.mock('../../SpaceInfoModal', () => ({
 
 jest.mock('next/link', () => ({
   __esModule: true,
-  default: ({ children, href }: { children: ReactNode; href: string }) => <a href={href}>{children}</a>,
+  // Spread the rest of the props: Button's `render` prop forwards data-testid,
+  // className and onClick onto the anchor — dropping them hides the button
+  // from queries and swallows click tracking.
+  default: ({ children, href, ...props }: { children: ReactNode; href: string }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
 }))
 
 jest.mock('@/services/analytics', () => ({
@@ -89,13 +104,36 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     render(<SpacesList />)
 
-    // The signed-out card with Sign in heading + SignInOptions must render…
-    expect(screen.getByRole('heading', { name: /sign in/i })).toBeInTheDocument()
+    // The signed-out card with the "Sign in to your workspace" heading +
+    // SignInOptions must render…
+    expect(screen.getByRole('heading', { name: /sign in to your workspace/i })).toBeInTheDocument()
     expect(screen.getByTestId('sign-in-options')).toBeInTheDocument()
 
-    // …and the Create space CTA / no-spaces empty state must NOT.
-    expect(screen.queryByText(/^create space$/i)).not.toBeInTheDocument()
-    expect(screen.queryByText(/no spaces found/i)).not.toBeInTheDocument()
+    // …and the Create workspace CTA / no-workspaces empty state must NOT.
+    expect(screen.queryByText(/^create workspace$/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/create your first workspace/i)).not.toBeInTheDocument()
+  })
+
+  // /welcome/spaces keeps its Topbar + tabbed layout. The Accounts/Workspaces
+  // tabs must render regardless of auth state, with the sign-in card offered
+  // below the tabs.
+  it('renders the AccountsNavigation chrome when signed out', () => {
+    mockUseAppSelector.mockReturnValue(false)
+
+    render(<SpacesList />)
+
+    expect(screen.getByTestId('accounts-nav')).toBeInTheDocument()
+    expect(screen.getByTestId('sign-in-options')).toBeInTheDocument()
+  })
+
+  it('renders the AccountsNavigation chrome when the user is signed in', () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(screen.getByTestId('accounts-nav')).toBeInTheDocument()
   })
 
   it('renders the No-spaces empty state with Create space CTA when the user is authenticated and has no spaces', () => {
@@ -105,24 +143,180 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     render(<SpacesList />)
 
-    expect(screen.getByText(/no spaces found/i)).toBeInTheDocument()
-    // The "Create space" CTA link is rendered (Button + NextLink composition).
-    expect(screen.getByRole('link', { name: /create space/i })).toBeInTheDocument()
+    expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
+    const cta = screen.getByRole('link', { name: /create workspace/i })
+    expect(cta).toHaveAttribute('href')
 
     // Sign in card must NOT render in this branch.
     expect(screen.queryByTestId('sign-in-options')).not.toBeInTheDocument()
   })
 
+  // Regression: on re-login after logout the spaces RTK Query cache entry
+  // already exists (the post-logout page load fired a request with stale
+  // persisted auth that errored, then invalidateTags marked it stale). When
+  // skip flips to false on re-login, both isFetching and isUninitialized are
+  // briefly false while currentData is still undefined — the previous fix
+  // relied solely on `isFetching || isUninitialized`, which missed this case
+  // and bounced existing users into /welcome/create-space. SpacesList must
+  // pass isSpacesLoading=true whenever currentData and error are both absent.
+  it('passes isSpacesLoading=true to useSignInRedirect when spaces data and error are both undefined', () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: undefined,
+      isFetching: false,
+      isUninitialized: false,
+      error: undefined,
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(mockUseSignInRedirect).toHaveBeenCalledWith(expect.objectContaining({ isSpacesLoading: true }))
+  })
+
+  it('passes the space uuid as singleSpaceId to useSignInRedirect when the user has exactly one space', () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: [{ uuid: 'uuid-1', name: 'Solo Space' }],
+      isFetching: false,
+      error: undefined,
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(mockUseSignInRedirect).toHaveBeenCalledWith(expect.objectContaining({ singleSpaceId: 'uuid-1' }))
+  })
+
+  // A pending invite must not auto-redirect the user into the space — they have
+  // no access until they accept, so they stay on the list with the invite banner.
+  it('passes singleSpaceId=null and shows the invite banner when the only space is a pending invite', () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: [{ uuid: 'uuid-1', name: 'Pending Space', memberStatus: 'INVITED' }],
+      isFetching: false,
+      error: undefined,
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(mockUseSignInRedirect).toHaveBeenCalledWith(expect.objectContaining({ singleSpaceId: null }))
+    expect(screen.getByTestId('invite-banner')).toBeInTheDocument()
+    expect(screen.queryByTestId('space-row')).not.toBeInTheDocument()
+  })
+
+  it('passes singleSpaceId with inviteAmount>0 so useSignInRedirect skips the auto-redirect, rendering both the active space row and the invite banner', () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: [
+        { uuid: 'uuid-active', name: 'Active Space', memberStatus: 'ACTIVE' },
+        { uuid: 'uuid-invite', name: 'Pending Space', memberStatus: 'INVITED' },
+      ],
+      isFetching: false,
+      error: undefined,
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(mockUseSignInRedirect).toHaveBeenCalledWith(
+      expect.objectContaining({ singleSpaceId: 'uuid-active', inviteAmount: 1 }),
+    )
+    expect(screen.getByTestId('space-row')).toBeInTheDocument()
+    expect(screen.getByTestId('invite-banner')).toBeInTheDocument()
+  })
+
+  it('passes singleSpaceId=null to useSignInRedirect when the user has multiple spaces', () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: [
+        { uuid: 'uuid-1', name: 'Space 1' },
+        { uuid: 'uuid-2', name: 'Space 2' },
+      ],
+      isFetching: false,
+      error: undefined,
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(mockUseSignInRedirect).toHaveBeenCalledWith(expect.objectContaining({ singleSpaceId: null }))
+  })
+
+  // WA-2486: the sign-in card title (logo + heading) is centered, not left-aligned.
+  it('centers the "Sign in to your workspace" heading', () => {
+    mockUseAppSelector.mockReturnValue(false)
+
+    render(<SpacesList />)
+
+    const heading = screen.getByRole('heading', { name: /sign in to your workspace/i })
+    expect(heading.className).toContain('text-center')
+  })
+
+  // WA-2486: the "By continuing…" Terms/Privacy text is moved out of the card
+  // (below it) to reduce text overload inside the box.
+  it('renders the "By continuing" text outside the sign-in card', () => {
+    mockUseAppSelector.mockReturnValue(false)
+
+    const { container } = render(<SpacesList />)
+
+    const card = container.querySelector('.bg-card')
+    const termsLink = screen.getByRole('link', { name: /^terms$/i })
+    expect(card).toBeInTheDocument()
+    expect(card).not.toContainElement(termsLink)
+  })
+
+  // The Create button sits right-aligned above the workspaces list when the
+  // user is signed in and has spaces.
+  it('renders the Create workspace button in the tabbed layout when signed in with active spaces', async () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: [{ uuid: 'uuid-1', name: 'Space 1' }],
+      isFetching: false,
+      error: undefined,
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(screen.getByTestId('accounts-nav')).toBeInTheDocument()
+    const button = screen.getByTestId('create-space-button')
+    expect(button).toBeInTheDocument()
+
+    await userEvent.click(button)
+    expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
+      entry_point: WorkspaceCreateEntryPoint.WELCOME,
+    })
+  })
+
+  it('does not render the Create workspace button in the header when the user has no active spaces', () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    // The header button is absent; only the empty-state CTA inside the
+    // No-workspaces card renders (it lives outside the spacesHeader).
+    expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
+    expect(screen.getAllByTestId('create-space-button')).toHaveLength(1)
+  })
+
   it('disables the Create space button and shows a tooltip when the user has reached the 10-space limit', async () => {
     mockUseAppSelector.mockReturnValue(true)
-    const tenSpaces = Array.from({ length: 10 }, (_, i) => ({ id: i + 1, name: `Space ${i + 1}` }))
+    const tenSpaces = Array.from({ length: 10 }, (_, i) => ({
+      id: i + 1,
+      uuid: `00000000-0000-0000-0000-0000000000${String(i + 1).padStart(2, '0')}`,
+      name: `Space ${i + 1}`,
+    }))
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: tenSpaces, isFetching: false, error: undefined })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
 
     render(<SpacesList />)
 
     const button = screen.getByTestId('create-space-button')
-    expect(button).toHaveAttribute('disabled')
+    expect(button).toHaveAttribute('aria-disabled', 'true')
 
     await userEvent.hover(button)
     expect(await screen.findByText(/limit of 10 workspaces reached/i)).toBeInTheDocument()

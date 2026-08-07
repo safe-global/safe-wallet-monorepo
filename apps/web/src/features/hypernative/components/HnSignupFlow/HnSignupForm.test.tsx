@@ -1,8 +1,8 @@
 import { render, screen } from '@/tests/test-utils'
 import HnSignupForm from './HnSignupForm'
-import * as HubSpotFormModule from '@/features/hypernative/components/HubSpotForm/HubSpotForm'
+import * as HubSpotFormModule from '../HubSpotForm/HubSpotForm'
 
-jest.mock('@/features/hypernative/components/HubSpotForm/HubSpotForm', () => ({
+jest.mock('../HubSpotForm/HubSpotForm', () => ({
   __esModule: true,
   default: jest.fn(() => <div data-testid="hubspot-form-mock">HubSpot Form</div>),
 }))

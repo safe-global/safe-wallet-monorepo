@@ -1,0 +1,140 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./InitialsAvatar.stories AllSizes 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiStack-root mui-style-1sos3zc-MuiStack-root"
+  >
+    <div
+      class="initialsAvatar MuiBox-root mui-style-1kpfxt2"
+    >
+      S
+    </div>
+    <div
+      class="initialsAvatar MuiBox-root mui-style-19jkslu"
+    >
+      S
+    </div>
+    <div
+      class="initialsAvatar MuiBox-root mui-style-1k2z1fr"
+    >
+      S
+    </div>
+    <div
+      class="initialsAvatar MuiBox-root mui-style-yswk6x"
+    >
+      S
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./InitialsAvatar.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="initialsAvatar MuiBox-root mui-style-1i5fx43"
+  >
+    S
+  </div>
+</div>
+`;
+
+exports[`./InitialsAvatar.stories DifferentNames 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiStack-root mui-style-1sos3zc-MuiStack-root"
+  >
+    <div
+      class="initialsAvatar MuiBox-root mui-style-1pllxyi"
+    >
+      A
+    </div>
+    <div
+      class="initialsAvatar MuiBox-root mui-style-4k3oai"
+    >
+      B
+    </div>
+    <div
+      class="initialsAvatar MuiBox-root mui-style-6wba2u"
+    >
+      C
+    </div>
+    <div
+      class="initialsAvatar MuiBox-root mui-style-6355sa"
+    >
+      D
+    </div>
+    <div
+      class="initialsAvatar MuiBox-root mui-style-xuvxgc"
+    >
+      E
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./InitialsAvatar.stories Large 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="initialsAvatar MuiBox-root mui-style-1i5fx43"
+  >
+    S
+  </div>
+</div>
+`;
+
+exports[`./InitialsAvatar.stories Medium 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="initialsAvatar MuiBox-root mui-style-1ea0l7d"
+  >
+    S
+  </div>
+</div>
+`;
+
+exports[`./InitialsAvatar.stories Rounded 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="initialsAvatar MuiBox-root mui-style-lr13v5"
+  >
+    S
+  </div>
+</div>
+`;
+
+exports[`./InitialsAvatar.stories Small 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="initialsAvatar MuiBox-root mui-style-rxyyoq"
+  >
+    S
+  </div>
+</div>
+`;
+
+exports[`./InitialsAvatar.stories XSmall 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="initialsAvatar MuiBox-root mui-style-1cvuzms"
+  >
+    S
+  </div>
+</div>
+`;

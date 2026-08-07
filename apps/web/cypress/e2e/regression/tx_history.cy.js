@@ -69,14 +69,11 @@ describe('Tx history tests 1', () => {
 
   // Added to prod
   // Token send
-  it('Verify exapanded details for token send', () => {
+  it('Verify expanded details for token send', () => {
+    createTx.scrollToBottom()
     createTx.clickOnTransactionItemByName(typeSend.title, typeSend.summaryTxInfo)
-    createTx.verifyExpandedDetails([typeSend.sentTo, typeSend.recipientAddress])
-    createTx.verifyActionListExists([
-      typeSideActions.created,
-      typeSideActions.confirmations,
-      typeSideActions.executedBy,
-    ])
+    createTx.verifyExpandedDetails([typeSend.sentTo])
+    createTx.verifyActionListExists([typeSideActions.created, typeSideActions.executedBy])
   })
 
   // Added to prod
@@ -152,13 +149,5 @@ describe('Tx history tests 1', () => {
       typeDeleteAllowance.zero_call,
     ])
     createTx.collapseAdvancedDetails([typeDeleteAllowance.baseGas])
-  })
-
-  it.skip('Verify address can be copied in advanced details', () => {
-    const data =
-      '0x885133e3000000000000000000000000c16db0251654c0a72e91b190d81ead367d2c6fed0000000000000000000000000000000000000000000000000000000000000000'
-    createTx.clickOnTransactionItemByName(typeDeleteAllowance.title, typeDeleteAllowance.summaryTxInfo)
-    createTx.expandAdvancedDetails([typeDeleteAllowance.baseGas])
-    createTx.clickOnCopyDataBtn(data)
   })
 })

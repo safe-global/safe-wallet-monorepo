@@ -98,17 +98,37 @@ export const isTxSimulationEnabled = (chain?: Pick<Chain, 'features'>): boolean 
   return isSimulationEnvSet && hasFeature(chain, FEATURES.TX_SIMULATION)
 }
 
-export const isSimulationError = (status: SimulationStatus, nestedTx: NestedTxStatus, isNested: boolean) => {
-  const mainIsSuccess = status.isSuccess && !status.isError
-  const nestedIsSuccess = isNested ? nestedTx.status.isSuccess && !nestedTx.status.isError : true
-  const isSimulationSuccess = mainIsSuccess && nestedIsSuccess
+export type SimulationOutcome = {
+  mainIsSuccess: boolean
+  nestedIsSuccess: boolean
+  isSimulationSuccess: boolean
+  isSimulationFinished: boolean
+  isLoading: boolean
+}
 
-  const mainIsFinished = status.isFinished
-  const nestedIsFinished = isNested ? nestedTx.status.isFinished : true
-  const isSimulationFinished = mainIsFinished && nestedIsFinished
-
+export const getSimulationOutcome = (
+  status: SimulationStatus,
+  nestedTx: NestedTxStatus,
+  isNested: boolean,
+): SimulationOutcome => {
+  const mainIsSuccess = status.isSuccess && !status.isError && !status.isCallTraceError
+  const nestedIsSuccess = isNested
+    ? nestedTx.status.isSuccess && !nestedTx.status.isError && !nestedTx.status.isCallTraceError
+    : true
+  const isSimulationFinished = status.isFinished && (!isNested || nestedTx.status.isFinished)
   const isLoading = status.isLoading || (isNested && nestedTx.status.isLoading)
 
+  return {
+    mainIsSuccess,
+    nestedIsSuccess,
+    isSimulationSuccess: mainIsSuccess && nestedIsSuccess,
+    isSimulationFinished,
+    isLoading,
+  }
+}
+
+export const isSimulationError = (status: SimulationStatus, nestedTx: NestedTxStatus, isNested: boolean) => {
+  const { isSimulationSuccess, isSimulationFinished, isLoading } = getSimulationOutcome(status, nestedTx, isNested)
   return isSimulationFinished && !isSimulationSuccess && !isLoading
 }
 

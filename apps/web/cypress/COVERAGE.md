@@ -2,7 +2,7 @@
 
 > **Maintenance:** This file is manually maintained. Update it when adding, removing, or changing visual test files in `e2e/visual/`. Cross-reference with `.storybook/COVERAGE.md` for component-level gaps.
 
-**65 tests** across **33 test files** — each test captures an Argos screenshot automatically.
+**65 tests** across **32 test files** — each test captures an Argos screenshot automatically.
 
 Screenshots are captured via a global `afterEach` hook in `cypress/support/e2e.js`.
 
@@ -47,13 +47,12 @@ Screenshots are captured via a global `afterEach` hook in `cypress/support/e2e.j
 | `/imprint`                        | legal_pages.cy.js            | 1     | No               | No      |
 | `/cookie`                         | legal_pages.cy.js            | 1     | No               | No      |
 | `/safe-labs-terms`                | legal_pages.cy.js            | 1     | No               | No      |
-| `/welcome/spaces`                 | spaces.cy.js                 | 1     | Yes (auth + API) | No      |
+| `/welcome/spaces`                 | spaces.cy.js                 | 3     | Yes (auth + API) | No      |
 | `/spaces` (dashboard)             | spaces.cy.js                 | 1     | Yes (auth + API) | No      |
 | `/spaces/settings`                | spaces.cy.js                 | 1     | Yes (auth + API) | No      |
 | `/spaces/members`                 | spaces.cy.js                 | 1     | Yes (auth + API) | No      |
 | `/spaces/safe-accounts`           | spaces.cy.js                 | 1     | Yes (auth + API) | No      |
 | `/spaces/address-book`            | spaces.cy.js                 | 1     | Yes (auth + API) | No      |
-| `/user-settings`                  | user_settings.cy.js          | 1     | Yes (auth + API) | No      |
 | Send tx form (modal)              | create_tx_flow.cy.js         | 4     | No               | Yes     |
 | Add owner form (modal)            | owner_management.cy.js       | 2     | No               | Yes     |
 | Replace owner dialog (modal)      | owner_management.cy.js       | 1     | No               | Yes     |

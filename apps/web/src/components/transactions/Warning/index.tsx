@@ -52,7 +52,7 @@ export const DelegateCallWarning = ({
       datatestid="delegate-call-warning"
       title={
         <>
-          This transaction calls a smart contract that will be able to modify your Safe Account.
+          This transaction calls a smart contract that will be able to modify your Safe account.
           {!trustedDelegateCall && (
             <>
               <br />

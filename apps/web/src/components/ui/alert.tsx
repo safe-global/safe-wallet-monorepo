@@ -24,7 +24,7 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - Alert: `variant` ('default' | 'destructive')
+ * - Alert: `variant` ('default' | 'destructive' | 'warning' | 'success')
  * - AlertAction: for action buttons (positioned top-right)
  */
 
@@ -38,6 +38,8 @@ const alertVariants = cva(
           'text-destructive bg-card *:data-[slot=alert-description]:text-destructive/90 *:[svg]:text-current',
         warning:
           'bg-yellow-50 text-yellow-800 border-transparent *:data-[slot=alert-description]:text-yellow-800 *:[svg]:text-current',
+        success:
+          'bg-success-subtle text-success-strong border-success-muted *:data-[slot=alert-description]:text-success-strong *:[svg]:text-current',
       },
     },
     defaultVariants: {

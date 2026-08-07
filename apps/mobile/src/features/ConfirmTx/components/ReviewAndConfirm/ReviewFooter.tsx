@@ -5,7 +5,7 @@ import { SelectSigner } from '@/src/components/SelectSigner'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Address } from '@/src/types/address'
 import type { Signer } from '@/src/store/signersSlice'
-import { WalletConnectGate } from '@/src/features/WalletConnect/components/WalletConnectGate'
+import { WalletConnectGate } from '@/src/features/WalletConnect/Signer/components/WalletConnectGate'
 
 interface ReviewFooterProps {
   txId: string
@@ -31,7 +31,12 @@ export function ReviewFooter({ txId, activeSigner, isSigningLoading, onConfirmPr
       <SelectSigner address={activeSigner?.value as Address} txId={txId} disabled={buttonDisabled} />
 
       <WalletConnectGate signerAddress={activeSigner?.value || ''}>
-        <SafeButton onPress={onConfirmPress} disabled={buttonDisabled} loading={isSigningLoading}>
+        <SafeButton
+          onPress={onConfirmPress}
+          disabled={buttonDisabled}
+          loading={isSigningLoading}
+          testID="review-and-confirm-button"
+        >
           {buttonText}
         </SafeButton>
       </WalletConnectGate>

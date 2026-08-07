@@ -1,17 +1,23 @@
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { useAddressBooksGetAddressBookItemsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import {
+  useAddressBooksGetAddressBookItemsV1Query,
+  type SpaceAddressBookItemDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 
-const useGetSpaceAddressBook = () => {
+const EMPTY_ADDRESS_BOOK: SpaceAddressBookItemDto[] = []
+
+const useGetSpaceAddressBook = (): SpaceAddressBookItemDto[] => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: addressBook } = useAddressBooksGetAddressBookItemsV1Query(
-    { spaceId: Number(spaceId) },
-    { skip: !isUserSignedIn || !spaceId },
+    { spaceId: spaceId ?? '' },
+    { skip: !isUserSignedIn || !spaceId, ...SPACE_REFRESH_OPTIONS },
   )
 
-  return addressBook?.data || []
+  return addressBook?.data ?? EMPTY_ADDRESS_BOOK
 }
 
 export default useGetSpaceAddressBook

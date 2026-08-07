@@ -19,7 +19,7 @@ import type {
   withScannerTimeout,
 } from './data/scanners/utils'
 import type { isKnownModuleByName } from './data/scanners/modules'
-import type { getStrengthLevel, getStrengthColor } from './data/securityScoring'
+import type { getScoreBand } from './data/scoreBands'
 import type { CHECK_DEFS } from './data/securityChecks'
 import type { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { getCachedScan, setCachedScan } from './data/scanResultsCache'
@@ -37,8 +37,7 @@ export interface SecurityContract {
   formatTimestamp: typeof formatTimestamp
   withScannerTimeout: typeof withScannerTimeout
   isKnownModuleByName: typeof isKnownModuleByName
-  getStrengthLevel: typeof getStrengthLevel
-  getStrengthColor: typeof getStrengthColor
+  getScoreBand: typeof getScoreBand
   // Module-level scan-result cache accessors (the cache itself stays private)
   getCachedScan: typeof getCachedScan
   setCachedScan: typeof setCachedScan

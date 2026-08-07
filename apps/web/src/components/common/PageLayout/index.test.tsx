@@ -9,7 +9,9 @@ jest.mock('@/components/common/Header/Topbar', () => {
 })
 
 jest.mock('@/components/common/SafeLogo', () => {
-  const MockSafeLogo = ({ href }: { href?: string }) => <a data-testid="safe-logo" href={href} />
+  const MockSafeLogo = ({ href, 'data-testid': testId }: { href?: string; 'data-testid'?: string }) => (
+    <a data-testid={testId ?? 'safe-logo'} href={href} />
+  )
   MockSafeLogo.displayName = 'SafeLogo'
   return { __esModule: true, default: MockSafeLogo }
 })
@@ -54,9 +56,13 @@ jest.mock('@/hooks/useRouterGuard', () => ({
   useRouterGuard: jest.fn(),
 }))
 
-jest.mock('@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard', () => ({
-  useFlowActivationGuard: jest.fn(),
-}))
+jest.mock('@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard', () => {
+  const actual = jest.requireActual('@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard')
+  return {
+    ...actual,
+    useFlowActivationGuard: jest.fn(),
+  }
+})
 
 jest.mock('@/hooks/useKeyboardObserver', () => ({
   useKeyboardObserver: jest.fn(),
@@ -64,11 +70,17 @@ jest.mock('@/hooks/useKeyboardObserver', () => ({
 
 jest.mock('@/hooks/useTopbarElevation', () => ({
   useIsTopbarElevated: jest.fn(() => false),
+  useIsTopbarAboveOverlay: jest.fn(() => false),
 }))
 
 const mockUseSafeAddressFromUrl = jest.fn<string, []>(() => '')
 jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   useSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
+}))
+
+const mockUseIsSignedIn = jest.fn(() => false)
+jest.mock('@/hooks/useIsSignedIn', () => ({
+  useIsSignedIn: () => mockUseIsSignedIn(),
 }))
 
 jest.mock('@/features/__core__', () => ({
@@ -88,6 +100,7 @@ const NON_STATIC_ROUTES = ['/home', '/balances', '/settings/setup', '/welcome/ac
 describe('PageLayout', () => {
   beforeEach(() => {
     mockUseSafeAddressFromUrl.mockReturnValue('')
+    mockUseIsSignedIn.mockReturnValue(false)
   })
 
   const renderLayout = (pathname: string) =>
@@ -121,35 +134,46 @@ describe('PageLayout', () => {
       expect(screen.queryByTestId('safe-logo')).not.toBeInTheDocument()
     })
 
-    it.each(NON_STATIC_ROUTES.filter((r) => !r.startsWith('/welcome')).map((r) => [r]))(
-      'renders Topbar on %s',
+    it.each(NON_STATIC_ROUTES.map((r) => [r]))('renders Topbar on %s', (pathname) => {
+      renderLayout(pathname)
+      expect(screen.getByTestId('topbar')).toBeInTheDocument()
+    })
+  })
+
+  // The Topbar carries the Safe logo and the wallet section on the welcome tabs,
+  // so it must stay visible regardless of the auth state.
+  describe('welcome pages topbar (/welcome/spaces, /welcome/accounts and /)', () => {
+    it.each([[AppRoutes.welcome.spaces], [AppRoutes.welcome.accounts], [AppRoutes.index]])(
+      'renders Topbar on %s when the user is signed in',
       (pathname) => {
+        mockUseIsSignedIn.mockReturnValue(true)
+        renderLayout(pathname)
+        expect(screen.getByTestId('topbar')).toBeInTheDocument()
+      },
+    )
+
+    it.each([[AppRoutes.welcome.spaces], [AppRoutes.welcome.accounts], [AppRoutes.index]])(
+      'renders Topbar on %s when the user is signed out',
+      (pathname) => {
+        mockUseIsSignedIn.mockReturnValue(false)
         renderLayout(pathname)
         expect(screen.getByTestId('topbar')).toBeInTheDocument()
       },
     )
   })
 
-  describe('settings route padding-top', () => {
-    it('applies the compact main class on settings without a safe address', () => {
-      mockUseSafeAddressFromUrl.mockReturnValue('')
-      const { container } = renderLayout('/settings/notifications')
-      const main = container.querySelector('main, [class*="main"]')
-      expect(main?.className).toMatch(/mainSpaceCompact/)
-    })
+  describe('welcome background glow', () => {
+    it.each([[AppRoutes.welcome.accounts], [AppRoutes.welcome.spaces]])(
+      'applies the brand-green glow behind the content on %s',
+      (pathname) => {
+        const { container } = renderLayout(pathname)
+        expect(container.querySelector('.welcomeGlow')).toBeInTheDocument()
+      },
+    )
 
-    it('does not apply the compact main class on settings with a safe address', () => {
-      mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
-      const { container } = renderLayout('/settings/notifications')
-      const main = container.querySelector('main, [class*="main"]')
-      expect(main?.className).not.toMatch(/mainSpaceCompact/)
-    })
-
-    it('does not apply the compact main class on non-settings routes', () => {
-      mockUseSafeAddressFromUrl.mockReturnValue('')
-      const { container } = renderLayout('/home')
-      const main = container.querySelector('main, [class*="main"]')
-      expect(main?.className).not.toMatch(/mainSpaceCompact/)
+    it.each([['/home'], ['/balances'], [AppRoutes.welcome.index]])('does not apply the glow on %s', (pathname) => {
+      const { container } = renderLayout(pathname)
+      expect(container.querySelector('.welcomeGlow')).not.toBeInTheDocument()
     })
   })
 })

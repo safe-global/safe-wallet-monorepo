@@ -37,7 +37,7 @@ jest.mock('@/components/common/Track', () => ({
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 
-jest.mock('@/components/sidebar/QrCodeButton', () => ({
+jest.mock('@/components/common/QrCodeButton', () => ({
   __esModule: true,
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
@@ -226,7 +226,7 @@ describe('ActionsTray geoblocking', () => {
       renderTray({ isBlockedCountry: false, variant: 'safe' })
 
       const buildTxControl = screen.getByRole('link', { name: /transaction builder/i })
-      expect(buildTxControl).toBeEnabled()
+      expect(buildTxControl).toHaveAttribute('href')
 
       const tooltipTrigger = buildTxControl.parentElement
       expect(tooltipTrigger).toBeTruthy()

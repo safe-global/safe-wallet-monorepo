@@ -345,6 +345,12 @@ export function generateRandomString(length) {
   return result
 }
 
+export function blockBeamer() {
+  // Block the Beamer widget script so its announcement popup never renders and
+  // covers onboarding buttons. Call before cy.visit().
+  cy.intercept('GET', 'https://*.getbeamer.com/**', { statusCode: 204, body: '' })
+}
+
 export function verifyElementsCount(element, count) {
   cy.get(element).should('have.length', count)
 }
@@ -488,6 +494,22 @@ export function getIframeBody(iframe) {
 
 export const checkButtonByTextExists = (buttonText) => {
   cy.get('button').contains(buttonText).should('exist')
+}
+
+/**
+ * Read a key from the AUT's localStorage (after cy.visit) and assert its parsed
+ * value deep-equals `expectedValue`. Uses `.should()` so Cypress retries until
+ * the value matches or the default command timeout elapses — needed for keys
+ * the app writes asynchronously after sync completes.
+ */
+export function verifyAppLocalStorageItemEquals(key, expectedValue) {
+  cy.window()
+    .its('localStorage')
+    .invoke('getItem', key)
+    .should((stored) => {
+      const parsed = stored ? JSON.parse(stored) : null
+      expect(parsed).to.deep.equal(expectedValue)
+    })
 }
 
 export function getAddedSafeAddressFromLocalStorage(chainId, index) {

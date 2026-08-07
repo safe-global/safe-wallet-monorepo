@@ -149,7 +149,7 @@ export const CounterfactualForm = ({
           <NonOwnerError />
         ) : isExecutionLoop ? (
           <ErrorMessage>
-            Cannot execute a transaction from the Safe Account itself, please connect a different account.
+            Cannot execute a transaction from the Safe account itself, please connect a different account.
           </ErrorMessage>
         ) : !walletCanPay ? (
           <ErrorMessage>Your connected wallet doesn&apos;t have enough funds to execute this transaction.</ErrorMessage>

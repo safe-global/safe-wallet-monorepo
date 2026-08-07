@@ -2,10 +2,10 @@ import { fireEvent, waitFor } from '@testing-library/react'
 
 import { render } from '@/tests/test-utils'
 import { RecoveryInProgressCard } from '../RecoveryInProgressCard'
-import { useRecoveryTxState } from '@/features/recovery/hooks/useRecoveryTxState'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import { useRecoveryTxState } from '../../../hooks/useRecoveryTxState'
+import type { RecoveryQueueItem } from '../../../services/recovery-state'
 
-jest.mock('@/features/recovery/hooks/useRecoveryTxState')
+jest.mock('../../../hooks/useRecoveryTxState')
 
 const mockUseRecoveryTxState = useRecoveryTxState as jest.MockedFunction<typeof useRecoveryTxState>
 

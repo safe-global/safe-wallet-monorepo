@@ -11,5 +11,8 @@ export const BatchingFeature: FeatureHandle<BatchingContract> = {
 
 export { useDraftBatch, useUpdateBatch } from './hooks/useDraftBatch'
 
+export { default as BatchTxList } from './components/BatchSidebar/BatchTxList'
+export { default as BatchTooltip } from './components/BatchTooltip'
+
 export { batchSlice, addTx, removeTx, selectBatchBySafe } from './store/batchSlice'
 export type { DraftBatchItem, CallOnlyTxData, BatchTxsState } from './store/batchSlice'

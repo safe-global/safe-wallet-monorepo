@@ -9,6 +9,7 @@ import { GATEWAY_URL } from '@/src/config/constants'
 const mockActiveSafe = { chainId: '1', address: '0x123' }
 
 jest.mock('@/src/store/activeSafeSlice', () => ({
+  ...jest.requireActual('@/src/store/activeSafeSlice'),
   selectActiveSafe: () => mockActiveSafe,
 }))
 

@@ -1,26 +1,15 @@
-import { type PropsWithChildren, type ReactElement, useContext, useEffect } from 'react'
-import { Typography } from '@mui/material'
+import { type ReactElement, useContext, useEffect } from 'react'
 import useChainId from '@/hooks/useChainId'
 import { createExistingTx } from '@/services/tx/tx-sender'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
-import type { ReviewTransactionContentProps } from '@/components/tx/ReviewTransactionV2/ReviewTransactionContent'
+import type { ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 
-type ConfirmProposedTxProps = PropsWithChildren<
-  {
-    txNonce: number | undefined
-  } & ReviewTransactionContentProps
->
-
-const SIGN_TEXT = 'Sign this transaction.'
-const EXECUTE_TEXT = 'Submit the form to execute this transaction.'
-const SIGN_EXECUTE_TEXT = 'Sign or immediately execute this transaction.'
-
-const ConfirmProposedTx = ({ txNonce, children, ...props }: ConfirmProposedTxProps): ReactElement => {
+const ConfirmProposedTx = ({ children, ...props }: ReviewTransactionProps): ReactElement => {
   const chainId = useChainId()
   const { setSafeTx, setSafeTxError, setNonce } = useContext(SafeTxContext)
-  const { txId, onlyExecute, isExecutable } = useContext(TxFlowContext)
+  const { txId, txNonce } = useContext(TxFlowContext)
 
   useEffect(() => {
     if (txNonce !== undefined) {
@@ -34,14 +23,7 @@ const ConfirmProposedTx = ({ txNonce, children, ...props }: ConfirmProposedTxPro
     }
   }, [txId, chainId, setSafeTx, setSafeTxError])
 
-  const text = !onlyExecute ? (isExecutable ? SIGN_EXECUTE_TEXT : SIGN_TEXT) : EXECUTE_TEXT
-
-  return (
-    <ReviewTransaction {...props}>
-      <Typography mb={1}>{text}</Typography>
-      {children}
-    </ReviewTransaction>
-  )
+  return <ReviewTransaction {...props}>{children}</ReviewTransaction>
 }
 
 export default ConfirmProposedTx

@@ -4,7 +4,7 @@ import { removeSigner } from '@/src/store/signersSlice'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { removeSafe, SafesSliceItem } from '@/src/store/safesSlice'
 import { setEditMode } from '@/src/store/myAccountsSlice'
-import { keyStorageService } from '@/src/services/key-storage'
+import { BiometryInvalidationError, keyStorageService } from '@/src/services/key-storage'
 import Logger from '@/src/utils/logger'
 import { CommonActions } from '@react-navigation/native'
 import { Alert } from 'react-native'
@@ -122,11 +122,32 @@ export const cleanupSinglePrivateKey = async (
   dispatch: AppDispatch,
 ): Promise<StandardErrorResult<{ success: true }>> => {
   try {
-    const privateKey = await keyStorageService.getPrivateKey(ownerAddress)
+    let privateKey: string | undefined
+    let invalidated = false
+    try {
+      privateKey = await keyStorageService.getPrivateKey(ownerAddress)
+    } catch (err) {
+      if (err instanceof BiometryInvalidationError) {
+        Logger.warn('Skipping delegate cleanup: signer encryption key invalidated', { ownerAddress })
+        invalidated = true
+      } else {
+        throw err
+      }
+    }
+
     if (!privateKey) {
-      return createErrorResult(ErrorType.STORAGE_ERROR, 'Private key not found for the specified address', null, {
-        ownerAddress,
-      })
+      // Only force-wipe when we know the wrapping key is unusable. Without
+      // this gate, transient failures (user-cancel, lockout, unknown decrypt
+      // errors) would silently delete the signer despite the user not asking
+      // for it.
+      if (!invalidated) {
+        return createErrorResult(ErrorType.STORAGE_ERROR, 'Private key not found for the specified address', null, {
+          ownerAddress,
+        })
+      }
+      await keyStorageService.removePrivateKey(ownerAddress, { requireAuthentication: false })
+      dispatch(removeSigner(ownerAddress))
+      return createSuccessResult({ success: true as const })
     }
 
     // Remove delegates (includes notification cleanup)

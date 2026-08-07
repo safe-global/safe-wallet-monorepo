@@ -3,7 +3,7 @@ import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Divider, Typo
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import PendingDelegation from './PendingDelegation'
 import DelegationErrorBoundary from './DelegationErrorBoundary'
-import { usePendingDelegations } from '@/features/proposers/hooks/usePendingDelegations'
+import { usePendingDelegations } from '../hooks/usePendingDelegations'
 
 function PendingDelegationsList(): ReactElement | null {
   const { pendingDelegations, isLoading, refetch } = usePendingDelegations()

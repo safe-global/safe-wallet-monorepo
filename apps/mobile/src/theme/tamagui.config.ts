@@ -9,6 +9,7 @@ import { inputTheme, inputWithLabelTheme } from '../components/SafeInput/theme'
 import { safeTabTheme } from '@/src/components/SafeTab/theme'
 import { SafeListItemTheme } from '@/src/components/SafeListItem/theme'
 import { alertTheme } from '@/src/components/Alert/theme'
+import { approvalEditorTheme } from '@/src/features/ConfirmTx/components/ApprovalEditor/theme'
 import { safeShieldHeadlineStatusTheme } from '@/src/features/SafeShield/components/SafeShieldHeadline/theme'
 import { safeShieldAnalysisStatusTheme } from '@/src/features/SafeShield/theme'
 import { safeShieldWidgetTheme } from '../features/SafeShield/components/SafeShieldWidget/theme'
@@ -72,6 +73,7 @@ export const config = createTamagui({
     },
     ...badgeTheme,
     ...alertTheme,
+    ...approvalEditorTheme,
     ...inputTheme,
     ...NetworkBadgeTheme,
     ...navbarTheme,

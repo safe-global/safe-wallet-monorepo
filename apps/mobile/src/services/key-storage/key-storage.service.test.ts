@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { KeyStorageService } from './key-storage.service'
+import { BiometryInvalidationError } from './errors'
 import DeviceCrypto from 'react-native-device-crypto'
 import * as Keychain from 'react-native-keychain'
 import DeviceInfo from 'react-native-device-info'
@@ -242,10 +243,60 @@ describe('KeyStorageService', () => {
   })
 
   describe('key invalidation handling', () => {
-    it('retries storage after key invalidation', async () => {
+    it('retries storage after key invalidation on iOS (AKSError fingerprint)', async () => {
       ;(Platform.OS as string) = 'ios'
       mockDeviceInfo.isEmulator.mockResolvedValue(false)
       mockDeviceCrypto.getOrCreateAsymmetricKey.mockResolvedValue('key-name')
+
+      mockDeviceCrypto.encrypt
+        .mockRejectedValueOnce(new Error('Domain=CryptoTokenKit Code=-3 ... AKSError=-536362999'))
+        .mockResolvedValueOnce({ encryptedText: 'encrypted', iv: 'iv-value' })
+
+      mockKeychain.getGenericPassword.mockResolvedValue(false)
+      mockKeychain.resetGenericPassword.mockResolvedValue(true)
+      mockDeviceCrypto.deleteKey.mockResolvedValue(undefined as never)
+      mockKeychain.setGenericPassword.mockResolvedValue({
+        service: 'test-service',
+        storage: Keychain.STORAGE_TYPE.AES_GCM,
+      })
+
+      await service.storePrivateKey(userId, privateKey)
+
+      expect(mockDeviceCrypto.encrypt).toHaveBeenCalledTimes(2)
+      expect(mockDeviceCrypto.deleteKey).toHaveBeenCalled()
+    })
+
+    it('retries storage when iOS post-store decrypt probe reveals orphan SE key', async () => {
+      // iOS Quick Start migration leaves an orphan SE asymmetric key reference
+      // where encrypt (public-half) succeeds but decrypt (private-half) fails.
+      // The probe should surface this and trigger handleKeyInvalidation.
+      ;(Platform.OS as string) = 'ios'
+      mockDeviceInfo.isEmulator.mockResolvedValue(false)
+      mockDeviceCrypto.getOrCreateAsymmetricKey.mockResolvedValue('key-name')
+
+      mockDeviceCrypto.encrypt.mockResolvedValue({ encryptedText: 'encrypted', iv: 'iv-value' })
+      mockDeviceCrypto.decrypt
+        .mockRejectedValueOnce(new Error('Domain=CryptoTokenKit Code=-3 ... AKSError=-536362999'))
+        .mockResolvedValueOnce('decrypted')
+
+      mockKeychain.getGenericPassword.mockResolvedValue(false)
+      mockKeychain.resetGenericPassword.mockResolvedValue(true)
+      mockDeviceCrypto.deleteKey.mockResolvedValue(undefined as never)
+      mockKeychain.setGenericPassword.mockResolvedValue({
+        service: 'test-service',
+        storage: Keychain.STORAGE_TYPE.AES_GCM,
+      })
+
+      await service.storePrivateKey(userId, privateKey)
+
+      expect(mockDeviceCrypto.encrypt).toHaveBeenCalledTimes(2)
+      expect(mockDeviceCrypto.decrypt).toHaveBeenCalledTimes(2)
+      expect(mockDeviceCrypto.deleteKey).toHaveBeenCalled()
+    })
+
+    it('retries storage after key invalidation on Android (KeyPermanentlyInvalidatedException)', async () => {
+      ;(Platform.OS as string) = 'android'
+      mockDeviceCrypto.getOrCreateSymmetricKey.mockResolvedValue(undefined as never)
 
       mockDeviceCrypto.encrypt
         .mockRejectedValueOnce(new Error('Key permanently invalidated'))
@@ -263,6 +314,67 @@ describe('KeyStorageService', () => {
 
       expect(mockDeviceCrypto.encrypt).toHaveBeenCalledTimes(2)
       expect(mockDeviceCrypto.deleteKey).toHaveBeenCalled()
+    })
+  })
+
+  describe('getPrivateKey biometry invalidation', () => {
+    const mockKeychainEntry = () => {
+      const encryptedData = JSON.stringify({ encryptedPassword: 'encrypted', iv: 'iv-value' })
+      mockKeychain.getGenericPassword.mockResolvedValue({
+        username: 'signer_address',
+        password: encryptedData,
+        service: 'test-service',
+        storage: Keychain.STORAGE_TYPE.AES_GCM,
+      })
+    }
+
+    it('throws BiometryInvalidationError for iOS AKSError fingerprint', async () => {
+      ;(Platform.OS as string) = 'ios'
+      mockKeychainEntry()
+      mockDeviceCrypto.decrypt.mockRejectedValue(
+        new Error(
+          'Error Domain=CryptoTokenKit Code=-3 "unable to compute shared secret" ' + 'UserInfo={AKSError=-536362999}',
+        ),
+      )
+
+      await expect(service.getPrivateKey(userId)).rejects.toBeInstanceOf(BiometryInvalidationError)
+    })
+
+    it('throws BiometryInvalidationError for Android KeyPermanentlyInvalidatedException', async () => {
+      ;(Platform.OS as string) = 'android'
+      mockKeychainEntry()
+      mockDeviceCrypto.decrypt.mockRejectedValue(new Error('Key permanently invalidated'))
+
+      await expect(service.getPrivateKey(userId)).rejects.toBeInstanceOf(BiometryInvalidationError)
+    })
+
+    it('returns undefined for Android ERROR_CANCELED (user-driven cancel)', async () => {
+      ;(Platform.OS as string) = 'android'
+      mockKeychainEntry()
+      mockDeviceCrypto.decrypt.mockRejectedValue(new Error('5- Fingerprint operation Cancelled'))
+
+      const result = await service.getPrivateKey(userId)
+
+      expect(result).toBeUndefined()
+    })
+
+    it('returns undefined for benign decrypt failures (not biometry-related)', async () => {
+      ;(Platform.OS as string) = 'ios'
+      mockKeychainEntry()
+      mockDeviceCrypto.decrypt.mockRejectedValue(new Error('Some unrelated decrypt error'))
+
+      const result = await service.getPrivateKey(userId)
+
+      expect(result).toBeUndefined()
+    })
+
+    it('returns undefined when no keychain entry exists', async () => {
+      ;(Platform.OS as string) = 'ios'
+      mockKeychain.getGenericPassword.mockResolvedValue(false)
+
+      const result = await service.getPrivateKey(userId)
+
+      expect(result).toBeUndefined()
     })
   })
 })

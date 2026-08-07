@@ -20,7 +20,7 @@ describe('useTransactionType', () => {
       }),
     )
 
-    expect(result.current.text).toBe('Safe Account created')
+    expect(result.current.text).toBe('Safe account created')
   })
 
   it('should be a outgoing transfer transaction', () => {

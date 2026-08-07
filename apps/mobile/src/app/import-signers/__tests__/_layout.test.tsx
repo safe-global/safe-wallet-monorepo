@@ -25,7 +25,7 @@ jest.mock('@/src/features/ImportSigner', () => {
   }
 })
 
-jest.mock('@/src/features/WalletConnect/context/WalletConnectContext', () => ({
+jest.mock('@/src/features/WalletConnect/Signer/context/WalletConnectContext', () => ({
   useWalletConnectContext: () => ({ disconnect: jest.fn(), initiateConnection: jest.fn() }),
 }))
 

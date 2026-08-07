@@ -1,4 +1,5 @@
 import { Errors, CodedException } from '..'
+import { ErrorDomain, ErrorLayer, ErrorType } from '@safe-global/utils/services/exceptions/errorTaxonomy'
 
 const defaultPublicIsProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION
 describe('CodedException', () => {
@@ -102,7 +103,15 @@ describe('CodedException', () => {
       const { logError, Errors } = await import('..')
 
       logError(Errors._601, 'rpc down')
-      expect(mockWarn).toHaveBeenCalledWith(expect.stringContaining('601'), { code: 601 })
+      expect(mockWarn).toHaveBeenCalledWith(
+        expect.stringContaining('601'),
+        expect.objectContaining({
+          code: 601,
+          error_domain: ErrorDomain.DATA_LOADING,
+          error_type: ErrorType.FETCH_FAILED,
+          error_layer: ErrorLayer.OFF_CHAIN,
+        }),
+      )
       expect(mockError).not.toHaveBeenCalled()
     })
 
@@ -121,41 +130,274 @@ describe('CodedException', () => {
     })
   })
 
+  const mockObservability = (captureError: jest.Mock, logger?: Record<string, jest.Mock>) => {
+    jest.doMock('@/services/observability', () => ({
+      __esModule: true,
+      ...jest.requireActual('@/services/observability'),
+      captureError,
+      logger: logger ?? { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
+    }))
+  }
+
   describe('Tracking (error level)', () => {
-    it('logs at error level AND forwards to captureException on production', async () => {
+    it('logs at error level AND reports a user-facing error to observability on production', async () => {
       process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
 
-      const mockCaptureException = jest.fn()
+      const mockCaptureError = jest.fn()
       const mockError = jest.fn()
-
-      jest.doMock('@/services/observability', () => ({
-        __esModule: true,
-        ...jest.requireActual('@/services/observability'),
-        captureException: mockCaptureException,
-        logger: { info: jest.fn(), warn: jest.fn(), error: mockError, debug: jest.fn() },
-      }))
+      mockObservability(mockCaptureError, { info: jest.fn(), warn: jest.fn(), error: mockError, debug: jest.fn() })
 
       const { trackError, Errors } = await import('..')
 
       const err = trackError(Errors._100)
-      expect(mockCaptureException).toHaveBeenCalled()
-      expect(mockError).toHaveBeenCalledWith(err.message, { code: 100 })
+      expect(mockCaptureError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: err,
+          isUserFacing: true,
+          code: 100,
+          tags: expect.objectContaining({
+            code: 100,
+            error_domain: ErrorDomain.TX_CREATION,
+            error_type: ErrorType.ADDRESS_INVALID,
+            error_layer: ErrorLayer.OFF_CHAIN,
+          }),
+        }),
+      )
+      expect(mockError).toHaveBeenCalledWith(
+        err.message,
+        expect.objectContaining({
+          code: 100,
+          error_domain: ErrorDomain.TX_CREATION,
+          error_type: ErrorType.ADDRESS_INVALID,
+        }),
+      )
       expect(console.error).toHaveBeenCalledWith(err.message)
     })
 
+    it('tags the Datadog error with the refined domain/type/layer (on-chain revert)', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._804, 'execution reverted GS013')
+      expect(mockCaptureError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: expect.objectContaining({
+            error_domain: ErrorDomain.TX_EXECUTION,
+            error_type: ErrorType.ON_CHAIN_REVERT,
+            error_layer: ErrorLayer.ON_CHAIN,
+          }),
+        }),
+      )
+    })
+
+    it('merges RPC endpoint context into the Datadog tags', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      const mockError = jest.fn()
+      mockObservability(mockCaptureError, { info: jest.fn(), warn: jest.fn(), error: mockError, debug: jest.fn() })
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._105, 'rpc down', { rpcEndpointKind: 'infura', rpcHost: 'mainnet.infura.io' })
+      expect(mockCaptureError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: expect.objectContaining({
+            code: 105,
+            error_domain: ErrorDomain.RPC,
+            error_type: ErrorType.RPC_ERROR,
+            rpc_endpoint_kind: 'infura',
+            rpc_host: 'mainnet.infura.io',
+          }),
+        }),
+      )
+      // The Datadog action (logger.error) carries the same facets
+      expect(mockError).toHaveBeenCalledWith(
+        expect.stringContaining('105'),
+        expect.objectContaining({ rpc_endpoint_kind: 'infura', rpc_host: 'mainnet.infura.io' }),
+      )
+    })
+
+    it('extracts the HTTP status from the thrown error into the Datadog tags', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._805, new Error('CGW error - 422: Invalid transaction'))
+      expect(mockCaptureError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: expect.objectContaining({ http_status: 422 }),
+          context: expect.objectContaining({ httpStatus: 422 }),
+        }),
+      )
+    })
+
+    it('extracts a structural status property from the thrown error', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._805, Object.assign(new Error('proposal failed'), { status: 404 }))
+      expect(mockCaptureError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: expect.objectContaining({ http_status: 404 }),
+        }),
+      )
+    })
+
+    it('lets an explicit call-site httpStatus override the extracted one', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._805, new Error('CGW error - 422: Invalid transaction'), { httpStatus: 400 })
+      expect(mockCaptureError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: expect.objectContaining({ http_status: 400 }),
+        }),
+      )
+    })
+
+    it('omits the HTTP status tag when not provided', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._805, 'proposal failed')
+      expect(mockCaptureError.mock.calls[0][0].tags).not.toHaveProperty('http_status')
+    })
+
+    it('omits RPC tags when no endpoint context is provided', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._105, 'rpc down')
+      const { tags } = mockCaptureError.mock.calls[0][0]
+      expect(tags).not.toHaveProperty('rpc_endpoint_kind')
+      expect(tags).not.toHaveProperty('rpc_host')
+    })
+
     it('does not track in non-production envs', async () => {
-      const mockCaptureException = jest.fn()
-      jest.doMock('@/services/observability', () => ({
-        __esModule: true,
-        ...jest.requireActual('@/services/observability'),
-        captureException: mockCaptureException,
-      }))
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
 
       const { trackError, Errors } = await import('..')
 
       const err = trackError(Errors._100)
-      expect(mockCaptureException).not.toHaveBeenCalled()
+      expect(mockCaptureError).not.toHaveBeenCalled()
       expect(console.error).toHaveBeenCalledWith(err)
+    })
+  })
+
+  describe('User-driven outcomes (WA-2950)', () => {
+    it('downgrades a tracked user rejection to an info action (no error, no Error Surfaced)', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      const mockInfo = jest.fn()
+      const mockWarn = jest.fn()
+      const mockError = jest.fn()
+      mockObservability(mockCaptureError, { info: mockInfo, warn: mockWarn, error: mockError, debug: jest.fn() })
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._804, 'user rejected the request')
+
+      expect(mockInfo).toHaveBeenCalledWith(
+        expect.stringContaining('804'),
+        expect.objectContaining({ error_type: ErrorType.USER_REJECTED }),
+      )
+      expect(mockWarn).not.toHaveBeenCalled()
+      expect(mockError).not.toHaveBeenCalled()
+      expect(mockCaptureError).not.toHaveBeenCalled()
+      expect(console.error).not.toHaveBeenCalled()
+    })
+
+    it('downgrades a tracked WalletConnect expiry to an info action', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      const mockInfo = jest.fn()
+      const mockError = jest.fn()
+      mockObservability(mockCaptureError, { info: mockInfo, warn: jest.fn(), error: mockError, debug: jest.fn() })
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._804, 'Request expired. Please try again.')
+
+      expect(mockInfo).toHaveBeenCalledWith(
+        expect.stringContaining('804'),
+        expect.objectContaining({ error_type: ErrorType.EXPIRED }),
+      )
+      expect(mockError).not.toHaveBeenCalled()
+      expect(mockCaptureError).not.toHaveBeenCalled()
+    })
+
+    it('keeps a genuine execution failure on the error path', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      const mockError = jest.fn()
+      mockObservability(mockCaptureError, { info: jest.fn(), warn: jest.fn(), error: mockError, debug: jest.fn() })
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._804, 'execution reverted GS013')
+
+      expect(mockCaptureError).toHaveBeenCalledWith(expect.objectContaining({ isUserFacing: true }))
+      expect(mockError).toHaveBeenCalled()
+    })
+  })
+
+  describe('Error Surfaced analytics', () => {
+    it('reports a user-facing error to observability when tracking in production', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const captureError = jest.fn()
+      mockObservability(captureError)
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._804, 'rpc down')
+      expect(captureError).toHaveBeenCalledWith(expect.objectContaining({ code: 804, isUserFacing: true }))
+    })
+
+    it('reports a non-user-facing error to observability when logging in production', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const captureError = jest.fn()
+      mockObservability(captureError)
+      const { logError, Errors } = await import('..')
+
+      logError(Errors._601)
+      expect(captureError).toHaveBeenCalledWith(expect.objectContaining({ code: 601, isUserFacing: false }))
+    })
+
+    it('does not report an error in non-production envs', async () => {
+      const captureError = jest.fn()
+      mockObservability(captureError)
+      const { trackError, logError, Errors } = await import('..')
+
+      trackError(Errors._804)
+      logError(Errors._601)
+      expect(captureError).not.toHaveBeenCalled()
+    })
+
+    it('forwards call-site context (e.g. txHash) to observability', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const captureError = jest.fn()
+      mockObservability(captureError)
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._814, 'speed up failed', { txHash: '0xdeadbeef' })
+      expect(captureError).toHaveBeenCalledWith(expect.objectContaining({ context: { txHash: '0xdeadbeef' } }))
     })
   })
 })

@@ -6,7 +6,7 @@ import type { ComponentProps, ReactElement } from 'react'
 import RecoverySummary from '../RecoverySummary'
 import RecoveryDetails from '../RecoveryDetails'
 import { RecoveryListItemContext, RecoveryListItemProvider } from './RecoveryListItemContext'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
 
 function ProvidedRecoveryListItem({ item }: { item: RecoveryQueueItem }): ReactElement {
   const { submitError, setSubmitError } = useContext(RecoveryListItemContext)

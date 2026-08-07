@@ -1,6 +1,7 @@
 import { renderHook } from '@testing-library/react'
 import { faker } from '@faker-js/faker'
 import { useCurrentMemberProfile } from '../useSpaceMembers'
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockUseAuthGetMeV1Query = jest.fn()
 const mockUseMembersGetMembershipV1Query = jest.fn()
@@ -44,7 +45,7 @@ describe('useCurrentMemberProfile', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseCurrentSpaceId.mockReturnValue('1')
+    mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
     mockUseAppSelector.mockReturnValue(true)
     mockUseAuthGetMeV1Query.mockReturnValue({ data: undefined, isLoading: false })
     mockUseMembersGetMembershipV1Query.mockReturnValue({ currentData: undefined, isLoading: false })
@@ -82,6 +83,18 @@ describe('useCurrentMemberProfile', () => {
     expect(result.current.signerAddress).toBeUndefined()
   })
 
+  it('returns email when present on the session', () => {
+    const email = faker.internet.email().toLowerCase()
+    mockUseAuthGetMeV1Query.mockReturnValue({
+      data: { id: 'u1', authMethod: 'oidc', email },
+      isLoading: false,
+    })
+
+    const { result } = renderHook(() => useCurrentMemberProfile())
+
+    expect(result.current.email).toBe(email)
+  })
+
   it('returns undefined signerAddress when session is not loaded', () => {
     const { result } = renderHook(() => useCurrentMemberProfile())
 
@@ -109,7 +122,7 @@ describe('useCurrentMemberProfile', () => {
     renderHook(() => useCurrentMemberProfile())
 
     expect(mockUseAuthGetMeV1Query).toHaveBeenCalledWith(undefined, { skip: true })
-    expect(mockUseMembersGetMembershipV1Query).toHaveBeenCalledWith({ spaceId: 1 }, { skip: true })
+    expect(mockUseMembersGetMembershipV1Query).toHaveBeenCalledWith({ spaceId: MOCK_SPACE_UUID }, { skip: true })
   })
 
   it('skips membership query when there is no spaceId', () => {
@@ -117,6 +130,6 @@ describe('useCurrentMemberProfile', () => {
 
     renderHook(() => useCurrentMemberProfile())
 
-    expect(mockUseMembersGetMembershipV1Query).toHaveBeenCalledWith({ spaceId: expect.any(Number) }, { skip: true })
+    expect(mockUseMembersGetMembershipV1Query).toHaveBeenCalledWith({ spaceId: '' }, { skip: true })
   })
 })

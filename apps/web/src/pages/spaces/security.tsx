@@ -17,7 +17,7 @@ export default function SpaceSecurityPage() {
   return (
     <>
       <Head>
-        <title>{`${BRAND_NAME} – Security`}</title>
+        <title>{`${BRAND_NAME} – Security hub`}</title>
       </Head>
 
       <main>

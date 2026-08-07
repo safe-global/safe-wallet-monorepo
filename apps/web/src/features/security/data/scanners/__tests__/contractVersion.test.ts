@@ -3,23 +3,26 @@ import { createMockContext } from '../test-helpers'
 
 jest.mock('@safe-global/utils/services/contracts/safeContracts', () => ({
   isValidMasterCopy: jest.fn(),
-  isMigrationToL2Possible: jest.fn(),
+  isUnsupportedMastercopyMigratable: jest.fn(),
 }))
 
-import { isValidMasterCopy, isMigrationToL2Possible } from '@safe-global/utils/services/contracts/safeContracts'
+import {
+  isValidMasterCopy,
+  isUnsupportedMastercopyMigratable,
+} from '@safe-global/utils/services/contracts/safeContracts'
 
 const mockIsValidMasterCopy = isValidMasterCopy as jest.Mock
-const mockIsMigrationToL2Possible = isMigrationToL2Possible as jest.Mock
+const mockIsUnsupportedMastercopyMigratable = isUnsupportedMastercopyMigratable as jest.Mock
 
 describe('contractVersionScanner', () => {
   beforeEach(() => {
     mockIsValidMasterCopy.mockReturnValue(true)
-    mockIsMigrationToL2Possible.mockReturnValue(false)
+    mockIsUnsupportedMastercopyMigratable.mockReturnValue(false)
   })
 
   it('returns critical issue for unsupported mastercopy', async () => {
     mockIsValidMasterCopy.mockReturnValue(false)
-    mockIsMigrationToL2Possible.mockReturnValue(false)
+    mockIsUnsupportedMastercopyMigratable.mockReturnValue(false)
 
     const result = await contractVersionScanner.scan(createMockContext({ implementationVersionState: 'UNKNOWN' }))
     expect(result.status).toBe('issue')
@@ -27,9 +30,9 @@ describe('contractVersionScanner', () => {
     expect(result.score).toBe(10)
   })
 
-  it('suggests migration when L2 migration is possible', async () => {
+  it('suggests migration when mastercopy migration is possible', async () => {
     mockIsValidMasterCopy.mockReturnValue(false)
-    mockIsMigrationToL2Possible.mockReturnValue(true)
+    mockIsUnsupportedMastercopyMigratable.mockReturnValue(true)
 
     const result = await contractVersionScanner.scan(createMockContext({ implementationVersionState: 'UNKNOWN' }))
     expect(result.status).toBe('issue')
@@ -37,7 +40,7 @@ describe('contractVersionScanner', () => {
     expect(result.ctaLabelOverride).toBe('Migrate')
   })
 
-  it('returns issue for outdated Gnosis-deployed mastercopy', async () => {
+  it('returns issue for outdated Gnosis-deployed mastercopy (non-L2)', async () => {
     const result = await contractVersionScanner.scan(
       createMockContext({
         implementationVersionState: 'OUTDATED',
@@ -51,12 +54,87 @@ describe('contractVersionScanner', () => {
     expect(result.severity).toBe('High')
   })
 
-  it('returns clear for outdated non-critical update', async () => {
+  it('returns issue for 1.3.0+L2 when chain latest is 1.4.1 (WA-2370)', async () => {
+    const result = await contractVersionScanner.scan(
+      createMockContext({
+        implementationVersionState: 'OUTDATED',
+        // gateway returns true for 1.3.0+L2 because `>= 1.3.0`; the scanner must
+        // ignore that flag and compare against the chain's latest version instead
+        isNonCriticalUpdate: true,
+        masterCopyDeployer: 'Gnosis',
+        version: '1.3.0+L2',
+        latestVersion: '1.4.1',
+      }),
+    )
+    expect(result.status).toBe('issue')
+    expect(result.severity).toBe('High')
+    expect(result.score).toBe(30)
+  })
+
+  it('returns issue for 1.4.1 when chain latest is 1.5.1 (future upgrade)', async () => {
     const result = await contractVersionScanner.scan(
       createMockContext({
         implementationVersionState: 'OUTDATED',
         isNonCriticalUpdate: true,
         masterCopyDeployer: 'Gnosis',
+        version: '1.4.1',
+        latestVersion: '1.5.1',
+      }),
+    )
+    expect(result.status).toBe('issue')
+    expect(result.severity).toBe('High')
+  })
+
+  it('returns clear for 1.4.1+L2 when chain latest is 1.4.1 (L2 metadata equals latest)', async () => {
+    // implementationVersionState is UP_TO_DATE here because the gateway already
+    // considers 1.4.1+L2 equivalent to 1.4.1. Default ctx state covers this.
+    const result = await contractVersionScanner.scan(
+      createMockContext({
+        version: '1.4.1+L2',
+        latestVersion: '1.4.1',
+      }),
+    )
+    expect(result.status).toBe('clear')
+  })
+
+  it('defers to gateway and returns issue when implementationVersionState is OUTDATED but version is null', async () => {
+    const result = await contractVersionScanner.scan(
+      createMockContext({
+        implementationVersionState: 'OUTDATED',
+        isNonCriticalUpdate: false,
+        masterCopyDeployer: 'Gnosis',
+        version: null,
+        latestVersion: '1.4.1',
+      }),
+    )
+    expect(result.status).toBe('issue')
+    expect(result.severity).toBe('High')
+    expect(result.score).toBe(30)
+  })
+
+  it('defers to gateway and returns issue when implementationVersionState is OUTDATED but version is not valid semver', async () => {
+    const result = await contractVersionScanner.scan(
+      createMockContext({
+        implementationVersionState: 'OUTDATED',
+        isNonCriticalUpdate: false,
+        masterCopyDeployer: 'Gnosis',
+        version: 'not-a-version',
+        latestVersion: '1.4.1',
+      }),
+    )
+    expect(result.status).toBe('issue')
+    expect(result.severity).toBe('High')
+    expect(result.score).toBe(30)
+  })
+
+  it('trusts semver over gateway OUTDATED when semver confirms version is current (1.4.1+L2 vs 1.4.1)', async () => {
+    const result = await contractVersionScanner.scan(
+      createMockContext({
+        implementationVersionState: 'OUTDATED',
+        isNonCriticalUpdate: true,
+        masterCopyDeployer: 'Gnosis',
+        version: '1.4.1+L2',
+        latestVersion: '1.4.1',
       }),
     )
     expect(result.status).toBe('clear')
@@ -68,6 +146,8 @@ describe('contractVersionScanner', () => {
         implementationVersionState: 'OUTDATED',
         isNonCriticalUpdate: false,
         masterCopyDeployer: 'Circles',
+        version: '1.3.0',
+        latestVersion: '1.4.1',
       }),
     )
     expect(result.status).toBe('clear')
@@ -89,6 +169,11 @@ describe('contractVersionScanner', () => {
     expect(result.status).toBe('issue')
     expect(result.severity).toBe('High')
     expect(result.score).toBe(30)
+    // Full address so EvidenceList shortens it and adds a copy button (WA-2371).
+    expect(result.evidence).toContainEqual({
+      label: 'Implementation',
+      value: '0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF',
+    })
   })
 
   it('returns clear for known L2 singleton address', async () => {
@@ -116,6 +201,10 @@ describe('contractVersionScanner', () => {
     expect(result.status).toBe('partial')
     expect(result.severity).toBe('Medium')
     expect(result.score).toBe(60)
+    expect(result.evidence).toContainEqual({
+      label: 'Original implementation',
+      value: '0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF',
+    })
   })
 
   it('returns clear when creation master copy is a known deployment', async () => {

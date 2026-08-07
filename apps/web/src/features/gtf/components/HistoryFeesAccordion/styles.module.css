@@ -1,0 +1,47 @@
+.feesAccordion {
+  border: 1px solid var(--color-border-light);
+  border-radius: 6px 6px 0 0;
+  margin-bottom: -1px;
+}
+
+.feesAccordion:last-child {
+  border-radius: 6px;
+  margin-bottom: 0;
+}
+
+.summaryContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.summaryLeftColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.summaryLeft {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.summaryRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 72px;
+  text-align: right;
+}
+
+.tooltipIcon {
+  display: inline-flex;
+}
+
+.breakdownContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 48px 12px 16px;
+}

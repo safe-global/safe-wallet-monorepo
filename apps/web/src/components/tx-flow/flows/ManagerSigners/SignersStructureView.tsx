@@ -19,6 +19,7 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import TxCard from '../../common/TxCard'
 import OwnerRow from '@/components/new-safe/OwnerRow'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { ManageSignersFormFields } from '.'
 import { TxFlowContext } from '../../TxFlowProvider'
@@ -39,6 +40,9 @@ type Props = {
 
 export function SignersStructureView(props: Props): ReactElement {
   const { onNext } = useContext<TxFlowContextType<ManageSignersForm>>(TxFlowContext)
+
+  // Copilot address-poisoning check for the configured signers.
+  useSafeShieldForAddressPoisoning(props.newOwners.map((owner) => owner.address))
 
   return (
     <TxCard>
@@ -112,7 +116,7 @@ function Threshold({ formMethods, newOwners }: Pick<Props, 'formMethods' | 'newO
       <Typography variant="h4" fontWeight={700} display="inline-flex" alignItems="center" gap={1}>
         Threshold
         <Tooltip
-          title="The threshold of a Safe Account specifies how many signers need to confirm a Safe Account transaction before it can be executed."
+          title="The threshold of a Safe account specifies how many signers need to confirm a Safe account transaction before it can be executed."
           arrow
           placement="top"
         >

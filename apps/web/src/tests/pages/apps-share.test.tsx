@@ -168,7 +168,7 @@ describe('Share Safe App Page', () => {
     await waitFor(() => {
       expect(fetchSafeAppFromManifestSpy).toHaveBeenCalledWith(TX_BUILDER, '5')
 
-      expect(screen.getByText('Create new Safe Account')).toBeInTheDocument()
+      expect(screen.getByText('Create new Safe account')).toBeInTheDocument()
     })
   })
 
@@ -206,7 +206,7 @@ describe('Share Safe App Page', () => {
     await waitFor(() => {
       expect(fetchSafeAppFromManifestSpy).toHaveBeenCalledWith(TX_BUILDER, '1')
 
-      expect(screen.getByLabelText('Select a Safe Account')).toBeInTheDocument()
+      expect(screen.getByLabelText('Select a Safe account')).toBeInTheDocument()
     })
   })
 })

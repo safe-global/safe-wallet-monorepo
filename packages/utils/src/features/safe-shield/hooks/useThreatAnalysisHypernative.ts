@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import isEqual from 'lodash/isEqual'
 import { StatusGroup, type ThreatAnalysisResults } from '../types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
@@ -84,12 +84,22 @@ export function useThreatAnalysisHypernative({
     })
   }, [data, safeAddress, chainId, walletAddress, origin, safeVersion, skip, isMessageAnalysis])
 
+  // RTK Query mutations don't dedup or cancel, `data` reflects the last settled call. Abort
+  // any in-flight request before triggering a new one so a slow stale response can't overwrite
+  // a fresh result
+  const inflightRef = useRef<{ abort?: () => void } | null>(null)
+
   useEffect(() => {
     if (!skip && !isMessageAnalysis && hypernativeRequest && authToken && walletAddress) {
-      triggerAssessment({
+      inflightRef.current?.abort?.()
+      const promise = triggerAssessment({
         ...hypernativeRequest,
         authToken,
       })
+      inflightRef.current = promise ?? null
+      return () => {
+        promise?.abort?.()
+      }
     }
   }, [hypernativeRequest, authToken, triggerAssessment, skip, walletAddress, isMessageAnalysis])
 
@@ -131,5 +141,9 @@ export function useThreatAnalysisHypernative({
     return [undefined, new Error('authToken is required'), false]
   }
 
-  return isMessageAnalysis ? messageAnalysisResult : [threatAnalysisResult, fetchError, isLoading]
+  if (isMessageAnalysis) {
+    return messageAnalysisResult
+  }
+
+  return [threatAnalysisResult, fetchError, isLoading]
 }

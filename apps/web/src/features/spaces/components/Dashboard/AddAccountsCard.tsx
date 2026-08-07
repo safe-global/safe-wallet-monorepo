@@ -1,4 +1,4 @@
-import AddAccounts from '../AddAccounts'
+import AddAccountsChooser from '../AddAccountsChooser'
 import Image from 'next/image'
 import { Typography, Paper, Box, Stack } from '@mui/material'
 import EmptyDashboard from '@/public/images/spaces/empty_dashboard.png'
@@ -17,16 +17,16 @@ const AddAccountsCard = () => {
       <Stack direction={{ xs: 'column-reverse', md: 'row' }} alignItems="center" spacing={3}>
         <Box sx={{ flex: 2 }}>
           <Typography variant="h4" fontWeight={700} mb={2}>
-            Add your Safe Accounts
+            Add your Safe accounts
           </Typography>
 
           <Typography variant="body1" color="primary.light" mb={2}>
-            Start by adding Safe Accounts to your space. Any accounts that are linked to your connected wallet can be
-            added to the space.
+            Start by adding Safe accounts to your workspace. Any accounts that are linked to your connected wallet can
+            be added to the workspace.
           </Typography>
 
           <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
-            <AddAccounts />
+            <AddAccountsChooser buttonLabel="Manage accounts" entryPoint="dashboard" />
           </Track>
         </Box>
 

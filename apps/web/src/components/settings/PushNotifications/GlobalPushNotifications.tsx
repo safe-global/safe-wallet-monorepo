@@ -397,7 +397,7 @@ export const GlobalPushNotifications = (): ReactElement | null => {
         <Box display="flex" alignItems="center">
           {totalSignaturesRequired > 0 && (
             <Typography display="inline" mr={2} textAlign="right">
-              We&apos;ll ask you to verify ownership of each Safe Account with your signature per chain{' '}
+              We&apos;ll ask you to verify ownership of each Safe account with your signature per chain{' '}
               {totalSignaturesRequired} time{maybePlural(totalSignaturesRequired)}
             </Typography>
           )}
@@ -453,7 +453,7 @@ export const GlobalPushNotifications = (): ReactElement | null => {
                         <Checkbox edge="start" checked={isChainSelected} disableRipple />
                       </ListItemIcon>
                       <ListItemText
-                        primary={`${chain?.chainName} Safe Accounts`}
+                        primary={`${chain?.chainName} Safe accounts`}
                         primaryTypographyProps={{ variant: 'h5' }}
                       />
                     </ListItemButton>

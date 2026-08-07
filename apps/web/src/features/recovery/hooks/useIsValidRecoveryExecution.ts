@@ -9,7 +9,7 @@ import { getPatchedSignerProvider } from '../../../hooks/useIsValidExecution'
 import { useRecoveryTxState } from './useRecoveryTxState'
 import { useIsRecoverer } from './useIsRecoverer'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '../services/recovery-state'
 
 export function useIsValidRecoveryExecTransactionFromModule(
   delayModifierAddress?: string,

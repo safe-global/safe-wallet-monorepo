@@ -1,16 +1,18 @@
 import { Accordion, AccordionDetails, AccordionSummary, Box, Card, Stack, Typography } from '@mui/material'
-import PositionsHeader from '@/features/positions/components/PositionsHeader'
-import { PositionGroup } from '@/features/positions/components/PositionGroup'
-import usePositions from '@/features/positions/hooks/usePositions'
-import PositionsEmpty from '@/features/positions/components/PositionsEmpty'
-import usePositionsFiatTotal from '@/features/positions/hooks/usePositionsFiatTotal'
+import PositionsHeader from './components/PositionsHeader'
+import { PositionGroup } from './components/PositionGroup'
+import usePositions from './hooks/usePositions'
+import PositionsEmpty from './components/PositionsEmpty'
+import usePositionsFiatTotal from './hooks/usePositionsFiatTotal'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import React from 'react'
 import PositionsUnavailable from './components/PositionsUnavailable'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
-import PositionsSkeleton from '@/features/positions/components/PositionsSkeleton'
+import PositionsSkeleton from './components/PositionsSkeleton'
 import { PortfolioFeature } from '@/features/portfolio'
 import { useLoadFeature } from '@/features/__core__'
+
+export { default as useIsPositionsFeatureEnabled } from './hooks/useIsPositionsFeatureEnabled'
 
 const Positions = () => {
   const positionsFiatTotal = usePositionsFiatTotal()

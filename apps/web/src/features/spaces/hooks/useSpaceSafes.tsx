@@ -1,13 +1,22 @@
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { _buildSafeItems, type AllSafeItems, useAllSafesGrouped, useAllOwnedSafes, getComparator } from '@/hooks/safes'
+import {
+  _buildSafeItems,
+  type AllSafeItems,
+  _getMultiChainAccounts,
+  _getSingleChainAccounts,
+  useSafeOrderComparator,
+} from '@/hooks/safes'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
+import { useSpaceSafeOverviews } from './useSpaceSafeOverviews'
 import useGetSpaceAddressBook from './useGetSpaceAddressBook'
+import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 import { mapSpaceContactsToAddressBookState } from '../utils'
 import { useAppSelector } from '@/store'
-import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
+import { getSpaceOrderScope } from '@/store/orderByPreferenceSlice'
+import { selectAllAddressBooks, selectAllVisitedSafes } from '@/store/slices'
+import merge from 'lodash/merge'
 import { useMemo } from 'react'
 import { isAuthenticated } from '@/store/authSlice'
-import useWallet from '@/hooks/wallets/useWallet'
 
 export const useSpaceSafes = () => {
   const spaceId = useCurrentSpaceId()
@@ -18,23 +27,48 @@ export const useSpaceSafes = () => {
     isError: isSpaceSafesError,
     error: spaceSafesError,
     refetch: refetchSpaceSafes,
-  } = useSpaceSafesGetV1Query({ spaceId: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
-  const spaceContacts = useGetSpaceAddressBook()
-
-  // We are doing this in order to reuse the _buildSafeItems function but only take space contacts into account
-  const addressBooks = mapSpaceContactsToAddressBookState(spaceContacts)
-
-  const { address: walletAddress = '' } = useWallet() || {}
-  const [allOwned = {}] = useAllOwnedSafes(walletAddress)
-  const safeItems = currentData ? _buildSafeItems(currentData.safes, addressBooks, allOwned) : []
-  const safes = useAllSafesGrouped(safeItems)
-  const { orderBy } = useAppSelector(selectOrderByPreference)
-  const sortComparator = getComparator(orderBy)
-
-  const allSafes = useMemo<AllSafeItems>(
-    () => [...(safes.allMultiChainSafes ?? []), ...(safes.allSingleSafes ?? [])].sort(sortComparator),
-    [safes.allMultiChainSafes, safes.allSingleSafes, sortComparator],
+  } = useSpaceSafesGetV1Query(
+    { spaceId: spaceId ?? '' },
+    { skip: !isUserSignedIn || !spaceId, ...SPACE_REFRESH_OPTIONS },
   )
+  const spaceContacts = useGetSpaceAddressBook()
+  const localAddressBook = useAppSelector(selectAllAddressBooks)
+
+  // Space contacts take priority but fall back to the user's address book, so the name used for
+  // sorting matches the name actually displayed (the row resolves via the address book too — see
+  // useSafeDisplayName). Without the fallback, address-book-named safes have an empty `name` here
+  // and "Name" sorting silently no-ops on them.
+  const addressBooks = useMemo(
+    () => merge({}, localAddressBook, mapSpaceContactsToAddressBookState(spaceContacts)),
+    [localAddressBook, spaceContacts],
+  )
+
+  // Ownership is derived from the batched overviews this surface already fetches; the pure groupers
+  // below avoid pulling in `useAllSafes()`.
+  const spaceSafeItems = useMemo(
+    () =>
+      currentData
+        ? Object.entries(currentData.safes).flatMap(([chainId, addresses]) =>
+            addresses.map((address) => ({ chainId, address })),
+          )
+        : [],
+    [currentData],
+  )
+  const { ownedByChain } = useSpaceSafeOverviews(spaceSafeItems)
+  const allVisitedSafes = useAppSelector(selectAllVisitedSafes)
+
+  const safeItems = useMemo(
+    () => (currentData ? _buildSafeItems(currentData.safes, addressBooks, ownedByChain, allVisitedSafes) : []),
+    [currentData, addressBooks, ownedByChain, allVisitedSafes],
+  )
+
+  const sortComparator = useSafeOrderComparator(spaceId ? getSpaceOrderScope(spaceId) : undefined)
+
+  const allSafes = useMemo<AllSafeItems>(() => {
+    const allMultiChainSafes = _getMultiChainAccounts(safeItems)
+    const allSingleSafes = _getSingleChainAccounts(safeItems, allMultiChainSafes)
+    return [...allMultiChainSafes, ...allSingleSafes].sort(sortComparator)
+  }, [safeItems, sortComparator])
 
   return { allSafes, isLoading, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes }
 }

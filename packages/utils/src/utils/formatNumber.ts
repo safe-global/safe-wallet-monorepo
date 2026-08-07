@@ -63,8 +63,19 @@ export const formatAmount = (number: string | number, precision = 5, maxLength =
  * @param number Number to format
  * @param precision Fraction digits to show
  */
+// A string that `Intl.NumberFormat.format` can consume while preserving full precision.
+const isNumericString = (value: string): value is `${number}` => value.trim() !== '' && !Number.isNaN(Number(value))
+
 export const formatAmountPrecise = (number: string | number, precision?: number): string => {
-  return getNumberFormatter(precision).format(Number(number))
+  const formatter = getNumberFormatter(precision)
+  // Pass the numeric string straight to Intl to keep full precision — converting to a JS
+  // number first (float64) loses digits beyond ~15 significant figures, e.g.
+  // 0.016000000000020475 would render as 0.016000000000020474.
+  if (typeof number === 'number' || isNumericString(number)) {
+    return formatter.format(number)
+  }
+
+  return NaN.toString()
 }
 
 /**
@@ -85,8 +96,28 @@ export const formatCurrency = (number: string | number, currency: string, maxLen
   return result.replace(/^(\D+)/, '$1 ')
 }
 
+// Crypto codes need more decimals than the 2-digit fiat default — a 0.0001 ETH
+// fee is meaningful and shouldn't collapse to "< 0.01".
+const CRYPTO_CURRENCIES = new Set(['BTC', 'ETH'])
+const getPrecision = (currency: string) => (CRYPTO_CURRENCIES.has(currency.toUpperCase()) ? 6 : 2)
+
+/**
+ * Currency formatter for small fees: forces fixed precision and shows
+ * "< {currency}{min}" when the value rounds to zero (e.g. "< $0.01", "< Ξ0.000001").
+ */
+export const formatCurrencyMinimal = (number: string | number, currency: string): string => {
+  const float = Number(number)
+  const precision = getPrecision(currency)
+  const min = Math.pow(10, -precision)
+  if (float > 0 && float < min / 2) {
+    return `< ${formatCurrencyPrecise(min, currency)}`
+  }
+  return formatCurrencyPrecise(number, currency)
+}
+
 export const formatCurrencyPrecise = (number: string | number, currency: string): string => {
-  const result = getCurrencyFormatter(currency, false, 2, 2).format(Number(number))
+  const precision = getPrecision(currency)
+  const result = getCurrencyFormatter(currency, false, precision, precision).format(Number(number))
   return result.replace(/^(\D+)/, '$1 ')
 }
 

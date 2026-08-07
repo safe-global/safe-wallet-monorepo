@@ -199,7 +199,7 @@ describe('useNotificationRegistrations', () => {
 
       expect(showNotificationSpy).toHaveBeenCalledWith({
         groupKey: 'notifications',
-        message: 'You will now receive notifications for these Safe Accounts in your browser.',
+        message: 'You will now receive notifications for these Safe accounts in your browser.',
         variant: 'success',
       })
     })

@@ -84,7 +84,7 @@ describe('SpaceSafeContextMenu', () => {
     })
   })
 
-  it('shows "Give name" when safe has no name', async () => {
+  it('shows "Rename" when safe has no name', async () => {
     ;(useAppSelector as jest.Mock).mockReturnValue({})
 
     render(<SpaceSafeContextMenu safeItem={mockSafeItem} />)
@@ -93,7 +93,7 @@ describe('SpaceSafeContextMenu', () => {
     fireEvent.click(menuButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Give name')).toBeInTheDocument()
+      expect(screen.getByText('Rename')).toBeInTheDocument()
     })
   })
 
@@ -128,7 +128,7 @@ describe('SpaceSafeContextMenu', () => {
     fireEvent.click(menuButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Remove')).toBeInTheDocument()
+      expect(screen.getByText('Remove from workspace')).toBeInTheDocument()
     })
   })
 
@@ -139,7 +139,7 @@ describe('SpaceSafeContextMenu', () => {
     fireEvent.click(menuButton)
 
     await waitFor(() => {
-      expect(screen.queryByText('Remove')).not.toBeInTheDocument()
+      expect(screen.queryByText('Remove from workspace')).not.toBeInTheDocument()
     })
   })
 
@@ -167,7 +167,7 @@ describe('SpaceSafeContextMenu', () => {
     fireEvent.click(menuButton)
 
     await waitFor(() => {
-      const removeOption = screen.getByText('Remove')
+      const removeOption = screen.getByText('Remove from workspace')
       fireEvent.click(removeOption)
     })
 

@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@/src/tests/test-utils'
+import { renderHook, waitFor, type RootState } from '@/src/tests/test-utils'
 import { useTransactionData } from './useTransactionData'
 import { server } from '@/src/tests/server'
 import { http, HttpResponse } from 'msw'
@@ -304,6 +304,109 @@ describe('useTransactionData', () => {
       })
 
       expect(result.current.isFetching).toBe(false)
+      expect(result.current.data).toEqual(mockTransactionDetails)
+    })
+  })
+
+  describe('draft branch', () => {
+    const seedDraft = (safeTxHash: string, txDetails: TransactionDetails) => ({
+      draftTx: {
+        drafts: {
+          [safeTxHash]: {
+            chainId: mockActiveSafe.chainId,
+            safeAddress: mockActiveSafe.address,
+            buildParams: { to: faker.finance.ethereumAddress(), value: '0', data: '0x', nonce: 0 },
+            safeTxHash,
+            txDetails,
+          },
+        },
+      },
+    })
+
+    it('returns the synthetic draft details when CGW has no record of the tx', async () => {
+      const safeTxHash = `0x${faker.string.hexadecimal({ length: 64, prefix: '' })}`
+      const draftDetails = createMockTransactionDetails({ txId: safeTxHash })
+
+      server.use(
+        http.get(`${GATEWAY_URL}/v1/chains/${mockActiveSafe.chainId}/transactions/${safeTxHash}`, () => {
+          return HttpResponse.json({ message: 'not found' }, { status: 404 })
+        }),
+      )
+
+      const { result } = renderHook(() => useTransactionData(safeTxHash), seedDraft(safeTxHash, draftDetails))
+
+      // Synchronously fulfilled from the slice; the CGW 404 is suppressed.
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true)
+      })
+      expect(result.current.data).toBe(draftDetails)
+      expect(result.current.currentData).toBe(draftDetails)
+      expect(result.current.isError).toBe(false)
+      expect(result.current.error).toBeUndefined()
+    })
+
+    it('lets CGW data override the local draft when the server has the tx (e.g. a cosigner proposed it)', async () => {
+      const safeTxHash = `0x${faker.string.hexadecimal({ length: 64, prefix: '' })}`
+      const draftDetails = createMockTransactionDetails({ txId: safeTxHash })
+      const cgwDetails = createMockTransactionDetails({ txId: `multisig_real_${safeTxHash}` })
+
+      server.use(
+        http.get(`${GATEWAY_URL}/v1/chains/${mockActiveSafe.chainId}/transactions/${safeTxHash}`, () =>
+          HttpResponse.json(cgwDetails),
+        ),
+      )
+
+      const { result } = renderHook(() => useTransactionData(safeTxHash), seedDraft(safeTxHash, draftDetails))
+
+      await waitFor(() => {
+        expect(result.current.data).toEqual(cgwDetails)
+      })
+      expect(result.current.data).not.toBe(draftDetails)
+    })
+
+    it('drops the local draft once CGW confirms the tx so subsequent renders read straight from the query', async () => {
+      const safeTxHash = `0x${faker.string.hexadecimal({ length: 64, prefix: '' })}`
+      const draftDetails = createMockTransactionDetails({ txId: safeTxHash })
+      const cgwDetails = createMockTransactionDetails({ txId: `multisig_real_${safeTxHash}` })
+
+      server.use(
+        http.get(`${GATEWAY_URL}/v1/chains/${mockActiveSafe.chainId}/transactions/${safeTxHash}`, () =>
+          HttpResponse.json(cgwDetails),
+        ),
+      )
+
+      const hookResult = renderHook(() => useTransactionData(safeTxHash), seedDraft(safeTxHash, draftDetails))
+      const store = hookResult.store as { getState: () => RootState }
+
+      // Draft is in place initially.
+      expect(store.getState().draftTx.drafts[safeTxHash]).toBeDefined()
+
+      await waitFor(() => {
+        expect(hookResult.result.current.data).toEqual(cgwDetails)
+      })
+
+      // Once the server responds, the draft is cleared.
+      await waitFor(() => {
+        expect(store.getState().draftTx.drafts[safeTxHash]).toBeUndefined()
+      })
+    })
+
+    it('falls back to the CGW query when no matching draft exists', async () => {
+      const txId = faker.string.alphanumeric(10)
+      server.use(
+        http.get(`${GATEWAY_URL}/v1/chains/${mockActiveSafe.chainId}/transactions/${txId}`, () =>
+          HttpResponse.json(mockTransactionDetails),
+        ),
+      )
+
+      const { result } = renderHook(() => useTransactionData(txId), {
+        draftTx: { drafts: {} },
+      })
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
       expect(result.current.data).toEqual(mockTransactionDetails)
     })
   })

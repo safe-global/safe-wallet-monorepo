@@ -79,3 +79,8 @@ export { CF_TX_GROUP_KEY } from './constants'
 export { useIsCounterfactualEnabled } from './hooks/useIsCounterfactualEnabled'
 export { default as useIsCounterfactualSafe } from './hooks/useIsCounterfactualSafe'
 export { safeCreationPendingStatuses } from './hooks/safeCreationPendingStatuses'
+export { useCounterfactualBalances } from './hooks/useCounterfactualBalances'
+export { default as useCounterfactualSafeSync } from './hooks/useCounterfactualSafeSync'
+
+export { default as PayNowPayLater } from './components/PayNowPayLater'
+export { LoopIcon } from './components/CounterfactualStatusButton'

@@ -1,6 +1,5 @@
 import { useContext } from 'react'
 import { SlotName, withSlot } from '../slots'
-import { FEATURES } from '@/utils/featureToggled'
 import { Card, Checkbox, FormControlLabel, Typography } from '@mui/material'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
@@ -23,7 +22,7 @@ export const RiskConfirmation = () => {
   }
 
   return (
-    <Card sx={{ px: 1, backgroundColor: 'background.main' }}>
+    <Card sx={{ px: 1 }}>
       <Track {...MODALS_EVENTS.ACCEPT_RISK}>
         <FormControlLabel
           data-testid="risk-confirmation-checkbox"
@@ -48,7 +47,6 @@ const RiskConfirmationSlot = withSlot({
   Component: RiskConfirmation,
   slotName: SlotName.Footer,
   id: 'riskConfirmation',
-  feature: FEATURES.RISK_MITIGATION,
   useSlotCondition,
 })
 

@@ -33,7 +33,11 @@ export function SignForm({ txId, riskAcknowledged, onRiskAcknowledgedChange, sho
               label="I understand the risks and would like to proceed with transaction."
             />
           )}
-          <SafeButton onPress={onSignPress} disabled={showRiskCheckbox && !riskAcknowledged}>
+          <SafeButton
+            testID="sign-transaction-continue-button"
+            onPress={onSignPress}
+            disabled={showRiskCheckbox && !riskAcknowledged}
+          >
             Continue
           </SafeButton>
         </YStack>

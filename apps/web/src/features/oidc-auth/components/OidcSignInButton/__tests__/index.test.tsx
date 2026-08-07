@@ -23,7 +23,7 @@ jest.mock('@/hooks/useChains', () => ({
 const testEvent = { action: 'Test action', category: 'test' }
 const TestIcon = () => <span data-testid="test-icon" />
 
-const renderButton = () =>
+const renderButton = (variant?: 'primary' | 'secondary') =>
   render(
     <OidcSignInButton
       connection={OidcConnection.EMAIL}
@@ -31,6 +31,7 @@ const renderButton = () =>
       icon={<TestIcon />}
       analyticsEvent={testEvent}
       testId="test-btn"
+      variant={variant}
     />,
   )
 
@@ -70,5 +71,20 @@ describe('OidcSignInButton', () => {
     fireEvent.click(screen.getByTestId('test-btn'))
 
     expect(mockLoginWithRedirect).toHaveBeenCalledWith(OidcConnection.EMAIL)
+  })
+
+  // The primary variant maps to the sidebar-primary token pair, which does not
+  // flip to Safe-green in dark mode like shadcn's --primary does — keeping the
+  // Google "G" legible against the button surface.
+  it('applies the sidebar-primary token classes when variant="primary"', () => {
+    renderButton('primary')
+
+    expect(screen.getByTestId('test-btn').className).toContain('bg-sidebar-primary')
+  })
+
+  it('does not apply the sidebar-primary token classes when variant defaults to secondary', () => {
+    renderButton()
+
+    expect(screen.getByTestId('test-btn').className).not.toContain('bg-sidebar-primary')
   })
 })

@@ -1,5 +1,5 @@
 import type { Chain as ChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { SafeVersion } from '@safe-global/types-kit'
+import type { SafeTransaction, SafeVersion } from '@safe-global/types-kit'
 import { generateTypedData } from '@safe-global/protocol-kit'
 import { SigningMethod } from '@safe-global/types-kit'
 import { TypedDataEncoder } from 'ethers'
@@ -17,6 +17,12 @@ export interface WalletConnectSigningParams {
   signerAddress: string
   safeVersion: SafeVersion
   provider: Provider
+  /**
+   * Pre-built SafeTransaction for un-proposed (draft) transactions. When
+   * supplied, the service signs this transaction directly instead of
+   * fetching its data from CGW by `txId`.
+   */
+  prebuiltSafeTx?: SafeTransaction
 }
 
 export interface SigningResponse {
@@ -24,12 +30,31 @@ export interface SigningResponse {
   safeTransactionHash: string
 }
 
-export const signWithWalletConnect = async (params: WalletConnectSigningParams): Promise<SigningResponse> => {
-  const { chain, activeSafe, txId, signerAddress, safeVersion, provider } = params
+// domain.chainId → number (EIP-712 uint256; a string is rejected by strict wallets), scoped to
+// the domain so a chainId elsewhere in the message isn't coerced. All other bigints → string to
+// keep uint256 precision. Exported for the hash-preservation test.
+export const stringifyTypedData = (typedData: { domain: { chainId?: bigint | number } }): string => {
+  const { chainId } = typedData.domain
+  if (typeof chainId === 'bigint' && chainId > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new Error(`chainId ${chainId} exceeds Number.MAX_SAFE_INTEGER`)
+  }
+  const domain = typeof chainId === 'bigint' ? { ...typedData.domain, chainId: Number(chainId) } : typedData.domain
+  return JSON.stringify({ ...typedData, domain }, (_key, value) =>
+    typeof value === 'bigint' ? value.toString() : value,
+  )
+}
 
-  const txDetails = await fetchTransactionDetails(activeSafe.chainId, txId)
-  const { txParams, signatures } = extractTxInfo(txDetails, activeSafe.address)
-  const safeTx = await createExistingTx(txParams, signatures)
+export const signWithWalletConnect = async (params: WalletConnectSigningParams): Promise<SigningResponse> => {
+  const { chain, activeSafe, txId, signerAddress, safeVersion, provider, prebuiltSafeTx } = params
+
+  let safeTx: SafeTransaction
+  if (prebuiltSafeTx) {
+    safeTx = prebuiltSafeTx
+  } else {
+    const txDetails = await fetchTransactionDetails(activeSafe.chainId, txId)
+    const { txParams, signatures } = extractTxInfo(txDetails, activeSafe.address)
+    safeTx = await createExistingTx(txParams, signatures)
+  }
 
   const typedData = generateTypedData({
     safeAddress: activeSafe.address,
@@ -53,7 +78,7 @@ export const signWithWalletConnect = async (params: WalletConnectSigningParams):
 
   const signature = await provider.request({
     method: SigningMethod.ETH_SIGN_TYPED_DATA_V4,
-    params: [signerAddress, JSON.stringify(typedData)],
+    params: [signerAddress, stringifyTypedData(typedData)],
   })
 
   if (typeof signature !== 'string') {
@@ -63,7 +88,7 @@ export const signWithWalletConnect = async (params: WalletConnectSigningParams):
   logger.info('Successfully signed transaction via WalletConnect', {
     signerAddress,
     safeTransactionHash,
-    txId,
+    ...(prebuiltSafeTx ? {} : { txId }),
   })
 
   return {

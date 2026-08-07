@@ -13,7 +13,7 @@ import { isTransactionListItem } from '@/utils/transaction-guards'
 import NoTransactionsIcon from '@/public/images/transactions/no-transactions.svg'
 import { useHasPendingTxs } from '@/hooks/usePendingTxs'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useRecoveryQueue } from '@/features/recovery/hooks/useRecoveryQueue'
+import { useRecoveryQueue } from '@/features/recovery'
 import { isSamePage } from '@/utils/tx-list'
 
 const NoQueuedTxns = () => {
@@ -93,7 +93,7 @@ const PaginatedTxns = ({
   const [loadedPages, setLoadedPages] = useState<Map<string, QueuedItemPage>>(new Map())
   const lastPageItemsRef = useRef<QueuedItemPage[]>([])
 
-  // Reset the pages when the Safe Account or filter changes
+  // Reset the pages when the Safe account or filter changes
   useEffect(() => {
     setPages([''])
   }, [filter, safe.chainId, safeAddress, useTxns])

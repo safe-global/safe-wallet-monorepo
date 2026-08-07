@@ -1,5 +1,5 @@
 import NavTabs from '@/components/common/NavTabs'
-import { transactionNavItems } from '@/components/sidebar/SidebarNavigation/config'
+import { transactionNavItems } from '@/components/common/NavTabs/navItemsConfig'
 import { AppRoutes } from '@/config/routes'
 import { useHasFeature } from '@/hooks/useChains'
 

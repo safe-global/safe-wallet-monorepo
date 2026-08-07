@@ -52,7 +52,7 @@ function IconRow({
 export function SelectRecipientContainer() {
   const router = useRouter()
   const { bottom } = useSafeAreaInsets()
-  const { scannedAddress, scanTimestamp } = useLocalSearchParams<{ scannedAddress?: string; scanTimestamp?: string }>()
+  const { scannedAddress, scanNonce } = useLocalSearchParams<{ scannedAddress?: string; scanNonce?: string }>()
   const activeSafe = useDefinedActiveSafe()
   const chain = useAppSelector((state) => selectChainById(state, activeSafe.chainId))
   const chainName = chain?.chainName ?? 'this network'
@@ -65,7 +65,7 @@ export function SelectRecipientContainer() {
       setAddress(scannedAddress)
       setRecipientName(undefined)
     }
-  }, [scannedAddress, scanTimestamp])
+  }, [scannedAddress, scanNonce])
 
   const validation = useRecipientValidation(address)
   const searchResults = useRecipientSearch(address)

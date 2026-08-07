@@ -33,4 +33,10 @@ export const ATTENTION_PANEL_EVENTS = {
     action: 'Trust Safe from warning',
     category: ATTENTION_PANEL_CATEGORY,
   },
+
+  // Vulnerable Zodiac module
+  READ_MORE_VULNERABLE_MODULE: {
+    action: 'Read more about vulnerable module',
+    category: ATTENTION_PANEL_CATEGORY,
+  },
 }

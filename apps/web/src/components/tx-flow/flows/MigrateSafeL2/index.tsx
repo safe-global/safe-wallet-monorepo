@@ -5,7 +5,7 @@ import { TxFlow } from '../../TxFlow'
 const MigrateSafeL2Flow = () => (
   <TxFlow
     icon={SettingsIcon}
-    subtitle="Update Safe Account base contract"
+    subtitle="Update Safe account base contract"
     ReviewTransactionComponent={MigrateSafeL2Review}
   />
 )

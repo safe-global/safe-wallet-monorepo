@@ -1,0 +1,22 @@
+/* Scoped tweaks for the staking promo banner (defaults from PromoBanner otherwise). */
+
+.stakingPromoBanner {
+  --promo-banner-radius: 12px;
+}
+
+/* 24px padding */
+.stakingPromoBanner :global(.MuiPaper-root) {
+  padding: 24px;
+}
+
+/* 16px gap between the illustration and the content column */
+.stakingPromoBanner :global(.MuiStack-root) > :global(* + *) {
+  margin-left: 16px;
+}
+
+/* Coin illustration: 55px wide, aligned to the top */
+.stakingPromoBanner img {
+  width: 55px;
+  height: auto;
+  align-self: flex-start;
+}

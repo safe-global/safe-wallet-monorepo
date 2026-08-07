@@ -1,13 +1,17 @@
 import { useState } from 'react'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { type GetSpaceResponse, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { sanitizeName } from '@safe-global/utils/validation/names'
 
 export type UpdateSpaceFormData = {
   name: string
 }
 
-export const useUpdateSpace = (space: GetSpaceResponse | undefined) => {
+export const useUpdateSpace = (space: GetSpaceResponse | undefined, onSuccess?: () => void) => {
   const [error, setError] = useState<string>()
   const dispatch = useAppDispatch()
   const [updateSpace] = useSpacesUpdateV1Mutation()
@@ -20,18 +24,20 @@ export const useUpdateSpace = (space: GetSpaceResponse | undefined) => {
     }
 
     try {
-      await updateSpace({ id: space.id, updateSpaceDto: { name: data.name } })
+      await updateSpace({ id: space.uuid, updateSpaceDto: { name: sanitizeName(data.name) } }).unwrap()
 
       dispatch(
         showNotification({
           variant: 'success',
-          message: 'Updated space name',
+          message: 'Updated workspace name',
           groupKey: 'space-update-name',
         }),
       )
+
+      onSuccess?.()
     } catch (e) {
       console.error(e)
-      setError('Error updating the space. Please try again.')
+      setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
     }
   }
 

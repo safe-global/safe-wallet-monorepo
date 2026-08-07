@@ -60,7 +60,15 @@ export function usePortalContainerElement(): HTMLDivElement | null {
   return ctx?.element ?? null
 }
 
-export function ShadcnProvider({ children, dark }: { children: ReactNode; dark?: boolean }) {
+export function ShadcnProvider({
+  children,
+  dark,
+  className,
+}: {
+  children: ReactNode
+  dark?: boolean
+  className?: string
+}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [element, setElement] = useState<HTMLDivElement | null>(null)
 
@@ -75,7 +83,7 @@ export function ShadcnProvider({ children, dark }: { children: ReactNode; dark?:
 
   return (
     <PortalContainerContext.Provider value={value}>
-      <div className={cn('shadcn-scope', dark && 'dark')} ref={callbackRef}>
+      <div className={cn('shadcn-scope', dark && 'dark', className)} ref={callbackRef}>
         {children}
       </div>
     </PortalContainerContext.Provider>

@@ -1,4 +1,4 @@
-import { asError } from '../utils'
+import { asError, getHttpStatusFromError } from '../utils'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 
 describe('utils', () => {
@@ -91,6 +91,37 @@ describe('utils', () => {
       const result = asError(thrown)
       expect(result.message).toBe('HTTP Error 500')
       expect(result.status).toBe(500)
+    })
+  })
+
+  describe('getHttpStatusFromError', () => {
+    it('reads a numeric status property (RTK Query / asError)', () => {
+      expect(getHttpStatusFromError({ status: 422 })).toBe(422)
+      expect(getHttpStatusFromError(Object.assign(new Error('x'), { status: 404 }))).toBe(404)
+    })
+
+    it('reads a numeric statusCode property', () => {
+      expect(getHttpStatusFromError({ statusCode: 429 })).toBe(429)
+    })
+
+    it('parses the status from a CGW SDK error message', () => {
+      expect(getHttpStatusFromError(new Error('CGW error - 422: Invalid transaction'))).toBe(422)
+    })
+
+    it('parses a wrapped CGW SDK error message', () => {
+      expect(getHttpStatusFromError(new Error('Code 805: Error proposing (CGW error - 400: Bad request)'))).toBe(400)
+    })
+
+    it('ignores non-HTTP numbers (CGW internal codes, string statuses)', () => {
+      expect(getHttpStatusFromError(new Error('CGW error - 1337: Some internal code'))).toBeUndefined()
+      expect(getHttpStatusFromError({ status: 'FETCH_ERROR' })).toBeUndefined()
+      expect(getHttpStatusFromError({ status: 42 })).toBeUndefined()
+    })
+
+    it('returns undefined when no status is present', () => {
+      expect(getHttpStatusFromError(new Error('something broke'))).toBeUndefined()
+      expect(getHttpStatusFromError(undefined)).toBeUndefined()
+      expect(getHttpStatusFromError('string error')).toBeUndefined()
     })
   })
 })

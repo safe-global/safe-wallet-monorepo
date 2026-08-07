@@ -70,7 +70,6 @@ describe('HiddenTokenToggle', () => {
           hiddenTokens: mockHiddenAssets,
           tokenList: TOKEN_LISTS.ALL,
           shortName: {
-            copy: true,
             qr: true,
           },
           theme: {

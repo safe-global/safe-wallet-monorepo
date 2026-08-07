@@ -47,7 +47,7 @@ const OwnerRow = ({
   const validateOwnerAddress = useCallback(
     async (address: string) => {
       if (sameAddress(address, safeAddress)) {
-        return 'The Safe Account cannot own itself'
+        return 'The Safe account cannot own itself'
       }
       const owners = getValues('owners')
       if (owners.filter((owner: NamedAddress) => sameAddress(owner.address, address)).length > 1) {

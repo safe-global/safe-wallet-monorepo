@@ -185,7 +185,7 @@ describe('useImportLedgerAddress', () => {
       expect(importResult).toEqual({ success: false })
       expect(result.current.error).toEqual({
         code: 'OWNER_VALIDATION',
-        message: 'This address is not an owner of the Safe Account',
+        message: 'This address is not an owner of the Safe account',
       })
       expect(result.current.isImporting).toBe(false)
     })

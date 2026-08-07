@@ -54,7 +54,7 @@ export const useImportLedgerAddress = () => {
         if (!validationResult.isOwner) {
           setError({
             code: 'OWNER_VALIDATION',
-            message: 'This address is not an owner of the Safe Account',
+            message: 'This address is not an owner of the Safe account',
           })
           setIsImporting(false)
           return { success: false }

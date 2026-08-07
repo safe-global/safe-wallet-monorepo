@@ -1,5 +1,4 @@
 import * as constants from '../../support/constants.js'
-import * as owner from '../pages/owners.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as proposer from '../pages/proposers.pages.js'
@@ -23,9 +22,8 @@ describe('Proposers 2 tests', () => {
   })
 
   it('Verify a proposers is capable of propose transactions', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_33)
+    wallet.connectSignerViaStorage(signer2, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_33)
     assets.toggleHideDust(false)
-    wallet.connectSigner(signer2)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
     createtx.typeRecipientAddress(getMockAddress())
@@ -35,41 +33,26 @@ describe('Proposers 2 tests', () => {
   })
 
   it('Verify a proposers cannot confirm a transaction', () => {
-    cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_31)
-    wallet.connectSigner(signer2)
+    wallet.connectSignerViaStorage(signer2, constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_31)
     tx.verifyTxConfirmBtnDisabled()
   })
 
   it('Verify a proposer cannot edit himself', () => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
-    wallet.connectSigner(signer2)
+    wallet.connectSignerViaStorage(signer2, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
     proposer.verifyEditProposerBtnDisabled(proposerAddress)
   })
 
   it('Verify a proposer cannot edit or remove other proposers', () => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_33)
-    wallet.connectSigner(signer2)
+    wallet.connectSignerViaStorage(signer2, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_33)
     proposer.verifyEditProposerBtnDisabled(proposerAddress_2)
     proposer.verifyDeleteProposerBtnIsDisabled(proposerAddress_2)
   })
 
   it('Verify that deleting a proposer is only possible by creator', () => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_33)
-    wallet.connectSigner(signer3)
+    wallet.connectSignerViaStorage(signer3, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_33)
     proposer.verifyEditProposerBtnDisabled(proposerAddress_2)
     proposer.verifyDeleteProposerBtnIsDisabled(proposerAddress_2)
     proposer.verifyEditProposerBtnDisabled(proposerAddress)
     proposer.verifyDeleteProposerBtnIsDisabled(proposerAddress)
-  })
-
-  //TODO: Unskip when tenderly visibilty bug is solved
-  it.skip('Verify a Tenderly simulation can be performed while proposing a tx', () => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_33)
-    wallet.connectSigner(signer2)
-    owner.openAddOwnerWindow()
-    owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
-    owner.clickOnNextBtn()
-    createtx.clickOnSimulateTxBtn()
-    createtx.verifySuccessfulSimulation()
   })
 })

@@ -8,8 +8,7 @@ import type {
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { useTransactionData } from '@/src/features/ConfirmTx/hooks/useTransactionData'
 import useSafeTx from '@/src/hooks/useSafeTx'
 import { Image, Text, View } from 'tamagui'
 import { ToastViewport } from '@tamagui/toast'
@@ -23,17 +22,7 @@ export const SafeShieldDetailsSheetContainer = () => {
     txId?: string
   }>()
 
-  const activeSafe = useDefinedActiveSafe()
-
-  const { data: txDetails } = useTransactionsGetTransactionByIdV1Query(
-    {
-      chainId: activeSafe.chainId,
-      id: txId || '',
-    },
-    {
-      skip: !txId,
-    },
-  )
+  const { data: txDetails } = useTransactionData(txId || '')
 
   const safeTx = useSafeTx(txDetails)
 

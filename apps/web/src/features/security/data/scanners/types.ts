@@ -43,6 +43,13 @@ export type ScanResult = {
   lastChecked: string
   ctaLabelOverride?: string
   partner?: 'hypernative'
+  /**
+   * Set by the modules scanner when the Safe is affected by a known Zodiac module
+   * vulnerability. Defined means "affected"; the array holds the installed module
+   * addresses we can offer to remove (empty when the Safe is only implicated via a
+   * related Safe and has no directly removable module).
+   */
+  vulnerableModules?: string[]
 }
 
 export type ScannerId =
@@ -56,7 +63,6 @@ export type ScannerId =
   | 'transaction_scanning'
   | 'fallback_handler'
   | 'factory_validation'
-  | 'signer_integrity'
 
 export type SecurityScanner = {
   id: ScannerId

@@ -4,8 +4,8 @@ export type { SafeSetup, SafeOrMultichainSafe, CreateSafeOnNewChainForm } from '
 
 export { MIN_SAFE_VERSION_FOR_MULTICHAIN } from './constants'
 
-export { useIsMultichainSafe, useSafeCreationData, useAddNetworkState } from './hooks'
-export type { AddNetworkState, AddNetworkUnavailableReason, AvailableNetwork } from './hooks'
+export { useIsMultichainSafe, useSafeCreationData, useAddNetworkState, useMastercopyMigration } from './hooks'
+export type { AddNetworkState, AddNetworkUnavailableReason, AvailableNetwork, MastercopyMigration } from './hooks'
 
 export {
   isMultiChainSafeItem,
@@ -18,6 +18,9 @@ export {
   hasMultiChainAddNetworkFeature,
 } from './utils'
 
+// Static export — the pill is tiny and always visible in its consumers' first paint
+export { default as NetworkLogosPill } from './components/NetworkLogosPill'
+
 const CreateSafeOnNewChain = dynamic(() =>
   import('./components/CreateSafeOnNewChain').then((mod) => ({ default: mod.CreateSafeOnNewChain })),
 )
@@ -27,6 +30,8 @@ const CreateSafeOnSpecificChain = dynamic(() =>
 )
 
 const NetworkLogosList = dynamic(() => import('./components/NetworkLogosList'))
+
+const NetworkLogosTooltip = dynamic(() => import('./components/NetworkLogosTooltip'))
 
 const SafeCreationNetworkInput = dynamic(() => import('./components/SafeCreationNetworkInput'))
 
@@ -48,15 +53,9 @@ const ChainIndicatorList = dynamic(() =>
   })),
 )
 
-const UnsupportedMastercopyWarning = dynamic(() =>
-  import('./components/UnsupportedMastercopyWarning/UnsupportedMasterCopyWarning').then((mod) => ({
-    default: mod.UnsupportedMastercopyWarning,
-  })),
-)
-
-const OutdatedMastercopyWarning = dynamic(() =>
-  import('./components/OutdatedMastercopyWarning/OutdatedMastercopyWarning').then((mod) => ({
-    default: mod.OutdatedMastercopyWarning,
+const MastercopyWarning = dynamic(() =>
+  import('./components/MastercopyWarning/MastercopyWarning').then((mod) => ({
+    default: mod.MastercopyWarning,
   })),
 )
 
@@ -64,10 +63,10 @@ export {
   CreateSafeOnNewChain,
   CreateSafeOnSpecificChain,
   NetworkLogosList,
+  NetworkLogosTooltip,
   SafeCreationNetworkInput,
   ChangeSignerSetupWarning,
   InconsistentSignerSetupWarning,
   ChainIndicatorList,
-  UnsupportedMastercopyWarning,
-  OutdatedMastercopyWarning,
+  MastercopyWarning,
 }

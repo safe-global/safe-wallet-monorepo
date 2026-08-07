@@ -2,6 +2,7 @@ import { type ReactElement } from 'react'
 import { Skeleton, Stack, SvgIcon, Tooltip, Typography } from '@mui/material'
 import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+// eslint-disable-next-line no-restricted-imports -- routing SeverityIcon through the safe-shield barrel closes a hypernative<->safe-shield module-init cycle (TDZ)
 import { SeverityIcon as SeverityIconSafeShield } from '@/features/safe-shield/components/SeverityIcon'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'

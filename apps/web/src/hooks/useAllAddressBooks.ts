@@ -2,14 +2,13 @@ import { useAppSelector } from '@/store'
 import { type AddressBook, selectAddressBookByChain, selectAllAddressBooks } from '@/store/addressBookSlice'
 import { type SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import useChainId from '@/hooks/useChainId'
-import { useGetSpaceAddressBook, useGetPrivateAddressBook } from '@/features/spaces'
+import { useGetSpaceAddressBook } from '@/features/spaces'
 import { useAddressBookSource } from '@/components/common/AddressBookSourceProvider'
 
 export enum ContactSource {
   space = 'space',
-  private = 'private',
   local = 'local',
 }
 
@@ -39,16 +38,8 @@ const mapSpaceToContacts = (addressBook: SpaceAddressBookItemDto[]): ExtendedCon
   }))
 }
 
-const mapPrivateToContacts = (addressBook: SpaceAddressBookItemDto[]): ExtendedContact[] => {
-  if (!addressBook) return []
-
-  return addressBook.map<ExtendedContact>((entry) => ({
-    ...entry,
-    source: ContactSource.private,
-  }))
-}
-
-const addressBookKey = (address: string, chainId: string) => `${chainId}:${address.toLowerCase()}`
+const addressBookKey = (address: string, chainId: string) =>
+  `${chainId}:${typeof address === 'string' ? address.toLowerCase() : address}`
 
 export type MergedAddressBook = {
   list: ExtendedContact[]
@@ -62,7 +53,6 @@ export const useMergedAddressBooks = (chainId?: string): MergedAddressBook => {
   const fallbackChainId = useChainId()
   const actualChainId = chainId ?? fallbackChainId
   const spaceAddressBook = useGetSpaceAddressBook()
-  const privateAddressBook = useGetPrivateAddressBook()
   const localAddressBook = useAppSelector((state) => selectAddressBookByChain(state, actualChainId))
 
   return useMemo<MergedAddressBook>(() => {
@@ -71,7 +61,6 @@ export const useMergedAddressBooks = (chainId?: string): MergedAddressBook => {
     const byKeyLocal = new Map<string, ExtendedContact>()
 
     const spaceContacts = mapSpaceToContacts(spaceAddressBook)
-    const privateContacts = mapPrivateToContacts(privateAddressBook)
     const localContacts = mapLocalToContacts(localAddressBook, actualChainId)
 
     // Priority 1: Space contacts (highest)
@@ -83,17 +72,7 @@ export const useMergedAddressBooks = (chainId?: string): MergedAddressBook => {
       }
     }
 
-    // Priority 2: Private contacts
-    for (const privateContact of privateContacts) {
-      for (const cid of privateContact.chainIds) {
-        const key = addressBookKey(privateContact.address, cid)
-        if (!byKeyMerged.has(key)) {
-          byKeyMerged.set(key, { ...privateContact, chainIds: [cid] })
-        }
-      }
-    }
-
-    // Priority 3: Local contacts (lowest)
+    // Priority 2: Local contacts (lowest)
     for (const localContact of localContacts) {
       const key = addressBookKey(localContact.address, actualChainId)
 
@@ -104,33 +83,22 @@ export const useMergedAddressBooks = (chainId?: string): MergedAddressBook => {
       }
     }
 
-    // Build list: space + non-duplicate private + non-duplicate local
-    // Private keeps any chainIds not covered by a matching space entry
-    const filteredPrivate = privateContacts.flatMap((priv) => {
-      const spaceChainIds = new Set(
-        spaceContacts.filter((space) => sameAddress(space.address, priv.address)).flatMap((space) => space.chainIds),
-      )
-      const remainingChainIds = priv.chainIds.filter((cid) => !spaceChainIds.has(cid))
-      return remainingChainIds.length > 0 ? [{ ...priv, chainIds: remainingChainIds }] : []
-    })
+    // Build list: space + non-duplicate local
     const filteredLocal = localContacts.filter(
       (local) =>
         !spaceContacts.some(
           (space) => sameAddress(space.address, local.address) && space.chainIds.includes(actualChainId),
-        ) &&
-        !privateContacts.some(
-          (priv) => sameAddress(priv.address, local.address) && priv.chainIds.includes(actualChainId),
         ),
     )
 
-    const list = [...spaceContacts, ...filteredPrivate, ...filteredLocal]
+    const list = [...spaceContacts, ...filteredLocal]
     const get = (address: string, chainId: string) => byKeyMerged.get(addressBookKey(address, chainId))
     const has = (address: string, chainId: string) => byKeyMerged.has(addressBookKey(address, chainId))
     const getFromSpace = (address: string, cid: string) => byKeySpace.get(addressBookKey(address, cid))
     const getFromLocal = (address: string, cid: string) => byKeyLocal.get(addressBookKey(address, cid))
 
     return { list, get, has, getFromSpace, getFromLocal }
-  }, [actualChainId, localAddressBook, spaceAddressBook, privateAddressBook])
+  }, [actualChainId, localAddressBook, spaceAddressBook])
 }
 
 /**
@@ -161,6 +129,54 @@ export const useAddressBookItem = (address: string, chainId: string | undefined)
 
     return undefined
   }, [chainId, source, getFromLocal, address, get])
+}
+
+/**
+ * Returns a source-aware resolver for safe display names, mirroring {@link useSafeDisplayName}
+ * (`preferredName > address book`) but usable across many addresses without a hook per item.
+ *
+ * Use this only to resolve names in bulk inside a loop / filter / sort (e.g. the account dropdown
+ * search) — the visible name often comes from the address book, not the safe's own `name`, so
+ * filtering the raw name misses those safes. For a single name in a component use the lighter
+ * {@link useSafeDisplayName} instead.
+ *
+ * Keep the source priority below in sync with {@link useSafeDisplayName}/{@link useAddressBookItem}:
+ * this is the array-friendly twin of that per-item hook, so the two must resolve names identically.
+ */
+export const useSafeNameResolver = (): ((
+  address: string,
+  chainId: string | undefined,
+  preferredName?: string,
+) => string) => {
+  const { get } = useMergedAddressBooks()
+  const allLocal = useAppSelector(selectAllAddressBooks)
+  const source = useAddressBookSource()
+
+  // Flatten every chain's local book into a lowercased lookup so names on chains other than the
+  // currently-loaded one still resolve (the merged map only carries the current chain's locals).
+  const localByKey = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const [cid, book] of Object.entries(allLocal)) {
+      for (const [addr, name] of Object.entries(book)) {
+        map.set(addressBookKey(addr, cid), name)
+      }
+    }
+    return map
+  }, [allLocal])
+
+  return useCallback(
+    (address, chainId, preferredName) => {
+      if (preferredName) return preferredName
+      if (!chainId) return ''
+      const localName = localByKey.get(addressBookKey(address, chainId))
+      if (source === 'localOnly') return localName ?? ''
+      const item = get(address, chainId)
+      if (source === 'spaceOnly') return item?.source === ContactSource.space ? (item.name ?? '') : ''
+      // merged: space (cross-chain) takes priority, then any chain's local
+      return item?.name ?? localName ?? ''
+    },
+    [get, source, localByKey],
+  )
 }
 
 // Returns all local address books

@@ -16,6 +16,7 @@ enum ErrorCodes {
   _107 = '107: Error connecting to the wallet',
   _108 = '108: Error disconnecting the wallet',
   _109 = '109: Error signing out',
+  _110 = '110: Failed to copy to clipboard',
 
   _200 = '200: Tenderly simulation failed',
   _201 = '201: Blockaid scan failed',
@@ -38,11 +39,13 @@ enum ErrorCodes {
   _616 = '616: Failed to retrieve recommended nonce',
   _619 = '619: Error fetching data from master-copies',
   _620 = '620: Error loading chains',
+  _621 = '621: Error checking modules for known vulnerabilities',
   _630 = '630: Error fetching remaining daily relays',
   _631 = '631: Transaction failed to be relayed',
   _632 = '632: Error fetching relay task status',
   _633 = '633: Notification (un-)registration failed',
   _640 = '640: Error signing in with Ethereum',
+  _650 = '650: Error syncing counterfactual safes with backend',
 
   _700 = '700: Failed to read from local/session storage',
   _701 = '701: Failed to write to local/session storage',
@@ -73,6 +76,7 @@ enum ErrorCodes {
   _818 = '818: Error validating transaction data',
   _819 = '819: Error adding a transaction to the batch',
   _820 = '820: Error signing or submitting delegation',
+  _821 = '821: Untrusted gas-fee refundReceiver returned by CGW',
 
   _900 = '900: Error loading Safe App',
   _901 = '901: Error processing Safe Apps SDK request',

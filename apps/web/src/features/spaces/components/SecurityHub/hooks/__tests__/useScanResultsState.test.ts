@@ -120,6 +120,24 @@ describe('useScanResultsState', () => {
     expect(result.current.lastScannedAt).toBe(1000)
   })
 
+  it('does not re-clear when returning to the same space after a null id', () => {
+    const { result, rerender } = renderHook(() => useScanResultsState(mkSecurity()))
+
+    act(() => {
+      result.current.handleScanComplete(SAFE_A, CHAIN, 1000, { account_setup: mkResult() })
+    })
+
+    // Transient null (e.g. route in flux) must not wipe results...
+    useCurrentSpaceIdMock.mockReturnValue(null)
+    rerender()
+    // ...and settling back to the same space must not wipe them either.
+    useCurrentSpaceIdMock.mockReturnValue('space-1')
+    rerender()
+
+    expect(result.current.lastScannedAt).toBe(1000)
+    expect(result.current.allScanResults[`${SAFE_A}:${CHAIN}`]).toBeDefined()
+  })
+
   it('does not clear state when the current space ID is null', () => {
     useCurrentSpaceIdMock.mockReturnValue('space-1')
     const { result, rerender } = renderHook(() => useScanResultsState(mkSecurity()))

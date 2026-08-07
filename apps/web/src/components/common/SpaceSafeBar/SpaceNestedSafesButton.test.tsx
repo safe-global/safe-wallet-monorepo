@@ -1,6 +1,16 @@
 import { render, screen, fireEvent } from '@testing-library/react'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
+import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import SpaceNestedSafesButton from './SpaceNestedSafesButton'
+
+jest.mock('next/router', () => ({
+  useRouter: jest.fn(),
+}))
+jest.mock('@/hooks/safe-apps/useSafeAppUrl', () => ({
+  useSafeAppUrl: jest.fn(),
+}))
 
 const mockStartFiltering = jest.fn()
 
@@ -27,7 +37,7 @@ jest.mock('@/hooks/useNestedSafesVisibility', () => ({
   useNestedSafesVisibility: jest.fn(),
 }))
 
-jest.mock('@/components/sidebar/NestedSafesPopover', () => ({
+jest.mock('@/components/nested-safes/NestedSafesPopover', () => ({
   NestedSafesPopover: (props: Record<string, unknown>) => (
     <div data-testid="nested-safes-popover" data-open={String(!!props.anchorEl)} />
   ),
@@ -68,6 +78,8 @@ describe('SpaceNestedSafesButton', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
+    jest.mocked(useRouter).mockReturnValue({ pathname: '/', query: {} } as unknown as ReturnType<typeof useRouter>)
+    jest.mocked(useSafeAppUrl).mockReturnValue(undefined)
     mockUseSafeInfo.mockReturnValue({
       safe: { chainId: '1', address: { value: '0xSafe1' }, deployed: true },
     })
@@ -247,6 +259,47 @@ describe('SpaceNestedSafesButton', () => {
       expect(button.className).not.toMatch(/opacity-50/)
       expect(screen.getByText('Nested Safes')).toBeInTheDocument()
       expect(screen.queryByText('Nested Safes are not allowed in this screen')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('disabled while inside an opened Safe App', () => {
+    it('disables the button on /apps/open with an appUrl', () => {
+      jest.mocked(useRouter).mockReturnValue({
+        pathname: AppRoutes.apps.open,
+        query: { appUrl: 'https://example-safe-app.test' },
+      } as unknown as ReturnType<typeof useRouter>)
+      jest.mocked(useSafeAppUrl).mockReturnValue('https://example-safe-app.test')
+
+      render(<SpaceNestedSafesButton />)
+
+      const button = screen.getByTestId('nested-safes-button')
+      expect(button).toBeDisabled()
+      expect(screen.getByText('Nested Safes are not allowed in this screen')).toBeInTheDocument()
+    })
+
+    it('does not disable the button on /apps/open without an appUrl', () => {
+      jest
+        .mocked(useRouter)
+        .mockReturnValue({ pathname: AppRoutes.apps.open, query: {} } as unknown as ReturnType<typeof useRouter>)
+
+      render(<SpaceNestedSafesButton />)
+
+      const button = screen.getByTestId('nested-safes-button')
+      expect(button).not.toBeDisabled()
+      expect(screen.getByText('Nested Safes')).toBeInTheDocument()
+    })
+
+    it('does not disable the button on /apps/custom', () => {
+      jest.mocked(useRouter).mockReturnValue({
+        pathname: AppRoutes.apps.custom,
+        query: { safe: 'eth:0xSafe1' },
+      } as unknown as ReturnType<typeof useRouter>)
+
+      render(<SpaceNestedSafesButton />)
+
+      const button = screen.getByTestId('nested-safes-button')
+      expect(button).not.toBeDisabled()
+      expect(screen.getByText('Nested Safes')).toBeInTheDocument()
     })
   })
 })

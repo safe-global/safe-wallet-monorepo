@@ -51,7 +51,9 @@ const Disclaimer = ({
           >
             {title}
           </Typography>
-          <Typography variant="body2">{content}</Typography>
+          <Typography variant="body2" component="div">
+            {content}
+          </Typography>
           <Divider />
         </Stack>
         <Box

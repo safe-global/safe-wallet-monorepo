@@ -2,11 +2,13 @@ import EnhancedTable from '@/components/common/EnhancedTable'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
-import UpsertProposer from '@/features/proposers/components/UpsertProposer'
-import DeleteProposerDialog from '@/features/proposers/components/DeleteProposerDialog'
-import EditProposerDialog from '@/features/proposers/components/EditProposerDialog'
-import PendingDelegationsList from '@/features/proposers/components/PendingDelegationsList'
-import { useParentSafeThreshold } from '@/features/proposers/hooks/useParentSafeThreshold'
+import {
+  UpsertProposer,
+  DeleteProposerDialog,
+  EditProposerDialog,
+  PendingDelegationsList,
+  useParentSafeThreshold,
+} from '@/features/proposers'
 import { useHasFeature } from '@/hooks/useChains'
 import useProposers from '@/hooks/useProposers'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'

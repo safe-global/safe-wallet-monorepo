@@ -21,7 +21,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading = false }: SignedOutState
           </Typography>
 
           <Typography color="text.secondary" mb={2}>
-            To view and interact with spaces, you need to sign in with the wallet, that is a member of the space
+            To view and interact with workspaces, you need to sign in with the wallet, that is a member of the workspace
             {!$isDisabled && ', or sign in with email'}. Sign in to continue.
           </Typography>
 

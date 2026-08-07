@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react'
 import { Alert } from 'react-native'
 import { useRouter } from 'expo-router'
 import { PrivateKeyView } from './components/PrivateKeyView'
-import { keyStorageService } from '@/src/services/key-storage'
+import { BIOMETRY_ROTATION_DESCRIPTION, BiometryInvalidationError, keyStorageService } from '@/src/services/key-storage'
 import { useDelegateCleanup } from '@/src/hooks/useDelegateCleanup'
 import { useAppDispatch } from '@/src/store/hooks'
 import { type Address } from '@/src/types/address'
@@ -35,6 +35,10 @@ export const PrivateKeyContainer = ({ signerAddress }: Props) => {
       setPrivateKey(key)
       setIsKeyVisible(true)
     } catch (error) {
+      if (error instanceof BiometryInvalidationError) {
+        Alert.alert('Signer needs to be re-imported', BIOMETRY_ROTATION_DESCRIPTION, [{ text: 'OK' }])
+        return
+      }
       console.error('Error retrieving private key:', error)
       Alert.alert('Error', 'Failed to retrieve private key')
     } finally {

@@ -12,6 +12,7 @@ declare module '@mui/material/styles' {
     logo: Palette['primary']
     backdrop: Palette['primary']
     static: Palette['primary']
+    review: { main: string; background: string }
   }
 
   interface PaletteOptions {
@@ -19,6 +20,7 @@ declare module '@mui/material/styles' {
     logo: PaletteOptions['primary']
     backdrop: PaletteOptions['primary']
     static: PaletteOptions['primary']
+    review?: { main: string; background: string }
   }
 
   interface TypeBackground {

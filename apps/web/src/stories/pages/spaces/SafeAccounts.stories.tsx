@@ -4,7 +4,7 @@ import { createMockStory } from '@/stories/mocks'
 import SpaceSafeAccounts from '@/pages/spaces/safe-accounts'
 
 /**
- * Space Safe Accounts page - Safes within a Space.
+ * Space Safe accounts page - Safes within a Space.
  * View and manage Safes associated with a Space.
  */
 

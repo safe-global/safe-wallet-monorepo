@@ -125,7 +125,7 @@ export const ImportDialog = ({
             {!isDisabled && (
               <Alert severity="warning">
                 <AlertTitle sx={{ fontWeight: 700 }}>Overwrite your current data?</AlertTitle>
-                This action will overwrite your currently added Safe Accounts, address book and settings with those from
+                This action will overwrite your currently added Safe accounts, address book and settings with those from
                 the imported file.
               </Alert>
             )}

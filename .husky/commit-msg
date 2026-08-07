@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eu
 
 # Validate commit message follows conventional commit format
 # Format: type(scope): description OR type: description

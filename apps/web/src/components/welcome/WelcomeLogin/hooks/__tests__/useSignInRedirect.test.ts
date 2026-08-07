@@ -2,7 +2,6 @@ import { renderHook, act } from '@/tests/test-utils'
 import { useSignInRedirect } from '../useSignInRedirect'
 import * as router from 'next/router'
 import * as store from '@/store'
-import { AppRoutes } from '@/config/routes'
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -83,11 +82,11 @@ describe('useSignInRedirect', () => {
   })
 
   // -----------------------------------------------------------------------
-  // Redirect for new users (no spaces, no invites)
+  // New users (no spaces) are no longer pushed into the create-workspace flow
   // -----------------------------------------------------------------------
 
-  describe('when user is new (no spaces, no invites)', () => {
-    it('should redirect to create space page after sign-in', async () => {
+  describe('when user is new (no spaces)', () => {
+    it('does not redirect after sign-in (they stay on the Workspaces tab)', async () => {
       setupMocks()
 
       const { result } = renderHook(() => useSignInRedirect(defaultProps))
@@ -96,35 +95,17 @@ describe('useSignInRedirect', () => {
         result.current.setHasSignedIn(true)
       })
 
-      expect(mockPush).toHaveBeenCalledWith({
-        pathname: AppRoutes.welcome.createSpace,
-        query: {},
-      })
-      expect(result.current.redirectLoading).toBe(true)
-    })
-
-    it('should preserve query parameters when redirecting to create space', async () => {
-      setupMocks({ routerQuery: { chain: 'eth' } })
-
-      const { result } = renderHook(() => useSignInRedirect(defaultProps))
-
-      await act(async () => {
-        result.current.setHasSignedIn(true)
-      })
-
-      expect(mockPush).toHaveBeenCalledWith({
-        pathname: AppRoutes.welcome.createSpace,
-        query: { chain: 'eth' },
-      })
+      expect(mockPush).not.toHaveBeenCalled()
+      expect(result.current.redirectLoading).toBe(false)
     })
   })
 
   // -----------------------------------------------------------------------
-  // Redirect when spaces endpoint returns 404
+  // No redirect when the spaces endpoint errors (incl. 404)
   // -----------------------------------------------------------------------
 
-  describe('when spaces endpoint returns 404', () => {
-    it('should redirect to create space page', async () => {
+  describe('when the spaces endpoint returns 404', () => {
+    it('does not redirect', async () => {
       setupMocks()
       const notFoundError = { status: 404, data: 'Not Found' } as unknown as Error
 
@@ -134,10 +115,7 @@ describe('useSignInRedirect', () => {
         result.current.setHasSignedIn(true)
       })
 
-      expect(mockPush).toHaveBeenCalledWith({
-        pathname: AppRoutes.welcome.createSpace,
-        query: {},
-      })
+      expect(mockPush).not.toHaveBeenCalled()
     })
   })
 
@@ -164,24 +142,6 @@ describe('useSignInRedirect', () => {
       setupMocks()
 
       const { result } = renderHook(() => useSignInRedirect({ ...defaultProps, spacesAmount: 2 }))
-
-      await act(async () => {
-        result.current.setHasSignedIn(true)
-      })
-
-      expect(mockPush).not.toHaveBeenCalled()
-    })
-  })
-
-  // -----------------------------------------------------------------------
-  // No redirect when user has invites
-  // -----------------------------------------------------------------------
-
-  describe('when user has pending invites', () => {
-    it('should not redirect to create space page', async () => {
-      setupMocks()
-
-      const { result } = renderHook(() => useSignInRedirect({ ...defaultProps, inviteAmount: 1 }))
 
       await act(async () => {
         result.current.setHasSignedIn(true)
@@ -226,16 +186,39 @@ describe('useSignInRedirect', () => {
 
       expect(mockPush).not.toHaveBeenCalled()
     })
+
+    // Regression: re-login after logout used to bounce existing users into the
+    // create-space flow because on the render where sign-in completed the
+    // spaces query was still in the skip→unskip transition (isFetching=false,
+    // currentData=undefined) and the hook read spacesAmount=0. The fix is at
+    // the SpacesList call site (isSpacesLoading: isFetching || isUninitialized),
+    // and this test pins the contract: while loading, no redirect — even with
+    // spacesAmount=0 and hasSignedIn=true.
+    it('does not redirect when isSpacesLoading=true even if spacesAmount is 0', async () => {
+      setupMocks()
+
+      const { result } = renderHook(() =>
+        useSignInRedirect({ ...defaultProps, spacesAmount: 0, isSpacesLoading: true }),
+      )
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).not.toHaveBeenCalled()
+    })
   })
 
   describe('when OIDC sign-in completes', () => {
-    it('should redirect new users to create space page after OIDC login', async () => {
+    it('jumps a single-space user to their space after OIDC login', async () => {
       // Start with OIDC login pending
       const useAppSelectorSpy = jest.spyOn(store, 'useAppSelector')
 
       setupMocks({ isAuthenticated: false, isOidcLoginPending: true })
 
-      const { rerender } = renderHook(() => useSignInRedirect(defaultProps))
+      const { rerender } = renderHook(() =>
+        useSignInRedirect({ ...defaultProps, spacesAmount: 1, singleSpaceId: 'space-42' }),
+      )
 
       expect(mockPush).not.toHaveBeenCalled()
 
@@ -256,16 +239,101 @@ describe('useSignInRedirect', () => {
         rerender()
       })
 
-      expect(mockPush).toHaveBeenCalledWith({
-        pathname: AppRoutes.welcome.createSpace,
-        query: {},
-      })
+      expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: 'space-42' } })
     })
 
     it('should not redirect if OIDC login was never pending', async () => {
       setupMocks({ isAuthenticated: true, isOidcLoginPending: false })
 
       renderHook(() => useSignInRedirect(defaultProps))
+
+      expect(mockPush).not.toHaveBeenCalled()
+    })
+  })
+
+  // -----------------------------------------------------------------------
+  // Single-space short-circuit
+  // -----------------------------------------------------------------------
+
+  describe('when the user has exactly one space', () => {
+    it('redirects to that space after sign-in instead of the workspace list', async () => {
+      setupMocks()
+
+      const { result } = renderHook(() =>
+        useSignInRedirect({ ...defaultProps, spacesAmount: 1, singleSpaceId: 'space-42' }),
+      )
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: 'space-42' } })
+      expect(result.current.redirectLoading).toBe(true)
+    })
+
+    it('does not redirect to the single space when there is a pending invite', async () => {
+      setupMocks()
+
+      const { result } = renderHook(() =>
+        useSignInRedirect({ ...defaultProps, spacesAmount: 1, inviteAmount: 1, singleSpaceId: 'space-42' }),
+      )
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).not.toHaveBeenCalled()
+    })
+
+    it('still redirects to the single space when there are no invites', async () => {
+      setupMocks()
+
+      const { result } = renderHook(() =>
+        useSignInRedirect({ ...defaultProps, spacesAmount: 1, inviteAmount: 0, singleSpaceId: 'space-42' }),
+      )
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: 'space-42' } })
+    })
+
+    it('does not redirect when there are multiple spaces (no singleSpaceId)', async () => {
+      setupMocks()
+
+      const { result } = renderHook(() => useSignInRedirect({ ...defaultProps, spacesAmount: 3, singleSpaceId: null }))
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).not.toHaveBeenCalled()
+    })
+
+    it('does not short-circuit before the user has signed in', async () => {
+      setupMocks()
+
+      renderHook(() => useSignInRedirect({ ...defaultProps, spacesAmount: 1, singleSpaceId: 'space-42' }))
+
+      expect(mockPush).not.toHaveBeenCalled()
+    })
+
+    it('does not short-circuit while spaces are still loading', async () => {
+      setupMocks()
+
+      const { result } = renderHook(() =>
+        useSignInRedirect({
+          ...defaultProps,
+          spacesAmount: 1,
+          isSpacesLoading: true,
+          singleSpaceId: 'space-42',
+        }),
+      )
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
 
       expect(mockPush).not.toHaveBeenCalled()
     })

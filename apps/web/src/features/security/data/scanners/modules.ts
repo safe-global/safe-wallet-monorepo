@@ -4,6 +4,30 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { SecurityScanner } from './types'
 import { getSeverityFromScore } from './constants'
+import { isSafeAffectedByZodiacVulnerability } from '../../services/vulnerableModules'
+
+/**
+ * Module name fragments (case-insensitive) for the Zodiac modules covered by the
+ * known security vulnerability. Used to pick which installed module(s) to offer
+ * for removal when the security-check API reports the Safe as affected.
+ */
+const VULNERABLE_MODULE_NAMES = ['delay', 'roles']
+
+const isVulnerableModuleName = (name?: string | null): boolean => {
+  if (!name) return false
+  const lower = name.toLowerCase()
+  return VULNERABLE_MODULE_NAMES.some((fragment) => lower.includes(fragment))
+}
+
+// Unsupported Zodiac mastercopies enabled directly as a module (the module address is the
+// mastercopy, not a per-Safe proxy) — flagged Critical by address, without the name/API checks.
+// A recovery Delay Modifier is a unique per-Safe proxy, so it never matches. Add addresses here.
+const UNSUPPORTED_ZODIAC_MASTERCOPIES = new Set(
+  ['0x01F8cabB808D7dE0dF4202D4B60C8310d2f1339b'].map((address) => address.toLowerCase()), // Delay Modifier v1.1.0
+)
+
+const isUnsupportedZodiacMastercopy = (address: string): boolean =>
+  UNSUPPORTED_ZODIAC_MASTERCOPIES.has(address.toLowerCase())
 
 /** Safe Allowance Module deployment versions to check against. */
 const ALLOWANCE_MODULE_VERSIONS = ['0.1.0', '0.1.1']
@@ -86,17 +110,19 @@ const isKnownModule = (chainId: string, moduleAddress: string, moduleName?: stri
 export const modulesScanner: SecurityScanner = {
   id: 'modules',
   scan: async (ctx) => {
-    const { modules, chainId } = ctx
+    const { modules, chainId, safeAddress } = ctx
     const now = new Date().toISOString()
 
     const activeModules = (modules ?? []).filter((m) => m.value !== ZERO_ADDRESS)
+
+    const moduleLabel = (m: { value: string; name?: string | null }) => m.name || m.value
 
     // Tier 1: No modules — perfectly fine for most Safes
     if (activeModules.length === 0) {
       const score = 100
       return {
-        status: 'clear',
-        severity: getSeverityFromScore(score),
+        status: 'not_applicable',
+        severity: getSeverityFromScore(score, { excluded: true }),
         score,
         evidence: [{ label: 'Status', value: 'No modules installed' }],
         remediation: '',
@@ -104,10 +130,38 @@ export const modulesScanner: SecurityScanner = {
       }
     }
 
+    // Critical (takes precedence over the trust tiers below): a module matches the unsupported
+    // mastercopy ruleset, or the server-side check flags the Safe as affected (which also covers
+    // the nested "affected via a related account" case). Fails closed.
+    const flaggedByAddress = activeModules.filter((m) => isUnsupportedZodiacMastercopy(m.value))
+    const isAffected = await isSafeAffectedByZodiacVulnerability(chainId, safeAddress)
+    if (flaggedByAddress.length > 0 || isAffected) {
+      // Removable modules: address-matched plus (when affected) name-matched, de-duped.
+      const nameMatched = isAffected ? activeModules.filter((m) => isVulnerableModuleName(m.name)) : []
+      const vulnerable = [...flaggedByAddress, ...nameMatched].filter(
+        (m, i, arr) => arr.findIndex((o) => sameAddress(o.value, m.value)) === i,
+      )
+      const score = 0
+      const hasRemovable = vulnerable.length > 0
+      return {
+        status: 'issue',
+        severity: getSeverityFromScore(score),
+        score,
+        evidence: hasRemovable
+          ? vulnerable.map((m) => ({ label: 'Vulnerable module', value: moduleLabel(m) }))
+          : [{ label: 'Status', value: 'Affected by a known Zodiac module vulnerability' }],
+        remediation: hasRemovable
+          ? 'This Safe has a Zodiac module affected by a known security vulnerability. Remove it immediately to protect your funds.'
+          : 'This Safe is affected by a known Zodiac module vulnerability through a related account. Review your setup and remove the affected module.',
+        lastChecked: now,
+        ctaLabelOverride: hasRemovable ? 'Remove unsupported module' : undefined,
+        vulnerableModules: vulnerable.map((m) => m.value),
+      }
+    }
+
     const trusted = activeModules.filter((m) => isKnownModule(chainId, m.value, m.name))
     const untrusted = activeModules.filter((m) => !isKnownModule(chainId, m.value, m.name))
 
-    const moduleLabel = (m: { value: string; name?: string | null }) => m.name || `${m.value.slice(0, 10)}...`
     const trustedEvidence = trusted.map((m) => ({ label: 'Trusted module', value: moduleLabel(m) }))
     const untrustedEvidence = untrusted.map((m) => ({ label: 'Unverified module', value: moduleLabel(m) }))
 

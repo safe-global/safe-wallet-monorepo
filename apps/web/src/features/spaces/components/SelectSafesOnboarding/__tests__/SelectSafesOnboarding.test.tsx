@@ -1,10 +1,15 @@
-import { render, screen } from '@/tests/test-utils'
+import { render, screen, act } from '@/tests/test-utils'
 import SelectSafesOnboarding from '../index'
 import type { AllSafeItems } from '@/hooks/safes'
+import useIsSurveyEnabled from '@/hooks/useIsSurveyEnabled'
 
-jest.mock('../../Sidebar/constants', () => ({
+jest.mock('@/features/spaces/constants', () => ({
+  ...jest.requireActual('@/features/spaces/constants'),
   SAFE_ACCOUNTS_LIMIT: 10,
 }))
+
+jest.mock('@/hooks/useIsSurveyEnabled')
+const mockedUseIsSurveyEnabled = useIsSurveyEnabled as jest.MockedFunction<typeof useIsSurveyEnabled>
 
 // Captured props from OnboardingSafesList renders
 let capturedListProps: Record<string, unknown> = {}
@@ -15,11 +20,6 @@ jest.mock('../components/OnboardingSafesList', () => ({
     capturedListProps = props
     return <div data-testid="onboarding-safes-list" />
   },
-}))
-
-jest.mock('../components/StepIndicator', () => ({
-  __esModule: true,
-  default: () => <div data-testid="step-indicator" />,
 }))
 
 jest.mock('@/components/common/ConnectWallet/useConnectWallet', () => ({
@@ -43,14 +43,16 @@ jest.mock('../hooks/useOnboardingNavigation', () => ({
 
 let mockTrustedSafes: AllSafeItems = []
 let mockOwnedSafes: AllSafeItems = []
+let mockFlagged = new Set<string>()
 
 jest.mock('../hooks/useOnboardingSafes', () => ({
   __esModule: true,
   default: () => ({
     trustedSafes: mockTrustedSafes,
     ownedSafes: mockOwnedSafes,
-    similarAddresses: new Set<string>(),
+    flaggedAddresses: mockFlagged,
     handleSearch: jest.fn(),
+    hasNoSafes: false,
   }),
 }))
 
@@ -89,67 +91,44 @@ const makeSafe = (chainId: string, address: string) => ({
   name: undefined,
 })
 
-describe('SelectSafesOnboarding — SelectAll wiring', () => {
+describe('SelectSafesOnboarding — selection wiring', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     capturedListProps = {}
-    mockTrustedSafes = []
+    mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
     mockOwnedSafes = []
+    mockFlagged = new Set<string>()
     mockWalletValue = { address: '0xWallet' }
   })
 
-  it('does not render global select-all toggle', () => {
+  it('shows a selected-count of the per-workspace cap instead of a select-all control', () => {
     render(<SelectSafesOnboarding />)
-    expect(screen.queryByTestId('select-all-global')).not.toBeInTheDocument()
+
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('0 of 10 selected')
+    expect(screen.queryByTestId('select-all-trusted')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('select-all-owned')).not.toBeInTheDocument()
   })
 
-  it('never renders global select-all toggle even when safes are present', () => {
-    mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
-    render(<SelectSafesOnboarding />)
-    expect(screen.queryByTestId('select-all-global')).not.toBeInTheDocument()
-  })
-
-  it('passes trustedSelectAll and ownedSelectAll to OnboardingSafesList', () => {
-    mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
+  it('passes the selection model (not select-all toggles) to OnboardingSafesList', () => {
     mockOwnedSafes = [makeSafe('10', '0xB')] as AllSafeItems
+    mockFlagged = new Set(['0xb'])
     render(<SelectSafesOnboarding />)
 
-    expect(capturedListProps.trustedSelectAll).toBeDefined()
-    expect(capturedListProps.ownedSelectAll).toBeDefined()
+    expect(capturedListProps.selectedKeys).toBeInstanceOf(Set)
+    expect(typeof capturedListProps.onToggle).toBe('function')
+    expect(capturedListProps.isAtLimit).toBe(false)
+    expect(capturedListProps.flaggedAddresses).toBe(mockFlagged)
+    expect(capturedListProps.trustedSelectAll).toBeUndefined()
+    expect(capturedListProps.ownedSelectAll).toBeUndefined()
   })
 
-  it('trustedSelectAll reflects only trusted safes count', () => {
-    mockTrustedSafes = [makeSafe('1', '0xA'), makeSafe('1', '0xB')] as AllSafeItems
-    mockOwnedSafes = [makeSafe('10', '0xC')] as AllSafeItems
+  it('increments the selected-count when a row is toggled on', () => {
     render(<SelectSafesOnboarding />)
 
-    const trusted = capturedListProps.trustedSelectAll as { total: number; state: string }
-    expect(trusted.total).toBe(2)
-    expect(trusted.state).toBe('none')
-  })
+    const onToggle = capturedListProps.onToggle as (line: unknown, checked: boolean) => void
+    act(() => onToggle({ key: '1:0xA', variant: 'single', address: '0xA', source: makeSafe('1', '0xA') }, true))
 
-  it('passes count info to section toggles via OnboardingSafesList props', () => {
-    mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
-    render(<SelectSafesOnboarding />)
-    const trusted = capturedListProps.trustedSelectAll as { total: number; count: number }
-    expect(trusted.total).toBe(1)
-    expect(trusted.count).toBe(0)
-  })
-
-  it('shows cap message when section select-all hits the limit', () => {
-    // Pre-fill 11 safes — exceeding the mocked SAFE_ACCOUNTS_LIMIT of 10
-    mockTrustedSafes = Array.from({ length: 11 }, (_, i) =>
-      makeSafe('1', `0x${i.toString().padStart(40, '0')}`),
-    ) as AllSafeItems
-
-    render(<SelectSafesOnboarding />)
-
-    // Simulate clicking "Select all" for the trusted section via captured props
-    const trustedSelectAll = capturedListProps.trustedSelectAll as { onToggle: (check: boolean) => void }
-    const { act } = require('@testing-library/react')
-    act(() => trustedSelectAll.onToggle(true))
-
-    expect(screen.getByText('Limit of 10 accounts reached')).toBeInTheDocument()
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('1 of 10 selected')
   })
 })
 
@@ -157,8 +136,9 @@ describe('SelectSafesOnboarding — wallet connection state', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     capturedListProps = {}
-    mockTrustedSafes = []
+    mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
     mockOwnedSafes = []
+    mockFlagged = new Set<string>()
     mockWalletValue = { address: '0xWallet' }
   })
 
@@ -170,20 +150,45 @@ describe('SelectSafesOnboarding — wallet connection state', () => {
     expect(screen.queryByTestId('select-safes-connect-wallet-button')).not.toBeInTheDocument()
   })
 
-  it('renders the ConnectWalletPrompt when no wallet is connected', () => {
+  it('still renders the list, Continue, and an inline connect hint when no wallet is connected', () => {
     mockWalletValue = null
     render(<SelectSafesOnboarding />)
 
+    // No-wallet users can still pick their locally stored Safes; the wallet CTA is just an inline hint.
+    expect(screen.getByTestId('onboarding-safes-list')).toBeInTheDocument()
+    expect(screen.getByTestId('select-safes-continue-button')).toBeInTheDocument()
     expect(screen.getByTestId('select-safes-connect-wallet-button')).toBeInTheDocument()
-    expect(screen.getByText('Connect your wallet to access all your Safes')).toBeInTheDocument()
-    expect(screen.queryByTestId('onboarding-safes-list')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('select-safes-continue-button')).not.toBeInTheDocument()
   })
 
-  it('still shows the Skip button when no wallet is connected', () => {
+  it('shows the skip link when no wallet is connected', () => {
     mockWalletValue = null
     render(<SelectSafesOnboarding />)
 
-    expect(screen.getByTestId('select-safes-skip-button')).toBeInTheDocument()
+    expect(screen.getByTestId('select-safes-skip-link')).toBeInTheDocument()
+  })
+})
+
+describe('SelectSafesOnboarding — step counter reflects the survey flag', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    capturedListProps = {}
+    mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
+    mockOwnedSafes = []
+    mockFlagged = new Set<string>()
+    mockWalletValue = { address: '0xWallet' }
+  })
+
+  // Regression guard for WA-2537: the survey is the optional last step, so when
+  // SPACE_ONBOARDING_SURVEY is off the always-rendered steps must total 3, not 4.
+  it('shows 3 total steps when the survey is disabled', () => {
+    mockedUseIsSurveyEnabled.mockReturnValue(false)
+    render(<SelectSafesOnboarding />)
+    expect(screen.getByRole('group', { name: 'Step 2 of 3' })).toBeInTheDocument()
+  })
+
+  it('shows 4 total steps when the survey is enabled', () => {
+    mockedUseIsSurveyEnabled.mockReturnValue(true)
+    render(<SelectSafesOnboarding />)
+    expect(screen.getByRole('group', { name: 'Step 2 of 4' })).toBeInTheDocument()
   })
 })

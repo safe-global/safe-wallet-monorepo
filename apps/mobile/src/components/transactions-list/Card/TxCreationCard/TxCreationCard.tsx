@@ -14,7 +14,7 @@ export function TxCreationCard({ txInfo, ...rest }: TxCreationCardProps) {
   return (
     <SafeListItem
       label={`Created by: ${shortenAddress(txInfo.creator.value)}`}
-      type="Safe Account created"
+      type="Safe account created"
       leftNode={
         <Theme name="logo">
           <View backgroundColor="$background" padding="$2" borderRadius={100}>

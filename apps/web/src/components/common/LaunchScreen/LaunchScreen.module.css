@@ -1,0 +1,58 @@
+/* Gentle breathing pulse on the logo. */
+.breathe {
+  animation: launch-breathe 2s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes launch-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.82;
+  }
+}
+
+/* Soft brand-green halo behind the logo. Alpha via color-mix so the colour stays a single token. */
+.halo {
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-static-text-brand) 20%, transparent) 0%,
+    transparent 70%
+  );
+  animation: launch-halo 2s ease-in-out infinite;
+}
+
+@keyframes launch-halo {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* Dark-mode logo: mask the SVG and fill with the theme primary (green in dark mode), mirroring SafeLogo. */
+.logoDarkFill {
+  background-color: var(--primary);
+  mask: url(/images/logo-no-text.svg) center / contain no-repeat;
+  -webkit-mask: url(/images/logo-no-text.svg) center / contain no-repeat;
+}
+
+/* Smooth the eased progress steps. */
+.bar {
+  transition: width 0.4s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .breathe,
+  .halo {
+    animation: none;
+  }
+}

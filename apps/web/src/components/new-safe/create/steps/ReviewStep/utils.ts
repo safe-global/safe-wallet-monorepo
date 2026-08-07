@@ -18,6 +18,25 @@ export function getThresholdLabel(threshold: number, ownerCount: number): string
 }
 
 /**
+ * Resolves the pay method that is actually used for creation.
+ * With counterfactual enabled, multichain creations are always counterfactual
+ * (PayLater) — paying upfront on every network at once isn't offered. For
+ * single-chain (or when counterfactual is disabled), PayLater requires an
+ * authenticated session, otherwise it falls back to PayNow.
+ */
+export function getEffectivePayMethod(
+  isMultiChainDeployment: boolean,
+  isUserAuthenticated: boolean,
+  payMethod: PayMethod,
+  isCounterfactualEnabled?: boolean,
+): PayMethod {
+  if (isMultiChainDeployment && isCounterfactualEnabled) {
+    return PayMethod.PayLater
+  }
+  return !isUserAuthenticated && payMethod === PayMethod.PayLater ? PayMethod.PayNow : payMethod
+}
+
+/**
  * Determines whether the deployment type label is "Counterfactual" or "Direct".
  */
 export function getDeploymentType(isCounterfactualEnabled: boolean | undefined, payMethod: PayMethod): string {

@@ -40,17 +40,17 @@ export const TURNSTILE_SITE_KEY = IS_PRODUCTION ? TURNSTILE_SITE_KEY_PRODUCTION 
 // Help Center
 export const HELP_CENTER_URL = 'https://help.safe.global'
 export const HelpCenterArticle = {
-  ADDRESS_BOOK_DATA: `${HELP_CENTER_URL}/articles/9240138540-address-book-export-and-import`,
-  ADVANCED_PARAMS: `${HELP_CENTER_URL}/articles/6061270064-advanced-transaction-parameters`,
+  ADDRESS_BOOK_DATA: `${HELP_CENTER_URL}/articles/9590725697-address-book`,
+  ADVANCED_PARAMS: `${HELP_CENTER_URL}/articles/1896549699-transaction-fees`,
   CANCELLING_TRANSACTIONS: `${HELP_CENTER_URL}/articles/4016097317-why-do-i-need-to-pay-for-cancelling-a-transaction`,
   COOKIES: `${HELP_CENTER_URL}/articles/2134118452-why-do-i-need-to-enable-third-party-cookies-for-safe-apps`,
   CONFLICTING_TRANSACTIONS: `${HELP_CENTER_URL}/articles/9901464751-why-are-transactions-with-the-same-nonce-conflicting-with-each-other`,
   FALLBACK_HANDLER: `${HELP_CENTER_URL}/articles/9256158266-what-is-a-fallback-handler-and-how-does-it-relate-to-safe`,
   RECOVERY: `${HELP_CENTER_URL}/articles/9622260218-account-recovery-with-saferecoveryhub`,
-  RELAYING: `${HELP_CENTER_URL}/articles/1901481110-what-is-gas-fee-sponsoring`,
+  RELAYING: `${HELP_CENTER_URL}/articles/9993850744-safewallet-gas-fees-faq`,
   SAFE_SETUP: `${HELP_CENTER_URL}/articles/1038062742-what-safe-setup-should-i-use`,
   SIGNED_MESSAGES: `${HELP_CENTER_URL}/articles/7507962149-what-are-signed-messages`,
-  SPAM_TOKENS: `${HELP_CENTER_URL}/articles/3481782709-40784-default-token-list-local-hiding-of-spam-tokens`,
+  SPAM_TOKENS: `${HELP_CENTER_URL}/articles/8123132082-token-visibility-spam-protection-and-hiding-tokens`,
   SPENDING_LIMITS: `${HELP_CENTER_URL}/articles/3961440620-set-up-and-use-spending-limits`,
   TRANSACTION_GUARD: `${HELP_CENTER_URL}/articles/6757075087-what-is-a-transaction-guard`,
   UNEXPECTED_DELEGATE_CALL: `${HELP_CENTER_URL}/articles/4308960633-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction`,
@@ -59,7 +59,7 @@ export const HelpCenterArticle = {
   SWAP_WIDGET_FEES: `${HELP_CENTER_URL}/articles/9969629388-how-does-the-widget-fee-work-for-native-swaps`,
   VERIFY_TX_DETAILS: `${HELP_CENTER_URL}/articles/2485383995-how-to-perform-basic-transactions-checks-on-safewallet`,
   BULK_IMPORT_OLD_DATA: `${HELP_CENTER_URL}/articles/6865463992-export-your-data-from-the-safewallet-mobile-app-and-import-into-the-new-safemobile-app-ios-only`,
-  SAFE_SHIELD: `${HELP_CENTER_URL}/articles/6434169802-understanding-safe-shield-copilot`,
+  SAFE_SHIELD: `${HELP_CENTER_URL}/articles/6128275759-security-hub`,
   ADDRESS_POISONING: `${HELP_CENTER_URL}/articles/3861480988-what-is-address-poisoning-and-how-does-safewallet-battle-it`,
 } as const
 export const HelperCenterArticleTitles = {

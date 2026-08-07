@@ -274,6 +274,78 @@ describe('trackTxEvents', () => {
     })
   })
 
+  describe('gasPaymentSource property', () => {
+    it('attaches Gas Payment Source to creation event when provided', () => {
+      trackTxEvents(
+        baseDetails,
+        true, // isCreation
+        false, // isExecuted
+        false,
+        false,
+        false,
+        undefined,
+        false,
+        2,
+        'safe',
+      )
+
+      expect(mockTrackEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ action: TX_EVENTS.CREATE.action }),
+        expect.objectContaining({
+          [MixpanelEventParams.GAS_PAYMENT_SOURCE]: 'safe',
+        }),
+      )
+    })
+
+    it('attaches Gas Payment Source to execution event when provided', () => {
+      trackTxEvents(
+        baseDetails,
+        false, // isCreation
+        true, // isExecuted
+        false,
+        false,
+        false,
+        undefined,
+        false,
+        2,
+        'signing_wallet',
+      )
+
+      expect(mockTrackEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ action: TX_EVENTS.EXECUTE.action }),
+        expect.objectContaining({
+          [MixpanelEventParams.GAS_PAYMENT_SOURCE]: 'signing_wallet',
+        }),
+      )
+    })
+
+    it('attaches Gas Payment Source to both events when isCreation and isExecuted are both true', () => {
+      trackTxEvents(baseDetails, true, true, false, false, false, undefined, false, 1, 'safe')
+
+      expect(mockTrackEvent).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ action: TX_EVENTS.CREATE.action }),
+        expect.objectContaining({ [MixpanelEventParams.GAS_PAYMENT_SOURCE]: 'safe' }),
+      )
+      expect(mockTrackEvent).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ action: TX_EVENTS.EXECUTE.action }),
+        expect.objectContaining({ [MixpanelEventParams.GAS_PAYMENT_SOURCE]: 'safe' }),
+      )
+    })
+
+    it('omits Gas Payment Source when arg is undefined', () => {
+      trackTxEvents(baseDetails, true, false, false, false, false, undefined, false, 2)
+
+      expect(mockTrackEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ action: TX_EVENTS.CREATE.action }),
+        expect.not.objectContaining({
+          [MixpanelEventParams.GAS_PAYMENT_SOURCE]: expect.anything(),
+        }),
+      )
+    })
+  })
+
   describe('execution variants (Transaction Executed)', () => {
     it('should track EXECUTE_VIA_PARENT with Mixpanel properties when isParentSigner is true', () => {
       trackTxEvents(

@@ -240,6 +240,59 @@ describe('TxSigners (Audit Log)', () => {
     expect(screen.queryByText('Can be executed once the threshold is reached.')).not.toBeInTheDocument()
   })
 
+  it('shows the expired warning for a queued expired order', () => {
+    const { confirmations } = buildConfirmations(1, 2)
+    const txDetails = transactionDetailsBuilder()
+      .with({
+        detailedExecutionInfo: multisigExecutionDetailsBuilder()
+          .with({ confirmations, confirmationsRequired: 2, executor: null })
+          .build(),
+        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+      })
+      .build()
+    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+
+    render(
+      <TxSigners
+        txDetails={txDetails}
+        txSummary={txSummary}
+        isTxFromProposer={false}
+        proposer={ownerAddress}
+        isExpired
+      />,
+    )
+
+    expect(screen.getByText('This order has expired. Reject this transaction and try again.')).toBeInTheDocument()
+  })
+
+  it('hides the expired warning once the transaction has been executed', () => {
+    const executor = addressExBuilder().build()
+    const { confirmations } = buildConfirmations(2, 2)
+    const txDetails = transactionDetailsBuilder()
+      .with({
+        detailedExecutionInfo: multisigExecutionDetailsBuilder()
+          .with({ confirmations, confirmationsRequired: 2, executor })
+          .build(),
+        txStatus: TransactionStatus.SUCCESS,
+        executedAt: Date.now(),
+        txHash: faker.string.hexadecimal({ length: 64 }),
+      })
+      .build()
+    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
+
+    render(
+      <TxSigners
+        txDetails={txDetails}
+        txSummary={txSummary}
+        isTxFromProposer={false}
+        proposer={ownerAddress}
+        isExpired
+      />,
+    )
+
+    expect(screen.queryByText('This order has expired. Reject this transaction and try again.')).not.toBeInTheDocument()
+  })
+
   it('shows proposer banner even after threshold is reached but not executed', () => {
     const { confirmations } = buildConfirmations(2, 2)
     const txDetails = transactionDetailsBuilder()
@@ -343,6 +396,52 @@ describe('TxSigners (Audit Log)', () => {
     // Cancellation uses same labels as normal transactions
     expect(screen.getByText('Created')).toBeInTheDocument()
     expect(screen.getByText('Signed (1/2)')).toBeInTheDocument()
+  })
+
+  it('copies the transaction hash to clipboard via the hash button', async () => {
+    const writeTextMock = jest.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, { clipboard: { writeText: writeTextMock } })
+
+    const txHash = faker.string.hexadecimal({ length: 64 })
+    const executor = addressExBuilder().build()
+    const { confirmations } = buildConfirmations(2, 2)
+    const txDetails = transactionDetailsBuilder()
+      .with({
+        detailedExecutionInfo: multisigExecutionDetailsBuilder()
+          .with({ confirmations, confirmationsRequired: 2, executor })
+          .build(),
+        txStatus: TransactionStatus.SUCCESS,
+        executedAt: Date.now(),
+        txHash,
+      })
+      .build()
+    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
+
+    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+
+    fireEvent.click(screen.getByTestId('copy-tx-hash-btn'))
+
+    await waitFor(() => {
+      expect(writeTextMock).toHaveBeenCalledWith(txHash)
+    })
+  })
+
+  it('disables the hash button when the transaction has no hash yet', () => {
+    const { confirmations } = buildConfirmations(1, 2)
+    const txDetails = transactionDetailsBuilder()
+      .with({
+        detailedExecutionInfo: multisigExecutionDetailsBuilder()
+          .with({ confirmations, confirmationsRequired: 2 })
+          .build(),
+        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+        txHash: null,
+      })
+      .build()
+    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+
+    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+
+    expect(screen.queryByTestId('copy-tx-hash-btn')).not.toBeInTheDocument()
   })
 
   it('copies address to clipboard on click', async () => {

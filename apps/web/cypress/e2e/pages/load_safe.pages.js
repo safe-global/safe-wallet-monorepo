@@ -23,9 +23,9 @@ const settingsBtnStr = 'Settings'
 const ownersConfirmationsStr = 'Owners and confirmations'
 const transactionStr = 'Transactions'
 const qrErrorMsg = 'The QR could not be read'
-const safeAddressError = 'Address given is not a valid Safe Account address'
+const safeAddressError = 'Address given is not a valid Safe account address'
 const ownerNameLabel = 'Signer name'
-export const addSafeStr = 'Add existing Safe Account'
+export const addSafeStr = 'Add existing Safe account'
 
 const mandatoryNetworks = [constants.networks.sepolia, constants.networks.polygon, constants.networks.ethereum]
 

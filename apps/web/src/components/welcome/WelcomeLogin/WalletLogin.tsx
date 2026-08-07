@@ -62,7 +62,7 @@ const WalletLogin = ({
         disableElevation
       >
         {isLoading ? (
-          <CircularProgress size={20} sx={{ color: '#fff' }} />
+          <CircularProgress size={20} color="inherit" />
         ) : (
           <Box justifyContent="space-between" display="flex" flexDirection="row" alignItems="center" gap={1}>
             <Box display="flex" flexDirection="column" alignItems="flex-start">

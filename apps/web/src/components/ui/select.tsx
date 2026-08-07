@@ -87,6 +87,7 @@ function SelectContent({
   alignItemWithTrigger = true,
   collisionBoundary,
   collisionAvoidance,
+  showBackdrop = false,
   ...props
 }: SelectPrimitive.Popup.Props &
   Pick<
@@ -98,10 +99,19 @@ function SelectContent({
     | 'alignItemWithTrigger'
     | 'collisionBoundary'
     | 'collisionAvoidance'
-  >) {
+  > & {
+    /** Dims the rest of the page while the select is open (same look as the dialog overlay). */
+    showBackdrop?: boolean
+  }) {
   const portalContainer = usePortalContainer()
   return (
     <SelectPrimitive.Portal container={portalContainer}>
+      {showBackdrop && (
+        <SelectPrimitive.Backdrop
+          data-slot="select-backdrop"
+          className="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-starting-style:opacity-0 data-ending-style:opacity-0 bg-backdrop fixed inset-0 z-[var(--z-overlay)]"
+        />
+      )}
       <SelectPrimitive.Positioner
         side={side}
         sideOffset={sideOffset}

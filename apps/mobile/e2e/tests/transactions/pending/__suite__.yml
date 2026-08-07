@@ -1,0 +1,70 @@
+appId: ${APP_ID}
+tags:
+  - transactions
+  - pending
+  - suite
+---
+# Pending Transactions Test Suite
+# First test does a clean start; subsequent tests preserve state and re-seed via
+# their own e2ePendingTxsSafe* button. Tests are grouped by the safe they target.
+# Note: the safe-shield/ subdirectory has its own group and is not included here.
+
+# ============================================
+# Pending Tx Safe 1
+# ============================================
+
+# First test: clean start
+- runFlow:
+    file: ./send-transaction.yml
+
+- runFlow:
+    file: ./conflicting-transactions.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./settings-change.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+# ============================================
+# Pending Tx Safe 2
+# ============================================
+
+- runFlow:
+    file: ./limit-order.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./swap-order.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./twap-order.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./on-chain-rejection.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+# ============================================
+# Pending Tx Safe 3
+# ============================================
+
+- runFlow:
+    file: ./set-fallback-handler.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+# ============================================
+# Pending Tx Safe 4
+# ============================================
+
+- runFlow:
+    file: ./batch-transaction.yml
+    env:
+      SKIP_CLEAN_START: 'true'

@@ -8,11 +8,12 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { ChainIndicatorList } from '@/features/multichain'
 import { useAddressBooksDeleteByAddressV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId, useWorkspaceAddressBookLabel } from '@/features/spaces'
 import { useState } from 'react'
 import { Alert, CircularProgress } from '@mui/material'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
+import { getContactRemovedMessage } from '@/utils/addressBookNotifications'
 
 type DeleteContactDialogProps = {
   name: string
@@ -26,6 +27,7 @@ const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContact
   const [isSubmitting, setIsSubmitting] = useState(false)
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
+  const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
   const [deleteEntry] = useAddressBooksDeleteByAddressV1Mutation()
 
   const handleConfirm = async () => {
@@ -34,7 +36,7 @@ const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContact
     try {
       setIsSubmitting(true)
       trackEvent({ ...SPACE_EVENTS.REMOVE_ADDRESS_SUBMIT })
-      const response = await deleteEntry({ spaceId: Number(spaceId), address })
+      const response = await deleteEntry({ spaceId: spaceId ?? '', address })
 
       if (response.error) {
         setError('Something went wrong deleting the contact. Please try again.')
@@ -43,7 +45,7 @@ const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContact
 
       dispatch(
         showNotification({
-          message: `Deleted contact`,
+          message: getContactRemovedMessage(workspaceAddressBookLabel),
           variant: 'success',
           groupKey: 'delete-contact-success',
         }),

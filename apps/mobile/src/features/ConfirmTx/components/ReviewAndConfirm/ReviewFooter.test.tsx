@@ -22,7 +22,7 @@ jest.mock('@/src/components/SelectSigner', () => ({
 }))
 
 // Mock WalletConnectGate to avoid @reown/appkit-react-native ESM issues
-jest.mock('@/src/features/WalletConnect/components/WalletConnectGate', () => ({
+jest.mock('@/src/features/WalletConnect/Signer/components/WalletConnectGate', () => ({
   WalletConnectGate: ({ children }: { children: React.ReactNode }) => children,
 }))
 

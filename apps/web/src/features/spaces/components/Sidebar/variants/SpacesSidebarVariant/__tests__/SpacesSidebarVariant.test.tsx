@@ -13,9 +13,11 @@ jest.mock('@/components/ui/tooltip', () => ({
 }))
 
 jest.mock('@/components/ui/sidebar', () => ({
+  useSidebar: () => ({ state: 'expanded', isMobile: false }),
   SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroupLabel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SidebarSeparator: ({ className }: { className?: string }) => <hr className={className} />,
   SidebarGroupContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenuItem: ({ children, className }: { children: ReactNode; className?: string }) => (
@@ -56,14 +58,14 @@ jest.mock('../../SpaceSelectorDropdown', () => ({
 
 describe('SpacesSidebarVariant', () => {
   const mockSpace: SpaceItem = {
-    id: 1,
+    uuid: 'uuid-1',
     name: 'Test Space',
     safeCount: 0,
   }
 
   const mockSpaces: SpaceItem[] = [
-    { id: 1, name: 'Space 1', safeCount: 0 },
-    { id: 2, name: 'Space 2', safeCount: 0 },
+    { uuid: 'uuid-1', name: 'Space 1', safeCount: 0 },
+    { uuid: 'uuid-2', name: 'Space 2', safeCount: 0 },
   ]
 
   const mockMainNavItems: ResolvedSidebarItem[] = [

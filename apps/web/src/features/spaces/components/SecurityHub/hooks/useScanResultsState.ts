@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import type { ScanResult } from '@/features/security/types'
 import type { useLoadFeature } from '@/features/__core__'
 import type { SecurityContract } from '@/features/security'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 
 type SecurityHandle = ReturnType<typeof useLoadFeature<SecurityContract>>
 
@@ -23,17 +23,24 @@ export type ScanResultsState = {
  * Resets state when the current space changes — the page stays mounted across
  * sidebar space switches, so without this the workspace card would aggregate
  * the previous space's results and `lastScannedAt` would show its old timestamp.
+ *
+ * The reset runs during render (not in an effect) using the previous-value
+ * pattern. An effect-based reset only clears AFTER the render that already
+ * carried the new `currentSpaceId` has committed, so the workspace card paints
+ * the previous space's aggregated score for a frame before going to a skeleton.
+ * Resetting in render discards that stale output before it's ever committed.
  */
 const useScanResultsState = (security: SecurityHandle): ScanResultsState => {
   const currentSpaceId = useCurrentSpaceId()
   const [allScanResults, setAllScanResults] = useState<ScanResultsByKey>({})
   const [scanTimestamps, setScanTimestamps] = useState<ScanTimestampsByKey>({})
+  const [trackedSpaceId, setTrackedSpaceId] = useState<string | null>(currentSpaceId)
 
-  useEffect(() => {
-    if (!currentSpaceId) return
+  if (currentSpaceId && currentSpaceId !== trackedSpaceId) {
+    setTrackedSpaceId(currentSpaceId)
     setAllScanResults({})
     setScanTimestamps({})
-  }, [currentSpaceId])
+  }
 
   const handleScanComplete = useCallback(
     (address: string, chainId: string, timestamp: number, results: Record<string, ScanResult>) => {

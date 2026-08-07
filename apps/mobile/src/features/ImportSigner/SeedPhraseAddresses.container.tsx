@@ -152,7 +152,7 @@ export const SeedPhraseAddressesContainer = () => {
       <SectionTitle
         title={TITLE}
         paddingHorizontal={'$0'}
-        description={`Select one or more addresses derived from your seed phrase. Make sure they are signers of the selected Safe Account.`}
+        description={`Select one or more addresses derived from your seed phrase. Make sure they are signers of the selected Safe account.`}
       />
 
       {addresses[0] && (

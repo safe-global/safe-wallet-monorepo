@@ -31,10 +31,13 @@ jest.mock('@/services/siwe/useSiwe', () => ({
 
 jest.mock('@/store', () => ({
   useAppDispatch: () => mockDispatch,
+  useAppSelector: (selector: (state: unknown) => unknown) => selector({ auth: { sessionExpiresAt: null } }),
 }))
 
 jest.mock('@/store/authSlice', () => ({
   setAuthenticated: (value: number) => ({ type: 'auth/setAuthenticated', payload: value }),
+  SESSION_LIFETIME_MS: 24 * 60 * 60 * 1000,
+  isAuthenticated: () => false,
 }))
 
 jest.mock('@/store/notificationsSlice', () => ({
@@ -168,7 +171,7 @@ describe('SignInButton error messages', () => {
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'notifications/show',
         payload: expect.objectContaining({
-          message: 'Safe{Wallet} for logging into Workspace is not supported at the moment.',
+          message: 'Safe{Wallet} for logging into workspace is not supported at the moment.',
           variant: 'error',
         }),
       })
@@ -187,7 +190,7 @@ describe('SignInButton error messages', () => {
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'notifications/show',
         payload: expect.objectContaining({
-          message: 'MetaMask for logging into Workspace is not supported at the moment.',
+          message: 'MetaMask for logging into workspace is not supported at the moment.',
           variant: 'error',
         }),
       })
@@ -205,7 +208,7 @@ describe('SignInButton error messages', () => {
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'notifications/show',
         payload: expect.objectContaining({
-          message: 'Ledger for logging into Workspace is not supported at the moment.',
+          message: 'Ledger for logging into workspace is not supported at the moment.',
           variant: 'error',
         }),
       })

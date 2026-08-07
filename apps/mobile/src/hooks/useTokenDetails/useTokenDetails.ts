@@ -12,10 +12,14 @@ interface tokenDetails {
   logoUri?: string
 }
 
-export const useTokenDetails = (txInfo: TransferTransactionInfo): tokenDetails => {
-  const transfer = txInfo.transferInfo
+export const useTokenDetails = (txInfo?: TransferTransactionInfo): tokenDetails => {
+  const transfer = txInfo?.transferInfo
   const unnamedToken = 'Unnamed token'
   const nativeCurrency = useAppSelector(selectActiveChainCurrency)
+
+  if (!transfer) {
+    return { name: unnamedToken, value: '' }
+  }
 
   if (isNativeTokenTransfer(transfer) && nativeCurrency) {
     return {

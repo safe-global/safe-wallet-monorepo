@@ -19,7 +19,6 @@ import type SpaceBreadcrumbs from './components/SpaceBreadcrumbs'
 import type SpacesList from './components/SpacesList'
 import type SpaceSidebar from './components/SpaceSidebar'
 import type SpaceSettings from './components/SpaceSettings'
-import type UserSettings from './components/UserSettings'
 import type SpaceSafeContextMenu from './components/SafeAccounts/SpaceSafeContextMenu'
 import type SendTransactionButton from './components/SafeAccounts/SendTransactionButton'
 import type PendingTxWidget from './components/Dashboard/PendingTxWidget'
@@ -31,8 +30,10 @@ import type SpaceSettingsPage from './components/SpaceSettings/Page'
 import type CreateSpaceOnboarding from './components/CreateSpaceOnboarding'
 import type SelectSafesOnboarding from './components/SelectSafesOnboarding'
 import type InviteMembersOnboarding from './components/InviteMembersOnboarding'
+import type SurveyOnboarding from './components/SurveyOnboarding'
 import type SelectSafeModal from './components/SelectSafeModal'
 import type SecurityHubPage from './components/SecurityHub/Page'
+import type SpaceActivityLogPage from './components/SpaceActivityLog/Page'
 
 // Utility services
 import type { isUnauthorized, filterSpacesByStatus, getNonDeclinedSpaces } from './utils'
@@ -53,7 +54,6 @@ export interface SpacesContract {
   SpacesList: typeof SpacesList
   SpaceSidebar: typeof SpaceSidebar
   SpaceSettings: typeof SpaceSettings
-  UserSettings: typeof UserSettings
   SpaceSafeContextMenu: typeof SpaceSafeContextMenu
   SendTransactionButton: typeof SendTransactionButton
   PendingTxWidget: typeof PendingTxWidget
@@ -65,6 +65,7 @@ export interface SpacesContract {
   SpaceAddressBookPage: typeof SpaceAddressBookPage
   SpaceSettingsPage: typeof SpaceSettingsPage
   SecurityHubPage: typeof SecurityHubPage
+  SpaceActivityLogPage: typeof SpaceActivityLogPage
 
   // Modal components (PascalCase) - stub renders null
   SelectSafeModal: typeof SelectSafeModal
@@ -73,6 +74,7 @@ export interface SpacesContract {
   CreateSpaceOnboarding: typeof CreateSpaceOnboarding
   SelectSafesOnboarding: typeof SelectSafesOnboarding
   InviteMembersOnboarding: typeof InviteMembersOnboarding
+  SurveyOnboarding: typeof SurveyOnboarding
 
   // Services (camelCase) - undefined when not ready
   isUnauthorized: typeof isUnauthorized

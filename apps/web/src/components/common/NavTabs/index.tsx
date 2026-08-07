@@ -2,7 +2,7 @@ import React from 'react'
 import NextLink from 'next/link'
 import { Tab, Tabs, Typography, Stack } from '@mui/material'
 import { useRouter } from 'next/router'
-import type { NavItem } from '@/components/sidebar/SidebarNavigation/config'
+import type { NavItem } from '@/components/common/NavTabs/navItemsConfig'
 import css from './styles.module.css'
 
 const NavTabs = ({ tabs }: { tabs: NavItem[] }) => {

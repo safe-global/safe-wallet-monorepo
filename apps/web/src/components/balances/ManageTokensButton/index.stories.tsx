@@ -8,7 +8,7 @@ const baseSettings = {
   currency: 'usd',
   tokenList: TOKEN_LISTS.TRUSTED,
   hideDust: true,
-  shortName: { copy: true, qr: true },
+  shortName: { qr: true },
   theme: {},
   env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
   signing: { onChainSigning: false, blindSigning: false },

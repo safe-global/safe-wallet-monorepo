@@ -1,7 +1,7 @@
 import { Chip, Typography } from '@mui/material'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
-import { LoopIcon } from '@/features/counterfactual/components/CounterfactualStatusButton'
+import { LoopIcon } from '@/features/counterfactual'
 import css from './styles.module.css'
 
 export interface AccountItemStatusChipProps {
@@ -18,7 +18,7 @@ const ActivationChip = ({ isActivating }: { isActivating: boolean }) => (
       backgroundColor: isActivating ? 'var(--color-info-light)' : 'var(--color-warning-background)',
     }}
     size="small"
-    label={isActivating ? 'Activating account' : 'Not activated'}
+    label={isActivating ? 'Activating' : 'Not activated'}
     icon={
       isActivating ? (
         <LoopIcon fontSize="small" className={css.pendingLoopIcon} sx={{ mr: '-4px', ml: '4px' }} />

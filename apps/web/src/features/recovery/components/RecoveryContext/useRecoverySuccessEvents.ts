@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
-import { RecoveryEvent, RecoveryTxType, recoveryDispatch } from '@/features/recovery/services/recoveryEvents'
-import type { RecoveryState } from '@/features/recovery/services/recovery-state'
+import { RecoveryEvent, RecoveryTxType, recoveryDispatch } from '../../services/recoveryEvents'
+import type { RecoveryState } from '../../services/recovery-state'
 import type { useRecoveryPendingTxs } from './useRecoveryPendingTxs'
 
 export function useRecoverySuccessEvents(

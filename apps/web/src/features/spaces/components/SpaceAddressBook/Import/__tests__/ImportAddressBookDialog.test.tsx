@@ -1,5 +1,5 @@
-import React from 'react'
-import { screen } from '@testing-library/react'
+import React, { act } from 'react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ImportAddressBookDialog from '../ImportAddressBookDialog'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
@@ -7,19 +7,33 @@ import { render } from '@/tests/test-utils'
 import useChains from '@/hooks/useChains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import * as spacesRTK from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { selectNotifications } from '@/store/notificationsSlice'
+import { getStoreInstance } from '@/store'
 
 jest.mock('@/hooks/useAllAddressBooks')
 jest.mock('@/hooks/useChains')
 const mockedUseAllAddressBooks = useAllAddressBooks as jest.MockedFunction<typeof useAllAddressBooks>
 const mockedUseChains = useChains as jest.MockedFunction<typeof useChains>
+const importMessages = () =>
+  selectNotifications(getStoreInstance().getState())
+    .filter((n) => n.groupKey === 'import-contacts-success')
+    .map((n) => ({ message: n.message, variant: n.variant }))
 const upsertionSpyFn = jest.fn()
 const upsertionSpy = jest
   .spyOn(spacesRTK, 'useAddressBooksUpsertAddressBookItemsV1Mutation')
   .mockReturnValue([upsertionSpyFn, { reset: jest.fn() }])
+const spaceQuerySpy = jest
+  .spyOn(spacesRTK, 'useSpacesGetOneV1Query')
+  .mockReturnValue({ currentData: { name: 'Acme' } } as unknown as ReturnType<typeof spacesRTK.useSpacesGetOneV1Query>)
 
 describe('ImportAddressBookDialog', () => {
   beforeEach(() => {
     mockedUseChains.mockReturnValue({ configs: [{ chainId: '1' } as Chain, { chainId: '5' } as Chain] })
+    upsertionSpyFn.mockReset()
+  })
+
+  afterAll(() => {
+    spaceQuerySpy.mockRestore()
   })
 
   afterAll(() => {
@@ -100,5 +114,161 @@ describe('ImportAddressBookDialog', () => {
         }),
       ]),
     )
+  })
+
+  it('disables the Import button when no contacts are selected', () => {
+    mockedUseAllAddressBooks.mockReturnValue({
+      '1': { '0x123': 'Alice' },
+    })
+
+    render(<ImportAddressBookDialog handleClose={jest.fn()} />)
+
+    expect(screen.getByRole('button', { name: /Import contacts \(0\)/i })).toBeDisabled()
+  })
+
+  it('disables the Import button and delays closing after a successful import', async () => {
+    jest.useFakeTimers()
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
+    upsertionSpyFn.mockResolvedValue({ data: {} })
+
+    mockedUseAllAddressBooks.mockReturnValue({
+      '1': { '0x123': 'Alice' },
+    })
+    const handleClose = jest.fn()
+
+    render(<ImportAddressBookDialog handleClose={handleClose} />)
+
+    await user.click(screen.getByText(/Alice/i))
+    await user.click(screen.getByText(/Import contacts \(1\)/i))
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Import contacts \(1\)/i })).toBeDisabled()
+    })
+    expect(handleClose).not.toHaveBeenCalled()
+
+    act(() => jest.advanceTimersByTime(500))
+    expect(handleClose).toHaveBeenCalledTimes(1)
+
+    jest.useRealTimers()
+  })
+
+  it('shows a single-network success notification with the contact count', async () => {
+    upsertionSpyFn.mockResolvedValue({ data: {} })
+
+    mockedUseAllAddressBooks.mockReturnValue({
+      '1': { '0x123': 'Alice', '0x456': 'Bob' },
+    })
+
+    render(<ImportAddressBookDialog handleClose={jest.fn()} />)
+
+    await userEvent.click(screen.getByText(/Alice/i))
+    await userEvent.click(screen.getByText(/Bob/i))
+    await userEvent.click(screen.getByText(/Import contacts \(2\)/i))
+
+    await waitFor(() => {
+      expect(importMessages()).toContainEqual({
+        message: '2 contacts imported to Acme address book',
+        variant: 'success',
+      })
+    })
+  })
+
+  it('calls out the network spread in the success notification for a multi-network import', async () => {
+    upsertionSpyFn.mockResolvedValue({ data: {} })
+
+    mockedUseAllAddressBooks.mockReturnValue({
+      '1': { '0x123': 'Alice' },
+      '5': { '0xABC': 'Charlie' },
+    })
+
+    render(<ImportAddressBookDialog handleClose={jest.fn()} />)
+
+    await userEvent.click(screen.getByText(/Alice/i))
+    await userEvent.click(screen.getByText(/Charlie/i))
+    await userEvent.click(screen.getByText(/Import contacts \(2\)/i))
+
+    await waitFor(() => {
+      expect(importMessages()).toContainEqual({
+        message:
+          '2 contacts imported to Acme address book across 2 networks. Only contacts on the current network are shown here',
+        variant: 'success',
+      })
+    })
+  })
+
+  it('bubbles the backend error message inline when the mutation returns an error', async () => {
+    upsertionSpyFn.mockResolvedValue({
+      error: { status: 422, data: { message: 'name must contain only valid characters' } },
+    })
+
+    mockedUseAllAddressBooks.mockReturnValue({
+      '1': { '0x123': 'Alice' },
+    })
+
+    render(<ImportAddressBookDialog handleClose={jest.fn()} />)
+
+    await userEvent.click(screen.getByText(/Alice/i))
+    await userEvent.click(screen.getByText(/Import contacts \(1\)/i))
+
+    await waitFor(() => {
+      expect(screen.getByText(/name must contain only valid characters/i)).toBeInTheDocument()
+    })
+    expect(screen.getByRole('button', { name: /Import contacts \(1\)/i })).not.toBeDisabled()
+  })
+
+  it('disables a contact whose name has invalid characters and keeps it unselectable', async () => {
+    mockedUseAllAddressBooks.mockReturnValue({
+      '1': {
+        '0x123': 'Alice',
+        '0x456': 'Bad/Name',
+      },
+    })
+
+    render(<ImportAddressBookDialog handleClose={jest.fn()} />)
+
+    const invalidRow = screen.getByText('Bad/Name').closest('[role="button"]') as HTMLElement
+    expect(invalidRow).toHaveAttribute('aria-disabled', 'true')
+
+    await userEvent.click(invalidRow)
+    expect(screen.getByRole('button', { name: /Import contacts \(0\)/i })).toBeInTheDocument()
+  })
+
+  it('explains in a tooltip why an invalid-name contact cannot be imported', async () => {
+    mockedUseAllAddressBooks.mockReturnValue({
+      '1': { '0x456': 'Bad/Name' },
+    })
+
+    render(<ImportAddressBookDialog handleClose={jest.fn()} />)
+
+    await userEvent.hover(screen.getByText('Bad/Name').closest('[role="button"]')?.parentElement as HTMLElement)
+
+    await waitFor(() => expect(screen.getByText(/Rename this contact to add it to the workspace/)).toBeInTheDocument())
+  })
+
+  it('filters the contact list based on the search input', async () => {
+    jest.useFakeTimers()
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
+
+    mockedUseAllAddressBooks.mockReturnValue({
+      '1': {
+        '0x123': 'Alice',
+        '0x456': 'Bob',
+      },
+    })
+
+    render(<ImportAddressBookDialog handleClose={jest.fn()} />)
+
+    expect(screen.getByText('Alice')).toBeInTheDocument()
+    expect(screen.getByText('Bob')).toBeInTheDocument()
+
+    await user.type(screen.getByPlaceholderText(/Search/i), 'Alice')
+    act(() => jest.advanceTimersByTime(300))
+
+    await waitFor(() => {
+      expect(screen.queryByText('Bob')).not.toBeInTheDocument()
+    })
+    expect(screen.getByText('Alice')).toBeInTheDocument()
+
+    jest.useRealTimers()
   })
 })

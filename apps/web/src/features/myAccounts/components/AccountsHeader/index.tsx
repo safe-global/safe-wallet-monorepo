@@ -9,26 +9,26 @@ import useWallet from '@/hooks/wallets/useWallet'
 import AddIcon from '@/public/images/common/add.svg'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
+import { useNewSafeNextParam } from '@/components/new-safe/getReturnUrl'
 
 const AddSafeButton = ({ trackingLabel, onLinkClick }: { trackingLabel: string; onLinkClick?: () => void }) => {
+  const next = useNewSafeNextParam()
   return (
     <Track {...OVERVIEW_EVENTS.ADD_TO_WATCHLIST} label={trackingLabel}>
-      <Button
+      <NextLink
         data-testid="add-safe-button"
-        variant="outline"
-        size="lg"
+        href={{ pathname: AppRoutes.newSafe.load, query: { next } }}
         onClick={onLinkClick}
-        className="w-full rounded-lg h-full px-5 text-base "
-        render={<NextLink href={AppRoutes.newSafe.load} />}
+        className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'h-full w-full rounded-lg px-5 text-base')}
       >
         <AddIcon color="currentColor" className="size-5 fill-primary" />
         Add
-      </Button>
+      </NextLink>
     </Track>
   )
 }

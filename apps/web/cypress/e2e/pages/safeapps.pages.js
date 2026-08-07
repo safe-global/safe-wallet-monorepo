@@ -8,7 +8,6 @@ export const contractMethodIndex = '[name="contractMethodIndex"]'
 export const saveToLibraryBtn = 'button[aria-label="Save to Library"]'
 export const downloadBatchBtn = 'button[aria-label="Download batch"]'
 export const deleteBatchBtn = 'button[aria-label="Delete Batch"]'
-const appModal = '[data-testid="app-info-modal"]'
 export const safeAppsList = '[data-testid="apps-list"]'
 const openSafeAppBtn = '[data-testid="open-safe-app-btn"]'
 const appMessageInput = 'input[placeholder="Message"]'
@@ -25,8 +24,6 @@ const addCustomAppBtnStr = /add custom Safe App/i
 const openSafeAppBtnStr = /open Safe App/i
 const disclaimerTtle = /disclaimer/i
 const continueBtnStr = /continue/i
-const cameraCheckBoxStr = /camera/i
-const microfoneCheckBoxStr = /microphone/i
 const permissionRequestStr = /permissions request/i
 const accessToAddressBookStr = /access to your address book/i
 const acceptBtnStr = /accept/i
@@ -299,27 +296,6 @@ export function verifyDisclaimerIsDisplayed() {
 
 function verifyDisclaimerIsVisible() {
   cy.findByRole('heading', { name: disclaimerTtle }).should('be.visible')
-}
-
-export function clickOnContinueBtn() {
-  cy.get(appModal).should('exist')
-  return cy.findByRole('button', { name: continueBtnStr }).click().wait(1000)
-}
-
-export function checkLocalStorage() {
-  clickOnContinueBtn().should(() => {
-    const storedItem = window.localStorage.getItem(constants.BROWSER_PERMISSIONS_KEY)
-    expect(storedItem).to.include('"feature":"camera","status":"granted"')
-    expect(storedItem).to.include('"feature":"microphone","status":"denied"')
-  })
-}
-
-export function verifyCameraCheckBoxExists() {
-  cy.findByRole('checkbox', { name: cameraCheckBoxStr }).should('exist')
-}
-
-export function verifyMicrofoneCheckBoxExists() {
-  return cy.findByRole('checkbox', { name: microfoneCheckBoxStr }).should('exist')
 }
 
 export function verifyInfoModalAcceptance() {

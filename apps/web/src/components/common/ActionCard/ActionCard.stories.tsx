@@ -78,7 +78,7 @@ export const LongContent: Story = {
     severity: 'warning',
     title: 'Base contract is not supported',
     content:
-      "Your Safe Account's base contract is not in the list of officially supported deployments, but its bytecode matches a supported L2 contract (v1.3.0). You can migrate it to the corresponding official deployment to ensure full compatibility and support.",
+      "Your Safe account's base contract is not in the list of officially supported deployments, but its bytecode matches a supported L2 contract (v1.3.0). You can migrate it to the corresponding official deployment to ensure full compatibility and support.",
     action: { label: 'Migrate', onClick: () => alert('Migrate clicked') },
   },
 }

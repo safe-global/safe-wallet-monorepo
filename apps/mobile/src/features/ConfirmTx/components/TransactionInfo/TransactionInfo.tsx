@@ -12,6 +12,7 @@ import { useCounterpartyAnalysis, useThreatAnalysis } from '@/src/features/SafeS
 import { useSafeShieldSeverity } from '@/src/features/SafeShield/hooks/useSafeShieldSeverity'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { useTransactionSigner } from '../../hooks/useTransactionSigner'
+import { FeesBreakdown } from './FeesBreakdown'
 
 export function TransactionInfo({
   detailedExecutionInfo,
@@ -45,6 +46,8 @@ export function TransactionInfo({
 
   return (
     <YStack paddingHorizontal="$4" gap="$4" marginTop="$4">
+      <FeesBreakdown detailedExecutionInfo={detailedExecutionInfo} txDetails={txDetails} />
+
       {activeSigner && (
         <>
           <SafeShieldWidget recipient={recipient} contract={contract} threat={threat} safeTx={safeTx} txId={txId} />

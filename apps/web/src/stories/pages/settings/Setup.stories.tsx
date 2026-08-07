@@ -4,7 +4,7 @@ import { createMockStory } from '@/stories/mocks'
 import Setup from '@/pages/settings/setup'
 
 /**
- * Settings Setup page - displays Safe Account configuration.
+ * Settings Setup page - displays Safe account configuration.
  * Shows nonce, contract version, members, spending limits, and nested Safes.
  */
 

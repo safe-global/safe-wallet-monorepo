@@ -18,30 +18,22 @@ import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { MyAccountsFeature, useSpaceAccountsData } from '@/features/myAccounts'
 import { useLoadFeature } from '@/features/__core__'
-import AddAccounts from '@/features/spaces/components/AddAccounts'
+import AddAccountsChooser from '../AddAccountsChooser'
 import { useRouter } from 'next/router'
 import AggregatedBalance from './AggregatedBalances'
 import SafeWidget from '../SafeWidget'
 import SetupWidget from '../SetupWidget'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
-const AddActionsAction = () => {
-  return (
-    <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
-      <AddAccounts />
-    </Track>
-  )
-}
-
 const EmptyStateAddAction = () => {
   return (
     <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
-      <AddAccounts buttonVariant="default" buttonLabel="Add account" />
+      <AddAccountsChooser buttonVariant="default" buttonLabel="Manage accounts" entryPoint="dashboard" />
     </Track>
   )
 }
 
-const DASHBOARD_LIST_DISPLAY_LIMIT = 3
+const DASHBOARD_LIST_DISPLAY_LIMIT = 5
 const PENDING_TX_DISPLAY_LIMIT = 4
 
 const SpaceDashboard = () => {
@@ -80,8 +72,7 @@ const SpaceDashboard = () => {
 
   const safesToDisplay = safes.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
 
-  const { accounts, isLoading: isOverviewLoading, error, refetch } = useSpaceAccountsData(safesToDisplay)
-  const remainingCount = Math.max(0, safeItems.length - DASHBOARD_LIST_DISPLAY_LIMIT)
+  const { isLoading: isOverviewLoading, error, refetch } = useSpaceAccountsData(safesToDisplay)
 
   const handleViewAll = () => {
     if (spaceId) {
@@ -107,12 +98,6 @@ const SpaceDashboard = () => {
     )
   }
 
-  const handleViewAllPendingTxs = () => {
-    if (spaceId) {
-      router.push({ pathname: AppRoutes.spaces.transactions, query: { spaceId } })
-    }
-  }
-
   const handlePendingTxItemClick = (safeAddress: string, txId: string) => {
     trackEvent(
       { ...SPACE_EVENTS.PENDING_TX_WIDGET_CLICKED, label: spaceId },
@@ -124,7 +109,6 @@ const SpaceDashboard = () => {
     )
   }
 
-  const remainingPendingTxCount = Math.max(0, pendingTxCount - PENDING_TX_DISPLAY_LIMIT)
   const showSetupWidget = safeItems.length === 0 && !isSafesLoading && !setupDismissed && !isSetupDismissedForSpace
 
   return (
@@ -139,26 +123,36 @@ const SpaceDashboard = () => {
         </Grid>
 
         <Grid container spacing={3}>
-          <Grid data-testid="dashboard-safe-list" size={{ xs: 12, md: 6 }}>
+          <Grid data-testid="dashboard-safe-list" size={{ xs: 12, md: 7 }}>
             {$isReady ? (
               <AccountsWidget
-                accounts={accounts}
-                loading={isOverviewLoading}
-                remainingCount={remainingCount > 0 ? remainingCount : undefined}
+                items={safesToDisplay}
+                loading={isSafesLoading}
+                totalCount={safes.length}
                 onViewAll={handleViewAll}
                 onItemClick={handleItemClick}
-                action={accounts.length > 0 ? <AddActionsAction /> : undefined}
                 emptyStateAction={<EmptyStateAddAction />}
                 error={error}
                 onRefresh={refetch}
               />
             ) : (
-              <SafeWidget title="Accounts" action={<AddActionsAction />} testId="space-dashboard-accounts-widget">
+              <SafeWidget
+                title="Accounts"
+                action={
+                  safes.length > 0 ? (
+                    <SafeWidget.ViewAll
+                      count={Math.max(0, safes.length - safesToDisplay.length)}
+                      onClick={handleViewAll}
+                    />
+                  ) : undefined
+                }
+                testId="space-dashboard-accounts-widget"
+              >
                 <div className="animate-pulse rounded-lg bg-muted" />
               </SafeWidget>
             )}
           </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid size={{ xs: 12, md: 5 }}>
             {showSetupWidget ? (
               <SetupWidget onDismiss={() => setSetupDismissed(true)} />
             ) : (
@@ -166,8 +160,6 @@ const SpaceDashboard = () => {
                 transactions={pendingTxs}
                 loading={isPendingTxLoading}
                 error={pendingTxError ? String(pendingTxError) : undefined}
-                remainingCount={remainingPendingTxCount > 0 ? remainingPendingTxCount : undefined}
-                onViewAll={handleViewAllPendingTxs}
                 onRefresh={refetchPendingTxs}
                 onItemClick={handlePendingTxItemClick}
               />

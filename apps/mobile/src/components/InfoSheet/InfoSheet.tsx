@@ -6,18 +6,20 @@ import { getVariable, Text, View, useTheme, H4, YStack } from 'tamagui'
 import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Badge } from '@/src/components/Badge'
-import { Platform } from 'react-native'
+import { Linking, Platform } from 'react-native'
 import { FullWindowOverlay } from 'react-native-screens'
 
 export const InfoSheet = ({
   info,
   title,
   displayIcon = true,
+  link,
   children,
 }: {
   info: string
   title?: string
   displayIcon?: boolean
+  link?: { text: string; url: string }
   children?: string | React.ReactElement
 }) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null)
@@ -61,6 +63,11 @@ export const InfoSheet = ({
             <View gap="$2" alignItems="center">
               {title && <H4 fontWeight="600">{title}</H4>}
               <Text textAlign="center">{info}</Text>
+              {link && (
+                <Text textAlign="center" color="$primary" onPress={() => Linking.openURL(link.url)}>
+                  {link.text}
+                </Text>
+              )}
             </View>
           </YStack>
         </BottomSheetScrollView>

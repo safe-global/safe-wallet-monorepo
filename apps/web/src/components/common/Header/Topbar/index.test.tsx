@@ -105,6 +105,10 @@ jest.mock('@/services/analytics/events/spaces', () => ({
 const mockUseCurrentSpaceId = jest.fn<string | null, []>(() => 'space-42')
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
+  get HeaderNavigation() {
+    return jest.requireActual('@/features/spaces/components/HeaderNavigation').HeaderNavigation
+  },
+  HeaderAccountInfo: () => <div data-testid="header-account-info" />,
 }))
 
 jest.mock(
@@ -222,6 +226,40 @@ describe('Topbar', () => {
       expect(screen.queryByTestId('logo-image')).not.toBeInTheDocument()
       // Default top alignment is preserved when the SpaceSafeBar is shown
       expect(container.querySelector('header')?.className).toMatch(/items-start/)
+    })
+
+    it.each([['/welcome/accounts'], ['/welcome/spaces']])(
+      'renders SafeLogo instead of the search input on %s',
+      (pathname) => {
+        mockIsSpaceRoute.mockReturnValue(false)
+        mockUsePathname.mockReturnValue(pathname)
+        const { container } = render(<Topbar />)
+        expect(screen.getByTestId('logo-image')).toBeInTheDocument()
+        expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
+        // The compact logo aligns with the action group instead of top-anchoring the selector row
+        expect(container.querySelector('header')?.className).toMatch(/items-center/)
+      },
+    )
+
+    it('keeps the compact logo inline but wraps the wide selector on narrow headers', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/welcome/accounts')
+      const { container: logoContainer } = render(<Topbar />)
+      // The logo group must not take a full-width row that pushes it below the actions
+      expect(logoContainer.querySelector('header')?.outerHTML).not.toMatch(/basis-full/)
+
+      // The wide left content (selector/search) still drops to its own row when cramped
+      mockIsSpaceRoute.mockReturnValue(true)
+      mockUsePathname.mockReturnValue('/home')
+      const { container: selectorContainer } = render(<Topbar />)
+      expect(selectorContainer.querySelector('header')?.outerHTML).toMatch(/basis-full/)
+    })
+
+    it('renders the account info slot next to the wallet section', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/welcome/accounts')
+      render(<Topbar />)
+      expect(screen.getByTestId('header-account-info')).toBeInTheDocument()
     })
   })
 

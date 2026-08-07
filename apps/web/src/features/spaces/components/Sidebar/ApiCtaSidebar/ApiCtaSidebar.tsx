@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import Image from 'next/image'
 import { X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
 import { SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
@@ -30,7 +30,7 @@ export const ApiCtaSidebar = (): ReactElement => {
           render={isIconCollapsed ? <a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer" /> : undefined}
         >
           <Tooltip>
-            <TooltipTrigger render={<span />} className="flex min-w-0 cursor-pointer items-center gap-3">
+            <TooltipTrigger render={<div />} className="flex min-w-0 cursor-pointer items-center gap-3">
               <Image
                 src="/images/spaces/api-sidebar.svg"
                 alt="API"
@@ -83,14 +83,17 @@ export const ApiCtaSidebar = (): ReactElement => {
           Authenticated access, predictable quotas, and webhooks for teams that rely on Safe as critical infrastructure.
         </Typography>
 
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-auto self-start !bg-background hover:!bg-muted"
-          render={<a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer" />}
+        <a
+          href={API_DOCS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(
+            buttonVariants({ variant: 'outline', size: 'sm' }),
+            'w-auto self-start !bg-background hover:!bg-muted',
+          )}
         >
           Get API key
-        </Button>
+        </a>
       </div>
     </SidebarMenuItem>
   )

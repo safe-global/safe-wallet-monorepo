@@ -1,12 +1,35 @@
 import { useMemo } from 'react'
-import { useIsQualifiedSafe, useSpaceSafes } from '@/features/spaces'
-import { useAllSafes, useAllSafesGrouped, type AllSafeItems } from '@/hooks/safes'
-import type { SafeItem } from '@/hooks/safes'
+import { useIsQualifiedSafe, useSpaceSafes, useCurrentSpaceId } from '@/features/spaces'
+import { useAllSafes, useAllSafesGrouped, useSafeOrderComparator, type AllSafeItems } from '@/hooks/safes'
+import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
+import { getSpaceOrderScope, TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+
+/**
+ * Orders a dropdown list consistently across space / non-space contexts. Every account is sorted by
+ * the chosen comparator, so the current safe keeps its natural position (e.g. mid-list under Name or
+ * a custom Manual order); the dropdown scrolls to and highlights it instead of hoisting it. When the
+ * current safe is in the list, its entry is swapped for `current` in place — `current` carries the
+ * fuller (multi-chain) representation so the row can switch chains even if only one is pinned. It's
+ * injected at the top only when it isn't part of the list at all (e.g. a safe opened by URL that
+ * isn't trusted / not a space member).
+ */
+const orderDropdownSafes = (
+  items: AllSafeItems,
+  safeAddress: string,
+  comparator: ReturnType<typeof useSafeOrderComparator>,
+  current: SafeItem | MultiChainSafeItem | undefined,
+): AllSafeItems => {
+  const sorted = items.slice().sort(comparator)
+  if (!safeAddress || !current) return sorted
+  const index = sorted.findIndex((s) => sameAddress(s.address, safeAddress))
+  if (index === -1) return [current, ...sorted]
+  return sorted.map((safe, i) => (i === index ? current : safe))
+}
 
 /**
  * Returns appropriate safe lists for the SafeBar based on context.
@@ -28,12 +51,22 @@ export function useSafeBarSafes() {
   const safeAddress = urlSafeAddress || reduxSafeAddress
   const currentChainId = useChainId()
 
-  const allSafeItems = useAllSafes()
+  // Skip the owned-safes enumeration (the captcha-protected owners endpoint): the bar's lists are the
+  // space safes (overview-derived) and the trusted/pinned safes (added-safes state), neither of which
+  // needs it. Per-row read-only is derived from the overviews in useSpaceSafeSelectorItems instead.
+  const allSafeItems = useAllSafes(false)
+
+  const spaceId = useCurrentSpaceId()
+  // Trusted (pinned) lists honour the trusted custom order; space lists honour that space's order.
+  const trustedComparator = useSafeOrderComparator(TRUSTED_ORDER_SCOPE)
+  const spaceComparator = useSafeOrderComparator(spaceId ? getSpaceOrderScope(spaceId) : undefined)
 
   const pinnedItems = useMemo(() => allSafeItems?.filter((s) => s.isPinned) ?? [], [allSafeItems])
 
-  const pinnedGrouped = useAllSafesGrouped(pinnedItems)
-  const allGrouped = useAllSafesGrouped(allSafeItems ?? [])
+  // Pass fetchOwnedSafes=false too: useAllSafesGrouped still calls useAllSafes internally even when
+  // customSafes is supplied, so without this it would re-trigger the owners endpoint.
+  const pinnedGrouped = useAllSafesGrouped(pinnedItems, false)
+  const allGrouped = useAllSafesGrouped(allSafeItems ?? [], false)
 
   const pinnedSafes = useMemo<AllSafeItems>(() => {
     const multiChainSafes = pinnedGrouped.allMultiChainSafes ?? []
@@ -67,12 +100,27 @@ export function useSafeBarSafes() {
   // deployed on (pinned, owned, or counterfactual); other safes stay pinned-only.
   // Pin state stays decoupled — bookmark drives it, navigating doesn't auto-pin.
   const dropdownSafes = useMemo<AllSafeItems>(() => {
-    if (!safeAddress) return pinnedSafes
-    const current = allKnownSafes.find((s) => sameAddress(s.address, safeAddress)) ?? fallbackCurrentSafe
-    if (!current) return pinnedSafes
-    const otherPinned = pinnedSafes.filter((s) => !sameAddress(s.address, safeAddress))
-    return [current, ...otherPinned]
-  }, [pinnedSafes, allKnownSafes, safeAddress, fallbackCurrentSafe])
+    const current = safeAddress
+      ? (allKnownSafes.find((s) => sameAddress(s.address, safeAddress)) ?? fallbackCurrentSafe)
+      : undefined
+    return orderDropdownSafes(pinnedSafes, safeAddress, trustedComparator, current)
+  }, [pinnedSafes, allKnownSafes, safeAddress, fallbackCurrentSafe, trustedComparator])
+
+  // Trusted tab: pinned safes only. The current safe is pulled to the front only when it's actually
+  // pinned — it's never injected, so a non-trusted active safe never shows up under "Trusted accounts".
+  // (The trigger still renders the current safe via the workspace list, which always injects it.)
+  const localSafes = useMemo<AllSafeItems>(() => {
+    const currentPinned = safeAddress ? pinnedSafes.find((s) => sameAddress(s.address, safeAddress)) : undefined
+    return orderDropdownSafes(pinnedSafes, safeAddress, trustedComparator, currentPinned)
+  }, [pinnedSafes, safeAddress, trustedComparator])
+
+  // Space context: same ordering rule, applied to the space's safes.
+  const spaceDropdownSafes = useMemo<AllSafeItems>(() => {
+    const current = safeAddress
+      ? (spaceSafes.find((s) => sameAddress(s.address, safeAddress)) ?? fallbackCurrentSafe)
+      : undefined
+    return orderDropdownSafes(spaceSafes, safeAddress, spaceComparator, current)
+  }, [spaceSafes, safeAddress, fallbackCurrentSafe, spaceComparator])
 
   // Same for chain selector.
   const chainSelectorSafes = useMemo<AllSafeItems>(() => {
@@ -84,7 +132,13 @@ export function useSafeBarSafes() {
   }, [allKnownSafes, safeAddress, fallbackCurrentSafe])
 
   return {
-    dropdownSafes: isInSpaceContext ? spaceSafes : dropdownSafes,
+    dropdownSafes: isInSpaceContext ? spaceDropdownSafes : dropdownSafes,
     chainSelectorSafes: isInSpaceContext ? spaceSafes : chainSelectorSafes,
+    // Both lists are exposed so the dropdown can offer Workspace | Local tabs:
+    // `workspaceSafes` are the current space's safes, `localSafes` the trusted (pinned) ones.
+    workspaceSafes: spaceDropdownSafes,
+    localSafes,
+    // Expose so the header label stays in sync with which list is shown
+    isInSpaceContext,
   }
 }

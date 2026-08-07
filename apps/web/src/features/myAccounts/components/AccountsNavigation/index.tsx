@@ -1,41 +1,35 @@
 import { AppRoutes } from '@/config/routes'
-import css from './styles.module.css'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
-import { Chip } from '@mui/material'
-import classNames from 'classnames'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { trackEvent } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
+import { useDarkMode } from '@/hooks/useDarkMode'
+import { cn } from '@/utils/cn'
 
 type Item = {
   label: string
   url: string
   trackEvent?: AnalyticsEvent
-  beta?: boolean
 }
 
-type NavItems = Item[]
-
-const navItems: NavItems = [
+const navItems: Item[] = [
   {
-    label: 'Accounts',
-    url: AppRoutes.welcome.accounts,
-  },
-  {
-    label: 'Spaces',
+    label: 'Workspaces',
     url: AppRoutes.welcome.spaces,
     trackEvent: { ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.accounts_page },
-    beta: true,
+  },
+  {
+    label: 'My accounts',
+    url: AppRoutes.welcome.accounts,
   },
 ]
 
 const AccountsNavigation = () => {
   const router = useRouter()
+  const isDarkMode = useDarkMode()
 
-  const isActiveNavigation = (pathname: string) => {
-    return router.pathname === pathname
-  }
+  const isActiveNavigation = (pathname: string) => router.pathname === pathname
 
   const handleClick = (item: Item) => () => {
     if (item.trackEvent && !isActiveNavigation(item.url)) {
@@ -44,20 +38,32 @@ const AccountsNavigation = () => {
   }
 
   return (
-    <nav className={css.nav}>
-      {navItems.map((item) => (
-        <Link
-          key={item.url}
-          href={item.url}
-          onClick={handleClick(item)}
-          className={classNames(css.tab, { [css.active]: isActiveNavigation(item.url) })}
-        >
-          <span className={css.label}>
+    <nav
+      className={cn(
+        'shadcn-scope flex w-full max-w-[440px] items-center gap-1 rounded-lg bg-[#fafafa] p-1 dark:bg-muted',
+        isDarkMode && 'dark',
+      )}
+    >
+      {navItems.map((item) => {
+        const isActive = isActiveNavigation(item.url)
+
+        return (
+          <Link
+            key={item.url}
+            href={item.url}
+            onClick={handleClick(item)}
+            aria-current={isActive ? 'page' : undefined}
+            className={cn(
+              'inline-flex h-[38px] flex-1 items-center justify-center rounded-lg border border-transparent px-2.5 text-base no-underline transition-all',
+              isActive
+                ? 'bg-background font-semibold text-foreground shadow-sm dark:border-input dark:bg-input/30 dark:text-foreground'
+                : 'font-normal text-muted-foreground hover:text-foreground',
+            )}
+          >
             {item.label}
-            {item.beta && <Chip label="Beta" size="small" sx={{ ml: 1, fontWeight: 'normal', borderRadius: '4px' }} />}
-          </span>
-        </Link>
-      ))}
+          </Link>
+        )
+      })}
     </nav>
   )
 }

@@ -1,0 +1,93 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./SafeGradeChip.stories ActiveFilter 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <span
+    class="border has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-1.5 rounded-full border-transparent px-2.5 py-1 text-xs font-medium bg-[var(--color-error-background)] text-[var(--color-error-main)] cursor-pointer transition-opacity hover:opacity-80 ring-1 ring-inset ring-current"
+    data-slot="badge"
+    data-variant="default"
+    role="button"
+    tabindex="0"
+  >
+    <span
+      aria-hidden="true"
+      class="size-2 shrink-0 rounded-full bg-[var(--color-error-main)]"
+    />
+    1 critical
+  </span>
+</div>
+`;
+
+exports[`./SafeGradeChip.stories AtRisk 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <span
+    class="border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-1.5 rounded-full border-transparent px-2.5 py-1 text-xs font-medium bg-[var(--color-warning-background)] text-[var(--color-warning-main)]"
+    data-slot="badge"
+    data-variant="default"
+  >
+    <span
+      aria-hidden="true"
+      class="size-2 shrink-0 rounded-full bg-[var(--color-warning-main)]"
+    />
+    3 at risk
+  </span>
+</div>
+`;
+
+exports[`./SafeGradeChip.stories Critical 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <span
+    class="border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-1.5 rounded-full border-transparent px-2.5 py-1 text-xs font-medium bg-[var(--color-error-background)] text-[var(--color-error-main)]"
+    data-slot="badge"
+    data-variant="default"
+  >
+    <span
+      aria-hidden="true"
+      class="size-2 shrink-0 rounded-full bg-[var(--color-error-main)]"
+    />
+    1 critical
+  </span>
+</div>
+`;
+
+exports[`./SafeGradeChip.stories NeedsAttention 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <span
+    class="border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-1.5 rounded-full border-transparent px-2.5 py-1 text-xs font-medium bg-[var(--color-review-background)] text-[var(--color-review-main)]"
+    data-slot="badge"
+    data-variant="default"
+  >
+    <span
+      aria-hidden="true"
+      class="size-2 shrink-0 rounded-full bg-[var(--color-review-main)]"
+    />
+    2 needs review
+  </span>
+</div>
+`;
+
+exports[`./SafeGradeChip.stories Passing 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <span
+    class="border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-1.5 rounded-full border-transparent px-2.5 py-1 text-xs font-medium bg-[var(--color-success-background)] text-[var(--color-success-main)]"
+    data-slot="badge"
+    data-variant="default"
+  >
+    <span
+      aria-hidden="true"
+      class="size-2 shrink-0 rounded-full bg-[var(--color-success-main)]"
+    />
+    12 healthy
+  </span>
+</div>
+`;

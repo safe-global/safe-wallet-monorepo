@@ -53,15 +53,82 @@ const createMockQueueResponse = (txCount: number, confirmations: number = 1, thr
 
 // Create handlers for tx queue
 const createTxQueueHandlers = (txCount: number, confirmations: number = 1, threshold: number = 2) => {
+  return createQueueResponseHandlers(createMockQueueResponse(txCount, confirmations, threshold))
+}
+
+// Create handlers that serve a pre-built queue response (for custom scenarios)
+const createQueueResponseHandlers = (response: object) => {
   const chainData = createChainData()
   return [
     http.get(/\/v1\/chains\/\d+$/, () => HttpResponse.json(chainData)),
     http.get(/\/v1\/chains$/, () => HttpResponse.json({ ...chainFixtures.all, results: [chainData] })),
     http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+$/, () => HttpResponse.json(safeFixtures.efSafe)),
-    http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+\/transactions\/queued/, () =>
-      HttpResponse.json(createMockQueueResponse(txCount, confirmations, threshold)),
-    ),
+    http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+\/transactions\/queued/, () => HttpResponse.json(response)),
   ]
+}
+
+// WA-2489: rows with very different description lengths (a long contract method
+// name vs. a short "N actions" Transaction Builder row) must keep their signer
+// badge aligned to the right. This mixed-type queue reproduces that scenario.
+const createCustomContractTx = (nonce: number, methodName: string, name: string) => ({
+  type: 'TRANSACTION',
+  transaction: {
+    id: `multisig_custom_0x${nonce.toString(16).padStart(8, '0')}`,
+    timestamp: Date.now() - nonce * 3600000,
+    txStatus: 'AWAITING_CONFIRMATIONS',
+    txInfo: {
+      type: 'Custom',
+      to: { value: '0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67', name },
+      dataSize: '100',
+      isCancellation: false,
+      methodName,
+    },
+    executionInfo: {
+      type: 'MULTISIG',
+      nonce,
+      confirmationsRequired: 2,
+      confirmationsSubmitted: 1,
+      missingSigners: [{ value: '0xowner1111111111111111111111111111111111' }],
+    },
+  },
+  conflictType: 'None',
+})
+
+const createTxBuilderTx = (nonce: number, actionCount: number) => ({
+  type: 'TRANSACTION',
+  transaction: {
+    id: `multisig_txbuilder_0x${nonce.toString(16).padStart(8, '0')}`,
+    timestamp: Date.now() - nonce * 3600000,
+    txStatus: 'AWAITING_CONFIRMATIONS',
+    txInfo: {
+      type: 'Custom',
+      to: { value: '0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67' },
+      dataSize: '500',
+      isCancellation: false,
+      methodName: 'multiSend',
+      actionCount,
+    },
+    safeAppInfo: { name: 'Transaction Builder', url: 'https://apps-portal.safe.global/tx-builder' },
+    executionInfo: {
+      type: 'MULTISIG',
+      nonce,
+      confirmationsRequired: 2,
+      confirmationsSubmitted: 1,
+      missingSigners: [{ value: '0xowner1111111111111111111111111111111111' }],
+    },
+  },
+  conflictType: 'None',
+})
+
+const mixedQueueResponse = {
+  count: 3,
+  next: null,
+  previous: null,
+  results: [
+    createCustomContractTx(1, 'createProxyWithNonce', 'SafeProxyFactory 1.4.1'),
+    createCustomContractTx(2, 'createProxyWithNonce', 'SafeProxyFactory 1.4.1'),
+    createTxBuilderTx(3, 2),
+  ],
 }
 
 const defaultSetup = createMockStory({
@@ -222,6 +289,31 @@ export const Loading: Story = (() => {
         return HttpResponse.json({})
       }),
     ],
+  })
+  return {
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()
+
+/**
+ * Mixed transaction types with different description lengths (WA-2489).
+ * The signer badge ("1/2") must stay aligned to the right on every row,
+ * including the shorter Transaction Builder row.
+ */
+export const MixedTransactionTypes: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'efSafe',
+    wallet: 'owner',
+    layout: 'paper',
+    store: {
+      txQueue: {
+        data: mixedQueueResponse,
+        loading: false,
+        error: undefined,
+      },
+    },
+    handlers: createQueueResponseHandlers(mixedQueueResponse),
   })
   return {
     parameters: { ...setup.parameters },

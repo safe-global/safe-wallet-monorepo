@@ -3,7 +3,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { ScanContext } from '@/features/security/types'
 import type { useLoadFeature } from '@/features/__core__'
 import type { SecurityContract } from '@/features/security'
-import useSafeScanContext from '@/features/spaces/hooks/useSafeScanContext'
+import useSafeScanContext from '../../../hooks/useSafeScanContext'
 import type { OverviewMap, SelectedSafe, SpaceSafeEntry } from '../types'
 
 type SecurityHandle = ReturnType<typeof useLoadFeature<SecurityContract>>

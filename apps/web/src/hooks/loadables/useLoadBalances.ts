@@ -4,7 +4,7 @@ import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSli
 import { useCurrentChain, useHasFeature } from '../useChains'
 import useSafeInfo from '../useSafeInfo'
 import { POLLING_INTERVAL } from '@/config/constants'
-import { useCounterfactualBalances } from '@/features/counterfactual/hooks'
+import { useCounterfactualBalances } from '@/features/counterfactual'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useTotalBalances from '@safe-global/utils/hooks/useTotalBalances'
@@ -16,12 +16,14 @@ export { initialBalancesState, createPortfolioBalances } from '@safe-global/util
 
 export const useTokenListSetting = (): boolean | undefined => {
   const chain = useCurrentChain()
+  const hasPortfolioFeature = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT)
   const settings = useAppSelector(selectSettings)
 
   return useMemo(() => {
+    if (hasPortfolioFeature === false) return false
     if (settings.tokenList === TOKEN_LISTS.ALL) return false
     return chain ? hasFeature(chain, FEATURES.DEFAULT_TOKENLIST) : undefined
-  }, [chain, settings.tokenList])
+  }, [chain, hasPortfolioFeature, settings.tokenList])
 }
 
 /**

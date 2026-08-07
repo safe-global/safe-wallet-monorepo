@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { selectUndeployedSafes } from '@/features/counterfactual/store'
 import { getSafeSetups, getSharedSetup, hasMultiChainAddNetworkFeature } from '@/features/multichain'
 import { isPredictedSafeProps } from '@/features/counterfactual/services'
 import { AppRoutes } from '@/config/routes'
@@ -32,6 +32,21 @@ export function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem
   const deployedSafes = useMemo(
     () => sortedSafes.filter((safe) => !undeployedSafes[safe.chainId]?.[safe.address]),
     [sortedSafes, undeployedSafes],
+  )
+
+  const isFullyUndeployed = useMemo(
+    () => sortedSafes.length > 0 && deployedSafes.length === 0,
+    [sortedSafes, deployedSafes],
+  )
+
+  const isActivating = useMemo(
+    () =>
+      isFullyUndeployed &&
+      sortedSafes.some((safe) => {
+        const record = undeployedSafes[safe.chainId]?.[safe.address]
+        return record ? record.status.status !== 'AWAITING_EXECUTION' : false
+      }),
+    [isFullyUndeployed, sortedSafes, undeployedSafes],
   )
 
   const currency = useAppSelector(selectCurrency)
@@ -78,5 +93,7 @@ export function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem
     isWelcomePage,
     deployedChainIds,
     isSpaceRoute,
+    isFullyUndeployed,
+    isActivating,
   }
 }

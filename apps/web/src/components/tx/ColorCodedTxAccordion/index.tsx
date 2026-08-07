@@ -16,7 +16,7 @@ import {
 import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import accordionCss from '@/styles/accordion.module.css'
-import HelpTooltip from './HelpTooltip'
+import HelpTooltip from '@/components/tx/ColorCodedTxAccordion/HelpTooltip'
 import { useDarkMode } from '@/hooks/useDarkMode'
 
 enum ColorLevel {

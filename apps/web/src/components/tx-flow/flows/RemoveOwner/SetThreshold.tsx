@@ -38,7 +38,7 @@ export const SetThreshold = ({
     <TxCard>
       <form onSubmit={onSubmitHandler}>
         <Box mb={3}>
-          <Typography mb={2}>Review the signer you want to remove from the active Safe Account:</Typography>
+          <Typography mb={2}>Review the signer you want to remove from the active Safe account:</Typography>
 
           <EthHashInfo address={params.removedOwner.address} shortAddress={false} showCopyButton hasExplorer />
         </Box>

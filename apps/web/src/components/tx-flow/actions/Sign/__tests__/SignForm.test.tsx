@@ -49,6 +49,7 @@ describe('SignForm', () => {
     },
     txSecurity: {
       setRecipientAddresses: jest.fn(),
+      setPoisoningAddresses: jest.fn(),
       setSafeTx: jest.fn(),
       recipient: [undefined, undefined, false] as AsyncResult<RecipientAnalysisResults>,
       contract: [undefined, undefined, false] as AsyncResult<ContractAnalysisResults>,
@@ -98,7 +99,7 @@ describe('SignForm', () => {
 
     expect(
       queryByText(
-        'You are currently not a signer of this Safe Account and won&apos;t be able to submit this transaction.',
+        'You are currently not a signer of this Safe account and won&apos;t be able to submit this transaction.',
       ),
     ).not.toBeInTheDocument()
   })

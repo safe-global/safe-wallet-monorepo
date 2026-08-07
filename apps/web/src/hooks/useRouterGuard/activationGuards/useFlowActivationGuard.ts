@@ -9,6 +9,7 @@ import { useLazySpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERAT
 import type { GuardRule } from '../types'
 import { allow, evaluateGuard, redirect } from '../utils'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
+import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
 
 // ---------------------------------------------------------------------------
 // Route classifications
@@ -21,15 +22,17 @@ const ONBOARDING_ROUTES = [
 ]
 
 const guardRules: GuardRule[] = [
-  // Public and welcome routes are always accessible
+  // Store not hydrated — we can't trust isSiweAuthenticated yet, keep page visible.
+  // (We deliberately do NOT wait for full wallet readiness here: that meant the
+  // page would render briefly on /home etc. before the auth check fired.)
   {
-    match: ({ isPublicRoute }) => isPublicRoute,
+    match: ({ isStoreHydrated }) => !isStoreHydrated,
     action: () => allow(),
   },
 
-  // Wallet provider not ready — keep current page visible
+  // Public and welcome routes are always accessible
   {
-    match: ({ isWalletReady }) => !isWalletReady,
+    match: ({ isPublicRoute }) => isPublicRoute,
     action: () => allow(),
   },
 
@@ -39,7 +42,7 @@ const guardRules: GuardRule[] = [
       return !isSiweAuthenticated
     },
     action: ({ isSpacesPath, query }) => {
-      const target = isSpacesPath ? AppRoutes.welcome.spaces : AppRoutes.welcome.index
+      const target = isSpacesPath ? AppRoutes.welcome.spaces : getWelcomeRoute()
       const safe = typeof query.safe === 'string' ? query.safe : undefined
       return redirect(safe ? `${target}?safe=${encodeURIComponent(safe)}` : target)
     },
@@ -77,7 +80,7 @@ const guardRules: GuardRule[] = [
       const shouldRedirect = isWalletReady && !isPartOfSpaceUrl && !isOnboardingRoute && !isPublicRoute
       return shouldRedirect
     },
-    action: () => redirect(AppRoutes.welcome.index),
+    action: () => redirect(getWelcomeRoute()),
   },
 ]
 
@@ -105,16 +108,29 @@ export const useFlowActivationGuard: UseGuard = () => {
     let isPartOfSpaceUrl = true
 
     if (isSiweAuthenticated) {
-      const { data: spaces } = await fetchSpaces(undefined)
-      hasSpaces = !!spaces && spaces.length > 0
+      const { data: spaces, error } = await fetchSpaces(undefined)
+      // Trust the response only when it's definitive: a successful fetch
+      // (possibly empty) or a 404 confirming the user has no spaces. On any
+      // other error (401/403 from cleared cookies, network failure, 5xx),
+      // assume the user has spaces so we don't bounce them into create-space.
+      // The auth listener / reconcileAuth flow will clean up the stale auth
+      // state and re-trigger the guard with a correct isSiweAuthenticated.
+      const isNotFound = !!error && (error as { status?: unknown }).status === 404
+      const transientError = !!error && !isNotFound
+      if (transientError) {
+        hasSpaces = true
+      } else {
+        hasSpaces = !!spaces && spaces.length > 0
+      }
 
       if (query.spaceId) {
-        isPartOfSpaceUrl = hasSpaces && !!spaces && spaces.some((s) => String(s.id) === query.spaceId)
+        isPartOfSpaceUrl = hasSpaces && !!spaces && spaces.some((s) => s.uuid === query.spaceId)
       }
     }
 
     const isSpacesPath = pathname.startsWith('/spaces')
     const isOnboardingRoute = ONBOARDING_ROUTES.some((route) => pathname.startsWith(route))
+
     return evaluateGuard(
       {
         pathname,
@@ -122,6 +138,7 @@ export const useFlowActivationGuard: UseGuard = () => {
         isPublicRoute: !isOnboardingRoute && !isSpaceRoute && !isSpacesPath,
         isOnboardingRoute,
         isSpacesPath,
+        isStoreHydrated,
         isWalletReady,
         isSiweAuthenticated,
         hasSpaces,
@@ -129,7 +146,7 @@ export const useFlowActivationGuard: UseGuard = () => {
       },
       guardRules,
     )
-  }, [pathname, query, isReady, isWalletReady, isSiweAuthenticated, isStoreHydrated, fetchSpaces])
+  }, [pathname, query, isReady, isWalletReady, isSiweAuthenticated, isStoreHydrated, fetchSpaces, isSpaceRoute])
 
   return {
     activationGuard,

@@ -19,6 +19,23 @@ jest.mock('@/store', () => ({
   useAppSelector: (...args: unknown[]) => mockUseAppSelector(...args),
 }))
 
+const mockUseUsersGetWithWalletsV1Query = jest.fn()
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
+  useUsersGetWithWalletsV1Query: (...args: unknown[]) => mockUseUsersGetWithWalletsV1Query(...args),
+}))
+
+const CURRENT_USER_ID = 7
+const adminMembersForCurrentUser = [
+  {
+    role: 'ADMIN' as const,
+    status: 'ACTIVE' as const,
+    name: '',
+    invitedBy: null,
+    inviteExpiresAt: null,
+    user: { id: CURRENT_USER_ID },
+  },
+]
+
 jest.mock('next/router', () => ({
   useRouter: jest.fn(() => ({
     push: jest.fn(),
@@ -36,8 +53,8 @@ jest.mock('@/features/counterfactual', () => ({
   useIsCounterfactualSafe: () => mockUseIsCounterfactualSafe(),
 }))
 
-jest.mock('../../../hooks/useSidebarHydrated', () => ({
-  useSidebarHydrated: () => mockUseSidebarHydrated(),
+jest.mock('@/hooks/useIsHydrated', () => ({
+  useIsHydrated: () => mockUseSidebarHydrated(),
 }))
 
 jest.mock('../../../NewTransactionButton', () => ({
@@ -53,23 +70,33 @@ jest.mock('@safe-global/utils/utils/chains', () => ({
 }))
 
 jest.mock('@/features/spaces', () => ({
-  getDeterministicColor: (name: string) => `color-${name}`,
   useCurrentSpaceId: () => '42',
 }))
 
+jest.mock('@/components/common/SpaceSafeBar/hooks/useSpaceBackLink', () => ({
+  useSpaceBackLink: () => ({ handleBackToSpace: jest.fn() }),
+}))
+
+jest.mock('@/utils/colors', () => ({
+  getDeterministicColor: (name: string) => `color-${name}`,
+}))
+
 jest.mock('../../NavItem', () => ({
-  NavItem: ({ item }: { item: ResolvedSidebarItem }) => (
-    <div data-testid={`sidebar-item-${item.label.toLowerCase()}`}>
-      {item.label}
-      {!!item.badge && <span aria-label={`${item.badge} ${item.label} notifications`}>{item.badge}</span>}
-    </div>
-  ),
+  NavItem: ({ item }: { item: ResolvedSidebarItem | null }) =>
+    item ? (
+      <div data-testid={item.testId ?? `sidebar-item-${item.label.toLowerCase()}`} data-active={item.isActive}>
+        {item.label}
+        {!!item.badge && <span aria-label={`${item.badge} ${item.label} notifications`}>{item.badge}</span>}
+        {item.indicator && <span aria-hidden />}
+      </div>
+    ) : null,
 }))
 
 jest.mock('@/components/ui/sidebar', () => ({
   SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroupLabel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SidebarSeparator: ({ className }: { className?: string }) => <hr className={className} />,
   SidebarGroupContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenuItem: ({ children, className }: { children: ReactNode; className?: string }) => (
@@ -138,7 +165,7 @@ jest.mock('../../SpaceSelectorDropdown', () => ({
   SpaceSelectorDropdown: ({ triggerVariant }: { triggerVariant?: 'default' | 'addToWorkspace' }) =>
     triggerVariant === 'addToWorkspace' ? (
       <button type="button" data-testid="add-safe-to-workspace-button">
-        Add Safe to space
+        Add Safe to workspace
       </button>
     ) : (
       <div data-testid="space-selector-default">Space selector</div>
@@ -202,6 +229,7 @@ describe('SafeSidebarVariant', () => {
     mockUseIsCounterfactualSafe.mockReturnValue(false)
     mockUseSidebarHydrated.mockReturnValue(true)
     mockUseAppSelector.mockReturnValue(true)
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: CURRENT_USER_ID } })
   })
 
   it('renders all navigation sections', () => {
@@ -232,7 +260,7 @@ describe('SafeSidebarVariant', () => {
     )
 
     expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
-    expect(screen.queryByText('Add Safe to space')).not.toBeInTheDocument()
+    expect(screen.queryByText('Add Safe to workspace')).not.toBeInTheDocument()
   })
 
   it('still renders backToSpace workspace header when Safe is counterfactual', () => {
@@ -386,8 +414,8 @@ describe('SafeSidebarVariant', () => {
 
     it('passes spaces array to addToWorkspace variant', () => {
       const spaces = [
-        { id: 1, name: 'Team', safeCount: 5 },
-        { id: 2, name: 'Personal', safeCount: 2 },
+        { id: 1, uuid: 'uuid-1', name: 'Team', safeCount: 5, members: adminMembersForCurrentUser },
+        { id: 2, uuid: 'uuid-2', name: 'Personal', safeCount: 2, members: adminMembersForCurrentUser },
       ]
       render(
         <SafeSidebarVariant
@@ -412,12 +440,12 @@ describe('SafeSidebarVariant', () => {
       )
 
       expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
-      expect(screen.queryByText('Add Safe to space')).not.toBeInTheDocument()
+      expect(screen.queryByText('Add Safe to workspace')).not.toBeInTheDocument()
     })
 
     it('hides the addToWorkspace section entirely when Safe is counterfactual (undeployed)', () => {
       mockUseIsCounterfactualSafe.mockReturnValue(true)
-      const spaces = [{ id: 1, name: 'Team', safeCount: 0 }]
+      const spaces = [{ id: 1, uuid: 'uuid-1', name: 'Team', safeCount: 0 }]
 
       render(
         <SafeSidebarVariant
@@ -448,8 +476,10 @@ describe('SafeSidebarVariant', () => {
     it('renders correct number of spaces in addToWorkspace when multiple spaces provided', () => {
       const spaces = Array.from({ length: 5 }, (_, i) => ({
         id: i + 1,
+        uuid: `uuid-${i + 1}`,
         name: `Space ${i + 1}`,
         safeCount: 0,
+        members: adminMembersForCurrentUser,
       }))
 
       render(

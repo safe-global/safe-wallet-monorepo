@@ -5,6 +5,7 @@ import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
 import { parseUnits, AbiCoder } from 'ethers'
 
 import AddressBookInput from '@/components/common/AddressBookInput'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import useChainId from '@/hooks/useChainId'
 import { getResetTimeOptions } from '../../constants'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
@@ -14,6 +15,8 @@ import TokenAmountInput from '@/components/common/TokenAmountInput'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../types'
+import useIsSpendingLimitSupported from '../../hooks/useIsSpendingLimitSupported'
+import SpendingLimitNotSupported from './SpendingLimitNotSupported'
 
 export const _validateSpendingLimit = (val: string, decimals?: number | null) => {
   // Allowance amount is uint96 https://github.com/safe-global/safe-modules/blob/main/modules/allowances/contracts/AllowanceModule.sol#L52
@@ -27,6 +30,7 @@ export const _validateSpendingLimit = (val: string, decimals?: number | null) =>
 
 const CreateSpendingLimit = () => {
   const chainId = useChainId()
+  const isSupported = useIsSpendingLimitSupported()
   const { balances } = useVisibleBalances()
   const { onNext, data } = useContext<TxFlowContextType<NewSpendingLimitFlowProps>>(TxFlowContext)
 
@@ -40,6 +44,10 @@ const CreateSpendingLimit = () => {
   const { handleSubmit, watch, control } = formMethods
 
   const tokenAddress = watch(SpendingLimitFields.tokenAddress)
+  const beneficiary = watch(SpendingLimitFields.beneficiary)
+
+  // Copilot address-poisoning check for the beneficiary
+  useSafeShieldForAddressPoisoning([beneficiary])
   const selectedToken = tokenAddress
     ? balances.items.find((item) => item.tokenInfo.address === tokenAddress)
     : undefined
@@ -54,6 +62,10 @@ const CreateSpendingLimit = () => {
     },
     [selectedToken?.tokenInfo.decimals],
   )
+
+  if (!isSupported) {
+    return <SpendingLimitNotSupported />
+  }
 
   return (
     <TxCard>

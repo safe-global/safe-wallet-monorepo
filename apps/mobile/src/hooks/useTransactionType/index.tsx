@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { AnyAppDataDocVersion, latest } from '@cowprotocol/app-data'
+import type { AnyAppDataDocVersion, cowAppDataLatestScheme as latest } from '@cowprotocol/sdk-app-data'
 import { SettingsInfoType, TransactionInfoType } from '@safe-global/store/gateway/types'
 import type { Transaction, AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import {
@@ -50,7 +50,7 @@ export const getTransactionType = (tx: Transaction): TxType => {
       return {
         image: toAddress?.logoUri || <SafeFontIcon name={'settings'} />,
         icon: toAddress?.logoUri || <SafeFontIcon name={'settings'} />,
-        text: 'Safe Account created',
+        text: 'Safe account created',
       }
     }
     case TransactionInfoType.SWAP_TRANSFER:

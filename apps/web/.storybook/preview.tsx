@@ -21,7 +21,7 @@ initialize({
 
 // Export decorators for use in individual stories
 // These are not applied globally but can be imported and used per-story
-export { withLayout, withMockProvider } from './decorators'
+export { withMockProvider } from './decorators'
 
 const BACKGROUND_COLORS: Record<string, string> = { light: '#ffffff', dark: '#121312' }
 

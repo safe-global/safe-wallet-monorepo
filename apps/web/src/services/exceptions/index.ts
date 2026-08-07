@@ -1,11 +1,19 @@
 import { IS_PRODUCTION } from '@/config/constants'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
-import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { logger, captureException } from '../observability'
+import { asError, getHttpStatusFromError } from '@safe-global/utils/services/exceptions/utils'
+import { normalizeError } from '@safe-global/utils/services/exceptions/normalizeError'
+import { logger, captureError } from '../observability'
+import type { ErrorContext } from '../observability/types'
+
+// Re-exported for back-compat with `@/services/exceptions` call sites.
+// Canonical definition + cycle rationale: observability/types.ts.
+export type { ErrorContext }
 
 export class CodedException extends Error {
   public readonly code: number
   public readonly content: string
+  /** HTTP status of the wrapped request failure, when one is recoverable from `thrown`. */
+  public readonly httpStatus?: number
 
   private getCode(content: ErrorCodes): number {
     const codePrefix = content.split(':')[0]
@@ -23,6 +31,17 @@ export class CodedException extends Error {
     this.message = `Code ${content}${extraInfo}`
     this.code = this.getCode(content)
     this.content = content
+    this.httpStatus = getHttpStatusFromError(thrown)
+  }
+
+  /**
+   * Call-site context enriched with the HTTP status extracted from the thrown
+   * error, so every `trackError`/`logError` site gets the facet for free. An
+   * explicit `context.httpStatus` wins over the extracted one.
+   */
+  private withHttpStatus(context?: ErrorContext): ErrorContext | undefined {
+    if (this.httpStatus === undefined) return context
+    return { httpStatus: this.httpStatus, ...context }
   }
 
   /**
@@ -31,7 +50,26 @@ export class CodedException extends Error {
    * are not counted against the Error-Free Views SLO. Use `track()` / `trackError`
    * for failures that truly break a user action.
    */
-  public log(): void {
+  /**
+   * Context attached to the Datadog RUM error/action, so issues can be grouped
+   * by the same taxonomy as the Mixpanel `Error Surfaced` event and reconciled
+   * across the two tools (WA-2775). Namespaced `error_*` to avoid colliding with
+   * Datadog's built-in `@type` field.
+   */
+  private getObservabilityContext(context?: ErrorContext): Record<string, unknown> {
+    const { domain, type, layer } = normalizeError({ code: this.code, message: this.message, isUserFacing: false })
+    return {
+      code: this.code,
+      error_domain: domain,
+      error_type: type,
+      error_layer: layer,
+      ...(context?.rpcEndpointKind && { rpc_endpoint_kind: context.rpcEndpointKind }),
+      ...(context?.rpcHost && { rpc_host: context.rpcHost }),
+      ...(context?.httpStatus && { http_status: context.httpStatus }),
+    }
+  }
+
+  public log(context?: ErrorContext): void {
     // Filter out the logError fn from the stack trace
     if (this.stack) {
       const newStack = this.stack
@@ -46,29 +84,46 @@ export class CodedException extends Error {
     console.warn(IS_PRODUCTION ? this.message : this)
 
     if (IS_PRODUCTION) {
-      logger.warn(this.message, { code: this.code })
+      const enrichedContext = this.withHttpStatus(context)
+      const tags = this.getObservabilityContext(enrichedContext)
+      logger.warn(this.message, tags)
+      captureError({ error: this, isUserFacing: false, code: this.code, tags, context: enrichedContext })
     }
   }
 
-  public track(): void {
+  public track(context?: ErrorContext): void {
+    // User-driven outcomes (rejection, approval-prompt expiry) are expected
+    // behaviour, not failures: recorded as info-level Datadog actions only —
+    // no RUM error, no Error Surfaced analytics event (WA-2950).
+    const { isUserFacing } = normalizeError({ code: this.code, message: this.message, isUserFacing: true })
+    if (!isUserFacing) {
+      console.info(IS_PRODUCTION ? this.message : this)
+      if (IS_PRODUCTION) {
+        logger.info(this.message, this.getObservabilityContext(this.withHttpStatus(context)))
+      }
+      return
+    }
+
     console.error(IS_PRODUCTION ? this.message : this)
 
     if (IS_PRODUCTION) {
-      logger.error(this.message, { code: this.code })
-      captureException(this)
+      const enrichedContext = this.withHttpStatus(context)
+      const tags = this.getObservabilityContext(enrichedContext)
+      logger.error(this.message, tags)
+      captureError({ error: this, isUserFacing: true, code: this.code, tags, context: enrichedContext })
     }
   }
 }
 
-type ErrorHandler = (content: ErrorCodes, thrown?: unknown) => CodedException
+type ErrorHandler = (content: ErrorCodes, thrown?: unknown, context?: ErrorContext) => CodedException
 
 /**
  * Log a caught exception as a warning. Does NOT count against the RUM
  * Error-Free Views SLO. Use for recoverable / background / expected failures.
  */
-export const logError: ErrorHandler = function logError(...args) {
-  const error = new CodedException(...args)
-  error.log()
+export const logError: ErrorHandler = function logError(content, thrown, context) {
+  const error = new CodedException(content, thrown)
+  error.log(context)
   return error
 }
 
@@ -77,9 +132,9 @@ export const logError: ErrorHandler = function logError(...args) {
  * observability exception channel (Datadog RUM addError + Sentry), so it
  * DOES count against Error-Free Views. Use for failed user actions.
  */
-export const trackError: ErrorHandler = function trackError(...args) {
-  const error = new CodedException(...args)
-  error.track()
+export const trackError: ErrorHandler = function trackError(content, thrown, context) {
+  const error = new CodedException(content, thrown)
+  error.track(context)
   return error
 }
 

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { generalSettingsNavItems, settingsNavItems } from '@/components/sidebar/SidebarNavigation/config'
+import { generalSettingsNavItems, settingsNavItems } from '@/components/common/NavTabs/navItemsConfig'
 import { BRAND_NAME } from '@/config/constants'
 
 const Settings: NextPage = () => {

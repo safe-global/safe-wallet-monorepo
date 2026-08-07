@@ -9,13 +9,14 @@ import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
+import { NetworkLogosTooltip } from '@/features/multichain'
 import { getSafeAppUrl } from '@/components/safe-apps/SafeAppCard'
-import ChainIndicator from '@/components/common/ChainIndicator'
 import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
 import SafeAppActionButtons from '@/components/safe-apps/SafeAppActionButtons'
 import SafeAppTags from '@/components/safe-apps/SafeAppTags'
 import SafeAppSocialLinksCard from '@/components/safe-apps/SafeAppSocialLinksCard'
 import CloseIcon from '@/public/images/common/close.svg'
+import useChains from '@/hooks/useChains'
 import { useOpenedSafeApps } from '@/hooks/safe-apps/useOpenedSafeApps'
 import css from './styles.module.css'
 import { SAFE_APPS_EVENTS, SAFE_APPS_LABELS, trackSafeAppEvent, SafeAppLaunchLocation } from '@/services/analytics'
@@ -32,6 +33,8 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
   const { markSafeAppOpened } = useOpenedSafeApps()
   const router = useRouter()
   const safeAppUrl = getSafeAppUrl(router, safeApp?.url || '')
+  const { configs } = useChains()
+  const knownChainIds = safeApp?.chainIds.filter((chainId) => configs.some((chain) => chain.chainId === chainId)) ?? []
 
   const onOpenSafe = () => {
     if (safeApp) {
@@ -86,10 +89,8 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
           Available networks
         </Typography>
 
-        <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap' }}>
-          {safeApp?.chainIds.map((chainId) => (
-            <ChainIndicator key={chainId} chainId={chainId} inline showUnknown={false} />
-          ))}
+        <Box sx={{ display: 'flex', mt: 2 }}>
+          <NetworkLogosTooltip networks={knownChainIds.map((chainId) => ({ chainId }))} maxVisible={3} />
         </Box>
 
         {/* Open Safe App button */}

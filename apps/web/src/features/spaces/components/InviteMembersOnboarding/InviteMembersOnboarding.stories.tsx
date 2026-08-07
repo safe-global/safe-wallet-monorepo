@@ -8,7 +8,7 @@ const defaultSetup = createMockStory({
   wallet: 'owner',
   features: { spaces: true },
   pathname: '/welcome/invite-members',
-  query: { spaceId: '1' },
+  query: { spaceId: 'uuid-1' },
   shadcn: true,
 })
 

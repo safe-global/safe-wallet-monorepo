@@ -138,4 +138,12 @@ describe('PendingTxWidget – onItemClick callback', () => {
     expect(screen.queryByText('No pending transactions')).not.toBeInTheDocument()
     expect(getTxRows()).toHaveLength(0)
   })
+
+  it('never renders a "View all" action', () => {
+    const tx = createMockTx('tx-1', MOCK_SAFE_ADDRESS, MOCK_CHAIN_ID)
+
+    render(<PendingTxWidget transactions={[tx]} />)
+
+    expect(screen.queryByText('View all')).not.toBeInTheDocument()
+  })
 })

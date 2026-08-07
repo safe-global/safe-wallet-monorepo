@@ -1,8 +1,8 @@
-import { useContext, useState } from 'react'
+import { useState } from 'react'
 import type { ReactElement } from 'react'
 import { GitMerge } from 'lucide-react'
 
-import { NestedSafesPopover } from '@/components/sidebar/NestedSafesPopover'
+import { NestedSafesPopover } from '@/components/nested-safes/NestedSafesPopover'
 import { useOwnersGetSafesByOwnerV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -12,7 +12,7 @@ import Track from '@/components/common/Track'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { TxModalContext } from '@/components/tx-flow'
+import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
 import { cn } from '@/utils/cn'
 
 function SpaceNestedSafesButton(): ReactElement | null {
@@ -20,8 +20,7 @@ function SpaceNestedSafesButton(): ReactElement | null {
   const { chainId } = safe
   const safeAddress = safe.address.value
   const isEnabled = useHasFeature(FEATURES.NESTED_SAFES)
-  const { txFlow } = useContext(TxModalContext)
-  const isDisabled = !!txFlow
+  const isDisabled = useIsSafeBarControlDisabled()
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
 
   const { currentData: ownedSafes } = useOwnersGetSafesByOwnerV1Query(
@@ -49,7 +48,7 @@ function SpaceNestedSafesButton(): ReactElement | null {
 
   return (
     <>
-      <div className="flex self-stretch items-stretch sm:order-1 rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+      <div className="flex self-stretch items-stretch order-1 rounded-lg bg-muted">
         <Tooltip>
           <TooltipTrigger
             render={
@@ -57,8 +56,8 @@ function SpaceNestedSafesButton(): ReactElement | null {
                 onClick={isDisabled ? undefined : onClick}
                 disabled={isDisabled}
                 className={cn(
-                  'relative flex items-center border-0 rounded-lg bg-transparent px-2 m-1 transition-colors',
-                  isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-muted/30',
+                  'relative flex items-center border-0 rounded-lg bg-transparent px-3 transition-colors',
+                  isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-muted-foreground/10',
                 )}
                 aria-label="Nested Safes"
                 data-testid="nested-safes-button"

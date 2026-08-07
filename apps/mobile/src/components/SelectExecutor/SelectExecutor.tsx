@@ -13,18 +13,20 @@ type Props = {
   address: Address
   txId: string
   executionMethod: ExecutionMethod
+  isPaidFromSafe?: boolean
 }
 
-export function SelectExecutor({ address, txId, executionMethod }: Props) {
+export function SelectExecutor({ address, txId, executionMethod, isPaidFromSafe }: Props) {
   return (
     <View
-      onPress={() => router.push({ pathname: '/how-to-execute-sheet', params: { txId } })}
+      onPress={isPaidFromSafe ? undefined : () => router.push({ pathname: '/how-to-execute-sheet', params: { txId } })}
       flexDirection="row"
       justifyContent="space-between"
       alignItems="center"
       gap={'$2'}
+      minHeight="$10"
     >
-      <Text color="$colorSecondary">Execution method</Text>
+      <Text color="$colorSecondary">Pay fees from</Text>
 
       <View flexDirection="row" justifyContent="center" alignItems="center" gap={'$2'}>
         <Container
@@ -36,7 +38,9 @@ export function SelectExecutor({ address, txId, executionMethod }: Props) {
           alignItems="center"
           gap={'$1'}
         >
-          {executionMethod === ExecutionMethod.WITH_RELAY ? (
+          {isPaidFromSafe ? (
+            <Text fontWeight={600}>This Safe</Text>
+          ) : executionMethod === ExecutionMethod.WITH_RELAY ? (
             <Text fontWeight={600}>Sponsored by Safe</Text>
           ) : (
             <>
@@ -46,7 +50,7 @@ export function SelectExecutor({ address, txId, executionMethod }: Props) {
           )}
         </Container>
 
-        <SafeFontIcon name="chevron-right" />
+        {!isPaidFromSafe && <SafeFontIcon name="chevron-right" />}
       </View>
     </View>
   )

@@ -58,7 +58,7 @@ const NotificationsPopover = forwardRef<NotificationsPopoverRef>((_props, ref): 
       onClose={handleClose}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-      sx={{ mt: 1 }}
+      sx={{ '& > .MuiPaper-root': { marginTop: '12px' } }}
       transitionDuration={0}
       slotProps={{ paper: { className: notificationCss.popoverContainer } }}
     >

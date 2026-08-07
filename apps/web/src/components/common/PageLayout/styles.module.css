@@ -1,71 +1,34 @@
 @reference '../../../styles/shadcn.css';
 
+/* The topbar lives in normal flow as the first child of .main, so it pushes the
+   page content down by its own height — no fixed reservation to keep in sync,
+   so it can wrap onto extra rows on narrow viewports without clipping content.
+   .main owns the sidebar offset (padding-left), so the topbar inherits it.
+   It scrolls away with the page (not sticky) so a page's own sticky sub-header
+   — e.g. the Assets tabs — can pin to the top cleanly without overlapping it. */
 .topbar {
-  @apply absolute top-0 right-0 z-[1];
-  left: 230px;
-}
-
-.topbarCollapsed {
-  left: 4rem;
-}
-
-.topbarNoSidebar {
-  left: 0;
-}
-
-.topbarElevated {
-  position: fixed;
-  z-index: 99;
-  left: 0;
+  position: relative;
+  z-index: 2;
   width: 100%;
-  transition: none;
-
-  header {
-    padding-left: 230px;
-  }
 }
 
-.topbarElevated:not(.topbarNoSidebar) header {
-  padding-left: calc(230px + 1.5rem);
+/* Elevated above a modal backdrop (e.g. tx flow). Raised above page sub-headers
+   and pinned to the viewport top so it fills the strip the tx dialog leaves
+   uncovered (top: var(--topbar-height)) even when the page was scrolled before
+   the modal opened — e.g. spending limits in Settings → Setup, where the pinned
+   settings tabs showed through instead (WA-2552). Sticky keeps its flow space,
+   so nothing shifts when the class toggles on open/close. */
+.topbarElevated {
+  position: sticky;
+  top: 0;
+  z-index: 99;
 }
 
-.topbarElevated.topbarNoSidebar header {
-  padding-left: 1.5rem;
-}
-
-@media (max-width: 899.95px) {
-  .topbar {
-    left: 0;
-    position: sticky;
-    top: 0;
-  }
-
-  .mainSpace {
-    && {
-      @apply pt-0;
-    }
-  }
-}
-
-.mainSpace {
-  /* we need it in order to have higher importance than the .main class */
-  && {
-    padding-top: var(--topbar-height);
-
-    @media (max-width: 640px) {
-      padding-top: 0;
-    }
-  }
-}
-
-/* Compact variant: settings page without an active safe — topbar collapses
-   to a single row (logo only) so we shrink the reserved space accordingly.
-   The topbar is ~76px tall (header --header-height plus the wallet button row),
-   so we leave one space-3 of breathing room below it. */
-@media (min-width: 900px) {
-  .mainSpace.mainSpaceCompact {
-    padding-top: calc(var(--header-height) + var(--space-3));
-  }
+/* While a shadcn overlay-layer popup (e.g. the safe-selector dropdown) is open, drop the
+   topbar's own stacking context so the SpaceSafeBar inside it can elevate itself above the
+   backdrop (--z-overlay) on its own — the rest of the topbar stays below and gets dimmed. */
+.topbarAboveOverlay {
+  z-index: auto;
 }
 
 .main {
@@ -90,8 +53,10 @@
   background-color: var(--background);
 }
 
-/* Spaces: reduce left padding when the sidebar is collapsed to icon mode */
-.mainSpaceCollapsed {
+/* Reduce left padding when the sidebar is collapsed to icon mode so the content
+   reclaims the freed space. 4rem matches the floating sidebar's collapsed width
+   (--sidebar-width-icon 3rem + 1rem padding). */
+.mainSidebarCollapsed {
   padding-left: 4rem;
 }
 
@@ -106,6 +71,18 @@
   flex-direction: column;
   flex-wrap: wrap;
   min-width: 0;
+}
+
+/* Soft brand-green glow behind the welcome list pages (Workspaces + Trusted
+   accounts). Lives on .content so it sits below the opaque topbar without a seam. */
+.welcomeGlow {
+  background-image: radial-gradient(
+    60% 55% at 50% 42%,
+    color-mix(in srgb, var(--color-static-text-brand) 14%, transparent) 0%,
+    color-mix(in srgb, var(--color-static-text-brand) 4%, transparent) 42%,
+    transparent 72%
+  );
+  background-repeat: no-repeat;
 }
 
 /* Onboarding flows: prevent flex descendants from forcing horizontal overflow on narrow viewports */

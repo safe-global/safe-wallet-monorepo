@@ -15,7 +15,7 @@ export default function SpaceAccountsPage() {
   return (
     <>
       <Head>
-        <title>{`${BRAND_NAME} – Space Safe Accounts`}</title>
+        <title>{`${BRAND_NAME} – Workspace Safe accounts`}</title>
       </Head>
 
       <main>

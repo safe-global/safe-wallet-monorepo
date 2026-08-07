@@ -13,7 +13,6 @@ export enum MixpanelEvent {
   CSV_TX_EXPORT_CLICKED = 'Export CSV Clicked',
   CSV_TX_EXPORT_SUBMITTED = 'CSV Exported',
   NATIVE_SWAP_VIEWED = 'Native Swap Viewed',
-  SAFE_LABS_TERMS_ACCEPTED = 'Safe Labs Terms Accepted',
   SIDEBAR_CLICKED = 'Sidebar Clicked',
   GUARDIAN_BANNER_VIEWED = 'Guardian Banner Viewed',
   GUARDIAN_FORM_VIEWED = 'Guardian Form Viewed',
@@ -39,6 +38,7 @@ export enum MixpanelEvent {
   TRUSTED_SAFE_REMOVED = 'Trusted Safe Removed',
   HYPERNATIVE_LOGIN_CLICKED = 'Hypernative Login Clicked',
   HYPERNATIVE_CONNECTED = 'Hypernative Connected',
+  HYPERNATIVE_FULL_REPORT_CLICKED = 'Hypernative Full Report Clicked',
   FALSE_RESULT_REPORTED = 'False Result Reported',
   WORKSPACE_DASHBOARD_VIEWED = 'Workspace Dashboard Viewed',
   AUTH_LOGIN_SUCCEEDED = 'Auth Login Succeeded',
@@ -64,6 +64,8 @@ export enum MixpanelEvent {
   ADDRESS_BOOK_ENTRY_CREATED = 'Address Book Entry Created',
   WORKSPACE_TRANSACTION_INITIATED = 'Workspace Transaction Initiated',
   ONBOARDING_WIZARD = 'Onboarding Wizard',
+  USE_OLD_UI = 'Use Old UI',
+  ERROR_SURFACED = 'Error Surfaced',
 }
 
 export enum WorkspaceCreateEntryPoint {
@@ -117,6 +119,17 @@ export enum MixpanelEventParams {
   CHAIN_ID = 'Chain ID',
   TX_ID = 'TX ID',
   SAFE_SELECTOR_DROPDOWN = 'Safe Selector Dropdown',
+  GAS_PAYMENT_SOURCE = 'Gas Payment Source',
+  ERROR_DOMAIN = 'Error Domain',
+  ERROR_TYPE = 'Error Type',
+  ERROR_LAYER = 'Error Layer',
+  ERROR_CODE = 'Error Code',
+  IS_USER_FACING = 'Is User Facing',
+  TARGET_CONTRACT_LABEL = 'Target Contract Label',
+  TX_HASH = 'Transaction Hash',
+  RPC_ENDPOINT_KIND = 'RPC Endpoint Kind',
+  RPC_HOST = 'RPC Host',
+  HTTP_STATUS = 'HTTP Status',
 }
 
 export enum AuthLoginMethod {

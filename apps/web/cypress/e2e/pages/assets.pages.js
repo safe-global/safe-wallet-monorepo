@@ -52,6 +52,7 @@ const assetsTableAssetCell = '[data-testid="table-cell-asset"]'
 const assetsTableBalanceCell = '[data-testid="table-cell-balance"]'
 const assetsTableValueCell = '[data-testid="table-cell-value"]'
 export const assetsTableActionsCell = '[data-testid="table-cell-actions"]'
+const tokenName = '[data-testid="token-name"]'
 const tokenSymbol = '[data-testid="token-symbol"]'
 const tokenBalanceCell = '[data-testid="token-balance"]'
 
@@ -214,25 +215,25 @@ export function verifyTableRows(assetsLength) {
 }
 
 export function clickOnTokenNameSortBtn() {
-  cy.get('span').contains(assetNameSortBtnStr).click()
+  cy.get(`${tokenListTable} th`).contains(assetNameSortBtnStr).click()
   cy.wait(500)
 }
 
 export function clickOnTokenBalanceSortBtn() {
-  cy.get('span').contains(assetBalanceSortBtnStr).click()
+  cy.get(`${tokenListTable} th`).contains(assetBalanceSortBtnStr).click()
   cy.wait(500)
 }
 
 export function verifyTokenNamesOrder(option = 'ascending') {
   const tokens = []
 
-  main.getTextToArray(assetsTableRow, tokens)
+  main.getTextToArray(`${assetsTableRow} ${tokenName}`, tokens)
 
   cy.wrap(tokens).then((arr) => {
     cy.log('*** Original array ' + tokens)
-    let sortedNames = [...arr].sort()
+    const sortedNames = [...arr].sort((a, b) => a.localeCompare(b))
     cy.log('*** Sorted array ' + sortedNames)
-    if (option == 'descending') sortedNames = [...arr].sort().reverse()
+    if (option == 'descending') sortedNames.reverse()
     expect(arr).to.deep.equal(sortedNames)
   })
 }
@@ -243,9 +244,10 @@ export function verifyTokenBalanceOrder(option = 'ascending') {
   main.extractDigitsToArray(`${assetsTableRow} ${assetsTableBalanceCell} span`, balances)
 
   cy.wrap(balances).then((arr) => {
-    let sortedBalance = [...arr].sort()
-    if (option == 'descending') sortedBalance = [...arr].sort().reverse()
-    expect(arr).to.deep.equal(sortedBalance)
+    const numericBalances = arr.map(Number)
+    const sortedBalances = [...numericBalances].sort((a, b) => a - b)
+    if (option == 'descending') sortedBalances.reverse()
+    expect(numericBalances).to.deep.equal(sortedBalances)
   })
 }
 

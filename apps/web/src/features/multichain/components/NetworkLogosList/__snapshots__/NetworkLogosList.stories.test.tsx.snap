@@ -64,6 +64,71 @@ exports[`./NetworkLogosList.stories FourNetworks 1`] = `
 </div>
 `;
 
+exports[`./NetworkLogosList.stories InsideAccountBadgePill 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <span
+      style="background-color: rgba(0, 0, 0, 0.05); border-radius: 9999px; padding: 3px; display: inline-flex; align-items: center;"
+    >
+      <div
+        class="networks capped MuiBox-root mui-style-0"
+        style="--network-logo-size: 22px;"
+      >
+        <span
+          class="inlineIndicator withLogo onlyLogo"
+          data-testid="chain-logo"
+        >
+          <img
+            alt="Ethereum Logo"
+            data-testid="chain-indicator-network-logo-img"
+            height="22"
+            loading="lazy"
+            src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+            style="min-width: 22px;"
+            width="22"
+          />
+        </span>
+        <span
+          class="inlineIndicator withLogo onlyLogo"
+          data-testid="chain-logo"
+        >
+          <img
+            alt="Polygon Logo"
+            data-testid="chain-indicator-network-logo-img"
+            height="22"
+            loading="lazy"
+            src="https://safe-transaction-assets.staging.5afe.dev/chains/137/chain_logo.png"
+            style="min-width: 22px;"
+            width="22"
+          />
+        </span>
+        <span
+          class="inlineIndicator withLogo onlyLogo"
+          data-testid="chain-logo"
+        >
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-104dftr-MuiSvgIcon-root"
+            focusable="false"
+          />
+        </span>
+        <div
+          class="moreChainsIndicator MuiBox-root mui-style-0"
+        >
+          +
+          3
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+`;
+
 exports[`./NetworkLogosList.stories ManyNetworksWithHasMore 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
@@ -73,7 +138,7 @@ exports[`./NetworkLogosList.stories ManyNetworksWithHasMore 1`] = `
     style="--Paper-shadow: none;"
   >
     <div
-      class="networks MuiBox-root mui-style-0"
+      class="networks capped MuiBox-root mui-style-0"
     >
       <span
         class="inlineIndicator withLogo onlyLogo"

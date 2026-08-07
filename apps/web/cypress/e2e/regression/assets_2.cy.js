@@ -36,8 +36,7 @@ describe('Assets 2 tests', () => {
   })
 
   it('Verify Proposers have the Send and Swap buttons enabled', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_31)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_31)
     assets.toggleShowAllTokens(false)
     assets.toggleHideDust(false)
     main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther])
