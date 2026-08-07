@@ -200,6 +200,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
       <div ref={wrapperRef} className={css.wrapper}>
         <AddressInput
           {...props}
+          data-testid={props['data-testid'] ?? 'address-book-input'}
           name={name}
           focused={props.focused || !addressValue}
           onOpenListClick={hasVisibleOptions ? handleToggleAutocomplete : undefined}

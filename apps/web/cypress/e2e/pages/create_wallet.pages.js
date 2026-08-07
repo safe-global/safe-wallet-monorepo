@@ -176,6 +176,13 @@ export function verifyNextBtnIsEnabled() {
 export function clickOnCreateNewSafeBtn() {
   // Open the "Add accounts" chooser, then pick "Create new" to enter the create-safe flow.
   cy.get(addAccountsChooserBtn).should('be.visible').click()
+  // A re-render while the accounts list loads can close the menu right after it opens — reopen it once.
+  cy.wait(1000)
+  cy.get('body').then(($body) => {
+    if (!$body.find(`${createNewAccountOption}:visible`).length) {
+      cy.get(addAccountsChooserBtn).filter(':visible').first().click()
+    }
+  })
   cy.get(createNewAccountOption).should('be.visible').click()
   cy.wait(1000)
 }

@@ -11,6 +11,7 @@ import type { NewSafeFormData } from '@/components/new-safe/create'
 
 import layoutCss from '@/components/new-safe/create/styles.module.css'
 import NameInput from '@/components/common/NameInput'
+import { getNewSafeReturnUrl } from '@/components/new-safe/getReturnUrl'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
 import NextLink from 'next/link'
@@ -93,7 +94,7 @@ function SetNameStep({
 
   const onCancel = () => {
     trackEvent(CREATE_SAFE_EVENTS.CANCEL_CREATE_SAFE_FORM)
-    router.push(AppRoutes.welcome.index)
+    router.push(getNewSafeReturnUrl(router.query.next))
   }
 
   // whenever the chain switches we need to update the latest Safe version and selected chain

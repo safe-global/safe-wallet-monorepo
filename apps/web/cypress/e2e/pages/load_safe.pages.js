@@ -12,7 +12,7 @@ const safeDataForm = '[data-testid=load-safe-form]'
 const removeOwnerBtn = '[data-testid="remove-owner-btn"]'
 const addOwnerBtn = '[data-testid="add-new-signer"]'
 const ownerPolicyStepForm = '[data-testid="owner-policy-step-form"]'
-const addressItem = '[data-testid="address-item"]'
+const addressItem = '[data-testid="address-book-input"]'
 const sideBarIcon = '[data-testid="ChevronRightIcon"]'
 const sidebarCheckIcon = '[data-testid="CheckIcon"]'
 const addressStepNextBtn = '[data-testid="load-safe-next-btn"]'
@@ -33,12 +33,19 @@ export function verifyAddresFormatIsValid() {
   cy.get(addressSection).find('label').contains(constants.addressBookErrrMsg.invalidFormat).should('not.exist')
 }
 
+function getOwnerNameInput(index) {
+  return cy
+    .get(ownerName)
+    .eq(index)
+    .then(($el) => ($el.is('input') ? cy.wrap($el) : cy.wrap($el.find('input'))))
+}
+
 export function clickOnAddNewOwnerBtn() {
   cy.get(addOwnerBtn).click()
 }
 
 export function verifyOnwerName(index, name) {
-  cy.get(ownerName).eq(index).find('input').should('have.value', name)
+  getOwnerNameInput(index).should('have.value', name)
   cy.get(addressBookRecipient).eq(index).should('contain', name)
 }
 
@@ -67,7 +74,12 @@ export function clickOnRemoveOwnerBtn(index) {
 }
 
 export function verifyownerNameFormatIsValid() {
-  cy.get(ownerName).find('label').contains(ownerNameLabel).should('be.visible')
+  cy.get(ownerName)
+    .eq(0)
+    .then(($el) => {
+      const $label = $el.is('input') ? $el.closest('[data-slot="field"]').find('label') : $el.find('label')
+      cy.wrap($label).contains(ownerNameLabel).should('be.visible')
+    })
 }
 
 export function clickOnBackBtn() {
@@ -89,9 +101,7 @@ export function verifyDataDoesNotExist(data) {
 }
 
 export function inputOwnerName(index, name) {
-  cy.get(ownerName)
-    .eq(index)
-    .find('input')
+  getOwnerNameInput(index)
     .clear()
     .type(name)
     .then(($input) => {
@@ -118,7 +128,7 @@ export function inputOwnerAddress(index, name) {
 }
 
 export function verifyOnwerNameENS(index, ens) {
-  cy.get(ownerName).eq(index).find('input').invoke('attr', 'placeholder').should('contain', ens)
+  getOwnerNameInput(index).invoke('attr', 'placeholder').should('contain', ens)
 }
 
 export function verifyAddressError() {
@@ -126,7 +136,7 @@ export function verifyAddressError() {
 }
 
 export function verifyOnwerInputIsNotEmpty(index) {
-  cy.get(ownerName).find('input').eq(index).invoke('attr', 'placeholder').should('not.be.empty')
+  getOwnerNameInput(index).invoke('attr', 'placeholder').should('not.be.empty')
 }
 
 export function checkMainNetworkSelected(network) {

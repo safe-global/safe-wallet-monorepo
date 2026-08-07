@@ -74,6 +74,7 @@ const AddressInput = ({
   InputLabelProps,
   fullWidth,
   variant,
+  'data-testid': dataTestId,
   ...props
 }: AddressInputProps): ReactElement => {
   const id = useId()
@@ -213,6 +214,7 @@ const AddressInput = ({
       </FieldLabel>
 
       <div
+        data-testid={dataTestId}
         className={classnames(css.inputWrapper, { [css.error]: !!error, [css.readOnly]: isReadOnly })}
         onClick={resetName}
       >
