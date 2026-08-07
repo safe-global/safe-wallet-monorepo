@@ -1,4 +1,4 @@
 .nonce {
-  min-width: 170px;
+  flex-shrink: 0;
   justify-content: flex-end;
 }

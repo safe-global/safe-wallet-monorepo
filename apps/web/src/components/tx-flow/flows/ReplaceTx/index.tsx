@@ -134,7 +134,7 @@ const ReplaceTxMenu = ({
   return (
     <TxLayout title={`Reject transaction #${txNonce}`} step={0} hideNonce isReplacement>
       <TxCard>
-        <div className="mt-4 text-center">
+        <div className="mt-4 flex justify-center">
           <ReplaceTxIcon />
         </div>
 

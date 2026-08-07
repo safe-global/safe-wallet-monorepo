@@ -33,14 +33,14 @@ export const TxLayoutHeader = ({
 
   return (
     <div className={css.headerInner}>
-      <div className="flex items-center">
+      <div className="flex min-w-0 flex-1 items-center">
         {Icon && (
           <div className={css.icon}>
             <Icon />
           </div>
         )}
 
-        <Typography variant="h4" className="font-bold">
+        <Typography variant="h4" className="font-bold [overflow-wrap:anywhere]">
           {subtitle}
         </Typography>
       </div>
