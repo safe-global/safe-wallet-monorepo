@@ -55,8 +55,11 @@ runs:
       shell: bash
       run: yarn workspace @safe-global/web after-install
 
+    # Save only outside pull_request runs. Each yarn cache is ~2.2 GB and PR
+    # merge-ref saves were saturating the 10 GB repo quota, evicting the dev
+    # caches every PR restores from. PR runs restore via restore-keys instead.
     - name: Save Yarn Cache & Types
-      if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true'
+      if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true' && github.event_name != 'pull_request'
       uses: ./.github/actions/cache-deps
       with:
         mode: save-yarn

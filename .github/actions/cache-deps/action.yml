@@ -37,6 +37,12 @@ runs:
           ${{ github.workspace }}/.yarn/install-state.gz
           ${{ github.workspace }}/packages/utils/src/types
         key: ${{ runner.os }}-web-core-modules-${{ hashFiles('**/package.json','**/yarn.lock') }}
+        # Exact key misses whenever any package.json or the lockfile changes;
+        # fall back to the latest cache so yarn install runs incrementally.
+        # A prefix hit does not set cache-hit, so install and after-install
+        # still run and regenerate node_modules and generated types.
+        restore-keys: |
+          ${{ runner.os }}-web-core-modules-
 
     - name: Set composite outputs yarn
       if: ${{ inputs.mode == 'restore-yarn' }}
