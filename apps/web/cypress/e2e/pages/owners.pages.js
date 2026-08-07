@@ -17,10 +17,9 @@ const newOwnerAddress = 'input[name="newOwner.address"]'
 const newOwnerNonceInput = 'input[name="nonce"]'
 const signerNameField = '[data-testid="owner-name"]'
 const signerAddressField = 'input[name="owners.0.address"]'
-const thresholdInput = 'input[name="threshold"]'
-const thresholdList = 'ul[role="listbox"]'
+const thresholdList = '[data-slot="select-content"]'
 const thresholdDropdown = '[data-testid="threshold-selector"]'
-const thresholdOption = 'li[role="option"]'
+const thresholdOption = '[data-slot="select-item"]'
 const existingOwnerAddressInput = (index) => `input[name="owners.${index}.address"]`
 const existingOwnerNameInput = (index) => `input[name="owners.${index}.name"]`
 const singleOwnerNameInput = 'input[name="name"]'
@@ -94,7 +93,7 @@ export function clickOnThresholdDropdown() {
 }
 
 export function getThresholdOptions() {
-  return cy.get('ul').find(thresholdOption)
+  return cy.get(thresholdList).find(thresholdOption)
 }
 
 export function verifyThresholdLimit(startValue, endValue) {
@@ -257,14 +256,15 @@ export function verifyConfirmTransactionWindowDisplayed() {
 }
 
 export function verifyThreshold(startValue, endValue) {
-  main.verifyInputValue(thresholdInput, startValue)
+  cy.get(thresholdDropdown).should('contain.text', startValue)
   cy.get('p')
     .contains(`out of ${endValue} signer${endValue > 1 ? 's' : ''}`)
     .should('be.visible')
-  cy.get(thresholdInput).parent().click()
+  cy.get(thresholdDropdown).click()
   cy.get(thresholdList).contains(endValue).should('be.visible')
-  cy.get(thresholdList).find('li').should('have.length', endValue)
-  cy.get('body').click(0, 0)
+  cy.get(thresholdList).find(thresholdOption).should('have.length', endValue)
+  cy.get('body').type('{esc}')
+  cy.get(thresholdList).should('not.be.visible')
 }
 
 export function clickOnChangeThresholdBtn() {

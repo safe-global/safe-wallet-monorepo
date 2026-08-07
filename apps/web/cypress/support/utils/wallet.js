@@ -131,7 +131,9 @@ export function connectSignerViaStorage(signer, url, { extraStorage, waitForConn
   // The last wallet reconnects asynchronously after the page loads (useOnboard ->
   // connectLastWallet), so wait for the header's connected-wallet chip to be visible before
   // proceeding; otherwise the test can act while the wallet is still (briefly) disconnected.
+  // The reconnect can take well over the default 10s when the RPC is rate-limited (429s), so
+  // wait longer before giving up.
   if (waitForConnection) {
-    cy.get('[data-testid="open-account-center"]').should('be.visible')
+    cy.get('[data-testid="open-account-center"]', { timeout: 30000 }).should('be.visible')
   }
 }

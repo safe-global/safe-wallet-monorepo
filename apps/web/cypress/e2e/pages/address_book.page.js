@@ -22,8 +22,8 @@ const exportSummary = '[data-testid="export-summary"]'
 const sendBtn = '[data-testid="send-btn"]'
 export const entryDialog = '[data-testid="entry-dialog"]'
 
-//TODO Move to specific component
-const moreActionIcon = '[data-testid="MoreHorizIcon"]'
+const moreActionsBtn = '[data-testid="transfer-actions-btn"]'
+const dropdownMenuItem = '[data-slot="dropdown-menu-item"]'
 
 export const acceptSelection = main.acceptSelectionStr
 export const addressBook = 'Address book'
@@ -80,11 +80,11 @@ export function clickOnSendBtn() {
 }
 
 export function clickOnMoreActionsBtn() {
-  cy.get(moreActionIcon).click()
+  cy.get(moreActionsBtn).click()
 }
 
 export function clickOnAddToAddressBookBtn() {
-  cy.get('li span').contains(addToAddressBookStr).click()
+  cy.get(dropdownMenuItem).contains(addToAddressBookStr).click()
 }
 
 export function verifyExportMessage(count) {
@@ -197,7 +197,7 @@ export function addEntry(name, address) {
 }
 
 export function clickOnEditEntryBtn() {
-  cy.get(editEntryBtn).click({ force: true })
+  cy.get(editEntryBtn).filter(':visible').click({ force: true })
 }
 
 export function typeInNameInput(name) {
@@ -210,7 +210,7 @@ export function verifyNameWasChanged(name, editedName) {
 }
 
 export function clickDeleteEntryButton() {
-  cy.get(deleteEntryBtn).click({ force: true })
+  cy.get(deleteEntryBtn).filter(':visible').click({ force: true })
 }
 
 export function clickDeleteEntryModalDeleteButton() {
