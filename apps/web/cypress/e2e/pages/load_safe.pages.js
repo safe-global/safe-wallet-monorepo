@@ -122,7 +122,7 @@ export function verifyOnwerNameENS(index, ens) {
 }
 
 export function verifyAddressError() {
-  cy.get(addressSection).find('label').contains(safeAddressError)
+  cy.get(addressSection).closest('[data-slot="field"]').find('label').contains(safeAddressError)
 }
 
 export function verifyOnwerInputIsNotEmpty(index) {
@@ -185,7 +185,7 @@ export function verifyIncorrectAddressErrorMessage() {
 }
 
 export function verifyNameLengthErrorMessage() {
-  cy.get(main.nameInput).parent().prev('label').contains(invalidAddressNameLengthErrorMsg)
+  cy.get(main.nameInput).closest('[data-slot="field"]').find('label').contains(invalidAddressNameLengthErrorMsg)
 }
 
 export function inputAddress(address) {

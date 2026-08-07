@@ -65,9 +65,12 @@ function setSwitchState(switchSelector, shouldBeOn) {
   cy.get(switchSelector).then(($switch) => {
     const isOn = $switch.attr('aria-checked') === 'true'
     if (isOn !== shouldBeOn) {
-      cy.wrap($switch).click()
+      // A focus-opened info tooltip can overlay the switch inside the menu, so force the click
+      // and assert the resulting state instead of relying on the click landing unobstructed.
+      cy.wrap($switch).click({ force: true })
     }
   })
+  cy.get(switchSelector).should('have.attr', 'aria-checked', String(shouldBeOn))
 }
 
 export function toggleShowAllTokens(shouldShow) {

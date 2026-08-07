@@ -13,7 +13,6 @@ export const tokenSelector = '[data-testid="token-selector"]'
 const newTransactionBtnStr = 'New transaction'
 const recepientInput = 'input[name="recipients.0.recipient"]'
 const recepientInput_ = (index) => `input[name="recipients.${index}.recipient"]`
-const tokenAddressInput = 'input[name="recipients.0.tokenAddress"]'
 const amountInput = 'input[name="recipients.0.amount"]'
 const amountInput_ = (index) => `input[name="recipients.${index}.amount"]`
 const nonceInput = 'input[name="nonce"]'
@@ -769,7 +768,7 @@ export function verifyAmountLargerThanCurrentBalance() {
 }
 
 export function verifyTooltipMessage(message) {
-  cy.get('div[role="tooltip"]').contains(message).should('be.visible')
+  cy.get('[data-slot="tooltip-content"]').contains(message).should('be.visible')
 }
 
 export function selectCurrentWallet() {
@@ -781,13 +780,12 @@ export function verifyRelayerAttemptsAvailable() {
 }
 
 export function clickOnTokenselectorAndSelectSepoliaEth() {
-  cy.get(tokenSelector).click()
-  cy.get('ul[role="listbox"]').contains(constants.tokenNames.sepoliaEther).click()
+  clickOnTokenselectorAndSelectToken(constants.tokenNames.sepoliaEther)
 }
 
 export function clickOnTokenselectorAndSelectToken(tokenName) {
   cy.get(tokenSelector).click()
-  cy.get('ul[role="listbox"]').contains(tokenName).click()
+  cy.get('[data-slot="select-content"]').contains(tokenName).click()
 }
 
 export function setMaxAmount() {
@@ -795,9 +793,9 @@ export function setMaxAmount() {
 }
 
 export function verifyMaxAmount(token, tokenAbbreviation) {
-  cy.get(tokenAddressInput)
-    .prev()
-    .find('p')
+  cy.get(tokenSelector)
+    .find('[data-testid="token-item"]')
+    .first()
     .contains(token)
     .next()
     .then((element) => {
@@ -806,7 +804,6 @@ export function verifyMaxAmount(token, tokenAbbreviation) {
         const actualValue = parseFloat($input.val())
         expect(actualValue).to.be.closeTo(maxBalance, 0.1)
       })
-      console.log(maxBalance)
     })
 }
 
