@@ -179,7 +179,7 @@ function clickOnCurrencySelector() {
 
 export function changeCurrency(currency) {
   clickOnCurrencySelector()
-  cy.get(currencyItem).contains(currency).click()
+  main.selectDropdownOption(currencyItem, currency)
 }
 
 export function clickOnSendBtn(index) {
@@ -395,7 +395,13 @@ export function verifyInitialTableState() {
 
 export function changeTo10RowsPerPage() {
   cy.get(rowsPerPageSelect).click()
-  cy.get(paginationPageList).contains(rowsPerPage10).click()
+  // Base UI select items only commit a click while highlighted: hover the item first,
+  // wait for the highlight to land (tabindex=0), then click. Exact-match the label so
+  // '10' cannot land on the '100' option.
+  cy.contains(paginationPageList, new RegExp(`^\\s*${rowsPerPage10}\\s*$`)).as('rowsPerPageOption')
+  cy.get('@rowsPerPageOption').trigger('mousemove')
+  cy.get('@rowsPerPageOption').should('have.attr', 'tabindex', '0')
+  cy.get('@rowsPerPageOption').click()
 }
 
 export function verifyTableHas10Rows() {

@@ -73,7 +73,7 @@ function NestedSafeItem({
   if (isManageMode) {
     return (
       <AccountItemButton onClick={onToggle} elementRef={elementRef}>
-        <AccountItemCheckbox checked={isSelected} address={safeItem.address} />
+        <AccountItemCheckbox checked={isSelected} address={safeItem.address} onCheckedChange={onToggle} />
         <AccountItemIcon
           address={safeItem.address}
           threshold={threshold}

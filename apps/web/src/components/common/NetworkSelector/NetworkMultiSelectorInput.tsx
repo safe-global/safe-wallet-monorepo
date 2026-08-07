@@ -168,6 +168,9 @@ const NetworkMultiSelectorInput = ({
     } else {
       toggleOption(chain as Chain)
     }
+    // Selecting an option resets the search text (MUI Autocomplete parity) so the next
+    // search starts fresh instead of appending to a stale filter.
+    setInputValue('')
   }
 
   return (

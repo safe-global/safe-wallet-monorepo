@@ -311,7 +311,8 @@ export function verifyBulkExecuteBtnIsEnabled(txs) {
 }
 
 export function verifyEnabledBulkExecuteBtnTooltip() {
-  cy.get('button').contains(bulkExecuteBtnStr).trigger('mouseover', { force: true })
+  // Base UI tooltips open on a native mouseenter on the trigger (mouseover/mousemove don't open them)
+  cy.get('button').contains(bulkExecuteBtnStr).trigger('mouseenter', { force: true })
   cy.contains(enabledBulkExecuteBtnTooltip).should('exist')
 }
 
@@ -787,12 +788,15 @@ export function selectCurrentWallet() {
 
 export function verifyRelayerAttemptsAvailable() {
   // GTF (unlimited relay) chains hide the execution-method selector and the
-  // "free transactions left today" counter in the execute flow, so assert the loaded
-  // execute screen instead and only check the counter when the relay option is rendered.
+  // "free transactions left today" counter in the execute flow. Assert one of the two
+  // valid states explicitly: relay option with its counter, or no selector at all —
+  // a rendered selector without the relay option would be a real bug, not GTF.
   cy.contains(estimatedFeeStr).should('be.visible')
   cy.get('body').then(($body) => {
     if ($body.find(relayExecMethod).length) {
       cy.contains(transactionsPerHrStr).should('exist')
+    } else {
+      cy.get(connectedWalletExecMethod).should('not.exist')
     }
   })
 }
@@ -982,8 +986,29 @@ export function waitForProposeRequest() {
   cy.wait('@ProposeTx')
 }
 
-export function clickViewTransaction() {
-  cy.contains(viewTransactionBtn).click()
+const submitTxErrorMsg = 'Error submitting the transaction. Please try again.'
+
+export function clickViewTransaction(retriesLeft = 2) {
+  // Wait for the submitted-tx success screen. Transient RPC/CGW throttling (429) surfaces a
+  // retryable submission error with the sign button re-enabled instead — retry like a user would.
+  cy.get('body', { timeout: 60000 }).should(($body) => {
+    const hasSuccess = $body.text().includes(viewTransactionBtn)
+    const hasSubmitError = $body.text().includes(submitTxErrorMsg)
+    expect(hasSuccess || hasSubmitError, 'success screen or retryable submission error shown').to.be.true
+  })
+  cy.get('body').then(($body) => {
+    const needsRetry = !$body.text().includes(viewTransactionBtn) && $body.text().includes(submitTxErrorMsg)
+    if (!needsRetry) {
+      cy.contains(viewTransactionBtn).click()
+      return
+    }
+    if (retriesLeft === 0 || !$body.find(signBtn).length) {
+      throw new Error('Transaction kept failing to submit — likely RPC rate limiting (429)')
+    }
+    cy.wait(5000)
+    cy.get(signBtn).should('be.enabled').click()
+    clickViewTransaction(retriesLeft - 1)
+  })
 }
 
 export function verifySingleTxPage() {
@@ -1064,7 +1089,7 @@ export function verifyBulkTxHistoryBlock(order, tx, actions) {
 
 export function verifyBulkExecuteBtnIsDisabled() {
   cy.get('button').contains(bulkExecuteBtnStr).should('be.disabled')
-  cy.get('button').contains(bulkExecuteBtnStr).trigger('mouseover', { force: true })
+  cy.get('button').contains(bulkExecuteBtnStr).parent().trigger('mouseenter', { force: true })
   cy.contains(disabledBultExecuteBtnTooltip).should('exist')
 }
 
