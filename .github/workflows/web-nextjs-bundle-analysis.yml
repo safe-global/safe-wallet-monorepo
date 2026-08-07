@@ -5,6 +5,7 @@ name: 'Web Next.js Bundle Analysis'
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
     paths:
       - apps/web/**
   push:
@@ -13,6 +14,7 @@ on:
     paths:
       - apps/web/**
       - packages/**
+  workflow_dispatch:
 permissions:
   contents: read # for checkout repository
   actions: read # for fetching base branch bundle stats
@@ -20,7 +22,12 @@ permissions:
 
 jobs:
   analyze:
+    # Experiment: on PRs, run only when the bundle-analysis label is set.
+    # The push run on dev stays; it produces the base artifact PRs compare
+    # against.
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'bundle-analysis')
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
