@@ -54,7 +54,7 @@ jobs:
         if: github.event_name == 'pull_request'
         id: scope
         run: |
-          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          CHANGED=$(git diff --name-only "origin/$GITHUB_BASE_REF...HEAD")
           if echo "$CHANGED" | grep -qE '^(packages/|config/|yarn\.lock$|package\.json$)|^apps/web/(jest\.config\.cjs|jest\.setup\.js|package\.json|next\.config\.mjs|tsconfig\.json|mocks/|src/tests/)'; then
             echo "full=true" >> "$GITHUB_OUTPUT"
           else
@@ -63,7 +63,7 @@ jobs:
 
       - name: Run affected tests
         if: github.event_name == 'pull_request' && steps.scope.outputs.full == 'false'
-        run: yarn test --ci --silent --watchAll=false --changedSince=origin/${{ github.base_ref }} --passWithNoTests --shard=${{ matrix.shard }}/4
+        run: yarn test --ci --silent --watchAll=false --changedSince="origin/$GITHUB_BASE_REF" --passWithNoTests --shard=${{ matrix.shard }}/4
         working-directory: apps/web
         env:
           NEXT_PUBLIC_IS_OFFICIAL_HOST: true

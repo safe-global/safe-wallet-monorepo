@@ -43,8 +43,8 @@ jobs:
           fi
 
           # Get the list of changed files in the PR
-          git fetch origin ${{ github.base_ref }}
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          git fetch origin "$GITHUB_BASE_REF"
+          CHANGED_FILES=$(git diff --name-only "origin/$GITHUB_BASE_REF...HEAD")
 
           # Check if schema.json or AUTO_GENERATED files changed
           if echo "$CHANGED_FILES" | grep -qE "packages/store/(scripts/api-schema/schema\.json|src/gateway/AUTO_GENERATED/)"; then
