@@ -31,52 +31,26 @@ import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { TxModalContext } from '@/components/tx-flow'
 import { cn } from '@/utils/cn'
 
-// The context and the actions card share one row until they genuinely stop fitting, then the actions
-// take the top row and the context drops underneath. Where that happens depends on WHICH context is
-// showing, so the threshold is per variant rather than shared — the two differ by ~335px, and one
-// threshold sized for the widest of them broke the narrowest ~600px early, stranding the search on
-// its own row with most of the header empty.
-//
-// Measured, with the header's px-6 excluded because a container query on `inline-size` resolves
-// against the content box (verified: a 1268px content box sits on one row under a 1260px rule, a
-// 1218px one wraps). The actions card is not one width either — a Safe route carries more chips
-// (batch, Safe token) than a space route:
+// The context (left) and actions card (right) share one row until they genuinely stop fitting, then
+// the actions keep the top row and the context drops underneath — `order-last` + `basis-full` on the
+// context only (the actions are a painted card and would stretch across a full-width row), with
+// `ml-0` dropping the actions' right-alignment once stacked. Thresholds are per context variant and
+// resolve against the container's content box (px-6 excluded), measured:
 //   space route  search 320 + actions 315 =  635  ->  break under 660
-//   safe route   bar    655 + actions 479 = 1134  ->  break under 1260
-// Keep the slack. Setting a threshold BELOW what the pair needs does not avoid the wrap, it just
-// makes flexbox do it unprompted — and then `order-first` never applies, so the context lands on top
-// and the account is no longer the fixed element. Measured that at a 1000px safe-route threshold.
+//   safe route   bar    655 + actions 479 = 1134  ->  break under 1150
+// The threshold must stay ABOVE the pair's real width — below it flexbox wraps unprompted and the
+// order utilities never apply — but keep the slack thin: at 1260 a ~1200px window was forced onto
+// two rows even though the pair fit. The 24px logo variant always fits and opts out.
 //
-// Stacked, the burger and the account card share the top row and the context drops underneath, with
-// both rows starting on the page's left padding. That falls out of `order-last` on the CONTEXT: the
-// DOM order is burger, context, actions, so moving just the context to the end leaves row 1 as
-// burger + actions without having to renumber the other two. (Reordering from the actions' side
-// instead — `order-first` there — put them ahead of the burger and pushed it down a row.) Its
-// partner is `ml-0` on the actions, which drops the `ml-auto` that right-aligns them while the two
-// share a row.
-//
-// Only the context slot gets `basis-full` — that alone consumes its line, which is what pushes the
-// two apart. The actions must NOT repeat it: `flex-basis: 100%` sets a flex item's *width*, and
-// unlike the invisible context slot the actions are a painted card, so it stretched across the whole
-// row with its chips (~295px) marooned at the left of ~650px of empty white.
-//
-// No `justify-end` on the context either: it right-aligned the search inside its full-width slot
-// while the actions sat left, putting the two rows on a diagonal.
-//
-// The logo variant is 24px and always fits beside the actions, so it opts out entirely. Named so the
-// Topbar tests can assert which left-slot variant opts in without restating the utility list.
-//
-// The slot height is per variant too. The search input sizes itself with `h-full`, which needs a
-// definite parent, so that variant is pinned to `h-14` (56px, matching the actions card). The safe
-// bar must NOT be: it wraps internally at narrow widths (to 104px measured), and against a fixed
-// 56px slot `items-center` centred the overflow — half of it spilling *upwards*, 24px into the
-// actions card above. `min-h-14` keeps the 56px floor while letting it grow.
+// Slot heights are per variant too: the search input is `h-full` and needs a definite parent
+// (`h-14`); the safe bar wraps internally at narrow widths, so it gets `min-h-14` — against a fixed
+// 56px slot the overflow spilled upwards into the actions card.
 export const SEARCH_CONTEXT_HEIGHT = 'h-14'
 export const SAFE_BAR_CONTEXT_HEIGHT = 'min-h-14'
 export const SEARCH_CONTEXT_WRAP = '@max-[660px]:order-last @max-[660px]:basis-full'
 export const SEARCH_ACTIONS_WRAP = '@max-[660px]:ml-0'
-export const SAFE_BAR_CONTEXT_WRAP = '@max-[1260px]:order-last @max-[1260px]:basis-full'
-export const SAFE_BAR_ACTIONS_WRAP = '@max-[1260px]:ml-0'
+export const SAFE_BAR_CONTEXT_WRAP = '@max-[1150px]:order-last @max-[1150px]:basis-full'
+export const SAFE_BAR_ACTIONS_WRAP = '@max-[1150px]:ml-0'
 
 interface TopbarProps {
   /** When provided, shows a menu button on mobile to open the sidebar */
