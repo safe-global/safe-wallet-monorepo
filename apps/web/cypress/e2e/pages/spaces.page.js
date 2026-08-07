@@ -299,6 +299,14 @@ export function disconnectFromSpaceLevel() {
   navigation.clickOnDisconnectBtn()
 }
 
+export function clickOnSpaceDashboardSendBtn() {
+  cy.contains('button', 'Send', { timeout: 30000 }).should('be.visible').click()
+}
+
+export function verifySendFromModalOpen() {
+  cy.contains('[role="dialog"]', 'Send from', { timeout: 30000 }).should('be.visible')
+}
+
 // Navigate to a space section through the sidebar (client-side) rather than a full cy.visit reload.
 // Dismiss any open popover first (e.g. the space selector left open by clickOnSpaceSelector) so it
 // can't cover the nav item.
