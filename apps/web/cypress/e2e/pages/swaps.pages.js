@@ -19,7 +19,7 @@ export const assetsSwapBtn = '[data-testid="swap-btn"]'
 export const dashboardSwapBtn = '[data-testid="overview-swap-btn"]'
 export const customRecipient = 'div[id="recipient"]'
 const recipientToggle = 'span[id="toggle-recipient-mode-button"]'
-const twapsAddressToggle = 'button[class*="Toggle__Wrapper"]'
+const twapsCustomRecipientStr = 'Custom Recipient'
 const explorerBtn = '[data-testid="explorer-btn"]'
 const limitPriceFld = '[data-testid="limit-price"]'
 const expiryFld = '[data-testid="expiry"]'
@@ -242,18 +242,34 @@ export function clickOnReviewOrderBtn() {
   cy.get(reviewTwapBtn).should('be.enabled').click()
 }
 
-export function placeTwapOrder() {
+export function placeTwapOrder(attempt = 0) {
+  const maxAttempts = 5
   cy.wait(3000)
+
+  // The quote auto-refreshes (~every 30s) and re-disables "Place TWAP order" behind a
+  // "Price Updated" -> "Accept" prompt. Accept the refreshed quote, then place the order;
+  // if the quote refreshes again before we click, retry.
   cy.get('button')
     .contains(acceptStrBtn)
     .should(() => {})
-    .then(($button) => {
-      if (!$button.length) {
-        return
+    .then(($accept) => {
+      if ($accept.length) {
+        cy.wrap($accept).click()
       }
-      cy.wrap($button).click()
     })
-  cy.get('button').contains(placeTwapOrderStrBtn).should('be.enabled').click()
+
+  cy.get('button')
+    .contains(placeTwapOrderStrBtn)
+    .then(($button) => {
+      if ($button.is(':disabled')) {
+        if (attempt >= maxAttempts) {
+          throw new Error('"Place TWAP order" stayed disabled after accepting refreshed quotes')
+        }
+        placeTwapOrder(attempt + 1)
+      } else {
+        cy.wrap($button).click()
+      }
+    })
 }
 
 export function confirmPriceImpact() {
@@ -264,6 +280,16 @@ export function confirmPriceImpact() {
     .then(($checkbox) => {
       if ($checkbox.length) {
         cy.wrap($checkbox).click()
+      }
+    })
+
+  // High price-impact orders now require typing "confirm" before the order can proceed.
+  cy.get(confirmPriceImpactInput)
+    .should(() => {})
+    .then(($input) => {
+      if ($input.length) {
+        cy.wrap($input).clear().type('confirm')
+        cy.get(confirmPriceImpactBtn).should('be.enabled').click()
       }
     })
 }
@@ -283,6 +309,24 @@ export const currencyDirectionOptions = {
 
 export function acceptLegalDisclaimer() {
   cy.get('button').contains('Continue').click()
+}
+
+// The widget can miss the host wallet handshake and stay on "Connect Wallet" — reload to redo it.
+export function ensureWidgetWalletConnected(iframeSelector, attempt = 0) {
+  cy.wait(5000)
+  main.getIframeBody(iframeSelector).then(($body) => {
+    if (!$body.find('button:contains("Connect Wallet")').length) return
+    if (attempt >= 2) {
+      throw new Error('CoW widget did not receive the connected wallet after reloading')
+    }
+    cy.reload()
+    cy.wait(4000)
+    cy.get('button').then(($btns) => {
+      const $continue = $btns.filter(':contains("Continue")')
+      if ($continue.length) cy.wrap($continue.first()).click()
+    })
+    ensureWidgetWalletConnected(iframeSelector, attempt + 1)
+  })
 }
 
 export function checkTokenBalance(safe, tokenSymbol) {
@@ -369,13 +413,32 @@ export function setOutputValue(value) {
   })
 }
 
+export function setNumberOfParts(parts) {
+  cy.get('span')
+    .contains(numberOfPartsStr)
+    .next()
+    .find('input')
+    .should('be.visible')
+    .clear()
+    .invoke('val', '')
+    .trigger('input')
+    .then(($input) => {
+      if ($input.val() !== '') {
+        cy.wrap($input).clear().invoke('val', '').trigger('input')
+      }
+    })
+    .should('have.value', '')
+    .type(parts, { force: true })
+    .should('have.value', String(parts))
+}
+
 export function outputInputIsNotEmpty() {
   cy.get(outputCurrencyInput).find('input').invoke('val').should('not.be.empty')
 }
 
 export function enableTwapCustomRecipient(option) {
-  main.verifyMinimumElementsCount(twapsAddressToggle, 1)
-  if (!option) cy.get(twapsAddressToggle).eq(0).click()
+  cy.contains(twapsCustomRecipientStr).should('be.visible')
+  if (!option) cy.contains(twapsCustomRecipientStr).click()
 }
 
 export function enableCustomRecipient(option) {

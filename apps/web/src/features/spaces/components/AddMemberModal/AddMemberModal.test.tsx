@@ -226,6 +226,32 @@ describe('AddMemberModal tracking', () => {
     expect(screen.getByTestId('add-member-modal-button')).toBeDisabled()
   })
 
+  it('keeps a typed address when the suggestion popup closes without a selection', async () => {
+    const bookAddress = '0x1234567890123456789012345678901234567890'
+    const typedAddress = '0x9999999999999999999999999999999999999999'
+
+    mockUseAddressBook.mockReturnValue({ [bookAddress]: 'Alice' })
+
+    render(<AddMemberModal onClose={jest.fn()} />)
+
+    const input = screen.getByTestId('member-invitee-identifier-input')
+
+    // Open the suggestion popup with a partial query, as a user typing a name would.
+    fireEvent.change(input, { target: { value: 'Ali' } })
+    fireEvent.click(await screen.findByLabelText('Toggle suggestions'))
+    await screen.findByRole('option', { name: 'Alice' })
+
+    // Completing a full address empties the suggestions, which closes the popup. The typed
+    // address must survive that close instead of being reset as an abandoned filter query.
+    fireEvent.change(input, { target: { value: typedAddress } })
+
+    await waitFor(() => expect(screen.queryByRole('option')).not.toBeInTheDocument())
+    expect(screen.getByTestId('member-invitee-identifier-input')).toHaveValue(typedAddress)
+
+    const submitButton = screen.getByTestId('add-member-modal-button')
+    await waitFor(() => expect(submitButton).not.toBeDisabled())
+  })
+
   it('fills the address and name from an address book suggestion', async () => {
     const address = '0x1234567890123456789012345678901234567890'
     const name = 'Alice'
