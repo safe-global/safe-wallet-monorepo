@@ -27,6 +27,8 @@ const submitNextBt = '[data-testid="submit-next"]'
 const addOwnerNextBtn = '[data-testid="add-owner-next-btn"]'
 const modalHeader = '[data-testid="modal-header"]'
 const addressToBeRemoved = '[aria-label="Copy to clipboard"] span'
+const addressRegex = /0x[0-9a-fA-F]{40}/
+const txModalDialog = '[role="dialog"]:visible'
 const thresholdNextBtn = '[data-testid="threshold-next-btn"]'
 const signerList = '[data-testid="signer-list"]'
 
@@ -35,6 +37,7 @@ const notConnectedStatus = 'Connect'
 const continueBtnStr = 'Continue'
 const backbtnStr = 'Back'
 const removeOwnerStr = 'Remove signer'
+const removedOwnerSectionStr = 'Remove owner'
 const selectedOwnerStr = 'Signers'
 const changeThresholdStr = 'Change threshold'
 
@@ -123,18 +126,16 @@ export function openRemoveOwnerWindow(btn) {
 }
 
 export function getAddressToBeRemoved() {
-  let removedAddress
-  cy.get(modalHeader)
-    .next()
-    .should('exist')
+  cy.get(txModalDialog)
+    .contains('p', removedOwnerSectionStr)
+    .parent()
     .find(addressToBeRemoved)
     .first()
     .invoke('text')
-    .then((value) => {
-      removedAddress = value
-      cy.wrap(removedAddress).as('removedAddress')
+    .then((address) => {
+      expect(address, 'removed owner address').to.match(addressRegex)
+      cy.wrap(address).as('removedAddress')
     })
-  return removedAddress
 }
 
 export function openReplaceOwnerWindow(index) {
