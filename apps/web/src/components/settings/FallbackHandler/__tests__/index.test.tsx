@@ -110,6 +110,52 @@ describe('FallbackHandler', () => {
     })
   })
 
+  it('should label the official ExtensibleFallbackHandler with its own deployment name', async () => {
+    const EXTENSIBLE_FALLBACK_HANDLER_1_5_0 = '0x85a8ca358D388530ad0fB95D0cb89Dd44Fc242c3'
+
+    jest.spyOn(useSafeInfoHook, 'default').mockImplementation(
+      () =>
+        ({
+          safe: {
+            version: '1.5.0',
+            chainId: '1',
+            fallbackHandler: {
+              value: EXTENSIBLE_FALLBACK_HANDLER_1_5_0,
+            },
+          },
+        }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
+    )
+
+    const fbHandler = render(<FallbackHandler />)
+
+    await waitFor(() => {
+      expect(fbHandler.getByText('ExtensibleFallbackHandler')).toBeDefined()
+      expect(fbHandler.queryByText('CompatibilityFallbackHandler')).not.toBeInTheDocument()
+    })
+  })
+
+  it('should label the TWAP fallback handler as ExtensibleFallbackHandler, not CompatibilityFallbackHandler', async () => {
+    jest.spyOn(useSafeInfoHook, 'default').mockImplementation(
+      () =>
+        ({
+          safe: {
+            version: '1.3.0',
+            chainId: '1',
+            fallbackHandler: {
+              value: TWAP_FALLBACK_HANDLER,
+            },
+          },
+        }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
+    )
+
+    const fbHandler = render(<FallbackHandler />)
+
+    await waitFor(() => {
+      expect(fbHandler.getByText('ExtensibleFallbackHandler')).toBeDefined()
+      expect(fbHandler.queryByText('CompatibilityFallbackHandler')).not.toBeInTheDocument()
+    })
+  })
+
   describe('No Fallback Handler', () => {
     it('should render a warning when no Fallback Handler is set', async () => {
       jest.spyOn(useSafeInfoHook, 'default').mockImplementation(
@@ -160,6 +206,9 @@ describe('FallbackHandler', () => {
         ).toBeDefined()
 
         expect(fbHandler.getByText('0x123')).toBeDefined()
+
+        // An unrecognised handler must not be mislabelled with an official deployment name
+        expect(fbHandler.queryByText('CompatibilityFallbackHandler')).not.toBeInTheDocument()
       })
 
       await waitFor(() => {

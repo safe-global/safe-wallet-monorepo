@@ -9,7 +9,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { BRAND_NAME } from '@/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
-import { useCompatibilityFallbackHandlerDeployments } from '@/hooks/useCompatibilityFallbackHandlerDeployments'
+import { useFallbackHandlerName } from '@/hooks/useFallbackHandlerName'
 import { useHasUntrustedFallbackHandler } from '@/hooks/useHasUntrustedFallbackHandler'
 import css from '../TransactionGuards/styles.module.css'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
@@ -43,7 +43,7 @@ export const FallbackHandlerWarning = ({
 
 export const FallbackHandler = (): ReactElement | null => {
   const { safe } = useSafeInfo()
-  const fallbackHandlerDeployments = useCompatibilityFallbackHandlerDeployments()
+  const fallbackHandlerName = useFallbackHandlerName()
   const isTWAPFallbackHandler = useIsTWAPFallbackHandler()
   const isUntrusted = useHasUntrustedFallbackHandler()
 
@@ -117,7 +117,7 @@ export const FallbackHandler = (): ReactElement | null => {
               {safe.fallbackHandler && (
                 <EthHashInfo
                   shortAddress={false}
-                  name={safe.fallbackHandler.name || fallbackHandlerDeployments?.contractName}
+                  name={safe.fallbackHandler.name || fallbackHandlerName}
                   address={safe.fallbackHandler.value}
                   customAvatar={safe.fallbackHandler.logoUri || undefined}
                   showCopyButton
