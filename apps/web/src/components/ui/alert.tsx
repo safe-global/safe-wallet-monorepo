@@ -28,23 +28,6 @@ import { cn } from '@/utils/cn'
  * - Alert: `outlined` (destructive & warning only; default true = card surface with border,
  *   false = borderless severity tint)
  * - AlertAction: for action buttons (positioned top-right)
- *
- * Figma: https://www.figma.com/design/trBVcpjZslO63zxiNUI9io/?node-id=58-5416
- *
- * Intentional differences from Figma:
- * - Figma specs warning in light mode only (Tailwind yellow/50, /500, /700). Those hexes back the
- *   warning-subtle / warning-accent / warning-strong tokens in light (see shadcn.css); dark mode
- *   keeps the brand warning tint since the file has no dark spec.
- * - Muted alerts show a 16px radius in Figma; all variants share `rounded-md` (12px) here.
- *
- * Changelog (from Figma):
- * - 2026-08-06: Added `info` variant from the "Muted / Info" column (node 4316-13083):
- *   muted background, foreground text, muted-foreground icons, no border.
- * - 2026-08-06: Synced `warning` with the muted warning column (node 4316-12854): border
- *   removed, icon takes the brighter `warning-accent` instead of the text ink.
- * - 2026-08-06: Added `outlined` (default true) for `destructive` and `warning`. Outlined is the
- *   card style with the default border (nodes 1255-182975 / 4316-12819); `outlined={false}` is
- *   the borderless severity tint (nodes 1255-183763 / 4316-12854).
  */
 
 const alertVariants = cva(
