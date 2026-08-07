@@ -7,7 +7,6 @@ import * as owner from './owners.pages'
 
 const ownerInput = 'input[name^="owners"][name$="name"]'
 const ownerAddress = 'input[name^="owners"][name$="address"]'
-const thresholdInput = 'input[name="threshold"]'
 export const removeOwnerBtn = 'button[aria-label="Remove signer"]'
 // Welcome "My accounts" redesign (V2): creation lives behind the "Add accounts" chooser rather than a
 // standalone create-safe button.
@@ -36,7 +35,6 @@ export const addFundsSection = '[data-testid="add-funds-section"]'
 export const noTokensAlert = '[data-testid="no-tokens-alert"]'
 const networkCheckbox = '[data-testid="network-checkbox"]'
 const cancelIcon = '[data-testid="CancelIcon"]'
-const thresholdItem = '[data-testid="threshold-item"]'
 export const payNowLaterMessageBox = '[data-testid="pay-now-later-message-box"]'
 export const safeSetupOverview = '[data-testid="safe-setup-overview"]'
 export const networksLogoList = '[data-testid="network-list"]'
@@ -283,10 +281,6 @@ export function verifyOwnerAddress(address, index) {
   cy.get(ownerAddress).eq(index).should('have.value', address)
 }
 
-export function verifyThreshold(number) {
-  cy.get(thresholdInput).should('have.value', number)
-}
-
 export function clickOnSignerAddressInput(index) {
   cy.get(getOwnerAddressInput(index)).click().clear()
 }
@@ -320,8 +314,8 @@ export function addNewOwner(name, address, index) {
 }
 
 export function updateThreshold(number) {
-  cy.get(thresholdInput).parent().click()
-  cy.get(thresholdItem).contains(number).click()
+  owner.clickOnThresholdDropdown()
+  owner.getThresholdOptions().contains(number).trigger('mousemove').click()
 }
 
 export function removeOwner(index) {
