@@ -10,7 +10,8 @@ Screenshots are captured via a global `afterEach` hook in `cypress/support/e2e.j
 
 | Page                              | Test file               | Tests | Mocked?          | Wallet? |
 | --------------------------------- | ----------------------- | ----- | ---------------- | ------- |
-| `/welcome`                        | welcome.cy.js           | 2     | No               | No      |
+| `/welcome/accounts`               | welcome.cy.js           | 1     | No               | No      |
+| `/welcome/spaces` (signed-out)    | welcome.cy.js           | 1     | No               | No      |
 | `/home`                           | dashboard.cy.js         | 2     | Yes (1 mocked)   | No      |
 | `/balances`                       | balances.cy.js          | 2     | No               | No      |
 | `/balances/nfts`                  | nfts.cy.js              | 1     | Yes              | No      |
