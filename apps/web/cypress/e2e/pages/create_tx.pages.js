@@ -316,7 +316,9 @@ export function verifyEnabledBulkExecuteBtnTooltip() {
 
 export function deleteTx() {
   clickOnRejectBtn()
-  cy.get(wallet.choiceBtn).contains(deleteFromQueueStr).click()
+  // The delete choice stays disabled until the recommended nonce loads (deletability check),
+  // so wait for it to become enabled — a click on the disabled button is silently ignored.
+  cy.get(wallet.choiceBtn).contains(deleteFromQueueStr).closest(wallet.choiceBtn).should('be.enabled').click()
   cy.get(deleteTxModalBtn).click()
 }
 

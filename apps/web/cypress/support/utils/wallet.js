@@ -38,12 +38,10 @@ export function connectSigner(signer) {
   function handlePkConnect() {
     cy.get('body').then(($body) => {
       if ($body.find(pkInput).length > 0) {
-        cy.get(pkInput)
-          .find('input')
-          .then(($input) => {
-            $input.val(signer)
-            cy.wrap($input).trigger('input').trigger('change')
-          })
+        cy.get(pkInput).then(($input) => {
+          $input.val(signer)
+          cy.wrap($input).trigger('input').trigger('change')
+        })
         cy.get(pkConnectBtn).click()
         cy.wait(2000)
       }
@@ -54,12 +52,10 @@ export function connectSigner(signer) {
     cy.wait(3000)
     return cy.get('body').then(($body) => {
       if ($body.find(pkInput).length > 0) {
-        cy.get(pkInput)
-          .find('input')
-          .then(($input) => {
-            $input.val(signer)
-            cy.wrap($input).trigger('input').trigger('change')
-          })
+        cy.get(pkInput).then(($input) => {
+          $input.val(signer)
+          cy.wrap($input).trigger('input').trigger('change')
+        })
 
         cy.get(pkConnectBtn).click()
       } else if ($body.find(connectWalletBtn).length > 0) {

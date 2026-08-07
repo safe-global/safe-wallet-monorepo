@@ -200,12 +200,10 @@ export function clickOnSignInBtn() {
 export function signInWithWallet(signer) {
   cy.contains(connectWalletBtn, workspaceWalletBtnText, { timeout: 30000 }).should('be.visible').click()
   cy.get(onboardV2, { timeout: 30000 }).shadow().find('button').contains('Private key').click()
-  cy.get(pkInput, { timeout: 30000 })
-    .find('input')
-    .then(($input) => {
-      $input.val(signer)
-      cy.wrap($input).trigger('input').trigger('change')
-    })
+  cy.get(pkInput, { timeout: 30000 }).then(($input) => {
+    $input.val(signer)
+    cy.wrap($input).trigger('input').trigger('change')
+  })
   cy.get(pkConnectBtn).click()
   // The page renders more than one sign-in card (the workspace card plus the generic "Sign in to
   // see content" gate), each with a continue-with-wallet-btn — click the visible one.
