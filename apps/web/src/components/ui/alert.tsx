@@ -25,41 +25,52 @@ import { cn } from '@/utils/cn'
  * @remarks
  * Key Props:
  * - Alert: `variant` ('default' | 'destructive' | 'warning' | 'success' | 'info')
+ * - Alert: `outlined` (destructive & warning only; default true = card surface with border,
+ *   false = borderless severity tint)
  * - AlertAction: for action buttons (positioned top-right)
  */
 
 const alertVariants = cva(
-  "grid gap-0.5 rounded-lg border px-4 py-3 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-18 has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2.5 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert",
+  "grid gap-0.5 rounded-md border px-4 py-3 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-24 has-[>svg]:grid-cols-[auto_minmax(0,1fr)] has-[>svg]:gap-x-3 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert",
   {
     variants: {
       variant: {
         default: 'bg-card text-card-foreground',
-        destructive:
-          'text-destructive bg-card *:data-[slot=alert-description]:text-destructive/90 *:[svg]:text-current',
-        // Body copy stays default foreground, as MUI's `<Alert severity>` did (text.primary). The
-        // tint and the icon carry the severity: `--color-*-dark` is identical in both themes, so as
-        // ink it dropped warning to 3.14:1 in dark and success to ~3.7:1 in both. It clears the 3:1
-        // graphics threshold as an icon, which is where it belongs.
-        // `--color-warning-background` (the coral-tinted tint) with a coral icon, not the amber
-        // `warning-subtle`/`warning1` scale — and no border, matching the rest of our surfaces.
-        warning:
-          'bg-[var(--color-warning-background)] text-foreground border-transparent *:[svg]:text-[var(--color-warning-main)]',
-        success: 'bg-success-subtle text-foreground border-success-muted *:[svg]:text-success-strong',
-        // Info tint with no border: the fill and the icon carry the meaning, like `warning` above.
-        // The icon takes `info-strong` (= `--color-info-dark`) rather than `info-main` because it is
-        // the darker of the two info accents — 2.04:1 vs 1.51:1 on the pale light-mode tint. Neither
-        // is dark enough to serve as body copy, hence `text-foreground` (see semanticContrast.test.ts).
-        info: 'bg-info-subtle text-foreground border-transparent *:[svg]:text-info-strong',
+        destructive: 'text-error-strong *:data-[slot=alert-description]:text-error-strong *:[svg]:text-destructive',
+        warning: 'text-warning-strong *:data-[slot=alert-description]:text-warning-strong *:[svg]:text-warning-accent',
+        success:
+          'bg-success-subtle text-success-strong border-success-muted *:data-[slot=alert-description]:text-success-strong *:[svg]:text-current',
+        info: 'bg-muted text-foreground border-transparent *:data-[slot=alert-description]:text-foreground *:[svg]:text-muted-foreground',
+      },
+      // Only `destructive` and `warning` have both designs (see compoundVariants); the other
+      // variants ignore this.
+      outlined: {
+        true: '',
+        false: '',
       },
     },
+    compoundVariants: [
+      { variant: 'destructive', outlined: true, class: 'bg-card' },
+      { variant: 'destructive', outlined: false, class: 'bg-error-subtle border-transparent' },
+      { variant: 'warning', outlined: true, class: 'bg-card' },
+      { variant: 'warning', outlined: false, class: 'bg-warning-subtle border-transparent' },
+    ],
     defaultVariants: {
       variant: 'default',
+      outlined: true,
     },
   },
 )
 
-function Alert({ className, variant, ...props }: React.ComponentProps<'div'> & VariantProps<typeof alertVariants>) {
-  return <div data-slot="alert" role="alert" className={cn(alertVariants({ variant }), className)} {...props} />
+function Alert({
+  className,
+  variant,
+  outlined,
+  ...props
+}: React.ComponentProps<'div'> & VariantProps<typeof alertVariants>) {
+  return (
+    <div data-slot="alert" role="alert" className={cn(alertVariants({ variant, outlined }), className)} {...props} />
+  )
 }
 
 function AlertTitle({ className, ...props }: React.ComponentProps<'div'>) {
@@ -67,7 +78,7 @@ function AlertTitle({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="alert-title"
       className={cn(
-        'font-semibold group-has-[>svg]/alert:col-start-2 [&_a]:hover:text-foreground [&_a]:underline [&_a]:underline-offset-3',
+        'font-medium break-words min-w-0 group-has-[>svg]/alert:col-start-2 [&_a]:hover:text-foreground [&_a]:underline [&_a]:underline-offset-3',
         className,
       )}
       {...props}
@@ -80,7 +91,7 @@ function AlertDescription({ className, ...props }: React.ComponentProps<'div'>) 
     <div
       data-slot="alert-description"
       className={cn(
-        'text-muted-foreground text-sm text-balance md:text-pretty [&_p:not(:last-child)]:mb-4 [&_a]:hover:text-foreground [&_a]:underline [&_a]:underline-offset-3',
+        'text-muted-foreground text-sm font-normal break-words min-w-0 text-balance md:text-pretty [&_p:not(:last-child)]:mb-4 [&_a]:hover:text-foreground [&_a]:underline [&_a]:underline-offset-3',
         className,
       )}
       {...props}
@@ -89,7 +100,13 @@ function AlertDescription({ className, ...props }: React.ComponentProps<'div'>) 
 }
 
 function AlertAction({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="alert-action" className={cn('absolute top-2.5 right-3', className)} {...props} />
+  return (
+    <div
+      data-slot="alert-action"
+      className={cn('text-foreground absolute top-1/2 right-4 -translate-y-1/2', className)}
+      {...props}
+    />
+  )
 }
 
 export { Alert, AlertTitle, AlertDescription, AlertAction }
