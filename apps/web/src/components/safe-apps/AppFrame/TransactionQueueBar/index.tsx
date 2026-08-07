@@ -45,9 +45,11 @@ const TransactionQueueBar = ({
           className="rounded-bl-none rounded-br-none"
         >
           <AccordionItem value="queue" className="relative border-b-0">
+            {/* items-center: the trigger's base is items-start, which top-aligns the title and the
+                chevron inside this fixed-height bar instead of centring them on it. */}
             <AccordionTrigger
               aria-label="expand transaction queue bar"
-              className="pl-4 pr-12"
+              className="items-center pl-4 pr-12"
               style={{ height: TRANSACTION_BAR_HEIGHT }}
             >
               <Typography variant="paragraph-bold" className="mr-auto text-[var(--color-primary-main)]">
