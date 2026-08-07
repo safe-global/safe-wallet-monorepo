@@ -179,7 +179,7 @@ function clickOnCurrencySelector() {
 
 export function changeCurrency(currency) {
   clickOnCurrencySelector()
-  cy.get(currencyItem).contains(currency).click()
+  main.selectDropdownOption(currencyItem, currency)
 }
 
 export function clickOnSendBtn(index) {
