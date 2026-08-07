@@ -29,12 +29,20 @@ jobs:
 
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # Experiment: shard PR runs 4 ways. Jest applies --shard after
+    # --changedSince selection, so each shard runs a quarter of the selected
+    # set. Push runs stay single (shard 1); shards 2-4 skip install and exit.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
       - uses: ./.github/actions/yarn
+        if: github.event_name == 'pull_request' || matrix.shard == 1
 
       # Experiment: replace the coverage-report action, which ran the full
       # suite twice per PR (head + base). Jest's --changedSince only maps
@@ -55,27 +63,27 @@ jobs:
 
       - name: Run affected tests
         if: github.event_name == 'pull_request' && steps.scope.outputs.full == 'false'
-        run: yarn test --ci --silent --watchAll=false --changedSince=origin/${{ github.base_ref }} --passWithNoTests
+        run: yarn test --ci --silent --watchAll=false --changedSince=origin/${{ github.base_ref }} --passWithNoTests --shard=${{ matrix.shard }}/4
         working-directory: apps/web
         env:
           NEXT_PUBLIC_IS_OFFICIAL_HOST: true
 
       - name: Run full suite (out-of-root changes)
         if: github.event_name == 'pull_request' && steps.scope.outputs.full == 'true'
-        run: yarn test --ci --silent --watchAll=false
+        run: yarn test --ci --silent --watchAll=false --shard=${{ matrix.shard }}/4
         working-directory: apps/web
         env:
           NEXT_PUBLIC_IS_OFFICIAL_HOST: true
 
       - name: Run tests (push only)
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && matrix.shard == 1
         run: yarn test:ci
         working-directory: apps/web
         env:
           NEXT_PUBLIC_IS_OFFICIAL_HOST: true
 
       - name: Upload coverage to Datadog
-        if: success() && github.event_name == 'push'
+        if: success() && github.event_name == 'push' && matrix.shard == 1
         uses: ./.github/actions/upload-coverage
         with:
           api-key: ${{ secrets.DATADOG_API_KEY }}
@@ -85,7 +93,7 @@ jobs:
           flag: workspace:web
 
       - name: Notify Slack on failure
-        if: failure() && github.event_name == 'push'
+        if: failure() && github.event_name == 'push' && matrix.shard == 1
         uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_DEV_ALERT }}
