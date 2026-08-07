@@ -18,10 +18,42 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Experiment: build the static export once and hand it to the shards as an
+  # artifact. Previously each of the 5 shards installed and built the whole
+  # app before running 2-4 minutes of specs.
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    name: Build test bundle
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/yarn
+
+      - uses: ./.github/actions/build
+        with:
+          secrets: ${{ toJSON(secrets) }}
+        env:
+          NODE_ENV: cypress
+          # `next build` overrides NODE_ENV to 'production' in client bundles, so
+          # APP_ENV-based IS_TEST_E2E doesn't survive. Forward an explicit
+          # NEXT_PUBLIC_ flag that does survive the build.
+          NEXT_PUBLIC_IS_TEST_E2E: 'true'
+
+      - name: Upload static export
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: web-e2e-out
+          path: apps/web/out
+          retention-days: 1
+
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     name: Cypress Smoke tests
+    needs: build
     permissions:
       contents: read
 
@@ -35,12 +67,19 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Download static export
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: web-e2e-out
+          path: apps/web/out
+
       - uses: ./.github/actions/cypress
         with:
           secrets: ${{ toJSON(secrets) }}
           spec: cypress/e2e/smoke/*.cy.js
           group: 'Smoke tests'
           tag: 'smoke'
+          prebuilt: 'true'
 
   notify:
     if: failure() && github.event_name == 'push'

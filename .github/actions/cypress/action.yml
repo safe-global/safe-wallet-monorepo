@@ -42,6 +42,11 @@ inputs:
     required: false
     default: '0'
 
+  prebuilt:
+    description: 'Skip the app build; expects apps/web/out to be present already'
+    required: false
+    default: 'false'
+
 runs:
   using: 'composite'
   steps:
@@ -54,6 +59,7 @@ runs:
       id: setup-chrome
 
     - uses: ./.github/actions/build
+      if: inputs.prebuilt != 'true'
       with:
         secrets: ${{ inputs.secrets }}
       env:

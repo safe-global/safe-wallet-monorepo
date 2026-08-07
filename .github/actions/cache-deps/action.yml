@@ -65,6 +65,10 @@ runs:
         path: |
           ${{ github.workspace }}/apps/web/.next/cache
         key: ${{ runner.os }}-nextjs-cypress-${{ hashFiles('apps/web/package.json', 'apps/web/yarn.lock') }}-${{ hashFiles('apps/web/src/**/*', 'apps/web/public/**/*', 'apps/web/*.{js,jsx,cjs,ts,mjs,tsx,json}') }}
+        # Exact key misses on any src change; fall back to the latest build
+        # for the same dependency set so Next.js rebuilds incrementally.
+        restore-keys: |
+          ${{ runner.os }}-nextjs-cypress-${{ hashFiles('apps/web/package.json', 'apps/web/yarn.lock') }}-
 
     - name: Set composite outputs nc
       if: ${{ inputs.mode == 'restore-nc' }}
