@@ -1,9 +1,5 @@
 /* Scoped tweaks for the staking promo banner (defaults from PromoBanner otherwise). */
 
-.stakingPromoBanner {
-  --promo-banner-radius: 12px;
-}
-
 /* 24px padding */
 .stakingPromoBanner :global(.MuiPaper-root) {
   padding: 24px;
