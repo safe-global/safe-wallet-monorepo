@@ -49,6 +49,21 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          fetch-depth: 0
+
+      # Experiment: skip the storybook build on PRs that touch no stories and
+      # no storybook config. The PR deploy then excludes storybook/* from the
+      # S3 sync so --delete keeps the previously deployed storybook.
+      - name: Determine storybook scope
+        if: github.event.number
+        id: storybook-scope
+        run: |
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          if echo "$CHANGED" | grep -qE '\.stories\.|storybook|src/stories/|package\.json|yarn\.lock'; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - uses: ./.github/actions/yarn
 
@@ -58,6 +73,7 @@ jobs:
           # if: startsWith(github.ref, 'refs/heads/main')
 
       - uses: ./.github/actions/build-storybook
+        if: github.event_name == 'push' || steps.storybook-scope.outputs.build == 'true'
         with:
           secrets: ${{ toJSON(secrets) }}
 
@@ -95,6 +111,7 @@ jobs:
         if: github.event.number
         env:
           BUCKET: s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/walletweb/${{ steps.extract_branch.outputs.slug }}
+          SKIP_STORYBOOK: ${{ steps.storybook-scope.outputs.build == 'false' }}
         working-directory: apps/web
         run: bash  ./scripts/github/s3_upload.sh
 

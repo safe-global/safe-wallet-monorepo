@@ -8,8 +8,14 @@ fi
 
 cd out
 
-# Upload the build to S3
-aws s3 sync . $BUCKET --delete
+# Upload the build to S3. When the storybook build was skipped
+# (SKIP_STORYBOOK=true, PR deploys only), exclude storybook/* so
+# --delete does not remove the previously deployed storybook.
+if [[ "$SKIP_STORYBOOK" == "true" ]]; then
+  aws s3 sync . $BUCKET --delete --exclude 'storybook/*'
+else
+  aws s3 sync . $BUCKET --delete
+fi
 
 function parallel_limit {
     local max="$1"
