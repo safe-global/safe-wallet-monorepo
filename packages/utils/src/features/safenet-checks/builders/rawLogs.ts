@@ -24,7 +24,7 @@ export const resetLogCounter = (): void => {
   logCounter = 0
 }
 
-export type LogMeta = { blockNumber?: number; logIndex?: number; transactionHash?: string }
+type LogMeta = { blockNumber?: number; logIndex?: number; transactionHash?: string }
 
 const hash = (): string => faker.string.hexadecimal({ length: 64, prefix: '0x', casing: 'lower' })
 const addr = (): string => faker.finance.ethereumAddress()
