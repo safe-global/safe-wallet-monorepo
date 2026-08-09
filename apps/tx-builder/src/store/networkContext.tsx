@@ -59,15 +59,24 @@ const NetworkProvider: React.FC<PropsWithChildren> = ({ children }) => {
   }, [chainInfo, safe, sdk])
 
   useEffect(() => {
+    let cancelled = false
+
     const getChainInfo = async () => {
       try {
-        const chainInfo = await sdk.safe.getChainInfo()
-        setChainInfo(chainInfo)
+        const nextChainInfo = await sdk.safe.getChainInfo()
+        if (cancelled) return
+        setChainInfo(nextChainInfo)
 
         try {
-          setEnsHubProvider(await createEnsHubProvider(chainInfo.chainId))
+          const hubProvider = await createEnsHubProvider(nextChainInfo.chainId)
+          if (cancelled) {
+            hubProvider?.destroy()
+            return
+          }
+          setEnsHubProvider(hubProvider)
         } catch (error) {
           console.error('Unable to configure the ENS hub provider:', error)
+          if (!cancelled) setEnsHubProvider(undefined)
         }
       } catch (error) {
         console.error('Unable to get chain info:', error)
@@ -75,6 +84,10 @@ const NetworkProvider: React.FC<PropsWithChildren> = ({ children }) => {
     }
 
     getChainInfo()
+
+    return () => {
+      cancelled = true
+    }
   }, [sdk.safe])
 
   useEffect(() => () => ensHubProvider?.destroy(), [ensHubProvider])
