@@ -7,11 +7,13 @@ import { isAddress } from 'ethers'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import useNameResolver from '@/components/common/AddressInput/useNameResolver'
 import useAddressBook from '@/hooks/useAddressBook'
+import useChains from '@/hooks/useChains'
 import { useAddressBookSearch } from '@/features/spaces'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import Identicon from '@/components/common/Identicon'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import CaretDownIcon from '@/public/images/common/caret-down.svg'
+import { DEFAULT_MAINNET_CHAIN_ID } from '@/config/constants'
 import inputCss from '@/styles/inputs.module.css'
 import { EMAIL_MAX_LENGTH, isEmailAddress } from './utils'
 import css from './styles.module.css'
@@ -36,15 +38,20 @@ const AVATAR_DEBOUNCE_MS = 500
  * Unlike AddressBookInput/AddressInput, this accepts either an email or a wallet
  * inviteeIdentifier. Address-book names and ENS names are resolved to addresses before
  * submit; emails are kept as-is.
+ *
+ * ENS invites are chain-agnostic (space members, not Safe-chain recipients), so names resolve
+ * against mainnet regardless of the currently viewed Safe.
  */
 const AddMemberInput = ({ error, inputProps, onSelectAddress, value }: AddMemberInputProps): ReactElement => {
   const addressBook = useAddressBook()
+  const { configs: allNetworks } = useChains()
+  const ensChain = allNetworks.find((chain) => chain.chainId === String(DEFAULT_MAINNET_CHAIN_ID))
   const [isOpen, setIsOpen] = useState(false)
   const inviteeIdentifier = value.trim()
   const shouldResolveEns = Boolean(
     inviteeIdentifier && !isEmailAddress(inviteeIdentifier) && !isAddress(inviteeIdentifier),
   )
-  const { address: resolvedAddress } = useNameResolver(shouldResolveEns ? inviteeIdentifier : '')
+  const { address: resolvedAddress } = useNameResolver(shouldResolveEns ? inviteeIdentifier : '', ensChain)
 
   useEffect(() => {
     if (resolvedAddress) {
