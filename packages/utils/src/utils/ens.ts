@@ -1,12 +1,16 @@
 import type { JsonRpcProvider } from 'ethers'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 
 /** SLIP-44 coin type for Ethereum (ENSIP-9). */
 export const ETH_COIN_TYPE = 60
 
+// Spelled literally so this module stays free of `@safe-global/utils/utils/chains`
+// (and its `@safe-global/store` dependency) — tx-builder consumes it directly.
+const DOMAIN_LOOKUP_FEATURE = 'DOMAIN_LOOKUP'
+
 // Immutable network ids, spelled literally to keep this module dependency-free
 // (it is also consumed by apps that don't depend on @safe-global/protocol-kit)
 const MAINNET_CHAIN_ID = 1
+const SEPOLIA_CHAIN_ID = 11155111
 export const ENS_HUB_MAINNET = '1'
 export const ENS_HUB_SEPOLIA = '11155111'
 
@@ -27,7 +31,7 @@ export const hasHubDomainLookup = (chain?: { chainId: string; features: readonly
     return false
   }
 
-  return chain.features.includes(FEATURES.DOMAIN_LOOKUP)
+  return chain.features.includes(DOMAIN_LOOKUP_FEATURE)
 }
 
 // ENSIP-11 reserves the most significant bit as the EVM marker, so only chain ids
@@ -36,15 +40,16 @@ const ENSIP11_MAX_CHAIN_ID = 0x80000000
 
 /**
  * Converts an EVM chain id to an ENS coin type.
- * Mainnet uses SLIP-44 coin type 60; other EVM chains use ENSIP-11 (`0x80000000 | chainId`).
- * Returns undefined for chain ids ENSIP-11 cannot represent.
+ * Mainnet and Sepolia (L1 testnet) use SLIP-44 coin type 60 (ENSIP-19); other EVM chains use
+ * ENSIP-11 (`0x80000000 | chainId`). Returns undefined for chain ids ENSIP-11 cannot represent.
  */
 export const convertChainIdToCoinType = (chainId: number): number | undefined => {
   if (!Number.isInteger(chainId) || chainId <= 0 || chainId >= ENSIP11_MAX_CHAIN_ID) {
     return undefined
   }
 
-  if (chainId === MAINNET_CHAIN_ID) {
+  // L1 hubs use coin type 60; L2s (and L2 testnets) use ENSIP-11
+  if (chainId === MAINNET_CHAIN_ID || chainId === SEPOLIA_CHAIN_ID) {
     return ETH_COIN_TYPE
   }
 
