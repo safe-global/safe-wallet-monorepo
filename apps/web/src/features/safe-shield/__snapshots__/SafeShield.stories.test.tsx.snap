@@ -318,6 +318,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -402,6 +403,7 @@ exports[`./SafeShield.stories Empty 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -714,6 +716,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -948,6 +951,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -1182,6 +1186,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -1630,6 +1635,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -1826,6 +1832,7 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -1965,6 +1972,7 @@ exports[`./SafeShield.stories Loading 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -2491,6 +2499,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -2839,6 +2848,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -3171,6 +3181,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -3483,6 +3494,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -5089,6 +5101,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -5567,6 +5580,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -5821,6 +5835,7 @@ exports[`./SafeShield.stories OverflowFindings 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -6133,6 +6148,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -6614,6 +6630,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -6945,6 +6962,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -7255,6 +7273,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
@@ -7489,6 +7508,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
               >
                 <mock-icon
                   class="cursor-pointer [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] hover:[&_.shield-bg]:fill-[var(--color-background-secondary)] hover:[&_.shield-img]:fill-[var(--color-static-text-brand)] hover:[&_.shield-lines]:fill-[var(--color-static-main)] hover:[&_.shield-text]:fill-[var(--color-text-primary)]"
+                  data-testid="safe-shield-logo"
                   height="18"
                   width="78"
                 />
