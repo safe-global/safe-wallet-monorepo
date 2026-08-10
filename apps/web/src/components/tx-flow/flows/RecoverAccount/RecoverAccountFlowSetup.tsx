@@ -1,7 +1,7 @@
 import { useForm, FormProvider, useFieldArray, Controller } from 'react-hook-form'
 import type { ReactElement } from 'react'
 
-import TxCard from '../../common/TxCard'
+import TxCard, { TxCardActions } from '../../common/TxCard'
 import AddIcon from '@/public/images/common/add.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { RecoverAccountFlowFields } from '.'
@@ -191,11 +191,11 @@ export function RecoverAccountFlowSetup({
 
           <Separator className={commonCss.nestedDivider} />
 
-          <div className="mt-0 flex items-center">
+          <TxCardActions className="!mt-0">
             <Button data-testid="next-btn" variant="default" type="submit" className="mt-2" disabled={isSameSetup}>
               Next
             </Button>
-          </div>
+          </TxCardActions>
         </TxCard>
       </form>
     </FormProvider>

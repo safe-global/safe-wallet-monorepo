@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 
-import TxCard from '../../common/TxCard'
+import TxCard, { TxCardActions } from '../../common/TxCard'
 import RecoveryRecoverers from '@/public/images/settings/spending-limit/beneficiary.svg'
 import RecoveryRecoverer from '@/public/images/transactions/recovery-recoverer.svg'
 import RecoveryDelay from '@/public/images/settings/spending-limit/time.svg'
@@ -63,11 +63,11 @@ export function UpsertRecoveryFlowIntro(): ReactElement {
         ))}
       </div>
       <Separator className={commonCss.nestedDivider} />
-      <div className="flex items-center" style={{ marginTop: 'var(--space-1)' }}>
+      <TxCardActions>
         <Button data-testid="next-btn" variant="default" onClick={() => onNext(data)}>
           Next
         </Button>
-      </div>
+      </TxCardActions>
     </TxCard>
   )
 }

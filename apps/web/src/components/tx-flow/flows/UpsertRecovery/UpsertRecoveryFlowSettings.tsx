@@ -5,7 +5,7 @@ import { useForm, FormProvider, Controller } from 'react-hook-form'
 import { useContext, useState } from 'react'
 import type { ReactElement } from 'react'
 
-import TxCard from '../../common/TxCard'
+import TxCard, { TxCardActions } from '../../common/TxCard'
 import { useRecoveryPeriods } from './useRecoveryPeriods'
 import { UpsertRecoveryFlowFields, type UpsertRecoveryFlowProps } from '.'
 import AddressBookInput from '@/components/common/AddressBookInput'
@@ -289,11 +289,11 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
             </Label>
           </div>
 
-          <div className="flex items-center">
+          <TxCardActions>
             <Button data-testid="next-btn" variant="default" type="submit" disabled={isDisabled}>
               Next
             </Button>
-          </div>
+          </TxCardActions>
         </form>
       </FormProvider>
     </TxCard>

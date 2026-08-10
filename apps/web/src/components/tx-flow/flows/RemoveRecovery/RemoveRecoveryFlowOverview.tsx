@@ -1,7 +1,7 @@
 import { useContext, type ReactElement } from 'react'
 
 import EthHashInfo from '@/components/common/EthHashInfo'
-import TxCard from '../../common/TxCard'
+import TxCard, { TxCardActions } from '../../common/TxCard'
 import type { RecoveryFlowProps } from '.'
 
 import commonCss from '@/components/tx-flow/common/styles.module.css'
@@ -42,11 +42,11 @@ export function RemoveRecoveryFlowOverview({ delayModifier }: RecoveryFlowProps)
 
       <Separator className={commonCss.nestedDivider} />
 
-      <div className="mt-0 flex items-center">
+      <TxCardActions className="!mt-0">
         <Button data-testid="next-btn" variant="default" onClick={onNext}>
           Next
         </Button>
-      </div>
+      </TxCardActions>
     </TxCard>
   )
 }
