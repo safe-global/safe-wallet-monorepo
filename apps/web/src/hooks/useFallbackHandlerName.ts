@@ -1,12 +1,8 @@
 import { useMemo } from 'react'
-import {
-  getCompatibilityFallbackHandlerDeployments,
-  getExtensibleFallbackHandlerDeployments,
-} from '@safe-global/safe-deployments'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useTWAPFallbackHandlerAddress } from '@/features/swap'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { hasMatchingDeployment, TRUSTED_DEPLOYMENT_VERSIONS } from '@safe-global/utils/services/contracts/deployments'
+import { identifyOfficialFallbackHandler } from '@safe-global/utils/services/contracts/deployments'
 
 /**
  * Hook to get the official deployment name of the current Safe's fallback handler,
@@ -23,17 +19,13 @@ export const useFallbackHandlerName = (): string | undefined => {
   return useMemo(() => {
     if (!address) return undefined
 
-    if (
-      hasMatchingDeployment(getCompatibilityFallbackHandlerDeployments, address, chainId, TRUSTED_DEPLOYMENT_VERSIONS)
-    ) {
+    const officialHandler = identifyOfficialFallbackHandler(address, chainId)
+    if (officialHandler === 'compatibility') {
       return 'CompatibilityFallbackHandler'
     }
 
     // CoW's TWAP handler is CoW's own instance of the ExtensibleFallbackHandler
-    if (
-      hasMatchingDeployment(getExtensibleFallbackHandlerDeployments, address, chainId, TRUSTED_DEPLOYMENT_VERSIONS) ||
-      sameAddress(address, twapFallbackHandler)
-    ) {
+    if (officialHandler === 'extensible' || sameAddress(address, twapFallbackHandler)) {
       return 'ExtensibleFallbackHandler'
     }
 

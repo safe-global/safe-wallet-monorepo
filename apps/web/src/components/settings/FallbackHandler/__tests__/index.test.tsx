@@ -131,6 +131,7 @@ describe('FallbackHandler', () => {
     await waitFor(() => {
       expect(fbHandler.getByText('ExtensibleFallbackHandler')).toBeDefined()
       expect(fbHandler.queryByText('CompatibilityFallbackHandler')).not.toBeInTheDocument()
+      expect(fbHandler.queryByText('An unofficial fallback handler is currently set.')).not.toBeInTheDocument()
     })
   })
 

@@ -1,8 +1,4 @@
-import {
-  getCompatibilityFallbackHandlerDeployments,
-  getExtensibleFallbackHandlerDeployments,
-} from '@safe-global/safe-deployments'
-import { hasMatchingDeployment, TRUSTED_DEPLOYMENT_VERSIONS } from '@safe-global/utils/services/contracts/deployments'
+import { identifyOfficialFallbackHandler } from '@safe-global/utils/services/contracts/deployments'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { SecurityScanner } from './types'
@@ -12,22 +8,11 @@ import { getSeverityFromScore } from './constants'
 // that creates a circular dependency with @/features/__core__ in test environments.
 import { TWAP_FALLBACK_HANDLER, TWAP_FALLBACK_HANDLER_NETWORKS } from '@/features/swap/helpers/utils'
 
-/** Check if address matches an ExtensibleFallbackHandler deployment (v1.5.0+, not in SafeVersion type yet). */
-const isExtensibleFallbackHandler = (address: string, chainId: string): boolean => {
-  const deployment = getExtensibleFallbackHandlerDeployments()
-  if (!deployment) return false
-  const addresses = deployment.networkAddresses[chainId]
-  if (!addresses) return false
-  const addrList = Array.isArray(addresses) ? addresses : [addresses]
-  return addrList.some((a) => sameAddress(a, address))
-}
-
 type HandlerMatch = 'compatibility' | 'extensible' | 'twap' | null
 
 const identifyFallbackHandler = (address: string, chainId: string): HandlerMatch => {
-  if (hasMatchingDeployment(getCompatibilityFallbackHandlerDeployments, address, chainId, TRUSTED_DEPLOYMENT_VERSIONS))
-    return 'compatibility'
-  if (isExtensibleFallbackHandler(address, chainId)) return 'extensible'
+  const officialHandler = identifyOfficialFallbackHandler(address, chainId)
+  if (officialHandler) return officialHandler
   if (TWAP_FALLBACK_HANDLER_NETWORKS.includes(chainId) && sameAddress(address, TWAP_FALLBACK_HANDLER)) return 'twap'
   return null
 }
