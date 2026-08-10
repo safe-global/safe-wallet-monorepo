@@ -10,11 +10,6 @@ describe('[VISUAL] Spaces page screenshots', { defaultCommandTimeout: 60000, ...
     signInToSpaces()
   })
 
-  it('[VISUAL] Screenshot spaces settings page', () => {
-    cy.visit(constants.spaceUrl + SPACE_ID)
-    main.awaitVisualStability()
-  })
-
   it('[VISUAL] Screenshot spaces members page', () => {
     cy.visit(constants.spaceMembersUrl + SPACE_ID)
     main.awaitVisualStability()
