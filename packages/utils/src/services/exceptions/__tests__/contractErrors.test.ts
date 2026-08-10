@@ -4,6 +4,7 @@ import CONTRACT_ERRORS, {
   getContractErrorHandling,
   getContractErrorMessage,
   getGs026Message,
+  getGsCodeFromError,
   isGsCode,
   type GsCode,
 } from '../contractErrors'
@@ -104,6 +105,23 @@ describe('contractErrors', () => {
       expect(isGsCode('Invalid owner provided')).toBe(false)
       expect(isGsCode(undefined)).toBe(false)
       expect(isGsCode(42)).toBe(false)
+    })
+  })
+
+  describe('getGsCodeFromError', () => {
+    it('extracts a GS code from the reason', () => {
+      expect(getGsCodeFromError({ reason: 'GS026', message: 'anything' })).toBe('GS026')
+    })
+
+    it('extracts a GS code embedded in the message', () => {
+      expect(getGsCodeFromError({ message: 'execution reverted: "GS013" (action="estimateGas")' })).toBe('GS013')
+    })
+
+    it('returns undefined for non-GS errors', () => {
+      expect(getGsCodeFromError({ message: 'HTTP request failed. Status: 500' })).toBeUndefined()
+      expect(getGsCodeFromError({ message: 'GS999 is not a real code' })).toBeUndefined()
+      expect(getGsCodeFromError(undefined)).toBeUndefined()
+      expect(getGsCodeFromError(null)).toBeUndefined()
     })
   })
 

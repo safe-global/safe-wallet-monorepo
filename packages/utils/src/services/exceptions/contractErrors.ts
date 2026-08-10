@@ -54,7 +54,7 @@ export type GsCode =
 export type ContractErrorHandling = 'inline-validation' | 'runtime' | 'internal'
 
 export interface ContractErrorMeta {
-  /** User-facing copy. May contain `{nativeAsset}` / `{token}` / `{network}` placeholders. */
+  /** User-facing copy. May contain `{nativeAsset}` / `{token}` placeholders. */
   message: string
   handling: ContractErrorHandling
 }
@@ -133,8 +133,6 @@ const CONTRACT_ERRORS: Record<GsCode, ContractErrorMeta> = {
 }
 
 export interface ContractErrorParams {
-  /** Chain name, e.g. "Ethereum". */
-  network?: string
   /** Native currency symbol, e.g. "ETH". */
   nativeAsset?: string
   /** ERC-20 token symbol used to pay the fee. */
@@ -150,6 +148,23 @@ const interpolate = (template: string, params: ContractErrorParams = {}): string
 /** Type guard: is `code` a known GS code? */
 export const isGsCode = (code: unknown): code is GsCode =>
   typeof code === 'string' && Object.prototype.hasOwnProperty.call(CONTRACT_ERRORS, code)
+
+const GS_CODE_RE = /\bGS\d{3}\b/
+
+/**
+ * Extract a known GS code from an error's `reason`/`message`, if present.
+ * Lets the UI tell an on-chain (GS) error apart from any other error so the
+ * code-only support reference is shown for GS errors only.
+ */
+export const getGsCodeFromError = (error?: { message?: string; reason?: string } | null): GsCode | undefined => {
+  if (!error) return undefined
+
+  const reason = typeof error.reason === 'string' ? error.reason : ''
+  const message = typeof error.message === 'string' ? error.message : ''
+  const match = `${reason} ${message}`.match(GS_CODE_RE)
+
+  return match && isGsCode(match[0]) ? match[0] : undefined
+}
 
 /** Resolve a GS code to its user-facing message, interpolating any placeholders. */
 export const getContractErrorMessage = (code: GsCode, params?: ContractErrorParams): string =>

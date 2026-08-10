@@ -15,7 +15,6 @@ import GasParams from '@/components/tx/GasParams'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { getTxOptions } from '@/utils/transactions'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
-import { buildSupportReference } from '@safe-global/utils/services/exceptions/supportReference'
 import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
 import { isWalletRejection } from '@/utils/wallets'
 import { type TransactionOptions } from '@safe-global/types-kit'
@@ -133,7 +132,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
           showNotification({
             message: 'Speed up failed',
             variant: 'error',
-            errorReference: buildSupportReference(error, { network: chainInfo?.chainName, txHash }),
+            detailedMessage: error.message,
             groupKey: txHash,
           }),
         )

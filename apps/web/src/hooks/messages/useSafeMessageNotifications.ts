@@ -5,7 +5,6 @@ import { SafeMsgEvent, safeMsgSubscribe } from '@/services/safe-messages/safeMsg
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectNotifications, showNotification } from '@/store/notificationsSlice'
 import { formatError } from '@safe-global/utils/utils/formatters'
-import { buildSupportReference } from '@safe-global/utils/services/exceptions/supportReference'
 import { isSafeMessageListItem } from '@/utils/safe-message-guards'
 import useSafeMessages from '@/hooks/messages/useSafeMessages'
 import { selectPendingSafeMessages } from '@/store/pendingSafeMessagesSlice'
@@ -58,7 +57,7 @@ const useSafeMessageNotifications = () => {
         dispatch(
           showNotification({
             message,
-            errorReference: isError ? buildSupportReference(detail.error) : undefined,
+            detailedMessage: isError ? detail.error.message : undefined,
             groupKey: detail.messageHash,
             variant: isError ? 'error' : isSuccess ? 'success' : 'info',
           }),

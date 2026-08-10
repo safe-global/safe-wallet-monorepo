@@ -15,11 +15,11 @@ import CONTRACT_ERRORS, {
  * - `MessageCatalog` lists every GS code with its user-facing copy and handling.
  * - `RenderedInErrorMessage` shows the copy in the real `ErrorMessage` component.
  *   Each error is fed a realistic raw payload (provider URLs, request bodies,
- *   library versions); "Details" shows only the sanitised support reference
- *   (code / tx hash / network / timestamp / copy) — never the raw payload.
+ *   library versions); for a GS error "Details" shows only the error code —
+ *   never the raw payload. (Non-GS errors keep their raw Details, unchanged.)
  */
 
-const PARAMS = { network: 'Ethereum', nativeAsset: 'ETH', token: 'USDC' }
+const PARAMS = { nativeAsset: 'ETH', token: 'USDC' }
 const CODES = Object.keys(CONTRACT_ERRORS) as GsCode[]
 
 const handlingColor = (handling: string) =>
@@ -81,8 +81,8 @@ const RAW_PAYLOADS: Partial<Record<GsCode, string>> = {
   GS201: `execution reverted: GS201 (action="estimateGas", data="0x08c379a0...4753323031", reason="GS201", code=CALL_EXCEPTION, version=6.13.2)`,
   GS010: `Error: cannot estimate gas; transaction may fail or may require manual gas limit (reason="GS010", method="estimateGas", code=UNPREDICTABLE_GAS_LIMIT, version=providers/5.7.2)`,
   GS011: `HTTP request failed.\n\nStatus: 200\nURL: https://rpc.stable.xyz/\nRequest body: {"method":"eth_call","params":[{"to":"0xA063...","data":"0x6a761202..."}]}\n\nreason: GS011\nVersion: viem@2.52.2`,
-  GS026: `HTTP request failed.\n\nStatus: 500\nURL: https://berachain.drpc.org\nRequest body: {"method":"eth_call","params":[{"to":"0x1f9840...","data":"0x6a761202..."}]}\n\nDetails: Internal server error\nVersion: viem@2.52.2`,
-  GS100: `Error: SDK is not initialized yet\n    at GnosisSafe.execTransaction (protocol-kit/dist/index.js:1024:13)`,
+  GS026: `execution reverted: GS026 (action="estimateGas", data="0x08c379a0...4753303236", reason="GS026", code=CALL_EXCEPTION, version=6.13.2)`,
+  GS100: `execution reverted: GS100 (action="estimateGas", data="0x08c379a0...4753313030", reason="GS100", code=CALL_EXCEPTION, version=6.13.2)`,
 }
 
 const InErrorMessage = () => {
@@ -97,8 +97,8 @@ const InErrorMessage = () => {
     <Stack spacing={2}>
       <Alert severity="info" variant="outlined">
         The message you see is the new copy. Each error is fed a realistic raw payload (provider URLs, request bodies,
-        library versions), but <strong>Details</strong> shows only the support reference — code, tx hash, network,
-        timestamp, copy — never the raw payload.
+        library versions), but for a GS error <strong>Details</strong> shows only the error code — never the raw
+        payload. The full support reference is meant to live in the support tool.
       </Alert>
       {samples.map(({ code, label }) => {
         const message = getContractErrorMessage(code, PARAMS)

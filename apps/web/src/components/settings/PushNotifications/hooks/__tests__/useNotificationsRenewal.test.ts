@@ -281,7 +281,7 @@ describe('useNotificationsRenewal', () => {
         expect(showNotificationSpy).toHaveBeenCalledWith({
           message: 'Failed to renew notifications',
           variant: 'error',
-          errorReference: { code: 'UNKNOWN', timestamp: expect.any(String) },
+          detailedMessage: 'Failed to renew notifications',
           groupKey: RENEWAL_NOTIFICATION_KEY,
         })
       })

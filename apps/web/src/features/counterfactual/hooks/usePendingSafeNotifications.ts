@@ -2,7 +2,6 @@ import { SafeCreationEvent, safeCreationSubscribe } from '../services/safeCreati
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { useEffect } from 'react'
 import { formatError } from '@safe-global/utils/utils/formatters'
-import { buildSupportReference } from '@safe-global/utils/services/exceptions/supportReference'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -54,9 +53,7 @@ const usePendingSafeNotifications = (): void => {
           showNotification({
             title: 'Safe account activation',
             message,
-            errorReference: isError
-              ? buildSupportReference(detail.error, { network: chain?.chainName, txHash })
-              : undefined,
+            detailedMessage: isError ? detail.error.message : undefined,
             groupKey,
             variant: isError ? Variant.ERROR : isSuccess ? Variant.SUCCESS : Variant.INFO,
             link,

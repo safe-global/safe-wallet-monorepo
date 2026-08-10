@@ -1,7 +1,7 @@
-import { type ReactElement, type ReactNode, type SyntheticEvent, useMemo, useState } from 'react'
+import { type ReactElement, type ReactNode, type SyntheticEvent, useState } from 'react'
 import { Link, Typography, SvgIcon, AlertTitle } from '@mui/material'
 import classNames from 'classnames'
-import { buildSupportReference } from '@safe-global/utils/services/exceptions/supportReference'
+import { getGsCodeFromError } from '@safe-global/utils/services/exceptions/contractErrors'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { getGuardErrorInfo } from '@/utils/transaction-errors'
@@ -12,6 +12,8 @@ import ExternalLink from '@/components/common/ExternalLink'
 import ErrorDetails from '@/components/common/ErrorDetails'
 import css from './styles.module.css'
 
+const ETHERS_PREFIX = 'could not coalesce error'
+
 const ErrorMessage = ({
   children,
   error,
@@ -19,7 +21,6 @@ const ErrorMessage = ({
   level = 'error',
   title,
   context,
-  txHash,
 }: {
   children: ReactNode
   error?: Error
@@ -27,17 +28,14 @@ const ErrorMessage = ({
   level?: 'error' | 'warning' | 'info'
   title?: string
   context?: 'estimation' | 'execution'
-  txHash?: string
 }): ReactElement => {
   const [showDetails, setShowDetails] = useState<boolean>(false)
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
 
-  // Build a support reference from the error — never surface the raw payload.
-  const supportReference = useMemo(
-    () => (error ? buildSupportReference(error, { network: chain?.chainName, txHash }) : undefined),
-    [error, chain?.chainName, txHash],
-  )
+  // On-chain (GS) errors show a code-only support reference; every other error
+  // keeps its raw message in Details, as before (WA-3005 is on-chain-scoped).
+  const gsCode = error ? getGsCodeFromError(error) : undefined
 
   // Check if this is a Guard error that should get special treatment
   const guardErrorName = error && context ? getGuardErrorInfo(error) : undefined
@@ -104,7 +102,15 @@ const ErrorMessage = ({
             )}
           </Typography>
 
-          {supportReference && showDetails && <ErrorDetails reference={supportReference} />}
+          {error &&
+            showDetails &&
+            (gsCode ? (
+              <ErrorDetails code={gsCode} />
+            ) : (
+              <Typography variant="body2" className={css.details}>
+                {error.message.replace(ETHERS_PREFIX, '').trim().slice(0, 500)}
+              </Typography>
+            ))}
         </div>
       </div>
     </div>

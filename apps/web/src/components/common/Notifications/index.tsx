@@ -12,7 +12,6 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import Track from '../Track'
 import { isRelativeUrl } from '@/utils/url'
-import ErrorDetails from '@/components/common/ErrorDetails'
 
 const toastStyle = { position: 'static', margin: 1 }
 
@@ -67,7 +66,7 @@ export const NotificationLink = ({
 const Toast = ({
   title,
   message,
-  errorReference,
+  detailedMessage,
   variant,
   link,
   onClose,
@@ -109,10 +108,10 @@ const Toast = ({
 
         {message}
 
-        {errorReference && (
+        {detailedMessage && (
           <details>
             <Link component="summary">Details</Link>
-            <ErrorDetails reference={errorReference} />
+            <pre>{detailedMessage}</pre>
           </details>
         )}
         <NotificationLink link={link} onClick={handleClose} />

@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 
 import { formatError } from '@safe-global/utils/utils/formatters'
-import { buildSupportReference } from '@safe-global/utils/services/exceptions/supportReference'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useSafeAddress from '../../../hooks/useSafeAddress'
@@ -66,9 +65,7 @@ export function useRecoveryTxNotifications(): void {
           showNotification({
             title,
             message,
-            errorReference: isError
-              ? buildSupportReference(detail.error, { network: chain.chainName, txHash })
-              : undefined,
+            detailedMessage: isError ? detail.error.message : undefined,
             groupKey,
             variant: isError ? 'error' : isSuccess ? 'success' : 'info',
             link,
@@ -80,5 +77,5 @@ export function useRecoveryTxNotifications(): void {
     return () => {
       unsubFns.forEach((unsub) => unsub())
     }
-  }, [dispatch, safeAddress, chain?.blockExplorerUriTemplate, chain?.chainName])
+  }, [dispatch, safeAddress, chain?.blockExplorerUriTemplate])
 }

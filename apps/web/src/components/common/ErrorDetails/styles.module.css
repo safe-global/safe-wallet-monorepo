@@ -5,22 +5,8 @@
   border-radius: 6px;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-1);
-}
-
-.row {
-  display: flex;
-  gap: var(--space-1);
-  align-items: baseline;
-}
-
 .label {
-  min-width: 96px;
-  flex-shrink: 0;
+  color: var(--color-text-secondary);
 }
 
 .value {
