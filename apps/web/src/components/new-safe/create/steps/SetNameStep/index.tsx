@@ -124,6 +124,7 @@ function SetNameStep({
                 name={SetNameStepFields.name}
                 label={errors?.[SetNameStepFields.name]?.message || 'Name'}
                 placeholder={fallbackName}
+                className="[&_label]:text-base [&_label]:font-semibold"
                 InputLabelProps={{ shrink: true }}
                 InputProps={{
                   endAdornment: (
@@ -145,7 +146,7 @@ function SetNameStep({
             </div>
 
             <div className="col-span-12">
-              <Typography variant="h4" className="mt-4 inline-flex items-center gap-2">
+              <Typography variant="paragraph-bold" className="mt-4 inline-flex items-center gap-2">
                 Select networks
               </Typography>
               <Typography variant="paragraph-small" className="mb-4 block">
