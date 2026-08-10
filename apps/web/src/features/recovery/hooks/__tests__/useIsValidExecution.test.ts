@@ -9,6 +9,7 @@ import * as web3 from '@/hooks/wallets/web3'
 import type { Eip1193Provider } from 'ethers'
 import { JsonRpcProvider, BrowserProvider } from 'ethers'
 import * as contracts from '@/services/contracts/safeContracts'
+import { CONTRACT_ERROR_FALLBACK } from '@safe-global/utils/services/exceptions/contractErrors'
 
 import { MockEip1193Provider } from '@/tests/mocks/providers'
 
@@ -56,7 +57,7 @@ describe('useIsValidExecution', () => {
     jest.spyOn(web3, 'createWeb3').mockImplementation(() => mockProvider)
   })
 
-  it('should append the error code description to the error thrown', async () => {
+  it('should map a known GS revert reason to its user-facing message', async () => {
     const error = new Error('Some error') as EthersError
     error.reason = 'GS026' as EthersTxReplacedReason
 
@@ -86,7 +87,8 @@ describe('useIsValidExecution', () => {
     var { isValidExecution, executionValidationError, isValidExecutionLoading } = result.current
 
     expect(isValidExecution).toBe(undefined)
-    expect((executionValidationError as EthersError)?.reason).toBe('GS026: Invalid owner provided')
+    // A reactive GS026 (cause unknown post-broadcast) resolves to the shared fallback.
+    expect((executionValidationError as EthersError)?.reason).toBe(CONTRACT_ERROR_FALLBACK)
     expect(isValidExecutionLoading).toBe(false)
   })
 })
