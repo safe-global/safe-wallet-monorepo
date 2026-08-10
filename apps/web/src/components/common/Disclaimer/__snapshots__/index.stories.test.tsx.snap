@@ -44,13 +44,6 @@ exports[`./index.stories BlockedAddress 1`] = `
           >
             This signer address is blocked by the Safe interface, due to being associated with the blocked activities by the U.S. Department of Treasury in the Specially Designated Nationals (SDN) list.
           </div>
-          <div
-            aria-orientation="horizontal"
-            class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch"
-            data-orientation="horizontal"
-            data-slot="separator"
-            role="separator"
-          />
         </div>
         <div
           class="flex justify-center pt-6 pb-4"
@@ -183,13 +176,6 @@ exports[`./index.stories LegalDisclaimer 1`] = `
               </div>
             </div>
           </div>
-          <div
-            aria-orientation="horizontal"
-            class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch"
-            data-orientation="horizontal"
-            data-slot="separator"
-            role="separator"
-          />
         </div>
         <div
           class="flex justify-center pt-6 pb-4"
