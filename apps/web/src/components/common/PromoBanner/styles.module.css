@@ -31,6 +31,7 @@
 
 .bannerCtaText {
   color: var(--color-static-main);
+  font-weight: bold !important;
   margin-left: 0 !important;
   padding: var(--space-1) !important;
   margin-left: -8px !important;

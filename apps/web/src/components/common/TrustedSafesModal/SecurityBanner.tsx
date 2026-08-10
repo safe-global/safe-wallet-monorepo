@@ -20,7 +20,7 @@ const SecurityBanner = ({ title, className }: SecurityBannerProps) => {
       {title && <AlertTitle className="font-bold">{title}</AlertTitle>}
       <AlertDescription>
         Some Safe accounts may be malicious or impersonations. Only trust Safe accounts you can verify.{' '}
-        <ExternalLink href={HelpCenterArticle.ADDRESS_POISONING} noIcon className="underline">
+        <ExternalLink href={HelpCenterArticle.ADDRESS_POISONING} noIcon className="font-bold [&>span]:underline">
           Learn more
         </ExternalLink>
       </AlertDescription>

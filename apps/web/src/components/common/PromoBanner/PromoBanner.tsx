@@ -133,6 +133,7 @@ const PromoBanner = ({
 
           {description ? (
             <Typography
+              as="div"
               variant="paragraph-small"
               className={`${css.bannerText} ${css.bannerDescription}`}
               style={customFontColor ? { color: customFontColor } : undefined}
