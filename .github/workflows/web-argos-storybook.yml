@@ -8,12 +8,13 @@ name: Web Argos Storybook
 # Storybook, separate from the E2E project's ARGOS_TOKEN_E2E).
 
 on:
+  # ! Temporarily disabled — re-enable when Storybook Argos should run on every web PR again. !
   # Runs automatically on web PRs so visual regressions surface in review instead of
   # being discovered by hand. Fork PRs without ARGOS_TOKEN_STORYBOOK skip the upload step.
-  pull_request:
-    paths:
-      - 'apps/web/**'
-      - 'packages/**'
+  # pull_request:
+  #   paths:
+  #     - 'apps/web/**'
+  #     - 'packages/**'
   workflow_dispatch:
     inputs:
       reference_branch:
