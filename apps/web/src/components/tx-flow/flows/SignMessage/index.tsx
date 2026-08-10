@@ -59,7 +59,7 @@ export const AppTitle = ({
       ) : (
         <SafeAppIconCard src={appLogo} alt={name || 'The icon of the application'} width={32} height={32} />
       )}
-      <Typography variant="h4" className="pl-4 font-bold">
+      <Typography variant="h4" as="span" className="pl-4 font-bold">
         {title}
       </Typography>
     </div>

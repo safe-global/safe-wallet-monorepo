@@ -19,7 +19,7 @@ export const BreadcrumbItem = ({ title, address, href }: { title: string; addres
     <Tooltip>
       <TooltipTrigger
         render={
-          <div className={css.breadcrumb}>
+          <div className={css.breadcrumb} aria-label={title}>
             <Identicon address={address} size={20} />
             {href ? (
               <Link href={href}>

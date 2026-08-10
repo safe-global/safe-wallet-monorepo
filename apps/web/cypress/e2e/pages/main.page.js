@@ -84,6 +84,21 @@ export function selectDropdownOption(itemSelector, text) {
   cy.get('@dropdownOption').click({ scrollBehavior: 'center' })
 }
 
+// Base UI attaches tooltip hover listeners in an effect after mount, so an early mouseenter
+// can be lost: re-trigger until this trigger reports its popup open (data-popup-open).
+export function hoverUntilTooltipOpen(getTrigger, retries = 5) {
+  const attempt = (left) => {
+    getTrigger().trigger('mouseenter', { force: true })
+    cy.wait(300)
+    getTrigger().then(($trigger) => {
+      if ($trigger.attr('data-popup-open') !== undefined) return
+      if (left <= 0) throw new Error('Tooltip never opened')
+      attempt(left - 1)
+    })
+  }
+  attempt(retries)
+}
+
 export function clickOnExecuteBtn() {
   cy.get('button').contains(executeStr).click()
 }

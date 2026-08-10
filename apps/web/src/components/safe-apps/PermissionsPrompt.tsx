@@ -29,7 +29,9 @@ const PermissionsPrompt = ({
     <Dialog open={isOpen}>
       <DialogContent showCloseButton={false} padding="none">
         <ModalDialogTitle onClose={() => onReject()}>
-          <Typography variant="paragraph-bold">Permissions Request</Typography>
+          <Typography variant="paragraph-bold" as="span">
+            Permissions Request
+          </Typography>
         </ModalDialogTitle>
         <Separator />
         <div className="px-6 py-4">

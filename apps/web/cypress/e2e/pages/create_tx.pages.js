@@ -223,7 +223,7 @@ export function clickOnRejectBtn() {
 
 export function hoverOverRejectBtnBtn() {
   // Base UI tooltips open on a native mouseenter on the trigger span (CheckWallet wrapper), not the disabled button
-  getRejectButton().closest(checkWalletTooltipTrigger).trigger('mouseenter', { force: true })
+  main.hoverUntilTooltipOpen(() => getRejectButton().closest(checkWalletTooltipTrigger))
 }
 
 export function verifyRejectBtnDisabled() {
@@ -282,7 +282,7 @@ export function checkNoteRecordedNote(note) {
 }
 
 export function checkNoteCreator(creator) {
-  cy.get(txNoteTooltip).trigger('mouseenter', { force: true })
+  main.hoverUntilTooltipOpen(() => cy.get(txNoteTooltip))
   cy.get(noteCreator).should('be.visible').invoke('text').should('include', creator)
 }
 
@@ -476,14 +476,13 @@ export function verifyNumberOfExternalLinks(number) {
 }
 
 export function clickOnTransactionItemByName(name, token) {
-  cy.get(transactionItem)
-    .filter(':contains("' + name + '")')
-    .then(($elements) => {
-      if (token) {
-        $elements = $elements.filter(':contains("' + token + '")')
-      }
-      cy.wrap($elements.first()).scrollIntoView().click({ force: true })
-    })
+  // Keep both filters in the query chain so Cypress retries until a row contains
+  // name AND token — rows render their token text slightly after they appear
+  let matches = cy.get(transactionItem).filter(':contains("' + name + '")')
+  if (token) {
+    matches = matches.filter(':contains("' + token + '")')
+  }
+  matches.first().scrollIntoView().click({ force: true })
 }
 
 export function clickOnTransactionItemByIndex(index) {

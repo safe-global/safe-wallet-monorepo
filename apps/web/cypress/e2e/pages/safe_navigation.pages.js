@@ -101,9 +101,23 @@ export function verifyConnectWalletBtnVisible() {
 }
 
 export function expandMultichainRowByAddress(address) {
-  cy.get(dropdownContent).contains(address).closest('[data-slot="collapsible"]').find('button').first().click()
+  // The Base UI select popup intercepts the pointer-event sequence of a normal Cypress
+  // click, so the collapsible never toggles — dispatch a bare DOM click instead.
+  cy.get(dropdownContent)
+    .contains(address)
+    .closest('[data-slot="collapsible"]')
+    .find('[data-slot="collapsible-trigger"]')
+    .as('multichainRowTrigger')
+  cy.get('@multichainRowTrigger').then(($trigger) => $trigger[0].click())
+  cy.get('@multichainRowTrigger').should('have.attr', 'aria-expanded', 'true')
 }
 
 export function clickNotActivatedSubAccount() {
-  cy.get(dropdownContent).find(dropdownRow).filter(`:has(${notActivatedBadge})`).first().click()
+  // Expanding the multichain group can already commit the selection of the revealed
+  // not-activated row (the popup closes and the app navigates). Only click when the
+  // popup is still open; a bare DOM click so the popup can't swallow the pointer events.
+  cy.get('body').then(($body) => {
+    const $row = $body.find(`${dropdownContent} ${dropdownRow}:has(${notActivatedBadge})`).first()
+    if ($row.length) $row[0].click()
+  })
 }

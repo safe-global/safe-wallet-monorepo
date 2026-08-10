@@ -240,13 +240,17 @@ export function verifyShowAllNestedSafesNotVisible() {
   cy.contains(showAllNestedSafesStr).should('not.exist')
 }
 
-export function clickFirstValidSafeCheckbox() {
+export function clickValidSafeCheckbox(index) {
   cy.get(nestedSafeList)
     .find(safeListItem)
     .filter(`:not(:has(${suspiciousWarningIcon}))`)
-    .first()
+    .eq(index)
     .find(safeItemCheckbox)
     .click()
+}
+
+export function clickFirstValidSafeCheckbox() {
+  clickValidSafeCheckbox(0)
 }
 
 export function selectAllValidSafes() {

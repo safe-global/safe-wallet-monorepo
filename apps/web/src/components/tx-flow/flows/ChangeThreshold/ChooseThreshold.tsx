@@ -71,7 +71,7 @@ export const ChooseThreshold = () => {
                 <div className="flex flex-row flex-wrap items-center gap-4">
                   <div>
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger aria-invalid={isError}>
+                      <SelectTrigger data-testid="threshold-selector" aria-invalid={isError}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>

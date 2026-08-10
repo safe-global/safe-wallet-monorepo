@@ -341,6 +341,14 @@ export function clickOnAcceptBtn() {
   cy.findByRole('button', { name: acceptBtnStr }).click()
 }
 
+export function verifyPermissionsRequestVisible() {
+  cy.contains(permissionRequestStr).should('be.visible')
+}
+
+export function clickOnPermissionsAcceptBtn() {
+  cy.contains('button', acceptBtnStr).click()
+}
+
 export function uncheckAllPermissions(element) {
   cy.wrap(element).findByText(clearAllBtnStr).click()
 }
