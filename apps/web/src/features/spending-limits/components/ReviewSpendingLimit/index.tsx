@@ -1,7 +1,7 @@
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useEffect, useMemo, useContext } from 'react'
-import { Typography, Alert, Box } from '@mui/material'
+import { Typography, Alert, Box, Stack } from '@mui/material'
 
 import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
 import { getResetTimeOptions } from '../../constants'
@@ -11,13 +11,14 @@ import useChainId from '@/hooks/useChainId'
 import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
 import { selectSpendingLimits } from '../../store/spendingLimitsSlice'
 import { formatVisualAmount, safeParseUnits } from '@safe-global/utils/utils/formatters'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { NewSpendingLimitFlowProps } from '../../types'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import TxDetailsRow from '@/components/tx/ConfirmTxDetails/TxDetailsRow'
-import { createNewSpendingLimitTx } from '../../services/spendingLimitExecution'
+import { createNewSpendingLimitTx, findExistingSpendingLimit } from '../../services/spendingLimitExecution'
 import { useAppSelector } from '@/store'
 
 const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => {
@@ -28,93 +29,70 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
   const chain = useCurrentChain()
   const { balances } = useBalances()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
-  const token = balances.items.find((item) => item.tokenInfo.address === data?.tokenAddress)
-  const { decimals } = token?.tokenInfo || {}
 
-  const amountInWei = useMemo(
-    () => safeParseUnits(data?.amount || '0', token?.tokenInfo.decimals)?.toString() || '0',
-    [data?.amount, token?.tokenInfo.decimals],
-  )
+  const resetTimeOptions = useMemo(() => getResetTimeOptions(chainId), [chainId])
 
-  const existingSpendingLimit = useMemo(() => {
-    return spendingLimits.find(
-      (spendingLimit) =>
-        spendingLimit.beneficiary === data?.beneficiary && spendingLimit.token.address === data?.tokenAddress,
-    )
-  }, [spendingLimits, data])
+  // Each row is resolved against the balances list for its token info and decimals
+  const rows = useMemo(() => {
+    if (!data) return []
+
+    return data.limits.map((limit) => {
+      const token = balances.items.find((item) => sameAddress(item.tokenInfo.address, limit.tokenAddress))
+      const decimals = token?.tokenInfo.decimals
+      const existing = findExistingSpendingLimit(spendingLimits, data.beneficiary, limit.tokenAddress)
+
+      return {
+        ...limit,
+        token,
+        decimals,
+        existing,
+        amountInWei: safeParseUnits(limit.amount || '0', decimals)?.toString() || '0',
+        resetTimeLabel:
+          limit.resetTime === '0'
+            ? 'One-time spending limit'
+            : resetTimeOptions.find((time) => time.value === limit.resetTime)?.label,
+      }
+    })
+  }, [data, balances.items, spendingLimits, resetTimeOptions])
 
   useEffect(() => {
     if (!chain || !data) return
 
     createNewSpendingLimitTx(
-      data,
+      {
+        beneficiary: data.beneficiary,
+        limits: rows.map(({ tokenAddress, amount, resetTime, decimals }) => ({
+          tokenAddress,
+          amount,
+          resetTime,
+          decimals,
+        })),
+      },
       spendingLimits,
       chainId,
       chain,
       safe.modules,
       safe.deployed,
-      decimals,
-      existingSpendingLimit,
     )
       .then(setSafeTx)
       .catch(setSafeTxError)
-  }, [
-    chain,
-    chainId,
-    decimals,
-    existingSpendingLimit,
-    data,
-    safe.modules,
-    safe.deployed,
-    setSafeTx,
-    setSafeTxError,
-    spendingLimits,
-  ])
+  }, [chain, chainId, data, rows, safe.modules, safe.deployed, setSafeTx, setSafeTxError, spendingLimits])
 
-  const isOneTime = data?.resetTime === '0'
-  const resetTime = useMemo(() => {
-    return isOneTime
-      ? 'One-time spending limit'
-      : getResetTimeOptions(chainId).find((time) => time.value === data?.resetTime)?.label
-  }, [isOneTime, data?.resetTime, chainId])
+  const replacedTokens = rows.filter((row) => row.existing).map((row) => row.token?.tokenInfo.symbol || 'token')
 
   const onFormSubmit = () => {
-    trackEvent({
-      ...SETTINGS_EVENTS.SPENDING_LIMIT.RESET_PERIOD,
-      label: resetTime,
+    rows.forEach((row) => {
+      trackEvent({
+        ...SETTINGS_EVENTS.SPENDING_LIMIT.RESET_PERIOD,
+        label: row.resetTimeLabel,
+      })
     })
 
     onSubmit()
   }
 
-  const existingAmount = existingSpendingLimit
-    ? formatVisualAmount(BigInt(existingSpendingLimit?.amount), decimals)
-    : undefined
-
-  const oldResetTime = existingSpendingLimit
-    ? getResetTimeOptions(chainId).find((time) => time.value === existingSpendingLimit?.resetTimeMin)?.label
-    : undefined
-
   return (
     <ReviewTransaction onSubmit={onFormSubmit} withDecodedData={false}>
-      {token && (
-        <SendAmountBlock amountInWei={amountInWei} tokenInfo={token.tokenInfo} title="Amount">
-          {existingAmount && existingAmount !== data?.amount && (
-            <>
-              <Typography
-                data-testid="old-token-amount"
-                color="error"
-                sx={{ textDecoration: 'line-through' }}
-                component="span"
-              >
-                {existingAmount}
-              </Typography>
-              →
-            </>
-          )}
-        </SendAmountBlock>
-      )}
-
       <TxDetailsRow label="Beneficiary" grid>
         <Box data-testid="beneficiary-address">
           <EthHashInfo
@@ -127,46 +105,73 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
         </Box>
       </TxDetailsRow>
 
-      <TxDetailsRow label="Reset time" grid>
-        {existingSpendingLimit ? (
-          <>
-            <SpendingLimitLabel
-              label={
-                <>
-                  {existingSpendingLimit.resetTimeMin !== data?.resetTime && (
-                    <>
-                      <Typography
-                        data-testid="old-reset-time"
-                        color="error"
-                        component="span"
-                        sx={{
-                          textDecoration: 'line-through',
-                        }}
-                      >
-                        {oldResetTime}
-                      </Typography>
-                      {' → '}
-                    </>
-                  )}
-                  <Typography component="span">{resetTime}</Typography>
-                </>
-              }
-              isOneTime={existingSpendingLimit.resetTimeMin === '0'}
-            />
-          </>
-        ) : (
-          <SpendingLimitLabel
-            data-testid="spending-limit-label"
-            label={resetTime || 'One-time spending limit'}
-            isOneTime={!!resetTime && isOneTime}
-          />
-        )}
-      </TxDetailsRow>
+      {rows.map((row, index) => {
+        const existingAmount = row.existing ? formatVisualAmount(BigInt(row.existing.amount), row.decimals) : undefined
+        const oldResetTime = row.existing
+          ? resetTimeOptions.find((time) => time.value === row.existing?.resetTimeMin)?.label
+          : undefined
 
-      {existingSpendingLimit && (
+        return (
+          <Stack key={`${row.tokenAddress}-${index}`} spacing={1}>
+            {row.token && (
+              <SendAmountBlock amountInWei={row.amountInWei} tokenInfo={row.token.tokenInfo} title="Amount">
+                {existingAmount && existingAmount !== row.amount && (
+                  <>
+                    <Typography
+                      data-testid="old-token-amount"
+                      color="error"
+                      sx={{ textDecoration: 'line-through' }}
+                      component="span"
+                    >
+                      {existingAmount}
+                    </Typography>
+                    →
+                  </>
+                )}
+              </SendAmountBlock>
+            )}
+
+            <TxDetailsRow label="Reset time" grid>
+              {row.existing ? (
+                <SpendingLimitLabel
+                  label={
+                    <>
+                      {row.existing.resetTimeMin !== row.resetTime && (
+                        <>
+                          <Typography
+                            data-testid="old-reset-time"
+                            color="error"
+                            component="span"
+                            sx={{ textDecoration: 'line-through' }}
+                          >
+                            {oldResetTime}
+                          </Typography>
+                          {' → '}
+                        </>
+                      )}
+                      <Typography component="span">{row.resetTimeLabel}</Typography>
+                    </>
+                  }
+                  isOneTime={row.existing.resetTimeMin === '0'}
+                />
+              ) : (
+                <SpendingLimitLabel
+                  data-testid="spending-limit-label"
+                  label={row.resetTimeLabel || 'One-time spending limit'}
+                  isOneTime={row.resetTime === '0'}
+                />
+              )}
+            </TxDetailsRow>
+          </Stack>
+        )
+      })}
+
+      {replacedTokens.length > 0 && (
         <Alert severity="warning" sx={{ border: 'unset' }}>
           <Typography data-testid="limit-replacement-warning" fontWeight={700}>
-            You are about to replace an existing spending limit
+            {replacedTokens.length === 1
+              ? 'You are about to replace an existing spending limit'
+              : `You are about to replace existing spending limits for ${replacedTokens.join(', ')}`}
           </Typography>
         </Alert>
       )}

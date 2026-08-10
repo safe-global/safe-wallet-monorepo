@@ -8,9 +8,7 @@ import { SpendingLimitsFeature, type NewSpendingLimitFlowProps } from '@/feature
 
 const defaultValues: NewSpendingLimitFlowProps = {
   beneficiary: '',
-  tokenAddress: ZERO_ADDRESS,
-  amount: '',
-  resetTime: '0',
+  limits: [{ tokenAddress: ZERO_ADDRESS, amount: '', resetTime: '0' }],
 }
 
 const NewSpendingLimitFlow = () => {
