@@ -28,13 +28,17 @@ describe('NetworkMultiSelectorInput', () => {
       </Form>,
     )
 
-  it('opens the listbox on input click and closes it on an outside pointerdown', () => {
+  it('opens the listbox on input click and closes it on an outside press', () => {
     renderInput()
 
     fireEvent.click(screen.getByRole('combobox'))
     expect(screen.getByRole('listbox')).toBeInTheDocument()
 
+    // base-ui's Popover dismisses on an outside press; fire the full sequence so it triggers
+    // regardless of the resolved `outsidePressEvent` mode.
     fireEvent.pointerDown(document.body)
+    fireEvent.mouseDown(document.body)
+    fireEvent.click(document.body)
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
   })
 
