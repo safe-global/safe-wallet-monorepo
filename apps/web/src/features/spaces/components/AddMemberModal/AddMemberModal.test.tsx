@@ -69,6 +69,11 @@ jest.mock('@/hooks/useAddressBook', () => ({
   default: () => mockUseAddressBook(),
 }))
 
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: () => ({ configs: [{ chainId: '1', chainName: 'Ethereum', shortName: 'eth' }] }),
+}))
+
 jest.mock('./MemberInfoForm', () => ({
   __esModule: true,
   default: () => null,

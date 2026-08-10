@@ -1,4 +1,5 @@
-import { type Provider } from 'ethers'
+import { type Provider, type BigNumberish } from 'ethers'
+import { resolveNameForChain as resolveNameOnHub } from '@safe-global/utils/utils/ens'
 import { logError } from '../exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 
@@ -13,18 +14,31 @@ export function isDomain(domain: string): boolean {
   return DOMAIN_RE.test(domain)
 }
 
-export const resolveName = async (rpcProvider: Provider, name: string): Promise<string | undefined> => {
+export const lookupAddress = async (
+  rpcProvider: Provider,
+  address: string,
+  coinType?: BigNumberish,
+): Promise<string | undefined> => {
   try {
-    return (await rpcProvider.resolveName(name)) || undefined
+    return (await rpcProvider.lookupAddress(address, coinType)) || undefined
   } catch (e) {
     const err = e as EthersError
     logError(ErrorCodes._101, err.reason || err.message)
   }
 }
 
-export const lookupAddress = async (rpcProvider: Provider, address: string): Promise<string | undefined> => {
+/**
+ * Forward-resolve an ENS name for a target chain via a hub provider (Mainnet/Sepolia).
+ * Delegates to the shared chain-specific coin-type lookup (no ETH fallback); failures are
+ * logged and swallowed.
+ */
+export const resolveNameForChain = async (
+  hubProvider: Provider,
+  name: string,
+  targetChainId: number,
+): Promise<string | undefined> => {
   try {
-    return (await rpcProvider.lookupAddress(address)) || undefined
+    return (await resolveNameOnHub(hubProvider, name, targetChainId)) || undefined
   } catch (e) {
     const err = e as EthersError
     logError(ErrorCodes._101, err.reason || err.message)

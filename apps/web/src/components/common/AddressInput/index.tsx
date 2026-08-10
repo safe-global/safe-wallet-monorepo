@@ -26,7 +26,7 @@ import classnames from 'classnames'
 import css from './styles.module.css'
 import inputCss from '@/styles/inputs.module.css'
 import Identicon from '../Identicon'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { useEnsHubProvider } from '@/hooks/useEnsHubProvider'
 
 export type AddressInputProps = TextFieldProps & {
   name: string
@@ -73,10 +73,10 @@ const AddressInput = ({
   // greyed-out input — even when the address isn't in the (source-scoped) address book.
   const isReadOnly = Boolean(addressBook[watchedValue]) || Boolean(props.disabled)
 
-  // Resolve ENS against the given chain when provided (e.g. mainnet for the chain-agnostic Spaces
-  // address book), otherwise fall back to the app's current chain.
+  // Target chain for the addr record (e.g. mainnet for Spaces contacts, otherwise the current Safe).
+  // DOMAIN_LOOKUP is hub-only (Mainnet/Sepolia); L2 chain flags are ignored.
   const ensChain = chain ?? currentChain
-  const isDomainLookupEnabled = !!ensChain && hasFeature(ensChain, FEATURES.DOMAIN_LOOKUP)
+  const { isDomainLookupEnabled } = useEnsHubProvider(ensChain)
   const {
     address,
     name: resolvedName,
