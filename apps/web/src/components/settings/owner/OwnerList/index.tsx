@@ -117,14 +117,14 @@ export const OwnerList = () => {
           them.
         </Typography>
 
-        <div className="flex justify-between py-4">
+        <div className="flex flex-wrap justify-between gap-3 py-4">
           <CheckWallet>
             {(isOk) => (
               <Track {...SETTINGS_EVENTS.SETUP.MANAGE_SIGNERS}>
                 <Button
                   data-testid="manage-signers-btn"
                   onClick={() => setTxFlow(<ManageSignersFlow />)}
-                  variant="ghost"
+                  variant="outline"
                   disabled={!isOk}
                 >
                   <EditOwnerIcon className="size-4" />
