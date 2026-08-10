@@ -16,6 +16,7 @@ import { getTxLink } from '@/utils/tx-link'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import { getGuardErrorInfo, isRateLimitError, RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
+import { buildSupportReference } from '@safe-global/utils/services/exceptions/supportReference'
 
 const TxNotifications = {
   [TxEvent.SIGN_FAILED]: 'Failed to sign. Please try again.',
@@ -69,7 +70,10 @@ const useTxNotifications = (): void => {
         let message = isError ? `${baseMessage} ${formatError(detail.error)}` : baseMessage
 
         // Override message for Guard errors
-        if (guardErrorName) {
+        if (event === TxEvent.REVERTED) {
+          // A mined revert means gas was already paid — say so (WA-3005).
+          message = `Transaction reverted on ${chain.chainName}. Gas was spent.`
+        } else if (guardErrorName) {
           message = `Guard reverted the transaction (${guardErrorName}).`
         } else if (isError && isRateLimitError(detail.error)) {
           // Translate transient RPC rate-limit failures into friendly copy.
@@ -96,7 +100,9 @@ const useTxNotifications = (): void => {
           showNotification({
             title: humanDescription,
             message,
-            detailedMessage: isError ? detail.error.message : undefined,
+            errorReference: isError
+              ? buildSupportReference(detail.error, { network: chain.chainName, txHash })
+              : undefined,
             groupKey,
             variant: isError ? Variant.ERROR : isSuccess ? Variant.SUCCESS : Variant.INFO,
             link: txId

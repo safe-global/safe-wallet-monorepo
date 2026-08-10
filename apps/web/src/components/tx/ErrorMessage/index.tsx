@@ -1,6 +1,7 @@
-import { type ReactElement, type ReactNode, type SyntheticEvent, useState } from 'react'
+import { type ReactElement, type ReactNode, type SyntheticEvent, useMemo, useState } from 'react'
 import { Link, Typography, SvgIcon, AlertTitle } from '@mui/material'
 import classNames from 'classnames'
+import { buildSupportReference } from '@safe-global/utils/services/exceptions/supportReference'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { getGuardErrorInfo } from '@/utils/transaction-errors'
@@ -8,9 +9,8 @@ import { getBlockExplorerLink } from '@/utils/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
 import ExternalLink from '@/components/common/ExternalLink'
+import ErrorDetails from '@/components/common/ErrorDetails'
 import css from './styles.module.css'
-
-const ETHERS_PREFIX = 'could not coalesce error'
 
 const ErrorMessage = ({
   children,
@@ -19,6 +19,7 @@ const ErrorMessage = ({
   level = 'error',
   title,
   context,
+  txHash,
 }: {
   children: ReactNode
   error?: Error
@@ -26,10 +27,17 @@ const ErrorMessage = ({
   level?: 'error' | 'warning' | 'info'
   title?: string
   context?: 'estimation' | 'execution'
+  txHash?: string
 }): ReactElement => {
   const [showDetails, setShowDetails] = useState<boolean>(false)
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
+
+  // Build a support reference from the error — never surface the raw payload.
+  const supportReference = useMemo(
+    () => (error ? buildSupportReference(error, { network: chain?.chainName, txHash }) : undefined),
+    [error, chain?.chainName, txHash],
+  )
 
   // Check if this is a Guard error that should get special treatment
   const guardErrorName = error && context ? getGuardErrorInfo(error) : undefined
@@ -96,11 +104,7 @@ const ErrorMessage = ({
             )}
           </Typography>
 
-          {error && showDetails && (
-            <Typography variant="body2" className={css.details}>
-              {error.message.replace(ETHERS_PREFIX, '').trim().slice(0, 500)}
-            </Typography>
-          )}
+          {supportReference && showDetails && <ErrorDetails reference={supportReference} />}
         </div>
       </div>
     </div>

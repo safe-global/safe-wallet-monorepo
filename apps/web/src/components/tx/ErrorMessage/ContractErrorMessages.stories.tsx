@@ -13,9 +13,10 @@ import CONTRACT_ERRORS, {
  * Living reference for the Safe contract (GS) error messages (WA-3005).
  *
  * - `MessageCatalog` lists every GS code with its user-facing copy and handling.
- * - `RenderedInErrorMessage` shows the copy in the real `ErrorMessage` component,
- *   with a realistic raw payload behind "Details" — i.e. the technical dump we
- *   ship today. Sanitising that Details panel is Topic 2.
+ * - `RenderedInErrorMessage` shows the copy in the real `ErrorMessage` component.
+ *   Each error is fed a realistic raw payload (provider URLs, request bodies,
+ *   library versions); "Details" shows only the sanitised support reference
+ *   (code / tx hash / network / timestamp / copy) — never the raw payload.
  */
 
 const PARAMS = { network: 'Ethereum', nativeAsset: 'ETH', token: 'USDC' }
@@ -95,8 +96,9 @@ const InErrorMessage = () => {
   return (
     <Stack spacing={2}>
       <Alert severity="info" variant="outlined">
-        The message you see is the new copy. Click <strong>Details</strong> on any error to see the raw payload we ship
-        today — provider URLs, request bodies, library versions. Topic 2 replaces that with a clean support reference.
+        The message you see is the new copy. Each error is fed a realistic raw payload (provider URLs, request bodies,
+        library versions), but <strong>Details</strong> shows only the support reference — code, tx hash, network,
+        timestamp, copy — never the raw payload.
       </Alert>
       {samples.map(({ code, label }) => {
         const message = getContractErrorMessage(code, PARAMS)

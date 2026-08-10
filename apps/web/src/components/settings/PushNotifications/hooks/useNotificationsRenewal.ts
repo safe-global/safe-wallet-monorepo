@@ -2,6 +2,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useNotificationPreferences } from './useNotificationPreferences'
 import { useNotificationRegistrations } from './useNotificationRegistrations'
 import { useCallback, useMemo } from 'react'
+import { buildSupportReference } from '@safe-global/utils/services/exceptions/supportReference'
 import { NotificationsTokenVersion } from '@/services/push-notifications/preferences'
 import { useIsNotificationsRenewalEnabled, useNotificationsTokenVersion } from './useNotificationsTokenVersion'
 import type { NotifiableSafes } from '../logic'
@@ -114,7 +115,7 @@ export const useNotificationsRenewal = () => {
           showNotification({
             message: 'Failed to renew notifications',
             variant: 'error',
-            detailedMessage: err.message,
+            errorReference: buildSupportReference(err),
             groupKey: RENEWAL_NOTIFICATION_KEY,
           }),
         )

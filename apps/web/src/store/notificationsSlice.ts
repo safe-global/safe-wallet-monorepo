@@ -3,11 +3,13 @@ import type { AlertColor } from '@mui/material'
 import type { AppThunk, RootState } from '@/store'
 import type { LinkProps } from 'next/link'
 import type { ReactNode } from 'react'
+import type { SupportReference } from '@safe-global/utils/services/exceptions/supportReference'
 
 export type Notification = {
   id: string
   message: string
-  detailedMessage?: string
+  /** Support reference shown behind "Details" — never the raw error payload. */
+  errorReference?: SupportReference
   title?: string
   groupKey: string
   variant: AlertColor

@@ -123,7 +123,7 @@ describe('useSafeMessageNotifications', () => {
 
     expect(showNotification).toHaveBeenCalledWith({
       message: 'Signing the message failed. Please try again.',
-      detailedMessage: 'Example error',
+      errorReference: { code: 'UNKNOWN', timestamp: expect.any(String) },
       groupKey: '0x456',
       variant: 'error',
     })
@@ -151,7 +151,7 @@ describe('useSafeMessageNotifications', () => {
 
     expect(showNotification).toHaveBeenCalledWith({
       message: 'Confirming the message failed. Please try again.',
-      detailedMessage: 'Other error',
+      errorReference: { code: 'UNKNOWN', timestamp: expect.any(String) },
       groupKey: '0x789',
       variant: 'error',
     })

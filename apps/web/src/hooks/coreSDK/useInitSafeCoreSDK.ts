@@ -11,6 +11,7 @@ import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { useRpcEndpointInfo } from '@/hooks/wallets/useRpcEndpointInfo'
 import { parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { buildSupportReference } from '@safe-global/utils/services/exceptions/supportReference'
 import { useChain } from '@/hooks/useChains'
 
 export const useInitSafeCoreSDK = () => {
@@ -52,7 +53,7 @@ export const useInitSafeCoreSDK = () => {
             message: 'Error connecting to the blockchain. Please try reloading the page.',
             groupKey: 'core-sdk-init-error',
             variant: 'error',
-            detailedMessage: e.message,
+            errorReference: buildSupportReference(e, { network: chain?.chainName }),
           }),
         )
         trackError(ErrorCodes._105, e.message, rpcInfo)
@@ -61,6 +62,7 @@ export const useInitSafeCoreSDK = () => {
     address,
     chain?.l2,
     chain?.zk,
+    chain?.chainName,
     dispatch,
     safe.address.value,
     safe.chainId,
