@@ -142,7 +142,8 @@ export const dispatchOnChainSigning = async (
   chainId: SafeState['chainId'],
   signerAddress: string,
   safeAddress: string,
-  isNestedSafe: boolean,
+  isSafeSigner: boolean,
+  executed: boolean,
 ) => {
   const sdk = await getSafeSDKWithSigner(provider)
   const safeTxHash = await sdk.getTransactionHash(safeTx)
@@ -173,11 +174,15 @@ export const dispatchOnChainSigning = async (
 
   txDispatch(TxEvent.ONCHAIN_SIGNATURE_SUCCESS, eventParams)
 
-  if (isNestedSafe) {
+  // On-chain signing runs for any smart-account signer, but only a Safe signer creates an
+  // approveHash tx we can surface and deep-link to. Non-Safe smart accounts keep the plain flow.
+  if (isSafeSigner) {
     txDispatch(TxEvent.NESTED_SAFE_TX_CREATED, {
       ...eventParams,
       txHashOrParentSafeTxHash,
       parentSafeAddress: signerAddress,
+      executed,
+      method: 'approveHash',
     })
   }
 
@@ -290,6 +295,7 @@ export const dispatchTxExecution = async (
   signerAddress: string,
   safeAddress: string,
   isSmartAccount: boolean,
+  executed: boolean,
 ): Promise<string> => {
   const sdk = await getSafeSDKWithSigner(provider)
   const eventParams = { txId, nonce: safeTx.data.nonce, chainId, safeAddress }
@@ -314,11 +320,28 @@ export const dispatchTxExecution = async (
     } else {
       result = await sdk.executeTransaction(safeTx, txOptions)
     }
-    txDispatch(TxEvent.EXECUTING, { ...eventParams })
   } catch (error) {
     txDispatch(TxEvent.FAILED, { ...eventParams, error: asError(error) })
     throw error
   }
+
+  // A smart-contract-wallet executor (a nested parent Safe, or a Safe connected via WalletConnect)
+  // that doesn't execute immediately only queues the execTransaction in that Safe; nothing executes
+  // here yet, and `result.hash` is the executor Safe's safeTxHash, not an on-chain tx hash. Treat it
+  // like nested signing instead of a processing/executed tx.
+  if (isSmartAccount && !executed) {
+    txDispatch(TxEvent.NESTED_SAFE_TX_CREATED, {
+      ...eventParams,
+      txHashOrParentSafeTxHash: result.hash,
+      parentSafeAddress: signerAddress,
+      executed: false,
+      method: 'execTransaction',
+    })
+
+    return result.hash
+  }
+
+  txDispatch(TxEvent.EXECUTING, { ...eventParams })
 
   txDispatch(TxEvent.PROCESSING, {
     ...eventParams,
