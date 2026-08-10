@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { act, render, screen, fireEvent } from '@testing-library/react'
 import PaginatedDataTable, { type DataTableColumn } from './index'
 
 const mockUseIsMobile = jest.fn(() => false)
@@ -19,6 +19,52 @@ describe('PaginatedDataTable', () => {
     render(tableElement(['a', 'b']))
 
     expect(screen.getByText('Value')).toBeInTheDocument()
+  })
+
+  describe('compact layout', () => {
+    const columnsWithSecondary: DataTableColumn<string>[] = [
+      { id: 'main', header: 'Main', minWidth: 200, cell: (row) => row },
+      { id: 'extra', header: 'Extra', minWidth: 130, priority: 'secondary', cell: () => 'extra-cell' },
+    ]
+
+    it('drops secondary columns from the DOM on mobile', () => {
+      mockUseIsMobile.mockReturnValue(true)
+
+      render(<PaginatedDataTable columns={columnsWithSecondary} rows={['a']} getRowKey={(row) => row} />)
+
+      expect(screen.queryByText('Extra')).not.toBeInTheDocument()
+      expect(screen.queryByText('extra-cell')).not.toBeInTheDocument()
+    })
+
+    it('drops secondary columns when the container is narrower than the column minimums', () => {
+      let notify: ((width: number) => void) | undefined
+      class ResizeObserverMock {
+        constructor(callback: ResizeObserverCallback) {
+          notify = (width) =>
+            callback([{ contentRect: { width } } as ResizeObserverEntry], this as unknown as ResizeObserver)
+        }
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      }
+      const globalWithObserver = globalThis as { ResizeObserver?: typeof ResizeObserver }
+      globalWithObserver.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver
+
+      try {
+        render(<PaginatedDataTable columns={columnsWithSecondary} rows={['a']} getRowKey={(row) => row} />)
+        expect(screen.getByText('Extra')).toBeInTheDocument()
+
+        // Below the 330px column-minimum floor → compact
+        act(() => notify?.(300))
+        expect(screen.queryByText('Extra')).not.toBeInTheDocument()
+
+        // Wide enough again → full column set returns
+        act(() => notify?.(400))
+        expect(screen.getByText('Extra')).toBeInTheDocument()
+      } finally {
+        delete globalWithObserver.ResizeObserver
+      }
+    })
   })
 
   it('renders every row and no pagination when below the page size', () => {

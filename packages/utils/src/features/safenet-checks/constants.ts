@@ -1,12 +1,8 @@
 /**
  * Configuration for the Safenet read layer. Shared web+mobile, so every value
- * reads the `NEXT_PUBLIC_*` variable first and falls back to `EXPO_PUBLIC_*`.
- *
- * These MUST be referenced statically (`process.env.NEXT_PUBLIC_…`). The web
- * (webpack/Next) and mobile (Expo/Babel) bundlers only inline literal
- * `process.env.<PREFIX>_*` reads — a dynamic `process.env[…]` lookup is left
- * untouched and resolves to `undefined` in the browser, silently leaving the
- * reader with no RPC URLs.
+ * reads `NEXT_PUBLIC_*` first and falls back to `EXPO_PUBLIC_*`. All reads MUST
+ * be static (`process.env.NEXT_PUBLIC_…`): the bundlers only inline literal
+ * lookups, so a dynamic one resolves to `undefined` in the browser.
  */
 
 const parseCsv = (value: string | undefined): string[] =>
@@ -18,15 +14,14 @@ const parseCsv = (value: string | undefined): string[] =>
     : []
 
 /**
- * The Safenet chain id — feeds BOTH the reader's provider network AND the
- * EIP-712 domain used to derive request ids. A wrong value silently derives
- * wrong request ids (checks stuck at SUBMITTED), so the reader asserts it
- * against `eth_chainId` in development.
+ * The Safenet chain id — feeds both the provider network and the EIP-712 domain
+ * request ids derive from. A wrong value leaves every check stuck at SUBMITTED,
+ * so the reader asserts it against `eth_chainId` in development.
  */
 export const SAFENET_CHAIN_ID =
   process.env.NEXT_PUBLIC_SAFENET_CHAIN_ID || process.env.EXPO_PUBLIC_SAFENET_CHAIN_ID || '100'
 
-/** Pinned Gnosis RPC endpoints for the read layer (csv). Rotated on failure. */
+/** Pinned RPC endpoints for the read layer (csv). Rotated on failure. */
 export const SAFENET_RPC_URLS = parseCsv(
   process.env.NEXT_PUBLIC_SAFENET_RPC_URLS || process.env.EXPO_PUBLIC_SAFENET_RPC_URLS || 'https://rpc.gnosischain.com',
 )
@@ -37,27 +32,18 @@ export const SAFENET_CONSENSUS_ADDRESS =
   process.env.EXPO_PUBLIC_SAFENET_CONSENSUS_ADDRESS ||
   '0x223624cBF099e5a8f8cD5aF22aFa424a1d1acEE9'
 
+/** FROSTCoordinator the epoch group keys are read from. Default: Gnosis beta. */
+export const SAFENET_COORDINATOR_ADDRESS =
+  process.env.NEXT_PUBLIC_SAFENET_COORDINATOR_ADDRESS ||
+  process.env.EXPO_PUBLIC_SAFENET_COORDINATOR_ADDRESS ||
+  '0xaE27021CEB45316f1efe69D8E362aC07ED3Bd7E4'
+
 /**
- * Sentinel-oracle allowlist (csv). Security-critical, and empty by default.
- *
- * `Consensus.proposeOracleTransaction` is permissionless and takes the oracle
- * address as a caller argument, so the `oracle` field on a proposal event is
- * chosen by whoever called it. Sourcing oracle logs from that field would let
- * anyone emit a fabricated `OracleResult(approved=false)` from their own
- * contract and mark any Safe transaction `MALICIOUS`. The reader only reads
- * oracle events from an address on this list, normalized in the constructor.
- *
- * The allowlist limits which address a verdict can come from. It does not limit
- * who can ask for one. `proposeOracleTransaction` forwards the caller's
- * transaction tuple to the named oracle through `postRequest`, so anyone who
- * pays the request fee can have the sentinels evaluate another user's Safe
- * transaction, including one whose owner only ever used the plain path. That
- * verdict is real and the reader cannot filter it out. This is the tradeoff
- * that comes with populating the list.
- *
- * The default empty list trusts no sentinel oracle, so the oracle path is
- * skipped. That matches live beta, where only the validator attesters run and
- * no sentinel oracle is deployed. Populate this once one is.
+ * Sentinel-oracle allowlist (csv). `proposeOracleTransaction` is permissionless
+ * with a caller-chosen oracle address, so reading verdicts from an unlisted
+ * address would let anyone mark any Safe transaction MALICIOUS with a fabricated
+ * `OracleResult`. Empty (the default) skips the oracle path entirely, matching
+ * live beta where no sentinel oracle is deployed.
  */
 export const SAFENET_ORACLE_ADDRESSES = parseCsv(
   process.env.NEXT_PUBLIC_SAFENET_ORACLE_ADDRESSES || process.env.EXPO_PUBLIC_SAFENET_ORACLE_ADDRESSES,
@@ -76,14 +62,9 @@ export const BLOCK_TIME_SECONDS = 5
 
 /**
  * How far behind the estimated transaction block the targeted window starts.
- *
- * The window is weighted forward on purpose. Every event the read looks for
- * (`Proposed`, `Attested`, `NewRequest`, `Committed`, `OracleResult`) is emitted
- * at or after the Safe transaction, so the backward reach only has to cover
- * estimate error and skew between the caller's submission timestamp and chain
- * time. A converged estimate is within {@link BLOCK_ESTIMATE_TOLERANCE_SECONDS},
- * about 120 blocks at nominal cadence. 1,000 blocks gives roughly 1.4h of slack,
- * leaving about 9,000 blocks (12.5h) ahead, where a late settlement lands.
+ * Weighted forward: every event the read looks for is emitted at or after the
+ * Safe transaction, so the backward reach only covers estimate error (~1.4h),
+ * leaving ~12.5h ahead for a late settlement.
  */
 export const TARGETED_WINDOW_BACK_BLOCKS = 1_000
 
@@ -94,9 +75,27 @@ export const BLOCK_ESTIMATE_TOLERANCE_SECONDS = 600
 export const BLOCK_ESTIMATE_MAX_REFINEMENTS = 2
 
 /**
- * Max JSON-RPC calls batched into a single HTTP request by the provider.
- * Equals `MAX_LOOKBACK_BLOCKS / GETLOGS_CHUNK_BLOCKS`, so a head-relative read
- * is one HTTP round-trip. Changing either of those without changing this splits
- * every head-relative read into two.
+ * Max JSON-RPC calls batched into one HTTP request. Equals
+ * `MAX_LOOKBACK_BLOCKS / GETLOGS_CHUNK_BLOCKS`, so a head-relative read is a
+ * single round-trip.
  */
 export const PROVIDER_BATCH_MAX_COUNT = 3
+
+// --- Polling tuning -------------------------------------------------------
+
+/** Poll interval before the deadline block. */
+export const POLL_INTERVAL_FAST_MS = 6_000
+
+/** Poll interval in the post-deadline late window (a late BENIGN can still land). */
+export const POLL_INTERVAL_LATE_MS = 30_000
+
+/** How many blocks past the deadline polling continues (~1h at Gnosis cadence). */
+export const LATE_WINDOW_BLOCKS = 720
+
+/**
+ * Deadline substitute for the plain path, which emits none: an attestation is
+ * expected within this many blocks of the first observed event (~20 min; beta
+ * attests within ~5 blocks). Without it, a proposed-but-never-attested check
+ * would poll a public RPC at the fast interval forever.
+ */
+export const PLAIN_DEADLINE_BLOCKS = 240

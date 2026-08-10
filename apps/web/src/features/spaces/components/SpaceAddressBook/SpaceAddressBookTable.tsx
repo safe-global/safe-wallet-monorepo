@@ -8,7 +8,6 @@ import { HardDrive } from 'lucide-react'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceAddressBookActions from './SpaceAddressBookActions'
 import LocalContactActions from './LocalContactActions'
-import { useIsMobile } from '@/hooks/use-mobile'
 import { formatDate } from '@/features/spaces/utils'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
@@ -53,7 +52,6 @@ function SpaceAddressBookTable({
   showLastUpdated = false,
   renderExtraAction,
 }: SpaceAddressBookTableProps) {
-  const isMobile = useIsMobile()
   const resolveMemberName = useMemberNameResolver()
   const hasMiddleColumn = showAddedBy || showLastUpdated
 
@@ -77,7 +75,7 @@ function SpaceAddressBookTable({
       header: 'Name',
       width: '20%',
       sticky: true,
-      minWidth: 140,
+      minWidth: 120,
       emphasis: 'strong',
       sortValue: (e) => e.name,
       cell: (entry) => (
@@ -93,14 +91,14 @@ function SpaceAddressBookTable({
     {
       id: 'address',
       header: 'Address',
-      width: '40%',
-      minWidth: 360,
+      width: hasMiddleColumn ? '30%' : '40%',
+      minWidth: 240,
       sortValue: (e) => e.address,
-      cell: (entry) => (
+      cell: (entry, { isCompact }) => (
         <div className="text-[0.8em] font-mono">
           <EthHashInfo
             address={entry.address}
-            shortAddress={isMobile}
+            shortAddress={isCompact}
             showPrefix={false}
             showName={false}
             highlight4bytes
@@ -114,9 +112,9 @@ function SpaceAddressBookTable({
     {
       id: 'chains',
       header: 'Chains',
-      width: '15%',
+      width: '20%',
       priority: 'secondary',
-      minWidth: 100,
+      minWidth: 90,
       sortValue: (e) => e.chainIds.length,
       cell: renderChains,
     },
@@ -125,9 +123,9 @@ function SpaceAddressBookTable({
           {
             id: 'middle',
             header: showAddedBy ? 'Added by' : 'Last updated',
-            width: '20%' as const,
+            width: '15%' as const,
             priority: 'secondary' as const,
-            minWidth: 140,
+            minWidth: 120,
             sortValue: (e: AddressBookEntry) => (showAddedBy ? e.createdBy : e.updatedAt || e.createdAt),
             cell: renderAddedBy,
           },
@@ -135,13 +133,17 @@ function SpaceAddressBookTable({
       : []),
     {
       id: 'actions',
-      width: (hasMiddleColumn ? '15%' : '35%') as ColumnWidth,
+      width: (hasMiddleColumn ? '15%' : '20%') as ColumnWidth,
       align: 'end',
       minWidth: 80,
-      cell: (entry) => (
+      cell: (entry, { isCompact }) => (
         <span className="inline-flex items-center justify-end gap-1">
           {renderExtraAction?.(entry)}
-          {entry.isLocal ? <LocalContactActions entry={entry} /> : <SpaceAddressBookActions entry={entry} />}
+          {entry.isLocal ? (
+            <LocalContactActions entry={entry} />
+          ) : (
+            <SpaceAddressBookActions entry={entry} isCompact={isCompact} />
+          )}
         </span>
       ),
     },

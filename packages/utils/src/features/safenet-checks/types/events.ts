@@ -1,24 +1,14 @@
 /**
- * Normalized Safenet lifecycle events.
- *
- * Every onchain value that is a `uint256`/`uint64`/`uint` is carried as a
- * decimal `string` so the whole tree is Redux-serializable (no bigints ever
- * cross the decode boundary). Point coordinates and scalars (FROST `r`/`z`) are
- * likewise strings.
- *
- * `Hex` is the Safe SDK's own (`@safe-global/types-kit`, already a dependency
- * of this package) — re-exported so feature code keeps importing from
- * `../types`.
+ * Normalized Safenet lifecycle events. Every onchain uint is carried as a
+ * decimal string so the whole tree is Redux-serializable. `Hex` is re-exported
+ * from `@safe-global/types-kit` so feature code keeps importing from `../types`.
  */
 
 import type { Hex } from '@safe-global/types-kit'
 
 export type { Hex }
 
-/**
- * Which sentinel-oracle generation produced an event. Consensus events and the
- * shared `OracleResult`/`DisputeResolved` are generation-agnostic (`STABLE`).
- */
+/** Which sentinel-oracle generation produced an event (`STABLE` = agnostic). */
 export enum OracleGeneration {
   V1 = 'V1',
   V2 = 'V2',
@@ -26,22 +16,13 @@ export enum OracleGeneration {
 }
 
 export enum CheckEventType {
-  /** Consensus `OracleTransactionProposed` — the check enters existence. */
+  /** Consensus `OracleTransactionProposed`. */
   ORACLE_PROPOSED = 'ORACLE_PROPOSED',
   /** Consensus `OracleTransactionAttested` — carries the FROST signature. */
   ORACLE_ATTESTED = 'ORACLE_ATTESTED',
-  /**
-   * Consensus `TransactionProposed` — the **non-oracle** path: the validator set
-   * is asked to attest a Safe transaction with no sentinel oracle in the loop.
-   * No fee, no bond, no verdict. This is what live beta traffic overwhelmingly
-   * uses today.
-   */
+  /** Consensus `TransactionProposed` — the non-oracle path live beta uses. */
   PLAIN_PROPOSED = 'PLAIN_PROPOSED',
-  /**
-   * Consensus `TransactionAttested` — the non-oracle attestation. Proves the
-   * validator set signed the transaction; proves **nothing** about whether it is
-   * safe, because no security check ran.
-   */
+  /** Consensus `TransactionAttested` — the non-oracle attestation. */
   PLAIN_ATTESTED = 'PLAIN_ATTESTED',
   /** Sentinel `NewRequest` — carries the per-check deadline block. */
   REQUEST_CREATED = 'REQUEST_CREATED',
@@ -72,7 +53,7 @@ export type OracleProposedEvent = CheckEventBase & {
   oracle: string
 }
 
-export type FrostSignature = {
+type FrostSignature = {
   r: { x: string; y: string }
   z: string
 }
@@ -112,11 +93,7 @@ export type RequestCreatedEvent = CheckEventBase & {
   proposer: string
   fee: string
   bondTarget: string
-  /**
-   * The block the check times out at. Normalized across generations: V1's
-   * single `deadline`, or V2's `revealDeadline` (the last block a verdict can
-   * still land). V2's earlier `commitDeadline` is kept separately.
-   */
+  /** Normalized across generations: V1 `deadline`, V2 `revealDeadline`. */
   deadlineBlock: string
   commitDeadlineBlock: string | null
 }
@@ -126,9 +103,9 @@ export type SentinelCommittedEvent = CheckEventBase & {
   requestId: Hex
   sentinel: string
   bondAmount: string
-  /** Present in V1 only — V1 commits carry the verdict directly. */
+  /** V1 only — V1 commits carry the verdict directly. */
   approved: boolean | null
-  /** Present in V1 only. */
+  /** V1 only. */
   position: string | null
 }
 

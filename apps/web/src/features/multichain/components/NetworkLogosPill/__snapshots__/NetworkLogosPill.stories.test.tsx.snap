@@ -17,7 +17,7 @@ exports[`./NetworkLogosPill.stories FewNetworks 1`] = `
         id="base-ui-_r_2_"
       >
         <div
-          class="networks MuiBox-root mui-style-0"
+          class="networks capped MuiBox-root mui-style-0"
           style="--network-logo-size: 22px;"
         >
           <span
@@ -72,7 +72,7 @@ exports[`./NetworkLogosPill.stories WithOverflow 1`] = `
         id="base-ui-_r_5_"
       >
         <div
-          class="networks MuiBox-root mui-style-0"
+          class="networks capped MuiBox-root mui-style-0"
           style="--network-logo-size: 22px;"
         >
           <span
