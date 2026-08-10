@@ -2,18 +2,13 @@ import { TypedDataEncoder } from 'ethers'
 import type { Hex } from '../types'
 
 /**
- * The EIP-712 oracle-transaction proposal hash — ported from
- * `repos/safenet/validator/src/consensus/verify/oracleTx/hashing.ts` (viem
- * `hashTypedData`) onto ethers' `TypedDataEncoder`.
- *
- * The domain is ONLY `{ chainId, verifyingContract }` (no name/version/salt).
- * This hash is both the message the FROST attestation signs AND the oracle
- * `requestId` — so deriving it gives the read layer request-id correlation for
- * free (verified live: it equals the onchain `requestId`).
+ * The EIP-712 oracle-transaction proposal hash. The domain is ONLY
+ * `{ chainId, verifyingContract }` — no name/version/salt — and `chainId` is
+ * the Safenet chain Consensus is deployed to, NOT the Safe's home chain carried
+ * in the event. This hash is both the message the FROST attestation signs and
+ * the oracle `requestId`.
  */
 export type OracleProposal = {
-  /** The chain Consensus is deployed to, which is what the domain uses — NOT the
-   * `chainId` carried in the event, which is the chain the Safe lives on. */
   chainId: string
   /** The Consensus contract address — the EIP-712 `verifyingContract`. */
   consensus: string
@@ -38,16 +33,10 @@ export const oracleProposalHash = ({ chainId, consensus, epoch, oracle, safeTxHa
   }) as Hex
 
 /**
- * The EIP-712 message a **non-oracle** `TransactionAttested` signs — the
- * attestation produced when the validator set runs its own deterministic checks
- * with no sentinel oracle involved. Same domain as
+ * The EIP-712 message a non-oracle `TransactionAttested` signs. Same domain as
  * {@link oracleProposalHash}, one fewer field (no `oracle`).
- *
- * Source: `contracts/src/libraries/ConsensusMessages.sol`
- * (`TRANSACTION_PROPOSAL_TYPEHASH` = `keccak256("TransactionProposal(uint64
- * epoch,bytes32 safeTxHash)")`).
  */
-export type PlainProposal = Omit<OracleProposal, 'oracle'> & { oracle?: never }
+type PlainProposal = Omit<OracleProposal, 'oracle'> & { oracle?: never }
 
 export const PLAIN_PROPOSAL_TYPES = {
   TransactionProposal: [
