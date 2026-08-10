@@ -3,12 +3,14 @@ import type { EthersError } from '@/utils/ethers-utils'
 
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { getContractErrorMessage, isGsCode } from '@safe-global/utils/services/exceptions/contractErrors'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { createWeb3, useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { type JsonRpcProvider } from 'ethers'
+import { type JsonRpcProvider, ZeroAddress } from 'ethers'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { getCurrentGnosisSafeContract } from '@/services/contracts/safeContracts'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import useBalances from '@/hooks/useBalances'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { type NestedWallet } from '@/utils/nested-safe-wallet'
@@ -58,6 +60,7 @@ const useIsValidExecution = (
   const { safe } = useSafeInfo()
   const readOnlyProvider = useWeb3ReadOnly()
   const chain = useCurrentChain()
+  const { balances } = useBalances()
 
   const [isValidExecution, executionValidationError, isValidExecutionLoading] = useAsync(async () => {
     if (!safeTx || !wallet || gasLimit === undefined || !readOnlyProvider) {
@@ -81,14 +84,23 @@ const useIsValidExecution = (
       // the shared source. The raw GS code stays out of the message; it belongs
       // in the support reference (Details panel).
       if (isGsCode(err.reason)) {
+        // GS012 pays the network fee in an ERC-20 gas token; resolve its symbol
+        // so the message reads e.g. "Not enough USDC ..." instead of "{token}".
+        const gasToken = safeTx.data.gasToken
+        const token =
+          gasToken && !sameAddress(gasToken, ZeroAddress)
+            ? balances.items.find((item) => sameAddress(item.tokenInfo.address, gasToken))?.tokenInfo.symbol
+            : undefined
+
         err.reason = getContractErrorMessage(err.reason, {
           nativeAsset: chain?.nativeCurrency.symbol,
+          token,
         }) as EthersError['reason']
       }
 
       throw err
     }
-  }, [safeTx, wallet, gasLimit, safe, readOnlyProvider, chain])
+  }, [safeTx, wallet, gasLimit, safe, readOnlyProvider, chain, balances])
 
   return { isValidExecution, executionValidationError, isValidExecutionLoading }
 }
