@@ -19,7 +19,7 @@ const MemberInfoForm = ({
   const { control } = useFormContext()
 
   return (
-    <div className="flex flex-row items-center gap-4">
+    <div className="flex flex-row items-end gap-4">
       <NameInput
         data-testid="member-name-input"
         name="name"
@@ -37,10 +37,10 @@ const MemberInfoForm = ({
         defaultValue={MemberRole.MEMBER}
         render={({ field: { value, onChange } }) => (
           <Select value={value} onValueChange={onChange} required disabled={disableRole}>
-            <SelectTrigger className="min-w-[150px]">
+            <SelectTrigger aria-label="Role" className="min-w-[150px]">
               <SelectValue>{(role) => <RoleMenuItem role={role as MemberRole} />}</SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent align="end" alignItemWithTrigger={false} showBackdrop className="w-[340px]">
               <SelectItem value={MemberRole.ADMIN}>
                 <RoleMenuItem role={MemberRole.ADMIN} hasDescription />
               </SelectItem>
