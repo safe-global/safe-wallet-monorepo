@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react'
+import { useCallback, useRef, useState, type ReactElement } from 'react'
 import { XIcon } from 'lucide-react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import ChainIndicator from '../ChainIndicator'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Typography } from '@/components/ui/typography'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import css from './styles.module.css'
 import { useFormContext } from 'react-hook-form'
 import useChains from '@/hooks/useChains'
@@ -34,29 +35,6 @@ const NetworkMultiSelectorInput = ({
   const [open, setOpen] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
-  const wrapperRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!open) return
-
-    const onPointerDown = (event: PointerEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
-        setOpen(false)
-      }
-    }
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setOpen(false)
-      }
-    }
-
-    document.addEventListener('pointerdown', onPointerDown)
-    document.addEventListener('keydown', onKeyDown)
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown)
-      document.removeEventListener('keydown', onKeyDown)
-    }
-  }, [open])
 
   const getOptionDisabled = isOptionDisabled || (() => false)
 
@@ -174,67 +152,78 @@ const NetworkMultiSelectorInput = ({
   }
 
   return (
-    <div ref={wrapperRef} className={css.multiSelectWrapper}>
-      <div
-        className={`${css.multiSelectControl} ${error ? css.multiSelectError : ''}`}
-        onClick={() => inputRef.current?.focus()}
-      >
-        {renderChips()}
+    <div className={css.multiSelectWrapper}>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger
+          render={
+            <div
+              className={`${css.multiSelectControl} ${error ? css.multiSelectError : ''}`}
+              onClick={() => inputRef.current?.focus()}
+            />
+          }
+        >
+          {renderChips()}
 
-        <input
-          ref={inputRef}
-          role="combobox"
-          aria-expanded={open}
-          aria-controls={`${name}-listbox`}
-          aria-invalid={error || undefined}
-          className={css.multiSelectInput}
-          placeholder={value.length === 0 ? 'Select networks' : undefined}
-          value={inputValue}
-          onChange={(e) => {
-            setInputValue(e.target.value)
-            setOpen(true)
-          }}
-          onClick={() => setOpen((prev) => !prev)}
-        />
-
-        {value.length > 0 && (
-          <button
-            type="button"
-            aria-label="Clear all"
-            className={css.clearAll}
-            onClick={(e) => {
-              e.stopPropagation()
-              handleChange([])
+          <input
+            ref={inputRef}
+            role="combobox"
+            aria-expanded={open}
+            aria-controls={`${name}-listbox`}
+            aria-invalid={error || undefined}
+            className={css.multiSelectInput}
+            placeholder={value.length === 0 ? 'Select networks' : undefined}
+            value={inputValue}
+            onChange={(e) => {
+              setInputValue(e.target.value)
+              setOpen(true)
             }}
-          >
-            <XIcon data-testid="CloseIcon" className="size-4" />
-          </button>
-        )}
-      </div>
+          />
 
-      {open && (
-        <ul id={`${name}-listbox`} role="listbox" aria-multiselectable className={css.multiSelectList}>
-          {visibleOptions.map((chain) => {
-            const disabled =
-              showSelectAll && chain.chainId === SELECT_ALL_OPTION.chainId ? false : getOptionDisabled(chain as Chain)
-            const selected =
-              showSelectAll && chain.chainId === SELECT_ALL_OPTION.chainId ? isAllSelected : isSelected(chain.chainId)
+          {value.length > 0 && (
+            <button
+              type="button"
+              aria-label="Clear all"
+              className={css.clearAll}
+              onClick={(e) => {
+                e.stopPropagation()
+                handleChange([])
+              }}
+            >
+              <XIcon data-testid="CloseIcon" className="size-4" />
+            </button>
+          )}
+        </PopoverTrigger>
 
-            return (
-              <li
-                key={chain.chainId}
-                role="option"
-                aria-disabled={Boolean(disabled)}
-                aria-selected={Boolean(selected)}
-                className={css.multiSelectOption}
-                onClick={() => handleOptionClick(chain, disabled)}
-              >
-                {renderOptionContent(chain)}
-              </li>
-            )
-          })}
-        </ul>
-      )}
+        {/* Portaled by PopoverContent so it escapes the dialog's overflow clipping. */}
+        <PopoverContent
+          align="start"
+          sideOffset={4}
+          initialFocus={inputRef}
+          className="max-h-[300px] w-[var(--anchor-width)] overflow-y-auto p-1"
+        >
+          <ul id={`${name}-listbox`} role="listbox" aria-multiselectable className="m-0 list-none p-0">
+            {visibleOptions.map((chain) => {
+              const disabled =
+                showSelectAll && chain.chainId === SELECT_ALL_OPTION.chainId ? false : getOptionDisabled(chain as Chain)
+              const selected =
+                showSelectAll && chain.chainId === SELECT_ALL_OPTION.chainId ? isAllSelected : isSelected(chain.chainId)
+
+              return (
+                <li
+                  key={chain.chainId}
+                  role="option"
+                  aria-disabled={Boolean(disabled)}
+                  aria-selected={Boolean(selected)}
+                  className={css.multiSelectOption}
+                  onClick={() => handleOptionClick(chain, disabled)}
+                >
+                  {renderOptionContent(chain)}
+                </li>
+              )
+            })}
+          </ul>
+        </PopoverContent>
+      </Popover>
 
       {helperText && (
         <Typography variant="paragraph-mini" className={error ? 'text-destructive' : 'text-muted-foreground'}>
