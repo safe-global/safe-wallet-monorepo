@@ -108,7 +108,7 @@ export const SafeShieldDisplay = ({
 
       <div className="flex flex-row items-center self-end">
         <ExternalLink href={HelpCenterArticle.SAFE_SHIELD} noIcon>
-          <SafeShieldLogo width={78} height={18} className={shieldLogoOnHover} />
+          <SafeShieldLogo data-testid="safe-shield-logo" width={78} height={18} className={shieldLogoOnHover} />
         </ExternalLink>
       </div>
     </div>
