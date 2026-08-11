@@ -5,28 +5,31 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as txs from '../pages/transactions.page.js'
 import * as createtx from '../pages/create_tx.pages.js'
 import * as safeapps from '../pages/safeapps.pages'
-import * as wallet from '../../support/utils/wallet.js'
+import * as ls from '../../support/localstorage_data.js'
 
 let staticSafes = []
-
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 const contracts = {
   illegal: '0xF184a243925Bf7fb1D64487339FF4F177Fb75644',
   '1_4_1': '0xfd0732dc9e303f09fcef3a7388ad10a83459ec99',
 }
 const appUrl = constants.TX_Builder_url
-const iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
-//iframeSelector = `iframe[id="iframe-${encodeURIComponent(constants.safeTestAppurl)}"]`
+const iframeSelector = safeapps.getSafeAppIframeSelector(appUrl)
 
 describe('Transaction details create tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('Verify that there is an error if tx contain unofficial fallbackhandler on tx confirmation screen', () => {
+  beforeEach(() => {
+    // tx-builder keeps its form disabled until the address book permission prompt is answered:
+    // pre-grant it before the visit
+    main.addToLocalStorage(constants.SAFE_PERMISSIONS_KEY, ls.safeAppSafePermissions(appUrl))
     cy.visit(`/apps/open?safe=${staticSafes.SEP_STATIC_SAFE_36}&appUrl=${encodeURIComponent(appUrl)}`)
+    safeapps.verifySafeAppIframeVisible(appUrl)
+  })
+
+  it('Verify that there is an error if tx contain unofficial fallbackhandler on tx confirmation screen', () => {
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findByLabelText(safeapps.enterAddressStr).type(staticSafes.SEP_STATIC_SAFE_36)
       getBody().findByRole('button', { name: safeapps.useImplementationABI }).click()
@@ -41,7 +44,6 @@ describe('Transaction details create tests', { defaultCommandTimeout: 30000 }, (
   })
 
   it('Verify that when the tx contains the action with an official 1.4.1 fallbackhandler contract there is no error', () => {
-    cy.visit(`/apps/open?safe=${staticSafes.SEP_STATIC_SAFE_36}&appUrl=${encodeURIComponent(appUrl)}`)
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findByLabelText(safeapps.enterAddressStr).type(staticSafes.SEP_STATIC_SAFE_36)
       getBody().findByRole('button', { name: safeapps.useImplementationABI }).click()
