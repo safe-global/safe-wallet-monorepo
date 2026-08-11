@@ -5,11 +5,13 @@ import NameInput from '@/components/common/NameInput'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import {
+  addressIsNotSmartContract,
   encodeEIP1271Signature,
   signProposerData,
   signProposerTypedData,
   signProposerTypedDataForSafe,
 } from '@/features/proposers/utils/utils'
+import { SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
 import { useDelegatorSelection } from '../hooks/useDelegatorSelection'
 import { buildDelegationOrigin, createDelegationMessage } from '../services/delegationMessages'
 import useChainId from '@/hooks/useChainId'
@@ -100,10 +102,11 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
   const safeOwnerAddresses = useMemo(() => safe.owners.map((owner) => owner.value), [safe.owners])
 
   const validateAddress = useCallback<Validate<string>>(
-    (value) =>
+    async (value) =>
       addressIsNotCurrentSafe(safeAddress, 'Cannot add Safe account itself as proposer')(value) ??
-      addressIsNotOwner(safeOwnerAddresses, 'Cannot add Safe Owner as proposer')(value),
-    [safeAddress, safeOwnerAddresses],
+      addressIsNotOwner(safeOwnerAddresses, 'Cannot add Safe Owner as proposer')(value) ??
+      (await addressIsNotSmartContract(chainId, SMART_CONTRACT_PROPOSER_ERROR)(value)),
+    [safeAddress, safeOwnerAddresses, chainId],
   )
 
   const { handleSubmit, formState } = methods

@@ -1,8 +1,10 @@
 import type { ReactElement } from 'react'
 import { faker } from '@faker-js/faker'
 import { render, fakerChecksummedAddress } from '@/tests/test-utils'
+import { SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
 import { act, fireEvent, waitFor } from '@testing-library/react'
 import * as proposerUtils from '@/features/proposers/utils/utils'
+import * as walletUtils from '@/utils/wallets'
 import UpsertProposer from './UpsertProposer'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useDelegatorSelection } from '../hooks/useDelegatorSelection'
@@ -82,6 +84,7 @@ describe('UpsertProposer signing logic', () => {
       })
 
       mockGetSigner.mockResolvedValue({} as Awaited<ReturnType<typeof getAssertedChainSigner>>)
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
       jest.spyOn(proposerUtils, 'signProposerTypedData').mockResolvedValue('0xsignature')
 
       mockUseAddDelegateV2.mockReturnValue([addDelegateV2, {} as never])
@@ -132,6 +135,73 @@ describe('UpsertProposer signing logic', () => {
       await waitFor(() => expect(addDelegateV2).toHaveBeenCalled())
       const label = addDelegateV2.mock.calls[0][0].createDelegateDto.label
       expect(label).toBe(label.trim())
+    })
+  })
+
+  describe('smart contract address validation', () => {
+    const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>
+    const mockUseDelegatorSelection = useDelegatorSelection as jest.MockedFunction<typeof useDelegatorSelection>
+    const mockUseAddDelegateV2 = useDelegatesPostDelegateV2Mutation as jest.MockedFunction<
+      typeof useDelegatesPostDelegateV2Mutation
+    >
+
+    const addDelegateV2 = jest.fn().mockReturnValue({ unwrap: () => Promise.resolve() })
+
+    beforeEach(() => {
+      mockUseWallet.mockReturnValue({
+        address: fakerChecksummedAddress(),
+        chainId: '1',
+        label: 'MetaMask',
+        provider: MockEip1193Provider,
+      })
+
+      mockUseDelegatorSelection.mockReturnValue({
+        delegatorOptions: [],
+        setSelectedDelegator: jest.fn(),
+        effectiveDelegator: undefined,
+        parentSafeAddress: undefined,
+        parentThreshold: undefined,
+        parentOwners: undefined,
+        isMultiSigRequired: false,
+        isParentLoading: false,
+        canEdit: true,
+      })
+
+      mockUseAddDelegateV2.mockReturnValue([addDelegateV2, {} as never])
+      useDelegatesPostDelegateV1Mutation.mockReturnValue([jest.fn(), {}])
+    })
+
+    it('shows an error and keeps submit disabled when the address is a smart contract', async () => {
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(true)
+
+      const { getByLabelText, getByTestId, findByText } = render(
+        <UpsertProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
+      )
+
+      act(() => {
+        fireEvent.change(getByLabelText(/Address/i), { target: { value: fakerChecksummedAddress() } })
+        fireEvent.change(getByLabelText(/Name/i), { target: { value: 'My other Safe' } })
+      })
+
+      await findByText(SMART_CONTRACT_PROPOSER_ERROR, {}, { timeout: 3000 })
+      expect(getByTestId('submit-proposer-btn')).toBeDisabled()
+      expect(addDelegateV2).not.toHaveBeenCalled()
+    })
+
+    it('allows an EOA address', async () => {
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
+
+      const { getByLabelText, getByTestId, queryByText } = render(
+        <UpsertProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
+      )
+
+      act(() => {
+        fireEvent.change(getByLabelText(/Address/i), { target: { value: fakerChecksummedAddress() } })
+        fireEvent.change(getByLabelText(/Name/i), { target: { value: 'An EOA' } })
+      })
+
+      await waitFor(() => expect(getByTestId('submit-proposer-btn')).not.toBeDisabled())
+      expect(queryByText(SMART_CONTRACT_PROPOSER_ERROR)).toBeNull()
     })
   })
 })
