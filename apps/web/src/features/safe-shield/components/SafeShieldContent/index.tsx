@@ -18,6 +18,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { analysisVisibilityDelay, calculateAnalysisDelays, useDelayedLoading } from '../../hooks/useDelayedLoading'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hypernative'
+import { SafenetChecksFeature } from '@/features/safenet-checks'
 import { useLoadFeature } from '@/features/__core__'
 import { ThreatAnalysis } from '../ThreatAnalysis'
 
@@ -47,6 +48,7 @@ export const SafeShieldContent = ({
   onAddToTrustedList?: () => void
 }): ReactElement => {
   const hn = useLoadFeature(HypernativeFeature)
+  const safenet = useLoadFeature(SafenetChecksFeature)
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
   const [contractResults = {}, _contractError, contractLoading = false] = contract
   const [threatResults = {}, _threatError, threatLoading = false] = threat
@@ -125,6 +127,8 @@ export const SafeShieldContent = ({
             highlightedSeverity={highlightedSeverity}
             hypernativeAuth={hypernativeAuth}
           />
+
+          {shouldShowContent && <safenet.SafenetChecksSection />}
 
           {!contractLoading && !threatLoading && (
             <TenderlySimulation

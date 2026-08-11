@@ -9,16 +9,9 @@ import {
   SAFENET_EXPLORER_URL,
   type PublicCheckStatus,
 } from '@safe-global/utils/features/safenet-checks'
-import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
+import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
+import { STATUS_PRESENTATION } from '../statusPresentation'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-
-const STEP_LABEL: Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string> = {
-  [CheckStatus.SUBMITTED]: 'Submitted',
-  [CheckStatus.IN_PROGRESS]: 'Simulating',
-  [CheckStatus.BENIGN]: 'No issues found',
-  [CheckStatus.MALICIOUS]: 'Risk detected',
-  [CheckStatus.TIMED_OUT]: 'Safenet check failed',
-}
 
 const STEP_ICON: Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, ActionType> = {
   [CheckStatus.SUBMITTED]: 'pending',
@@ -60,12 +53,12 @@ export const SafenetAuditRow = ({
   timestampMs,
   isLast,
 }: SafenetAuditRowProps): ReactElement | null => {
-  const { publicStatus, snapshot } = useSafenetCheck(safeTxHash, timestampMs)
+  const { publicStatus, snapshot } = useSafenetDisplayStatus(safeTxHash, timestampMs)
   // The Safenet chain (the chain the attestation landed on), not the Safe's.
   const safenetChain = useChain(snapshot?.chainId ?? '')
   const isDarkMode = useDarkMode()
 
-  if (!safeTxHash || !snapshot || publicStatus === CheckStatus.UNAVAILABLE) return null
+  if (!safeTxHash || publicStatus === CheckStatus.UNAVAILABLE) return null
 
   // Link only on BENIGN: it is underivable without a FROST-verified
   // attestation, so "No issues found" and the proof link always travel together.
@@ -87,7 +80,7 @@ export const SafenetAuditRow = ({
     // animation softens the late insert instead of popping it in one frame.
     <div className="animate-in fade-in slide-in-from-top-1 duration-300">
       <AuditRow
-        label={STEP_LABEL[publicStatus]}
+        label={STATUS_PRESENTATION[publicStatus].label}
         actionType={STEP_ICON[publicStatus]}
         iconColor={isDarkMode ? DARK_STEP_COLOR[publicStatus] : undefined}
         actor={
@@ -102,7 +95,7 @@ export const SafenetAuditRow = ({
         }
         isLast={isLast}
         // Null while running or when the header read failed — column stays empty.
-        timestamp={snapshot.attestedAtMs}
+        timestamp={snapshot?.attestedAtMs ?? null}
       />
     </div>
   )
