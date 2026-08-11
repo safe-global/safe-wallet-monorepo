@@ -1,0 +1,59 @@
+import type { ReactElement } from 'react'
+import { useCurrentChain } from '@/hooks/useChains'
+import { isRateLimitError, isRevertError, RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
+import { didRevert, type EthersError } from '@/utils/ethers-utils'
+import ErrorMessage from '@/components/tx/ErrorMessage'
+
+export const COULD_NOT_SUBMIT_MESSAGE = 'Could not submit the transaction.'
+export const COULD_NOT_SUBMIT_RETRY_MESSAGE = 'Could not submit the transaction. Try again.'
+
+export const getRevertedMessage = (network?: string): string =>
+  `Transaction reverted on ${network ?? 'the network'}. Gas was spent.`
+
+/**
+ * Renders a submit/execution error.
+ *
+ * "Gas was spent" is only claimed on positive proof — a mined receipt whose
+ * status is 0 (reverted on-chain). A pre-broadcast failure (the common inline
+ * case: the wallet/node reverted during estimation) never spends gas, so we
+ * never assert it did. A deterministic revert is not offered a retry (it would
+ * only waste more gas); a transient failure is. Rate-limits keep their own copy.
+ */
+const TxSubmitError = ({
+  error,
+  context = 'execution',
+}: {
+  error: Error
+  context?: 'estimation' | 'execution'
+}): ReactElement => {
+  const chain = useCurrentChain()
+
+  if (isRateLimitError(error)) {
+    return (
+      <ErrorMessage error={error} level="warning" context={context}>
+        {RATE_LIMIT_USER_MESSAGE}
+      </ErrorMessage>
+    )
+  }
+
+  // Only a mined receipt with a reverted status proves gas was actually spent.
+  if (didRevert((error as EthersError).receipt)) {
+    return (
+      <ErrorMessage error={error} level="error" context={context}>
+        {getRevertedMessage(chain?.chainName)}
+      </ErrorMessage>
+    )
+  }
+
+  // Nothing hit the chain, so no gas was spent. A deterministic revert must not
+  // invite a retry; a transient failure can.
+  const message = isRevertError(error) ? COULD_NOT_SUBMIT_MESSAGE : COULD_NOT_SUBMIT_RETRY_MESSAGE
+
+  return (
+    <ErrorMessage error={error} level="error" context={context}>
+      {message}
+    </ErrorMessage>
+  )
+}
+
+export default TxSubmitError

@@ -5,7 +5,7 @@ import { Errors, trackError } from '@/services/exceptions'
 import { dispatchRecoveryExecution } from '@/features/recovery/services'
 import useWallet from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import ErrorMessage from '@/components/tx/ErrorMessage'
+import TxSubmitError from '@/components/tx/TxSubmitError'
 import TxCard from '@/components/tx-flow/common/TxCard'
 import { TxModalContext } from '@/components/tx-flow'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
@@ -92,7 +92,7 @@ const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
 
           <RecoveryValidationErrors item={item} />
 
-          {error && <ErrorMessage error={error}>Error submitting the transaction.</ErrorMessage>}
+          {error && <TxSubmitError error={error} />}
         </Stack>
 
         <Divider sx={{ mx: -3, my: 3.5 }} />

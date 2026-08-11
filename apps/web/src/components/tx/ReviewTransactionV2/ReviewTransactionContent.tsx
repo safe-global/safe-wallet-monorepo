@@ -3,7 +3,7 @@ import type { PropsWithChildren, ReactElement } from 'react'
 import { useCallback, useContext } from 'react'
 import madProps from '@/utils/mad-props'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import ErrorMessage from '../ErrorMessage'
+import TxCheckError from '../TxCheckError'
 import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import ApprovalEditor from '../ApprovalEditor'
@@ -73,11 +73,7 @@ export const ReviewTransactionContent = ({
 
         <Divider sx={{ mt: 2, mx: -3 }} />
 
-        {safeTxError && (
-          <ErrorMessage error={safeTxError}>
-            This transaction will most likely fail. To save gas costs, avoid confirming the transaction.
-          </ErrorMessage>
-        )}
+        {safeTxError && <TxCheckError error={safeTxError} />}
 
         <Slot name={SlotName.Footer} />
         <NetworkWarning />

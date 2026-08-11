@@ -5,10 +5,33 @@ import {
   getGuardErrorInfo,
   getGuardErrorName,
   isRateLimitError,
+  isRevertError,
   GUARD_ERROR_CODES,
 } from '../transaction-errors'
 
 describe('transaction-errors', () => {
+  describe('isRevertError', () => {
+    it('treats a GS revert reason as a revert', () => {
+      expect(isRevertError(Object.assign(new Error('execution reverted'), { reason: 'GS013' }))).toBe(true)
+      expect(isRevertError(new Error('execution reverted: "GS026"'))).toBe(true)
+    })
+
+    it('treats an ethers CALL_EXCEPTION as a revert', () => {
+      expect(isRevertError(Object.assign(new Error('call failed'), { code: 'CALL_EXCEPTION' }))).toBe(true)
+    })
+
+    it('treats "execution reverted" text as a revert', () => {
+      expect(isRevertError(new Error('execution reverted'))).toBe(true)
+    })
+
+    it('treats infrastructure failures as NOT a revert (safe default)', () => {
+      expect(isRevertError(new Error('HTTP request failed. Status: 500'))).toBe(false)
+      expect(isRevertError(Object.assign(new Error('timeout'), { code: 'TIMEOUT' }))).toBe(false)
+      expect(isRevertError(Object.assign(new Error('network error'), { code: 'SERVER_ERROR' }))).toBe(false)
+      expect(isRevertError(null)).toBe(false)
+      expect(isRevertError(undefined)).toBe(false)
+    })
+  })
   describe('isGuardError', () => {
     it('should detect guard error in message', () => {
       const error = new Error(`Transaction reverted: ${GUARD_ERROR_CODES.UNAPPROVED_HASH}`)

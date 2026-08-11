@@ -2,6 +2,7 @@
  * Utilities for detecting and handling specific transaction errors
  */
 import { BaseError } from 'viem'
+import { getGsCodeFromError } from '@safe-global/utils/services/exceptions/contractErrors'
 
 /**
  * Guard error codes
@@ -98,6 +99,33 @@ export const isRateLimitError = (error: unknown): boolean => {
     })
     if (match) return true
   }
+
+  return false
+}
+
+/**
+ * Detects whether an error is a genuine on-chain revert — i.e. a node told us
+ * the transaction reverts — as opposed to an infrastructure failure (RPC down,
+ * timeout, rate-limit) where we simply could not complete the check.
+ *
+ * Only a decodable revert signal counts: a known GS code, an ethers
+ * `CALL_EXCEPTION`, or an "execution reverted" message. Everything else is
+ * treated as infra — the safe default, so we never claim a transaction will
+ * fail unless a node actually reverted it (WA-3005 guideline #2).
+ */
+export const isRevertError = (error: unknown): boolean => {
+  if (!error) return false
+
+  const err = error as { code?: unknown; reason?: string; message?: string }
+
+  // A known GS revert reason is definitive.
+  if (getGsCodeFromError(err)) return true
+
+  // ethers marks a reverted eth_call/estimateGas as CALL_EXCEPTION.
+  if (err.code === 'CALL_EXCEPTION') return true
+
+  // viem/ethers revert text.
+  if (typeof err.message === 'string' && /execution reverted|reverted with/i.test(err.message)) return true
 
   return false
 }

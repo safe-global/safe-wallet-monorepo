@@ -4,6 +4,7 @@ import { type ReactElement, type SyntheticEvent, useContext } from 'react'
 import { Box, CardActions, Divider, Typography } from '@mui/material'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import TxCheckError from '@/components/tx/TxCheckError'
 import { trackError, Errors } from '@/services/exceptions'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getTxOptions } from '@/utils/transactions'
@@ -202,9 +203,7 @@ export const ExecuteThroughRoleForm = ({
         ) : (
           gasLimitError && (
             <Box mt={1}>
-              <ErrorMessage error={gasLimitError}>
-                This transaction will most likely fail. To save gas costs, avoid creating this transaction.
-              </ErrorMessage>
+              <TxCheckError error={gasLimitError} />
             </Box>
           )
         )}
