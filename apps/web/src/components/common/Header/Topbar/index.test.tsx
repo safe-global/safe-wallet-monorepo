@@ -1,4 +1,11 @@
-import Topbar from './index'
+import Topbar, {
+  SAFE_BAR_ACTIONS_WRAP,
+  SAFE_BAR_CONTEXT_HEIGHT,
+  SAFE_BAR_CONTEXT_WRAP,
+  SEARCH_ACTIONS_WRAP,
+  SEARCH_CONTEXT_HEIGHT,
+  SEARCH_CONTEXT_WRAP,
+} from './index'
 import * as contracts from '@/features/__core__'
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
@@ -20,10 +27,10 @@ jest.mock('@/hooks/use-mobile', () => ({
   useIsMobile: () => mockUseIsMobile(),
 }))
 
-const mockUseMediaQuery = jest.fn(() => false)
-jest.mock('@mui/material', () => ({
-  ...jest.requireActual('@mui/material'),
-  useMediaQuery: () => mockUseMediaQuery(),
+const mockUseIsBelowMd = jest.fn(() => false)
+jest.mock('@/hooks/useMediaQuery', () => ({
+  ...jest.requireActual('@/hooks/useMediaQuery'),
+  useIsBelowMd: () => mockUseIsBelowMd(),
 }))
 
 jest.mock('@/features/wallet', () => ({
@@ -136,6 +143,7 @@ describe('Topbar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseIsMobile.mockReturnValue(false)
+    mockUseIsBelowMd.mockReturnValue(false)
     mockIsSpaceRoute.mockReturnValue(true)
     mockUsePathname.mockReturnValue('/home')
     mockUseSafeAddressFromUrl.mockReturnValue('')
@@ -263,6 +271,130 @@ describe('Topbar', () => {
     })
   })
 
+  // jsdom loads no CSS, so these check which layout branch the left slot took, not the resulting
+  // geometry: the logo variant must not inherit the wrapping the wide variants need, or it drops
+  // onto a second row below the actions and (below md) right-aligns there. Real widths were
+  // measured in a browser; see the Playwright gap noted in the PR.
+  describe('single-row layout on logo routes', () => {
+    const groups = (container: HTMLElement) => {
+      const header = container.querySelector('header')
+      if (!header) throw new Error('header not found')
+      const [context, actions] = [...header.children].slice(-2)
+      return { header, context, actions }
+    }
+
+    const LOGO_ROUTES = [['/welcome/accounts'], ['/welcome/spaces'], ['/settings/appearance']]
+
+    it.each(LOGO_ROUTES)('keeps the logo and the actions on one row on %s', (pathname) => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue(pathname)
+
+      const { context, actions } = groups(render(<Topbar />).container)
+
+      expect(context).toContainElement(screen.getByTestId('logo-image'))
+      // The logo opts out of both variants' thresholds — it always fits beside the actions.
+      expect(context.className).not.toMatch(/basis-full/)
+      expect(actions.className).not.toMatch(/order-first/)
+      // Nothing left to push the actions off the right edge.
+      expect(actions.className).toContain('ml-auto')
+    })
+
+    it.each(LOGO_ROUTES)('centers the short logo row against the actions card on %s', (pathname) => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue(pathname)
+
+      const { header } = groups(render(<Topbar />).container)
+
+      expect(header.className).toMatch(/items-center/)
+      expect(header.className).not.toMatch(/items-start/)
+    })
+
+    it('uses the wider safe-bar threshold for the safe-selector variant', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/home')
+
+      const { header, context, actions } = groups(render(<Topbar />).container)
+
+      expect(context).toContainElement(screen.getByTestId('space-safe-bar'))
+      expect(context.className).toContain(SAFE_BAR_CONTEXT_WRAP)
+      expect(actions.className).toContain(SAFE_BAR_ACTIONS_WRAP)
+      expect(header.className).toMatch(/items-start/)
+      // A floor, not a fixed height: the bar wraps internally at narrow widths, and against a fixed
+      // h-14 the slot's items-center centred the overflow — half of it spilling up into the actions.
+      expect(context.className).toContain(SAFE_BAR_CONTEXT_HEIGHT)
+      expect(context.className).not.toMatch(/(?:^|\s)h-14(?:\s|$)/)
+    })
+
+    // The search input is ~335px narrower than the safe bar, so sharing the safe bar's threshold
+    // stranded it on its own row while ~600px of the header was still empty.
+    it('uses the narrower search threshold for the global-search variant', () => {
+      mockIsSpaceRoute.mockReturnValue(true)
+      mockUsePathname.mockReturnValue('/spaces')
+
+      const { context, actions } = groups(render(<Topbar />).container)
+
+      // The search variant is the one the safe bar is NOT in (GlobalSearchInput is stubbed to null
+      // by the feature mock, so there is no element of its own to assert on).
+      expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
+      expect(context.className).toContain(SEARCH_CONTEXT_WRAP)
+      expect(actions.className).toContain(SEARCH_ACTIONS_WRAP)
+      expect(context.className).not.toContain(SAFE_BAR_CONTEXT_WRAP)
+      // This variant keeps the FIXED height: the search input sizes itself with `h-full`, which
+      // needs a definite parent — a min-height would leave it collapsed to its content.
+      expect(context.className).toContain(SEARCH_CONTEXT_HEIGHT)
+      expect(context.className).not.toContain(SAFE_BAR_CONTEXT_HEIGHT)
+    })
+
+    // The three below pin the *shape* of the wrap rules, not just that the named constants are
+    // applied — asserting the constants alone passed while all three of these were broken.
+    it('does not give the actions card a full-basis, which would stretch it across the wrapped row', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/home')
+
+      const { context, actions } = groups(render(<Topbar />).container)
+
+      // The context slot's basis-full already consumes the line and pushes the actions below it.
+      expect(context.className).toContain('basis-full')
+      // Repeating it on the actions set the painted card's *width* to the whole row, leaving its
+      // chips at the left of a wide empty white area.
+      expect(actions.className).not.toContain('basis-full')
+    })
+
+    it('stacks the account card above the context with both rows on the left edge', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/home')
+
+      const { context, actions } = groups(render(<Topbar />).container)
+
+      // The context is what moves, not the actions — reordering from the actions' side put them
+      // ahead of the burger and pushed it onto a row of its own.
+      expect(context.className).toMatch(/order-last/)
+      expect(actions.className).not.toMatch(/order-first/)
+      // `ml-0` drops the `ml-auto` that right-aligns the card while the two share a row, so both
+      // wrapped rows start on the page's left padding.
+      expect(actions.className).toMatch(/ml-0/)
+      // And the search is not right-aligned inside its full-width slot, which would put the two
+      // rows on a diagonal.
+      expect(context.className).not.toMatch(/justify-end/)
+    })
+
+    it('leaves the sidebar burger first in the header so it holds the top row', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/home')
+      mockUseIsBelowMd.mockReturnValue(true)
+
+      const { header, context } = groups(render(<Topbar onMenuToggle={jest.fn()} />).container)
+      const burger = screen.getByRole('button', { name: 'Open sidebar menu' })
+
+      // First child and carrying no order class of its own, so nothing can push it below the fold:
+      // the context reorders around it. Inside the context slot it travelled down with it instead.
+      expect(header.firstElementChild).toBe(burger)
+      expect(context).not.toContainElement(burger)
+      // Anchored to a class boundary — an unanchored /order-/ also matches `border-*`.
+      expect(burger.className).not.toMatch(/(?:^|\s)(?:@\S+:)?order-/)
+    })
+  })
+
   describe('search button visibility', () => {
     it('shows the search button on non-space, non-welcome routes', () => {
       mockIsSpaceRoute.mockReturnValue(false)
@@ -362,11 +494,11 @@ describe('Topbar', () => {
   describe('mobile', () => {
     beforeEach(() => {
       mockUseIsMobile.mockReturnValue(true)
-      mockUseMediaQuery.mockReturnValue(true)
+      mockUseIsBelowMd.mockReturnValue(true)
     })
 
     afterEach(() => {
-      mockUseMediaQuery.mockReturnValue(false)
+      mockUseIsBelowMd.mockReturnValue(false)
     })
 
     it('shows the sidebar menu button when on mobile and onMenuToggle is provided', () => {

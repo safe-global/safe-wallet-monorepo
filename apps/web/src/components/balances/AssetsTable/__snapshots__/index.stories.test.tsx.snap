@@ -1,715 +1,567 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./index.stories Default 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 0px;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-2tdm0y-MuiPaper-root-MuiCard-root"
-      style="--Paper-shadow: none;"
+      class="bg-card rounded-lg p-4"
     >
       <div
-        class="container"
+        class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col gap-0 py-0 rounded-lg mb-4 border-4 border-transparent"
+        data-radius="lg"
+        data-size="none"
+        data-slot="card"
+        data-variant="default"
       >
         <div
-          class="MuiBox-root mui-style-dzaqf9"
+          class="container"
         >
           <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-aapmsc-MuiPaper-root-MuiTableContainer-root"
-            data-testid="table-container"
-            style="--Paper-shadow: none;"
+            class="mb-4 w-full"
           >
-            <table
-              aria-labelledby="tableTitle"
-              class="MuiTable-root compactTable mui-style-14ipoqq-MuiTable-root"
+            <div
+              class="w-full overflow-x-auto bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
+              data-testid="table-container"
             >
-              <thead
-                class="MuiTableHead-root mui-style-1bxxo5-MuiTableHead-root"
+              <div
+                class="relative w-full overflow-x-auto"
+                data-slot="table-container"
               >
-                <tr
-                  class="MuiTableRow-root MuiTableRow-head mui-style-ee4r5n-MuiTableRow-root"
+                <table
+                  aria-labelledby="tableTitle"
+                  class="w-full caption-bottom text-sm compactTable"
+                  data-slot="table"
                 >
-                  <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-10rwvyk-MuiTableCell-root"
-                    scope="col"
+                  <thead
+                    class="[&_tr]:border-b"
+                    data-slot="table-header"
                   >
-                    <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc mui-style-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
-                      role="button"
-                      tabindex="0"
+                    <tr
+                      class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                      data-slot="table-row"
                     >
-                      Asset
-                      <svg
-                        aria-hidden="true"
-                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc mui-style-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                        data-testid="ArrowDownwardIcon"
-                        focusable="false"
-                        viewBox="0 0 24 24"
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                        data-slot="table-head"
+                        style="width: 35%;"
                       >
-                        <path
-                          d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                        />
-                      </svg>
-                    </span>
-                  </th>
-                  <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-6wrafk-MuiTableCell-root"
-                    scope="col"
-                  >
-                    <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc mui-style-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
-                      role="button"
-                      tabindex="0"
-                    >
-                      Price
-                      <svg
-                        aria-hidden="true"
-                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc mui-style-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                        data-testid="ArrowDownwardIcon"
-                        focusable="false"
-                        viewBox="0 0 24 24"
+                        <span
+                          class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
+                        >
+                          Asset
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                        data-slot="table-head"
+                        style="width: 16%; text-align: right;"
                       >
-                        <path
-                          d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                        />
-                      </svg>
-                    </span>
-                  </th>
-                  <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-6wrafk-MuiTableCell-root"
-                    scope="col"
-                  >
-                    <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc mui-style-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
-                      role="button"
-                      tabindex="0"
-                    >
-                      Balance
-                      <svg
-                        aria-hidden="true"
-                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc mui-style-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                        data-testid="ArrowDownwardIcon"
-                        focusable="false"
-                        viewBox="0 0 24 24"
+                        <span
+                          class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
+                        >
+                          Price
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                        data-slot="table-head"
+                        style="width: 16%; text-align: right;"
                       >
-                        <path
-                          d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                        />
-                      </svg>
-                    </span>
-                  </th>
-                  <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-6wrafk-MuiTableCell-root"
-                    scope="col"
-                  >
-                    <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc mui-style-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
-                      role="button"
-                      tabindex="0"
-                    >
-                      <span
-                        aria-label="Based on total portfolio value"
-                        class=""
-                        data-mui-internal-clone-element="true"
+                        <span
+                          class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
+                        >
+                          Balance
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                        data-slot="table-head"
+                        style="width: 16%; text-align: right;"
                       >
-                        Weight
-                      </span>
-                      <svg
-                        aria-hidden="true"
-                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc mui-style-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                        data-testid="ArrowDownwardIcon"
-                        focusable="false"
-                        viewBox="0 0 24 24"
+                        <span
+                          class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
+                        >
+                          <span
+                            data-slot="tooltip-trigger"
+                            id="base-ui-_r_1_"
+                          >
+                            Weight
+                          </span>
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                        data-slot="table-head"
+                        style="width: 17%; text-align: right;"
                       >
-                        <path
-                          d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                        />
-                      </svg>
-                    </span>
-                  </th>
-                  <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-8owqfo-MuiTableCell-root"
-                    scope="col"
-                  >
-                    <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc mui-style-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
-                      role="button"
-                      tabindex="0"
-                    >
-                      Value
-                      <svg
-                        aria-hidden="true"
-                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc mui-style-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                        data-testid="ArrowDownwardIcon"
-                        focusable="false"
-                        viewBox="0 0 24 24"
+                        <span
+                          class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
+                        >
+                          Value
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                        data-slot="table-head"
+                        style="width: 86px; text-align: right;"
                       >
-                        <path
-                          d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                        />
-                      </svg>
-                    </span>
-                  </th>
-                  <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-11b8h52-MuiTableCell-root"
-                    scope="col"
+                        <span
+                          class="text-sm"
+                        >
+                          Actions
+                        </span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    class="[&_tr:last-child]:border-0 tableBody"
+                    data-slot="table-body"
                   >
-                    <span
-                      class="MuiBox-root mui-style-1kuy7z7"
+                    <tr
+                      class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                      data-slot="table-row"
+                      data-testid="table-row"
+                      tabindex="-1"
                     >
-                      Actions
-                    </span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody
-                class="MuiTableBody-root tableBody mui-style-hvwm6q-MuiTableBody-root"
-              >
-                <tr
-                  class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
-                  data-testid="table-row"
-                  tabindex="-1"
-                >
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-asset"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        data-slot="table-cell"
+                        data-testid="table-cell-asset"
                       >
                         <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                          class="overflow-hidden transition-all"
                         >
                           <div
                             class="token"
                           >
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                              style="width: 26px; height: 26px;"
+                            <div
+                              class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                              data-slot="skeleton"
                             />
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
                             >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 80px;"
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
+                                data-slot="skeleton"
                               />
-                            </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-price"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        data-slot="table-cell"
+                        data-testid="table-cell-price"
                       >
                         <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
-                          <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                          >
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                              style="width: 32px;"
-                            />
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-balance"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
-                          <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                          >
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                              style="width: 32px;"
-                            />
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-weight"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
-                          <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                          >
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                              style="width: 32px;"
-                            />
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-value"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
-                          <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                          >
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                              style="width: 32px;"
-                            />
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-actions"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="MuiStack-root mui-style-1hx50e8-MuiStack-root"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                              style="width: 28px; height: 28px;"
-                            />
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                              style="width: 28px; height: 28px;"
-                            />
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                              style="width: 24px; height: 24px;"
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
                             />
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr
-                  class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
-                  data-testid="table-row"
-                  tabindex="-1"
-                >
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-asset"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        data-slot="table-cell"
+                        data-testid="table-cell-balance"
                       >
                         <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        data-slot="table-cell"
+                        data-testid="table-cell-weight"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        data-slot="table-cell"
+                        data-testid="table-cell-value"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        data-slot="table-cell"
+                        data-testid="table-cell-actions"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="flex flex-row justify-end gap-2"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr
+                      class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                      data-slot="table-row"
+                      data-testid="table-row"
+                      tabindex="-1"
+                    >
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        data-slot="table-cell"
+                        data-testid="table-cell-asset"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
                         >
                           <div
                             class="token"
                           >
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                              style="width: 26px; height: 26px;"
+                            <div
+                              class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                              data-slot="skeleton"
                             />
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
                             >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 80px;"
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
+                                data-slot="skeleton"
                               />
-                            </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-price"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        data-slot="table-cell"
+                        data-testid="table-cell-price"
                       >
                         <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
-                          <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                          >
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                              style="width: 32px;"
-                            />
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-balance"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
-                          <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                          >
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                              style="width: 32px;"
-                            />
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-weight"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
-                          <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                          >
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                              style="width: 32px;"
-                            />
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-value"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
-                          <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                          >
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                              style="width: 32px;"
-                            />
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-actions"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="MuiStack-root mui-style-1hx50e8-MuiStack-root"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                              style="width: 28px; height: 28px;"
-                            />
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                              style="width: 28px; height: 28px;"
-                            />
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                              style="width: 24px; height: 24px;"
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
                             />
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr
-                  class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
-                  data-testid="table-row"
-                  tabindex="-1"
-                >
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-asset"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        data-slot="table-cell"
+                        data-testid="table-cell-balance"
                       >
                         <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        data-slot="table-cell"
+                        data-testid="table-cell-weight"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        data-slot="table-cell"
+                        data-testid="table-cell-value"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        data-slot="table-cell"
+                        data-testid="table-cell-actions"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="flex flex-row justify-end gap-2"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr
+                      class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                      data-slot="table-row"
+                      data-testid="table-row"
+                      tabindex="-1"
+                    >
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        data-slot="table-cell"
+                        data-testid="table-cell-asset"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
                         >
                           <div
                             class="token"
                           >
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                              style="width: 26px; height: 26px;"
+                            <div
+                              class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                              data-slot="skeleton"
                             />
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
                             >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 80px;"
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
+                                data-slot="skeleton"
                               />
-                            </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-price"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        data-slot="table-cell"
+                        data-testid="table-cell-price"
                       >
                         <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
-                          <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                          >
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                              style="width: 32px;"
-                            />
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-balance"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
-                          <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                          >
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                              style="width: 32px;"
-                            />
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-weight"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
-                          <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                          >
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                              style="width: 32px;"
-                            />
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-value"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
-                          <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                          >
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                              style="width: 32px;"
-                            />
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-actions"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="MuiStack-root mui-style-1hx50e8-MuiStack-root"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                              style="width: 28px; height: 28px;"
-                            />
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                              style="width: 28px; height: 28px;"
-                            />
-                            <span
-                              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                              style="width: 24px; height: 24px;"
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
                             />
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        data-slot="table-cell"
+                        data-testid="table-cell-balance"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        data-slot="table-cell"
+                        data-testid="table-cell-weight"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        data-slot="table-cell"
+                        data-testid="table-cell-value"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        data-slot="table-cell"
+                        data-testid="table-cell-actions"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="flex flex-row justify-end gap-2"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div
+              class="flex h-[52px] items-center rounded-b-3xl rounded-t-none border-t border-[var(--color-background-main)] bg-[var(--color-background-paper)] px-4"
+            />
           </div>
-          <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root mui-style-wm16xp-MuiPaper-root"
-            style="--Paper-shadow: none;"
-          />
         </div>
       </div>
     </div>
@@ -722,715 +574,566 @@ exports[`./index.stories EmptyBalance 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 0px;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-      style="--Paper-shadow: none;"
+      class="bg-card rounded-lg p-4"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-2tdm0y-MuiPaper-root-MuiCard-root"
-        style="--Paper-shadow: none;"
+        class="bg-card rounded-lg p-4"
       >
         <div
-          class="container"
+          class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col gap-0 py-0 rounded-lg mb-4 border-4 border-transparent"
+          data-radius="lg"
+          data-size="none"
+          data-slot="card"
+          data-variant="default"
         >
           <div
-            class="MuiBox-root mui-style-dzaqf9"
+            class="container"
           >
             <div
-              class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-aapmsc-MuiPaper-root-MuiTableContainer-root"
-              data-testid="table-container"
-              style="--Paper-shadow: none;"
+              class="mb-4 w-full"
             >
-              <table
-                aria-labelledby="tableTitle"
-                class="MuiTable-root compactTable mui-style-14ipoqq-MuiTable-root"
+              <div
+                class="w-full overflow-x-auto bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
+                data-testid="table-container"
               >
-                <thead
-                  class="MuiTableHead-root mui-style-1bxxo5-MuiTableHead-root"
+                <div
+                  class="relative w-full overflow-x-auto"
+                  data-slot="table-container"
                 >
-                  <tr
-                    class="MuiTableRow-root MuiTableRow-head mui-style-ee4r5n-MuiTableRow-root"
+                  <table
+                    aria-labelledby="tableTitle"
+                    class="w-full caption-bottom text-sm compactTable"
+                    data-slot="table"
                   >
-                    <th
-                      class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-10rwvyk-MuiTableCell-root"
-                      scope="col"
+                    <thead
+                      class="[&_tr]:border-b"
+                      data-slot="table-header"
                     >
-                      <span
-                        class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc mui-style-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
-                        role="button"
-                        tabindex="0"
+                      <tr
+                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                        data-slot="table-row"
                       >
-                        Asset
-                        <svg
-                          aria-hidden="true"
-                          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc mui-style-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                          data-testid="ArrowDownwardIcon"
-                          focusable="false"
-                          viewBox="0 0 24 24"
+                        <th
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          data-slot="table-head"
+                          style="width: 35%;"
                         >
-                          <path
-                            d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                          />
-                        </svg>
-                      </span>
-                    </th>
-                    <th
-                      class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-6wrafk-MuiTableCell-root"
-                      scope="col"
-                    >
-                      <span
-                        class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc mui-style-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
-                        role="button"
-                        tabindex="0"
-                      >
-                        Price
-                        <svg
-                          aria-hidden="true"
-                          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc mui-style-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                          data-testid="ArrowDownwardIcon"
-                          focusable="false"
-                          viewBox="0 0 24 24"
+                          <span
+                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            role="button"
+                            tabindex="0"
+                          >
+                            Asset
+                          </span>
+                        </th>
+                        <th
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          data-slot="table-head"
+                          style="width: 16%; text-align: right;"
                         >
-                          <path
-                            d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                          />
-                        </svg>
-                      </span>
-                    </th>
-                    <th
-                      class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-6wrafk-MuiTableCell-root"
-                      scope="col"
-                    >
-                      <span
-                        class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc mui-style-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
-                        role="button"
-                        tabindex="0"
-                      >
-                        Balance
-                        <svg
-                          aria-hidden="true"
-                          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc mui-style-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                          data-testid="ArrowDownwardIcon"
-                          focusable="false"
-                          viewBox="0 0 24 24"
+                          <span
+                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            role="button"
+                            tabindex="0"
+                          >
+                            Price
+                          </span>
+                        </th>
+                        <th
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          data-slot="table-head"
+                          style="width: 16%; text-align: right;"
                         >
-                          <path
-                            d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                          />
-                        </svg>
-                      </span>
-                    </th>
-                    <th
-                      class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-6wrafk-MuiTableCell-root"
-                      scope="col"
-                    >
-                      <span
-                        class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc mui-style-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
-                        role="button"
-                        tabindex="0"
-                      >
-                        <span
-                          aria-label="Based on total portfolio value"
-                          class=""
-                          data-mui-internal-clone-element="true"
+                          <span
+                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            role="button"
+                            tabindex="0"
+                          >
+                            Balance
+                          </span>
+                        </th>
+                        <th
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          data-slot="table-head"
+                          style="width: 16%; text-align: right;"
                         >
-                          Weight
-                        </span>
-                        <svg
-                          aria-hidden="true"
-                          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc mui-style-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                          data-testid="ArrowDownwardIcon"
-                          focusable="false"
-                          viewBox="0 0 24 24"
+                          <span
+                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            role="button"
+                            tabindex="0"
+                          >
+                            <span
+                              data-slot="tooltip-trigger"
+                              id="base-ui-_r_3_"
+                            >
+                              Weight
+                            </span>
+                          </span>
+                        </th>
+                        <th
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          data-slot="table-head"
+                          style="width: 17%; text-align: right;"
                         >
-                          <path
-                            d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                          />
-                        </svg>
-                      </span>
-                    </th>
-                    <th
-                      class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-8owqfo-MuiTableCell-root"
-                      scope="col"
-                    >
-                      <span
-                        class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc mui-style-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
-                        role="button"
-                        tabindex="0"
-                      >
-                        Value
-                        <svg
-                          aria-hidden="true"
-                          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc mui-style-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                          data-testid="ArrowDownwardIcon"
-                          focusable="false"
-                          viewBox="0 0 24 24"
+                          <span
+                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            role="button"
+                            tabindex="0"
+                          >
+                            Value
+                          </span>
+                        </th>
+                        <th
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          data-slot="table-head"
+                          style="width: 86px; text-align: right;"
                         >
-                          <path
-                            d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                          />
-                        </svg>
-                      </span>
-                    </th>
-                    <th
-                      class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-11b8h52-MuiTableCell-root"
-                      scope="col"
+                          <span
+                            class="text-sm"
+                          >
+                            Actions
+                          </span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody
+                      class="[&_tr:last-child]:border-0 tableBody"
+                      data-slot="table-body"
                     >
-                      <span
-                        class="MuiBox-root mui-style-1kuy7z7"
+                      <tr
+                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                        data-slot="table-row"
+                        data-testid="table-row"
+                        tabindex="-1"
                       >
-                        Actions
-                      </span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody
-                  class="MuiTableBody-root tableBody mui-style-hvwm6q-MuiTableBody-root"
-                >
-                  <tr
-                    class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
-                    data-testid="table-row"
-                    tabindex="-1"
-                  >
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-asset"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-asset"
                         >
                           <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                            class="overflow-hidden transition-all"
                           >
                             <div
                               class="token"
                             >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 26px; height: 26px;"
+                              <div
+                                class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                                data-slot="skeleton"
                               />
-                              <p
-                                class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                              <div
+                                class="m-0 text-base leading-6 font-normal"
+                                data-slot="typography"
+                                data-variant="paragraph"
                               >
-                                <span
-                                  class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                  style="width: 80px;"
+                                <div
+                                  class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
+                                  data-slot="skeleton"
                                 />
-                              </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-price"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-price"
                         >
                           <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-balance"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-weight"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-value"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-actions"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                            class="overflow-hidden transition-all"
                           >
                             <div
-                              class="MuiStack-root mui-style-1hx50e8-MuiStack-root"
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
                             >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 28px; height: 28px;"
-                              />
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 28px; height: 28px;"
-                              />
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 24px; height: 24px;"
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
                               />
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr
-                    class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
-                    data-testid="table-row"
-                    tabindex="-1"
-                  >
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-asset"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-balance"
                         >
                           <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-weight"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-value"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-actions"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="flex flex-row justify-end gap-2"
+                            >
+                              <div
+                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr
+                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                        data-slot="table-row"
+                        data-testid="table-row"
+                        tabindex="-1"
+                      >
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-asset"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
                           >
                             <div
                               class="token"
                             >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 26px; height: 26px;"
+                              <div
+                                class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                                data-slot="skeleton"
                               />
-                              <p
-                                class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                              <div
+                                class="m-0 text-base leading-6 font-normal"
+                                data-slot="typography"
+                                data-variant="paragraph"
                               >
-                                <span
-                                  class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                  style="width: 80px;"
+                                <div
+                                  class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
+                                  data-slot="skeleton"
                                 />
-                              </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-price"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-price"
                         >
                           <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-balance"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-weight"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-value"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-actions"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                            class="overflow-hidden transition-all"
                           >
                             <div
-                              class="MuiStack-root mui-style-1hx50e8-MuiStack-root"
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
                             >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 28px; height: 28px;"
-                              />
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 28px; height: 28px;"
-                              />
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 24px; height: 24px;"
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
                               />
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr
-                    class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
-                    data-testid="table-row"
-                    tabindex="-1"
-                  >
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-asset"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-balance"
                         >
                           <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-weight"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-value"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-actions"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="flex flex-row justify-end gap-2"
+                            >
+                              <div
+                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr
+                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                        data-slot="table-row"
+                        data-testid="table-row"
+                        tabindex="-1"
+                      >
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-asset"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
                           >
                             <div
                               class="token"
                             >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 26px; height: 26px;"
+                              <div
+                                class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                                data-slot="skeleton"
                               />
-                              <p
-                                class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                              <div
+                                class="m-0 text-base leading-6 font-normal"
+                                data-slot="typography"
+                                data-variant="paragraph"
                               >
-                                <span
-                                  class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                  style="width: 80px;"
+                                <div
+                                  class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
+                                  data-slot="skeleton"
                                 />
-                              </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-price"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-price"
                         >
                           <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-balance"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-weight"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-value"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-actions"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                            class="overflow-hidden transition-all"
                           >
                             <div
-                              class="MuiStack-root mui-style-1hx50e8-MuiStack-root"
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
                             >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 28px; height: 28px;"
-                              />
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 28px; height: 28px;"
-                              />
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 24px; height: 24px;"
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
                               />
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-balance"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-weight"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-value"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-actions"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="flex flex-row justify-end gap-2"
+                            >
+                              <div
+                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div
+                class="flex h-[52px] items-center rounded-b-3xl rounded-t-none border-t border-[var(--color-background-main)] bg-[var(--color-background-paper)] px-4"
+              />
             </div>
-            <div
-              class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root mui-style-wm16xp-MuiPaper-root"
-              style="--Paper-shadow: none;"
-            />
           </div>
         </div>
       </div>
@@ -1444,715 +1147,566 @@ exports[`./index.stories WhalePortfolio 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 0px;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-      style="--Paper-shadow: none;"
+      class="bg-card rounded-lg p-4"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-2tdm0y-MuiPaper-root-MuiCard-root"
-        style="--Paper-shadow: none;"
+        class="bg-card rounded-lg p-4"
       >
         <div
-          class="container"
+          class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col gap-0 py-0 rounded-lg mb-4 border-4 border-transparent"
+          data-radius="lg"
+          data-size="none"
+          data-slot="card"
+          data-variant="default"
         >
           <div
-            class="MuiBox-root mui-style-dzaqf9"
+            class="container"
           >
             <div
-              class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-aapmsc-MuiPaper-root-MuiTableContainer-root"
-              data-testid="table-container"
-              style="--Paper-shadow: none;"
+              class="mb-4 w-full"
             >
-              <table
-                aria-labelledby="tableTitle"
-                class="MuiTable-root compactTable mui-style-14ipoqq-MuiTable-root"
+              <div
+                class="w-full overflow-x-auto bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
+                data-testid="table-container"
               >
-                <thead
-                  class="MuiTableHead-root mui-style-1bxxo5-MuiTableHead-root"
+                <div
+                  class="relative w-full overflow-x-auto"
+                  data-slot="table-container"
                 >
-                  <tr
-                    class="MuiTableRow-root MuiTableRow-head mui-style-ee4r5n-MuiTableRow-root"
+                  <table
+                    aria-labelledby="tableTitle"
+                    class="w-full caption-bottom text-sm compactTable"
+                    data-slot="table"
                   >
-                    <th
-                      class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-10rwvyk-MuiTableCell-root"
-                      scope="col"
+                    <thead
+                      class="[&_tr]:border-b"
+                      data-slot="table-header"
                     >
-                      <span
-                        class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc mui-style-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
-                        role="button"
-                        tabindex="0"
+                      <tr
+                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                        data-slot="table-row"
                       >
-                        Asset
-                        <svg
-                          aria-hidden="true"
-                          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc mui-style-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                          data-testid="ArrowDownwardIcon"
-                          focusable="false"
-                          viewBox="0 0 24 24"
+                        <th
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          data-slot="table-head"
+                          style="width: 35%;"
                         >
-                          <path
-                            d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                          />
-                        </svg>
-                      </span>
-                    </th>
-                    <th
-                      class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-6wrafk-MuiTableCell-root"
-                      scope="col"
-                    >
-                      <span
-                        class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc mui-style-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
-                        role="button"
-                        tabindex="0"
-                      >
-                        Price
-                        <svg
-                          aria-hidden="true"
-                          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc mui-style-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                          data-testid="ArrowDownwardIcon"
-                          focusable="false"
-                          viewBox="0 0 24 24"
+                          <span
+                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            role="button"
+                            tabindex="0"
+                          >
+                            Asset
+                          </span>
+                        </th>
+                        <th
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          data-slot="table-head"
+                          style="width: 16%; text-align: right;"
                         >
-                          <path
-                            d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                          />
-                        </svg>
-                      </span>
-                    </th>
-                    <th
-                      class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-6wrafk-MuiTableCell-root"
-                      scope="col"
-                    >
-                      <span
-                        class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc mui-style-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
-                        role="button"
-                        tabindex="0"
-                      >
-                        Balance
-                        <svg
-                          aria-hidden="true"
-                          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc mui-style-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                          data-testid="ArrowDownwardIcon"
-                          focusable="false"
-                          viewBox="0 0 24 24"
+                          <span
+                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            role="button"
+                            tabindex="0"
+                          >
+                            Price
+                          </span>
+                        </th>
+                        <th
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          data-slot="table-head"
+                          style="width: 16%; text-align: right;"
                         >
-                          <path
-                            d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                          />
-                        </svg>
-                      </span>
-                    </th>
-                    <th
-                      class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-6wrafk-MuiTableCell-root"
-                      scope="col"
-                    >
-                      <span
-                        class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc mui-style-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
-                        role="button"
-                        tabindex="0"
-                      >
-                        <span
-                          aria-label="Based on total portfolio value"
-                          class=""
-                          data-mui-internal-clone-element="true"
+                          <span
+                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            role="button"
+                            tabindex="0"
+                          >
+                            Balance
+                          </span>
+                        </th>
+                        <th
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          data-slot="table-head"
+                          style="width: 16%; text-align: right;"
                         >
-                          Weight
-                        </span>
-                        <svg
-                          aria-hidden="true"
-                          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc mui-style-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                          data-testid="ArrowDownwardIcon"
-                          focusable="false"
-                          viewBox="0 0 24 24"
+                          <span
+                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            role="button"
+                            tabindex="0"
+                          >
+                            <span
+                              data-slot="tooltip-trigger"
+                              id="base-ui-_r_5_"
+                            >
+                              Weight
+                            </span>
+                          </span>
+                        </th>
+                        <th
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          data-slot="table-head"
+                          style="width: 17%; text-align: right;"
                         >
-                          <path
-                            d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                          />
-                        </svg>
-                      </span>
-                    </th>
-                    <th
-                      class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-8owqfo-MuiTableCell-root"
-                      scope="col"
-                    >
-                      <span
-                        class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc mui-style-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
-                        role="button"
-                        tabindex="0"
-                      >
-                        Value
-                        <svg
-                          aria-hidden="true"
-                          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc mui-style-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                          data-testid="ArrowDownwardIcon"
-                          focusable="false"
-                          viewBox="0 0 24 24"
+                          <span
+                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            role="button"
+                            tabindex="0"
+                          >
+                            Value
+                          </span>
+                        </th>
+                        <th
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          data-slot="table-head"
+                          style="width: 86px; text-align: right;"
                         >
-                          <path
-                            d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                          />
-                        </svg>
-                      </span>
-                    </th>
-                    <th
-                      class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-11b8h52-MuiTableCell-root"
-                      scope="col"
+                          <span
+                            class="text-sm"
+                          >
+                            Actions
+                          </span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody
+                      class="[&_tr:last-child]:border-0 tableBody"
+                      data-slot="table-body"
                     >
-                      <span
-                        class="MuiBox-root mui-style-1kuy7z7"
+                      <tr
+                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                        data-slot="table-row"
+                        data-testid="table-row"
+                        tabindex="-1"
                       >
-                        Actions
-                      </span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody
-                  class="MuiTableBody-root tableBody mui-style-hvwm6q-MuiTableBody-root"
-                >
-                  <tr
-                    class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
-                    data-testid="table-row"
-                    tabindex="-1"
-                  >
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-asset"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-asset"
                         >
                           <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                            class="overflow-hidden transition-all"
                           >
                             <div
                               class="token"
                             >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 26px; height: 26px;"
+                              <div
+                                class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                                data-slot="skeleton"
                               />
-                              <p
-                                class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                              <div
+                                class="m-0 text-base leading-6 font-normal"
+                                data-slot="typography"
+                                data-variant="paragraph"
                               >
-                                <span
-                                  class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                  style="width: 80px;"
+                                <div
+                                  class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
+                                  data-slot="skeleton"
                                 />
-                              </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-price"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-price"
                         >
                           <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-balance"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-weight"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-value"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-actions"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                            class="overflow-hidden transition-all"
                           >
                             <div
-                              class="MuiStack-root mui-style-1hx50e8-MuiStack-root"
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
                             >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 28px; height: 28px;"
-                              />
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 28px; height: 28px;"
-                              />
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 24px; height: 24px;"
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
                               />
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr
-                    class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
-                    data-testid="table-row"
-                    tabindex="-1"
-                  >
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-asset"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-balance"
                         >
                           <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-weight"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-value"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-actions"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="flex flex-row justify-end gap-2"
+                            >
+                              <div
+                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr
+                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                        data-slot="table-row"
+                        data-testid="table-row"
+                        tabindex="-1"
+                      >
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-asset"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
                           >
                             <div
                               class="token"
                             >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 26px; height: 26px;"
+                              <div
+                                class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                                data-slot="skeleton"
                               />
-                              <p
-                                class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                              <div
+                                class="m-0 text-base leading-6 font-normal"
+                                data-slot="typography"
+                                data-variant="paragraph"
                               >
-                                <span
-                                  class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                  style="width: 80px;"
+                                <div
+                                  class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
+                                  data-slot="skeleton"
                                 />
-                              </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-price"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-price"
                         >
                           <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-balance"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-weight"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-value"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-actions"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                            class="overflow-hidden transition-all"
                           >
                             <div
-                              class="MuiStack-root mui-style-1hx50e8-MuiStack-root"
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
                             >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 28px; height: 28px;"
-                              />
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 28px; height: 28px;"
-                              />
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 24px; height: 24px;"
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
                               />
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr
-                    class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
-                    data-testid="table-row"
-                    tabindex="-1"
-                  >
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-asset"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-balance"
                         >
                           <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-weight"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-value"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-actions"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="flex flex-row justify-end gap-2"
+                            >
+                              <div
+                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr
+                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                        data-slot="table-row"
+                        data-testid="table-row"
+                        tabindex="-1"
+                      >
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-asset"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
                           >
                             <div
                               class="token"
                             >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 26px; height: 26px;"
+                              <div
+                                class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                                data-slot="skeleton"
                               />
-                              <p
-                                class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                              <div
+                                class="m-0 text-base leading-6 font-normal"
+                                data-slot="typography"
+                                data-variant="paragraph"
                               >
-                                <span
-                                  class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                  style="width: 80px;"
+                                <div
+                                  class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
+                                  data-slot="skeleton"
                                 />
-                              </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-price"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-price"
                         >
                           <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-balance"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-weight"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-value"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-                            >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
-                                style="width: 32px;"
-                              />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                      data-testid="table-cell-actions"
-                    >
-                      <div
-                        class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                        style="min-height: 0px;"
-                      >
-                        <div
-                          class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                        >
-                          <div
-                            class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                            class="overflow-hidden transition-all"
                           >
                             <div
-                              class="MuiStack-root mui-style-1hx50e8-MuiStack-root"
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
                             >
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 28px; height: 28px;"
-                              />
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 28px; height: 28px;"
-                              />
-                              <span
-                                class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
-                                style="width: 24px; height: 24px;"
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
                               />
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-balance"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-weight"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-value"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          data-slot="table-cell"
+                          data-testid="table-cell-actions"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="flex flex-row justify-end gap-2"
+                            >
+                              <div
+                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div
+                class="flex h-[52px] items-center rounded-b-3xl rounded-t-none border-t border-[var(--color-background-main)] bg-[var(--color-background-paper)] px-4"
+              />
             </div>
-            <div
-              class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root mui-style-wm16xp-MuiPaper-root"
-              style="--Paper-shadow: none;"
-            />
           </div>
         </div>
       </div>

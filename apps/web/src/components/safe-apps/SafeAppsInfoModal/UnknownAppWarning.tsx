@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Box, Checkbox, FormControlLabel, Typography } from '@mui/material'
-import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined'
-import { lightPalette } from '@safe-global/theme/palettes'
+import { TriangleAlert } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Field, FieldLabel } from '@/components/ui/field'
 import Domain from './Domain'
 
 type UnknownAppWarningProps = {
@@ -18,38 +19,39 @@ const UnknownAppWarning = ({ url, onHideWarning }: UnknownAppWarningProps): Reac
   }
 
   return (
-    <Box display="flex" flexDirection="column" height="100%" alignItems="center">
-      <Box display="block" alignItems="center" mt={6}>
-        <WarningAmberOutlinedIcon fontSize="large" color="warning" />
-        <Typography variant="h3" fontWeight={700} mt={2} color={lightPalette.warning.main}>
+    <div className="flex h-full flex-col items-center">
+      <div className="mt-12 block items-center">
+        <TriangleAlert className="size-9 text-[var(--color-warning-main)]" />
+        <Typography variant="h3" className="mt-4 text-[var(--color-warning-main)]">
           Warning
         </Typography>
-      </Box>
-      <Typography my={2} fontWeight={700} color={lightPalette.warning.main}>
+      </div>
+      <Typography variant="paragraph-bold" className="my-4 text-[var(--color-warning-main)]">
         The application you are trying to access is not in the default Safe Apps list
       </Typography>
 
-      <Typography my={2} textAlign="center">
+      <Typography className="my-4 text-center">
         Check the link you are using and ensure that it comes from a source you trust
       </Typography>
 
       {url && <Domain url={url} showInOneLine />}
 
       {onHideWarning && (
-        <Box mt={2}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={toggleHideWarning}
-                onChange={handleToggleWarningPreference}
-                name="Warning message preference"
-              />
-            }
-            label="Don't show this warning again"
-          />
-        </Box>
+        <div className="mt-4">
+          <Field orientation="horizontal">
+            <Checkbox
+              id="hide-warning"
+              name="Warning message preference"
+              checked={toggleHideWarning}
+              onCheckedChange={handleToggleWarningPreference}
+            />
+            <FieldLabel htmlFor="hide-warning" className="font-normal">
+              Don&apos;t show this warning again
+            </FieldLabel>
+          </Field>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 

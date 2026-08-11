@@ -1,18 +1,10 @@
 import { useMemo, type ReactElement } from 'react'
 import { useForm, Controller, FormProvider } from 'react-hook-form'
-import {
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  TextField,
-  MenuItem,
-  Box,
-  Grid,
-  SvgIcon,
-  FormControl,
-  Alert,
-} from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Alert } from '@/components/ui/alert'
 import { subMonths, startOfYear, isBefore, isAfter, startOfDay, addMonths, endOfDay } from 'date-fns'
 import ExportIcon from '@/public/images/common/export.svg'
 import UpdateIcon from '@/public/images/notifications/update.svg'
@@ -107,7 +99,7 @@ const CsvTxExportModal = ({ onClose, onExport, hasActiveFilter }: CsvTxExportMod
         groupKey: 'export-csv-started',
         title: 'Generating CSV export',
         message: 'This might take a few minutes.',
-        icon: <SvgIcon component={UpdateIcon} inheritViewBox fontSize="inherit" />,
+        icon: <UpdateIcon />,
       }),
     )
   }
@@ -183,7 +175,7 @@ const CsvTxExportModal = ({ onClose, onExport, hasActiveFilter }: CsvTxExportMod
       onClose={onClose}
       dialogTitle={
         <>
-          <SvgIcon component={ExportIcon} inheritViewBox sx={{ mr: 1 }} />
+          <ExportIcon className="mr-2 inline size-4" />
           Export CSV
         </>
       }
@@ -192,81 +184,76 @@ const CsvTxExportModal = ({ onClose, onExport, hasActiveFilter }: CsvTxExportMod
     >
       <FormProvider {...methods}>
         <form onSubmit={onSubmit}>
-          <DialogContent sx={{ p: '24px !important' }}>
-            <Typography mb={3}>
+          <div className="p-6">
+            <Typography className="mb-6">
               The CSV includes transactions from the selected period, suitable for reporting.
             </Typography>
 
             {hasActiveFilter && (
-              <Alert severity="info" color="background" sx={{ mb: 3 }}>
+              <Alert className="mb-6 bg-[var(--color-background-main)]">
                 Transaction history filters won&apos;t apply here.
               </Alert>
             )}
 
-            <FormControl fullWidth sx={{ mb: 1 }}>
+            <div className="mb-2 flex w-full flex-col gap-1.5">
+              <Label htmlFor="csv-export-range">Date range</Label>
               <Controller
                 name={CsvTxExportField.RANGE}
                 control={control}
                 render={({ field }) => (
-                  <TextField select focused={false} label="Date range" fullWidth {...field}>
-                    {Object.values(DateRangeOption).map((option) => (
-                      <MenuItem key={option} value={option}>
-                        {DATE_RANGE_LABELS[option]}
-                      </MenuItem>
-                    ))}
-                  </TextField>
+                  <Select value={field.value || null} onValueChange={(value) => field.onChange(value ?? '')}>
+                    <SelectTrigger id="csv-export-range" aria-label="Date range" className="w-full">
+                      <SelectValue placeholder="Date range" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.values(DateRangeOption).map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {DATE_RANGE_LABELS[option]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 )}
               />
-            </FormControl>
+            </div>
 
             {selectedRange === DateRangeOption.CUSTOM && (
-              <Box mt={2} mb={1} display="flex" flexDirection="column" gap={3}>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} md={6}>
-                    <DatePickerInput
-                      name={CsvTxExportField.FROM}
-                      label="From"
-                      deps={[CsvTxExportField.TO]}
-                      validate={(val) => {
-                        const toDate = getValues(CsvTxExportField.TO)
-                        if (val && toDate && isBefore(startOfDay(toDate), startOfDay(val))) {
-                          return 'Must be before "To" date'
-                        }
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <DatePickerInput
-                      name={CsvTxExportField.TO}
-                      label="To"
-                      deps={[CsvTxExportField.FROM]}
-                      validate={(val) => {
-                        const fromDate = getValues(CsvTxExportField.FROM)
-                        if (val && fromDate && isAfter(startOfDay(fromDate), startOfDay(val))) {
-                          return 'Must be after "From" date'
-                        }
-                      }}
-                    />
-                  </Grid>
-                </Grid>
+              <div className="mt-4 mb-2 flex flex-col gap-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <DatePickerInput
+                    name={CsvTxExportField.FROM}
+                    label="From"
+                    deps={[CsvTxExportField.TO]}
+                    validate={(val) => {
+                      const toDate = getValues(CsvTxExportField.TO)
+                      if (val && toDate && isBefore(startOfDay(toDate), startOfDay(val))) {
+                        return 'Must be before "To" date'
+                      }
+                    }}
+                  />
+                  <DatePickerInput
+                    name={CsvTxExportField.TO}
+                    label="To"
+                    deps={[CsvTxExportField.FROM]}
+                    validate={(val) => {
+                      const fromDate = getValues(CsvTxExportField.FROM)
+                      if (val && fromDate && isAfter(startOfDay(fromDate), startOfDay(val))) {
+                        return 'Must be after "From" date'
+                      }
+                    }}
+                  />
+                </div>
                 <YearRangeAlert isOverYear={isOverYear} />
-              </Box>
+              </div>
             )}
-          </DialogContent>
+          </div>
 
-          <DialogActions sx={{ justifyContent: 'flex-end', '&::after': { display: 'none' } }}>
-            <Button
-              type="submit"
-              variant="contained"
-              size="small"
-              sx={{ height: 36 }}
-              disabled={isExportDisabled}
-              disableElevation
-              startIcon={<SvgIcon component={ExportIcon} inheritViewBox fontSize="small" />}
-            >
+          <div className="flex justify-end p-4">
+            <Button type="submit" variant="default" size="sm" disabled={isExportDisabled}>
+              <ExportIcon className="size-4" />
               Export
             </Button>
-          </DialogActions>
+          </div>
         </form>
       </FormProvider>
     </ModalDialog>
@@ -274,17 +261,17 @@ const CsvTxExportModal = ({ onClose, onExport, hasActiveFilter }: CsvTxExportMod
 }
 
 const YearRangeAlert = ({ isOverYear }: { isOverYear: boolean }): ReactElement => {
-  const { severity, message } = isOverYear
+  const { variant, message } = isOverYear
     ? {
-        severity: 'warning' as const,
+        variant: 'warning' as const,
         message: 'Date range cannot exceed 12 months.',
       }
     : {
-        severity: 'info' as const,
+        variant: 'default' as const,
         message: 'You can select up to 12 months.',
       }
 
-  return <Alert severity={severity}>{message}</Alert>
+  return <Alert variant={variant}>{message}</Alert>
 }
 
 export default CsvTxExportModal

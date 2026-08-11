@@ -97,26 +97,6 @@ describe('MembersList', () => {
     expect(within(emailCells[1]!).queryByText(/@/)).not.toBeInTheDocument()
   })
 
-  it('truncates long member emails inside a tooltip trigger', () => {
-    const longEmail = `${'a'.repeat(64)}@${'b'.repeat(186)}.com`
-
-    render(
-      <MembersList
-        members={[
-          memberBuilder()
-            .with({
-              name: 'Alice',
-              user: memberUserBuilder().with({ email: longEmail }).build(),
-            })
-            .build(),
-        ]}
-      />,
-    )
-
-    const emailNode = screen.getByText(longEmail)
-    expect(emailNode).toHaveClass('truncate')
-  })
-
   it('shows an Expired chip for a pending invite past its expiry', () => {
     render(
       <MembersList

@@ -1,14 +1,11 @@
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
+import { Typography } from '@/components/ui/typography'
 import type { ReactElement } from 'react'
 
 import ModalDialog from '@/components/common/ModalDialog'
+import DialogActions from '@/components/common/DialogActions'
 import { useAppDispatch } from '@/store'
 import useAddressBook from '@/hooks/useAddressBook'
-import Track from '@/components/common/Track'
-import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
+import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
 import router from 'next/router'
 import { removeAddressBookEntry } from '@/store/addressBookSlice'
@@ -35,6 +32,7 @@ const SafeListRemoveDialog = ({
   const safe = addressBook?.[address] || address
 
   const handleConfirm = async () => {
+    trackEvent({ ...OVERVIEW_EVENTS.DELETED_FROM_WATCHLIST, label: trackingLabel })
     // When removing the current counterfactual safe, redirect to the accounts page
     if (safeAddress === address && safeChainId === chainId) {
       await router.push(AppRoutes.welcome.accounts)
@@ -47,22 +45,21 @@ const SafeListRemoveDialog = ({
 
   return (
     <ModalDialog open onClose={handleClose} dialogTitle="Delete entry" chainId={chainId}>
-      <DialogContent sx={{ p: '24px !important' }}>
+      <div className="p-6">
         <Typography>
           Are you sure you want to remove the <b>{safe}</b> account?
         </Typography>
-      </DialogContent>
+      </div>
 
-      <DialogActions>
-        <Button data-testid="cancel-btn" onClick={handleClose}>
-          Cancel
-        </Button>
-        <Track {...OVERVIEW_EVENTS.DELETED_FROM_WATCHLIST} label={trackingLabel}>
-          <Button data-testid="delete-btn" onClick={handleConfirm} variant="danger" disableElevation>
-            Delete
-          </Button>
-        </Track>
-      </DialogActions>
+      <DialogActions
+        className="p-4 pt-2"
+        onCancel={handleClose}
+        cancelTestId="cancel-btn"
+        confirmLabel="Delete"
+        confirmTestId="delete-btn"
+        confirmDestructive
+        onConfirm={handleConfirm}
+      />
     </ModalDialog>
   )
 }

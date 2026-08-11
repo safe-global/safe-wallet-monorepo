@@ -1,18 +1,27 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./CustomTooltip.stories BottomPlacement 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <button
-    aria-label="Tooltip on bottom"
-    class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary mui-style-1ndpwxp-MuiButtonBase-root-MuiButton-root"
-    data-mui-internal-clone-element="true"
-    tabindex="0"
-    type="button"
+  <div
+    class="shadcn-scope"
   >
-    Bottom placement
-  </button>
+    <span
+      class="inline-flex"
+      data-slot="tooltip-trigger"
+      id="base-ui-_r_1_"
+    >
+      <button
+        class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+        data-slot="button"
+        tabindex="0"
+        type="button"
+      >
+        Bottom placement
+      </button>
+    </span>
+  </div>
 </div>
 `;
 
@@ -20,15 +29,24 @@ exports[`./CustomTooltip.stories Default 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <button
-    aria-label="This is a tooltip"
-    class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary mui-style-1ndpwxp-MuiButtonBase-root-MuiButton-root"
-    data-mui-internal-clone-element="true"
-    tabindex="0"
-    type="button"
+  <div
+    class="shadcn-scope"
   >
-    Hover me
-  </button>
+    <span
+      class="inline-flex"
+      data-slot="tooltip-trigger"
+      id="base-ui-_r_3_"
+    >
+      <button
+        class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+        data-slot="button"
+        tabindex="0"
+        type="button"
+      >
+        Hover me
+      </button>
+    </span>
+  </div>
 </div>
 `;
 
@@ -36,15 +54,24 @@ exports[`./CustomTooltip.stories LeftPlacement 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <button
-    aria-label="Tooltip on left"
-    class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary mui-style-1ndpwxp-MuiButtonBase-root-MuiButton-root"
-    data-mui-internal-clone-element="true"
-    tabindex="0"
-    type="button"
+  <div
+    class="shadcn-scope"
   >
-    Left placement
-  </button>
+    <span
+      class="inline-flex"
+      data-slot="tooltip-trigger"
+      id="base-ui-_r_5_"
+    >
+      <button
+        class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+        data-slot="button"
+        tabindex="0"
+        type="button"
+      >
+        Left placement
+      </button>
+    </span>
+  </div>
 </div>
 `;
 
@@ -52,15 +79,24 @@ exports[`./CustomTooltip.stories LongContent 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <button
-    aria-label="This is a much longer tooltip that contains more detailed information about a particular feature or functionality."
-    class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary mui-style-1ndpwxp-MuiButtonBase-root-MuiButton-root"
-    data-mui-internal-clone-element="true"
-    tabindex="0"
-    type="button"
+  <div
+    class="shadcn-scope"
   >
-    Long tooltip
-  </button>
+    <span
+      class="inline-flex"
+      data-slot="tooltip-trigger"
+      id="base-ui-_r_7_"
+    >
+      <button
+        class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+        data-slot="button"
+        tabindex="0"
+        type="button"
+      >
+        Long tooltip
+      </button>
+    </span>
+  </div>
 </div>
 `;
 
@@ -68,15 +104,24 @@ exports[`./CustomTooltip.stories RightPlacement 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <button
-    aria-label="Tooltip on right"
-    class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary mui-style-1ndpwxp-MuiButtonBase-root-MuiButton-root"
-    data-mui-internal-clone-element="true"
-    tabindex="0"
-    type="button"
+  <div
+    class="shadcn-scope"
   >
-    Right placement
-  </button>
+    <span
+      class="inline-flex"
+      data-slot="tooltip-trigger"
+      id="base-ui-_r_9_"
+    >
+      <button
+        class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+        data-slot="button"
+        tabindex="0"
+        type="button"
+      >
+        Right placement
+      </button>
+    </span>
+  </div>
 </div>
 `;
 
@@ -84,15 +129,24 @@ exports[`./CustomTooltip.stories TopPlacement 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <button
-    aria-label="Tooltip on top"
-    class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary mui-style-1ndpwxp-MuiButtonBase-root-MuiButton-root"
-    data-mui-internal-clone-element="true"
-    tabindex="0"
-    type="button"
+  <div
+    class="shadcn-scope"
   >
-    Top placement
-  </button>
+    <span
+      class="inline-flex"
+      data-slot="tooltip-trigger"
+      id="base-ui-_r_b_"
+    >
+      <button
+        class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+        data-slot="button"
+        tabindex="0"
+        type="button"
+      >
+        Top placement
+      </button>
+    </span>
+  </div>
 </div>
 `;
 
@@ -100,14 +154,24 @@ exports[`./CustomTooltip.stories WithComplexContent 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <button
-    class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedError MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorError MuiButton-root MuiButton-contained MuiButton-containedError MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorError mui-style-1a8kwhc-MuiButtonBase-root-MuiButton-root"
-    data-mui-internal-clone-element="true"
-    tabindex="0"
-    type="button"
+  <div
+    class="shadcn-scope"
   >
-    Delete
-  </button>
+    <span
+      class="inline-flex"
+      data-slot="tooltip-trigger"
+      id="base-ui-_r_d_"
+    >
+      <button
+        class="cursor-pointer aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30 h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+        data-slot="button"
+        tabindex="0"
+        type="button"
+      >
+        Delete
+      </button>
+    </span>
+  </div>
 </div>
 `;
 
@@ -115,24 +179,47 @@ exports[`./CustomTooltip.stories WithIcon 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <button
-    aria-label="More information about this feature"
-    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-uneijd-MuiButtonBase-root-MuiIconButton-root"
-    data-mui-internal-clone-element="true"
-    tabindex="0"
-    type="button"
+  <div
+    class="shadcn-scope"
   >
-    <svg
-      aria-hidden="true"
-      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
-      data-testid="InfoIcon"
-      focusable="false"
-      viewBox="0 0 24 24"
+    <span
+      class="inline-flex"
+      data-slot="tooltip-trigger"
+      id="base-ui-_r_f_"
     >
-      <path
-        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m1 15h-2v-6h2zm0-8h-2V7h2z"
-      />
-    </svg>
-  </button>
+      <button
+        class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm"
+        data-slot="button"
+        tabindex="0"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-info"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="M12 16v-4"
+          />
+          <path
+            d="M12 8h.01"
+          />
+        </svg>
+      </button>
+    </span>
+  </div>
 </div>
 `;

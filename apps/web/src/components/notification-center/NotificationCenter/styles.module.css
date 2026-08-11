@@ -48,13 +48,16 @@
   color: var(--color-border-main);
 }
 
+/* inline-flex centring rather than text-align + a bare height: the digit's 16px line-height left it
+   sitting off-centre in the 18px pill. shrink-0 in spirit — the box is a fixed 18px either way. */
 .unreadCount {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: var(--color-secondary-light);
   border-radius: 6px;
   margin-left: 9px;
   color: var(--color-static-main);
-  text-align: center;
   width: 18px;
   height: 18px;
 }

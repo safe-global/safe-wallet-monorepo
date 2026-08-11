@@ -1,5 +1,9 @@
 import useWallet from '@/hooks/wallets/useWallet'
-import { CircularProgress, Typography, Button, CardActions, Divider, Alert } from '@mui/material'
+import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Alert } from '@/components/ui/alert'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -213,7 +217,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   return (
     <>
       <TxCard>
-        <Typography variant="body2">
+        <Typography variant="paragraph-small" className="block">
           This transaction batches a total of {params.txs.length} transactions from your queue into a single Ethereum
           transaction. Please check every included transaction carefully, especially if you have rejection transactions,
           and make sure you want to execute all of them. Included transactions are highlighted when you hover over the
@@ -228,7 +232,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
           <DecodedTxs txs={txsWithDetails} />
         </div>
 
-        <Divider sx={{ mt: 2, mx: -3 }} />
+        <Separator className="mt-4 -mx-6 w-auto" />
 
         <ConfirmationTitle variant={ConfirmationTitleTypes.execute} />
 
@@ -245,7 +249,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
           </>
         ) : null}
 
-        <Alert severity="warning">
+        <Alert variant="warning">
           Be aware that if any of the included transactions revert, none of them will be executed. This will result in
           the loss of the allocated transaction fees.
         </Alert>
@@ -253,23 +257,19 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
         <BatchErrorMessages estimationError={error} submitError={submitError} isRejectedByUser={isRejectedByUser} />
 
         <div>
-          <Divider className={commonCss.nestedDivider} sx={{ pt: 2 }} />
+          <div className="pt-4">
+            <Separator className={commonCss.nestedDivider} />
+          </div>
 
-          <CardActions>
+          <div className="flex items-center gap-2 p-2">
             <CheckWallet allowNonOwner={true} checkNetwork>
               {(isOk) => (
-                <Button
-                  variant="contained"
-                  type="submit"
-                  disabled={!isOk || submitDisabled}
-                  onClick={handleSubmit}
-                  sx={{ minWidth: '114px' }}
-                >
-                  {!isSubmittable ? <CircularProgress size={20} /> : 'Submit'}
+                <Button type="submit" size="submit" disabled={!isOk || submitDisabled} onClick={handleSubmit}>
+                  {!isSubmittable ? <Spinner className="size-5" /> : 'Submit'}
                 </Button>
               )}
             </CheckWallet>
-          </CardActions>
+          </div>
         </div>
       </TxCard>
     </>

@@ -1,4 +1,5 @@
-import { render, screen } from '@/tests/test-utils'
+import { act, render, screen, waitFor } from '@/tests/test-utils'
+import { userEvent } from '@testing-library/user-event'
 import TxNonce from '../index'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext, initialContext as initialTxFlowContext } from '@/components/tx-flow/TxFlowProvider'
@@ -74,18 +75,18 @@ describe('TxNonce', () => {
   describe('loading state', () => {
     it('shows a skeleton when nonce is undefined', () => {
       const { container } = renderTxNonce({ nonce: undefined })
-      // MUI Skeleton renders when nonce is undefined
-      expect(container.querySelector('.MuiSkeleton-root')).toBeInTheDocument()
+      // shadcn Skeleton renders when nonce is undefined
+      expect(container.querySelector('[data-slot="skeleton"]')).toBeInTheDocument()
     })
 
     it('shows a skeleton when recommendedNonce is undefined', () => {
       const { container } = renderTxNonce({ recommendedNonce: undefined })
-      expect(container.querySelector('.MuiSkeleton-root')).toBeInTheDocument()
+      expect(container.querySelector('[data-slot="skeleton"]')).toBeInTheDocument()
     })
 
     it('shows a skeleton when both nonce and recommendedNonce are undefined', () => {
       const { container } = renderTxNonce({ nonce: undefined, recommendedNonce: undefined })
-      expect(container.querySelector('.MuiSkeleton-root')).toBeInTheDocument()
+      expect(container.querySelector('[data-slot="skeleton"]')).toBeInTheDocument()
     })
   })
 
@@ -192,6 +193,39 @@ describe('TxNonce', () => {
       renderTxNonce({ nonce: 5, recommendedNonce: 5, isReadOnly: false }, false)
       expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
       expect(screen.getByText('5')).toBeInTheDocument()
+    })
+  })
+
+  describe('nonce dropdown', () => {
+    // Regression: the group labels ("Recommended nonce" / "Replace existing") are rendered
+    // directly inside the popup list. Base UI's GroupLabel requires a Combobox.Group ancestor
+    // for its context, so mounting the popup throws and the dropdown never opens.
+    it('opens the nonce dropdown when the input is clicked', async () => {
+      const user = userEvent.setup()
+      mockUsePreviousNonces.mockReturnValue([4, 3])
+      renderTxNonce({ nonce: 5, recommendedNonce: 5 })
+
+      await user.click(screen.getByRole('combobox'))
+
+      await waitFor(() => {
+        expect(screen.getByRole('listbox')).toBeInTheDocument()
+      })
+      expect(screen.getByText('Recommended nonce')).toBeInTheDocument()
+      expect(screen.getByText('Replace existing')).toBeInTheDocument()
+    })
+
+    it('opens the nonce dropdown on arrow down', async () => {
+      const user = userEvent.setup()
+      mockUsePreviousNonces.mockReturnValue([4, 3])
+      renderTxNonce({ nonce: 5, recommendedNonce: 5 })
+
+      const input = screen.getByRole('combobox')
+      await act(async () => input.focus())
+      await user.keyboard('{ArrowDown}')
+
+      await waitFor(() => {
+        expect(screen.getByRole('listbox')).toBeInTheDocument()
+      })
     })
   })
 

@@ -31,10 +31,10 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
-import { ArrowLeft, Info, Search, Plus, Settings2, Loader2 } from 'lucide-react'
+import { ArrowLeft, Info, Plus, Settings2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { SearchInput } from '@/components/ui/search-input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { SafeAccountsTable, type AccountLine, type SafeAccountColumnId } from '@/features/myAccounts'
 import ManageTrustedSafesContent from '@/components/common/TrustedSafesModal/ManageTrustedSafesContent'
@@ -354,7 +354,7 @@ const AddAccounts = ({
         <AdminOnlyWorkspaceTooltip isAdmin={isAdmin} side="bottom">
           <Button
             size="lg"
-            className="font-normal px-4 py-0"
+            className="font-normal"
             variant={buttonVariant}
             disabled={!isAdmin}
             onClick={() => {
@@ -377,19 +377,22 @@ const AddAccounts = ({
       )}
 
       <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
+        {/* eslint-disable-next-line no-restricted-syntax -- bespoke full-height dialog layout preserved from dev's #8271 redesign */}
         <DialogContent className="flex max-h-[90vh] w-full max-w-[min(900px,calc(100vw-2rem))] flex-col gap-0 p-0">
           {view === 'manage' ? (
             <>
+              {/* eslint-disable-next-line no-restricted-syntax -- bespoke dialog header (back button row + divider) from dev's #8271 redesign */}
               <DialogHeader className="shrink-0 flex-row items-center gap-2 border-b border-border px-6 pb-4 pt-6">
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
                   onClick={handleBack}
                   aria-label="Back"
                   data-testid="manage-trusted-back"
-                  className="rounded-md p-1 hover:bg-muted"
                 >
                   <ArrowLeft className="size-5" />
-                </button>
+                </Button>
                 <DialogTitle className="font-bold">Manage my account list</DialogTitle>
               </DialogHeader>
 
@@ -404,6 +407,7 @@ const AddAccounts = ({
             </>
           ) : (
             <>
+              {/* eslint-disable-next-line no-restricted-syntax -- bespoke dialog header divider/padding from dev's #8271 redesign */}
               <DialogHeader className="shrink-0 border-b border-border px-6 pb-4 pt-6">
                 <DialogTitle className="font-bold">My accounts</DialogTitle>
               </DialogHeader>
@@ -417,7 +421,7 @@ const AddAccounts = ({
                       <p className="text-sm text-muted-foreground">
                         This list protects you from impersonation. Anyone can create a Safe account listing your address
                         as a signer, so only accounts you&apos;ve confirmed appear here.{' '}
-                        <ExternalLink href={HELP_CENTER_URL} noIcon sx={{ textDecoration: 'underline' }}>
+                        <ExternalLink href={HELP_CENTER_URL} noIcon className="underline">
                           Learn more
                         </ExternalLink>
                       </p>
@@ -453,19 +457,15 @@ const AddAccounts = ({
                           </TooltipContent>
                         </Tooltip>
                       </div>
-                      <InputGroup className="flex-1 rounded-md bg-card">
-                        <InputGroupAddon>
-                          <Search className="size-4" />
-                        </InputGroupAddon>
-                        <InputGroupInput
-                          placeholder="by name, address or network"
-                          aria-label="Search Safe accounts by name, address or network"
-                          autoComplete="off"
-                          value={rawSearchQuery}
-                          onChange={(e) => setRawSearchQuery(e.target.value)}
-                          data-testid="add-accounts-search-input"
-                        />
-                      </InputGroup>
+                      <SearchInput
+                        className="flex-1"
+                        placeholder="by name, address or network"
+                        aria-label="Search Safe accounts by name, address or network"
+                        autoComplete="off"
+                        value={rawSearchQuery}
+                        onChange={(e) => setRawSearchQuery(e.target.value)}
+                        data-testid="add-accounts-search-input"
+                      />
                     </div>
                   )}
 

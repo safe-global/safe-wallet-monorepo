@@ -1,9 +1,6 @@
 import { render } from '@testing-library/react'
 import type { NextRouter } from 'next/router'
 import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime'
-import type { Theme } from '@mui/material/styles'
-import { ThemeProvider } from '@mui/material/styles'
-import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import { type RootState, makeStore, useHydrateStore, setStoreInstance } from '@/store'
 import { Provider } from 'react-redux'
 import type { RequestHandler } from 'msw'
@@ -48,11 +45,7 @@ const getProviders: (options: {
 
     return (
       <Provider store={store}>
-        <RouterContext.Provider value={mockRouter(routerProps)}>
-          <SafeThemeProvider mode="light">
-            {(safeTheme: Theme) => <ThemeProvider theme={safeTheme}>{children}</ThemeProvider>}
-          </SafeThemeProvider>
-        </RouterContext.Provider>
+        <RouterContext.Provider value={mockRouter(routerProps)}>{children}</RouterContext.Provider>
       </Provider>
     )
   }

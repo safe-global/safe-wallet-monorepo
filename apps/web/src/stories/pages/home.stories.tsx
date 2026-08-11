@@ -14,12 +14,6 @@ const meta = {
   loaders: [mswLoader],
   parameters: {
     layout: 'fullscreen',
-    chromatic: {
-      modes: {
-        'light-desktop': { theme: 'light', viewport: { width: 1280, height: 800 } },
-        'dark-desktop': { theme: 'dark', viewport: { width: 1280, height: 800 } },
-      },
-    },
   },
 } satisfies Meta<typeof Home>
 

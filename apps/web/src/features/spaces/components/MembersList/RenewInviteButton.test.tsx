@@ -90,7 +90,8 @@ describe('RenewInviteButton', () => {
 
     await userEvent.hover(screen.getByRole('button'))
 
-    expect(await screen.findByRole('tooltip', { name: 'Renew invitation and resend the email' })).toBeInTheDocument()
+    // Base UI tooltips do not expose role="tooltip"; assert on the visible tooltip text.
+    expect(await screen.findByText('Renew invitation and resend the email')).toBeInTheDocument()
   })
 
   it('shows the default tooltip when the invite has no email', async () => {
@@ -98,6 +99,6 @@ describe('RenewInviteButton', () => {
 
     await userEvent.hover(screen.getByRole('button'))
 
-    expect(await screen.findByRole('tooltip', { name: 'Renew invitation' })).toBeInTheDocument()
+    expect(await screen.findByText('Renew invitation')).toBeInTheDocument()
   })
 })

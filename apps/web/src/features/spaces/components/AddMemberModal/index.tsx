@@ -1,20 +1,13 @@
 import { type ReactElement, useCallback, useEffect, useState } from 'react'
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  DialogActions,
-  DialogContent,
-  Stack,
-  SvgIcon,
-  Typography,
-} from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
+import DialogActions from '@/components/common/DialogActions'
 import memberIcon from '@/public/images/spaces/member.svg'
 import adminIcon from '@/public/images/spaces/admin.svg'
-import CheckIcon from '@mui/icons-material/Check'
+import { Typography } from '@/components/ui/typography'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import css from './styles.module.css'
 import { useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId, MemberRole } from '@/features/spaces'
@@ -42,35 +35,31 @@ import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 export const RoleMenuItem = ({
   role,
   hasDescription = false,
-  selected = false,
 }: {
   role: MemberRole
   hasDescription?: boolean
-  selected?: boolean
 }): ReactElement => {
   const isAdmin = role === MemberRole.ADMIN
+  const Icon = isAdmin ? adminIcon : memberIcon
 
   return (
-    <Box width="100%" alignItems="center" className={css.roleMenuItem}>
-      <Box className={css.roleIcon}>
-        <SvgIcon mr={1} component={isAdmin ? adminIcon : memberIcon} inheritViewBox fontSize="small" />
-      </Box>
-      <Typography gridArea="title" fontWeight={hasDescription ? 'bold' : undefined}>
+    <div className={cn('w-full items-center', css.roleMenuItem)}>
+      <div className="flex items-center" style={{ gridArea: 'icon' }}>
+        <Icon className="size-4" />
+      </div>
+      <Typography variant={hasDescription ? 'paragraph-bold' : 'paragraph'} style={{ gridArea: 'title' }}>
         {isAdmin ? 'Admin' : 'Member'}
       </Typography>
       {hasDescription && (
-        <>
-          <Box className={css.roleDescription}>
-            <Typography variant="body2">
-              {isAdmin ? 'Admins can create and delete spaces, invite members, and more.' : 'Can view the space data.'}
-            </Typography>
-          </Box>
-          <Box className={selected ? css.roleCheckIcon : css.roleCheckIconHidden}>
-            <CheckIcon fontSize="small" className={css.roleCheckSvg} />
-          </Box>
-        </>
+        <div style={{ gridArea: 'description' }}>
+          <Typography variant="paragraph-small" className="max-w-[300px] break-words whitespace-normal">
+            {isAdmin
+              ? 'Admins can create and delete workspaces, invite members, and more.'
+              : 'Can view the workspace data.'}
+          </Typography>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 
@@ -82,6 +71,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [inviteMembers] = useMembersInviteUserV1Mutation()
   const addressBook = useAddressBook()
+  const isDarkMode = useDarkMode()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { data: session } = useAuthGetMeV1Query(undefined, { skip: !isUserSignedIn })
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
@@ -185,45 +175,45 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
 
   return (
     <ModalDialog open onClose={onClose} dialogTitle="Add member" hideChainIndicator>
-      <FormProvider {...methods}>
-        <form onSubmit={onSubmit}>
-          <DialogContent sx={{ overflow: 'visible', py: 2 }}>
-            <Typography mb={2}>Invite a member by email or wallet address.</Typography>
+      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+        <FormProvider {...methods}>
+          <form onSubmit={onSubmit}>
+            <div className="overflow-visible px-6 py-4">
+              <Typography variant="paragraph" className="mb-4">
+                Invite a member by email or wallet address.
+              </Typography>
 
-            <Stack spacing={3}>
-              <MemberInfoForm />
+              <div className="flex flex-col gap-6">
+                <MemberInfoForm />
 
-              <AddMemberInput
-                error={formState.errors.inviteeIdentifier?.message}
-                inputProps={inviteeIdentifierInputProps}
-                onSelectAddress={handleSelectAddress}
-                value={inviteeIdentifierValue}
-              />
-            </Stack>
+                <AddMemberInput
+                  error={formState.errors.inviteeIdentifier?.message}
+                  inputProps={inviteeIdentifierInputProps}
+                  onSelectAddress={handleSelectAddress}
+                  value={inviteeIdentifierValue}
+                />
+              </div>
 
-            {error && (
-              <Alert severity="error" sx={{ mt: 2 }}>
-                {error}
-              </Alert>
-            )}
-          </DialogContent>
+              {error && (
+                <Alert variant="destructive" className="mt-4">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+            </div>
 
-          <DialogActions>
-            <Button data-testid="cancel-btn" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              data-testid="add-member-modal-button"
-              type="submit"
-              variant="contained"
-              disabled={!formState.isValid || isSubmitting}
-              disableElevation
-            >
-              {isSubmitting ? <CircularProgress size={20} /> : 'Add member'}
-            </Button>
-          </DialogActions>
-        </form>
-      </FormProvider>
+            <DialogActions
+              className="px-6 pb-6"
+              onCancel={onClose}
+              cancelTestId="cancel-btn"
+              confirmType="submit"
+              confirmLabel="Add member"
+              confirmTestId="add-member-modal-button"
+              confirmDisabled={!formState.isValid}
+              confirmLoading={isSubmitting}
+            />
+          </form>
+        </FormProvider>
+      </div>
     </ModalDialog>
   )
 }

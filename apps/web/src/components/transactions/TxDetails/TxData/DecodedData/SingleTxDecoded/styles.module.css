@@ -1,13 +1,60 @@
 .summary {
   display: flex;
-  gap: 8px;
+  min-width: 0;
+  flex: 1;
   align-items: center;
+  gap: 8px;
+}
+
+.summaryIndex {
+  display: inline-flex;
+  min-width: 1rem;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.summaryLabel {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.875rem;
+  line-height: 1.25;
+}
+
+.groupedTrigger {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none;
+  background-color: transparent !important;
+}
+
+.groupedTrigger:hover {
+  background-color: color-mix(in srgb, var(--card) 72%, var(--muted) 28%) !important;
+}
+
+.groupedTriggerOpen {
+  background-color: var(--card) !important;
+}
+
+.outlinedTrigger {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none;
+  background-color: transparent !important;
+}
+
+.outlinedTrigger:hover {
+  background-color: transparent !important;
 }
 
 .actions {
   margin-left: auto;
-  border-left: 1px solid var(--color-border-light);
-  border-right: 1px solid var(--color-border-light);
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
   margin-right: 16px;
   padding: 8px;
   margin-top: -16px;

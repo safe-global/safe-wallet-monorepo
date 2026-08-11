@@ -22,7 +22,7 @@ const SelectAllConfirmDialog = ({
 }: SelectAllConfirmDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
-      <DialogContent className="max-w-[500px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Similar addresses detected</DialogTitle>
         </DialogHeader>

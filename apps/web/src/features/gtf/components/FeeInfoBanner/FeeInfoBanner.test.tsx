@@ -17,7 +17,7 @@ describe('FeeInfoBanner', () => {
   it('renders the banner when not dismissed', () => {
     render(<FeeInfoBanner />)
 
-    expect(screen.getByText('Pay fees directly from your Safe wallet.')).toBeInTheDocument()
+    expect(screen.getByText('Soon, fees will be paid from your Safe balance.')).toBeInTheDocument()
     expect(screen.getByText('No need to fund signing wallets')).toBeInTheDocument()
     expect(screen.getByText('Pay fees in any supported token')).toBeInTheDocument()
     expect(screen.getByText('Learn more')).toBeInTheDocument()

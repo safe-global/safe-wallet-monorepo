@@ -20,8 +20,21 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+export const Open: Story = {
+  render: () => (
+    <div className="flex min-h-32 items-end justify-center pb-2">
+      <Tooltip open>
+        <TooltipTrigger render={<Button>Hover me</Button>} />
+        <TooltipContent side="top">
+          <p>Tooltip content</p>
+        </TooltipContent>
+      </Tooltip>
+    </div>
+  ),
+}
+
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div style={{ display: 'block' }}>
       <div style={{ marginBottom: '2rem' }}>

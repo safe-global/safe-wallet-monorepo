@@ -6,13 +6,16 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 const GELATO = '0xaEf22e5f09980fC1Ba6F2ec3EC34c1B9aeC885b5'
 const ZERO = '0x0000000000000000000000000000000000000000'
 const GAS_TOKEN = ZERO
+const NATIVE_LOGO = 'https://example.com/pol.png'
+const ERC20_GAS_TOKEN = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'
 
 let mockRelayer: { type: string } | null = null
+let mockBalanceItems: Array<{ tokenInfo: { address: string; logoUri: string; symbol: string } }> = []
 
 jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: () => ({
     chainId: '137',
-    nativeCurrency: { symbol: 'POL', decimals: 18, logoUri: '' },
+    nativeCurrency: { symbol: 'POL', decimals: 18, logoUri: NATIVE_LOGO },
     features: ['GTF'],
     relayer: mockRelayer,
   }),
@@ -26,7 +29,7 @@ jest.mock('@/hooks/useSafeInfo', () => ({
 
 jest.mock('@/hooks/useBalances', () => ({
   __esModule: true,
-  default: () => ({ balances: { items: [] } }),
+  default: () => ({ balances: { items: mockBalanceItems } }),
 }))
 
 const mockUseGtfFeePreview = jest.fn()
@@ -54,7 +57,12 @@ jest.mock('@/components/common/EthHashInfo', () => ({
 jest.mock('@/components/transactions/HexEncodedData', () => ({
   HexEncodedData: ({ hexData }: { hexData: string }) => <span>{hexData}</span>,
 }))
-jest.mock('@/components/common/TokenIcon', () => ({ __esModule: true, default: () => null }))
+jest.mock('@/components/common/TokenIcon', () => ({
+  __esModule: true,
+  default: ({ logoUri, tokenSymbol }: { logoUri?: string; tokenSymbol?: string | null }) => (
+    <span data-testid="gas-token-icon" data-logo={logoUri} data-symbol={tokenSymbol} />
+  ),
+}))
 
 const baseSafeTxData = {
   to: '0x8b0aB586dF1Ca1f360cb26b34eEC2C3AF969E821',
@@ -146,5 +154,45 @@ describe('Receipt GTF fee preview', () => {
     expect(getByText('999')).toBeInTheDocument()
     expect(getByText('888')).toBeInTheDocument()
     expect(getByText('777')).toBeInTheDocument()
+  })
+})
+
+// The GasToken row shows the bare token address, which on its own says nothing about what is
+// actually being spent — the logo/symbol beside it is what identifies the token to the signer.
+describe('Receipt GasToken identity', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockRelayer = { type: 'RELAY_FEE' }
+    mockBalanceItems = []
+    mockUseGtfFeePreview.mockReturnValue({ data: undefined })
+  })
+
+  it("labels a native gas token with the chain's currency logo and symbol", () => {
+    const { getByTestId } = renderReceipt({})
+
+    const icon = getByTestId('gas-token-icon')
+    expect(icon).toHaveAttribute('data-logo', NATIVE_LOGO)
+    expect(icon).toHaveAttribute('data-symbol', 'POL')
+  })
+
+  it('labels an ERC-20 gas token with the held token logo and symbol', () => {
+    mockBalanceItems = [
+      { tokenInfo: { address: ERC20_GAS_TOKEN, logoUri: 'https://example.com/uni.png', symbol: 'UNI' } },
+    ]
+    const erc20Data = { ...baseSafeTxData, gasToken: ERC20_GAS_TOKEN }
+
+    const { getByTestId } = renderReceipt({ gtfSelectedGasToken: ERC20_GAS_TOKEN }, erc20Data)
+
+    const icon = getByTestId('gas-token-icon')
+    expect(icon).toHaveAttribute('data-logo', 'https://example.com/uni.png')
+    expect(icon).toHaveAttribute('data-symbol', 'UNI')
+  })
+
+  it('omits the icon for an ERC-20 gas token the Safe does not hold', () => {
+    const erc20Data = { ...baseSafeTxData, gasToken: ERC20_GAS_TOKEN }
+
+    const { queryByTestId } = renderReceipt({ gtfSelectedGasToken: ERC20_GAS_TOKEN }, erc20Data)
+
+    expect(queryByTestId('gas-token-icon')).not.toBeInTheDocument()
   })
 })

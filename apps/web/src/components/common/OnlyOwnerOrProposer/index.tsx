@@ -3,11 +3,13 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import useConnectWallet from '../ConnectWallet/useConnectWallet'
-import { Tooltip, type TooltipProps } from '@mui/material'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+
+type TooltipSide = 'top' | 'bottom' | 'left' | 'right'
 
 type OnlyOwnerOrProposerProps = {
   children: (ok: boolean) => ReactElement
-  placement?: TooltipProps['placement']
+  placement?: TooltipSide
 }
 
 enum Message {
@@ -34,8 +36,9 @@ const OnlyOwnerOrProposer = ({ children, placement = 'bottom' }: OnlyOwnerOrProp
   if (!message) return children(true)
 
   return (
-    <Tooltip title={message} placement={placement}>
-      <span onClick={wallet ? undefined : connectWallet}>{children(false)}</span>
+    <Tooltip>
+      <TooltipTrigger render={<span onClick={wallet ? undefined : connectWallet}>{children(false)}</span>} />
+      <TooltipContent side={placement}>{message}</TooltipContent>
     </Tooltip>
   )
 }

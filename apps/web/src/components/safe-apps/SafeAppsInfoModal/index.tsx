@@ -1,7 +1,8 @@
 import { memo, type ReactElement, useMemo, useState } from 'react'
-import { alpha, Box } from '@mui/system'
-import { Grid, LinearProgress } from '@mui/material'
+import { Progress as ProgressPrimitive } from '@base-ui/react/progress'
 
+import { cn } from '@/utils/cn'
+import { ProgressTrack, ProgressIndicator } from '@/components/ui/progress'
 import type { BrowserPermission } from '@/hooks/safe-apps/permissions'
 import Slider from './Slider'
 import AllowedFeaturesList from './AllowedFeaturesList'
@@ -85,6 +86,10 @@ const SafeAppsInfoModal = ({
   }
 
   const progressValue = useMemo(() => {
+    if (totalSlides <= 1) {
+      return 0
+    }
+
     return ((currentSlide + 1) * 100) / totalSlides
   }, [currentSlide, totalSlides])
 
@@ -110,47 +115,26 @@ const SafeAppsInfoModal = ({
   const origin = useMemo(() => getOrigin(appUrl), [appUrl])
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'column',
-        height: 'calc(100vh - 52px)',
-      }}
-    >
-      <Box
+    <div className="flex h-[calc(100vh-52px)] flex-col items-center justify-center">
+      <div
         data-testid="app-info-modal"
-        sx={({ palette }) => ({
-          width: '450px',
-          backgroundColor: palette.background.paper,
-          boxShadow: `1px 2px 10px 0 ${alpha(palette.text.primary, 0.18)}`,
-        })}
+        className="w-[450px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border bg-card shadow-lg"
       >
-        <LinearProgress
-          variant="determinate"
-          value={progressValue}
-          sx={({ palette }) => ({
-            height: '6px',
-            backgroundColor: palette.background.paper,
-            borderRadius: '8px 8px 0 0',
-            '> .MuiLinearProgress-bar': {
-              backgroundColor:
-                progressValue === 100 && shouldShowUnknownAppWarning ? palette.warning.main : palette.primary.main,
-              borderRadius: '8px',
-            },
-          })}
-        />
-        <Grid
-          container
-          direction="column"
-          sx={{
-            justifyContent: 'center',
-            alignItems: 'center',
-            textAlign: 'center',
-            p: 3,
-          }}
-        >
+        {totalSlides > 1 && (
+          <ProgressPrimitive.Root value={progressValue} className="block">
+            <ProgressTrack className="h-1.5 rounded-none bg-muted">
+              <ProgressIndicator
+                className={cn(
+                  'rounded-lg',
+                  progressValue === 100 && shouldShowUnknownAppWarning
+                    ? 'bg-[var(--color-warning-main)]'
+                    : 'bg-[var(--color-primary-main)]',
+                )}
+              />
+            </ProgressTrack>
+          </ProgressPrimitive.Root>
+        )}
+        <div className="flex flex-col p-6 text-center">
           <Slider onSlideChange={handleSlideChange}>
             {!isConsentAccepted && <LegalDisclaimerContent />}
 
@@ -163,9 +147,9 @@ const SafeAppsInfoModal = ({
 
             {shouldShowUnknownAppWarning && <UnknownAppWarning url={origin} onHideWarning={setHideWarning} />}
           </Slider>
-        </Grid>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   )
 }
 

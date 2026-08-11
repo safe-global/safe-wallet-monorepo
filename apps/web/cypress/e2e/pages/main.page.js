@@ -9,8 +9,8 @@ export const acceptSelectionStr = 'Save settings'
 // Common table selectors
 export const tableRow = '[data-testid="table-row"]'
 export const tableContainer = '[data-testid="table-container"]'
-export const nextPageBtn = 'button[aria-label="Go to next page"]'
-export const previousPageBtn = 'button[aria-label="Go to previous page"]'
+export const nextPageBtn = '[data-testid="next-page-btn"]'
+export const previousPageBtn = '[data-testid="prev-page-btn"]'
 
 // Common form input selectors
 export const nameInput = 'input[name="name"]'
@@ -72,6 +72,31 @@ export function injectChainFeature({ chainId, addFlag, removeFlag, dataEndpoint,
 
 export function checkElementBackgroundColor(element, color) {
   cy.get(element).should('have.css', 'background-color', color)
+}
+
+// Base UI select items only commit a click while highlighted: hover the item first,
+// wait for the highlight to land (tabindex=0), then click.
+// Center scroll keeps the item clear of the sticky scroll arrows.
+export function selectDropdownOption(itemSelector, text) {
+  cy.get(itemSelector).contains(text).closest(itemSelector).as('dropdownOption')
+  cy.get('@dropdownOption').trigger('mousemove', { scrollBehavior: 'center' })
+  cy.get('@dropdownOption').should('have.attr', 'tabindex', '0')
+  cy.get('@dropdownOption').click({ scrollBehavior: 'center' })
+}
+
+// Base UI attaches tooltip hover listeners in an effect after mount, so an early mouseenter
+// can be lost: re-trigger until this trigger reports its popup open (data-popup-open).
+export function hoverUntilTooltipOpen(getTrigger, retries = 5) {
+  const attempt = (left) => {
+    getTrigger().trigger('mouseenter', { force: true })
+    cy.wait(300)
+    getTrigger().then(($trigger) => {
+      if ($trigger.attr('data-popup-open') !== undefined) return
+      if (left <= 0) throw new Error('Tooltip never opened')
+      attempt(left - 1)
+    })
+  }
+  attempt(retries)
 }
 
 export function clickOnExecuteBtn() {

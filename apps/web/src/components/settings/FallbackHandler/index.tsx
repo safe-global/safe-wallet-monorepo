@@ -1,5 +1,6 @@
 import NextLink from 'next/link'
-import { Typography, Box, Grid, Paper, Link } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Link } from '@/components/ui/link'
 import semverSatisfies from 'semver/functions/satisfies'
 import type { ReactElement } from 'react'
 import classnames from 'classnames'
@@ -14,6 +15,7 @@ import { useHasUntrustedFallbackHandler } from '@/hooks/useHasUntrustedFallbackH
 import css from '../TransactionGuards/styles.module.css'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { useIsTWAPFallbackHandler } from '@/features/swap'
+import SettingsCard from '../SettingsCard'
 
 const FALLBACK_HANDLER_VERSION = '>=1.1.1'
 
@@ -31,10 +33,7 @@ export const FallbackHandlerWarning = ({
       {!!txBuilder && !!txBuilderLinkPrefix && (
         <>
           {` ${txBuilderLinkPrefix} `}
-          <NextLink href={txBuilder.link} passHref legacyBehavior>
-            <Link>Transaction Builder</Link>
-          </NextLink>
-          .
+          <Link render={<NextLink href={txBuilder.link} />}>Transaction Builder</Link>.
         </>
       )}
     </>
@@ -73,61 +72,41 @@ export const FallbackHandler = (): ReactElement | null => {
   ) : undefined
 
   return (
-    <Paper sx={{ padding: 4 }}>
-      <Grid
-        container
-        direction="row"
-        spacing={3}
-        sx={{
-          justifyContent: 'space-between',
-        }}
-      >
-        <Grid item lg={4} xs={12}>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-            }}
-          >
-            Fallback handler
-          </Typography>
-        </Grid>
+    <SettingsCard title="Fallback handler">
+      <div>
+        <Typography>
+          The fallback handler adds fallback logic for funtionality that may not be present in the Safe account
+          contract. Learn more about the fallback handler{' '}
+          <ExternalLink href={HelpCenterArticle.FALLBACK_HANDLER}>here</ExternalLink>
+        </Typography>
 
-        <Grid item xs>
-          <Box>
-            <Typography>
-              The fallback handler adds fallback logic for funtionality that may not be present in the Safe account
-              contract. Learn more about the fallback handler{' '}
-              <ExternalLink href={HelpCenterArticle.FALLBACK_HANDLER}>here</ExternalLink>
-            </Typography>
-
-            <Box
-              className={classnames(css.guardDisplay, {
-                [css.warning]: !hasFallbackHandler,
-                [css.info]: hasFallbackHandler && isUntrusted,
-              })}
-              sx={{ display: 'block !important' }}
+        <div
+          className={classnames(css.guardDisplay, '!block', {
+            [css.warning]: !hasFallbackHandler,
+            [css.info]: hasFallbackHandler && isUntrusted,
+          })}
+        >
+          {warning && (
+            <Typography
+              variant="paragraph-small"
+              className={classnames('block w-full', { 'mb-2': hasFallbackHandler })}
             >
-              {warning && (
-                <Typography variant="body2" width="100%" mb={hasFallbackHandler ? 1 : 0}>
-                  {warning}
-                </Typography>
-              )}
+              {warning}
+            </Typography>
+          )}
 
-              {safe.fallbackHandler && (
-                <EthHashInfo
-                  shortAddress={false}
-                  name={safe.fallbackHandler.name || fallbackHandlerDeployments?.contractName}
-                  address={safe.fallbackHandler.value}
-                  customAvatar={safe.fallbackHandler.logoUri || undefined}
-                  showCopyButton
-                  hasExplorer
-                />
-              )}
-            </Box>
-          </Box>
-        </Grid>
-      </Grid>
-    </Paper>
+          {safe.fallbackHandler && (
+            <EthHashInfo
+              shortAddress={false}
+              name={safe.fallbackHandler.name || fallbackHandlerDeployments?.contractName}
+              address={safe.fallbackHandler.value}
+              customAvatar={safe.fallbackHandler.logoUri || undefined}
+              showCopyButton
+              hasExplorer
+            />
+          )}
+        </div>
+      </div>
+    </SettingsCard>
   )
 }

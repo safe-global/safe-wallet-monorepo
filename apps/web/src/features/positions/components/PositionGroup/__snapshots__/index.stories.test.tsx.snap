@@ -1,97 +1,106 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./index.stories Default 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-7hn9i9-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiBox-root mui-style-1qm1lh"
+      class="max-w-[900px] rounded-lg bg-card p-4"
     >
       <div
-        class="MuiBox-root mui-style-dzaqf9"
+        class="mb-4"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-aapmsc-MuiPaper-root-MuiTableContainer-root"
-          data-testid="table-container"
-          style="--Paper-shadow: none;"
+          class="mb-4 w-full"
         >
-          <table
-            aria-labelledby="tableTitle"
-            class="MuiTable-root compactTable mui-style-14ipoqq-MuiTable-root"
+          <div
+            class="w-full overflow-x-auto bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
+            data-testid="table-container"
           >
-            <thead
-              class="MuiTableHead-root mui-style-1bxxo5-MuiTableHead-root"
+            <div
+              class="relative w-full overflow-x-auto"
+              data-slot="table-container"
             >
-              <tr
-                class="MuiTableRow-root MuiTableRow-head mui-style-ee4r5n-MuiTableRow-root"
+              <table
+                aria-labelledby="tableTitle"
+                class="w-full caption-bottom text-sm compactTable"
+                data-slot="table"
               >
-                <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-16mkdhd-MuiTableCell-root"
-                  scope="col"
+                <thead
+                  class="[&_tr]:border-b"
+                  data-slot="table-header"
                 >
-                  <span
-                    class="MuiBox-root mui-style-1kuy7z7"
+                  <tr
+                    class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                    data-slot="table-row"
                   >
-                    <p
-                      class="MuiTypography-root MuiTypography-body2 mui-style-df2485-MuiTypography-root"
+                    <th
+                      class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                      data-slot="table-head"
+                      style="width: 25%;"
                     >
-                      Supply
-                    </p>
-                  </span>
-                </th>
-                <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-14qoodj-MuiTableCell-root"
-                  scope="col"
+                      <span
+                        class="text-sm"
+                      >
+                        <span
+                          class="m-0 text-sm leading-5 font-semibold text-[var(--color-text-primary)]"
+                          data-slot="typography"
+                          data-variant="paragraph-small-bold"
+                        >
+                          Supply
+                        </span>
+                      </span>
+                    </th>
+                    <th
+                      class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                      data-slot="table-head"
+                      style="width: 35%; text-align: right;"
+                    >
+                      <span
+                        class="text-sm"
+                      >
+                        Balance
+                      </span>
+                    </th>
+                    <th
+                      class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                      data-slot="table-head"
+                      style="width: 40%; text-align: right;"
+                    >
+                      <span
+                        class="text-sm"
+                      >
+                        Value
+                      </span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  class="[&_tr:last-child]:border-0 tableBody"
+                  data-slot="table-body"
                 >
-                  <span
-                    class="MuiBox-root mui-style-1kuy7z7"
+                  <tr
+                    class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                    data-slot="table-row"
+                    data-testid="table-row"
+                    tabindex="-1"
                   >
-                    Balance
-                  </span>
-                </th>
-                <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-1lpfb9u-MuiTableCell-root"
-                  scope="col"
-                >
-                  <span
-                    class="MuiBox-root mui-style-1kuy7z7"
-                  >
-                    Value
-                  </span>
-                </th>
-              </tr>
-            </thead>
-            <tbody
-              class="MuiTableBody-root tableBody mui-style-hvwm6q-MuiTableBody-root"
-            >
-              <tr
-                class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
-                data-testid="table-row"
-                tabindex="-1"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                  data-testid="table-cell-name"
-                >
-                  <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                    style="min-height: 0px;"
-                  >
-                    <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    <td
+                      class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                      data-slot="table-cell"
+                      data-testid="table-cell-name"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="overflow-hidden transition-all"
                       >
                         <div
-                          class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
+                          class="flex items-center gap-2"
                         >
                           <div
-                            class="MuiBox-root mui-style-olq4e8"
+                            class="relative"
                           >
                             <iframe
                               height="32"
@@ -115,131 +124,122 @@ exports[`./index.stories Default 1`] = `
                               width="32"
                             />
                           </div>
-                          <div
-                            class="MuiBox-root mui-style-0"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body2 mui-style-1ct9qkn-MuiTypography-root"
+                          <div>
+                            <span
+                              class="m-0 text-sm leading-5 font-semibold"
+                              data-slot="typography"
+                              data-variant="paragraph-small-bold"
                             >
                               Wrapped Ether
-                            </p>
-                            <p
-                              class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                            </span>
+                            <span
+                              class="m-0 text-sm leading-5 font-normal block text-[var(--color-primary-light)]"
+                              data-slot="typography"
+                              data-variant="paragraph-small"
                             >
                               WETH
                                •  
                               Deposited
-                            </p>
+                            </span>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                  data-testid="table-cell-balance"
-                >
-                  <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                    style="min-height: 0px;"
-                  >
-                    <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    </td>
+                    <td
+                      class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                      data-slot="table-cell"
+                      data-testid="table-cell-balance"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="overflow-hidden transition-all"
                       >
                         <p
-                          class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
+                          class="m-0 text-base leading-6 font-normal block w-full text-right"
+                          data-slot="typography"
+                          data-variant="paragraph"
                         >
                           1.5
                            
                           WETH
                         </p>
                       </div>
-                    </div>
-                  </div>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                  data-testid="table-cell-value"
-                >
-                  <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                    style="min-height: 0px;"
-                  >
-                    <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    </td>
+                    <td
+                      class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                      data-slot="table-cell"
+                      data-testid="table-cell-value"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="overflow-hidden transition-all"
                       >
                         <div
-                          class="MuiBox-root mui-style-s2uf1z"
+                          class="text-right"
                         >
                           <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
                             <span
-                              aria-label="$ 5,475.00"
-                              class=""
-                              data-mui-internal-clone-element="true"
-                              style="white-space: nowrap;"
+                              class="whitespace-nowrap"
+                              data-slot="tooltip-trigger"
+                              id="base-ui-_r_1_"
                             >
-                              $ 5,475
+                              <span
+                                aria-hidden="true"
+                              >
+                                $ 5,475
+                              </span>
+                              <span
+                                class="sr-only"
+                              >
+                                $ 5,475.00
+                              </span>
                             </span>
                           </p>
                           <span
-                            class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
+                            class="m-0 text-xs leading-4 font-normal block"
+                            data-slot="typography"
+                            data-variant="paragraph-mini"
                           >
-                            <div
-                              aria-label="24h change"
-                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-w1uylf-MuiChip-root"
-                              data-mui-internal-clone-element="true"
+                            <span
+                              class="inline-flex w-fit items-center gap-1 whitespace-nowrap font-medium [&>svg]:size-3 [&>svg]:pointer-events-none text-foreground py-0.5 text-xs rounded-4xl bg-transparent px-0 pr-0 dark:bg-transparent"
+                              data-slot="tooltip-trigger"
+                              id="base-ui-_r_3_"
                             >
                               <mock-icon
-                                aria-hidden=""
-                                class="MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorSuccess mui-style-12cxu6e-MuiSvgIcon-root"
-                                focusable="false"
+                                class="h-[6px] w-[9px] text-[var(--color-success-main)]"
                               />
                               <span
-                                class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+                                class="text-[13px]"
                               >
                                 2.50%
                               </span>
-                            </div>
+                            </span>
                           </span>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
-                data-testid="table-row"
-                tabindex="-1"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                  data-testid="table-cell-name"
-                >
-                  <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                    style="min-height: 0px;"
+                    </td>
+                  </tr>
+                  <tr
+                    class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                    data-slot="table-row"
+                    data-testid="table-row"
+                    tabindex="-1"
                   >
-                    <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    <td
+                      class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                      data-slot="table-cell"
+                      data-testid="table-cell-name"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="overflow-hidden transition-all"
                       >
                         <div
-                          class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
+                          class="flex items-center gap-2"
                         >
                           <div
-                            class="MuiBox-root mui-style-olq4e8"
+                            class="relative"
                           >
                             <iframe
                               height="32"
@@ -263,131 +263,122 @@ exports[`./index.stories Default 1`] = `
                               width="32"
                             />
                           </div>
-                          <div
-                            class="MuiBox-root mui-style-0"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body2 mui-style-1ct9qkn-MuiTypography-root"
+                          <div>
+                            <span
+                              class="m-0 text-sm leading-5 font-semibold"
+                              data-slot="typography"
+                              data-variant="paragraph-small-bold"
                             >
                               USD Coin
-                            </p>
-                            <p
-                              class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                            </span>
+                            <span
+                              class="m-0 text-sm leading-5 font-normal block text-[var(--color-primary-light)]"
+                              data-slot="typography"
+                              data-variant="paragraph-small"
                             >
                               USDC
                                •  
                               Deposited
-                            </p>
+                            </span>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                  data-testid="table-cell-balance"
-                >
-                  <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                    style="min-height: 0px;"
-                  >
-                    <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    </td>
+                    <td
+                      class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                      data-slot="table-cell"
+                      data-testid="table-cell-balance"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="overflow-hidden transition-all"
                       >
                         <p
-                          class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
+                          class="m-0 text-base leading-6 font-normal block w-full text-right"
+                          data-slot="typography"
+                          data-variant="paragraph"
                         >
                           10,000
                            
                           USDC
                         </p>
                       </div>
-                    </div>
-                  </div>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                  data-testid="table-cell-value"
-                >
-                  <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                    style="min-height: 0px;"
-                  >
-                    <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    </td>
+                    <td
+                      class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                      data-slot="table-cell"
+                      data-testid="table-cell-value"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="overflow-hidden transition-all"
                       >
                         <div
-                          class="MuiBox-root mui-style-s2uf1z"
+                          class="text-right"
                         >
                           <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
                             <span
-                              aria-label="$ 10,000.00"
-                              class=""
-                              data-mui-internal-clone-element="true"
-                              style="white-space: nowrap;"
+                              class="whitespace-nowrap"
+                              data-slot="tooltip-trigger"
+                              id="base-ui-_r_5_"
                             >
-                              $ 10,000
+                              <span
+                                aria-hidden="true"
+                              >
+                                $ 10,000
+                              </span>
+                              <span
+                                class="sr-only"
+                              >
+                                $ 10,000.00
+                              </span>
                             </span>
                           </p>
                           <span
-                            class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
+                            class="m-0 text-xs leading-4 font-normal block"
+                            data-slot="typography"
+                            data-variant="paragraph-mini"
                           >
-                            <div
-                              aria-label="24h change"
-                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-w1uylf-MuiChip-root"
-                              data-mui-internal-clone-element="true"
+                            <span
+                              class="inline-flex w-fit items-center gap-1 whitespace-nowrap font-medium [&>svg]:size-3 [&>svg]:pointer-events-none text-foreground py-0.5 text-xs rounded-4xl bg-transparent px-0 pr-0 dark:bg-transparent"
+                              data-slot="tooltip-trigger"
+                              id="base-ui-_r_7_"
                             >
                               <mock-icon
-                                aria-hidden=""
-                                class="MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorSuccess mui-style-12cxu6e-MuiSvgIcon-root"
-                                focusable="false"
+                                class="h-[6px] w-[9px] text-[var(--color-success-main)]"
                               />
                               <span
-                                class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+                                class="text-[13px]"
                               >
                                 0.01%
                               </span>
-                            </div>
+                            </span>
                           </span>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
-                data-testid="table-row"
-                tabindex="-1"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                  data-testid="table-cell-name"
-                >
-                  <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                    style="min-height: 0px;"
+                    </td>
+                  </tr>
+                  <tr
+                    class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                    data-slot="table-row"
+                    data-testid="table-row"
+                    tabindex="-1"
                   >
-                    <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    <td
+                      class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                      data-slot="table-cell"
+                      data-testid="table-cell-name"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="overflow-hidden transition-all"
                       >
                         <div
-                          class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
+                          class="flex items-center gap-2"
                         >
                           <div
-                            class="MuiBox-root mui-style-olq4e8"
+                            class="relative"
                           >
                             <iframe
                               height="32"
@@ -411,131 +402,122 @@ exports[`./index.stories Default 1`] = `
                               width="32"
                             />
                           </div>
-                          <div
-                            class="MuiBox-root mui-style-0"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body2 mui-style-1ct9qkn-MuiTypography-root"
+                          <div>
+                            <span
+                              class="m-0 text-sm leading-5 font-semibold"
+                              data-slot="typography"
+                              data-variant="paragraph-small-bold"
                             >
                               Dai Stablecoin
-                            </p>
-                            <p
-                              class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                            </span>
+                            <span
+                              class="m-0 text-sm leading-5 font-normal block text-[var(--color-primary-light)]"
+                              data-slot="typography"
+                              data-variant="paragraph-small"
                             >
                               DAI
                                •  
                               Deposited
-                            </p>
+                            </span>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                  data-testid="table-cell-balance"
-                >
-                  <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                    style="min-height: 0px;"
-                  >
-                    <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    </td>
+                    <td
+                      class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                      data-slot="table-cell"
+                      data-testid="table-cell-balance"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="overflow-hidden transition-all"
                       >
                         <p
-                          class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
+                          class="m-0 text-base leading-6 font-normal block w-full text-right"
+                          data-slot="typography"
+                          data-variant="paragraph"
                         >
                           5,000
                            
                           DAI
                         </p>
                       </div>
-                    </div>
-                  </div>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                  data-testid="table-cell-value"
-                >
-                  <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                    style="min-height: 0px;"
-                  >
-                    <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    </td>
+                    <td
+                      class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                      data-slot="table-cell"
+                      data-testid="table-cell-value"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="overflow-hidden transition-all"
                       >
                         <div
-                          class="MuiBox-root mui-style-s2uf1z"
+                          class="text-right"
                         >
                           <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
                             <span
-                              aria-label="$ 5,000.00"
-                              class=""
-                              data-mui-internal-clone-element="true"
-                              style="white-space: nowrap;"
+                              class="whitespace-nowrap"
+                              data-slot="tooltip-trigger"
+                              id="base-ui-_r_9_"
                             >
-                              $ 5,000
+                              <span
+                                aria-hidden="true"
+                              >
+                                $ 5,000
+                              </span>
+                              <span
+                                class="sr-only"
+                              >
+                                $ 5,000.00
+                              </span>
                             </span>
                           </p>
                           <span
-                            class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
+                            class="m-0 text-xs leading-4 font-normal block"
+                            data-slot="typography"
+                            data-variant="paragraph-mini"
                           >
-                            <div
-                              aria-label="24h change"
-                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1v5d94b-MuiChip-root"
-                              data-mui-internal-clone-element="true"
+                            <span
+                              class="inline-flex w-fit items-center gap-1 whitespace-nowrap font-medium [&>svg]:size-3 [&>svg]:pointer-events-none text-destructive py-0.5 text-xs rounded-4xl bg-transparent px-0 pr-0 dark:bg-transparent"
+                              data-slot="tooltip-trigger"
+                              id="base-ui-_r_b_"
                             >
                               <mock-icon
-                                aria-hidden=""
-                                class="MuiSvgIcon-root MuiSvgIcon-colorError MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorError mui-style-19da0qu-MuiSvgIcon-root"
-                                focusable="false"
+                                class="h-[6px] w-[9px] text-[var(--color-error-main)]"
                               />
                               <span
-                                class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+                                class="text-[13px]"
                               >
                                 0.02%
                               </span>
-                            </div>
+                            </span>
                           </span>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
-                data-testid="table-row"
-                tabindex="-1"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                  data-testid="table-cell-name"
-                >
-                  <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                    style="min-height: 0px;"
+                    </td>
+                  </tr>
+                  <tr
+                    class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                    data-slot="table-row"
+                    data-testid="table-row"
+                    tabindex="-1"
                   >
-                    <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    <td
+                      class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                      data-slot="table-cell"
+                      data-testid="table-cell-name"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="overflow-hidden transition-all"
                       >
                         <div
-                          class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
+                          class="flex items-center gap-2"
                         >
                           <div
-                            class="MuiBox-root mui-style-olq4e8"
+                            class="relative"
                           >
                             <iframe
                               height="32"
@@ -559,109 +541,107 @@ exports[`./index.stories Default 1`] = `
                               width="32"
                             />
                           </div>
-                          <div
-                            class="MuiBox-root mui-style-0"
-                          >
-                            <p
-                              class="MuiTypography-root MuiTypography-body2 mui-style-1ct9qkn-MuiTypography-root"
+                          <div>
+                            <span
+                              class="m-0 text-sm leading-5 font-semibold"
+                              data-slot="typography"
+                              data-variant="paragraph-small-bold"
                             >
                               Unknown Token
-                            </p>
-                            <p
-                              class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                            </span>
+                            <span
+                              class="m-0 text-sm leading-5 font-normal block text-[var(--color-primary-light)]"
+                              data-slot="typography"
+                              data-variant="paragraph-small"
                             >
                               UNK
                                •  
                               Deposited
-                            </p>
+                            </span>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                  data-testid="table-cell-balance"
-                >
-                  <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                    style="min-height: 0px;"
-                  >
-                    <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    </td>
+                    <td
+                      class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                      data-slot="table-cell"
+                      data-testid="table-cell-balance"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="overflow-hidden transition-all"
                       >
                         <p
-                          class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
+                          class="m-0 text-base leading-6 font-normal block w-full text-right"
+                          data-slot="typography"
+                          data-variant="paragraph"
                         >
                           1,000
                            
                           UNK
                         </p>
                       </div>
-                    </div>
-                  </div>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                  data-testid="table-cell-value"
-                >
-                  <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                    style="min-height: 0px;"
-                  >
-                    <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    </td>
+                    <td
+                      class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                      data-slot="table-cell"
+                      data-testid="table-cell-value"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="overflow-hidden transition-all"
                       >
                         <div
-                          class="MuiBox-root mui-style-s2uf1z"
+                          class="text-right"
                         >
                           <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
                             <span
-                              aria-label="$ 2,500.00"
-                              class=""
-                              data-mui-internal-clone-element="true"
-                              style="white-space: nowrap;"
+                              class="whitespace-nowrap"
+                              data-slot="tooltip-trigger"
+                              id="base-ui-_r_d_"
                             >
-                              $ 2,500
+                              <span
+                                aria-hidden="true"
+                              >
+                                $ 2,500
+                              </span>
+                              <span
+                                class="sr-only"
+                              >
+                                $ 2,500.00
+                              </span>
                             </span>
                           </p>
                           <span
-                            class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
+                            class="m-0 text-xs leading-4 font-normal block"
+                            data-slot="typography"
+                            data-variant="paragraph-mini"
                           >
-                            <div
-                              aria-label="24h change"
-                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-w1uylf-MuiChip-root"
-                              data-mui-internal-clone-element="true"
+                            <span
+                              class="inline-flex w-fit items-center gap-1 whitespace-nowrap font-medium [&>svg]:size-3 [&>svg]:pointer-events-none text-foreground py-0.5 text-xs rounded-4xl bg-transparent px-0 pr-0 dark:bg-transparent"
+                              data-slot="tooltip-trigger"
+                              id="base-ui-_r_f_"
                             >
                               <mock-icon
-                                aria-hidden=""
-                                class="MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorSuccess mui-style-12cxu6e-MuiSvgIcon-root"
-                                focusable="false"
+                                class="h-[6px] w-[9px] text-[var(--color-success-main)]"
                               />
                               <span
-                                class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+                                class="text-[13px]"
                               >
                                 1.23%
                               </span>
-                            </div>
+                            </span>
                           </span>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>

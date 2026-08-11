@@ -85,9 +85,12 @@ export function checkSafesCountInPopverList(number) {
 }
 
 export function clickOnSafeInPopover(safe) {
-  cy.get(nestedSafeListPopover).within(() => {
-    cy.contains(safe).click()
-  })
+  // Rows are overlay links: the content layer is pointer-events-none, so click the row's
+  // covering "Open Safe" anchor directly (force: the copy button sits above its center).
+  cy.get(nestedSafeListPopover)
+    .contains('[data-testid="safe-list-item"]', safe)
+    .find('a[aria-label="Open Safe"]')
+    .click({ force: true })
 }
 
 export function clickOnParentSafeInBreadcrumb() {
@@ -109,9 +112,7 @@ export function checkParentSafeInBreadcrumb(name, address) {
 
 export function checkNestedSafeInBreadcrumb(name) {
   cy.get(breadcrumpContainer).within(() => {
-    cy.get(nestedSafeItem).within(() => {
-      cy.get('p').should('contain', name)
-    })
+    cy.get(nestedSafeItem).should('contain', name)
   })
 }
 

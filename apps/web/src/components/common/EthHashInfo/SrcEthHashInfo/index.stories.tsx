@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import SrcEthHashInfo from './index'
-import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
 const meta = {
+  title: 'Components/Common/SrcEthHashInfo',
   component: SrcEthHashInfo,
   parameters: {
     componentSubtitle: 'Renders a hash address with options for copy and explorer link',
@@ -13,9 +13,9 @@ const meta = {
     (Story) => {
       return (
         <StoreDecorator initialState={{}}>
-          <Paper sx={{ padding: 2 }}>
+          <div className="rounded-lg bg-[var(--color-background-paper)] p-4">
             <Story />
-          </Paper>
+          </div>
         </StoreDecorator>
       )
     },

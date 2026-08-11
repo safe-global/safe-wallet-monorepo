@@ -1,6 +1,6 @@
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext } from 'react'
-import { Box, Divider, Stack } from '@mui/material'
+import { Separator } from '@/components/ui/separator'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
@@ -104,13 +104,13 @@ export const SignForm = ({
     (needsRiskConfirmation && !isRiskConfirmed)
 
   return (
-    <Stack gap={3}>
+    <div className="flex flex-col gap-6">
       {hasSigned && <ErrorMessage level="warning">You have already signed this transaction.</ErrorMessage>}
 
       {cannotPropose && <NonOwnerError />}
 
-      <Box>
-        <Divider className={commonCss.nestedDivider} />
+      <div>
+        <Separator className={commonCss.nestedDivider} />
 
         {/* Submit button */}
         <TxCardActions>
@@ -129,8 +129,8 @@ export const SignForm = ({
             </CheckWallet>
           </form>
         </TxCardActions>
-      </Box>
-    </Stack>
+      </div>
+    </div>
   )
 }
 

@@ -1,5 +1,6 @@
-import { Tooltip, SvgIcon, Typography, List, ListItem, Box, ListItemAvatar, Avatar, ListItemText } from '@mui/material'
-import CheckIcon from '@mui/icons-material/Check'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
+import { Check } from 'lucide-react'
 import type { ReactElement } from 'react'
 
 import NestedSafesIcon from '@/public/images/sidebar/nested-safes-icon.svg'
@@ -8,55 +9,46 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 
 export function NestedSafeInfo(): ReactElement {
   return (
-    <Box display="flex" flexDirection="column" alignItems="center" pt={1}>
+    <div className="flex flex-col items-center pt-2">
       <NestedSafes />
-      <Box display="flex" gap={1} py={2}>
-        <Typography fontWeight={700}>No Nested Safes yet</Typography>
-        <Tooltip
-          title="Nested Safes are separate wallets owned by your main Account, perfect for organizing different funds and projects."
-          placement="top"
-          arrow
-          sx={{ ml: 1 }}
-        >
-          <span>
-            <SvgIcon
-              component={InfoIcon}
-              inheritViewBox
-              fontSize="small"
-              color="border"
-              sx={{ verticalAlign: 'middle' }}
-            />
-          </span>
+      <div className="flex gap-2 py-4">
+        <Typography variant="paragraph-bold">No Nested Safes yet</Typography>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <span>
+                <InfoIcon className="size-5 align-middle text-[var(--color-border-main)]" />
+              </span>
+            }
+          />
+          <TooltipContent>
+            Nested Safes are separate wallets owned by your main Account, perfect for organizing different funds and
+            projects.
+          </TooltipContent>
         </Tooltip>
-      </Box>
-      <Box display="flex" gap={2} alignItems="center" pt={1} pb={4}>
-        <Avatar sx={{ padding: '20px', backgroundColor: 'success.background' }}>
-          <SvgIcon component={NestedSafesIcon} inheritViewBox color="primary" sx={{ fontSize: 20 }} />
-        </Avatar>
-        <Typography variant="body2" fontWeight={700}>
-          Nested Safes allow you to:
-        </Typography>
-      </Box>
-      <List sx={{ p: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+      </div>
+      <div className="flex items-center gap-4 pb-8 pt-2">
+        <div className="flex items-center justify-center rounded-full bg-[var(--color-success-background)] p-5">
+          <NestedSafesIcon className="size-5 text-[var(--color-primary-main)]" />
+        </div>
+        <Typography variant="paragraph-small-bold">Nested Safes allow you to:</Typography>
+      </div>
+      <ul className="m-0 flex list-none flex-col gap-4 p-0">
         {[
           'rebuild your organizational structure onchain',
           'explore new DeFi opportunities without exposing your main Account',
           'deploy specialized modules and extend Safe functionality',
         ].map((item) => {
           return (
-            <ListItem key={item} sx={{ p: 0, pl: 1.5, alignItems: 'unset' }}>
-              <ListItemAvatar sx={{ minWidth: 'unset', mr: 3 }}>
-                <Avatar sx={{ width: 25, height: 25, backgroundColor: 'success.background' }}>
-                  <CheckIcon fontSize="small" color="success" />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText sx={{ m: 0 }} primaryTypographyProps={{ variant: 'body2' }}>
-                {item}
-              </ListItemText>
-            </ListItem>
+            <li key={item} className="flex items-start gap-6 pl-3">
+              <div className="flex size-[25px] shrink-0 items-center justify-center rounded-full bg-[var(--color-success-background)]">
+                <Check className="size-4 text-[var(--color-success-main)]" />
+              </div>
+              <Typography variant="paragraph-small">{item}</Typography>
+            </li>
           )
         })}
-      </List>
-    </Box>
+      </ul>
+    </div>
   )
 }

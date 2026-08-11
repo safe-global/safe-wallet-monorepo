@@ -1,8 +1,6 @@
 import type { ReactElement } from 'react'
-import Box from '@mui/material/Box'
-import TableCell from '@mui/material/TableCell'
-import TableRow from '@mui/material/TableRow'
-import Typography from '@mui/material/Typography'
+import { TableCell, TableRow } from '@/components/ui/table'
+import { Typography } from '@/components/ui/typography'
 import { TriangleAlert, Info, Copy, Check } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import useCopyToClipboard from '@/hooks/useCopyToClipboard'
@@ -66,19 +64,18 @@ export const SimilarityWarningIcon = ({ warning }: { warning: SimilarWarning }) 
 }
 
 /**
- * Full-width header row opening a similarity band. Tint + card borders live in the Table sx, keyed
- * off `data-band-header` / `data-highlighted`, so they compose with the hover/separator machinery.
+ * Full-width header row opening a similarity band. Tint + card borders live in the table's CSS module
+ * (styles.module.css), keyed off `data-band-header` / `data-highlighted`, so they compose with the
+ * hover/separator machinery there.
  */
 const SimilarityBandHeader = ({ colSpan }: { colSpan: number }) => (
   <TableRow data-band-header="">
-    {/* pl aligns the label with the checkbox column; `&&` outranks the theme's tbody padding. */}
-    <TableCell colSpan={colSpan} sx={{ pr: 2, pl: 3.25, '&&': { pt: 1, pb: 0.25 } }}>
+    {/* pl-[26px] aligns the label with the checkbox column; the vertical padding overrides the
+        primitive's own p-2 so the head zone hugs its label. */}
+    <TableCell colSpan={colSpan} className="pt-2 pr-4 pb-0.5 pl-[26px]">
       {/* Warning accent flips with the theme: dark amber-yellow on the light band, coral on the dark band. */}
-      <Box
-        className="text-yellow-800 dark:text-[var(--color-warning-main)]"
-        sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}
-      >
-        <Typography variant="caption" fontWeight={600} color="inherit">
+      <div className="flex items-center gap-1.5 text-yellow-800 dark:text-[var(--color-warning-main)]">
+        <Typography variant="paragraph-mini" className="font-semibold text-inherit">
           Address poisoning warning
         </Typography>
         <Tooltip>
@@ -89,7 +86,7 @@ const SimilarityBandHeader = ({ colSpan }: { colSpan: number }) => (
             These accounts have very similar addresses. Carefully verify the full address before selecting one.
           </TooltipContent>
         </Tooltip>
-      </Box>
+      </div>
     </TableCell>
   </TableRow>
 )

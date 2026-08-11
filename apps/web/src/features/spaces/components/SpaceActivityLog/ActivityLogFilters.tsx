@@ -58,7 +58,11 @@ function DateFilter({
       <Input
         id={id}
         type="date"
-        className="bg-card dark:bg-card border-input w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark] [&~p]:w-40 [&~p]:text-xs"
+        variant="surface"
+        // No radius/height utilities here on purpose: Input's defaults (rounded-md, h-9) are the same
+        // as SelectTrigger's, which is what keeps this field flush with the selects on the same row.
+        // The rest is layout plus the colour scheme the native date picker needs per theme.
+        className="w-40 [color-scheme:light] dark:[color-scheme:dark] [&~p]:w-40 [&~p]:text-xs"
         value={value}
         min={min}
         max={max}
@@ -103,7 +107,7 @@ function ActivityLogFilters({
             onFiltersChange({ ...filters, actorUserId: value === ALL_ACTORS ? undefined : Number(value) })
           }
         >
-          <SelectTrigger id="activity-actor-filter" className="bg-card dark:bg-card w-48 cursor-pointer rounded-lg">
+          <SelectTrigger id="activity-actor-filter" className="w-48 cursor-pointer">
             <SelectValue placeholder={ALL_ACTORS_LABEL}>
               <span className="truncate">
                 {selectedActor ? getActorLabel(selectedActor.actorUserId, selectedActor.actor) : ALL_ACTORS_LABEL}
@@ -145,7 +149,7 @@ function ActivityLogFilters({
           value={sortDirection}
           onValueChange={(value) => onFiltersChange({ ...filters, sortDirection: value === 'asc' ? 'asc' : undefined })}
         >
-          <SelectTrigger id="activity-sort-filter" className="bg-card dark:bg-card w-40 cursor-pointer rounded-lg">
+          <SelectTrigger id="activity-sort-filter" className="w-40 cursor-pointer">
             <SelectValue>{SORT_LABELS[sortDirection]}</SelectValue>
           </SelectTrigger>
           <SelectContent alignItemWithTrigger={false} align="start">

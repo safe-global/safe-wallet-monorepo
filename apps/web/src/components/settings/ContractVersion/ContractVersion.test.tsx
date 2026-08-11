@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import { screen } from '@testing-library/react'
 import { render } from '@/tests/test-utils'
 import { ContractVersion } from './index'
@@ -7,12 +6,6 @@ import type { MastercopyMigration } from '@/features/multichain'
 
 const GNOSIS_REPO = 'https://github.com/gnosis/safe-contracts/releases'
 
-// `@/components/common/Mui` re-exports `@mui/material/index` (ESM), which Jest does not
-// transform; ContractVersion only needs `Box` from it, so stub it out.
-jest.mock('@/components/common/Mui', () => ({
-  __esModule: true,
-  Box: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-}))
 jest.mock('@/hooks/useSafeInfo')
 // Stub MastercopyWarning capturing its `variant` prop. ContractVersion owns only the
 // version chrome and the delegation; the settings Alert / cards it renders are asserted

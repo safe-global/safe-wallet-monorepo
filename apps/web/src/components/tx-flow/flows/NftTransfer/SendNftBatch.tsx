@@ -1,4 +1,6 @@
-import { Box, Button, CardActions, Divider, FormControl, Stack, SvgIcon, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Typography } from '@/components/ui/typography'
 import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import { FormProvider, useForm } from 'react-hook-form'
 import NftIcon from '@/public/images/common/nft.svg'
@@ -18,55 +20,37 @@ enum Field {
 type FormData = Pick<NftTransferParams, Field.recipient>
 
 const NftItem = ({ image, name, description }: { image: string; name: string; description?: string }) => (
-  <Stack direction="row" spacing={1} flexWrap="nowrap" alignItems="flex-start">
-    <Box flex={0}>
+  <div className="flex flex-row flex-nowrap items-start gap-2">
+    <div className="flex-none">
       <ImageFallback
         src={image}
         fallbackSrc=""
-        fallbackComponent={<SvgIcon component={NftIcon} inheritViewBox sx={{ width: 1, height: 1 }} />}
+        fallbackComponent={<NftIcon className="size-full" />}
         alt={name}
         height={40}
       />
-    </Box>
+    </div>
 
-    <Box flex={1} minWidth={0} maxWidth={{ xl: 'calc(100% - 200px)' }}>
-      <Typography
-        data-testid="nft-item-name"
-        variant="body2"
-        fontWeight={700}
-        whiteSpace="nowrap"
-        overflow="hidden"
-        textOverflow="ellipsis"
-      >
+    <div className="min-w-0 flex-1 xl:max-w-[calc(100%-200px)]">
+      <Typography data-testid="nft-item-name" variant="paragraph-small-bold" className="block truncate">
         {name}
       </Typography>
 
       {description && (
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          display="block"
-          whiteSpace="nowrap"
-          overflow="hidden"
-          textOverflow="ellipsis"
-        >
+        <Typography variant="paragraph-small" className="text-muted-foreground block truncate">
           {description}
         </Typography>
       )}
-    </Box>
-  </Stack>
+    </div>
+  </div>
 )
 
 export const NftItems = ({ tokens }: { tokens: Collectible[] }) => {
   return (
-    <Stack
+    <div
       data-testid="nft-item-list"
-      sx={{
-        gap: 2,
-        overflow: 'auto',
-        maxHeight: '20vh',
-        minHeight: '40px',
-      }}
+      className="flex flex-col gap-4 overflow-auto"
+      style={{ maxHeight: '20vh', minHeight: '40px' }}
     >
       {tokens.map((token) => (
         <NftItem
@@ -76,7 +60,7 @@ export const NftItems = ({ tokens }: { tokens: Collectible[] }) => {
           description={`Token ID: ${token.id}${token.name ? ` - ${token.name}` : ''}`}
         />
       ))}
-    </Stack>
+    </div>
   )
 }
 
@@ -112,30 +96,27 @@ const SendNftBatch = () => {
     <TxCard>
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onFormSubmit)}>
-          <FormControl fullWidth sx={{ mb: 3, mt: 1 }}>
+          <div className="mt-2 mb-6 w-full">
             <AddressBookInput name={Field.recipient} canAdd={isAddressValid} />
-          </FormControl>
+          </div>
 
           <Typography
             data-testid="selected-nfts"
-            variant="body2"
-            sx={{
-              color: 'text.secondary',
-              mb: 2,
-            }}
+            variant="paragraph-small"
+            className="text-muted-foreground mb-4 block"
           >
             Selected NFTs
           </Typography>
 
           <NftItems tokens={tokens} />
 
-          <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
+          <div className="pt-6">
+            <Separator className={commonCss.nestedDivider} />
+          </div>
 
-          <CardActions>
-            <Button variant="contained" type="submit">
-              Next
-            </Button>
-          </CardActions>
+          <div className="flex items-center gap-2 p-2">
+            <Button type="submit">Next</Button>
+          </div>
         </form>
       </FormProvider>
     </TxCard>

@@ -1,4 +1,5 @@
-import { Alert, Typography, Box } from '@mui/material'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Typography } from '@/components/ui/typography'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ExternalLink from '@/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
@@ -11,47 +12,37 @@ interface SimilarAddressAlertProps {
 const SimilarAddressAlert = ({ similarAddresses }: SimilarAddressAlertProps) => {
   return (
     <>
-      <Alert severity="warning" sx={{ mb: 2 }}>
-        <Typography variant="body2" fontWeight="bold" gutterBottom>
-          Similar address detected
-        </Typography>
-        <Typography variant="body2">
-          This address is similar to another Safe in your account. This could indicate an address poisoning attack.
-          Compare the addresses carefully before proceeding.{' '}
-        </Typography>
-        <Typography variant="body2">
-          <ExternalLink href={HelpCenterArticle.ADDRESS_POISONING} noIcon>
-            Learn more about address poisoning
-          </ExternalLink>
-        </Typography>
+      <Alert variant="warning" className="mb-4">
+        <AlertTitle>Similar address detected</AlertTitle>
+        <AlertDescription>
+          <p>
+            This address is similar to another Safe in your account. This could indicate an address poisoning attack.
+            Compare the addresses carefully before proceeding.
+          </p>
+          <p>
+            <ExternalLink href={HelpCenterArticle.ADDRESS_POISONING} noIcon>
+              Learn more about address poisoning
+            </ExternalLink>
+          </p>
+        </AlertDescription>
       </Alert>
 
       {similarAddresses.length > 0 && (
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
+        <div className="mb-4">
+          <Typography variant="paragraph-small" color="muted" className="mb-2 block">
             Similar {similarAddresses.length === 1 ? 'Safe' : 'Safes'} in your account
           </Typography>
           {similarAddresses.map((similar) => (
-            <Box
-              key={similar.address}
-              sx={{
-                p: 2,
-                mb: 1,
-                bgcolor: 'background.paper',
-                borderRadius: 1,
-                border: '1px solid',
-                borderColor: 'border.light',
-              }}
-            >
+            <div key={similar.address} className="bg-background border-border mb-2 rounded-md border p-4">
               <EthHashInfo address={similar.address} showCopyButton shortAddress={false} showAvatar avatarSize={32} />
               {similar.name && (
-                <Typography variant="body2" color="text.primary" sx={{ mt: 1 }}>
+                <Typography variant="paragraph-small" className="mt-2 block">
                   Name: {similar.name}
                 </Typography>
               )}
-            </Box>
+            </div>
           ))}
-        </Box>
+        </div>
       )}
     </>
   )
