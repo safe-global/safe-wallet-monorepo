@@ -11,7 +11,7 @@ import {
   signProposerTypedData,
   signProposerTypedDataForSafe,
 } from '@/features/proposers/utils/utils'
-import { SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
+import { SMART_CONTRACT_PROPOSER_ERROR, SMART_CONTRACT_PROPOSER_INFO } from '@/features/proposers/constants'
 import { useDelegatorSelection } from '../hooks/useDelegatorSelection'
 import { buildDelegationOrigin, createDelegationMessage } from '../services/delegationMessages'
 import useChainId from '@/hooks/useChainId'
@@ -110,6 +110,9 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
   )
 
   const { handleSubmit, formState } = methods
+
+  const addressError = formState.errors[ProposerEntryFields.address]?.message
+  const isSmartContractError = addressError === SMART_CONTRACT_PROPOSER_ERROR
 
   const onConfirm = handleSubmit(async (data: ProposerEntry) => {
     if (!wallet) return
@@ -349,6 +352,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
                 confirmLoading={isLoading}
                 confirmDisabled={isParentLoading || (isEditing && !canEdit) || !formState.isValid}
                 confirmCheckWallet={{ checkNetwork: !isLoading, allowProposer: false }}
+                confirmTooltip={isSmartContractError ? SMART_CONTRACT_PROPOSER_INFO : undefined}
               />
             </DialogFooter>
           </form>

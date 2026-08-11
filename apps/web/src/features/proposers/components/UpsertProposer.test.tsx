@@ -1,7 +1,7 @@
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import { faker } from '@faker-js/faker'
 import { render, fakerChecksummedAddress } from '@/tests/test-utils'
-import { SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
+import { SMART_CONTRACT_PROPOSER_ERROR, SMART_CONTRACT_PROPOSER_INFO } from '@/features/proposers/constants'
 import { act, fireEvent, waitFor } from '@testing-library/react'
 import * as proposerUtils from '@/features/proposers/utils/utils'
 import * as walletUtils from '@/utils/wallets'
@@ -23,6 +23,12 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
 jest.mock('@/components/common/CheckWallet', () => ({
   __esModule: true,
   default: ({ children }: { children: (ok: boolean) => ReactElement }) => children(true),
+}))
+
+jest.mock('@/components/ui/tooltip', () => ({
+  Tooltip: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+  TooltipTrigger: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+  TooltipContent: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
 }))
 
 const { useDelegatesPostDelegateV1Mutation } = jest.requireMock('@safe-global/store/gateway/AUTO_GENERATED/delegates')
@@ -202,6 +208,36 @@ describe('UpsertProposer signing logic', () => {
 
       await waitFor(() => expect(getByTestId('submit-proposer-btn')).not.toBeDisabled())
       expect(queryByText(SMART_CONTRACT_PROPOSER_ERROR)).toBeNull()
+    })
+
+    it('explains on the disabled button why a smart contract cannot be a proposer', async () => {
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(true)
+
+      const { getByLabelText, findByText } = render(<UpsertProposer onClose={jest.fn()} onSuccess={jest.fn()} />)
+
+      act(() => {
+        fireEvent.change(getByLabelText(/Address/i), { target: { value: fakerChecksummedAddress() } })
+        fireEvent.change(getByLabelText(/Name/i), { target: { value: 'My other Safe' } })
+      })
+
+      await findByText(SMART_CONTRACT_PROPOSER_ERROR, {}, { timeout: 3000 })
+      expect(await findByText(SMART_CONTRACT_PROPOSER_INFO)).toBeInTheDocument()
+    })
+
+    it('does not show the smart contract info for a valid EOA address', async () => {
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
+
+      const { getByLabelText, getByTestId, queryByText } = render(
+        <UpsertProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
+      )
+
+      act(() => {
+        fireEvent.change(getByLabelText(/Address/i), { target: { value: fakerChecksummedAddress() } })
+        fireEvent.change(getByLabelText(/Name/i), { target: { value: 'An EOA' } })
+      })
+
+      await waitFor(() => expect(getByTestId('submit-proposer-btn')).not.toBeDisabled())
+      expect(queryByText(SMART_CONTRACT_PROPOSER_INFO)).toBeNull()
     })
   })
 })
