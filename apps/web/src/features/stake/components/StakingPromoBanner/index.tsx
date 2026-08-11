@@ -36,7 +36,7 @@ const StakingPromoBanner = ({ onDismiss }: { onDismiss: () => void }) => {
               href={LEARN_MORE_LINK}
               noIcon
               onClick={onLearnMore}
-              className="font-bold text-inherit underline"
+              className="font-bold text-inherit [&>span]:underline"
             >
               Learn more
             </ExternalLink>

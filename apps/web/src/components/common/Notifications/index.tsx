@@ -7,20 +7,23 @@ import { closeNotification, readNotification, selectNotifications } from '@/stor
 import { Alert, AlertAction } from '@/components/ui/alert'
 import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/utils/cn'
 import css from './styles.module.css'
 import NextLink from 'next/link'
-import { ChevronRight, X } from 'lucide-react'
+import { ChevronRight, X, CircleAlert, CircleCheck, TriangleAlert, Info } from 'lucide-react'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import Track from '../Track'
 import { isRelativeUrl } from '@/utils/url'
 
 type NotificationVariant = 'success' | 'info' | 'warning' | 'error'
 
-const variantToAlertVariant: Record<NotificationVariant, 'default' | 'destructive' | 'warning'> = {
-  success: 'default',
-  info: 'default',
-  warning: 'warning',
-  error: 'destructive',
+// Toast styling per severity — a light tinted background with a colored icon and neutral (dark) text,
+// matching how MUI's Alert looked before the shadcn migration (text is never colour-on-colour).
+const variantStyles: Record<NotificationVariant, { background: string; icon: ReactNode }> = {
+  success: { background: 'bg-success-subtle', icon: <CircleCheck style={{ color: 'var(--color-success-main)' }} /> },
+  info: { background: 'bg-info-subtle', icon: <Info style={{ color: 'var(--color-info-dark)' }} /> },
+  warning: { background: 'bg-warning-subtle', icon: <TriangleAlert style={{ color: 'var(--color-warning-main)' }} /> },
+  error: { background: 'bg-error-subtle', icon: <CircleAlert style={{ color: 'var(--color-error-main)' }} /> },
 }
 
 export const NotificationLink = ({
@@ -143,8 +146,12 @@ const Toast = ({
   const autoHideProps = useAutoHide(getAutoHideDuration(variant, autoHideDurationOverride), onClose)
 
   return (
-    <Alert variant={variantToAlertVariant[variant]} className="w-[340px] shadow-lg" {...autoHideProps}>
-      {icon ? (icon as ReactNode) : null}
+    <Alert
+      variant="default"
+      className={cn('w-[340px] border-transparent shadow-lg', variantStyles[variant].background)}
+      {...autoHideProps}
+    >
+      {icon ? (icon as ReactNode) : variantStyles[variant].icon}
       <AlertAction>
         <Button variant="ghost" size="icon-xs" aria-label="Close" onClick={handleManualClose}>
           <X />

@@ -52,14 +52,14 @@ const LoadSafe = ({ initialData }: { initialData?: TxStepperProps<LoadSafeFormDa
   const initialSafe = initialData ?? loadSafeDefaultData
 
   return (
-    <div data-testid="load-safe-form" className="mx-auto w-full max-w-[1200px] px-4">
-      <div className="mt-4 grid grid-cols-12 justify-center gap-x-6 md:mt-14">
-        <div className="col-span-12 md:col-span-10 lg:col-span-8">
+    <div data-testid="load-safe-form" className="mx-auto w-full max-w-[1200px] px-4 sm:px-6">
+      <div className="grid grid-cols-12 gap-x-6">
+        <div className="col-span-12 md:col-span-10 md:col-start-2 lg:col-span-8 lg:col-start-3">
           <Typography variant="h2" className="pb-4">
             Add existing Safe account
           </Typography>
         </div>
-        <div className="order-1 col-span-12 md:order-0 md:col-span-10 lg:col-span-8">
+        <div className="order-1 col-span-12 md:order-0 md:col-span-10 md:col-start-2 lg:col-span-8 lg:col-start-3">
           <CardStepper
             // Populate initial data
             key={initialSafe.address}

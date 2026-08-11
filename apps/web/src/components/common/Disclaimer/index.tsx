@@ -1,6 +1,5 @@
 import type { ReactElement, ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/ui/typography'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import css from './styles.module.css'
@@ -35,7 +34,6 @@ const Disclaimer = ({
           <Typography variant="paragraph-small" as="div">
             {content}
           </Typography>
-          <Separator />
         </div>
         <div className="flex justify-center pt-6 pb-4">
           <Button size="sm" onClick={onAccept}>

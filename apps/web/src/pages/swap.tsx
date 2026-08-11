@@ -40,7 +40,7 @@ const SwapPage: NextPage = () => {
         <title>{`${BRAND_NAME} – Swap`}</title>
       </Head>
 
-      <main style={{ height: 'calc(100vh - 52px)' }}>
+      <main style={{ height: 'calc(100vh - var(--topbar-height))' }}>
         {isFeatureEnabled === true && isCowEnabled === true ? (
           <SwapWidget sell={sell} />
         ) : isFeatureEnabled === true && isCowEnabled === false ? (
