@@ -1,8 +1,10 @@
 import * as constants from '../../support/constants.js'
 import * as safeapps from '../pages/safeapps.pages.js'
+import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as utils from '../../support/utils/checkers.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
+import * as ls from '../../support/localstorage_data.js'
 
 let safeAppSafes = []
 let iframeSelector
@@ -14,13 +16,12 @@ describe('Transaction Builder 2 tests', { defaultCommandTimeout: 20000 }, () => 
 
   beforeEach(() => {
     const appUrl = constants.TX_Builder_url
-    iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
+    iframeSelector = safeapps.getSafeAppIframeSelector(appUrl)
     const visitUrl = `/apps/open?safe=${safeAppSafes.SEP_SAFEAPP_SAFE_1}&appUrl=${encodeURIComponent(appUrl)}`
-    cy.visit(visitUrl, {
-      onBeforeLoad(win) {
-        safeapps.preGrantAddressBookPermission(win, appUrl)
-      },
-    })
+    // tx-builder keeps its form disabled until the address book permission prompt is answered:
+    // pre-grant it before the visit
+    main.addToLocalStorage(constants.SAFE_PERMISSIONS_KEY, ls.safeAppSafePermissions(appUrl))
+    cy.visit(visitUrl)
   })
 
   it('Verify a batch cannot be created without method data', () => {

@@ -1,5 +1,4 @@
 import * as constants from '../../support/constants'
-import * as ls from '../../support/localstorage_data.js'
 import { accordionActionItem } from '../pages/nfts.pages'
 
 const searchAppInput = 'input[id="search-by-name"]'
@@ -344,8 +343,10 @@ export function checkAllPermissions(element) {
   cy.wrap(element).findByText(allowAllPermissions).click()
 }
 
-// tx-builder requests address book access on load and keeps its form disabled until the
-// prompt is answered: pre-grant the permission before the page loads (visit onBeforeLoad)
-export function preGrantAddressBookPermission(win, appUrl) {
-  win.localStorage.setItem(constants.SAFE_PERMISSIONS_KEY, JSON.stringify(ls.safeAppSafePermissions(appUrl)))
+export function getSafeAppIframeSelector(appUrl) {
+  return `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
+}
+
+export function verifySafeAppIframeVisible(appUrl) {
+  cy.get(getSafeAppIframeSelector(appUrl), { timeout: 30000 }).should('be.visible')
 }
