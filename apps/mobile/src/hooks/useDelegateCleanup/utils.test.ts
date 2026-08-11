@@ -131,11 +131,12 @@ describe('useDelegateCleanup utils', () => {
   describe('removeDelegatesFromBackend', () => {
     const mockOwnerWallet = new Wallet('0x123')
     const mockDeleteDelegate = jest.fn()
-    const mockSignTypedData = jest.fn()
+    const mockSign = jest.fn()
 
     beforeEach(() => {
-      mockOwnerWallet.signTypedData = mockSignTypedData
-      mockSignTypedData.mockResolvedValue('0xsignature')
+      // Signing now derives from the raw EIP-712 digest via signingKey.sign()
+      mockSign.mockReturnValue({ serialized: '0xsignature' })
+      ;(mockOwnerWallet as unknown as { signingKey: { sign: jest.Mock } }).signingKey = { sign: mockSign }
       mockDeleteDelegate.mockResolvedValue({})
     })
 

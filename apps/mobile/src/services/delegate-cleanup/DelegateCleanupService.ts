@@ -55,7 +55,7 @@ export interface DelegateCleanupConfig {
   allChains: Chain[]
   allDelegates: Record<Address, Record<string, DelegateInfo>>
   cleanupNotificationsForDelegate: ReturnType<typeof useNotificationCleanup>['cleanupNotificationsForDelegate']
-  deleteDelegate: ReturnType<typeof cgwApi.useDelegatesDeleteDelegateV2Mutation>[0]
+  deleteDelegate: ReturnType<typeof cgwApi.useDelegatesDeleteDelegateV3Mutation>[0]
   dispatch: AppDispatch
   onProgress?: (progress: DelegateCleanupProgress) => void
 }

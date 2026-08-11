@@ -1,7 +1,8 @@
 import { buildDelegationOrigin, createDelegationMessage, confirmDelegationMessage } from '../delegationMessages'
-import type { TypedData, MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import type { AppDispatch } from '@/store'
 
 describe('delegationMessages', () => {
@@ -12,12 +13,8 @@ describe('delegationMessages', () => {
   const signature = `0x${faker.string.hexadecimal({ length: 130 })}`
   const messageHash = `0x${faker.string.hexadecimal({ length: 64 })}`
 
-  const createTypedData = (delegate: string = delegateAddress): TypedData => ({
-    domain: { chainId: Number(chainId) },
-    types: { Delegate: [{ name: 'delegateAddress', type: 'address' }] },
-    primaryType: 'Delegate',
-    message: { delegateAddress: delegate },
-  })
+  const createTypedData = (delegate: string = delegateAddress) =>
+    getDelegateTypedData(chainId, delegate, nestedSafeAddress)
 
   describe('buildDelegationOrigin', () => {
     it('should build correct JSON string for add action', () => {

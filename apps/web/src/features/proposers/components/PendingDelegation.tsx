@@ -21,7 +21,14 @@ import { AppRoutes } from '@/config/routes'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import type { DelegateAction } from '@safe-global/utils/services/delegates'
 import type { PendingDelegation as PendingDelegationType } from '@/features/proposers/types'
+
+const SIGNING_ACTION_BY_DELEGATION: Record<PendingDelegationType['action'], DelegateAction> = {
+  add: 'add',
+  edit: 'edit',
+  remove: 'delete',
+}
 
 type PendingDelegationProps = {
   delegation: PendingDelegationType
@@ -59,10 +66,14 @@ function PendingDelegation({ delegation, onRefetch }: PendingDelegationProps): R
     try {
       const signer = await getAssertedChainSigner(wallet.provider)
 
+      const signingAction = SIGNING_ACTION_BY_DELEGATION[delegation.action]
+
       const eoaSignature = await signProposerTypedDataForSafe(
         chainId,
         delegation.delegateAddress,
         delegation.parentSafeAddress,
+        delegation.nestedSafeAddress,
+        signingAction,
         signer,
       )
 
