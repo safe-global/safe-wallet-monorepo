@@ -6,6 +6,7 @@ export interface ColorPalette {
   text: {
     primary: string
     secondary: string
+    muted: string
     disabled: string
     contrast: string
   }
@@ -76,6 +77,7 @@ export interface ColorPalette {
     /** Hover state of `light` (e.g. hovering the selected safe row) */
     lightHover: string
     secondary: string
+    mutedSecondary: string
     skeleton: string
     disabled: string
   }

@@ -1,6 +1,7 @@
 import { type ReactElement, useMemo } from 'react'
 import { useCurrentSpaceId } from '../../../../hooks/useCurrentSpaceId'
 import { useIsActiveMember } from '../../../../hooks/useSpaceMembers'
+import useIsBillingVisible from '../../../../hooks/useIsBillingVisible'
 import { spacesMainNavigation, spacesSetupGroup } from '../../config'
 import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
 import type { SidebarItemConfig, SidebarVariantContentProps } from '../../types'
@@ -19,6 +20,7 @@ export const SpacesSidebarContent = ({
   const isActiveMember = useIsActiveMember(selectedSpace?.uuid)
   const isSecurityHubEnabled = useHasFeature(FEATURES.SECURITY_HUB)
   const isAuditLogEnabled = useHasFeature(FEATURES.SPACE_AUDIT_LOG)
+  const isBillingVisible = useIsBillingVisible()
 
   const getLink = (item: SidebarItemConfig) => ({
     pathname: item.href,
@@ -36,15 +38,17 @@ export const SpacesSidebarContent = ({
     return pathname === item.href || pathname.startsWith(`${item.href}/`)
   }
 
-  // Drop the Security entry from the Setup group when the chain feature flag is explicitly
-  // off. `undefined` means the chain config is still loading — keep the item to avoid flicker.
-  const filteredSetupGroup = useMemo(
-    () =>
-      isSecurityHubEnabled === false
-        ? { ...spacesSetupGroup, items: spacesSetupGroup.items.filter((i) => i.href !== AppRoutes.spaces.security) }
-        : spacesSetupGroup,
-    [isSecurityHubEnabled],
-  )
+  // Drop Setup-group entries whose chain feature flag is explicitly off. `undefined` means the
+  // chain config is still loading — keep the item to avoid flicker. Security is gated by
+  // SECURITY_HUB; Billing is gated by GTF_PLANS || GTF (see useIsBillingVisible).
+  const filteredSetupGroup = useMemo(() => {
+    const items = spacesSetupGroup.items.filter(
+      (i) =>
+        !(isSecurityHubEnabled === false && i.href === AppRoutes.spaces.security) &&
+        !(isBillingVisible === false && i.href === AppRoutes.spaces.billing),
+    )
+    return { ...spacesSetupGroup, items }
+  }, [isSecurityHubEnabled, isBillingVisible])
 
   // Same anti-flicker rule for the Activity entry (SPACE_AUDIT_LOG flag).
   const filteredMainNavigation = useMemo(

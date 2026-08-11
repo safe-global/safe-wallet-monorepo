@@ -57,6 +57,8 @@ export {
 } from './hooks/useIsCurrentSpaceAtSafeLimit'
 export { default as useFeatureFlagRedirect } from './hooks/useFeatureFlagRedirect'
 export { default as useFeatureRedirect } from './hooks/useFeatureRedirect'
+export { default as useIsBillingVisible } from './hooks/useIsBillingVisible'
+export { default as useBillingFeatureRedirect } from './hooks/useBillingFeatureRedirect'
 export { default as useGetSpaceAddressBook } from './hooks/useGetSpaceAddressBook'
 export { useMemberNameResolver } from './hooks/useMemberNameResolver'
 export { default as useGetSpaceAuditLog } from './hooks/useGetSpaceAuditLog'

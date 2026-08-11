@@ -29,6 +29,12 @@ describe('useIsSpaceRoute', () => {
     expect(result.current).toBe(true)
   })
 
+  it('returns true on /spaces/billing', () => {
+    mockUsePathname.mockReturnValue('/spaces/billing')
+    const { result } = renderHook(() => useIsSpaceRoute())
+    expect(result.current).toBe(true)
+  })
+
   it('returns true on a nested prefix route like /spaces/settings/general', () => {
     mockUsePathname.mockReturnValue('/spaces/settings/general')
     const { result } = renderHook(() => useIsSpaceRoute())
