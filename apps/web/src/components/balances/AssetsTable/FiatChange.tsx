@@ -3,6 +3,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Typography } from '@/components/ui/typography'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
+import { getFiatChangeDirection, parseFiatChange } from '@safe-global/utils/utils/fiatChange'
 import ArrowDown from '@/public/images/balances/change-down.svg'
 import ArrowUp from '@/public/images/balances/change-up.svg'
 
@@ -19,11 +20,9 @@ interface FiatChangeProps {
  * @param inline - Inline display variant
  */
 export const FiatChange = ({ balanceItem, change, inline = false }: FiatChangeProps) => {
-  const fiatChange = change ?? balanceItem?.fiatBalance24hChange ?? null
-  // The backend emits null for missing data and "0" for a genuine zero change
-  const changeAsNumber = fiatChange === null || fiatChange === '' ? NaN : Number(fiatChange) / 100
+  const changeAsNumber = parseFiatChange(change ?? balanceItem?.fiatBalance24hChange)
 
-  if (Number.isNaN(changeAsNumber)) {
+  if (changeAsNumber === null) {
     return (
       <Typography variant="paragraph-mini" color="muted" className="block pl-6">
         n/a
@@ -32,7 +31,7 @@ export const FiatChange = ({ balanceItem, change, inline = false }: FiatChangePr
   }
 
   const changeLabel = formatPercentage(changeAsNumber)
-  const direction = changeAsNumber < 0 ? 'down' : changeAsNumber > 0 ? 'up' : 'none'
+  const direction = getFiatChangeDirection(changeAsNumber)
 
   return (
     <Tooltip>

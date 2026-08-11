@@ -9,6 +9,7 @@ import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import { calculateProtocolPercentage } from '@safe-global/utils/features/positions'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import { calculateProtocolFiatChange } from '../ProtocolDetailSheet/utils'
+import { ProtocolFiatChange } from '../ProtocolFiatChange'
 
 interface ProtocolSectionProps {
   protocol: Protocol
@@ -81,17 +82,7 @@ export const ProtocolSection = ({ protocol, totalFiatValue, currency }: Protocol
             >
               {formattedFiatTotal}
             </Text>
-            {fiatChange !== null && (
-              <Text
-                fontSize="$4"
-                fontWeight={400}
-                color={fiatChange > 0 ? '$success' : fiatChange < 0 ? '$error' : '$colorSecondary'}
-                lineHeight={20}
-              >
-                {fiatChange > 0 ? '+' : fiatChange < 0 ? '-' : ''}
-                {formatPercentage(fiatChange)}
-              </Text>
-            )}
+            <ProtocolFiatChange fiatChange={fiatChange} />
           </View>
           <SafeFontIcon name="chevron-right" size={24} color="$colorSecondary" />
         </View>

@@ -24,5 +24,7 @@ export const calculateProtocolFiatChange = (protocol: Protocol): number | null =
     return null
   }
 
-  return totalChange / totalFiat
+  const ratio = totalChange / totalFiat
+
+  return Number.isFinite(ratio) ? ratio : null
 }

@@ -26,6 +26,11 @@ describe('FiatChange', () => {
     expect(screen.getByText('n/a')).toBeInTheDocument()
   })
 
+  it('renders "n/a" when the change is not finite', () => {
+    render(<FiatChange change="Infinity" />)
+    expect(screen.getByText('n/a')).toBeInTheDocument()
+  })
+
   it('renders a negative change as a positive percentage', () => {
     const mockBalance: Balance = {
       fiatBalance24hChange: '-3.00', // 3% decrease

@@ -4,13 +4,32 @@ import { FiatChange } from '../FiatChange'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 describe('FiatChange', () => {
-  it('renders "n/a" when fiatBalance24hChange is not present', () => {
+  it('renders "0%" when fiatBalance24hChange is not present', () => {
     const mockBalance: Balance = {
       fiatBalance24hChange: undefined,
     } as Balance
 
     const { getByText } = render(<FiatChange balanceItem={mockBalance} />)
     expect(getByText('0%')).toBeTruthy()
+  })
+
+  it('renders "0%" when fiatBalance24hChange is an empty string', () => {
+    const mockBalance: Balance = {
+      fiatBalance24hChange: '',
+    } as Balance
+
+    const { getByText } = render(<FiatChange balanceItem={mockBalance} />)
+    expect(getByText('0%')).toBeTruthy()
+  })
+
+  it('renders "0%" instead of "NaN%" when fiatBalance24hChange is not numeric', () => {
+    const mockBalance: Balance = {
+      fiatBalance24hChange: 'not-a-number',
+    } as Balance
+
+    const { getByText, queryByText } = render(<FiatChange balanceItem={mockBalance} />)
+    expect(getByText('0%')).toBeTruthy()
+    expect(queryByText('NaN%')).toBeNull()
   })
 
   it('renders positive change with success color and plus sign', () => {

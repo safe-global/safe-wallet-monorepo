@@ -6,6 +6,7 @@ import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import { splitCurrencyParts } from '@/src/utils/formatters'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import { calculateProtocolFiatChange } from './utils'
+import { ProtocolFiatChange } from '../ProtocolFiatChange'
 
 interface ProtocolDetailSheetHeaderProps {
   protocol: Protocol
@@ -79,17 +80,7 @@ export const ProtocolDetailSheetHeader = ({ protocol, percentageRatio, currency 
               </Text>
             )}
           </View>
-          {fiatChange !== null && (
-            <Text
-              fontSize="$4"
-              fontWeight={400}
-              color={fiatChange > 0 ? '$success' : fiatChange < 0 ? '$error' : '$colorSecondary'}
-              lineHeight={20}
-            >
-              {fiatChange > 0 ? '+' : fiatChange < 0 ? '-' : ''}
-              {formatPercentage(fiatChange)}
-            </Text>
-          )}
+          <ProtocolFiatChange fiatChange={fiatChange} />
         </View>
       </View>
 

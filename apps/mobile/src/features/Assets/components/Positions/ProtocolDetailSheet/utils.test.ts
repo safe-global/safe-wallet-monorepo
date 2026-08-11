@@ -45,6 +45,17 @@ describe('calculateProtocolFiatChange', () => {
     expect(calculateProtocolFiatChange(protocol)).toBeNull()
   })
 
+  it('returns null rather than NaN when fiatTotal is not numeric', () => {
+    const protocol = createMockProtocol({ fiatTotal: 'not-a-number' })
+    expect(calculateProtocolFiatChange(protocol)).toBeNull()
+  })
+
+  it('returns null rather than NaN when a position 24h change is not numeric', () => {
+    const protocol = createMockProtocol()
+    protocol.items[0].items[0].fiatBalance24hChange = 'not-a-number'
+    expect(calculateProtocolFiatChange(protocol)).toBeNull()
+  })
+
   it('returns null when all positions have null 24h change', () => {
     const protocol = createMockProtocol({
       items: [

@@ -2,6 +2,8 @@ import React from 'react'
 import { Text, View } from 'tamagui'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
+import { getFiatChangeDirection, parseFiatChange } from '@safe-global/utils/utils/fiatChange'
+import { getFiatChangeColor, getFiatChangeSign } from '@/src/utils/fiatChange'
 import { InfoSheet } from '@/src/components/InfoSheet'
 
 interface PositionFiatChangeProps {
@@ -15,7 +17,9 @@ const INFO_SHEET_DESCRIPTION =
   'This shows how much the value of this position has changed in the last 24 hours, based on token price movements.'
 
 export const PositionFiatChange = ({ fiatBalance24hChange, fiatBalance, currency }: PositionFiatChangeProps) => {
-  if (!fiatBalance24hChange) {
+  const changeAsNumber = parseFiatChange(fiatBalance24hChange)
+
+  if (changeAsNumber === null) {
     return (
       <InfoSheet title={INFO_SHEET_TITLE} info={INFO_SHEET_DESCRIPTION}>
         <Text fontSize="$3" color="$colorSecondary" opacity={0.7}>
@@ -25,42 +29,16 @@ export const PositionFiatChange = ({ fiatBalance24hChange, fiatBalance, currency
     )
   }
 
-  const changeAsNumber = Number(fiatBalance24hChange) / 100
-  const changeLabel = formatPercentage(changeAsNumber)
-  const direction = changeAsNumber < 0 ? 'down' : changeAsNumber > 0 ? 'up' : 'none'
-
-  const fiatBalanceNumber = Number(fiatBalance)
-  const changeAmount = fiatBalanceNumber * changeAsNumber
+  const direction = getFiatChangeDirection(changeAsNumber)
+  const changeAmount = Number(fiatBalance) * changeAsNumber
   const formattedChangeAmount = formatCurrencyPrecise(Math.abs(changeAmount).toString(), currency)
-
-  const getColor = () => {
-    switch (direction) {
-      case 'down':
-        return '$error'
-      case 'up':
-        return '$success'
-      default:
-        return '$colorSecondary'
-    }
-  }
-
-  const changeSign = () => {
-    switch (direction) {
-      case 'down':
-        return '-'
-      case 'up':
-        return '+'
-      default:
-        return ''
-    }
-  }
 
   return (
     <InfoSheet title={INFO_SHEET_TITLE} info={INFO_SHEET_DESCRIPTION}>
       <View flexDirection="row" alignItems="center" gap="$1">
-        <Text fontSize="$3" color={getColor()} fontWeight={400}>
-          {changeSign()}
-          {changeLabel} ({formattedChangeAmount})
+        <Text fontSize="$3" color={getFiatChangeColor(direction)} fontWeight={400}>
+          {getFiatChangeSign(direction)}
+          {formatPercentage(changeAsNumber)} ({formattedChangeAmount})
         </Text>
       </View>
     </InfoSheet>
