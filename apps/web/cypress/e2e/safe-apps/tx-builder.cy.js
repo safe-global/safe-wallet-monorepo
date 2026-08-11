@@ -1,8 +1,10 @@
 import * as constants from '../../support/constants.js'
 import * as safeapps from '../pages/safeapps.pages.js'
 import * as navigation from '../pages/navigation.page.js'
+import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as utils from '../../support/utils/checkers.js'
+import * as ls from '../../support/localstorage_data.js'
 
 let safeAppSafes = []
 let iframeSelector
@@ -14,21 +16,13 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
 
   beforeEach(() => {
     const appUrl = constants.TX_Builder_url
-    iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
+    iframeSelector = safeapps.getSafeAppIframeSelector(appUrl)
     const visitUrl = `/apps/open?safe=${safeAppSafes.SEP_SAFEAPP_SAFE_1}&appUrl=${encodeURIComponent(appUrl)}`
-    cy.visit(visitUrl, {
-      onBeforeLoad(win) {
-        // Pre-grant address book access: the permissions prompt is a modal dialog, and Base UI
-        // marks everything behind it inert, hiding the tx modal from Cypress
-        win.localStorage.setItem(
-          constants.SAFE_PERMISSIONS_KEY,
-          JSON.stringify({
-            [appUrl]: [{ invoker: appUrl, parentCapability: 'requestAddressBook', date: 1111111111111, caveats: [] }],
-          }),
-        )
-      },
-    })
-    cy.get(iframeSelector, { timeout: 30000 }).should('be.visible')
+    // tx-builder keeps its form disabled until the address book permission prompt is answered:
+    // pre-grant it before the visit
+    main.addToLocalStorage(constants.SAFE_PERMISSIONS_KEY, ls.safeAppSafePermissions(appUrl))
+    cy.visit(visitUrl)
+    safeapps.verifySafeAppIframeVisible(appUrl)
   })
 
   it('Verify a simple batch can be created', () => {

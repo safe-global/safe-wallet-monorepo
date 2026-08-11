@@ -5,6 +5,7 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -25,8 +26,8 @@ export const FeatureFlagEditorDialog = ({ open, onOpenChange }: FeatureFlagEdito
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[90vh] w-full max-w-[min(900px,calc(100vw-2rem))] flex-col gap-0 p-0">
-        <DialogHeader className="shrink-0 border-b border-border px-6 pb-4 pt-6">
+      <DialogContent size="md" className="flex max-h-[90vh] flex-col">
+        <DialogHeader divided className="shrink-0">
           <DialogTitle className="font-bold">Feature flags</DialogTitle>
           <DialogDescription>
             Override the feature flags delivered by the config service. Changes apply instantly across all chains — no
@@ -34,22 +35,22 @@ export const FeatureFlagEditorDialog = ({ open, onOpenChange }: FeatureFlagEdito
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col px-6 pb-6 pt-4">
+        <div className="flex min-h-0 flex-1 flex-col p-4">
           <FeatureFlagEditor />
-
-          <div className="mt-4 flex shrink-0 flex-row items-center gap-3 border-t border-border pt-4">
-            <Button
-              variant="destructive"
-              size="lg"
-              onClick={() => dispatch(clearAllOverrides())}
-              disabled={overridden.length === 0}
-            >
-              <RotateCcw />
-              Reset all overrides
-            </Button>
-            <DialogClose render={<Button size="lg" className="ml-auto" />}>Done</DialogClose>
-          </div>
         </div>
+
+        <DialogFooter divided className="shrink-0 flex-row items-center">
+          <Button
+            variant="destructive"
+            size="lg"
+            onClick={() => dispatch(clearAllOverrides())}
+            disabled={overridden.length === 0}
+          >
+            <RotateCcw />
+            Reset all overrides
+          </Button>
+          <DialogClose render={<Button size="lg" className="ml-auto" />}>Done</DialogClose>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

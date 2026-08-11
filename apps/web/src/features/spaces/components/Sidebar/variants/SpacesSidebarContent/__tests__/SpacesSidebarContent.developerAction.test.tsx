@@ -59,6 +59,7 @@ jest.mock('@/components/ui/sidebar', () => ({
   SidebarGroupContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenuItem: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SidebarSeparator: () => null,
   // Mirrors the real primitive's two shapes so NavItem's link-vs-button decision stays observable.
   SidebarMenuButton: ({
     children,
