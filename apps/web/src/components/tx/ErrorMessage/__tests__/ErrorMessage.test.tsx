@@ -7,7 +7,7 @@ describe('ErrorMessage', () => {
     expect(getByText('Transaction failed')).toBeInTheDocument()
   })
 
-  it('shows a code-only reference for a GS error — never the raw payload', () => {
+  it('shows an always-visible, code-only reference for a GS error — never the raw payload', () => {
     const raw =
       'HTTP request failed. URL: https://berachain.drpc.org Request body: {"method":"eth_call"} Version: viem@2.52.2 reason "GS013"'
 
@@ -15,8 +15,8 @@ describe('ErrorMessage', () => {
       <ErrorMessage error={new Error(raw)}>This transaction will most likely fail.</ErrorMessage>,
     )
 
-    fireEvent.click(getByText('Details'))
-
+    // The code is shown inline without a Details toggle
+    expect(queryByText('Details')).not.toBeInTheDocument()
     expect(getByText('GS013')).toBeInTheDocument()
     expect(queryByText(/drpc\.org/)).not.toBeInTheDocument()
     expect(queryByText(/viem@/)).not.toBeInTheDocument()

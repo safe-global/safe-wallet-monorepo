@@ -19,8 +19,9 @@ import CONTRACT_ERRORS, {
  * - `MessageCatalog` lists every GS code with its user-facing copy and handling.
  * - `RenderedInErrorMessage` shows the copy in the real `ErrorMessage` component.
  *   Each error is fed a realistic raw payload (provider URLs, request bodies,
- *   library versions); for a GS error "Details" shows only the error code —
- *   never the raw payload. (Non-GS errors keep their raw Details, unchanged.)
+ *   library versions); a GS error shows an always-visible, code-only reference
+ *   with a copy button — never the raw payload. (Non-GS errors keep their raw
+ *   Details toggle, unchanged.)
  */
 
 const PARAMS = { nativeAsset: 'ETH', token: 'USDC' }
@@ -98,8 +99,8 @@ const InErrorMessage = () => {
       <Alert variant="info" outlined>
         <AlertDescription>
           The message you see is the new copy. Each error is fed a realistic raw payload (provider URLs, request bodies,
-          library versions), but for a GS error <strong>Details</strong> shows only the error code — never the raw
-          payload. The full support reference is meant to live in the support tool.
+          library versions), but a GS error shows only an inline <strong>error code</strong> with a copy button — never
+          the raw payload. The full support reference is meant to live in the support tool.
         </AlertDescription>
       </Alert>
       {samples.map(({ code, label }) => {
