@@ -66,7 +66,7 @@ describe('SafeSelectorTriggerContent', () => {
       <SafeSelectorTriggerContent selectedItem={selectedItem} selectedChainId={SELECTED_CHAIN_ID} />,
     )
 
-    expect(container.querySelector('[class*="MuiSvgIcon"]')).not.toBeNull()
+    expect(container.querySelector('[class*="shield-lines"]')).not.toBeNull()
   })
 
   it('does not render the Hypernative shield icon when the active Safe has no Hypernative guard', () => {
@@ -74,6 +74,6 @@ describe('SafeSelectorTriggerContent', () => {
       <SafeSelectorTriggerContent selectedItem={selectedItem} selectedChainId={SELECTED_CHAIN_ID} />,
     )
 
-    expect(container.querySelector('[class*="MuiSvgIcon"]')).toBeNull()
+    expect(container.querySelector('[class*="shield-lines"]')).toBeNull()
   })
 })

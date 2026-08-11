@@ -12,7 +12,7 @@ type Props = {
 }
 
 const shouldTrack = (el: HTMLDivElement) => {
-  const disabledChildren = el.querySelectorAll('*[disabled]')
+  const disabledChildren = el.querySelectorAll('*[disabled], *[aria-disabled="true"]')
   return disabledChildren.length === 0
 }
 

@@ -80,7 +80,7 @@ const defaultSetup = createMockStory({
 })
 
 const meta = {
-  title: 'Settings/OwnerList',
+  title: 'Components/Settings/OwnerList',
   component: OwnerList,
   loaders: [mswLoader],
   parameters: {

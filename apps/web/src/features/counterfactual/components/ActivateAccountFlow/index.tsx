@@ -26,7 +26,10 @@ import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useAppSelector } from '@/store'
 import { hasRemainingRelays } from '@/utils/relaying'
-import { Box, Button, CircularProgress, Divider, Grid, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Separator } from '@/components/ui/separator'
+import { Typography } from '@/components/ui/typography'
 import React, { useContext, useMemo, useState } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useEstimateSafeCreationGas } from '@/components/new-safe/create/useEstimateSafeCreationGas'
@@ -166,7 +169,7 @@ const ActivateAccountFlow = () => {
           wallet.
         </Typography>
 
-        <Divider sx={{ mx: -3, my: 2 }} />
+        <Separator className="-mx-6 my-4 w-auto" />
 
         <SafeSetupOverview
           owners={owners.map((owner) => ({ name: '', address: owner }))}
@@ -174,10 +177,10 @@ const ActivateAccountFlow = () => {
           networks={chain ? [chain] : []}
         />
 
-        {showGasFeeEstimation && <Divider sx={{ mx: -3, mt: 2, mb: 1 }} />}
-        <Box display="flex" flexDirection="column" gap={3}>
+        {showGasFeeEstimation && <Separator className="-mx-6 mt-4 mb-2 w-auto" />}
+        <div className="flex flex-col gap-6">
           {canRelay && (
-            <Grid container spacing={3}>
+            <div>
               <ReviewRow
                 name="Execution method"
                 value={
@@ -188,11 +191,11 @@ const ActivateAccountFlow = () => {
                   />
                 }
               />
-            </Grid>
+            </div>
           )}
 
           {showGasFeeEstimation && (
-            <Grid data-testid="network-fee-section" container spacing={3}>
+            <div data-testid="network-fee-section">
               <ReviewRow
                 name="Est. network fee"
                 value={
@@ -200,7 +203,7 @@ const ActivateAccountFlow = () => {
                     <NetworkFee totalFee={totalFee} isWaived={willRelay || isWrongChain} chain={chain} />
 
                     {!willRelay && (
-                      <Typography variant="body2" color="text.secondary" mt={1}>
+                      <Typography variant="paragraph-small" color="muted" className="block mt-2">
                         {isWrongChain
                           ? `Switch your connected wallet to ${chain?.chainName} to see the correct estimated network fee`
                           : 'You will have to confirm a transaction with your connected wallet.'}
@@ -209,13 +212,13 @@ const ActivateAccountFlow = () => {
                   </>
                 }
               />
-            </Grid>
+            </div>
           )}
 
           {submitError && (
-            <Box mt={1}>
+            <div className="mt-2">
               <TxSubmitError error={submitError} />
-            </Box>
+            </div>
           )}
           {isWrongChain && <NetworkWarning />}
           {!walletCanPay && !willRelay && showInsufficientFundsWarning && (
@@ -223,25 +226,24 @@ const ActivateAccountFlow = () => {
               Your connected wallet doesn&apos;t have enough funds to execute this transaction
             </ErrorMessage>
           )}
-        </Box>
+        </div>
 
-        <Divider sx={{ mx: -3, mt: 2, mb: 1 }} />
+        <Separator className="-mx-6 mt-4 mb-2 w-auto" />
 
-        <Box display="flex" flexDirection="row" justifyContent="flex-end" gap={3}>
+        <div className="flex flex-row justify-end gap-6">
           <CheckWallet checkNetwork={!submitDisabled} allowNonOwner allowUndeployedSafe>
             {(isOk) => (
               <Button
                 data-testid="activate-account-flow-btn"
                 onClick={createSafe}
-                variant="contained"
-                size="xlarge"
+                size="lg"
                 disabled={!isOk || submitDisabled}
               >
-                {!isSubmittable ? <CircularProgress size={20} /> : 'Activate'}
+                {!isSubmittable ? <Spinner className="size-5" /> : 'Activate'}
               </Button>
             )}
           </CheckWallet>
-        </Box>
+        </div>
       </TxCard>
     </TxLayout>
   )

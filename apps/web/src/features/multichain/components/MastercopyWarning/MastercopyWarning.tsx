@@ -1,5 +1,6 @@
 import { useCallback, useContext } from 'react'
-import { Alert, AlertTitle, Button, SvgIcon, Typography } from '@mui/material'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import { TxModalContext } from '@/components/tx-flow'
 import { MigrateSafeL2Flow, UpdateSafeFlow } from '@/components/tx-flow/flows'
 import { ActionCard } from '@/components/common/ActionCard'
@@ -73,26 +74,26 @@ export const MastercopyWarning = ({ variant = 'dashboard' }: MastercopyWarningPr
     // Settings intentionally prompts non-critical updates too, hence no `isCritical` gate here.
     if (variant === 'settings') {
       return (
-        <Alert
-          sx={{ borderRadius: '2px', borderColor: '#B0FFC9' }}
-          icon={<SvgIcon component={InfoIcon} inheritViewBox color="secondary" />}
-        >
-          <AlertTitle sx={{ fontWeight: 700 }}>
+        <Alert>
+          <InfoIcon className="size-4 text-[var(--color-secondary-main)]" />
+          <AlertTitle>
             New version is available: {latestVersion} (<ExternalLink href={changelogUrl}>changelog</ExternalLink>)
           </AlertTitle>
 
-          <Typography mb={2}>
-            Update now to take advantage of new features and the highest security standards available. You will need to
-            confirm this update just like any other transaction.
-          </Typography>
+          <AlertDescription>
+            <p>
+              Update now to take advantage of new features and the highest security standards available. You will need
+              to confirm this update just like any other transaction.
+            </p>
 
-          <CheckWallet>
-            {(isOk) => (
-              <Button onClick={() => setTxFlow(<UpdateSafeFlow />)} variant="contained" disabled={!isOk}>
-                Update
-              </Button>
-            )}
-          </CheckWallet>
+            <CheckWallet>
+              {(isOk) => (
+                <Button onClick={openUpdateModal} disabled={!isOk}>
+                  Update
+                </Button>
+              )}
+            </CheckWallet>
+          </AlertDescription>
         </Alert>
       )
     }

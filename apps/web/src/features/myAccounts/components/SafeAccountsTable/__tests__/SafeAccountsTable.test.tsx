@@ -206,11 +206,15 @@ describe('SafeAccountsTable', () => {
   it('draws the card outline by default and drops it with bordered={false}, keeping the header', () => {
     const container = () => screen.getByTestId('safe-accounts-table').firstElementChild as HTMLElement
 
+    // Asserted on the classes, not on computed style: the outline moved from an MUI `sx` prop to the
+    // colocated CSS module, and jsdom does not evaluate CSS modules — `toHaveStyle` would fail even
+    // when the border renders. `containerBorderless` is what zeroes it.
     const { rerender } = render(<SafeAccountsTable items={items} />)
-    expect(container()).toHaveStyle({ borderTopStyle: 'solid' })
+    expect(container().className).toContain('container')
+    expect(container().className).not.toContain('containerBorderless')
 
     rerender(<SafeAccountsTable items={items} bordered={false} />)
-    expect(container()).not.toHaveStyle({ borderTopStyle: 'solid' })
+    expect(container().className).toContain('containerBorderless')
     // Unlike embedded mode, the borderless table keeps its column header.
     expect(screen.getByTestId('account-sort-name')).toBeInTheDocument()
   })

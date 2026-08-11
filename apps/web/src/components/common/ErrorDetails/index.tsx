@@ -1,16 +1,5 @@
 import type { ReactElement } from 'react'
-import { Box, Typography } from '@mui/material'
-import css from './styles.module.css'
-
-/**
- * NOTE: This component intentionally uses MUI, not shadcn/ui.
- *
- * It renders inside the MUI `ErrorMessage` component, and mounting a shadcn
- * `Alert` there (which needs its own `.shadcn-scope` + scoped Tailwind preflight)
- * conflicts with `ErrorMessage`'s MUI styling. `ErrorMessage` is owned/changed by
- * another workstream, so we keep this MUI for now. Migrate this to shadcn once the
- * app-wide shadcn migration lands and `ErrorMessage` is shadcn.
- */
+import { Typography } from '@/components/ui/typography'
 
 /**
  * Support reference for an on-chain (GS) error's "Details" panel. Per product
@@ -20,14 +9,14 @@ import css from './styles.module.css'
  */
 const ErrorDetails = ({ code }: { code: string }): ReactElement => {
   return (
-    <Box className={css.container} data-testid="error-details">
-      <Typography variant="body2" component="span" className={css.label}>
+    <div className="mt-2 rounded-md bg-[var(--color-background-main)] px-4 py-2" data-testid="error-details">
+      <Typography variant="paragraph-small" color="muted">
         Error code
       </Typography>{' '}
-      <Typography variant="body2" component="span" className={css.value}>
+      <Typography variant="paragraph-small" className="break-all">
         {code}
       </Typography>
-    </Box>
+    </div>
   )
 }
 

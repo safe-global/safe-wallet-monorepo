@@ -1,6 +1,5 @@
 import { useContext, useMemo } from 'react'
 import { Slot, type SlotComponentProps, SlotName, useSlot, useSlotIds, withSlot } from '../slots'
-import { Box } from '@mui/material'
 import WalletRejectionError from '@/components/tx/shared/errors/WalletRejectionError'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import TxSubmitError from '@/components/tx/TxSubmitError'
@@ -59,15 +58,15 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
   return (
     <>
       {submitError && (
-        <Box mt={1}>
+        <div className="mt-2">
           <TxSubmitError error={submitError} context="execution" />
-        </Box>
+        </div>
       )}
 
       {isRejectedByUser && (
-        <Box mt={1}>
+        <div className="mt-2">
           <WalletRejectionError />
-        </Box>
+        </div>
       )}
 
       {validationError !== undefined && (
@@ -75,11 +74,11 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
       )}
 
       {showLastSignerWarning && (
-        <Box mt={1}>
+        <div className="mt-2">
           <ErrorMessage level="info">
             You&apos;re providing the last signature. After you sign, anyone can execute this transaction.
           </ErrorMessage>
-        </Box>
+        </div>
       )}
 
       <Slot

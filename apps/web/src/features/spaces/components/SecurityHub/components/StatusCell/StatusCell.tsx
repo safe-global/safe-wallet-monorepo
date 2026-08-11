@@ -1,4 +1,5 @@
-import { Skeleton, Typography } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Typography } from '@/components/ui/typography'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import type { SafeGrade } from '@/features/security/types'
 import SafeGradeChip, { SAFE_GRADE_LABEL } from '../SafeGradeChip/SafeGradeChip'
@@ -18,9 +19,9 @@ const formatNonPassingLabel = (grade: SafeGrade, count: number): string =>
 const StatusCell = ({ grade, count, isScanning }: StatusCellProps) => {
   if (!grade) {
     // Width chosen to comfortably fit the longest expected label ("Needs review · 99 issues found").
-    if (isScanning) return <Skeleton variant="rounded" width={160} height={20} />
+    if (isScanning) return <Skeleton className="h-5 w-40 rounded-md" />
     return (
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="paragraph-small" color="muted">
         {DASH}
       </Typography>
     )

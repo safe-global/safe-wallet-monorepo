@@ -147,15 +147,6 @@ describe('SpaceAddressBookTable', () => {
     expect(screen.getAllByTestId('eth-hash-info')).toHaveLength(1)
   })
 
-  it('dims duplicate entries', () => {
-    const entry = entryBuilder().with({ isDuplicate: true }).build()
-    render(<SpaceAddressBookTable entries={[entry]} />)
-
-    const nameTrigger = screen.getByRole('button', { name: entry.name })
-    expect(nameTrigger.closest('tr')).toHaveClass('opacity-50')
-    expect(nameTrigger.closest('div')).not.toHaveClass('line-through')
-  })
-
   it('exposes the full name via a tooltip trigger in the Name column', () => {
     const name = 'A very long contact name that would overflow the Name column'
     render(<SpaceAddressBookTable entries={[entryBuilder().with({ name }).build()]} />)

@@ -1,12 +1,11 @@
 import type { NativeStakingWithdrawTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Box } from '@mui/material'
 import StakingConfirmationTxWithdraw from './StakingConfirmationTxWithdraw'
 
 const StakingTxWithdrawDetails = ({ info }: { info: NativeStakingWithdrawTransactionInfo }) => {
   return (
-    <Box pl={1} pr={5} display="flex" flexDirection="column" gap={1}>
+    <div className="flex flex-col gap-2 pl-2 pr-10">
       <StakingConfirmationTxWithdraw order={info} />
-    </Box>
+    </div>
   )
 }
 

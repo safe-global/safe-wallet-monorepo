@@ -1,5 +1,6 @@
 import { useState, type ReactElement } from 'react'
-import { Alert, Box, Button, Typography } from '@mui/material'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import CheckWalletWithPermission from '@/components/common/CheckWalletWithPermission'
 import { useNotificationsRenewal } from '@/components/settings/PushNotifications/hooks/useNotificationsRenewal'
@@ -26,22 +27,20 @@ const NotificationRenewal = (): ReactElement => {
 
   return (
     <>
-      <Alert severity="warning">
-        <Typography variant="body2" fontWeight={700} mb={1}>
-          Signature needed
-        </Typography>
-        <Typography variant="body2">{RENEWAL_MESSAGE}</Typography>
+      <Alert variant="warning">
+        <AlertTitle className="mb-2">Signature needed</AlertTitle>
+        <AlertDescription>{RENEWAL_MESSAGE}</AlertDescription>
       </Alert>
-      <Box>
+      <div>
         <CheckWalletWithPermission
           permission={Permission.EnablePushNotifications}
           checkNetwork={!isRegistering && safe.deployed}
         >
           {(isOk) => (
             <Button
-              variant="contained"
-              size="small"
-              sx={{ width: '200px' }}
+              variant="default"
+              size="sm"
+              className="w-[200px]"
               onClick={handeSignClick}
               disabled={!isOk || isRegistering || !safe.deployed}
             >
@@ -49,7 +48,7 @@ const NotificationRenewal = (): ReactElement => {
             </Button>
           )}
         </CheckWalletWithPermission>
-      </Box>
+      </div>
     </>
   )
 }

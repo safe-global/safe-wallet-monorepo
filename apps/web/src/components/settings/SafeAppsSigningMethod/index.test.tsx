@@ -1,15 +1,27 @@
 import { act, fireEvent, render } from '@/tests/test-utils'
+import { initialState } from '@/store/settingsSlice'
 import { SafeAppsSigningMethod } from '.'
+
+jest.mock('@/services/analytics', () => ({
+  trackEvent: jest.fn(),
+  SETTINGS_EVENTS: {
+    SAFE_APPS: {
+      CHANGE_SIGNING_METHOD: { action: 'Safe apps signing method changed', category: 'settings' },
+    },
+  },
+}))
 
 describe('SafeAppsSigningMethod', () => {
   it('Toggle on-chain signing', async () => {
     const result = render(<SafeAppsSigningMethod />, {
       initialReduxState: {
         settings: {
+          ...initialState,
           signing: {
-            useOnChainSigning: false,
+            onChainSigning: false,
+            blindSigning: false,
           },
-        } as any,
+        },
       },
     })
 

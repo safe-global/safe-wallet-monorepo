@@ -1,12 +1,12 @@
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-import { Skeleton } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useCurrentChain } from '@/hooks/useChains'
 
 const WalletBalance = ({ balance }: { balance: string | bigint | undefined }) => {
   const currentChain = useCurrentChain()
 
   if (balance === undefined) {
-    return <Skeleton width={30} variant="text" sx={{ display: 'inline-block' }} />
+    return <Skeleton className="inline-block h-4 w-[30px]" />
   }
 
   if (typeof balance === 'string') {

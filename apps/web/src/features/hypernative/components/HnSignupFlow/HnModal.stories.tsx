@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import HnModal from './HnModal'
 
@@ -33,12 +33,10 @@ export const Default: Story = {
     open: true,
     onClose: () => console.log('Modal closed'),
     children: (
-      <Box p={4}>
-        <Typography variant="h4" gutterBottom>
-          Modal Content
-        </Typography>
+      <div className="flex flex-col gap-1 p-8">
+        <Typography variant="h4">Modal content</Typography>
         <Typography>This is the content inside the Hypernative modal.</Typography>
-      </Box>
+      </div>
     ),
   },
 }

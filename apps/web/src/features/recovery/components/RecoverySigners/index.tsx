@@ -1,5 +1,6 @@
-import { Alert, Box } from '@mui/material'
 import type { ReactElement } from 'react'
+
+import { Alert } from '@/components/ui/alert'
 
 import { AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
 import { Countdown } from '@/components/common/Countdown'
@@ -29,7 +30,7 @@ export default function RecoverySigners({ item }: { item: RecoveryQueueItem }): 
 
   return (
     <>
-      <Box>
+      <div>
         <AuditLogHeader />
 
         <AuditRow
@@ -42,28 +43,21 @@ export default function RecoverySigners({ item }: { item: RecoveryQueueItem }): 
 
         <AuditRow label={executionLabel} actionType={executionActionType} isLast />
 
-        <Alert severity={isExpired ? 'warning' : 'info'} sx={{ mt: 2, py: 0.5 }}>
+        <Alert variant={isExpired ? 'warning' : 'default'} className="mt-4 py-1">
           {desc}
         </Alert>
 
         {isNext && remainingSeconds > 0 && (
-          <Box mt={2}>
+          <div className="mt-4">
             <Countdown seconds={remainingSeconds} />
-          </Box>
+          </div>
         )}
-      </Box>
+      </div>
 
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 1,
-        }}
-      >
+      <div className="flex items-center justify-center gap-2">
         <ExecuteRecoveryButton recovery={item} />
         <CancelRecoveryButton recovery={item} />
-      </Box>
+      </div>
     </>
   )
 }

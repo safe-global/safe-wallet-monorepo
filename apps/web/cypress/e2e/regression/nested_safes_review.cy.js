@@ -40,8 +40,10 @@ describe('Nested safes review step tests', () => {
 
   it('Verify middle step without Fund new assets in create nestedsafe tx flow', () => {
     nsafes.clickOnAddNextBtn()
-    nsafes.actionsExist(nsafes.nonfundAssetsActions)
+    // A single createProxyWithNonce call has no multisend action list; the contract name only
+    // mounts inside the Transaction details accordion (closed Base UI panels are unmounted).
     createTx.clickOnAdvancedDetails()
+    nsafes.actionsExist(nsafes.nonfundAssetsActions)
     createTx.verifytxAccordionDetailsScroll(createTx.SafeProxy)
   })
 })

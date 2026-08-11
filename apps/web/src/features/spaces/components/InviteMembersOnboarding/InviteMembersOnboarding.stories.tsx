@@ -13,6 +13,7 @@ const defaultSetup = createMockStory({
 })
 
 const meta = {
+  title: 'Features/Spaces/InviteMembersOnboarding',
   component: InviteMembersOnboarding,
   loaders: [mswLoader],
   parameters: {

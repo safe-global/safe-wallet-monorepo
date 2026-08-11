@@ -128,7 +128,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
             </div>
           )}
 
-          <div className="mb-3 mx-1 block items-center gap-3">
+          <div className="mb-3 flex flex-wrap items-center gap-3">
             <button
               type="button"
               role="checkbox"
@@ -142,8 +142,8 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
               <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} tabIndex={-1} aria-hidden />
               Select all · {selectedCount} of {totalSafesCount} selected
             </button>
-            <div className="flex flex-1 items-center justify-end gap-3">
-              <InputGroup className="max-w-sm flex-1 rounded-md border-gray-100 bg-card shadow-none">
+            <div className="flex grow basis-72 items-center justify-end gap-3">
+              <InputGroup variant="search" className="max-w-sm flex-1">
                 <InputGroupAddon>
                   <Search className="size-4" />
                 </InputGroupAddon>

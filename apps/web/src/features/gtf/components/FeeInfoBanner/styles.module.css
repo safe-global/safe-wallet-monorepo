@@ -51,6 +51,8 @@
 }
 
 .bulletIcon {
+  width: 16px;
+  height: 16px;
   font-size: 16px;
   color: var(--color-primary-light);
 }
@@ -60,6 +62,8 @@
 }
 
 .closeIcon {
+  width: 16px;
+  height: 16px;
   font-size: 16px;
 }
 

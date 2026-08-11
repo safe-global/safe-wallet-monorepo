@@ -46,6 +46,7 @@ const MOCK_PENDING_TRANSACTIONS: TransactionQueuedItem[] = [
 ]
 
 const meta: Meta<typeof PendingTxWidget> = {
+  title: 'Features/Spaces/PendingTxWidget',
   component: PendingTxWidget,
   tags: ['autodocs'],
   decorators: [

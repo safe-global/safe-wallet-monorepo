@@ -5,7 +5,6 @@ import DeleteIcon from '@/public/images/common/delete.svg'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { cn } from '@/utils/cn'
 import MemberName from './MemberName'
 import RemoveMemberDialog from './RemoveMemberDialog'
 import RenewInviteButton from './RenewInviteButton'
@@ -73,8 +72,14 @@ const EditButton = ({ member, disabled }: { member: MemberDto; disabled: boolean
     <>
       <Tooltip>
         <TooltipTrigger render={<span className="inline-flex" />}>
-          <Button variant="ghost" size="icon-sm" onClick={() => setOpen(true)} disabled={disabled}>
-            <EditIcon className="text-muted-foreground size-4 fill-current" />
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => setOpen(true)}
+            disabled={disabled}
+            aria-label="Edit member"
+          >
+            <EditIcon className="size-4 text-muted-foreground" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
@@ -105,10 +110,14 @@ export const RemoveMemberButton = ({
             {...SPACE_EVENTS.REMOVE_MEMBER_MODAL}
             label={isInvite ? SPACE_LABELS.invite_list : SPACE_LABELS.member_list}
           >
-            <Button variant="ghost" size="icon-sm" disabled={disabled} onClick={() => setOpenRemoveMemberDialog(true)}>
-              <DeleteIcon
-                className={cn('size-4 fill-current', disabled ? 'text-muted-foreground' : 'text-destructive')}
-              />
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              disabled={disabled}
+              onClick={() => setOpenRemoveMemberDialog(true)}
+              aria-label={`Remove ${isInvite ? 'invitation' : 'member'}`}
+            >
+              <DeleteIcon className={disabled ? 'size-4 text-muted-foreground' : 'size-4 text-destructive'} />
             </Button>
           </Track>
         </TooltipTrigger>

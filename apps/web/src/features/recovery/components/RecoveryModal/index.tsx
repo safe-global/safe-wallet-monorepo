@@ -1,4 +1,3 @@
-import { Backdrop, Fade } from '@mui/material'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
@@ -95,11 +94,13 @@ function InternalRecoveryModal({
   }, [router])
 
   return (
-    <Fade in={!!modal}>
-      <Backdrop open={!!modal} sx={{ zIndex: 3, bgcolor: ({ palette }) => palette.background.main }}>
-        {modal}
-      </Backdrop>
-    </Fade>
+    <div
+      className={`fixed inset-0 z-[3] flex items-center justify-center bg-[var(--color-background-main)] transition-opacity duration-300 ${
+        modal ? 'opacity-100' : 'pointer-events-none opacity-0'
+      }`}
+    >
+      {modal}
+    </div>
   )
 }
 

@@ -130,10 +130,8 @@ export function verifyAppsAreVisible(appNames) {
 }
 
 export function verifyPinnedApps(pinnedApps) {
+  cy.contains('h2', pinnedAppsStr).should('be.visible')
   pinnedApps.forEach((appName) => {
-    cy.get('p')
-      .contains(pinnedAppsStr)
-      .within(() => {})
     cy.get('li').contains(appName).should('be.visible')
   })
 }
@@ -163,8 +161,9 @@ export function verifyCheckboxes(checkboxes, checked = false) {
   checkboxes.forEach((checkbox) => {
     cy.get('main')
       .contains('label', checkbox)
-      .find('input[type="checkbox"]')
-      .should(checked ? 'be.checked' : 'not.be.checked')
+      .closest('[data-slot="field"]')
+      .find('[role="switch"]')
+      .should('have.attr', 'aria-checked', String(checked))
   })
 }
 

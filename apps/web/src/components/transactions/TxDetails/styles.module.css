@@ -1,9 +1,18 @@
 .container {
   display: flex;
   width: 100%;
+  flex-direction: row;
+  gap: 0;
   overflow-x: auto;
-  background-color: var(--color-background-paper);
-  border-radius: 6px;
+  border-radius: var(--radius-lg);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.containerContrast {
+  box-shadow: none;
+  border-radius: 0;
+  background-color: transparent;
 }
 
 .detailsWrapper {
@@ -34,27 +43,37 @@
   z-index: 1;
 }
 
+/* `--tx-details-edge-inset` is the horizontal room the surrounding panel gives up so the rules
+   below can reach the card's edges — set by the transaction list item, 0 elsewhere (message and
+   recovery details already render in an unpadded panel, so they are unaffected). Each block re-adds
+   it on the side that meets a card edge: a border spans its element's border box, so padding moves
+   the text without moving the rule. */
 .txNote {
   margin: var(--space-1) 0;
-  padding: 0 var(--space-2) var(--space-2);
-  border-bottom: 1px solid var(--color-border-light);
+  padding: 0 var(--space-2) var(--space-2) calc(var(--space-2) + var(--tx-details-edge-inset, 0px));
+  border-bottom: 1px solid var(--border);
 }
 
 .txNote:empty {
   display: none;
 }
 
-.loading,
-.error,
 .txData,
 .txSummary,
 .advancedDetails,
 .txModule {
   padding: var(--space-2);
+  padding-left: calc(var(--space-2) + var(--tx-details-edge-inset, 0px));
+}
+
+/* No column split in these states, so both sides sit on a card edge. */
+.loading,
+.error {
+  padding: var(--space-2) calc(var(--space-2) + var(--tx-details-edge-inset, 0px));
 }
 
 .txData {
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--border);
 }
 
 .txData:empty {
@@ -71,7 +90,8 @@
   width: 33.3%;
   flex-direction: column;
   padding: var(--space-3);
-  border-left: 1px solid var(--color-border-light);
+  padding-right: calc(var(--space-3) + var(--tx-details-edge-inset, 0px));
+  border-left: 1px solid var(--border);
   gap: var(--space-2);
   position: relative;
 }
@@ -82,7 +102,9 @@
 }
 
 .multiSend {
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--border);
+  /* No padding of its own — the batch rows bring theirs — so it only owes the edge inset. */
+  padding-left: var(--tx-details-edge-inset, 0px);
 }
 
 .buttons {
@@ -113,7 +135,26 @@
   .txSigners {
     width: 100%;
     border-left: 0;
-    border-top: 1px solid var(--color-border-light);
+    border-top: 1px solid var(--border);
+    /* Stacked, so the side that used to face the vertical rule is now a card edge as well. */
+    padding-left: calc(var(--space-3) + var(--tx-details-edge-inset, 0px));
+  }
+
+  .txNote,
+  .txData,
+  .txSummary,
+  .advancedDetails,
+  .txModule {
+    padding-right: calc(var(--space-2) + var(--tx-details-edge-inset, 0px));
+  }
+
+  .multiSend {
+    padding-right: var(--tx-details-edge-inset, 0px);
+  }
+
+  /* Pinned to the details column, whose right edge is the card's once the columns stack. */
+  .inlineSimulation {
+    margin-right: calc(var(--space-2) + var(--tx-details-edge-inset, 0px));
   }
 }
 

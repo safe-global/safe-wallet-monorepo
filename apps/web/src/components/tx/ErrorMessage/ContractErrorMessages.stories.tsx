@@ -1,6 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Fragment } from 'react'
-import { Paper, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography, Chip, Alert } from '@mui/material'
+import { Card } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Typography } from '@/components/ui/typography'
+import { Chip } from '@/components/ui/chip'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import ErrorMessage from './index'
 import CONTRACT_ERRORS, {
@@ -22,20 +26,20 @@ import CONTRACT_ERRORS, {
 const PARAMS = { nativeAsset: 'ETH', token: 'USDC' }
 const CODES = Object.keys(CONTRACT_ERRORS) as GsCode[]
 
-const handlingColor = (handling: string) =>
+const handlingVariant = (handling: string) =>
   handling === 'inline-validation' ? 'info' : handling === 'internal' ? 'default' : 'warning'
 
 const Catalog = () => (
-  <Stack spacing={2}>
+  <div className="flex flex-col gap-4">
     <Typography variant="h4">All 32 GS codes → user-facing message</Typography>
-    <Table size="small">
-      <TableHead>
+    <Table>
+      <TableHeader>
         <TableRow>
-          <TableCell>Code</TableCell>
-          <TableCell>Handling</TableCell>
-          <TableCell>Message</TableCell>
+          <TableHead>Code</TableHead>
+          <TableHead>Handling</TableHead>
+          <TableHead>Message</TableHead>
         </TableRow>
-      </TableHead>
+      </TableHeader>
       <TableBody>
         {CODES.map((code) => (
           <TableRow key={code}>
@@ -43,11 +47,7 @@ const Catalog = () => (
               <strong>{code}</strong>
             </TableCell>
             <TableCell>
-              <Chip
-                size="small"
-                label={CONTRACT_ERRORS[code].handling}
-                color={handlingColor(CONTRACT_ERRORS[code].handling)}
-              />
+              <Chip variant={handlingVariant(CONTRACT_ERRORS[code].handling)}>{CONTRACT_ERRORS[code].handling}</Chip>
             </TableCell>
             <TableCell>{getContractErrorMessage(code, PARAMS)}</TableCell>
           </TableRow>
@@ -56,7 +56,7 @@ const Catalog = () => (
     </Table>
 
     <Typography variant="h4">GS026 — three causes (chosen by pre-check in Topic 4)</Typography>
-    <Table size="small">
+    <Table>
       <TableBody>
         {Object.entries(GS026_MESSAGES).map(([reason, message]) => (
           <TableRow key={reason}>
@@ -68,7 +68,7 @@ const Catalog = () => (
         ))}
       </TableBody>
     </Table>
-  </Stack>
+  </div>
 )
 
 /**
@@ -94,25 +94,27 @@ const InErrorMessage = () => {
     { code: 'GS100', label: 'internal fallback' },
   ]
   return (
-    <Stack spacing={2}>
-      <Alert severity="info" variant="outlined">
-        The message you see is the new copy. Each error is fed a realistic raw payload (provider URLs, request bodies,
-        library versions), but for a GS error <strong>Details</strong> shows only the error code — never the raw
-        payload. The full support reference is meant to live in the support tool.
+    <div className="flex flex-col gap-4">
+      <Alert variant="info" outlined>
+        <AlertDescription>
+          The message you see is the new copy. Each error is fed a realistic raw payload (provider URLs, request bodies,
+          library versions), but for a GS error <strong>Details</strong> shows only the error code — never the raw
+          payload. The full support reference is meant to live in the support tool.
+        </AlertDescription>
       </Alert>
       {samples.map(({ code, label }) => {
         const message = getContractErrorMessage(code, PARAMS)
         const raw = RAW_PAYLOADS[code]
         return (
           <Fragment key={code}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="paragraph-mini" color="muted">
               {code} — {label}
             </Typography>
             <ErrorMessage error={raw ? new Error(raw) : undefined}>{message}</ErrorMessage>
           </Fragment>
         )
       })}
-    </Stack>
+    </div>
   )
 }
 
@@ -122,9 +124,9 @@ const meta = {
   decorators: [
     (Story) => (
       <StoreDecorator initialState={{}}>
-        <Paper sx={{ padding: 2 }}>
+        <Card className="p-4">
           <Story />
-        </Paper>
+        </Card>
       </StoreDecorator>
     ),
   ],

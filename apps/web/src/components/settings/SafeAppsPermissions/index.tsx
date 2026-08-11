@@ -10,9 +10,11 @@ import { useCallback, useMemo } from 'react'
 import type { AllowedFeatures } from '@/components/safe-apps/types'
 import { PermissionStatus } from '@/components/safe-apps/types'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
-import { Grid, Link, Paper, SvgIcon, Typography } from '@mui/material'
+import { Link } from '@/components/ui/link'
+import { Typography } from '@/components/ui/typography'
 import PermissionsCheckbox from '@/components/safe-apps/PermissionCheckbox'
 import DeleteIcon from '@/public/images/common/delete.svg'
+import SettingsCard from '@/components/settings/SettingsCard'
 
 const SafeAppsPermissions = (): ReactElement => {
   const { allSafeApps } = useSafeApps()
@@ -95,100 +97,66 @@ const SafeAppsPermissions = (): ReactElement => {
   }
 
   return (
-    <Paper sx={{ padding: 4 }}>
-      <Typography variant="h4" fontWeight={700}>
-        Safe Apps permissions
-      </Typography>
-      <br />
+    <SettingsCard title="Safe Apps permissions">
       {!domains.length && (
-        <Typography variant="body1" sx={{ color: ({ palette }) => palette.primary.light }}>
-          There are no Safe Apps using permissions.
-        </Typography>
+        <Typography className="text-muted-foreground">There are no Safe Apps using permissions.</Typography>
       )}
       {domains.map((domain) => (
-        <Grid
-          item
-          key={domain}
-          sx={({ palette, shape }) => ({
-            border: `1px solid ${palette.border.light}`,
-            borderRadius: shape.borderRadius,
-            marginBottom: '16px',
-          })}
-        >
-          <Grid
-            container
-            sx={({ palette }) => ({
-              padding: '15px 24px',
-              borderBottom: `1px solid ${palette.border.light}`,
-            })}
-          >
-            <Grid
-              item
-              xs={12}
-              sm={5}
-              sx={{
-                padding: '9px 0',
-              }}
-            >
-              <Typography variant="h5" fontWeight={700}>
-                {appNames[domain]}
-              </Typography>
-              <Typography variant="body2">{domain}</Typography>
-            </Grid>
-            <Grid container item xs={12} sm={7}>
+        <div key={domain} className="mb-4 rounded-lg border border-[var(--color-border-light)]">
+          <div className="grid grid-cols-1 border-b border-[var(--color-border-light)] px-6 py-[15px] sm:grid-cols-12">
+            <div className="py-[9px] sm:col-span-5">
+              <Typography variant="paragraph-bold">{appNames[domain]}</Typography>
+              <Typography variant="paragraph-small">{domain}</Typography>
+            </div>
+            <div className="grid grid-cols-1 sm:col-span-7 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {safePermissions[domain]?.map(({ parentCapability, caveats }) => {
                 return (
-                  <Grid key={parentCapability} item xs={12} sm={6} lg={4} xl={3}>
+                  <div key={parentCapability}>
                     <PermissionsCheckbox
                       name={parentCapability}
                       label={getSafePermissionDisplayValues(parentCapability).displayName}
                       onChange={(_, checked: boolean) => handleSafePermissionsChange(domain, parentCapability, checked)}
                       checked={!isUserRestricted(caveats)}
                     />
-                  </Grid>
+                  </div>
                 )
               })}
               {browserPermissions[domain]?.map(({ feature, status }) => {
                 return (
-                  <Grid key={feature} item xs={12} sm={6} lg={4} xl={3}>
+                  <div key={feature}>
                     <PermissionsCheckbox
                       name={feature.toString()}
                       label={getBrowserPermissionDisplayValues(feature).displayName}
                       onChange={(_, checked: boolean) => handleBrowserPermissionsChange(domain, feature, checked)}
                       checked={status === PermissionStatus.GRANTED ? true : false}
                     />
-                  </Grid>
+                  </div>
                 )
               })}
-            </Grid>
-          </Grid>
-          <Grid
-            container
-            item
-            justifyContent="flex-end"
-            sx={{
-              padding: '12px 24px',
-            }}
-          >
-            <Link href="#" onClick={(event) => handleAllowAll(event, domain)} sx={{ textDecoration: 'none' }}>
+            </div>
+          </div>
+          <div className="flex justify-end gap-4 px-6 py-3">
+            <Link
+              href="#"
+              className="no-underline hover:no-underline"
+              onClick={(event) => handleAllowAll(event, domain)}
+            >
               Allow all
             </Link>
             <Link
               href="#"
-              color="error"
+              className="text-destructive no-underline hover:no-underline"
               onClick={(event) => handleClearAll(event, domain)}
-              sx={{ textDecoration: 'none' }}
-              ml={2}
             >
               Clear all
             </Link>
-            <Link href="#" color="error" onClick={(event) => handleRemoveApp(event, domain)} ml={2}>
-              <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
+            <Link href="#" className="text-destructive" onClick={(event) => handleRemoveApp(event, domain)}>
+              <DeleteIcon className="size-4" />
             </Link>
-          </Grid>
-        </Grid>
+          </div>
+        </div>
       ))}
-    </Paper>
+    </SettingsCard>
   )
 }
 

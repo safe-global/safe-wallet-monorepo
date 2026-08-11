@@ -1,39 +1,35 @@
-/* --topbar-height is measured live from the topbar element (see useTopbarHeight),
-   so the dialog sits flush against the header at any width — including the wrapped
-   two-row header below 1148px — with no per-viewport override to keep in sync. */
+/* The elevated topbar (z-index 99) paints over this dialog, so the dialog starts below it
+   to keep the close button visible and clickable. `--topbar-height` is measured live from
+   the real topbar element (see useTopbarHeight), so it already tracks the extra rows the
+   header wraps onto below 1148px — no width-banded offsets to keep in sync. */
 .dialog {
+  position: fixed;
   top: var(--topbar-height);
   left: 230px;
+  right: 0;
+  bottom: 0;
   z-index: 3;
+  overflow-y: auto;
+  /* Keep scrolling inside the dialog: no chaining to the page behind and no rubber-band bounce past
+     the dialog's own content. `.dialog` is the scroll container now that it is the Base UI popup;
+     it used to be MUI's `.MuiDialog-container` wrapper. */
+  overscroll-behavior: none;
+  display: flex;
+  flex-direction: column;
   transition: left 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
-  /* Opaque so macOS elastic overscroll can't reveal the page behind the
-     dialog (the backdrop is hidden, so the root is otherwise transparent). */
-  background-color: var(--color-border-background);
+  /* Opaque so macOS elastic overscroll can't reveal the page behind the dialog (the backdrop
+     is hidden, so the root is otherwise transparent) — and the same colour as that page, so
+     the flow reads as the page itself rather than a sheet laid over it. Mirrors PageLayout's
+     `.main` / `[data-theme='dark'] .mainSpace` pair; styles.test.ts keeps the two in step. */
+  background-color: var(--color-background-main);
 }
 
-/* Keep scrolling inside the dialog: no chaining to the page behind and no
-   rubber-band bounce past the dialog's own content. */
-.dialog :global .MuiDialog-container {
-  overscroll-behavior: none;
+[data-theme='dark'] .dialog {
+  background-color: var(--background);
 }
 
 .dialog.fullWidth {
   left: 0;
-}
-
-.dialog :global .MuiDialogActions-root {
-  border-top: 2px solid var(--color-border-light);
-  padding: var(--space-3);
-}
-
-.dialog :global .MuiDialogActions-root > :last-of-type:not(:first-of-type) {
-  order: 2;
-}
-
-.dialog :global .MuiDialogActions-root:after {
-  content: '';
-  order: 1;
-  flex: 1;
 }
 
 .title {
@@ -48,22 +44,31 @@
 }
 
 .close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  border-radius: 50%;
   color: var(--color-border-main);
   padding: var(--space-1);
   background-color: var(--color-border-light);
 }
 
+/* No background of its own: `.dialog` above lands on this same element and already paints the
+   page grey. Setting `--background` here instead made the flow a white sheet in light mode and
+   pure black in dark, both against the `--color-border-background` page it is supposed to blend
+   into. The two classes were separate elements under MUI, which is how they drifted apart. */
 .paper {
   padding-bottom: var(--space-8);
-  background-color: var(--color-border-background);
 }
 
-.dialog :global .MuiDialogContent-root {
+.content {
   overflow: visible;
 }
 
 @media (min-width: 600px) {
-  .dialog :global .MuiDialog-paper {
+  .paper {
     min-width: 600px;
     margin: 0;
   }
@@ -81,10 +86,6 @@
     left: 0;
     top: 0;
     z-index: 1300;
-  }
-
-  .dialog :global .MuiDialogActions-root {
-    padding: 0;
   }
 
   .title {

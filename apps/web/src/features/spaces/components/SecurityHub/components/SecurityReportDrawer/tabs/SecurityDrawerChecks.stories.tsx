@@ -51,13 +51,12 @@ const setup = createMockStory({ features: { spaces: true }, layout: 'paper' })
 
 const meta = {
   title: 'Features/SecurityHub/SecurityDrawerChecks',
+  tags: ['autodocs', 'skip-visual-test'],
   component: SecurityDrawerChecks,
   decorators: [setup.decorator],
   parameters: {
     ...setup.parameters,
-    chromatic: { disableSnapshot: true },
   },
-  tags: ['autodocs'],
 } satisfies Meta<typeof SecurityDrawerChecks>
 
 export default meta

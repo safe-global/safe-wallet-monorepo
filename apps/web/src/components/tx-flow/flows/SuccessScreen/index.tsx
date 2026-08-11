@@ -1,7 +1,6 @@
 import StatusStepper from './StatusStepper'
-import { Button, Container, Divider, Paper } from '@mui/material'
 import classnames from 'classnames'
-import Link from 'next/link'
+import NextLink from 'next/link'
 import css from './styles.module.css'
 import { useAppSelector } from '@/store'
 import { PendingStatus, selectPendingTxById } from '@/store/pendingTxsSlice'
@@ -21,6 +20,8 @@ import { usePredictSafeAddressFromTxDetails } from '@/hooks/usePredictSafeAddres
 import { AppRoutes } from '@/config/routes'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import Track from '@/components/common/Track'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 
 interface Props {
   /** The ID assigned to the transaction in the client-gateway */
@@ -81,15 +82,7 @@ const SuccessScreen = ({ txId, txHash }: Props) => {
   }
 
   return (
-    <Container
-      component={Paper}
-      disableGutters
-      sx={{
-        textAlign: 'center',
-        maxWidth: `${900 - 75}px`, // md={11}
-      }}
-      maxWidth={false}
-    >
+    <div className="mx-auto w-full max-w-[825px] rounded-lg bg-[var(--color-background-paper)] text-center">
       <div className={css.row}>
         <LoadingSpinner status={spinnerStatus} />
         {StatusComponent}
@@ -97,61 +90,59 @@ const SuccessScreen = ({ txId, txHash }: Props) => {
 
       {!error && (
         <>
-          <Divider />
+          <Separator />
           <div className={css.row}>
             <StatusStepper status={status} txHash={localTxHash} />
           </div>
         </>
       )}
 
-      <Divider />
+      <Separator />
 
       <div className={classnames(css.row, css.buttons)}>
         {isSwapOrder && (
-          <Button data-testid="finish-transaction-btn" variant="outlined" size="small" onClick={onClose}>
+          <Button data-testid="finish-transaction-btn" variant="outline" size="sm" onClick={onClose}>
             Back to swaps
           </Button>
         )}
 
         {txLink && (
-          <Link {...txLink} passHref target="_blank" rel="noreferrer" legacyBehavior>
-            <Button
-              data-testid="view-transaction-btn"
-              variant={isSwapOrder ? 'contained' : 'outlined'}
-              size="small"
-              onClick={onClose}
-            >
-              View transaction
-            </Button>
-          </Link>
+          <Button
+            data-testid="view-transaction-btn"
+            variant={isSwapOrder ? 'default' : 'outline'}
+            size="sm"
+            onClick={onClose}
+            render={<NextLink {...txLink} target="_blank" rel="noreferrer" />}
+          >
+            View transaction
+          </Button>
         )}
 
         {!isSwapOrder &&
           (predictedSafeAddress ? (
             <Track {...NESTED_SAFE_EVENTS.OPEN_NESTED_SAFE} label={NESTED_SAFE_LABELS.success_screen}>
-              <Link
-                href={{ pathname: AppRoutes.home, query: { safe: `${chain?.shortName}:${predictedSafeAddress}` } }}
-                passHref
-                legacyBehavior
+              <Button
+                data-testid="open-nested-safe-btn"
+                variant="default"
+                size="sm"
+                onClick={onClose}
+                disabled={!isSuccess}
+                render={
+                  <NextLink
+                    href={{ pathname: AppRoutes.home, query: { safe: `${chain?.shortName}:${predictedSafeAddress}` } }}
+                  />
+                }
               >
-                <Button
-                  data-testid="open-nested-safe-btn"
-                  variant="contained"
-                  size="small"
-                  onClick={onClose}
-                  disabled={!isSuccess}
-                >
-                  Go to Nested Safe
-                </Button>
-              </Link>
+                Go to Nested Safe
+              </Button>
             </Track>
           ) : (
-            <Button data-testid="finish-transaction-btn" variant="contained" size="small" onClick={onClose}>
+            <Button data-testid="finish-transaction-btn" variant="default" size="sm" onClick={onClose}>
               Finish
             </Button>
           ))}
       </div>
-    </Container>
+    </div>
   )
 }
 
