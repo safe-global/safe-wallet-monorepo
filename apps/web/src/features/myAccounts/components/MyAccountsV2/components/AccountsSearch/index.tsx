@@ -13,6 +13,7 @@ const AccountsSearch = ({ setSearchQuery }: AccountsSearchProps) => {
   return (
     <div className="w-full">
       <SearchInput
+        className="border-border bg-transparent"
         id="search-by-name"
         placeholder="by name, address or network"
         aria-label="Search Safe accounts by name, address or network"
