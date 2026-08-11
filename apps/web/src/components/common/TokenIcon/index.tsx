@@ -2,7 +2,7 @@ import { useMemo, type ReactElement } from 'react'
 import IframeIcon from '../IframeIcon'
 import css from './styles.module.css'
 import { upgradeCoinGeckoThumbToQuality } from '@safe-global/utils/utils/image'
-import { Box } from '@mui/material'
+import classNames from 'classnames'
 import ChainIndicator from '../ChainIndicator'
 
 const FALLBACK_ICON = '/images/common/token-placeholder.svg'
@@ -31,7 +31,7 @@ const TokenIcon = ({
   const fallback = fallbackSrc || FALLBACK_ICON
 
   return (
-    <Box position="relative" marginRight={chainId ? '8px' : '0px'}>
+    <div className={classNames('relative', { 'mr-2': chainId })}>
       <IframeIcon
         src={src || fallback}
         alt={tokenSymbol ?? ''}
@@ -50,7 +50,7 @@ const TokenIcon = ({
           <IframeIcon src={badgeUri} alt="badge" width={12} height={12} borderRadius="100%" />
         </div>
       )}
-    </Box>
+    </div>
   )
 }
 

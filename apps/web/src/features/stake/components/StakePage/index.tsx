@@ -1,4 +1,3 @@
-import { Stack } from '@mui/material'
 import Disclaimer from '@/components/common/Disclaimer'
 import WidgetDisclaimer from '@/components/common/WidgetDisclaimer'
 import StakingWidget from '../StakingWidget'
@@ -17,16 +16,9 @@ const StakePage = () => {
 
   if (blockedAddress) {
     return (
-      <Stack
-        direction="column"
-        sx={{
-          alignItems: 'center',
-          justifyContent: 'center',
-          flex: 1,
-        }}
-      >
+      <div className="flex flex-1 flex-col items-center justify-center">
         <BlockedAddress address={blockedAddress} featureTitle="stake feature with Kiln" />
-      </Stack>
+      </div>
     )
   }
 
@@ -35,21 +27,14 @@ const StakePage = () => {
       {isConsentAccepted === undefined ? null : isConsentAccepted ? (
         <StakingWidget asset={String(asset)} />
       ) : (
-        <Stack
-          direction="column"
-          sx={{
-            alignItems: 'center',
-            justifyContent: 'center',
-            flex: 1,
-          }}
-        >
+        <div className="flex flex-1 flex-col items-center justify-center">
           <Disclaimer
             title="Note"
             content={<WidgetDisclaimer widgetName="Stake Widget by Kiln" />}
             onAccept={onAccept}
             buttonText="Continue"
           />
-        </Stack>
+        </div>
       )}
     </>
   )

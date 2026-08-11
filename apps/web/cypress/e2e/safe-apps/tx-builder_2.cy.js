@@ -16,7 +16,18 @@ describe('Transaction Builder 2 tests', { defaultCommandTimeout: 20000 }, () => 
     const appUrl = constants.TX_Builder_url
     iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
     const visitUrl = `/apps/open?safe=${safeAppSafes.SEP_SAFEAPP_SAFE_1}&appUrl=${encodeURIComponent(appUrl)}`
-    cy.visit(visitUrl)
+    cy.visit(visitUrl, {
+      onBeforeLoad(win) {
+        // Pre-grant address book access: the permissions prompt is a modal dialog, and Base UI
+        // marks everything behind it (including the app iframe) inert
+        win.localStorage.setItem(
+          constants.SAFE_PERMISSIONS_KEY,
+          JSON.stringify({
+            [appUrl]: [{ invoker: appUrl, parentCapability: 'requestAddressBook', date: 1111111111111, caveats: [] }],
+          }),
+        )
+      },
+    })
   })
 
   it('Verify a batch cannot be created without method data', () => {
@@ -47,6 +58,15 @@ describe('Transaction Builder 2 tests', { defaultCommandTimeout: 20000 }, () => 
       getBody().findAllByText(safeapps.confirmDeleteBtnStr).should('not.be.disabled').click()
       getBody().findByText(safeapps.noSavedBatchesStr).should('be.visible')
       getBody().findByText(safeapps.backToTransactionStr).should('be.visible')
+
+      // Clear the uploaded draft: the app persists it in its own localStorage, and with
+      // testIsolation off the next tests would land on the batch view instead of the dropzone
+      getBody().findByText(safeapps.backToTransactionStr).click()
+      getBody().findByText(safeapps.createBatchStr).click()
+      getBody().findByRole('button', { name: safeapps.cancelBtnStr }).click()
+      getBody().findByText(safeapps.clearTransactionListStr)
+      getBody().findByRole('button', { name: safeapps.confirmClearTransactionListStr }).click()
+      getBody().findAllByText('choose a file').should('be.visible')
     })
     cy.readFile('cypress/downloads/E2E test.json').should('exist')
   })

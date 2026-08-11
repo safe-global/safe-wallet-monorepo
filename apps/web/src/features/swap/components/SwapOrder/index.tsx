@@ -11,13 +11,12 @@ import StatusLabel from '../StatusLabel'
 import SwapProgress from '../SwapProgress'
 import { capitalize } from '@/hooks/useMnemonicName'
 import { formatDateTime, formatTimeInWords } from '@safe-global/utils/utils/date'
-import Stack from '@mui/material/Stack'
 import type { ReactElement } from 'react'
 import { DataRow } from '@/components/common/Table/DataRow'
 import { DataTable } from '@/components/common/Table/DataTable'
 import { compareAsc } from 'date-fns'
 import css from './styles.module.css'
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import {
   getExecutionPrice,
@@ -49,11 +48,7 @@ const AmountRow = ({ order }: { order: OrderTransactionInfo }) => {
   const isSellOrder = kind === 'sell'
   return (
     <DataRow key="Amount" title="Amount">
-      <Stack
-        sx={{
-          flexDirection: isSellOrder ? 'column' : 'column-reverse',
-        }}
-      >
+      <div className={`flex ${isSellOrder ? 'flex-col' : 'flex-col-reverse'}`}>
         <div>
           <span className={css.value}>
             {isSellOrder ? 'Sell' : 'For at most'}{' '}
@@ -76,7 +71,7 @@ const AmountRow = ({ order }: { order: OrderTransactionInfo }) => {
             />
           </span>
         </div>
-      </Stack>
+      </div>
     </DataRow>
   )
 }
@@ -110,15 +105,8 @@ const ExpiryRow = ({ order }: { order: OrderTransactionInfo }) => {
       return (
         <DataRow key="Expiry" title="Expiry">
           <Typography>
-            <Typography
-              component="span"
-              sx={{
-                fontWeight: 700,
-              }}
-            >
-              {formatTimeInWords(validUntil * 1000)}
-            </Typography>{' '}
-            ({formatDateTime(validUntil * 1000)})
+            <span className="font-bold">{formatTimeInWords(validUntil * 1000)}</span> (
+            {formatDateTime(validUntil * 1000)})
           </Typography>
         </DataRow>
       )
@@ -257,15 +245,8 @@ export const TwapOrder = ({ order }: { order: SwapTwapOrder }) => {
         status !== 'fulfilled' && compareAsc(now, expires) !== 1 ? (
           <DataRow key="Expiry" title="Expiry">
             <Typography>
-              <Typography
-                component="span"
-                sx={{
-                  fontWeight: 700,
-                }}
-              >
-                {formatTimeInWords(validUntil * 1000)}
-              </Typography>{' '}
-              ({formatDateTime(validUntil * 1000)})
+              <span className="font-bold">{formatTimeInWords(validUntil * 1000)}</span> (
+              {formatDateTime(validUntil * 1000)})
             </Typography>
           </DataRow>
         ) : (

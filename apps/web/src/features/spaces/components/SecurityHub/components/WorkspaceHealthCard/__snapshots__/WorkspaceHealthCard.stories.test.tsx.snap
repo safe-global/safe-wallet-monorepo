@@ -1,48 +1,53 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./WorkspaceHealthCard.stories CriticalFilterActive 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="bg-card text-card-foreground overflow-hidden rounded-xl text-sm has-[>img:first-child]:pt-0 data-[size=sm]:gap-4 data-[size=sm]:py-4 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex mb-6 flex-col items-start gap-6 p-6 md:flex-row md:items-center"
-      data-size="default"
-      data-slot="card"
+      class="bg-card rounded-lg p-4"
     >
       <div
-        class="bg-muted animate-pulse size-[100px] shrink-0 rounded-full"
-        data-slot="skeleton"
-      />
-      <div
-        class="min-w-0 flex-1"
+        class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex gap-6 rounded-lg mb-6 flex-col items-start p-6 md:flex-row md:items-center"
+        data-radius="lg"
+        data-size="default"
+        data-slot="card"
+        data-variant="default"
       >
         <div
-          class="bg-muted animate-pulse mb-2 h-6 w-[180px] rounded"
+          class="bg-muted animate-pulse size-[100px] shrink-0 rounded-full"
           data-slot="skeleton"
         />
         <div
-          class="bg-muted animate-pulse mb-1 h-4 w-[320px] rounded"
-          data-slot="skeleton"
-        />
-        <div
-          class="bg-muted animate-pulse mb-4 h-4 w-[260px] rounded"
-          data-slot="skeleton"
-        />
-        <div
-          class="flex gap-2"
+          class="min-w-0 flex-1"
         >
           <div
-            class="bg-muted animate-pulse h-5 w-20 rounded-[10px]"
+            class="bg-muted animate-pulse mb-2 h-6 w-[180px] rounded"
             data-slot="skeleton"
           />
           <div
-            class="bg-muted animate-pulse h-5 w-[100px] rounded-[10px]"
+            class="bg-muted animate-pulse mb-1 h-4 w-[320px] rounded"
             data-slot="skeleton"
           />
+          <div
+            class="bg-muted animate-pulse mb-4 h-4 w-[260px] rounded"
+            data-slot="skeleton"
+          />
+          <div
+            class="flex gap-2"
+          >
+            <div
+              class="bg-muted animate-pulse h-5 w-20 rounded-[10px]"
+              data-slot="skeleton"
+            />
+            <div
+              class="bg-muted animate-pulse h-5 w-[100px] rounded-[10px]"
+              data-slot="skeleton"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -55,44 +60,49 @@ exports[`./WorkspaceHealthCard.stories Healthy 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="bg-card text-card-foreground overflow-hidden rounded-xl text-sm has-[>img:first-child]:pt-0 data-[size=sm]:gap-4 data-[size=sm]:py-4 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex mb-6 flex-col items-start gap-6 p-6 md:flex-row md:items-center"
-      data-size="default"
-      data-slot="card"
+      class="bg-card rounded-lg p-4"
     >
       <div
-        class="bg-muted animate-pulse size-[100px] shrink-0 rounded-full"
-        data-slot="skeleton"
-      />
-      <div
-        class="min-w-0 flex-1"
+        class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex gap-6 rounded-lg mb-6 flex-col items-start p-6 md:flex-row md:items-center"
+        data-radius="lg"
+        data-size="default"
+        data-slot="card"
+        data-variant="default"
       >
         <div
-          class="bg-muted animate-pulse mb-2 h-6 w-[180px] rounded"
+          class="bg-muted animate-pulse size-[100px] shrink-0 rounded-full"
           data-slot="skeleton"
         />
         <div
-          class="bg-muted animate-pulse mb-1 h-4 w-[320px] rounded"
-          data-slot="skeleton"
-        />
-        <div
-          class="bg-muted animate-pulse mb-4 h-4 w-[260px] rounded"
-          data-slot="skeleton"
-        />
-        <div
-          class="flex gap-2"
+          class="min-w-0 flex-1"
         >
           <div
-            class="bg-muted animate-pulse h-5 w-20 rounded-[10px]"
+            class="bg-muted animate-pulse mb-2 h-6 w-[180px] rounded"
             data-slot="skeleton"
           />
           <div
-            class="bg-muted animate-pulse h-5 w-[100px] rounded-[10px]"
+            class="bg-muted animate-pulse mb-1 h-4 w-[320px] rounded"
             data-slot="skeleton"
           />
+          <div
+            class="bg-muted animate-pulse mb-4 h-4 w-[260px] rounded"
+            data-slot="skeleton"
+          />
+          <div
+            class="flex gap-2"
+          >
+            <div
+              class="bg-muted animate-pulse h-5 w-20 rounded-[10px]"
+              data-slot="skeleton"
+            />
+            <div
+              class="bg-muted animate-pulse h-5 w-[100px] rounded-[10px]"
+              data-slot="skeleton"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -105,44 +115,49 @@ exports[`./WorkspaceHealthCard.stories MixedGrades 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="bg-card text-card-foreground overflow-hidden rounded-xl text-sm has-[>img:first-child]:pt-0 data-[size=sm]:gap-4 data-[size=sm]:py-4 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex mb-6 flex-col items-start gap-6 p-6 md:flex-row md:items-center"
-      data-size="default"
-      data-slot="card"
+      class="bg-card rounded-lg p-4"
     >
       <div
-        class="bg-muted animate-pulse size-[100px] shrink-0 rounded-full"
-        data-slot="skeleton"
-      />
-      <div
-        class="min-w-0 flex-1"
+        class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex gap-6 rounded-lg mb-6 flex-col items-start p-6 md:flex-row md:items-center"
+        data-radius="lg"
+        data-size="default"
+        data-slot="card"
+        data-variant="default"
       >
         <div
-          class="bg-muted animate-pulse mb-2 h-6 w-[180px] rounded"
+          class="bg-muted animate-pulse size-[100px] shrink-0 rounded-full"
           data-slot="skeleton"
         />
         <div
-          class="bg-muted animate-pulse mb-1 h-4 w-[320px] rounded"
-          data-slot="skeleton"
-        />
-        <div
-          class="bg-muted animate-pulse mb-4 h-4 w-[260px] rounded"
-          data-slot="skeleton"
-        />
-        <div
-          class="flex gap-2"
+          class="min-w-0 flex-1"
         >
           <div
-            class="bg-muted animate-pulse h-5 w-20 rounded-[10px]"
+            class="bg-muted animate-pulse mb-2 h-6 w-[180px] rounded"
             data-slot="skeleton"
           />
           <div
-            class="bg-muted animate-pulse h-5 w-[100px] rounded-[10px]"
+            class="bg-muted animate-pulse mb-1 h-4 w-[320px] rounded"
             data-slot="skeleton"
           />
+          <div
+            class="bg-muted animate-pulse mb-4 h-4 w-[260px] rounded"
+            data-slot="skeleton"
+          />
+          <div
+            class="flex gap-2"
+          >
+            <div
+              class="bg-muted animate-pulse h-5 w-20 rounded-[10px]"
+              data-slot="skeleton"
+            />
+            <div
+              class="bg-muted animate-pulse h-5 w-[100px] rounded-[10px]"
+              data-slot="skeleton"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -155,44 +170,49 @@ exports[`./WorkspaceHealthCard.stories Scanning 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="bg-card text-card-foreground overflow-hidden rounded-xl text-sm has-[>img:first-child]:pt-0 data-[size=sm]:gap-4 data-[size=sm]:py-4 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex mb-6 flex-col items-start gap-6 p-6 md:flex-row md:items-center"
-      data-size="default"
-      data-slot="card"
+      class="bg-card rounded-lg p-4"
     >
       <div
-        class="bg-muted animate-pulse size-[100px] shrink-0 rounded-full"
-        data-slot="skeleton"
-      />
-      <div
-        class="min-w-0 flex-1"
+        class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex gap-6 rounded-lg mb-6 flex-col items-start p-6 md:flex-row md:items-center"
+        data-radius="lg"
+        data-size="default"
+        data-slot="card"
+        data-variant="default"
       >
         <div
-          class="bg-muted animate-pulse mb-2 h-6 w-[180px] rounded"
+          class="bg-muted animate-pulse size-[100px] shrink-0 rounded-full"
           data-slot="skeleton"
         />
         <div
-          class="bg-muted animate-pulse mb-1 h-4 w-[320px] rounded"
-          data-slot="skeleton"
-        />
-        <div
-          class="bg-muted animate-pulse mb-4 h-4 w-[260px] rounded"
-          data-slot="skeleton"
-        />
-        <div
-          class="flex gap-2"
+          class="min-w-0 flex-1"
         >
           <div
-            class="bg-muted animate-pulse h-5 w-20 rounded-[10px]"
+            class="bg-muted animate-pulse mb-2 h-6 w-[180px] rounded"
             data-slot="skeleton"
           />
           <div
-            class="bg-muted animate-pulse h-5 w-[100px] rounded-[10px]"
+            class="bg-muted animate-pulse mb-1 h-4 w-[320px] rounded"
             data-slot="skeleton"
           />
+          <div
+            class="bg-muted animate-pulse mb-4 h-4 w-[260px] rounded"
+            data-slot="skeleton"
+          />
+          <div
+            class="flex gap-2"
+          >
+            <div
+              class="bg-muted animate-pulse h-5 w-20 rounded-[10px]"
+              data-slot="skeleton"
+            />
+            <div
+              class="bg-muted animate-pulse h-5 w-[100px] rounded-[10px]"
+              data-slot="skeleton"
+            />
+          </div>
         </div>
       </div>
     </div>

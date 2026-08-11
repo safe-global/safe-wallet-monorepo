@@ -1,6 +1,7 @@
 const executeNowOption = '[data-testid="execute-checkbox"]'
 const executeLaterOption = '[data-testid="sign-checkbox"]'
 const connectedWalletExecutionMethod = '[data-testid="connected-wallet-execution-method"]'
+const relayExecutionMethod = '[data-testid="relay-execution-method"]'
 const txStatus = '[data-testid="transaction-status"]'
 const finishTransactionBtn = '[data-testid="finish-transaction-btn"]'
 const executeFormBtn = '[data-testid="execute-form-btn"]'
@@ -46,6 +47,10 @@ export function selectConnectedWalletOption() {
 
 export function selectRelayOtion() {
   cy.get(connectedWalletExecutionMethod).prev().click()
+}
+
+export function verifyRelayExecutionMethodChecked() {
+  cy.get(relayExecutionMethod).find('[data-slot="radio-group-item"]').should('have.attr', 'aria-checked', 'true')
 }
 
 export function clickOnExecuteBtn() {

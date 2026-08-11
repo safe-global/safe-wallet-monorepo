@@ -77,6 +77,7 @@ const baseSetup = createMockStory({
 })
 
 const meta = {
+  title: 'Features/Spaces/SurveyOnboarding',
   component: SurveyOnboarding,
   loaders: [mswLoader],
   parameters: {

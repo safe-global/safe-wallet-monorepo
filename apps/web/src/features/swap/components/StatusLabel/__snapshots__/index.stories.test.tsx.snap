@@ -1,29 +1,24 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./index.stories Cancelled 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1im6wh6-MuiChip-root"
+      class="bg-background rounded-lg p-4"
     >
       <span
-        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+        class="gap-1 border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-destructive/10 [a]:hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 text-destructive dark:bg-destructive/20 border-transparent h-6 px-2.5 py-0 text-sm rounded-4xl font-bold"
+        data-slot="badge"
+        data-variant="destructive"
       >
-        <span
-          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-        >
-          <mock-icon
-            aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-            focusable="false"
-          />
-          Cancelled
-        </span>
+        <mock-icon
+          class="size-5"
+        />
+        Cancelled
       </span>
     </div>
   </div>
@@ -35,25 +30,20 @@ exports[`./index.stories Expired 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-a204je-MuiChip-root"
+      class="bg-background rounded-lg p-4"
     >
       <span
-        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+        class="gap-1 border border-transparent transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-primary text-primary-foreground [a]:hover:bg-primary/80 h-6 px-2.5 py-0 text-sm rounded-4xl font-bold"
+        data-slot="badge"
+        data-variant="default"
       >
-        <span
-          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-        >
-          <mock-icon
-            aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-            focusable="false"
-          />
-          Expired
-        </span>
+        <mock-icon
+          class="size-5"
+        />
+        Expired
       </span>
     </div>
   </div>
@@ -65,25 +55,20 @@ exports[`./index.stories Filled 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1cjet8q-MuiChip-root"
+      class="bg-background rounded-lg p-4"
     >
       <span
-        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+        class="gap-1 border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-accent-secondary text-accent-secondary-foreground border-transparent dark:bg-accent-secondary/20 dark:text-accent-success h-6 px-2.5 py-0 text-sm rounded-4xl font-bold"
+        data-slot="badge"
+        data-variant="success"
       >
-        <span
-          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-        >
-          <mock-icon
-            aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-            focusable="false"
-          />
-          Filled
-        </span>
+        <mock-icon
+          class="size-5"
+        />
+        Filled
       </span>
     </div>
   </div>
@@ -95,25 +80,20 @@ exports[`./index.stories Open 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-2q1p8k-MuiChip-root"
+      class="bg-background rounded-lg p-4"
     >
       <span
-        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+        class="gap-1 border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-warning-subtle text-warning-strong border-transparent h-6 px-2.5 py-0 text-sm rounded-4xl font-bold"
+        data-slot="badge"
+        data-variant="warning"
       >
-        <span
-          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-        >
-          <mock-icon
-            aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-            focusable="false"
-          />
-          Open
-        </span>
+        <mock-icon
+          class="size-5"
+        />
+        Open
       </span>
     </div>
   </div>
@@ -125,25 +105,20 @@ exports[`./index.stories PartiallyFilled 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1cjet8q-MuiChip-root"
+      class="bg-background rounded-lg p-4"
     >
       <span
-        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+        class="gap-1 border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-accent-secondary text-accent-secondary-foreground border-transparent dark:bg-accent-secondary/20 dark:text-accent-success h-6 px-2.5 py-0 text-sm rounded-4xl font-bold"
+        data-slot="badge"
+        data-variant="success"
       >
-        <span
-          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-        >
-          <mock-icon
-            aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-            focusable="false"
-          />
-          Partially filled
-        </span>
+        <mock-icon
+          class="size-5"
+        />
+        Partially filled
       </span>
     </div>
   </div>
@@ -155,25 +130,20 @@ exports[`./index.stories Pending 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-2q1p8k-MuiChip-root"
+      class="bg-background rounded-lg p-4"
     >
       <span
-        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+        class="gap-1 border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-warning-subtle text-warning-strong border-transparent h-6 px-2.5 py-0 text-sm rounded-4xl font-bold"
+        data-slot="badge"
+        data-variant="warning"
       >
-        <span
-          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-        >
-          <mock-icon
-            aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-            focusable="false"
-          />
-          Execution needed
-        </span>
+        <mock-icon
+          class="size-5"
+        />
+        Execution needed
       </span>
     </div>
   </div>

@@ -1,5 +1,6 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Tooltip, Typography, Stack } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -13,29 +14,33 @@ export default function TxNote({ txDetails }: { txDetails: TransactionDetails | 
 
   return (
     <div>
-      <Typography variant="h5" display="flex" alignItems="center" justifyItems="center">
+      <Typography variant="h4" className="flex items-center">
         Note
-        <Tooltip
-          data-testid="tx-note-tooltip"
-          title={
-            <Stack data-testid="note-creator" direction="row" gap={1}>
+        <Tooltip>
+          <TooltipTrigger
+            data-testid="tx-note-tooltip"
+            render={<span className="inline-flex h-[1em] text-muted-foreground" />}
+          >
+            <InfoIcon height="100%" />
+          </TooltipTrigger>
+          <TooltipContent>
+            <div data-testid="note-creator" className="flex flex-row gap-2">
               <span>By </span>
               {creator ? (
                 <EthHashInfo avatarSize={20} address={creator.value} showName onlyName />
               ) : (
                 <span>transaction creator</span>
               )}
-            </Stack>
-          }
-          arrow
-        >
-          <Typography color="text.secondary" component="span" height="1em">
-            <InfoIcon height="100%" />
-          </Typography>
+            </div>
+          </TooltipContent>
         </Tooltip>
       </Typography>
 
-      <Typography data-testid="tx-note" p={2} mt={1} borderRadius={1} bgcolor="background.main">
+      <Typography
+        data-testid="tx-note"
+        variant="paragraph"
+        className="mt-2 rounded bg-[var(--color-background-main)] p-4"
+      >
         {note}
       </Typography>
     </div>

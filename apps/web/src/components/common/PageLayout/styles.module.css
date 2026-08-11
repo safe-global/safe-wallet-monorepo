@@ -1,27 +1,87 @@
 @reference '../../../styles/shadcn.css';
 
-/* The topbar lives in normal flow as the first child of .main, so it pushes the
-   page content down by its own height — no fixed reservation to keep in sync,
-   so it can wrap onto extra rows on narrow viewports without clipping content.
-   .main owns the sidebar offset (padding-left), so the topbar inherits it.
-   It scrolls away with the page (not sticky) so a page's own sticky sub-header
-   — e.g. the Assets tabs — can pin to the top cleanly without overlapping it. */
+/* The topbar is absolutely positioned, so it does not inherit `.main`'s sidebar
+   offset — it carries its own. Both live on `--topbar-offset` so the elevated
+   variant (which drops `left` for a full-width sticky strip and re-adds the
+   offset as header padding) reads the same value instead of duplicating the
+   sidebar states as extra selectors. */
 .topbar {
-  position: relative;
-  z-index: 2;
-  width: 100%;
+  @apply absolute top-0 right-0 z-[1];
+  --topbar-offset: 230px;
+  left: var(--topbar-offset);
+}
+
+.topbarCollapsed {
+  --topbar-offset: 4rem;
+}
+
+.topbarNoSidebar {
+  --topbar-offset: 0px;
 }
 
 /* Elevated above a modal backdrop (e.g. tx flow). Raised above page sub-headers
    and pinned to the viewport top so it fills the strip the tx dialog leaves
    uncovered (top: var(--topbar-height)) even when the page was scrolled before
    the modal opened — e.g. spending limits in Settings → Setup, where the pinned
-   settings tabs showed through instead (WA-2552). Sticky keeps its flow space,
-   so nothing shifts when the class toggles on open/close. */
+   settings tabs showed through instead (WA-2552).
+
+   `fixed`, not `sticky`: `.mainSpace` already reserves `padding-top:
+   var(--topbar-height)` for the out-of-flow base variant, so an in-flow
+   position lands the topbar *after* its own reserve — one topbar-height of
+   empty page above it, and the tx dialog's close button buried underneath.
+   `fixed` also makes the `left: 0` / `width: 100%` below resolve against the
+   viewport rather than `.main`'s sidebar padding, which the header padding
+   underneath assumes. Out of flow either way, so nothing shifts when the class
+   toggles on open/close. */
 .topbarElevated {
-  position: sticky;
+  position: fixed;
   top: 0;
   z-index: 99;
+  left: 0;
+  width: 100%;
+  transition: none;
+
+  /* `left: 0` above spans the viewport, so the sidebar offset moves to the header's
+     own padding — on top of the 1.5rem page padding it already has. */
+  header {
+    padding-left: calc(var(--topbar-offset) + 1.5rem);
+  }
+}
+
+@media (max-width: 899.95px) {
+  /* The sidebar is a temporary overlay below `md`, so nothing is reserved for it. */
+  .topbar {
+    --topbar-offset: 0px;
+    position: sticky;
+    top: 0;
+  }
+
+  /* Below md the topbar is in flow and `.mainSpace` reserves nothing for it, so the
+     elevated variant has to stay in flow too — going fixed here would lift it out and
+     let the page content jump up underneath it the moment a modal opens. Declared after
+     `.topbarElevated` above so it wins on equal specificity. */
+  .topbarElevated {
+    position: sticky;
+  }
+
+  .topbarElevated header {
+    padding-left: var(--space-3);
+  }
+}
+
+.mainSpace {
+  /* we need it in order to have higher importance than the .main class */
+  && {
+    padding-top: var(--topbar-height);
+
+    @media (max-width: 899.95px) {
+      @apply pt-0;
+    }
+
+    @media (max-width: 640px) {
+      padding-top: 0;
+    }
+  }
 }
 
 /* While a shadcn overlay-layer popup (e.g. the safe-selector dropdown) is open, drop the

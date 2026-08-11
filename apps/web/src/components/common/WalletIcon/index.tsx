@@ -1,4 +1,4 @@
-import { Skeleton } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const WalletIcon = ({
   provider,
@@ -19,7 +19,7 @@ const WalletIcon = ({
       alt={`${provider} logo`}
     />
   ) : (
-    <Skeleton variant="circular" width={width} height={height} />
+    <Skeleton className="rounded-full" style={{ width, height }} />
   )
 }
 

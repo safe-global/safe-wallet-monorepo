@@ -175,6 +175,9 @@ export function verifyBlindSigningEnabled(option) {
 
 export function clickOnBlindSigningOption() {
   cy.contains(blindSigningStr2).click()
+  // Navigating away from the open message flow asks to discard it. This used to be a
+  // native confirm() that Cypress auto-accepted; the themed dialog needs a real click.
+  cy.contains('button', 'Discard').click()
   cy.contains(enableBlindSigningStr).click()
 }
 
@@ -207,7 +210,10 @@ export function verifyLinkName(name) {
 }
 
 export function clickOnApp(app) {
-  cy.contains(app).click()
+  // The card's text sits in a pointer-events-none layer; clicks land on the overlay
+  // link covering the card, so target that link directly. An app can render two cards
+  // (featured + all apps), so take the first like cy.contains() used to.
+  cy.get(`a[aria-label="Open ${app}"]`).first().click()
   cy.wait(2000)
 }
 
@@ -333,6 +339,14 @@ export function verifyAccessToAddressBookExists() {
 
 export function clickOnAcceptBtn() {
   cy.findByRole('button', { name: acceptBtnStr }).click()
+}
+
+export function verifyPermissionsRequestVisible() {
+  cy.contains(permissionRequestStr).should('be.visible')
+}
+
+export function clickOnPermissionsAcceptBtn() {
+  cy.contains('button', acceptBtnStr).click()
 }
 
 export function uncheckAllPermissions(element) {

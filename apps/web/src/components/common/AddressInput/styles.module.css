@@ -1,9 +1,51 @@
-.wrapper :global .MuiInputLabel-root.Mui-error[data-shrink='false'] {
-  padding: 5px 4px;
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  min-height: 66px;
+  padding: 12px var(--space-2);
+  color: var(--foreground);
 }
 
-.wrapper :global .MuiInputAdornment-root {
-  margin-left: 0;
+.inputWrapper.error {
+  border-color: var(--color-error-main);
+}
+
+.startAdornment {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.prefix {
+  white-space: nowrap;
+  color: var(--foreground);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+}
+
+.readOnly .input {
+  visibility: hidden;
+  width: 0;
+  flex: 0;
+}
+
+.endAdornment {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
 }
 
 .openButton svg {
@@ -12,8 +54,4 @@
 
 .rotated svg {
   transform: rotate(180deg);
-}
-
-.readOnly :global .MuiInputBase-input {
-  visibility: hidden;
 }

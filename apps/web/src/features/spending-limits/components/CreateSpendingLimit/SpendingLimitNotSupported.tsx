@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 
 import TxCard from '@/components/tx-flow/common/TxCard'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -13,8 +13,8 @@ const SpendingLimitNotSupported = () => {
   return (
     <TxCard>
       <ErrorMessage>
-        <Typography fontWeight={700}>Spending limits aren&apos;t available on {chainName} yet</Typography>
-        <Typography mt={1}>
+        <Typography variant="paragraph-bold">Spending limits aren&apos;t available on {chainName} yet</Typography>
+        <Typography className="mt-1">
           The spending limit module hasn&apos;t been deployed on this network. Once it&apos;s available you&apos;ll be
           able to set up spending limits here. <ExternalLink href={HELP_CENTER_URL}>Contact us</ExternalLink> to request
           support for {chainName}.

@@ -7,8 +7,6 @@
 import { Outlet, createRootRoute } from '@tanstack/react-router'
 import { HelmetProvider, Helmet } from 'react-helmet-async'
 import { Provider } from 'react-redux'
-import { CacheProvider } from '@emotion/react'
-import CssBaseline from '@mui/material/CssBaseline'
 import { lazy, memo, Suspense, useMemo, type ReactElement } from 'react'
 
 // Reused verbatim from apps/web/src — the provider chain itself is exported.
@@ -16,7 +14,6 @@ import { AppProviders } from '@/pages/_app'
 import { BRAND_NAME } from '@/config/constants'
 import { GATEWAY_URL } from '@/config/gateway'
 import { makeStore, setStoreInstance, useHydrateStore, useInitChains } from '@/store'
-import createEmotionCache from '@/utils/createEmotionCache'
 import MetaTags from '@/components/common/MetaTags'
 import PageLayout from '@/components/common/PageLayout'
 import PwaReloadPrompt from '../components/PwaReloadPrompt'
@@ -64,7 +61,6 @@ if (typeof window !== 'undefined') {
 
 const reduxStore = makeStore()
 setStoreInstance(reduxStore)
-const emotionCache = createEmotionCache()
 
 // LazyWeb3Init was `next/dynamic(..., { ssr: false })` — `ssr` is a no-op in
 // the SPA, so a plain React.lazy is equivalent.
@@ -149,19 +145,16 @@ function RootShell() {
           <title>{BRAND_NAME}</title>
         </Helmet>
         <MetaTags prefetchUrl={GATEWAY_URL} />
-        <CacheProvider value={emotionCache}>
-          <AppProviders>
-            <CssBaseline />
-            <CaptchaProvider>
-              <InitApp />
-              <PwaReloadPrompt />
-              <Suspense fallback={null}>
-                <LazyWeb3Init />
-              </Suspense>
-              <MemoizedTree pathname={location.pathname} outlet={outlet} />
-            </CaptchaProvider>
-          </AppProviders>
-        </CacheProvider>
+        <AppProviders>
+          <CaptchaProvider>
+            <InitApp />
+            <PwaReloadPrompt />
+            <Suspense fallback={null}>
+              <LazyWeb3Init />
+            </Suspense>
+            <MemoizedTree pathname={location.pathname} outlet={outlet} />
+          </CaptchaProvider>
+        </AppProviders>
       </HelmetProvider>
     </Provider>
   )

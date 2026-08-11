@@ -1,7 +1,9 @@
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { getFilledAmount, getFilledPercentage } from '@/features/swap/helpers/utils'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
-import { LinearProgress, Stack, Typography } from '@mui/material'
+import { Progress } from '@/components/ui/progress'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
 
 const SwapProgress = ({ order }: { order: OrderTransactionInfo }) => {
   const filledPercentage = getFilledPercentage(order)
@@ -9,27 +11,30 @@ const SwapProgress = ({ order }: { order: OrderTransactionInfo }) => {
 
   const progressValue = Math.min(Math.max(Number(filledPercentage), 0), 100)
   const isFilled = progressValue >= 100
-  const color = isFilled ? 'success' : 'warning'
+  const colorVar = isFilled ? 'var(--color-success-main)' : 'var(--color-warning-main)'
 
   const isSellOrder = order.kind === 'sell'
   const tokenSymbol = isSellOrder ? order.sellToken.symbol : order.buyToken.symbol
 
   return (
-    <Stack direction="row" alignItems="center" gap={1}>
-      <LinearProgress
-        variant="determinate"
+    <div className="flex flex-row items-center gap-2">
+      <Progress
         value={progressValue}
-        sx={{ width: '100px', borderRadius: '6px' }}
-        color={color}
+        className={cn(
+          'w-[100px] [&_[data-slot=progress-track]]:rounded-md [&_[data-slot=progress-indicator]]:rounded-md',
+          isFilled
+            ? '[&_[data-slot=progress-indicator]]:bg-[var(--color-success-main)]'
+            : '[&_[data-slot=progress-indicator]]:bg-[var(--color-warning-main)]',
+        )}
       />
-      <Typography color={`${color}.main`}>{progressValue} %</Typography>
+      <Typography style={{ color: colorVar }}>{progressValue} %</Typography>
       <Typography>
-        <Typography component="span" fontWeight="bold">
+        <span className="font-bold">
           {filledAmount} {tokenSymbol}
-        </Typography>{' '}
+        </span>{' '}
         sold
       </Typography>
-    </Stack>
+    </div>
   )
 }
 

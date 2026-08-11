@@ -80,7 +80,7 @@ describe('CopyAddressButton', () => {
 
     await waitFor(async () => {
       expect(navigator.clipboard.readText()).resolves.toEqual('')
-      expect(result.queryByText(address)).not.toBeVisible()
+      expect(result.queryByText(address)).not.toBeInTheDocument()
     })
   })
 })

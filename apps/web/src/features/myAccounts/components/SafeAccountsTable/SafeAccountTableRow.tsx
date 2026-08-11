@@ -1,10 +1,8 @@
-import { useMemo, type MouseEvent, type ReactNode } from 'react'
+import { useCallback, useMemo, type MouseEvent, type ReactNode } from 'react'
 import type { DraggableProvidedDraggableProps, DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
-import NextLink from 'next/link'
+import type { LinkProps } from 'next/link'
 import { useRouter } from 'next/router'
-import TableCell from '@mui/material/TableCell'
-import TableRow from '@mui/material/TableRow'
-import { useForkRef } from '@mui/material/utils'
+import { TableCell, TableRow } from '@/components/ui/table'
 import type { SafeItem } from '@/hooks/safes'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useRowOverviews } from './useRowOverviews'
@@ -75,10 +73,13 @@ const NameCellContent = ({
   line,
   warning,
   onRename,
+  nameLink,
 }: {
   line: AccountLine
   warning?: SimilarWarning
   onRename?: () => void
+  /** When set, only the name text becomes a navigation link — see SafeInfoDisplay's `nameLink`. */
+  nameLink?: { href: LinkProps['href']; onClick?: () => void; testId?: string }
 }) => {
   const chainConfig = useChain(line.chainId)
   // Explorer links are per-chain, so only single safes and per-chain child rows get one — never the
@@ -102,6 +103,7 @@ const NameCellContent = ({
       nameAdornment={warning ? <SimilarityWarningIcon warning={warning} /> : undefined}
       nameVariant="paragraph-bold"
       className="min-w-0"
+      nameLink={nameLink}
     />
   )
 }
@@ -124,7 +126,18 @@ const NameCell = ({
   onLinkClick?: () => void
   onRename?: () => void
 }) => {
-  const content = <NameCellContent line={line} warning={warning} onRename={onRename} />
+  // Only the name text is the navigation link — never a wrapper around the whole cell — so the row's
+  // explorer/copy/rename controls stay outside it (a nested <a> is invalid HTML). Expandable group
+  // rows render inside a <button>, so they never get a link (an <a> inside a <button> is invalid too);
+  // selection mode (disableLink) makes the whole row toggle the checkbox instead of navigating.
+  const nameLink =
+    line.href && !line.expandable && !disableLink
+      ? { href: line.href, onClick: onLinkClick, testId: 'account-row-link' }
+      : undefined
+
+  // `warning` replaces the old boolean `isFlagged`: it carries the look-alike peers, so the cell can
+  // render the ⚠️ adornment with them listed rather than just tinting the row.
+  const content = <NameCellContent line={line} warning={warning} onRename={onRename} nameLink={nameLink} />
 
   if (line.expandable) {
     return (
@@ -137,26 +150,6 @@ const NameCell = ({
       >
         {content}
       </button>
-    )
-  }
-
-  if (line.href && !disableLink) {
-    // A link can't wrap the content (the explorer <a> is in there — no <a> inside <a>), so it sits
-    // behind it instead. Clicks pass through the content to the link; only the small controls and
-    // the address tooltip still catch the mouse.
-    return (
-      <div className="relative">
-        <NextLink
-          href={line.href}
-          onClick={onLinkClick}
-          data-testid="account-row-link"
-          aria-label={line.displayName}
-          className="absolute inset-0"
-        />
-        <div className="pointer-events-none relative [&_[role=button]]:pointer-events-auto [&_[data-address-tooltip]]:pointer-events-auto [&_a]:pointer-events-auto">
-          {content}
-        </div>
-      </div>
     )
   }
 
@@ -307,22 +300,16 @@ const RowCell = ({
   return (
     <TableCell
       data-testid={`account-cell-${column.id}`}
-      sx={{
+      // The Name cell hosts the always-visible grip (w-7, anchored left-0), so it needs extra left
+      // padding for the avatar to start after the grip rather than under it. The selection cell's
+      // grip is the narrower `inline` one and fits the default padding. Widening happens in
+      // styles.module.css — the `td:first-of-type` rule there outranks a utility class.
+      data-hosts-handle={hostsHandle && column.id !== 'select' ? '' : undefined}
+      // Slim 8px padding (ui default), 16px on the outer cells + the hover-pill inset borders live in
+      // styles.module.css (they need background-clip + specificity the primitive's classes can't beat).
+      className={cn(hostsHandle ? 'relative overflow-visible' : 'overflow-hidden')}
+      style={{
         textAlign: column.align ?? 'left',
-        verticalAlign: 'middle',
-        overflow: hostsHandle ? 'visible' : 'hidden',
-        ...(hostsHandle ? { position: 'relative' } : {}),
-        // Slimmer than MUI's default 16px so the fixed column budget matches the design.
-        px: 1,
-        // Horizontal inset for the hover pill on the outer cells (vertical inset + background-clip are set
-        // at the Table level, where they can beat the theme's cell-border override). When the Name cell
-        // hosts the reorder grip, the extra padding makes room so the grip sits
-        // left of the avatar instead of over it.
-        '&:first-of-type': {
-          pl: hostsHandle && column.id !== 'select' ? 3.5 : 2,
-          borderLeft: '4px solid transparent',
-        },
-        '&:last-of-type': { pr: 2, borderRight: '4px solid transparent' },
         ...(reorderable && column.width ? { width: column.width, minWidth: column.width, maxWidth: column.width } : {}),
       }}
       onClick={column.id === 'actions' || column.id === 'select' ? (e) => e.stopPropagation() : undefined}
@@ -374,8 +361,15 @@ const SafeAccountTableRow = ({
     [line],
   )
   const observerRef = useRowOverviews(rowSafes, line.variant !== 'child', onOverviewsLoaded)
-  // Compose the visibility observer ref with the drag-and-drop ref (only set in reorder mode).
-  const setRowRef = useForkRef(observerRef, rowRef)
+  // Compose the visibility observer ref (an object ref) with the drag-and-drop callback ref
+  // (only set in reorder mode) — replaces MUI's useForkRef.
+  const setRowRef = useCallback(
+    (element: HTMLTableRowElement | null) => {
+      observerRef.current = element
+      if (typeof rowRef === 'function') rowRef(element)
+    },
+    [observerRef, rowRef],
+  )
 
   // In selection mode a leaf row is one big checkbox — clicking anywhere on it toggles selection
   // (except affordances that stop propagation: the checkbox, actions, copy and explorer link).
@@ -426,14 +420,16 @@ const SafeAccountTableRow = ({
       // Band membership marker — the card styling lives in the Table sx, keyed off this attribute.
       data-highlighted={highlighted && !isDragging ? '' : undefined}
       // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover.
-      className="group/row"
+      // The row border + row-level hover are neutralised in styles.module.css (we paint the hover pill
+      // on the cells and draw our own data-divider separator); the lifted-while-dragging chrome is here.
+      className={cn(
+        'group/row',
+        checkbox?.disabledReason && 'opacity-[0.55]',
+        (rowSelectable || rowNavigable) && 'cursor-pointer',
+        isDragging && 'rounded-xl bg-[var(--color-background-paper)] shadow-md',
+      )}
       tabIndex={-1}
       onClick={rowSelectable ? () => onSelectToggle?.(!checkbox?.checked) : rowNavigable ? handleRowClick : undefined}
-      sx={{
-        ...(checkbox?.disabledReason ? { opacity: 0.55 } : {}),
-        ...(rowSelectable || rowNavigable ? { cursor: 'pointer' } : {}),
-        ...(isDragging ? { backgroundColor: 'background.paper', boxShadow: 3, borderRadius: '12px' } : {}),
-      }}
     >
       {columns.map((column, index) => (
         <RowCell

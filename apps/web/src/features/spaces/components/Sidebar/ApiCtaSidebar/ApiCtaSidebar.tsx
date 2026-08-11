@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import Image from 'next/image'
 import { X } from 'lucide-react'
-import { buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
 import { SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
@@ -47,7 +47,7 @@ export const ApiCtaSidebar = (): ReactElement => {
           className={cn(css.footerHelpStatus, !isIconCollapsed && 'cursor-pointer')}
           onClick={!isIconCollapsed ? () => setIsCollapsed(false) : undefined}
         >
-          <Badge className="px-1 py-0 text-[10px] leading-none tabular-nums group-data-[collapsible=icon]:hidden">
+          <Badge size="sm" className="tabular-nums group-data-[collapsible=icon]:hidden">
             New
           </Badge>
         </div>
@@ -83,17 +83,14 @@ export const ApiCtaSidebar = (): ReactElement => {
           Authenticated access, predictable quotas, and webhooks for teams that rely on Safe as critical infrastructure.
         </Typography>
 
-        <a
-          href={API_DOCS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={cn(
-            buttonVariants({ variant: 'outline', size: 'sm' }),
-            'w-auto self-start !bg-background hover:!bg-muted',
-          )}
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-auto self-start"
+          render={<a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer" />}
         >
           Get API key
-        </a>
+        </Button>
       </div>
     </SidebarMenuItem>
   )

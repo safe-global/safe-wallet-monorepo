@@ -1,5 +1,4 @@
 import type { OrderStatuses } from '@safe-global/store/gateway/types'
-import { SvgIcon } from '@mui/material'
 import type { ReactElement } from 'react'
 import CheckIcon from '@/public/images/common/circle-check.svg'
 import ClockIcon from '@/public/images/common/clock.svg'
@@ -7,6 +6,7 @@ import BlockIcon from '@/public/images/common/block.svg'
 import SignatureIcon from '@/public/images/common/document_signature.svg'
 import CircleIPartialFillcon from '@/public/images/common/circle-partial-fill.svg'
 import TxStatusChip, { type TxStatusChipProps } from '@/components/transactions/TxStatusChip'
+import type { SvgrComponent } from '@/components/common/icons/types'
 
 type CustomOrderStatuses = OrderStatuses | 'partiallyFilled'
 type Props = {
@@ -16,7 +16,7 @@ type Props = {
 type StatusProps = {
   label: string
   color: TxStatusChipProps['color']
-  icon: React.ComponentType
+  icon: SvgrComponent
 }
 
 const statusMap: Record<CustomOrderStatuses, StatusProps> = {
@@ -59,11 +59,11 @@ const statusMap: Record<CustomOrderStatuses, StatusProps> = {
 }
 const StatusLabel = (props: Props): ReactElement => {
   const { status } = props
-  const { label, color, icon } = statusMap[status]
+  const { label, color, icon: Icon } = statusMap[status]
 
   return (
     <TxStatusChip color={color}>
-      <SvgIcon component={icon} inheritViewBox fontSize="small" />
+      <Icon className="size-5" />
       {label}
     </TxStatusChip>
   )

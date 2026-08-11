@@ -1,0 +1,186 @@
+/* Colocated styling for SafeAccountsTable — ports the component's former MUI `sx` (grey rounded
+   header bar, inset rounded hover pills painted on the cells, and the gradient row divider) onto
+   the shadcn Table primitive. Kept as a CSS module (in the spirit of EnhancedTable/cardTable.module.css)
+   because the pill/divider tricks rely on background-clip + descendant selectors that don't fit
+   inline utilities and would otherwise be lost when dropping MUI's theme-level cell overrides. */
+
+/* Card container (non-embedded): a rounded panel on the paper surface. */
+.container {
+  width: 100%;
+  border-radius: 16px;
+  background-color: var(--color-background-paper);
+  border: 1px solid var(--color-border-light);
+  /* Keep the last row off the rounded bottom edge (the header already insets from the top). */
+  padding-bottom: 8px;
+}
+
+/* `bordered={false}`: the panel sits inside something that already draws an edge. Transparent rather
+   than `border: none` so the 1px does not come out of the box and shift every column by half a pixel. */
+.containerBorderless {
+  border-color: transparent;
+}
+
+/* Header: labels sit on a grey bar (bg-muted, set via className) inset from the panel's top and side
+   edges — transparent borders + a padding-box clip shrink the painted background without moving the
+   cells. No bottom inset: the first row's own top border already provides that gap. */
+.table thead th {
+  border-top: 4px solid transparent;
+  background-clip: padding-box;
+}
+.table thead th:first-of-type {
+  padding-left: 16px;
+  border-left: 4px solid transparent;
+}
+.table thead th:last-of-type {
+  padding-right: 16px;
+  border-right: 4px solid transparent;
+}
+/* Indent the NAME label so it sits above the account name text rather than the avatar. A leading
+   checkbox column already offsets the cell by 48px, so it needs correspondingly less. Declared after
+   the `:first-of-type` rule above — equal specificity, so the later rule wins whether or not the
+   Name column leads. */
+.table thead th[data-name-head='default'] {
+  padding-left: 84px;
+}
+.table thead th[data-name-head='selection'] {
+  padding-left: 60px;
+}
+
+/* Body cells: transparent top/bottom borders (with clip) inset the hover pill vertically so it floats
+   clear of the row separator; the outer cells add a 4px horizontal inset. The 5/8 split is asymmetric
+   because the 1px separator is drawn inside the bottom border and the row background paints it ~1px
+   above the row's bottom edge — 5/8 lands the pill visually centred, with ~6px of clear space either
+   side of the line. */
+.table tbody td {
+  border-top: 5px solid transparent;
+  border-bottom: 8px solid transparent;
+  background-clip: padding-box;
+}
+.table tbody td:first-of-type {
+  padding-left: 16px;
+  border-left: 4px solid transparent;
+}
+/* While reordering, the Name cell hosts the always-visible grip (28px wide, anchored to the cell's
+   left edge). Widen the cell so the avatar starts after the grip instead of underneath it. */
+.table tbody td:first-of-type[data-hosts-handle] {
+  padding-left: 28px;
+}
+.table tbody td:last-of-type {
+  padding-right: 16px;
+  border-right: 4px solid transparent;
+}
+
+/* Neutralise the primitive's per-row border + row-level hover: we draw our own divider and paint
+   the hover pill on the cells instead. */
+.table tbody tr {
+  border: 0;
+}
+.table tbody tr:hover {
+  background-color: transparent;
+}
+
+/* Hover pill: painted on the cells (not the <tr>) so the inset borders float it clear of the panel
+   edges and round the outer corners. Locked rows (data-disabled) stay un-hovered, and band rows opt
+   out entirely — their own square fill must not be notched by a rounded pill. */
+.table tbody tr:not([data-disabled]):not([data-band-header]):not([data-highlighted]):hover td {
+  background-color: var(--muted);
+}
+.table tbody tr:not([data-disabled]):not([data-band-header]):not([data-highlighted]):hover td:first-of-type {
+  border-top-left-radius: 16px;
+  border-bottom-left-radius: 16px;
+}
+.table tbody tr:not([data-disabled]):not([data-band-header]):not([data-highlighted]):hover td:last-of-type {
+  border-top-right-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+/* Row separator: a 1px line at the row's bottom, inset 4px each side to line up with the pill.
+   Keyed off data-divider (absent on the last row of a group/list). */
+.table tbody tr[data-divider] {
+  background-image: linear-gradient(
+    to right,
+    transparent 4px,
+    var(--color-border-light) 4px,
+    var(--color-border-light) calc(100% - 4px),
+    transparent calc(100% - 4px)
+  );
+  background-repeat: no-repeat;
+  background-position: bottom;
+  background-size: 100% 1px;
+}
+
+/* ---------------------------------------------------------------------------
+   Address-poisoning similarity band. Ported from the MUI-era tableStyles.module.css, whose
+   `:global(.MuiTableRow-root…)` selectors matched nothing once this table became a plain <table> —
+   the feature would have rendered untinted. Same palette and geometry, keyed off the same
+   `data-band-header` / `data-highlighted` attributes the rows already set.
+   --------------------------------------------------------------------------- */
+
+.table {
+  /* Theme-adaptive band palette (light: yellow surface/border; dark: warning-brown/coral). */
+  --band-surface: var(--color-yellow-50);
+  --band-border: var(--color-yellow-500);
+}
+:global(.dark) .table {
+  --band-surface: var(--color-warning-background);
+  --band-border: var(--color-warning-main);
+}
+
+/* Must stay after the [data-divider] rule — equal specificity, later wins. Band cards separate
+   themselves, so the grey divider inside a band is suppressed. */
+.table tbody tr[data-highlighted] {
+  background-image: none;
+}
+
+/* Band surface: fills across the transparent borders (border-box clip) so it runs row to row.
+   Never via border colours — those miter diagonally into the side insets and show as spikes. */
+.table tbody tr[data-band-header] td,
+.table tbody tr[data-highlighted] td {
+  position: relative;
+  background-color: var(--band-surface);
+  background-clip: border-box;
+}
+
+/* Card frame as a ::before overlay, so it carries its own radius while the cell fill stays square.
+   Top/bottom on every cell, sides only on the outer ones → one continuous per-row outline. */
+.table tbody tr[data-highlighted] td::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-top: 1px solid var(--band-border);
+  border-bottom: 1px solid var(--band-border);
+}
+.table tbody tr[data-highlighted] td:first-of-type::before {
+  border-left: 1px solid var(--band-border);
+  border-top-left-radius: 16px;
+  border-bottom-left-radius: 16px;
+}
+.table tbody tr[data-highlighted] td:last-of-type::before {
+  border-right: 1px solid var(--band-border);
+  border-top-right-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+/* 4px panel-edge inset, with the outer corners rounded via clip-path on the outer cells only
+   (border-radius cannot round an inset fill); middle cells stay unclipped for a continuous fill. */
+.table tbody tr[data-highlighted] td:first-of-type {
+  clip-path: inset(0 0 0 4px);
+}
+.table tbody tr[data-highlighted] td:last-of-type {
+  clip-path: inset(0 4px 0 0);
+}
+.table tbody tr[data-highlighted]:not(:has(+ tr[data-highlighted])) td:first-of-type {
+  clip-path: inset(0 0 0 4px round 0 0 0 16px);
+}
+.table tbody tr[data-highlighted]:not(:has(+ tr[data-highlighted])) td:last-of-type {
+  clip-path: inset(0 4px 0 0 round 0 0 16px 0);
+}
+
+/* Band header: 3px top gap (separates the cluster from the table head or the row above), slim 2px
+   bottom border so the head zone hugs its label. Both side insets and the top gap in one clip. */
+.table tbody tr[data-band-header] td {
+  border-top: 3px solid transparent;
+  border-bottom: 2px solid transparent;
+  clip-path: inset(3px 4px 0 4px round 16px 16px 0 0);
+}

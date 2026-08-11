@@ -1,13 +1,9 @@
 import { type SafeItem, type MultiChainSafeItem, isMultiChainSafeItem } from '@/hooks/safes'
 import RemoveSafeDialog from './RemoveSafeDialog'
 import { type MouseEvent, useState } from 'react'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-import IconButton from '@mui/material/IconButton'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
-import MenuItem from '@mui/material/MenuItem'
-import { LogOut, Pencil } from 'lucide-react'
-import ContextMenu from '@/components/common/ContextMenu'
+import { LogOut, MoreVertical, Pencil } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import { useAppSelector } from '@/store'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
@@ -23,7 +19,7 @@ enum ModalType {
 const defaultOpen = { [ModalType.RENAME]: false, [ModalType.REMOVE]: false }
 
 const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeItem }) => {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
   const isAdmin = useIsAdmin()
 
@@ -31,23 +27,10 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
   const chainIds = isMultiChainSafeItem(safeItem) ? safeItem.safes.map((safe) => safe.chainId) : [safeItem.chainId]
   const name = isMultiChainSafeItem(safeItem) ? safeItem.name : allAddressBooks[safeItem.chainId]?.[safeItem.address]
 
-  const handleOpenContextMenu = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    // Anchor to the row, not the button: the row's right edge is the table border, so the
-    // right-aligned popover sits flush with it at every viewport width.
-    setAnchorEl(e.currentTarget.closest('tr') ?? e.currentTarget)
-  }
-
-  const handleCloseContextMenu = (e: Event) => {
-    e.stopPropagation()
-    setAnchorEl(undefined)
-  }
-
   const handleOpenModal = (e: MouseEvent, type: keyof typeof open) => {
     e.stopPropagation()
     if (type === ModalType.REMOVE) trackEvent({ ...SPACE_EVENTS.DELETE_ACCOUNT_MODAL })
-    setAnchorEl(undefined)
+    setIsMenuOpen(false)
     setOpen((prev) => ({ ...prev, [type]: true }))
   }
 
@@ -57,48 +40,39 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
 
   return (
     <>
-      <span
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-        onMouseDown={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-      >
-        <IconButton edge="end" size="small" onClick={handleOpenContextMenu}>
-          <MoreVertIcon />
-        </IconButton>
-      </span>
-      <ContextMenu
-        anchorEl={anchorEl}
-        open={!!anchorEl}
-        onClose={handleCloseContextMenu}
-        autoFocus={false}
-        // The theme tints every MuiBackdrop; suppress it here so opening the row actions
-        // doesn't dim the whole accounts screen.
-        sx={{ '& .MuiBackdrop-root': { backgroundColor: 'transparent' } }}
-        // Right-align the popover with the anchored row so its edge sits on the table border.
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <MenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)}>
-          <ListItemIcon>
-            <Pencil className="size-5 text-muted-foreground" />
-          </ListItemIcon>
-          <ListItemText>Rename</ListItemText>
-        </MenuItem>
+      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Safe Account actions"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+              }}
+            />
+          }
+        >
+          <MoreVertical className="size-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)} onSelect={(e) => e.stopPropagation()}>
+            <Pencil className="size-4 text-muted-foreground" />
+            <span>Rename</span>
+          </DropdownMenuItem>
 
-        {isAdmin && (
-          <MenuItem onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
-            <ListItemIcon>
-              <LogOut className="size-5 text-muted-foreground" />
-            </ListItemIcon>
-            <ListItemText>Remove from workspace</ListItemText>
-          </MenuItem>
-        )}
-      </ContextMenu>
+          {isAdmin && (
+            <DropdownMenuItem
+              onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}
+              onSelect={(e) => e.stopPropagation()}
+            >
+              <LogOut className="size-4 text-muted-foreground" />
+              <span>Remove from workspace</span>
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {open[ModalType.RENAME] && (
         <EntryDialog

@@ -1,11 +1,10 @@
-import { AppRoutes } from '@/config/routes'
-import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
+import NextLink from 'next/link'
 import { useRouter } from 'next/router'
-import Link from 'next/link'
+import { AppRoutes } from '@/config/routes'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
-import { useDarkMode } from '@/hooks/useDarkMode'
-import { cn } from '@/utils/cn'
 
 type Item = {
   label: string
@@ -27,44 +26,30 @@ const navItems: Item[] = [
 
 const AccountsNavigation = () => {
   const router = useRouter()
-  const isDarkMode = useDarkMode()
 
-  const isActiveNavigation = (pathname: string) => router.pathname === pathname
+  const activeUrl = navItems.some((item) => item.url === router.pathname) ? router.pathname : navItems[0].url
 
   const handleClick = (item: Item) => () => {
-    if (item.trackEvent && !isActiveNavigation(item.url)) {
+    if (item.trackEvent && router.pathname !== item.url) {
       trackEvent(item.trackEvent)
     }
   }
 
   return (
-    <nav
-      className={cn(
-        'shadcn-scope flex w-full max-w-[440px] items-center gap-1 rounded-lg bg-[#fafafa] p-1 dark:bg-muted',
-        isDarkMode && 'dark',
-      )}
-    >
-      {navItems.map((item) => {
-        const isActive = isActiveNavigation(item.url)
-
-        return (
-          <Link
+    <Tabs value={activeUrl} className="w-full max-w-[440px]">
+      <TabsList variant="toggle" size="lg" aria-label="Accounts navigation" className="w-full">
+        {navItems.map((item) => (
+          <TabsTrigger
             key={item.url}
-            href={item.url}
-            onClick={handleClick(item)}
-            aria-current={isActive ? 'page' : undefined}
-            className={cn(
-              'inline-flex h-[38px] flex-1 items-center justify-center rounded-lg border border-transparent px-2.5 text-base no-underline transition-all',
-              isActive
-                ? 'bg-background font-semibold text-foreground shadow-sm dark:border-input dark:bg-input/30 dark:text-foreground'
-                : 'font-normal text-muted-foreground hover:text-foreground',
-            )}
+            value={item.url}
+            nativeButton={false}
+            render={<NextLink href={item.url} onClick={handleClick(item)} />}
           >
             {item.label}
-          </Link>
-        )
-      })}
-    </nav>
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
   )
 }
 

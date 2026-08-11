@@ -2,7 +2,6 @@
  * Track analytics events using Google Tag Manager
  */
 import { useEffect, useState } from 'react'
-import { useTheme } from '@mui/material/styles'
 import {
   gtmTrackPageview,
   gtmSetChainId,
@@ -19,7 +18,7 @@ import useChainId from '@/hooks/useChainId'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import useMetaEvents from './useMetaEvents'
-import { useMediaQuery } from '@mui/material'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { AnalyticsUserProperties, DeviceType } from './types'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -31,9 +30,8 @@ const useGtm = () => {
   const isAnalyticsEnabled = useAppSelector((state) => hasConsentFor(state, CookieAndTermType.ANALYTICS))
   const [, setPrevAnalytics] = useState(isAnalyticsEnabled)
   const router = useRouter()
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'))
+  const isMobile = useMediaQuery('(max-width:599.95px)')
+  const isTablet = useMediaQuery('(max-width:899.95px)')
   const deviceType = isMobile ? DeviceType.MOBILE : isTablet ? DeviceType.TABLET : DeviceType.DESKTOP
   const safeAddress = useSafeAddress()
   const wallet = useWallet()

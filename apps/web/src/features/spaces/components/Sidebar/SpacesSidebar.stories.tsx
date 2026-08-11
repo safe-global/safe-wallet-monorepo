@@ -8,11 +8,11 @@ import { SpacesSidebarVariant } from './variants/SpacesSidebarVariant'
 import { SidebarTopBar } from './SidebarTopBar'
 import { SidebarCommonFooter } from './SidebarCommonFooter'
 import type { SpaceItem } from './types'
-import type { ResolvedSidebarItem, ResolvedSidebarGroup } from './types'
+import type { ResolvedSidebarNavItem, ResolvedSidebarGroup } from './types'
 
 const mockSpaceId = '1'
 
-const mockMainNavItems: ResolvedSidebarItem[] = [
+const mockMainNavItems: ResolvedSidebarNavItem[] = [
   {
     icon: House,
     label: 'Home',

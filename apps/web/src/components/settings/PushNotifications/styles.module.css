@@ -1,18 +1,3 @@
-.macOsInfo {
-  border-color: var(--color-info-main);
-  background-color: var(--color-background-main);
-  padding: var(--space-2);
-}
-
-.macOsInfo :global .MuiAlert-icon {
-  color: var(--color-text-main);
-  padding: 0;
-}
-
-.macOsInfo :global .MuiAlert-message {
-  padding: 0;
-}
-
 .item {
   padding-left: var(--space-1);
 }

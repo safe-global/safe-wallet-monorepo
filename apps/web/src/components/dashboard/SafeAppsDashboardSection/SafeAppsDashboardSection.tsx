@@ -1,13 +1,12 @@
-import { Typography, Card, Stack } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 import useSafeAppPreviewDrawer from '@/hooks/safe-apps/useSafeAppPreviewDrawer'
 import SafeAppPreviewDrawer from '@/components/safe-apps/SafeAppPreviewDrawer'
 import SafeAppCard from '@/components/safe-apps/SafeAppCard'
 import { SAFE_APPS_LABELS } from '@/services/analytics'
 import css from './styles.module.css'
-import IconButton from '@mui/material/IconButton'
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeftRounded'
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRightRounded'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 const ITEM_GAP = 16
@@ -52,32 +51,34 @@ const SafeAppsDashboardSection = () => {
   const showNav = canScrollLeft || canScrollRight
 
   return (
-    <Card sx={{ px: 3, pt: 2.5, pb: 3 }} component="section">
-      <Stack direction="row" justifyContent="space-between" mb={2}>
-        <Typography fontWeight={700}>Featured Apps</Typography>
+    <section className="overflow-hidden rounded-xl bg-[var(--color-background-paper)] px-6 pb-6 pt-5">
+      <div className="mb-4 flex flex-row justify-between">
+        <Typography variant="paragraph-bold">Featured Apps</Typography>
         {showNav && (
           <>
             <div className={css.carouselNav}>
-              <IconButton
+              <Button
+                variant="ghost"
+                size="icon"
                 aria-label="previous apps"
                 onClick={() => scrollList('left')}
                 disabled={!canScrollLeft}
-                size="medium"
               >
-                <KeyboardArrowLeftIcon fontSize="small" />
-              </IconButton>
-              <IconButton
+                <ChevronLeft className="size-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
                 aria-label="next apps"
                 onClick={() => scrollList('right')}
                 disabled={!canScrollRight}
-                size="medium"
               >
-                <KeyboardArrowRightIcon fontSize="small" />
-              </IconButton>
+                <ChevronRight className="size-5" />
+              </Button>
             </div>
           </>
         )}
-      </Stack>
+      </div>
 
       <div className={css.carouselWrapper}>
         <ul className={css.carouselList} ref={listRef} style={{ gap: ITEM_GAP }}>
@@ -106,7 +107,7 @@ const SafeAppsDashboardSection = () => {
         onClose={closePreviewDrawer}
         onBookmark={(appId) => togglePin(appId, SAFE_APPS_LABELS.apps_sidebar)}
       />
-    </Card>
+    </section>
   )
 }
 

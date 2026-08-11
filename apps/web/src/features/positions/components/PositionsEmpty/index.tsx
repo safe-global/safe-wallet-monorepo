@@ -1,7 +1,8 @@
 import { useRouter } from 'next/router'
-import Link from 'next/link'
-import { Box, Button, Paper, Typography } from '@mui/material'
+import NextLink from 'next/link'
 import DefiIcon from '@/public/images/balances/defi.svg'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import { AppRoutes } from '@/config/routes'
 import Track from '@/components/common/Track'
 import { POSITIONS_EVENTS } from '@/services/analytics/events/positions'
@@ -17,12 +18,10 @@ const PositionsEmpty = ({ entryPoint = 'Dashboard' }: PositionsEmptyProps) => {
   const isEarnFeatureEnabled = useIsEarnPromoEnabled()
 
   return (
-    <Paper elevation={0} sx={{ p: 3, textAlign: 'center' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-        <DefiIcon />
-      </Box>
+    <div className="rounded-xl border border-border bg-card p-6 text-center">
+      <DefiIcon />
 
-      <Typography data-testid="no-tx-text" variant="body1" color="primary.light">
+      <Typography data-testid="no-tx-text" align="center" className="text-[var(--color-primary-light)]">
         You have no active DeFi positions yet
       </Typography>
 
@@ -33,14 +32,17 @@ const PositionsEmpty = ({ entryPoint = 'Dashboard' }: PositionsEmptyProps) => {
             [MixpanelEventParams.ENTRY_POINT]: entryPoint,
           }}
         >
-          <Link href={{ pathname: AppRoutes.earn, query: { safe: router.query.safe } }} passHref>
-            <Button size="small" sx={{ mt: 1 }}>
-              Explore Earn
-            </Button>
-          </Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mt-2"
+            render={<NextLink href={{ pathname: AppRoutes.earn, query: { safe: router.query.safe } }} />}
+          >
+            Explore Earn
+          </Button>
         </Track>
       )}
-    </Paper>
+    </div>
   )
 }
 

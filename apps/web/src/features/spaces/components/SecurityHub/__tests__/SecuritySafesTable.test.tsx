@@ -195,7 +195,7 @@ describe('SecuritySafesTable', () => {
       scanningKeys: new Set([key]),
       scanResults: {},
     })
-    expect(container.querySelectorAll('.MuiSkeleton-root').length).toBeGreaterThanOrEqual(1)
+    expect(container.querySelectorAll('[data-slot="skeleton"]').length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders scan data even when the key is still in scanningKeys', () => {
@@ -211,7 +211,7 @@ describe('SecuritySafesTable', () => {
     })
     // Balance resolves to real data ($1.0K) rather than a skeleton.
     expect(screen.getByText('$1.0K')).toBeInTheDocument()
-    expect(container.querySelectorAll('.MuiSkeleton-root').length).toBe(0)
+    expect(container.querySelectorAll('[data-slot="skeleton"]').length).toBe(0)
   })
 
   it('shows total non-passing checks in the status column, regardless of status/severity', () => {

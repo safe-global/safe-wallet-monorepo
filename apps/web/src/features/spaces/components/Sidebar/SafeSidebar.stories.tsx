@@ -11,7 +11,7 @@ import { chainsAdapter, chainsInitialState } from '@safe-global/store/gateway'
 import { CONFIG_SERVICE_KEY, DEFAULT_CHAIN_ID } from '@/config/constants'
 import chains from '@safe-global/utils/config/chains'
 import type { RootState } from '@/store'
-import type { ResolvedSidebarItem, ResolvedSidebarGroup, SpaceItem } from './types'
+import type { ResolvedSidebarNavItem, ResolvedSidebarGroup, SpaceItem } from './types'
 import { AppRoutes } from '@/config/routes'
 import { Wallet, Coins, ArrowRightLeft, BookUser, LayoutGrid, Repeat2, Orbit, Database, TrendingUp } from 'lucide-react'
 
@@ -195,7 +195,7 @@ const VARIANT_SAFE_ADDRESS = '0x1234567890123456789012345678901234567890'
 const VARIANT_CHAIN_ID = '11155111'
 const variantQuery = { safe: `eth:${VARIANT_SAFE_ADDRESS}`, spaceId: '1' }
 
-const variantMainNavItems: ResolvedSidebarItem[] = [
+const variantMainNavItems: ResolvedSidebarNavItem[] = [
   {
     icon: Wallet,
     label: 'Overview',

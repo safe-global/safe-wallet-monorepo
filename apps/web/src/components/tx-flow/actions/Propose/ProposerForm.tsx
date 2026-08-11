@@ -1,7 +1,10 @@
 import WalletRejectionError from '@/components/tx/shared/errors/WalletRejectionError'
 import { isWalletRejection } from '@/utils/wallets'
 import { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
-import { Box, Button, CircularProgress, Divider, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Separator } from '@/components/ui/separator'
+import { Typography } from '@/components/ui/typography'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
@@ -73,12 +76,14 @@ export const ProposerForm = ({
       </Typography>
 
       {isRejectedByUser && (
-        <Box mt={1}>
+        <div className="mt-2">
           <WalletRejectionError />
-        </Box>
+        </div>
       )}
 
-      <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
+      <div className="pt-6">
+        <Separator className={commonCss.nestedDivider} />
+      </div>
 
       <TxCardActions>
         {/* Submit button */}
@@ -86,12 +91,12 @@ export const ProposerForm = ({
           {(isOk) => (
             <Button
               data-testid="sign-btn"
-              variant="contained"
               type="submit"
+              size="submit"
               disabled={!isOk || submitDisabled}
-              sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
+              className="order-1 w-full lg:w-auto"
             >
-              {!isSubmittable ? <CircularProgress size={20} /> : 'Propose transaction'}
+              {!isSubmittable ? <Spinner className="size-5" /> : 'Propose transaction'}
             </Button>
           )}
         </CheckWallet>

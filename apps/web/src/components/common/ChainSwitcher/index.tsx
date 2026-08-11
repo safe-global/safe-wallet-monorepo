@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react'
 import { useCallback, useState } from 'react'
-import { Button, CircularProgress, Typography } from '@mui/material'
+import { cn } from '@/utils/cn'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { useCurrentChain } from '@/hooks/useChains'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
@@ -30,18 +32,16 @@ const ChainSwitcher = ({
   return (
     <Button
       onClick={handleChainSwitch}
-      variant={primaryCta ? 'contained' : 'outlined'}
-      sx={{ minWidth: '200px' }}
-      size={primaryCta ? 'medium' : 'small'}
-      fullWidth={fullWidth}
-      color="primary"
+      variant={primaryCta ? 'default' : 'outline'}
+      className={cn('min-w-[200px]', fullWidth && 'w-full')}
+      size={primaryCta ? 'default' : 'sm'}
       disabled={loading}
     >
       {loading ? (
-        <CircularProgress size={20} />
+        <Spinner className="size-5" />
       ) : (
         <>
-          <Typography noWrap>Switch to&nbsp;</Typography>
+          <span className="whitespace-nowrap">Switch to&nbsp;</span>
           <img
             src={chain?.chainLogoUri ?? undefined}
             alt={`${chain?.chainName} Logo`}
@@ -49,7 +49,7 @@ const ChainSwitcher = ({
             height={24}
             loading="lazy"
           />
-          <Typography noWrap>&nbsp;{chain?.chainName}</Typography>
+          <span className="whitespace-nowrap">&nbsp;{chain?.chainName}</span>
         </>
       )}
     </Button>
