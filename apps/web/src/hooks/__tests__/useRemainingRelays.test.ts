@@ -50,6 +50,33 @@ describe('fetch remaining relays hooks', () => {
       expect(result.current[0]).toEqual({ remaining: 5, limit: 5 })
     })
 
+    // The per-address relay quota must still be fetched for tx execution on every
+    // relay model, only creation is exempt from the remaining check.
+    it.each(['GTF', 'RELAY_FEE'] as const)('should fetch relay count on a %s chain', async (relayerType) => {
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(
+        chainBuilder()
+          .with({
+            features: [FEATURES.RELAYING],
+            chainId: '1',
+            relayer: {
+              type: relayerType,
+              safeCreationSponsored: true,
+              safeTransactionSponsored: true,
+              enableTenderlySimulationBeforeRelay: false,
+            },
+          })
+          .build(),
+      )
+
+      const { result } = renderHook(() => useRelaysBySafe())
+
+      await waitFor(() => {
+        expect(result.current[2]).toBe(false) // isLoading should be false
+      })
+
+      expect(result.current[0]).toEqual({ remaining: 5, limit: 5 })
+    })
+
     it('refetch if the txHistoryTag changes', async () => {
       const { result, rerender } = renderHook(() => useRelaysBySafe())
 
@@ -160,6 +187,32 @@ describe('fetch remaining relays hooks', () => {
 
       expect(result.current[0]).toBeUndefined() // data should be undefined
       expect(result.current[1]).toBeUndefined() // error should be undefined
+    })
+
+    it.each(['GTF', 'RELAY_FEE'] as const)('should fetch relay count on a %s chain', async (relayerType) => {
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(
+        chainBuilder()
+          .with({
+            features: [FEATURES.RELAYING],
+            chainId: '1',
+            relayer: {
+              type: relayerType,
+              safeCreationSponsored: true,
+              safeTransactionSponsored: true,
+              enableTenderlySimulationBeforeRelay: false,
+            },
+          })
+          .build(),
+      )
+
+      const { result } = renderHook(() => useLeastRemainingRelays(ownerAddresses))
+
+      await waitFor(() => {
+        expect(result.current[2]).toBe(false) // isLoading should be false
+      })
+
+      // Default MSW handler returns { remaining: 5, limit: 5 } for every owner.
+      expect(result.current[0]).toEqual({ remaining: 5, limit: 5 })
     })
 
     it('refetch if the txHistoryTag changes', async () => {
