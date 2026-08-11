@@ -1,4 +1,5 @@
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
+import { parseFiatChange } from '@safe-global/utils/utils/fiatChange'
 
 export const calculateProtocolFiatChange = (protocol: Protocol): number | null => {
   const totalFiat = Number(protocol.fiatTotal)
@@ -9,14 +10,17 @@ export const calculateProtocolFiatChange = (protocol: Protocol): number | null =
   let totalChange = 0
   let hasAnyChange = false
 
+  // A position we cannot parse is skipped, not fatal — one bad row must not hide the protocol total.
   for (const group of protocol.items) {
     for (const position of group.items) {
-      if (position.fiatBalance24hChange != null) {
-        hasAnyChange = true
-        const fiatBalance = Number(position.fiatBalance)
-        const changePercent = Number(position.fiatBalance24hChange) / 100
-        totalChange += fiatBalance * changePercent
+      const changePercent = parseFiatChange(position.fiatBalance24hChange)
+      const fiatBalance = Number(position.fiatBalance)
+      if (changePercent === null || !Number.isFinite(fiatBalance)) {
+        continue
       }
+
+      hasAnyChange = true
+      totalChange += fiatBalance * changePercent
     }
   }
 

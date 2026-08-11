@@ -50,9 +50,15 @@ describe('calculateProtocolFiatChange', () => {
     expect(calculateProtocolFiatChange(protocol)).toBeNull()
   })
 
-  it('returns null rather than NaN when a position 24h change is not numeric', () => {
+  it('returns null when the only position 24h change is not numeric', () => {
     const protocol = createMockProtocol()
     protocol.items[0].items[0].fiatBalance24hChange = 'not-a-number'
+    expect(calculateProtocolFiatChange(protocol)).toBeNull()
+  })
+
+  it('treats an empty 24h change as absent', () => {
+    const protocol = createMockProtocol()
+    protocol.items[0].items[0].fiatBalance24hChange = ''
     expect(calculateProtocolFiatChange(protocol)).toBeNull()
   })
 
@@ -174,5 +180,22 @@ describe('calculateProtocolFiatChange', () => {
     const result = calculateProtocolFiatChange(protocol)
     // Only first position counted: 60 / 2000 = 0.03
     expect(result).toBeCloseTo(0.03)
+  })
+
+  it('skips an unparseable position instead of discarding the whole total', () => {
+    const protocol = createMockProtocol({ fiatTotal: '2000.00' })
+    const [good] = protocol.items[0].items
+    protocol.items[0].items.push({ ...good, fiatBalance24hChange: 'not-a-number' })
+
+    // 1000 * 0.05 = 50 from the parseable position only, 50 / 2000 = 0.025
+    expect(calculateProtocolFiatChange(protocol)).toBeCloseTo(0.025)
+  })
+
+  it('skips a position whose fiat balance is not numeric', () => {
+    const protocol = createMockProtocol({ fiatTotal: '2000.00' })
+    const [good] = protocol.items[0].items
+    protocol.items[0].items.push({ ...good, fiatBalance: 'not-a-number' })
+
+    expect(calculateProtocolFiatChange(protocol)).toBeCloseTo(0.025)
   })
 })
