@@ -1,6 +1,5 @@
 /* Scoped tweaks for the staking promo banner (defaults from PromoBanner otherwise). */
 
-
 .stakingPromoBanner {
   --promo-banner-radius: 24px;
 }
