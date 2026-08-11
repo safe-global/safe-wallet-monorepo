@@ -20,8 +20,10 @@ interface FiatChangeProps {
  */
 export const FiatChange = ({ balanceItem, change, inline = false }: FiatChangeProps) => {
   const fiatChange = change ?? balanceItem?.fiatBalance24hChange ?? null
+  // The backend emits null for missing data and "0" for a genuine zero change
+  const changeAsNumber = fiatChange === null || fiatChange === '' ? NaN : Number(fiatChange) / 100
 
-  if (!fiatChange) {
+  if (Number.isNaN(changeAsNumber)) {
     return (
       <Typography variant="paragraph-mini" color="muted" className="block pl-6">
         n/a
@@ -29,7 +31,6 @@ export const FiatChange = ({ balanceItem, change, inline = false }: FiatChangePr
     )
   }
 
-  const changeAsNumber = Number(fiatChange) / 100
   const changeLabel = formatPercentage(changeAsNumber)
   const direction = changeAsNumber < 0 ? 'down' : changeAsNumber > 0 ? 'up' : 'none'
 

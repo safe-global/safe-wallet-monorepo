@@ -12,6 +12,20 @@ describe('FiatChange', () => {
     expect(screen.getByText('n/a')).toBeInTheDocument()
   })
 
+  it('renders "n/a" when the change is an empty string', () => {
+    const mockBalance: Balance = {
+      fiatBalance24hChange: '',
+    } as Balance
+
+    render(<FiatChange balanceItem={mockBalance} />)
+    expect(screen.getByText('n/a')).toBeInTheDocument()
+  })
+
+  it('renders "n/a" when the change is not numeric', () => {
+    render(<FiatChange change="not-a-number" />)
+    expect(screen.getByText('n/a')).toBeInTheDocument()
+  })
+
   it('renders a negative change as a positive percentage', () => {
     const mockBalance: Balance = {
       fiatBalance24hChange: '-3.00', // 3% decrease
