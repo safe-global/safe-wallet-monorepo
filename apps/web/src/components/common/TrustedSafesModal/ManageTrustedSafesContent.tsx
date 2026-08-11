@@ -137,7 +137,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
               onClick={() => (allSelected ? deselectAll() : selectAll())}
               disabled={isLoading || totalSafesCount === 0}
               data-testid="manage-trusted-select-all"
-              className="flex shrink-0 items-center gap-2 rounded-md px-2 py-1 text-sm text-muted-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex shrink-0 items-center gap-2 rounded-md py-1 pl-[21px] pr-2 text-sm text-muted-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} tabIndex={-1} aria-hidden />
               Select all · {selectedCount} of {totalSafesCount} selected
