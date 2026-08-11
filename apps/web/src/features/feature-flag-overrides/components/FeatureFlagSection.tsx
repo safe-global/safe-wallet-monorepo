@@ -22,7 +22,7 @@ export const FeatureFlagSection = ({
         <Badge variant="secondary">{rows.length}</Badge>
       </div>
 
-      <Card className="gap-0 p-0">
+      <Card size="none">
         <div
           className={cn(
             GRID,

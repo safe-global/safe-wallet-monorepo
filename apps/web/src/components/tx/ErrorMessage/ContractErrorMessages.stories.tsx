@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Fragment } from 'react'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Typography } from '@/components/ui/typography'
 import { Chip } from '@/components/ui/chip'
@@ -125,8 +125,10 @@ const meta = {
   decorators: [
     (Story) => (
       <StoreDecorator initialState={{}}>
-        <Card className="p-4">
-          <Story />
+        <Card size="sm">
+          <CardContent>
+            <Story />
+          </CardContent>
         </Card>
       </StoreDecorator>
     ),

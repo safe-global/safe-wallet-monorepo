@@ -25,8 +25,9 @@ export const FeatureFlagEditorDialog = ({ open, onOpenChange }: FeatureFlagEdito
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[90vh] w-full max-w-[min(900px,calc(100vw-2rem))] flex-col gap-0 p-0">
-        <DialogHeader className="shrink-0 border-b border-border px-6 pb-4 pt-6">
+      <DialogContent size="md" padding="none" className="flex max-h-[90vh] flex-col">
+        {/* eslint-disable-next-line no-restricted-syntax -- keep the 24px gutter aligned with the dialog body (px-6) */}
+        <DialogHeader divided className="shrink-0 px-6 pb-4 pt-6">
           <DialogTitle className="font-bold">Feature flags</DialogTitle>
           <DialogDescription>
             Override the feature flags delivered by the config service. Changes apply instantly across all chains — no
