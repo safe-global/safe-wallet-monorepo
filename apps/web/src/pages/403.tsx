@@ -12,10 +12,8 @@ const Custom403: NextPage = () => {
       </div>
       <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1rem' }}>403 – Access Restricted</h1>
       <p>
-        We regret to inform you that access to this service is currently unavailable in your region. For further
-        information, you may refer to our{' '}
-        <Link render={<NextLink href={AppRoutes.terms} target="_blank" rel="noreferrer" />}>terms</Link>. We apologize
-        for any inconvenience this may cause. Thank you for your understanding.
+        Safe{'{Wallet}'} is not available in your region. See our{' '}
+        <Link render={<NextLink href={AppRoutes.terms} target="_blank" rel="noreferrer" />}>terms</Link> for details.
       </p>
     </main>
   )
