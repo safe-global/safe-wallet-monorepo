@@ -98,10 +98,10 @@ export const AddCustomAppModal = ({ open, onClose, onSave, safeAppsList }: Props
               <Label htmlFor="appUrl">Safe App URL</Label>
               <Input
                 id="appUrl"
-                error={errors?.appUrl?.type === 'validUrl' ? errors?.appUrl?.message : undefined}
+                error={errors?.appUrl?.type !== 'alreadyExists' ? errors?.appUrl?.message : undefined}
                 autoComplete="off"
                 {...register('appUrl', {
-                  required: true,
+                  required: 'URL is required',
                   validate: {
                     validUrl: (val: string) => (isValidURL(val) ? undefined : INVALID_URL_ERROR),
                     alreadyExists: (val: string) =>
