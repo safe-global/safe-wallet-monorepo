@@ -98,6 +98,7 @@ export const AddCustomAppModal = ({ open, onClose, onSave, safeAppsList }: Props
               <Label htmlFor="appUrl">Safe App URL</Label>
               <Input
                 id="appUrl"
+                // show all validation errors except alreadyExists, which renders as its own confirmation panel below
                 error={errors?.appUrl?.type !== 'alreadyExists' ? errors?.appUrl?.message : undefined}
                 autoComplete="off"
                 {...register('appUrl', {

@@ -48,15 +48,19 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
   /**
    * Runs `action` now when there is no unsaved progress, otherwise parks it behind the discard
    * dialog; `deferred` tells the action which of the two happened. Returns whether it ran,
-   * because `usePreventNavigation` needs a synchronous answer.
+   * because `usePreventNavigation` needs a synchronous answer. The return is always the inverse of
+   * the action's `deferred`, so a caller owning a side effect must place it on one side only.
    */
   const requestDiscard = useCallback((action: (deferred: boolean) => void): boolean => {
-    if (!shouldWarn.current) {
-      action(false)
-      return true
+    const deferred = shouldWarn.current
+
+    if (deferred) {
+      setPendingDiscard(() => () => action(deferred))
+    } else {
+      action(deferred)
     }
-    setPendingDiscard(() => () => action(true))
-    return false
+
+    return !deferred
   }, [])
 
   const closeFlow = useCallback(() => {
