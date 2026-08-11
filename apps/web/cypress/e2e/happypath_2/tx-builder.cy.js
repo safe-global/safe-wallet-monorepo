@@ -5,6 +5,8 @@ import * as navigation from '../pages/navigation.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import { getEvents, events, checkDataLayerEvents } from '../../support/utils/gtag.js'
 import * as wallet from '../../support/utils/wallet.js'
+import * as main from '../pages/main.page.js'
+import * as ls from '../../support/localstorage_data.js'
 
 let safeAppSafes = []
 let iframeSelector
@@ -41,13 +43,17 @@ describe('Transaction Builder happy path tests', { defaultCommandTimeout: 20000 
       ]
 
       const appUrl = constants.TX_Builder_url
-      iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
+      iframeSelector = safeapps.getSafeAppIframeSelector(appUrl)
       const visitUrl = `/apps/open?safe=${safeAppSafes.SEP_SAFEAPP_SAFE_1}&appUrl=${encodeURIComponent(appUrl)}`
 
       wallet.connectSignerViaStorage(signer, constants.transactionQueueUrl + safeAppSafes.SEP_SAFEAPP_SAFE_1)
       cy.wait(5000)
       createtx.deleteAllTx()
+      // tx-builder keeps its form disabled until the address book permission prompt is answered:
+      // pre-grant it before the visit
+      main.addToLocalStorage(constants.SAFE_PERMISSIONS_KEY, ls.safeAppSafePermissions(appUrl))
       cy.visit(visitUrl)
+      safeapps.verifySafeAppIframeVisible(appUrl)
       navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
       cy.enter(iframeSelector).then((getBody) => {
         getBody().findByLabelText(safeapps.enterAddressStr).type(constants.SAFE_APP_ADDRESS)
