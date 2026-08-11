@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { SpacesSidebarContent } from '../SpacesSidebarContent'
-import type { SpaceItem, ResolvedSidebarItem, ResolvedSidebarGroup } from '../../../types'
+import type { SpaceItem, ResolvedSidebarNavItem, ResolvedSidebarGroup } from '../../../types'
 
 const mockUseCurrentSpaceId = jest.fn()
 const mockUseIsActiveMember = jest.fn()
@@ -67,7 +67,7 @@ jest.mock('../../SpacesSidebarVariant', () => ({
     mainNavItems,
     setupGroup,
   }: {
-    mainNavItems: ResolvedSidebarItem[]
+    mainNavItems: ResolvedSidebarNavItem[]
     setupGroup: ResolvedSidebarGroup
   }) => (
     <div>
