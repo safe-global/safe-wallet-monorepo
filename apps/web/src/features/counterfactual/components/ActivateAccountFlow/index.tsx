@@ -42,13 +42,7 @@ import useGasPrice from '@/hooks/useGasPrice'
 const useActivateAccount = (undeployedSafe: UndeployedSafe | undefined) => {
   const chain = useCurrentChain()
   const [gasPrice] = useGasPrice()
-  const safeVersion =
-    undeployedSafe &&
-    (isPredictedSafeProps(undeployedSafe?.props)
-      ? undeployedSafe?.props.safeDeploymentConfig?.safeVersion
-      : undeployedSafe?.props.safeVersion)
-
-  const { gasLimit } = useEstimateSafeCreationGas(undeployedSafe?.props, safeVersion)
+  const { gasLimit } = useEstimateSafeCreationGas(undeployedSafe?.props)
 
   const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
   const maxFeePerGas = gasPrice?.maxFeePerGas

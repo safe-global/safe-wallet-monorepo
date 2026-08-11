@@ -5,7 +5,6 @@ import { type SafeState, cgwApi as safesApi } from '@safe-global/store/gateway/A
 import { cgwApi as relayApi } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getStoreInstance } from '@/store'
-import { getReadOnlyProxyFactoryContract } from '@/services/contracts/safeContracts'
 import type { UrlObject } from 'url'
 import { AppRoutes } from '@/config/routes'
 import { SAFE_APPS_EVENTS, trackEvent } from '@/services/analytics'
@@ -38,7 +37,6 @@ import {
 } from '@safe-global/utils/types/contracts'
 import { createWeb3 } from '@/hooks/wallets/web3'
 import { hasMultiChainCreationFeatures } from '@/features/multichain'
-import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 // Type for the lazy-loaded activateReplayedSafe function
 export type ActivateReplayedSafeFn = (
@@ -125,14 +123,17 @@ export const estimateSafeCreationGas = async (
   provider: Provider,
   from: string,
   undeployedSafe: UndeployedSafeProps,
-  safeVersion?: SafeVersion,
 ): Promise<bigint> => {
-  const readOnlyProxyFactoryContract = await getReadOnlyProxyFactoryContract(safeVersion ?? getLatestSafeVersion(chain))
-  const encodedSafeCreationTx = encodeSafeCreationTx(undeployedSafe, chain)
+  // Estimate against the factory the creation will actually be sent to (see
+  // activateReplayedSafe/relaySafeCreation) — a version-derived factory can differ
+  // from the replayed creation's factory and deploys different proxy bytecode,
+  // underestimating the gas and making the real transaction run out of gas.
+  const replayedSafeProps = assertNewUndeployedSafeProps(undeployedSafe, chain)
+  const encodedSafeCreationTx = encodeSafeCreationTx(replayedSafeProps, chain)
 
   const gas = await provider.estimateGas({
     from,
-    to: readOnlyProxyFactoryContract.getAddress(),
+    to: replayedSafeProps.factoryAddress,
     data: encodedSafeCreationTx,
   })
 

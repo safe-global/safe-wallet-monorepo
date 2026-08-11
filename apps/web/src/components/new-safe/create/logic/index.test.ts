@@ -5,6 +5,7 @@ import {
   relaySafeCreation,
   getRedirect,
   createNewUndeployedSafeWithoutSalt,
+  estimateSafeCreationGas,
 } from '@/components/new-safe/create/logic/index'
 import { chainBuilder } from '@/tests/builders/chains'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
@@ -137,6 +138,48 @@ describe('create/logic', () => {
       }
     })
   })
+  describe('estimateSafeCreationGas', () => {
+    it('estimates against the factory of the replayed creation, not the version-derived one', async () => {
+      // A replayed creation whose factory differs from the safeVersion's canonical
+      // factory (e.g. a 1.5.0 Safe created through the 1.4.1 SafeProxyFactory) —
+      // estimating against the wrong factory deploys different proxy bytecode and
+      // underestimates the gas, making the real activation run out of gas.
+      const replayedProps: ReplayedSafeProps = {
+        factoryAddress: getProxyFactoryDeployment({ version: '1.4.1', network: '1' })?.defaultAddress!,
+        masterCopy: getSafeL2SingletonDeployment({ version: '1.5.0', network: '1' })?.defaultAddress!,
+        saltNonce: '0',
+        safeVersion: '1.5.0',
+        safeAccountConfig: {
+          owners: [faker.finance.ethereumAddress()],
+          threshold: 1,
+          to: ZERO_ADDRESS,
+          data: EMPTY_DATA,
+          fallbackHandler: faker.finance.ethereumAddress(),
+          paymentReceiver: ZERO_ADDRESS,
+        },
+      }
+      const estimatedGas = faker.number.bigInt()
+      const estimateGas = jest.fn().mockResolvedValue(estimatedGas)
+      const provider = { estimateGas } as unknown as JsonRpcProvider
+      const from = faker.finance.ethereumAddress()
+
+      const gas = await estimateSafeCreationGas(
+        chainBuilder().with({ chainId: '1' }).build(),
+        provider,
+        from,
+        replayedProps,
+      )
+
+      expect(estimateGas).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from,
+          to: replayedProps.factoryAddress,
+        }),
+      )
+      expect(gas).toBe(estimatedGas)
+    })
+  })
+
   describe('getRedirect', () => {
     it("should redirect to home for any redirect that doesn't start with /apps", () => {
       const expected = {
