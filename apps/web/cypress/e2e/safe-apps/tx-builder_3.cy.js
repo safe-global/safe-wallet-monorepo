@@ -15,7 +15,12 @@ describe('Transaction Builder 3 tests', { defaultCommandTimeout: 20000 }, () => 
     const appUrl = constants.TX_Builder_url
     iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
     const visitUrl = `/apps/open?safe=${staticSafes.SEP_STATIC_SAFE_43}&appUrl=${encodeURIComponent(appUrl)}`
-    cy.visit(visitUrl)
+    cy.visit(visitUrl, {
+      onBeforeLoad(win) {
+        safeapps.preGrantAddressBookPermission(win, appUrl)
+      },
+    })
+    cy.get(iframeSelector, { timeout: 30000 }).should('be.visible')
   })
 
   it('Verify that no error for the COWSwap fallbackhandler on confirm tx screen', () => {

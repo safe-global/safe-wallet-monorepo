@@ -944,6 +944,11 @@ export const appPermissions = (url) => ({
   infoModalAccepted: JSON.stringify(infoModalAccepted),
 })
 
+// Safe (SDK) permissions payload for SAFE_PERMISSIONS_KEY, as stored after accepting the prompt
+export const safeAppSafePermissions = (appUrl) => ({
+  [appUrl]: [{ invoker: appUrl, parentCapability: 'requestAddressBook', date: 1111111111111, caveats: [] }],
+})
+
 export const cookies = {
   acceptedCookies: JSON.stringify(cookieState),
   acceptedTokenListOnboarding: true,
