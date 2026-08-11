@@ -3,6 +3,8 @@ import {
   getCanonicalOrFirstAddress,
   getChainAgnosticAddress,
   getDeploymentTypeForMasterCopy,
+  getSafeToL2SetupVersion,
+  getSafeToL2SetupVersionByAddress,
   hasCanonicalDeployment,
   hasMatchingDeployment,
   identifyOfficialFallbackHandler,
@@ -217,6 +219,34 @@ describe('deployments utils', () => {
     it('returns undefined for unofficial handlers, including the CoW TWAP instance', () => {
       expect(identifyOfficialFallbackHandler(COW_TWAP_FALLBACK_HANDLER, '1')).toBeUndefined()
       expect(identifyOfficialFallbackHandler('0x6666666666666666666666666666666666666666', '1')).toBeUndefined()
+    })
+  })
+
+  describe('getSafeToL2SetupVersion', () => {
+    it('pairs 1.5.0 Safes with the 1.5.0 setup contract', () => {
+      expect(getSafeToL2SetupVersion('1.5.0')).toBe('1.5.0')
+    })
+
+    it('pairs earlier Safes with the 1.4.1 setup contract', () => {
+      expect(getSafeToL2SetupVersion('1.4.1')).toBe('1.4.1')
+      expect(getSafeToL2SetupVersion('1.3.0')).toBe('1.4.1')
+    })
+  })
+
+  describe('getSafeToL2SetupVersionByAddress', () => {
+    // Canonical SafeToL2Setup deployment addresses
+    const SAFE_TO_L2_SETUP_1_4_1 = '0xBD89A1CE4DDe368FFAB0eC35506eEcE0b1fFdc54'
+    const SAFE_TO_L2_SETUP_1_5_0 = '0x900C7589200010D6C6eCaaE5B06EBe653bc2D82a'
+
+    it('identifies both setup releases, case-insensitively', () => {
+      expect(getSafeToL2SetupVersionByAddress(SAFE_TO_L2_SETUP_1_4_1)).toBe('1.4.1')
+      expect(getSafeToL2SetupVersionByAddress(SAFE_TO_L2_SETUP_1_5_0)).toBe('1.5.0')
+      expect(getSafeToL2SetupVersionByAddress(SAFE_TO_L2_SETUP_1_5_0.toLowerCase())).toBe('1.5.0')
+    })
+
+    it('returns undefined for unknown or missing addresses', () => {
+      expect(getSafeToL2SetupVersionByAddress('0x6666666666666666666666666666666666666666')).toBeUndefined()
+      expect(getSafeToL2SetupVersionByAddress(undefined)).toBeUndefined()
     })
   })
 

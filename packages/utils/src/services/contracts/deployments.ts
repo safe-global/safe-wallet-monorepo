@@ -17,6 +17,7 @@ import {
   getSignMessageLibDeployments,
   getCreateCallDeployment,
   getCreateCallDeployments,
+  getSafeToL2SetupDeployment,
   getSimulateTxAccessorDeployments,
 } from '@safe-global/safe-deployments'
 import type { SingletonDeployment, DeploymentFilter, SingletonDeploymentV2 } from '@safe-global/safe-deployments'
@@ -217,6 +218,30 @@ export const identifyOfficialFallbackHandler = (
     return 'extensible'
   }
   return undefined
+}
+
+/** SafeToL2Setup releases, newest first. There is no 1.3.0 release — the contract was introduced with 1.4.1. */
+export const SAFE_TO_L2_SETUP_VERSIONS = ['1.5.0', '1.4.1'] as const
+export type SafeToL2SetupVersion = (typeof SAFE_TO_L2_SETUP_VERSIONS)[number]
+
+/**
+ * Returns the SafeToL2Setup version that pairs with the given Safe version when
+ * building a (multichain) creation — 1.5.0 Safes use the 1.5.0 setup contract,
+ * everything from 1.4.1 up uses the 1.4.1 one.
+ */
+export const getSafeToL2SetupVersion = (safeVersion: string): SafeToL2SetupVersion =>
+  semverSatisfies(safeVersion, '>=1.5.0') ? '1.5.0' : '1.4.1'
+
+/**
+ * Identifies which SafeToL2Setup release a `setup()` `to` address belongs to, or
+ * undefined for addresses that are no known SafeToL2Setup deployment. Use this to
+ * recognise multichain creations regardless of the Safe version they were built at.
+ */
+export const getSafeToL2SetupVersionByAddress = (address: string | undefined): SafeToL2SetupVersion | undefined => {
+  if (!address) return undefined
+  return SAFE_TO_L2_SETUP_VERSIONS.find((version) =>
+    sameAddress(getSafeToL2SetupDeployment({ version })?.defaultAddress, address),
+  )
 }
 
 /**

@@ -27,12 +27,11 @@ import { useAppSelector } from '@/store'
 import { hasRemainingRelays } from '@/utils/relaying'
 import { Box, Button, CircularProgress, Divider, Grid, Typography } from '@mui/material'
 import React, { useContext, useMemo, useState } from 'react'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { getSafeToL2SetupVersionByAddress } from '@safe-global/utils/services/contracts/deployments'
 import { useEstimateSafeCreationGas } from '@/components/new-safe/create/useEstimateSafeCreationGas'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import CheckWallet from '@/components/common/CheckWallet'
-import { getSafeToL2SetupDeployment } from '@safe-global/safe-deployments'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { useNativeTokenDisplay } from '@/hooks/useNativeTokenDisplay'
 import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
@@ -103,9 +102,7 @@ const ActivateAccountFlow = () => {
 
   const { owners, threshold } = undeployedSafeSetup
 
-  const safeToL2SetupDeployment = getSafeToL2SetupDeployment({ version: '1.4.1' })
-  const safeToL2SetupAddress = safeToL2SetupDeployment?.defaultAddress
-  const isMultichainSafe = sameAddress(safeAccountConfig?.to, safeToL2SetupAddress)
+  const isMultichainSafe = Boolean(getSafeToL2SetupVersionByAddress(safeAccountConfig?.to))
 
   const onSubmit = (txHash?: string) => {
     const mixpanelProps = {

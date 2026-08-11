@@ -307,6 +307,44 @@ describe('create/logic', () => {
       })
     })
 
+    it('should pair 1.5.0 creations with the 1.5.0 SafeToL2Setup', () => {
+      const safeSetup = {
+        owners: [faker.finance.ethereumAddress()],
+        threshold: 1,
+      }
+      const chainSetup = chainBuilder()
+        .with({ chainId: '137' })
+        // Multichain creation is toggled on
+        .with({ features: [FEATURES.COUNTERFACTUAL, FEATURES.MULTI_CHAIN_SAFE_CREATION] as any })
+        .with({ recommendedMasterCopyVersion: '1.5.0' })
+        .with({ l2: true })
+        .build()
+
+      const safeL2SingletonDeployment = getSafeL2SingletonDeployment({
+        version: '1.5.0',
+        network: '137',
+      })?.defaultAddress
+
+      const safeToL2SetupDeployment = getSafeToL2SetupDeployment({ version: '1.5.0', network: chainSetup.chainId })
+      const safeToL2SetupAddress = safeToL2SetupDeployment?.networkAddresses[chainSetup.chainId]
+      const safeToL2SetupInterface = Safe_to_l2_setup__factory.createInterface()
+
+      expect(createNewUndeployedSafeWithoutSalt('1.5.0', safeSetup, chainSetup)).toEqual({
+        safeAccountConfig: {
+          ...safeSetup,
+          fallbackHandler: getFallbackHandlerDeployment({ version: '1.5.0', network: '137' })?.defaultAddress,
+          to: safeToL2SetupAddress,
+          data:
+            safeL2SingletonDeployment &&
+            safeToL2SetupInterface.encodeFunctionData('setupToL2', [safeL2SingletonDeployment]),
+          paymentReceiver: ECOSYSTEM_ID_ADDRESS,
+        },
+        safeVersion: '1.5.0',
+        masterCopy: getSafeSingletonDeployment({ version: '1.5.0', network: '137' })?.defaultAddress,
+        factoryAddress: getProxyFactoryDeployment({ version: '1.5.0', network: '137' })?.defaultAddress,
+      })
+    })
+
     it('should use l2 masterCopy and no migration on zkSync', () => {
       const safeSetup = {
         owners: [faker.finance.ethereumAddress()],
