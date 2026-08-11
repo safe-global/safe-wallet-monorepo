@@ -39,7 +39,7 @@ export function ImportError() {
               </Text>
 
               <Text textAlign="center" fontSize="$4">
-                Don’t worry, your private key was not stored!
+                Your private key was not stored.
               </Text>
             </View>
           </View>
