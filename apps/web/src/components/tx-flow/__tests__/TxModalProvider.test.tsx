@@ -1,4 +1,5 @@
 import { useContext } from 'react'
+import { fireEvent } from '@testing-library/react'
 import { render, screen, waitFor } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { TxModalContext, TxModalProvider } from '..'
@@ -83,6 +84,53 @@ describe('TxModalProvider close gate', () => {
     await user.click(screen.getByRole('button', { name: 'Discard' }))
 
     await waitFor(() => expect(screen.queryByText(FLOW_TEXT)).not.toBeInTheDocument())
+  })
+
+  it('navigates exactly once when a link is clicked and the flow opted out of the warning', async () => {
+    const user = userEvent.setup()
+    const push = jest.fn(() => Promise.resolve(true))
+
+    render(
+      <TxModalProvider>
+        <Opener shouldWarn={false} />
+        <a href="/queue">queue</a>
+      </TxModalProvider>,
+      { routerProps: { push } },
+    )
+    await openFlow(user)
+
+    fireEvent.mouseDown(screen.getByText('queue'))
+
+    await waitFor(() => expect(screen.queryByText(FLOW_TEXT)).not.toBeInTheDocument())
+    expect(screen.queryByText('Discard this transaction?')).not.toBeInTheDocument()
+    expect(push).toHaveBeenCalledTimes(1)
+    expect(push).toHaveBeenCalledWith('/queue')
+  })
+
+  it('blocks link navigation until the discard is confirmed, then navigates once', async () => {
+    const user = userEvent.setup()
+    const push = jest.fn(() => Promise.resolve(true))
+
+    render(
+      <TxModalProvider>
+        <Opener />
+        <a href="/queue">queue</a>
+      </TxModalProvider>,
+      { routerProps: { push } },
+    )
+    await openFlow(user)
+
+    fireEvent.mouseDown(screen.getByText('queue'))
+
+    expect(await screen.findByText('Discard this transaction?')).toBeInTheDocument()
+    expect(screen.getByText(FLOW_TEXT)).toBeInTheDocument()
+    expect(push).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('button', { name: 'Discard' }))
+
+    await waitFor(() => expect(screen.queryByText(FLOW_TEXT)).not.toBeInTheDocument())
+    expect(push).toHaveBeenCalledTimes(1)
+    expect(push).toHaveBeenCalledWith('/queue')
   })
 
   it('runs the flow onClose callback only once the discard is confirmed', async () => {

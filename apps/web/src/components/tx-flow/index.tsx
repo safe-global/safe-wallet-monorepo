@@ -47,14 +47,15 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
 
   /**
    * Runs `action` now when there is no unsaved progress, otherwise parks it behind the discard
-   * dialog. Returns whether it ran, because `usePreventNavigation` needs a synchronous answer.
+   * dialog; `deferred` tells the action which of the two happened. Returns whether it ran,
+   * because `usePreventNavigation` needs a synchronous answer.
    */
-  const requestDiscard = useCallback((action: () => void): boolean => {
+  const requestDiscard = useCallback((action: (deferred: boolean) => void): boolean => {
     if (!shouldWarn.current) {
-      action()
+      action(false)
       return true
     }
-    setPendingDiscard(() => action)
+    setPendingDiscard(() => () => action(true))
     return false
   }, [])
 
@@ -104,9 +105,10 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
   usePreventNavigation(
     txFlow
       ? (proceed) =>
-          requestDiscard(() => {
+          requestDiscard((deferred) => {
             closeFlow()
-            proceed()
+            // The hook navigates itself when the guard allows synchronously — only a blocked navigation is replayed.
+            if (deferred) proceed()
           })
       : undefined,
   )

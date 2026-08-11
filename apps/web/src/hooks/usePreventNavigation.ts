@@ -7,7 +7,8 @@ import { useRouter } from 'next/router'
  * `onNavigate` decides synchronously — `preventDefault`/`stopImmediatePropagation` on a `mousedown`
  * and a `false` from `beforePopState` are both only honoured in the same tick, so the guard cannot
  * await a user's answer. It instead returns `false` to block now and receives `proceed`, the
- * navigation it blocked, to run later once the user has confirmed.
+ * navigation it blocked, to run later once the user has confirmed. A guard that returns `true`
+ * must not call `proceed` itself — the hook owns the navigation in that case.
  */
 export function usePreventNavigation(onNavigate?: (proceed: () => void) => boolean): void {
   const router = useRouter()
