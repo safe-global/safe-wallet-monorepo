@@ -155,6 +155,21 @@ describe('AddressBookInput', () => {
     expect(input).toHaveAttribute('aria-expanded', 'true')
   })
 
+  it('should open the suggestion list while typing, without clicking the field', () => {
+    const address = checksumAddress(faker.finance.ethereumAddress())
+    const { input, utils } = setup('', { [address]: 'Tim Testermann' })
+
+    expect(input).toHaveAttribute('aria-expanded', 'false')
+
+    // Mirrors the e2e flow: type only the tail of a known address and never click the input.
+    act(() => {
+      fireEvent.change(input, { target: { value: address.slice(30) } })
+    })
+
+    expect(input).toHaveAttribute('aria-expanded', 'true')
+    expect(utils.getAllByTestId('address-item')).toHaveLength(1)
+  })
+
   it('should allow to input and validate an address by typing an address', async () => {
     const invalidAddress = checksumAddress(faker.finance.ethereumAddress())
     const validationError = 'You cannot use this address'

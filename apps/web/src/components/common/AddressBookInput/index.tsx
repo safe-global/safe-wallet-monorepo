@@ -101,6 +101,17 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
     setActiveIndex(-1)
   }, [filteredEntries])
 
+  // MUI's Autocomplete opened the list as the user typed. Nothing else here reacts to input, so
+  // without this a typed query never surfaces its matches — only a click or arrow-down would.
+  // Picking an entry writes a complete address, which empties `filteredEntries`, so this cannot
+  // reopen the list on top of a selection.
+  const lastAddressValue = useRef(addressValue)
+  useEffect(() => {
+    if (lastAddressValue.current === addressValue) return
+    lastAddressValue.current = addressValue
+    setOpen(true)
+  }, [addressValue])
+
   // Restores the three dismissal paths MUI's Autocomplete provided. Without them the suggestion
   // list stays open over the rest of the form, and a click aimed at the next field lands on a
   // contact instead — silently writing it in as the recipient.
