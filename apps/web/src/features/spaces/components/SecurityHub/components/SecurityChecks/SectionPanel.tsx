@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react'
 import { motion } from 'framer-motion'
-import { Separator } from '@/components/ui/separator'
+import { Separator } from '@safe-global/design-system/components/separator'
 import { ROW_STAGGER } from './constants'
 
 export type SectionPanelProps = {

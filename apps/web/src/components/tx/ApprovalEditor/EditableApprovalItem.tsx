@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/design-system/components/button'
 import css from '@/components/tx/ApprovalEditor/styles.module.css'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'
 

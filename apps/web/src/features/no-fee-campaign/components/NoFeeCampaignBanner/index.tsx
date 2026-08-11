@@ -5,7 +5,7 @@ import PromoBanner from '@/components/common/PromoBanner/PromoBanner'
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import { Link } from '@/components/ui/link'
+import { Link } from '@safe-global/design-system/components/link'
 
 const NoFeeCampaignBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   const { setTxFlow } = useContext(TxModalContext)

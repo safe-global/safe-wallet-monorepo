@@ -1,7 +1,7 @@
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { DataRow } from '@/components/common/Table/DataRow'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 

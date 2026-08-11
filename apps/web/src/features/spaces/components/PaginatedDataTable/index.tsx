@@ -1,10 +1,17 @@
 import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import { useIsMobile } from '@/hooks/use-mobile'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@safe-global/design-system/components/table'
+import { Button } from '@safe-global/design-system/components/button'
+import { useIsMobile } from '@safe-global/design-system/hooks/use-mobile'
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 // Bounded design-system styling for columns. Consumers pick from these variant
 // axes — they never pass raw className/style — so no table can drift on color,

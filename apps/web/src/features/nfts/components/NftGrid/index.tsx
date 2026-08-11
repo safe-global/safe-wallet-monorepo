@@ -3,21 +3,28 @@ import { useMemo, useState } from 'react'
 import { useCallback } from 'react'
 import { type ReactElement } from 'react'
 import { Funnel } from 'lucide-react'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Card } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Checkbox } from '@safe-global/design-system/components/checkbox'
+import { Input } from '@safe-global/design-system/components/input'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
+import { Card } from '@safe-global/design-system/components/card'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@safe-global/design-system/components/table'
 import enhancedTableCss from '@/components/common/EnhancedTable/styles.module.css'
-import { Typography } from '@/components/ui/typography'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 import NftIcon from '@/public/images/common/nft.svg'
 import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import ExternalLink from '@/components/common/ExternalLink'
 import useChainId from '@/hooks/useChainId'
 import { nftPlatforms } from '../../config'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 interface NftsTableProps {
   nfts: Collectible[]

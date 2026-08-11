@@ -7,10 +7,16 @@ import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { isDomain } from '@/services/ens'
 import { MemberRole } from '../../../hooks/useSpaceMembers'
 import useNameResolver from '@/components/common/AddressInput/useNameResolver'
-import { cn } from '@/utils/cn'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { cn } from '@safe-global/design-system/utils/cn'
+import { Button } from '@safe-global/design-system/components/button'
+import { Input } from '@safe-global/design-system/components/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@safe-global/design-system/components/select'
 import { Controller } from 'react-hook-form'
 import type { InviteMembersFormValues } from '../hooks/useInviteForm'
 import { EMAIL_MAX_LENGTH, INVALID_IDENTIFIER_ERROR, isEmailAddress } from '../../AddMemberModal/utils'

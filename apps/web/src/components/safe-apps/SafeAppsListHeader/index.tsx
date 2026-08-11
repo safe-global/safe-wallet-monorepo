@@ -1,4 +1,4 @@
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 type SafeAppsListHeaderProps = {
   title: string

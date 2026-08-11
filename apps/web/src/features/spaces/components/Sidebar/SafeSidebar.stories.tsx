@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import type { CSSProperties, ReactNode } from 'react'
-import { Sidebar, SidebarHeader, SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { Sidebar, SidebarHeader, SidebarInset, SidebarProvider } from '@safe-global/design-system/components/sidebar'
 import { withMockProvider } from '@/storybook/preview'
 import { createChainData } from '@/stories/mocks'
 import { EnhancedSidebar } from './index'

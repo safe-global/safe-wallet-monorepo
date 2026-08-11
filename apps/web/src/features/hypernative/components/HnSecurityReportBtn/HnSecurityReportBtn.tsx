@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Button } from '@safe-global/design-system/components/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
 import ExternalLink from '@/components/common/ExternalLink'
 import { hnSecurityReportBtnConfig } from './config'

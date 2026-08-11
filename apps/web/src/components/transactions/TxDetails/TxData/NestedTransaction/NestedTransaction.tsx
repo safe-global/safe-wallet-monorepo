@@ -1,6 +1,6 @@
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Card, CardContent } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
+import { Card, CardContent } from '@safe-global/design-system/components/card'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 import { Divider } from '@/components/tx/ColorCodedTxAccordion'
 

@@ -1,10 +1,10 @@
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setDarkMode } from '@/store/settingsSlice'
 import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Button } from '@safe-global/design-system/components/button'
+import { Label } from '@safe-global/design-system/components/label'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { cn } from '@safe-global/design-system/utils/cn'
 import SpaceSettingsSection, { SpaceSettingsSectionTitle } from '../SpaceSettingsSection'
 
 type ThemeOption = {

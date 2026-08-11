@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Button } from '@safe-global/design-system/components/button'
 import ModalDialog from '@/components/common/ModalDialog'
 import { useAppDispatch } from '@/store'
 import { removeAddressBookEntry } from '@/store/addressBookSlice'

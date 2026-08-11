@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 // Gauge arc spans 270° with a 90° gap centered at the bottom. The SVG is rotated 135°
 // so the dash (which natively starts at 3 o'clock and sweeps clockwise) begins at the

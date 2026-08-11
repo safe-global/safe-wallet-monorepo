@@ -1,5 +1,5 @@
 import { type ReactNode, useMemo, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/design-system/components/button'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { EvidenceItem, SafeGrade, ScanContext, ScanResult, SecurityGrade } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'

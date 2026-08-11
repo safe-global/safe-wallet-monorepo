@@ -14,7 +14,7 @@ jest.mock('@/utils/colors', () => ({
   getDeterministicColor: (name: string) => `color-${name}`,
 }))
 
-jest.mock('@/components/ui/sidebar', () => ({
+jest.mock('@safe-global/design-system/components/sidebar', () => ({
   SidebarMenuButton: ({
     children,
     tooltip,
@@ -34,7 +34,7 @@ jest.mock('@/components/ui/sidebar', () => ({
   ),
 }))
 
-jest.mock('@/components/ui/avatar', () => ({
+jest.mock('@safe-global/design-system/components/avatar', () => ({
   Avatar: ({ children, className }: { children: ReactNode; className?: string }) => (
     <div className={className}>{children}</div>
   ),

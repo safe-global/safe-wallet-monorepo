@@ -1,17 +1,17 @@
 import { type ReactElement, useMemo } from 'react'
 import { RefreshCw } from 'lucide-react'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import { Card } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Card } from '@safe-global/design-system/components/card'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { cn } from '@safe-global/design-system/utils/cn'
 import type { ScanResult, SafeGrade, ScoreBandDef } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
 import SafeGradeChip, { SAFE_GRADE_LABEL } from '../SafeGradeChip/SafeGradeChip'
 import type { SpaceSafeEntry } from '../../types'
 import { ScoreGauge } from './WorkspaceGauge'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/design-system/components/button'
 
 const FILTER_GRADES: SafeGrade[] = ['critical', 'at_risk', 'needs_attention', 'passing']
 

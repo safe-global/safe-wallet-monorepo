@@ -1,7 +1,7 @@
 import { type ReactElement } from 'react'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
+import { Typography } from '@safe-global/design-system/components/typography'
 import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 // eslint-disable-next-line no-restricted-imports -- routing SeverityIcon through the safe-shield barrel closes a hypernative<->safe-shield module-init cycle (TDZ)

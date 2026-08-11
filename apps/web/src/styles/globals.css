@@ -1,4 +1,7 @@
-@import url(./vars.css);
+/* Brand vars + the semantic token layer + the scoped Tailwind preflight.
+   Owned by packages/design-system; `yarn workspace @safe-global/design-system css-vars`
+   regenerates the brand half from @safe-global/theme. */
+@import '@safe-global/design-system/styles.css';
 @import url(./onboard.css);
 @import url(/fonts/fonts.css);
 /**

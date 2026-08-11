@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import TokenIcon from '@/components/common/TokenIcon'
 import TokenAmount from '@/components/common/TokenAmount'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 export type InfoBlock = {
   value: string

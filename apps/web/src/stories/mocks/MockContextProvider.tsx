@@ -4,7 +4,7 @@ import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { setSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import PageLayout from '@/components/common/PageLayout'
-import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
+import { ShadcnProvider } from '@safe-global/design-system/components/ShadcnProvider'
 import type { StoryContext } from '@storybook/react'
 import type { LayoutType } from './types'
 import {

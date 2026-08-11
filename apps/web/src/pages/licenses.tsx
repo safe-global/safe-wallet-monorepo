@@ -1,7 +1,14 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { Typography } from '@/components/ui/typography'
-import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '@/components/ui/table'
+import { Typography } from '@safe-global/design-system/components/typography'
+import {
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableHeader,
+  TableHead,
+} from '@safe-global/design-system/components/table'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { BRAND_NAME } from '@/config/constants'

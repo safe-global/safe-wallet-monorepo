@@ -3,7 +3,7 @@ import LoadingSpinner, { SpinnerStatus } from '@/components/new-safe/create/step
 import { SafeCreationEvent } from '@/features/counterfactual/services'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import FailedIcon from '@/public/images/common/tx-failed.svg'
 import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
 

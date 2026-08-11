@@ -1,6 +1,6 @@
 import QRCodeReact from 'qrcode.react'
 import { lightPalette, darkPalette } from '@safe-global/theme/palettes'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import type { ReactElement } from 'react'
 

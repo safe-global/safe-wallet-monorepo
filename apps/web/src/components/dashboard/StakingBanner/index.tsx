@@ -1,9 +1,9 @@
 /**
  * @usedBy pages/balances/index.tsx (StakingBanner, useIsStakingBannerVisible)
  */
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
-import { Link } from '@/components/ui/link'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Button } from '@safe-global/design-system/components/button'
+import { Link } from '@safe-global/design-system/components/link'
 import css from './styles.module.css'
 import StakeIcon from '@/public/images/common/stake.svg'
 import classNames from 'classnames'

@@ -1,6 +1,6 @@
 import ExternalLink from '@/components/common/ExternalLink'
-import { Card, CardContent } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
+import { Card, CardContent } from '@safe-global/design-system/components/card'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { hnActivatedSettingsBannerConfig } from './config'
 import css from './styles.module.css'
 import SafeShieldColored from '@/public/images/safe-shield/safe-shield-colored.svg'

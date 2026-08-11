@@ -1,6 +1,6 @@
 import { AlertCircle } from 'lucide-react'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { cn } from '@/utils/cn'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/design-system/components/tooltip'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 export interface NotActivatedBadgeProps {
   isActivating?: boolean

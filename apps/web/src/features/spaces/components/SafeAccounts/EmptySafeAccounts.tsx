@@ -1,4 +1,4 @@
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import SafeAccountsIcon from '@/public/images/spaces/safe-accounts.svg'
 
 const EmptySafeAccounts = () => {

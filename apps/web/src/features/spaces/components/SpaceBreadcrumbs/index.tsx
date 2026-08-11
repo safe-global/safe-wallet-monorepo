@@ -12,8 +12,8 @@ import { useCurrentSpaceId, useIsQualifiedSafe } from '@/features/spaces'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/design-system/components/button'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 const SpaceBreadcrumbs = () => {
   const isQualifiedSafe = useIsQualifiedSafe()

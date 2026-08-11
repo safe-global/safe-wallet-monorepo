@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import NetworkLogosTooltip from './index'
 
-jest.mock('@/components/ui/tooltip', () => ({
+jest.mock('@safe-global/design-system/components/tooltip', () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   TooltipTrigger: ({ children }: { children: React.ReactNode }) => <div data-testid="trigger">{children}</div>,
   TooltipContent: ({ children, className }: { children: React.ReactNode; className?: string }) => (

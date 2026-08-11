@@ -1,6 +1,6 @@
 import { undeployedSafesSlice } from '@/features/counterfactual/store'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { Alert, AlertTitle, AlertDescription } from '@safe-global/design-system/components/alert'
+import { Button } from '@safe-global/design-system/components/button'
 import type { ReactElement, Dispatch, SetStateAction } from 'react'
 
 import ModalDialog from '@/components/common/ModalDialog'

@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
-import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/utils/cn'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 interface WidgetItemSkeletonProps {
   className?: string

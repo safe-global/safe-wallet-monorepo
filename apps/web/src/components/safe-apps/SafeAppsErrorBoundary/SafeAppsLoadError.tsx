@@ -1,7 +1,7 @@
 import NetworkError from '@/public/images/apps/network-error.svg'
 
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Button } from '@safe-global/design-system/components/button'
 import css from './styles.module.css'
 import ExternalLink from '@/components/common/ExternalLink'
 import { DISCORD_URL } from '@safe-global/utils/config/constants'

@@ -9,7 +9,7 @@ import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { AppRoutes } from '@/config/routes'
 import { SafeWidget } from '@/features/spaces'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/design-system/components/button'
 import TokenIcon from '@/components/common/TokenIcon'
 
 const MAX_ASSETS = 3

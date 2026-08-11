@@ -1,7 +1,12 @@
 import type { CSSProperties, ReactElement } from 'react'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/design-system/components/accordion'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { cn } from '@safe-global/design-system/utils/cn'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { HistoryFeesData } from '../../hooks/useHistoryFeesBreakdown'
 import { FeeBreakdownRow } from '../shared/FeeBreakdownRow'

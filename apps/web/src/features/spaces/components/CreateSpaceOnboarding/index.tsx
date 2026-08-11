@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-import OnboardingFooter from '@/components/common/OnboardingFooter'
-import { Input } from '@/components/ui/input'
-import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Spinner } from '@/components/ui/spinner'
+import OnboardingFooter from '@safe-global/design-system/presets/OnboardingFooter'
+import { Input } from '@safe-global/design-system/components/input'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Alert, AlertDescription } from '@safe-global/design-system/components/alert'
+import { Spinner } from '@safe-global/design-system/components/spinner'
 import {
   OnboardingLayout,
   StepCounter,

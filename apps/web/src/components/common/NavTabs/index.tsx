@@ -1,6 +1,6 @@
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@safe-global/design-system/components/tabs'
 import type { NavItem } from '@/components/common/NavTabs/navItemsConfig'
 
 const NavTabs = ({ tabs }: { tabs: NavItem[] }) => {

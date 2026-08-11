@@ -1,8 +1,8 @@
 import { memo, type ReactElement, useMemo, useState } from 'react'
 import { Progress as ProgressPrimitive } from '@base-ui/react/progress'
 
-import { cn } from '@/utils/cn'
-import { ProgressTrack, ProgressIndicator } from '@/components/ui/progress'
+import { cn } from '@safe-global/design-system/utils/cn'
+import { ProgressTrack, ProgressIndicator } from '@safe-global/design-system/components/progress'
 import type { BrowserPermission } from '@/hooks/safe-apps/permissions'
 import Slider from './Slider'
 import AllowedFeaturesList from './AllowedFeaturesList'

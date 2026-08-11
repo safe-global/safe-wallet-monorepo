@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react'
-import { TableCell, TableRow } from '@/components/ui/table'
-import { Typography } from '@/components/ui/typography'
+import { TableCell, TableRow } from '@safe-global/design-system/components/table'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { TriangleAlert, Info, Copy, Check } from 'lucide-react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 import useCopyToClipboard from '@/hooks/useCopyToClipboard'
 import type { SimilarWarning } from '@/features/address-poisoning'
 

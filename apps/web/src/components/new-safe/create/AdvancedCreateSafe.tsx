@@ -1,6 +1,6 @@
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { useRouter } from 'next/router'
 
 import useWallet from '@/hooks/wallets/useWallet'

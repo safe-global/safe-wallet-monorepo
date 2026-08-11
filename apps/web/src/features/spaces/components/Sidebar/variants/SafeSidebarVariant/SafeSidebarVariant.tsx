@@ -10,7 +10,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarSeparator,
-} from '@/components/ui/sidebar'
+} from '@safe-global/design-system/components/sidebar'
 import css from '../../styles.module.css'
 import type { ResolvedSidebarNavItem, SafeSidebarVariantProps } from '../../types'
 import { AppRoutes } from '@/config/routes'

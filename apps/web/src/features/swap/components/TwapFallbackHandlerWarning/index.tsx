@@ -1,4 +1,4 @@
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription } from '@safe-global/design-system/components/alert'
 import InfoOutlinedIcon from '@/public/images/notifications/info.svg'
 
 export const TwapFallbackHandlerWarning = () => {

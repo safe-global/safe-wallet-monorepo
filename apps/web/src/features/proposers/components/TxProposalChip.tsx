@@ -1,5 +1,5 @@
-import { Badge } from '@/components/ui/badge'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Badge } from '@safe-global/design-system/components/badge'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 import InfoIcon from '@/public/images/notifications/info.svg'
 
 const TxProposalChip = () => {

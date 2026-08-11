@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { MoreVertical } from 'lucide-react'
-import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
-import { Button } from '@/components/ui/button'
+import { ShadcnProvider } from '@safe-global/design-system/components/ShadcnProvider'
+import { Button } from '@safe-global/design-system/components/button'
 import { HeaderActions } from './HeaderActions'
 
 const meta = {

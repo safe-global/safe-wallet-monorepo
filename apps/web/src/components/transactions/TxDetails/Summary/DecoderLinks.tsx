@@ -1,5 +1,5 @@
 import ExternalLink from '@/components/common/ExternalLink'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 const TX_DECODER_URL = 'https://transaction-decoder.pages.dev'
 const SAFE_UTILS_URL = 'https://safeutils.openzeppelin.com'

@@ -1,7 +1,7 @@
 import type { WalletKitTypes } from '@reown/walletkit'
 
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Typography } from '@/components/ui/typography'
+import { Alert, AlertDescription } from '@safe-global/design-system/components/alert'
+import { Typography } from '@safe-global/design-system/components/typography'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { useCompatibilityWarning, type CompatibilityWarningSeverity } from './useCompatibilityWarning'
 import useSafeInfo from '@/hooks/useSafeInfo'

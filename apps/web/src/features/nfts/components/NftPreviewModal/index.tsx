@@ -4,7 +4,7 @@ import css from './styles.module.css'
 import ExternalLink from '@/components/common/ExternalLink'
 import { nftPlatforms } from '../../config'
 import useChainId from '@/hooks/useChainId'
-import { Spinner } from '@/components/ui/spinner'
+import { Spinner } from '@safe-global/design-system/components/spinner'
 
 const NftPreviewModal = ({ nft, onClose }: { nft?: Collectible; onClose: () => void }) => {
   const chainId = useChainId()

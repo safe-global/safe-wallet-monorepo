@@ -1,7 +1,7 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 import InfoIcon from '@/public/images/notifications/info.svg'
 import type { FeeRow } from '../../hooks/useFeesPreview'

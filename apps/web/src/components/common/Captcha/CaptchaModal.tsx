@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/design-system/components/button'
+import { Typography } from '@safe-global/design-system/components/typography'
 import ModalDialog from '@/components/common/ModalDialog'
 import SafeLogo from '@/public/images/logo-no-text.svg'
 

@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { ProfilePopoverContent } from '../ProfilePopoverContent'
 
 // PopoverContent renders into a portal only when open; render it inline here.
-jest.mock('@/components/ui/popover', () => ({
+jest.mock('@safe-global/design-system/components/popover', () => ({
   PopoverContent: ({ children, 'data-testid': testId }: { children: ReactNode; 'data-testid'?: string }) => (
     <div data-testid={testId}>{children}</div>
   ),

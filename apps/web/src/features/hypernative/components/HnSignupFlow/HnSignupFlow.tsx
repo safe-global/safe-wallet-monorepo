@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { useAppDispatch } from '@/store'
 import { setFormCompleted } from '../../store/hnStateSlice'
 import useChainId from '@/hooks/useChainId'

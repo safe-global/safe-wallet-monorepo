@@ -1,6 +1,6 @@
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useChainId from '@/hooks/useChainId'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { NestedTransaction } from '../NestedTransaction'

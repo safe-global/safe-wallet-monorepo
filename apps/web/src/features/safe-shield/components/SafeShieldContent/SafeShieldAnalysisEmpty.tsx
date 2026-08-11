@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 export const SafeShieldAnalysisEmpty = (): ReactElement => (
   <Typography variant="paragraph-small" align="center" className="block p-4 text-[var(--color-text-secondary)]">

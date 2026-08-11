@@ -1,5 +1,5 @@
 import Identicon from '@/components/common/Identicon'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { Suspense } from 'react'
 import type { ReactElement } from 'react'
 

@@ -1,7 +1,7 @@
 import { render, screen } from '@/tests/test-utils'
 import EntryDialog from './index'
 
-jest.mock('@/hooks/use-mobile', () => ({
+jest.mock('@safe-global/design-system/hooks/use-mobile', () => ({
   useIsMobile: jest.fn(() => false),
 }))
 

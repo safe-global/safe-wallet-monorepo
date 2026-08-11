@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { AdminOnlyWorkspaceTooltip, ADMIN_ONLY_WORKSPACE_TOOLTIP_MESSAGE } from '../AdminOnlyWorkspaceTooltip'
 
-jest.mock('@/components/ui/tooltip', () => ({
+jest.mock('@safe-global/design-system/components/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <div data-testid="tooltip">{children}</div>,
   TooltipTrigger: ({ children }: { children: ReactNode }) => <div data-testid="tooltip-trigger">{children}</div>,
   TooltipContent: ({ children }: { children: ReactNode }) => <div data-testid="tooltip-content">{children}</div>,

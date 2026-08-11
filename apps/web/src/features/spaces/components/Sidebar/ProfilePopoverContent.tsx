@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
-import { PopoverContent } from '@/components/ui/popover'
-import { Separator } from '@/components/ui/separator'
+import { PopoverContent } from '@safe-global/design-system/components/popover'
+import { Separator } from '@safe-global/design-system/components/separator'
 import { LogOut } from 'lucide-react'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import css from './styles.module.css'

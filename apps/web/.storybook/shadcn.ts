@@ -1,13 +1,10 @@
 /**
- * Storybook-specific ShadcnProvider that bundles the CSS dependency.
+ * Storybook re-export of the design system's scope provider.
  *
- * In production, shadcn.css is imported from _app.tsx. In Storybook, _app.tsx is
- * not part of the bundle, so we import the CSS here alongside the provider.
- *
- * NOTE: The CSS is global once loaded (webpack side-effect), but all styles are
- * scoped to .shadcn-scope via selectors, so they won't affect MUI-only stories.
+ * The tokens arrive via `../src/styles/globals.css` (imported in preview.tsx), which imports
+ * `@safe-global/design-system/styles.css` — the same entry `_app.tsx` uses, so Storybook and
+ * production load an identical token layer. Tailwind's `@source` directives in the design
+ * system's tokens.css already cover both this app's tree and the package's own stories, so no
+ * Storybook-only source declaration is needed.
  */
-import '../src/styles/shadcn.css'
-import './shadcn-stories.css'
-
-export { ShadcnProvider } from '../src/components/ui/ShadcnProvider'
+export { ShadcnProvider } from '@safe-global/design-system/components/ShadcnProvider'

@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react'
 import TruncatedText, { shouldOpenTooltip } from '../TruncatedText'
 
 // Render the tooltip primitives inline so the wired content is assertable without a portal.
-jest.mock('@/components/ui/tooltip', () => ({
+jest.mock('@safe-global/design-system/components/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({ render: element }: { render: ReactElement }) => element,
   TooltipContent: ({ children }: { children: ReactNode }) => <span data-testid="tooltip-content">{children}</span>,

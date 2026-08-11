@@ -1,6 +1,6 @@
 import Track from '@/components/common/Track'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import partition from 'lodash/partition'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
 import type { ReactElement } from 'react'

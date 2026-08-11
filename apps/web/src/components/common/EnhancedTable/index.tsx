@@ -3,10 +3,23 @@ import React, { useState } from 'react'
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from 'lucide-react'
 import classNames from 'classnames'
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Typography } from '@/components/ui/typography'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@safe-global/design-system/components/table'
+import { Button } from '@safe-global/design-system/components/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@safe-global/design-system/components/select'
+import { Typography } from '@safe-global/design-system/components/typography'
 import css from './styles.module.css'
 
 type SortDirection = 'asc' | 'desc'

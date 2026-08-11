@@ -1,8 +1,8 @@
 import { Shield } from 'lucide-react'
 import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { Badge } from '@/components/ui/badge'
-import { Typography } from '@/components/ui/typography'
+import { Badge } from '@safe-global/design-system/components/badge'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { useHasFeature } from '@/hooks/useChains'
 
 /**

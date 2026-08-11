@@ -1,5 +1,5 @@
-import { Typography } from '@/components/ui/typography'
-import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Spinner } from '@safe-global/design-system/components/spinner'
 import { useEffect, useRef, useState } from 'react'
 import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
 

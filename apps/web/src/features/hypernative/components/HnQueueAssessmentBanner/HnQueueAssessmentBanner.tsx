@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Typography } from '@/components/ui/typography'
+import { Alert, AlertDescription } from '@safe-global/design-system/components/alert'
+import { Typography } from '@safe-global/design-system/components/typography'
 import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import ExternalLink from '@/components/common/ExternalLink'

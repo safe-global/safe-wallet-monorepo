@@ -1,4 +1,4 @@
-import { SearchInput } from '@/components/ui/search-input'
+import { SearchInput } from '@safe-global/design-system/components/search-input'
 
 interface SafeSearchProps {
   value: string

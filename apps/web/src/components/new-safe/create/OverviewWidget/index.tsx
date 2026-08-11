@@ -1,7 +1,7 @@
 import WalletOverview from 'src/components/common/WalletOverview'
 import useWallet from '@/hooks/wallets/useWallet'
-import { Card } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
+import { Card } from '@safe-global/design-system/components/card'
+import { Typography } from '@safe-global/design-system/components/typography'
 import type { ReactElement } from 'react'
 import SafeLogo from '@/public/images/logo-no-text.svg'
 

@@ -1,7 +1,7 @@
 import { type ReactElement } from 'react'
-import { Switch } from '@/components/ui/switch'
-import { Field } from '@/components/ui/field'
-import { Label } from '@/components/ui/label'
+import { Switch } from '@safe-global/design-system/components/switch'
+import { Field } from '@safe-global/design-system/components/field'
+import { Label } from '@safe-global/design-system/components/label'
 import { TX_LIST_EVENTS } from '@/services/analytics'
 import Track from '@/components/common/Track'
 

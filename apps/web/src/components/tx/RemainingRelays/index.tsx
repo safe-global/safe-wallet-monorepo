@@ -1,6 +1,6 @@
 import type { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
+import { Typography } from '@safe-global/design-system/components/typography'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { MAX_DAY_RELAYS } from '@/hooks/useRemainingRelays'
 import css from '../BalanceInfo/styles.module.css'

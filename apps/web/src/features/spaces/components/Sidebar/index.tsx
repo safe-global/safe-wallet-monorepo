@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Sidebar, SidebarHeader } from '@/components/ui/sidebar'
+import { Sidebar, SidebarHeader } from '@safe-global/design-system/components/sidebar'
 import { SidebarTopBar } from './SidebarTopBar'
 import { getSidebarVariant } from './variants'
 import { SidebarCommonFooter } from './SidebarCommonFooter'

@@ -1,8 +1,8 @@
 import ImportIcon from '@/public/images/common/import.svg'
 import { useMemo, useState } from 'react'
 import ImportAddressBookDialog from './ImportAddressBookDialog'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Button } from '@safe-global/design-system/components/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import { flattenAddressBook } from '../utils'
 

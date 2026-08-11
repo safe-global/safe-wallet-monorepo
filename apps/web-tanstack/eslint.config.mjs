@@ -6,6 +6,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import react from 'eslint-plugin-react'
 import prettier from 'eslint-config-prettier'
 import js from '@eslint/js'
+import { designSystemRestrictedSyntax } from '@safe-global/design-system/eslint/index.mjs'
 
 // Mirrors apps/web/eslint.config.mjs rule-by-rule, minus the framework
 // extends (`next`, `plugin:storybook/recommended`) which aren't applicable
@@ -100,6 +101,12 @@ export default [
           ],
         },
       ],
+
+      // Design-system consistency. This app renders the same primitives as apps/web (it resolves
+      // @/* into apps/web/src), but until the design system owned these guards they only ran in
+      // apps/web — so a styling override written here was never flagged. Same contract, one source:
+      // packages/design-system/eslint/rules.cjs.
+      'no-restricted-syntax': ['error', ...designSystemRestrictedSyntax],
     },
   },
 ]

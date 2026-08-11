@@ -77,6 +77,18 @@ function getMergeBase() {
 
 const SOURCE_EXT_RE = /\.(ts|tsx|js|jsx)$/
 
+/**
+ * Yarn workspaces live under apps/, packages/ and config/ — so a workspace name alone does
+ * not tell you its directory. Resolve it by looking for the package.json, falling back to
+ * apps/ (the historical assumption) so an unknown name fails the same way it used to.
+ */
+const WORKSPACE_PARENTS = ['apps', 'packages', 'config', 'expo-plugins']
+
+function workspaceRoot(ws) {
+  const match = WORKSPACE_PARENTS.find((parent) => existsSync(path.join(parent, ws, 'package.json')))
+  return path.join(match ?? 'apps', ws)
+}
+
 function getChangedFiles(ws, { quiet = false } = {}) {
   const mergeBase = getMergeBase()
   const committed = mergeBase ? gitDiff(`${mergeBase}...HEAD`) : []
@@ -87,12 +99,13 @@ function getChangedFiles(ws, { quiet = false } = {}) {
 
   if (!ws) return all
 
-  const prefix = `apps/${ws}/`
+  const root = workspaceRoot(ws)
+  const prefix = `${root}/`
   const outside = all.filter((f) => !f.startsWith(prefix))
   const inside = all.filter((f) => f.startsWith(prefix)).map((f) => f.slice(prefix.length))
 
   if (outside.length > 0 && !quiet) {
-    console.log(`ℹ ${outside.length} changed file(s) outside apps/${ws}/ — skipped`)
+    console.log(`ℹ ${outside.length} changed file(s) outside ${root}/ — skipped`)
   }
 
   return inside
@@ -114,7 +127,7 @@ const workspacePkg = WORKSPACE_NAMES[workspace] ?? `@safe-global/${workspace}`
 // ---------------------------------------------------------------------------
 
 function detectMissingTests(changedFiles, workspace) {
-  const wsRoot = workspace ? path.join('apps', workspace) : ''
+  const wsRoot = workspace ? workspaceRoot(workspace) : ''
   const warnings = []
 
   const testablePatterns = [

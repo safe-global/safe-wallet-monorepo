@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Inbox, CircleAlert } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/design-system/components/button'
 import PagePlaceholder from './index'
 
 const meta: Meta<typeof PagePlaceholder> = {

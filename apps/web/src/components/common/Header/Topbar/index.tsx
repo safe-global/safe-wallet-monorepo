@@ -2,7 +2,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useContext, useMemo, useRef, type ReactElement } from 'react'
 import { Menu } from 'lucide-react'
 import { usePathname } from 'next/navigation'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/design-system/components/button'
 import { AppRoutes } from '@/config/routes'
 import { HeaderNavigation, HeaderAccountInfo } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
@@ -29,7 +29,7 @@ import SpaceSafeBar from '@/components/common/SpaceSafeBar'
 import SafenetStakingButton from './SafenetStakingButton'
 import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { TxModalContext } from '@/components/tx-flow'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 // The context (left) and actions card (right) share one row until they genuinely stop fitting, then
 // the actions keep the top row and the context drops underneath — `order-last` + `basis-full` on the

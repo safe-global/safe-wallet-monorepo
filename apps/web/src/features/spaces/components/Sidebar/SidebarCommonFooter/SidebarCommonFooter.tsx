@@ -1,13 +1,18 @@
 import { useState, useCallback, type ReactElement } from 'react'
 import { Sparkles } from 'lucide-react'
-import { SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar'
-import { cn } from '@/utils/cn'
+import {
+  SidebarFooter,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from '@safe-global/design-system/components/sidebar'
+import { cn } from '@safe-global/design-system/utils/cn'
 import { icons } from '../config'
 import css from '../styles.module.css'
 import { IS_PRODUCTION } from '@/config/constants'
 import { trackEvent, OVERVIEW_EVENTS, MixpanelEventParams } from '@/services/analytics'
-import { Switch } from '@/components/ui/switch'
-import { Field, FieldLabel } from '@/components/ui/field'
+import { Switch } from '@safe-global/design-system/components/switch'
+import { Field, FieldLabel } from '@safe-global/design-system/components/field'
 import { setDarkMode } from '@/store/settingsSlice'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -19,7 +24,7 @@ import { SidebarIndexingStatus } from '../SidebarIndexingStatus'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { LS_KEY } from '@/config/gateway'
 import HelpMenu from '@/components/common/HelpMenu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 
 export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?: boolean }): ReactElement => {
   const dispatch = useAppDispatch()

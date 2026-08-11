@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import css from './styles.module.css'
 

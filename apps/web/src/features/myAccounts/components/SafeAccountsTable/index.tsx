@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { TableBody, TableHead, TableHeader, TableRow } from '@safe-global/design-system/components/table'
 import tableCss from './styles.module.css'
 import type { AllSafeItems } from '@/hooks/safes'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 import { SAFE_ACCOUNT_COLUMNS, SELECT_COLUMN, type SafeAccountColumnId } from './columns'
 import {
   compareGroups,

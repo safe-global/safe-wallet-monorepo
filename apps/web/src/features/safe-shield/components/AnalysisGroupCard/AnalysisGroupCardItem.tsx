@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Link } from '@/components/ui/link'
-import { Typography } from '@/components/ui/typography'
+import { Link } from '@safe-global/design-system/components/link'
+import { Typography } from '@safe-global/design-system/components/typography'
 import type { Severity } from '@safe-global/utils/features/safe-shield/types'
 import {
   type AnalysisResult,

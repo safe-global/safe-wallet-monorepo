@@ -4,13 +4,13 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import Identicon from '@/components/common/Identicon'
 import CopyTooltip from '@/components/common/CopyTooltip'
-import { Separator } from '@/components/ui/separator'
-import { Typography } from '@/components/ui/typography'
+import { Separator } from '@safe-global/design-system/components/separator'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { useChain } from '@/hooks/useChains'
 import { useLoadFeature } from '@/features/__core__'
 import { SecurityFeature } from '@/features/security'
 import type { ScanContext } from '@/features/security/types'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 type SecurityDrawerDetailsProps = {
   scanContext: ScanContext | null

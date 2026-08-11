@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Info } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/design-system/components/button'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { CustomTooltip } from './index'
 
 const meta = {

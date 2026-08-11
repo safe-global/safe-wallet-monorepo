@@ -23,7 +23,7 @@ jest.mock('@/features/__core__', () => ({
 const mockWallet = { address: '0x1234567890abcdef1234567890abcdef12345678', balance: '0' }
 
 const mockUseIsMobile = jest.fn(() => false)
-jest.mock('@/hooks/use-mobile', () => ({
+jest.mock('@safe-global/design-system/hooks/use-mobile', () => ({
   useIsMobile: () => mockUseIsMobile(),
 }))
 

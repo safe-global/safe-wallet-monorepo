@@ -11,6 +11,12 @@ allowed-tools:
   - Grep
 ---
 
+> **Direction of travel:** Storybook is now the source of truth for the Safe design system, not Figma
+> (see `packages/design-system/AGENTS.md`). This skill still exists for designs that only live in
+> Figma today — when the component already exists in the design system, use it as-is via
+> `/design-system.use` rather than re-deriving styling from a Figma frame, and take variant/token
+> decisions to the design-system Storybook.
+
 # Sync Component from Figma
 
 Sync the **$ARGUMENTS** component from Figma to code.
@@ -18,8 +24,8 @@ Sync the **$ARGUMENTS** component from Figma to code.
 ## Source Files
 
 - **Figma File**: `trBVcpjZslO63zxiNUI9io` (Obra shadcn-ui safe)
-- **Component Mapping**: `apps/web/src/components/ui/docs/figma-code-connect.md`
-- **Target**: `apps/web/src/components/ui/<component>.tsx`
+- **Component Mapping**: `packages/design-system/docs/figma-code-connect.md`
+- **Target**: `packages/design-system/src/components/<component>.tsx`
 
 ## Process
 

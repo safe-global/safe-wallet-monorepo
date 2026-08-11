@@ -1,4 +1,4 @@
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 import TxCard from '@/components/tx-flow/common/TxCard'
 import ErrorMessage from '@/components/tx/ErrorMessage'

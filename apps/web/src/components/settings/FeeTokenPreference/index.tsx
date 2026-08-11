@@ -1,10 +1,16 @@
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
-import { Label } from '@/components/ui/label'
-import { Alert, AlertAction, AlertDescription } from '@/components/ui/alert'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@safe-global/design-system/components/button'
+import { Spinner } from '@safe-global/design-system/components/spinner'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Label } from '@safe-global/design-system/components/label'
+import { Alert, AlertAction, AlertDescription } from '@safe-global/design-system/components/alert'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@safe-global/design-system/components/select'
 import { XIcon } from 'lucide-react'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'

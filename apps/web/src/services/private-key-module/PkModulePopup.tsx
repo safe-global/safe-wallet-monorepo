@@ -1,8 +1,8 @@
 import type { FormEvent } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Field, FieldLabel } from '@/components/ui/field'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/design-system/components/button'
+import { Input } from '@safe-global/design-system/components/input'
+import { Field, FieldLabel } from '@safe-global/design-system/components/field'
+import { Typography } from '@safe-global/design-system/components/typography'
 import ModalDialog from '@/components/common/ModalDialog'
 import pkStore from './pk-popup-store'
 const { useStore, setStore } = pkStore

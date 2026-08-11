@@ -10,10 +10,10 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/surveys'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
-import OnboardingFooter from '@/components/common/OnboardingFooter'
-import { Spinner } from '@/components/ui/spinner'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Typography } from '@/components/ui/typography'
+import OnboardingFooter from '@safe-global/design-system/presets/OnboardingFooter'
+import { Spinner } from '@safe-global/design-system/components/spinner'
+import { Alert, AlertDescription } from '@safe-global/design-system/components/alert'
+import { Typography } from '@safe-global/design-system/components/typography'
 import {
   OnboardingLayout,
   StepCounter,

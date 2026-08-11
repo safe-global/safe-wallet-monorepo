@@ -1,6 +1,6 @@
 import NextLink from 'next/link'
-import { Typography } from '@/components/ui/typography'
-import { Link } from '@/components/ui/link'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Link } from '@safe-global/design-system/components/link'
 import semverSatisfies from 'semver/functions/satisfies'
 import type { ReactElement } from 'react'
 import classnames from 'classnames'

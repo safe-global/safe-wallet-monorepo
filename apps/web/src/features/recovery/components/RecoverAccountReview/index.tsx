@@ -1,9 +1,9 @@
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { Separator } from '@/components/ui/separator'
-import { Spinner } from '@/components/ui/spinner'
+import { Button } from '@safe-global/design-system/components/button'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Separator } from '@safe-global/design-system/components/separator'
+import { Spinner } from '@safe-global/design-system/components/spinner'
 import { useContext, useEffect, useState } from 'react'
 import type { ReactElement } from 'react'
 

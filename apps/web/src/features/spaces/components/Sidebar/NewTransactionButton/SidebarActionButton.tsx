@@ -6,7 +6,7 @@ import { OVERVIEW_EVENTS, trackEvent, MixpanelEventParams } from '@/services/ana
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
 import { NewTxFlow } from '@/components/tx-flow/flows'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/design-system/components/button'
 
 export const SidebarActionButton = (): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)

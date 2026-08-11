@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { ChevronRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/utils/cn'
+import { Button } from '@safe-global/design-system/components/button'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 interface WidgetViewAllProps {
   /** Optional overflow count (items beyond those shown) rendered as a `+N` pill before the link. */

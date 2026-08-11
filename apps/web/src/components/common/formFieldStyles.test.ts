@@ -1,4 +1,4 @@
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 import { largeFormFieldSurfaceClassName } from './formFieldStyles'
 
 // These constants are merged over a primitive's own classes with tailwind-merge, so anything in the

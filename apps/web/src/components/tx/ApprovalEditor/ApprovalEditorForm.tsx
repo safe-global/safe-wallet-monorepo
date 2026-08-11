@@ -1,4 +1,4 @@
-import { Separator } from '@/components/ui/separator'
+import { Separator } from '@safe-global/design-system/components/separator'
 import { FormProvider, useForm } from 'react-hook-form'
 import css from './styles.module.css'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'

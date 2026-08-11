@@ -1,9 +1,9 @@
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { getFilledAmount, getFilledPercentage } from '@/features/swap/helpers/utils'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
-import { Progress } from '@/components/ui/progress'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Progress } from '@safe-global/design-system/components/progress'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 const SwapProgress = ({ order }: { order: OrderTransactionInfo }) => {
   const filledPercentage = getFilledPercentage(order)

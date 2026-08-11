@@ -1,6 +1,6 @@
 import { type ReactElement, useEffect, useRef, useState } from 'react'
 import { CircleCheck } from 'lucide-react'
-import { Popover, PopoverContent } from '@/components/ui/popover'
+import { Popover, PopoverContent } from '@safe-global/design-system/components/popover'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 
 /**

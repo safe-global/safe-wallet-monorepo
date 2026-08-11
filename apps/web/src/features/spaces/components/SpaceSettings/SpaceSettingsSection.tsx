@@ -1,7 +1,7 @@
 import type { ComponentProps } from 'react'
-import { Card } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Card } from '@safe-global/design-system/components/card'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 const SpaceSettingsSection = ({ className, ...props }: ComponentProps<'section'>) => {
   // eslint-disable-next-line no-restricted-syntax -- SpaceSettingsSection preset owns its 24px padding + 16px radius (rounded-2xl); no matching Card variants

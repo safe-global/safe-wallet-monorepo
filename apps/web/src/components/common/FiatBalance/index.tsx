@@ -1,7 +1,7 @@
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 /** Renders a raw fiat amount formatted in the user's selected currency. Shared across features. */
 const FiatBalance = ({ value }: { value: string | number | undefined }) => {

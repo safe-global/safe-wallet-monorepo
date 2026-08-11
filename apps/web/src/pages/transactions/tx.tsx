@@ -2,7 +2,7 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 
 import SingleTx from '@/components/transactions/SingleTx'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { BRAND_NAME } from '@/config/constants'
 
 const SingleTransaction: NextPage = () => {

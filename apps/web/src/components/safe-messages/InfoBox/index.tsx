@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react'
 import { type ReactElement, type ReactNode } from 'react'
-import { Typography } from '@/components/ui/typography'
-import { Separator } from '@/components/ui/separator'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Separator } from '@safe-global/design-system/components/separator'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import css from './styles.module.css'
 

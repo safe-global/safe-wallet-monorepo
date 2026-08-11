@@ -2,7 +2,7 @@ import { type ReactElement, useCallback, useEffect, useRef, useState } from 'rea
 import type { ScanContext, ScanResult } from '@/features/security/types'
 import { useSecurityScan } from '@/features/security'
 import { useChain } from '@/hooks/useChains'
-import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { Sheet, SheetContent } from '@safe-global/design-system/components/sheet'
 import { HnSignupFlow } from '@/features/hypernative'
 import SecurityDrawerHeader from './SecurityDrawerHeader'
 import SecurityDrawerContent from './SecurityDrawerContent'

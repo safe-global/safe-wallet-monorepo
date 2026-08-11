@@ -1,5 +1,5 @@
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 /**
  * TotalValueElement

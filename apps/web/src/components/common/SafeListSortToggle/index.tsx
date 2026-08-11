@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react'
 import { ArrowDownUp, ChevronDown } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/design-system/components/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,10 +9,10 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@safe-global/design-system/components/dropdown-menu'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { OrderByOption, selectOrderByPreference, setOrderByPreference } from '@/store/orderByPreferenceSlice'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 const labels: Record<OrderByOption, string> = {
   [OrderByOption.NAME]: 'Name',

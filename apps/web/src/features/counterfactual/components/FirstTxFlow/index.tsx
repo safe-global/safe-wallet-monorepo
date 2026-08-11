@@ -5,7 +5,7 @@ import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { useRouter } from 'next/router'
 import { useContext } from 'react'
 import ModalDialog from '@/components/common/ModalDialog'
-import ChoiceButton from '@/components/common/ChoiceButton'
+import ChoiceButton from '@safe-global/design-system/presets/ChoiceButton'
 import { TxModalContext } from '@/components/tx-flow'
 import { AddOwnerFlow, TokenTransferFlow, UpsertRecoveryFlow } from '@/components/tx-flow/flows'
 const ActivateAccountFlow = dynamic(() => import('../ActivateAccountFlow'))

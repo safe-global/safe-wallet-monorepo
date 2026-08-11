@@ -1,4 +1,4 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 
 const MaliciousTxWarning = ({ withTooltip = true }: { withTooltip?: boolean }) => {

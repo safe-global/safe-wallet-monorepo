@@ -1,5 +1,5 @@
 import React, { type ReactElement } from 'react'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Checkbox } from '@safe-global/design-system/components/checkbox'
 import SendButton from './SendButton'
 import { SwapFeature } from '@/features/swap'
 import { useLoadFeature } from '@/features/__core__'

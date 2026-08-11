@@ -1,4 +1,4 @@
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
 
 const WalletIcon = ({
   provider,

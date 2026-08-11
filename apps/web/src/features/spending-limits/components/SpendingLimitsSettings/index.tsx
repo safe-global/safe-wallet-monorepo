@@ -1,6 +1,6 @@
 import { useContext } from 'react'
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Button } from '@safe-global/design-system/components/button'
 import AddIcon from '@/public/images/common/add.svg'
 import { NoSpendingLimits } from './NoSpendingLimits'
 import { SpendingLimitsTable } from './SpendingLimitsTable'

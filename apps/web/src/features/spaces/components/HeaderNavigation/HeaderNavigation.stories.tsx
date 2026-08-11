@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
-import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
-import { Typography } from '@/components/ui/typography'
+import { ShadcnProvider } from '@safe-global/design-system/components/ShadcnProvider'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { HeaderNavigation } from './HeaderNavigation'
 
 /**

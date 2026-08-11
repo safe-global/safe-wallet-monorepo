@@ -46,6 +46,8 @@
         "apps/web-tanstack/src/**",
         "apps/web-tanstack/plugins/**",
         "apps/web-tanstack/package.json",
+        "packages/design-system/src/**",
+        "packages/design-system/package.json",
         "packages/store/src/**",
         "packages/store/package.json",
         "packages/theme/src/**",

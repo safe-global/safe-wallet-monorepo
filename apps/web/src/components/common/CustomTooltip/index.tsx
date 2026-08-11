@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 
 export type CustomTooltipProps = {
   title: ReactNode

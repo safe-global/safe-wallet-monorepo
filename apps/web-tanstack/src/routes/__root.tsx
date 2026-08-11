@@ -51,8 +51,8 @@ import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { TargetedOutreachFeature } from '@/features/targeted-outreach'
 import { useLocation, useSearch } from '@tanstack/react-router'
 
+// globals.css imports @safe-global/design-system/styles.css (brand vars + semantic tokens).
 import '@/styles/globals.css'
-import '@/styles/shadcn.css'
 
 // Initialize observability before React mounts — matches apps/web/src/pages/_app.tsx:102.
 if (typeof window !== 'undefined') {

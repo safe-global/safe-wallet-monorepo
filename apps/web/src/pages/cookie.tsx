@@ -7,7 +7,14 @@ import SafeCookiePolicy from '@/markdown/cookie/cookie.md'
 import type { MDXComponents } from 'mdx/types'
 import CustomLink from '@/components/common/CustomLink'
 import MarkdownContent from '@/components/common/MarkdownContent'
-import { Table as ShadcnTable, TableHeader, TableBody, TableRow, TableCell, TableHead } from '@/components/ui/table'
+import {
+  Table as ShadcnTable,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableHead,
+} from '@safe-global/design-system/components/table'
 
 const Table = (props: ComponentProps<typeof ShadcnTable>) => (
   <ShadcnTable {...props} className="border border-[black]" />

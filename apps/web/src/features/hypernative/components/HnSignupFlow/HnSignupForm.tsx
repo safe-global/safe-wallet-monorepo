@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/design-system/components/button'
 import HubSpotForm from '../HubSpotForm/HubSpotForm'
 import HnSignupLayout from './HnSignupLayout'
 import css from './styles.module.css'

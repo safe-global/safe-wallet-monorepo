@@ -1,6 +1,6 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Separator } from '@/components/ui/separator'
-import { Typography } from '@/components/ui/typography'
+import { Separator } from '@safe-global/design-system/components/separator'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 import React from 'react'
 import commonCss from '@/components/tx-flow/common/styles.module.css'

@@ -5,7 +5,7 @@ import { Builder } from '@/tests/Builder'
 import { faker } from '@faker-js/faker'
 
 const mockUseIsMobile = jest.fn(() => false)
-jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
+jest.mock('@safe-global/design-system/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 
 jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
 jest.mock('@/components/common/EthHashInfo', () => {

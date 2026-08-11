@@ -1,6 +1,6 @@
 import { ArrowDownLeft, Repeat, ArrowUpRight, SquareDashedBottomCode } from 'lucide-react'
 
-import { ActionBar, ActionButton } from '@/components/common/ActionBar'
+import { ActionBar, ActionButton } from '@safe-global/design-system/presets/ActionBar'
 
 /**
  * HeaderActions

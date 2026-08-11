@@ -10,9 +10,9 @@ import css from './styles.module.css'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { useContext } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Button } from '@safe-global/design-system/components/button'
+import { Separator } from '@safe-global/design-system/components/separator'
 
 const RecoverySteps = [
   {

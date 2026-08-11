@@ -8,7 +8,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarSeparator,
-} from '@/components/ui/sidebar'
+} from '@safe-global/design-system/components/sidebar'
 import css from '../../styles.module.css'
 import type { SpaceSelectorProps, ResolvedSidebarNavItem, ResolvedSidebarGroup } from '../../types'
 import { NavItem } from '../NavItem'

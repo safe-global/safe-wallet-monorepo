@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
+import { Button } from '@safe-global/design-system/components/button'
+import { Spinner } from '@safe-global/design-system/components/spinner'
 import NameInput from '@/components/common/NameInput'
 import { largeFormFieldRowClassName } from '@/components/common/formFieldStyles'
 import AddressBookInput from '@/components/common/AddressBookInput'

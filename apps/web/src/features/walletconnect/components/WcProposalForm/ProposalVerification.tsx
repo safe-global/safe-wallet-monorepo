@@ -1,5 +1,5 @@
 import type { WalletKitTypes } from '@reown/walletkit'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription } from '@safe-global/design-system/components/alert'
 import AlertIcon from '@/public/images/notifications/alert.svg'
 import type { ReactElement } from 'react'
 import { getPeerName } from '../../services/utils'

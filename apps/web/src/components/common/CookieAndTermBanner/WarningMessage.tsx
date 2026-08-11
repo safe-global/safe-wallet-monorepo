@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 
 const WarningMessage = ({ message }: { message: string }): ReactElement => {

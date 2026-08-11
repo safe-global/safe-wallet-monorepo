@@ -1,6 +1,6 @@
 import TxCard from '@/components/tx-flow/common/TxCard'
-import { Typography } from '@/components/ui/typography'
-import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Spinner } from '@safe-global/design-system/components/spinner'
 import ExternalLink from '@/components/common/ExternalLink'
 import { type PropsWithChildren, useContext } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'

@@ -10,7 +10,7 @@ import type { Notification } from '@/store/notificationsSlice'
 type NotificationVariant = Notification['variant']
 import UnreadBadge from '@/components/common/UnreadBadge'
 import { formatTimeInWords } from '@safe-global/utils/utils/date'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 import css from './styles.module.css'
 import classnames from 'classnames'

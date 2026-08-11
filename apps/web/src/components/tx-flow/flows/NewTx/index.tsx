@@ -1,6 +1,6 @@
 import { useCallback, useContext } from 'react'
 import { MakeASwapButton, SendTokensButton, TxBuilderButton } from '@/components/tx-flow/common/TxButton'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { TxModalContext } from '../../'
 import TokenTransferFlow from '../TokenTransfer'
 import { ProgressBar } from '@/components/common/ProgressBar'

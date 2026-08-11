@@ -1,6 +1,6 @@
 import type { ComponentProps, Ref } from 'react'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 /**
  * Full address with emphasised head and tail. The middle segment ellipsizes first when space is

@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 
-import { Spinner } from '@/components/ui/spinner'
+import { Spinner } from '@safe-global/design-system/components/spinner'
 import ClockIcon from '@/public/images/common/clock.svg'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
 import { RecoveryEvent } from '../../services/recoveryEvents'

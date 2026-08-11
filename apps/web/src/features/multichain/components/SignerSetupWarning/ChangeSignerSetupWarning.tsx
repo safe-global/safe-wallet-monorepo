@@ -1,4 +1,4 @@
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription } from '@safe-global/design-system/components/alert'
 import { useIsMultichainSafe } from '../../hooks/useIsMultichainSafe'
 import { useCurrentChain } from '@/hooks/useChains'
 

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent } from '@safe-global/design-system/components/card'
 import { DelegateCallWarning, ThresholdWarning, UnsignedWarning } from './index'
 import { Operation } from '@safe-global/store/gateway/types'
 

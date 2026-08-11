@@ -1,7 +1,7 @@
 import Track from '@/components/common/Track'
 import { CreateSafeOnNewChain } from '@/features/multichain'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/design-system/components/button'
 import { useState } from 'react'
 import PlusIcon from '@/public/images/common/plus.svg'
 

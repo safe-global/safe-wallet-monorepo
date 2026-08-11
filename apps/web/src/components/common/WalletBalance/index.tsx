@@ -1,5 +1,5 @@
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
 import { useCurrentChain } from '@/hooks/useChains'
 
 const WalletBalance = ({ balance }: { balance: string | bigint | undefined }) => {

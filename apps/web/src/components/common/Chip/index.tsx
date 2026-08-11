@@ -1,4 +1,4 @@
-import { Chip as ShadcnChip } from '@/components/ui/chip'
+import { Chip as ShadcnChip } from '@safe-global/design-system/components/chip'
 
 type ChipSx = {
   backgroundColor?: string

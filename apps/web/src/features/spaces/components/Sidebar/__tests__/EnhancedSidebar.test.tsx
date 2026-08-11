@@ -4,7 +4,7 @@ import { EnhancedSidebar } from '../index'
 import type { SpaceItem } from '../types'
 
 // Mock the sidebar components
-jest.mock('@/components/ui/sidebar', () => ({
+jest.mock('@safe-global/design-system/components/sidebar', () => ({
   Sidebar: ({ children, className }: { children: ReactNode; className?: string }) => (
     <div className={className}>{children}</div>
   ),

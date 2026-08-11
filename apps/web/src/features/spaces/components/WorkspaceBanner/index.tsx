@@ -1,8 +1,8 @@
 import { ArrowUpRight, Sparkles } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
-import { Link } from '@/components/ui/link'
-import { cn } from '@/utils/cn'
+import { Badge } from '@safe-global/design-system/components/badge'
+import { Card } from '@safe-global/design-system/components/card'
+import { Link } from '@safe-global/design-system/components/link'
+import { cn } from '@safe-global/design-system/utils/cn'
 import { WORKSPACE_ANNOUNCEMENT_URL } from '@/config/constants'
 import css from './styles.module.css'
 

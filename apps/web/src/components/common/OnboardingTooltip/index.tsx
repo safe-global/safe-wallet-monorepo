@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactElement } from 'react'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/design-system/components/tooltip'
+import { Button } from '@safe-global/design-system/components/button'
 import InfoIcon from '@/public/images/notifications/info.svg'
 
 type Placement =

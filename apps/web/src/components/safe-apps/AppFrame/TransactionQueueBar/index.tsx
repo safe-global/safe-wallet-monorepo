@@ -2,9 +2,14 @@ import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/t
 import type { Dispatch, ReactElement, SetStateAction } from 'react'
 import { X } from 'lucide-react'
 
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@safe-global/design-system/components/accordion'
+import { Button } from '@safe-global/design-system/components/button'
+import { Typography } from '@safe-global/design-system/components/typography'
 import useTxQueue from '@/hooks/useTxQueue'
 import PaginatedTxns from '@/components/common/PaginatedTxns'
 import styles from './styles.module.css'

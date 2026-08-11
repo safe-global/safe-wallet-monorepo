@@ -1,8 +1,13 @@
 import type { ReactElement, SyntheticEvent } from 'react'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Link } from '@/components/ui/link'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/design-system/components/accordion'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
+import { Link } from '@safe-global/design-system/components/link'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import { useCurrentChain } from '@/hooks/useChains'

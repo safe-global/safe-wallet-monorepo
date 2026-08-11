@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { SimilarityGroupContainer } from './SimilarityGroupContainer'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 /**
  * `SimilarityGroupContainer` wraps a set of nested Safes whose addresses look alike,

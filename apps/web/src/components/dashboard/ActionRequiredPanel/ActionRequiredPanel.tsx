@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, type ReactElement, type ReactNode } from 'react'
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
-import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Button } from '@safe-global/design-system/components/button'
+import { Collapsible, CollapsibleContent } from '@safe-global/design-system/components/collapsible'
 import { ChevronDown } from 'lucide-react'
 
 import { SidebarListItemCounter } from '@/components/common/SidebarList'

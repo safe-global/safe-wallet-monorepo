@@ -1,9 +1,15 @@
 import { useId } from 'react'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { Label } from '@/components/ui/label'
-import { Typography } from '@/components/ui/typography'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { cn } from '@/utils/cn'
+import { Label } from '@safe-global/design-system/components/label'
+import { Typography } from '@safe-global/design-system/components/typography'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@safe-global/design-system/components/select'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 import css from './styles.module.css'
 

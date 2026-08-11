@@ -1,7 +1,12 @@
 import { useContext, useState } from 'react'
 import type { ComponentProps, ReactElement } from 'react'
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/design-system/components/accordion'
 import RecoverySummary from '../RecoverySummary'
 import RecoveryDetails from '../RecoveryDetails'
 import { RecoveryListItemContext, RecoveryListItemProvider } from './RecoveryListItemContext'

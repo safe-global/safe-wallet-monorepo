@@ -1,6 +1,6 @@
 import { shortenText } from '@safe-global/utils/utils/formatters'
-import { Link } from '@/components/ui/link'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Link } from '@safe-global/design-system/components/link'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 import type { ReactElement, SyntheticEvent } from 'react'
 import { Fragment, useState } from 'react'
 import css from './styles.module.css'

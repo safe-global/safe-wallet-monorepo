@@ -1,6 +1,6 @@
 import type { ComponentProps, PropsWithChildren, ReactElement } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import LockIcon from '@/public/images/common/lock-small.svg'
 
 /**

@@ -14,6 +14,8 @@ module.exports = {
   },
   moduleNameMapper: {
     ...preset.moduleNameMapper,
+    // Workspace packages consumed as source.
+    '^@safe-global/design-system/(.*)$': '<rootDir>/../../packages/design-system/src/$1',
     // App path aliases — mirror tsconfig.json "paths". This app reuses apps/web source.
     '^@/public/(.*)$': '<rootDir>/../web/public/$1',
     '^@/storybook/(.*)$': '<rootDir>/../web/.storybook/$1',

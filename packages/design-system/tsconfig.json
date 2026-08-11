@@ -1,0 +1,31 @@
+{
+  "extends": "../../config/tsconfig/confs/base.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    // `Bundler` (not the base's `node`) so TypeScript reads the `exports` map of
+    // subpath-only deps — `@base-ui/react/button`, `@base-ui/react/menu` and friends
+    // are unresolvable under node10 resolution.
+    "moduleResolution": "Bundler",
+    "module": "ESNext",
+    "noEmit": true,
+    // The shared base pins `types` to node + jest, which excludes jest-dom's ambient matcher
+    // declarations — without this every `toHaveClass`/`toBeInTheDocument` in the colocated
+    // component tests is a type error.
+    "types": ["node", "jest", "@testing-library/jest-dom"],
+    "paths": {
+      "@safe-global/design-system/*": ["./src/*"],
+      "@safe-global/theme/*": ["../../packages/theme/src/*"],
+      "@safe-global/utils/*": ["../../packages/utils/src/*"],
+      "@safe-global/test/*": ["../../config/test/*"]
+    }
+  },
+  "include": [
+    "src/**/*.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "eslint/**/*.ts",
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx"
+  ],
+  "exclude": ["node_modules", "storybook-static"]
+}

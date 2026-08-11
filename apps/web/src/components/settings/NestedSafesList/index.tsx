@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Button } from '@safe-global/design-system/components/button'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 import { useContext, useMemo, useState } from 'react'
 import type { ReactElement } from 'react'
 

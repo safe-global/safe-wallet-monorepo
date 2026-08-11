@@ -21,6 +21,7 @@
       "@/public/*": ["../web/public/*"],
       "@/storybook/*": ["../web/.storybook/*"],
       "src/*": ["../web/src/*"],
+      "@safe-global/design-system/*": ["../../packages/design-system/src/*"],
       "@safe-global/theme/*": ["../../packages/theme/src/*"],
       "@safe-global/store/*": ["../../packages/store/src/*"],
       "@safe-global/utils/*": ["../../packages/utils/src/*"],

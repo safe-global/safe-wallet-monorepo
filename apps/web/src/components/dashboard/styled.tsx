@@ -5,10 +5,10 @@
 import type { ComponentProps, ReactElement, ReactNode } from 'react'
 import NextLink from 'next/link'
 import type { LinkProps } from 'next/link'
-import { Link } from '@/components/ui/link'
-import { Typography } from '@/components/ui/typography'
+import { Link } from '@safe-global/design-system/components/link'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { ChevronRight } from 'lucide-react'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 export const WidgetContainer = ({ className, ...props }: ComponentProps<'section'>) => (
   <section className={cn('flex h-full flex-col', className)} {...props} />

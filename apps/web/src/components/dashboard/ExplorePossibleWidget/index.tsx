@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/design-system/components/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useRef, useEffect, useMemo } from 'react'

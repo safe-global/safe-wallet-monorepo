@@ -25,12 +25,18 @@ import { sanitizeName } from '@safe-global/utils/validation/names'
 import { addressIsNotCurrentSafe, addressIsNotOwner } from '@safe-global/utils/utils/validation'
 import { isEthSignWallet } from '@/utils/wallets'
 import { XIcon } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { Alert, AlertDescription } from '@safe-global/design-system/components/alert'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@safe-global/design-system/components/dialog'
+import { Button } from '@safe-global/design-system/components/button'
+import { Separator } from '@safe-global/design-system/components/separator'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
+import { Typography } from '@safe-global/design-system/components/typography'
 import {
   useDelegatesPostDelegateV1Mutation,
   useDelegatesPostDelegateV2Mutation,

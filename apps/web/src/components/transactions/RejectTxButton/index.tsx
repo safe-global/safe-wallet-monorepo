@@ -1,5 +1,5 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/design-system/components/button'
 
 import type { ReactElement } from 'react'
 import { useContext } from 'react'

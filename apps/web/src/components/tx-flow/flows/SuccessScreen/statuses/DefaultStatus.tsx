@@ -1,7 +1,7 @@
 import classNames from 'classnames'
 import css from '@/components/tx-flow/flows/SuccessScreen/styles.module.css'
 import { isTimeoutError } from '@/utils/ethers-utils'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 const TRANSACTION_FAILED = 'Transaction failed'
 const NESTED_SAFE_SUCCESSFUL = 'Nested Safe was created'

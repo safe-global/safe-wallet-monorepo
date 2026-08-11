@@ -1,9 +1,9 @@
 import { useMemo, type ReactElement } from 'react'
 import { Plus } from 'lucide-react'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import OnboardingFooter from '@/components/common/OnboardingFooter'
-import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import OnboardingFooter from '@safe-global/design-system/presets/OnboardingFooter'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Alert, AlertDescription } from '@safe-global/design-system/components/alert'
 import {
   OnboardingLayout,
   StepCounter,

@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Typography } from '@/components/ui/typography'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@safe-global/design-system/components/dropdown-menu'
+import { Typography } from '@safe-global/design-system/components/typography'
 import AllNetworksSection from './AllNetworksSection'
 import ChainLogo from './ChainLogo'
 import type { ChainInfo } from '@/features/spaces/types'

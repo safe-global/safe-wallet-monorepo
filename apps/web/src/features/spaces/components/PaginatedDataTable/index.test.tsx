@@ -2,7 +2,7 @@ import { act, render, screen, fireEvent } from '@testing-library/react'
 import PaginatedDataTable, { type DataTableColumn } from './index'
 
 const mockUseIsMobile = jest.fn(() => false)
-jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
+jest.mock('@safe-global/design-system/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 
 const columns: DataTableColumn<string>[] = [{ id: 'value', header: 'Value', cell: (row) => row }]
 

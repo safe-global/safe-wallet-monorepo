@@ -12,7 +12,7 @@ jest.mock('@/components/common/SpaceSafeBar/hooks/useSpaceBackLink', () => ({
   useSpaceBackLink: () => ({ handleBackToSpace: mockHandleBackToSpace }),
 }))
 
-jest.mock('@/components/ui/dialog', () => ({
+jest.mock('@safe-global/design-system/components/dialog', () => ({
   Dialog: ({ children }: { children: ReactNode }) => <div data-testid="dialog-root">{children}</div>,
   DialogTrigger: ({ children, render: renderProp }: { children: ReactNode; render?: ReactNode }) => (
     <div data-testid="dialog-trigger">
@@ -45,7 +45,7 @@ jest.mock('@/utils/colors', () => ({
   getDeterministicColor: (name: string) => `color-${name}`,
 }))
 
-jest.mock('@/components/ui/sidebar', () => ({
+jest.mock('@safe-global/design-system/components/sidebar', () => ({
   SidebarMenuButton: ({
     children,
     isActive,
@@ -79,7 +79,7 @@ jest.mock('@/components/ui/sidebar', () => ({
   ),
 }))
 
-jest.mock('@/components/ui/avatar', () => ({
+jest.mock('@safe-global/design-system/components/avatar', () => ({
   Avatar: ({ children, className }: { children: ReactNode; className?: string }) => (
     <div className={className}>{children}</div>
   ),

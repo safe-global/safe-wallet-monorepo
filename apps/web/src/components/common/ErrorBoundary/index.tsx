@@ -1,7 +1,7 @@
 import NextLink from 'next/link'
 
-import { Typography } from '@/components/ui/typography'
-import { Link } from '@/components/ui/link'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Link } from '@safe-global/design-system/components/link'
 import { IS_PRODUCTION } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
 import WarningIcon from '@/public/images/notifications/warning.svg'

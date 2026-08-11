@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import { X } from 'lucide-react'
 import Identicon from '@/components/common/Identicon'
 import CopyButton from '@/components/common/CopyButton'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
 type SecurityDrawerHeaderProps = {

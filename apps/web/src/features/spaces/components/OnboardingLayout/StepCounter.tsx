@@ -1,4 +1,4 @@
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 interface StepCounterProps {
   currentStep: number

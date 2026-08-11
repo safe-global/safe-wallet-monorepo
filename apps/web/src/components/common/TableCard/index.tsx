@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 import cardTableCss from '@/components/common/EnhancedTable/cardTable.module.css'
 
 /**

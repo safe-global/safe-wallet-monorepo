@@ -15,11 +15,17 @@ allowed-tools:
   - Grep
 ---
 
+> **Direction of travel:** Storybook is now the source of truth for the Safe design system, not Figma
+> (see `packages/design-system/AGENTS.md`). This skill still exists for designs that only live in
+> Figma today — when the component already exists in the design system, use it as-is via
+> `/design-system.use` rather than re-deriving styling from a Figma frame, and take variant/token
+> decisions to the design-system Storybook.
+
 # Figma to Code Implementation
 
 Implement the Figma design at **$ARGUMENTS** using shadcn/ui components.
 
-**Note:** All shadcn/ui components are already installed and available at `apps/web/src/components/ui/`. Import them directly (e.g., `import { Button } from '@/components/ui/button'`). Avoid other components.
+**Note:** All shadcn/ui components are already installed and available at `packages/design-system/src/components/`. Import them directly (e.g., `import { Button } from '@safe-global/design-system/components/button'`). Avoid other components.
 
 ## Step 1: Parse Figma URL
 
@@ -84,13 +90,13 @@ For shadcn Figma libraries, extract props from **attributes only**:
 2. CSS variable names → variant (`--general/secondary` → `variant="secondary"`)
 3. **Omitted = default**
 
-**Typography:** NEVER use hardcoded Tailwind for text. Always use `<Typography variant="…" />` from `@/components/ui/typography`. Map Figma variable names (e.g. `heading 2`, `paragraph-bold`) to Typography variants (e.g. `h2`, `paragraph-bold`).
+**Typography:** NEVER use hardcoded Tailwind for text. Always use `<Typography variant="…" />` from `@safe-global/design-system/components/typography`. Map Figma variable names (e.g. `heading 2`, `paragraph-bold`) to Typography variants (e.g. `h2`, `paragraph-bold`).
 
 ## Step 5: Build the Component
 
 ```tsx
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@safe-global/design-system/components/button'
+import { Card, CardContent } from '@safe-global/design-system/components/card'
 
 type MyComponentProps = {
   // typed props
@@ -173,7 +179,7 @@ yarn workspace @safe-global/web storybook
 
 ## Project Notes
 
-- **Components Path**: `apps/web/src/components/ui/`
+- **Components Path**: `packages/design-system/src/components/`
 - **Utility Path**: `apps/web/src/utils/cn.ts`
 - **Icon Library**: `lucide-react`
 

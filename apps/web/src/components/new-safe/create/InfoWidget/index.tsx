@@ -1,8 +1,13 @@
 import { type ReactElement, useRef } from 'react'
 import LightbulbIcon from '@/public/images/common/lightbulb.svg'
-import { Card } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
+import { Card } from '@safe-global/design-system/components/card'
+import { Typography } from '@safe-global/design-system/components/typography'
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@safe-global/design-system/components/accordion'
 import type { CreateSafeInfoVariant } from '@/components/new-safe/create/CreateSafeInfos'
 import css from 'src/components/new-safe/create/InfoWidget/styles.module.css'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'

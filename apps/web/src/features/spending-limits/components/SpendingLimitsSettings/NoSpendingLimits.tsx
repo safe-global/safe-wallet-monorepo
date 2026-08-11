@@ -1,4 +1,4 @@
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 import BeneficiaryIcon from '@/public/images/settings/spending-limit/beneficiary.svg'
 import AssetAmountIcon from '@/public/images/settings/spending-limit/asset-amount.svg'

@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom'
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 import { reorderByKey } from '@/utils/reorder'
 import DragHandle from './DragHandle'
 import SafeItem from './SafeItem'

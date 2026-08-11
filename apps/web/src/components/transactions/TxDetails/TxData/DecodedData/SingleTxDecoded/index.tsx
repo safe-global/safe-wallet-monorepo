@@ -1,13 +1,18 @@
 import type { MultiSend, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { SyntheticEvent } from 'react'
 import { isEmptyHexData } from '@/utils/hex'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Card } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/design-system/components/accordion'
+import { Card } from '@safe-global/design-system/components/card'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { Code } from 'lucide-react'
 import css from './styles.module.css'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getSafeToL2MigrationDeployment } from '@safe-global/safe-deployments'
 import { useCurrentChain } from '@/hooks/useChains'

@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import WalletInfo from '@/components/common/WalletInfo'
-import { Popover, PopoverContent } from '@/components/ui/popover'
+import { Popover, PopoverContent } from '@safe-global/design-system/components/popover'
 
 type WalletPopoverProps = {
   wallet: ConnectedWallet

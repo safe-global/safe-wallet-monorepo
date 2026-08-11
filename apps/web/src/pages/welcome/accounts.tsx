@@ -6,7 +6,7 @@ import { MyAccountsFeature } from '@/features/myAccounts'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { BRAND_NAME, CONFIG_SERVICE_KEY } from '@/config/constants'
-import { Spinner } from '@/components/ui/spinner'
+import { Spinner } from '@safe-global/design-system/components/spinner'
 
 const Accounts: NextPage = () => {
   const { MyAccounts, MyAccountsV2 } = useLoadFeature(MyAccountsFeature)

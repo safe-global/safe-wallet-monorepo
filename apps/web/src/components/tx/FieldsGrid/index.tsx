@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 // Title column sizing: xs auto, lg 170px, xl 25%, min 100px
 export const gridFieldClass = 'min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap'

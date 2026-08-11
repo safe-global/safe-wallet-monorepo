@@ -1,13 +1,13 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { Checkbox } from '@safe-global/design-system/components/checkbox'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/design-system/components/tooltip'
 import { Controller, useFormContext, useWatch } from 'react-hook-form'
 import type { ImportContactsFormValues } from './ImportAddressBookDialog'
 import { getSelectedAddresses, getContactId, validateContactName, getRenameContactTooltip } from '../utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useGetSpaceAddressBook } from '@/features/spaces'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 export type ContactItem = {
   chainId: string

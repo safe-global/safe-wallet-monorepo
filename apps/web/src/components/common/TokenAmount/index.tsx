@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 import { TransferDirection } from '@safe-global/store/gateway/types'
 import css from './styles.module.css'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'

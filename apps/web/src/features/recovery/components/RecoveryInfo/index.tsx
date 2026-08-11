@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 
 const RecoveryInfo = ({ isMalicious }: { isMalicious: boolean }): ReactElement | null => {

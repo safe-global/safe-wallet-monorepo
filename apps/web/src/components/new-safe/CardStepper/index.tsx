@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { lightPalette } from '@safe-global/theme/palettes'
 import css from './styles.module.css'
-import { Card } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
+import { Card } from '@safe-global/design-system/components/card'
+import { Typography } from '@safe-global/design-system/components/typography'
 import type { TxStepperProps } from './useCardStepper'
 import { useCardStepper } from './useCardStepper'
 

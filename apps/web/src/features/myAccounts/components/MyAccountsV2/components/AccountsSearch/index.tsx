@@ -1,6 +1,6 @@
 import { type Dispatch, type SetStateAction, useCallback } from 'react'
 import debounce from 'lodash/debounce'
-import { SearchInput } from '@/components/ui/search-input'
+import { SearchInput } from '@safe-global/design-system/components/search-input'
 
 type AccountsSearchProps = {
   setSearchQuery: Dispatch<SetStateAction<string>>

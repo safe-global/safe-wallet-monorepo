@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { useCurrentChain } from '@/hooks/useChains'
 
 import NavTabs from '@/components/common/NavTabs'

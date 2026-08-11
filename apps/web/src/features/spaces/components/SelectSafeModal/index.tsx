@@ -13,8 +13,8 @@ import {
   selectSafeActionsModalType,
   closeSafeActionsModal,
 } from '@/features/spaces/store'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@safe-global/design-system/components/dialog'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
 import SafeCardReadOnly from '../SafeAccounts/SafeCardReadOnly'
 import SafeSearch from './SafeSearch'
 import useSafeActionMapper from './useSafeActionMapper'

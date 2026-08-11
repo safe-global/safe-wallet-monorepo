@@ -1,8 +1,8 @@
 import { type ReactElement, type ReactNode, useState, useCallback, useRef, useEffect } from 'react'
 import { type LucideIcon, Plus, Check, PenLine, Clock, CircleAlert } from 'lucide-react'
-import { Separator } from '@/components/ui/separator'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { Separator } from '@safe-global/design-system/components/separator'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
 import css from './styles.module.css'

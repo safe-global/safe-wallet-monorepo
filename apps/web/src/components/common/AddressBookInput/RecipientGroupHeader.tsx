@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { Building2, HardDrive, Info } from 'lucide-react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 import css from './styles.module.css'
 

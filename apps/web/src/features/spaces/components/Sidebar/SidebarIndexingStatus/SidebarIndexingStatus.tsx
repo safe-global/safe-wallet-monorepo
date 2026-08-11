@@ -3,7 +3,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { useChainsGetIndexingStatusV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useChainId from '@/hooks/useChainId'
 import { STATUS_PAGE_URL } from '@/config/constants'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/design-system/components/tooltip'
 import StatusIcon from '@/public/images/sidebar/status.svg'
 import css from './styles.module.css'
 

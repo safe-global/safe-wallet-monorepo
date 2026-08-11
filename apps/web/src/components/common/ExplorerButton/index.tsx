@@ -1,8 +1,8 @@
 import type { ReactElement, ComponentType, SyntheticEvent } from 'react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { buttonVariants } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
+import { buttonVariants } from '@safe-global/design-system/components/button'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { cn } from '@safe-global/design-system/utils/cn'
 import LinkIcon from '@/public/images/common/link.svg'
 import Link from 'next/link'
 

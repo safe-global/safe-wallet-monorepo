@@ -1,5 +1,5 @@
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import type { ReactNode, ReactElement } from 'react'
 import CopyButton from '../CopyButton'
 import EthHashInfo from '../EthHashInfo'

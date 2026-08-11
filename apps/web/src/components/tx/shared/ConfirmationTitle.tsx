@@ -1,4 +1,4 @@
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import EditIcon from '@/public/images/common/edit.svg'
 import css from './styles.module.css'
 

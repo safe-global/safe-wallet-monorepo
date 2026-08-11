@@ -2,13 +2,18 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import type { ReactNode, CSSProperties } from 'react'
 import { type ReactElement, memo, useMemo } from 'react'
 import { isNativeTokenTransfer, isTransferTxInfo } from '@/utils/transaction-guards'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
-import { Typography } from '@/components/ui/typography'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/design-system/components/accordion'
+import { Badge } from '@safe-global/design-system/components/badge'
+import { Card } from '@safe-global/design-system/components/card'
+import { Separator } from '@safe-global/design-system/components/separator'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 import HelpTooltip from './HelpTooltip'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import css from './styles.module.css'
@@ -25,7 +30,7 @@ const TX_INFO_LEVEL = {
 }
 
 /** `main` inks the method chip; `border` outlines the panel and uses the palette's `*-light` tier,
- * which is our border weight everywhere else (shadcn.css maps `--color-*-muted` to it). */
+ * which is our border weight everywhere else (the design system maps `--color-*-muted` to it). */
 const TxInfoColors: Record<ColorLevel, { main: string; mainDark?: string; border: string }> = {
   [ColorLevel.info]: { main: 'info.dark', border: 'info.light' },
   [ColorLevel.warning]: { main: 'warning.main', border: 'warning.light' },

@@ -31,7 +31,7 @@ jest.mock('@/hooks/useChains', () => ({
   default: jest.fn(),
 }))
 
-jest.mock('@/components/ui/tooltip', () => ({
+jest.mock('@safe-global/design-system/components/tooltip', () => ({
   __esModule: true,
   Tooltip: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
   TooltipTrigger: ({
@@ -97,7 +97,7 @@ jest.mock('../components/SafeDropdownContainer', () => ({
  * then again with the previous id (e.g. before the router updates selectedItemId).
  * See SafeSelectorDropdown + SpaceSafeBar: selection is driven by the URL async.
  */
-jest.mock('@/components/ui/select', () => {
+jest.mock('@safe-global/design-system/components/select', () => {
   const { flushSync } = jest.requireActual<typeof ReactDomModule>('react-dom')
   const NEW_ID = '2:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
   const PREV_ID = '1:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'

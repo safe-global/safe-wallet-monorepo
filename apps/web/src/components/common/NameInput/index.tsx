@@ -2,9 +2,14 @@ import { type ComponentProps, type ReactNode, useId } from 'react'
 import get from 'lodash/get'
 import { Controller, type FieldError, useFormContext } from 'react-hook-form'
 import { getNameValidationDisplay, sanitizeName, validateName } from '@safe-global/utils/validation/names'
-import { Field, FieldDescription, FieldError as FieldErrorText, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import {
+  Field,
+  FieldDescription,
+  FieldError as FieldErrorText,
+  FieldLabel,
+} from '@safe-global/design-system/components/field'
+import { Input } from '@safe-global/design-system/components/input'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@safe-global/design-system/components/input-group'
 
 type NameInputProps = {
   name: string

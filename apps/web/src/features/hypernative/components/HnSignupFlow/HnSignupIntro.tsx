@@ -1,6 +1,6 @@
 import { CircleCheck } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/design-system/components/button'
+import { Typography } from '@safe-global/design-system/components/typography'
 import HnSignupLayout from './HnSignupLayout'
 import css from './styles.module.css'
 import Track from '@/components/common/Track'

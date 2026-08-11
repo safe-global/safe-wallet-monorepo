@@ -21,6 +21,8 @@
     "verify:web": "node scripts/verify.mjs --workspace=web",
     "verify:changed": "node scripts/verify.mjs --changed",
     "verify:changed:web": "node scripts/verify.mjs --changed --workspace=web",
+    "verify:ds": "node scripts/verify.mjs --workspace=design-system",
+    "verify:changed:ds": "node scripts/verify.mjs --changed --workspace=design-system",
     "knip": "knip",
     "knip:exports:web": "knip --workspace apps/web --exports",
     "postinstall": "husky"

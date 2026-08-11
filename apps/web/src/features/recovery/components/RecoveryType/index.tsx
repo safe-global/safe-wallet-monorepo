@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import RecoveryPlusIcon from '@/public/images/common/recovery-plus.svg'
 import txTypeCss from '@/components/transactions/TxType/styles.module.css'
 import pendingTxCss from '@/components/dashboard/PendingTxs/styles.module.css'

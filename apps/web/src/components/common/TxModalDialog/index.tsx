@@ -2,7 +2,7 @@ import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import classnames from 'classnames'
 import type { ReactElement, ReactNode } from 'react'
 import { X } from 'lucide-react'
-import { usePortalContainer } from '@/components/ui/ShadcnProvider'
+import { usePortalContainer } from '@safe-global/design-system/components/ShadcnProvider'
 import css from './styles.module.css'
 
 type TxModalDialogProps = {

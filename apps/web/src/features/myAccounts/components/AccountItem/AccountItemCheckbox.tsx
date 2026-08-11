@@ -1,4 +1,4 @@
-import { Checkbox } from '@/components/ui/checkbox'
+import { Checkbox } from '@safe-global/design-system/components/checkbox'
 import css from '../AccountItems/styles.module.css'
 
 export interface AccountItemCheckboxProps {

@@ -1,6 +1,6 @@
 import { type ReactElement, memo } from 'react'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
+import { Typography } from '@safe-global/design-system/components/typography'
 import SafeAppCard from '@/components/safe-apps/SafeAppCard'
 import { SafeAppsTag } from '@/config/constants'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'

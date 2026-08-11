@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
+import { Button } from '@safe-global/design-system/components/button'
+import { Separator } from '@safe-global/design-system/components/separator'
 
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { LoadSafeFormData } from '@/components/new-safe/load'

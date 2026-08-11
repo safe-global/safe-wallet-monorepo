@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
 import ExternalLink from '@/components/common/ExternalLink'
-import { Spinner } from '@/components/ui/spinner'
+import { Spinner } from '@safe-global/design-system/components/spinner'
 import PromoBanner from '@/components/common/PromoBanner/PromoBanner'
 import { useOpenSafenetStakingApp } from '@/hooks/useOpenSafenetStakingApp'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'

@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import css from './styles.module.css'
 

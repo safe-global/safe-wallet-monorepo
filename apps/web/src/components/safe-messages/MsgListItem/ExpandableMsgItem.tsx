@@ -1,6 +1,11 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import type { ReactElement } from 'react'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/design-system/components/accordion'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 
 import MsgDetails from '@/components/safe-messages/MsgDetails'

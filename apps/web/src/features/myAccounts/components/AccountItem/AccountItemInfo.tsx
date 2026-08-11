@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { type ContactSource } from '@/hooks/useAllAddressBooks'
 import css from '../AccountItems/styles.module.css'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 export interface AccountItemInfoProps {
   address: string

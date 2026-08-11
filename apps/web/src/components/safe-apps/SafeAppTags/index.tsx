@@ -1,4 +1,4 @@
-import { Chip } from '@/components/ui/chip'
+import { Chip } from '@safe-global/design-system/components/chip'
 
 import { filterInternalCategories } from '@/components/safe-apps/utils'
 import css from './styles.module.css'

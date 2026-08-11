@@ -1,10 +1,10 @@
 import type { ReactElement } from 'react'
 import type { PermissionRequest } from '@safe-global/safe-apps-sdk/dist/types/types/permissions'
 
-import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { Separator } from '@/components/ui/separator'
+import { Dialog, DialogContent } from '@safe-global/design-system/components/dialog'
+import { Button } from '@safe-global/design-system/components/button'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Separator } from '@safe-global/design-system/components/separator'
 import { ModalDialogTitle } from '@/components/common/ModalDialog'
 import { getSafePermissionDisplayValues } from '@/hooks/safe-apps/permissions'
 

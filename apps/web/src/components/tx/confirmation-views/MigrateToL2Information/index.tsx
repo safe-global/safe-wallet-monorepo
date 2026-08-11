@@ -1,4 +1,4 @@
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertTitle, AlertDescription } from '@safe-global/design-system/components/alert'
 import { Info } from 'lucide-react'
 
 export const MigrateToL2Information = ({ variant }: { variant: 'history' | 'queue' }) => {

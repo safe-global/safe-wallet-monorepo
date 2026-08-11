@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/design-system/components/button'
+import { Typography } from '@safe-global/design-system/components/typography'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import css from './styles.module.css'
 

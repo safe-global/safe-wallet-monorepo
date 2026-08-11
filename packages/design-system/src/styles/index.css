@@ -1,0 +1,16 @@
+/**
+ * The design system's stylesheet entry — import this once per app:
+ *
+ *   import '@safe-global/design-system/styles.css'
+ *
+ * Two layers, in order:
+ *   1. brand-vars.css — generated from @safe-global/theme; the `--color-*` brand palette on
+ *      `:root` / `[data-theme='dark']`. Shared with everything else that reads Safe colours.
+ *   2. tokens.css — the semantic token layer scoped to `.shadcn-scope`, the `@theme inline`
+ *      mapping that turns those tokens into Tailwind utilities, and the scoped preflight.
+ *
+ * Anything rendering design-system components must sit inside a `<ShadcnProvider>` (or a
+ * `.shadcn-scope` element) — the tokens are deliberately not defined on `:root`.
+ */
+@import './brand-vars.css';
+@import './tokens.css';

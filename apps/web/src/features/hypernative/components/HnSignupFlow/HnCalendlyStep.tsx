@@ -2,9 +2,9 @@ import { useRef, useState, useEffect } from 'react'
 import HnSignupLayout from './HnSignupLayout'
 import { useCalendly } from '../../hooks/useCalendly'
 import css from './styles.module.css'
-import { Typography } from '@/components/ui/typography'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Button } from '@/components/ui/button'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
+import { Button } from '@safe-global/design-system/components/button'
 import { RotateCw, ExternalLink as OpenInNewIcon } from 'lucide-react'
 
 export type HnCalendlyStepProps = {

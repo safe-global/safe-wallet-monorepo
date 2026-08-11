@@ -1,5 +1,5 @@
 import { AppRoutes } from '@/config/routes'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import Link from 'next/link'
 
 import css from './styles.module.css'

@@ -1,7 +1,7 @@
 import type { ReactElement, ReactNode } from 'react'
 import { useRouter } from 'next/router'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 interface WidgetItemProps {
   label: string | ReactNode

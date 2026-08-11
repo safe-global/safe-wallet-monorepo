@@ -1,10 +1,10 @@
 import { Eye } from 'lucide-react'
 import type { ReactNode } from 'react'
 import FiatValue from '@/components/common/FiatValue'
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
-import { SelectItem } from '@/components/ui/select'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@safe-global/design-system/components/collapsible'
+import { SelectItem } from '@safe-global/design-system/components/select'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/design-system/components/tooltip'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
@@ -14,7 +14,7 @@ import {
   SafeInfoDisplay,
   TOOLTIP_DELAY_MS,
 } from '@/components/common/AccountRow'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 import BalanceDisplay from './BalanceDisplay'
 import RowEndColumn from './RowEndColumn'
 import SafeRowStats from './SafeRowStats'

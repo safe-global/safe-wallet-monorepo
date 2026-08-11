@@ -9,9 +9,9 @@ import { OVERVIEW_EVENTS, trackEvent, WALLET_EVENTS, MixpanelEventParams } from 
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import madProps from '@/utils/mad-props'
 import React, { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
-import SubmitButton from '@/components/common/SubmitButton'
-import { Separator } from '@/components/ui/separator'
-import { Alert } from '@/components/ui/alert'
+import SubmitButton from '@safe-global/design-system/presets/SubmitButton'
+import { Separator } from '@safe-global/design-system/components/separator'
+import { Alert } from '@safe-global/design-system/components/alert'
 import classNames from 'classnames'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'

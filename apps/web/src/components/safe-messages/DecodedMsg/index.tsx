@@ -4,7 +4,7 @@ import { Value } from '@/components/transactions/TxDetails/TxData/DecodedData/Va
 import { isByte } from '@/utils/transaction-guards'
 import { normalizeTypedData } from '@safe-global/utils/utils/web3'
 import { type TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import classNames from 'classnames'
 import { isAddress } from 'ethers'

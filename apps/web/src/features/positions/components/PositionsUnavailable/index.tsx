@@ -1,5 +1,5 @@
 import DefiIcon from '@/public/images/balances/defi.svg'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 // This component is displayed when the positions feature flag is enabled,
 // but the API does not return data from CGW (Client Gateway), or errors out.

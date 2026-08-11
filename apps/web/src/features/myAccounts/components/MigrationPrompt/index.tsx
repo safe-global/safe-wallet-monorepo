@@ -1,5 +1,5 @@
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { Alert, AlertTitle, AlertDescription } from '@safe-global/design-system/components/alert'
+import { Button } from '@safe-global/design-system/components/button'
 
 interface MigrationPromptProps {
   /** Callback when user wants to proceed with selecting safes */

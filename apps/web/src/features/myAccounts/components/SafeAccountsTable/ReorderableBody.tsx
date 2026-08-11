@@ -2,7 +2,7 @@ import { useMemo, useRef, type Dispatch, type ReactNode, type SetStateAction } f
 import partition from 'lodash/partition'
 import { createPortal } from 'react-dom'
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd'
-import { TableBody } from '@/components/ui/table'
+import { TableBody } from '@safe-global/design-system/components/table'
 import tableCss from './styles.module.css'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { reorderByKey } from '@/utils/reorder'

@@ -1,7 +1,7 @@
 import { Check, type LucideIcon } from 'lucide-react'
 import type { SurveyOptionDto } from '@safe-global/store/gateway/AUTO_GENERATED/surveys'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 interface SurveyOptionCardProps {
   option: SurveyOptionDto

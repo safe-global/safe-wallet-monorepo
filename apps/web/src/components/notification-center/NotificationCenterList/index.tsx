@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 
-import { Typography } from '@/components/ui/typography'
-import { List } from '@/components/ui/list'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { List } from '@safe-global/design-system/components/list'
 import type { NotificationState } from '@/store/notificationsSlice'
 import NotificationCenterItem from '@/components/notification-center/NotificationCenterItem'
 import NoNotificationsIcon from '@/public/images/notifications/no-notifications.svg'

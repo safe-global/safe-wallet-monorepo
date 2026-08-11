@@ -1,5 +1,5 @@
 import { InfoIcon } from 'lucide-react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import css from './styles.module.css'
 
 const GasTooHighBanner = () => {

@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
-import { Alert, AlertAction, AlertDescription } from '@/components/ui/alert'
-import { Typography } from '@/components/ui/typography'
+import { Alert, AlertAction, AlertDescription } from '@safe-global/design-system/components/alert'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { useHypernativeOAuth } from '../../hooks/useHypernativeOAuth'
 import ExternalLink from '@/components/common/ExternalLink'
 import AlertIcon from '@/public/images/common/alert.svg'

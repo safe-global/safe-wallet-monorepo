@@ -1,6 +1,11 @@
 import React from 'react'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/design-system/components/accordion'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
 import EnhancedTable, { type EnhancedTableProps } from '@/components/common/EnhancedTable'
 
 const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {

@@ -3,7 +3,7 @@ import { type OrderByOption, selectOrderByPreference, setOrderByPreference } fro
 import debounce from 'lodash/debounce'
 import { type Dispatch, type SetStateAction, useCallback } from 'react'
 import OrderByButton from '../OrderByButton'
-import { SearchInput } from '@/components/ui/search-input'
+import { SearchInput } from '@safe-global/design-system/components/search-input'
 
 const AccountListFilters = ({ setSearchQuery }: { setSearchQuery: Dispatch<SetStateAction<string>> }) => {
   const dispatch = useAppDispatch()

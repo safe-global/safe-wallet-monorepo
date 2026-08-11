@@ -18,10 +18,10 @@ import { SafeTxContext } from '../../SafeTxProvider'
 import useGasPrice from '@/hooks/useGasPrice'
 import { useCurrentChain } from '@/hooks/useChains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Button } from '@safe-global/design-system/components/button'
+import { Separator } from '@safe-global/design-system/components/separator'
+import { Spinner } from '@safe-global/design-system/components/spinner'
 
 type RecoveryAttemptReviewProps = {
   item: RecoveryQueueItem

@@ -22,7 +22,7 @@ jest.mock('@/public/images/sidebar/status.svg', () => ({
   default: ({ className }: { className?: string }) => <svg data-testid="status-icon" className={className} />,
 }))
 
-jest.mock('@/components/ui/tooltip', () => ({
+jest.mock('@safe-global/design-system/components/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({ render: renderProp, children }: { render: React.ReactElement; children: ReactNode }) =>
     isValidElement(renderProp) ? cloneElement(renderProp, undefined, children) : <>{children}</>,

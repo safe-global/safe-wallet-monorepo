@@ -6,7 +6,7 @@ import { join } from 'node:path'
  *
  *   onboard's connect modal   `--onboard-modal-z-index`  (onboard.css)
  *   the WalletConnect QR modal `--wcm-z-index`           (wallets.ts, a JS theme variable)
- *   the private key prompt     `--z-above-onboard`       (shadcn.css)
+ *   the private key prompt     `--z-above-onboard`       (design-system tokens.css)
  *
  * The last two are opened from inside the first, so both have to beat it. Nothing in the type
  * system or the CSS connects them, and getting it wrong is not a cosmetic bug: onboard's
@@ -14,6 +14,7 @@ import { join } from 'node:path'
  * connected. This test is the only link between the three numbers.
  */
 const WEB_SRC = join(__dirname, '..', '..', '..')
+const DESIGN_SYSTEM_STYLES = join(WEB_SRC, '..', '..', '..', 'packages', 'design-system', 'src', 'styles')
 
 const numberFrom = (source: string, pattern: RegExp, label: string): number => {
   const match = source.match(pattern)
@@ -22,11 +23,11 @@ const numberFrom = (source: string, pattern: RegExp, label: string): number => {
 }
 
 const ONBOARD_CSS = readFileSync(join(WEB_SRC, 'styles', 'onboard.css'), 'utf8')
-const SHADCN_CSS = readFileSync(join(WEB_SRC, 'styles', 'shadcn.css'), 'utf8')
+const TOKENS_CSS = readFileSync(join(DESIGN_SYSTEM_STYLES, 'tokens.css'), 'utf8')
 const WALLETS_TS = readFileSync(join(WEB_SRC, 'hooks', 'wallets', 'wallets.ts'), 'utf8')
 
 const onboardModal = numberFrom(ONBOARD_CSS, /--onboard-modal-z-index:\s*(\d+)/, '--onboard-modal-z-index')
-const aboveOnboard = numberFrom(SHADCN_CSS, /--z-above-onboard:\s*(\d+)/, '--z-above-onboard')
+const aboveOnboard = numberFrom(TOKENS_CSS, /--z-above-onboard:\s*(\d+)/, '--z-above-onboard')
 const walletConnectModal = numberFrom(WALLETS_TS, /'--wcm-z-index':\s*'(\d+)'/, "the QR modal's --wcm-z-index")
 
 describe('wallet modal stacking order', () => {
@@ -44,7 +45,7 @@ describe('wallet modal stacking order', () => {
   })
 
   it('keeps both above-onboard overlays below the picker layer', () => {
-    const picker = numberFrom(SHADCN_CSS, /--z-picker:\s*(\d+)/, '--z-picker')
+    const picker = numberFrom(TOKENS_CSS, /--z-picker:\s*(\d+)/, '--z-picker')
 
     expect(picker).toBeGreaterThan(walletConnectModal)
     expect(picker).toBeGreaterThan(aboveOnboard)

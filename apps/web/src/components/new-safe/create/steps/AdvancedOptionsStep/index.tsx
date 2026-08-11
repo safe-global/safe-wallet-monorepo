@@ -1,13 +1,19 @@
 import { predictAddressBasedOnReplayData } from '@/features/multichain'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
-import { Input } from '@/components/ui/input'
-import { Field, FieldLabel } from '@/components/ui/field'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@safe-global/design-system/components/button'
+import { Separator } from '@safe-global/design-system/components/separator'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/design-system/components/tooltip'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Input } from '@safe-global/design-system/components/input'
+import { Field, FieldLabel } from '@safe-global/design-system/components/field'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@safe-global/design-system/components/select'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import { type ReactElement, useMemo } from 'react'
 

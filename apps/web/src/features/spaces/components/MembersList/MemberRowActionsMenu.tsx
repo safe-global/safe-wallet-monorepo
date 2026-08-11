@@ -1,8 +1,13 @@
 import { useState } from 'react'
 import { type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { EllipsisVertical } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import { Button } from '@safe-global/design-system/components/button'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@safe-global/design-system/components/dropdown-menu'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import EditMemberDialog from './EditMemberDialog'

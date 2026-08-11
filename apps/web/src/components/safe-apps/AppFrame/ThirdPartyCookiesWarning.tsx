@@ -1,7 +1,7 @@
 import React from 'react'
 import { TriangleAlert, X } from 'lucide-react'
-import { Alert, AlertTitle, AlertAction } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { Alert, AlertTitle, AlertAction } from '@safe-global/design-system/components/alert'
+import { Button } from '@safe-global/design-system/components/button'
 import ExternalLink from '@/components/common/ExternalLink'
 
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'

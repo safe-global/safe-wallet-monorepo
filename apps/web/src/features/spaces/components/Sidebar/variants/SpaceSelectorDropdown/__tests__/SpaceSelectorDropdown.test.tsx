@@ -96,7 +96,7 @@ jest.mock('@/services/analytics/events/spaces', () => ({
   },
 }))
 
-jest.mock('@/components/ui/sidebar', () => ({
+jest.mock('@safe-global/design-system/components/sidebar', () => ({
   SidebarMenuButton: ({
     children,
     onClick,
@@ -112,7 +112,7 @@ jest.mock('@/components/ui/sidebar', () => ({
   ),
 }))
 
-jest.mock('@/components/ui/avatar', () => ({
+jest.mock('@safe-global/design-system/components/avatar', () => ({
   Avatar: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   AvatarFallback: ({ children, style }: { children: ReactNode; style?: CSSProperties }) => (
     <div data-testid="avatar-fallback" style={style}>
@@ -121,13 +121,13 @@ jest.mock('@/components/ui/avatar', () => ({
   ),
 }))
 
-jest.mock('@/components/ui/tooltip', () => ({
+jest.mock('@safe-global/design-system/components/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipContent: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 
-jest.mock('@/components/ui/dropdown-menu', () => {
+jest.mock('@safe-global/design-system/components/dropdown-menu', () => {
   const { createContext, useContext, useState, cloneElement } = jest.requireActual('react') as typeof ReactModule
 
   type DropdownCtx = { open: boolean; setOpen: (open: boolean) => void }

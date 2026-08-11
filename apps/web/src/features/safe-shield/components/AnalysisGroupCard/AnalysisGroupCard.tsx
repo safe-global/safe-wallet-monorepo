@@ -1,7 +1,7 @@
 import { type ReactElement, type ReactNode, type TransitionEvent, useMemo, useState, useEffect, useRef } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
-import { Typography } from '@/components/ui/typography'
+import { Collapsible, CollapsibleContent } from '@safe-global/design-system/components/collapsible'
+import { Typography } from '@safe-global/design-system/components/typography'
 import {
   ContractStatus,
   RecipientStatus,

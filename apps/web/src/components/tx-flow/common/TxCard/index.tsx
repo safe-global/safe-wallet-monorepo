@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { cn } from '@/utils/cn'
+import { Card, CardContent } from '@safe-global/design-system/components/card'
+import { cn } from '@safe-global/design-system/utils/cn'
 import css from '../styles.module.css'
 
 /** @deprecated MUI `sx` is ignored after the shadcn migration; use `className` instead. */

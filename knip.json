@@ -15,7 +15,6 @@
         "src/features/ledger/types.ts",
         "src/features/multichain/types.ts",
         "src/store/**/*Slice.ts",
-        "src/components/ui/**",
         ".storybook/mocks/querystring.ts"
       ],
       "ignoreDependencies": [
@@ -42,6 +41,12 @@
       ],
       "project": ["src/**/*.{ts,tsx}", "plugins/**/*.ts"],
       "ignore": ["**/*.test.{ts,tsx}", "dist/**"]
+    },
+    "packages/design-system": {
+      "entry": ["src/index.ts", ".storybook/*.ts", ".storybook/*.tsx", "eslint/index.mjs", "scripts/css-vars.ts"],
+      "project": ["src/**/*.{ts,tsx}", "eslint/**/*.mjs"],
+      "ignore": ["**/*.test.{ts,tsx}", "**/*.stories.{ts,tsx}", "**/__snapshots__/**"],
+      "ignoreDependencies": ["@storybook/*", "storybook", "jest", "@testing-library/*", "tw-animate-css", "shadcn"]
     },
     "packages/store": {
       "entry": ["src/index.ts"],

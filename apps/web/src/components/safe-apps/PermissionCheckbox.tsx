@@ -1,6 +1,6 @@
 import { useId } from 'react'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Field, FieldLabel } from '@/components/ui/field'
+import { Checkbox } from '@safe-global/design-system/components/checkbox'
+import { Field, FieldLabel } from '@safe-global/design-system/components/field'
 
 type PermissionsCheckboxProps = {
   label: string

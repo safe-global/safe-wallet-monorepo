@@ -1,7 +1,7 @@
 import { type ReactElement, type ReactNode } from 'react'
 import classNames from 'classnames'
 import CheckIcon from '@/public/images/common/check.svg'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import css from './styles.module.css'
 
 const SuccessMessage = ({ children, className }: { children: ReactNode; className?: string }): ReactElement => {

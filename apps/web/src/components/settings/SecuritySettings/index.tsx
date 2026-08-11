@@ -1,8 +1,8 @@
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectBlindSigning, setBlindSigning } from '@/store/settingsSlice'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Field, FieldLabel } from '@/components/ui/field'
-import { Typography } from '@/components/ui/typography'
+import { Checkbox } from '@safe-global/design-system/components/checkbox'
+import { Field, FieldLabel } from '@safe-global/design-system/components/field'
+import { Typography } from '@safe-global/design-system/components/typography'
 import SettingsCard from '../SettingsCard'
 
 const SecuritySettings = () => {

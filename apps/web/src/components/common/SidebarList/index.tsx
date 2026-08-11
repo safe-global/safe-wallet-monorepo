@@ -2,8 +2,8 @@ import type { ComponentProps, ReactElement, ReactNode } from 'react'
 import Link from 'next/link'
 import type { LinkProps } from 'next/link'
 
-import { typographyVariants } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { typographyVariants } from '@safe-global/design-system/components/typography'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 import css from './styles.module.css'
 

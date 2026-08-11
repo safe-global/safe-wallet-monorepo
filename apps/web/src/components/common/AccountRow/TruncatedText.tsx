@@ -1,8 +1,8 @@
 import { useRef, useState, type HTMLAttributes } from 'react'
 import type { VariantProps } from 'class-variance-authority'
-import { typographyVariants } from '@/components/ui/typography'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { cn } from '@/utils/cn'
+import { typographyVariants } from '@safe-global/design-system/components/typography'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/design-system/components/tooltip'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 type TruncatedTextProps = {
   text: string

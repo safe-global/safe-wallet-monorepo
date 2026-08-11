@@ -1,6 +1,6 @@
 import { useCallback, useContext } from 'react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription, AlertTitle } from '@safe-global/design-system/components/alert'
+import { Button } from '@safe-global/design-system/components/button'
 import { TxModalContext } from '@/components/tx-flow'
 import { MigrateSafeL2Flow, UpdateSafeFlow } from '@/components/tx-flow/flows'
 import { ActionCard } from '@/components/common/ActionCard'

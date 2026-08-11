@@ -1,9 +1,9 @@
 import { useCallback } from 'react'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { Controller, useForm } from 'react-hook-form'
-import { Typography } from '@/components/ui/typography'
-import { Field, FieldLabel } from '@/components/ui/field'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Field, FieldLabel } from '@safe-global/design-system/components/field'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@safe-global/design-system/components/input-group'
 
 const MAX_NOTE_LENGTH = 60
 

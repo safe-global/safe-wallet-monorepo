@@ -3,11 +3,17 @@ import type { LucideIcon } from 'lucide-react'
 import { Layers, UsersRound, ShieldAlert, ChevronDown, TrendingUp, ArrowUpRight, X } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 
-import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog'
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from '@safe-global/design-system/components/dialog'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Button } from '@safe-global/design-system/components/button'
 import Identicon from '@/components/common/Identicon'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 import css from './styles.module.css'
 
 const SPACE_HELP_ARTICLE_LINK = 'https://help.safe.global/collections/1628654831-workspace?lang=en'

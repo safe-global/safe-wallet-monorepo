@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import CopyAddressButton from './index'
 import { StoreDecorator } from '@/stories/storeDecorator'
 

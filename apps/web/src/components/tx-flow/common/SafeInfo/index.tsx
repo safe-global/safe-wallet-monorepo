@@ -6,8 +6,8 @@ import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import useChainId from '@/hooks/useChainId'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import CopyAddressButton from '@/components/common/CopyAddressButton'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { useChain } from '@/hooks/useChains'
 
 const SafeInfo = (): ReactElement => {

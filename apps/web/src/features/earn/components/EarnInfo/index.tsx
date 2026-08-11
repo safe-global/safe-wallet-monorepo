@@ -1,8 +1,8 @@
 import Image from 'next/image'
-import { Card, CardContent } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Card, CardContent } from '@safe-global/design-system/components/card'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Button } from '@safe-global/design-system/components/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 import EarnIllustrationLight from '@/public/images/common/earn-illustration-light.png'
 
 import CheckIcon from '@/public/images/common/check.svg'

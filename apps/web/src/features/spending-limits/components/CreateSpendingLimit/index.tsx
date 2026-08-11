@@ -1,9 +1,15 @@
 import { useCallback, useContext, useMemo } from 'react'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@safe-global/design-system/components/button'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Label } from '@safe-global/design-system/components/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@safe-global/design-system/components/select'
 import { parseUnits, AbiCoder } from 'ethers'
 
 import AddressBookInput from '@/components/common/AddressBookInput'

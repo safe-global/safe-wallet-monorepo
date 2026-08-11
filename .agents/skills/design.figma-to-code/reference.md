@@ -5,7 +5,7 @@
 **Never hardcode Tailwind classes for text.** Always use the `Typography` component with variants.
 
 ```tsx
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 // ✅ Correct
 <Typography variant="h2" align="center">Invite team members</Typography>

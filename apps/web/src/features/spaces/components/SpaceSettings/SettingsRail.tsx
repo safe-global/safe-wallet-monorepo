@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { Info, SlidersHorizontal, User } from 'lucide-react'
 import { type ReactElement } from 'react'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 import { AppRoutes } from '@/config/routes'
 
 export type SettingsPageKey = 'general' | 'account' | 'about'

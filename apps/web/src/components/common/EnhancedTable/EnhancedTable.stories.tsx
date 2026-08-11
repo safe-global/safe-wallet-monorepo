@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { Badge } from '@/components/ui/badge'
+import { Button } from '@safe-global/design-system/components/button'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Badge } from '@safe-global/design-system/components/badge'
 import EnhancedTable, { type EnhancedTableProps } from './index'
 
 const meta: Meta<typeof EnhancedTable> = {

@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { PendingBadge, ThresholdBadge, formatPendingLabel } from '@/components/common/AccountBadges'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/design-system/components/tooltip'
 import { TOOLTIP_DELAY_MS } from '@/components/common/AccountRow'
 import ChainLogo from './ChainLogo'
 import type { SafeItemDataChain } from '../types'

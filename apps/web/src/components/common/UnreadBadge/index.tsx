@@ -1,6 +1,6 @@
 import React from 'react'
 import classNames from 'classnames'
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '@safe-global/design-system/components/badge'
 
 type AnchorOrigin = {
   vertical: 'top' | 'bottom'

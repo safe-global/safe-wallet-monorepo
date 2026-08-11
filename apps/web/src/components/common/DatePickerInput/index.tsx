@@ -3,10 +3,15 @@ import { useFormContext, Controller, type ControllerFieldState, type ControllerR
 import { format, isFuture, isValid, parse, startOfDay } from 'date-fns'
 import { Calendar as CalendarIcon } from 'lucide-react'
 
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Field, FieldError, FieldLabel } from '@/components/ui/field'
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
+import { Calendar } from '@safe-global/design-system/components/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@safe-global/design-system/components/popover'
+import { Field, FieldError, FieldLabel } from '@safe-global/design-system/components/field'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@safe-global/design-system/components/input-group'
 
 const DATE_FORMAT = 'dd/MM/yyyy'
 

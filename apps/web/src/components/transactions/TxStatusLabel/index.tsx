@@ -1,7 +1,7 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { isCancelledSwapOrder } from '@/utils/transaction-guards'
-import { Spinner } from '@/components/ui/spinner'
+import { Spinner } from '@safe-global/design-system/components/spinner'
 import useIsPending from '@/hooks/useIsPending'
 import useTransactionStatus from '@/hooks/useTransactionStatus'
 

@@ -1,6 +1,6 @@
 import { ShieldCheck, Wallet, type LucideIcon } from 'lucide-react'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '@safe-global/design-system/components/badge'
 import { getMemberTwoFactorStatus, MemberTwoFactorStatus } from '../../utils/twoFactor'
 
 const BADGE_BY_STATUS: Record<

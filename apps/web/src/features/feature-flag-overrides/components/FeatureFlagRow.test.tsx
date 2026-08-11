@@ -7,7 +7,7 @@ import type { FeatureFlagRowData } from '../hooks/useFeatureFlagEditorData'
 // The base-ui Switch doesn't toggle reliably in jsdom, so mock it with a plain
 // checkbox that forwards onCheckedChange — this pins our dispatch wiring, which
 // is the point of these tests (the real Switch is covered by its own tests).
-jest.mock('@/components/ui/switch', () => ({
+jest.mock('@safe-global/design-system/components/switch', () => ({
   Switch: ({
     checked,
     onCheckedChange,

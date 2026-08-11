@@ -1,5 +1,5 @@
 import { type ReactElement, useContext, useEffect } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import useChainId from '@/hooks/useChainId'
 import { createExistingTx } from '@/services/tx/tx-sender'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'

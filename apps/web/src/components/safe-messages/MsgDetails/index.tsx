@@ -1,7 +1,12 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { useMemo, type ReactElement } from 'react'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Typography } from '@/components/ui/typography'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/design-system/components/accordion'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { Code as CodeIcon } from 'lucide-react'
 import classNames from 'classnames'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'

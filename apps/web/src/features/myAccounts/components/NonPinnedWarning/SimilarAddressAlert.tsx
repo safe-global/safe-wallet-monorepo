@@ -1,5 +1,5 @@
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { Typography } from '@/components/ui/typography'
+import { Alert, AlertTitle, AlertDescription } from '@safe-global/design-system/components/alert'
+import { Typography } from '@safe-global/design-system/components/typography'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ExternalLink from '@/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'

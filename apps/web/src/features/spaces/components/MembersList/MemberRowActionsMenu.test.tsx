@@ -39,7 +39,7 @@ jest.mock('@/services/analytics/events/spaces', () => ({
 
 // The codebase tests dropdown menus with a lightweight stand-in rather than
 // driving base-ui's portal/pointer machinery in jsdom (see SpaceSelectorDropdown.test).
-jest.mock('@/components/ui/dropdown-menu', () => {
+jest.mock('@safe-global/design-system/components/dropdown-menu', () => {
   const { createContext, useContext, useState, cloneElement } = jest.requireActual('react') as typeof ReactModule
 
   type DropdownCtx = { open: boolean; setOpen: (open: boolean) => void }

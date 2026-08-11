@@ -1,9 +1,9 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type ReactElement } from 'react'
 import { Copy } from 'lucide-react'
-import { Alert } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Alert } from '@safe-global/design-system/components/alert'
+import { Button } from '@safe-global/design-system/components/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 import TxConfirmations from '@/components/transactions/TxConfirmations'
 import { AuditRow, AuditLogHeader, useCopyToClipboard } from '@/components/common/AuditLog'
 

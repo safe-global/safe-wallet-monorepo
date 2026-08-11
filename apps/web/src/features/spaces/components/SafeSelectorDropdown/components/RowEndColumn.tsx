@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 // Fixed-width, right-aligned trailing column of a safe row. The fiat balance and the
 // counterfactual activation status both render inside it so the trailing slot keeps a

@@ -1,6 +1,6 @@
 import type { ReactNode, ReactElement } from 'react'
 import React from 'react'
-import { Toggle } from '@/components/ui/toggle'
+import { Toggle } from '@safe-global/design-system/components/toggle'
 
 interface ToggleButtonGroupProps {
   value?: number

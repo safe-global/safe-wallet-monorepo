@@ -1,5 +1,5 @@
-import { Typography } from '@/components/ui/typography'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
 import RowEndColumn from './RowEndColumn'
 import type { ReactNode } from 'react'
 

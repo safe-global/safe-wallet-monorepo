@@ -1,7 +1,7 @@
 import type { ReactElement, ComponentProps } from 'react'
 import { ExternalLink as ExternalLinkIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Link } from '@/components/ui/link'
+import { Button } from '@safe-global/design-system/components/button'
+import { Link } from '@safe-global/design-system/components/link'
 
 /**
  * Renders an external Link which always sets the noopener and noreferrer rel attribute and the target to _blank.

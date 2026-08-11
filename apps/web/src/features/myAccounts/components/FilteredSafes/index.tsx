@@ -3,7 +3,7 @@ import { type AllSafeItems, useSafesSearch } from '@/hooks/safes'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { OVERVIEW_EVENTS } from '@/services/analytics'
 import { trackEvent } from '@/services/analytics'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { useEffect } from 'react'
 
 const FilteredSafes = ({

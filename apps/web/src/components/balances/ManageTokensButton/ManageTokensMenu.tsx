@@ -1,9 +1,13 @@
 import { type ReactElement, type ReactNode } from 'react'
 import { Info } from 'lucide-react'
-import { DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
-import { Switch } from '@/components/ui/switch'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import {
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@safe-global/design-system/components/dropdown-menu'
+import { Switch } from '@safe-global/design-system/components/switch'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setTokenList, setHideDust, TOKEN_LISTS } from '@/store/settingsSlice'
 import { useHasFeature } from '@/hooks/useChains'
@@ -15,7 +19,7 @@ import useHiddenTokens from '@/hooks/useHiddenTokens'
 import Track from '@/components/common/Track'
 import { ASSETS_EVENTS } from '@/services/analytics'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 interface ManageTokensMenuProps {
   onClose: () => void

@@ -2,9 +2,15 @@ import { FormProvider, useForm } from 'react-hook-form'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { debounce } from 'lodash'
 
-import { Alert } from '@/components/ui/alert'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { SearchInput } from '@/components/ui/search-input'
+import { Alert } from '@safe-global/design-system/components/alert'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@safe-global/design-system/components/dialog'
+import { SearchInput } from '@safe-global/design-system/components/search-input'
 import DialogActions from '@/components/common/DialogActions'
 
 import ContactsList from './ContactsList'

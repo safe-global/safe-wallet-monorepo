@@ -1,7 +1,7 @@
 import type { ReactElement, CSSProperties } from 'react'
 import { useMemo } from 'react'
 import { blo } from 'blo'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
 
 import css from './styles.module.css'
 import { isAddress } from 'ethers'

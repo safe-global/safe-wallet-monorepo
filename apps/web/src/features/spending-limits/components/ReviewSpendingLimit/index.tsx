@@ -1,8 +1,8 @@
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useEffect, useMemo, useContext } from 'react'
-import { Typography } from '@/components/ui/typography'
-import { Alert } from '@/components/ui/alert'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Alert } from '@safe-global/design-system/components/alert'
 
 import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
 import { getResetTimeOptions } from '../../constants'

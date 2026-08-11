@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Alert } from '@/components/ui/alert'
+import { Alert } from '@safe-global/design-system/components/alert'
 
 import InfoOutlinedIcon from '@/public/images/notifications/info.svg'
 import css from './styles.module.css'

@@ -1,5 +1,5 @@
 import { TriangleAlert } from 'lucide-react'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertTitle, AlertDescription } from '@safe-global/design-system/components/alert'
 import { useCurrentChain } from '@/hooks/useChains'
 import ChainSwitcher from '@/components/common/ChainSwitcher'
 import useIsWrongChain from '@/hooks/useIsWrongChain'

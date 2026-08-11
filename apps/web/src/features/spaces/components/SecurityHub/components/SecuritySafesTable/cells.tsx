@@ -1,5 +1,5 @@
 import type { GradeSummary } from '@/features/security/types'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
 import { DASH } from './constants'
 import { formatBalance } from './utils'
 

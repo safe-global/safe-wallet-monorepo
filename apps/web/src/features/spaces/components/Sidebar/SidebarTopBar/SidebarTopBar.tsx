@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
-import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
-import { cn } from '@/utils/cn'
+import { SidebarTrigger, useSidebar } from '@safe-global/design-system/components/sidebar'
+import { cn } from '@safe-global/design-system/utils/cn'
 import { AppRoutes } from '@/config/routes'
 import SafeLogo from '@/components/common/SafeLogo'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'

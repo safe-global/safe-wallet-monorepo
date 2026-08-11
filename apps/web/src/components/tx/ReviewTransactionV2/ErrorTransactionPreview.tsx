@@ -1,5 +1,5 @@
 import TxCard from '@/components/tx-flow/common/TxCard'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 const ErrorTransactionPreview = () => (
   <TxCard>

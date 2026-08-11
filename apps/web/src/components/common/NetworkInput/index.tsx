@@ -1,7 +1,13 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
-import { Label } from '@/components/ui/label'
-import { Typography } from '@/components/ui/typography'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@safe-global/design-system/components/label'
+import { Typography } from '@safe-global/design-system/components/typography'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@safe-global/design-system/components/select'
 import partition from 'lodash/partition'
 import css from './styles.module.css'
 import { type ReactElement, useId, useMemo } from 'react'

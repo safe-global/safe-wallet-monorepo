@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 import NetworkLogosTooltip from '../NetworkLogosTooltip'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 

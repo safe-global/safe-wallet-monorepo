@@ -163,6 +163,10 @@ export default defineConfig(({ mode }) => {
 
         // Mirror apps/web/tsconfig.json `paths` so reused source resolves shared
         // packages by subpath (e.g. `@safe-global/utils/utils/chains`).
+        {
+          find: /^@safe-global\/design-system\/(.*)$/,
+          replacement: path.resolve(__dirname, '../../packages/design-system/src/$1'),
+        },
         { find: /^@safe-global\/theme\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/theme/src/$1') },
         { find: /^@safe-global\/store\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/store/src/$1') },
         { find: /^@safe-global\/utils\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/utils/src/$1') },

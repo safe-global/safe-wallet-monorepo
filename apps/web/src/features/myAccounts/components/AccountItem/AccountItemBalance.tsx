@@ -1,8 +1,8 @@
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
 import FiatValue from '@/components/common/FiatValue'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import css from '../AccountItems/styles.module.css'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 export interface AccountItemBalanceProps {
   fiatTotal?: string | number

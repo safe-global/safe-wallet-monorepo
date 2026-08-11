@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
-import SubmitButton from '@/components/common/SubmitButton'
-import { Typography } from '@/components/ui/typography'
+import SubmitButton from '@safe-global/design-system/presets/SubmitButton'
+import { Typography } from '@safe-global/design-system/components/typography'
 import ArrowIcon from '@/public/images/common/arrow-up-right.svg'
 import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import { Sticky } from '@/components/common/Sticky'

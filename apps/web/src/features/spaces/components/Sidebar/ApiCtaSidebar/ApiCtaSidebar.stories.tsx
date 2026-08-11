@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import type { CSSProperties } from 'react'
-import { SidebarProvider, Sidebar, SidebarFooter, SidebarMenu } from '@/components/ui/sidebar'
+import { SidebarProvider, Sidebar, SidebarFooter, SidebarMenu } from '@safe-global/design-system/components/sidebar'
 import { withMockProvider } from '@/storybook/preview'
 import { ApiCtaSidebar } from './ApiCtaSidebar'
 

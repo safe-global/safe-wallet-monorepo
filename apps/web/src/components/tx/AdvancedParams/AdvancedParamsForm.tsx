@@ -1,6 +1,6 @@
 import { type SyntheticEvent } from 'react'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/design-system/components/button'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { FormProvider, useForm } from 'react-hook-form'
 import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { FLOAT_REGEX } from '@safe-global/utils/utils/validation'

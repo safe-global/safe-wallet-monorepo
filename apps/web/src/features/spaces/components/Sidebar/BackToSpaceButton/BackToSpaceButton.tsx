@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
-import { SidebarMenuButton } from '@/components/ui/sidebar'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { SidebarMenuButton } from '@safe-global/design-system/components/sidebar'
+import { Avatar, AvatarFallback } from '@safe-global/design-system/components/avatar'
 import { getDeterministicColor } from '@/utils/colors'
 import { useSpaceBackLink } from '@/components/common/SpaceSafeBar/hooks/useSpaceBackLink'
 import { icons } from '../config'

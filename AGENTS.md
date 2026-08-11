@@ -6,14 +6,15 @@ This repository is the Safe{Wallet} monorepo, containing both web and mobile app
 
 This monorepo uses nested AGENTS.md files. Agents working in a subtree automatically load the nearest one. Start at root for cross-cutting rules, then drop into the relevant subtree:
 
-| Subtree                | File                                                           | Covers                                                     |
-| ---------------------- | -------------------------------------------------------------- | ---------------------------------------------------------- |
-| `apps/web/`            | [apps/web/AGENTS.md](apps/web/AGENTS.md)                       | Feature architecture, Storybook, web testing, web pitfalls |
-| `apps/web/cypress/`    | [apps/web/cypress/AGENTS.md](apps/web/cypress/AGENTS.md)       | Cypress E2E patterns (legacy — no new tests)               |
-| `apps/web/e2e/`        | [apps/web/e2e/docs/README.md](apps/web/e2e/docs/README.md)     | **Playwright E2E — all new tests go here**                 |
-| `apps/web/.storybook/` | [apps/web/.storybook/AGENTS.md](apps/web/.storybook/AGENTS.md) | Storybook fixtures and provider patterns                   |
-| `apps/mobile/`         | [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md)                 | Expo + Tamagui                                             |
-| `packages/`            | [packages/AGENTS.md](packages/AGENTS.md)                       | Shared packages, dual env vars                             |
+| Subtree                   | File                                                                 | Covers                                                               |
+| ------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `apps/web/`               | [apps/web/AGENTS.md](apps/web/AGENTS.md)                             | Feature architecture, Storybook, web testing, web pitfalls           |
+| `apps/web/cypress/`       | [apps/web/cypress/AGENTS.md](apps/web/cypress/AGENTS.md)             | Cypress E2E patterns (legacy — no new tests)                         |
+| `apps/web/e2e/`           | [apps/web/e2e/docs/README.md](apps/web/e2e/docs/README.md)           | **Playwright E2E — all new tests go here**                           |
+| `apps/web/.storybook/`    | [apps/web/.storybook/AGENTS.md](apps/web/.storybook/AGENTS.md)       | Storybook fixtures and provider patterns                             |
+| `apps/mobile/`            | [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md)                       | Expo + Tamagui                                                       |
+| `packages/`               | [packages/AGENTS.md](packages/AGENTS.md)                             | Shared packages, dual env vars                                       |
+| `packages/design-system/` | [packages/design-system/AGENTS.md](packages/design-system/AGENTS.md) | **UI primitives, variants, tokens — read before writing any web UI** |
 
 When adding new guidance, place it in the most-specific subtree it applies to.
 
@@ -73,17 +74,18 @@ The monorepo uses **Yarn 4 workspaces** to manage dependencies and enables shari
 
 Stable architectural landmarks for fast orientation:
 
-| Area           | Path                                         | Purpose                                              |
-| -------------- | -------------------------------------------- | ---------------------------------------------------- |
-| Web app entry  | `apps/web/src/pages/_app.tsx`                | Next.js app bootstrap, providers, `InitApp`          |
-| Redux store    | `apps/web/src/store/index.ts`                | `makeStore()`, middleware, RTK Query APIs            |
-| RTK Query APIs | `apps/web/src/store/api/gateway/`            | CGW API endpoints (balances, transactions, etc.)     |
-| Feature system | `apps/web/src/features/__core__/`            | `createFeatureHandle`, `useLoadFeature`, proxy stubs |
-| Page layout    | `apps/web/src/components/common/PageLayout/` | Main app layout, sidebar, header                     |
-| Safe info hook | `apps/web/src/hooks/useSafeInfo.ts`          | Current Safe address, owners, threshold              |
-| Chain config   | `packages/store/src/gateway/chains/`         | RTK Query chains endpoint with retry logic           |
-| Theme package  | `packages/theme/src/`                        | Palettes, spacing, typography tokens                 |
-| Mobile entry   | `apps/mobile/src/app/_layout.tsx`            | Expo Router root layout                              |
+| Area           | Path                                         | Purpose                                                   |
+| -------------- | -------------------------------------------- | --------------------------------------------------------- |
+| Web app entry  | `apps/web/src/pages/_app.tsx`                | Next.js app bootstrap, providers, `InitApp`               |
+| Redux store    | `apps/web/src/store/index.ts`                | `makeStore()`, middleware, RTK Query APIs                 |
+| RTK Query APIs | `apps/web/src/store/api/gateway/`            | CGW API endpoints (balances, transactions, etc.)          |
+| Feature system | `apps/web/src/features/__core__/`            | `createFeatureHandle`, `useLoadFeature`, proxy stubs      |
+| Page layout    | `apps/web/src/components/common/PageLayout/` | Main app layout, sidebar, header                          |
+| Safe info hook | `apps/web/src/hooks/useSafeInfo.ts`          | Current Safe address, owners, threshold                   |
+| Chain config   | `packages/store/src/gateway/chains/`         | RTK Query chains endpoint with retry logic                |
+| Theme package  | `packages/theme/src/`                        | Brand palettes, spacing, typography tokens (web + mobile) |
+| Design system  | `packages/design-system/src/`                | Web UI primitives, presets, semantic tokens, Storybook    |
+| Mobile entry   | `apps/mobile/src/app/_layout.tsx`            | Expo Router root layout                                   |
 
 ### AST-Based Code Search
 
@@ -154,13 +156,15 @@ The project uses `@safe-global/theme` package as a single source of truth for al
 
 ### Usage
 
-**Web (MUI)**:
+**Web** — the web apps consume the theme through `@safe-global/design-system`, which generates the
+brand CSS custom properties from these palettes and layers its semantic tokens on top. Import the
+design system's stylesheet, not the theme package:
 
 ```typescript
-import { generateMuiTheme } from '@safe-global/theme'
-
-const theme = generateMuiTheme('light') // or 'dark'
+import '@safe-global/design-system/styles.css'
 ```
+
+`generateMuiTheme` remains for `apps/tx-builder`, the one app still on MUI.
 
 **Mobile (Tamagui)**:
 
@@ -183,11 +187,15 @@ To add or modify colors/tokens:
 
 1. Edit files in `packages/theme/src/palettes/` or `packages/theme/src/tokens/`
 2. Run type-check to ensure consistency: `yarn workspace @safe-global/theme type-check`
-3. Regenerate CSS vars for web: `yarn workspace @safe-global/web css-vars`
+3. Regenerate the brand CSS vars: `yarn workspace @safe-global/design-system css-vars`
+
+For **semantic** web tokens (`--background`, `--primary`, the status tints) edit
+`packages/design-system/src/styles/tokens.css` instead — see
+[packages/design-system/AGENTS.md](packages/design-system/AGENTS.md).
 
 ### Important Notes
 
-- Never edit `apps/web/src/styles/vars.css` directly - it's auto-generated
+- Never edit `packages/design-system/src/styles/brand-vars.css` directly - it's auto-generated
 - Always use theme tokens instead of hard-coded colors
 - Both light and dark modes must be updated together for consistency
 

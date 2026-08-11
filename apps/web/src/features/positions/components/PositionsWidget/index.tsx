@@ -2,11 +2,16 @@ import { useRouter } from 'next/router'
 import usePositionsFiatTotal from '../../hooks/usePositionsFiatTotal'
 import React, { useMemo, type ReactElement } from 'react'
 import { AppRoutes } from '@/config/routes'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Separator } from '@/components/ui/separator'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/design-system/components/accordion'
+import { Separator } from '@safe-global/design-system/components/separator'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { cn } from '@safe-global/design-system/utils/cn'
 import { WidgetCard } from '@/components/dashboard/styled'
 import css from './styles.module.css'
 import PositionsHeader from '../PositionsHeader'

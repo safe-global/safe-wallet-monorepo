@@ -1,13 +1,13 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import { RefreshCwIcon, type LucideProps } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Button } from '@safe-global/design-system/components/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 import { trackEvent } from '@/services/analytics'
 import { POSITIONS_EVENTS } from '@/services/analytics/events/positions'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { logError, Errors } from '@/services/exceptions'
 import { useRefetchBalances } from '@/hooks/useRefetchBalances'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 import css from './styles.module.css'
 
 const COOLDOWN_MS = 30_000

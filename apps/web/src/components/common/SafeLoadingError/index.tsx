@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/design-system/components/button'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import PagePlaceholder from '../PagePlaceholder'
 import { AppRoutes } from '@/config/routes'

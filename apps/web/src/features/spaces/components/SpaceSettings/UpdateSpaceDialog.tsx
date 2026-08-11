@@ -1,10 +1,10 @@
 import ModalDialog from '@/components/common/ModalDialog'
 import UpdateSpaceForm from './UpdateSpaceForm'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { AppRoutes } from '@/config/routes'
 import ExternalLink from '@/components/common/ExternalLink'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 
 const UpdateSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse; onClose: () => void }) => {

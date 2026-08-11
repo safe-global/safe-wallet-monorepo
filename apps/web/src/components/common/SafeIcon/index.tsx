@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
 
 import css from './styles.module.css'
 import Identicon, { type IdenticonProps } from '../Identicon'

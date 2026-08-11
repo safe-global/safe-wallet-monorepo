@@ -37,7 +37,7 @@ jest.mock(
       )
     },
 )
-jest.mock('@/components/ui/tooltip', () => ({
+jest.mock('@safe-global/design-system/components/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <div data-testid="tooltip">{children}</div>,
   TooltipTrigger: ({ render: renderProp, children }: { render?: ReactElement; children: ReactNode }) => (
     <div data-testid="tooltip-trigger" data-has-render-prop={String(Boolean(renderProp))}>

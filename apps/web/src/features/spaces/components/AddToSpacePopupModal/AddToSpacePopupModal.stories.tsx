@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent } from '@safe-global/design-system/components/dialog'
 import { withMockProvider } from '@/storybook/preview'
 import { AddToSpacePopupModal } from './AddToSpacePopupModal'
 

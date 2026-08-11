@@ -3,7 +3,7 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import useConnectWallet from '../ConnectWallet/useConnectWallet'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/design-system/components/tooltip'
 
 type TooltipSide = 'top' | 'bottom' | 'left' | 'right'
 

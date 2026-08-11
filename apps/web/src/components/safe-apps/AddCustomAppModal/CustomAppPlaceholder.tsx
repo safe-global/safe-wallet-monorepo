@@ -1,8 +1,8 @@
 import classNames from 'classnames'
 
 import SafeAppIcon from '@/public/images/apps/apps-icon.svg'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 import css from './styles.module.css'
 

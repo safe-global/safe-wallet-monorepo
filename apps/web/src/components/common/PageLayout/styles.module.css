@@ -1,4 +1,4 @@
-@reference '../../../styles/shadcn.css';
+@reference '@safe-global/design-system/styles/tokens.css';
 
 /* The topbar is absolutely positioned, so it does not inherit `.main`'s sidebar
    offset — it carries its own. Both live on `--topbar-offset` so the elevated

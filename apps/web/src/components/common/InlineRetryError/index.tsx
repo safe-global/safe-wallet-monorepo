@@ -1,5 +1,5 @@
-import { Alert, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { Alert, AlertTitle } from '@safe-global/design-system/components/alert'
+import { Button } from '@safe-global/design-system/components/button'
 import { AlertCircle, RotateCw } from 'lucide-react'
 
 type InlineRetryErrorProps = {

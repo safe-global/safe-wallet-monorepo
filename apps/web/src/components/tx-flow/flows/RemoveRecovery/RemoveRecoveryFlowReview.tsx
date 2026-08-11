@@ -8,7 +8,7 @@ import { OwnerList } from '../../common/OwnerList'
 import { SafeTxContext } from '../../SafeTxProvider'
 import type { RecoveryFlowProps } from '.'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 export function RemoveRecoveryFlowReview({
   delayModifier,

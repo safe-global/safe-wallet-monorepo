@@ -1,7 +1,7 @@
 import type { ModuleTransaction, MultisigTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TxProposalChip } from '@/features/proposers'
 import { SwapFeature, useIsExpiredSwap } from '@/features/swap'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import type { ReactElement } from 'react'
 
 import css from './styles.module.css'

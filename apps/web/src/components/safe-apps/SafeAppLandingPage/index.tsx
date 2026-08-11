@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import { Spinner } from '@/components/ui/spinner'
-import { Card } from '@/components/ui/card'
+import { Spinner } from '@safe-global/design-system/components/spinner'
+import { Card } from '@safe-global/design-system/components/card'
 import { OVERVIEW_EVENTS, SAFE_APPS_EVENTS, trackEvent, trackSafeAppEvent } from '@/services/analytics'
 import { useSafeAppFromBackend } from '@/hooks/safe-apps/useSafeAppFromBackend'
 import { useSafeAppFromManifest } from '@/hooks/safe-apps/useSafeAppFromManifest'

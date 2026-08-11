@@ -1,5 +1,5 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { Textarea } from '@/components/ui/textarea'
+import { Textarea } from '@safe-global/design-system/components/textarea'
 import { useMemo } from 'react'
 import type { ReactElement } from 'react'
 

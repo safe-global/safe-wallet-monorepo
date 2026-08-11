@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react'
 import type { VariantProps } from 'class-variance-authority'
-import { Badge, type badgeVariants } from '@/components/ui/badge'
+import { Badge, type badgeVariants } from '@safe-global/design-system/components/badge'
 
 export type TxStatusChipProps = {
   children: ReactNode

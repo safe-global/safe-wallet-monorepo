@@ -1,6 +1,6 @@
 import HypernativeLogoSvg from '@/public/images/hypernative/hypernative-logo.svg'
 import { useEffect, useId, useRef, type CSSProperties } from 'react'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 interface HypernativeLogoProps {
   className?: string

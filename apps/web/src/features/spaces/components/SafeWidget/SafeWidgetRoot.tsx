@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 interface SafeWidgetProps {
   title: string

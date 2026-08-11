@@ -3,7 +3,7 @@ import SignMessage, { type SignMessageProps } from '@/components/tx-flow/flows/S
 import { getSwapTitle } from '@/features/swap'
 import { selectSwapParams } from '@/features/swap/store'
 import { useAppSelector } from '@/store'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import { type BaseTransaction } from '@safe-global/safe-apps-sdk'

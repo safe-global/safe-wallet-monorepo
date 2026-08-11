@@ -6,7 +6,7 @@ import type {
 import type { DraftBatchItem } from '../../store/batchSlice'
 import BatchTxItem from './BatchTxItem'
 
-import { List } from '@/components/ui/list'
+import { List } from '@safe-global/design-system/components/list'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'

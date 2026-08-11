@@ -9,12 +9,12 @@ import {
   AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-} from '@/components/ui/alert-dialog'
+} from '@safe-global/design-system/components/alert-dialog'
 import DialogActions from '@/components/common/DialogActions'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Input } from '@safe-global/design-system/components/input'
+import { Label } from '@safe-global/design-system/components/label'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Alert, AlertDescription } from '@safe-global/design-system/components/alert'
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'

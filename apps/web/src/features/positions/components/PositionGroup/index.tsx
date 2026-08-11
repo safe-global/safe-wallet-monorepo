@@ -4,8 +4,8 @@ import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { getReadablePositionType } from '@/features/positions/utils'
 import TokenIcon from '@/components/common/TokenIcon'
 import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { cn } from '@safe-global/design-system/utils/cn'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 
 interface PositionGroupProps {

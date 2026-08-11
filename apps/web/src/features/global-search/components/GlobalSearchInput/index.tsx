@@ -1,5 +1,5 @@
 import { Search } from 'lucide-react'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 import { useAppDispatch } from '@/store'
 import { openGlobalSearch } from '@/features/global-search/store'
 

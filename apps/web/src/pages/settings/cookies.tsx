@@ -1,6 +1,6 @@
 import { CookieAndTermBanner } from 'src/components/common/CookieAndTermBanner'
 import SettingsHeader from '@/components/settings/SettingsHeader'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'

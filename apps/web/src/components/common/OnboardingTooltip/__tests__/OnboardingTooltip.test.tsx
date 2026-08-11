@@ -1,6 +1,6 @@
 import local from '@/services/local-storage/local'
 import { act, render } from '@/tests/test-utils'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/design-system/components/button'
 import { OnboardingTooltip } from '..'
 
 describe('<OnboardingWidget>', () => {

@@ -1,6 +1,6 @@
 import classNames from 'classnames'
 import css from '@/components/tx-flow/flows/SuccessScreen/styles.module.css'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 export const IndexingStatus = ({ willDeploySafe: isCreatingSafe }: { willDeploySafe: boolean }) => (
   <div className="mt-6 px-6">

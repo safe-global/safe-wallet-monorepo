@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import BackLink from './index'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@safe-global/design-system/components/avatar'
 
 const meta = {
   title: 'Components/Common/BackLink',

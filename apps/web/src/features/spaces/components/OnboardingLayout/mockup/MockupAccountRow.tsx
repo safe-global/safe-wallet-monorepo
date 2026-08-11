@@ -1,5 +1,5 @@
 import Identicon from '@/components/common/Identicon'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { SafeAppMockupAccount } from './types'

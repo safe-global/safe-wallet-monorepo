@@ -8,8 +8,8 @@ import dynamic from 'next/dynamic'
 // Lazy-load Web3 initialization to keep viem/protocol-kit out of the main _app chunk
 const LazyWeb3Init = dynamic(() => import('@/components/common/LazyWeb3Init'), { ssr: false })
 import { Provider } from 'react-redux'
+// globals.css imports @safe-global/design-system/styles.css (brand vars + semantic tokens).
 import '@/styles/globals.css'
-import '@/styles/shadcn.css'
 import { BRAND_NAME } from '@/config/constants'
 import { makeStore, setStoreInstance, useHydrateStore, useInitChains } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
@@ -94,7 +94,7 @@ import { useOidcLoginCallback } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
-import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
+import { ShadcnProvider } from '@safe-global/design-system/components/ShadcnProvider'
 
 // Initialize observability before React rendering starts
 // This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration

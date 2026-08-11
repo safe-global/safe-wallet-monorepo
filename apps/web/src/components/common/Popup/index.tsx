@@ -1,4 +1,4 @@
-import { Popover, PopoverContent } from '@/components/ui/popover'
+import { Popover, PopoverContent } from '@safe-global/design-system/components/popover'
 import type { ComponentProps, ReactElement, ReactNode } from 'react'
 
 type PopupProps = {

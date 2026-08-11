@@ -11,6 +11,12 @@ allowed-tools:
   - Grep
 ---
 
+> **Direction of travel:** Storybook is now the source of truth for the Safe design system, not Figma
+> (see `packages/design-system/AGENTS.md`). This skill still exists for designs that only live in
+> Figma today — when the component already exists in the design system, use it as-is via
+> `/design-system.use` rather than re-deriving styling from a Figma frame, and take variant/token
+> decisions to the design-system Storybook.
+
 # Figma-to-Code Verification
 
 Verify the implementation of **$ARGUMENTS** matches Figma specs.
@@ -153,7 +159,7 @@ yarn workspace @safe-global/web type-check
 
 ## Project Notes
 
-- **Components Path**: `apps/web/src/components/ui/`
+- **Components Path**: `packages/design-system/src/components/`
 - **Utility Path**: `apps/web/src/utils/cn.ts`
 - **Icon Library**: `lucide-react`
 

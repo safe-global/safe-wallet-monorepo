@@ -1,6 +1,6 @@
 ---
 name: design.sync-variables
-description: Sync CSS variables from Figma plugin export to globals.css. Use when updating design tokens/colors from Figma.
+description: Sync CSS variables from a Figma plugin export into the design system's semantic token layer (packages/design-system/src/styles/tokens.css). Use when updating design tokens/colors from Figma.
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -11,7 +11,12 @@ allowed-tools:
 
 # Sync Variables from Figma
 
-Sync CSS variables from Figma plugin [variables2css](https://www.figma.com/community/plugin/1261234393153346915) export to `globals.css`.
+Sync CSS variables from Figma plugin [variables2css](https://www.figma.com/community/plugin/1261234393153346915) export into the design system's semantic token layer, `packages/design-system/src/styles/tokens.css`.
+
+> The brand palette (`--color-*`) is NOT edited here — it is generated from `@safe-global/theme`
+> into `brand-vars.css`. Change the theme package and run
+> `yarn workspace @safe-global/design-system css-vars`. This skill covers the semantic layer
+> (`--background`, `--primary`, the status tints) only. See packages/design-system/AGENTS.md.
 
 ## Rules
 
@@ -23,12 +28,12 @@ Sync CSS variables from Figma plugin [variables2css](https://www.figma.com/commu
 ## Source Files
 
 - **Source of truth**: Figma plugin export (user provides)
-- **Target**: `apps/web/src/styles/globals.css`
+- **Target**: `packages/design-system/src/styles/tokens.css`
 
 ## Process
 
 1. Ask user for Figma CSS Variables plugin export
-2. Compare Figma values vs `globals.css` existing variables
+2. Compare Figma values vs the existing variables in `tokens.css`
 3. Update only values that differ (use direct hex values)
 4. Verify: `yarn workspace @safe-global/web type-check`
 
@@ -72,7 +77,7 @@ User provides export:
 --general-primary: #12ff80;
 ```
 
-Update in globals.css:
+Update in tokens.css:
 
 ```css
 --background: #ffffff;

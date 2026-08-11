@@ -1,4 +1,4 @@
-import { Link } from '@/components/ui/link'
+import { Link } from '@safe-global/design-system/components/link'
 import { useState } from 'react'
 import { Operation } from '@safe-global/store/gateway/types'
 import type { ReactElement } from 'react'

@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 
-import { Alert } from '@/components/ui/alert'
+import { Alert } from '@safe-global/design-system/components/alert'
 
 import { AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
 import { Countdown } from '@/components/common/Countdown'

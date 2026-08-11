@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { Spinner } from '@/components/ui/spinner'
+import { Spinner } from '@safe-global/design-system/components/spinner'
 import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import { SafeAppLanding } from '@/components/safe-apps/SafeAppLandingPage'
 import { useCurrentChain } from '@/hooks/useChains'

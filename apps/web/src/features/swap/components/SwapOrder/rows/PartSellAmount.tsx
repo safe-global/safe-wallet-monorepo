@@ -1,5 +1,5 @@
 import type { TwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { DataRow } from '@/components/common/Table/DataRow'
 

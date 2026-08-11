@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent } from '@safe-global/design-system/components/dialog'
 import { type ReactNode } from 'react'
 
 export type HnModalProps = {

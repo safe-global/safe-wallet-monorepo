@@ -1,6 +1,6 @@
 import { blo } from 'blo'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Typography } from '@/components/ui/typography'
+import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/design-system/components/avatar'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeBalanceBlock from './SafeBalanceBlock'
 import { ThresholdBadge } from '@/components/common/AccountBadges'

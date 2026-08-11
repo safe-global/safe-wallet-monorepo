@@ -1,8 +1,8 @@
 import { useContext } from 'react'
 import type { SyntheticEvent, ReactElement } from 'react'
 
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Button } from '@safe-global/design-system/components/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
 import type { RecoveryQueueItem } from '../../services/recovery-state'

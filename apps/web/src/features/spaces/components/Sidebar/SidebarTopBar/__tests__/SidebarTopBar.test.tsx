@@ -18,7 +18,7 @@ jest.mock('@/hooks/useIsSpaceRoute', () => ({
   useIsSpaceRoute: () => mockUseIsSpaceRoute(),
 }))
 
-jest.mock('@/components/ui/sidebar', () => ({
+jest.mock('@safe-global/design-system/components/sidebar', () => ({
   SidebarTrigger: ({ className, 'data-testid': testId }: { className?: string; 'data-testid'?: string }) => (
     <button data-testid={testId} className={className}>
       Toggle
@@ -49,7 +49,7 @@ describe('SidebarTopBar', () => {
     mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.accounts })
     mockUseSafeAddressFromUrl.mockReturnValue('')
     mockUseIsSpaceRoute.mockReturnValue(false)
-    const { useSidebar } = require('@/components/ui/sidebar')
+    const { useSidebar } = require('@safe-global/design-system/components/sidebar')
     useSidebar.mockReturnValue({ state: 'expanded' })
   })
 
@@ -62,7 +62,7 @@ describe('SidebarTopBar', () => {
   })
 
   it('exposes the expanded sidebar state on the top bar', () => {
-    const { useSidebar } = require('@/components/ui/sidebar')
+    const { useSidebar } = require('@safe-global/design-system/components/sidebar')
     useSidebar.mockReturnValue({ state: 'expanded' })
 
     render(<SidebarTopBar />)
@@ -71,7 +71,7 @@ describe('SidebarTopBar', () => {
   })
 
   it('exposes the collapsed sidebar state on the top bar', () => {
-    const { useSidebar } = require('@/components/ui/sidebar')
+    const { useSidebar } = require('@safe-global/design-system/components/sidebar')
     useSidebar.mockReturnValue({ state: 'collapsed' })
 
     render(<SidebarTopBar />)
@@ -110,7 +110,7 @@ describe('SidebarTopBar', () => {
   })
 
   it('does not show the Home label pill when the sidebar is collapsed', () => {
-    const { useSidebar } = require('@/components/ui/sidebar')
+    const { useSidebar } = require('@safe-global/design-system/components/sidebar')
     useSidebar.mockReturnValue({ state: 'collapsed' })
     mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
 

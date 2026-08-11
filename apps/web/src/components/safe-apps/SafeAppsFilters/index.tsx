@@ -2,12 +2,18 @@ import { X } from 'lucide-react'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 import SearchField from '@/components/common/SearchField'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Field, FieldLabel } from '@/components/ui/field'
-import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@safe-global/design-system/components/select'
+import { Checkbox } from '@safe-global/design-system/components/checkbox'
+import { Field, FieldLabel } from '@safe-global/design-system/components/field'
+import { Label } from '@safe-global/design-system/components/label'
+import { Button } from '@safe-global/design-system/components/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 import { getUniqueTags } from '@/components/safe-apps/utils'
 import BatchIcon from '@/public/images/apps/batch-icon.svg'
 import css from './styles.module.css'

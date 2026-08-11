@@ -4,7 +4,7 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 import AssetsIcon from '@/public/images/sidebar/assets.svg'
 import AppsIcon from '@/public/images/apps/apps-icon.svg'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 const EmptyBatch = ({ children }: { children: ReactNode }) => (
   <div className="flex w-full max-w-full flex-col items-center px-2 py-6 text-center sm:px-4">

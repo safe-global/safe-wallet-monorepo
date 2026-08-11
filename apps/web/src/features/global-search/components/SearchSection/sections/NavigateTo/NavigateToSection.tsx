@@ -1,7 +1,7 @@
 import { ArrowUpRight, Coins, Repeat2, SquareDashedBottomCode, WalletCards } from 'lucide-react'
 import { type ReactNode, useCallback, useContext, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 import type { SectionItemProps } from '../../sectionItems'
 import useGlobalSearchFilter from '../../../../hooks/useGlobalSearchFilter'
 import SectionWrapper from '../../SectionWrapper'

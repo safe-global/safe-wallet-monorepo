@@ -2,8 +2,8 @@ import { CTA_HEIGHT, CTA_BUTTON_WIDTH } from '@/components/safe-apps/SafeAppLand
 import Link from 'next/link'
 import type { LinkProps } from 'next/link'
 import DemoAppSVG from '@/public/images/apps/apps-demo.svg'
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Button } from '@safe-global/design-system/components/button'
 
 type Props = {
   demoUrl: LinkProps['href']

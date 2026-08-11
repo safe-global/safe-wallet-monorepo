@@ -1,7 +1,7 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/design-system/components/button'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 import ExternalLink from '@/components/common/ExternalLink'
 import { RemoveModuleFlow } from '@/components/tx-flow/flows'

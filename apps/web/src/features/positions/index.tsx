@@ -1,5 +1,10 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Typography } from '@/components/ui/typography'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/design-system/components/accordion'
+import { Typography } from '@safe-global/design-system/components/typography'
 import PositionsHeader from './components/PositionsHeader'
 import { PositionGroup } from './components/PositionGroup'
 import usePositions from './hooks/usePositions'

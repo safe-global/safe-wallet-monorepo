@@ -1,6 +1,6 @@
 import React, { type ReactElement } from 'react'
-import { Link } from '@/components/ui/link'
-import { Typography } from '@/components/ui/typography'
+import { Link } from '@safe-global/design-system/components/link'
+import { Typography } from '@safe-global/design-system/components/typography'
 import TokenIcon from '@/components/common/TokenIcon'
 import TokenAmount from '@/components/common/TokenAmount'
 import { TokenType } from '@safe-global/store/gateway/types'

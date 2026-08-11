@@ -1,0 +1,337 @@
+@import 'tailwindcss/theme.css';
+@import 'tailwindcss/utilities.css';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Tailwind v4 source detection. Every tree whose JSX uses these utilities must be listed
+   here, in the same file that imports tailwindcss/utilities.css — that is how v4 aggregates
+   sources. Under Next.js the framework also auto-scans its own project, but Vite
+   (apps/web-tanstack, this package's Storybook) relies entirely on these directives.
+
+   A missing entry does not error: Tailwind simply emits no rule for the classes it never
+   saw, and the affected components render unstyled. When adding a consumer, add it here. */
+/* This package: the primitives, presets and stories. */
+@source '../';
+/* Sibling packages whose JSX is reused via path aliases. */
+@source '../../../../store';
+@source '../../../../utils';
+/* The apps that render design-system components. */
+@source '../../../../../apps/web/src';
+@source '../../../../../apps/web-tanstack/src';
+
+/* CSS variables scoped to .shadcn-scope ONLY — never :root */
+.shadcn-scope {
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  --dialog: #ffffff;
+  --backdrop: rgba(99, 102, 105, 0.75);
+  --primary: #171717;
+  --primary-foreground: #fafafa;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #171717;
+  --secondary-hover: var(--border);
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
+  /* A well sunk *into* a card, holding sibling rows (nested items of a bulk/conflict group).
+     `--muted` can't express this: it sits darker than `--card` in light mode but lighter in dark, so
+     the recess would read as a raised block in one theme. Pinning it to the page floor keeps the
+     card-above-surface relationship pointing the same way in both. */
+  --surface-sunken: var(--color-background-main);
+  --accent: #f0fdf4;
+  --accent-foreground: #171717;
+  --destructive: #dc2626;
+  --border: #e5e5e5;
+  --input: #ffffff;
+  --ring: #d4d4d4;
+  --chart-1: oklch(0.809 0.105 251.813);
+  --chart-2: oklch(0.623 0.214 259.815);
+  --chart-3: oklch(0.546 0.245 262.881);
+  --chart-4: oklch(0.488 0.243 264.376);
+  --chart-5: oklch(0.424 0.199 265.638);
+  --radius: 1rem;
+  /* Light mode: the sidebar is the white "paper" surface so it reads as a distinct panel against
+     the grey page background (restores the pre-migration white sidebar). Dark mode keeps the
+     page-background blend below. */
+  --sidebar: var(--color-background-paper);
+  --sidebar-foreground: #404040;
+  --sidebar-primary: #171717;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #f0fdf4;
+  --sidebar-accent-foreground: #171717;
+  --sidebar-border: #e5e5e5;
+  --sidebar-ring: #d4d4d4;
+  --accent-secondary: #c4fddd;
+  --accent-secondary-foreground: #121312;
+  --accent-success: #16a34a;
+  /* The Figma warning surface (alert node 4316-12854) is Tailwind yellow, not the coral/amber brand
+     warning tint, so light mode pins the Figma hexes. The file has no dark warning spec — dark mode
+     below keeps the brand tint, which already clears AA. */
+  --warning-subtle: #fefce8; /* yellow-50 */
+  --warning-strong: #a16207; /* yellow-700 */
+  --warning-accent: #eab308; /* yellow-500 */
+  /* Figma error/background (alert node 1255-183763) — the brand token drifted to #ffe6ea, so the
+     Figma hex is pinned here. Dark mode below keeps the brand tint (no dark spec in the file). */
+  --error-subtle: #fff4f6;
+  --z-sidebar: 1300;
+  --z-overlay: 1400;
+  /* A dialog opened from inside another overlay (e.g. Rename from a modal or an open dropdown). Both
+     sit in the same portal container, so at equal z-index the winner would be whichever mounted last. */
+  --z-nested-overlay: 1450;
+  /* Must beat onboard.css's --onboard-modal-z-index (1450) — for dialogs the wallet-connect modal
+     itself opens, such as the private key prompt. */
+  --z-above-onboard: 1451;
+  --z-picker: 1500;
+}
+
+.dark.shadcn-scope,
+.shadcn-scope.dark {
+  --background: #000000;
+  --foreground: #f5f5f5;
+  --card: #171717;
+  --card-foreground: #f5f5f5;
+  --popover: #171717;
+  --popover-foreground: #f5f5f5;
+  --dialog: #1c1c1c;
+  --backdrop: rgba(99, 102, 105, 0.75);
+  --primary: #12ff80;
+  --primary-foreground: #0a0a0a;
+  --secondary: #262626;
+  --secondary-foreground: #f5f5f5;
+  --secondary-hover: rgba(255, 255, 255, 0.12);
+  --muted: #262626;
+  --muted-foreground: #a3a3a3;
+  --surface-sunken: var(--color-background-main);
+  --accent: #052e16;
+  --accent-foreground: #f5f5f5;
+  /* Brand dark error.main (packages/theme dark palette) — the old #9e4042 was sub-AA as text
+     on dark surfaces (alert/badge/button destructive variants). */
+  --destructive: #ff5f72;
+  --destructive-foreground: #ffffff;
+  --border: #404040;
+  --input: #ffffff0d;
+  --ring: #404040;
+  --chart-1: oklch(0.809 0.105 251.813);
+  --chart-2: oklch(0.623 0.214 259.815);
+  --chart-3: oklch(0.546 0.245 262.881);
+  --chart-4: oklch(0.488 0.243 264.376);
+  --chart-5: oklch(0.424 0.199 265.638);
+  /* Matches the page background so the sidebar blends in without a visible panel edge. */
+  --sidebar: var(--color-background-main);
+  --sidebar-foreground: #d4d4d4;
+  --sidebar-primary: #fafafa;
+  --sidebar-primary-foreground: #171717;
+  --sidebar-accent: #052e16;
+  --sidebar-accent-foreground: #f5f5f5;
+  --sidebar-border: #262626;
+  --sidebar-ring: #404040;
+  --accent-secondary: #c4fddd;
+  --accent-secondary-foreground: #121312;
+  --accent-success: #00b460; /* brand dark success.main */
+  --warning-subtle: var(--color-warning-background);
+  --warning-strong: var(--color-warning1-text);
+  --warning-accent: var(--color-warning-main);
+  --error-subtle: var(--color-error-background);
+}
+
+@theme inline {
+  /* Override Tailwind's default system font stack with the Safe{Wallet} app font */
+  --font-sans: 'DM Sans', sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-dialog: var(--dialog);
+  --color-backdrop: var(--backdrop);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-accent-secondary: var(--accent-secondary);
+  --color-accent-secondary-foreground: var(--accent-secondary-foreground);
+  --color-accent-success: var(--accent-success);
+  --color-success-subtle: var(--color-success-background);
+  --color-success-muted: var(--color-success-light);
+  --color-success-strong: var(--color-success-dark);
+  --color-error-strong: var(--color-error-dark);
+  --color-error-subtle: var(--error-subtle);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-warning-muted: var(--color-warning-light);
+  --color-warning-strong: var(--warning-strong);
+  /* Icon accent on the warning tint — brighter than the `warning-strong` ink, mirroring how
+     `destructive` pairs its icon accent with `error-strong` text. */
+  --color-warning-accent: var(--warning-accent);
+  --color-info-subtle: var(--color-info-background);
+  --color-info-muted: var(--color-info-light);
+  --color-info-strong: var(--color-info-dark);
+  --radius-2xs: 0.25rem;
+  --radius-xs: 0.5rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 1.5rem;
+  --radius-infinite: 9999px;
+}
+
+/*
+ * Scoped Tailwind Preflight
+ *
+ * The design system does not own the document, so it must not ship a document-level reset:
+ * a global `tailwindcss/preflight.css` would reset the host app's own element styles
+ * (apps/web's globals.css, the legacy onboard.css) out from under it. Instead the relevant
+ * subset is scoped to `.shadcn-scope`, so it only applies inside a `<ShadcnProvider>`.
+ * Derived from: node_modules/tailwindcss/preflight.css
+ *
+ * Intentionally omitted (document-level — the host app owns these):
+ *   - html/:host line-height, font-family, tap-highlight
+ *   - [hidden] display:none
+ */
+@layer base {
+  /* 1. Box model reset  2. Remove default margins/padding  3. Reset borders */
+  .shadcn-scope,
+  .shadcn-scope *,
+  .shadcn-scope ::before,
+  .shadcn-scope ::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    border-style: solid;
+    border-color: var(--border, currentColor);
+  }
+
+  .shadcn-scope * {
+    @apply outline-ring/50;
+  }
+
+  /* Heading reset — shadcn uses h-tags in accordions, dialogs, sheets, etc. */
+  .shadcn-scope h1,
+  .shadcn-scope h2,
+  .shadcn-scope h3,
+  .shadcn-scope h4,
+  .shadcn-scope h5,
+  .shadcn-scope h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  /* Link reset */
+  .shadcn-scope a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  /* List reset */
+  .shadcn-scope ol,
+  .shadcn-scope ul,
+  .shadcn-scope menu {
+    list-style: none;
+  }
+
+  /* Replaced elements: block display + vertical alignment */
+  .shadcn-scope img,
+  .shadcn-scope svg,
+  .shadcn-scope video,
+  .shadcn-scope canvas,
+  .shadcn-scope audio,
+  .shadcn-scope iframe,
+  .shadcn-scope embed,
+  .shadcn-scope object {
+    display: block;
+    vertical-align: middle;
+  }
+
+  .shadcn-scope img,
+  .shadcn-scope video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Form element reset — fixes browser user-agent button/input defaults */
+  .shadcn-scope button,
+  .shadcn-scope input,
+  .shadcn-scope select,
+  .shadcn-scope optgroup,
+  .shadcn-scope textarea {
+    font: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    border-radius: 0;
+    background-color: transparent;
+    opacity: 1;
+  }
+
+  /* Button appearance fix for iOS Safari */
+  .shadcn-scope button,
+  .shadcn-scope input:where([type='button'], [type='reset'], [type='submit']) {
+    appearance: button;
+  }
+
+  /* Textarea resize */
+  .shadcn-scope textarea {
+    resize: vertical;
+  }
+
+  /* Placeholder styling */
+  .shadcn-scope ::placeholder {
+    opacity: 1;
+  }
+
+  @supports (not (-webkit-appearance: -apple-pay-button)) or (contain-intrinsic-size: 1px) {
+    .shadcn-scope ::placeholder {
+      color: color-mix(in oklab, currentcolor 50%, transparent);
+    }
+  }
+
+  /* Table reset */
+  .shadcn-scope table {
+    text-indent: 0;
+    border-color: inherit;
+    border-collapse: collapse;
+  }
+
+  /* HR reset */
+  .shadcn-scope hr {
+    height: 0;
+    color: inherit;
+    border-top-width: 1px;
+  }
+
+  /* Summary display */
+  .shadcn-scope summary {
+    display: list-item;
+  }
+}

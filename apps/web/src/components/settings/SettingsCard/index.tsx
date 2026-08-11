@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react'
-import { Card } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Card } from '@safe-global/design-system/components/card'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 type SettingsCardProps = Omit<ComponentProps<'div'>, 'title'> & {
   title: ReactNode

@@ -1,6 +1,6 @@
 import { splitError } from '../../services/utils'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/design-system/components/button'
+import { Typography } from '@safe-global/design-system/components/typography'
 import WcLogoHeader from '../WcLogoHeader'
 import css from './styles.module.css'
 

@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import { useReducer } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
-import { Typography } from '@/components/ui/typography'
+import { Collapsible, CollapsibleContent } from '@safe-global/design-system/components/collapsible'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 interface AnalysisDetailsDropdownProps {
   showLabel?: string

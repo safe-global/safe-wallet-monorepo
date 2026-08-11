@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { Progress } from '@/components/ui/progress'
+import { Progress } from '@safe-global/design-system/components/progress'
 
 import css from './styles.module.css'
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import Image from 'next/image'
 import css from './styles.module.css'
 import Link from 'next/link'

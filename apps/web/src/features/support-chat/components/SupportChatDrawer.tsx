@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Typography } from '@/components/ui/typography'
-import { Spinner } from '@/components/ui/spinner'
-import { cn } from '@/utils/cn'
+import { Typography } from '@safe-global/design-system/components/typography'
+import { Spinner } from '@safe-global/design-system/components/spinner'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 // Types
 type ChatStatus = 'idle' | 'waiting' | 'config-sent' | 'ready' | 'error'

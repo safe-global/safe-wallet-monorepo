@@ -1,6 +1,6 @@
 import { type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode } from 'react'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { cn } from '@/utils/cn'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/design-system/components/tooltip'
+import { cn } from '@safe-global/design-system/utils/cn'
 import { TOOLTIP_DELAY_MS } from './utils'
 
 const TRIGGER_CLASS = 'shrink-0 rounded p-0.5 hover:bg-foreground/5 transition-colors cursor-pointer inline-flex'

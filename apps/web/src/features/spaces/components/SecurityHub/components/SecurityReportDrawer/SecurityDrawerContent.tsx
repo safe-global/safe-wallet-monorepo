@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@safe-global/design-system/components/tabs'
 import type { ScanContext, ScanResult } from '@/features/security/types'
 import SecurityDrawerChecks from './tabs/SecurityDrawerChecks'
 import SecurityDrawerDetails from './tabs/SecurityDrawerDetails'

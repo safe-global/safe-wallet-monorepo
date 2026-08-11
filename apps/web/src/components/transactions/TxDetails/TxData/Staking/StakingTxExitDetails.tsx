@@ -1,6 +1,6 @@
 import type { NativeStakingValidatorsExitTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { NativeStakingStatus } from '@safe-global/store/gateway/types'
-import { Link } from '@/components/ui/link'
+import { Link } from '@safe-global/design-system/components/link'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import StakingStatus from './StakingStatus'
 import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'

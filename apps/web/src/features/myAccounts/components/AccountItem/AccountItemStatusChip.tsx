@@ -1,8 +1,8 @@
-import { Chip } from '@/components/ui/chip'
+import { Chip } from '@safe-global/design-system/components/chip'
 import { EyeIcon, CircleAlertIcon } from 'lucide-react'
 import { LoopIcon } from '@/features/counterfactual'
 import css from './styles.module.css'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 export interface AccountItemStatusChipProps {
   isActivating?: boolean

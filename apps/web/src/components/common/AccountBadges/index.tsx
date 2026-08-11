@@ -1,6 +1,6 @@
 import { Clock, User } from 'lucide-react'
-import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/utils/cn'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 /**
  * `3/5` owners pill, shared by the accounts table and the safe selector dropdown.

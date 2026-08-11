@@ -1,6 +1,6 @@
 import { useState, useImperativeHandle, forwardRef, type ReactElement } from 'react'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Button } from '@safe-global/design-system/components/button'
+import { DropdownMenu, DropdownMenuTrigger } from '@safe-global/design-system/components/dropdown-menu'
 import ManageTokensMenu from './ManageTokensMenu'
 import { trackEvent, ASSETS_EVENTS } from '@/services/analytics'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'

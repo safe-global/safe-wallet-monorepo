@@ -7,7 +7,7 @@ import ReplaceTxIcon from '@/public/images/transactions/replace-tx.svg'
 import { TxModalContext } from '../..'
 import TxCard from '../../common/TxCard'
 import { TxFlowContext } from '../../TxFlowProvider'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import DialogActions from '@/components/common/DialogActions'
 
 export function CancelRecoveryOverview(): ReactElement {

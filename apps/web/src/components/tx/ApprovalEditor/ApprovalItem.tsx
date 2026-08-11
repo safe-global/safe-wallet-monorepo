@@ -1,7 +1,7 @@
 import TokenIcon from '@/components/common/TokenIcon'
 import css from '@/components/tx/ApprovalEditor/styles.module.css'
 import type { Approval } from '@safe-global/utils/services/security/modules/ApprovalModule'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { TokenType } from '@safe-global/store/gateway/types'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'
 import { PSEUDO_APPROVAL_VALUES } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'

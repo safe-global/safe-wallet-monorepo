@@ -1,7 +1,7 @@
 import { type MouseEventHandler, type ReactElement } from 'react'
 import type { VariantProps } from 'class-variance-authority'
-import { Badge, type badgeVariants } from '@/components/ui/badge'
-import { cn } from '@/utils/cn'
+import { Badge, type badgeVariants } from '@safe-global/design-system/components/badge'
+import { cn } from '@safe-global/design-system/utils/cn'
 import type { SafeGrade } from '@/features/security/types'
 
 /** Human-readable label per SafeGrade. Shared by every chip in the SecurityHub UI. */

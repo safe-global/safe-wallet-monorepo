@@ -2,8 +2,13 @@ import type { MouseEvent } from 'react'
 import { useState, type ReactElement } from 'react'
 import { EllipsisVertical } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Button } from '@safe-global/design-system/components/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@safe-global/design-system/components/dropdown-menu'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import EditIcon from '@/public/images/common/edit.svg'
 import PlusIcon from '@/public/images/common/plus.svg'

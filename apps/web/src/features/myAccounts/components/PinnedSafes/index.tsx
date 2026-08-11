@@ -2,8 +2,8 @@ import SafesList from '../SafesList'
 import type { AllSafeItems } from '@/hooks/safes'
 import css from '../../styles.module.css'
 import BookmarkIcon from '@/public/images/apps/bookmark.svg'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/design-system/components/button'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { useMemo } from 'react'
 
 interface PinnedSafesProps {

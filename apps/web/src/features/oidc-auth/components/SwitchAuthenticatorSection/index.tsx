@@ -1,9 +1,9 @@
 import { Plus, ShieldCheck, Smartphone } from 'lucide-react'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
+import { Badge } from '@safe-global/design-system/components/badge'
+import { Button } from '@safe-global/design-system/components/button'
+import { Skeleton } from '@safe-global/design-system/components/skeleton'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { useHasFeature } from '@/hooks/useChains'
 import { useAuthenticators } from '../../hooks/useAuthenticators'
 

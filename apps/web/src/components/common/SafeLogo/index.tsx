@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 import css from './SafeLogo.module.css'
 
 const LogoMark = (): ReactElement => (

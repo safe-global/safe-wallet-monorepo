@@ -3,7 +3,7 @@ import type { ReactElement } from 'react'
 
 import PlusIcon from '@/public/images/common/plus.svg'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 import css from './styles.module.css'
 import { maybePlural } from '@safe-global/utils/utils/formatters'

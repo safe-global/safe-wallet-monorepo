@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { Users } from 'lucide-react'
 import SafeWidget from '../SafeWidget'
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '@safe-global/design-system/components/badge'
 import { getTxStatus } from '@/features/transactions/utils'
 import { formatTimeInWords } from '@safe-global/utils/utils/date'
 import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
@@ -10,7 +10,7 @@ import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENE
 import Identicon from '@/components/common/Identicon'
 import { AppRoutes } from '@/config/routes'
 import { getEip3770ShortName } from '@safe-global/utils/utils/chains'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 import css from './styles.module.css'
 
 /** Transaction with safeAddress and chainId from the space pending-transactions API */

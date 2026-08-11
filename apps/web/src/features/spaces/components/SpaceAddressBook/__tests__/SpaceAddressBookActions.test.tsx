@@ -28,7 +28,7 @@ jest.mock('@/services/analytics/events/spaces', () => ({
   SPACE_EVENTS: { EDIT_ADDRESS: {}, REMOVE_ADDRESS: {} },
 }))
 
-jest.mock('@/components/ui/dropdown-menu', () => {
+jest.mock('@safe-global/design-system/components/dropdown-menu', () => {
   const { createContext, useContext, useState, cloneElement } = jest.requireActual('react') as typeof ReactModule
 
   type DropdownCtx = { open: boolean; setOpen: (open: boolean) => void }

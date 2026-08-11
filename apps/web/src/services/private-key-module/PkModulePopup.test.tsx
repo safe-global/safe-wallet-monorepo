@@ -2,7 +2,7 @@ import { render, screen } from '@/tests/test-utils'
 import PkModulePopup from './PkModulePopup'
 import pkStore from './pk-popup-store'
 
-jest.mock('@/hooks/use-mobile', () => ({
+jest.mock('@safe-global/design-system/hooks/use-mobile', () => ({
   useIsMobile: jest.fn(() => false),
 }))
 

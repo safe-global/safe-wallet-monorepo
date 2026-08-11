@@ -18,7 +18,7 @@ jest.mock('@/services/analytics', () => ({
 
 // Render the Base UI popover content inline so the trigger does not need to be
 // opened (the real component renders content into a portal only when open).
-jest.mock('@/components/ui/popover', () => ({
+jest.mock('@safe-global/design-system/components/popover', () => ({
   Popover: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   PopoverTrigger: ({ children, 'aria-label': ariaLabel }: { children: ReactNode; 'aria-label'?: string }) => (
     <button aria-label={ariaLabel}>{children}</button>

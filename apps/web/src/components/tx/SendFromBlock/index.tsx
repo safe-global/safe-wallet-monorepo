@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
 import { ArrowDown } from 'lucide-react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import css from './styles.module.css'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import EthHashInfo from '@/components/common/EthHashInfo'

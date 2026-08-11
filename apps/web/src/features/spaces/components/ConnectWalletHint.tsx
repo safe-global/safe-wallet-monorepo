@@ -1,6 +1,6 @@
 import { Wallet } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@safe-global/design-system/components/alert'
+import { Button } from '@safe-global/design-system/components/button'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 
 /**

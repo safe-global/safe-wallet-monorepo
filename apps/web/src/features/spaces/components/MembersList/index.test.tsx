@@ -32,7 +32,7 @@ jest.mock('./MemberRowActionsMenu', () => ({
 }))
 
 const mockUseIsMobile = jest.fn(() => false)
-jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
+jest.mock('@safe-global/design-system/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 
 const mockUseHasFeature = jest.fn(() => true)
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))

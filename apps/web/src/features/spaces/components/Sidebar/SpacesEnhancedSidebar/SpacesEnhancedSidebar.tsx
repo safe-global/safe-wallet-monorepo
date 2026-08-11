@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
-import { SidebarProvider, useSidebar } from '@/components/ui/sidebar'
+import { SidebarProvider, useSidebar } from '@safe-global/design-system/components/sidebar'
 import { EnhancedSidebar } from '../index'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -14,7 +14,7 @@ import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import useIsQualifiedSafe from '../../../hooks/useIsQualifiedSafe'
 import { SidebarSkeleton } from '../SidebarSkeleton'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 
 interface SpacesEnhancedSidebarProps {

@@ -1,5 +1,5 @@
 import React, { type ReactElement } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import SpeedIcon from '@/public/images/settings/spending-limit/speed.svg'
 
 const SpendingLimitLabel = ({

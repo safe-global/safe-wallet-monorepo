@@ -2,7 +2,7 @@ import type { AddressInfo, DataDecoded } from '@safe-global/store/gateway/AUTO_G
 import type { ReactElement } from 'react'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { isAddress, isArrayParameter, isByte } from '@/utils/transaction-guards'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { Value } from '@/components/transactions/TxDetails/TxData/DecodedData/ValueArray'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 

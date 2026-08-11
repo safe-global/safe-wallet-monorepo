@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react'
 import { ChevronRight } from 'lucide-react'
-import { Alert } from '@/components/ui/alert'
-import { Link } from '@/components/ui/link'
-import { Typography } from '@/components/ui/typography'
+import { Alert } from '@safe-global/design-system/components/alert'
+import { Link } from '@safe-global/design-system/components/link'
+import { Typography } from '@safe-global/design-system/components/typography'
 import { trackEvent } from '@/services/analytics'
 import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 

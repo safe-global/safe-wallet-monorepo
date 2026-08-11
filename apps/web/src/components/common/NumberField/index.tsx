@@ -1,10 +1,10 @@
 import { useEffect, useRef, type ReactNode, type ComponentProps, type ChangeEventHandler } from 'react'
 import { getLocalDecimalSeparator } from '@safe-global/utils/utils/formatNumber'
 
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import { cn } from '@/utils/cn'
+import { Field, FieldDescription, FieldLabel } from '@safe-global/design-system/components/field'
+import { Input } from '@safe-global/design-system/components/input'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@safe-global/design-system/components/input-group'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 export const _formatNumber = (value: string) => {
   value = value.trim()

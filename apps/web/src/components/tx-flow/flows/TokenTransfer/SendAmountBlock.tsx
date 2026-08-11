@@ -1,6 +1,6 @@
 import { type ReactNode, useMemo } from 'react'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 import TokenIcon from '@/components/common/TokenIcon'
 import FiatValue from '@/components/common/FiatValue'
 import FieldsGrid from '@/components/tx/FieldsGrid'

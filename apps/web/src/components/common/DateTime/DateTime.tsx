@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design-system/components/tooltip'
 import { formatDateTime, formatTime, formatTimeInWords } from '@safe-global/utils/utils/date'
 
 type DateTimeProps = {

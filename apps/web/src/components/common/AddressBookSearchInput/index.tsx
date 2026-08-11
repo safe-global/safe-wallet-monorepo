@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactElement } from 'react'
 
 import SearchField from '@/components/common/SearchField'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 interface AddressBookSearchInputProps {
   value: string

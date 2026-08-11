@@ -11,7 +11,7 @@ import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrust
 import useMigrationPrompt from '../../hooks/useMigrationPrompt'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useMemo, useCallback } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 const AccountsList = ({
   searchQuery,

@@ -1,7 +1,7 @@
 import { AppRoutes } from '@/config/routes'
 import type { NextPage } from 'next'
 import NextLink from 'next/link'
-import { Link } from '@/components/ui/link'
+import { Link } from '@safe-global/design-system/components/link'
 import SafeLogo from '@/components/common/SafeLogo'
 
 const Custom403: NextPage = () => {

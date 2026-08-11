@@ -1,7 +1,7 @@
 import type { KeyboardEvent } from 'react'
 import { Copy } from 'lucide-react'
 import CopyTooltip from '../CopyTooltip'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/design-system/utils/cn'
 
 /**
  * Inline copy-address affordance for account rows/cards. Reuses CopyTooltip for

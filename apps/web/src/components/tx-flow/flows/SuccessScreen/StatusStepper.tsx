@@ -2,7 +2,7 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import StatusStep from '@/components/new-safe/create/steps/StatusStep/StatusStep'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { PendingStatus } from '@/store/pendingTxsSlice'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/design-system/components/typography'
 
 const StatusStepper = ({ status, txHash }: { status?: PendingStatus; txHash?: string }) => {
   const { safeAddress } = useSafeInfo()

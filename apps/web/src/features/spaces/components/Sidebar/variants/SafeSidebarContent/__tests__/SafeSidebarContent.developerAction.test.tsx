@@ -70,13 +70,13 @@ jest.mock('@/services/analytics', () => ({
   MixpanelEventParams: { SIDEBAR_ELEMENT: 'sidebarElement', ENTRY_POINT: 'entryPoint' },
 }))
 
-jest.mock('@/components/ui/tooltip', () => ({
+jest.mock('@safe-global/design-system/components/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({ children }: { children: ReactNode }) => <span>{children}</span>,
   TooltipContent: () => null,
 }))
 
-jest.mock('@/components/ui/sidebar', () => ({
+jest.mock('@safe-global/design-system/components/sidebar', () => ({
   useSidebar: () => ({ state: 'expanded', isMobile: false, isTablet: false, setOpenMobile: jest.fn() }),
   SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
@@ -84,6 +84,7 @@ jest.mock('@/components/ui/sidebar', () => ({
   SidebarGroupContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenuItem: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SidebarSeparator: () => <hr />,
   // Mirrors the real primitive's two shapes so NavItem's link-vs-button decision stays observable.
   SidebarMenuButton: ({
     children,
