@@ -30,7 +30,7 @@ const openFlow = async (user: ReturnType<typeof userEvent.setup>) => {
 }
 
 const clickClose = (user: ReturnType<typeof userEvent.setup>) =>
-  user.click(screen.getByRole('button', { name: 'close' }))
+  user.click(screen.getByRole('button', { name: /close/i }))
 
 describe('TxModalProvider close gate', () => {
   beforeEach(() => {
