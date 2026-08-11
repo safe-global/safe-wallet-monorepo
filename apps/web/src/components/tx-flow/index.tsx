@@ -29,6 +29,14 @@ export const TxModalContext = createContext<TxModalContextType>({
   setFullWidth: noop,
 })
 
+type DiscardHandlers = {
+  /** Runs synchronously when there is nothing to lose. */
+  immediate: () => void
+  /** Runs once the user confirms the discard; defaults to `immediate`. A navigation the guard
+      blocked has to be replayed here, since nothing else is left to perform it. */
+  deferred?: () => void
+}
+
 export const TxModalProvider = ({ children }: { children: ReactNode }): ReactElement => {
   const [txFlow, setFlow] = useState<TxModalContextType['txFlow']>(undefined)
   const [fullWidth, setFullWidth] = useState<boolean>(false)
@@ -46,21 +54,18 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
   flowRef.current = txFlow
 
   /**
-   * Runs `action` now when there is no unsaved progress, otherwise parks it behind the discard
-   * dialog; `deferred` tells the action which of the two happened. Returns whether it ran,
-   * because `usePreventNavigation` needs a synchronous answer. The return is always the inverse of
-   * the action's `deferred`, so a caller owning a side effect must place it on one side only.
+   * Runs `immediate` when there is no unsaved progress, otherwise parks `deferred` behind the
+   * discard dialog. Returns whether it ran now, because `beforePopState` in `usePreventNavigation`
+   * needs a synchronous verdict.
    */
-  const requestDiscard = useCallback((action: (deferred: boolean) => void): boolean => {
-    const deferred = shouldWarn.current
-
-    if (deferred) {
-      setPendingDiscard(() => () => action(deferred))
-    } else {
-      action(deferred)
+  const requestDiscard = useCallback(({ immediate, deferred }: DiscardHandlers): boolean => {
+    if (shouldWarn.current) {
+      setPendingDiscard(() => deferred ?? immediate)
+      return false
     }
 
-    return !deferred
+    immediate()
+    return true
   }, [])
 
   const closeFlow = useCallback(() => {
@@ -71,7 +76,7 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
     setSignerAddress?.(undefined)
   }, [setSignerAddress])
 
-  const handleModalClose = useCallback(() => requestDiscard(closeFlow), [requestDiscard, closeFlow])
+  const handleModalClose = useCallback(() => requestDiscard({ immediate: closeFlow }), [requestDiscard, closeFlow])
 
   const applyFlow = useCallback(
     (newTxFlow: TxModalContextType['txFlow'], newOnClose?: () => void, newShouldWarn?: boolean) => {
@@ -94,9 +99,11 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
         !!prev && !!newTxFlow && newTxFlow.type !== SuccessScreenFlow && newTxFlow.type !== NestedTxSuccessScreenFlow
 
       if (isSuperseding) {
-        requestDiscard(() => {
-          onClose.current()
-          applyFlow(newTxFlow, newOnClose, newShouldWarn)
+        requestDiscard({
+          immediate: () => {
+            onClose.current()
+            applyFlow(newTxFlow, newOnClose, newShouldWarn)
+          },
         })
         return
       }
@@ -109,10 +116,13 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
   usePreventNavigation(
     txFlow
       ? (proceed) =>
-          requestDiscard((deferred) => {
-            closeFlow()
-            // The hook navigates itself when the guard allows synchronously — only a blocked navigation is replayed.
-            if (deferred) proceed()
+          requestDiscard({
+            // The hook navigates itself once this returns true, so `proceed` belongs to the blocked branch only.
+            immediate: closeFlow,
+            deferred: () => {
+              closeFlow()
+              proceed()
+            },
           })
       : undefined,
   )

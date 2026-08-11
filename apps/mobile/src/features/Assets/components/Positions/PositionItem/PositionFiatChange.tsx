@@ -31,14 +31,18 @@ export const PositionFiatChange = ({ fiatBalance24hChange, fiatBalance, currency
 
   const direction = getFiatChangeDirection(changeAsNumber)
   const changeAmount = Number(fiatBalance) * changeAsNumber
-  const formattedChangeAmount = formatCurrencyPrecise(Math.abs(changeAmount).toString(), currency)
+  // The percentage stands on its own, so an unusable balance drops the amount rather than the row.
+  const changeAmountLabel = Number.isFinite(changeAmount)
+    ? ` (${formatCurrencyPrecise(Math.abs(changeAmount).toString(), currency)})`
+    : ''
 
   return (
     <InfoSheet title={INFO_SHEET_TITLE} info={INFO_SHEET_DESCRIPTION}>
       <View flexDirection="row" alignItems="center" gap="$1">
         <Text fontSize="$3" color={getFiatChangeColor(direction)} fontWeight={400}>
           {getFiatChangeSign(direction)}
-          {formatPercentage(changeAsNumber)} ({formattedChangeAmount})
+          {formatPercentage(changeAsNumber)}
+          {changeAmountLabel}
         </Text>
       </View>
     </InfoSheet>

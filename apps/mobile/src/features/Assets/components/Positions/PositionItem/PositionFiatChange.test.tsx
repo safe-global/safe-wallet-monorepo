@@ -21,6 +21,13 @@ describe('PositionFiatChange', () => {
     expect(screen.queryByText(/NaN/)).toBeNull()
   })
 
+  it('keeps the percentage but drops the amount when fiatBalance is not numeric', () => {
+    render(<PositionFiatChange fiatBalance="not-a-number" currency="usd" fiatBalance24hChange="5.0" />)
+
+    expect(screen.getByText(/5\.00%/)).toBeTruthy()
+    expect(screen.queryByText(/NaN/)).toBeNull()
+  })
+
   it('renders a genuine zero change as 0.00%', () => {
     render(<PositionFiatChange {...defaultProps} fiatBalance24hChange="0" />)
 
