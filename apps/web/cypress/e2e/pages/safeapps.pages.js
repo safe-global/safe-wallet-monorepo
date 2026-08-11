@@ -119,10 +119,10 @@ export const transactiobUilderHeadlinePreview = 'Transaction Builder'
 export const availableNetworksPreview = 'Available networks'
 export const connecttextPreview = 'Compose custom contract interactions and batch them into a single transaction'
 export const AddressEmptyCodeStr = 'AddressEmptyCode'
-export const gridItem = 'main .MuiPaper-root > .MuiGrid-item'
+export const gridItem = '[data-testid="app-permissions-item"]'
 export const linkNames = {
-  wcLogo: /WalletConnect logo/i,
-  txBuilderLogo: /Transaction Builder logo/i,
+  wcLink: /Open WalletConnect/i,
+  txBuilderLink: /Open Transaction Builder/i,
 }
 const featuredAppsStr = /featured apps/i
 const pinnedAppsStr = 'My pinned apps'
