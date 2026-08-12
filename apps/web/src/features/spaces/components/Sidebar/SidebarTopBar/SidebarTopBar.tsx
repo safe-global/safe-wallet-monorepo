@@ -30,7 +30,7 @@ export const SidebarTopBar = (): ReactElement => {
     <div
       data-testid="sidebar-top-bar"
       data-sidebar-state={state}
-      className={cn('relative w-full', isCollapsed ? 'min-h-16' : 'h-10')}
+      className={cn('relative w-full', isCollapsed ? 'min-h-15' : 'h-10')}
     >
       <SafeLogo
         href={logoHref}
@@ -53,7 +53,7 @@ export const SidebarTopBar = (): ReactElement => {
         className={cn(
           'absolute z-10 shrink-0 cursor-pointer text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent',
           'transition-[left,transform] duration-200 ease-linear',
-          isCollapsed ? 'left-1/2 top-11 -translate-x-1/2' : 'left-[calc(100%-2rem)] -top-2',
+          isCollapsed ? 'left-1/2 top-[38px] -translate-x-1/2' : 'left-[calc(100%-2rem)] -top-2',
         )}
         data-testid="sidebar-trigger"
       />

@@ -12,7 +12,7 @@
 }
 
 .topbarCollapsed {
-  --topbar-offset: 4rem;
+  --topbar-offset: 52px;
 }
 
 .topbarNoSidebar {
@@ -113,11 +113,9 @@
   background-color: var(--background);
 }
 
-/* Reduce left padding when the sidebar is collapsed to icon mode so the content
-   reclaims the freed space. 4rem matches the floating sidebar's collapsed width
-   (--sidebar-width-icon 3rem + 1rem padding). */
+/* 52px matches the collapsed (icon-mode) sidebar width. */
 .mainSidebarCollapsed {
-  padding-left: 4rem;
+  padding-left: 52px;
 }
 
 .mainNoHeader {
