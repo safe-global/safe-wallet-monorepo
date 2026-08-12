@@ -152,12 +152,18 @@ export const isGsCode = (code: unknown): code is GsCode =>
 const GS_CODE_RE = /\bGS\d{3}\b/
 
 /**
- * Extract a known GS code from an error's `reason`/`message`, if present.
- * Lets the UI tell an on-chain (GS) error apart from any other error so the
- * code-only support reference is shown for GS errors only.
+ * Extract a known GS code from an error, if present: an explicit `code`
+ * property (e.g. a pre-check error that identifies its GS code directly), or a
+ * code embedded in `reason`/`message`. Lets the UI tell an on-chain (GS) error
+ * apart from any other error so the code-only support reference is shown for
+ * GS errors only.
  */
-export const getGsCodeFromError = (error?: { message?: string; reason?: string } | null): GsCode | undefined => {
+export const getGsCodeFromError = (
+  error?: { message?: string; reason?: string; code?: unknown } | null,
+): GsCode | undefined => {
   if (!error) return undefined
+
+  if (isGsCode(error.code)) return error.code
 
   const reason = typeof error.reason === 'string' ? error.reason : ''
   const message = typeof error.message === 'string' ? error.message : ''

@@ -4,12 +4,46 @@ import {
   extractGuardErrorCode,
   getGuardErrorInfo,
   getGuardErrorName,
+  isNonceTooLowError,
   isRateLimitError,
   isRevertError,
   GUARD_ERROR_CODES,
 } from '../transaction-errors'
 
 describe('transaction-errors', () => {
+  describe('isNonceTooLowError', () => {
+    it('detects the RPC "nonce too low" text, even wrapped as a viem revert', () => {
+      // Real shape: viem wraps the RPC rejection as a contract revert
+      const viemWrapped = new Error(
+        'The contract function "execTransaction" reverted with the following reason:\nRPC 0xaa36a7 Infura eth_sendRawTransaction: nonce too low: next nonce 42, tx nonce 41',
+      )
+      expect(isNonceTooLowError(viemWrapped)).toBe(true)
+    })
+
+    it('detects a pending same-nonce conflict ("replacement transaction underpriced")', () => {
+      const viemWrapped = new Error(
+        'The contract function "execTransaction" reverted with the following reason:\nRPC 0xaa36a7 Infura eth_sendRawTransaction: replacement transaction underpriced',
+      )
+      expect(isNonceTooLowError(viemWrapped)).toBe(true)
+      expect(isNonceTooLowError(new Error('already known'))).toBe(true)
+    })
+
+    it('detects the structured ethers nonce-conflict codes', () => {
+      expect(
+        isNonceTooLowError(Object.assign(new Error('nonce has already been used'), { code: 'NONCE_EXPIRED' })),
+      ).toBe(true)
+      expect(
+        isNonceTooLowError(Object.assign(new Error('replacement fee too low'), { code: 'REPLACEMENT_UNDERPRICED' })),
+      ).toBe(true)
+    })
+
+    it('returns false for unrelated errors', () => {
+      expect(isNonceTooLowError(new Error('execution reverted: GS026'))).toBe(false)
+      expect(isNonceTooLowError(null)).toBe(false)
+      expect(isNonceTooLowError(undefined)).toBe(false)
+    })
+  })
+
   describe('isRevertError', () => {
     it('treats a GS revert reason as a revert', () => {
       expect(isRevertError(Object.assign(new Error('execution reverted'), { reason: 'GS013' }))).toBe(true)

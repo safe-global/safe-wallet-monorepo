@@ -109,6 +109,16 @@ describe('contractErrors', () => {
   })
 
   describe('getGsCodeFromError', () => {
+    it('extracts a GS code from an explicit code property', () => {
+      // e.g. a pre-check error that identifies its GS code directly, with a clean message
+      expect(getGsCodeFromError({ code: 'GS026', message: 'Another transaction used this nonce.' })).toBe('GS026')
+    })
+
+    it('ignores non-GS code properties', () => {
+      expect(getGsCodeFromError({ code: 'CALL_EXCEPTION', message: 'no gs here' })).toBeUndefined()
+      expect(getGsCodeFromError({ code: -32005, message: 'no gs here' })).toBeUndefined()
+    })
+
     it('extracts a GS code from the reason', () => {
       expect(getGsCodeFromError({ reason: 'GS026', message: 'anything' })).toBe('GS026')
     })
