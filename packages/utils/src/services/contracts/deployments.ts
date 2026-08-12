@@ -10,6 +10,7 @@ import {
   getMultiSendDeployments,
   getFallbackHandlerDeployment,
   getCompatibilityFallbackHandlerDeployments,
+  getExtensibleFallbackHandlerDeployments,
   getProxyFactoryDeployment,
   getProxyFactoryDeployments,
   getSignMessageLibDeployment,
@@ -144,6 +145,14 @@ export const getChainAgnosticAddress = (
 }
 
 /**
+ * Safe versions whose canonical companion deployments (CompatibilityFallbackHandler,
+ * MultiSend, SignMessageLib, …) the app trusts. Only 1.3.0+ is listed — earlier
+ * versions shipped different or no canonical companion contracts. Extend this when
+ * a new Safe version's contracts are rolled out.
+ */
+export const TRUSTED_DEPLOYMENT_VERSIONS: SafeVersion[] = ['1.3.0', '1.4.1', '1.5.0']
+
+/**
  * Checks if any of the deployments returned by the `getDeployments` function for the given `network` and `versions` contain a deployment for the `contractAddress`
  *
  * @param getDeployments function to get the contract deployments
@@ -166,6 +175,48 @@ export const hasMatchingDeployment = (
     const deployedAddresses = toNetworkAddressList(deployments.networkAddresses[network] ?? [])
     return deployedAddresses.some((deployedAddress) => sameAddress(deployedAddress, contractAddress))
   })
+}
+
+export type OfficialFallbackHandlerType = 'compatibility' | 'extensible'
+
+/**
+ * Identifies which official Safe fallback handler deployment an address matches on the
+ * given chain, across the trusted deployment versions. The single source of truth for
+ * "is this fallback handler official" — 1.5.0 ships TWO official handlers, so checking
+ * only the CompatibilityFallbackHandler tables misses the ExtensibleFallbackHandler.
+ *
+ * Note: CoW's TWAP handler is CoW's own ExtensibleFallbackHandler instance and is NOT
+ * covered here — callers that trust it must check it separately.
+ *
+ * @param contractAddress fallback handler address to identify
+ * @param network chainId that is getting checked
+ * @returns the matching handler type, or undefined if the address matches no official deployment
+ */
+export const identifyOfficialFallbackHandler = (
+  contractAddress: string,
+  network: string,
+): OfficialFallbackHandlerType | undefined => {
+  if (
+    hasMatchingDeployment(
+      getCompatibilityFallbackHandlerDeployments,
+      contractAddress,
+      network,
+      TRUSTED_DEPLOYMENT_VERSIONS,
+    )
+  ) {
+    return 'compatibility'
+  }
+  if (
+    hasMatchingDeployment(
+      getExtensibleFallbackHandlerDeployments,
+      contractAddress,
+      network,
+      TRUSTED_DEPLOYMENT_VERSIONS,
+    )
+  ) {
+    return 'extensible'
+  }
+  return undefined
 }
 
 /**
