@@ -3,17 +3,17 @@ import { useHasUntrustedFallbackHandler } from '../useHasUntrustedFallbackHandle
 import { useTWAPFallbackHandlerAddress } from '@/features/swap'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { faker } from '@faker-js/faker'
-import { getCompatibilityFallbackHandlerDeployment } from '@safe-global/safe-deployments'
+import {
+  getCompatibilityFallbackHandlerDeployment,
+  getExtensibleFallbackHandlerDeployment,
+} from '@safe-global/safe-deployments'
 import { safeInfoBuilder } from '@/tests/builders/safe'
+// Imported directly from helpers to avoid circular deps in tests
+import { TWAP_FALLBACK_HANDLER } from '@/features/swap/helpers/utils'
 
-// TWAP_FALLBACK_HANDLER constant - imported directly from helpers to avoid circular deps in tests
-const TWAP_FALLBACK_HANDLER = '0x2c2b9c9a4a25e24b174f26114e8926a9f2128fe4'
-
-jest.mock('@/hooks/useCompatibilityFallbackHandlerDeployments')
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/features/swap', () => ({
   useTWAPFallbackHandlerAddress: jest.fn(),
-  TWAP_FALLBACK_HANDLER: '0x2c2b9c9a4a25e24b174f26114e8926a9f2128fe4',
 }))
 
 const fallbackHandlerAddress = getCompatibilityFallbackHandlerDeployment({
@@ -45,6 +45,43 @@ describe('useHasUntrustedFallbackHandler', () => {
 
     it('if the provided fallback handler is an official one', () => {
       const { result } = renderHook(() => useHasUntrustedFallbackHandler(fallbackHandlerAddress))
+
+      expect(result.current).toBe(false)
+    })
+
+    it('if the provided fallback handler is the official 1.5.0 one', () => {
+      const fallbackHandler150Address = getCompatibilityFallbackHandlerDeployment({
+        network: '1',
+        version: '1.5.0',
+      })?.defaultAddress!
+
+      const { result } = renderHook(() => useHasUntrustedFallbackHandler(fallbackHandler150Address))
+
+      expect(result.current).toBe(false)
+    })
+
+    it('if the provided fallback handler is the official ExtensibleFallbackHandler', () => {
+      const extensibleFallbackHandlerAddress = getExtensibleFallbackHandlerDeployment({
+        network: '1',
+        version: '1.5.0',
+      })?.defaultAddress!
+
+      const { result } = renderHook(() => useHasUntrustedFallbackHandler(extensibleFallbackHandlerAddress))
+
+      expect(result.current).toBe(false)
+    })
+
+    it('if the current Safe`s fallback handler is the official ExtensibleFallbackHandler', () => {
+      const extensibleFallbackHandlerAddress = getExtensibleFallbackHandlerDeployment({
+        network: '1',
+        version: '1.5.0',
+      })?.defaultAddress!
+      ;(useSafeInfo as jest.Mock).mockReturnValue({
+        safe: safeInfoBuilder()
+          .with({ fallbackHandler: { value: extensibleFallbackHandlerAddress } })
+          .build(),
+      })
+      const { result } = renderHook(() => useHasUntrustedFallbackHandler())
 
       expect(result.current).toBe(false)
     })
