@@ -11,6 +11,7 @@ import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import useAsync from '@safe-global/utils/hooks/useAsync'
+import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { Operation } from '@safe-global/store/gateway/types'
 import { type SafeTransaction } from '@safe-global/types-kit'
 
@@ -54,7 +55,14 @@ const extractMultiSendActions = (txPreview: TransactionPreview | undefined): Mul
 }
 
 const BatchTxList = ({ txItems, onDelete }: { txItems: DraftBatchItem[]; onDelete?: (id: string) => void }) => {
+  // `createTx` throws if the SDK singleton is not ready yet. `txItems` alone never changes
+  // afterwards, so opening the sidebar before the SDK initialised left every row a permanent
+  // skeleton. Depending on the SDK re-runs this once it lands.
+  const safeSDK = useSafeSDK()
+
   const [batchSafeTx] = useAsync(() => {
+    if (!safeSDK) return
+
     const createSafeTx = async (): Promise<SafeTransaction> => {
       const isMultiSend = txItems.length > 1
       const tx = isMultiSend
@@ -64,7 +72,7 @@ const BatchTxList = ({ txItems, onDelete }: { txItems: DraftBatchItem[]; onDelet
     }
 
     return createSafeTx()
-  }, [txItems])
+  }, [txItems, safeSDK])
 
   const [decodedBatch] = useTxPreview(batchSafeTx?.data)
 
