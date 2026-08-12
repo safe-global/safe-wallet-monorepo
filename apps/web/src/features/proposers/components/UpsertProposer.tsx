@@ -11,7 +11,11 @@ import {
   signProposerTypedData,
   signProposerTypedDataForSafe,
 } from '@/features/proposers/utils/utils'
-import { SMART_CONTRACT_PROPOSER_ERROR, SMART_CONTRACT_PROPOSER_INFO } from '@/features/proposers/constants'
+import {
+  SMART_CONTRACT_PROPOSER_EDIT_ERROR,
+  SMART_CONTRACT_PROPOSER_ERROR,
+  SMART_CONTRACT_PROPOSER_INFO,
+} from '@/features/proposers/constants'
 import { useDelegatorSelection } from '../hooks/useDelegatorSelection'
 import { buildDelegationOrigin, createDelegationMessage } from '../services/delegationMessages'
 import useChainId from '@/hooks/useChainId'
@@ -66,6 +70,7 @@ type ProposerEntry = {
 
 const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) => {
   const [error, setError] = useState<Error>()
+  const [blockedReason, setBlockedReason] = useState<string>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [multiSigInitiated, setMultiSigInitiated] = useState<boolean>(false)
   const [addDelegateV1] = useDelegatesPostDelegateV1Mutation()
@@ -120,9 +125,17 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
     const name = sanitizeName(data.name)
 
     setError(undefined)
+    setBlockedReason(undefined)
     setIsLoading(true)
 
     try {
+      // Backstop for the edit flow, where the address field (and its validator) is not rendered
+      const smartContractError = await addressIsNotSmartContract(chainId, SMART_CONTRACT_PROPOSER_ERROR)(data.address)
+      if (smartContractError) {
+        setBlockedReason(isEditing ? SMART_CONTRACT_PROPOSER_EDIT_ERROR : smartContractError)
+        return
+      }
+
       const shouldEthSign = isEthSignWallet(wallet)
       const signer = await getAssertedChainSigner(wallet.provider)
 
@@ -305,6 +318,12 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
               {error && (
                 <div className="mt-4">
                   <ErrorMessage error={error}>Error adding proposer</ErrorMessage>
+                </div>
+              )}
+
+              {blockedReason && (
+                <div className="mt-4">
+                  <ErrorMessage>{blockedReason}</ErrorMessage>
                 </div>
               )}
 

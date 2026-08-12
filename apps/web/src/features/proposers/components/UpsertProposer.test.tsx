@@ -1,7 +1,11 @@
 import type { ReactElement, ReactNode } from 'react'
 import { faker } from '@faker-js/faker'
 import { render, fakerChecksummedAddress } from '@/tests/test-utils'
-import { SMART_CONTRACT_PROPOSER_ERROR, SMART_CONTRACT_PROPOSER_INFO } from '@/features/proposers/constants'
+import {
+  SMART_CONTRACT_PROPOSER_EDIT_ERROR,
+  SMART_CONTRACT_PROPOSER_ERROR,
+  SMART_CONTRACT_PROPOSER_INFO,
+} from '@/features/proposers/constants'
 import { act, fireEvent, waitFor } from '@testing-library/react'
 import * as proposerUtils from '@/features/proposers/utils/utils'
 import * as walletUtils from '@/utils/wallets'
@@ -238,6 +242,91 @@ describe('UpsertProposer signing logic', () => {
 
       await waitFor(() => expect(getByTestId('submit-proposer-btn')).not.toBeDisabled())
       expect(queryByText(SMART_CONTRACT_PROPOSER_INFO)).toBeNull()
+    })
+  })
+
+  describe('smart contract guard on submit (edit flow)', () => {
+    const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>
+    const mockUseDelegatorSelection = useDelegatorSelection as jest.MockedFunction<typeof useDelegatorSelection>
+    const mockGetSigner = getAssertedChainSigner as jest.MockedFunction<typeof getAssertedChainSigner>
+    const mockUseAddDelegateV2 = useDelegatesPostDelegateV2Mutation as jest.MockedFunction<
+      typeof useDelegatesPostDelegateV2Mutation
+    >
+
+    const addDelegateV2 = jest.fn().mockReturnValue({ unwrap: () => Promise.resolve() })
+
+    const proposer = {
+      delegate: fakerChecksummedAddress(),
+      delegator: fakerChecksummedAddress(),
+      safe: fakerChecksummedAddress(),
+      label: 'Existing proposer',
+    }
+
+    beforeEach(() => {
+      mockUseWallet.mockReturnValue({
+        address: fakerChecksummedAddress(),
+        chainId: '1',
+        label: 'MetaMask',
+        provider: MockEip1193Provider,
+      })
+
+      mockUseDelegatorSelection.mockReturnValue({
+        delegatorOptions: [],
+        setSelectedDelegator: jest.fn(),
+        effectiveDelegator: undefined,
+        parentSafeAddress: undefined,
+        parentThreshold: undefined,
+        parentOwners: undefined,
+        isMultiSigRequired: false,
+        isParentLoading: false,
+        canEdit: true,
+      })
+
+      mockGetSigner.mockResolvedValue({} as Awaited<ReturnType<typeof getAssertedChainSigner>>)
+      jest.spyOn(proposerUtils, 'signProposerTypedData').mockResolvedValue('0xsignature')
+
+      mockUseAddDelegateV2.mockReturnValue([addDelegateV2, {} as never])
+      useDelegatesPostDelegateV1Mutation.mockReturnValue([jest.fn(), {}])
+    })
+
+    it('blocks submitting an edit when the existing proposer is a smart contract', async () => {
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(true)
+
+      const { getByTestId, findByText } = render(
+        <UpsertProposer onClose={jest.fn()} onSuccess={jest.fn()} proposer={proposer} />,
+      )
+
+      await waitFor(() => expect(getByTestId('submit-proposer-btn')).not.toBeDisabled())
+
+      act(() => {
+        fireEvent.click(getByTestId('submit-proposer-btn'))
+      })
+
+      expect(await findByText(SMART_CONTRACT_PROPOSER_EDIT_ERROR)).toBeInTheDocument()
+      expect(addDelegateV2).not.toHaveBeenCalled()
+    })
+
+    it('submits an edit when the existing proposer is an EOA', async () => {
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
+
+      const { getByTestId, queryByText } = render(
+        <UpsertProposer onClose={jest.fn()} onSuccess={jest.fn()} proposer={proposer} />,
+      )
+
+      await waitFor(() => expect(getByTestId('submit-proposer-btn')).not.toBeDisabled())
+
+      act(() => {
+        fireEvent.click(getByTestId('submit-proposer-btn'))
+      })
+
+      await waitFor(() =>
+        expect(addDelegateV2).toHaveBeenCalledWith(
+          expect.objectContaining({
+            createDelegateDto: expect.objectContaining({ delegate: proposer.delegate }),
+          }),
+        ),
+      )
+      expect(queryByText(SMART_CONTRACT_PROPOSER_EDIT_ERROR)).toBeNull()
     })
   })
 })
