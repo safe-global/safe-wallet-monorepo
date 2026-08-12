@@ -296,7 +296,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
               <div className="my-4">
                 {isEditing ? (
-                  <div className="mb-6">
+                  <div className="mb-6 text-sm [&_svg]:size-4">
                     <EthHashInfo address={proposer?.delegate} showCopyButton hasExplorer shortAddress={false} />
                   </div>
                 ) : (
