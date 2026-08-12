@@ -107,10 +107,13 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
   const safeOwnerAddresses = useMemo(() => safe.owners.map((owner) => owner.value), [safe.owners])
 
   const validateAddress = useCallback<Validate<string>>(
-    async (value) =>
-      addressIsNotCurrentSafe(safeAddress, 'Cannot add Safe account itself as proposer')(value) ??
-      addressIsNotOwner(safeOwnerAddresses, 'Cannot add Safe Owner as proposer')(value) ??
-      (await addressIsNotSmartContract(chainId, SMART_CONTRACT_PROPOSER_ERROR)(value)),
+    async (value) => {
+      const notCurrentSafe = addressIsNotCurrentSafe(safeAddress, 'Cannot add Safe account itself as proposer')
+      const notOwner = addressIsNotOwner(safeOwnerAddresses, 'Cannot add Safe Owner as proposer')
+      const notSmartContract = addressIsNotSmartContract(chainId, SMART_CONTRACT_PROPOSER_ERROR)
+
+      return notCurrentSafe(value) ?? notOwner(value) ?? (await notSmartContract(value))
+    },
     [safeAddress, safeOwnerAddresses, chainId],
   )
 
