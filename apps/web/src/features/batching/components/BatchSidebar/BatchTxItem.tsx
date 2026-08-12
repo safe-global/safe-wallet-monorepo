@@ -1,6 +1,7 @@
 import type { TransactionData, MultiSend } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type SyntheticEvent, useMemo, useCallback } from 'react'
-import { ButtonBase, ListItem, Skeleton, SvgIcon } from '@mui/material'
+import { ListItem } from '@/components/ui/list'
+import { Skeleton } from '@/components/ui/skeleton'
 import css from './styles.module.css'
 
 import { type DraftBatchItem } from '../../store/batchSlice'
@@ -53,7 +54,7 @@ const BatchTxItem = ({
   )
 
   return (
-    <ListItem disablePadding sx={{ gap: 2, alignItems: 'flex-start' }}>
+    <ListItem className="items-start gap-4 py-0">
       <div className={css.number}>{count}</div>
       {txDecoded ? (
         <div className={css.accordion}>
@@ -63,15 +64,20 @@ const BatchTxItem = ({
             txData={transactionDetails}
             actions={
               onDelete ? (
-                <ButtonBase onClick={handleDelete} title="Delete transaction" sx={{ p: 0.5 }}>
-                  <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" />
-                </ButtonBase>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  title="Delete transaction"
+                  className="inline-flex cursor-pointer items-center justify-center border-0 bg-transparent p-0.5"
+                >
+                  <DeleteIcon className="size-4" />
+                </button>
               ) : undefined
             }
           />
         </div>
       ) : (
-        <Skeleton width="100%" height="56px" />
+        <Skeleton className="h-[56px] w-full" />
       )}
     </ListItem>
   )

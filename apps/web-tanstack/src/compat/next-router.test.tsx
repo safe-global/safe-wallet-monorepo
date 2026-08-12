@@ -170,3 +170,54 @@ describe('next-router compat push/replace', () => {
     expect(router.history.length).toBe(1)
   })
 })
+
+/**
+ * `beforePopState` backs the tx-flow's Back/Forward guard (usePreventNavigation). It used to be a
+ * no-op here, so a browser Back silently discarded an in-progress transaction in this app while the
+ * Next app asked first.
+ */
+describe('next-router compat beforePopState', () => {
+  const dispatchPopState = (path: string) => {
+    window.history.pushState({}, '', path)
+    act(() => {
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    })
+  }
+
+  beforeEach(() => {
+    capturedRouter = undefined
+  })
+
+  it('invokes the registered callback on a browser popstate, with the destination', async () => {
+    const router = buildTestRouter('/spaces?spaceId=abc-123')
+    render(<RouterProvider router={router} />)
+    expect(await screen.findByText('spaces page')).toBeInTheDocument()
+
+    const seen: { url: string; as: string }[] = []
+    capturedRouter!.beforePopState(({ url, as }) => {
+      seen.push({ url, as })
+      return false
+    })
+
+    dispatchPopState(`/home?safe=${SAFE_PARAM}`)
+
+    // The destination the user popped to — what usePreventNavigation replays via `proceed`.
+    expect(seen).toEqual([{ url: `/home?safe=${SAFE_PARAM}`, as: `/home?safe=${SAFE_PARAM}` }])
+  })
+
+  it('replaces the previous callback rather than stacking, as Next does', async () => {
+    const router = buildTestRouter('/spaces?spaceId=abc-123')
+    render(<RouterProvider router={router} />)
+    expect(await screen.findByText('spaces page')).toBeInTheDocument()
+
+    const first = jest.fn(() => true)
+    const second = jest.fn(() => true)
+    capturedRouter!.beforePopState(first)
+    capturedRouter!.beforePopState(second)
+
+    dispatchPopState('/home')
+
+    expect(first).not.toHaveBeenCalled()
+    expect(second).toHaveBeenCalledTimes(1)
+  })
+})

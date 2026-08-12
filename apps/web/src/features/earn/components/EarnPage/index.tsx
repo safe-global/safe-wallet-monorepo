@@ -1,4 +1,3 @@
-import { Stack } from '@mui/material'
 import Disclaimer from '@/components/common/Disclaimer'
 import WidgetDisclaimer from '@/components/common/WidgetDisclaimer'
 import BlockedAddress from '@/components/common/BlockedAddress'
@@ -13,16 +12,9 @@ const EarnPage = () => {
 
   if (blockedAddress) {
     return (
-      <Stack
-        direction="column"
-        sx={{
-          alignItems: 'center',
-          justifyContent: 'center',
-          flex: 1,
-        }}
-      >
+      <div className="flex flex-1 flex-col items-center justify-center">
         <BlockedAddress address={blockedAddress} featureTitle="Earn feature with Kiln" />
-      </Stack>
+      </div>
     )
   }
 
@@ -33,21 +25,14 @@ const EarnPage = () => {
       {isConsentAccepted ? (
         <EarnView />
       ) : (
-        <Stack
-          direction="column"
-          sx={{
-            alignItems: 'center',
-            justifyContent: 'center',
-            flex: 1,
-          }}
-        >
+        <div className="flex flex-1 flex-col items-center justify-center">
           <Disclaimer
             title="Note"
             content={<WidgetDisclaimer widgetName="Earn Widget by Kiln" />}
             onAccept={onAccept}
             buttonText="Continue"
           />
-        </Stack>
+        </div>
       )}
     </>
   )

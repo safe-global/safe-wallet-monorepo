@@ -12,6 +12,7 @@ const defaultSetup = createMockStory({
 })
 
 const meta = {
+  title: 'Features/Spaces/CreateSpaceOnboarding',
   component: CreateSpaceOnboarding,
   loaders: [mswLoader],
   parameters: {

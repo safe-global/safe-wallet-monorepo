@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import type { ReactElement } from 'react'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -30,7 +30,7 @@ export function NestedSafeBreadcrumbs(): ReactElement | null {
           query: { ...query, safe: prefixedAddress },
         }}
       />
-      <Typography variant="body2">/</Typography>
+      <Typography variant="paragraph-small">/</Typography>
       <BreadcrumbItem title="Nested Safe" address={safeAddress} />
     </>
   )

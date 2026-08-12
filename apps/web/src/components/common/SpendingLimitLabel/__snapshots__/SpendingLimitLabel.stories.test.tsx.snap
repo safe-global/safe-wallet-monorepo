@@ -1,22 +1,26 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./SpendingLimitLabel.stories Default 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-171onha"
+    class="shadcn-scope"
   >
-    <mock-icon
-      aria-hidden=""
-      class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium mui-style-16hj0i2-MuiSvgIcon-root"
-      focusable="false"
-    />
-    <p
-      class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+    <div
+      class="flex items-center gap-1 "
     >
-      100 ETH per day
-    </p>
+      <mock-icon
+        class="size-6 text-[var(--color-border-main)]"
+      />
+      <p
+        class="m-0 text-base leading-6 font-normal"
+        data-slot="typography"
+        data-variant="paragraph"
+      >
+        100 ETH per day
+      </p>
+    </div>
   </div>
 </div>
 `;
@@ -26,13 +30,19 @@ exports[`./SpendingLimitLabel.stories OneTime 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-171onha"
+    class="shadcn-scope"
   >
-    <p
-      class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+    <div
+      class="flex items-center gap-1 "
     >
-      50 ETH
-    </p>
+      <p
+        class="m-0 text-base leading-6 font-normal"
+        data-slot="typography"
+        data-variant="paragraph"
+      >
+        50 ETH
+      </p>
+    </div>
   </div>
 </div>
 `;
@@ -42,18 +52,22 @@ exports[`./SpendingLimitLabel.stories WithCustomLabel 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-171onha"
+    class="shadcn-scope"
   >
-    <mock-icon
-      aria-hidden=""
-      class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium mui-style-16hj0i2-MuiSvgIcon-root"
-      focusable="false"
-    />
-    <p
-      class="MuiTypography-root MuiTypography-body1 mui-style-10qi7i0-MuiTypography-root"
+    <div
+      class="flex items-center gap-1 "
     >
-      Custom spending limit
-    </p>
+      <mock-icon
+        class="size-6 text-[var(--color-border-main)]"
+      />
+      <p
+        class="m-0 text-base leading-6 font-semibold text-primary"
+        data-slot="typography"
+        data-variant="paragraph-bold"
+      >
+        Custom spending limit
+      </p>
+    </div>
   </div>
 </div>
 `;

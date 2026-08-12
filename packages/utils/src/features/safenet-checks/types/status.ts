@@ -1,9 +1,8 @@
 import type { Hex } from './events'
 
 /**
- * Full lifecycle status. The last two (`AWAITING_VERIFICATION`,
- * `VERIFICATION_FAILED`) are internal-only: they never reach the UI directly —
- * {@link toPublicStatus} folds them into the public set. Crucially,
+ * Full lifecycle status. `AWAITING_VERIFICATION` and `VERIFICATION_FAILED` are
+ * internal-only — {@link toPublicStatus} folds them into the public set, and
  * `VERIFICATION_FAILED` never becomes `BENIGN`.
  */
 export enum CheckStatus {
@@ -15,14 +14,7 @@ export enum CheckStatus {
   AWAITING_VERIFICATION = 'AWAITING_VERIFICATION',
   /** Attested, but the FROST signature failed verification (terminal). */
   VERIFICATION_FAILED = 'VERIFICATION_FAILED',
-  /**
-   * Attested AND cryptographically verified. The only green state.
-   *
-   * Reached from either path: the validator set's own deterministic checks
-   * (`TransactionAttested`, what beta runs today) or the sentinel-oracle checks
-   * (`OracleTransactionAttested`, richer checks, not yet live). Both require a
-   * verified FROST signature first.
-   */
+  /** Attested AND cryptographically verified. The only green state. */
   BENIGN = 'BENIGN',
   /** A negative verdict was observed (rejected / disapproved). */
   MALICIOUS = 'MALICIOUS',
@@ -42,12 +34,9 @@ export type PublicCheckStatus =
   | CheckStatus.UNAVAILABLE
 
 /**
- * Map an internal status to its public projection.
- *
- * `AWAITING_VERIFICATION` reads as still-working (`IN_PROGRESS`);
- * `VERIFICATION_FAILED` reads as `TIMED_OUT` (the copy is timeout-style — a
- * check whose attestation cannot be trusted is treated as not-completed, never
- * as safe).
+ * Map an internal status to its public projection: `AWAITING_VERIFICATION`
+ * reads as still-working, `VERIFICATION_FAILED` as `TIMED_OUT` — an attestation
+ * that cannot be trusted is not-completed, never safe.
  */
 export const toPublicStatus = (status: CheckStatus): PublicCheckStatus => {
   switch (status) {

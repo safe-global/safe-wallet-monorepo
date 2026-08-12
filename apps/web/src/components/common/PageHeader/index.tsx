@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import classNames from 'classnames'
 
 import type { ReactElement } from 'react'
@@ -15,14 +15,14 @@ const PageHeader = ({
   noBorder?: boolean
 }): ReactElement => {
   return (
-    <Box className={classNames(css.container, { [css.border]: noBorder })}>
+    <div className={classNames(css.container, { [css.border]: noBorder })}>
       {title && (
         <Typography variant="h3" className={css.title}>
           {title}
         </Typography>
       )}
       {action}
-    </Box>
+    </div>
   )
 }
 

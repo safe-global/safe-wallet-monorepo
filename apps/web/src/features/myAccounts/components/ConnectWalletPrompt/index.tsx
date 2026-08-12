@@ -1,5 +1,6 @@
-import { Alert, AlertTitle, Button, Typography, Box } from '@mui/material'
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { WalletIcon } from 'lucide-react'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 
 /**
@@ -10,22 +11,16 @@ const ConnectWalletPrompt = () => {
   const connectWallet = useConnectWallet()
 
   return (
-    <Alert severity="info" icon={<AccountBalanceWalletIcon />} data-testid="connect-wallet-prompt" sx={{ mb: 2 }}>
+    <Alert data-testid="connect-wallet-prompt" className="mb-4">
+      <WalletIcon />
       <AlertTitle>Connect your wallet</AlertTitle>
-      <Typography variant="body2" sx={{ mb: 2 }}>
-        Connect your wallet to view and manage your Safe accounts.
-      </Typography>
-      <Box>
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<AccountBalanceWalletIcon />}
-          onClick={connectWallet}
-          data-testid="connect-wallet-button"
-        >
+      <AlertDescription className="mb-4">Connect your wallet to view and manage your Safe accounts.</AlertDescription>
+      <div>
+        <Button size="sm" onClick={connectWallet} data-testid="connect-wallet-button">
+          <WalletIcon />
           Connect wallet
         </Button>
-      </Box>
+      </div>
     </Alert>
   )
 }

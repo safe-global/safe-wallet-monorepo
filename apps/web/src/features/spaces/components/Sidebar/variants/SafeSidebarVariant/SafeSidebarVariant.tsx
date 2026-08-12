@@ -12,9 +12,10 @@ import {
   SidebarSeparator,
 } from '@/components/ui/sidebar'
 import css from '../../styles.module.css'
-import type { ResolvedSidebarItem, SafeSidebarVariantProps } from '../../types'
+import type { ResolvedSidebarNavItem, SafeSidebarVariantProps } from '../../types'
 import { AppRoutes } from '@/config/routes'
 import { NavItem } from '../NavItem'
+import { SidebarDeveloperGroup } from '../SidebarDeveloperGroup'
 import { SidebarActionButton } from '../../NewTransactionButton'
 import { SafeSidebarWorkspaceHeader } from '../SafeSidebarWorkspaceHeader'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -55,7 +56,7 @@ export const SafeSidebarVariant = ({
 
   // Settings lives in the main nav group but isn't config-driven: its outdated indicator and
   // active state depend on the current Safe. Render it through NavItem so styling stays in sync.
-  const settingsItem: ResolvedSidebarItem = {
+  const settingsItem: ResolvedSidebarNavItem = {
     icon: Settings,
     label: 'Settings',
     href: AppRoutes.settings.setup,
@@ -129,6 +130,8 @@ export const SafeSidebarVariant = ({
             </SidebarGroup>
           </motion.div>
         )}
+
+        <SidebarDeveloperGroup isLoading={isLoading} />
       </motion.div>
     </SidebarContent>
   )

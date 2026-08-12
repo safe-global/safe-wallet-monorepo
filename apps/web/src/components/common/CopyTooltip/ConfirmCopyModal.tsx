@@ -1,18 +1,10 @@
-import { Close } from '@mui/icons-material'
-import {
-  Dialog,
-  DialogTitle,
-  SvgIcon,
-  Typography,
-  IconButton,
-  Divider,
-  DialogContent,
-  DialogActions,
-  Button,
-  Box,
-} from '@mui/material'
+import { XIcon } from 'lucide-react'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import { type ReactElement, useEffect, type SyntheticEvent } from 'react'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { Separator } from '@/components/ui/separator'
+import { Typography } from '@/components/ui/typography'
 import { trackEvent, TX_LIST_EVENTS } from '@/services/analytics'
 import Track from '../Track'
 
@@ -33,35 +25,37 @@ const ConfirmCopyModal = ({ open, onClose, onCopy, children }: ConfirmCopyModalP
   }, [open])
 
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>
-        <Box data-testid="untrusted-token-warning" display="flex" flexDirection="row" alignItems="center" gap={1}>
-          <SvgIcon component={WarningIcon} inheritViewBox color="warning" sx={{ mb: -0.4 }} />
-          <Typography variant="h6" fontWeight={700}>
-            Before you copy
-          </Typography>
-          <IconButton aria-label="close" onClick={onClose} sx={{ marginLeft: 'auto' }}>
-            <Close />
-          </IconButton>
-        </Box>
-      </DialogTitle>
-      <Divider />
-      <DialogContent>{children}</DialogContent>
-      <Divider />
-      <DialogActions sx={{ padding: 3 }}>
-        <Box className={css.dialogActions} gap={1}>
-          <Track {...TX_LIST_EVENTS.COPY_WARNING_PROCEED}>
-            <Button size="small" variant="text" color="primary" onClick={onCopy} fullWidth>
-              Proceed and copy
+    <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
+      <DialogContent showCloseButton={false}>
+        <DialogTitle render={<div />} className="p-4">
+          <div data-testid="untrusted-token-warning" className="flex flex-row items-center gap-2">
+            <WarningIcon className="-mb-0.5 size-6 text-[var(--color-warning-main)]" />
+            <Typography variant="h4" className="font-bold">
+              Before you copy
+            </Typography>
+            <Button variant="ghost" size="icon-sm" aria-label="close" onClick={onClose} className="ml-auto">
+              <XIcon />
             </Button>
-          </Track>
-          <Track {...TX_LIST_EVENTS.COPY_WARNING_CLOSE}>
-            <Button size="small" variant="contained" color="primary" onClick={onClose} fullWidth>
-              Do not copy
-            </Button>
-          </Track>
-        </Box>
-      </DialogActions>
+          </div>
+        </DialogTitle>
+        <Separator />
+        <div className="p-4">{children}</div>
+        <Separator />
+        <div className="p-6">
+          <div className={css.dialogActions + ' gap-2'}>
+            <Track {...TX_LIST_EVENTS.COPY_WARNING_PROCEED}>
+              <Button variant="ghost" size="sm" onClick={onCopy} className="w-full">
+                Proceed and copy
+              </Button>
+            </Track>
+            <Track {...TX_LIST_EVENTS.COPY_WARNING_CLOSE}>
+              <Button variant="default" size="sm" onClick={onClose} className="w-full">
+                Do not copy
+              </Button>
+            </Track>
+          </div>
+        </div>
+      </DialogContent>
     </Dialog>
   )
 }

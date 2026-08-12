@@ -108,7 +108,7 @@ export function verifyAccountsListContains(name) {
 }
 
 export function typeSafeName(name) {
-  cy.get(nameInput).find('input').clear().type(name)
+  cy.get(nameInput).clear().type(name)
 }
 
 export function clickSaveBtn() {

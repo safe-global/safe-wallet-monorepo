@@ -1,6 +1,5 @@
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { Typography } from '@mui/material'
 import { useCallback, useContext, useEffect } from 'react'
 import type { PropsWithChildren, ReactElement } from 'react'
 
@@ -9,6 +8,7 @@ import { OwnerList } from '../../common/OwnerList'
 import { SafeTxContext } from '../../SafeTxProvider'
 import type { RecoveryFlowProps } from '.'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
+import { Typography } from '@/components/ui/typography'
 
 export function RemoveRecoveryFlowReview({
   delayModifier,
@@ -36,7 +36,7 @@ export function RemoveRecoveryFlowReview({
       <OwnerList
         title="Removing Recoverer"
         owners={delayModifier.recoverers.map((recoverer) => ({ value: recoverer }))}
-        sx={{ bgcolor: ({ palette }) => `${palette.warning.background} !important` }}
+        className="bg-[var(--color-warning-background)]"
       />
 
       {children}

@@ -9,4 +9,26 @@
 
   /*this rule is needed to prevent the bar from being expanded outside the screen without scrolling on mobile devices*/
   max-height: 90vh;
+
+  /* The bar's own surface. It never needed one here before: MUI's <Accordion> rendered as a Paper,
+     which brought its background with it. The shadcn Accordion is an unstyled div, so the bar came
+     out fully transparent and the dimmed backdrop showed straight through it, behind the rows.
+     Page grey rather than paper white: the queued transactions are white cards, so they need the
+     same surface behind them that they get on the Transactions page — on white they dissolve into
+     the bar. Rounded at the top only — it is anchored to the bottom edge — and lifted with the
+     elevation Paper used to provide, so it reads as sitting above the app frame. */
+  background-color: var(--color-background-main);
+  border-top-left-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-md);
+  box-shadow: 0 -2px 12px rgb(0 0 0 / 0.12);
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+
+  /* one below .barWrapper, or the scrim covers the bar and swallows every click inside it */
+  z-index: 1199;
+
+  background-color: rgb(0 0 0 / 0.5);
 }

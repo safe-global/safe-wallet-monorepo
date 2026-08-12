@@ -4,25 +4,28 @@ exports[`./index.stories Default 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <span
-    aria-label="Copy to clipboard"
-    class=""
-    data-mui-internal-clone-element="true"
-    style="cursor: pointer;"
+  <div
+    class="shadcn-scope"
   >
-    <button
+    <span
       aria-label="Copy to clipboard"
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-uneijd-MuiButtonBase-root-MuiIconButton-root"
-      tabindex="0"
-      type="button"
+      class="inline-flex cursor-pointer"
+      data-slot="tooltip-trigger"
+      id="base-ui-_r_1_"
     >
-      <mock-icon
-        aria-hidden=""
-        class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-gvpe62-MuiSvgIcon-root"
-        data-testid="copy-btn-icon"
-        focusable="false"
-      />
-    </button>
-  </span>
+      <button
+        aria-label="Copy to clipboard"
+        class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm"
+        data-slot="button"
+        tabindex="0"
+        type="button"
+      >
+        <mock-icon
+          class="size-5 text-[var(--color-border-main)]"
+          data-testid="copy-btn-icon"
+        />
+      </button>
+    </span>
+  </div>
 </div>
 `;

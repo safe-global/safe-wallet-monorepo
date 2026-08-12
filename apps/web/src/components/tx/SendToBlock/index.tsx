@@ -1,4 +1,3 @@
-import { Typography } from '@mui/material'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import FieldsGrid from '../FieldsGrid'
 
@@ -17,7 +16,7 @@ const SendToBlock = ({
 }) => {
   return (
     <FieldsGrid title={title}>
-      <Typography variant="body2" component="div">
+      <div className="text-sm leading-5">
         <NamedAddressInfo
           address={address}
           name={name}
@@ -27,7 +26,7 @@ const SendToBlock = ({
           avatarSize={avatarSize}
           customAvatar={customAvatar}
         />
-      </Typography>
+      </div>
     </FieldsGrid>
   )
 }

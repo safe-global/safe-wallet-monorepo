@@ -9,6 +9,10 @@ const fundAssetBtn = '[data-testid="fund-asset-button"]'
 const assetData = '[data-testid="asset-data"]'
 const assetsInput = (index) => `input[name="assets.${index}.amount"]`
 const tokenItem = '[data-testid="token-item"]'
+// Once opened, Base UI select popups stay mounted after closing — scope to the open one.
+const selectContent = '[data-slot="select-content"][data-open]'
+const selectTrigger = '[data-slot="select-trigger"]'
+const selectItem = '[data-slot="select-item"]'
 const removeAssetIcon = '[data-testid="remove-asset-icon"]'
 const advancedDetailsSummary = '[data-testid="decoded-tx-summary"]'
 
@@ -40,19 +44,21 @@ export function removeAsset(index) {
 }
 
 export function selectToken(index, token) {
-  cy.get(tokenSelector).eq(index).click()
-  cy.get('li').contains(token).click()
+  cy.get(tokenSelector).eq(index).find(selectTrigger).click()
+  // Base UI select items only commit a click once highlighted; hover first so the
+  // highlight renders before the click lands.
+  cy.get(selectContent).contains(selectItem, token).trigger('mousemove').click()
 }
 
 export function getTokenList(index) {
-  cy.get(tokenSelector).eq(index).click()
+  cy.get(tokenSelector).eq(index).find(selectTrigger).click()
+  // Options render in the portaled select popup; each one holds a token-item whose
+  // first typography span is the token name.
   return cy
-    .get(tokenSelector)
-    .eq(index)
+    .get(selectContent)
     .find(tokenItem)
-    .find('p:first')
     .then(($tokens) => {
-      return Cypress._.map($tokens, (token) => token.innerText.trim())
+      return Cypress._.map($tokens, (token) => token.querySelector('[data-slot="typography"]')?.innerText.trim())
     })
 }
 
@@ -61,11 +67,13 @@ export function setSendValue(index, value) {
 }
 
 export function verifyMaxAmount(index, token, tokenAbbreviation) {
+  // The closed select trigger renders the chosen token as a token-item: a name span
+  // followed by a balance span ("0.462 ETH").
   cy.get(assetData)
     .eq(index)
     .within(() => {
-      cy.get(assetsInput(index))
-        .get('p')
+      cy.get(tokenItem)
+        .first()
         .contains(token)
         .next()
         .then((element) => {
@@ -74,7 +82,6 @@ export function verifyMaxAmount(index, token, tokenAbbreviation) {
             const actualValue = parseFloat($input.val())
             expect(actualValue).to.be.closeTo(maxBalance, 0.1)
           })
-          console.log(maxBalance)
         })
     })
 }
@@ -95,15 +102,17 @@ export function clickOnAddNextBtn() {
 }
 
 export function clickOnAddNestedSafeBtn() {
-  cy.get(addNestedSafeBtn).click()
+  // Wallet checks gate this button; it starts disabled and a click then is a silent no-op.
+  cy.get(addNestedSafeBtn).should('be.enabled').click()
 }
 
+// The testid lands directly on the <input> element of the shadcn field.
 export function typeName(name) {
-  cy.get(`${nestedSafeNameInput} input`).clear().type(name).should('have.value', name)
+  cy.get(nestedSafeNameInput).clear().type(name).should('have.value', name)
 }
 
 export function nameInputHasPlaceholder() {
-  cy.get(`${nestedSafeNameInput} input`).should('have.attr', 'placeholder').and('not.be.empty')
+  cy.get(nestedSafeNameInput).should('have.attr', 'placeholder').and('not.be.empty')
 }
 
 // Nested safes curation (hide/show) functions
@@ -112,6 +121,7 @@ const nestedSafeList = '[data-testid="nested-safe-list"]'
 const cancelManageBtn = '[data-testid="cancel-manage-nested-safes"]'
 const saveManageBtn = '[data-testid="save-manage-nested-safes"]'
 const safeListItem = '[data-testid="safe-list-item"]'
+const safeItemCheckbox = '[data-testid^="safe-item-checkbox-"]'
 const reviewNestedSafesBtn = '[data-testid="review-nested-safes-button"]'
 const moreNestedSafesIndicator = '[data-testid="more-nested-safes-indicator"]'
 const closePopoverBtn = '[data-testid="modal-dialog-close-btn"]'
@@ -173,7 +183,12 @@ export function clickOnSafeCheckbox(address) {
 }
 
 export function verifySafeCheckboxState(address, checked) {
-  cy.get(`[data-testid="safe-item-checkbox-${address}"]`).should(checked ? 'be.checked' : 'not.be.checked')
+  // Base UI checkboxes are non-native elements; checked state is exposed via aria-checked.
+  cy.get(`[data-testid="safe-item-checkbox-${address}"]`).should(
+    'have.attr',
+    'aria-checked',
+    checked ? 'true' : 'false',
+  )
 }
 
 // Warning icon selector for suspicious safes
@@ -225,13 +240,17 @@ export function verifyShowAllNestedSafesNotVisible() {
   cy.contains(showAllNestedSafesStr).should('not.exist')
 }
 
-export function clickFirstValidSafeCheckbox() {
+export function clickValidSafeCheckbox(index) {
   cy.get(nestedSafeList)
     .find(safeListItem)
     .filter(`:not(:has(${suspiciousWarningIcon}))`)
-    .first()
-    .find('input[type="checkbox"]')
+    .eq(index)
+    .find(safeItemCheckbox)
     .click()
+}
+
+export function clickFirstValidSafeCheckbox() {
+  clickValidSafeCheckbox(0)
 }
 
 export function selectAllValidSafes() {
@@ -239,7 +258,7 @@ export function selectAllValidSafes() {
     .find(safeListItem)
     .filter(`:not(:has(${suspiciousWarningIcon}))`)
     .each(($item) => {
-      cy.wrap($item).find('input[type="checkbox"]').click()
+      cy.wrap($item).click()
     })
 }
 
@@ -248,7 +267,7 @@ export function selectAllSafes() {
   cy.get(nestedSafeList)
     .find(safeListItem)
     .each(($item) => {
-      cy.wrap($item).find('input[type="checkbox"]').click()
+      cy.wrap($item).click()
     })
 }
 
@@ -257,7 +276,7 @@ export function clickFirstSuspiciousSafeCheckbox() {
     .find(safeListItem)
     .filter(`:has(${suspiciousWarningIcon})`)
     .first()
-    .find('input[type="checkbox"]')
+    .find(safeItemCheckbox)
     .click()
 }
 
@@ -295,11 +314,11 @@ export function completeIntroScreenSelectAll() {
   cy.get(reviewNestedSafesBtn).should('be.visible').click()
   // Wait for manage mode to load
   cy.get(saveManageBtn).should('be.visible')
-  // Select all safes
+  // Select all safes — clicking the row toggles selection (the checkbox inside works too)
   cy.get(nestedSafeList)
     .find(safeListItem)
     .each(($item) => {
-      cy.wrap($item).find('input[type="checkbox"]').click()
+      cy.wrap($item).click()
     })
   cy.get(saveManageBtn).click()
   // Wait for normal view to load after save
@@ -313,12 +332,13 @@ export function completeIntroScreenSelectValid() {
   cy.get(reviewNestedSafesBtn).should('be.visible').click()
   // Wait for manage mode to load
   cy.get(saveManageBtn).should('be.visible')
-  // Select only valid safes (without warning icon)
+  // Select only valid safes (without warning icon) — clicking the row toggles selection
+  // (the checkbox inside works too).
   cy.get(nestedSafeList)
     .find(safeListItem)
     .filter(`:not(:has(${suspiciousWarningIcon}))`)
     .each(($item) => {
-      cy.wrap($item).find('input[type="checkbox"]').click()
+      cy.wrap($item).click()
     })
   cy.get(saveManageBtn).click()
   // Wait for normal view to load after save

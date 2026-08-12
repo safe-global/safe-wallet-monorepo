@@ -1,6 +1,5 @@
 import AddAccountsChooser from '../AddAccountsChooser'
 import EmptySafeAccounts from './EmptySafeAccounts'
-import { Stack } from '@mui/material'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Typography } from '@/components/ui/typography'
 import { useMemo, useState } from 'react'
@@ -20,8 +19,6 @@ import { useSimilarityClusters } from '@/features/address-poisoning'
 import { useSpaceSafes, useIsInvited, useIsAdmin, useCurrentSpaceId } from '@/features/spaces'
 import { SafeAccountsTable } from '@/features/myAccounts'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
-import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
-import { useDarkMode } from '@/hooks/useDarkMode'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { TriangleAlert, RotateCw, Search } from 'lucide-react'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
@@ -34,7 +31,6 @@ const SpaceSafeAccounts = () => {
   const { allSafes, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()
   const isInvited = useIsInvited()
   const isAdmin = useIsAdmin()
-  const isDarkMode = useDarkMode()
   const spaceId = useCurrentSpaceId()
   const orderScope = spaceId ? getSpaceOrderScope(spaceId) : undefined
 
@@ -71,7 +67,7 @@ const SpaceSafeAccounts = () => {
         Safe accounts
       </Typography>
 
-      <Stack direction="row" alignItems="center" gap={2} sx={{ mb: 3 }}>
+      <div className="mb-6 flex items-center gap-4">
         {isAdmin && (
           <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
             <AddAccountsChooser buttonVariant="default" buttonLabel="Add accounts" entryPoint="safe_accounts" />
@@ -79,7 +75,7 @@ const SpaceSafeAccounts = () => {
         )}
         {!isSpaceEmpty && !isSpaceSafesError && (
           <>
-            <InputGroup className="flex-1 rounded-md bg-card">
+            <InputGroup variant="search" inputSize="lg" className="flex-1">
               <InputGroupAddon>
                 <Search className="size-4" />
               </InputGroupAddon>
@@ -92,12 +88,10 @@ const SpaceSafeAccounts = () => {
                 data-testid="space-safe-accounts-search-input"
               />
             </InputGroup>
-            <ShadcnProvider dark={isDarkMode} className="flex items-center">
-              <SafeListSortToggle className="border-border shadow-xs" />
-            </ShadcnProvider>
+            <SafeListSortToggle size="lg" className="border-border shadow-xs" />
           </>
         )}
-      </Stack>
+      </div>
 
       {isSpaceSafesError ? (
         <div className="flex items-center gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 px-5 py-4">

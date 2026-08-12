@@ -1,6 +1,6 @@
-import { Box, Card, IconButton, Stack, Typography } from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
-import { SvgIcon } from '@mui/material'
+import { X as CloseIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import StatusPendingIcon from '@/public/images/hypernative/status-pending.svg'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import css from './styles.module.css'
@@ -16,25 +16,25 @@ export interface HnPendingBannerProps extends WithHnSignupFlowProps {
  */
 export const HnPendingBanner = ({ onDismiss }: HnPendingBannerProps): ReactElement => {
   return (
-    <Card className={css.banner}>
-      <Stack direction="row" alignItems="flex-start" spacing={1} className={css.content}>
-        <Box className={css.iconContainer}>
-          <SvgIcon component={StatusPendingIcon} inheritViewBox className={css.icon} />
-        </Box>
-        <Box className={css.textContainer}>
-          <Typography variant="subtitle1" fontWeight="bold" className={css.title}>
+    <div className={css.banner}>
+      <div className={`flex flex-row items-start gap-2 ${css.content}`}>
+        <div className={css.iconContainer}>
+          <StatusPendingIcon className={css.icon} />
+        </div>
+        <div className={css.textContainer}>
+          <Typography variant="paragraph-bold" className={css.title}>
             Guardian setup in progress
           </Typography>
-          <Typography variant="body2" className={css.description}>
+          <Typography variant="paragraph-small" className={css.description}>
             We&apos;ve received your request and will follow up with next steps.
           </Typography>
-        </Box>
-      </Stack>
+        </div>
+      </div>
       {onDismiss && (
-        <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
-          <CloseIcon fontSize="medium" />
-        </IconButton>
+        <Button variant="ghost" className={css.closeButton} aria-label="close" onClick={onDismiss}>
+          <CloseIcon />
+        </Button>
       )}
-    </Card>
+    </div>
   )
 }

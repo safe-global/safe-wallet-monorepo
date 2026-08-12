@@ -1,86 +1,5 @@
-/* Desktop table - padding on cells instead of wrapper */
-.container tbody td:first-child {
-  padding-left: 16px !important;
-}
-
-.container tbody td:last-child {
-  padding-right: 16px !important;
-}
-
-.container thead th:first-child {
-  padding-left: 16px !important;
-}
-
-.container thead th:last-child {
-  padding-right: 16px !important;
-}
-
-.container tbody tr {
-  transition: background-color 100ms linear;
-}
-
-.container tbody tr:hover {
-  background-color: var(--color-secondary-background);
-}
-
-.container td:last-of-type button {
-  opacity: 1;
-  transition: opacity 200ms 100ms ease-in-out;
-}
-
-.container tr:hover td:last-of-type button {
-  opacity: 1;
-}
-
-.iconButton {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  padding: 6px;
-  background-color: var(--color-border-background);
-  border-radius: 4px;
-  color: var(--color-text-primary);
-}
-
-.iconButton:hover {
-  background-color: var(--color-background-paper);
-}
-
-.iconButton svg {
-  width: 16px;
-  height: 16px;
-  color: inherit;
-}
-
-.iconButton svg path {
-  fill: currentColor;
-}
-
-.headerButtonWrapper {
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-/* Header styling - no bottom border with grey background */
-.container thead th {
-  border-bottom: none !important;
-  background-color: var(--color-background-main);
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-}
-
-.container thead th span {
-  font-size: 14px;
-  color: var(--color-text-primary);
-}
-
-/* Last row - transparent border */
-.container tr:last-of-type {
-  border-bottom-color: transparent;
-}
+/* Desktop in-card table polish is provided by the shared <TableCard>
+   (@/components/common/TableCard). This module only holds the mobile-card layout. */
 
 .mobileContainer {
   display: none;
@@ -129,11 +48,16 @@
   flex-shrink: 0;
 }
 
-@media (max-width: 599.95px) {
-  .container {
-    display: none;
-  }
+/* Card wrappers: show desktop table by default, mobile list below the breakpoint */
+.mobileCard {
+  display: none;
+}
 
+.desktopCard {
+  display: block;
+}
+
+@media (max-width: 599.95px) {
   .mobileContainer {
     display: flex;
   }
@@ -144,5 +68,13 @@
 
   .mobileRow {
     display: flex;
+  }
+
+  .mobileCard {
+    display: block;
+  }
+
+  .desktopCard {
+    display: none;
   }
 }

@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import css from './styles.module.css'
 
 type PagePlaceholderProps = {
@@ -14,9 +14,7 @@ const PagePlaceholder = ({ img, text, children }: PagePlaceholderProps): ReactEl
       {img}
 
       {typeof text === 'string' ? (
-        <Typography variant="body1" color="primary.light" mt={2}>
-          {text}
-        </Typography>
+        <Typography className="mt-4 text-[var(--color-primary-light)]">{text}</Typography>
       ) : (
         text
       )}

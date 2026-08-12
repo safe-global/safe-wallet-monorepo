@@ -30,6 +30,7 @@ export const InCard: Story = {
   decorators: [
     (Story) => (
       <Card className="w-[320px]">
+        {/* eslint-disable-next-line no-restricted-syntax -- story-only: pt-6 adds top padding since this preview Card has no CardHeader */}
         <CardContent className="pt-6">
           <Story />
         </CardContent>

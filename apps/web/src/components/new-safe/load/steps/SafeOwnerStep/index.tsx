@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
-import { Box, Button, Divider } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { LoadSafeFormData } from '@/components/new-safe/load'
 import useChainId from '@/hooks/useChainId'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import layoutCss from '@/components/new-safe/create/styles.module.css'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import OwnerRow from '@/components/new-safe/OwnerRow'
 
 enum Field {
@@ -65,22 +65,22 @@ const SafeOwnerStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeFormD
   return (
     <FormProvider {...formMethods}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Box className={layoutCss.row}>
+        <div className={layoutCss.row}>
           {fields.map((field, index) => (
             <OwnerRow key={field.id} index={index} groupName="owners" readOnly />
           ))}
-        </Box>
-        <Divider />
-        <Box className={layoutCss.row}>
-          <Box display="flex" flexDirection="row" justifyContent="space-between" gap={3}>
-            <Button variant="outlined" size="large" onClick={handleBack} startIcon={<ArrowBackIcon fontSize="small" />}>
+        </div>
+        <Separator />
+        <div className={layoutCss.row}>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" size="lg" onClick={handleBack}>
               Back
             </Button>
-            <Button type="submit" variant="contained" size="large" disabled={!isValid}>
+            <Button type="submit" size="lg" disabled={!isValid}>
               Next
             </Button>
-          </Box>
-        </Box>
+          </div>
+        </div>
       </form>
     </FormProvider>
   )

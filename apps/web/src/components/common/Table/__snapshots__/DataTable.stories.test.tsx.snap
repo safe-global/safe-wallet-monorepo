@@ -1,98 +1,104 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./DataTable.stories Default 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiStack-root mui-style-1qh2y1i-MuiStack-root"
+      class="rounded-lg bg-card p-4"
     >
-      <p
-        class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+      <div
+        class="flex flex-col gap-1"
       >
-        <b>
+        <p
+          class="m-0 text-base leading-6 font-semibold"
+          data-slot="typography"
+          data-variant="paragraph-bold"
+        >
           Simple Data Table
-        </b>
-      </p>
-      <div
-        class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
-        data-testid=""
-      >
+        </p>
         <div
-          class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
-          data-testid="tx-row-title"
-          style="word-break: break-word;"
-        >
-          <span
-            class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
-          >
-            Transaction Hash
-          </span>
-        </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
-          data-testid="tx-data-row"
+          class="flex flex-wrap gap-2 xl:flex-nowrap"
+          data-testid=""
         >
           <div
-            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+            class="break-words min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
+            data-testid="tx-row-title"
           >
-            0x536e...94f9
+            <span
+              class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)]"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Transaction Hash
+            </span>
+          </div>
+          <div
+            class="flex-1"
+            data-testid="tx-data-row"
+          >
+            <div
+              class="text-base leading-6 font-normal"
+            >
+              0x536e...94f9
+            </div>
           </div>
         </div>
-      </div>
-      <div
-        class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
-        data-testid=""
-      >
         <div
-          class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
-          data-testid="tx-row-title"
-          style="word-break: break-word;"
-        >
-          <span
-            class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
-          >
-            Block Number
-          </span>
-        </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
-          data-testid="tx-data-row"
+          class="flex flex-wrap gap-2 xl:flex-nowrap"
+          data-testid=""
         >
           <div
-            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+            class="break-words min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
+            data-testid="tx-row-title"
           >
-            123456
+            <span
+              class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)]"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Block Number
+            </span>
+          </div>
+          <div
+            class="flex-1"
+            data-testid="tx-data-row"
+          >
+            <div
+              class="text-base leading-6 font-normal"
+            >
+              123456
+            </div>
           </div>
         </div>
-      </div>
-      <div
-        class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
-        data-testid=""
-      >
         <div
-          class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
-          data-testid="tx-row-title"
-          style="word-break: break-word;"
-        >
-          <span
-            class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
-          >
-            Gas Used
-          </span>
-        </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
-          data-testid="tx-data-row"
+          class="flex flex-wrap gap-2 xl:flex-nowrap"
+          data-testid=""
         >
           <div
-            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+            class="break-words min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
+            data-testid="tx-row-title"
           >
-            21000
+            <span
+              class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)]"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Gas Used
+            </span>
+          </div>
+          <div
+            class="flex-1"
+            data-testid="tx-data-row"
+          >
+            <div
+              class="text-base leading-6 font-normal"
+            >
+              21000
+            </div>
           </div>
         </div>
       </div>

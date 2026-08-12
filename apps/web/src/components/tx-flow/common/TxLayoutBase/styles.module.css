@@ -1,0 +1,135 @@
+/* The tx dialog spans the full viewport, so this row owns the page gutter: without it the
+   status rail — the row's first child, and the only one with no padding of its own — sits
+   flush against the viewport edge. `--space-3` matches the topbar's own `px-6`, so the rail
+   lines up with the safe selector above it instead of hanging off the side. The mobile block
+   below drops it again, where the card goes edge-to-edge. */
+.container {
+  margin-top: 10px;
+  padding-inline: var(--space-3);
+}
+
+.contentContainer {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.header {
+  overflow: hidden;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.headerInner {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.step {
+  position: relative;
+}
+
+/* Back button */
+.backButton {
+  position: absolute;
+  left: var(--space-3);
+  bottom: var(--space-3);
+}
+
+.step > :global(.txCardRoot:first-child) {
+  border-top-right-radius: 0;
+  border-top-left-radius: 0;
+  margin-top: 0;
+}
+
+/* Submit button */
+.step :global(.txCardActions) {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin-top: var(--space-3);
+}
+
+.step :global(.txCardActions) > * {
+  align-self: flex-end;
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  margin-right: var(--space-2);
+}
+
+.icon svg {
+  height: 16px;
+  width: auto;
+}
+
+.step :global([data-slot='accordion-trigger']) {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.sidebarSlot {
+  margin-bottom: var(--space-2);
+}
+
+.sticky {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  position: sticky;
+  top: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.titleWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.widget {
+  /* Height of transaction type title */
+  margin-top: 30px;
+}
+
+@media (max-width: 1199px) {
+  .backButton {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .step :global(.txCardActions) {
+    margin-bottom: var(--space-8);
+  }
+}
+
+@media (max-width: 899.95px) {
+  /* Narrow screens stack vertically: title above the card, then the card, then the
+     SafeShield widget full-width below it. The flex row wraps (see min-[900px]:flex-nowrap
+     in the JSX), so the widget only needs its top offset reset — the flex gap spaces it. */
+  .widget {
+    margin-top: 0;
+  }
+
+  .container {
+    padding: 0;
+  }
+
+  .step :global(.txCardRoot),
+  .header {
+    border-radius: 0;
+  }
+}

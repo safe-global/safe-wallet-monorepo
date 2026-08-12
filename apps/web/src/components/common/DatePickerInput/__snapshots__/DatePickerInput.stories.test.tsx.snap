@@ -1,71 +1,101 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./DatePickerInput.stories AllowFutureDates 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1v5z18m"
+    class="shadcn-scope"
   >
     <div
-      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input mui-style-xwn1oi-MuiFormControl-root-MuiTextField-root"
+      class="w-[300px]"
     >
-      <label
-        class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
-        data-shrink="false"
-        for="_r_1_"
-        id="_r_1_-label"
-      >
-        Expiry date
-      </label>
       <div
-        class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-adornedEnd mui-style-1j6cp9h-MuiInputBase-root-MuiOutlinedInput-root"
+        class="data-[invalid=true]:text-destructive gap-3 group/field flex w-full flex-col [&>*]:w-full [&>.sr-only]:w-auto"
+        data-invalid="false"
+        data-orientation="vertical"
+        data-slot="field"
+        role="group"
       >
-        <input
-          aria-invalid="false"
-          autocomplete="off"
-          class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd mui-style-f423sj-MuiInputBase-input-MuiOutlinedInput-input"
-          id="_r_1_"
-          inputmode="text"
-          name="expiryDate"
-          placeholder="DD/MM/YYYY"
-          type="text"
-          value=""
-        />
+        <label
+          class="text-sm font-medium group-data-[disabled=true]:opacity-50 group-data-disabled:opacity-50 peer-disabled:opacity-50 peer-data-disabled:opacity-50 items-center select-none group-data-[disabled=true]:pointer-events-none group-data-disabled:pointer-events-none peer-disabled:cursor-not-allowed peer-data-disabled:cursor-not-allowed has-data-checked:bg-primary/5 has-data-checked:border-primary dark:has-data-checked:bg-primary/10 gap-2 group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-3 group/field-label peer/field-label flex w-fit leading-snug has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col"
+          data-slot="field-label"
+          for="expiryDate-date"
+        >
+          Expiry date
+        </label>
         <div
-          class="MuiInputAdornment-root MuiInputAdornment-positionEnd MuiInputAdornment-outlined MuiInputAdornment-sizeMedium mui-style-elo8k2-MuiInputAdornment-root"
+          aria-invalid="false"
+          class="border-border has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-ring/50 has-[[data-slot][aria-invalid=true]]:ring-destructive/20 has-[[data-slot][aria-invalid=true]]:border-destructive dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40 border transition-[color,box-shadow] has-[[data-slot=input-group-control]:focus-visible]:ring-[3px] has-[[data-slot][aria-invalid=true]]:ring-[3px] has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3 has-[>[data-align=inline-end]]:[&>input]:pr-2 has-[>[data-align=inline-start]]:[&>input]:pl-2 [[data-slot=combobox-content]_&]:focus-within:border-inherit [[data-slot=combobox-content]_&]:focus-within:ring-0 group/input-group relative flex w-full min-w-0 items-center outline-none has-[>textarea]:h-auto h-[66px] min-h-[66px] rounded-[calc(var(--radius)-2px)] px-4 [&_[data-slot=input-group-addon][data-align=inline-end]]:pr-0 [&_[data-slot=input-group-control]]:px-0 [&_[data-slot=input-group-control]]:shadow-none [&_[data-slot=input-group-control]]:focus-visible:ring-0 bg-card shadow-none dark:bg-card"
+          data-input-size="hero"
+          data-slot="input-group"
+          data-variant="surface"
+          role="group"
         >
-          <button
-            aria-label="Choose date"
-            class="MuiButtonBase-root MuiIconButton-root MuiIconButton-edgeEnd MuiIconButton-sizeMedium mui-style-1rayppb-MuiButtonBase-root-MuiIconButton-root"
-            tabindex="0"
-            type="button"
+          <div
+            class="w-full"
           >
-            <svg
-              aria-hidden="true"
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
-              data-testid="CalendarIcon"
-              focusable="false"
-              viewBox="0 0 24 24"
+            <input
+              autocomplete="off"
+              class="border-border focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 py-1.5 text-base transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 h-9 px-3 rounded-none border-0 bg-transparent shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent flex-1"
+              data-slot="input-group-control"
+              id="expiryDate-date"
+              name="expiryDate"
+              placeholder="DD/MM/YYYY"
+              value=""
+            />
+          </div>
+          <div
+            class="text-muted-foreground h-auto gap-2 py-1.5 text-sm font-medium group-data-[disabled=true]/input-group:opacity-50 [&>kbd]:rounded-[calc(var(--radius)-5px)] [&>svg:not([class*='size-'])]:size-4 flex cursor-text items-center justify-center select-none pr-3 has-[>button]:mr-[-0.25rem] has-[>kbd]:mr-[-0.15rem] order-last"
+            data-align="inline-end"
+            data-slot="input-group-addon"
+            role="group"
+          >
+            <button
+              aria-expanded="false"
+              aria-haspopup="dialog"
+              aria-label="Open Expiry date calendar"
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 border border-transparent bg-clip-padding font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 gap-2 text-sm shadow-none flex items-center size-6 rounded-[calc(var(--radius)-5px)] p-0 has-[>svg]:p-0"
+              data-base-ui-click-trigger=""
+              data-size="icon-xs"
+              data-slot="popover-trigger"
+              id="base-ui-_r_3_"
+              tabindex="0"
+              type="button"
             >
-              <path
-                d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
-              />
-            </svg>
-          </button>
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-calendar size-4 text-muted-foreground"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M8 2v4"
+                />
+                <path
+                  d="M16 2v4"
+                />
+                <rect
+                  height="18"
+                  rx="2"
+                  width="18"
+                  x="3"
+                  y="4"
+                />
+                <path
+                  d="M3 10h18"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
-        <fieldset
-          aria-hidden="true"
-          class="MuiOutlinedInput-notchedOutline mui-style-oct7z5-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
-        >
-          <legend
-            class="mui-style-1n64csd-MuiNotchedOutlined-root"
-          >
-            <span>
-              Expiry date
-            </span>
-          </legend>
-        </fieldset>
       </div>
     </div>
   </div>
@@ -77,67 +107,97 @@ exports[`./DatePickerInput.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1v5z18m"
+    class="shadcn-scope"
   >
     <div
-      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input mui-style-xwn1oi-MuiFormControl-root-MuiTextField-root"
+      class="w-[300px]"
     >
-      <label
-        class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
-        data-shrink="false"
-        for="_r_5_"
-        id="_r_5_-label"
-      >
-        Birth date
-      </label>
       <div
-        class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-adornedEnd mui-style-1j6cp9h-MuiInputBase-root-MuiOutlinedInput-root"
+        class="data-[invalid=true]:text-destructive gap-3 group/field flex w-full flex-col [&>*]:w-full [&>.sr-only]:w-auto"
+        data-invalid="false"
+        data-orientation="vertical"
+        data-slot="field"
+        role="group"
       >
-        <input
-          aria-invalid="false"
-          autocomplete="off"
-          class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd mui-style-f423sj-MuiInputBase-input-MuiOutlinedInput-input"
-          id="_r_5_"
-          inputmode="text"
-          name="birthDate"
-          placeholder="DD/MM/YYYY"
-          type="text"
-          value=""
-        />
+        <label
+          class="text-sm font-medium group-data-[disabled=true]:opacity-50 group-data-disabled:opacity-50 peer-disabled:opacity-50 peer-data-disabled:opacity-50 items-center select-none group-data-[disabled=true]:pointer-events-none group-data-disabled:pointer-events-none peer-disabled:cursor-not-allowed peer-data-disabled:cursor-not-allowed has-data-checked:bg-primary/5 has-data-checked:border-primary dark:has-data-checked:bg-primary/10 gap-2 group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-3 group/field-label peer/field-label flex w-fit leading-snug has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col"
+          data-slot="field-label"
+          for="birthDate-date"
+        >
+          Birth date
+        </label>
         <div
-          class="MuiInputAdornment-root MuiInputAdornment-positionEnd MuiInputAdornment-outlined MuiInputAdornment-sizeMedium mui-style-elo8k2-MuiInputAdornment-root"
+          aria-invalid="false"
+          class="border-border has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-ring/50 has-[[data-slot][aria-invalid=true]]:ring-destructive/20 has-[[data-slot][aria-invalid=true]]:border-destructive dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40 border transition-[color,box-shadow] has-[[data-slot=input-group-control]:focus-visible]:ring-[3px] has-[[data-slot][aria-invalid=true]]:ring-[3px] has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3 has-[>[data-align=inline-end]]:[&>input]:pr-2 has-[>[data-align=inline-start]]:[&>input]:pl-2 [[data-slot=combobox-content]_&]:focus-within:border-inherit [[data-slot=combobox-content]_&]:focus-within:ring-0 group/input-group relative flex w-full min-w-0 items-center outline-none has-[>textarea]:h-auto h-[66px] min-h-[66px] rounded-[calc(var(--radius)-2px)] px-4 [&_[data-slot=input-group-addon][data-align=inline-end]]:pr-0 [&_[data-slot=input-group-control]]:px-0 [&_[data-slot=input-group-control]]:shadow-none [&_[data-slot=input-group-control]]:focus-visible:ring-0 bg-card shadow-none dark:bg-card"
+          data-input-size="hero"
+          data-slot="input-group"
+          data-variant="surface"
+          role="group"
         >
-          <button
-            aria-label="Choose date"
-            class="MuiButtonBase-root MuiIconButton-root MuiIconButton-edgeEnd MuiIconButton-sizeMedium mui-style-1rayppb-MuiButtonBase-root-MuiIconButton-root"
-            tabindex="0"
-            type="button"
+          <div
+            class="w-full"
           >
-            <svg
-              aria-hidden="true"
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
-              data-testid="CalendarIcon"
-              focusable="false"
-              viewBox="0 0 24 24"
+            <input
+              autocomplete="off"
+              class="border-border focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 py-1.5 text-base transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 h-9 px-3 rounded-none border-0 bg-transparent shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent flex-1"
+              data-slot="input-group-control"
+              id="birthDate-date"
+              name="birthDate"
+              placeholder="DD/MM/YYYY"
+              value=""
+            />
+          </div>
+          <div
+            class="text-muted-foreground h-auto gap-2 py-1.5 text-sm font-medium group-data-[disabled=true]/input-group:opacity-50 [&>kbd]:rounded-[calc(var(--radius)-5px)] [&>svg:not([class*='size-'])]:size-4 flex cursor-text items-center justify-center select-none pr-3 has-[>button]:mr-[-0.25rem] has-[>kbd]:mr-[-0.15rem] order-last"
+            data-align="inline-end"
+            data-slot="input-group-addon"
+            role="group"
+          >
+            <button
+              aria-expanded="false"
+              aria-haspopup="dialog"
+              aria-label="Open Birth date calendar"
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 border border-transparent bg-clip-padding font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 gap-2 text-sm shadow-none flex items-center size-6 rounded-[calc(var(--radius)-5px)] p-0 has-[>svg]:p-0"
+              data-base-ui-click-trigger=""
+              data-size="icon-xs"
+              data-slot="popover-trigger"
+              id="base-ui-_r_7_"
+              tabindex="0"
+              type="button"
             >
-              <path
-                d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
-              />
-            </svg>
-          </button>
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-calendar size-4 text-muted-foreground"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M8 2v4"
+                />
+                <path
+                  d="M16 2v4"
+                />
+                <rect
+                  height="18"
+                  rx="2"
+                  width="18"
+                  x="3"
+                  y="4"
+                />
+                <path
+                  d="M3 10h18"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
-        <fieldset
-          aria-hidden="true"
-          class="MuiOutlinedInput-notchedOutline mui-style-oct7z5-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
-        >
-          <legend
-            class="mui-style-1n64csd-MuiNotchedOutlined-root"
-          >
-            <span>
-              Birth date
-            </span>
-          </legend>
-        </fieldset>
       </div>
     </div>
   </div>
@@ -149,67 +209,97 @@ exports[`./DatePickerInput.stories DisableFutureDates 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1v5z18m"
+    class="shadcn-scope"
   >
     <div
-      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input mui-style-xwn1oi-MuiFormControl-root-MuiTextField-root"
+      class="w-[300px]"
     >
-      <label
-        class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
-        data-shrink="false"
-        for="_r_9_"
-        id="_r_9_-label"
-      >
-        Created date
-      </label>
       <div
-        class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-adornedEnd mui-style-1j6cp9h-MuiInputBase-root-MuiOutlinedInput-root"
+        class="data-[invalid=true]:text-destructive gap-3 group/field flex w-full flex-col [&>*]:w-full [&>.sr-only]:w-auto"
+        data-invalid="false"
+        data-orientation="vertical"
+        data-slot="field"
+        role="group"
       >
-        <input
-          aria-invalid="false"
-          autocomplete="off"
-          class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd mui-style-f423sj-MuiInputBase-input-MuiOutlinedInput-input"
-          id="_r_9_"
-          inputmode="text"
-          name="createdDate"
-          placeholder="DD/MM/YYYY"
-          type="text"
-          value=""
-        />
+        <label
+          class="text-sm font-medium group-data-[disabled=true]:opacity-50 group-data-disabled:opacity-50 peer-disabled:opacity-50 peer-data-disabled:opacity-50 items-center select-none group-data-[disabled=true]:pointer-events-none group-data-disabled:pointer-events-none peer-disabled:cursor-not-allowed peer-data-disabled:cursor-not-allowed has-data-checked:bg-primary/5 has-data-checked:border-primary dark:has-data-checked:bg-primary/10 gap-2 group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-3 group/field-label peer/field-label flex w-fit leading-snug has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col"
+          data-slot="field-label"
+          for="createdDate-date"
+        >
+          Created date
+        </label>
         <div
-          class="MuiInputAdornment-root MuiInputAdornment-positionEnd MuiInputAdornment-outlined MuiInputAdornment-sizeMedium mui-style-elo8k2-MuiInputAdornment-root"
+          aria-invalid="false"
+          class="border-border has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-ring/50 has-[[data-slot][aria-invalid=true]]:ring-destructive/20 has-[[data-slot][aria-invalid=true]]:border-destructive dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40 border transition-[color,box-shadow] has-[[data-slot=input-group-control]:focus-visible]:ring-[3px] has-[[data-slot][aria-invalid=true]]:ring-[3px] has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3 has-[>[data-align=inline-end]]:[&>input]:pr-2 has-[>[data-align=inline-start]]:[&>input]:pl-2 [[data-slot=combobox-content]_&]:focus-within:border-inherit [[data-slot=combobox-content]_&]:focus-within:ring-0 group/input-group relative flex w-full min-w-0 items-center outline-none has-[>textarea]:h-auto h-[66px] min-h-[66px] rounded-[calc(var(--radius)-2px)] px-4 [&_[data-slot=input-group-addon][data-align=inline-end]]:pr-0 [&_[data-slot=input-group-control]]:px-0 [&_[data-slot=input-group-control]]:shadow-none [&_[data-slot=input-group-control]]:focus-visible:ring-0 bg-card shadow-none dark:bg-card"
+          data-input-size="hero"
+          data-slot="input-group"
+          data-variant="surface"
+          role="group"
         >
-          <button
-            aria-label="Choose date"
-            class="MuiButtonBase-root MuiIconButton-root MuiIconButton-edgeEnd MuiIconButton-sizeMedium mui-style-1rayppb-MuiButtonBase-root-MuiIconButton-root"
-            tabindex="0"
-            type="button"
+          <div
+            class="w-full"
           >
-            <svg
-              aria-hidden="true"
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
-              data-testid="CalendarIcon"
-              focusable="false"
-              viewBox="0 0 24 24"
+            <input
+              autocomplete="off"
+              class="border-border focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 py-1.5 text-base transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 h-9 px-3 rounded-none border-0 bg-transparent shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent flex-1"
+              data-slot="input-group-control"
+              id="createdDate-date"
+              name="createdDate"
+              placeholder="DD/MM/YYYY"
+              value=""
+            />
+          </div>
+          <div
+            class="text-muted-foreground h-auto gap-2 py-1.5 text-sm font-medium group-data-[disabled=true]/input-group:opacity-50 [&>kbd]:rounded-[calc(var(--radius)-5px)] [&>svg:not([class*='size-'])]:size-4 flex cursor-text items-center justify-center select-none pr-3 has-[>button]:mr-[-0.25rem] has-[>kbd]:mr-[-0.15rem] order-last"
+            data-align="inline-end"
+            data-slot="input-group-addon"
+            role="group"
+          >
+            <button
+              aria-expanded="false"
+              aria-haspopup="dialog"
+              aria-label="Open Created date calendar"
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 border border-transparent bg-clip-padding font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 gap-2 text-sm shadow-none flex items-center size-6 rounded-[calc(var(--radius)-5px)] p-0 has-[>svg]:p-0"
+              data-base-ui-click-trigger=""
+              data-size="icon-xs"
+              data-slot="popover-trigger"
+              id="base-ui-_r_b_"
+              tabindex="0"
+              type="button"
             >
-              <path
-                d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
-              />
-            </svg>
-          </button>
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-calendar size-4 text-muted-foreground"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M8 2v4"
+                />
+                <path
+                  d="M16 2v4"
+                />
+                <rect
+                  height="18"
+                  rx="2"
+                  width="18"
+                  x="3"
+                  y="4"
+                />
+                <path
+                  d="M3 10h18"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
-        <fieldset
-          aria-hidden="true"
-          class="MuiOutlinedInput-notchedOutline mui-style-oct7z5-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
-        >
-          <legend
-            class="mui-style-1n64csd-MuiNotchedOutlined-root"
-          >
-            <span>
-              Created date
-            </span>
-          </legend>
-        </fieldset>
       </div>
     </div>
   </div>

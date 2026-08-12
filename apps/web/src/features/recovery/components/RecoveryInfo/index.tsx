@@ -1,6 +1,6 @@
-import { SvgIcon, Tooltip } from '@mui/material'
 import type { ReactElement } from 'react'
 
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 
 const RecoveryInfo = ({ isMalicious }: { isMalicious: boolean }): ReactElement | null => {
@@ -9,10 +9,11 @@ const RecoveryInfo = ({ isMalicious }: { isMalicious: boolean }): ReactElement |
   }
 
   return (
-    <Tooltip title="Suspicious activity" placement="top" arrow>
-      <span>
-        <SvgIcon component={WarningIcon} inheritViewBox color="error" />
-      </span>
+    <Tooltip>
+      <TooltipTrigger render={<span />}>
+        <WarningIcon className="size-6 fill-current text-[var(--color-error-main)]" />
+      </TooltipTrigger>
+      <TooltipContent side="top">Suspicious activity</TooltipContent>
     </Tooltip>
   )
 }

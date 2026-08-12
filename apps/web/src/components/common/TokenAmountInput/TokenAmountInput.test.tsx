@@ -1,5 +1,6 @@
 import React from 'react'
-import { render, screen } from '@/tests/test-utils'
+import { render, screen, waitFor, within } from '@/tests/test-utils'
+import userEvent from '@testing-library/user-event'
 import { FormProvider, useForm, useFieldArray } from 'react-hook-form'
 import TokenAmountInput from './index'
 import { TokenAmountFields } from '@/components/tx-flow/flows/TokenTransfer/types'
@@ -176,7 +177,57 @@ const FiatTestWrapper = ({
   )
 }
 
+// The token select is controlled by `setValue` on a field the component never `register`s. RHF still
+// writes unregistered names into the form values, which is what keeps the chosen token in the
+// submitted payload — pin it so that assumption cannot silently break.
+const SubmitTestWrapper = ({
+  defaultTokenAddress,
+  onSubmit,
+}: {
+  defaultTokenAddress: string
+  onSubmit: (values: unknown) => void
+}) => {
+  const methods = useForm({
+    defaultValues: {
+      [TokenAmountFields.tokenAddress]: defaultTokenAddress,
+      [TokenAmountFields.amount]: '',
+    },
+  })
+
+  const selectedToken = mockBalances.find((b) => b.tokenInfo.address === defaultTokenAddress)
+
+  return (
+    <FormProvider {...methods}>
+      <form onSubmit={methods.handleSubmit(onSubmit)}>
+        <TokenAmountInput
+          balances={mockBalances}
+          selectedToken={selectedToken}
+          maxAmount={BigInt(selectedToken?.balance || '0')}
+          validate={() => undefined}
+        />
+        <button type="submit">Submit</button>
+      </form>
+    </FormProvider>
+  )
+}
+
 describe('TokenAmountInput', () => {
+  describe('Submitted values', () => {
+    it('keeps the picked token address in the submitted payload', async () => {
+      const onSubmit = jest.fn()
+      render(<SubmitTestWrapper defaultTokenAddress={ZERO_ADDRESS} onSubmit={onSubmit} />)
+
+      await userEvent.click(within(screen.getByTestId('token-selector')).getByRole('combobox'))
+      await userEvent.click(await screen.findByText('USD Coin'))
+
+      await userEvent.type(screen.getByTestId('token-amount-field'), '1')
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+
+      await waitFor(() => expect(onSubmit).toHaveBeenCalled())
+      expect(onSubmit.mock.calls[0][0]).toMatchObject({ [TokenAmountFields.tokenAddress]: USDC_ADDRESS })
+    })
+  })
+
   describe('Token preselection without fieldArray', () => {
     it('should preselect ETH (ZERO_ADDRESS) by default', () => {
       render(<TestWrapper defaultTokenAddress={ZERO_ADDRESS} />)

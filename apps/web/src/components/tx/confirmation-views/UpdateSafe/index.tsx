@@ -1,6 +1,8 @@
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactNode } from 'react'
-import { Alert, AlertTitle, Box, Divider, Stack, Typography } from '@mui/material'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Separator } from '@/components/ui/separator'
+import { Typography } from '@/components/ui/typography'
 import semverSatisfies from 'semver/functions/satisfies'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -13,12 +15,12 @@ import { extractTargetVersionFromUpdateSafeTx } from '@/services/tx/safeUpdatePa
 const QUEUE_WARNING_VERSION = '<1.3.0'
 
 function BgBox({ children, light, warning }: { children: ReactNode; light?: boolean; warning?: boolean }) {
-  const bgcolor = warning ? 'warning.background' : light ? 'background.light' : 'border.background'
-  return (
-    <Box flex={1} bgcolor={bgcolor} p={2} textAlign="center" fontWeight={700} fontSize={18} borderRadius={1}>
-      {children}
-    </Box>
-  )
+  const bgcolor = warning
+    ? 'bg-[var(--color-warning-background)]'
+    : light
+      ? 'bg-[var(--color-background-light)]'
+      : 'bg-[var(--color-border-background)]'
+  return <div className={`flex-1 rounded-md p-4 text-center text-lg font-bold ${bgcolor}`}>{children}</div>
 }
 
 export function _UpdateSafe({
@@ -41,9 +43,9 @@ export function _UpdateSafe({
 
   return (
     <>
-      <Stack direction="row" alignItems="center" spacing={2}>
+      <div className="flex flex-row items-center gap-4">
         <BgBox>Current version: {safe.version}</BgBox>
-        <Box fontSize={28}>→</Box>
+        <div className="text-[28px]">→</div>
         {newVersion !== undefined ? (
           <BgBox light>
             New version: {newVersion} {chain?.l2 ? '+L2' : ''}
@@ -51,7 +53,7 @@ export function _UpdateSafe({
         ) : (
           <BgBox warning>Unknown contract</BgBox>
         )}
-      </Stack>
+      </div>
       {newVersion !== undefined ? (
         <Typography>
           Read about the updates in the new Safe contracts version in the{' '}
@@ -60,22 +62,26 @@ export function _UpdateSafe({
           </ExternalLink>
         </Typography>
       ) : (
-        <Alert severity="error">
-          <AlertTitle sx={{ fontWeight: 700 }}>Unknown contract</AlertTitle>
-          The target contract for this upgrade is unknown. Verify the transaction data and the target contract address
-          before executing this transaction.
+        <Alert variant="destructive">
+          <AlertTitle>Unknown contract</AlertTitle>
+          <AlertDescription>
+            The target contract for this upgrade is unknown. Verify the transaction data and the target contract address
+            before executing this transaction.
+          </AlertDescription>
         </Alert>
       )}
 
       {showQueueWarning && (
-        <Alert severity="warning">
-          <AlertTitle sx={{ fontWeight: 700 }}>This upgrade will invalidate all queued transactions!</AlertTitle>
-          You have {queueSize} unexecuted transaction{maybePlural(parseInt(queueSize))}. Please make sure to execute or
-          delete them before upgrading, otherwise you&apos;ll have to reject or replace them after the upgrade.
+        <Alert variant="warning">
+          <AlertTitle>This upgrade will invalidate all queued transactions!</AlertTitle>
+          <AlertDescription>
+            You have {queueSize} unexecuted transaction{maybePlural(parseInt(queueSize))}. Please make sure to execute
+            or delete them before upgrading, otherwise you&apos;ll have to reject or replace them after the upgrade.
+          </AlertDescription>
         </Alert>
       )}
 
-      <Divider sx={{ my: 1, mx: -3 }} />
+      <Separator className="mx-[-24px] my-2" />
     </>
   )
 }

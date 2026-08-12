@@ -1,4 +1,3 @@
-import { SvgIcon, Typography } from '@mui/material'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useState, useEffect } from 'react'
 import { useWatch } from 'react-hook-form'
@@ -56,16 +55,11 @@ export function RecovererWarning(): ReactElement | null {
   }
 
   return (
-    <Typography
-      variant="body2"
-      className={addressBookInputCss.unknownAddress}
-      sx={({ palette }) => ({
-        bgcolor: `${palette.warning.background} !important`,
-        color: `${palette.warning.main} !important`,
-      })}
+    <p
+      className={`${addressBookInputCss.unknownAddress} text-sm !bg-[var(--color-warning-background)] !text-[var(--color-warning-main)]`}
     >
-      <SvgIcon component={InfoIcon} fontSize="small" />
+      <InfoIcon className="size-4" />
       {warning}
-    </Typography>
+    </p>
   )
 }
