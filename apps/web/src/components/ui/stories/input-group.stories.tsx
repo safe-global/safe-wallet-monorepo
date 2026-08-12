@@ -25,7 +25,7 @@ const meta = {
     },
     variant: {
       control: 'select',
-      options: ['default', 'surface', 'search'],
+      options: ['default', 'surface', 'search', 'outline'],
     },
   },
 } satisfies Meta<typeof InputGroup>
@@ -83,6 +83,9 @@ export const AllVariants: Story = {
         >
           <div style={{ width: '300px' }}>
             <SearchInput placeholder="Search..." />
+          </div>
+          <div style={{ width: '300px' }}>
+            <SearchInput variant="outline" placeholder="outline (unfilled)" />
           </div>
         </div>
       </div>

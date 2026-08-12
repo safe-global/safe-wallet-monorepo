@@ -234,7 +234,8 @@ const SafeDropdownContainer = ({
             {showSearch && (
               <div className="flex items-center gap-2 px-2 py-2">
                 <SearchInput
-                  className="flex-1"
+                  variant="surface"
+                  className="flex-1 shadow-xs"
                   placeholder="by name, address or network"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
