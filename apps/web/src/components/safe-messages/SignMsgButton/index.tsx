@@ -1,5 +1,6 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { Button, Tooltip } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useContext } from 'react'
 import type { SyntheticEvent, ReactElement } from 'react'
 
@@ -23,22 +24,31 @@ const SignMsgButton = ({ msg, compact = false }: { msg: MessageItem; compact?: b
 
   return (
     <CheckWallet>
-      {(isOk) => (
-        <Tooltip title={isOk && !isSignable ? "You've already signed this message" : ''}>
+      {(isOk) => {
+        const button = (
           <span>
             <Track {...MESSAGE_EVENTS.SIGN}>
               <Button
                 onClick={onClick}
-                variant={isSignable ? 'contained' : 'outlined'}
+                variant={isSignable ? 'default' : 'outline'}
                 disabled={!isOk || !isSignable}
-                size={compact ? 'small' : 'large'}
+                size={compact ? 'sm' : 'action'}
               >
                 Sign
               </Button>
             </Track>
           </span>
-        </Tooltip>
-      )}
+        )
+
+        return isOk && !isSignable ? (
+          <Tooltip>
+            <TooltipTrigger render={button} />
+            <TooltipContent>You&apos;ve already signed this message</TooltipContent>
+          </Tooltip>
+        ) : (
+          button
+        )
+      }}
     </CheckWallet>
   )
 }

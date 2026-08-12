@@ -104,7 +104,7 @@ describe('Balances page', () => {
     expect(screen.queryByTestId('assets-table')).not.toBeInTheDocument()
   })
 
-  const tooltipText = 'Total Balance may be different when you show all tokens.'
+  const tooltipText = 'Total from this list only. Portfolio total includes positions and may use other token data.'
 
   const renderWithTokenList = (tokenList: TOKEN_LISTS | undefined) =>
     render(<BalancesPage />, {
@@ -123,9 +123,9 @@ describe('Balances page', () => {
     expect(screen.getByTestId('total-asset-value')).toHaveTextContent(tooltipText)
   })
 
-  it('hides the total balance tooltip when only trusted tokens are shown', () => {
+  it('shows the total balance tooltip when only trusted tokens are shown (tooltip is informational and list-independent)', () => {
     renderWithTokenList(TOKEN_LISTS.TRUSTED)
 
-    expect(screen.getByTestId('total-asset-value')).not.toHaveTextContent(tooltipText)
+    expect(screen.getByTestId('total-asset-value')).toHaveTextContent(tooltipText)
   })
 })

@@ -2,18 +2,7 @@ import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { useRouter } from 'next/router'
-import {
-  ArrowLeftRight,
-  BarChart3,
-  ChevronLeft,
-  ChevronRight,
-  FileCode,
-  HelpCircle,
-  Send,
-  Shield,
-  Sparkles,
-  type LucideIcon,
-} from 'lucide-react'
+import { ArrowLeftRight, BarChart3, FileCode, HelpCircle, Send, Shield, Sparkles, type LucideIcon } from 'lucide-react'
 import {
   useSurveysGetStateV1Query,
   useSurveysSubmitResponseV1Mutation,
@@ -21,9 +10,9 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/surveys'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
-import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Spinner } from '@/components/ui/spinner'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Typography } from '@/components/ui/typography'
 import {
   OnboardingLayout,
@@ -170,34 +159,16 @@ const SurveyOnboarding = (): ReactElement | null => {
   )
 
   const footer = (
-    <div className="flex flex-col-reverse gap-3 xl:flex-row xl:items-center">
-      <Button
-        type="button"
-        variant="ghost"
-        onClick={goBack}
-        disabled={isSubmitting}
-        className="w-full h-12 rounded-lg bg-muted hover:bg-border xl:flex-1"
-      >
-        <ChevronLeft className="size-4 mr-1" />
-        Back
-      </Button>
-      <Button
-        data-testid="survey-finish-button"
-        type="button"
-        disabled={!spaceId || selected.size === 0 || isSubmitting}
-        onClick={onFinish}
-        className="w-full h-12 rounded-lg text-base xl:flex-1"
-      >
-        {isSubmitting ? (
-          <Spinner />
-        ) : (
-          <>
-            Create Workspace
-            <ChevronRight className="size-4 ml-1" />
-          </>
-        )}
-      </Button>
-    </div>
+    <OnboardingFooter
+      onBack={goBack}
+      backDisabled={isSubmitting}
+      continueLabel="Create Workspace"
+      continueType="button"
+      onContinue={onFinish}
+      continueDisabled={!spaceId || selected.size === 0 || isSubmitting}
+      continueLoading={isSubmitting}
+      continueTestId="survey-finish-button"
+    />
   )
 
   return (

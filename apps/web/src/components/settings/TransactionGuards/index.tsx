@@ -1,6 +1,7 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Paper, Grid, Typography, Box, IconButton, SvgIcon } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 
 import css from './styles.module.css'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -12,34 +13,31 @@ import { useContext } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
 import { RemoveGuardFlow } from '@/components/tx-flow/flows'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import SettingsCard from '../SettingsCard'
 
 const NoTransactionGuard = () => {
-  return (
-    <Typography mt={2} sx={{ color: ({ palette }) => palette.primary.light }}>
-      No transaction guard set
-    </Typography>
-  )
+  return <Typography className="mt-4 text-muted-foreground">No transaction guard set</Typography>
 }
 
 const GuardDisplay = ({ guardAddress, chainId }: { guardAddress: string; chainId: string }) => {
   const { setTxFlow } = useContext(TxModalContext)
 
   return (
-    <Box className={css.guardDisplay}>
+    <div className={css.guardDisplay}>
       <EthHashInfo shortAddress={false} address={guardAddress} showCopyButton hasExplorer chainId={chainId} />
       <CheckWallet>
         {(isOk) => (
-          <IconButton
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={() => setTxFlow(<RemoveGuardFlow address={guardAddress} />)}
-            color="error"
-            size="small"
             disabled={!isOk}
           >
-            <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
-          </IconButton>
+            <DeleteIcon className="size-4 text-destructive" />
+          </Button>
         )}
       </CheckWallet>
-    </Box>
+    </div>
   )
 }
 
@@ -53,31 +51,17 @@ const TransactionGuards = () => {
   }
 
   return (
-    <Paper sx={{ padding: 4 }}>
-      <Grid container direction="row" justifyContent="space-between" spacing={3}>
-        <Grid item lg={4} xs={12}>
-          <Typography variant="h4" fontWeight={700}>
-            Transaction guards
-          </Typography>
-        </Grid>
-
-        <Grid item xs>
-          <Box>
-            <Typography>
-              Transaction guards impose additional constraints that are checked prior to executing a Safe transaction.
-              Transaction guards are potentially risky, so make sure to only use transaction guards from trusted
-              sources. Learn more about transaction guards{' '}
-              <ExternalLink href={HelpCenterArticle.TRANSACTION_GUARD}>here</ExternalLink>.
-            </Typography>
-            {safe.guard ? (
-              <GuardDisplay guardAddress={safe.guard.value} chainId={safe.chainId} />
-            ) : (
-              <NoTransactionGuard />
-            )}
-          </Box>
-        </Grid>
-      </Grid>
-    </Paper>
+    <SettingsCard title="Transaction guards">
+      <div>
+        <Typography>
+          Transaction guards impose additional constraints that are checked prior to executing a Safe transaction.
+          Transaction guards are potentially risky, so make sure to only use transaction guards from trusted sources.
+          Learn more about transaction guards{' '}
+          <ExternalLink href={HelpCenterArticle.TRANSACTION_GUARD}>here</ExternalLink>.
+        </Typography>
+        {safe.guard ? <GuardDisplay guardAddress={safe.guard.value} chainId={safe.chainId} /> : <NoTransactionGuard />}
+      </div>
+    </SettingsCard>
   )
 }
 

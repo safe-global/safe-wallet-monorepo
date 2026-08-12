@@ -1,5 +1,5 @@
 import { Tabs as TabsPrimitive } from '@base-ui/react/tabs'
-import { cva, type VariantProps } from 'class-variance-authority'
+import { cva } from 'class-variance-authority'
 
 import { cn } from '@/utils/cn'
 
@@ -26,7 +26,8 @@ import { cn } from '@/utils/cn'
  * Key Props:
  * - Tabs (Root): `defaultValue`, `value`, `onValueChange`
  * - Tabs (Root): `orientation` ('horizontal' | 'vertical')
- * - TabsList: `variant` ('default' | 'line')
+ * - TabsList: `variant` ('underline' | 'toggle'); on `underline`, `tone` ('brand' | 'neutral');
+ *   on `toggle`, `size` ('default' | 'lg')
  * - TabsTrigger: `value`, `disabled`
  */
 
@@ -41,31 +42,64 @@ function Tabs({ className, orientation = 'horizontal', ...props }: TabsPrimitive
   )
 }
 
+// Two public tab families:
+//  - `underline` — flush-underline tabs. `tone="brand"` is the bold, primary-coloured page nav
+//    (NavTabs: Assets/Settings/Transactions); `tone="neutral"` (default) is the lighter in-content
+//    look (Spaces address book, members).
+//  - `toggle` — pill-on-track switch. `size="default"` is the compact muted-track switch (SecurityHub
+//    drawer); `size="lg"` is the large muted-track welcome switch (Accounts/Workspaces).
+// Each (variant, tone|size) pair maps to one internal `look`, emitted as data-variant so TabsTrigger
+// (styled off the list's data-variant) remains the single source of truth for the per-look treatment.
 const tabsListVariants = cva(
-  'rounded-lg p-[3px] group-data-horizontal/tabs:h-9 data-[variant=line]:rounded-none group/tabs-list text-muted-foreground inline-flex w-fit items-center justify-center group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col',
+  'rounded-lg p-[3px] group-data-horizontal/tabs:h-9 group/tabs-list text-muted-foreground inline-flex w-fit items-center justify-center group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col',
   {
     variants: {
-      variant: {
+      look: {
         default: 'bg-muted',
-        line: 'gap-1 bg-transparent',
+        line: 'h-auto gap-1 rounded-none bg-transparent p-0',
+        nav: 'h-auto gap-6 rounded-none bg-transparent p-0',
+        // group-data-horizontal:h-auto overrides the base's horizontal h-9 (same variant prefix so
+        // twMerge collapses them) — the track must grow around the h-9 pills plus the p-1 gutter.
+        //
+        // The light track is a deliberate literal — do NOT "tidy" it to `bg-muted`. This look only
+        // ever sits on the page background, and `--muted` (#f5f5f5) is a single value away from it
+        // (#f4f4f4), so a muted track is invisible there and the switch reads as having no
+        // background at all. #fafafa goes the other way, giving page -> track -> white active pill
+        // as three distinct steps; it is the value the pre-migration switch uses. Dark mode has no
+        // such clash (`--muted` #262626 on a #121312 page), so it keeps the token.
+        segmented: 'h-auto group-data-horizontal/tabs:h-auto gap-1 bg-[#fafafa] dark:bg-muted p-1',
       },
     },
     defaultVariants: {
-      variant: 'default',
+      look: 'default',
     },
   },
 )
 
+type TabsListVariant = 'underline' | 'toggle'
+type TabsListTone = 'brand' | 'neutral'
+type TabsListSize = 'default' | 'lg'
+
+const resolveLook = (variant: TabsListVariant, tone: TabsListTone, size: TabsListSize) =>
+  variant === 'underline' ? (tone === 'brand' ? 'nav' : 'line') : size === 'lg' ? 'segmented' : 'default'
+
 function TabsList({
   className,
-  variant = 'default',
+  variant = 'toggle',
+  tone = 'neutral',
+  size = 'default',
   ...props
-}: TabsPrimitive.List.Props & VariantProps<typeof tabsListVariants>) {
+}: TabsPrimitive.List.Props & {
+  variant?: TabsListVariant
+  tone?: TabsListTone
+  size?: TabsListSize
+}) {
+  const look = resolveLook(variant, tone, size)
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
-      data-variant={variant}
-      className={cn(tabsListVariants({ variant }), className)}
+      data-variant={look}
+      className={cn(tabsListVariants({ look }), className)}
       {...props}
     />
   )
@@ -76,10 +110,23 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
     <TabsPrimitive.Tab
       data-slot="tabs-trigger"
       className={cn(
-        "gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium group-data-[variant=default]/tabs-list:data-active:shadow-sm group-data-[variant=line]/tabs-list:data-active:shadow-none [&_svg:not([class*='size-'])]:size-4 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring text-foreground/60 hover:text-foreground dark:text-muted-foreground dark:hover:text-foreground relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center whitespace-nowrap transition-all group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-        'group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent dark:group-data-[variant=line]/tabs-list:data-active:border-transparent dark:group-data-[variant=line]/tabs-list:data-active:bg-transparent',
-        'data-active:bg-background dark:data-active:text-foreground dark:data-active:border-input dark:data-active:bg-input/30 data-active:text-foreground',
-        'after:bg-foreground after:absolute after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-active:after:opacity-100',
+        "cursor-pointer gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium [&_svg:not([class*='size-'])]:size-4 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring text-foreground/60 hover:text-foreground dark:text-muted-foreground dark:hover:text-foreground relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center whitespace-nowrap transition-all group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        'group-data-[variant=default]/tabs-list:data-active:bg-background group-data-[variant=default]/tabs-list:data-active:text-foreground group-data-[variant=default]/tabs-list:data-active:shadow-sm dark:group-data-[variant=default]/tabs-list:data-active:border-border dark:group-data-[variant=default]/tabs-list:data-active:bg-input/30 dark:group-data-[variant=default]/tabs-list:data-active:text-foreground',
+        'group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent group-data-[variant=line]/tabs-list:data-active:shadow-none dark:group-data-[variant=line]/tabs-list:data-active:border-transparent dark:group-data-[variant=line]/tabs-list:data-active:bg-transparent dark:group-data-[variant=line]/tabs-list:data-active:text-foreground group-data-[variant=line]/tabs-list:data-active:text-foreground',
+        // nav variant: compact brand-coloured triggers (primary idle/active), transparent bg
+        'group-data-[variant=nav]/tabs-list:h-auto group-data-[variant=nav]/tabs-list:flex-none group-data-[variant=nav]/tabs-list:px-0 group-data-[variant=nav]/tabs-list:pb-2 group-data-[variant=nav]/tabs-list:font-bold group-data-[variant=nav]/tabs-list:bg-transparent',
+        'group-data-[variant=nav]/tabs-list:text-[var(--color-primary-light)] group-data-[variant=nav]/tabs-list:hover:text-[var(--color-primary-main)] group-data-[variant=nav]/tabs-list:data-active:text-[var(--color-primary-main)] group-data-[variant=nav]/tabs-list:data-active:bg-transparent group-data-[variant=nav]/tabs-list:data-active:shadow-none',
+        // Underline: shared pseudo-element. line sits 5px below the trigger; nav sits flush
+        // to the bottom (bottom-0) so it isn't clipped inside an overflow scroll container,
+        // and uses the brand primary colour.
+        'after:bg-foreground after:absolute after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5',
+        'group-data-[variant=line]/tabs-list:after:bottom-[-5px] group-data-[variant=line]/tabs-list:data-active:after:opacity-100',
+        'group-data-[variant=nav]/tabs-list:after:bottom-0 group-data-[variant=nav]/tabs-list:after:bg-[var(--color-primary-main)] group-data-[variant=nav]/tabs-list:data-active:after:opacity-100',
+        // segmented pill: large rounded pills on a muted track; the active pill is a raised paper surface.
+        // Geometry and type scale follow the welcome switch as redesigned in dev#8366 (rounded-lg pills,
+        // text-base), not the older pre-migration switch. Idle triggers are normal-weight muted text.
+        'group-data-[variant=segmented]/tabs-list:h-[38px] group-data-[variant=segmented]/tabs-list:rounded-lg group-data-[variant=segmented]/tabs-list:px-2.5 group-data-[variant=segmented]/tabs-list:text-base group-data-[variant=segmented]/tabs-list:font-normal group-data-[variant=segmented]/tabs-list:text-muted-foreground group-data-[variant=segmented]/tabs-list:hover:text-foreground',
+        'group-data-[variant=segmented]/tabs-list:data-active:bg-background group-data-[variant=segmented]/tabs-list:data-active:font-semibold group-data-[variant=segmented]/tabs-list:data-active:text-foreground group-data-[variant=segmented]/tabs-list:data-active:shadow-sm dark:group-data-[variant=segmented]/tabs-list:data-active:border-input dark:group-data-[variant=segmented]/tabs-list:data-active:bg-input/30 dark:group-data-[variant=segmented]/tabs-list:data-active:text-foreground',
         className,
       )}
       {...props}

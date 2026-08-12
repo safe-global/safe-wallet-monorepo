@@ -1,22 +1,20 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./Chip.stories CustomLabel 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <span
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-14d0kko-MuiChip-root"
+  <div
+    class="shadcn-scope"
   >
     <span
-      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+      class="inline-flex w-fit items-center gap-1 whitespace-nowrap font-medium [&>svg]:size-3 [&>svg]:pointer-events-none bg-secondary text-secondary-foreground px-2.5 py-0.5 text-xs rounded-4xl"
+      data-slot="chip"
+      style="margin-top: -2px; font-weight: bold;"
     >
-      <span
-        class="MuiTypography-root MuiTypography-caption mui-style-11b0zy1-MuiTypography-root"
-      >
-        Testing VRT
-      </span>
+      Testing VRT
     </span>
-  </span>
+  </div>
 </div>
 `;
 
@@ -24,19 +22,17 @@ exports[`./Chip.stories Default 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <span
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-14d0kko-MuiChip-root"
+  <div
+    class="shadcn-scope"
   >
     <span
-      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+      class="inline-flex w-fit items-center gap-1 whitespace-nowrap font-medium [&>svg]:size-3 [&>svg]:pointer-events-none bg-secondary text-secondary-foreground px-2.5 py-0.5 text-xs rounded-4xl"
+      data-slot="chip"
+      style="margin-top: -2px; font-weight: bold;"
     >
-      <span
-        class="MuiTypography-root MuiTypography-caption mui-style-11b0zy1-MuiTypography-root"
-      >
-        New
-      </span>
+      New
     </span>
-  </span>
+  </div>
 </div>
 `;
 
@@ -44,19 +40,17 @@ exports[`./Chip.stories NormalFontWeight 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <span
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-14d0kko-MuiChip-root"
+  <div
+    class="shadcn-scope"
   >
     <span
-      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+      class="inline-flex w-fit items-center gap-1 whitespace-nowrap font-medium [&>svg]:size-3 [&>svg]:pointer-events-none bg-secondary text-secondary-foreground px-2.5 py-0.5 text-xs rounded-4xl"
+      data-slot="chip"
+      style="margin-top: -2px; font-weight: normal;"
     >
-      <span
-        class="MuiTypography-root MuiTypography-caption mui-style-1pbessu-MuiTypography-root"
-      >
-        New
-      </span>
+      New
     </span>
-  </span>
+  </div>
 </div>
 `;
 
@@ -64,18 +58,16 @@ exports[`./Chip.stories WithCustomStyling 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <span
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1gcknf1-MuiChip-root"
+  <div
+    class="shadcn-scope"
   >
     <span
-      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+      class="inline-flex w-fit items-center gap-1 whitespace-nowrap font-medium [&>svg]:size-3 [&>svg]:pointer-events-none bg-secondary text-secondary-foreground px-2.5 py-0.5 text-xs rounded-4xl"
+      data-slot="chip"
+      style="margin-top: -2px; font-weight: bold; color: white;"
     >
-      <span
-        class="MuiTypography-root MuiTypography-caption mui-style-11b0zy1-MuiTypography-root"
-      >
-        Featured
-      </span>
+      Featured
     </span>
-  </span>
+  </div>
 </div>
 `;

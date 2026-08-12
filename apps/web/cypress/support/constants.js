@@ -126,7 +126,10 @@ export const safeListEndpoint = '**/safes*'
 export const ownedSafesEndpoint = '**/v2/owners/**/safes*'
 export const queuedEndpoint = '**/queued*'
 export const messagesEndpoint = 'v1/chains/**/safes/**/messages*'
-export const collectiblesEndpoint = '**/collectibles*'
+// Must stay scoped to the API path: a bare '**/collectibles*' also matches the Vite dev-server
+// module URL for store/gateway/AUTO_GENERATED/collectibles.ts, and fulfilling that with JSON
+// kills the whole app on load (module MIME type error).
+export const collectiblesEndpoint = '**/v2/**/safes/**/collectibles*'
 export const chainsEndpoint = '**/v2/chains'
 export const chainConfigEndpoint = '**/v2/chains/*'
 export const safeInfoEndpoint = '**/v1/chains/*/safes/*'

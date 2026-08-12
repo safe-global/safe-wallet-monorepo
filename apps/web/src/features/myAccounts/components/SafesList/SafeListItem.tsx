@@ -1,4 +1,4 @@
-import { useMediaQuery, useTheme } from '@mui/material'
+import { useIsBelowSm } from '@/hooks/useMediaQuery'
 import { AccountItem } from '../AccountItem'
 import { useSafeItemData } from '../../hooks/useSafeItemData'
 import css from '../AccountItems/styles.module.css'
@@ -15,8 +15,7 @@ export interface SafeListItemProps {
 
 export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: SafeListItemProps) => {
   const spaces = useLoadFeature(SpacesFeature)
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useIsBelowSm()
 
   const {
     chain,

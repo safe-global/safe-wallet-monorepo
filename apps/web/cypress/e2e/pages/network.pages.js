@@ -20,12 +20,16 @@ export function clickChainNavigationButton() {
 export function clickAllNetworksAccordion() {
   cy.get(allNetworksAccordion).should('be.visible')
   cy.get(chainSelectorLoading).should('not.exist')
-  cy.get(allNetworksAccordionTrigger).should('be.visible').click()
+  cy.get(allNetworksAccordionTrigger).then(($trigger) => $trigger[0].click())
+  cy.get(allNetworksAccordionTrigger).should('have.attr', 'aria-expanded', 'true')
   cy.get(addNetworkBtn).should('be.visible')
 }
 
 export function clickAddNetworkBtn(chainName) {
-  cy.get(addNetworkBtn).filter(`[aria-label="Add ${chainName}"]`).click()
+  // Same Base UI popup quirk as the accordion above: re-query and bare DOM click.
+  cy.get(addNetworkBtn)
+    .filter(`[aria-label="Add ${chainName}"]`)
+    .then(($btn) => $btn[0].click())
   cy.get(addChainDialog).should('be.visible')
 }
 

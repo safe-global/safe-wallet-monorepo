@@ -1,18 +1,21 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Box, IconButton, Tooltip, Typography, type SvgIconProps } from '@mui/material'
-import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
+import { RefreshCwIcon, type LucideProps } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import { useRefetchBalances } from '@/hooks/useRefetchBalances'
 import { PORTFOLIO_CACHE_TIME_MS } from '@/config/constants'
 import { trackEvent } from '@/services/analytics'
 import { PORTFOLIO_EVENTS } from '@/services/analytics/events/portfolio'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { logError, Errors } from '@/services/exceptions'
+import { cn } from '@/utils/cn'
 import css from './styles.module.css'
 
-const RefreshIcon = (props: SvgIconProps & { isLoading?: boolean }) => {
-  const { isLoading, ...iconProps } = props
-  return <AutorenewRoundedIcon {...iconProps} className={isLoading ? css.spinning : undefined} sx={iconProps.sx} />
+const RefreshIcon = (props: LucideProps & { isLoading?: boolean }) => {
+  const { isLoading, className, ...iconProps } = props
+  return <RefreshCwIcon {...iconProps} className={cn('size-4', isLoading && css.spinning, className)} />
 }
 
 interface PortfolioRefreshHintProps {
@@ -72,24 +75,25 @@ const PortfolioRefreshHint = ({
   )
 
   return (
-    <Box display="flex" alignItems="center" gap={0.5}>
-      <Typography variant="subtitle2" color="var(--color-text-secondary)">
+    <div className="flex items-center gap-1">
+      <Typography variant="paragraph-small-bold" className="text-[var(--color-text-secondary)]">
         {isFetching ? 'Fetching data' : timeAgo ? <>Updated {timeAgo} ago</> : 'Loading...'}
       </Typography>
-      <Tooltip title={tooltip} arrow>
-        <span style={{ display: 'inline-flex' }}>
-          <IconButton
+      <Tooltip>
+        <TooltipTrigger render={<span className="inline-flex" />}>
+          <Button
+            variant="ghost"
+            size="icon-xs"
             onClick={handleRefresh}
             disabled={isDisabled}
-            size="small"
-            sx={{ padding: '2px' }}
             data-testid="portfolio-refresh-button"
           >
-            <RefreshIcon fontSize="small" isLoading={isFetching} />
-          </IconButton>
-        </span>
+            <RefreshIcon isLoading={isFetching} />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{tooltip}</TooltipContent>
       </Tooltip>
-    </Box>
+    </div>
   )
 }
 

@@ -11,6 +11,14 @@ import { parseNextQuery, toNavigateOptions, type Url } from './next-url'
 // next router push/replace/prefetch accept (url, as?, options?).
 type TransitionOptions = { shallow?: boolean; locale?: string | false; scroll?: boolean }
 
+/**
+ * Mirrors Next's `NextHistoryState`, which its `beforePopState` callback receives. Typing the
+ * callback as argument-less made reused apps/web code that reads the destination —
+ * `beforePopState(({ url }) => …)` in usePreventNavigation — a type error here while compiling
+ * clean against the real router in apps/web.
+ */
+type NextHistoryStateLike = { url: string; as: string; options?: TransitionOptions }
+
 export interface NextRouterLike {
   pathname: string
   asPath: string
@@ -26,7 +34,7 @@ export interface NextRouterLike {
   forward: () => void
   reload: () => void
   prefetch: (url: Url, as?: Url, options?: TransitionOptions) => Promise<void>
-  beforePopState: (cb: () => boolean) => void
+  beforePopState: (cb: (state: NextHistoryStateLike) => boolean) => void
   events: {
     on: (event: string, handler: (...args: unknown[]) => void) => void
     off: (event: string, handler: (...args: unknown[]) => void) => void
@@ -38,6 +46,39 @@ const noopEvents: NextRouterLike['events'] = {
   on: () => undefined,
   off: () => undefined,
   emit: () => undefined,
+}
+
+/**
+ * `beforePopState`, as close to Next as this shim can get.
+ *
+ * Next holds ONE callback on its router singleton and replaces it on every call — never clearing it
+ * — so this is module-level rather than per-hook-instance, which also survives the fresh router
+ * object `useRouter` returns each render. The `popstate` listener is attached on first registration
+ * and left in place, matching that lifetime.
+ *
+ * One deliberate difference: Next runs the callback *before* it routes and treats `false` as "cancel
+ * my navigation". A listener cannot cancel TanStack Router's own sync to the popped entry, so `false`
+ * is not a veto here. It does not need to be — the browser has already changed the URL by the time
+ * either router reacts, so blocking always means rewinding, and our one consumer does exactly that:
+ * usePreventNavigation replaces back to the previous path itself and only uses the return value to
+ * decide whether to. The return value is therefore read and discarded, kept in the type so call
+ * sites stay identical across both apps.
+ */
+let beforePopStateCallback: ((state: NextHistoryStateLike) => boolean) | undefined
+
+const handlePopState = () => {
+  if (!beforePopStateCallback) return
+  const url = `${window.location.pathname}${window.location.search}`
+  // `as` mirrors `url`: this app has no rewrites, so Next's internal/displayed URLs coincide.
+  beforePopStateCallback({ url, as: url })
+}
+
+const registerBeforePopState = (cb: (state: NextHistoryStateLike) => boolean) => {
+  const isFirstRegistration = !beforePopStateCallback
+  beforePopStateCallback = cb
+  if (isFirstRegistration && typeof window !== 'undefined') {
+    window.addEventListener('popstate', handlePopState)
+  }
 }
 
 export function useRouter(): NextRouterLike {
@@ -81,7 +122,7 @@ export function useRouter(): NextRouterLike {
         if (typeof window !== 'undefined') window.location.reload()
       },
       prefetch: async () => undefined,
-      beforePopState: () => undefined,
+      beforePopState: registerBeforePopState,
       events: noopEvents,
     }),
     [navigate, tsRouter, pathname, searchStr, query],

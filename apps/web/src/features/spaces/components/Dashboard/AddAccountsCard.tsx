@@ -1,6 +1,6 @@
 import AddAccountsChooser from '../AddAccountsChooser'
 import Image from 'next/image'
-import { Typography, Paper, Box, Stack } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import EmptyDashboard from '@/public/images/spaces/empty_dashboard.png'
 import EmptyDashboardDark from '@/public/images/spaces/empty_dashboard_dark.png'
 
@@ -13,14 +13,14 @@ const AddAccountsCard = () => {
   const isDarkMode = useDarkMode()
 
   return (
-    <Paper sx={{ p: 3, display: 'flex', gap: 3 }}>
-      <Stack direction={{ xs: 'column-reverse', md: 'row' }} alignItems="center" spacing={3}>
-        <Box sx={{ flex: 2 }}>
-          <Typography variant="h4" fontWeight={700} mb={2}>
+    <div className="flex gap-6 rounded-xl bg-card p-6">
+      <div className="flex flex-col-reverse items-center gap-6 md:flex-row">
+        <div className="flex-[2]">
+          <Typography variant="h4" className="mb-4">
             Add your Safe accounts
           </Typography>
 
-          <Typography variant="body1" color="primary.light" mb={2}>
+          <Typography variant="paragraph" color="muted" className="mb-4">
             Start by adding Safe accounts to your workspace. Any accounts that are linked to your connected wallet can
             be added to the workspace.
           </Typography>
@@ -28,9 +28,9 @@ const AddAccountsCard = () => {
           <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
             <AddAccountsChooser buttonLabel="Manage accounts" entryPoint="dashboard" />
           </Track>
-        </Box>
+        </div>
 
-        <Box>
+        <div>
           <Image
             className={css.image}
             src={isDarkMode ? EmptyDashboardDark : EmptyDashboard}
@@ -38,9 +38,9 @@ const AddAccountsCard = () => {
             width={375}
             height={200}
           />
-        </Box>
-      </Stack>
-    </Paper>
+        </div>
+      </div>
+    </div>
   )
 }
 

@@ -1,5 +1,9 @@
 import { useState, useCallback, useEffect } from 'react'
-import { Button, CircularProgress, DialogActions, DialogContent, TextField, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Typography } from '@/components/ui/typography'
 import ModalDialog from '@/components/common/ModalDialog'
 import { useReportFalseResult } from '../../hooks/useReportFalseResult'
 import { trackEvent } from '@/services/analytics'
@@ -30,6 +34,7 @@ export const ReportFalseResultModal = ({ open, onClose, requestId }: ReportFalse
   }, [open])
 
   const isFormValid = details.trim().length > 0 && details.length <= MAX_DETAILS_LENGTH
+  const isError = details.length > MAX_DETAILS_LENGTH
 
   const handleSubmit = useCallback(async () => {
     if (!isFormValid) return
@@ -46,40 +51,46 @@ export const ReportFalseResultModal = ({ open, onClose, requestId }: ReportFalse
     }
   }, [isFormValid, requestId, details, reportFalseResult, onClose])
 
-  const handleDetailsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDetailsChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setDetails(event.target.value)
   }
 
   return (
     <ModalDialog open={open} onClose={onClose} dialogTitle="Report false result" hideChainIndicator>
-      <DialogContent sx={{ p: '24px !important' }}>
-        <Typography variant="body2" color="text.secondary" mb={3}>
+      <div className="p-6">
+        <Typography variant="paragraph-small" className="mb-6 block text-[var(--color-text-secondary)]">
           Help us improve our security analysis by reporting when a transaction was incorrectly flagged as dangerous.
         </Typography>
 
-        <TextField
-          label="Details"
-          placeholder="Please describe why you believe this result is incorrect..."
-          multiline
-          rows={4}
-          fullWidth
-          value={details}
-          onChange={handleDetailsChange}
-          inputProps={{ maxLength: MAX_DETAILS_LENGTH }}
-          helperText={`${details.length}/${MAX_DETAILS_LENGTH} characters`}
-          error={details.length > MAX_DETAILS_LENGTH}
-          required
-        />
-      </DialogContent>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="report-false-result-details">Details</Label>
+          <Textarea
+            id="report-false-result-details"
+            placeholder="Please describe why you believe this result is incorrect..."
+            rows={4}
+            value={details}
+            onChange={handleDetailsChange}
+            maxLength={MAX_DETAILS_LENGTH}
+            aria-invalid={isError}
+            required
+          />
+          <Typography
+            variant="paragraph-mini"
+            className={isError ? 'text-[var(--color-error-main)]' : 'text-[var(--color-text-secondary)]'}
+          >
+            {`${details.length}/${MAX_DETAILS_LENGTH} characters`}
+          </Typography>
+        </div>
+      </div>
 
-      <DialogActions sx={{ p: 3, pt: 0 }}>
-        <Button onClick={onClose} disabled={isLoading}>
+      <div className="flex flex-row justify-end gap-2 p-6 pt-0">
+        <Button variant="ghost" onClick={onClose} disabled={isLoading}>
           Cancel
         </Button>
-        <Button variant="contained" onClick={handleSubmit} disabled={!isFormValid || isLoading} disableElevation>
-          {isLoading ? <CircularProgress size={20} /> : 'Submit report'}
+        <Button onClick={handleSubmit} disabled={!isFormValid || isLoading}>
+          {isLoading ? <Spinner className="size-5" /> : 'Submit report'}
         </Button>
-      </DialogActions>
+      </div>
     </ModalDialog>
   )
 }

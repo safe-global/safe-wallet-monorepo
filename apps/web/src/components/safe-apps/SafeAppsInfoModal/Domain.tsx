@@ -1,6 +1,7 @@
 import React from 'react'
-import { Typography } from '@mui/material'
-import CheckIcon from '@mui/icons-material/Check'
+import { Check } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
 
 import styles from './styles.module.css'
 
@@ -11,8 +12,8 @@ type DomainProps = {
 
 const Domain: React.FC<DomainProps> = ({ url, showInOneLine }): React.ReactElement => {
   return (
-    <Typography className={styles.domainText} sx={showInOneLine ? { overflowY: 'hidden', whiteSpace: 'nowrap' } : {}}>
-      <CheckIcon color="success" className={styles.domainIcon} /> {url}
+    <Typography className={cn(styles.domainText, { 'overflow-y-hidden whitespace-nowrap': showInOneLine })}>
+      <Check className={cn(styles.domainIcon, 'text-[var(--color-success-main)]')} /> {url}
     </Typography>
   )
 }

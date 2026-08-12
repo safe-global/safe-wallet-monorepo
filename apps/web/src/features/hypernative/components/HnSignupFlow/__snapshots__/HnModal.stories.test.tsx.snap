@@ -1,7 +1,108 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./HnModal.stories Default 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
-/>
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      data-base-ui-portal=""
+      data-slot="dialog-portal"
+      id="_r_2_"
+    >
+      <div
+        aria-hidden="true"
+        data-base-ui-inert=""
+        role="presentation"
+        style="position: fixed; inset: 0; user-select: none;"
+      />
+      <div
+        aria-hidden="true"
+        class="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-starting-style:opacity-0 data-ending-style:opacity-0 bg-backdrop fixed inset-0 z-[var(--z-overlay)]"
+        data-base-ui-inert=""
+        data-open=""
+        data-slot="dialog-overlay"
+        role="presentation"
+        style="user-select: none;"
+      />
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+      <div
+        class="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-starting-style:opacity-0 data-ending-style:opacity-0 fixed top-[50%] left-[50%] z-[var(--z-overlay)] w-full -translate-x-1/2 -translate-y-1/2 shadow-lg duration-200 max-w-[900px] p-0 bg-[var(--color-background-paper)] overflow-auto rounded-2xl"
+        data-base-ui-focusable=""
+        data-open=""
+        data-slot="dialog-content"
+        id="_r_0_"
+        role="dialog"
+        style="--nested-dialogs: 0;"
+        tabindex="-1"
+      >
+        <div
+          class="flex flex-col gap-1 p-8"
+        >
+          <h4
+            class="m-0 scroll-m-20 text-xl font-semibold leading-6 tracking-normal"
+            data-slot="typography"
+            data-variant="h4"
+          >
+            Modal content
+          </h4>
+          <p
+            class="m-0 text-base leading-6 font-normal"
+            data-slot="typography"
+            data-variant="paragraph"
+          >
+            This is the content inside the Hypernative modal.
+          </p>
+        </div>
+        <button
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm absolute top-4 right-4"
+          data-slot="dialog-close"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-x"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6 6 18"
+            />
+            <path
+              d="m6 6 12 12"
+            />
+          </svg>
+          <span
+            class="sr-only"
+          >
+            Close
+          </span>
+        </button>
+      </div>
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+    </div>
+  </div>
+</div>
 `;

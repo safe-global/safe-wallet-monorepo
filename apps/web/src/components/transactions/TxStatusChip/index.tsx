@@ -1,33 +1,29 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Typography, Chip } from '@mui/material'
+import type { VariantProps } from 'class-variance-authority'
+import { Badge, type badgeVariants } from '@/components/ui/badge'
 
 export type TxStatusChipProps = {
   children: ReactNode
   color?: 'primary' | 'secondary' | 'info' | 'warning' | 'success' | 'error'
-  backgroundColor?: string
 }
 
-const TxStatusChip = ({ children, color = 'primary', backgroundColor }: TxStatusChipProps): ReactElement => {
+const colorToVariant: Record<
+  NonNullable<TxStatusChipProps['color']>,
+  NonNullable<VariantProps<typeof badgeVariants>['variant']>
+> = {
+  primary: 'default',
+  secondary: 'secondary',
+  info: 'info',
+  warning: 'warning',
+  success: 'success',
+  error: 'destructive',
+}
+
+const TxStatusChip = ({ children, color = 'primary' }: TxStatusChipProps): ReactElement => {
   return (
-    <Chip
-      size="small"
-      sx={{
-        backgroundColor: backgroundColor ?? `${color}.background`,
-        color: `${color}.${color === 'success' ? 'dark' : color === 'primary' ? 'light' : 'main'}`,
-      }}
-      label={
-        <Typography
-          variant="caption"
-          fontWeight="bold"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          gap={0.7}
-        >
-          {children}
-        </Typography>
-      }
-    />
+    <Badge variant={colorToVariant[color]} size="lg" className="font-bold">
+      {children}
+    </Badge>
   )
 }
 

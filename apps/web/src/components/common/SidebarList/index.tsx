@@ -1,83 +1,100 @@
-import type { ReactElement } from 'react'
-import List, { type ListProps } from '@mui/material/List'
-import ListItemButton, { type ListItemButtonProps } from '@mui/material/ListItemButton'
-import ListItemIcon, { type ListItemIconProps } from '@mui/material/ListItemIcon'
-import ListItemText, { type ListItemTextProps } from '@mui/material/ListItemText'
+import type { ComponentProps, ReactElement, ReactNode } from 'react'
 import Link from 'next/link'
 import type { LinkProps } from 'next/link'
-import Badge from '@mui/material/Badge'
-import Box from '@mui/material/Box'
+
+import { typographyVariants } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
 
 import css from './styles.module.css'
 
-export const SidebarList = ({ children, ...rest }: Omit<ListProps, 'className'>): ReactElement => (
-  <List className={css.list} {...rest}>
+export const SidebarList = ({ children, className, ...rest }: ComponentProps<'ul'>): ReactElement => (
+  <ul className={cn('m-0 list-none px-2 py-2', css.list, className)} {...rest}>
     {children}
-  </List>
+  </ul>
 )
 
 export const SidebarListItemButton = ({
   href,
+  externalUrl,
   children,
   disabled,
+  selected,
+  className,
   ...rest
-}: Omit<ListItemButtonProps, 'sx'> & { href?: LinkProps['href'] }): ReactElement => {
-  const button = (
-    <ListItemButton className={css.listItemButton} {...rest} sx={disabled ? { pointerEvents: 'none' } : undefined}>
-      {children}
-    </ListItemButton>
+}: Omit<ComponentProps<'a'>, 'href'> & {
+  href?: LinkProps['href']
+  externalUrl?: string
+  selected?: boolean
+  disabled?: boolean
+}): ReactElement => {
+  const classes = cn(
+    'flex w-full items-center px-3 no-underline',
+    css.listItemButton,
+    disabled && 'pointer-events-none',
+    className,
   )
 
-  return href ? (
-    <Link href={href} passHref legacyBehavior>
-      {button}
-    </Link>
-  ) : (
-    button
+  if (externalUrl) {
+    return (
+      <a
+        href={externalUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={classes}
+        data-selected={selected || undefined}
+        {...rest}
+      >
+        {children}
+      </a>
+    )
+  }
+
+  if (href) {
+    return (
+      <Link href={href} className={classes} data-selected={selected || undefined} {...rest}>
+        {children}
+      </Link>
+    )
+  }
+
+  return (
+    <span className={classes} data-selected={selected || undefined} {...rest}>
+      {children}
+    </span>
   )
 }
 
 export const SidebarListItemIcon = ({
   children,
   badge = false,
-  ...rest
-}: Omit<ListItemIconProps, 'className'> & { badge?: boolean }): ReactElement => (
-  <ListItemIcon
-    className={css.icon}
-    sx={{
-      '& svg': {
-        width: '16px',
-        height: '16px',
-        '& path': ({ palette }) => ({
-          fill: palette.logo.main,
-        }),
-      },
-    }}
-    {...rest}
-  >
-    <Badge color="error" variant="dot" invisible={!badge} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
-      {children}
-    </Badge>
-  </ListItemIcon>
+  className,
+}: {
+  children: ReactNode
+  badge?: boolean
+  className?: string
+}): ReactElement => (
+  <span className={cn('relative mr-2 flex min-w-0 shrink-0 items-center', css.icon, className)}>
+    {children}
+    {badge && <span className="absolute -right-1 -top-0.5 size-1.5 rounded-full bg-[var(--color-error-main)]" />}
+  </span>
 )
 
 export const SidebarListItemText = ({
   children,
   bold = false,
+  className,
   ...rest
-}: ListItemTextProps & { bold?: boolean }): ReactElement => (
-  <ListItemText
-    primaryTypographyProps={{
-      variant: 'body2',
-      fontWeight: bold ? 700 : undefined,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    }}
+}: ComponentProps<'div'> & { bold?: boolean }): ReactElement => (
+  <div
+    className={cn(
+      typographyVariants({ variant: bold ? 'paragraph-small-bold' : 'paragraph-small' }),
+      'flex w-full items-center justify-between',
+      className,
+    )}
     {...rest}
   >
     {children}
-  </ListItemText>
+  </div>
 )
 
 export const SidebarListItemCounter = ({
@@ -88,26 +105,14 @@ export const SidebarListItemCounter = ({
   variant?: 'warning' | 'subtle'
 }): ReactElement | null =>
   count ? (
-    <Box
-      component="span"
-      sx={{
-        color: variant === 'warning' ? 'static.main' : 'text.primary',
-        backgroundColor: variant === 'warning' ? 'warning.light' : 'background.main',
-        border: variant === 'subtle' ? '1px solid' : undefined,
-        borderColor: variant === 'subtle' ? 'background.main' : undefined,
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        verticalAlign: 'middle',
-        fontWeight: 700,
-        fontSize: 11,
-        minWidth: 20,
-        height: 20,
-        px: 0.5,
-        borderRadius: '10px',
-        ml: 3,
-      }}
+    <span
+      className={cn(
+        'ml-6 inline-flex h-5 min-w-5 items-center justify-center rounded-[10px] px-0.5 align-middle text-[11px] font-bold',
+        variant === 'warning'
+          ? 'bg-[var(--color-warning-light)] text-[var(--color-static-main)]'
+          : 'border border-[var(--color-background-main)] bg-[var(--color-background-main)] text-[var(--color-text-primary)]',
+      )}
     >
       {count}
-    </Box>
+    </span>
   ) : null

@@ -107,7 +107,7 @@ describe('AnalysisIssuesDisplay', () => {
       )
 
       const addressElement = screen.getByText(address)
-      const allTypography = container.querySelectorAll('p.MuiTypography-body2')
+      const allTypography = container.querySelectorAll('[data-slot="typography"][data-variant="paragraph-mini"]')
       let clickableElement: HTMLElement | null = null
 
       for (const typography of Array.from(allTypography)) {
@@ -192,7 +192,7 @@ describe('AnalysisIssuesDisplay', () => {
         <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
       )
 
-      expect(container.querySelectorAll('[class*="MuiBox-root"]').length).toBeGreaterThanOrEqual(2)
+      expect(container.querySelectorAll('div.rounded-\\[4px\\]').length).toBeGreaterThanOrEqual(2)
 
       expect(screen.getByText(address1)).toBeInTheDocument()
       expect(screen.getByText(address2)).toBeInTheDocument()

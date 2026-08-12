@@ -39,6 +39,7 @@ export * from './authSlice'
 export * from '@/features/hypernative/store'
 export * from '@/features/gtf/store'
 export * from '@/features/address-poisoning/store'
+export * from '@/features/feature-flag-overrides/store'
 export {
   globalSearchSlice,
   openGlobalSearch,

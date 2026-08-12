@@ -1,16 +1,20 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./BatchTransactions.stories Default 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1gj2qoe-MuiPaper-root"
-    style="--Paper-shadow: none; --Paper-overlay: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0));"
+    class="shadcn-scope"
   >
-    <ul
-      class="MuiList-root MuiList-padding mui-style-8g50lk-MuiList-root"
-    />
+    <div
+      class="w-[400px] p-4"
+    >
+      <ul
+        class="m-0 flex list-none flex-col p-0 gap-4"
+        data-slot="list"
+      />
+    </div>
   </div>
 </div>
 `;

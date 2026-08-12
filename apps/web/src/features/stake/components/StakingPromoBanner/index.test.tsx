@@ -61,9 +61,9 @@ describe('StakingPromoBanner', () => {
     mockIsNavigating = true
     render(<StakingPromoBanner onDismiss={jest.fn()} />, { routerProps: { query: { safe: SAFE } } })
 
-    expect(screen.getByRole('progressbar')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toBeInTheDocument()
     // The CTA stays enabled and visible while loading (re-clicks are guarded inside the hook)
-    expect(screen.getByRole('button', { name: 'Stake now' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: /Stake now/ })).toBeEnabled()
   })
 
   it('tracks the learn more click', () => {

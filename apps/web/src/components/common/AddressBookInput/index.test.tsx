@@ -357,4 +357,193 @@ describe('AddressBookInput', () => {
     expect(groupEl.querySelector('.lucide-hard-drive')).toBeInTheDocument()
     expect(groupEl.querySelector('.lucide-building-2')).not.toBeInTheDocument()
   })
+
+  /**
+   * MUI's Autocomplete dismissed the suggestion list on Escape, on an outside click and when focus
+   * left the field. The hand-rolled replacement dropped all three, leaving the list open over the
+   * rest of the form — where a click meant for the next field instead selects a contact as the
+   * recipient.
+   */
+  describe('dismissing the suggestion list', () => {
+    const openList = async (utils: ReturnType<typeof setup>['utils'], input: HTMLInputElement) => {
+      act(() => {
+        fireEvent.mouseDown(input)
+        fireEvent.mouseUp(input)
+      })
+      await waitFor(() => expect(utils.getByRole('listbox')).toBeInTheDocument())
+    }
+
+    it('closes on Escape', async () => {
+      const { input, utils } = setup('', {
+        [checksumAddress(faker.finance.ethereumAddress())]: 'Alice',
+      })
+      await openList(utils, input)
+
+      act(() => {
+        fireEvent.keyDown(document, { key: 'Escape' })
+      })
+
+      await waitFor(() => expect(utils.queryByRole('listbox')).not.toBeInTheDocument())
+      expect(input).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    it('closes when pointing down outside the field', async () => {
+      const { input, utils } = setup('', {
+        [checksumAddress(faker.finance.ethereumAddress())]: 'Alice',
+      })
+      await openList(utils, input)
+
+      act(() => {
+        fireEvent.pointerDown(utils.getByText('Submit'))
+      })
+
+      await waitFor(() => expect(utils.queryByRole('listbox')).not.toBeInTheDocument())
+    })
+
+    it('closes when focus leaves the field, without selecting a contact', async () => {
+      const address = checksumAddress(faker.finance.ethereumAddress())
+      const { input, utils } = setup('', { [address]: 'Alice' })
+      await openList(utils, input)
+
+      const submit = utils.getByText('Submit')
+      act(() => {
+        fireEvent.focusOut(input, { relatedTarget: submit })
+      })
+
+      await waitFor(() => expect(utils.queryByRole('listbox')).not.toBeInTheDocument())
+      // The recipient must not have been silently populated by the dismissal.
+      expect(input).toHaveValue('')
+    })
+  })
+
+  /**
+   * MUI's Autocomplete traversed the suggestions with the arrow keys and selected with Enter. Without
+   * that, a keyboard-only user can only reach a contact with a mouse — and otherwise has to hand-type
+   * the recipient address, which is exactly what the address book exists to avoid.
+   */
+  describe('keyboard navigation', () => {
+    const twoContacts = () => {
+      const alice = checksumAddress(faker.finance.ethereumAddress())
+      const bob = checksumAddress(faker.finance.ethereumAddress())
+      return { alice, bob, addressBook: { [alice]: 'Alice', [bob]: 'Bob' } }
+    }
+
+    const openListWithMouse = async (utils: ReturnType<typeof setup>['utils'], input: HTMLInputElement) => {
+      act(() => {
+        fireEvent.mouseDown(input)
+        fireEvent.mouseUp(input)
+      })
+      await waitFor(() => expect(utils.getByRole('listbox')).toBeInTheDocument())
+    }
+
+    // Contacts persisted by other tests leak in via localStorage, so assert on the rendered option
+    // order rather than on which contact happens to land where.
+    const activeOption = (input: HTMLInputElement) => {
+      const activeId = input.getAttribute('aria-activedescendant')
+      return activeId ? document.getElementById(activeId) : null
+    }
+
+    it('opens the list and activates the first option on ArrowDown', async () => {
+      const { addressBook } = twoContacts()
+      const { input, utils } = setup('', addressBook)
+
+      expect(input).toHaveAttribute('aria-expanded', 'false')
+
+      act(() => {
+        fireEvent.keyDown(input, { key: 'ArrowDown' })
+      })
+
+      await waitFor(() => expect(utils.getByRole('listbox')).toBeInTheDocument())
+      const firstOption = utils.getAllByRole('option')[0]
+      expect(activeOption(input)).toBe(firstOption)
+      expect(utils.getByRole('option', { selected: true })).toBe(firstOption)
+    })
+
+    it('moves through the options with ArrowDown/ArrowUp/Home/End', async () => {
+      const { addressBook } = twoContacts()
+      const { input, utils } = setup('', addressBook)
+
+      act(() => {
+        fireEvent.keyDown(input, { key: 'ArrowDown' })
+      })
+      await waitFor(() => expect(utils.getByRole('listbox')).toBeInTheDocument())
+
+      const options = utils.getAllByRole('option')
+      expect(options.length).toBeGreaterThan(1)
+      expect(activeOption(input)).toBe(options[0])
+
+      act(() => {
+        fireEvent.keyDown(input, { key: 'ArrowDown' })
+      })
+      expect(activeOption(input)).toBe(options[1])
+
+      act(() => {
+        fireEvent.keyDown(input, { key: 'ArrowUp' })
+      })
+      expect(activeOption(input)).toBe(options[0])
+
+      act(() => {
+        fireEvent.keyDown(input, { key: 'End' })
+      })
+      expect(activeOption(input)).toBe(options[options.length - 1])
+
+      act(() => {
+        fireEvent.keyDown(input, { key: 'Home' })
+      })
+      expect(activeOption(input)).toBe(options[0])
+    })
+
+    it('writes the active contact into the field on Enter', async () => {
+      const { addressBook } = twoContacts()
+      const { input, utils } = setup('', addressBook)
+
+      act(() => {
+        fireEvent.keyDown(input, { key: 'ArrowDown' })
+      })
+      await waitFor(() => expect(utils.getByRole('listbox')).toBeInTheDocument())
+
+      const activeAddress = activeOption(input)?.textContent?.match(/0x[a-fA-F0-9]{40}/)?.[0]
+      expect(activeAddress).toBeDefined()
+
+      act(() => {
+        fireEvent.keyDown(input, { key: 'Enter' })
+        jest.advanceTimersByTime(1000)
+      })
+
+      await waitFor(() => expect(utils.queryByRole('listbox')).not.toBeInTheDocument())
+      expect(utils.getByLabelText('Recipient address', { exact: false })).toHaveValue(activeAddress)
+    })
+
+    it('does not submit the form when Enter selects a contact', async () => {
+      const onSubmit = jest.fn()
+      const { addressBook } = twoContacts()
+      const { input, utils } = setup('', addressBook)
+      utils.getByText('Submit').closest('form')?.addEventListener('submit', onSubmit)
+
+      act(() => {
+        fireEvent.keyDown(input, { key: 'ArrowDown' })
+      })
+      await waitFor(() => expect(utils.getByRole('listbox')).toBeInTheDocument())
+
+      act(() => {
+        fireEvent.keyDown(input, { key: 'Enter' })
+      })
+
+      expect(onSubmit).not.toHaveBeenCalled()
+    })
+
+    it('leaves Enter alone when no option is active', async () => {
+      const { addressBook } = twoContacts()
+      const { input, utils } = setup('', addressBook)
+      await openListWithMouse(utils, input)
+
+      expect(input).not.toHaveAttribute('aria-activedescendant')
+
+      act(() => {
+        fireEvent.keyDown(input, { key: 'Enter' })
+      })
+
+      expect(input).toHaveValue('')
+    })
+  })
 })

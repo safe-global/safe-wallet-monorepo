@@ -1,47 +1,39 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./NameInput.stories Default 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1v5z18m"
+    class="shadcn-scope"
   >
     <div
-      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input mui-style-1c1lfd8-MuiFormControl-root-MuiTextField-root"
-      data-mui-internal-clone-element="true"
-      title=""
+      class="w-[300px]"
     >
-      <label
-        class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
-        data-shrink="false"
-        for="_r_2_"
-        id="_r_2_-label"
-      >
-        Owner name
-      </label>
       <div
-        class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl mui-style-1pfp7cx-MuiInputBase-root-MuiOutlinedInput-root"
+        class="data-[invalid=true]:text-destructive gap-3 group/field flex w-full flex-col [&>*]:w-full [&>.sr-only]:w-auto"
+        data-orientation="vertical"
+        data-slot="field"
+        role="group"
       >
-        <input
-          aria-invalid="false"
-          class="MuiInputBase-input MuiOutlinedInput-input mui-style-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
-          id="_r_2_"
-          name="ownerName"
-          type="text"
-        />
-        <fieldset
-          aria-hidden="true"
-          class="MuiOutlinedInput-notchedOutline mui-style-oct7z5-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
+        <label
+          class="text-sm font-medium group-data-[disabled=true]:opacity-50 group-data-disabled:opacity-50 peer-disabled:opacity-50 peer-data-disabled:opacity-50 items-center select-none group-data-[disabled=true]:pointer-events-none group-data-disabled:pointer-events-none peer-disabled:cursor-not-allowed peer-data-disabled:cursor-not-allowed has-data-checked:bg-primary/5 has-data-checked:border-primary dark:has-data-checked:bg-primary/10 gap-2 group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-3 group/field-label peer/field-label flex w-fit leading-snug has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col"
+          data-slot="field-label"
+          for="_r_0_"
         >
-          <legend
-            class="mui-style-1n64csd-MuiNotchedOutlined-root"
-          >
-            <span>
-              Owner name
-            </span>
-          </legend>
-        </fieldset>
+          Owner name
+        </label>
+        <div
+          class="w-full"
+        >
+          <input
+            class="border-border border shadow-none focus-visible:ring-0 focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md py-1.5 text-base transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 h-9 px-3 bg-input"
+            data-slot="input"
+            id="_r_0_"
+            name="ownerName"
+            value=""
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -53,44 +45,37 @@ exports[`./NameInput.stories Disabled 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1v5z18m"
+    class="shadcn-scope"
   >
     <div
-      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input mui-style-1c1lfd8-MuiFormControl-root-MuiTextField-root"
-      data-mui-internal-clone-element="true"
-      title=""
+      class="w-[300px]"
     >
-      <label
-        class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary Mui-disabled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
-        data-shrink="false"
-        for="_r_5_"
-        id="_r_5_-label"
-      >
-        Owner name
-      </label>
       <div
-        class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary Mui-disabled MuiInputBase-fullWidth MuiInputBase-formControl mui-style-1pfp7cx-MuiInputBase-root-MuiOutlinedInput-root"
+        class="data-[invalid=true]:text-destructive gap-3 group/field flex w-full flex-col [&>*]:w-full [&>.sr-only]:w-auto"
+        data-orientation="vertical"
+        data-slot="field"
+        role="group"
       >
-        <input
-          aria-invalid="false"
-          class="MuiInputBase-input MuiOutlinedInput-input Mui-disabled mui-style-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
-          disabled=""
-          id="_r_5_"
-          name="ownerName"
-          type="text"
-        />
-        <fieldset
-          aria-hidden="true"
-          class="MuiOutlinedInput-notchedOutline mui-style-oct7z5-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
+        <label
+          class="text-sm font-medium group-data-[disabled=true]:opacity-50 group-data-disabled:opacity-50 peer-disabled:opacity-50 peer-data-disabled:opacity-50 items-center select-none group-data-[disabled=true]:pointer-events-none group-data-disabled:pointer-events-none peer-disabled:cursor-not-allowed peer-data-disabled:cursor-not-allowed has-data-checked:bg-primary/5 has-data-checked:border-primary dark:has-data-checked:bg-primary/10 gap-2 group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-3 group/field-label peer/field-label flex w-fit leading-snug has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col"
+          data-slot="field-label"
+          for="_r_2_"
         >
-          <legend
-            class="mui-style-1n64csd-MuiNotchedOutlined-root"
-          >
-            <span>
-              Owner name
-            </span>
-          </legend>
-        </fieldset>
+          Owner name
+        </label>
+        <div
+          class="w-full"
+        >
+          <input
+            class="border-border border shadow-none focus-visible:ring-0 focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md py-1.5 text-base transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 h-9 px-3 bg-input"
+            data-disabled=""
+            data-slot="input"
+            disabled=""
+            id="_r_2_"
+            name="ownerName"
+            value=""
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -102,53 +87,36 @@ exports[`./NameInput.stories Required 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1v5z18m"
+    class="shadcn-scope"
   >
     <div
-      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input mui-style-1c1lfd8-MuiFormControl-root-MuiTextField-root"
-      data-mui-internal-clone-element="true"
-      title=""
+      class="w-[300px]"
     >
-      <label
-        class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary Mui-required MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
-        data-shrink="false"
-        for="_r_8_"
-        id="_r_8_-label"
-      >
-        Owner name
-        <span
-          aria-hidden="true"
-          class="MuiFormLabel-asterisk MuiInputLabel-asterisk mui-style-1f718y-MuiFormLabel-asterisk"
-        >
-           
-          *
-        </span>
-      </label>
       <div
-        class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl mui-style-1pfp7cx-MuiInputBase-root-MuiOutlinedInput-root"
+        class="data-[invalid=true]:text-destructive gap-3 group/field flex w-full flex-col [&>*]:w-full [&>.sr-only]:w-auto"
+        data-orientation="vertical"
+        data-slot="field"
+        role="group"
       >
-        <input
-          aria-invalid="false"
-          class="MuiInputBase-input MuiOutlinedInput-input mui-style-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
-          id="_r_8_"
-          name="ownerName"
-          required=""
-          type="text"
-        />
-        <fieldset
-          aria-hidden="true"
-          class="MuiOutlinedInput-notchedOutline mui-style-oct7z5-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
+        <label
+          class="text-sm font-medium group-data-[disabled=true]:opacity-50 group-data-disabled:opacity-50 peer-disabled:opacity-50 peer-data-disabled:opacity-50 items-center select-none group-data-[disabled=true]:pointer-events-none group-data-disabled:pointer-events-none peer-disabled:cursor-not-allowed peer-data-disabled:cursor-not-allowed has-data-checked:bg-primary/5 has-data-checked:border-primary dark:has-data-checked:bg-primary/10 gap-2 group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-3 group/field-label peer/field-label flex w-fit leading-snug has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col"
+          data-slot="field-label"
+          for="_r_4_"
         >
-          <legend
-            class="mui-style-1n64csd-MuiNotchedOutlined-root"
-          >
-            <span>
-              Owner name
-               
-              *
-            </span>
-          </legend>
-        </fieldset>
+          Owner name
+        </label>
+        <div
+          class="w-full"
+        >
+          <input
+            class="border-border border shadow-none focus-visible:ring-0 focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md py-1.5 text-base transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 h-9 px-3 bg-input"
+            data-slot="input"
+            id="_r_4_"
+            name="ownerName"
+            required=""
+            value=""
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -160,44 +128,36 @@ exports[`./NameInput.stories WithPlaceholder 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1v5z18m"
+    class="shadcn-scope"
   >
     <div
-      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input mui-style-1c1lfd8-MuiFormControl-root-MuiTextField-root"
-      data-mui-internal-clone-element="true"
-      title=""
+      class="w-[300px]"
     >
-      <label
-        class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
-        data-shrink="false"
-        for="_r_b_"
-        id="_r_b_-label"
-      >
-        Owner name
-      </label>
       <div
-        class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl mui-style-1pfp7cx-MuiInputBase-root-MuiOutlinedInput-root"
+        class="data-[invalid=true]:text-destructive gap-3 group/field flex w-full flex-col [&>*]:w-full [&>.sr-only]:w-auto"
+        data-orientation="vertical"
+        data-slot="field"
+        role="group"
       >
-        <input
-          aria-invalid="false"
-          class="MuiInputBase-input MuiOutlinedInput-input mui-style-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
-          id="_r_b_"
-          name="ownerName"
-          placeholder="Enter owner name"
-          type="text"
-        />
-        <fieldset
-          aria-hidden="true"
-          class="MuiOutlinedInput-notchedOutline mui-style-oct7z5-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
+        <label
+          class="text-sm font-medium group-data-[disabled=true]:opacity-50 group-data-disabled:opacity-50 peer-disabled:opacity-50 peer-data-disabled:opacity-50 items-center select-none group-data-[disabled=true]:pointer-events-none group-data-disabled:pointer-events-none peer-disabled:cursor-not-allowed peer-data-disabled:cursor-not-allowed has-data-checked:bg-primary/5 has-data-checked:border-primary dark:has-data-checked:bg-primary/10 gap-2 group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-3 group/field-label peer/field-label flex w-fit leading-snug has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col"
+          data-slot="field-label"
+          for="_r_6_"
         >
-          <legend
-            class="mui-style-1n64csd-MuiNotchedOutlined-root"
-          >
-            <span>
-              Owner name
-            </span>
-          </legend>
-        </fieldset>
+          Owner name
+        </label>
+        <div
+          class="w-full"
+        >
+          <input
+            class="border-border border shadow-none focus-visible:ring-0 focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md py-1.5 text-base transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 h-9 px-3 bg-input"
+            data-slot="input"
+            id="_r_6_"
+            name="ownerName"
+            placeholder="Enter owner name"
+            value=""
+          />
+        </div>
       </div>
     </div>
   </div>

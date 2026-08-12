@@ -1,7 +1,7 @@
 import { ArrowUpRight, Sparkles } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Link } from '@/components/ui/link'
 import { cn } from '@/utils/cn'
 import { WORKSPACE_ANNOUNCEMENT_URL } from '@/config/constants'
 import css from './styles.module.css'
@@ -9,9 +9,12 @@ import css from './styles.module.css'
 const WorkspaceBanner = ({ className }: { className?: string }) => {
   return (
     <Card
-      size="sm"
+      variant="outlined"
+      size="none"
+      radius="lg"
       className={cn(
-        'w-full gap-0 rounded-lg border border-border bg-card px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.05)]',
+        // eslint-disable-next-line no-restricted-syntax -- promo banner: bespoke 16/12px padding + a custom two-layer drop shadow; not a Card variant
+        'w-full px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.05)]',
         css.banner,
         className,
       )}
@@ -26,22 +29,16 @@ const WorkspaceBanner = ({ className }: { className?: string }) => {
           <span className="text-sm font-semibold tracking-[-0.01em] text-foreground">Introducing Workspace</span>
         </div>
 
-        <Button
-          variant="link"
-          size="sm"
-          className="group h-auto shrink-0 gap-1 px-0 text-xs font-medium"
-          render={
-            <a
-              href={WORKSPACE_ANNOUNCEMENT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Read the Workspace announcement"
-            />
-          }
+        <Link
+          href={WORKSPACE_ANNOUNCEMENT_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Read the Workspace announcement"
+          className="group inline-flex shrink-0 items-center gap-1 text-xs font-medium"
         >
           Read announcement
           <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-        </Button>
+        </Link>
       </div>
     </Card>
   )

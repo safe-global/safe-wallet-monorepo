@@ -1,5 +1,6 @@
-import { Box, Card, IconButton, Stack, Typography } from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
+import { X as CloseIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import Image from 'next/image'
 import Track from '@/components/common/Track'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
@@ -33,8 +34,8 @@ export const HnMiniTxBanner = ({ onHnSignupClick, onDismiss }: HnMiniTxBannerPro
         [MixpanelEventParams.SOURCE]: HYPERNATIVE_SOURCE.NewTransaction,
       }}
     >
-      <Card className={css.banner} onClick={handleClick}>
-        <Stack direction="row" spacing={1.5} className={css.bannerStack} alignItems="center">
+      <div className={css.banner} onClick={handleClick}>
+        <div className={`flex flex-row items-center gap-3 ${css.bannerStack}`}>
           <Image
             className={css.bannerImage}
             src="/images/hypernative/guardian-badge.svg"
@@ -42,24 +43,20 @@ export const HnMiniTxBanner = ({ onHnSignupClick, onDismiss }: HnMiniTxBannerPro
             width={32}
             height={32}
           />
-          <Box className={css.bannerContent}>
-            <Typography variant="body2" className={css.bannerTitle}>
+          <div className={css.bannerContent}>
+            <Typography variant="paragraph-small" className={css.bannerTitle}>
               Enforce enterprise-grade security
             </Typography>
-            <Typography variant="caption" className={css.bannerDescription}>
+            <Typography variant="paragraph-mini" className={css.bannerDescription}>
               Learn more
             </Typography>
-          </Box>
-        </Stack>
+          </div>
+        </div>
 
-        <IconButton className={css.closeButton} aria-label="close" onClick={handleDismissClick}>
-          <CloseIcon
-            fontSize="small"
-            className={css.closeIcon}
-            sx={{ color: 'var(--color-text-secondary) !important' }}
-          />
-        </IconButton>
-      </Card>
+        <Button variant="ghost" className={css.closeButton} aria-label="close" onClick={handleDismissClick}>
+          <CloseIcon className={`${css.closeIcon} text-[var(--color-text-secondary)]`} />
+        </Button>
+      </div>
     </Track>
   )
 }

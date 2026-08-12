@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { ExecTransaction } from './index'
 import { mockExecTransactionData } from './mockData'
@@ -7,6 +6,7 @@ import { http, HttpResponse } from 'msw'
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
 
 const meta = {
+  title: 'Components/Transactions/ExecTransaction',
   component: ExecTransaction,
   decorators: [
     (Story) => {
@@ -24,9 +24,9 @@ const meta = {
             },
           }}
         >
-          <Paper sx={{ padding: 2 }}>
+          <div className="p-4">
             <Story />
-          </Paper>
+          </div>
         </StoreDecorator>
       )
     },

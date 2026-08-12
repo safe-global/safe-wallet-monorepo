@@ -37,6 +37,8 @@ export const SpaceSummaryNew = ({
   )
 }
 
+// TODO(spaces): staged successor to SpaceCard for the Spaces redesign — not yet wired into
+// SpacesList/SpaceSidebarSelector. Kept in sync with BE changes (UUID #8020, memberCount #8150).
 const SpaceCardNew = ({ space, isLink = true }: { space: GetSpaceResponse; isLink?: boolean }) => {
   const { uuid, name, safeCount, memberCount } = space
   const isAdmin = useIsAdmin(uuid)
@@ -47,6 +49,7 @@ const SpaceCardNew = ({ space, isLink = true }: { space: GetSpaceResponse; isLin
   return (
     <Card
       data-testid="space-card-new"
+      // eslint-disable-next-line no-restricted-syntax -- bespoke 3-col card grid: tight gap-2 + p-4 padding (no CardContent slot); not a Card size
       className="relative grid grid-cols-[auto_1fr_auto] grid-rows-[auto_auto] gap-2 p-4"
       size="sm"
     >

@@ -1,11 +1,13 @@
 import { useForm, FormProvider } from 'react-hook-form'
-import { Paper, Grid, Typography, Button } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setRpc, setTenderly } from '@/store/settingsSlice'
 import useChainId from '@/hooks/useChainId'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import RpcProviderSection from './RpcProviderSection'
 import TenderlySection from './TenderlySection'
+import SettingsCard from '../SettingsCard'
 
 export enum EnvVariablesField {
   rpc = 'rpc',
@@ -64,55 +66,28 @@ const EnvironmentVariables = () => {
   const onResetTenderlyToken = () => setValue(EnvVariablesField.tenderlyToken, '')
 
   return (
-    <Paper sx={{ padding: 4 }}>
-      <Grid
-        container
-        direction="row"
-        spacing={3}
-        sx={{
-          justifyContent: 'space-between',
-          mb: 2,
-        }}
-      >
-        <Grid item lg={4} xs={12}>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-            }}
-          >
-            Environment variables
-          </Typography>
-        </Grid>
+    <SettingsCard title="Environment variables" contentClassName="mb-4">
+      <Typography className="mb-6">
+        You can override some of our default APIs here in case you need to. Proceed at your own risk.
+      </Typography>
 
-        <Grid item xs>
-          <Typography
-            sx={{
-              mb: 3,
-            }}
-          >
-            You can override some of our default APIs here in case you need to. Proceed at your own risk.
-          </Typography>
+      <FormProvider {...formMethods}>
+        <form onSubmit={onSubmit}>
+          <RpcProviderSection onReset={onResetRpc} showResetButton={!!rpc} />
 
-          <FormProvider {...formMethods}>
-            <form onSubmit={onSubmit}>
-              <RpcProviderSection onReset={onResetRpc} showResetButton={!!rpc} />
+          <TenderlySection
+            onResetUrl={onResetTenderlyUrl}
+            onResetToken={onResetTenderlyToken}
+            showResetUrlButton={!!tenderlyURL}
+            showResetTokenButton={!!tenderlyToken}
+          />
 
-              <TenderlySection
-                onResetUrl={onResetTenderlyUrl}
-                onResetToken={onResetTenderlyToken}
-                showResetUrlButton={!!tenderlyURL}
-                showResetTokenButton={!!tenderlyToken}
-              />
-
-              <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
-                Save
-              </Button>
-            </form>
-          </FormProvider>
-        </Grid>
-      </Grid>
-    </Paper>
+          <Button type="submit" className="mt-4">
+            Save
+          </Button>
+        </form>
+      </FormProvider>
+    </SettingsCard>
   )
 }
 

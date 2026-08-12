@@ -11,7 +11,7 @@ const defaultSetup = createMockStory({
 })
 
 const meta = {
-  title: 'Dashboard/Overview',
+  title: 'Components/Dashboard/Overview',
   component: Overview,
   loaders: [mswLoader],
   parameters: {

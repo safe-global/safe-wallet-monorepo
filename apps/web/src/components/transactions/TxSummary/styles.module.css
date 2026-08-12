@@ -1,12 +1,22 @@
+/* Minimums are deliberately tight — they set how far down the row survives as a single line, which
+   is what we want for as long as possible. Each is the real rendered width of its content (an
+   Execute button, a "1/1" badge, a "-0.001 ETH" amount) rather than a round number, and the text
+   cells ellipsize instead of forcing a wrap. Together they come to ~510px, so the one-line grid holds
+   until the container drops under 680px (see the container queries below). */
 .gridContainer {
-  --grid-nonce: minmax(45px, 0.25fr);
-  --grid-type: minmax(130px, 3fr);
-  --grid-info: minmax(170px, 3fr);
-  --grid-date: minmax(170px, 3fr);
-  --grid-confirmations: minmax(100px, 1fr);
+  --grid-nonce: minmax(32px, 0.25fr);
+  --grid-type: minmax(88px, 2fr);
+  /* The amount is the row's payload — its minimum fits icon + a 4-decimal value so it never
+     ellipsizes, and it takes the largest share of any slack. */
+  --grid-info: minmax(140px, 3fr);
+  /* Relative time is the most expendable cell, so it is the one that truncates first. */
+  --grid-date: minmax(76px, 2fr);
+  --grid-confirmations: minmax(56px, 1fr);
   --grid-assessment: 0;
-  --grid-status: minmax(100px, 1fr);
-  --grid-actions: minmax(100px, 1fr);
+  /* `auto`, not a fixed minimum: queue rows only render a status for pending/expired transactions, so
+     a hard min reserved ~72px of dead width on every ordinary row and forced the wrap sooner. */
+  --grid-status: auto;
+  --grid-actions: minmax(84px, 1fr);
 
   width: 100%;
   display: grid;
@@ -24,8 +34,30 @@
   --grid-assessment: minmax(80px, 1.5fr);
 }
 
+/* min-width: 0 lets a cell shrink below its content so the row can hold one line; without it a long
+   name or timestamp would force the grid wider than the card. */
 .gridContainer > * {
   max-width: 100%;
+  min-width: 0;
+}
+
+.gridContainer .type,
+.gridContainer .date {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.typeRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  overflow: hidden;
+}
+
+.typeLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .gridContainer.history {
@@ -77,22 +109,133 @@
   color: var(--color-text-secondary);
 }
 
-@media (max-width: 1350px) {
-  .gridContainer {
+/* The old viewport fallback, now for the non-queue variants only. Queue rows are driven entirely by
+   the container queries below — leaving them in here would have handed them this flex fallback
+   whenever the viewport was under 900px but the row still had over 680px (a collapsed sidebar at
+   880px, say), undoing the templates below. */
+@media (max-width: 900px) {
+  .gridContainer:not(.queue) {
     gap: var(--space-1);
     display: flex;
     flex-wrap: wrap;
   }
 
-  .nonce {
+  .gridContainer:not(.queue) .nonce {
     min-width: 30px;
   }
 
-  .date {
+  .gridContainer:not(.queue) .date {
     width: 100%;
   }
 
-  .status {
+  .gridContainer:not(.queue) .status {
     margin: 0 var(--space-1);
+  }
+}
+
+/* Queue rows switch on the width they actually have, not the viewport's: the sidebar takes ~350px, so
+   a 920px viewport leaves the row 638px while the one-line grid needs ~652px — a viewport breakpoint
+   kept the single line past the point it fitted and the trigger's `overflow-x-auto` turned the
+   14px overflow into a scrollbar. The container is the accordion trigger (see
+   ExpandableTransactionItem), so these thresholds are the row's own box.
+
+   680px: the one-line grid gives way to an explicit two-row template — identity on top (nonce, type,
+   amount), timing and the action beneath. The nonce spans both rows, the `1fr` middle column absorbs
+   the slack, and confirmations/actions land against the right edge, so the row keeps the reading
+   order the wide grid conveys instead of letting flex pack every cell left. */
+@container (max-width: 680px) {
+  .gridContainer.queue {
+    display: grid;
+    gap: var(--space-1) var(--space-2);
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      'nonce type info info'
+      'nonce date confirmations actions';
+    align-items: center;
+  }
+
+  /* Undo the flex fallback's rules: in the grid the middle column does the pushing. */
+  .gridContainer.queue .date,
+  .gridContainer.queue .confirmations {
+    width: auto;
+    margin-left: 0;
+  }
+
+  .gridContainer.queue .status {
+    margin: 0;
+  }
+
+  .gridContainer.queue .nonce {
+    min-width: 30px;
+  }
+}
+
+/* Phones: rather than stacking five lines, strip the row to what a scanning user needs — nonce,
+   direction, amount, and the action — and keep it on one line. Everything hidden here is either
+   redundant with an adjacent glyph or repeated in the expanded panel:
+     - the "Send" label, because the direction arrow beside it already says so (the img keeps its alt)
+     - the note, the token logo and the relative time
+   The label and note stay in the accessibility tree (out of flow, so their tracks still collapse);
+   the token logo is decorative and the amount text names the symbol anyway. */
+@container (max-width: 380px) {
+  /* The amount wants 74px but only had 49px of the 291px row, so it ellipsized to "-0.00…". Three
+     reclaims cover the 25px shortfall: a 4px gap instead of 8px across four gaps (16px), zeroing the
+     token container's own gap now that its logo is hidden (8px), and letting the nonce size to "12"
+     rather than the 30px floor the wider rules set (6px). */
+  .gridContainer.queue {
+    column-gap: 4px;
+    grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+    grid-template-areas: 'nonce type info confirmations actions';
+    align-items: center;
+  }
+
+  .gridContainer.queue .nonce {
+    min-width: 0;
+  }
+
+  /* TokenAmount lays its logo and value out in a flex row; with the logo hidden its gap is dead space. */
+  .gridContainer.queue .info > span {
+    gap: 0;
+  }
+
+  .gridContainer.queue .typeLabel,
+  .gridContainer.queue .note {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* !important because TokenIcon sets `display: block` inline on the iframe, which a stylesheet rule
+     cannot otherwise beat. */
+  .gridContainer.queue .info iframe,
+  .gridContainer.queue .info img {
+    display: none !important;
+  }
+
+  .gridContainer.queue .date {
+    display: none;
+  }
+}
+
+/* History and bulk-group rows have fewer columns (no confirmations/actions, ~424px of minimums), so
+   they hold one line well below the 900px fallback that queue rows need. */
+@media (max-width: 900px) and (min-width: 600px) {
+  .gridContainer.history,
+  .gridContainer.bulkGroup {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .gridContainer.history .date,
+  .gridContainer.bulkGroup .date {
+    width: auto;
+  }
+
+  .gridContainer.history .status,
+  .gridContainer.bulkGroup .status {
+    margin-right: var(--space-3);
   }
 }

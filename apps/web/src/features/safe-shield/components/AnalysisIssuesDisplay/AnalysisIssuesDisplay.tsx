@@ -4,7 +4,8 @@ import type {
   MaliciousOrModerateThreatAnalysisResult,
 } from '@safe-global/utils/features/safe-shield/types'
 import { sortByIssueSeverity } from '@safe-global/utils/features/safe-shield/utils/analysisUtils'
-import { Box, Typography, Tooltip } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import ExplorerButton from '@/components/common/ExplorerButton'
@@ -14,28 +15,6 @@ interface AnalysisIssuesDisplayProps {
   result: AnalysisResult
   issueBackgroundColor: string
 }
-
-const issueBoxStyles = {
-  display: 'flex',
-  flexDirection: 'column',
-  bgcolor: 'background.paper',
-  borderRadius: '4px',
-  overflow: 'hidden',
-} as const
-
-const addressTypographyStyles = {
-  lineHeight: '20px',
-  fontSize: 12,
-  color: 'primary.light',
-  cursor: 'pointer',
-  transition: 'background-color 0.2s',
-  overflowWrap: 'break-word',
-  wordBreak: 'break-all',
-  flex: 1,
-  '&:hover': {
-    color: 'text.primary',
-  },
-} as const
 
 export const AnalysisIssuesDisplay = ({ result, issueBackgroundColor }: AnalysisIssuesDisplayProps) => {
   const currentChain = useCurrentChain()
@@ -67,7 +46,7 @@ export const AnalysisIssuesDisplay = ({ result, issueBackgroundColor }: Analysis
   let issueCounter = 0
 
   return (
-    <Box display="flex" flexDirection="column" gap={1}>
+    <div className="flex flex-col gap-2">
       {sortedIssues.flatMap(({ severity, issues }) =>
         issues.map((issue, index) => {
           const globalIndex = issueCounter++
@@ -75,39 +54,45 @@ export const AnalysisIssuesDisplay = ({ result, issueBackgroundColor }: Analysis
             issue.address && currentChain ? getBlockExplorerLink(currentChain, issue.address) : undefined
 
           return (
-            <Box key={`${severity}-${index}`} sx={issueBoxStyles}>
+            <div
+              key={`${severity}-${index}`}
+              className="flex flex-col overflow-hidden rounded-[4px] bg-[var(--color-background-paper)]"
+            >
               {issue.address && (
-                <Box sx={{ padding: '8px' }}>
-                  <Typography
-                    variant="body2"
-                    lineHeight="20px"
-                    onClick={() => handleCopyToClipboard(issue.address!, globalIndex)}
-                  >
-                    <Tooltip
-                      title={copiedIndex === globalIndex ? 'Copied to clipboard' : 'Copy address'}
-                      placement="top"
-                      arrow
-                    >
-                      <Typography component="span" variant="body2" sx={addressTypographyStyles}>
-                        {issue.address}
-                      </Typography>
+                <div className="p-2">
+                  <div className="leading-5" onClick={() => handleCopyToClipboard(issue.address!, globalIndex)}>
+                    <Tooltip>
+                      <TooltipTrigger render={<span className="inline-flex" />}>
+                        <Typography
+                          variant="paragraph-mini"
+                          className="flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
+                        >
+                          {issue.address}
+                        </Typography>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {copiedIndex === globalIndex ? 'Copied to clipboard' : 'Copy address'}
+                      </TooltipContent>
                     </Tooltip>
-                    <Box component="span" color="text.secondary">
+                    <span className="text-[var(--color-text-secondary)]">
                       {explorerLink && <ExplorerButton href={explorerLink.href} />}
-                    </Box>
-                  </Typography>
-                </Box>
+                    </span>
+                  </div>
+                </div>
               )}
 
-              <Box bgcolor={issue.address ? issueBackgroundColor : 'transparent'} px={1} py={0.5}>
-                <Typography variant="body2" fontSize={12} lineHeight="14px" color="primary.light">
+              <div
+                className="px-2 py-1"
+                style={{ backgroundColor: issue.address ? issueBackgroundColor : 'transparent' }}
+              >
+                <Typography variant="paragraph-mini" className="leading-[14px] text-[var(--color-primary-light)]">
                   {issue.description}
                 </Typography>
-              </Box>
-            </Box>
+              </div>
+            </div>
           )
         }),
       )}
-    </Box>
+    </div>
   )
 }

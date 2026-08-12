@@ -293,20 +293,30 @@ function extractDependencies(sourceFile: ts.SourceFile): ComponentDependencies {
 }
 
 /**
- * Checks if a story file exists for a component
+ * Candidate story-file locations for a component: colocated next to the
+ * component, or in a sibling `stories/` folder (the pattern used by the shadcn
+ * UI atoms in components/ui/stories/).
  */
-function checkForStory(componentPath: string): boolean {
-  const storyPath = getStoryPath(componentPath)
-  return fs.existsSync(storyPath)
+function getStoryCandidates(componentPath: string): string[] {
+  const dir = path.dirname(componentPath)
+  const baseName = path.basename(componentPath, '.tsx')
+  return [path.join(dir, `${baseName}.stories.tsx`), path.join(dir, 'stories', `${baseName}.stories.tsx`)]
 }
 
 /**
- * Gets the expected story file path for a component
+ * Checks if a story file exists for a component
+ */
+function checkForStory(componentPath: string): boolean {
+  return getStoryCandidates(componentPath).some((candidate) => fs.existsSync(candidate))
+}
+
+/**
+ * Gets the story file path for a component — the first candidate that exists,
+ * falling back to the colocated path when none is present.
  */
 function getStoryPath(componentPath: string): string {
-  const dir = path.dirname(componentPath)
-  const baseName = path.basename(componentPath, '.tsx')
-  return path.join(dir, `${baseName}.stories.tsx`)
+  const candidates = getStoryCandidates(componentPath)
+  return candidates.find((candidate) => fs.existsSync(candidate)) ?? candidates[0]
 }
 
 /**

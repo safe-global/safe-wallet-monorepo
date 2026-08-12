@@ -3,7 +3,10 @@ import useBalances from '@/hooks/useBalances'
 import useChainId from '@/hooks/useChainId'
 import { useOpenSafenetStakingApp } from '@/hooks/useOpenSafenetStakingApp'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-import { Box, ButtonBase, CircularProgress, Skeleton, Tooltip, Typography } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Spinner } from '@/components/ui/spinner'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Typography } from '@/components/ui/typography'
 import SafeTokenIcon from '@/public/images/common/safe-token.svg'
 import css from './styles.module.css'
 
@@ -21,23 +24,27 @@ const SafenetStakingWidget = () => {
     : '0'
 
   return (
-    <Box className={css.container}>
-      <Tooltip title="Go to Safenet Staking">
-        <span>
-          <ButtonBase
-            aria-label="Safenet Staking"
-            className={css.tokenButton}
-            onClick={openSafenetStakingApp}
-            disabled={isNavigating}
-          >
-            {isNavigating ? <CircularProgress size={16} color="inherit" /> : <SafeTokenIcon width={24} height={24} />}
-            <Typography component="div" variant="body2" lineHeight={1}>
-              {loading ? <Skeleton width="16px" animation="wave" /> : safeBalance}
-            </Typography>
-          </ButtonBase>
-        </span>
+    <div className={css.container}>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <button
+              type="button"
+              aria-label="Safenet Staking"
+              className={css.tokenButton}
+              onClick={openSafenetStakingApp}
+              disabled={isNavigating}
+            />
+          }
+        >
+          {isNavigating ? <Spinner className="size-4" /> : <SafeTokenIcon width={24} height={24} />}
+          <Typography as="div" variant="paragraph-small" className="leading-none">
+            {loading ? <Skeleton className="h-4 w-4" /> : safeBalance}
+          </Typography>
+        </TooltipTrigger>
+        <TooltipContent>Go to Safenet Staking</TooltipContent>
       </Tooltip>
-    </Box>
+    </div>
   )
 }
 

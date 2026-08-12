@@ -1,13 +1,8 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import Box from '@mui/material/Box'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import TableSortLabel from '@mui/material/TableSortLabel'
+import { ChevronDown, ChevronUp } from 'lucide-react'
+import { TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import tableCss from './styles.module.css'
 import type { AllSafeItems } from '@/hooks/safes'
 import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNT_COLUMNS, SELECT_COLUMN, type SafeAccountColumnId } from './columns'
@@ -25,7 +20,6 @@ import { bandHeaderAt } from './SimilarityBand'
 import { orderGroupsBySimilarity } from './orderGroupsBySimilarity'
 import { weaveReorderedKeys } from '@/utils/reorder'
 import type { SimilarWarning } from '@/features/address-poisoning'
-import tableStyles from './tableStyles.module.css'
 import EntryDialog from '@/components/address-book/EntryDialog'
 
 /** Renaming a safe = editing its address-book entry across every chain it lives on. */
@@ -139,32 +133,15 @@ export type SafeAccountsTableProps = {
   'data-testid'?: string
 }
 
-// Header labels sit on a light-grey rounded bar (see the header cell sx below), matching the design.
-const headerSx = {
-  textTransform: 'uppercase',
-  fontSize: '12px',
-  fontWeight: 600,
-  lineHeight: '16px',
-  letterSpacing: 0,
-  color: 'text.secondary',
-  whiteSpace: 'nowrap',
-  py: 1.25,
-  // Sort arrow: same grey as the label in every state (MUI defaults dim it to 50% on hover and
-  // darken the active label to text.primary), and snug against the word instead of 4px each side.
-  '& .MuiTableSortLabel-root:hover, & .MuiTableSortLabel-root.Mui-active': { color: 'text.secondary' },
-  '& .MuiTableSortLabel-root:hover .MuiTableSortLabel-icon': { opacity: 1 },
-  '& .MuiTableSortLabel-icon': { color: 'text.secondary', fontSize: '14px', ml: 0.25, mr: 0 },
-  // Match the body cells' slim padding so labels align with their columns.
-  px: 1,
-  // Transparent borders inset the grey bar 4px from the panel's top and side edges (no bottom —
-  // the first row's top border provides that gap). `&&` outranks the theme's head border-bottom.
-  backgroundClip: 'padding-box',
-  '&&': { border: 'none', borderTop: '4px solid transparent' },
-  '&&:first-of-type': { pl: 2, borderLeft: '4px solid transparent' },
-  '&&:last-of-type': { pr: 2, borderRight: '4px solid transparent' },
-} as const
-
-const SafeAccountsTable = ({
+// Declared as a hoisted `function` (not a `const` arrow) on purpose: this component sits in a
+// cross-feature import cycle (myAccounts ↔ spaces barrels), and webpack's React Refresh runtime
+// eagerly reads every export at module-eval time. A `const` binding read mid-cycle throws
+// "Cannot access before initialization" (TDZ) and crashes Storybook; a hoisted function is
+// readable even while its module is still initializing. The app (Rspack) tolerates the cycle
+// regardless. Must be `export default function` inline (not a trailing `export default X`) — the
+// latter compiles to a TDZ `__WEBPACK_DEFAULT_EXPORT__` temp that reintroduces the crash. See
+// docs/feature-architecture.md.
+export default function SafeAccountsTable({
   items,
   columns,
   actionsWidth,
@@ -180,7 +157,7 @@ const SafeAccountsTable = ({
   embedded = false,
   bordered = true,
   'data-testid': testId = 'safe-accounts-table',
-}: SafeAccountsTableProps) => {
+}: SafeAccountsTableProps) {
   const [overviewsByKey, setOverviewsByKey] = useState<Map<string, SafeOverview>>(new Map())
 
   // Rows report their lazily-fetched overviews here. RTK returns a stable object ref per cache entry
@@ -279,25 +256,22 @@ const SafeAccountsTable = ({
   if (items.length === 0) return null
 
   return (
-    <Box data-testid={testId} sx={{ width: '100%' }}>
-      <TableContainer
-        sx={
-          embedded
-            ? { width: '100%', overflowX: 'visible' }
-            : {
-                width: '100%',
-                overflowX: 'auto',
-                borderRadius: '16px',
-                backgroundColor: 'background.paper',
-                ...(bordered && { border: '1px solid', borderColor: 'border.light' }),
-                // Keep the last row off the rounded bottom edge (the header already insets from the top).
-                pb: 1,
-              }
-        }
+    <div data-testid={testId} className="w-full">
+      <div
+        className={cn(
+          'w-full',
+          embedded ? 'overflow-x-visible' : 'overflow-x-auto',
+          !embedded && tableCss.container,
+          // `bordered={false}` drops the panel's edge — for tables nested in something that draws its own.
+          !embedded && !bordered && tableCss.containerBorderless,
+        )}
       >
-        <Table
-          className={tableStyles.body}
-          sx={{
+        {/* Raw <table> instead of the ui <Table> wrapper: we own the horizontal-scroll container
+            above so `embedded` tables can opt out of it. The shadcn table sub-components are used
+            throughout. */}
+        <table
+          className={cn('w-full caption-bottom text-sm', tableCss.table)}
+          style={{
             tableLayout: 'fixed',
             minWidth: embedded ? undefined : minWidth,
             borderCollapse: 'separate',
@@ -315,43 +289,57 @@ const SafeAccountsTable = ({
           )}
 
           {!embedded && (
-            <TableHead>
-              <TableRow>
-                {visibleColumns.map((column, index) => (
-                  <TableCell
-                    key={column.id}
-                    sortDirection={sort.orderBy === column.sortKey ? sort.order : false}
-                    className={cn(
-                      'bg-muted',
-                      index === 0 && 'rounded-l-lg',
-                      index === visibleColumns.length - 1 && 'rounded-r-lg',
-                    )}
-                    sx={{
-                      ...headerSx,
-                      width: column.width,
-                      textAlign: column.align ?? 'left',
-                      // Indent the NAME label so it sits above the account name text, not the avatar.
-                      // A leading checkbox column already offsets the cell by 48px, so less is needed.
-                      // `&&&` matches `&&:first-of-type`'s specificity and comes later.
-                      ...(column.id === 'name' ? { '&&&': { pl: selection ? 7.5 : 10.5 } } : {}),
-                    }}
-                  >
-                    {column.sortable && column.sortKey && sortableColumns ? (
-                      <TableSortLabel
-                        active={sort.orderBy === column.sortKey}
-                        direction={sort.orderBy === column.sortKey ? sort.order : 'asc'}
-                        onClick={() => handleSort(column.sortKey as SafeSortColumn)}
-                        data-testid={`account-sort-${column.id}`}
-                      >
-                        {column.label}
-                      </TableSortLabel>
-                    ) : (
-                      column.label
-                    )}
-                  </TableCell>
-                ))}
+            <TableHeader>
+              <TableRow className="border-0 hover:bg-transparent">
+                {visibleColumns.map((column, index) => {
+                  const active = sort.orderBy === column.sortKey
+                  const canSort = column.sortable && column.sortKey && sortableColumns
+                  return (
+                    <TableHead
+                      key={column.id}
+                      aria-sort={active ? (sort.order === 'asc' ? 'ascending' : 'descending') : undefined}
+                      // Indents the NAME label so it sits above the account name text rather than the
+                      // avatar (see styles.module.css) — a leading checkbox column already offsets the
+                      // cell, so it needs less.
+                      data-name-head={column.id === 'name' ? (selection ? 'selection' : 'default') : undefined}
+                      className={cn(
+                        'bg-muted whitespace-nowrap px-2 py-2.5 text-xs font-semibold uppercase leading-4 tracking-normal text-muted-foreground',
+                        index === 0 && 'rounded-l-lg',
+                        index === visibleColumns.length - 1 && 'rounded-r-lg',
+                      )}
+                      style={{ width: column.width, textAlign: column.align ?? 'left' }}
+                    >
+                      {canSort ? (
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => handleSort(column.sortKey as SafeSortColumn)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault()
+                              handleSort(column.sortKey as SafeSortColumn)
+                            }
+                          }}
+                          data-testid={`account-sort-${column.id}`}
+                          className="inline-flex cursor-pointer items-center gap-0.5 select-none uppercase"
+                        >
+                          {column.label}
+                          {active ? (
+                            sort.order === 'desc' ? (
+                              <ChevronDown className="size-4" aria-hidden />
+                            ) : (
+                              <ChevronUp className="size-4" aria-hidden />
+                            )
+                          ) : null}
+                        </span>
+                      ) : (
+                        column.label
+                      )}
+                    </TableHead>
+                  )
+                })}
               </TableRow>
-            </TableHead>
+            </TableHeader>
           )}
 
           {reorder ? (
@@ -403,20 +391,19 @@ const SafeAccountsTable = ({
               })}
             </TableBody>
           )}
-        </Table>
-      </TableContainer>
+        </table>
+      </div>
 
       {renameTarget && (
         <EntryDialog
           handleClose={() => setRenameTarget(null)}
           defaultValues={{ name: renameTarget.name, address: renameTarget.address }}
           chainIds={renameTarget.chainIds}
-          // In a modal surface, sit above the shadcn Dialog (--z-overlay: 1400) instead of behind it.
-          sx={allowRenameInDialog ? { zIndex: 1450 } : undefined}
+          // In a modal surface, sit above the shadcn Dialog (--z-overlay) instead of behind it.
+          className={allowRenameInDialog ? 'z-[var(--z-nested-overlay)]' : undefined}
+          overlayClassName={allowRenameInDialog ? 'z-[var(--z-nested-overlay)]' : undefined}
         />
       )}
-    </Box>
+    </div>
   )
 }
-
-export default SafeAccountsTable
