@@ -356,3 +356,11 @@ export function uncheckAllPermissions(element) {
 export function checkAllPermissions(element) {
   cy.wrap(element).findByText(allowAllPermissions).click()
 }
+
+export function getSafeAppIframeSelector(appUrl) {
+  return `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
+}
+
+export function verifySafeAppIframeVisible(appUrl) {
+  cy.get(getSafeAppIframeSelector(appUrl), { timeout: 30000 }).should('be.visible')
+}

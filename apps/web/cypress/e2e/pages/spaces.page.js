@@ -97,6 +97,11 @@ const memberAddressInput = '[data-testid="member-invitee-identifier-input"]'
 const memberNameInput = '[data-testid="member-name-input"]'
 const pendingMembersTab = '[data-testid="pending-members-tab"]'
 
+// -- Address book page --
+const addressBookTabRole = '[role="tab"]'
+export const addressBookTabLocal = 'Local contacts'
+export const addressBookTabPending = 'Pending'
+
 // -- Invites --
 const inviteBanner = '[data-testid="space-invite-banner"]'
 const inviteBannerHeadingText = 'You were invited to join'
@@ -295,6 +300,14 @@ export function clickOnSpaceSelector(spaceName) {
 export function disconnectFromSpaceLevel() {
   navigation.clickOnExpandWalletBtn()
   navigation.clickOnDisconnectBtn()
+}
+
+export function clickOnSpaceDashboardSendBtn() {
+  cy.contains('button', 'Send', { timeout: 30000 }).should('be.visible').click()
+}
+
+export function verifySendFromModalOpen() {
+  cy.contains('[role="dialog"]', 'Send from', { timeout: 30000 }).should('be.visible')
 }
 
 // Navigate to a space section through the sidebar (client-side) rather than a full cy.visit reload.
@@ -604,6 +617,20 @@ export function addAccountManually(address, network) {
 }
 
 // ===========================================
+// Members & Address book tab actions
+// ===========================================
+
+export function clickMembersPendingTab() {
+  cy.get(pendingMembersTab).should('be.visible').click()
+  cy.get(`${pendingMembersTab}[aria-selected="true"]`).should('exist')
+}
+
+export function clickAddressBookTab(label) {
+  cy.contains(addressBookTabRole, label).should('be.visible').click()
+  cy.contains(addressBookTabRole, label).should('have.attr', 'aria-selected', 'true')
+}
+
+// ===========================================
 // Add member & invite flow
 // ===========================================
 
@@ -614,7 +641,7 @@ export function addMember(name, address) {
   cy.get(memberAddressInput).should('have.value', address)
   cy.get(addMemberModalBtn).should('be.enabled').click()
 
-  cy.get(pendingMembersTab).should('be.visible').click()
+  clickMembersPendingTab()
   cy.contains(name).should('be.visible')
 }
 
