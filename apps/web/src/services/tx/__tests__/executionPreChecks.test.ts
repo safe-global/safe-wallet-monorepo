@@ -54,6 +54,33 @@ const contractSignature = (): SafeSignature => ({
   dynamicPart: () => '',
 })
 
+// Safe's eth_sign encoding: an EIP-191 personal_sign over the safeTxHash bytes,
+// with v shifted by +4 (27/28 -> 31/32)
+const ethSignSignature = (): SafeSignature => {
+  const sig = signerWallet.signMessageSync(ethers.getBytes(SAFE_TX_HASH))
+  const shiftedV = parseInt(sig.slice(-2), 16) + 4
+  const shiftedSig = `${sig.slice(0, -2)}${shiftedV.toString(16)}`
+  return {
+    signer: signerWallet.address,
+    data: shiftedSig,
+    isContractSignature: false,
+    staticPart: () => shiftedSig,
+    dynamicPart: () => '',
+  }
+}
+
+// Pre-validated signature: r = padded owner address, s = 0, v = 1
+const preValidatedSignature = (): SafeSignature => {
+  const staticPart = `0x${'00'.repeat(12)}${signerWallet.address.slice(2)}${'00'.repeat(32)}01`
+  return {
+    signer: signerWallet.address,
+    data: staticPart,
+    isContractSignature: false,
+    staticPart: () => staticPart,
+    dynamicPart: () => '',
+  }
+}
+
 const createSafeTx = (nonce: number, signatures: SafeSignature[]): SafeTransaction =>
   ({
     data: { nonce },
@@ -98,6 +125,36 @@ describe('executionPreChecks', () => {
     it('skips contract (EIP-1271) signatures', () => {
       const safeTx = createSafeTx(0, [contractSignature()])
       expect(validateTxSignatures(safeTx, SAFE_TX_HASH)).toBeUndefined()
+    })
+
+    it('skips pre-validated signatures — they can only be verified on-chain', () => {
+      // Recovery is impossible for a pre-validated signature, so returning
+      // undefined proves it was skipped rather than flagged as bad
+      const safeTx = createSafeTx(0, [preValidatedSignature()])
+      expect(validateTxSignatures(safeTx, SAFE_TX_HASH)).toBeUndefined()
+    })
+
+    it('passes an eth_sign signature that recovers to its claimed signer', () => {
+      const safeTx = createSafeTx(0, [ethSignSignature()])
+      expect(validateTxSignatures(safeTx, SAFE_TX_HASH)).toBeUndefined()
+    })
+
+    it('fails an eth_sign signature claiming to be from a different signer', () => {
+      const badEthSign: SafeSignature = {
+        ...ethSignSignature(),
+        signer: '0x000000000000000000000000000000000000dEaD',
+      }
+      const safeTx = createSafeTx(0, [badEthSign])
+      expect(validateTxSignatures(safeTx, SAFE_TX_HASH)).toBe(GS026_MESSAGES.BAD_SIGNATURE)
+    })
+
+    it('fails a malformed eth_sign signature instead of throwing', () => {
+      const broken: SafeSignature = {
+        ...ethSignSignature(),
+        staticPart: () => '0x1f', // v=31 but not a real signature
+      }
+      const safeTx = createSafeTx(0, [broken])
+      expect(validateTxSignatures(safeTx, SAFE_TX_HASH)).toBe(GS026_MESSAGES.BAD_SIGNATURE)
     })
   })
 
