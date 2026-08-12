@@ -19,7 +19,7 @@
 }
 
 .sidebarNavItem svg {
-  stroke-width: 2;
+  stroke-width: 1.5;
 }
 
 .sidebarNavItem[data-active],
@@ -111,6 +111,9 @@
   width: 16px;
   height: 16px;
   flex-shrink: 0;
+  /* 1px stroke, matching the nav icons (see the note on `.sidebarNavItem svg`). Size and stroke hold
+     in the collapsed rail too — the ring around it is 28px in both states. */
+  stroke-width: 1.5;
   color: var(--color-success-main, #16a34a);
 }
 
@@ -122,10 +125,7 @@
   text-align: left;
 }
 
-/* Must stay equal to the collapsed `.spaceSelector` radius above: there the avatar fills the button
-   exactly, so a tighter radius here would poke its corners out past the button's curve.
-   These two read `var(--rounded-md, 8px)` — a token that exists under no name — so they had always
-   been silently running on that 8px fallback. `--radius-md` is the real one. */
+/* 32px in both states; collapsed it centres in the 36px button, which has no surface of its own. */
 .spaceSelectorAvatar {
   width: 32px;
   height: 32px;
@@ -218,19 +218,13 @@
 
 :global(.group[data-collapsible='icon']) .addSafeToWorkspaceTrigger {
   justify-content: center;
-  min-height: 40px;
-  padding: 8px;
+  min-height: 0;
   gap: 0;
   border: none;
 }
 
 :global(.group[data-collapsible='icon']) .addSafeToWorkspaceLabel {
   display: none !important;
-}
-
-:global(.group[data-collapsible='icon']) .addSafeToWorkspacePlusIcon {
-  width: 12px;
-  height: 12px;
 }
 
 :global(.group[data-collapsible='icon']) .addSafeToWorkspaceTrigger:hover {
@@ -249,17 +243,6 @@
   /* Re-center the avatar: the base rule's flex-start !important would otherwise pin it to the
      left edge of the collapsed button. */
   justify-content: center !important;
-}
-
-/* The avatar IS the button, so it fills it edge to edge rather than carrying its own size. A fixed
-   32px happened to match while the rail was 32px squares; once those became 36px (the default
-   control height, per the rest of the rail) it left a 2px ring of button showing around the avatar.
-   That is also why dev's `min-height: 32px` is dropped here — the rule above sets `min-height: 0` so
-   the icon-mode `size-9!` can make a true 36px square, and a min-height always beats a height. */
-:global(.group[data-collapsible='icon']) .spaceSelector .spaceSelectorAvatar {
-  width: 100%;
-  height: 100%;
-  transition: opacity 0.15s ease;
 }
 
 :global(.group[data-collapsible='icon']) .spaceSelector:hover {
