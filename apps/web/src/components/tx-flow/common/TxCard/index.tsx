@@ -1,12 +1,17 @@
 import type { ReactNode } from 'react'
-import { Card, CardActions, CardContent, Stack, type SxProps } from '@mui/material'
+import { Card, CardContent } from '@/components/ui/card'
+import { cn } from '@/utils/cn'
 import css from '../styles.module.css'
 
-const sxBase = { my: 2, border: 0 }
+/** @deprecated MUI `sx` is ignored after the shadcn migration; use `className` instead. */
+type DeprecatedSx = object
 
-const TxCard = ({ children, sx = {} }: { children: ReactNode; sx?: SxProps }) => {
+const TxCard = ({ children, sx = {} }: { children: ReactNode; sx?: DeprecatedSx }) => {
+  void sx
   return (
-    <Card sx={{ ...sxBase, ...sx }}>
+    /* radius="xl" (24px) matches TxLayoutBase's header above and the rest of the app's cards —
+       Card's own `lg` default left the bottom corners flatter than the top. */
+    <Card size="none" radius="xl" className="txCardRoot my-4">
       <CardContent data-testid="card-content" className={css.cardContent}>
         {children}
       </CardContent>
@@ -16,18 +21,19 @@ const TxCard = ({ children, sx = {} }: { children: ReactNode; sx?: SxProps }) =>
 
 export default TxCard
 
-export const TxCardActions = ({ children, sx }: { children: ReactNode; sx?: SxProps }) => {
+export const TxCardActions = ({
+  children,
+  className,
+  sx,
+}: {
+  children: ReactNode
+  className?: string
+  sx?: DeprecatedSx
+}) => {
+  void sx
   return (
-    <CardActions sx={sx}>
-      <Stack
-        sx={{
-          width: ['100%', '100%', '100%', 'auto'],
-        }}
-        direction={{ xs: 'column-reverse', lg: 'row' }}
-        spacing={{ xs: 2, md: 2 }}
-      >
-        {children}
-      </Stack>
-    </CardActions>
+    <div className={cn('txCardActions flex items-center', className)}>
+      <div className="flex w-full flex-col-reverse gap-4 lg:w-auto lg:flex-row">{children}</div>
+    </div>
   )
 }

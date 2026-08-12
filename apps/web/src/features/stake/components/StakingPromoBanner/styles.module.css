@@ -4,14 +4,9 @@
   --promo-banner-radius: 12px;
 }
 
-/* 24px padding */
-.stakingPromoBanner :global(.MuiPaper-root) {
+/* 24px padding (targets PromoBanner's root div) */
+.stakingPromoBanner > div {
   padding: 24px;
-}
-
-/* 16px gap between the illustration and the content column */
-.stakingPromoBanner :global(.MuiStack-root) > :global(* + *) {
-  margin-left: 16px;
 }
 
 /* Coin illustration: 55px wide, aligned to the top */

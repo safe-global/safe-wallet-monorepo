@@ -1,5 +1,6 @@
 import { shortenText } from '@safe-global/utils/utils/formatters'
-import { Box, Link, Tooltip } from '@mui/material'
+import { Link } from '@/components/ui/link'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { ReactElement, SyntheticEvent } from 'react'
 import { Fragment, useState } from 'react'
 import css from './styles.module.css'
@@ -31,8 +32,9 @@ export const HexEncodedData = ({ hexData, title, highlightFirstBytes = true, lim
   }
 
   const firstBytes = highlightFirstBytes ? (
-    <Tooltip title="The first 4 bytes determine the contract method that is being called" arrow>
-      <b>{hexData.slice(0, FIRST_BYTES)}</b>
+    <Tooltip>
+      <TooltipTrigger render={<b>{hexData.slice(0, FIRST_BYTES)}</b>} />
+      <TooltipContent>The first 4 bytes determine the contract method that is being called</TooltipContent>
     </Tooltip>
   ) : null
   const restBytes = highlightFirstBytes ? hexData.slice(FIRST_BYTES) : hexData
@@ -56,7 +58,7 @@ export const HexEncodedData = ({ hexData, title, highlightFirstBytes = true, lim
   const fullData = dimmedZeroes.length ? dimmedZeroes : restBytes
 
   const content = (
-    <Box data-testid="tx-hexData" className={css.encodedData}>
+    <div data-testid="tx-hexData" className={css.encodedData}>
       <CopyButton text={hexData}>
         <span className={css.monospace}>
           {firstBytes}
@@ -66,16 +68,15 @@ export const HexEncodedData = ({ hexData, title, highlightFirstBytes = true, lim
 
       {showExpandBtn && (
         <Link
-          component="button"
+          render={<button type="button" />}
           data-testid="show-more"
           onClick={toggleExpanded}
-          type="button"
           className={css.showMore}
         >
           {showTxData ? SHOW_LESS : SHOW_MORE}
         </Link>
       )}
-    </Box>
+    </div>
   )
 
   return title ? <FieldsGrid title={title}>{content}</FieldsGrid> : content

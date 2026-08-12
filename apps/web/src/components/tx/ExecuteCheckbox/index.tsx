@@ -1,8 +1,10 @@
-import type { ChangeEvent, ReactElement } from 'react'
-import { FormControlLabel, RadioGroup, Radio, Typography } from '@mui/material'
+import { type ReactElement } from 'react'
 import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setTransactionExecution } from '@/store/settingsSlice'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
+import { Typography } from '@/components/ui/typography'
 
 import css from './styles.module.css'
 
@@ -10,7 +12,7 @@ const ExecuteCheckbox = ({ onChange }: { onChange: (checked: boolean) => void })
   const settings = useAppSelector(selectSettings)
   const dispatch = useAppDispatch()
 
-  const handleChange = (_: ChangeEvent<HTMLInputElement>, value: string) => {
+  const handleChange = (value: unknown) => {
     const checked = value === 'true'
     trackEvent({ ...MODALS_EVENTS.TOGGLE_EXECUTE_TX, label: checked })
     dispatch(setTransactionExecution(checked))
@@ -21,25 +23,21 @@ const ExecuteCheckbox = ({ onChange }: { onChange: (checked: boolean) => void })
     <>
       <Typography>Would you like to execute the transaction immediately?</Typography>
 
-      <RadioGroup row value={String(settings.transactionExecution)} onChange={handleChange} className={css.group}>
-        <FormControlLabel
-          value="true"
-          label={
-            <>
-              Yes, <b>execute</b>
-            </>
-          }
-          control={<Radio />}
-          className={css.radio}
-          data-testid="execute-checkbox"
-        />
-        <FormControlLabel
-          value="false"
-          label={<>No, later</>}
-          control={<Radio />}
-          className={css.radio}
-          data-testid="sign-checkbox"
-        />
+      <RadioGroup
+        value={String(settings.transactionExecution)}
+        onValueChange={handleChange}
+        className="grid grid-cols-2 gap-4"
+      >
+        <Label className={css.radio} data-testid="execute-checkbox">
+          <RadioGroupItem value="true" />
+          <span>
+            Yes, <b>execute</b>
+          </span>
+        </Label>
+        <Label className={css.radio} data-testid="sign-checkbox">
+          <RadioGroupItem value="false" />
+          <span>No, later</span>
+        </Label>
       </RadioGroup>
     </>
   )

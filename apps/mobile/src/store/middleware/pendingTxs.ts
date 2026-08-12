@@ -68,7 +68,12 @@ const startRelayWatcher = (listenerApi: AppListenerEffectAPI, txId: string, task
   if (!baseUrl) {
     logger.error('CGW base URL not configured for relay watcher', { txId, taskId })
     listenerApi.dispatch(
-      setPendingTxStatus({ txId, chainId, status: PendingStatus.FAILED, error: 'CGW base URL not configured' }),
+      setPendingTxStatus({
+        txId,
+        chainId,
+        status: PendingStatus.FAILED,
+        error: 'Could not track this transaction. Check the network explorer.',
+      }),
     )
     return
   }

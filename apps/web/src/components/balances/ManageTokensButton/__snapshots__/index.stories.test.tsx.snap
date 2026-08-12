@@ -1,30 +1,48 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./index.stories Default 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-2uby6n-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <button
-      class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary mui-style-z901d7-MuiButtonBase-root-MuiButton-root"
-      data-testid="manage-tokens-button"
-      tabindex="0"
-      type="button"
+    <div
+      class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col gap-0 py-0 rounded-lg"
+      data-radius="lg"
+      data-size="none"
+      data-slot="card"
+      data-variant="default"
     >
-      <span
-        class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall mui-style-1in3o51-MuiButton-startIcon"
+      <div
+        class="px-6 group-data-[size=sm]/card:px-4 group-data-[size=lg]/card:px-8 group-data-[size=none]/card:px-0"
+        data-slot="card-content"
       >
-        <mock-icon />
-      </span>
-      <span
-        class="MuiBox-root mui-style-u5d1ce"
-      >
-        Manage tokens
-      </span>
-    </button>
+        <div
+          class="p-6"
+        >
+          <button
+            aria-expanded="false"
+            aria-haspopup="menu"
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5"
+            data-slot="dropdown-menu-trigger"
+            data-testid="manage-tokens-button"
+            id="base-ui-_r_4_"
+            tabindex="0"
+            type="button"
+          >
+            <mock-icon
+              class="size-4 sm:mr-2"
+            />
+            <span
+              class="hidden sm:inline"
+            >
+              Manage tokens
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 `;
@@ -34,30 +52,60 @@ exports[`./index.stories WithHiddenTokens 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-2uby6n-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-2uby6n-MuiPaper-root"
-      style="--Paper-shadow: none;"
+      class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col gap-0 py-0 rounded-lg"
+      data-radius="lg"
+      data-size="none"
+      data-slot="card"
+      data-variant="default"
     >
-      <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary mui-style-z901d7-MuiButtonBase-root-MuiButton-root"
-        data-testid="manage-tokens-button"
-        tabindex="0"
-        type="button"
+      <div
+        class="px-6 group-data-[size=sm]/card:px-4 group-data-[size=lg]/card:px-8 group-data-[size=none]/card:px-0"
+        data-slot="card-content"
       >
-        <span
-          class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall mui-style-1in3o51-MuiButton-startIcon"
+        <div
+          class="p-6"
         >
-          <mock-icon />
-        </span>
-        <span
-          class="MuiBox-root mui-style-u5d1ce"
-        >
-          Manage tokens
-        </span>
-      </button>
+          <div
+            class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col gap-0 py-0 rounded-lg"
+            data-radius="lg"
+            data-size="none"
+            data-slot="card"
+            data-variant="default"
+          >
+            <div
+              class="px-6 group-data-[size=sm]/card:px-4 group-data-[size=lg]/card:px-8 group-data-[size=none]/card:px-0"
+              data-slot="card-content"
+            >
+              <div
+                class="p-6"
+              >
+                <button
+                  aria-expanded="false"
+                  aria-haspopup="menu"
+                  class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5"
+                  data-slot="dropdown-menu-trigger"
+                  data-testid="manage-tokens-button"
+                  id="base-ui-_r_a_"
+                  tabindex="0"
+                  type="button"
+                >
+                  <mock-icon
+                    class="size-4 sm:mr-2"
+                  />
+                  <span
+                    class="hidden sm:inline"
+                  >
+                    Manage tokens
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -68,26 +116,44 @@ exports[`./index.stories WithoutDefaultTokenlist 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-2uby6n-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <button
-      class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary mui-style-z901d7-MuiButtonBase-root-MuiButton-root"
-      data-testid="manage-tokens-button"
-      tabindex="0"
-      type="button"
+    <div
+      class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col gap-0 py-0 rounded-lg"
+      data-radius="lg"
+      data-size="none"
+      data-slot="card"
+      data-variant="default"
     >
-      <span
-        class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall mui-style-1in3o51-MuiButton-startIcon"
+      <div
+        class="px-6 group-data-[size=sm]/card:px-4 group-data-[size=lg]/card:px-8 group-data-[size=none]/card:px-0"
+        data-slot="card-content"
       >
-        <mock-icon />
-      </span>
-      <span
-        class="MuiBox-root mui-style-u5d1ce"
-      >
-        Manage tokens
-      </span>
-    </button>
+        <div
+          class="p-6"
+        >
+          <button
+            aria-expanded="false"
+            aria-haspopup="menu"
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5"
+            data-slot="dropdown-menu-trigger"
+            data-testid="manage-tokens-button"
+            id="base-ui-_r_g_"
+            tabindex="0"
+            type="button"
+          >
+            <mock-icon
+              class="size-4 sm:mr-2"
+            />
+            <span
+              class="hidden sm:inline"
+            >
+              Manage tokens
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 `;

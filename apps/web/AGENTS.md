@@ -9,7 +9,8 @@ Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide r
 - Each new feature must be behind a feature flag (stored on the CGW API in chains configs)
 - When making a new component, create a Storybook story file for it
 - Use theme variables from vars.css instead of hard-coded CSS values
-- Use MUI components and the Safe MUI theme
+- Build UI from the shadcn/ui primitives in `@/components/ui/*` (Tailwind); MUI/Emotion are removed
+- **Prefer a component's variant/size prop over one-off `className` overrides.** If you find yourself hand-rolling padding, height, border color, or hover on a `Button`/`Input`/etc., there is probably a variant for it — and if a pattern recurs, add a variant rather than repeating the classes. Watch the tokens: `--input` is white in light mode, so a visible field border needs `border-border`, not `border-input`. The `Button` and `Input` stories are the canonical variant reference; see [.storybook/AGENTS.md](.storybook/AGENTS.md#component-variants-over-custom-styling).
 
 ## Feature Architecture Import Rules
 
@@ -357,20 +358,21 @@ export const Empty: Story = (() => {
 })()
 ```
 
-### Chromatic Visual Regression Testing
+### Argos visual regression testing (Storybook)
 
-Chromatic is integrated for visual regression testing. It automatically captures snapshots of all stories in both light and dark themes.
+Storybook visual regression runs on Argos (the same service as the Cypress visual E2E suite), via
+`.github/workflows/web-argos-storybook.yml`: it builds the static Storybook, screenshots every story
+in **light and dark** with the render-sweep harness, and uploads to Argos. Requires the
+`ARGOS_TOKEN_STORYBOOK` repo secret. It runs **automatically on PRs touching `apps/web/**`or`packages/**`** (plus manual `workflow_dispatch` for baseline management) — do not remove the
+`pull_request` trigger; it exists because a fully broken send-tokens screen once shipped past
+6,600 green unit tests (ISSUE-050).
 
-- **Workflow**: Runs automatically on PRs affecting `apps/web/**` or `packages/**`
-- **TurboSnap**: Only stories affected by code changes are re-snapshotted
-- **Theme modes**: Both light and dark themes are captured automatically
-- **PR checks**: Chromatic posts status checks with links to visual diffs
-
-To run locally (set `CHROMATIC_PROJECT_TOKEN` in `.env.local`):
-
-```bash
-yarn workspace @safe-global/web chromatic
-```
+- **Opting a story out of snapshots**: add `tags: ['skip-visual-test']` (story- or meta-level) for
+  flaky/animated/interactive-only stories. The story is still render-checked (errors fail CI) —
+  only the pixel snapshot is skipped. This replaces the Chromatic-era `!chromatic` tag and
+  `chromatic: { disableSnapshot: true }` parameter.
+- **Local run**: `yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>` produces the
+  same screenshots; add `--filter=<substr>` to scope.
 
 ## Web-specific common pitfalls
 
@@ -378,6 +380,28 @@ yarn workspace @safe-global/web chromatic
 2. **Skipping Storybook stories** – New components should have stories for documentation
 3. **Using lazy() or nested structure in feature.ts** – The `feature.ts` file is already lazy-loaded via `createFeatureHandle`. Do NOT add `lazy()` calls for individual components, and do NOT use nested categories (`components`, `hooks`, `services`). Use a flat structure with direct imports. Naming conventions determine stub behavior: `useSomething` → hook, `PascalCase` → component, `camelCase` → service.
 4. **Using lazy loading inside features** – The entire feature is lazy-loaded by default via `createFeatureHandle`. Do NOT use `lazy()`, `dynamic()`, or any other lazy-loading mechanism inside the feature (not in `feature.ts`, not in components, not anywhere). All components and services inside a feature should use direct imports with a flat structure.
+5. **CSS-module padding silently beaten by variant utilities** – shadcn primitives ship group-data
+   variant utilities (e.g. Card's `group-data-[size=none]/card:px-0`) whose two-class selectors
+   outrank a single CSS-module class. If a module style "mysteriously doesn't apply", check for a
+   competing variant utility before adding more CSS (see ISSUE-050: every tx-flow card lost its
+   horizontal padding this way). Prefer utility classes at the call site; when a module must win,
+   document the `!important`.
+6. **`<img height={24}>` doesn't size images** – Tailwind's preflight sets `img { height: auto }`,
+   which overrides the HTML `height` attribute. Always size raster images with classes
+   (`className="h-6 w-auto"`), never attributes.
+7. **Unit tests don't see layout** – 6,600 green tests said nothing while the send-tokens form
+   rendered with zero padding (ISSUE-050). Any UI-affecting change must be verified visually:
+   check the component's story (or the live page) yourself, and rely on the Argos Storybook
+   workflow (auto-runs on web PRs) for regression cover. Never ship a story that permanently
+   renders skeletons/blank without a doc comment saying so — a broken story that "passes" is
+   worse than no story.
+8. **Don't rebuild field chrome out of raw divs + CSS modules** – `NumberField`/`Field`/
+   `InputGroup` already provide the label (with error coloring), the outline, focus ring, and
+   inline-start/end adornment slots. The migrated amount field hand-rolled its own outline box,
+   floating label, and adornment layout around a `NumberField` — producing a double border and
+   an overlapping MAX button (ISSUE-052). The variant lint cannot catch this: raw `div`s contain
+   no design-system component to flag. If a field needs something the primitives lack, extend
+   the primitive, don't wrap it.
 
 ## Debugging Tips
 

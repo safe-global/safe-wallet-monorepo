@@ -2,8 +2,8 @@ import { useMemo, useRef, type Dispatch, type ReactNode, type SetStateAction } f
 import partition from 'lodash/partition'
 import { createPortal } from 'react-dom'
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
+import { TableBody } from '@/components/ui/table'
+import tableCss from './styles.module.css'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { reorderByKey } from '@/utils/reorder'
 import type { SafeAccountColumn } from './columns'
@@ -217,9 +217,12 @@ const DraggableGroupRows = ({
           // table keeps the detached <tr> renderable.
           return snapshot.isDragging
             ? createPortal(
-                <Table sx={{ width: draggedRowWidth, borderCollapse: 'separate', borderSpacing: 0, margin: 0 }}>
+                <table
+                  className={`caption-bottom text-sm ${tableCss.table}`}
+                  style={{ width: draggedRowWidth, borderCollapse: 'separate', borderSpacing: 0, margin: 0 }}
+                >
                   <TableBody>{row}</TableBody>
-                </Table>,
+                </table>,
                 document.body,
               )
             : row

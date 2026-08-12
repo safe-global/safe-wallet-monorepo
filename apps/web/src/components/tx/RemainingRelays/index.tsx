@@ -1,5 +1,6 @@
 import type { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
-import { SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { MAX_DAY_RELAYS } from '@/hooks/useRemainingRelays'
 import css from '../BalanceInfo/styles.module.css'
@@ -13,12 +14,17 @@ const RemainingRelays = ({ relays, tooltip }: { relays?: RelaysRemaining; toolti
 
   return (
     <div className={css.container}>
-      <Typography variant="body2" color="primary.light" display="flex" alignItems="center" gap={0.5}>
+      <Typography variant="paragraph-small" className="flex items-center gap-1 text-[var(--color-primary-light)]">
         <b>{relays?.remaining ?? MAX_DAY_RELAYS}</b> free transactions left today
-        <Tooltip title={tooltip} placement="top" arrow>
-          <span style={{ lineHeight: 0 }}>
-            <SvgIcon component={InfoIcon} inheritViewBox color="info" fontSize="small" sx={{ color: '#B2B5B2' }} />
-          </span>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <span style={{ lineHeight: 0 }}>
+                <InfoIcon className="size-4 text-[#B2B5B2]" />
+              </span>
+            }
+          />
+          <TooltipContent>{tooltip}</TooltipContent>
         </Tooltip>
       </Typography>
     </div>

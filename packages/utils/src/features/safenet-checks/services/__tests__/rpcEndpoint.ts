@@ -1,4 +1,6 @@
 import { http, HttpResponse } from 'msw'
+import { Interface } from 'ethers'
+import { CONSENSUS_READ_ABI, COORDINATOR_READ_ABI } from '../../abi'
 import type { RawLog } from '../../utils/decodeLogs'
 
 /**
@@ -29,9 +31,18 @@ export type RpcConfig = {
    */
   failBlockProbes?: 'null' | 'error'
   failEverything?: boolean
+  /** `getEpochGroupId(epoch)` result. */
+  epochGroupId?: string
+  /** `coordinator.groupKey(gid)` result. */
+  groupKey?: { x: string; y: string }
+  /** `groupKey` calls revert (an epoch the coordinator has not seen). */
+  failGroupKey?: boolean
 }
 
 const hexToNum = (value: string): number => Number(BigInt(value))
+
+const consensusRead = new Interface([...CONSENSUS_READ_ABI])
+const coordinatorRead = new Interface([...COORDINATOR_READ_ABI])
 
 const filterLogs = (logs: RawLog[], filter: GetLogsFilter): RawLog[] => {
   const topic0s = (Array.isArray(filter.topics[0]) ? filter.topics[0] : [filter.topics[0]]) as string[]
@@ -114,6 +125,21 @@ export const makeEndpoint = (config: RpcConfig) => {
             removed: false,
           })),
         )
+      }
+      case 'eth_call': {
+        const call = req.params[0] as { to: string; data: string }
+        const selector = call.data.slice(0, 10)
+        if (selector === consensusRead.getFunction('getEpochGroupId')!.selector) {
+          return ok(
+            consensusRead.encodeFunctionResult('getEpochGroupId', [config.epochGroupId ?? '0x' + '00'.repeat(32)]),
+          )
+        }
+        if (selector === coordinatorRead.getFunction('groupKey')!.selector) {
+          if (config.failGroupKey) return err('group key not ready')
+          const gk = config.groupKey ?? { x: '1', y: '2' }
+          return ok(coordinatorRead.encodeFunctionResult('groupKey', [[BigInt(gk.x), BigInt(gk.y)]]))
+        }
+        return err('unexpected eth_call')
       }
       default:
         return err(`unhandled ${req.method}`)

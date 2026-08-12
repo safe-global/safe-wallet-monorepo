@@ -6,7 +6,8 @@ import { SpacesFeature } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useState } from 'react'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Divider } from '@mui/material'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { Separator } from '@/components/ui/separator'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 import css from './styles.module.css'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -118,21 +119,21 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
   }
 
   return (
-    <Box
+    <div
       data-testid="safe-list-item"
       className={classnames(css.multiListItem, css.listItem, { [css.currentListItem]: isCurrentSafe })}
     >
-      <Accordion data-testid="multichain-item-summary" expanded={expanded} sx={{ border: 'none' }}>
-        <AccordionSummary
-          onClick={toggleExpand}
-          sx={{
-            p: 0,
-            '& .MuiAccordionSummary-content': { m: '0 !important', alignItems: 'center' },
-            '&.Mui-expanded': { backgroundColor: 'transparent !important' },
-          }}
-          component="div"
+      <Collapsible open={expanded} onOpenChange={toggleExpand}>
+        <CollapsibleTrigger
+          data-testid="multichain-item-summary"
+          // `nativeButton={false}` is required when rendering as a non-<button>: without it Base UI
+          // keeps its native-button path, emitting no `role="button"` and no Enter/Space handling, so
+          // keyboard users could focus this header but never expand it — locking every Safe in the
+          // group behind a mouse.
+          nativeButton={false}
+          render={<div className="flex w-full cursor-pointer items-center p-2" />}
         >
-          <Box sx={{ flex: 1, minWidth: 0 }}>
+          <div className="min-w-0 flex-1">
             <AccountItem.Content data-testid="multichain-content">
               <AccountItem.Icon
                 address={address}
@@ -155,27 +156,29 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
                 isLoading={totalFiatValue === undefined}
                 data-testid="group-balance"
               />
-              {!isSpaceSafe && (
-                <AccountItem.PinButton safeItems={sortedSafes} safeOverviews={safeOverviews} name={name} />
-              )}
-              {isSpaceSafe ? (
-                <>
-                  <Box width="40px" />
-                  <spaces.SpaceSafeContextMenu safeItem={multiSafeAccountItem} />
-                </>
-              ) : (
-                <MultiAccountContextMenu
-                  name={multiSafeAccountItem.name ?? ''}
-                  address={address}
-                  chainIds={deployedChainIds}
-                  addNetwork={hasReplayableSafe}
-                />
-              )}
+              <span className="flex items-center" onClick={(e) => e.stopPropagation()}>
+                {!isSpaceSafe && (
+                  <AccountItem.PinButton safeItems={sortedSafes} safeOverviews={safeOverviews} name={name} />
+                )}
+                {isSpaceSafe ? (
+                  <>
+                    <div className="w-10" />
+                    <spaces.SpaceSafeContextMenu safeItem={multiSafeAccountItem} />
+                  </>
+                ) : (
+                  <MultiAccountContextMenu
+                    name={multiSafeAccountItem.name ?? ''}
+                    address={address}
+                    chainIds={deployedChainIds}
+                    addNetwork={hasReplayableSafe}
+                  />
+                )}
+              </span>
             </AccountItem.Content>
-          </Box>
-        </AccordionSummary>
-        <AccordionDetails sx={{ padding: '0px 12px' }}>
-          <Box data-testid="subacounts-container">
+          </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="px-3">
+          <div data-testid="subacounts-container">
             {sortedSafes.map((safeItem) => {
               const overview = safeOverviews?.find(
                 (o) => o.chainId === safeItem.chainId && sameAddress(o.address.value, safeItem.address),
@@ -189,30 +192,22 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
                 />
               )
             })}
-          </Box>
+          </div>
           {!isReadOnly && hasReplayableSafe && !isSpaceSafe && (
             <>
-              <Divider sx={{ ml: '-12px', mr: '-12px' }} />
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  ml: '-12px',
-                  mr: '-12px',
-                }}
-              >
+              <Separator className="-mx-3" />
+              <div className="-mx-3 flex items-center justify-center">
                 <AddNetworkButton
                   currentName={multiSafeAccountItem.name ?? ''}
                   safeAddress={address}
                   deployedChains={sortedSafes.map((safe) => safe.chainId)}
                 />
-              </Box>
+              </div>
             </>
           )}
-        </AccordionDetails>
-      </Accordion>
-    </Box>
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
   )
 }
 

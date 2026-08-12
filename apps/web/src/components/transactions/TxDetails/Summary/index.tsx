@@ -8,7 +8,8 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { Receipt } from '@/components/tx/ConfirmTxDetails/Receipt'
 import DecodedData from '../TxData/DecodedData'
 import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'
-import { Box, Divider, Stack, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
 import DecoderLinks from './DecoderLinks'
 import isEqual from 'lodash/isEqual'
 import Multisend from '../TxData/DecodedData/Multisend'
@@ -26,6 +27,8 @@ interface Props {
   showAuditLogFields?: boolean
 }
 
+// GTF (gas-token) fee breakdown for executed txs; the hook returns null when the
+// GTF feature is off, so this renders nothing on non-GTF chains.
 const HistoryFees = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement | null => {
   const { HistoryFeesAccordion } = useLoadFeature(GTFFeature)
   const feesData = useHistoryFeesBreakdown(txDetails)
@@ -77,62 +80,61 @@ const Summary = ({
         <Multisend txData={transactionData} isExecuted={!!txDetails?.executedAt} compact />
       )}
 
+      {showAuditLogFields && submittedAt && (
+        <TxDataRow datatestid="tx-created-at" title="Created">
+          <div className="text-sm">{dateString(submittedAt)}</div>
+        </TxDataRow>
+      )}
+
+      {showAuditLogFields && executedAt && (
+        <TxDataRow datatestid="tx-executed-at" title="Executed">
+          <div className="text-sm">{dateString(executedAt)}</div>
+        </TxDataRow>
+      )}
+
       {showAuditLogFields && txHash && (
         <TxDataRow datatestid="tx-hash" title="Transaction hash">
           {generateDataRowValue(txHash, 'hash', true)}{' '}
         </TxDataRow>
       )}
 
-      {showAuditLogFields && submittedAt && (
-        <TxDataRow datatestid="tx-created-at" title="Created">
-          <Typography variant="body2" component="div">
-            {dateString(submittedAt)}
-          </Typography>
-        </TxDataRow>
-      )}
+      {txDetails?.executedAt && <HistoryFees txDetails={txDetails} />}
 
-      {showAuditLogFields && executedAt && (
-        <TxDataRow datatestid="tx-executed-at" title="Executed">
-          <Typography variant="body2" component="div">
-            {dateString(executedAt)}
-          </Typography>
-        </TxDataRow>
-      )}
+      {showDetails && (
+        <div className="mt-4">
+          <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
+            <div className="flex flex-col gap-2">
+              {showDecodedData && (
+                <>
+                  <DecodedData txData={txData} toInfo={toInfo} />
+                  {/* Full-bleed across the accordion's px-4: the width has to carry Separator's own
+                      `data-[orientation=horizontal]:` prefix, otherwise its base
+                      `data-[orientation=horizontal]:w-full` wins on specificity (0-2-0 vs 0-1-0) no
+                      matter the order, and the rule stops 32px short of the card's right edge.
+                      Matching the variant lets tailwind-merge drop `w-full` instead. */}
+                  <Separator className="-mx-4 my-2 data-[orientation=horizontal]:w-[calc(100%+32px)]" />
+                </>
+              )}
 
-      {/* Fees + Advanced details stack with shared borders (margin-bottom: -1px on Fees) */}
-      {(txDetails?.executedAt || showDetails) && (
-        <Box
-          mt={2}
-          sx={{
-            '& > .MuiAccordion-root:not(:first-of-type)': {
-              borderTopLeftRadius: 0,
-              borderTopRightRadius: 0,
-            },
-          }}
-        >
-          {txDetails?.executedAt && <HistoryFees txDetails={txDetails} />}
+              <div>
+                <Typography variant="paragraph-small-bold" className="mb-4 block">
+                  Advanced details
+                </Typography>
 
-          {showDetails && (
-            <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
-              <Stack gap={1} divider={<Divider sx={{ mx: -2, my: 1 }} />}>
-                {showDecodedData && <DecodedData txData={txData} toInfo={toInfo} />}
+                <DecoderLinks />
 
-                <Box>
-                  <DecoderLinks />
-
-                  <Receipt
-                    safeTxData={safeTxData}
-                    txData={txData}
-                    txDetails={txDetails}
-                    txInfo={txInfo}
-                    withSignatures
-                    grid
-                  />
-                </Box>
-              </Stack>
-            </ColorCodedTxAccordion>
-          )}
-        </Box>
+                <Receipt
+                  safeTxData={safeTxData}
+                  txData={txData}
+                  txDetails={txDetails}
+                  txInfo={txInfo}
+                  withSignatures
+                  grid
+                />
+              </div>
+            </div>
+          </ColorCodedTxAccordion>
+        </div>
       )}
     </>
   )

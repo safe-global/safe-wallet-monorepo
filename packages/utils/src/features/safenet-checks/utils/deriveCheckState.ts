@@ -6,7 +6,7 @@ import {
   type NormalizedCheckEvent,
 } from '../types'
 
-export type DeriveCheckStateInput = {
+type DeriveCheckStateInput = {
   /** All decoded events for one check (order-independent; derive is a fold). */
   events: ReadonlyArray<NormalizedCheckEvent>
   /** FROST verification result for the attestation, if any. */
@@ -28,24 +28,14 @@ export const deadlineBlockOf = (events: ReadonlyArray<NormalizedCheckEvent>): bi
 }
 
 /**
- * True if the oracle has SETTLED on a rejection.
- *
- * Only `OracleResult` counts. A single sentinel's `Committed`/`Revealed` is one
- * bonded vote, not a verdict: the oracle resolves by unanimity, and a split goes
- * to arbitration which can still approve. Treating one dissent as final would
- * let any single sentinel permanently red-flag a transaction, and `MALICIOUS` is
- * terminal.
- *
- * Invariant (contract coupling): arbitrated rejections still reach this —
- * `SentinelOracle.resolveDispute` emits an `OracleResult` alongside
- * `DisputeResolved`. A hypothetical path emitting `DisputeResolved` WITHOUT its
- * paired `OracleResult` would read as `IN_PROGRESS`/`TIMED_OUT` here, never
- * `MALICIOUS`.
+ * True if the oracle has SETTLED on a rejection. Only `OracleResult` counts: a
+ * single sentinel's `Committed`/`Revealed` is one bonded vote, not a verdict —
+ * a split goes to arbitration, which can still approve, and arbitrated
+ * rejections re-emit `OracleResult` alongside `DisputeResolved`.
  */
 const hasNegativeVerdict = (events: ReadonlyArray<NormalizedCheckEvent>): boolean =>
   events.some((event) => event.type === CheckEventType.ORACLE_RESULT && event.approved === false)
 
-/** True once anything at all has been observed for this hash. */
 const hasAnyProposal = (events: ReadonlyArray<NormalizedCheckEvent>): boolean =>
   events.some((event) => event.type === CheckEventType.ORACLE_PROPOSED || event.type === CheckEventType.PLAIN_PROPOSED)
 
@@ -60,30 +50,23 @@ const hasOracleActivity = (events: ReadonlyArray<NormalizedCheckEvent>): boolean
   )
 
 /**
- * Derive the internal check status from a check's full event set.
+ * Derive the check status from its full event set. Recomputed from scratch each
+ * poll (idempotent, reorg-self-healing). Precedence, highest first:
  *
- * Recompute-from-scratch each poll (idempotent, reorg-self-healing). Precedence,
- * highest first:
- *
- *  1. A negative verdict → `MALICIOUS` (even late, even past deadline).
- *  2. Attested → `BENIGN` if the FROST signature verified, `VERIFICATION_FAILED`
- *     if it did not (never `BENIGN`), else `AWAITING_VERIFICATION`. This sits
- *     above the deadline check so a late-but-verified attestation replaces a
- *     would-be `TIMED_OUT`.
- *  3. Past the deadline block (`head > deadline`) → `TIMED_OUT` (incl. frozen
- *     disputes, which never emit a resolving `OracleResult`).
- *  4. Any oracle lifecycle activity → `IN_PROGRESS` (a positive `OracleResult`
- *     alone lands here — it is NOT `BENIGN` without a verified attestation).
- *  5. Otherwise → `SUBMITTED`.
+ *  1. Negative verdict → `MALICIOUS` (even late, even past deadline).
+ *  2. Attested → `BENIGN` only if the FROST signature verified,
+ *     `VERIFICATION_FAILED` if it did not, else `AWAITING_VERIFICATION`.
+ *     Above the deadline check so a late attestation beats `TIMED_OUT`.
+ *  3. Past the deadline block → `TIMED_OUT` (incl. frozen disputes).
+ *  4. Any oracle activity → `IN_PROGRESS` (a positive `OracleResult` alone is
+ *     NOT `BENIGN` without a verified attestation).
+ *  5. Otherwise → `SUBMITTED`, requiring an actual proposal event.
  */
 export const deriveCheckState = ({ events, attestation, headBlock }: DeriveCheckStateInput): CheckStatus => {
   if (hasNegativeVerdict(events)) return CheckStatus.MALICIOUS
 
-  // The attested branches deliberately do NOT require the matching proposal
-  // event: an attestation is self-authenticating (its FROST signature commits
-  // to safeTxHash/epoch/consensus/chainId), and a targeted read window can
-  // catch the attestation while clipping the proposal. Gating on the proposal
-  // would degrade a VERIFIED check to UNAVAILABLE on such a partial fetch.
+  // No proposal-event gate on the attested branches: an attestation is
+  // self-authenticating, and a targeted window can clip the proposal.
   const attested = events.some((event) => event.type === CheckEventType.ORACLE_ATTESTED)
   if (attested) {
     if (attestation.status === AttestationVerificationStatus.VERIFIED) return CheckStatus.BENIGN
@@ -91,11 +74,8 @@ export const deriveCheckState = ({ events, attestation, headBlock }: DeriveCheck
     return CheckStatus.AWAITING_VERIFICATION
   }
 
-  // Non-oracle path: the validator set ran its own deterministic checks and
-  // attested the result. That is a real passed check, so it resolves to BENIGN —
-  // but only on a verified signature, exactly like the oracle path. Sits below
-  // the oracle branch (richer checks win) and above the deadline check (it is a
-  // settled outcome, not a pending one).
+  // Non-oracle path: the validator set's own checks passed — BENIGN, but only
+  // on a verified signature, exactly like the oracle path.
   const plainAttested = events.some((event) => event.type === CheckEventType.PLAIN_ATTESTED)
   if (plainAttested) {
     if (attestation.status === AttestationVerificationStatus.VERIFIED) return CheckStatus.BENIGN
@@ -110,9 +90,6 @@ export const deriveCheckState = ({ events, attestation, headBlock }: DeriveCheck
 
   if (hasOracleActivity(events)) return CheckStatus.IN_PROGRESS
 
-  // `SUBMITTED` means "we saw the proposal, nothing has happened yet" — it must
-  // require an actual proposal event. Falling through to it on an empty event
-  // set claimed a check was in flight for every transaction that never had one.
   if (hasAnyProposal(events)) return CheckStatus.SUBMITTED
 
   return CheckStatus.UNAVAILABLE

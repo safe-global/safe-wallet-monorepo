@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
+import { Card, CardContent } from '@/components/ui/card'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import ManageTokensButton from './index'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
@@ -38,9 +38,13 @@ ManageTokensButton opens a menu with token management options:
           settings: { ...baseSettings, hiddenTokens: {} },
         }}
       >
-        <Paper sx={{ padding: 4 }}>
-          <Story />
-        </Paper>
+        <Card size="none">
+          <CardContent>
+            <div className="p-6">
+              <Story />
+            </div>
+          </CardContent>
+        </Card>
       </StoreDecorator>
     ),
   ],
@@ -56,27 +60,18 @@ ManageTokensButton opens a menu with token management options:
 export default meta
 type Story = StoryObj<typeof ManageTokensButton>
 
-/**
- * Default state with all menu options visible.
- */
 export const Default: Story = {
   args: {
     _hasDefaultTokenlist: true,
   },
 }
 
-/**
- * Without default tokenlist feature - only shows "Hide small balances" and "Hide tokens".
- */
 export const WithoutDefaultTokenlist: Story = {
   args: {
     _hasDefaultTokenlist: false,
   },
 }
 
-/**
- * Shows hidden tokens count in the menu when tokens are hidden.
- */
 export const WithHiddenTokens: Story = {
   args: {
     _hasDefaultTokenlist: true,
@@ -94,9 +89,13 @@ export const WithHiddenTokens: Story = {
           },
         }}
       >
-        <Paper sx={{ padding: 4 }}>
-          <Story />
-        </Paper>
+        <Card size="none">
+          <CardContent>
+            <div className="p-6">
+              <Story />
+            </div>
+          </CardContent>
+        </Card>
       </StoreDecorator>
     ),
   ],

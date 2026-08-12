@@ -2,7 +2,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-3);
+  /* !important: TxCard uses Card size="none", whose group-data-[size=none]:px-0 utility
+     (two-class selector) outranks this module class and stripped the horizontal padding. */
+  padding: var(--space-3) !important;
 }
 
 .cardContent :global .errorMessage {

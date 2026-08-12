@@ -1,5 +1,4 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { Box, SvgIcon } from '@mui/material'
 import RequiredIcon from '@/public/images/messages/required.svg'
 import ImageFallback from '@/components/common/ImageFallback'
 import txTypeCss from '@/components/transactions/TxType/styles.module.css'
@@ -25,7 +24,7 @@ const getMessageName = (msg: MessageItem) => {
 
 const MsgType = ({ msg }: { msg: MessageItem }) => {
   return (
-    <Box className={txTypeCss.txType}>
+    <div className={txTypeCss.txType}>
       {msg.logoUri ? (
         <ImageFallback
           src={msg.logoUri || FALLBACK_LOGO_URI}
@@ -35,10 +34,10 @@ const MsgType = ({ msg }: { msg: MessageItem }) => {
           height={16}
         />
       ) : (
-        <SvgIcon component={RequiredIcon} viewBox="0 0 32 32" fontSize="small" />
+        <RequiredIcon viewBox="0 0 32 32" className="size-5" />
       )}
       {getMessageName(msg)}
-    </Box>
+    </div>
   )
 }
 

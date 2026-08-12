@@ -1,4 +1,3 @@
-import { SvgIcon, Tooltip, Typography } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import type { ReactElement } from 'react'
 
@@ -19,6 +18,8 @@ import { isCustomDelaySelected } from './utils'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransactionProps): ReactElement {
   const web3ReadOnly = useWeb3ReadOnly()
@@ -81,16 +82,11 @@ export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransacti
         title={
           <>
             Review window
-            <Tooltip placement="top" title={TOOLTIP_TITLES.REVIEW_WINDOW}>
-              <span>
-                <SvgIcon
-                  component={InfoIcon}
-                  inheritViewBox
-                  fontSize="small"
-                  color="border"
-                  sx={{ verticalAlign: 'middle', ml: 0.5 }}
-                />
-              </span>
+            <Tooltip>
+              <TooltipTrigger render={<span />}>
+                <InfoIcon className="ml-1 inline size-4 align-middle text-[var(--color-border-main)]" />
+              </TooltipTrigger>
+              <TooltipContent>{TOOLTIP_TITLES.REVIEW_WINDOW}</TooltipContent>
             </Tooltip>
           </>
         }
@@ -103,16 +99,11 @@ export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransacti
           title={
             <>
               Proposal expiry
-              <Tooltip placement="top" title={TOOLTIP_TITLES.PROPOSAL_EXPIRY}>
-                <span>
-                  <SvgIcon
-                    component={InfoIcon}
-                    inheritViewBox
-                    fontSize="small"
-                    color="border"
-                    sx={{ verticalAlign: 'middle', ml: 0.5 }}
-                  />
-                </span>
+              <Tooltip>
+                <TooltipTrigger render={<span />}>
+                  <InfoIcon className="ml-1 inline size-4 align-middle text-[var(--color-border-main)]" />
+                </TooltipTrigger>
+                <TooltipContent>{TOOLTIP_TITLES.PROPOSAL_EXPIRY}</TooltipContent>
               </Tooltip>
             </>
           }

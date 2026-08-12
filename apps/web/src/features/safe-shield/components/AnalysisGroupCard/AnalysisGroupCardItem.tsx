@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Box, Link, Stack, Typography } from '@mui/material'
+import { Link } from '@/components/ui/link'
+import { Typography } from '@/components/ui/typography'
 import type { Severity } from '@safe-global/utils/features/safe-shield/types'
 import {
   type AnalysisResult,
@@ -40,10 +41,10 @@ export const AnalysisGroupCardItem = ({
 
   return (
     <>
-      <Box bgcolor="background.main" borderRadius="4px" overflow="hidden">
-        <Box sx={{ borderLeft: `4px solid ${borderColor}`, padding: '12px' }}>
-          <Stack gap={2}>
-            <Typography variant="body2" color="primary.light" sx={{ wordBreak: 'break-word' }}>
+      <div className="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]">
+        <div className="border-l-4 p-3" style={{ borderLeftColor: borderColor }}>
+          <div className="flex flex-col gap-4">
+            <Typography variant="paragraph-small" className="break-words text-[var(--color-primary-light)]">
               {displayDescription}
             </Typography>
 
@@ -52,19 +53,12 @@ export const AnalysisGroupCardItem = ({
                 showLabel="Show details"
                 hideLabel="Hide details"
                 contentWrapper={(children) => (
-                  <Box
-                    mt={0.5}
-                    px={1}
-                    py={0.5}
-                    bgcolor="background.paper"
-                    borderRadius="4px"
-                    sx={{ wordBreak: 'break-word' }}
-                  >
+                  <div className="mt-1 rounded-[4px] bg-[var(--color-background-paper)] px-2 py-1 break-words">
                     {children}
-                  </Box>
+                  </div>
                 )}
               >
-                <Typography variant="body2" fontSize={12} lineHeight="14px" color="text.secondary">
+                <Typography variant="paragraph-mini" className="leading-[14px] text-[var(--color-text-secondary)]">
                   {result.error}
                 </Typography>
               </AnalysisDetailsDropdown>
@@ -81,26 +75,17 @@ export const AnalysisGroupCardItem = ({
 
             {shouldShowReportLink && (
               <Link
-                component="button"
-                variant="body2"
-                color="text.secondary"
+                variant="inherit"
+                render={<button type="button" />}
                 onClick={() => setIsReportModalOpen(true)}
-                sx={{
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  textDecoration: 'none',
-                  fontWeight: 400,
-                  fontSize: '12px',
-                  lineHeight: '16px',
-                  letterSpacing: '1px',
-                }}
+                className="cursor-pointer text-left text-xs leading-4 font-normal text-[var(--color-text-secondary)] no-underline hover:no-underline"
               >
                 Report false result
               </Link>
             )}
-          </Stack>
-        </Box>
-      </Box>
+          </div>
+        </div>
+      </div>
 
       {shouldShowReportLink && (
         <ReportFalseResultModal

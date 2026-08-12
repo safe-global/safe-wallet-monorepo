@@ -1,16 +1,10 @@
 import { useState } from 'react'
-import {
-  Box,
-  Button as MuiButton,
-  CircularProgress,
-  DialogActions,
-  DialogContent,
-  Stack,
-  Typography,
-} from '@mui/material'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { Badge } from '@/components/ui/badge'
+import { Typography } from '@/components/ui/typography'
+import DialogActions from '@/components/common/DialogActions'
 import ModalDialog from '@/components/common/ModalDialog'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { NetworkLogosTooltip } from '@/features/multichain'
@@ -114,32 +108,32 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
       {nameError ? <InvalidContactNameTooltip nameError={nameError}>{trigger}</InvalidContactNameTooltip> : trigger}
 
       <ModalDialog open={open} onClose={() => setOpen(false)} dialogTitle="Request to add contact" hideChainIndicator>
-        <DialogContent sx={{ py: 2 }}>
-          <Stack spacing={2}>
-            <Typography variant="body2" color="text.secondary">
+        <div className="px-6 py-4">
+          <div className="flex flex-col gap-4">
+            <Typography variant="paragraph-small" color="muted">
               An admin has to approve the request before the contact appears in the workspace address book.
             </Typography>
 
-            <Box>
-              <Typography variant="body2" color="text.secondary" mb={0.5}>
+            <div className="flex flex-col gap-1">
+              <Typography variant="paragraph-small" color="muted">
                 Name
               </Typography>
-              <Typography variant="body1">{name}</Typography>
-            </Box>
+              <Typography>{name}</Typography>
+            </div>
 
-            <Box>
-              <Typography variant="body2" color="text.secondary" mb={0.5}>
+            <div className="flex flex-col gap-1">
+              <Typography variant="paragraph-small" color="muted">
                 Address
               </Typography>
               <EthHashInfo address={address} shortAddress={false} showPrefix={false} showName={false} avatarSize={24} />
-            </Box>
+            </div>
 
-            <Box>
-              <Typography variant="body2" color="text.secondary" mb={1}>
+            <div className="flex flex-col gap-2">
+              <Typography variant="paragraph-small" color="muted">
                 Networks
               </Typography>
               {chains.configs.length === chainIds.length ? (
-                <Typography variant="body1">All networks</Typography>
+                <Typography>All networks</Typography>
               ) : (
                 <NetworkLogosTooltip
                   networks={chainIds.map((chainId) => ({ chainId }))}
@@ -147,25 +141,26 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
                   triggerRender={<span className="inline-flex" />}
                 />
               )}
-            </Box>
-          </Stack>
-        </DialogContent>
+            </div>
 
-        <DialogActions>
-          <MuiButton data-testid="cancel-btn" onClick={() => setOpen(false)}>
-            Cancel
-          </MuiButton>
-          <MuiButton
-            data-testid="confirm-request-btn"
-            type="submit"
-            variant="contained"
-            onClick={handleConfirm}
-            disabled={isSubmitting}
-            disableElevation
-          >
-            {isSubmitting ? <CircularProgress size={20} /> : 'Request to add'}
-          </MuiButton>
-        </DialogActions>
+            {nameError && (
+              <Alert variant="warning">
+                <AlertDescription>Rename this contact to share it with the workspace. {nameError}.</AlertDescription>
+              </Alert>
+            )}
+          </div>
+        </div>
+
+        <DialogActions
+          className="px-6 pt-0 pb-6"
+          onCancel={() => setOpen(false)}
+          cancelTestId="cancel-btn"
+          confirmLabel="Request to add"
+          onConfirm={handleConfirm}
+          confirmTestId="confirm-request-btn"
+          confirmDisabled={!!nameError || isSubmitting}
+          confirmLoading={isSubmitting}
+        />
       </ModalDialog>
     </>
   )

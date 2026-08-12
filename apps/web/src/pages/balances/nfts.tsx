@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import AssetsHeader from '@/components/balances/AssetsHeader'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
@@ -25,7 +25,7 @@ const NFTs: NextPage = () => {
         </main>
       ) : isFeatureEnabled === false ? (
         <main>
-          <Typography textAlign="center" my={3}>
+          <Typography align="center" className="my-6">
             NFTs are not available on this network.
           </Typography>
         </main>

@@ -1,8 +1,8 @@
 // Extract status handling into separate components
-import { Box, Typography } from '@mui/material'
 import { useLoadFeature } from '@/features/__core__'
 import { SpeedupFeature } from '@/features/speedup'
 import { PendingStatus, type PendingTx } from '@/store/pendingTxsSlice'
+import { Typography } from '@/components/ui/typography'
 
 type Props = {
   txId: string
@@ -13,18 +13,18 @@ export const ProcessingStatus = ({ txId, pendingTx, willDeploySafe: isCreatingSa
   const { SpeedUpMonitor } = useLoadFeature(SpeedupFeature)
 
   return (
-    <Box px={3} mt={3}>
-      <Typography data-testid="transaction-status" variant="h6" mt={2} fontWeight={700}>
+    <div className="mt-6 px-6">
+      <Typography data-testid="transaction-status" variant="h4" className="mt-4">
         {!isCreatingSafe ? 'Transaction is now processing' : 'Nested Safe is now being created'}
       </Typography>
-      <Typography variant="body2" mb={3}>
+      <Typography variant="paragraph-small" className="mb-6 block">
         {!isCreatingSafe ? 'The transaction' : 'Your Nested Safe'} was confirmed and is now being processed.
       </Typography>
-      <Box>
+      <div>
         {pendingTx.status === PendingStatus.PROCESSING && (
           <SpeedUpMonitor txId={txId} pendingTx={pendingTx} modalTrigger="alertBox" />
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }

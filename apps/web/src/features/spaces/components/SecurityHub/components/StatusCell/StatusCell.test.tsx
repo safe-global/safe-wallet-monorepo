@@ -5,7 +5,7 @@ describe('StatusCell', () => {
   describe('null grade', () => {
     it('renders a skeleton when scanning', () => {
       const { container } = render(<StatusCell grade={null} isScanning />)
-      expect(container.querySelector('.MuiSkeleton-root')).toBeInTheDocument()
+      expect(container.querySelector('[data-slot="skeleton"]')).toBeInTheDocument()
     })
 
     it('renders a dash when not scanning', () => {

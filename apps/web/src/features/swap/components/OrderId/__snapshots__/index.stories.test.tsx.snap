@@ -5,54 +5,54 @@ exports[`./index.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiStack-root mui-style-m69qwo-MuiStack-root"
+      class="bg-background rounded-lg p-4"
     >
-      <span>
-        1282e32a
-      </span>
-      <span
-        aria-label="Copy to clipboard"
-        class=""
-        data-mui-internal-clone-element="true"
-        style="cursor: pointer;"
-      >
-        <button
-          aria-label="Copy to clipboard"
-          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-uneijd-MuiButtonBase-root-MuiIconButton-root"
-          tabindex="0"
-          type="button"
-        >
-          <mock-icon
-            aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-gvpe62-MuiSvgIcon-root"
-            data-testid="copy-btn-icon"
-            focusable="false"
-          />
-        </button>
-      </span>
       <div
-        class="MuiBox-root mui-style-yjghm1"
+        class="flex flex-row"
       >
-        <a
-          aria-label=""
-          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
-          data-mui-internal-clone-element="true"
-          data-testid="explorer-btn"
-          href="https://explorer.cow.fi/orders/0x1282e32a3a69aeb5a65fcdec0ae40fe16b398d54609bc9a3c8be3eb57d1a0fd07a9af6ef9197041a5841e84cb27873bebd3486e2661510ab"
-          rel="noreferrer"
-          tabindex="0"
-          target="_blank"
+        <span>
+          1282e32a
+        </span>
+        <span
+          aria-label="Copy to clipboard"
+          class="inline-flex cursor-pointer"
+          data-slot="tooltip-trigger"
+          id="base-ui-_r_1_"
         >
-          <mock-icon
-            aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-            focusable="false"
-          />
-        </a>
+          <button
+            aria-label="Copy to clipboard"
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            <mock-icon
+              class="size-5 text-[var(--color-border-main)]"
+              data-testid="copy-btn-icon"
+            />
+          </button>
+        </span>
+        <div
+          class="text-[var(--color-border-main)]"
+        >
+          <a
+            aria-label=""
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm text-inherit"
+            data-slot="tooltip-trigger"
+            data-testid="explorer-btn"
+            href="https://explorer.cow.fi/orders/0x1282e32a3a69aeb5a65fcdec0ae40fe16b398d54609bc9a3c8be3eb57d1a0fd07a9af6ef9197041a5841e84cb27873bebd3486e2661510ab"
+            id="base-ui-_r_3_"
+            rel="noreferrer"
+            target="_blank"
+          >
+            <mock-icon
+              class="size-5"
+            />
+          </a>
+        </div>
       </div>
     </div>
   </div>

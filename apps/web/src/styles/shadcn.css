@@ -31,6 +31,11 @@
   --secondary-hover: var(--border);
   --muted: #f5f5f5;
   --muted-foreground: #737373;
+  /* A well sunk *into* a card, holding sibling rows (nested items of a bulk/conflict group).
+     `--muted` can't express this: it sits darker than `--card` in light mode but lighter in dark, so
+     the recess would read as a raised block in one theme. Pinning it to the page floor keeps the
+     card-above-surface relationship pointing the same way in both. */
+  --surface-sunken: var(--color-background-main);
   --accent: #f0fdf4;
   --accent-foreground: #171717;
   --destructive: #dc2626;
@@ -43,7 +48,10 @@
   --chart-4: oklch(0.488 0.243 264.376);
   --chart-5: oklch(0.424 0.199 265.638);
   --radius: 1rem;
-  --sidebar: #ffffff;
+  /* Light mode: the sidebar is the white "paper" surface so it reads as a distinct panel against
+     the grey page background (restores the pre-migration white sidebar). Dark mode keeps the
+     page-background blend below. */
+  --sidebar: var(--color-background-paper);
   --sidebar-foreground: #404040;
   --sidebar-primary: #171717;
   --sidebar-primary-foreground: #fafafa;
@@ -54,8 +62,24 @@
   --accent-secondary: #c4fddd;
   --accent-secondary-foreground: #121312;
   --accent-success: #16a34a;
+  /* The Figma warning surface (alert node 4316-12854) is Tailwind yellow, not the coral/amber brand
+     warning tint, so light mode pins the Figma hexes. The file has no dark warning spec — dark mode
+     below keeps the brand tint, which already clears AA. */
+  --warning-subtle: #fefce8; /* yellow-50 */
+  --warning-strong: #a16207; /* yellow-700 */
+  --warning-accent: #eab308; /* yellow-500 */
+  /* Figma error/background (alert node 1255-183763) — the brand token drifted to #ffe6ea, so the
+     Figma hex is pinned here. Dark mode below keeps the brand tint (no dark spec in the file). */
+  --error-subtle: #fff4f6;
   --z-sidebar: 1300;
   --z-overlay: 1400;
+  /* A dialog opened from inside another overlay (e.g. Rename from a modal or an open dropdown). Both
+     sit in the same portal container, so at equal z-index the winner would be whichever mounted last. */
+  --z-nested-overlay: 1450;
+  /* Must beat onboard.css's --onboard-modal-z-index (1450) — for dialogs the wallet-connect modal
+     itself opens, such as the private key prompt. */
+  --z-above-onboard: 1451;
+  --z-picker: 1500;
 }
 
 .dark.shadcn-scope,
@@ -75,9 +99,12 @@
   --secondary-hover: rgba(255, 255, 255, 0.12);
   --muted: #262626;
   --muted-foreground: #a3a3a3;
+  --surface-sunken: var(--color-background-main);
   --accent: #052e16;
   --accent-foreground: #f5f5f5;
-  --destructive: #9e4042;
+  /* Brand dark error.main (packages/theme dark palette) — the old #9e4042 was sub-AA as text
+     on dark surfaces (alert/badge/button destructive variants). */
+  --destructive: #ff5f72;
   --destructive-foreground: #ffffff;
   --border: #404040;
   --input: #ffffff0d;
@@ -87,7 +114,8 @@
   --chart-3: oklch(0.546 0.245 262.881);
   --chart-4: oklch(0.488 0.243 264.376);
   --chart-5: oklch(0.424 0.199 265.638);
-  --sidebar: #171717;
+  /* Matches the page background so the sidebar blends in without a visible panel edge. */
+  --sidebar: var(--color-background-main);
   --sidebar-foreground: #d4d4d4;
   --sidebar-primary: #fafafa;
   --sidebar-primary-foreground: #171717;
@@ -97,7 +125,11 @@
   --sidebar-ring: #404040;
   --accent-secondary: #c4fddd;
   --accent-secondary-foreground: #121312;
-  --accent-success: #16a34a;
+  --accent-success: #00b460; /* brand dark success.main */
+  --warning-subtle: var(--color-warning-background);
+  --warning-strong: var(--color-warning1-text);
+  --warning-accent: var(--color-warning-main);
+  --error-subtle: var(--color-error-background);
 }
 
 @theme inline {
@@ -118,6 +150,7 @@
   --color-secondary-hover: var(--secondary-hover);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-surface-sunken: var(--surface-sunken);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
@@ -143,9 +176,17 @@
   --color-success-subtle: var(--color-success-background);
   --color-success-muted: var(--color-success-light);
   --color-success-strong: var(--color-success-dark);
-  /* Amber badge pairing. `warning1` is the amber scale; `warning` proper is the coral alert colour. */
-  --color-warning-subtle: var(--color-warning1-main);
-  --color-warning-strong: var(--color-warning1-text);
+  --color-error-strong: var(--color-error-dark);
+  --color-error-subtle: var(--error-subtle);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-warning-muted: var(--color-warning-light);
+  --color-warning-strong: var(--warning-strong);
+  /* Icon accent on the warning tint — brighter than the `warning-strong` ink, mirroring how
+     `destructive` pairs its icon accent with `error-strong` text. */
+  --color-warning-accent: var(--warning-accent);
+  --color-info-subtle: var(--color-info-background);
+  --color-info-muted: var(--color-info-light);
+  --color-info-strong: var(--color-info-dark);
   --radius-2xs: 0.25rem;
   --radius-xs: 0.5rem;
   --radius-sm: 0.5rem;

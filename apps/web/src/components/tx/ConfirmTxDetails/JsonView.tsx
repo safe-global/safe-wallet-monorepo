@@ -1,22 +1,16 @@
 import { useMemo } from 'react'
-import { Stack, Box, Typography } from '@mui/material'
 import CopyButton from '@/components/common/CopyButton'
-
-const containerSx = { backgroundColor: 'background.paper', borderRadius: 1, padding: 2 }
-const codeSx = { wordWrap: 'break-word', whiteSpace: 'pre-wrap' }
 
 export const JsonView = ({ data }: { data: unknown }) => {
   const json = useMemo(() => JSON.stringify(data, null, 2), [data])
 
   return (
-    <Stack sx={containerSx}>
-      <Box alignSelf="flex-end" m={-1}>
+    <div className="flex flex-col rounded bg-[var(--color-background-paper)] p-4">
+      <div className="-m-2 self-end">
         <CopyButton text={json} />
-      </Box>
+      </div>
 
-      <Typography variant="caption" component="code" sx={codeSx}>
-        {json}
-      </Typography>
-    </Stack>
+      <code className="font-mono text-xs leading-4 break-words whitespace-pre-wrap">{json}</code>
+    </div>
   )
 }

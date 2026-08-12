@@ -95,7 +95,7 @@ function SpaceAddressBookTable({
       minWidth: 240,
       sortValue: (e) => e.address,
       cell: (entry, { isCompact }) => (
-        <div className="text-[0.8em] font-mono">
+        <div className="text-[0.8em] font-mono [&_a]:size-4 [&_button]:size-4 [&_svg]:size-4">
           <EthHashInfo
             address={entry.address}
             shortAddress={isCompact}

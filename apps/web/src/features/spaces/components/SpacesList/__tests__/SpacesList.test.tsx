@@ -316,6 +316,9 @@ describe('SpacesList — auth/expiry state rendering', () => {
     render(<SpacesList />)
 
     const button = screen.getByTestId('create-space-button')
+    // Disabled state renders a <span> (not the NextLink), so there is no native `disabled`
+    // attribute — base-ui marks the non-native element with aria-disabled instead.
+    expect(button.tagName).toBe('SPAN')
     expect(button).toHaveAttribute('aria-disabled', 'true')
 
     await userEvent.hover(button)

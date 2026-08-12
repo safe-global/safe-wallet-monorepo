@@ -1,9 +1,7 @@
 import { fireEvent, waitFor, screen, render as rtlRender } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { Provider } from 'react-redux'
 import { makeStore } from '@/store'
-import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
-import { ThemeProvider } from '@mui/material/styles'
-import type { Theme } from '@mui/material/styles'
 import { CookieAndTermBanner } from '../index'
 import { CookieAndTermType } from '@/store/cookiesAndTermsSlice'
 import * as metadata from '@/markdown/terms/version'
@@ -23,16 +21,14 @@ jest.mock('next/router', () => ({
 // Helper to render with Redux store
 const renderWithStore = (ui: React.ReactElement, preloadedState?: any) => {
   const store = makeStore(preloadedState, { skipBroadcast: true })
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <Provider store={store}>
-      <SafeThemeProvider mode="light">
-        {(safeTheme: Theme) => <ThemeProvider theme={safeTheme}>{children}</ThemeProvider>}
-      </SafeThemeProvider>
-    </Provider>
-  )
+  const wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>
   const result = rtlRender(ui, { wrapper })
   return { ...result, store }
 }
+
+// The visible control is a `span[role=checkbox]` named by `aria-label`, because Base UI moves the
+// given `id` onto its hidden native input (which is what the wrapping `<label htmlFor>` targets).
+const getCheckboxByLabel = (label: string): HTMLElement => screen.getByRole('checkbox', { name: label })
 
 describe('CookieAndTermBanner', () => {
   beforeEach(() => {
@@ -92,8 +88,8 @@ describe('CookieAndTermBanner', () => {
     it('should have necessary cookie checkbox disabled and checked', () => {
       renderWithStore(<CookieAndTermBanner />)
 
-      const necessaryCheckbox = screen.getByRole('checkbox', { name: /Necessary/ })
-      expect(necessaryCheckbox).toBeDisabled()
+      const necessaryCheckbox = getCheckboxByLabel('Necessary')
+      expect(necessaryCheckbox).toHaveAttribute('aria-disabled', 'true')
       expect(necessaryCheckbox).toBeChecked()
     })
 
@@ -110,43 +106,43 @@ describe('CookieAndTermBanner', () => {
 
       renderWithStore(<CookieAndTermBanner />, preloadedState)
 
-      const beamerCheckbox = screen.getByRole('checkbox', { name: /Beamer/ })
-      const analyticsCheckbox = screen.getByRole('checkbox', { name: /Analytics/ })
+      const beamerCheckbox = getCheckboxByLabel('Beamer')
+      const analyticsCheckbox = getCheckboxByLabel('Analytics')
 
       expect(beamerCheckbox).toBeChecked()
       expect(analyticsCheckbox).not.toBeChecked()
     })
 
-    it('should allow toggling Beamer checkbox', () => {
+    it('should allow toggling Beamer checkbox', async () => {
       renderWithStore(<CookieAndTermBanner />)
 
-      const beamerCheckbox = screen.getByRole('checkbox', { name: /Beamer/ })
+      const beamerCheckbox = getCheckboxByLabel('Beamer')
       expect(beamerCheckbox).not.toBeChecked()
 
-      fireEvent.click(beamerCheckbox)
+      await userEvent.click(beamerCheckbox)
       expect(beamerCheckbox).toBeChecked()
 
-      fireEvent.click(beamerCheckbox)
+      await userEvent.click(beamerCheckbox)
       expect(beamerCheckbox).not.toBeChecked()
     })
 
-    it('should allow toggling Analytics checkbox', () => {
+    it('should allow toggling Analytics checkbox', async () => {
       renderWithStore(<CookieAndTermBanner />)
 
-      const analyticsCheckbox = screen.getByRole('checkbox', { name: /Analytics/ })
+      const analyticsCheckbox = getCheckboxByLabel('Analytics')
       expect(analyticsCheckbox).not.toBeChecked()
 
-      fireEvent.click(analyticsCheckbox)
+      await userEvent.click(analyticsCheckbox)
       expect(analyticsCheckbox).toBeChecked()
 
-      fireEvent.click(analyticsCheckbox)
+      await userEvent.click(analyticsCheckbox)
       expect(analyticsCheckbox).not.toBeChecked()
     })
 
     it('should check warning cookie when warningKey is provided', () => {
       renderWithStore(<CookieAndTermBanner warningKey={CookieAndTermType.UPDATES} />)
 
-      const beamerCheckbox = screen.getByRole('checkbox', { name: /Beamer/ })
+      const beamerCheckbox = getCheckboxByLabel('Beamer')
       expect(beamerCheckbox).toBeChecked()
     })
   })
@@ -155,11 +151,11 @@ describe('CookieAndTermBanner', () => {
     it('should save selected cookie preferences on "Save settings" click', async () => {
       const { store } = renderWithStore(<CookieAndTermBanner />)
 
-      const beamerCheckbox = screen.getByRole('checkbox', { name: /Beamer/ })
+      const beamerCheckbox = getCheckboxByLabel('Beamer')
       const saveButton = screen.getByText('Save settings')
 
       // Select only Beamer
-      fireEvent.click(beamerCheckbox)
+      await userEvent.click(beamerCheckbox)
 
       fireEvent.click(saveButton)
 
@@ -228,9 +224,9 @@ describe('CookieAndTermBanner', () => {
     it('should have proper labels for all checkboxes', () => {
       renderWithStore(<CookieAndTermBanner />)
 
-      expect(screen.getByLabelText('Necessary')).toBeInTheDocument()
-      expect(screen.getByLabelText('Beamer')).toBeInTheDocument()
-      expect(screen.getByLabelText('Analytics')).toBeInTheDocument()
+      expect(getCheckboxByLabel('Necessary')).toBeInTheDocument()
+      expect(getCheckboxByLabel('Beamer')).toBeInTheDocument()
+      expect(getCheckboxByLabel('Analytics')).toBeInTheDocument()
     })
 
     it('should have descriptions for each cookie type', () => {

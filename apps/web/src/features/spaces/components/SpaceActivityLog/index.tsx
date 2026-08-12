@@ -127,7 +127,7 @@ function SpaceActivityLog() {
         />
       ))}
 
-      <div className="bg-card rounded-lg border px-4">
+      <div className="bg-card rounded-lg px-4">
         {isLoading ? (
           <LoadingSkeleton />
         ) : isError ? (
@@ -136,14 +136,14 @@ function SpaceActivityLog() {
           <p className="text-muted-foreground py-4 text-sm">{isFiltered ? 'No results' : 'No activity yet.'}</p>
         ) : (
           <>
-            <div className="divide-y">
+            <div>
               {events.map((event) => (
                 <AuditEventRow key={event.id} event={event} />
               ))}
             </div>
 
             {(nextCursor || isLoadingMore) && (
-              <div className="border-t py-3 text-center">
+              <div className="py-3 text-center">
                 <Button
                   data-testid="activity-log-load-more"
                   variant="outline"
