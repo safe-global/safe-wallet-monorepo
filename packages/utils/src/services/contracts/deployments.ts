@@ -228,6 +228,9 @@ export type SafeToL2SetupVersion = (typeof SAFE_TO_L2_SETUP_VERSIONS)[number]
  * Returns the SafeToL2Setup version that pairs with the given Safe version when
  * building a (multichain) creation — 1.5.0 Safes use the 1.5.0 setup contract,
  * everything from 1.4.1 up uses the 1.4.1 one.
+ *
+ * Only meaningful for `safeVersion >= 1.4.1` — the setup contract does not exist
+ * for earlier versions; callers gate on that before including a setup call.
  */
 export const getSafeToL2SetupVersion = (safeVersion: string): SafeToL2SetupVersion =>
   semverSatisfies(safeVersion, '>=1.5.0') ? '1.5.0' : '1.4.1'
