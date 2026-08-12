@@ -17,7 +17,7 @@ export function isDomain(domain: string): boolean {
 // Lookups run on every debounced keystroke, so expected misses (chain without ENS,
 // malformed name) must not be reported — only genuine transport failures: the codes
 // below, or codeless errors (raw fetch rejections when the RPC is unreachable).
-const GENUINE_FAILURE_CODES = ['NETWORK_ERROR', 'SERVER_ERROR', 'TIMEOUT'] as const
+const GENUINE_FAILURE_CODES = ['NETWORK_ERROR', 'SERVER_ERROR', 'TIMEOUT', 'BAD_DATA', 'UNKNOWN_ERROR'] as const
 
 const logResolverFailure = (e: unknown): void => {
   const err = e as EthersError

@@ -37,7 +37,7 @@ describe('domains', () => {
       expect(await resolveName(mockProvider(), 'test.eth')).toBe('0x0000000000000000000000000000000000000001')
     })
 
-    it.each(['NETWORK_ERROR', 'SERVER_ERROR', 'TIMEOUT'] as const)(
+    it.each(['NETWORK_ERROR', 'SERVER_ERROR', 'TIMEOUT', 'BAD_DATA', 'UNKNOWN_ERROR'] as const)(
       'should return undefined and log a genuine %s failure',
       async (code) => {
         const address = await resolveName(mockProvider(makeError('rpc failed', code)), 'safe.eth')
@@ -49,7 +49,7 @@ describe('domains', () => {
       },
     )
 
-    it.each(['UNSUPPORTED_OPERATION', 'INVALID_ARGUMENT'] as const)(
+    it.each(['UNSUPPORTED_OPERATION', 'INVALID_ARGUMENT', 'UNCONFIGURED_NAME', 'CALL_EXCEPTION', 'CANCELLED'] as const)(
       'should return undefined without logging an expected %s miss',
       async (code) => {
         const address = await resolveName(mockProvider(makeError('cannot resolve', code)), 'safe.eth')
