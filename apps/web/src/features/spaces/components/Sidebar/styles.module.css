@@ -305,6 +305,16 @@
   padding-block: 0;
 }
 
+.collapsedSeparator {
+  display: none;
+  width: 36px !important;
+  margin-block: 8px;
+}
+
+:global(.group[data-collapsible='icon']) .collapsedSeparator {
+  display: block;
+}
+
 .navItemActive {
   background-color: var(--sidebar-accent);
 }

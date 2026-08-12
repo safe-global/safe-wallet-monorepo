@@ -72,7 +72,7 @@ export const SpacesSidebarVariant = ({
             <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
               {setupGroup?.label ?? ''}
             </SidebarGroupLabel>
-            <SidebarSeparator className="my-2 mx-0 px-[18px] hidden group-data-[collapsible=icon]:block group-data-[collapsible=icon]:self-stretch" />
+            <SidebarSeparator className={css.collapsedSeparator} />
             <SidebarGroupContent>
               <SidebarMenu className="gap-0">
                 {displaySetupItems.map((item, index) => (
