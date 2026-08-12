@@ -16,7 +16,7 @@ import { getSafeId } from './SafesList'
 import OnboardingSafesList from '../SelectSafesOnboarding/components/OnboardingSafesList'
 import ConnectWalletHint from '../ConnectWalletHint'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
-import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
+import { useCurrentSpaceId, useIsAdmin, useSpaceSafes, useSpaceSafeLimit } from '@/features/spaces'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import {
   useSpaceSafesCreateV1Mutation,
@@ -45,7 +45,6 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
-import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/constants'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
 import { useSelectAll } from '../../hooks/useSelectAll'
 import type { AddAccountsFormValues } from '../../hooks/useSelectAll.types'
@@ -109,6 +108,7 @@ const AddAccounts = ({
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
   const spaceId = useCurrentSpaceId()
+  const { limit: safeLimit } = useSpaceSafeLimit()
   const isDarkMode = useDarkMode()
 
   // Get wallet and chain info
@@ -411,7 +411,7 @@ const AddAccounts = ({
                     </div>
 
                     <Typography variant="paragraph" align="center" color="muted">
-                      You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts
+                      You can add up to {safeLimit} Safe account{safeLimit === 1 ? '' : 's'}
                     </Typography>
 
                     <InputGroup className="bg-card px-2">

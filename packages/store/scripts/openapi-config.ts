@@ -88,6 +88,9 @@ const config: ConfigFile = {
     '../src/gateway/AUTO_GENERATED/safe-shield.ts': {
       filterEndpoints: [/^safeShield/],
     },
+    '../src/gateway/AUTO_GENERATED/billing.ts': {
+      filterEndpoints: [/^billing/],
+    },
   },
 }
 

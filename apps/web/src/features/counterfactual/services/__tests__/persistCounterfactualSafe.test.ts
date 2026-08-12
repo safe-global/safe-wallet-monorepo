@@ -365,6 +365,7 @@ describe('persistCounterfactualSafe', () => {
       spaceId: MOCK_SPACE_UUID,
       isUserAuthenticated: true,
       spaceSafeCount: 40,
+      spaceSafeLimit: 40,
       dispatch,
     })
 
@@ -386,6 +387,7 @@ describe('persistCounterfactualSafe', () => {
       spaceId: MOCK_SPACE_UUID,
       isUserAuthenticated: true,
       spaceSafeCount: 39,
+      spaceSafeLimit: 40,
       dispatch,
     })
 

@@ -1,13 +1,9 @@
 import { type ReactElement } from 'react'
 import { Box, Button, Typography } from '@mui/material'
 import { TicketPercent } from 'lucide-react'
-import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
-import { useBillingData } from '../BillingDataContext'
 import css from './styles.module.css'
 
 const StarterUpsellBanner = ({ onUpgrade }: { onUpgrade?: () => void }): ReactElement => {
-  const { usage } = useBillingData()
-
   return (
     <Box className={css.banner} data-testid="billing-upsell-banner">
       <Box aria-hidden className={css.glow}>
@@ -20,7 +16,7 @@ const StarterUpsellBanner = ({ onUpgrade }: { onUpgrade?: () => void }): ReactEl
 
       <Box className={css.content}>
         <Box className={css.titleRow}>
-          <Typography variant="h4" fontWeight={700}>
+          <Typography variant="h4" component="h2" fontWeight={700}>
             Get flat pricing
           </Typography>
           <Button
@@ -29,13 +25,12 @@ const StarterUpsellBanner = ({ onUpgrade }: { onUpgrade?: () => void }): ReactEl
             data-testid="billing-upsell-upgrade"
             className={css.upgradeButton}
           >
-            Upgrade to Pro
+            Explore plans
           </Button>
         </Box>
 
         <Typography className={css.summary}>
-          In the past {usage.periodDays} days, you moved <strong>{formatCurrency(usage.movedUsd, 'USD')}</strong> across{' '}
-          <strong>{usage.transactionCount}</strong> transactions.
+          Cover more Safe Accounts and unlock fee-free volume with a paid plan.
         </Typography>
       </Box>
     </Box>

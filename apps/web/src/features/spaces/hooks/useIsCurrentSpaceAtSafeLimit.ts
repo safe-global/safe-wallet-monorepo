@@ -2,7 +2,7 @@ import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { normalizeSpaceId } from '@/utils/spaces'
-import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/constants'
+import { useSpaceSafeLimit } from './billing/useSpaceSafeLimit'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 
 /**
@@ -31,12 +31,17 @@ export const useCurrentSpaceSafeCount = (): number | undefined => {
 
 /**
  * Whether the current space already holds the maximum number of Safe accounts
- * (`SAFE_ACCOUNTS_LIMIT`). New Safes can still be created, but they won't be
- * added to a space that is at the limit, so callers can warn the user upfront.
+ * allowed by its plan (free tier = 1, paid = `FEATURE_NUMBER_OF_SAFES`). New
+ * Safes can still be created, but they won't be added to a space that is at the
+ * limit, so callers can warn the user upfront.
  *
- * Returns false when there is no current space or the count is unknown.
+ * Returns false when there is no current space, the count is unknown, or the
+ * limit is still loading — so a legitimately-subscribed user is never blocked
+ * while their subscription resolves.
  */
 export const useIsCurrentSpaceAtSafeLimit = (): boolean => {
   const safeCount = useCurrentSpaceSafeCount()
-  return safeCount !== undefined && safeCount >= SAFE_ACCOUNTS_LIMIT
+  const { limit, isLoading } = useSpaceSafeLimit()
+  if (isLoading) return false
+  return safeCount !== undefined && safeCount >= limit
 }

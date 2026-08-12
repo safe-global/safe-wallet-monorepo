@@ -8,7 +8,7 @@ import { replayCounterfactualSafeDeployment } from './safeDeployment'
 import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { normalizeSpaceId } from '@/utils/spaces'
-import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/constants'
+import { FREE_NUMBER_OF_SAFES } from '@/features/spaces/constants'
 
 type PersistArgs = {
   chainId: string
@@ -25,10 +25,14 @@ type PersistArgs = {
    *  safe is not auto-attached to the space (the backend would reject the call
    *  with 403). The safe is still persisted at the user level. */
   isAdminOfActiveSpace: boolean
-  /** Number of safes already in the active space. When at `SAFE_ACCOUNTS_LIMIT`
+  /** Number of safes already in the active space. When at `spaceSafeLimit`
    *  the backend would reject the add; the safe is still persisted at the user
    *  level and the user is informed via a toast. */
   spaceSafeCount?: number
+  /** Max safes the active space's plan allows (free tier = 1, paid = plan
+   *  feature). Callers resolve it via `useSpaceSafeLimit`; defaults to the free
+   *  tier for non-space contexts. */
+  spaceSafeLimit?: number
   /** True when this call is one chain of a multi-chain creation batch. A space
    *  limit rejection (400) then means the safe genuinely wasn't attached on this
    *  chain, so we surface it as a failure (after rolling back the user-level
@@ -61,6 +65,7 @@ export const persistCounterfactualSafe = async ({
   isUserAuthenticated,
   isAdminOfActiveSpace,
   spaceSafeCount,
+  spaceSafeLimit = FREE_NUMBER_OF_SAFES,
   isMultiChainCreation,
   dispatch,
 }: PersistArgs): Promise<PersistResult> => {
@@ -92,7 +97,7 @@ export const persistCounterfactualSafe = async ({
             message: 'Safe added to your accounts — ask an admin to add it to the workspace',
           }),
         )
-      } else if (spaceSafeCount !== undefined && spaceSafeCount >= SAFE_ACCOUNTS_LIMIT) {
+      } else if (spaceSafeCount !== undefined && spaceSafeCount >= spaceSafeLimit) {
         // Space is full — the backend would reject the add. Skip it and keep the
         // user-level safe so creation still succeeds, but tell the user it
         // wasn't added to the workspace.
@@ -100,7 +105,7 @@ export const persistCounterfactualSafe = async ({
           showNotification({
             variant: 'info',
             groupKey: 'cf-safe-space-limit',
-            message: `Safe created. This workspace is full (${SAFE_ACCOUNTS_LIMIT} Safes), so it wasn't added — switch to another workspace to add it there`,
+            message: `Safe created. This workspace is full (${spaceSafeLimit} Safe${spaceSafeLimit === 1 ? '' : 's'}), so it wasn't added — switch to another workspace to add it there`,
           }),
         )
       } else {

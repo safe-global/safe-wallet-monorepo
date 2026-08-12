@@ -6373,6 +6373,239 @@
           "notifications"
         ]
       }
+    },
+    "/v1/billing/spaces/{spaceId}/subscriptions": {
+      "get": {
+        "operationId": "billingGetSubscriptionsV1",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Subscription"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get a space subscriptions",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/plans/{planId}": {
+      "get": {
+        "operationId": "billingGetPlanV1",
+        "parameters": [
+          {
+            "name": "planId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Plan"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get a plan by id",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/spaces/{spaceId}/session-url": {
+      "get": {
+        "operationId": "billingGetSessionUrlV1",
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UrlResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get the billing portal session URL for a space",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/spaces/{spaceId}/payment-links": {
+      "get": {
+        "operationId": "billingGetSpacePaymentLinksV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PaymentLink"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get payment links for a space, plus the general catalog",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/spaces/{spaceId}/payment-links/{paymentLinkId}/checkout-url": {
+      "get": {
+        "operationId": "billingGetCheckoutUrlV1",
+        "parameters": [
+          {
+            "name": "paymentLinkId",
+            "required": true,
+            "in": "path",
+            "description": "Payment link identifier",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "returnUrl",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutSessionResult"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create a checkout session for a payment link",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/sessions/{sessionId}": {
+      "get": {
+        "operationId": "billingGetCheckoutSessionV1",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutSession"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get a checkout session by id",
+        "tags": [
+          "billing"
+        ]
+      }
     }
   },
   "info": {
@@ -15125,6 +15358,397 @@
         },
         "required": [
           "subscriptions"
+        ]
+      },
+      "Subscription": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "string"
+          },
+          "upstreamCustomerId": {
+            "type": "string"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/SubscriptionPlan"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "canceled",
+              "incomplete",
+              "incomplete_expired",
+              "past_due",
+              "paused",
+              "trialing",
+              "unpaid"
+            ]
+          },
+          "createdAt": {
+            "type": "number"
+          },
+          "startAt": {
+            "type": "number"
+          },
+          "cancelledAt": {
+            "type": "number",
+            "nullable": true
+          },
+          "cancelAt": {
+            "type": "number",
+            "nullable": true
+          },
+          "validUntil": {
+            "type": "number",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "customerId",
+          "upstreamCustomerId",
+          "plan",
+          "status",
+          "createdAt",
+          "startAt",
+          "cancelledAt",
+          "cancelAt"
+        ]
+      },
+      "SubscriptionPlan": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentPrice": {
+            "type": "number"
+          },
+          "originalPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "paymentMethod": {
+            "type": "string",
+            "enum": [
+              "fiat"
+            ]
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "usd",
+              "eur"
+            ]
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "billingCycle": {
+            "type": "string",
+            "enum": [
+              "month",
+              "year"
+            ],
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "standard",
+              "premium",
+              "enterprise"
+            ]
+          },
+          "product": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "currentPrice",
+          "originalPrice",
+          "paymentMethod",
+          "currency",
+          "features",
+          "type",
+          "product"
+        ]
+      },
+      "Plan": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentPrice": {
+            "type": "number"
+          },
+          "originalPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "paymentMethod": {
+            "type": "string",
+            "enum": [
+              "fiat"
+            ]
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "usd",
+              "eur"
+            ]
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "billingCycle": {
+            "type": "string",
+            "enum": [
+              "month",
+              "year"
+            ],
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "standard",
+              "premium",
+              "enterprise"
+            ]
+          },
+          "product": {
+            "$ref": "#/components/schemas/Product"
+          }
+        },
+        "required": [
+          "id",
+          "currentPrice",
+          "originalPrice",
+          "paymentMethod",
+          "currency",
+          "features",
+          "type",
+          "product"
+        ]
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "marketingFeatures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MarketingFeature"
+            }
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "active",
+          "description",
+          "marketingFeatures",
+          "metadata",
+          "name"
+        ]
+      },
+      "MarketingFeature": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UrlResponse": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "PaymentLink": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "customText": {
+            "type": "object"
+          },
+          "afterCompletion": {
+            "type": "object"
+          },
+          "lineItems": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "active",
+          "metadata"
+        ]
+      },
+      "CheckoutSessionResult": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sessionId",
+          "url"
+        ]
+      },
+      "CheckoutSession": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "object": {
+            "type": "string"
+          },
+          "amountSubtotal": {
+            "type": "number"
+          },
+          "amountTotal": {
+            "type": "number"
+          },
+          "cancelUrl": {
+            "type": "string"
+          },
+          "clientReferenceId": {
+            "type": "object",
+            "nullable": true
+          },
+          "created": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "customer": {
+            "type": "object",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "number"
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "paymentStatus": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "successUrl": {
+            "type": "string"
+          },
+          "url": {
+            "type": "object",
+            "nullable": true
+          },
+          "subscription": {
+            "type": "object",
+            "nullable": true
+          },
+          "invoice": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "object",
+          "amountSubtotal",
+          "amountTotal",
+          "cancelUrl",
+          "created",
+          "currency",
+          "expiresAt",
+          "metadata",
+          "mode",
+          "paymentStatus",
+          "status",
+          "successUrl"
         ]
       }
     }
