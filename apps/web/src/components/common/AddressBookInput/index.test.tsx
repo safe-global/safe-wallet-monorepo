@@ -87,6 +87,23 @@ const TestForm = ({
   )
 }
 
+// Mirrors TxFilterForm: a Clear button outside the input that resets the form programmatically.
+const TestFormWithClear = () => {
+  const name = 'recipient'
+  const methods = useForm<{ [name]: string }>({ defaultValues: { [name]: '' }, mode: 'all' })
+
+  return (
+    <FormProvider {...methods}>
+      <form onSubmit={methods.handleSubmit(() => null)}>
+        <AddressBookInput data-testid={testId} name={name} label="Recipient address" />
+        <button type="button" onClick={() => methods.reset({ [name]: '' })}>
+          Clear
+        </button>
+      </form>
+    </FormProvider>
+  )
+}
+
 const setup = (
   address: string,
   initialAddressBook: AddressBook,
@@ -155,6 +172,29 @@ describe('AddressBookInput', () => {
     expect(input).toHaveAttribute('aria-expanded', 'true')
   })
 
+  it('should not reopen the list when the form is reset programmatically', () => {
+    const address = checksumAddress(faker.finance.ethereumAddress())
+    const utils = render(<TestFormWithClear />, {
+      initialReduxState: { addressBook: { [mockChain.chainId]: { [address]: 'Tim Testermann' } } },
+    })
+    const input = utils.getByLabelText('Recipient address', { exact: false }) as HTMLInputElement
+
+    act(() => {
+      fireEvent.input(input, { target: { value: address.slice(30) } })
+    })
+    expect(input).toHaveAttribute('aria-expanded', 'true')
+
+    // Clicking Clear closes the list, then resets the field value from outside the input.
+    act(() => {
+      fireEvent.pointerDown(utils.getByText('Clear'))
+      fireEvent.click(utils.getByText('Clear'))
+    })
+
+    // An empty value matches every contact, so a value-driven effect would pop the list back open
+    // over the surrounding form even though the input is not focused.
+    expect(input).toHaveAttribute('aria-expanded', 'false')
+  })
+
   it('should open the suggestion list while typing, without clicking the field', () => {
     const address = checksumAddress(faker.finance.ethereumAddress())
     const { input, utils } = setup('', { [address]: 'Tim Testermann' })
@@ -163,7 +203,7 @@ describe('AddressBookInput', () => {
 
     // Mirrors the e2e flow: type only the tail of a known address and never click the input.
     act(() => {
-      fireEvent.change(input, { target: { value: address.slice(30) } })
+      fireEvent.input(input, { target: { value: address.slice(30) } })
     })
 
     expect(input).toHaveAttribute('aria-expanded', 'true')

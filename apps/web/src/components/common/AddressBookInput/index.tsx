@@ -103,14 +103,10 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
 
   // MUI's Autocomplete opened the list as the user typed. Nothing else here reacts to input, so
   // without this a typed query never surfaces its matches — only a click or arrow-down would.
-  // Picking an entry writes a complete address, which empties `filteredEntries`, so this cannot
-  // reopen the list on top of a selection.
-  const lastAddressValue = useRef(addressValue)
-  useEffect(() => {
-    if (lastAddressValue.current === addressValue) return
-    lastAddressValue.current = addressValue
-    setOpen(true)
-  }, [addressValue])
+  // Keyed off the input event rather than the value: a programmatic change (a form reset such as
+  // TxFilterForm's Clear, or a prefilled recipient) must not pop the list open over the page,
+  // and an empty value matches every contact so it would be the whole address book.
+  const onUserInput = useCallback(() => setOpen(true), [])
 
   // Restores the three dismissal paths MUI's Autocomplete provided. Without them the suggestion
   // list stays open over the rest of the form, and a click aimed at the next field lands on a
@@ -208,7 +204,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
 
   return (
     <>
-      <div ref={wrapperRef} className={css.wrapper}>
+      <div ref={wrapperRef} className={css.wrapper} onInput={onUserInput}>
         <AddressInput
           {...props}
           data-testid={props['data-testid'] ?? 'address-book-input'}
