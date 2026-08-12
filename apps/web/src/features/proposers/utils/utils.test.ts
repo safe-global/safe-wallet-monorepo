@@ -1,9 +1,15 @@
-import { encodeEIP1271Signature, signProposerTypedDataForSafe } from './utils'
+import { addressIsNotSmartContract, encodeEIP1271Signature, signProposerTypedDataForSafe } from './utils'
 import { faker } from '@faker-js/faker'
 import { getAddress } from 'ethers'
 import type { JsonRpcSigner } from 'ethers'
 import * as web3Utils from '@safe-global/utils/utils/web3'
 import * as delegateUtils from '@safe-global/utils/services/delegates'
+
+jest.mock('@/utils/wallets', () => ({
+  isSmartContractWallet: jest.fn(),
+}))
+
+const { isSmartContractWallet } = jest.requireMock('@/utils/wallets')
 
 describe('encodeEIP1271Signature', () => {
   const parentSafeAddress = getAddress(faker.finance.ethereumAddress())
@@ -208,5 +214,36 @@ describe('signProposerTypedDataForSafe', () => {
         }),
       }),
     )
+  })
+})
+
+describe('addressIsNotSmartContract', () => {
+  const message = 'Cannot add a smart contract account as proposer'
+  const chainId = '1'
+
+  beforeEach(() => {
+    isSmartContractWallet.mockReset()
+  })
+
+  it('returns the message for a smart contract address', async () => {
+    isSmartContractWallet.mockResolvedValue(true)
+    const address = getAddress(faker.finance.ethereumAddress())
+
+    await expect(addressIsNotSmartContract(chainId, message)(address)).resolves.toBe(message)
+    expect(isSmartContractWallet).toHaveBeenCalledWith(chainId, address)
+  })
+
+  it('returns undefined for an EOA', async () => {
+    isSmartContractWallet.mockResolvedValue(false)
+    const address = getAddress(faker.finance.ethereumAddress())
+
+    await expect(addressIsNotSmartContract(chainId, message)(address)).resolves.toBeUndefined()
+  })
+
+  it('returns undefined when the contract check fails', async () => {
+    isSmartContractWallet.mockRejectedValue(new Error('Provider not found'))
+    const address = getAddress(faker.finance.ethereumAddress())
+
+    await expect(addressIsNotSmartContract(chainId, message)(address)).resolves.toBeUndefined()
   })
 })
