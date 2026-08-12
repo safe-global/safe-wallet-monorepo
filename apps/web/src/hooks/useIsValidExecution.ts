@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import type { EthersError } from '@/utils/ethers-utils'
 
@@ -62,6 +63,18 @@ const useIsValidExecution = (
   const chain = useCurrentChain()
   const { balances } = useBalances()
 
+  // GS012 pays the network fee in an ERC-20 gas token; resolve its symbol so the
+  // message reads e.g. "Not enough USDC ..." instead of "{token}". Derived here as
+  // a string so balance polling doesn't re-trigger the simulation below.
+  const gasToken = safeTx?.data.gasToken
+  const gasTokenSymbol = useMemo(
+    () =>
+      gasToken && !sameAddress(gasToken, ZeroAddress)
+        ? balances.items.find((item) => sameAddress(item.tokenInfo.address, gasToken))?.tokenInfo.symbol
+        : undefined,
+    [gasToken, balances],
+  )
+
   const [isValidExecution, executionValidationError, isValidExecutionLoading] = useAsync(async () => {
     if (!safeTx || !wallet || gasLimit === undefined || !readOnlyProvider) {
       return
@@ -84,23 +97,15 @@ const useIsValidExecution = (
       // the shared source. The raw GS code stays out of the message; it belongs
       // in the support reference (Details panel).
       if (isGsCode(err.reason)) {
-        // GS012 pays the network fee in an ERC-20 gas token; resolve its symbol
-        // so the message reads e.g. "Not enough USDC ..." instead of "{token}".
-        const gasToken = safeTx.data.gasToken
-        const token =
-          gasToken && !sameAddress(gasToken, ZeroAddress)
-            ? balances.items.find((item) => sameAddress(item.tokenInfo.address, gasToken))?.tokenInfo.symbol
-            : undefined
-
         err.reason = getContractErrorMessage(err.reason, {
           nativeAsset: chain?.nativeCurrency.symbol,
-          token,
+          token: gasTokenSymbol,
         }) as EthersError['reason']
       }
 
       throw err
     }
-  }, [safeTx, wallet, gasLimit, safe, readOnlyProvider, chain, balances])
+  }, [safeTx, wallet, gasLimit, safe, readOnlyProvider, chain, gasTokenSymbol])
 
   return { isValidExecution, executionValidationError, isValidExecutionLoading }
 }

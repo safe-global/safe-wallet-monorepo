@@ -137,4 +137,42 @@ describe('useIsValidExecution', () => {
       'Not enough USDC to cover the network fee',
     )
   })
+
+  it('does not re-run the simulation when balances identity changes (PR review)', async () => {
+    const balancesResult: UseBalancesResult = {
+      balances: { ...initialBalancesState, items: [] },
+      loaded: true,
+      loading: false,
+      error: undefined,
+    }
+    const useBalancesSpy = jest.spyOn(balancesHook, 'default').mockReturnValue(balancesResult)
+
+    const isValidTransaction = jest.fn().mockResolvedValue(true)
+    jest
+      .spyOn(contracts, 'getCurrentGnosisSafeContract')
+      .mockImplementation(() => Promise.resolve({ isValidTransaction } as unknown as SafeContractImplementationType))
+
+    const mockTx = createSafeTx()
+
+    const { rerender } = renderHook(() => useIsValidExecution(mockTx, BigInt(1000)))
+
+    await act(async () => {
+      await new Promise(process.nextTick)
+    })
+
+    expect(isValidTransaction).toHaveBeenCalledTimes(1)
+
+    // Simulate a balances poll: same data, new object identity
+    useBalancesSpy.mockReturnValue({
+      ...balancesResult,
+      balances: { ...initialBalancesState, items: [] },
+    })
+    rerender()
+
+    await act(async () => {
+      await new Promise(process.nextTick)
+    })
+
+    expect(isValidTransaction).toHaveBeenCalledTimes(1)
+  })
 })
