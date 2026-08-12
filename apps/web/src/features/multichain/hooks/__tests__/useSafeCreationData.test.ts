@@ -77,6 +77,48 @@ describe('useSafeCreationData', () => {
     })
   })
 
+  it('should accept a replayedSafe using the 1.5.0 SafeToL2Setup', async () => {
+    const setupToL2Address150 = getSafeToL2SetupDeployment({ version: '1.5.0' })?.defaultAddress!
+    const safeAddress = faker.finance.ethereumAddress()
+    const chainInfos = [chainBuilder().with({ chainId: '1' }).build()]
+    const undeployedSafe: UndeployedSafe = {
+      props: {
+        factoryAddress: faker.finance.ethereumAddress(),
+        saltNonce: '420',
+        masterCopy: faker.finance.ethereumAddress(),
+        safeVersion: '1.5.0',
+        safeAccountConfig: {
+          owners: [faker.finance.ethereumAddress(), faker.finance.ethereumAddress()],
+          threshold: 1,
+          data: faker.string.hexadecimal({ length: 64 }),
+          to: setupToL2Address150,
+          fallbackHandler: faker.finance.ethereumAddress(),
+          payment: 0,
+          paymentToken: ZERO_ADDRESS,
+          paymentReceiver: ZERO_ADDRESS,
+        },
+      },
+      status: {
+        status: PendingSafeStatus.AWAITING_EXECUTION,
+        type: PayMethod.PayLater,
+      },
+    }
+
+    const { result } = renderHook(() => useSafeCreationData(safeAddress, chainInfos), {
+      initialReduxState: {
+        undeployedSafes: {
+          '1': {
+            [safeAddress]: undeployedSafe,
+          },
+        },
+      },
+    })
+    await waitFor(async () => {
+      await Promise.resolve()
+      expect(result.current).toEqual([undeployedSafe.props, undefined, false])
+    })
+  })
+
   it('should work for replayedSafe without payment info', async () => {
     const safeAddress = faker.finance.ethereumAddress()
     const chainInfos = [chainBuilder().with({ chainId: '1' }).build()]
