@@ -95,6 +95,12 @@
   background-color: var(--color-success-background, #dcfce7);
 }
 
+/* Hover keeps the ring green: the resting `--color-success-background` reads grey once the row's
+   green hover fill sits behind it. */
+.addSafeToWorkspaceTrigger:hover .addSafeToWorkspaceRing {
+  background-color: var(--color-background-light-hover);
+}
+
 .addSafeToWorkspacePlusIcon {
   width: 16px;
   height: 16px;
@@ -190,7 +196,7 @@
   font-weight: 700;
   line-height: 16px;
   color: var(--sidebar-foreground);
-  background-color: var(--color-success-background, #dcfce7);
+  background-color: var(--color-background-light-hover);
   border-radius: var(--rounded-lg, 12px);
 }
 
@@ -219,6 +225,14 @@
 :global(.group[data-collapsible='icon']) .addSafeToWorkspacePlusIcon {
   width: 12px;
   height: 12px;
+}
+
+:global(.group[data-collapsible='icon']) .addSafeToWorkspaceTrigger:hover {
+  background-color: transparent;
+}
+
+:global(.group[data-collapsible='icon']) .addSafeToWorkspaceTrigger:hover .addSafeToWorkspacePlusIcon {
+  color: var(--color-success-dark);
 }
 
 /* Collapsed the button carries no surface of its own — it goes transparent and hands its hover
@@ -283,7 +297,7 @@
   top: 50%;
   transform: translateY(-50%);
   height: 18px;
-  background-color: var(--sidebar-accent) !important;
+  background-color: var(--color-background-light-hover) !important;
   color: var(--sidebar-accent-foreground) !important;
 }
 
