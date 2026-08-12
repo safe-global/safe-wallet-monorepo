@@ -246,63 +246,71 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
     <div className={css.container}>
       <div className={css.header}>
         <Typography variant="paragraph-small-bold">Fees</Typography>
-        <a href={HOW_FEES_WORK_URL} target="_blank" rel="noreferrer noopener" className={css.howFeesWork}>
-          How fees work
-          <ArrowUpRightIcon className="size-4" />
-        </a>
+        {IS_RELAYING_LIVE && (
+          <a href={HOW_FEES_WORK_URL} target="_blank" rel="noreferrer noopener" className={css.howFeesWork}>
+            How fees work
+            <ArrowUpRightIcon className="size-4" />
+          </a>
+        )}
       </div>
 
       <div className={css.feeCard}>
-        {/* Confirmer on a Safe-pays signed payload — fees already locked in */}
-        {isConfirmation && canCoverFees && !isLegacySigned && (
+        {IS_RELAYING_LIVE && (
           <>
-            <ConfirmationFeeNotice availableGasTokens={availableGasTokens} selectedGasToken={selectedGasToken} />
-            <Separator className="-mx-4 w-auto" />
-          </>
-        )}
+            {/* Confirmer on a Safe-pays signed payload — fees already locked in */}
+            {isConfirmation && canCoverFees && !isLegacySigned && (
+              <>
+                <ConfirmationFeeNotice availableGasTokens={availableGasTokens} selectedGasToken={selectedGasToken} />
+                <Separator className="-mx-4 w-auto" />
+              </>
+            )}
 
-        {/* Confirmer on a non-Safe-pays signed payload — pay from signer, also locked. Same lock
-            when the Safe holds no eligible gas token. */}
-        {(isLegacySigned || noEligibleGasToken) && (
-          <>
-            <SignerFeeNotice isLocked />
-            <Separator className="-mx-4 w-auto" />
-          </>
-        )}
+            {/* Confirmer on a non-Safe-pays signed payload — pay from signer, also locked. Same lock
+                when the Safe holds no eligible gas token. */}
+            {(isLegacySigned || noEligibleGasToken) && (
+              <>
+                <SignerFeeNotice isLocked />
+                <Separator className="-mx-4 w-auto" />
+              </>
+            )}
 
-        {/* First signer, Safe can cover fees */}
-        {!isConfirmation && canCoverFees && !noEligibleGasToken && (
-          <>
-            <div className={css.paymentRow}>
-              <div className={css.paymentRowGroup}>
-                <Typography variant="paragraph-small" color="muted">
-                  Pay fees from:
-                </Typography>
-                <PaymentSourceSelector value={gtfPaymentMode} onChange={handlePaymentSourceChange} />
-              </div>
-              <div className={css.paymentRowGroup}>
-                <Typography variant="paragraph-small" color="muted">
-                  Fees token:
-                </Typography>
-                <GasTokenSelector
-                  availableGasTokens={availableGasTokens}
-                  selectedGasToken={isSafeWallet ? (selectedGasToken ?? '') : (availableGasTokens?.[0]?.address ?? '')}
-                  onGasTokenChange={props.onGasTokenChange}
-                  locked={!isSafeWallet}
-                  forcedDisplay={!isSafeWallet ? nativeDisplay : undefined}
-                />
-              </div>
-            </div>
+            {/* First signer, Safe can cover fees */}
+            {!isConfirmation && canCoverFees && !noEligibleGasToken && (
+              <>
+                <div className={css.paymentRow}>
+                  <div className={css.paymentRowGroup}>
+                    <Typography variant="paragraph-small" color="muted">
+                      Pay fees from:
+                    </Typography>
+                    <PaymentSourceSelector value={gtfPaymentMode} onChange={handlePaymentSourceChange} />
+                  </div>
+                  <div className={css.paymentRowGroup}>
+                    <Typography variant="paragraph-small" color="muted">
+                      Fees token:
+                    </Typography>
+                    <GasTokenSelector
+                      availableGasTokens={availableGasTokens}
+                      selectedGasToken={
+                        isSafeWallet ? (selectedGasToken ?? '') : (availableGasTokens?.[0]?.address ?? '')
+                      }
+                      onGasTokenChange={props.onGasTokenChange}
+                      locked={!isSafeWallet}
+                      forcedDisplay={!isSafeWallet ? nativeDisplay : undefined}
+                    />
+                  </div>
+                </div>
 
-            <Separator className="-mx-4 w-auto" />
-          </>
-        )}
+                <Separator className="-mx-4 w-auto" />
+              </>
+            )}
 
-        {/* Safe can't cover fees — fall back to signer */}
-        {!canCoverFees && (
-          <>
-            <SignerFeeNotice />
-            <Separator className="-mx-4 w-auto" />
+            {/* Safe can't cover fees — fall back to signer */}
+            {!canCoverFees && (
+              <>
+                <SignerFeeNotice />
+                <Separator className="-mx-4 w-auto" />
+              </>
+            )}
           </>
         )}
 
