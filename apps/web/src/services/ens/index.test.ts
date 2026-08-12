@@ -58,10 +58,10 @@ describe('domains', () => {
       },
     )
 
-    it('should return undefined without logging an unrecognized error', async () => {
-      const address = await resolveName(mockProvider(new Error('bad resolveName')), 'safe.eth')
+    it('should return undefined and log a codeless error', async () => {
+      const address = await resolveName(mockProvider(new TypeError('Failed to fetch')), 'safe.eth')
       expect(address).toBe(undefined)
-      expect(logError).not.toHaveBeenCalled()
+      expect(logError).toHaveBeenCalledWith('101: Failed to resolve the address', 'Failed to fetch')
     })
   })
 
@@ -86,6 +86,15 @@ describe('domains', () => {
       )
       expect(name).toBe(undefined)
       expect(logError).not.toHaveBeenCalled()
+    })
+
+    it('should return undefined and log a codeless error', async () => {
+      const name = await lookupAddress(
+        mockProvider(new TypeError('Failed to fetch')),
+        '0x0000000000000000000000000000000000000000',
+      )
+      expect(name).toBe(undefined)
+      expect(logError).toHaveBeenCalledWith('101: Failed to resolve the address', 'Failed to fetch')
     })
   })
 })
