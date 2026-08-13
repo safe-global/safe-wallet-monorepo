@@ -13,15 +13,16 @@ const createNotification = (notification: Partial<Notification> & Pick<Notificat
   ...notification,
 })
 
-const withNotifications =
-  (notifications: Notification[]): Decorator =>
-  (Story) => (
-    <StoreDecorator initialState={{ notifications }}>
-      <div className="min-h-[480px]">
-        <Story />
-      </div>
-    </StoreDecorator>
-  )
+const withNotifications = (notifications: Notification[]): Decorator =>
+  function WithNotifications(Story) {
+    return (
+      <StoreDecorator initialState={{ notifications }}>
+        <div className="min-h-[480px]">
+          <Story />
+        </div>
+      </StoreDecorator>
+    )
+  }
 
 const meta = {
   title: 'Components/Common/Notifications',
