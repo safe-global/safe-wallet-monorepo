@@ -14,6 +14,7 @@ import useReconciledSpaceSafes from './hooks/useReconciledSpaceSafes'
 import useScanResultsState from './hooks/useScanResultsState'
 import useAutoScanOrchestrator from './hooks/useAutoScanOrchestrator'
 import useReportDrawer from './hooks/useReportDrawer'
+import { isSameSelection } from './utils'
 
 /**
  * The per-space body of the Security Hub. Mounted under a `key={currentSpaceId}`
@@ -43,7 +44,6 @@ const SecurityHubContent = (): ReactElement => {
   const [gradeFilter, setGradeFilter] = useState<SafeGrade | null>(null)
   const hasTrackedView = useRef(false)
 
-  // Held until the accounts resolve, otherwise the view is always reported as empty.
   // Once per mount is once per space: the parent remounts this on every space switch.
   useEffect(() => {
     if (isLoadingSpacesSafes || hasTrackedView.current) return
@@ -51,6 +51,20 @@ const SecurityHubContent = (): ReactElement => {
     hasTrackedView.current = true
     trackEvent(SPACE_EVENTS.SECURITY_HUB_VIEWED, { [MixpanelEventParams.ACCOUNT_COUNT]: safes.length })
   }, [isLoadingSpacesSafes, safes.length])
+
+  const handleViewReport = (address: string, chainId: string) => {
+    if (!isSameSelection(selectedSafe, address, chainId)) {
+      const scanResults = security.$isReady ? allScanResults[security.scanKey(address, chainId)] : undefined
+
+      trackEvent(SPACE_EVENTS.SECURITY_REPORT_OPENED, {
+        [MixpanelEventParams.CHAIN_ID]: chainId,
+        [MixpanelEventParams.SAFE_ADDRESS]: address,
+        [MixpanelEventParams.RESULT]: scanResults && security.$isReady ? security.getSafeGrade(scanResults) : undefined,
+      })
+    }
+
+    openReport(address, chainId)
+  }
 
   return (
     <>
@@ -74,7 +88,7 @@ const SecurityHubContent = (): ReactElement => {
           />
           <SecuritySafesTable
             safes={safes}
-            onViewReport={openReport}
+            onViewReport={handleViewReport}
             selectedSafe={selectedSafe}
             scanResults={allScanResults}
             scanTimestamps={scanTimestamps}

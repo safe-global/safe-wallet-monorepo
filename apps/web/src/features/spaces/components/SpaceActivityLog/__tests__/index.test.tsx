@@ -224,4 +224,29 @@ describe('SpaceActivityLog', () => {
     expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ACTIVITY_LOG_VIEWED)
     expect(trackEvent).toHaveBeenCalledTimes(1)
   })
+
+  it('tracks a filter change with the control that changed', () => {
+    render(<SpaceActivityLog />)
+    ;(trackEvent as jest.Mock).mockClear()
+
+    fireEvent.click(screen.getByTestId('set-actor-filter'))
+
+    expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ACTIVITY_LOG_FILTERED, { Source: 'actor' })
+  })
+
+  it('does not track a filter change on the initial empty state', () => {
+    render(<SpaceActivityLog />)
+
+    expect(trackEvent).not.toHaveBeenCalledWith(SPACE_EVENTS.ACTIVITY_LOG_FILTERED, expect.anything())
+  })
+
+  it('does not track when the filter is set to the value it already has', () => {
+    render(<SpaceActivityLog />)
+    fireEvent.click(screen.getByTestId('set-actor-filter'))
+    ;(trackEvent as jest.Mock).mockClear()
+
+    fireEvent.click(screen.getByTestId('set-actor-filter'))
+
+    expect(trackEvent).not.toHaveBeenCalled()
+  })
 })

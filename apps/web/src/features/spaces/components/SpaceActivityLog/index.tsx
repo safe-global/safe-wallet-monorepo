@@ -8,6 +8,7 @@ import { useCurrentSpaceId } from '../../hooks/useCurrentSpaceId'
 import type { SpaceAuditLogEntryDto, SpaceAuditLogPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import AuditEventRow from './AuditEventRow'
 import ActivityLogFilters, { type ActivityLogFilterState, EMPTY_FILTERS } from './ActivityLogFilters'
 
@@ -58,6 +59,13 @@ function LoadingSkeleton() {
   )
 }
 
+const FILTER_SOURCE: Record<keyof ActivityLogFilterState, string> = {
+  actorUserId: 'actor',
+  createdAtGte: 'date',
+  createdAtLte: 'date',
+  sortDirection: 'sort',
+}
+
 function SpaceActivityLog() {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
@@ -69,6 +77,18 @@ function SpaceActivityLog() {
   useEffect(() => {
     trackEvent(SPACE_EVENTS.ACTIVITY_LOG_VIEWED)
   }, [])
+
+  const handleFiltersChange = (next: ActivityLogFilterState) => {
+    const changed = (Object.keys(FILTER_SOURCE) as Array<keyof ActivityLogFilterState>).find(
+      (key) => filters[key] !== next[key],
+    )
+
+    if (changed) {
+      trackEvent(SPACE_EVENTS.ACTIVITY_LOG_FILTERED, { [MixpanelEventParams.SOURCE]: FILTER_SOURCE[changed] })
+    }
+
+    setFilters(next)
+  }
 
   const queryArgs = useMemo(
     (): SpaceAuditLogQueryArgs => ({
@@ -122,7 +142,7 @@ function SpaceActivityLog() {
 
   return (
     <div data-testid="space-activity-log">
-      <ActivityLogFilters filters={filters} onFiltersChange={setFilters} />
+      <ActivityLogFilters filters={filters} onFiltersChange={handleFiltersChange} />
 
       {extraCursors.map((cursor, index) => (
         <AuditLogPageFetcher
