@@ -1,6 +1,6 @@
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { ChevronUp as ExpandLessIcon, ChevronDown as ExpandMoreIcon } from 'lucide-react'
+import { ChevronUp as ExpandLessIcon, ChevronDown as ExpandMoreIcon, TriangleAlert } from 'lucide-react'
 import { useForm, FormProvider, Controller } from 'react-hook-form'
 import { useContext, useState } from 'react'
 import type { ReactElement } from 'react'
@@ -53,6 +53,8 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
   const [showAdvanced, setShowAdvanced] = useState(data?.[UpsertRecoveryFlowFields.expiry] !== '0')
   const [understandsRisk, setUnderstandsRisk] = useState(false)
   const periods = useRecoveryPeriods()
+  const delayItems = Object.fromEntries(periods.delay.map(({ value, label }) => [value, label]))
+  const expirationItems = Object.fromEntries(periods.expiration.map(({ value, label }) => [value, label]))
   const [triggerGetSafe] = useLazySafesGetSafeV1Query()
 
   const getAddressType = async (address: string, chainId: string) => {
@@ -131,7 +133,8 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
     <TxCard>
       <FormProvider {...formMethods}>
         <form onSubmit={formMethods.handleSubmit(handleSubmit)}>
-          <Alert variant="warning" className="border-0">
+          <Alert variant="warning" outlined={false}>
+            <TriangleAlert />
             <AlertDescription>
               Your Recoverer will be able to reset your Account setup. Only select an address that you trust.{' '}
               <Track {...RECOVERY_EVENTS.LEARN_MORE} label="recover-setup-flow">
@@ -186,7 +189,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
               control={formMethods.control}
               name={UpsertRecoveryFlowFields.selectedDelay}
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select value={field.value} onValueChange={field.onChange} items={delayItems}>
                   <SelectTrigger data-testid="recovery-delay-select" className="w-[55%] max-w-[240px]">
                     <SelectValue />
                   </SelectTrigger>
@@ -262,7 +265,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
                   // Don't reset value if advanced section is collapsed
                   shouldUnregister={false}
                   render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
+                    <Select value={field.value} onValueChange={field.onChange} items={expirationItems}>
                       <SelectTrigger data-testid="recovery-expiry-select" className="w-[55%] max-w-[240px]">
                         <SelectValue />
                       </SelectTrigger>
