@@ -9,8 +9,6 @@
     border 0.2s;
 }
 
-/* The item's overflow: hidden does the clipping; the trigger's own rounded-md would leave
-   transparent notches in its background at the top corners */
 .container :global [data-slot='accordion-trigger'] {
   border-radius: 0;
 }

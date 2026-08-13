@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useReducer } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Typography } from '@/components/ui/typography'
 
 interface AnalysisDetailsDropdownProps {
@@ -23,14 +23,16 @@ export const AnalysisDetailsDropdown = ({
   const [expanded, toggle] = useReducer((state: boolean) => !state, defaultExpanded)
 
   return (
-    <Collapsible open={expanded} className="-mt-3">
-      <div
-        onClick={toggle}
-        role="button"
+    <Collapsible open={expanded} onOpenChange={toggle} className="-mt-3">
+      <CollapsibleTrigger
         aria-label={expanded ? hideLabel : showLabel}
-        className={`group relative inline-flex w-fit cursor-pointer items-center overflow-hidden text-[var(--color-text-secondary)] ${
-          expanded ? 'mb-1' : ''
-        }`}
+        render={
+          <div
+            className={`group relative inline-flex w-fit cursor-pointer items-center overflow-hidden text-[var(--color-text-secondary)] ${
+              expanded ? 'mb-1' : ''
+            }`}
+          />
+        }
       >
         <Typography variant="paragraph-mini" className="text-[var(--color-text-secondary)]">
           {expanded ? hideLabel : showLabel}
@@ -41,7 +43,7 @@ export const AnalysisDetailsDropdown = ({
           className="size-5 transition-transform"
           style={{ transform: expanded ? 'rotate(-180deg)' : 'rotate(0deg)' }}
         />
-      </div>
+      </CollapsibleTrigger>
 
       <CollapsibleContent keepMounted>{contentWrapper ? contentWrapper(children) : children}</CollapsibleContent>
     </Collapsible>

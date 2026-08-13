@@ -25,8 +25,7 @@ interface ModalDialogProps {
   className?: string
   /** Applied to the backdrop — needed when the dialog has to out-stack a third-party overlay. */
   overlayClassName?: string
-  /** Base UI drops the backdrop of a dialog nested inside another dialog, assuming the parent
-   * already dims. Opt in when the parent doesn't (the tx-flow modal renders no backdrop). */
+  /** Renders the backdrop even when nested in another dialog — needed inside the (backdrop-less) tx-flow modal. */
   forceBackdrop?: boolean
   /** MUI breakpoint key (e.g. `'sm'`) or a CSS width — applied as the popup's max-width. */
   maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | number | string | false
@@ -133,8 +132,6 @@ const ModalDialog = ({
         if (!nextOpen) onClose?.()
       }}
     >
-      {/* Replaces DialogContent's built-in backdrop (hidden below) so exactly one renders,
-          nested or not — forceRender alone would double-dim under a backdrop-ed parent. */}
       {forceBackdrop && (
         <DialogPortal keepMounted={keepMounted}>
           <DialogOverlay forceRender className={overlayClassName} />

@@ -239,7 +239,7 @@ export const TenderlySimulation = ({
       </div>
 
       {/* Show expandable content only for nested simulations */}
-      <CollapsibleContent keepMounted>
+      <CollapsibleContent>
         {showExpandable && (
           <div className="px-3 pt-1 pb-4">
             <div className="flex flex-col gap-4">
