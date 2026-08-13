@@ -111,6 +111,25 @@ describe('NetworkMultiSelectorInput', () => {
     expect(onNetworkChange).not.toHaveBeenCalled()
   })
 
+  it('prevents the default Enter action (form submission) while the listbox is open', () => {
+    renderInput()
+    const input = screen.getByRole('combobox')
+
+    fireEvent.click(input)
+    const notPrevented = fireEvent.keyDown(input, { key: 'Enter' })
+
+    expect(notPrevented).toBe(false)
+  })
+
+  it('leaves the default Enter action intact while the listbox is closed', () => {
+    renderInput()
+    const input = screen.getByRole('combobox')
+
+    const notPrevented = fireEvent.keyDown(input, { key: 'Enter' })
+
+    expect(notPrevented).toBe(true)
+  })
+
   it('resets the highlight when the search text changes', () => {
     renderInput()
     const input = screen.getByRole('combobox')

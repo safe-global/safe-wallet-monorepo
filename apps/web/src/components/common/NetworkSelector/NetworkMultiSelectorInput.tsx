@@ -174,10 +174,13 @@ const NetworkMultiSelectorInput = ({
       setActiveIndex(next)
       document.getElementById(getOptionId(visibleOptions[next] as Chain))?.scrollIntoView({ block: 'nearest' })
     } else if (event.key === 'Enter') {
-      if (open && activeIndex >= 0 && activeIndex < visibleOptions.length) {
+      // While the popup is open, Enter should not submit the surrounding form — it picks the highlighted option or does nothing.
+      if (open) {
         event.preventDefault()
-        const chain = visibleOptions[activeIndex] as Chain
-        handleOptionClick(chain, isOptionDisabledState(chain))
+        if (activeIndex >= 0 && activeIndex < visibleOptions.length) {
+          const chain = visibleOptions[activeIndex] as Chain
+          handleOptionClick(chain, isOptionDisabledState(chain))
+        }
       }
     } else if (event.key === 'Escape') {
       if (open) setOpen(false)
