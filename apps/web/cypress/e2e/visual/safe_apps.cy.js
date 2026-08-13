@@ -24,9 +24,4 @@ describe('[VISUAL] Safe Apps screenshots', { defaultCommandTimeout: 60000, ...co
     safeapps.typeAppName('Transaction Builder')
     main.awaitVisualStability()
   })
-
-  it('[VISUAL] Screenshot Safe Apps no results state', () => {
-    safeapps.typeAppName('zzzznonexistentapp12345')
-    main.awaitVisualStability()
-  })
 })

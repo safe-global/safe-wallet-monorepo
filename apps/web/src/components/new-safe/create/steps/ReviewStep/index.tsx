@@ -232,7 +232,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   }, [newSafeProps])
 
   // We estimate with a random nonce as we'll just slightly overestimates like this
-  const { gasLimit } = useEstimateSafeCreationGas(safePropsForGasEstimation, data.safeVersion)
+  const { gasLimit } = useEstimateSafeCreationGas(safePropsForGasEstimation)
 
   const maxFeePerGas = gasPrice?.maxFeePerGas
   const maxPriorityFeePerGas = gasPrice?.maxPriorityFeePerGas

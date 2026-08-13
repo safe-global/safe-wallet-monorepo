@@ -59,7 +59,7 @@ export const SafeSidebarWorkspaceHeader = ({
             }
           >
             <span className={css.addSafeToWorkspaceRing}>
-              <CircleFadingPlus className={css.addSafeToWorkspacePlusIcon} strokeWidth={2.5} />
+              <CircleFadingPlus className={css.addSafeToWorkspacePlusIcon} />
             </span>
             <span className={css.addSafeToWorkspaceLabel}>Add Safe to workspace</span>
           </DialogTrigger>

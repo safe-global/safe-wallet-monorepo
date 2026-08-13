@@ -54,6 +54,7 @@ const AddSpaceButton = ({
       className={cn(
         // eslint-disable-next-line no-restricted-syntax -- bespoke full-height create-workspace CTA sizing from dev's #8271 redesign
         size === 'lg' && 'h-full rounded-lg px-6 py-3 text-base',
+        variant === 'outline' && 'hover:bg-muted',
         disabled && 'cursor-not-allowed opacity-50 grayscale',
       )}
       render={disabled ? <span /> : <NextLink href={AppRoutes.welcome.createSpace} />}

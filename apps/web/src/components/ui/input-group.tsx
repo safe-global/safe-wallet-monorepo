@@ -52,6 +52,9 @@ const inputGroupVariants = cva(
         // `has-[…focus-visible]:border-ring` rule still paints and the box never shifts geometry on
         // focus, and pairs the base `shadow-xs` with a hover ring as the affordance that replaces it.
         search: 'bg-input border-transparent hover:ring-1 hover:ring-ring',
+        // Unfilled field: reads via the base `border-border` hairline + `shadow-xs`, like
+        // `Button variant="outline"`. Pair the two when they share a row.
+        outline: 'bg-transparent',
       },
     },
     defaultVariants: {
