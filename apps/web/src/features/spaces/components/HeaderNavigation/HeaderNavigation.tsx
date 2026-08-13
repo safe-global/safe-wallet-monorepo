@@ -5,6 +5,7 @@ import { blo } from 'blo'
 import { isAddress } from 'ethers'
 import { Button } from '@/components/ui/button'
 import IconAction from '@/components/common/IconAction'
+import { ICON_STROKE } from '@/components/common/iconStroke'
 import { cn } from '@/utils/cn'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, BATCH_EVENTS } from '@/services/analytics'
@@ -113,14 +114,14 @@ export function HeaderNavigation({
       {showSearch && (
         <div className="flex items-center rounded-lg bg-muted">
           <IconAction onClick={onSearchClick} aria-label="Search">
-            <Search className="size-5 text-muted-foreground" />
+            <Search className="size-5 text-muted-foreground" strokeWidth={ICON_STROKE} />
           </IconAction>
         </div>
       )}
 
       <div className="relative flex items-center rounded-lg bg-muted" data-testid="notifications-center">
         <IconAction onClick={onNotificationsClick} aria-label="Notifications">
-          <Bell className="size-5 text-muted-foreground" />
+          <Bell className="size-5 text-muted-foreground" strokeWidth={ICON_STROKE} />
         </IconAction>
 
         {messages > 0 && (
@@ -140,7 +141,7 @@ export function HeaderNavigation({
           <Track {...BATCH_EVENTS.BATCH_SIDEBAR_OPEN} label={batchCount}>
             <div className="relative flex items-center rounded-lg bg-muted" data-track="batching: Batch sidebar open">
               <IconAction onClick={onBatchClick} aria-label="Batch transactions">
-                <Layers className="size-5 text-muted-foreground" />
+                <Layers className="size-5 text-muted-foreground" strokeWidth={ICON_STROKE} />
               </IconAction>
 
               {batchCount > 0 && (
@@ -178,7 +179,7 @@ export function HeaderNavigation({
                 )}
               </div>
             ) : (
-              <Wallet className="size-5 text-muted-foreground" />
+              <Wallet className="size-5 text-muted-foreground" strokeWidth={ICON_STROKE} />
             )}
             <span className="text-xs text-muted-foreground font-normal">
               {isConnected ? walletDisplayName : 'Connect Wallet'}
