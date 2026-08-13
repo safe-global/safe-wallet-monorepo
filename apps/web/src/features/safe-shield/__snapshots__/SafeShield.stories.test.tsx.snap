@@ -3760,13 +3760,12 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   data-slot="collapsible"
                                 >
                                   <div
-                                    aria-disabled="false"
                                     aria-expanded="false"
                                     aria-label="Show all"
                                     class="group relative inline-flex w-fit cursor-pointer items-center overflow-hidden text-[var(--color-text-secondary)] "
                                     data-slot="collapsible-trigger"
+                                    role="button"
                                     tabindex="0"
-                                    type="button"
                                   >
                                     <span
                                       class="m-0 text-xs leading-4 font-normal text-[var(--color-text-secondary)]"
@@ -3879,13 +3878,12 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   data-slot="collapsible"
                                 >
                                   <div
-                                    aria-disabled="false"
                                     aria-expanded="false"
                                     aria-label="Show all"
                                     class="group relative inline-flex w-fit cursor-pointer items-center overflow-hidden text-[var(--color-text-secondary)] "
                                     data-slot="collapsible-trigger"
+                                    role="button"
                                     tabindex="0"
-                                    type="button"
                                   >
                                     <span
                                       class="m-0 text-xs leading-4 font-normal text-[var(--color-text-secondary)]"
@@ -3998,13 +3996,12 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   data-slot="collapsible"
                                 >
                                   <div
-                                    aria-disabled="false"
                                     aria-expanded="false"
                                     aria-label="Show all"
                                     class="group relative inline-flex w-fit cursor-pointer items-center overflow-hidden text-[var(--color-text-secondary)] "
                                     data-slot="collapsible-trigger"
+                                    role="button"
                                     tabindex="0"
-                                    type="button"
                                   >
                                     <span
                                       class="m-0 text-xs leading-4 font-normal text-[var(--color-text-secondary)]"
@@ -4160,13 +4157,12 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   data-slot="collapsible"
                                 >
                                   <div
-                                    aria-disabled="false"
                                     aria-expanded="false"
                                     aria-label="Show all"
                                     class="group relative inline-flex w-fit cursor-pointer items-center overflow-hidden text-[var(--color-text-secondary)] "
                                     data-slot="collapsible-trigger"
+                                    role="button"
                                     tabindex="0"
-                                    type="button"
                                   >
                                     <span
                                       class="m-0 text-xs leading-4 font-normal text-[var(--color-text-secondary)]"
@@ -4424,13 +4420,12 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   data-slot="collapsible"
                                 >
                                   <div
-                                    aria-disabled="false"
                                     aria-expanded="false"
                                     aria-label="Show all"
                                     class="group relative inline-flex w-fit cursor-pointer items-center overflow-hidden text-[var(--color-text-secondary)] "
                                     data-slot="collapsible-trigger"
+                                    role="button"
                                     tabindex="0"
-                                    type="button"
                                   >
                                     <span
                                       class="m-0 text-xs leading-4 font-normal text-[var(--color-text-secondary)]"
@@ -4610,13 +4605,12 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   data-slot="collapsible"
                                 >
                                   <div
-                                    aria-disabled="false"
                                     aria-expanded="false"
                                     aria-label="Show all"
                                     class="group relative inline-flex w-fit cursor-pointer items-center overflow-hidden text-[var(--color-text-secondary)] "
                                     data-slot="collapsible-trigger"
+                                    role="button"
                                     tabindex="0"
-                                    type="button"
                                   >
                                     <span
                                       class="m-0 text-xs leading-4 font-normal text-[var(--color-text-secondary)]"
@@ -4796,13 +4790,12 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   data-slot="collapsible"
                                 >
                                   <div
-                                    aria-disabled="false"
                                     aria-expanded="false"
                                     aria-label="Show all"
                                     class="group relative inline-flex w-fit cursor-pointer items-center overflow-hidden text-[var(--color-text-secondary)] "
                                     data-slot="collapsible-trigger"
+                                    role="button"
                                     tabindex="0"
-                                    type="button"
                                   >
                                     <span
                                       class="m-0 text-xs leading-4 font-normal text-[var(--color-text-secondary)]"
@@ -4982,13 +4975,12 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   data-slot="collapsible"
                                 >
                                   <div
-                                    aria-disabled="false"
                                     aria-expanded="false"
                                     aria-label="Show all"
                                     class="group relative inline-flex w-fit cursor-pointer items-center overflow-hidden text-[var(--color-text-secondary)] "
                                     data-slot="collapsible-trigger"
+                                    role="button"
                                     tabindex="0"
-                                    type="button"
                                   >
                                     <span
                                       class="m-0 text-xs leading-4 font-normal text-[var(--color-text-secondary)]"
@@ -6771,13 +6763,12 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                   data-slot="collapsible"
                                 >
                                   <div
-                                    aria-disabled="false"
                                     aria-expanded="false"
                                     aria-label="Show details"
                                     class="group relative inline-flex w-fit cursor-pointer items-center overflow-hidden text-[var(--color-text-secondary)] "
                                     data-slot="collapsible-trigger"
+                                    role="button"
                                     tabindex="0"
-                                    type="button"
                                   >
                                     <span
                                       class="m-0 text-xs leading-4 font-normal text-[var(--color-text-secondary)]"
