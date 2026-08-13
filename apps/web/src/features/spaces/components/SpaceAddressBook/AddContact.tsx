@@ -1,14 +1,14 @@
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId, useGetSpaceAddressBook, useWorkspaceAddressBookLabel } from '@/features/spaces'
+import { useGetSpaceAddressBook, useWorkspaceAddressBookLabel } from '@/features/spaces'
 import { getContactAddedMessage } from '@/utils/addressBookNotifications'
 import AddContactDialog from './AddContactDialog'
 
 export type { ContactField } from './AddContactDialog'
 
 const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
-  const spaceId = useCurrentSpaceId()
   const addressBookItems = useGetSpaceAddressBook()
   const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
@@ -30,7 +30,7 @@ const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
       onSuccess={() =>
         trackEvent(
           { ...SPACE_EVENTS.ADDRESS_BOOK_ENTRY_CREATED },
-          { workspace_id: spaceId, entry_count_after: addressBookItems.length + 1 },
+          { [MixpanelEventParams.ENTRY_COUNT]: addressBookItems.length + 1 },
         )
       }
     />
