@@ -42,8 +42,10 @@ const buttonVariants = cva(
         // would be invisible on exactly the surfaces this variant is meant for.
         outline:
           'border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs',
+        // Hover darkens via the `secondary-hover` token: `bg-secondary/80` lightened instead, since
+        // `--secondary` (#f5f5f5) is lighter than the white surfaces this variant sits on.
         secondary:
-          'bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground',
+          'bg-secondary text-secondary-foreground hover:bg-secondary-hover aria-expanded:bg-secondary-hover aria-expanded:text-secondary-foreground',
         ghost:
           'hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground',
         destructive:

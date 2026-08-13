@@ -29,7 +29,7 @@ describe('PageLayout topbar sidebar offset', () => {
   })
 
   it.each([
-    ['.topbarCollapsed', '4rem'],
+    ['.topbarCollapsed', '52px'],
     ['.topbarNoSidebar', '0px'],
   ])('%s overrides the offset to %s', (selector, expected) => {
     expect(declOf(findRule(selector), '--topbar-offset')).toBe(expected)
