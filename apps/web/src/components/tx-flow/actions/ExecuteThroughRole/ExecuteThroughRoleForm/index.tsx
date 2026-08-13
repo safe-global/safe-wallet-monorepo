@@ -5,6 +5,7 @@ import { Typography } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import TxCheckError from '@/components/tx/TxCheckError'
 import { trackError, Errors } from '@/services/exceptions'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getTxOptions } from '@/utils/transactions'
@@ -203,9 +204,7 @@ export const ExecuteThroughRoleForm = ({
         ) : (
           gasLimitError && (
             <div className="mt-2">
-              <ErrorMessage error={gasLimitError}>
-                This transaction will most likely fail. To save gas costs, avoid creating this transaction.
-              </ErrorMessage>
+              <TxCheckError error={gasLimitError} />
             </div>
           )
         )}

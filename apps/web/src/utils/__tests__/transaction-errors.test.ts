@@ -4,11 +4,68 @@ import {
   extractGuardErrorCode,
   getGuardErrorInfo,
   getGuardErrorName,
+  isNonceTooLowError,
   isRateLimitError,
+  isRevertError,
   GUARD_ERROR_CODES,
 } from '../transaction-errors'
 
 describe('transaction-errors', () => {
+  describe('isNonceTooLowError', () => {
+    it('detects the RPC "nonce too low" text, even wrapped as a viem revert', () => {
+      // Real shape: viem wraps the RPC rejection as a contract revert
+      const viemWrapped = new Error(
+        'The contract function "execTransaction" reverted with the following reason:\nRPC 0xaa36a7 Infura eth_sendRawTransaction: nonce too low: next nonce 42, tx nonce 41',
+      )
+      expect(isNonceTooLowError(viemWrapped)).toBe(true)
+    })
+
+    it('detects a pending same-nonce conflict ("replacement transaction underpriced")', () => {
+      const viemWrapped = new Error(
+        'The contract function "execTransaction" reverted with the following reason:\nRPC 0xaa36a7 Infura eth_sendRawTransaction: replacement transaction underpriced',
+      )
+      expect(isNonceTooLowError(viemWrapped)).toBe(true)
+      expect(isNonceTooLowError(new Error('already known'))).toBe(true)
+    })
+
+    it('detects the structured ethers nonce-conflict codes', () => {
+      expect(
+        isNonceTooLowError(Object.assign(new Error('nonce has already been used'), { code: 'NONCE_EXPIRED' })),
+      ).toBe(true)
+      expect(
+        isNonceTooLowError(Object.assign(new Error('replacement fee too low'), { code: 'REPLACEMENT_UNDERPRICED' })),
+      ).toBe(true)
+    })
+
+    it('returns false for unrelated errors', () => {
+      expect(isNonceTooLowError(new Error('execution reverted: GS026'))).toBe(false)
+      expect(isNonceTooLowError(null)).toBe(false)
+      expect(isNonceTooLowError(undefined)).toBe(false)
+    })
+  })
+
+  describe('isRevertError', () => {
+    it('treats a GS revert reason as a revert', () => {
+      expect(isRevertError(Object.assign(new Error('execution reverted'), { reason: 'GS013' }))).toBe(true)
+      expect(isRevertError(new Error('execution reverted: "GS026"'))).toBe(true)
+    })
+
+    it('treats an ethers CALL_EXCEPTION as a revert', () => {
+      expect(isRevertError(Object.assign(new Error('call failed'), { code: 'CALL_EXCEPTION' }))).toBe(true)
+    })
+
+    it('treats "execution reverted" text as a revert', () => {
+      expect(isRevertError(new Error('execution reverted'))).toBe(true)
+    })
+
+    it('treats infrastructure failures as NOT a revert (safe default)', () => {
+      expect(isRevertError(new Error('HTTP request failed. Status: 500'))).toBe(false)
+      expect(isRevertError(Object.assign(new Error('timeout'), { code: 'TIMEOUT' }))).toBe(false)
+      expect(isRevertError(Object.assign(new Error('network error'), { code: 'SERVER_ERROR' }))).toBe(false)
+      expect(isRevertError(null)).toBe(false)
+      expect(isRevertError(undefined)).toBe(false)
+    })
+  })
   describe('isGuardError', () => {
     it('should detect guard error in message', () => {
       const error = new Error(`Transaction reverted: ${GUARD_ERROR_CODES.UNAPPROVED_HASH}`)
