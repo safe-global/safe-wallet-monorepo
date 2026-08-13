@@ -31,7 +31,7 @@ import { cn } from '@/utils/cn'
  */
 
 const alertVariants = cva(
-  "grid gap-0.5 rounded-md border px-4 py-3 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-24 has-[>svg]:grid-cols-[auto_minmax(0,1fr)] has-[>svg]:gap-x-3 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert",
+  "grid gap-0.5 rounded-md border px-4 py-3 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-14 has-[>svg]:grid-cols-[auto_minmax(0,1fr)] has-[>svg]:gap-x-3 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert",
   {
     variants: {
       variant: {
@@ -103,7 +103,7 @@ function AlertAction({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="alert-action"
-      className={cn('text-foreground absolute top-1/2 right-4 -translate-y-1/2', className)}
+      className={cn('text-foreground absolute top-6 right-4 -translate-y-1/2', className)}
       {...props}
     />
   )

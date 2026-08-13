@@ -2,12 +2,12 @@ import { useContext, useMemo } from 'react'
 import { Slot, type SlotComponentProps, SlotName, useSlot, useSlotIds, withSlot } from '../slots'
 import WalletRejectionError from '@/components/tx/shared/errors/WalletRejectionError'
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import TxSubmitError from '@/components/tx/TxSubmitError'
 import { TxFlowContext } from '../TxFlowProvider'
 import { useValidateTxData } from '@/hooks/useValidateTxData'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { SafeTxContext } from '../SafeTxProvider'
 import { useAlreadySigned } from '@/components/tx/shared/hooks'
-import { isRateLimitError, RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
 
 const COMBO_SUBMIT_ACTION = 'comboSubmitAction'
 const EXECUTE_ACTION = 'execute'
@@ -59,11 +59,7 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
     <>
       {submitError && (
         <div className="mt-2">
-          <ErrorMessage error={submitError} context="execution">
-            {isRateLimitError(submitError)
-              ? RATE_LIMIT_USER_MESSAGE
-              : 'Error submitting the transaction. Please try again.'}
-          </ErrorMessage>
+          <TxSubmitError error={submitError} context="execution" />
         </div>
       )}
 
@@ -73,9 +69,7 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
         </div>
       )}
 
-      {validationError !== undefined && (
-        <ErrorMessage error={validationError}>Error validating transaction data</ErrorMessage>
-      )}
+      {validationError !== undefined && <ErrorMessage error={validationError}>{validationError.message}</ErrorMessage>}
 
       {showLastSignerWarning && (
         <div className="mt-2">

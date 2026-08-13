@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import ModalDialog from '@/components/common/ModalDialog'
 import classNames from 'classnames'
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import TxCheckError from '@/components/tx/TxCheckError'
 import { trackError, Errors } from '@/services/exceptions'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -35,7 +36,6 @@ import SplitMenuButton from '@/components/common/SplitMenuButton'
 import type { SlotComponentProps, SlotName } from '../../slots'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
-import { isRateLimitError, RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
 import { SafeTxContext } from '../../SafeTxProvider'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
@@ -50,7 +50,6 @@ export const ExecuteForm = ({
   disableSubmit = false,
   origin,
   onlyExecute,
-  isCreation,
   isOwner,
   isExecutionLoop,
   slotId,
@@ -155,6 +154,9 @@ export const ExecuteForm = ({
     safeTx,
     advancedParams.gasLimit ? advancedParams.gasLimit : undefined,
   )
+
+  // Pre-execution check error (validity simulation or gas estimation).
+  const checkError = executionValidationError || gasLimitError
 
   // CGW pre-relay simulation outcome (SIMULATION_FAILED blocks; INDETERMINATE offers an override).
   const [relaySimError, setRelaySimError] = useState<RelaySimulationError | undefined>(undefined)
@@ -292,20 +294,9 @@ export const ExecuteForm = ({
           <ErrorMessage level="info">
             Your connected wallet doesn&apos;t have enough funds to execute this transaction.
           </ErrorMessage>
-        ) : (
-          (executionValidationError || gasLimitError) && (
-            <ErrorMessage error={executionValidationError || gasLimitError} context="estimation">
-              {isRateLimitError(executionValidationError || gasLimitError) ? (
-                RATE_LIMIT_USER_MESSAGE
-              ) : (
-                <>
-                  This transaction will most likely fail.
-                  {` To save gas costs, ${isCreation ? 'avoid creating' : 'reject'} this transaction.`}
-                </>
-              )}
-            </ErrorMessage>
-          )
-        )}
+        ) : checkError ? (
+          <TxCheckError error={checkError} context="estimation" />
+        ) : null}
 
         {/* CGW pre-relay simulation verdict */}
         {relaySimError?.code === 'SIMULATION_FAILED' && (

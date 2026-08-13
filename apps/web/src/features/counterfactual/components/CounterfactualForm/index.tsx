@@ -15,6 +15,8 @@ import { Alert } from '@/components/ui/alert'
 import classNames from 'classnames'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import TxCheckError from '@/components/tx/TxCheckError'
+import TxSubmitError from '@/components/tx/TxSubmitError'
 import { trackError, Errors } from '@/services/exceptions'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getTxOptions } from '@/utils/transactions'
@@ -35,7 +37,6 @@ export const CounterfactualForm = ({
   safeTx,
   disableSubmit = false,
   onlyExecute,
-  isCreation,
   isOwner,
   isExecutionLoop,
   txSecurity,
@@ -156,17 +157,12 @@ export const CounterfactualForm = ({
         ) : !walletCanPay ? (
           <ErrorMessage>Your connected wallet doesn&apos;t have enough funds to execute this transaction.</ErrorMessage>
         ) : (
-          gasLimitError && (
-            <ErrorMessage error={gasLimitError}>
-              This transaction will most likely fail.
-              {` To save gas costs, ${isCreation ? 'avoid creating' : 'reject'} this transaction.`}
-            </ErrorMessage>
-          )
+          gasLimitError && <TxCheckError error={gasLimitError} />
         )}
 
         {submitError && (
           <div className="mt-2">
-            <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
+            <TxSubmitError error={submitError} />
           </div>
         )}
 
