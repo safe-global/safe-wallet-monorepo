@@ -10,6 +10,8 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import { NetworkLogosTooltip } from '@/features/multichain'
 import { useAddressBookRequestsCreateRequestV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'
@@ -71,6 +73,7 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
         return
       }
 
+      trackEvent(SPACE_EVENTS.ADDRESS_REQUEST_SENT)
       setRequested(true)
       setOpen(false)
       dispatch(
