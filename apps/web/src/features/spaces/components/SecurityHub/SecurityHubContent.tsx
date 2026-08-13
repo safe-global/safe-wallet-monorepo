@@ -1,5 +1,8 @@
-import { type ReactElement, useState } from 'react'
+import { type ReactElement, useEffect, useRef, useState } from 'react'
 import { Typography } from '@/components/ui/typography'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import type { SafeGrade } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
@@ -38,6 +41,16 @@ const SecurityHubContent = (): ReactElement => {
     overviewMap,
   })
   const [gradeFilter, setGradeFilter] = useState<SafeGrade | null>(null)
+  const hasTrackedView = useRef(false)
+
+  // Held until the accounts resolve, otherwise the view is always reported as empty.
+  // Once per mount is once per space: the parent remounts this on every space switch.
+  useEffect(() => {
+    if (isLoadingSpacesSafes || hasTrackedView.current) return
+
+    hasTrackedView.current = true
+    trackEvent(SPACE_EVENTS.SECURITY_HUB_VIEWED, { [MixpanelEventParams.ACCOUNT_COUNT]: safes.length })
+  }, [isLoadingSpacesSafes, safes.length])
 
   return (
     <>

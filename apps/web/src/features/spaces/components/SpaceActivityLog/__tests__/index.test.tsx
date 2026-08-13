@@ -1,11 +1,17 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import type { SpaceAuditLogEntryDto, SpaceAuditLogPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceActivityLog from '../index'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import useGetSpaceAuditLog from '../../../hooks/useGetSpaceAuditLog'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 
 jest.mock('@/store', () => ({
   useAppSelector: jest.fn(() => true),
+}))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
 }))
 jest.mock('../../../hooks/useGetSpaceAuditLog')
 jest.mock('../../../hooks/useCurrentSpaceId', () => ({
@@ -209,5 +215,13 @@ describe('SpaceActivityLog', () => {
     fireEvent.click(screen.getByTestId('set-actor-filter'))
 
     expect(screen.getByText('No results')).toBeInTheDocument()
+  })
+
+  it('tracks the activity log view once per mount', () => {
+    const { rerender } = render(<SpaceActivityLog />)
+    rerender(<SpaceActivityLog />)
+
+    expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ACTIVITY_LOG_VIEWED)
+    expect(trackEvent).toHaveBeenCalledTimes(1)
   })
 })

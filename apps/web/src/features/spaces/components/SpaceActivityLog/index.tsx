@@ -6,6 +6,8 @@ import { isAuthenticated } from '@/store/authSlice'
 import useGetSpaceAuditLog, { type SpaceAuditLogQueryArgs } from '../../hooks/useGetSpaceAuditLog'
 import { useCurrentSpaceId } from '../../hooks/useCurrentSpaceId'
 import type { SpaceAuditLogEntryDto, SpaceAuditLogPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import AuditEventRow from './AuditEventRow'
 import ActivityLogFilters, { type ActivityLogFilterState, EMPTY_FILTERS } from './ActivityLogFilters'
 
@@ -63,6 +65,10 @@ function SpaceActivityLog() {
   // Cursors of the pages loaded so far; index 0 is the first page.
   const [extraCursors, setExtraCursors] = useState<string[]>([])
   const [extraPages, setExtraPages] = useState<Record<number, SpaceAuditLogPage>>({})
+
+  useEffect(() => {
+    trackEvent(SPACE_EVENTS.ACTIVITY_LOG_VIEWED)
+  }, [])
 
   const queryArgs = useMemo(
     (): SpaceAuditLogQueryArgs => ({
