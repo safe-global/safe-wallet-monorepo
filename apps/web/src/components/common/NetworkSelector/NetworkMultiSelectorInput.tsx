@@ -159,18 +159,25 @@ const NetworkMultiSelectorInput = ({
     setActiveIndex(-1)
   }
 
+  // The pinned Select All row stays visible (and clickable) while filtering, but arrow keys
+  // skip it — otherwise "type a filter, ↓, Enter" would select every network instead of the match.
+  const isKeyboardSkippable = (option: Chain) => Boolean(inputValue) && isSelectAllOption(option)
+
   const handleInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault()
-      if (!open) {
-        setOpen(true)
-        setActiveIndex(0)
-        return
-      }
+      const wasOpen = open
+      if (!wasOpen) setOpen(true)
       const count = visibleOptions.length
       if (count === 0) return
       const delta = event.key === 'ArrowDown' ? 1 : -1
-      const next = activeIndex === -1 ? (delta === 1 ? 0 : count - 1) : (activeIndex + delta + count) % count
+      let next = !wasOpen || activeIndex === -1 ? (delta === 1 ? 0 : count - 1) : (activeIndex + delta + count) % count
+      let steps = 0
+      while (isKeyboardSkippable(visibleOptions[next] as Chain) && steps < count) {
+        next = (next + delta + count) % count
+        steps++
+      }
+      if (isKeyboardSkippable(visibleOptions[next] as Chain)) return
       setActiveIndex(next)
       document.getElementById(getOptionId(visibleOptions[next] as Chain))?.scrollIntoView({ block: 'nearest' })
     } else if (event.key === 'Enter') {

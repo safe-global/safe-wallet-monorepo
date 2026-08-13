@@ -21,10 +21,15 @@ describe('NetworkMultiSelectorInput', () => {
     })
   })
 
-  const renderInput = (onNetworkChange?: (networks: Chain[]) => void) =>
+  const renderInput = (onNetworkChange?: (networks: Chain[]) => void, showSelectAll?: boolean) =>
     render(
       <Form>
-        <NetworkMultiSelectorInput name="networks" value={[]} onNetworkChange={onNetworkChange} />
+        <NetworkMultiSelectorInput
+          name="networks"
+          value={[]}
+          onNetworkChange={onNetworkChange}
+          showSelectAll={showSelectAll}
+        />
       </Form>,
     )
 
@@ -128,6 +133,43 @@ describe('NetworkMultiSelectorInput', () => {
     const notPrevented = fireEvent.keyDown(input, { key: 'Enter' })
 
     expect(notPrevented).toBe(true)
+  })
+
+  it('skips the Select All option in keyboard navigation while a filter is typed', () => {
+    const onNetworkChange = jest.fn()
+    renderInput(onNetworkChange, true)
+    const input = screen.getByRole('combobox')
+
+    fireEvent.change(input, { target: { value: 'sep' } })
+    fireEvent.keyDown(input, { key: 'ArrowDown' })
+
+    const options = screen.getAllByRole('option')
+    expect(options[0]).toHaveTextContent('Select All')
+    expect(options[0]).not.toHaveAttribute('data-active')
+    expect(options[1]).toHaveAttribute('data-active')
+
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    expect(onNetworkChange).toHaveBeenCalledWith([expect.objectContaining({ chainId: '11155111' })])
+  })
+
+  it('still reaches the Select All option with arrow keys when no filter is typed', () => {
+    const onNetworkChange = jest.fn()
+    renderInput(onNetworkChange, true)
+    const input = screen.getByRole('combobox')
+
+    fireEvent.keyDown(input, { key: 'ArrowDown' })
+
+    const options = screen.getAllByRole('option')
+    expect(options[0]).toHaveTextContent('Select All')
+    expect(options[0]).toHaveAttribute('data-active')
+
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    expect(onNetworkChange).toHaveBeenCalledWith([
+      expect.objectContaining({ chainId: '1' }),
+      expect.objectContaining({ chainId: '11155111' }),
+    ])
   })
 
   it('resets the highlight when the search text changes', () => {
