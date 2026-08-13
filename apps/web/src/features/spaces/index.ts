@@ -104,7 +104,7 @@ export {
 } from './store'
 
 // Public types (compile-time only, no runtime cost)
-export { mapSpaceContactsToAddressBookState } from './utils'
+export { mapSpaceContactsToAddressBookState, getUniqueChainIds } from './utils'
 
 // Components consumed from outside the feature
 export { HeaderNavigation } from './components/HeaderNavigation'
