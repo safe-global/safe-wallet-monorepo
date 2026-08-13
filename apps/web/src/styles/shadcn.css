@@ -54,6 +54,11 @@
   --accent-secondary: #c4fddd;
   --accent-secondary-foreground: #121312;
   --accent-success: #16a34a;
+  /* Status-badge dots and the light-warning pairing, from the Obra DS Badge component. */
+  --success-dot: #22c55e;
+  --warning-light-subtle: #fefce8;
+  --warning-light-strong: #a16207;
+  --warning-light-dot: #eab308;
   --z-sidebar: 1300;
   --z-overlay: 1400;
 }
@@ -98,6 +103,13 @@
   --accent-secondary: #c4fddd;
   --accent-secondary-foreground: #121312;
   --accent-success: #16a34a;
+  /* Dark counterparts for the badge dots and light-warning pairing. The DS only
+     specifies light values, so these mirror the existing dark amber treatment:
+     a dim yellow-brown ground carrying pale yellow text. */
+  --success-dot: #22c55e;
+  --warning-light-subtle: #2f2a18;
+  --warning-light-strong: #fde68a;
+  --warning-light-dot: #eab308;
 }
 
 @theme inline {
@@ -146,6 +158,12 @@
   /* Amber badge pairing. `warning1` is the amber scale; `warning` proper is the coral alert colour. */
   --color-warning-subtle: var(--color-warning1-main);
   --color-warning-strong: var(--color-warning1-text);
+  /* Obra DS status-badge tokens. The DS yellow scale has no equivalent in
+     packages/theme, so it is defined web-locally above. */
+  --color-success-dot: var(--success-dot);
+  --color-warning-light-subtle: var(--warning-light-subtle);
+  --color-warning-light-strong: var(--warning-light-strong);
+  --color-warning-light-dot: var(--warning-light-dot);
   --radius-2xs: 0.25rem;
   --radius-xs: 0.5rem;
   --radius-sm: 0.5rem;
