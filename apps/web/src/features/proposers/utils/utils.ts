@@ -5,6 +5,7 @@ import { adjustVInSignature } from '@safe-global/protocol-kit'
 import type { JsonRpcSigner } from 'ethers'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import { TOTP_INTERVAL_SECONDS } from '@/features/proposers/constants'
+import { isSmartContractWallet } from '@/utils/wallets'
 
 export const signProposerTypedData = async (chainId: string, proposerAddress: string, signer: JsonRpcSigner) => {
   const typedData = getDelegateTypedData(chainId, proposerAddress)
@@ -85,3 +86,17 @@ export const encodeEIP1271Signature = async (parentSafeAddress: string, ownerSig
   // Encode to the final signature bytes string
   return '0x' + buildSignatureBytes([contractSig]).slice(2)
 }
+
+/**
+ * Address validator that rejects deployed smart contracts (EIP-7702 delegated EOAs are allowed).
+ * Fails open: returns undefined when the check cannot be performed, e.g. no RPC provider.
+ */
+export const addressIsNotSmartContract =
+  (chainId: string, message: string) =>
+  async (address: string): Promise<string | undefined> => {
+    try {
+      return (await isSmartContractWallet(chainId, address)) ? message : undefined
+    } catch {
+      return undefined
+    }
+  }

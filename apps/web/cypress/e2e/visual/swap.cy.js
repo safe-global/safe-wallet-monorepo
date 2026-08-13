@@ -16,6 +16,7 @@ describe('[VISUAL] Swap page screenshots', { defaultCommandTimeout: 60000, ...co
 
   it('[VISUAL] Screenshot swap page', () => {
     cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_2)
+    main.acceptWidgetDisclaimer()
     main.awaitVisualStability()
   })
 })

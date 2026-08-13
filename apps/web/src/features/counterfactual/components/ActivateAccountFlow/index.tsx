@@ -30,12 +30,11 @@ import { Spinner } from '@/components/ui/spinner'
 import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/ui/typography'
 import React, { useContext, useMemo, useState } from 'react'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { getSafeToL2SetupVersionByAddress } from '@safe-global/utils/services/contracts/deployments'
 import { useEstimateSafeCreationGas } from '@/components/new-safe/create/useEstimateSafeCreationGas'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import CheckWallet from '@/components/common/CheckWallet'
-import { getSafeToL2SetupDeployment } from '@safe-global/safe-deployments'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { useNativeTokenDisplay } from '@/hooks/useNativeTokenDisplay'
 import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
@@ -46,13 +45,7 @@ import useGasPrice from '@/hooks/useGasPrice'
 const useActivateAccount = (undeployedSafe: UndeployedSafe | undefined) => {
   const chain = useCurrentChain()
   const [gasPrice] = useGasPrice()
-  const safeVersion =
-    undeployedSafe &&
-    (isPredictedSafeProps(undeployedSafe?.props)
-      ? undeployedSafe?.props.safeDeploymentConfig?.safeVersion
-      : undeployedSafe?.props.safeVersion)
-
-  const { gasLimit } = useEstimateSafeCreationGas(undeployedSafe?.props, safeVersion)
+  const { gasLimit } = useEstimateSafeCreationGas(undeployedSafe?.props)
 
   const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
   const maxFeePerGas = gasPrice?.maxFeePerGas
@@ -106,9 +99,7 @@ const ActivateAccountFlow = () => {
 
   const { owners, threshold } = undeployedSafeSetup
 
-  const safeToL2SetupDeployment = getSafeToL2SetupDeployment({ version: '1.4.1' })
-  const safeToL2SetupAddress = safeToL2SetupDeployment?.defaultAddress
-  const isMultichainSafe = sameAddress(safeAccountConfig?.to, safeToL2SetupAddress)
+  const isMultichainSafe = Boolean(getSafeToL2SetupVersionByAddress(safeAccountConfig?.to))
 
   const onSubmit = (txHash?: string) => {
     const mixpanelProps = {

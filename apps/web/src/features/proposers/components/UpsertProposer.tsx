@@ -5,11 +5,17 @@ import NameInput from '@/components/common/NameInput'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import {
+  addressIsNotSmartContract,
   encodeEIP1271Signature,
   signProposerData,
   signProposerTypedData,
   signProposerTypedDataForSafe,
 } from '@/features/proposers/utils/utils'
+import {
+  SMART_CONTRACT_PROPOSER_EDIT_ERROR,
+  SMART_CONTRACT_PROPOSER_ERROR,
+  SMART_CONTRACT_PROPOSER_INFO,
+} from '@/features/proposers/constants'
 import { useDelegatorSelection } from '../hooks/useDelegatorSelection'
 import { buildDelegationOrigin, createDelegationMessage } from '../services/delegationMessages'
 import useChainId from '@/hooks/useChainId'
@@ -64,6 +70,7 @@ type ProposerEntry = {
 
 const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) => {
   const [error, setError] = useState<Error>()
+  const [blockedReason, setBlockedReason] = useState<string>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [multiSigInitiated, setMultiSigInitiated] = useState<boolean>(false)
   const [addDelegateV1] = useDelegatesPostDelegateV1Mutation()
@@ -100,13 +107,20 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
   const safeOwnerAddresses = useMemo(() => safe.owners.map((owner) => owner.value), [safe.owners])
 
   const validateAddress = useCallback<Validate<string>>(
-    (value) =>
-      addressIsNotCurrentSafe(safeAddress, 'Cannot add Safe account itself as proposer')(value) ??
-      addressIsNotOwner(safeOwnerAddresses, 'Cannot add Safe Owner as proposer')(value),
-    [safeAddress, safeOwnerAddresses],
+    async (value) => {
+      const notCurrentSafe = addressIsNotCurrentSafe(safeAddress, 'Cannot add Safe account itself as proposer')
+      const notOwner = addressIsNotOwner(safeOwnerAddresses, 'Cannot add Safe Owner as proposer')
+      const notSmartContract = addressIsNotSmartContract(chainId, SMART_CONTRACT_PROPOSER_ERROR)
+
+      return notCurrentSafe(value) ?? notOwner(value) ?? (await notSmartContract(value))
+    },
+    [safeAddress, safeOwnerAddresses, chainId],
   )
 
   const { handleSubmit, formState } = methods
+
+  const addressError = formState.errors[ProposerEntryFields.address]?.message
+  const isSmartContractError = addressError === SMART_CONTRACT_PROPOSER_ERROR
 
   const onConfirm = handleSubmit(async (data: ProposerEntry) => {
     if (!wallet) return
@@ -114,9 +128,17 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
     const name = sanitizeName(data.name)
 
     setError(undefined)
+    setBlockedReason(undefined)
     setIsLoading(true)
 
     try {
+      // Backstop for the edit flow, where the address field (and its validator) is not rendered
+      const smartContractError = await addressIsNotSmartContract(chainId, SMART_CONTRACT_PROPOSER_ERROR)(data.address)
+      if (smartContractError) {
+        setBlockedReason(isEditing ? SMART_CONTRACT_PROPOSER_EDIT_ERROR : smartContractError)
+        return
+      }
+
       const shouldEthSign = isEthSignWallet(wallet)
       const signer = await getAssertedChainSigner(wallet.provider)
 
@@ -277,7 +299,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
               <div className="my-4">
                 {isEditing ? (
-                  <div className="mb-6">
+                  <div className="mb-6 text-sm [&_svg]:size-4">
                     <EthHashInfo address={proposer?.delegate} showCopyButton hasExplorer shortAddress={false} />
                   </div>
                 ) : (
@@ -299,6 +321,12 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
               {error && (
                 <div className="mt-4">
                   <ErrorMessage error={error}>Error adding proposer</ErrorMessage>
+                </div>
+              )}
+
+              {blockedReason && (
+                <div className="mt-4">
+                  <ErrorMessage>{blockedReason}</ErrorMessage>
                 </div>
               )}
 
@@ -346,6 +374,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
                 confirmLoading={isLoading}
                 confirmDisabled={isParentLoading || (isEditing && !canEdit) || !formState.isValid}
                 confirmCheckWallet={{ checkNetwork: !isLoading, allowProposer: false }}
+                confirmTooltip={isSmartContractError ? SMART_CONTRACT_PROPOSER_INFO : undefined}
               />
             </DialogFooter>
           </form>
