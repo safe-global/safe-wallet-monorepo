@@ -1,6 +1,6 @@
 import { type ReactElement, type ReactNode } from 'react'
 import { X } from 'lucide-react'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogOverlay, DialogPortal } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useIsBelowSm } from '@/hooks/useMediaQuery'
 import { cn } from '@/utils/cn'
@@ -25,6 +25,9 @@ interface ModalDialogProps {
   className?: string
   /** Applied to the backdrop — needed when the dialog has to out-stack a third-party overlay. */
   overlayClassName?: string
+  /** Base UI drops the backdrop of a dialog nested inside another dialog, assuming the parent
+   * already dims. Opt in when the parent doesn't (the tx-flow modal renders no backdrop). */
+  forceBackdrop?: boolean
   /** MUI breakpoint key (e.g. `'sm'`) or a CSS width — applied as the popup's max-width. */
   maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | number | string | false
   /** @deprecated MUI `fullWidth` is a no-op after the shadcn migration; popups are full-width up to `maxWidth`. */
@@ -94,6 +97,7 @@ const ModalDialog = ({
   chainId,
   className,
   overlayClassName,
+  forceBackdrop = false,
   maxWidth,
   PaperProps,
   keepMounted,
@@ -129,6 +133,14 @@ const ModalDialog = ({
         if (!nextOpen) onClose?.()
       }}
     >
+      {/* Replaces DialogContent's built-in backdrop (hidden below) so exactly one renders,
+          nested or not — forceRender alone would double-dim under a backdrop-ed parent. */}
+      {forceBackdrop && (
+        <DialogPortal keepMounted={keepMounted}>
+          <DialogOverlay forceRender className={overlayClassName} />
+        </DialogPortal>
+      )}
+
       <DialogContent
         data-testid={dataTestid}
         showCloseButton={false}
@@ -140,7 +152,7 @@ const ModalDialog = ({
           isFullScreen && 'translate-x-0 translate-y-0',
           className,
         )}
-        overlayClassName={overlayClassName}
+        overlayClassName={forceBackdrop ? 'hidden' : overlayClassName}
         style={{ ...(inlineMaxWidth != null ? { maxWidth: inlineMaxWidth } : {}), ...fullScreenStyle }}
         onClick={(e) => e.stopPropagation()}
       >

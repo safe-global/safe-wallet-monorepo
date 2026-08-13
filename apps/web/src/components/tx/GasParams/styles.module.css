@@ -1,11 +1,36 @@
-.withExecutionMethod {
-  border-bottom-left-radius: 0px;
-  border-bottom-right-radius: 0px;
+/* Restores the pre-shadcn MuiAccordion look (border, green hover/expanded states) for this
+   accordion */
+.container :global [data-slot='accordion-item'] {
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition:
+    background 0.2s,
+    border 0.2s;
+}
+
+/* The item's overflow: hidden does the clipping; the trigger's own rounded-md would leave
+   transparent notches in its background at the top corners */
+.container :global [data-slot='accordion-trigger'] {
+  border-radius: 0;
+}
+
+.container:not(.error) :global [data-slot='accordion-item']:hover {
+  border-color: var(--color-secondary-light);
+}
+
+.container:not(.error) :global [data-slot='accordion-item']:hover [data-slot='accordion-trigger'],
+.container:not(.error) :global [data-slot='accordion-trigger'][aria-expanded='true'] {
+  background-color: var(--color-background-light);
+}
+
+.container .withExecutionMethod {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .error :global [data-slot='accordion-item'] {
-  border: 1px solid var(--color-error-light);
-  border-radius: var(--radius-lg);
+  border-color: var(--color-error-light);
 }
 
 .error :global [data-slot='accordion-trigger'][aria-expanded='true'] {

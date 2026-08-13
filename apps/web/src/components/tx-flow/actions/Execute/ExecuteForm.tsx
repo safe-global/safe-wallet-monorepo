@@ -243,7 +243,7 @@ export const ExecuteForm = ({
     <>
       <form onSubmit={handleSubmit}>
         {!requiresRelay && (
-          <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: canRelay })}>
+          <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: showExecutionSelector })}>
             <AdvancedParams
               willExecute
               params={advancedParams}
