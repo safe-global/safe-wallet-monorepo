@@ -25,6 +25,7 @@ export const AnalysisDetailsDropdown = ({
   return (
     <Collapsible open={expanded} onOpenChange={toggle} className="-mt-3">
       <CollapsibleTrigger
+        nativeButton={false}
         aria-label={expanded ? hideLabel : showLabel}
         render={
           <div
