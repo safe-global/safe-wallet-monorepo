@@ -8,6 +8,9 @@ import { useRouter } from 'next/router'
  * and a `false` from `beforePopState` are both only honoured in the same tick, so the guard cannot
  * await a user's answer. It instead returns `false` to block now and receives `proceed`, the
  * navigation it blocked, to run later once the user has confirmed.
+ *
+ * `proceed` belongs to whoever blocked the navigation: a guard that returns `true` must never call
+ * it, or the route change happens twice.
  */
 export function usePreventNavigation(onNavigate?: (proceed: () => void) => boolean): void {
   const router = useRouter()
@@ -32,16 +35,18 @@ export function usePreventNavigation(onNavigate?: (proceed: () => void) => boole
       const href = link?.getAttribute('href')
       const targetAttr = link?.getAttribute('target')
 
-      if (!link || !href || targetAttr?.toLowerCase() === '_blank') return
+      // Only in-app paths are ours to route; new tabs, `mailto:` and external URLs stay the anchor's.
+      if (!link || !href?.startsWith('/') || targetAttr?.toLowerCase() === '_blank') return
 
       const proceed = () => {
         router.push(href)
       }
 
+      e.preventDefault()
+
       if (onNavigate(proceed)) {
         proceed()
       } else {
-        e.preventDefault()
         e.stopImmediatePropagation()
         e.stopPropagation()
       }
