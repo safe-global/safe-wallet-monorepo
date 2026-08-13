@@ -1,3 +1,4 @@
+import type { ComponentProps } from 'react'
 import { mergeProps } from '@base-ui/react/merge-props'
 import { useRender } from '@base-ui/react/use-render'
 import { cva, type VariantProps } from 'class-variance-authority'
@@ -19,8 +20,8 @@ import { cn } from '@/utils/cn'
  * @remarks
  * Key Props:
  * - `variant` ('default' | 'secondary' | 'destructive' | 'outline' | 'warning' | 'success' | 'info' | 'positive' | 'negative' | 'ghost' | 'link')
- * - `size` ('sm' | 'default' | 'lg' | 'auto')
- * - `shape` ('pill' | 'tag')
+ * - `size` ('sm' | 'default' | 'lg' | 'auto' | 'status')
+ * - `shape` ('pill' | 'tag' | 'status')
  * - `render`
  * - `className`
  */
@@ -54,10 +55,13 @@ const badgeVariants = cva(
         default: 'h-5 px-2 py-0.5 text-xs',
         lg: 'h-6 px-2.5 py-0 text-sm',
         auto: 'h-auto px-2.5 py-1 text-xs',
+        // The Obra DS status badge, as used by the 2FA badges. Pair with `shape="status"`.
+        status: 'h-6 gap-1.5 px-2 py-[3px] text-xs leading-4',
       },
       shape: {
         pill: 'rounded-4xl',
         tag: 'rounded-sm',
+        status: 'rounded-lg',
       },
     },
     defaultVariants: {
@@ -67,6 +71,27 @@ const badgeVariants = cva(
     },
   },
 )
+
+/**
+ * The status dot the Obra DS uses in place of an icon on status badges. It reads the
+ * enclosing badge's `data-variant` so the accent stays correct in both themes; any
+ * variant without an accent falls back to the badge's own ink.
+ */
+function BadgeDot({ className, ...props }: ComponentProps<'span'>) {
+  return (
+    <span
+      data-slot="badge-dot"
+      aria-hidden="true"
+      className={cn(
+        'size-1.5 shrink-0 rounded-full bg-current',
+        'group-data-[variant=success]/badge:bg-accent-success',
+        'group-data-[variant=warning]/badge:bg-warning-accent',
+        className,
+      )}
+      {...props}
+    />
+  )
+}
 
 function Badge({
   className,
@@ -92,4 +117,4 @@ function Badge({
   })
 }
 
-export { Badge, badgeVariants }
+export { Badge, BadgeDot, badgeVariants }
