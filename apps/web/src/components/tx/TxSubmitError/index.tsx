@@ -1,7 +1,14 @@
 import type { ReactElement } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
-import { isRateLimitError, isRevertError, RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
+import { getGs026Message } from '@safe-global/utils/services/exceptions/contractErrors'
+import {
+  isNonceTooLowError,
+  isRateLimitError,
+  isRevertError,
+  RATE_LIMIT_USER_MESSAGE,
+} from '@/utils/transaction-errors'
 import { didRevert, type EthersError } from '@/utils/ethers-utils'
+import { isGs026PreCheckError } from '@/services/tx/executionPreChecks'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 
 export const COULD_NOT_SUBMIT_MESSAGE = 'Could not submit the transaction.'
@@ -27,6 +34,28 @@ const TxSubmitError = ({
   context?: 'estimation' | 'execution'
 }): ReactElement => {
   const chain = useCurrentChain()
+
+  // A failed GS026 pre-check blocked the broadcast — show its specific,
+  // cause-aware message (stale nonce / not a signer / bad signature).
+  if (isGs026PreCheckError(error)) {
+    return (
+      <ErrorMessage error={error} level="error" context={context}>
+        {error.message}
+      </ErrorMessage>
+    )
+  }
+
+  // The signer wallet's own Ethereum nonce advanced before broadcast (e.g. it
+  // executed another tx meanwhile). Same user story as a stale Safe nonce, so
+  // show the same message. Must be checked before the revert classification:
+  // viem misleadingly wraps this RPC rejection as a contract revert.
+  if (isNonceTooLowError(error)) {
+    return (
+      <ErrorMessage error={error} level="error" context={context}>
+        {getGs026Message('STALE_NONCE')}
+      </ErrorMessage>
+    )
+  }
 
   if (isRateLimitError(error)) {
     return (

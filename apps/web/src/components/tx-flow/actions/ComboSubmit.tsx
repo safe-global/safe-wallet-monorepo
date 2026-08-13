@@ -69,9 +69,7 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
         </div>
       )}
 
-      {validationError !== undefined && (
-        <ErrorMessage error={validationError}>Error validating transaction data</ErrorMessage>
-      )}
+      {validationError !== undefined && <ErrorMessage error={validationError}>{validationError.message}</ErrorMessage>}
 
       {showLastSignerWarning && (
         <div className="mt-2">

@@ -104,6 +104,28 @@ export const isRateLimitError = (error: unknown): boolean => {
 }
 
 /**
+ * Detects a wallet-level (EOA) nonce conflict rejected by the RPC pre-mining
+ * (no gas spent): the signer account's Ethereum nonce was already consumed
+ * ("nonce too low" — another tx from the same wallet mined first) or is still
+ * occupied by a pending tx that the new one doesn't outbid ("replacement
+ * transaction underpriced" / "already known"). Matched on the RPC error text
+ * (viem wraps these misleadingly as contract reverts) plus ethers' structured
+ * codes.
+ */
+export const isNonceTooLowError = (error: unknown): boolean => {
+  if (!error) return false
+
+  const err = error as { code?: unknown; message?: string }
+
+  if (err.code === 'NONCE_EXPIRED' || err.code === 'REPLACEMENT_UNDERPRICED') return true
+
+  return (
+    typeof err.message === 'string' &&
+    /nonce too low|nonce has already been used|replacement transaction underpriced|already known/i.test(err.message)
+  )
+}
+
+/**
  * Detects whether an error is a genuine on-chain revert — i.e. a node told us
  * the transaction reverts — as opposed to an infrastructure failure (RPC down,
  * timeout, rate-limit) where we simply could not complete the check.

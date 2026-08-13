@@ -15,7 +15,13 @@ import { isWalletRejection } from '@/utils/wallets'
 import { getTxLink } from '@/utils/tx-link'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import { getGuardErrorInfo, isRateLimitError, RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
+import {
+  getGuardErrorInfo,
+  isNonceTooLowError,
+  isRateLimitError,
+  RATE_LIMIT_USER_MESSAGE,
+} from '@/utils/transaction-errors'
+import { getGs026Message } from '@safe-global/utils/services/exceptions/contractErrors'
 
 const TxNotifications = {
   [TxEvent.SIGN_FAILED]: 'Failed to sign. Please try again.',
@@ -74,6 +80,11 @@ const useTxNotifications = (): void => {
           message = `Transaction reverted on ${chain.chainName}. Gas was spent.`
         } else if (guardErrorName) {
           message = `Guard reverted the transaction (${guardErrorName}).`
+        } else if (isError && isNonceTooLowError(detail.error)) {
+          // The signer wallet's Ethereum nonce advanced before broadcast — the
+          // RPC rejected it pre-mining (no gas spent). Same user story as a
+          // stale Safe nonce, so show the same message.
+          message = getGs026Message('STALE_NONCE')
         } else if (isError && isRateLimitError(detail.error)) {
           // Translate transient RPC rate-limit failures into friendly copy.
           // The raw error from viem looks like a contract revert ("Request is
