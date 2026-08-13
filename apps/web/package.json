@@ -71,7 +71,7 @@
     "@reduxjs/toolkit": "^2.11.0",
     "@reown/walletkit": "^1.2.7",
     "@safe-global/api-kit": "^5.0.2",
-    "@safe-global/protocol-kit": "^8.0.5",
+    "@safe-global/protocol-kit": "^8.0.6",
     "@safe-global/safe-apps-sdk": "^9.1.0",
     "@safe-global/safe-deployments": "^1.37.62",
     "@safe-global/safe-modules-deployments": "^3.0.9",

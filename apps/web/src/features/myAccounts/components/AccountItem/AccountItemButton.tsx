@@ -1,5 +1,6 @@
 import { type ReactNode, type MouseEvent, type RefObject } from 'react'
 import classnames from 'classnames'
+import { clickOnEnterOrSpace } from '@/utils/keyboard'
 import css from '../AccountItems/styles.module.css'
 import AccountItemContent from './AccountItemContent'
 
@@ -32,6 +33,7 @@ function AccountItemButton({ children, onClick, elementRef }: AccountItemButtonP
         'hover:bg-muted/40 flex cursor-pointer items-center p-2 transition-colors',
       )}
       onClick={onClick}
+      onKeyDown={clickOnEnterOrSpace}
     >
       <AccountItemContent>{children}</AccountItemContent>
     </div>

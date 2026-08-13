@@ -27,6 +27,7 @@ import { getDelay, isCustomDelaySelected } from './utils'
 import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import { isSmartContractWallet } from '@/utils/wallets'
+import { clickOnEnterOrSpace } from '@/utils/keyboard'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useChainId from '@/hooks/useChainId'
 import { Typography } from '@/components/ui/typography'
@@ -231,7 +232,10 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
               data-testid="advanced-btn"
               variant="paragraph-small"
               onClick={onShowAdvanced}
+              onKeyDown={clickOnEnterOrSpace}
               role="button"
+              tabIndex={0}
+              aria-expanded={showAdvanced}
               className={css.advanced}
             >
               Advanced {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
