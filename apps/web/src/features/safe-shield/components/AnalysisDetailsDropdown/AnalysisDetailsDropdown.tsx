@@ -3,6 +3,7 @@ import { useReducer } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
 import { Typography } from '@/components/ui/typography'
+import { clickOnEnterOrSpace } from '@/utils/keyboard'
 
 interface AnalysisDetailsDropdownProps {
   showLabel?: string
@@ -26,7 +27,10 @@ export const AnalysisDetailsDropdown = ({
     <Collapsible open={expanded} className="-mt-3">
       <div
         onClick={toggle}
+        onKeyDown={clickOnEnterOrSpace}
         role="button"
+        tabIndex={0}
+        aria-expanded={expanded}
         aria-label={expanded ? hideLabel : showLabel}
         className={`group relative inline-flex w-fit cursor-pointer items-center overflow-hidden text-[var(--color-text-secondary)] ${
           expanded ? 'mb-1' : ''

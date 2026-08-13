@@ -21,10 +21,10 @@ describe('NetworkMultiSelectorInput', () => {
     })
   })
 
-  const renderInput = () =>
+  const renderInput = (onNetworkChange?: (networks: Chain[]) => void) =>
     render(
       <Form>
-        <NetworkMultiSelectorInput name="networks" value={[]} />
+        <NetworkMultiSelectorInput name="networks" value={[]} onNetworkChange={onNetworkChange} />
       </Form>,
     )
 
@@ -58,5 +58,67 @@ describe('NetworkMultiSelectorInput', () => {
     fireEvent.keyDown(document, { key: 'Escape' })
 
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+  })
+
+  it('opens the listbox and highlights the first option on ArrowDown', () => {
+    renderInput()
+    const input = screen.getByRole('combobox')
+
+    fireEvent.keyDown(input, { key: 'ArrowDown' })
+
+    expect(screen.getByRole('listbox')).toBeInTheDocument()
+    const options = screen.getAllByRole('option')
+    expect(options[0]).toHaveAttribute('data-active')
+    expect(input).toHaveAttribute('aria-activedescendant', options[0].id)
+  })
+
+  it('moves the highlight with arrow keys and selects the highlighted option with Enter', () => {
+    const onNetworkChange = jest.fn()
+    renderInput(onNetworkChange)
+    const input = screen.getByRole('combobox')
+
+    fireEvent.keyDown(input, { key: 'ArrowDown' })
+    fireEvent.keyDown(input, { key: 'ArrowDown' })
+
+    const options = screen.getAllByRole('option')
+    expect(options[1]).toHaveAttribute('data-active')
+    expect(input).toHaveAttribute('aria-activedescendant', options[1].id)
+
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    expect(onNetworkChange).toHaveBeenCalledWith([expect.objectContaining({ chainId: '11155111' })])
+  })
+
+  it('wraps the highlight from the first option to the last on ArrowUp', () => {
+    renderInput()
+    const input = screen.getByRole('combobox')
+
+    fireEvent.keyDown(input, { key: 'ArrowDown' })
+    fireEvent.keyDown(input, { key: 'ArrowUp' })
+
+    const options = screen.getAllByRole('option')
+    expect(options[options.length - 1]).toHaveAttribute('data-active')
+  })
+
+  it('does not select anything on Enter before an option is highlighted', () => {
+    const onNetworkChange = jest.fn()
+    renderInput(onNetworkChange)
+    const input = screen.getByRole('combobox')
+
+    fireEvent.click(input)
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    expect(onNetworkChange).not.toHaveBeenCalled()
+  })
+
+  it('resets the highlight when the search text changes', () => {
+    renderInput()
+    const input = screen.getByRole('combobox')
+
+    fireEvent.keyDown(input, { key: 'ArrowDown' })
+    fireEvent.change(input, { target: { value: 'sep' } })
+
+    expect(input).not.toHaveAttribute('aria-activedescendant')
+    expect(screen.getAllByRole('option').some((option) => option.hasAttribute('data-active'))).toBe(false)
   })
 })

@@ -180,7 +180,8 @@
   cursor: not-allowed;
 }
 
-.multiSelectOption:hover:not([aria-disabled='true']) {
+.multiSelectOption:hover:not([aria-disabled='true']),
+.multiSelectOption[data-active]:not([aria-disabled='true']) {
   background-color: var(--color-background-light);
 }
 
