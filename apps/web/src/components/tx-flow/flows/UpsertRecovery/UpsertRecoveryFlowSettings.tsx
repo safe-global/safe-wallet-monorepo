@@ -1,6 +1,6 @@
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { ChevronUp as ExpandLessIcon, ChevronDown as ExpandMoreIcon } from 'lucide-react'
+import { ChevronUp as ExpandLessIcon, ChevronDown as ExpandMoreIcon, TriangleAlert } from 'lucide-react'
 import { useForm, FormProvider, Controller } from 'react-hook-form'
 import { useContext, useState } from 'react'
 import type { ReactElement } from 'react'
@@ -130,7 +130,8 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
     <TxCard>
       <FormProvider {...formMethods}>
         <form onSubmit={formMethods.handleSubmit(handleSubmit)}>
-          <Alert variant="warning" className="border-0">
+          <Alert variant="warning" outlined={false}>
+            <TriangleAlert />
             <AlertDescription>
               Your Recoverer will be able to reset your Account setup. Only select an address that you trust.{' '}
               <Track {...RECOVERY_EVENTS.LEARN_MORE} label="recover-setup-flow">
