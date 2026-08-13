@@ -44,7 +44,7 @@ const AddManually = ({
   const selectedChain = configs.find((chain) => chain.chainId === chainId)
 
   const onSubmit = handleSubmit((data) => {
-    trackEvent({ ...SPACE_EVENTS.ADD_ACCOUNT_MANUALLY }, { [MixpanelEventParams.CHAIN_ID]: data.chainId })
+    trackEvent(SPACE_EVENTS.ADD_ACCOUNT_MANUALLY, { [MixpanelEventParams.CHAIN_ID]: data.chainId })
     handleAddSafe(data)
     onClose()
   })

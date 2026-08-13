@@ -38,13 +38,10 @@ const RemoveSafeDialog = ({
 
   const handleConfirm = async () => {
     const safeAccounts = getToBeDeletedSafeAccounts(safeItem)
-    trackEvent(
-      { ...SPACE_EVENTS.DELETE_ACCOUNT },
-      {
-        [MixpanelEventParams.ACCOUNT_COUNT]: safeAccounts.length,
-        [MixpanelEventParams.CHAIN_ID]: getUniqueChainIds(safeAccounts),
-      },
-    )
+    trackEvent(SPACE_EVENTS.DELETE_ACCOUNT, {
+      [MixpanelEventParams.ACCOUNT_COUNT]: safeAccounts.length,
+      [MixpanelEventParams.CHAIN_ID]: getUniqueChainIds(safeAccounts),
+    })
 
     try {
       const result = await removeSafeAccounts({

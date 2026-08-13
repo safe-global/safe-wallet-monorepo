@@ -202,8 +202,11 @@ const useOnboardingSubmit = (
     }
   }
 
-  const processSelectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdStr: string) => {
-    const safesToAdd = getSafesToAdd(selectedSafes)
+  const processSelectedSafes = async (
+    safesToAdd: Array<{ chainId: string; address: string }>,
+    selectedSafes: AddAccountsFormValues['selectedSafes'],
+    spaceIdStr: string,
+  ) => {
     await addNewSafes(safesToAdd, spaceIdStr)
     await removeUnselectedSafes(selectedSafes, spaceIdStr)
     trustAddedSafes(safesToAdd)
@@ -217,15 +220,12 @@ const useOnboardingSubmit = (
 
     try {
       const safesToAdd = getSafesToAdd(data.selectedSafes)
-      trackEvent(
-        { ...SPACE_EVENTS.ADD_ACCOUNTS },
-        {
-          [MixpanelEventParams.ACCOUNT_COUNT]: safesToAdd.length,
-          [MixpanelEventParams.SOURCE]: 'onboarding',
-          [MixpanelEventParams.CHAIN_ID]: getUniqueChainIds(safesToAdd),
-        },
-      )
-      await processSelectedSafes(data.selectedSafes, spaceId)
+      trackEvent(SPACE_EVENTS.ADD_ACCOUNTS, {
+        [MixpanelEventParams.ACCOUNT_COUNT]: safesToAdd.length,
+        [MixpanelEventParams.SOURCE]: 'onboarding',
+        [MixpanelEventParams.CHAIN_ID]: getUniqueChainIds(safesToAdd),
+      })
+      await processSelectedSafes(safesToAdd, data.selectedSafes, spaceId)
 
       onSuccess()
     } catch (e) {

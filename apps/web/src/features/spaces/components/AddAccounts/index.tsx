@@ -227,23 +227,17 @@ const AddAccounts = ({
 
     // Track event based on what action is being taken
     if (safesToAdd.length > 0) {
-      trackEvent(
-        { ...SPACE_EVENTS.ADD_ACCOUNTS },
-        {
-          [MixpanelEventParams.ACCOUNT_COUNT]: safesToAdd.length,
-          [MixpanelEventParams.SOURCE]: SPACE_LABELS.add_accounts_modal,
-          [MixpanelEventParams.CHAIN_ID]: getUniqueChainIds(safesToAdd),
-        },
-      )
+      trackEvent(SPACE_EVENTS.ADD_ACCOUNTS, {
+        [MixpanelEventParams.ACCOUNT_COUNT]: safesToAdd.length,
+        [MixpanelEventParams.SOURCE]: SPACE_LABELS.add_accounts_modal,
+        [MixpanelEventParams.CHAIN_ID]: getUniqueChainIds(safesToAdd),
+      })
     }
     if (safesToRemove.length > 0) {
-      trackEvent(
-        { ...SPACE_EVENTS.DELETE_ACCOUNT },
-        {
-          [MixpanelEventParams.ACCOUNT_COUNT]: safesToRemove.length,
-          [MixpanelEventParams.CHAIN_ID]: getUniqueChainIds(safesToRemove),
-        },
-      )
+      trackEvent(SPACE_EVENTS.DELETE_ACCOUNT, {
+        [MixpanelEventParams.ACCOUNT_COUNT]: safesToRemove.length,
+        [MixpanelEventParams.CHAIN_ID]: getUniqueChainIds(safesToRemove),
+      })
     }
 
     try {

@@ -59,7 +59,7 @@ const SecurityHubContent = (): ReactElement => {
       trackEvent(SPACE_EVENTS.SECURITY_REPORT_OPENED, {
         [MixpanelEventParams.CHAIN_ID]: chainId,
         [MixpanelEventParams.SAFE_ADDRESS]: address,
-        [MixpanelEventParams.RESULT]: scanResults && security.$isReady ? security.getSafeGrade(scanResults) : undefined,
+        [MixpanelEventParams.RESULT]: scanResults ? security.getSafeGrade(scanResults) : undefined,
       })
     }
 

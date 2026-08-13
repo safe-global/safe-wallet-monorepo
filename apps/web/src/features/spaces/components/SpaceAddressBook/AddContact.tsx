@@ -28,10 +28,9 @@ const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
       }
       onSubmitStart={() => trackEvent({ ...SPACE_EVENTS.ADD_ADDRESS_SUBMIT })}
       onSuccess={() =>
-        trackEvent(
-          { ...SPACE_EVENTS.ADDRESS_BOOK_ENTRY_CREATED },
-          { [MixpanelEventParams.ENTRY_COUNT]: addressBookItems.length + 1 },
-        )
+        trackEvent(SPACE_EVENTS.ADDRESS_BOOK_ENTRY_CREATED, {
+          [MixpanelEventParams.ENTRY_COUNT]: addressBookItems.length + 1,
+        })
       }
     />
   )
