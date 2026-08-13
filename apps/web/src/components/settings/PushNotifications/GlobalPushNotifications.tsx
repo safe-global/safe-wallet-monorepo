@@ -26,6 +26,7 @@ import type { NotifiableSafes } from './logic'
 import type { PushNotificationPreferences } from '@/services/push-notifications/preferences'
 import CheckWalletWithPermission from '@/components/common/CheckWalletWithPermission'
 import { Permission } from '@/permissions/config'
+import { clickOnEnterOrSpace } from '@/utils/keyboard'
 
 import css from './styles.module.css'
 import { useAllOwnedSafes } from '@/hooks/safes'
@@ -408,6 +409,7 @@ export const GlobalPushNotifications = (): ReactElement | null => {
             tabIndex={0}
             className={`${css.item} flex w-full cursor-pointer items-center gap-3 py-2 text-left`}
             onClick={onSelectAll}
+            onKeyDown={clickOnEnterOrSpace}
           >
             <span className={css.icon}>
               <Checkbox checked={isAllSelected} aria-hidden tabIndex={-1} className="pointer-events-none" />
@@ -445,6 +447,7 @@ export const GlobalPushNotifications = (): ReactElement | null => {
                   tabIndex={0}
                   className={`${css.item} flex w-full cursor-pointer items-center gap-3 py-2 text-left`}
                   onClick={onSelectChain}
+                  onKeyDown={clickOnEnterOrSpace}
                 >
                   <span className={css.icon}>
                     <Checkbox checked={isChainSelected} aria-hidden tabIndex={-1} className="pointer-events-none" />
@@ -474,6 +477,7 @@ export const GlobalPushNotifications = (): ReactElement | null => {
                           tabIndex={0}
                           className="flex w-full cursor-pointer items-center gap-3 py-0.5 pl-14 text-left"
                           onClick={onSelectSafe}
+                          onKeyDown={clickOnEnterOrSpace}
                         >
                           <span className={css.icon}>
                             <Checkbox
