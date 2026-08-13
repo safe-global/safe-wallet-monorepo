@@ -252,17 +252,11 @@ describe('ShowAllAddress', () => {
     it('should be keyboard accessible - expand', async () => {
       const { user } = renderWithUserEvent(<ShowAllAddress addresses={mockAddresses} />)
 
-      const showAllButton = screen.getByText('Show all').closest('div')
+      await user.tab()
+      expect(screen.getByRole('button', { name: 'Show all' })).toHaveFocus()
 
-      // Tab to the element and press Enter
-      if (showAllButton) {
-        showAllButton.focus()
-        await user.keyboard('{Enter}')
-      }
+      await user.keyboard('{Enter}')
 
-      // Should expand (click handler should be triggered)
-      // Note: Depending on implementation, this might need adjustment
-      await user.click(screen.getByText('Show all'))
       expect(screen.getByText('Hide all')).toBeInTheDocument()
     })
 
