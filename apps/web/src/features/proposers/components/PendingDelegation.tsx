@@ -109,7 +109,7 @@ function PendingDelegation({ delegation, onRefetch }: PendingDelegationProps): R
         showNotification({
           variant: 'success',
           groupKey: 'delegation-submitted',
-          title: `Proposer ${delegation.action === 'add' ? 'added' : delegation.action === 'edit' ? 'updated' : 'removed'} successfully!`,
+          title: `Proposer ${delegation.action === 'add' ? 'added' : 'removed'} successfully!`,
           message: '',
         }),
       )
@@ -156,20 +156,10 @@ function PendingDelegation({ delegation, onRefetch }: PendingDelegationProps): R
       <div className="rounded-lg bg-[var(--color-border-background)] p-4">
         <div className="flex items-center gap-6">
           <Typography variant="paragraph-small" className="whitespace-nowrap">
-            {delegation.action === 'remove'
-              ? 'Remove proposer:'
-              : delegation.action === 'edit'
-                ? 'Edit proposer:'
-                : 'New proposer:'}
+            {delegation.action === 'remove' ? 'Remove proposer:' : 'New proposer:'}
           </Typography>
           <div className="[&_.ethHashInfo-name]:font-bold">
-            <EthHashInfo
-              address={delegation.delegateAddress}
-              showCopyButton
-              shortAddress={false}
-              name={delegation.delegateLabel}
-              hasExplorer
-            />
+            <EthHashInfo address={delegation.delegateAddress} showCopyButton shortAddress={false} hasExplorer />
           </div>
         </div>
       </div>

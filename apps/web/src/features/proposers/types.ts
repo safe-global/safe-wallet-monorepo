@@ -2,17 +2,15 @@ import type { AddressInfo, MessageConfirmation } from '@safe-global/store/gatewa
 
 export interface DelegationOrigin {
   type: 'proposer-delegation'
-  action: 'add' | 'remove' | 'edit'
+  action: 'add' | 'remove'
   delegate: string
   nestedSafe: string
-  label: string
 }
 
 export interface PendingDelegation {
   messageHash: string
-  action: 'add' | 'remove' | 'edit'
+  action: 'add' | 'remove'
   delegateAddress: string
-  delegateLabel: string
   nestedSafeAddress: string
   parentSafeAddress: string
   totp: number
