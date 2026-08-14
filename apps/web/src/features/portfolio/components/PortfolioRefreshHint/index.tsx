@@ -90,10 +90,11 @@ const PortfolioRefreshHint = ({
           <Button
             variant="ghost"
             size="icon-xs"
-            className="size-5 rounded-full"
             onClick={handleRefresh}
             disabled={isDisabled}
             data-testid="portfolio-refresh-button"
+            // eslint-disable-next-line no-restricted-syntax -- 20px circular icon button sized to the timestamp line; no size variant is this small or round
+            className="size-5 rounded-full"
           >
             <RefreshIcon isLoading={isFetching} />
           </Button>

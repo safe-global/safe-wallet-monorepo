@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import PositionsEmpty from './index'
@@ -13,19 +12,9 @@ const meta = {
     componentSubtitle: 'Empty state for the positions list, with the DeFi icon centered above the message',
   },
   decorators: [
+    // The component reads chain features through useAppSelector, so it needs a store Provider.
     (Story) => (
-      <StoreDecorator
-        initialState={{
-          chains: {
-            data: [
-              {
-                chainId: '1',
-                features: [FEATURES.EARN, FEATURES.EARN_PROMO],
-              },
-            ],
-          },
-        }}
-      >
+      <StoreDecorator initialState={{}}>
         <RouterDecorator router={{ query: { safe: SAFE_QUERY } }}>
           <div className="max-w-md">
             <Story />
@@ -42,24 +31,4 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {},
-}
-
-export const PositionsEntryPoint: Story = {
-  args: {
-    entryPoint: 'Positions',
-  },
-}
-
-export const LightMode: Story = {
-  args: {},
-  parameters: {
-    theme: 'light',
-  },
-}
-
-export const DarkMode: Story = {
-  args: {},
-  parameters: {
-    theme: 'dark',
-  },
 }
