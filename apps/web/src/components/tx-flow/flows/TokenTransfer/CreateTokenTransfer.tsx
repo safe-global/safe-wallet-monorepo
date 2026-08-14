@@ -187,7 +187,7 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
 
             {canBatch && (
               <>
-                <div className="mb-8 flex flex-row items-center justify-between">
+                <div className="flex flex-row items-center justify-between">
                   <Track {...MODALS_EVENTS.ADD_RECIPIENT}>
                     <Button data-testid="add-recipient-btn" onClick={addRecipient} disabled={!canAddMoreRecipients}>
                       <AddIcon className="size-4" />

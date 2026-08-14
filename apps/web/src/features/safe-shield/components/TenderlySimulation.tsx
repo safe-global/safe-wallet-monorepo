@@ -212,8 +212,8 @@ export const TenderlySimulation = ({
             data-testid="run-simulation-btn"
             onClick={handleRunSimulation}
             disabled={isLoading}
-            className={`rounded-[4px] border-none bg-transparent px-2 py-0.5 hover:bg-[var(--color-border-light)] ${
-              isLoading ? 'cursor-default hover:bg-transparent' : 'cursor-pointer'
+            className={`rounded-[4px] border-none bg-[var(--color-border-light)] px-2 py-0.5 hover:bg-[var(--color-border-main)] ${
+              isLoading ? 'cursor-default hover:bg-[var(--color-border-light)]' : 'cursor-pointer'
             }`}
           >
             <Typography variant="paragraph-mini" className="text-[var(--color-text-primary)] [letter-spacing:0.4px]">
@@ -239,7 +239,7 @@ export const TenderlySimulation = ({
       </div>
 
       {/* Show expandable content only for nested simulations */}
-      <CollapsibleContent keepMounted>
+      <CollapsibleContent>
         {showExpandable && (
           <div className="px-3 pt-1 pb-4">
             <div className="flex flex-col gap-4">

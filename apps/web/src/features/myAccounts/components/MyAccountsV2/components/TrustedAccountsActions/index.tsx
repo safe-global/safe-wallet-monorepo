@@ -14,9 +14,9 @@ const TrustedAccountsActions = ({ onManage, onLinkClick }: { onManage: () => voi
 
   return (
     <div className={cn('shadcn-scope flex flex-wrap gap-2', isDarkMode && 'dark')}>
-      <AddAccountsChooser onLinkClick={onLinkClick} />
+      <AddAccountsChooser onLinkClick={onLinkClick} className="hover:bg-muted" />
 
-      <Button variant="outline" onClick={onManage} data-testid="add-more-safes-button">
+      <Button variant="outline" onClick={onManage} className="hover:bg-muted" data-testid="add-more-safes-button">
         <Settings2 className="size-4" />
         Manage list
       </Button>
