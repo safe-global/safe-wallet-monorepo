@@ -12,7 +12,6 @@ import IconButton from '@mui/material/IconButton'
 import { EllipsisVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
-import { useIsMobile } from '@/hooks/use-mobile'
 
 enum ModalType {
   EDIT = 'edit',
@@ -21,10 +20,15 @@ enum ModalType {
 
 const defaultOpen = { [ModalType.EDIT]: false, [ModalType.REMOVE]: false }
 
-const SpaceAddressBookActions = ({ entry }: { entry: SpaceAddressBookItemDto }) => {
+const SpaceAddressBookActions = ({
+  entry,
+  isCompact = false,
+}: {
+  entry: SpaceAddressBookItemDto
+  isCompact?: boolean
+}) => {
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
   const isAdmin = useIsAdmin()
-  const isMobile = useIsMobile()
 
   const handleOpenModal = (e: MouseEvent, type: keyof typeof open) => {
     e.stopPropagation()
@@ -52,7 +56,7 @@ const SpaceAddressBookActions = ({ entry }: { entry: SpaceAddressBookItemDto }) 
     </>
   )
 
-  if (isMobile) {
+  if (isCompact) {
     return (
       <>
         <DropdownMenu>

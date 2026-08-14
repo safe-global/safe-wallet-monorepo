@@ -24,7 +24,7 @@ describe('useOnboardingSafes', () => {
 
     expect(result.current.trustedSafes).toEqual([])
     expect(result.current.ownedSafes).toEqual([])
-    expect(result.current.flaggedOwnedAddresses.size).toBe(0)
+    expect(result.current.flaggedAddresses.size).toBe(0)
   })
 
   it('returns trusted safes from addedSafes', () => {
@@ -125,14 +125,14 @@ describe('useOnboardingSafes', () => {
     expect('safes' in result.current.ownedSafes[0]).toBe(true)
   })
 
-  describe('similar address detection (owned safes only)', () => {
+  describe('similar address detection', () => {
     it('returns empty set when fewer than 2 unique addresses', () => {
       const mockOwned = { '1': ['0xSingle'] }
       jest.spyOn(allOwnedSafes, 'default').mockReturnValue([mockOwned, undefined, false])
 
       const { result } = renderHook(() => useOnboardingSafes())
 
-      expect(result.current.flaggedOwnedAddresses.size).toBe(0)
+      expect(result.current.flaggedAddresses.size).toBe(0)
     })
 
     it('returns empty set when addresses are not similar', () => {
@@ -143,10 +143,10 @@ describe('useOnboardingSafes', () => {
 
       const { result } = renderHook(() => useOnboardingSafes())
 
-      expect(result.current.flaggedOwnedAddresses.size).toBe(0)
+      expect(result.current.flaggedAddresses.size).toBe(0)
     })
 
-    it('flags an owned safe that is similar to a trusted one, but never the trusted safe itself', () => {
+    it('flags both sides of a look-alike pair across trusted and owned lists', () => {
       // Same 6-char prefix and 4-char suffix, differ only in middle
       const addr1 = '0x1234567890abcdef1234567890abcdef12345678' // trusted
       const addr2 = '0x123456eeeeeeeeee1234567890abcdef12345678' // owned look-alike
@@ -164,9 +164,87 @@ describe('useOnboardingSafes', () => {
         },
       })
 
-      // A safe the user trusted at some point is treated as vetted — only the owned look-alike is flagged.
-      expect(result.current.flaggedOwnedAddresses.has(addr2.toLowerCase())).toBe(true)
-      expect(result.current.flaggedOwnedAddresses.has(addr1.toLowerCase())).toBe(false)
+      expect(result.current.flaggedAddresses.has(addr2.toLowerCase())).toBe(true)
+      expect(result.current.flaggedAddresses.has(addr1.toLowerCase())).toBe(true)
+    })
+
+    it('flags a look-alike pair even when both safes are pinned (WA-2912 regression)', () => {
+      // The poisoning scenario QA reproduced: the impostor was already pinned, so both rows
+      // sit in the trusted list — the flag must not go silent there.
+      const real = '0x92b44804CeB2021197F9Aa947dC29797000065c1'
+      const impostor = '0x92b452E85d06FAB52262202f212F6F79000065c1'
+
+      const { result } = renderHook(() => useOnboardingSafes(), {
+        initialReduxState: {
+          addedSafes: {
+            '1': {
+              [real]: { owners: [], threshold: 1 },
+              [impostor]: { owners: [], threshold: 1 },
+            },
+          },
+        },
+      })
+
+      expect(result.current.ownedSafes).toHaveLength(0)
+      expect(result.current.flaggedAddresses.has(real.toLowerCase())).toBe(true)
+      expect(result.current.flaggedAddresses.has(impostor.toLowerCase())).toBe(true)
+    })
+
+    it('bands a same-list cluster within the trusted list (≥2 pinned look-alikes)', () => {
+      const real = '0x92b44804CeB2021197F9Aa947dC29797000065c1'
+      const impostor = '0x92b452E85d06FAB52262202f212F6F79000065c1'
+
+      const { result } = renderHook(() => useOnboardingSafes(), {
+        initialReduxState: {
+          addedSafes: { '1': { [real]: { owners: [], threshold: 1 }, [impostor]: { owners: [], threshold: 1 } } },
+        },
+      })
+
+      const { trustedSimilarityGroups, ownedSimilarityGroups } = result.current
+      expect(trustedSimilarityGroups.size).toBe(2)
+      expect(trustedSimilarityGroups.get(real.toLowerCase())).toBe(trustedSimilarityGroups.get(impostor.toLowerCase()))
+      expect(ownedSimilarityGroups.size).toBe(0)
+    })
+
+    it('bands a same-list cluster within the owned list (≥2 owned look-alikes)', () => {
+      const owned1 = '0x1234567890abcdef1234567890abcdef12345678'
+      const owned2 = '0x123456eeeeeeeeee1234567890abcdef12345678'
+      jest.spyOn(allOwnedSafes, 'default').mockReturnValue([{ '1': [owned1, owned2] }, undefined, false])
+
+      const { result } = renderHook(() => useOnboardingSafes())
+
+      const { trustedSimilarityGroups, ownedSimilarityGroups } = result.current
+      expect(ownedSimilarityGroups.size).toBe(2)
+      expect(ownedSimilarityGroups.get(owned1.toLowerCase())).toBe(ownedSimilarityGroups.get(owned2.toLowerCase()))
+      expect(trustedSimilarityGroups.size).toBe(0)
+    })
+
+    it('bands each side of a cross-list pair as a lone card and warns them about each other', () => {
+      const trusted = '0x1234567890abcdef1234567890abcdef12345678'
+      const owned = '0x123456eeeeeeeeee1234567890abcdef12345678'
+      jest.spyOn(allOwnedSafes, 'default').mockReturnValue([{ '1': [owned] }, undefined, false])
+
+      const { result } = renderHook(() => useOnboardingSafes(), {
+        initialReduxState: { addedSafes: { '1': { [trusted]: { owners: [], threshold: 1 } } } },
+      })
+
+      // Each list bands its own single member (lone card + title), and the cross-list ⚠️ points across.
+      expect(result.current.trustedSimilarityGroups.get(trusted.toLowerCase())).toBeDefined()
+      expect(result.current.ownedSimilarityGroups.get(owned.toLowerCase())).toBeDefined()
+
+      const { similarWarnings } = result.current
+      expect(similarWarnings.get(trusted.toLowerCase())).toEqual({ trusted: [], owned: [owned.toLowerCase()] })
+      expect(similarWarnings.get(owned.toLowerCase())).toEqual({ trusted: [trusted.toLowerCase()], owned: [] })
+    })
+
+    it('leaves same-list clusters out of similarWarnings (no cross-list ⚠️)', () => {
+      const owned1 = '0x1234567890abcdef1234567890abcdef12345678'
+      const owned2 = '0x123456eeeeeeeeee1234567890abcdef12345678'
+      jest.spyOn(allOwnedSafes, 'default').mockReturnValue([{ '1': [owned1, owned2] }, undefined, false])
+
+      const { result } = renderHook(() => useOnboardingSafes())
+
+      expect(result.current.similarWarnings.size).toBe(0)
     })
   })
 })

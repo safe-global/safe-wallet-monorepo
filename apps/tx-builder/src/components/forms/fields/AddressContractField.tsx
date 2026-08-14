@@ -30,7 +30,6 @@ const AddressContractField = ({
       name={name}
       label={label}
       address={value}
-      inputProps={{ value }}
       onBlur={onBlur}
       showNetworkPrefix={!!networkPrefix}
       networkPrefix={networkPrefix}

@@ -23,12 +23,9 @@ import { useLoadFeature } from '@/features/__core__'
 export interface SafeSelectorTriggerContentProps {
   selectedItem: SafeItemData
   selectedChainId: string
-  /** True when the safe exists on more than one chain — the owner computes this across all items,
-   * since the trigger item itself can be a chain-scoped entry for the current safe. */
-  isMultiChain?: boolean
 }
 
-function SafeSelectorTriggerContent({ selectedItem, selectedChainId, isMultiChain }: SafeSelectorTriggerContentProps) {
+function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelectorTriggerContentProps) {
   const selectedChain = selectedItem.chains.find((c) => c.chainId === selectedChainId) ?? selectedItem.chains[0]
   const isUndeployed = Boolean(selectedChain?.isUndeployed)
   const isActivating = Boolean(selectedChain?.isActivating)
@@ -60,7 +57,7 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId, isMultiChai
           />
           {isHypernativeGuard && <SafeHeaderHnTooltip />}
         </div>
-        <div className="relative flex items-center gap-1 min-w-0 max-w-full">
+        <div className="flex items-center gap-1 min-w-0 max-w-full">
           <FullAddress
             address={selectedItem.address}
             className="max-sm:hidden"
@@ -70,9 +67,10 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId, isMultiChai
           <Typography variant="paragraph-mini" color="muted" className="font-mono sm:hidden">
             {shortAddress}
           </Typography>
-          {/* On sm+ the actions overlay the tail of the address on hover (a muted fade keeps them
-              legible) so they consume no width and the full address always shows. Inline on touch. */}
-          <span className="flex shrink-0 items-center gap-0.5 sm:pointer-events-none sm:absolute sm:inset-y-0 sm:right-0 sm:z-10 sm:bg-gradient-to-l sm:from-muted sm:from-50% sm:to-transparent sm:pl-6 sm:opacity-0 sm:transition-opacity sm:group-hover:pointer-events-auto sm:group-hover:opacity-100 sm:group-focus-within:pointer-events-auto sm:group-focus-within:opacity-100">
+          {/* Inline after the address so hovering never paints over it — the actions reserve their
+              width and the address middle-truncates when space is short. Hidden (not removed) until
+              hover/focus on sm+ so the layout stays stable; always visible inline on touch. */}
+          <span className="flex shrink-0 items-center gap-0.5 sm:pointer-events-none sm:opacity-0 sm:transition-opacity sm:group-hover:pointer-events-auto sm:group-hover:opacity-100 sm:group-focus-within:pointer-events-auto sm:group-focus-within:opacity-100">
             <CopyAddressButton address={selectedItem.address} />
             {blockExplorerLink && <ExplorerLinkButton href={blockExplorerLink.href} title={blockExplorerLink.title} />}
             <EnvHintButton chainId={selectedChainId} />
@@ -83,12 +81,9 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId, isMultiChai
         // flex (not inline): the inline-flex badge would otherwise sit on the wrapper's text
         // baseline and render a couple of px above the vertical middle of the chip.
         <span className="flex shrink-0 items-center max-sm:hidden">
-          {/* Multi-chain setups can differ per chain, so the count would be misleading — icon only. */}
-          <ThresholdBadge
-            threshold={selectedItem.threshold}
-            owners={selectedItem.owners}
-            iconOnly={isMultiChain ?? selectedItem.chains.length > 1}
-          />
+          {/* The trigger always reflects the active safe on the active chain, so it shows that chain's
+              threshold — even for a multi-chain safe (the dropdown group summary stays icon-only). */}
+          <ThresholdBadge threshold={selectedItem.threshold} owners={selectedItem.owners} />
         </span>
       )}
       {isUndeployed ? (

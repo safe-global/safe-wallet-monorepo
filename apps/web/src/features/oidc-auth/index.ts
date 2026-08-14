@@ -37,3 +37,18 @@ export type { OidcAuthContract } from './contract'
 
 export { useOidcLogin } from './hooks/useOidcLogin'
 export { useOidcLoginCallback } from './hooks/useOidcLoginCallback'
+export { useAuthenticators } from './hooks/useAuthenticators'
+
+// Direct (non-lazy) component export: the spaces account settings page is
+// user-scoped, so the chain-based OIDC_AUTH flag gating of the feature
+// handle does not apply there.
+export { default as SwitchAuthenticatorSection } from './components/SwitchAuthenticatorSection'
+export { default as WalletTwoFactorSection } from './components/WalletTwoFactorSection'
+export { default as WorkspaceTwoFactorSection } from './components/WorkspaceTwoFactorSection'
+export { default as MemberTwoFactorBadge } from './components/MemberTwoFactorBadge'
+
+// ─────────────────────────────────────────────────────────────────
+// 2FA STATUS DERIVATION (shared with the spaces Team page)
+// ─────────────────────────────────────────────────────────────────
+
+export { getMemberTwoFactorStatus, getTwoFactorCoverage, MemberTwoFactorStatus } from './utils/twoFactor'

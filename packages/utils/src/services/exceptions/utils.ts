@@ -64,3 +64,30 @@ export const asError = (thrown: unknown): ErrorWithStatus => {
 
   return new Error(message) as ErrorWithStatus
 }
+
+/** CGW SDK errors flatten the HTTP status into the message: "CGW error - 422: ..." */
+const CGW_STATUS_RE = /\bCGW error - ([1-5]\d{2}):/
+
+const isHttpStatus = (value: unknown): value is number => typeof value === 'number' && value >= 100 && value <= 599
+
+/**
+ * Extracts the HTTP status of a failed request from an unknown thrown value,
+ * checking structural fields first (RTK Query / `asError` set `status`, the
+ * CGW SDK's `ErrorResponse` uses `statusCode`) and falling back to the CGW SDK
+ * message format. Returns `undefined` when no plausible HTTP status is found,
+ * so non-HTTP numbers (e.g. CGW internal codes) are never misreported.
+ */
+export const getHttpStatusFromError = (thrown: unknown): number | undefined => {
+  if (typeof thrown === 'object' && thrown !== null) {
+    const { status, statusCode } = thrown as { status?: unknown; statusCode?: unknown }
+    if (isHttpStatus(status)) return status
+    if (isHttpStatus(statusCode)) return statusCode
+  }
+
+  if (thrown instanceof Error) {
+    const match = thrown.message.match(CGW_STATUS_RE)
+    if (match) return Number(match[1])
+  }
+
+  return undefined
+}

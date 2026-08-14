@@ -8,8 +8,9 @@ import { useForkRef } from '@mui/material/utils'
 import type { SafeItem } from '@/hooks/safes'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useRowOverviews } from './useRowOverviews'
-import { Badge } from '@/components/ui/badge'
-import { GripVertical, TriangleAlert } from 'lucide-react'
+import { GripVertical } from 'lucide-react'
+import { SimilarityWarningIcon } from './SimilarityBand'
+import type { SimilarWarning } from '@/features/address-poisoning'
 import Identicon from '@/components/common/Identicon'
 import { SafeInfoDisplay } from '@/components/common/AccountRow'
 import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
@@ -21,6 +22,7 @@ import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { cn } from '@/utils/cn'
 import { AccountItem as BaseAccountItem } from '../AccountItem'
+import { NetworkLogosPill } from '@/features/multichain'
 import type { AccountLine } from './useSafeAccountRows'
 import type { SafeAccountColumn } from './columns'
 import { PendingBadge, ThresholdBadge, formatPendingLabel } from '@/components/common/AccountBadges'
@@ -43,8 +45,10 @@ type SafeAccountTableRowProps = {
   expanded?: boolean
   /** Draw a bottom divider — only true at the boundary between top-level accounts, not within a group. */
   showDivider?: boolean
-  /** Flags the row with a "High similarity" warning (address-poisoning defence). */
-  isFlagged?: boolean
+  /** When set, shows the inline look-alike ⚠️ (with a peers tooltip) after the name — cross-list only. */
+  warning?: SimilarWarning
+  /** Tints the row (warning background) as a member of an address-poisoning similarity group. */
+  highlighted?: boolean
   /** Replaces the default context-menu actions cell (e.g. an "Add to workspace" button). */
   renderActions?: (line: AccountLine) => ReactNode
   /** When set, adds the hover rename pencil to the identity cell (non-modal surfaces). */
@@ -63,24 +67,17 @@ type SafeAccountTableRowProps = {
   onOverviewsLoaded: (overviews: SafeOverview[]) => void
 }
 
-const HighSimilarityBadge = () => (
-  <Badge variant="warning" className="-ml-px self-start">
-    <TriangleAlert data-icon="inline-start" />
-    High similarity
-  </Badge>
-)
-
 // Shares the dropdown's row identity cell: clip-gated name/address tooltips and copy/explorer icons
 // revealed on row hover. Single/parent rows lead with the blockie identicon; per-chain child rows
 // carry no icon (the chain is already named beside them) — a blank icon-width spacer keeps their name
 // aligned under the parent's. `onRename`, when set, adds the hover rename pencil (non-modal surfaces).
 const NameCellContent = ({
   line,
-  isFlagged,
+  warning,
   onRename,
 }: {
   line: AccountLine
-  isFlagged?: boolean
+  warning?: SimilarWarning
   onRename?: () => void
 }) => {
   const chainConfig = useChain(line.chainId)
@@ -102,7 +99,7 @@ const NameCellContent = ({
       hideAddress={!line.showAddress}
       explorerLink={explorerLink}
       onRename={onRename}
-      badge={isFlagged ? <HighSimilarityBadge /> : undefined}
+      nameAdornment={warning ? <SimilarityWarningIcon warning={warning} /> : undefined}
       nameVariant="paragraph-bold"
       className="min-w-0"
     />
@@ -112,7 +109,7 @@ const NameCellContent = ({
 const NameCell = ({
   line,
   expanded,
-  isFlagged,
+  warning,
   disableLink,
   onToggle,
   onLinkClick,
@@ -120,14 +117,14 @@ const NameCell = ({
 }: {
   line: AccountLine
   expanded?: boolean
-  isFlagged?: boolean
+  warning?: SimilarWarning
   /** In selection mode the row itself toggles the checkbox, so the name never navigates. */
   disableLink?: boolean
   onToggle?: () => void
   onLinkClick?: () => void
   onRename?: () => void
 }) => {
-  const content = <NameCellContent line={line} isFlagged={isFlagged} onRename={onRename} />
+  const content = <NameCellContent line={line} warning={warning} onRename={onRename} />
 
   if (line.expandable) {
     return (
@@ -144,29 +141,38 @@ const NameCell = ({
   }
 
   if (line.href && !disableLink) {
+    // A link can't wrap the content (the explorer <a> is in there — no <a> inside <a>), so it sits
+    // behind it instead. Clicks pass through the content to the link; only the small controls and
+    // the address tooltip still catch the mouse.
     return (
-      <NextLink href={line.href} onClick={onLinkClick} data-testid="account-row-link" className="block">
-        {content}
-      </NextLink>
+      <div className="relative">
+        <NextLink
+          href={line.href}
+          onClick={onLinkClick}
+          data-testid="account-row-link"
+          aria-label={line.displayName}
+          className="absolute inset-0"
+        />
+        <div className="pointer-events-none relative [&_[role=button]]:pointer-events-auto [&_[data-address-tooltip]]:pointer-events-auto [&_a]:pointer-events-auto">
+          {content}
+        </div>
+      </div>
     )
   }
 
   return content
 }
 
-// Absolutely positioned so entering sort mode never shifts the row content — hidden until the row is
-// hovered/focused, or while it's dragging. Two placements, both reserving no layout space:
-//  • gutter (default): floats in the empty gutter left of the table, used by the page lists where the
-//    Name cell leads and there's room outside the table.
+// Always-visible grip, absolutely positioned so it reserves no layout space. Two placements:
+//  • default: inside the Name cell's left padding (the cell widens via `pl` while reordering, shifting
+//    the avatar right to make room — see the RowCell sx), used by the page lists.
 //  • inline: sits in the leading checkbox cell's own left padding (selection surfaces like the Manage
-//    list, whose table is inside a horizontally-clipping scroll container with no outer gutter).
+//    list, whose table is inside a horizontally-clipping scroll container).
 const ReorderHandle = ({
   dragHandleProps,
-  isDragging,
   inline,
 }: {
   dragHandleProps?: DraggableProvidedDragHandleProps | null
-  isDragging?: boolean
   inline?: boolean
 }) => (
   <span
@@ -174,9 +180,8 @@ const ReorderHandle = ({
     data-testid="account-drag-handle"
     aria-label="Drag to reorder"
     className={cn(
-      'text-muted-foreground hover:text-foreground absolute inset-y-0 flex cursor-grab items-center justify-center transition-opacity active:cursor-grabbing',
-      inline ? 'left-0 w-4' : '-left-8 w-8',
-      isDragging ? 'opacity-100' : 'opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100',
+      'text-muted-foreground hover:text-foreground absolute inset-y-0 flex cursor-grab items-center justify-center active:cursor-grabbing',
+      inline ? 'left-0 w-4' : 'left-0 w-7',
     )}
   >
     <GripVertical className="size-4" />
@@ -216,10 +221,14 @@ const CellContent = ({ column, line }: { column: SafeAccountColumn; line: Accoun
         />
       )
     case 'networks':
-      return line.networks ? (
-        <BaseAccountItem.ChainBadge safes={line.networks} />
-      ) : (
-        <BaseAccountItem.ChainBadge chainId={line.chainId} />
+      return (
+        <NetworkLogosPill>
+          {line.networks ? (
+            <BaseAccountItem.ChainBadge safes={line.networks} />
+          ) : (
+            <BaseAccountItem.ChainBadge chainId={line.chainId} />
+          )}
+        </NetworkLogosPill>
       )
     case 'workspaces':
       return <WorkspaceAvatars spaces={line.workspaces} />
@@ -279,7 +288,6 @@ const RowCell = ({
   onSelectToggle,
   renderActions,
   dragHandleProps,
-  isDragging,
 }: {
   column: SafeAccountColumn
   line: AccountLine
@@ -290,7 +298,6 @@ const RowCell = ({
   onSelectToggle?: (next: boolean) => void
   renderActions?: (line: AccountLine) => ReactNode
   dragHandleProps?: DraggableProvidedDragHandleProps | null
-  isDragging?: boolean
 }) => {
   // The draggable parent's first cell hosts the (absolutely-positioned) grip — the Name cell normally,
   // or the leading checkbox cell in selection mode, so the grip sits left of the checkbox instead of
@@ -308,16 +315,19 @@ const RowCell = ({
         // Slimmer than MUI's default 16px so the fixed column budget matches the design.
         px: 1,
         // Horizontal inset for the hover pill on the outer cells (vertical inset + background-clip are set
-        // at the Table level, where they can beat the theme's cell-border override).
-        '&:first-of-type': { pl: 2, borderLeft: '4px solid transparent' },
+        // at the Table level, where they can beat the theme's cell-border override). When the Name cell
+        // hosts the reorder grip, the extra padding makes room so the grip sits
+        // left of the avatar instead of over it.
+        '&:first-of-type': {
+          pl: hostsHandle && column.id !== 'select' ? 3.5 : 2,
+          borderLeft: '4px solid transparent',
+        },
         '&:last-of-type': { pr: 2, borderRight: '4px solid transparent' },
         ...(reorderable && column.width ? { width: column.width, minWidth: column.width, maxWidth: column.width } : {}),
       }}
       onClick={column.id === 'actions' || column.id === 'select' ? (e) => e.stopPropagation() : undefined}
     >
-      {hostsHandle && (
-        <ReorderHandle dragHandleProps={dragHandleProps} isDragging={isDragging} inline={column.id === 'select'} />
-      )}
+      {hostsHandle && <ReorderHandle dragHandleProps={dragHandleProps} inline={column.id === 'select'} />}
       {column.id === 'select' ? (
         <SelectCell checkbox={checkbox} onSelectToggle={onSelectToggle} />
       ) : column.id === 'name' ? (
@@ -341,7 +351,8 @@ const SafeAccountTableRow = ({
   columns,
   expanded,
   showDivider,
-  isFlagged,
+  warning,
+  highlighted,
   renderActions,
   onRename,
   checkbox,
@@ -393,7 +404,7 @@ const SafeAccountTableRow = ({
     <NameCell
       line={line}
       expanded={expanded}
-      isFlagged={isFlagged}
+      warning={warning}
       // Per-chain child rows can't be renamed on their own — only the whole safe (single/group).
       onRename={onRename && line.variant !== 'child' ? () => onRename(line) : undefined}
       disableLink={Boolean(checkbox)}
@@ -412,6 +423,8 @@ const SafeAccountTableRow = ({
       data-disabled={checkbox?.disabledReason ? '' : undefined}
       // Draws the row separator (via the Table sx override); false only at the last row of a group/list.
       data-divider={showDivider ? '' : undefined}
+      // Band membership marker — the card styling lives in the Table sx, keyed off this attribute.
+      data-highlighted={highlighted && !isDragging ? '' : undefined}
       // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover.
       className="group/row"
       tabIndex={-1}
@@ -434,7 +447,6 @@ const SafeAccountTableRow = ({
           onSelectToggle={onSelectToggle}
           renderActions={renderActions}
           dragHandleProps={dragHandleProps}
-          isDragging={isDragging}
         />
       ))}
     </TableRow>

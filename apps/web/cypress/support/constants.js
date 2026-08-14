@@ -49,7 +49,6 @@ export const spaceUrl = '/spaces/settings?spaceId='
 export const spaceMembersUrl = '/spaces/members?spaceId='
 export const spaceSafeAccountsUrl = '/spaces/safe-accounts?spaceId='
 export const spaceAddressBookUrl = '/spaces/address-book?spaceId='
-export const userSettingsUrl = '/user-settings'
 export const prodbaseUrl = 'https://app.safe.global'
 export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
 export const bridgeWidget = 'https://iframe.jumper.exchange/bridge'
@@ -323,8 +322,10 @@ export const localStorageKeys = {
   SAFE_v2__pendingCfDeletes: 'SAFE_v2__pendingCfDeletes',
   SAFE_v2__visitedSafes: 'SAFE_v2__visitedSafes',
   SAFE_v2__auth: 'SAFE_v2__auth',
+  SAFE_v2__lastWallet: 'SAFE_v2__lastWallet',
 }
 
 export const sessionStorageKeys = {
   SAFE_v2__classicViewEnabled: 'SAFE_v2__classicViewEnabled',
+  SAFE_v2__privateKeyModulePK: 'SAFE_v2__privateKeyModulePK',
 }

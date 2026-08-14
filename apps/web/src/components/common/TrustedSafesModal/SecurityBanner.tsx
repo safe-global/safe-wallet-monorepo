@@ -17,7 +17,7 @@ const SecurityBanner = ({ title, className }: SecurityBannerProps) => {
   return (
     <Alert
       variant="warning"
-      className={cn('mb-4 dark:bg-[var(--color-warning-background)] dark:text-[var(--color-text-primary)]', className)}
+      className={cn('mb-4 dark:bg-[var(--color-warning-background)] dark:text-[var(--color-warning-main)]', className)}
     >
       <TriangleAlert className="dark:text-[var(--color-warning-main)]" />
       {title && <AlertTitle className="font-bold">{title}</AlertTitle>}
@@ -26,7 +26,7 @@ const SecurityBanner = ({ title, className }: SecurityBannerProps) => {
         <ExternalLink
           href={HelpCenterArticle.ADDRESS_POISONING}
           noIcon
-          sx={{ '& span': { textDecoration: 'underline' }, '.dark &': { color: 'inherit' } }}
+          sx={{ '& span': { textDecoration: 'underline' }, color: 'inherit' }}
         >
           Learn more
         </ExternalLink>

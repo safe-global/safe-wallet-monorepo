@@ -117,7 +117,7 @@ const useSafeScanContext = (
     // transaction scanning) all default to false, producing wrong scanner results.
     if (!chain) return null
 
-    // Resolve deployer using the same logic as useMasterCopies + OutdatedMastercopyWarning
+    // Resolve deployer using the same logic as useMasterCopies + useMastercopyMigration
     const matchingMc = masterCopies?.find((mc) => sameAddress(mc.address, safeInfo.implementation.value))
     const isCircles = matchingMc?.version?.toLowerCase().includes('circles') ?? false
     const deployer: 'Gnosis' | 'Circles' | null = matchingMc ? (isCircles ? 'Circles' : 'Gnosis') : null

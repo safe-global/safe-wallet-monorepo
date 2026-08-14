@@ -3,7 +3,8 @@ import TrustedSafesModal from './index'
 import type { UseTrustedSafesModalReturn } from './useTrustedSafesModal'
 import { useRouter } from 'next/router'
 import { useIsQualifiedSafe } from '@/features/spaces'
-import { OrderByOption, ORDER_BY_RESET_VERSION } from '@/store/orderByPreferenceSlice'
+import { OrderByOption, ORDER_BY_RESET_VERSION, TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
+import { getStoreInstance } from '@/store'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
@@ -90,6 +91,9 @@ const mockModal: UseTrustedSafesModalReturn = {
   pendingConfirmation: null,
   pendingSelectAllConfirmation: false,
   similarAddressesForSelectAll: [],
+  flagged: new Set<string>(),
+  similarityGroups: new Map<string, string>(),
+  anchorAddresses: new Set<string>(),
   searchQuery: '',
   isLoading: false,
   hasChanges: false,
@@ -305,9 +309,15 @@ describe('TrustedSafesModal', () => {
       orderByPreference: { orderBy: OrderByOption.MANUAL, resetVersion: ORDER_BY_RESET_VERSION, manualOrder: {} },
     }
 
-    it('does not enable reordering under the default (Name) sort', () => {
+    it('enables reordering under the default (Name) sort and switches to Manual on drop', () => {
       render(<TrustedSafesModal modal={mockModal} />)
-      expect(screen.queryByTestId('reorder-enabled')).not.toBeInTheDocument()
+      expect(getStoreInstance().getState().orderByPreference.orderBy).toBe(OrderByOption.NAME)
+
+      fireEvent.click(screen.getByTestId('reorder-enabled'))
+
+      const { orderByPreference } = getStoreInstance().getState()
+      expect(orderByPreference.orderBy).toBe(OrderByOption.MANUAL)
+      expect(orderByPreference.manualOrder?.[TRUSTED_ORDER_SCOPE]).toBeDefined()
     })
 
     it('enables reordering in Manual sort mode', () => {

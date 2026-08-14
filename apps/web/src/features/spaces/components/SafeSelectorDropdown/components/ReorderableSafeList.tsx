@@ -73,8 +73,11 @@ const ReorderableSafeList = ({ items, selectedItemId, onSelect, onRename, onReor
                           // previous network row (network sub-rows are base-ui SelectItems).
                           onMouseEnter={focusRowOnHover}
                           className={cn(
-                            'group/row flex cursor-pointer items-center gap-2 rounded-lg py-3 pl-2 pr-3 hover:bg-muted',
-                            isCurrent && 'bg-[var(--color-background-light)]',
+                            'group/row flex cursor-pointer items-center gap-2 rounded-lg py-3 pl-2 pr-3',
+                            // The current safe hovers to a deeper green instead of the grey used by the rest.
+                            isCurrent
+                              ? 'bg-[var(--color-background-light)] hover:bg-[var(--color-background-light-hover)]'
+                              : 'hover:bg-muted',
                           )}
                         >
                           {dragHandle}

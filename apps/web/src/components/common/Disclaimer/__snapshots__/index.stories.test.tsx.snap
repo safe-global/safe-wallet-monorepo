@@ -33,11 +33,11 @@ exports[`./index.stories BlockedAddress 1`] = `
         >
           Blocked Address
         </h3>
-        <p
+        <div
           class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
         >
           This signer address is blocked by the Safe interface, due to being associated with the blocked activities by the U.S. Department of Treasury in the Specially Designated Nationals (SDN) list.
-        </p>
+        </div>
         <hr
           class="MuiDivider-root MuiDivider-fullWidth mui-style-1facvfi-MuiDivider-root"
         />
@@ -86,7 +86,7 @@ exports[`./index.stories LegalDisclaimer 1`] = `
         >
           Legal Disclaimer
         </h3>
-        <p
+        <div
           class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
         >
           <div
@@ -146,7 +146,7 @@ exports[`./index.stories LegalDisclaimer 1`] = `
               </p>
             </div>
           </div>
-        </p>
+        </div>
         <hr
           class="MuiDivider-root MuiDivider-fullWidth mui-style-1facvfi-MuiDivider-root"
         />

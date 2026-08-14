@@ -11,10 +11,12 @@ const LogoMark = (): ReactElement => (
       alt="Safe"
       width={24}
       height={24}
-      className="size-6 dark:hidden"
+      className="size-6 group-data-[collapsible=icon]:size-4.5 dark:hidden"
       data-testid="logo-image"
     />
-    <span className={`hidden dark:block size-6 shrink-0 rounded-[2px] ${css.logoPrimaryFill}`} />
+    <span
+      className={`hidden dark:block size-6 group-data-[collapsible=icon]:size-4.5 shrink-0 rounded-[2px] ${css.logoPrimaryFill}`}
+    />
   </>
 )
 
@@ -36,7 +38,7 @@ const SafeLogo = ({
         href={href}
         data-testid={testId}
         className={cn(
-          'flex items-center gap-2 rounded-2xl bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground transition-opacity hover:opacity-80',
+          'flex items-center gap-2 rounded-lg bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground transition-opacity hover:opacity-80',
           className,
         )}
       >

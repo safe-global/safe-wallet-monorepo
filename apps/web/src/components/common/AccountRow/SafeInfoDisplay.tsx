@@ -26,8 +26,8 @@ export interface SafeInfoDisplayProps {
   leading?: ReactNode
   /** Hides the address line — e.g. multi-chain child rows that show only a chain name. */
   hideAddress?: boolean
-  /** Rendered above the name (e.g. a "High similarity" warning badge). */
-  badge?: ReactNode
+  /** Rendered inline, right after the name (e.g. a small look-alike ⚠️ icon). */
+  nameAdornment?: ReactNode
   /** Typography variant for the name line. Defaults to the compact `paragraph-small-medium`. */
   nameVariant?: ComponentProps<typeof TruncatedText>['variant']
 }
@@ -40,7 +40,7 @@ const SafeInfoDisplay = ({
   onRename,
   leading,
   hideAddress,
-  badge,
+  nameAdornment,
   nameVariant = 'paragraph-small-medium',
 }: SafeInfoDisplayProps) => {
   const { displayName } = getSafeDisplayInfo(name, address)
@@ -58,9 +58,9 @@ const SafeInfoDisplay = ({
         )}
       </div>
       <div className="flex flex-col items-start flex-1 min-w-0">
-        {badge}
         <div className="flex items-center gap-1 min-w-0 max-w-full">
           <TruncatedText variant={nameVariant} className="block min-w-0" text={displayName} />
+          {nameAdornment}
           {onRename && <RenameButton onRename={onRename} className={HOVER_ACTION_CLASS} />}
           {/* With no address line to host it (e.g. a multi-chain child showing only its chain name),
               the explorer link rides alongside the name instead. */}
@@ -84,7 +84,8 @@ const SafeInfoDisplay = ({
                 setAddressTooltipOpen(shouldOpenTooltip(nextOpen, details.reason, addressMiddleRef.current))
               }
             >
-              <TooltipTrigger render={<span />} className="flex min-w-0">
+              {/* data-address-tooltip lets click-through hosts (see NameCell) keep this tooltip hoverable */}
+              <TooltipTrigger render={<span data-address-tooltip="" />} className="flex min-w-0">
                 <FullAddress address={address} middleRef={addressMiddleRef} data-testid="safe-item-address" />
               </TooltipTrigger>
               <TooltipContent className="pointer-events-none select-none">{address}</TooltipContent>

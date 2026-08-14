@@ -5,6 +5,10 @@ import type { SafeItem } from '@/hooks/safes'
 const mockUseSpaceSafes = jest.fn()
 const mockUseIsAdmin = jest.fn()
 
+jest.mock('@/features/address-poisoning', () => ({
+  useSimilarityClusters: () => ({ flagged: new Set<string>(), groupIdByAddress: new Map<string, string>() }),
+}))
+
 jest.mock('../../AddAccountsChooser', () => ({
   __esModule: true,
   default: ({ buttonLabel, entryPoint }: { buttonLabel?: string; entryPoint?: string }) => (
@@ -42,6 +46,7 @@ jest.mock('@/components/common/SafeListSortToggle', () => ({
 jest.mock('@/hooks/safes', () => ({
   useAllOwnedSafes: () => [{}, undefined, false],
   useSafeOrderComparator: () => () => 0,
+  useSaveManualOrder: () => jest.fn(),
   // Mirrors the real helper: unwraps multi-chain groups, otherwise passes the item through. The page
   // relies on this to keep the names useSpaceSafes already resolved instead of rebuilding them.
   flattenSafeItems: (items: Array<SafeItem & { safes?: SafeItem[] }>): SafeItem[] =>

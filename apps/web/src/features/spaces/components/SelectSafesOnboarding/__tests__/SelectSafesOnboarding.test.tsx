@@ -43,14 +43,14 @@ jest.mock('../hooks/useOnboardingNavigation', () => ({
 
 let mockTrustedSafes: AllSafeItems = []
 let mockOwnedSafes: AllSafeItems = []
-let mockFlaggedOwned = new Set<string>()
+let mockFlagged = new Set<string>()
 
 jest.mock('../hooks/useOnboardingSafes', () => ({
   __esModule: true,
   default: () => ({
     trustedSafes: mockTrustedSafes,
     ownedSafes: mockOwnedSafes,
-    flaggedOwnedAddresses: mockFlaggedOwned,
+    flaggedAddresses: mockFlagged,
     handleSearch: jest.fn(),
     hasNoSafes: false,
   }),
@@ -97,27 +97,27 @@ describe('SelectSafesOnboarding — selection wiring', () => {
     capturedListProps = {}
     mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
     mockOwnedSafes = []
-    mockFlaggedOwned = new Set<string>()
+    mockFlagged = new Set<string>()
     mockWalletValue = { address: '0xWallet' }
   })
 
   it('shows a selected-count of the per-workspace cap instead of a select-all control', () => {
     render(<SelectSafesOnboarding />)
 
-    expect(screen.getByText(/0 of 10 selected/i)).toBeInTheDocument()
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('0 of 10 selected')
     expect(screen.queryByTestId('select-all-trusted')).not.toBeInTheDocument()
     expect(screen.queryByTestId('select-all-owned')).not.toBeInTheDocument()
   })
 
   it('passes the selection model (not select-all toggles) to OnboardingSafesList', () => {
     mockOwnedSafes = [makeSafe('10', '0xB')] as AllSafeItems
-    mockFlaggedOwned = new Set(['0xb'])
+    mockFlagged = new Set(['0xb'])
     render(<SelectSafesOnboarding />)
 
     expect(capturedListProps.selectedKeys).toBeInstanceOf(Set)
     expect(typeof capturedListProps.onToggle).toBe('function')
     expect(capturedListProps.isAtLimit).toBe(false)
-    expect(capturedListProps.flaggedOwnedAddresses).toBe(mockFlaggedOwned)
+    expect(capturedListProps.flaggedAddresses).toBe(mockFlagged)
     expect(capturedListProps.trustedSelectAll).toBeUndefined()
     expect(capturedListProps.ownedSelectAll).toBeUndefined()
   })
@@ -128,7 +128,7 @@ describe('SelectSafesOnboarding — selection wiring', () => {
     const onToggle = capturedListProps.onToggle as (line: unknown, checked: boolean) => void
     act(() => onToggle({ key: '1:0xA', variant: 'single', address: '0xA', source: makeSafe('1', '0xA') }, true))
 
-    expect(screen.getByText(/1 of 10 selected/i)).toBeInTheDocument()
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('1 of 10 selected')
   })
 })
 
@@ -138,7 +138,7 @@ describe('SelectSafesOnboarding — wallet connection state', () => {
     capturedListProps = {}
     mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
     mockOwnedSafes = []
-    mockFlaggedOwned = new Set<string>()
+    mockFlagged = new Set<string>()
     mockWalletValue = { address: '0xWallet' }
   })
 
@@ -174,7 +174,7 @@ describe('SelectSafesOnboarding — step counter reflects the survey flag', () =
     capturedListProps = {}
     mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
     mockOwnedSafes = []
-    mockFlaggedOwned = new Set<string>()
+    mockFlagged = new Set<string>()
     mockWalletValue = { address: '0xWallet' }
   })
 

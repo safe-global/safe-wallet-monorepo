@@ -23,7 +23,6 @@ import SpaceBreadcrumbs from './components/SpaceBreadcrumbs'
 import SpacesList from './components/SpacesList'
 import SpaceSidebar from './components/SpaceSidebar'
 import SpaceSettings from './components/SpaceSettings'
-import UserSettings from './components/UserSettings'
 import SpaceSafeContextMenu from './components/SafeAccounts/SpaceSafeContextMenu'
 import SendTransactionButton from './components/SafeAccounts/SendTransactionButton'
 import PendingTxWidget from './components/Dashboard/PendingTxWidget'
@@ -58,7 +57,6 @@ const feature: SpacesContract = {
   SpacesList,
   SpaceSidebar,
   SpaceSettings,
-  UserSettings,
   SpaceSafeContextMenu,
   SendTransactionButton,
   PendingTxWidget,

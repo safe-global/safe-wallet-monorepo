@@ -16,7 +16,7 @@ import { applySafeSelectionToggle, getSelectedLeafKeys } from '../SelectSafesOnb
 import ExternalLink from '@/components/common/ExternalLink'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
-import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
+import { useSimilarityClusters } from '@/features/address-poisoning'
 import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import {
@@ -112,8 +112,10 @@ const AddAccounts = ({
   const { configs } = useChains()
   const allChainIds = useMemo(() => configs.map((c) => c.chainId), [configs])
 
-  // Get safe data
-  const [allOwned = {}] = useAllOwnedSafes(walletAddress)
+  // Get safe data. Only enumerate owned safes (the captcha-protected owners endpoint) once the modal
+  // is open: the trusted list itself is built from added safes, so `allOwned` only feeds the per-row
+  // read-only flag — which nothing needs while the dialog is closed and this trigger sits mounted.
+  const [allOwned = {}] = useAllOwnedSafes(isOpen ? walletAddress : '')
   const allAdded = useAppSelector(selectAllAddedSafes)
   const allUndeployed = useAppSelector(selectUndeployedSafes)
   const allVisitedSafes = useAppSelector(selectAllVisitedSafes)
@@ -143,10 +145,8 @@ const AddAccounts = ({
     sortComparator,
   ])
 
-  const similarAddresses = useMemo<Set<string>>(
-    () => getFlaggedSimilarAddressSet(trustedSafes.map((s) => s.address)),
-    [trustedSafes],
-  )
+  const trustedSafeAddresses = useMemo(() => trustedSafes.map((s) => s.address), [trustedSafes])
+  const { groupIdByAddress: similarityGroups } = useSimilarityClusters(trustedSafeAddresses)
 
   const [rawSearchQuery, setRawSearchQuery] = useState('')
   const debouncedSearchQuery = useDebounce(rawSearchQuery, 300)
@@ -485,7 +485,7 @@ const AddAccounts = ({
                       <SafeAccountsTable
                         items={visibleTrusted}
                         columns={PICKER_COLUMNS}
-                        flaggedAddresses={similarAddresses}
+                        similarityGroups={similarityGroups}
                         selection={{
                           selectedKeys,
                           onToggle: handleTableToggle,

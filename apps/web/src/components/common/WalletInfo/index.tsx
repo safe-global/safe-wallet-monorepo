@@ -10,6 +10,7 @@ import { useChain } from '@/hooks/useChains'
 import madProps from '@/utils/mad-props'
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew'
 import useChainId from '@/hooks/useChainId'
+import { useWalletName } from '@/hooks/wallets/useWalletName'
 import { getNativeTokenDisplay, NATIVE_TOKEN_DISPLAY_DEFAULT } from '@safe-global/utils/utils/chains'
 
 type WalletInfoProps = {
@@ -35,6 +36,7 @@ export const WalletInfo = ({
 }: WalletInfoProps) => {
   const chainInfo = useChain(wallet.chainId)
   const prefix = chainInfo?.shortName
+  const walletName = useWalletName(wallet)
   const { showWalletBalance } = chainInfo ? getNativeTokenDisplay(chainInfo) : NATIVE_TOKEN_DISPLAY_DEFAULT
 
   const handleSwitchWallet = () => {
@@ -61,7 +63,7 @@ export const WalletInfo = ({
         <Typography variant="body2" className={css.address} component="div">
           <EthHashInfo
             address={wallet.address}
-            name={addressBook[wallet.address] || wallet.ens || wallet.label}
+            name={addressBook[wallet.address] || walletName || wallet.label}
             showAvatar={false}
             showPrefix={false}
             hasExplorer

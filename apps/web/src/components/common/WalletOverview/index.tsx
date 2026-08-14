@@ -7,6 +7,7 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import WalletIcon from '@/components/common/WalletIcon'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { useChain } from '@/hooks/useChains'
+import { useWalletName } from '@/hooks/wallets/useWalletName'
 import WalletBalance from '@/components/common/WalletBalance'
 import { getNativeTokenDisplay, NATIVE_TOKEN_DISPLAY_DEFAULT } from '@safe-global/utils/utils/chains'
 
@@ -35,8 +36,8 @@ const WalletOverview = ({
   showBalance?: boolean
 }): ReactElement => {
   const walletChain = useChain(wallet.chainId)
-  const prefix = walletChain?.shortName
   const { showWalletBalance } = walletChain ? getNativeTokenDisplay(walletChain) : NATIVE_TOKEN_DISPLAY_DEFAULT
+  const ens = useWalletName(wallet)
 
   return (
     <Box className={css.container}>
@@ -44,11 +45,11 @@ const WalletOverview = ({
 
       <Box className={css.walletDetails}>
         <Typography variant="body2" component="div">
-          {wallet.ens ? (
-            <div>{wallet.ens}</div>
+          {ens ? (
+            <div>{ens}</div>
           ) : (
             <EthHashInfo
-              prefix={prefix || ''}
+              prefix={walletChain?.shortName || ''}
               address={wallet.address}
               showName={false}
               showAvatar={false}

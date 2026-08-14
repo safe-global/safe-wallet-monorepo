@@ -9,6 +9,7 @@ import {
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuItem,
+  SidebarSeparator,
 } from '@/components/ui/sidebar'
 import css from '../../styles.module.css'
 import type { ResolvedSidebarItem, SafeSidebarVariantProps } from '../../types'
@@ -20,7 +21,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
-import { useSidebarHydrated } from '../../hooks/useSidebarHydrated'
+import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { containerVariants, itemVariants } from '../../constants'
 import { useAppSelector } from '@/store'
@@ -38,7 +39,7 @@ export const SafeSidebarVariant = ({
   const router = useRouter()
   const { safe } = useSafeInfo()
   const isCounterfactualSafe = useIsCounterfactualSafe()
-  const isHydrated = useSidebarHydrated()
+  const isHydrated = useIsHydrated()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const safeFromQuery = useSafeQueryParam()
   const safeAddress = isHydrated ? safeFromQuery || undefined : undefined
@@ -76,7 +77,7 @@ export const SafeSidebarVariant = ({
     <SidebarContent>
       <motion.div variants={containerVariants} initial="hidden" animate="visible">
         {shouldRenderWorkspaceHeaderGroup && (
-          <motion.div variants={itemVariants} className="mb-2">
+          <motion.div variants={itemVariants} className="mb-4">
             <SidebarGroup className={css.sidebarGroup}>
               <SidebarMenu>
                 <SidebarMenuItem>
@@ -88,7 +89,7 @@ export const SafeSidebarVariant = ({
         )}
 
         {/* Action Button */}
-        <motion.div variants={itemVariants} className="mb-2">
+        <motion.div variants={itemVariants} className="mb-4">
           <SidebarGroup className={css.sidebarGroup}>
             <SidebarGroupContent>
               <SidebarActionButton />
@@ -114,7 +115,10 @@ export const SafeSidebarVariant = ({
         {(defiGroup?.items?.length ?? 0) > 0 && (
           <motion.div variants={itemVariants}>
             <SidebarGroup className={css.sidebarGroup}>
-              <SidebarGroupLabel>{defiGroup?.label ?? ''}</SidebarGroupLabel>
+              <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+                {defiGroup?.label ?? ''}
+              </SidebarGroupLabel>
+              <SidebarSeparator className="my-2 mx-0 px-[18px] hidden group-data-[collapsible=icon]:block group-data-[collapsible=icon]:self-stretch" />
               <SidebarGroupContent>
                 <SidebarMenu className="gap-0">
                   {displayDefiItems.map((item, index) => (

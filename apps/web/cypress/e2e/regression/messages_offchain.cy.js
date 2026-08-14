@@ -22,8 +22,7 @@ describe('Offchain Messages tests', () => {
   })
 
   it('Verify confirmation window is displayed for unsigned message', () => {
-    cy.visit(constants.transactionsMessagesUrl + staticSafes.SEP_STATIC_SAFE_26)
-    wallet.connectSigner(signer2)
+    wallet.connectSignerViaStorage(signer2, constants.transactionsMessagesUrl + staticSafes.SEP_STATIC_SAFE_26)
     messages.clickOnMessageSignBtn(0)
     msg_confirmation_modal.verifyConfirmationWindowTitle(modal.modalTitiles.confirmMsg)
     msg_confirmation_modal.verifyMessagePresent(messages.offchainMessage)

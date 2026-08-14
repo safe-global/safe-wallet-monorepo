@@ -144,13 +144,12 @@ describe('SafeSelectorTriggerContent', () => {
     expect(getByTestId('account-threshold')).toHaveTextContent('2/3')
   })
 
-  it('renders an icon-only threshold pill for a multi-chain safe (setup can differ per chain)', () => {
+  it('shows the active chain threshold for a multi-chain safe (the trigger reflects the active chain)', () => {
     const item = createItem({ threshold: 2, owners: 3 })
 
     const { getByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="1" />)
 
-    expect(getByTestId('account-threshold')).toBeInTheDocument()
-    expect(getByTestId('account-threshold')).not.toHaveTextContent('2/3')
+    expect(getByTestId('account-threshold')).toHaveTextContent('2/3')
   })
 
   it('does not render the threshold pill when the setup is unknown', () => {

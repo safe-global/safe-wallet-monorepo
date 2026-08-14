@@ -1,5 +1,4 @@
 import * as constants from '../../support/constants.js'
-import * as main from '../pages/main.page.js'
 import * as safeSelector from '../pages/safe_navigation.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
@@ -14,14 +13,19 @@ describe('[SMOKE] Safe selector tests', { defaultCommandTimeout: 60000, ...const
   })
 
   it('[SMOKE] Verify the safe selector dropdown displays multichain safes', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
     // Add multichain safe data (safe3 on Sepolia + Ethereum)
-    main.addToAppLocalStorage(
-      constants.localStorageKeys.SAFE_v2__addedSafes,
-      ls.addedSafes.sidebarTrustedSafe3TwoChains,
-    )
-    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safes2)
-    cy.reload()
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9, {
+      onBeforeLoad(win) {
+        win.localStorage.setItem(
+          constants.localStorageKeys.SAFE_v2__addedSafes,
+          JSON.stringify(ls.addedSafes.sidebarTrustedSafe3TwoChains),
+        )
+        win.localStorage.setItem(
+          constants.localStorageKeys.SAFE_v2__undeployedSafes,
+          JSON.stringify(ls.undeployedSafe.safes2),
+        )
+      },
+    })
 
     // Chains are fetched at runtime now (no build-time seed) and the selector
     // snapshots its safe list when opened, so it must only be opened once chain

@@ -46,7 +46,7 @@ function EntryDialog({
   const { handleSubmit, formState } = methods
 
   const submitCallback = handleSubmit((data: AddressEntry) => {
-    dispatch(upsertAddressBookEntries({ ...data, chainIds: chainIds ?? [actualChainId] }))
+    dispatch(upsertAddressBookEntries({ ...data, chainIds: chainIds ?? [actualChainId], notify: true }))
     handleClose()
   })
 

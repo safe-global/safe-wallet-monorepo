@@ -1,7 +1,8 @@
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId, useGetSpaceAddressBook } from '@/features/spaces'
+import { useCurrentSpaceId, useGetSpaceAddressBook, useWorkspaceAddressBookLabel } from '@/features/spaces'
+import { getContactAddedMessage } from '@/utils/addressBookNotifications'
 import AddContactDialog from './AddContactDialog'
 
 export type { ContactField } from './AddContactDialog'
@@ -9,13 +10,14 @@ export type { ContactField } from './AddContactDialog'
 const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
   const spaceId = useCurrentSpaceId()
   const addressBookItems = useGetSpaceAddressBook()
+  const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
 
   return (
     <AddContactDialog
       triggerLabel={label}
       dialogTitle="Add contact"
-      successMessage="Added contact"
+      successMessage={getContactAddedMessage(workspaceAddressBookLabel)}
       successGroupKey="add-contact-success"
       validateCharset
       submit={(item, sid) =>

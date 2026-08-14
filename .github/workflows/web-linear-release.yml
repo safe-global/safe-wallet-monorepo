@@ -51,7 +51,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0 # Full history required to scan commits for Linear issue IDs
 
@@ -69,7 +69,7 @@ jobs:
           echo "Linear release version: $VERSION"
 
       - name: Run Linear release (${{ inputs.command }})
-        uses: linear/linear-release-action@c0cb8354a362c24c6d3e0948f37fd66d07588e3f # v0.14.5
+        uses: linear/linear-release-action@3858a5d7892435dc63302ac76b0cdb587435caa9 # v0.14.6
         with:
           access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
           command: ${{ inputs.command }}

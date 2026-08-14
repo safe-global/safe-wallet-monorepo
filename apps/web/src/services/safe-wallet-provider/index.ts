@@ -1,7 +1,10 @@
 import { TransactionStatus } from '@safe-global/store/gateway/types'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { TransactionReceipt } from 'ethers'
+import { isHexString } from 'ethers'
 import { numberToHex } from '@/utils/hex'
+
+const TX_HASH_BYTES = 32
 
 type SafeInfo = {
   safeAddress: string
@@ -375,25 +378,38 @@ export class SafeWalletProvider {
   }
 
   async eth_getTransactionByHash(txHash: string): Promise<TransactionDetails> {
-    try {
-      const resp = await this.sdk.getBySafeTxHash(txHash)
-      txHash = resp.txHash || txHash
-    } catch (e) {}
-
-    // Use fake transaction if we don't have a real tx hash
-    if (this.submittedTxs.has(txHash)) {
-      return this.submittedTxs.get(txHash) as TransactionDetails
+    if (!isHexString(txHash, TX_HASH_BYTES)) {
+      throw new RpcError(RpcErrorCode.INVALID_PARAMS, 'Invalid transaction hash')
     }
 
-    return (await this.sdk.proxy('eth_getTransactionByHash', [txHash])) as Promise<TransactionDetails>
+    // A 404 here only means the hash isn't a Safe tx, so we fall through to the RPC. Not logged:
+    // apps poll these methods in a loop, so it would fire on every poll.
+    const resolvedTx = await this.sdk.getBySafeTxHash(txHash).catch(() => undefined)
+    const resolvedHash = resolvedTx?.txHash || txHash
+
+    // Use fake transaction if we don't have a real tx hash
+    if (this.submittedTxs.has(resolvedHash)) {
+      return this.submittedTxs.get(resolvedHash) as TransactionDetails
+    }
+
+    return (await this.sdk.proxy('eth_getTransactionByHash', [resolvedHash])) as Promise<TransactionDetails>
   }
 
-  async eth_getTransactionReceipt(txHash: string): Promise<TransactionReceipt> {
-    try {
-      const resp = await this.sdk.getBySafeTxHash(txHash)
-      txHash = resp.txHash || txHash
-    } catch (e) {}
-    return this.sdk.proxy('eth_getTransactionReceipt', [txHash]) as Promise<TransactionReceipt>
+  async eth_getTransactionReceipt(txHash: string): Promise<TransactionReceipt | null> {
+    if (!isHexString(txHash, TX_HASH_BYTES)) {
+      throw new RpcError(RpcErrorCode.INVALID_PARAMS, 'Invalid transaction hash')
+    }
+
+    const resolvedTx = await this.sdk.getBySafeTxHash(txHash).catch(() => undefined)
+
+    // A Safe transaction that is not on-chain yet has no receipt
+    if (resolvedTx && !resolvedTx.txHash) {
+      return null
+    }
+
+    return this.sdk.proxy('eth_getTransactionReceipt', [
+      resolvedTx?.txHash ?? txHash,
+    ]) as Promise<TransactionReceipt | null>
   }
 
   // EIP-5792

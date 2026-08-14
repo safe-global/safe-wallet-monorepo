@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import { useEffect, useState, type ReactElement } from 'react'
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import { cn } from '@/utils/cn'
 import { AppRoutes } from '@/config/routes'
@@ -14,7 +14,12 @@ export const SidebarTopBar = (): ReactElement => {
 
   // Inside a space or an individual safe the logo turns into a "Home" label pill that returns to the
   // top-level accounts view; elsewhere it stays a plain logo linking to that same view.
-  const isInSafeOrSpace = Boolean(safeAddress) || isSpaceRoute
+  // Deferred to after hydration: both source hooks read browser-only state (location.search
+  // fallback / persisted store), so their SSR value differs from the first client render.
+  const [isInSafeOrSpace, setIsInSafeOrSpace] = useState(false)
+  useEffect(() => {
+    setIsInSafeOrSpace(Boolean(safeAddress) || isSpaceRoute)
+  }, [safeAddress, isSpaceRoute])
   const showHomeLabel = isInSafeOrSpace && !isCollapsed
   const logoHref = AppRoutes.welcome.accounts
 
@@ -28,13 +33,21 @@ export const SidebarTopBar = (): ReactElement => {
         href={logoHref}
         showHomeLabel={showHomeLabel}
         data-testid="logo-container"
-        className={showHomeLabel ? 'absolute left-0 top-1/2 z-10 -translate-y-1/2' : 'absolute left-3 top-3 z-10'}
+        className={cn(
+          'absolute z-10 top-1/2 -translate-y-1/2',
+          (showHomeLabel || isCollapsed) && 'shadow-xs',
+          showHomeLabel
+            ? 'left-0'
+            : isCollapsed
+              ? 'left-1/2 top-0 -translate-x-1/2 translate-y-0 size-9 rounded-md bg-sidebar-accent'
+              : 'left-3',
+        )}
       />
       <SidebarTrigger
         className={cn(
           'absolute z-10 shrink-0 cursor-pointer text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent',
           'transition-[left,transform] duration-200 ease-linear',
-          isCollapsed ? 'left-1/2 top-10 -translate-x-1/2' : 'left-[calc(100%-2rem)] top-3',
+          isCollapsed ? 'left-1/2 top-11 -translate-x-1/2' : 'left-[calc(100%-2rem)] -top-2',
         )}
         data-testid="sidebar-trigger"
       />

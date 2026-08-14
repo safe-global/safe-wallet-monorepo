@@ -47,7 +47,7 @@ function visit(url) {
 
 function executeTransactionFlow(fromSafe) {
   visit(constants.transactionQueueUrl + fromSafe)
-  wallet.connectSigner(signer)
+  wallet.connectSignerViaStorage(signer)
   createTx.clickOnConfirmBtn(0)
   tx.executeFlow_1()
   cy.wait(5000)
@@ -125,7 +125,7 @@ describe('Send funds from queue happy path tests 1', () => {
   it('Verify 1 signer can execute a tx confirmed by 2 signers', { defaultCommandTimeout: 300000 }, () => {
     function executeTransaction(fromSafe) {
       visit(constants.transactionQueueUrl + fromSafe)
-      wallet.connectSigner(signer)
+      wallet.connectSignerViaStorage(signer)
       createTx.clickOnExecuteBtn(0)
       tx.executeFlow_3()
       cy.wait(5000)

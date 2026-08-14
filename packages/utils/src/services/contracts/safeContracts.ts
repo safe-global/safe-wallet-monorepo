@@ -1,11 +1,17 @@
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { type GetContractProps } from '@safe-global/protocol-kit'
 import type { SafeVersion } from '@safe-global/types-kit'
+import semverSatisfies from 'semver/functions/satisfies'
 import { assertValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
 import { getSafeMigrationDeployments } from '@safe-global/safe-deployments'
-import { SAFE_TO_L2_MIGRATION_VERSION } from '@safe-global/utils/config/constants'
-import { getChainAgnosticAddress } from '@safe-global/utils/services/contracts/deployments'
-import type { BytecodeComparisonResult } from './bytecodeComparison'
+import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
+import {
+  getChainAgnosticAddress,
+  getDeploymentTypeForMasterCopy,
+  isEraVmChain,
+  isOfficialMasterCopy,
+} from '@safe-global/utils/services/contracts/deployments'
+import { isSupportedMigrationVersion, type BytecodeComparisonResult } from './bytecodeComparison'
 
 // `UNKNOWN` is returned if the mastercopy does not match supported ones
 // @see https://github.com/safe-global/safe-client-gateway/blob/main/src/routes/safes/handlers/safes.rs#L28-L31
@@ -14,31 +20,85 @@ export const isValidMasterCopy = (implementationVersionState: SafeState['impleme
   return implementationVersionState !== 'UNKNOWN'
 }
 
+export type MastercopyMigrationOptions = {
+  bytecodeResult?: BytecodeComparisonResult
+  recommendedVersion?: string
+}
+
+type MastercopySafe = Pick<SafeState, 'implementationVersionState' | 'version' | 'chainId' | 'implementation'>
+
 /**
- * Checks if an unsupported mastercopy can be migrated based on bytecode comparison
- * with supported L2 contracts (1.3.0+L2 and 1.4.1+L2)
- *
- * @param safe - The Safe state object
- * @param bytecodeComparisonResult - Optional result from bytecode comparison
- * @returns boolean indicating if migration is possible
+ * An in-place upgrade/migration delegatecalls a singleton of the SAME VM stack — an
+ * EraVM (zkSync) proxy can only delegatecall an EraVM singleton, an EVM proxy an EVM
+ * one. So a zkSync EraVM Safe cannot move to an EVM-only version (e.g. 1.5.0, which
+ * ships `canonical` only): its only path is a fresh EVM Safe + asset transfer. Returns
+ * false only for that stranded case — EVM Safes always have a canonical target.
  */
-export const canMigrateUnsupportedMastercopy = (
-  safe: SafeState,
-  bytecodeComparisonResult?: BytecodeComparisonResult,
+export const canUpgradeInPlace = (safe: MastercopySafe, targetVersion: string): boolean => {
+  // Only zkSync EraVM Safes can be stranded. The master-copy flavour decides: canonical
+  // and eip155 are both EVM bytecode, only the zksync variant is EraVM. Unrecognised
+  // implementations on an EraVM chain conservatively default to EraVM.
+  const isEraVmSafe =
+    isEraVmChain(safe.chainId, safe.version) &&
+    getDeploymentTypeForMasterCopy(safe.implementation?.value, safe.version ?? '', {
+      deploymentType: 'zksync',
+      isL1: false,
+    }).deploymentType === 'zksync'
+
+  // EVM Safes always have a canonical target; an EraVM Safe needs an EraVM singleton
+  // at the target version too (1.5.0 ships EVM-only, so there is none).
+  if (!isEraVmSafe) return true
+  return isEraVmChain(safe.chainId, targetVersion)
+}
+
+/**
+ * Whether an unrecognized (UNKNOWN) master copy is provably an official Safe singleton —
+ * by bytecode match or by living at an official deployment address — and reports a
+ * non-legacy version within the migratable range. Trust only; VM-stack reachability and
+ * migration-contract availability are gated separately.
+ */
+const isProvablyOfficialUnsupported = (
+  safe: MastercopySafe,
+  opts: MastercopyMigrationOptions | undefined,
+  targetVersion: string,
 ): boolean => {
-  // Must be an unsupported mastercopy
+  if (isValidMasterCopy(safe.implementationVersionState)) return false
+  if (!safe.version) return false
+  if (!isSupportedMigrationVersion(safe.version, targetVersion)) return false
+  return Boolean(opts?.bytecodeResult?.isMatch) || isOfficialMasterCopy(safe.implementation?.value, safe.version)
+}
+
+export const isUnsupportedMastercopyMigratable = (safe: MastercopySafe, opts?: MastercopyMigrationOptions): boolean => {
+  const targetVersion = opts?.recommendedVersion ?? LATEST_SAFE_VERSION
+
+  if (!isProvablyOfficialUnsupported(safe, opts, targetVersion)) return false
+  if (!canUpgradeInPlace(safe, targetVersion)) return false
+
+  return Boolean(getChainAgnosticAddress(getSafeMigrationDeployments({ version: targetVersion }), safe.chainId))
+}
+
+export type MastercopyAction = 'none' | 'update' | 'migrate' | 'cli' | 'redeploy'
+
+export const getMastercopyAction = (safe: MastercopySafe, opts?: MastercopyMigrationOptions): MastercopyAction => {
+  const targetVersion = opts?.recommendedVersion ?? LATEST_SAFE_VERSION
+
   if (isValidMasterCopy(safe.implementationVersionState)) {
-    return false
+    if (safe.implementationVersionState !== 'OUTDATED') return 'none'
+    // CGW flags OUTDATED against the raw config recommendation, while our target is capped
+    // at the latest version deployed on the chain. When the cap pulls the target back to
+    // the current version there is nothing to offer.
+    const [currentVersion] = (safe.version ?? '').split('+')
+    if (currentVersion && semverSatisfies(currentVersion, `>=${targetVersion}`)) return 'none'
+    // Recognized but outdated: normally an in-place update; a stranded EraVM Safe must redeploy.
+    return canUpgradeInPlace(safe, targetVersion) ? 'update' : 'redeploy'
   }
 
-  // Must have bytecode comparison result with a match
-  if (!bytecodeComparisonResult || !bytecodeComparisonResult.isMatch) {
-    return false
+  // Unknown master copy.
+  if (isUnsupportedMastercopyMigratable(safe, opts)) return 'migrate'
+  if (isProvablyOfficialUnsupported(safe, opts, targetVersion) && !canUpgradeInPlace(safe, targetVersion)) {
+    return 'redeploy'
   }
-
-  // Check if migration contract is deployed on this chain
-  const deployment = getSafeMigrationDeployments({ version: SAFE_TO_L2_MIGRATION_VERSION })
-  return Boolean(getChainAgnosticAddress(deployment, safe.chainId))
+  return 'cli'
 }
 
 export const _getValidatedGetContractProps = (
@@ -53,8 +113,4 @@ export const _getValidatedGetContractProps = (
   return {
     safeVersion: noMetadataVersion as SafeVersion,
   }
-}
-export const isMigrationToL2Possible = (safe: SafeState): boolean => {
-  const deployment = getSafeMigrationDeployments({ version: SAFE_TO_L2_MIGRATION_VERSION })
-  return safe.nonce === 0 && Boolean(getChainAgnosticAddress(deployment, safe.chainId))
 }

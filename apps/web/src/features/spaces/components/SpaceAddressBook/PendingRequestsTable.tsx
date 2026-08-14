@@ -6,7 +6,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import Identicon from '@/components/common/Identicon'
-import { NetworkLogosTooltip } from '@/features/multichain'
+import { NetworkLogosPill, NetworkLogosTooltip } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import {
@@ -126,21 +126,25 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     }
   }
 
-  const renderChains = (req: AddressBookRequestItemDto) => (
-    <NetworkLogosTooltip
-      networks={req.chainIds.map((chainId) => ({ chainId }))}
-      maxVisible={3}
-      trigger={chains.configs.length === req.chainIds.length ? <Badge variant="secondary">All</Badge> : undefined}
-    />
-  )
+  // The "All" badge stands on its own; logo stacks get the standard grey pill.
+  const renderChains = (req: AddressBookRequestItemDto) =>
+    chains.configs.length === req.chainIds.length ? (
+      <NetworkLogosTooltip
+        networks={req.chainIds.map((chainId) => ({ chainId }))}
+        maxVisible={3}
+        trigger={<Badge variant="secondary">All</Badge>}
+      />
+    ) : (
+      <NetworkLogosPill networks={req.chainIds.map((chainId) => ({ chainId }))} />
+    )
 
   const columns: DataTableColumn<AddressBookRequestItemDto>[] = [
     {
       id: 'name',
       header: 'Name',
-      width: '20%',
+      width: '15%',
       sticky: true,
-      minWidth: 140,
+      minWidth: 120,
       emphasis: 'strong',
       cell: (req) => (
         <span className="inline-flex min-w-0 items-center gap-2 overflow-hidden">
@@ -158,12 +162,12 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
       id: 'address',
       header: 'Address',
       width: '30%',
-      minWidth: 360,
-      cell: (req) => (
+      minWidth: 240,
+      cell: (req, { isCompact }) => (
         <div className="text-[0.8em] font-mono">
           <EthHashInfo
             address={req.address}
-            shortAddress={false}
+            shortAddress={isCompact}
             showPrefix={false}
             showName={false}
             highlight4bytes
@@ -177,17 +181,17 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     {
       id: 'chains',
       header: 'Chains',
-      width: '15%',
+      width: '20%',
       priority: 'secondary',
-      minWidth: 100,
+      minWidth: 90,
       cell: renderChains,
     },
     {
       id: 'requestedBy',
       header: 'Requested by',
-      width: '30%',
+      width: '20%',
       priority: 'secondary',
-      minWidth: 300,
+      minWidth: 140,
       cell: (req) => (req.requestedBy ? <RequestedBy requestedBy={req.requestedBy} /> : null),
     },
     {
