@@ -15,7 +15,13 @@ import css from './styles.module.css'
 
 const RefreshIcon = (props: LucideProps & { isLoading?: boolean }) => {
   const { isLoading, className, ...iconProps } = props
-  return <RefreshCwIcon {...iconProps} className={cn('size-4', isLoading && css.spinning, className)} />
+  return (
+    <RefreshCwIcon
+      {...iconProps}
+      className={cn('size-3.5 text-muted-foreground', isLoading && css.spinning, className)}
+      data-testid="auto-renew-rounded-icon"
+    />
+  )
 }
 
 interface PortfolioRefreshHintProps {
@@ -76,7 +82,7 @@ const PortfolioRefreshHint = ({
 
   return (
     <div className="flex items-center gap-1">
-      <Typography variant="paragraph-small-bold" className="text-[var(--color-text-secondary)]">
+      <Typography variant="paragraph-small" className="text-[var(--color-text-secondary)]">
         {isFetching ? 'Fetching data' : timeAgo ? <>Updated {timeAgo} ago</> : 'Loading...'}
       </Typography>
       <Tooltip>
@@ -84,6 +90,7 @@ const PortfolioRefreshHint = ({
           <Button
             variant="ghost"
             size="icon-xs"
+            className="size-5 rounded-full"
             onClick={handleRefresh}
             disabled={isDisabled}
             data-testid="portfolio-refresh-button"
