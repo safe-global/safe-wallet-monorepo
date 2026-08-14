@@ -2,7 +2,7 @@ import type { NextPage } from 'next'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import { Box, Typography, Card, SvgIcon } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { GradientCircularProgress } from '@/components/common/GradientCircularProgress'
 import { readPkce, clearPkce, useAuthToken, HYPERNATIVE_OAUTH_CONFIG, getRedirectUri } from '@/features/hypernative'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
@@ -157,25 +157,18 @@ const HypernativeOAuthCallback: NextPage = () => {
         <title>Hypernative Authentication</title>
       </Head>
 
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        minHeight="100vh"
-        padding={3}
-        mt="calc(-1 * var(--header-height))" // subtract header height to center content in the viewport
+      <div
+        className="flex min-h-screen flex-col items-center justify-center p-6"
+        style={{ marginTop: 'calc(-1 * var(--header-height))' }} // subtract header height to center content in the viewport
       >
-        <Card
-          sx={{ p: 4, justifyItems: 'center', textAlign: 'center', borderRadius: 2, maxWidth: 433, width: { sm: 433 } }}
-        >
+        <div className="bg-card flex w-full max-w-[433px] flex-col items-center rounded-lg p-8 text-center sm:w-[433px]">
           {status === 'loading' && (
             <>
               <GradientCircularProgress size={40} thickness={5} />
-              <Typography variant="h3" fontWeight={700} marginTop={3}>
+              <Typography variant="h3" className="mt-6 font-bold">
                 Authentication in progress
               </Typography>
-              <Typography variant="body2" color="text.secondary" marginTop={1}>
+              <Typography variant="paragraph-small" color="muted" className="block mt-2">
                 Hypernative authentication is in progress. Don’t close this window.
               </Typography>
             </>
@@ -183,21 +176,13 @@ const HypernativeOAuthCallback: NextPage = () => {
 
           {status === 'success' && (
             <>
-              <Box
-                sx={{
-                  backgroundColor: 'success.background',
-                  width: 40,
-                  height: 40,
-                  borderRadius: 40,
-                  padding: 1,
-                }}
-              >
-                <SvgIcon component={CheckIcon} inheritViewBox color="success" width={20} height={20} />
-              </Box>
-              <Typography variant="h3" fontWeight={700} marginTop={3}>
+              <div className="size-10 rounded-full bg-[var(--color-success-background)] p-2">
+                <CheckIcon className="size-5 text-[var(--color-success-main)]" />
+              </div>
+              <Typography variant="h3" className="mt-6 font-bold">
                 Login successful
               </Typography>
-              <Typography variant="body2" color="text.secondary" marginTop={1}>
+              <Typography variant="paragraph-small" color="muted" className="block mt-2">
                 You’re now signed in to Hypernative.
               </Typography>
             </>
@@ -205,27 +190,24 @@ const HypernativeOAuthCallback: NextPage = () => {
 
           {status === 'error' && (
             <>
-              <Box
-                sx={{
-                  backgroundColor: isDarkMode ? 'info.background' : 'info.light',
-                  width: 40,
-                  height: 40,
-                  borderRadius: 40,
-                  padding: 1,
+              <div
+                className="size-10 rounded-full p-2"
+                style={{
+                  backgroundColor: isDarkMode ? 'var(--color-info-background)' : 'var(--color-info-light)',
                 }}
               >
-                <SvgIcon component={InfoIcon} inheritViewBox color="info" width={20} height={20} />
-              </Box>
-              <Typography variant="h3" fontWeight={700} marginTop={3}>
+                <InfoIcon className="size-5 text-[var(--color-info-main)]" />
+              </div>
+              <Typography variant="h3" className="mt-6 font-bold">
                 Something went wrong
               </Typography>
-              <Typography variant="body2" color="text.secondary" marginTop={1}>
+              <Typography variant="paragraph-small" color="muted" className="block mt-2">
                 {errorMessage}
               </Typography>
             </>
           )}
-        </Card>
-      </Box>
+        </div>
+      </div>
     </>
   )
 }

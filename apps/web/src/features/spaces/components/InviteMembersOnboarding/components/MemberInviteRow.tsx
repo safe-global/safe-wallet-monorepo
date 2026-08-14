@@ -94,7 +94,9 @@ const MemberInviteRow = ({
   }, [resolvedAddress, handleAddressResolved])
 
   return (
-    <div className="flex gap-2">
+    // items-center so the fixed-height remove button centres against the 44px field/select pair
+    // instead of top-aligning under the default `stretch`.
+    <div className="flex items-center gap-2">
       <div className="flex flex-1 flex-col gap-1">
         <div className="relative">
           <Input
@@ -145,7 +147,9 @@ const MemberInviteRow = ({
               },
             })}
             placeholder="Email, wallet address or ENS name"
-            className={cn('h-11 rounded-lg bg-card px-4', resolving && 'pr-10')}
+            variant="surface"
+            // eslint-disable-next-line no-restricted-syntax -- bespoke 44px invite field (h-11, rounded-lg, px-4); between the lg/xl tiers, no size fits
+            className={cn('h-11 rounded-lg px-4', resolving && 'pr-10')}
             error={displayError}
             data-testid={`invite-identifier-input-${index}`}
           />
@@ -164,7 +168,7 @@ const MemberInviteRow = ({
         name={`members.${index}.role`}
         render={({ field }) => (
           <Select value={field.value} onValueChange={field.onChange}>
-            <SelectTrigger className="min-w-[120px] cursor-pointer rounded-lg bg-card data-[size=default]:h-11">
+            <SelectTrigger className="min-w-[120px] cursor-pointer data-[size=default]:h-11">
               <SelectValue placeholder="Role">{ROLE_LABELS[field.value]}</SelectValue>
             </SelectTrigger>
             <SelectContent alignItemWithTrigger={false} align="start">

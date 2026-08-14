@@ -43,7 +43,7 @@ const Button = ({ count }: { count?: number }) => (
   <Wrapper>
     <button className="relative flex items-center border-0 rounded-lg bg-transparent px-2 m-1 cursor-pointer hover:bg-muted/30 transition-colors h-full">
       <div className="relative flex items-center">
-        <GitMerge className="size-5" />
+        <GitMerge className="size-5 text-muted-foreground" />
         {count !== undefined && count > 0 && <Badge count={count} />}
       </div>
     </button>

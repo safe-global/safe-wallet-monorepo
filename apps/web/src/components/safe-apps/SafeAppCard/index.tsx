@@ -1,9 +1,5 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import Card from '@mui/material/Card'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
 import { resolveHref } from 'next/dist/client/resolve-href'
 import classNames from 'classnames'
 import type { ReactNode, SyntheticEvent } from 'react'
@@ -16,6 +12,8 @@ import SafeAppActionButtons from '@/components/safe-apps/SafeAppActionButtons'
 import SafeAppTags from '@/components/safe-apps/SafeAppTags'
 import { isOptimizedForBatchTransactions } from '@/components/safe-apps/utils'
 import { AppRoutes } from '@/config/routes'
+import { Card } from '@/components/ui/card'
+import { Typography } from '@/components/ui/typography'
 import BatchIcon from '@/public/images/apps/batch-icon.svg'
 import css from './styles.module.css'
 
@@ -88,53 +86,51 @@ const SafeAppCardGridView = ({
       onClickSafeApp={onClickSafeApp}
       height="100%"
       compact={compact}
+      ariaLabel={`Open ${safeApp.name}`}
     >
       {/* Safe App Header */}
-      <CardHeader
-        className={css.safeAppHeader}
-        avatar={
-          <div className={css.safeAppIconContainer}>
-            {/* Batch transactions Icon */}
-            {isOptimizedForBatchTransactions(safeApp) && (
-              <BatchIcon className={css.safeAppBatchIcon} alt="batch transactions icon" />
-            )}
+      <div className={classNames('flex items-start justify-between', css.safeAppHeader)}>
+        <div className={css.safeAppIconContainer}>
+          {/* Batch transactions Icon */}
+          {isOptimizedForBatchTransactions(safeApp) && (
+            <BatchIcon className={css.safeAppBatchIcon} alt="batch transactions icon" />
+          )}
 
-            {/* Safe App Icon */}
-            <SafeAppIconCard src={safeApp.iconUrl} alt={`${safeApp.name} logo`} />
-          </div>
-        }
-        action={
-          <>
-            {/* Safe App Action Buttons */}
-            {!compact && (
-              <SafeAppActionButtons
-                safeApp={safeApp}
-                isBookmarked={isBookmarked}
-                onBookmarkSafeApp={onBookmarkSafeApp}
-                removeCustomApp={removeCustomApp}
-                openPreviewDrawer={openPreviewDrawer}
-              />
-            )}
-          </>
-        }
-      />
+          {/* Safe App Icon */}
+          <SafeAppIconCard src={safeApp.iconUrl} alt={`${safeApp.name} logo`} />
+        </div>
 
-      <CardContent className={css.safeAppContent}>
+        {/* Safe App Action Buttons */}
+        {!compact && (
+          <SafeAppActionButtons
+            safeApp={safeApp}
+            isBookmarked={isBookmarked}
+            onBookmarkSafeApp={onBookmarkSafeApp}
+            removeCustomApp={removeCustomApp}
+            openPreviewDrawer={openPreviewDrawer}
+          />
+        )}
+      </div>
+
+      <div className={css.safeAppContent}>
         {/* Safe App Title */}
-        <Typography className={css.safeAppTitle} gutterBottom variant="h5">
+        <Typography className={classNames('mb-2', css.safeAppTitle)} variant="paragraph-bold">
           {safeApp.name}
         </Typography>
 
         {/* Safe App Description */}
         {!compact && (
-          <Typography className={css.safeAppDescription} variant="body2" color="text.secondary">
+          <Typography
+            variant="paragraph-small"
+            className={classNames(css.safeAppDescription, 'text-[var(--color-text-secondary)]')}
+          >
             {safeApp.description}
           </Typography>
         )}
 
         {/* Safe App Tags */}
         <SafeAppTags tags={safeApp.tags} compact={compact} />
-      </CardContent>
+      </div>
     </SafeAppCardContainer>
   )
 }
@@ -146,6 +142,7 @@ type SafeAppCardContainerProps = {
   height?: string
   className?: string
   compact?: boolean
+  ariaLabel?: string
 }
 
 export const SafeAppCardContainer = ({
@@ -154,6 +151,7 @@ export const SafeAppCardContainer = ({
   onClickSafeApp,
   height,
   className,
+  ariaLabel = 'Open Safe app',
 }: SafeAppCardContainerProps) => {
   const handleClickSafeApp = (event: SyntheticEvent) => {
     if (onClickSafeApp) {
@@ -162,10 +160,17 @@ export const SafeAppCardContainer = ({
   }
 
   return (
-    <Link href={safeAppUrl} passHref rel="noreferrer" onClick={handleClickSafeApp}>
-      <Card className={classNames(css.safeAppContainer, className)} sx={{ height }}>
+    <Card size="none" className={classNames(css.safeAppContainer, 'relative', className)} style={{ height }}>
+      <Link
+        href={safeAppUrl}
+        rel="noreferrer"
+        onClick={handleClickSafeApp}
+        aria-label={ariaLabel}
+        className="absolute inset-0 z-0 rounded-[inherit] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      />
+      <div className="relative z-10 h-full pointer-events-none [&_[data-slot=tooltip-trigger]]:pointer-events-auto [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
         {children}
-      </Card>
-    </Link>
+      </div>
+    </Card>
   )
 }

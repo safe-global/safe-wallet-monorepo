@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import StatusLabel from './index'
-import { Paper } from '@mui/material'
 
 const meta = {
+  title: 'Features/Swap/StatusLabel',
   component: StatusLabel,
   parameters: {
     componentSubtitle: 'Renders a Status label with icon and text for a swap order',
@@ -11,9 +11,9 @@ const meta = {
   decorators: [
     (Story) => {
       return (
-        <Paper sx={{ padding: 2 }}>
+        <div className="bg-background rounded-lg p-4">
           <Story />
-        </Paper>
+        </div>
       )
     },
   ],

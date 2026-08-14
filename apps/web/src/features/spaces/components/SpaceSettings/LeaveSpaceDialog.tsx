@@ -8,9 +8,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogDescription,
-  AlertDialogFooter,
 } from '@/components/ui/alert-dialog'
-import { Button } from '@/components/ui/button'
+import DialogActions from '@/components/common/DialogActions'
 import { Typography } from '@/components/ui/typography'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AppRoutes } from '@/config/routes'
@@ -74,19 +73,16 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
           </Alert>
         )}
 
-        <AlertDialogFooter>
-          <Button variant="ghost" onClick={onClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={onLeave}
-            disabled={isLoading || !space}
-            data-testid="space-confirm-leave-button"
-          >
-            {isLoading ? 'Leaving…' : 'Leave workspace'}
-          </Button>
-        </AlertDialogFooter>
+        <DialogActions
+          onCancel={onClose}
+          cancelDisabled={isLoading}
+          confirmLabel="Leave workspace"
+          onConfirm={onLeave}
+          confirmDisabled={isLoading || !space}
+          confirmLoading={isLoading}
+          confirmDestructive
+          confirmTestId="space-confirm-leave-button"
+        />
       </AlertDialogContent>
     </AlertDialog>
   )

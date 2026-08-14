@@ -6,13 +6,12 @@ const setup = createMockStory({ features: { spaces: true }, layout: 'paper', sha
 
 const meta = {
   title: 'Features/SecurityHub/SecurityEmptyState',
+  tags: ['autodocs', 'skip-visual-test'],
   component: SecurityEmptyState,
   decorators: [setup.decorator],
   parameters: {
     ...setup.parameters,
-    chromatic: { disableSnapshot: true },
   },
-  tags: ['autodocs'],
 } satisfies Meta<typeof SecurityEmptyState>
 
 export default meta

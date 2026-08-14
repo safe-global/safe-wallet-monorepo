@@ -1,35 +1,24 @@
-.select {
-  height: 100%;
-}
-
-.select:after,
-.select:before {
-  display: none;
-}
-
-.select *:focus-visible {
-  outline: 5px auto Highlight;
-  outline: 5px auto -webkit-focus-ring-color;
-}
-
-.select :global .MuiSelect-select {
-  padding-right: 40px !important;
-  padding-left: 16px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.select :global .MuiSelect-icon {
-  margin-right: var(--space-2);
-}
-
-.select :global .Mui-disabled {
-  pointer-events: none;
-}
-
-.select :global .MuiMenuItem-root {
+.menuItem {
   padding: 0;
+}
+
+.menuItem a {
+  display: flex;
+  width: 100%;
+  padding: 6px 16px;
+}
+
+.undeployedItem {
+  display: flex;
+  width: 100%;
+  padding: 6px 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.undeployedItem:disabled {
+  pointer-events: none;
 }
 
 .listSubHeader {
@@ -42,6 +31,8 @@
   letter-spacing: 1px;
   width: 100%;
   margin-top: var(--space-1);
+  border: none;
+  cursor: pointer;
 }
 
 [data-theme='dark'] .undeployedNetworksHeader {
@@ -74,10 +65,108 @@
   width: 100%;
 }
 
+/* Compact chip (24px tall) that fits inside the 36px control without growing it —
+   selecting networks must not change the field height. */
 .multiChainChip {
-  padding: var(--space-2) 0;
-  margin: 2px;
-  border-color: var(--color-border-main);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 24px;
+  padding: 0 8px;
+  font-size: 14px;
+  border: 1px solid var(--color-border-main);
+  border-radius: 6px;
+}
+
+.multiChainChip img[data-testid='chain-indicator-network-logo-img'] {
+  width: 16px;
+  height: 16px;
+  /* The logo img carries an inline min-width from ChainIndicator. */
+  min-width: 16px !important;
+}
+
+.chipDelete {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: var(--color-text-secondary);
+}
+
+.multiSelectWrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Mirrors the InputGroup default variant (h-9, bg-input, border-border, rounded-md, shadow-xs,
+   focus ring) so the control matches the standard text fields in the same form. */
+.multiSelectControl {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 36px;
+  padding: 3px 12px;
+  background-color: var(--input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  transition:
+    color 0.15s,
+    box-shadow 0.15s;
+  cursor: text;
+}
+
+.multiSelectControl:focus-within {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent);
+}
+
+.multiSelectError {
+  border-color: var(--color-error-main);
+}
+
+.multiSelectInput {
+  flex: 1;
+  min-width: 60px;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+}
+
+.clearAll {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+  color: var(--color-text-secondary);
+}
+
+.multiSelectOption {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.multiSelectOption[aria-disabled='true'] {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.multiSelectOption:hover:not([aria-disabled='true']),
+.multiSelectOption[data-active]:not([aria-disabled='true']) {
+  background-color: var(--color-background-light);
 }
 
 .comingSoon {

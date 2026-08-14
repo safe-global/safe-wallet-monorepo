@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react'
 import { useState } from 'react'
-import { Box, Button, CircularProgress, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@/components/ui/typography'
 import { Countdown } from '@/components/common/Countdown'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -122,14 +124,8 @@ function PendingDelegation({ delegation, onRefetch }: PendingDelegationProps): R
   function renderActionButton(): ReactElement | null {
     if (delegation.status === 'ready') {
       return (
-        <Button
-          size="small"
-          variant="contained"
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          sx={{ minWidth: '140px' }}
-        >
-          {isSubmitting ? <CircularProgress size={16} /> : 'Submit delegation'}
+        <Button size="sm" onClick={handleSubmit} disabled={isSubmitting} className="min-w-[140px]">
+          {isSubmitting ? <Spinner className="size-4" /> : 'Submit delegation'}
         </Button>
       )
     }
@@ -141,7 +137,7 @@ function PendingDelegation({ delegation, onRefetch }: PendingDelegationProps): R
     if (hasAlreadySigned) {
       return (
         <CopyTooltip text={shareUrl} initialToolTipText="Copy link to share">
-          <Button size="small" variant="outlined" sx={{ minWidth: '100px' }} disabled={!shareUrl}>
+          <Button size="sm" variant="outline" className="min-w-[100px]" disabled={!shareUrl}>
             Copy link
           </Button>
         </CopyTooltip>
@@ -149,24 +145,24 @@ function PendingDelegation({ delegation, onRefetch }: PendingDelegationProps): R
     }
 
     return (
-      <Button size="small" variant="contained" onClick={handleSign} disabled={isSignLoading} sx={{ minWidth: '80px' }}>
-        {isSignLoading ? <CircularProgress size={16} /> : 'Sign'}
+      <Button size="sm" onClick={handleSign} disabled={isSignLoading} className="min-w-[80px]">
+        {isSignLoading ? <Spinner className="size-4" /> : 'Sign'}
       </Button>
     )
   }
 
   return (
-    <Box>
-      <Box sx={{ bgcolor: 'var(--color-border-background)', borderRadius: 1, p: 2 }}>
-        <Box display="flex" alignItems="center" gap={3}>
-          <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+    <div>
+      <div className="rounded-lg bg-[var(--color-border-background)] p-4">
+        <div className="flex items-center gap-6">
+          <Typography variant="paragraph-small" className="whitespace-nowrap">
             {delegation.action === 'remove'
               ? 'Remove proposer:'
               : delegation.action === 'edit'
                 ? 'Edit proposer:'
                 : 'New proposer:'}
           </Typography>
-          <Box sx={{ '& .ethHashInfo-name': { fontWeight: 700 } }}>
+          <div className="[&_.ethHashInfo-name]:font-bold">
             <EthHashInfo
               address={delegation.delegateAddress}
               showCopyButton
@@ -174,41 +170,41 @@ function PendingDelegation({ delegation, onRefetch }: PendingDelegationProps): R
               name={delegation.delegateLabel}
               hasExplorer
             />
-          </Box>
-        </Box>
-      </Box>
+          </div>
+        </div>
+      </div>
 
-      <Typography variant="caption" color="text.secondary" display="block" mt={1}>
+      <Typography variant="paragraph-mini" color="muted" className="mt-2 block">
         {remainingSeconds > 0 ? (
           <>
             Expires in <Countdown seconds={remainingSeconds} />
           </>
         ) : (
-          <Typography component="span" variant="caption" color="error">
+          <Typography variant="paragraph-mini" className="text-destructive">
             Expired
           </Typography>
         )}
       </Typography>
 
-      <Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
-        <Typography variant="body1">
-          <Box component="span" fontWeight={700}>
+      <div className="mt-4 flex items-center justify-between">
+        <Typography variant="paragraph">
+          <span className="font-bold">
             {delegation.confirmationsSubmitted}/{delegation.confirmationsRequired}
-          </Box>{' '}
+          </span>{' '}
           signatures collected
         </Typography>
 
         {renderActionButton()}
-      </Box>
+      </div>
 
       {error && (
-        <Box mt={1}>
+        <div className="mt-2">
           <ErrorMessage error={error}>
             {delegation.status === 'ready' ? 'Error submitting delegation' : 'Error signing delegation'}
           </ErrorMessage>
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 

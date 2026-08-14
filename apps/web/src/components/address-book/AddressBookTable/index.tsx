@@ -1,7 +1,9 @@
 import { useContext, useMemo, useState } from 'react'
-import { Box, Card, Typography, useMediaQuery, useTheme } from '@mui/material'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import type { AddressEntry } from '@/components/address-book/EntryDialog'
 import EntryDialog from '@/components/address-book/EntryDialog'
@@ -10,19 +12,19 @@ import ImportDialog from '@/components/address-book/ImportDialog'
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import SendIcon from '@/public/images/common/arrow-up-right.svg'
-import IconButton from '@mui/material/IconButton'
-import Tooltip from '@mui/material/Tooltip'
 import RemoveDialog from '@/components/address-book/RemoveDialog'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import AddressBookHeader from '../AddressBookHeader'
 import useAddressBook from '@/hooks/useAddressBook'
 import Track from '@/components/common/Track'
 import { ADDRESS_BOOK_EVENTS } from '@/services/analytics/events/addressBook'
-import SvgIcon from '@mui/material/SvgIcon'
 import PagePlaceholder from '@/components/common/PagePlaceholder'
 import NoEntriesIcon from '@/public/images/address-book/no-entries.svg'
 import { useCurrentChain } from '@/hooks/useChains'
+import { useDarkMode } from '@/hooks/useDarkMode'
+import { cn } from '@/utils/cn'
 import css from './styles.module.css'
+import TableCard from '@/components/common/TableCard'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
@@ -58,6 +60,7 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
   const [searchQuery, setSearchQuery] = useState('')
   const [defaultValues, setDefaultValues] = useState<AddressEntry | undefined>(undefined)
+  const isDarkMode = useDarkMode()
 
   const handleOpenModal = (type: keyof typeof open) => () => {
     setOpen((prev) => ({ ...prev, [type]: true }))
@@ -86,47 +89,65 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
     })
   }, [addressBookEntries, searchQuery])
 
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-
   const renderActionButtons = (address: string, name: string) => (
     <>
       <Track {...ADDRESS_BOOK_EVENTS.EDIT_ENTRY}>
-        <Tooltip title="Edit entry" placement="top">
-          <IconButton
-            onClick={() => handleOpenModalWithValues(ModalType.ENTRY, address, name)}
-            className={css.iconButton}
-          >
-            <SvgIcon component={EditIcon} inheritViewBox fontSize="small" />
-          </IconButton>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Edit entry"
+                onClick={() => handleOpenModalWithValues(ModalType.ENTRY, address, name)}
+              >
+                <EditIcon className="size-4 text-[var(--color-border-main)]" />
+              </Button>
+            }
+          />
+          <TooltipContent>Edit entry</TooltipContent>
         </Tooltip>
       </Track>
 
       <Track {...ADDRESS_BOOK_EVENTS.DELETE_ENTRY}>
-        <Tooltip title="Delete entry" placement="top">
-          <IconButton
-            onClick={() => handleOpenModalWithValues(ModalType.REMOVE, address, name)}
-            className={css.iconButton}
-          >
-            <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" />
-          </IconButton>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Delete entry"
+                onClick={() => handleOpenModalWithValues(ModalType.REMOVE, address, name)}
+              >
+                <DeleteIcon className="size-4 text-[var(--color-error-main)]" />
+              </Button>
+            }
+          />
+          <TooltipContent>Delete entry</TooltipContent>
         </Tooltip>
       </Track>
 
       <CheckWallet>
         {(isOk) => (
           <Track {...ADDRESS_BOOK_EVENTS.SEND}>
-            <Tooltip title="Send" placement="top">
-              <span>
-                <IconButton
-                  data-testid="send-btn"
-                  onClick={() => setTxFlow(<TokenTransferFlow recipients={[{ recipient: address }]} />)}
-                  disabled={!isOk}
-                  className={css.iconButton}
-                >
-                  <SvgIcon component={SendIcon} inheritViewBox fontSize="small" />
-                </IconButton>
-              </span>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <span>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Send"
+                      data-testid="send-btn"
+                      onClick={() => setTxFlow(<TokenTransferFlow recipients={[{ recipient: address }]} />)}
+                      disabled={!isOk}
+                    >
+                      <SendIcon className="size-4 text-[var(--color-border-main)]" />
+                    </Button>
+                  </span>
+                }
+              />
+              <TooltipContent>Send</TooltipContent>
             </Tooltip>
           </Track>
         )}
@@ -153,50 +174,49 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
   }))
 
   return (
-    <>
+    <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
       <AddressBookHeader
         handleOpenModal={handleOpenModal}
         searchQuery={searchQuery}
         onSearchQueryChange={setSearchQuery}
+        hasEntries={addressBookEntries.length > 0}
       />
 
       <main>
         {filteredEntries.length > 0 ? (
-          isMobile ? (
-            <Card sx={{ mb: 2, border: '4px solid transparent' }}>
-              <Box className={css.mobileContainer}>
-                <Box className={css.mobileHeader}>
-                  <Typography variant="body2" color="text.secondary">
+          <TableCard className="mb-4">
+            <div className={css.mobileCard}>
+              <div className={css.mobileContainer}>
+                <div className={css.mobileHeader}>
+                  <Typography variant="paragraph-small" color="muted">
                     Name
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="paragraph-small" color="muted">
                     Actions
                   </Typography>
-                </Box>
+                </div>
                 {filteredEntries.map(([address, name]) => (
-                  <Box key={address} className={css.mobileRow}>
-                    <Box className={css.mobileEntryInfo}>
+                  <div key={address} className={css.mobileRow}>
+                    <div className={css.mobileEntryInfo}>
                       <EthHashInfo address={address} showName={true} shortAddress hasExplorer showCopyButton />
-                    </Box>
-                    <Box className={css.mobileActions}>{renderActionButtons(address, name)}</Box>
-                  </Box>
+                    </div>
+                    <div className={css.mobileActions}>{renderActionButtons(address, name)}</div>
+                  </div>
                 ))}
-              </Box>
-            </Card>
-          ) : (
-            <Card sx={{ mb: 2, border: '4px solid transparent' }}>
-              <div className={css.container}>
-                <EnhancedTable rows={rows} headCells={headCells} />
               </div>
-            </Card>
-          )
+            </div>
+
+            <div className={css.desktopCard}>
+              <EnhancedTable rows={rows} headCells={headCells} />
+            </div>
+          </TableCard>
         ) : (
-          <Box bgcolor="background.paper" borderRadius={1}>
+          <TableCard>
             <PagePlaceholder
               img={<NoEntriesIcon />}
               text={`No entries found${chain ? ` on ${chain.chainName}` : ''}`}
             />
-          </Box>
+          </TableCard>
         )}
       </main>
 
@@ -213,7 +233,7 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
       )}
 
       {open[ModalType.REMOVE] && <RemoveDialog handleClose={handleClose} address={defaultValues?.address || ''} />}
-    </>
+    </div>
   )
 }
 

@@ -1,5 +1,6 @@
 import { type MouseEventHandler, type ReactElement } from 'react'
-import { Badge } from '@/components/ui/badge'
+import type { VariantProps } from 'class-variance-authority'
+import { Badge, type badgeVariants } from '@/components/ui/badge'
 import { cn } from '@/utils/cn'
 import type { SafeGrade } from '@/features/security/types'
 
@@ -12,29 +13,23 @@ export const SAFE_GRADE_LABEL: Record<SafeGrade, string> = {
 }
 
 /**
- * Per-grade chip styling on the score ramp: a soft tinted pill (`pill`) with the label in
- * the grade's readable text shade, plus a filled `dot` in the grade's fill colour. Critical
- * uses `error-main` (#FF5F72) — matching the red seen on per-check Critical rows — over
- * the soft `error-background` accent, so Critical labels read the same red everywhere in
- * the Security Hub.
+ * Badge variant per grade on the score ramp. `needs_attention` maps to the `review-*`
+ * palette, which has no Badge variant — its pill tint is applied as a grandfathered
+ * className below.
  */
-const GRADE_CHIP_STYLES: Record<SafeGrade, { pill: string; dot: string }> = {
-  critical: {
-    pill: 'bg-[var(--color-error-background)] text-[var(--color-error-main)]',
-    dot: 'bg-[var(--color-error-main)]',
-  },
-  at_risk: {
-    pill: 'bg-[var(--color-warning-background)] text-[var(--color-warning-main)]',
-    dot: 'bg-[var(--color-warning-main)]',
-  },
-  needs_attention: {
-    pill: 'bg-[var(--color-review-background)] text-[var(--color-review-main)]',
-    dot: 'bg-[var(--color-review-main)]',
-  },
-  passing: {
-    pill: 'bg-[var(--color-success-background)] text-[var(--color-success-main)]',
-    dot: 'bg-[var(--color-success-main)]',
-  },
+const GRADE_BADGE_VARIANT: Record<SafeGrade, NonNullable<VariantProps<typeof badgeVariants>['variant']> | undefined> = {
+  critical: 'negative',
+  at_risk: 'warning',
+  needs_attention: undefined,
+  passing: 'positive',
+}
+
+/** Filled status dot in the grade's fill colour, sitting on the tinted pill. */
+const GRADE_DOT_STYLES: Record<SafeGrade, string> = {
+  critical: 'bg-[var(--color-error-main)]',
+  at_risk: 'bg-[var(--color-warning-main)]',
+  needs_attention: 'bg-[var(--color-review-main)]',
+  passing: 'bg-[var(--color-success-main)]',
 }
 
 export type SafeGradeChipProps = {
@@ -63,22 +58,24 @@ const SafeGradeChip = ({
   onClick,
   className,
 }: SafeGradeChipProps): ReactElement => {
-  const styles = GRADE_CHIP_STYLES[grade]
   return (
     <Badge
+      variant={GRADE_BADGE_VARIANT[grade]}
+      size="auto"
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       aria-label={ariaLabel}
       className={cn(
-        'h-auto gap-1.5 rounded-full border-transparent px-2.5 py-1 text-xs font-medium',
-        styles.pill,
+        'gap-1.5',
+        // eslint-disable-next-line no-restricted-syntax -- needs_attention maps to the review-* palette, which has no Badge variant
+        grade === 'needs_attention' && 'bg-[var(--color-review-background)] text-[var(--color-review-main)]',
         onClick && 'cursor-pointer transition-opacity hover:opacity-80',
         active && 'ring-1 ring-inset ring-current',
         className,
       )}
     >
-      <span className={cn('size-2 shrink-0 rounded-full', styles.dot)} aria-hidden />
+      <span className={cn('size-2 shrink-0 rounded-full', GRADE_DOT_STYLES[grade])} aria-hidden />
       {label ?? SAFE_GRADE_LABEL[grade]}
     </Badge>
   )

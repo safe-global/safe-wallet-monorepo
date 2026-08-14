@@ -1,39 +1,36 @@
-import React from 'react'
 import NextLink from 'next/link'
-import { Tab, Tabs, Typography, Stack } from '@mui/material'
 import { useRouter } from 'next/router'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { NavItem } from '@/components/common/NavTabs/navItemsConfig'
-import css from './styles.module.css'
 
 const NavTabs = ({ tabs }: { tabs: NavItem[] }) => {
   const router = useRouter()
-  const activeTab = Math.max(0, tabs.map((tab) => tab.href).indexOf(router.pathname))
+  const activeHref = tabs.map((tab) => tab.href).includes(router.pathname) ? router.pathname : tabs[0]?.href
   const query = router.query.safe ? { safe: router.query.safe } : undefined
 
+  // Mounting Tabs with value=undefined (tabs still loading) locks Base UI into uncontrolled mode
+  // and the active tab is never highlighted once the tabs arrive.
+  if (!tabs.length) return null
+
   return (
-    <Tabs value={activeTab} variant="scrollable" allowScrollButtonsMobile className={css.tabs}>
-      {tabs.map((tab, idx) => (
-        <Tab
-          key={tab.href}
-          href={{ pathname: tab.href, query }}
-          component={NextLink}
-          tabIndex={0}
-          className={css.tab}
-          label={
-            <Stack direction="row" alignItems="center" gap={1}>
-              <Typography
-                variant="body2"
-                fontWeight={700}
-                color={activeTab === idx ? 'primary' : 'primary.light'}
-                className={css.label}
-              >
-                {tab.label}
-              </Typography>
+    <Tabs value={activeHref}>
+      <TabsList variant="underline" tone="brand" className="overflow-x-auto overflow-y-hidden">
+        {tabs.map((tab) => (
+          <TabsTrigger
+            key={tab.href}
+            value={tab.href}
+            tabIndex={0}
+            nativeButton={false}
+            className="whitespace-nowrap"
+            render={<NextLink href={{ pathname: tab.href, query }} />}
+          >
+            <span className="flex items-center gap-2">
+              {tab.label}
               {tab.tag}
-            </Stack>
-          }
-        />
-      ))}
+            </span>
+          </TabsTrigger>
+        ))}
+      </TabsList>
     </Tabs>
   )
 }

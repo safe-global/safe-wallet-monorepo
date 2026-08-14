@@ -4,10 +4,8 @@ import * as chainIdModule from '@/hooks/useChainId'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import * as wallet from '@/hooks/wallets/useWallet'
 import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
-import * as safeContracts from '@/services/contracts/safeContracts'
 import * as store from '@/store'
 import { renderHook } from '@/tests/test-utils'
-import type { SafeProxyFactoryContractImplementationType } from '@safe-global/protocol-kit'
 import { JsonRpcProvider } from 'ethers'
 import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { waitFor } from '@testing-library/react'
@@ -47,9 +45,6 @@ describe('useEstimateSafeCreationGas', () => {
     }))
     jest.spyOn(useChains, 'useChain').mockImplementation(() => mockChain)
     jest.spyOn(useChains, 'useCurrentChain').mockImplementation(() => mockChain)
-    jest
-      .spyOn(safeContracts, 'getReadOnlyProxyFactoryContract')
-      .mockResolvedValue({ getAddress: () => ZERO_ADDRESS } as unknown as SafeProxyFactoryContractImplementationType)
     jest.spyOn(sender, 'encodeSafeCreationTx').mockReturnValue(EMPTY_DATA)
     jest.spyOn(wallet, 'default').mockReturnValue({} as ConnectedWallet)
   })

@@ -6,7 +6,7 @@ import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
 import { useNewSafeNextParam } from '@/components/new-safe/getReturnUrl'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@/utils/cn'
@@ -39,12 +39,7 @@ const GetStartedCard = () => {
         </p>
 
         <div className="mt-5 flex flex-col gap-2.5">
-          <Button
-            size="lg"
-            className="h-12 w-full text-[15px]"
-            onClick={connectWallet}
-            data-testid="connect-wallet-button"
-          >
+          <Button size="xl" className="w-full" onClick={connectWallet} data-testid="connect-wallet-button">
             <Wallet className="size-[18px]" />
             Connect wallet
           </Button>
@@ -56,13 +51,15 @@ const GetStartedCard = () => {
           </div>
 
           <Track {...OVERVIEW_EVENTS.ADD_TO_WATCHLIST} label={OVERVIEW_LABELS.login_page}>
-            <NextLink
-              href={{ pathname: AppRoutes.newSafe.load, query: { next } }}
+            <Button
+              variant="ghost"
+              size="xl"
+              className="w-full"
               data-testid="watch-account-button"
-              className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }), 'h-12 w-full text-[15px]')}
+              render={<NextLink href={{ pathname: AppRoutes.newSafe.load, query: { next } }} />}
             >
               Watch any account
-            </NextLink>
+            </Button>
           </Track>
         </div>
       </div>

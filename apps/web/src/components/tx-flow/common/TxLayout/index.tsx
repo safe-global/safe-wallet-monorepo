@@ -1,52 +1,12 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import useSafeInfo from '@/hooks/useSafeInfo'
-import { type ComponentType, type ReactElement, type ReactNode, useContext } from 'react'
-import { Box, Container, Grid2 as Grid, Typography, Button, Paper, SvgIcon, useMediaQuery, Stack } from '@mui/material'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import { useTheme } from '@mui/material/styles'
-import classnames from 'classnames'
-import { ProgressBar } from '@/components/common/ProgressBar'
-import SafeTxProvider, { SafeTxContext } from '../../SafeTxProvider'
+import { type ComponentType, type ReactElement, type ReactNode } from 'react'
+import SafeTxProvider from '../../SafeTxProvider'
 import { TxInfoProvider } from '@/components/tx-flow/TxInfoProvider'
-import TxNonce from '../TxNonce'
-import TxStatusWidget from '../TxStatusWidget'
-import css from './styles.module.css'
-import SafeShieldWidget from '@/features/safe-shield'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import TxLayoutBase from '../TxLayoutBase'
 
-export const TxLayoutHeader = ({
-  hideNonce,
-  fixedNonce,
-  icon,
-  subtitle,
-}: {
-  hideNonce: TxLayoutProps['hideNonce']
-  fixedNonce: TxLayoutProps['fixedNonce']
-  icon: TxLayoutProps['icon']
-  subtitle: TxLayoutProps['subtitle']
-}) => {
-  const { safe } = useSafeInfo()
-  const { nonceNeeded } = useContext(SafeTxContext)
-
-  if (hideNonce && !icon && !subtitle) return null
-
-  return (
-    <Box className={css.headerInner}>
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        {icon && (
-          <div className={css.icon}>
-            <SvgIcon component={icon} inheritViewBox />
-          </div>
-        )}
-
-        <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
-          {subtitle}
-        </Typography>
-      </Box>
-      {!hideNonce && safe.deployed && nonceNeeded && <TxNonce canEdit={!fixedNonce} />}
-    </Box>
-  )
-}
+// Re-exported for backwards compatibility; the header now lives with the shared chrome.
+export { TxLayoutHeader } from '../TxLayoutBase'
 
 type TxLayoutProps = {
   title: ReactNode
@@ -65,6 +25,11 @@ type TxLayoutProps = {
   hideSafeShield?: boolean
 }
 
+/**
+ * Prop-driven entry point for the standalone transaction flows (Replace, Recover, Batch,
+ * Sign message, Recovery attempt, Activate account). It owns the tx providers and computes
+ * step progress, then delegates the rendering to the shared {@link TxLayoutBase} chrome.
+ */
 const TxLayout = ({
   title,
   subtitle,
@@ -81,11 +46,6 @@ const TxLayout = ({
   isMessage = false,
   hideSafeShield = false,
 }: TxLayoutProps): ReactElement => {
-  const smallScreenBreakpoint = 'md'
-  const theme = useTheme()
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down(smallScreenBreakpoint))
-  const isDesktop = useMediaQuery(theme.breakpoints.up('lg'))
-
   const steps = Array.isArray(children) ? children : [children]
   const progress = Math.round(((step + 1) / steps.length) * 100)
 
@@ -93,89 +53,25 @@ const TxLayout = ({
     <SafeTxProvider>
       <TxInfoProvider>
         <SafeShieldProvider>
-          <Grid container className={css.container}>
-            {!isReplacement && !isSmallScreen && (
-              <Grid sx={{ width: 200 }} pt={5}>
-                <aside>
-                  <Stack gap={3} position="fixed">
-                    <TxStatusWidget
-                      isLastStep={step === steps.length - 1}
-                      txSummary={txSummary}
-                      isBatch={isBatch}
-                      isMessage={isMessage}
-                    />
-                  </Stack>
-                </aside>
-              </Grid>
-            )}
-
-            <Grid size={{ xs: 12, [smallScreenBreakpoint]: 'grow' }} px={{ [smallScreenBreakpoint]: 5 }}>
-              <Container className={css.contentContainer}>
-                <Grid container spacing={3} justifyContent="center">
-                  {/* Main content */}
-                  <Grid size="grow" sx={{ maxWidth: { [smallScreenBreakpoint]: 672 } }}>
-                    <div className={css.titleWrapper}>
-                      <Typography
-                        data-testid="modal-title"
-                        variant="h3"
-                        component="div"
-                        className={css.title}
-                        sx={{ fontWeight: '700' }}
-                      >
-                        {title}
-                      </Typography>
-                    </div>
-
-                    <Paper
-                      data-testid="modal-header"
-                      className={css.header}
-                      sx={{
-                        borderTopLeftRadius: !hideProgress ? '0' : '16px',
-                        borderTopRightRadius: !hideProgress ? '0' : '16px',
-                      }}
-                    >
-                      {!hideProgress && (
-                        <Box className={css.progressBar}>
-                          <ProgressBar value={progress} />
-                        </Box>
-                      )}
-
-                      <TxLayoutHeader subtitle={subtitle} icon={icon} hideNonce={hideNonce} fixedNonce={fixedNonce} />
-                    </Paper>
-
-                    <div className={css.step}>
-                      {steps[step]}
-
-                      {onBack && step > 0 && (
-                        <Button
-                          data-testid="modal-back-btn"
-                          variant={isDesktop ? 'outlined' : 'text'}
-                          onClick={onBack}
-                          className={css.backButton}
-                          startIcon={<ArrowBackIcon fontSize="small" />}
-                        >
-                          Back
-                        </Button>
-                      )}
-                    </div>
-                  </Grid>
-
-                  {/* Sidebar */}
-                  {!isReplacement && !hideSafeShield && (
-                    <Grid
-                      size={{ xs: 12, [smallScreenBreakpoint]: 4.5 }}
-                      sx={{ width: { lg: 320 } }}
-                      className={classnames(css.widget)}
-                    >
-                      <Box className={css.sticky}>
-                        <SafeShieldWidget />
-                      </Box>
-                    </Grid>
-                  )}
-                </Grid>
-              </Container>
-            </Grid>
-          </Grid>
+          <TxLayoutBase
+            title={title}
+            subtitle={subtitle}
+            icon={icon}
+            txSummary={txSummary}
+            hideNonce={hideNonce}
+            fixedNonce={fixedNonce}
+            hideProgress={hideProgress}
+            isReplacement={isReplacement}
+            isMessage={isMessage}
+            isBatch={isBatch}
+            hideSafeShield={hideSafeShield}
+            step={step}
+            stepCount={steps.length}
+            progress={progress}
+            onBack={onBack}
+          >
+            {steps[step]}
+          </TxLayoutBase>
         </SafeShieldProvider>
       </TxInfoProvider>
     </SafeTxProvider>

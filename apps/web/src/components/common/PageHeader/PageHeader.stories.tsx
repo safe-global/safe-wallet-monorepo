@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Button, IconButton } from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
-import SettingsIcon from '@mui/icons-material/Settings'
+import { Plus, Settings } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import PageHeader from './index'
 
 const meta = {
+  title: 'Components/Common/PageHeader',
   component: PageHeader,
   parameters: {
     layout: 'padded',
@@ -25,7 +25,8 @@ export const WithButton: Story = {
   args: {
     title: 'Address book',
     action: (
-      <Button variant="contained" startIcon={<AddIcon />}>
+      <Button>
+        <Plus className="size-4" />
         Add entry
       </Button>
     ),
@@ -36,9 +37,9 @@ export const WithIconButton: Story = {
   args: {
     title: 'Settings',
     action: (
-      <IconButton>
-        <SettingsIcon />
-      </IconButton>
+      <Button variant="ghost" size="icon">
+        <Settings className="size-4" />
+      </Button>
     ),
   },
 }
@@ -53,6 +54,6 @@ export const NoBorder: Story = {
 export const LongTitle: Story = {
   args: {
     title: 'Transaction queue and history overview',
-    action: <Button variant="outlined">Export</Button>,
+    action: <Button variant="outline">Export</Button>,
   },
 }

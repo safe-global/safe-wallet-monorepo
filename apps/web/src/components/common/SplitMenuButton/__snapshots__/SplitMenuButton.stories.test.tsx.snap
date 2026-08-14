@@ -5,46 +5,57 @@ exports[`./SplitMenuButton.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1v5z18m"
+    class="shadcn-scope"
   >
     <div
-      aria-label="Button group with a nested menu"
-      class="MuiButtonGroup-root MuiButtonGroup-contained MuiButtonGroup-horizontal MuiButtonGroup-fullWidth MuiButtonGroup-colorPrimary mui-style-izkk6m-MuiButtonGroup-root"
-      role="group"
+      class="w-[300px]"
     >
       <div
-        class="MuiBox-root mui-style-1rr4qq7"
-        data-mui-internal-clone-element="true"
+        aria-label="Button group with a nested menu"
+        class="flex h-10 w-full"
+        data-slot="button-group"
       >
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButtonGroup-firstButton mui-style-6kkrx9-MuiButtonBase-root-MuiButton-root"
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 h-full min-w-0 flex-1 shrink in-data-[slot=button-group]:rounded-r-none"
+          data-slot="tooltip-trigger"
           data-testid="combo-submit-execute"
+          id="base-ui-_r_1_"
+          style="min-width: min(9ch, 100% - 3rem);"
           tabindex="0"
           type="submit"
         >
           Execute
         </button>
-      </div>
-      <button
-        aria-haspopup="menu"
-        aria-label="select action"
-        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButtonGroup-lastButton mui-style-11igftf-MuiButtonBase-root-MuiButton-root"
-        data-testid="combo-submit-dropdown"
-        tabindex="0"
-        type="button"
-      >
-        <svg
-          aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
-          data-testid="ArrowDropDownIcon"
-          focusable="false"
-          viewBox="0 0 24 24"
+        <button
+          aria-expanded="false"
+          aria-haspopup="menu"
+          aria-label="select action"
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground gap-1.5 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 h-full max-w-12 border-l border-l-[var(--color-border-light)] px-3 in-data-[slot=button-group]:rounded-l-none"
+          data-slot="dropdown-menu-trigger"
+          data-testid="combo-submit-dropdown"
+          id="base-ui-_r_6_"
+          tabindex="0"
+          type="button"
         >
-          <path
-            d="m7 10 5 5 5-5z"
-          />
-        </svg>
-      </button>
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-chevron-down"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m6 9 6 6 6-6"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -55,47 +66,59 @@ exports[`./SplitMenuButton.stories Disabled 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1v5z18m"
+    class="shadcn-scope"
   >
     <div
-      aria-label="Button group with a nested menu"
-      class="MuiButtonGroup-root MuiButtonGroup-contained MuiButtonGroup-horizontal MuiButtonGroup-fullWidth MuiButtonGroup-colorPrimary mui-style-izkk6m-MuiButtonGroup-root"
-      role="group"
+      class="w-[300px]"
     >
       <div
-        class="MuiBox-root mui-style-1rr4qq7"
-        data-mui-internal-clone-element="true"
+        aria-label="Button group with a nested menu"
+        class="flex h-10 w-full"
+        data-slot="button-group"
       >
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth Mui-disabled MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButtonGroup-firstButton mui-style-6kkrx9-MuiButtonBase-root-MuiButton-root"
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 h-full min-w-0 flex-1 shrink in-data-[slot=button-group]:rounded-r-none"
+          data-disabled=""
+          data-slot="tooltip-trigger"
           data-testid="combo-submit-execute"
           disabled=""
-          tabindex="-1"
+          id="base-ui-_r_9_"
+          style="min-width: min(9ch, 100% - 3rem);"
+          tabindex="0"
           type="submit"
         >
           Execute
         </button>
-      </div>
-      <button
-        aria-haspopup="menu"
-        aria-label="select action"
-        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButtonGroup-lastButton mui-style-11igftf-MuiButtonBase-root-MuiButton-root"
-        data-testid="combo-submit-dropdown"
-        tabindex="0"
-        type="button"
-      >
-        <svg
-          aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
-          data-testid="ArrowDropDownIcon"
-          focusable="false"
-          viewBox="0 0 24 24"
+        <button
+          aria-expanded="false"
+          aria-haspopup="menu"
+          aria-label="select action"
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground gap-1.5 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 h-full max-w-12 border-l border-l-[var(--color-border-light)] px-3 in-data-[slot=button-group]:rounded-l-none"
+          data-slot="dropdown-menu-trigger"
+          data-testid="combo-submit-dropdown"
+          id="base-ui-_r_e_"
+          tabindex="0"
+          type="button"
         >
-          <path
-            d="m7 10 5 5 5-5z"
-          />
-        </svg>
-      </button>
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-chevron-down"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m6 9 6 6 6-6"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -106,65 +129,76 @@ exports[`./SplitMenuButton.stories Loading 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1v5z18m"
+    class="shadcn-scope"
   >
     <div
-      aria-label="Button group with a nested menu"
-      class="MuiButtonGroup-root MuiButtonGroup-contained MuiButtonGroup-horizontal MuiButtonGroup-fullWidth MuiButtonGroup-colorPrimary mui-style-izkk6m-MuiButtonGroup-root"
-      role="group"
+      class="w-[300px]"
     >
       <div
-        class="MuiBox-root mui-style-1rr4qq7"
-        data-mui-internal-clone-element="true"
+        aria-label="Button group with a nested menu"
+        class="flex h-10 w-full"
+        data-slot="button-group"
       >
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButtonGroup-firstButton mui-style-6kkrx9-MuiButtonBase-root-MuiButton-root"
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 h-full min-w-0 flex-1 shrink in-data-[slot=button-group]:rounded-r-none"
+          data-slot="tooltip-trigger"
           data-testid="combo-submit-execute"
+          id="base-ui-_r_h_"
+          style="min-width: min(9ch, 100% - 3rem);"
           tabindex="0"
           type="submit"
         >
-          <span
-            class="MuiCircularProgress-root MuiCircularProgress-indeterminate MuiCircularProgress-colorPrimary mui-style-vg4kwr-MuiCircularProgress-root"
-            role="progressbar"
-            style="width: 20px; height: 20px;"
+          <svg
+            aria-label="Loading"
+            class="lucide lucide-loader-circle animate-spin size-5"
+            fill="none"
+            height="24"
+            role="status"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <svg
-              class="MuiCircularProgress-svg mui-style-54pwck-MuiCircularProgress-svg"
-              viewBox="22 22 44 44"
-            >
-              <circle
-                class="MuiCircularProgress-circle MuiCircularProgress-circleIndeterminate mui-style-19t5dcl-MuiCircularProgress-circle"
-                cx="44"
-                cy="44"
-                fill="none"
-                r="20.2"
-                stroke-width="3.6"
-              />
-            </svg>
-          </span>
+            <path
+              d="M21 12a9 9 0 1 1-6.219-8.56"
+            />
+          </svg>
+        </button>
+        <button
+          aria-expanded="false"
+          aria-haspopup="menu"
+          aria-label="select action"
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground gap-1.5 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 h-full max-w-12 border-l border-l-[var(--color-border-light)] px-3 in-data-[slot=button-group]:rounded-l-none"
+          data-disabled=""
+          data-slot="dropdown-menu-trigger"
+          data-testid="combo-submit-dropdown"
+          disabled=""
+          id="base-ui-_r_m_"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-chevron-down"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m6 9 6 6 6-6"
+            />
+          </svg>
         </button>
       </div>
-      <button
-        aria-haspopup="menu"
-        aria-label="select action"
-        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth Mui-disabled MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButtonGroup-lastButton mui-style-11igftf-MuiButtonBase-root-MuiButton-root"
-        data-testid="combo-submit-dropdown"
-        disabled=""
-        tabindex="-1"
-        type="button"
-      >
-        <svg
-          aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
-          data-testid="ArrowDropDownIcon"
-          focusable="false"
-          viewBox="0 0 24 24"
-        >
-          <path
-            d="m7 10 5 5 5-5z"
-          />
-        </svg>
-      </button>
     </div>
   </div>
 </div>
@@ -175,20 +209,22 @@ exports[`./SplitMenuButton.stories SingleOption 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1v5z18m"
+    class="shadcn-scope"
   >
     <div
-      aria-label="Button group with a nested menu"
-      class="MuiButtonGroup-root MuiButtonGroup-contained MuiButtonGroup-horizontal MuiButtonGroup-fullWidth MuiButtonGroup-colorPrimary mui-style-izkk6m-MuiButtonGroup-root"
-      role="group"
+      class="w-[300px]"
     >
       <div
-        class="MuiBox-root mui-style-1rr4qq7"
-        data-mui-internal-clone-element="true"
+        aria-label="Button group with a nested menu"
+        class="flex h-10 w-full"
+        data-slot="button-group"
       >
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary mui-style-48sc2n-MuiButtonBase-root-MuiButton-root"
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 h-full min-w-0 flex-1 shrink"
+          data-slot="tooltip-trigger"
           data-testid="combo-submit-submit"
+          id="base-ui-_r_p_"
+          style="min-width: min(8ch, 100% - 3rem);"
           tabindex="0"
           type="submit"
         >
@@ -205,46 +241,57 @@ exports[`./SplitMenuButton.stories WithDisabledOption 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1v5z18m"
+    class="shadcn-scope"
   >
     <div
-      aria-label="Button group with a nested menu"
-      class="MuiButtonGroup-root MuiButtonGroup-contained MuiButtonGroup-horizontal MuiButtonGroup-fullWidth MuiButtonGroup-colorPrimary mui-style-izkk6m-MuiButtonGroup-root"
-      role="group"
+      class="w-[300px]"
     >
       <div
-        class="MuiBox-root mui-style-1rr4qq7"
-        data-mui-internal-clone-element="true"
+        aria-label="Button group with a nested menu"
+        class="flex h-10 w-full"
+        data-slot="button-group"
       >
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButtonGroup-firstButton mui-style-6kkrx9-MuiButtonBase-root-MuiButton-root"
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 h-full min-w-0 flex-1 shrink in-data-[slot=button-group]:rounded-r-none"
+          data-slot="tooltip-trigger"
           data-testid="combo-submit-execute"
+          id="base-ui-_r_r_"
+          style="min-width: min(9ch, 100% - 3rem);"
           tabindex="0"
           type="submit"
         >
           Execute
         </button>
-      </div>
-      <button
-        aria-haspopup="menu"
-        aria-label="select action"
-        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButtonGroup-lastButton mui-style-11igftf-MuiButtonBase-root-MuiButton-root"
-        data-testid="combo-submit-dropdown"
-        tabindex="0"
-        type="button"
-      >
-        <svg
-          aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
-          data-testid="ArrowDropDownIcon"
-          focusable="false"
-          viewBox="0 0 24 24"
+        <button
+          aria-expanded="false"
+          aria-haspopup="menu"
+          aria-label="select action"
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground gap-1.5 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 h-full max-w-12 border-l border-l-[var(--color-border-light)] px-3 in-data-[slot=button-group]:rounded-l-none"
+          data-slot="dropdown-menu-trigger"
+          data-testid="combo-submit-dropdown"
+          id="base-ui-_r_10_"
+          tabindex="0"
+          type="button"
         >
-          <path
-            d="m7 10 5 5 5-5z"
-          />
-        </svg>
-      </button>
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-chevron-down"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m6 9 6 6 6-6"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -255,46 +302,57 @@ exports[`./SplitMenuButton.stories WithSelectedOption 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1v5z18m"
+    class="shadcn-scope"
   >
     <div
-      aria-label="Button group with a nested menu"
-      class="MuiButtonGroup-root MuiButtonGroup-contained MuiButtonGroup-horizontal MuiButtonGroup-fullWidth MuiButtonGroup-colorPrimary mui-style-izkk6m-MuiButtonGroup-root"
-      role="group"
+      class="w-[300px]"
     >
       <div
-        class="MuiBox-root mui-style-1rr4qq7"
-        data-mui-internal-clone-element="true"
+        aria-label="Button group with a nested menu"
+        class="flex h-10 w-full"
+        data-slot="button-group"
       >
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButtonGroup-firstButton mui-style-6kkrx9-MuiButtonBase-root-MuiButton-root"
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 h-full min-w-0 flex-1 shrink in-data-[slot=button-group]:rounded-r-none"
+          data-slot="tooltip-trigger"
           data-testid="combo-submit-sign"
+          id="base-ui-_r_13_"
+          style="min-width: min(9ch, 100% - 3rem);"
           tabindex="0"
           type="submit"
         >
           Sign
         </button>
-      </div>
-      <button
-        aria-haspopup="menu"
-        aria-label="select action"
-        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButtonGroup-lastButton mui-style-11igftf-MuiButtonBase-root-MuiButton-root"
-        data-testid="combo-submit-dropdown"
-        tabindex="0"
-        type="button"
-      >
-        <svg
-          aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
-          data-testid="ArrowDropDownIcon"
-          focusable="false"
-          viewBox="0 0 24 24"
+        <button
+          aria-expanded="false"
+          aria-haspopup="menu"
+          aria-label="select action"
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground gap-1.5 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 h-full max-w-12 border-l border-l-[var(--color-border-light)] px-3 in-data-[slot=button-group]:rounded-l-none"
+          data-slot="dropdown-menu-trigger"
+          data-testid="combo-submit-dropdown"
+          id="base-ui-_r_18_"
+          tabindex="0"
+          type="button"
         >
-          <path
-            d="m7 10 5 5 5-5z"
-          />
-        </svg>
-      </button>
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-chevron-down"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m6 9 6 6 6-6"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -305,47 +363,57 @@ exports[`./SplitMenuButton.stories WithTooltip 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1v5z18m"
+    class="shadcn-scope"
   >
     <div
-      aria-label="Button group with a nested menu"
-      class="MuiButtonGroup-root MuiButtonGroup-contained MuiButtonGroup-horizontal MuiButtonGroup-fullWidth MuiButtonGroup-colorPrimary mui-style-izkk6m-MuiButtonGroup-root"
-      role="group"
+      class="w-[300px]"
     >
       <div
-        aria-label="Choose an action to perform"
-        class="MuiBox-root mui-style-1rr4qq7"
-        data-mui-internal-clone-element="true"
+        aria-label="Button group with a nested menu"
+        class="flex h-10 w-full"
+        data-slot="button-group"
       >
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButtonGroup-firstButton mui-style-6kkrx9-MuiButtonBase-root-MuiButton-root"
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 h-full min-w-0 flex-1 shrink in-data-[slot=button-group]:rounded-r-none"
+          data-slot="tooltip-trigger"
           data-testid="combo-submit-execute"
+          id="base-ui-_r_1b_"
+          style="min-width: min(9ch, 100% - 3rem);"
           tabindex="0"
           type="submit"
         >
           Execute
         </button>
-      </div>
-      <button
-        aria-haspopup="menu"
-        aria-label="select action"
-        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButtonGroup-lastButton mui-style-11igftf-MuiButtonBase-root-MuiButton-root"
-        data-testid="combo-submit-dropdown"
-        tabindex="0"
-        type="button"
-      >
-        <svg
-          aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
-          data-testid="ArrowDropDownIcon"
-          focusable="false"
-          viewBox="0 0 24 24"
+        <button
+          aria-expanded="false"
+          aria-haspopup="menu"
+          aria-label="select action"
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground gap-1.5 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 h-full max-w-12 border-l border-l-[var(--color-border-light)] px-3 in-data-[slot=button-group]:rounded-l-none"
+          data-slot="dropdown-menu-trigger"
+          data-testid="combo-submit-dropdown"
+          id="base-ui-_r_1g_"
+          tabindex="0"
+          type="button"
         >
-          <path
-            d="m7 10 5 5 5-5z"
-          />
-        </svg>
-      </button>
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-chevron-down"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m6 9 6 6 6-6"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 </div>

@@ -1,12 +1,14 @@
 import { type ElementType } from 'react'
-import { Box, ButtonBase, SvgIcon, type SvgIconOwnProps, Typography } from '@mui/material'
-import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
+import { ChevronRight } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
 import css from './styles.module.css'
+
+type IconColor = 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success' | 'border'
 
 const ChoiceButton = ({
   title,
   description,
-  icon,
+  icon: Icon,
   iconColor,
   onClick,
   disabled,
@@ -15,46 +17,31 @@ const ChoiceButton = ({
   title: string
   description?: string
   icon: ElementType
-  iconColor?: SvgIconOwnProps['color']
+  iconColor?: IconColor
   onClick: () => void
   disabled?: boolean
   chip?: string
 }) => {
   return (
-    <ButtonBase data-testid="choice-btn" className={css.txButton} onClick={onClick} disabled={disabled}>
-      <Box
+    <button type="button" data-testid="choice-btn" className={css.txButton} onClick={onClick} disabled={disabled}>
+      <div
         className={css.iconBg}
-        sx={{ backgroundColor: iconColor ? `var(--color-${iconColor}-background) !important` : '' }}
+        style={iconColor ? { backgroundColor: `var(--color-${iconColor}-background)` } : undefined}
       >
-        <SvgIcon component={icon} fontSize="small" inheritViewBox color={iconColor} />
-      </Box>
-      <Box
-        sx={{
-          py: 0.2,
-        }}
-      >
-        <Typography
-          sx={{
-            fontWeight: 'bold',
-          }}
-        >
-          {title}
-        </Typography>
+        <Icon className="size-5" style={iconColor ? { color: `var(--color-${iconColor}-main)` } : undefined} />
+      </div>
+      <div className="py-0.5">
+        <Typography className="font-bold">{title}</Typography>
 
         {description && (
-          <Typography
-            variant="body2"
-            sx={{
-              color: 'primary.light',
-            }}
-          >
+          <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
             {description}
           </Typography>
         )}
-      </Box>
-      <SvgIcon component={ChevronRightRoundedIcon} color="border" sx={{ ml: 'auto' }} />
-      {chip && <Box className={css.chip}>{chip}</Box>}
-    </ButtonBase>
+      </div>
+      <ChevronRight className="ml-auto size-6 text-[var(--color-border-main)]" />
+      {chip && <div className={css.chip}>{chip}</div>}
+    </button>
   )
 }
 

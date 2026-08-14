@@ -139,7 +139,7 @@ describe('ShowAllAddress', () => {
       })
 
       // Check that addresses are in separate boxes
-      const addressBoxes = container.querySelectorAll('.MuiBox-root')
+      const addressBoxes = container.querySelectorAll('.rounded-\\[4px\\]')
       expect(addressBoxes.length).toBeGreaterThanOrEqual(mockAddresses.length)
     })
 
@@ -195,9 +195,8 @@ describe('ShowAllAddress', () => {
       expect(screen.getByText('Hide all')).toBeInTheDocument()
 
       // No address boxes should be rendered
-      const addressText = container.querySelectorAll('.MuiTypography-body2')
-      // Only the "Hide all" text should be present
-      expect(addressText.length).toBeLessThanOrEqual(1)
+      const addressBoxes = container.querySelectorAll('.rounded-\\[4px\\]')
+      expect(addressBoxes.length).toBe(0)
     })
   })
 
@@ -253,17 +252,11 @@ describe('ShowAllAddress', () => {
     it('should be keyboard accessible - expand', async () => {
       const { user } = renderWithUserEvent(<ShowAllAddress addresses={mockAddresses} />)
 
-      const showAllButton = screen.getByText('Show all').closest('div')
+      await user.tab()
+      expect(screen.getByRole('button', { name: 'Show all' })).toHaveFocus()
 
-      // Tab to the element and press Enter
-      if (showAllButton) {
-        showAllButton.focus()
-        await user.keyboard('{Enter}')
-      }
+      await user.keyboard('{Enter}')
 
-      // Should expand (click handler should be triggered)
-      // Note: Depending on implementation, this might need adjustment
-      await user.click(screen.getByText('Show all'))
       expect(screen.getByText('Hide all')).toBeInTheDocument()
     })
 

@@ -1,10 +1,5 @@
 .drawerContainer {
   padding: calc(var(--header-height) + var(--space-3)) var(--space-3) 0 var(--space-3);
-  width: 100vw;
-}
-
-@media (min-width: 600px) {
-  .drawerContainer {
-    width: 450px;
-  }
+  width: 100%;
+  overflow-y: auto;
 }

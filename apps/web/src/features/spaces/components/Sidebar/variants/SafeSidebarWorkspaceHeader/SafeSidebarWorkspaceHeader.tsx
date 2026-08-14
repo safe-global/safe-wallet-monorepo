@@ -59,11 +59,16 @@ export const SafeSidebarWorkspaceHeader = ({
             }
           >
             <span className={css.addSafeToWorkspaceRing}>
-              <CircleFadingPlus className={css.addSafeToWorkspacePlusIcon} strokeWidth={2.5} />
+              <CircleFadingPlus className={css.addSafeToWorkspacePlusIcon} />
             </span>
             <span className={css.addSafeToWorkspaceLabel}>Add Safe to workspace</span>
           </DialogTrigger>
-          <DialogContent className="max-w-[420px] p-0" showCloseButton={false}>
+          <DialogContent
+            padding="none"
+            // eslint-disable-next-line no-restricted-syntax -- max-w-[420px]: bespoke width, not a size token (needs design to snap)
+            className="max-w-[420px]"
+            showCloseButton={false}
+          >
             <AddToSpacePopupModal />
           </DialogContent>
         </Dialog>

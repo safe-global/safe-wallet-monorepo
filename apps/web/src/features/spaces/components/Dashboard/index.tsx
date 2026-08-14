@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import Grid from '@mui/material/Grid2'
 import { flattenSafeItems } from '@/hooks/safes'
 import {
   useSpaceSafes,
@@ -116,14 +115,12 @@ const SpaceDashboard = () => {
       {isInvited && <PreviewInvite />}
 
       <>
-        <Grid container>
-          <Grid size={12}>
-            <AggregatedBalance safeItems={safeItems} accountsLoading={isOverviewLoading} />
-          </Grid>
-        </Grid>
+        <div>
+          <AggregatedBalance safeItems={safeItems} accountsLoading={isOverviewLoading} />
+        </div>
 
-        <Grid container spacing={3}>
-          <Grid data-testid="dashboard-safe-list" size={{ xs: 12, md: 7 }}>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+          <div data-testid="dashboard-safe-list" className="md:col-span-7">
             {$isReady ? (
               <AccountsWidget
                 items={safesToDisplay}
@@ -151,8 +148,8 @@ const SpaceDashboard = () => {
                 <div className="animate-pulse rounded-lg bg-muted" />
               </SafeWidget>
             )}
-          </Grid>
-          <Grid size={{ xs: 12, md: 5 }}>
+          </div>
+          <div className="md:col-span-5">
             {showSetupWidget ? (
               <SetupWidget onDismiss={() => setSetupDismissed(true)} />
             ) : (
@@ -164,8 +161,8 @@ const SpaceDashboard = () => {
                 onItemClick={handlePendingTxItemClick}
               />
             )}
-          </Grid>
-        </Grid>
+          </div>
+        </div>
         {safeItems.length > 0 && (
           <div className="mt-4">
             <SetupWidget loading={isOverviewLoading} horizontal />

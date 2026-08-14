@@ -209,6 +209,36 @@ describe('SpaceSafeBar', () => {
     expect(getByTestId('nested-safes-button')).toBeInTheDocument()
   })
 
+  // The selector is `w-full` below `sm`, so it takes the pill's first row on its own and the two
+  // chips wrap underneath — the address stays on top on mobile. That only holds while nothing
+  // reorders the flex items: an `order-*` on the selector used to push it below the chips under
+  // 430px, which is the layout this guards against.
+  describe('mobile stacking order', () => {
+    const pillChildren = (container: HTMLElement) => {
+      const pill = container.querySelector('[data-testid="safe-level-navigation"] > div')
+      if (!pill) throw new Error('safe bar pill not found')
+      return [...pill.children]
+    }
+
+    it('renders the safe selector as the pill first child, ahead of both chips', () => {
+      const { container, getByTestId } = render(<SpaceSafeBar />)
+      const children = pillChildren(container)
+
+      expect(children[0]).toContainElement(getByTestId('safe-selector-dropdown'))
+      expect(children.findIndex((child) => child.contains(getByTestId('nested-safes-button')))).toBeGreaterThan(0)
+      expect(children.findIndex((child) => child.contains(getByTestId('space-chain-selector')))).toBeGreaterThan(0)
+    })
+
+    it('does not reorder the safe selector away from the first row', () => {
+      const { container, getByTestId } = render(<SpaceSafeBar />)
+      const selectorItem = pillChildren(container).find((child) =>
+        child.contains(getByTestId('safe-selector-dropdown')),
+      )
+
+      expect(selectorItem?.className).not.toMatch(/(^|:)order-/)
+    })
+  })
+
   it('passes the union of workspace + local items to SafeSelectorDropdown (for the trigger)', () => {
     const { getByTestId } = render(<SpaceSafeBar />)
     const dropdown = getByTestId('safe-selector-dropdown')

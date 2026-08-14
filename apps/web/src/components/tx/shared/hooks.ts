@@ -26,6 +26,7 @@ import {
   dispatchTxSigning,
 } from '@/services/tx/tx-sender'
 import { useHasPendingTxs } from '@/hooks/usePendingTxs'
+import { runExecutionPreChecks } from '@/services/tx/executionPreChecks'
 import { getSafeTxGas, getNonces } from '@/services/tx/tx-sender/recommendedNonce'
 import { getAndValidateSafeSDK } from '@/services/tx/tx-sender/sdk'
 import { prepareNestedApproveHashTx } from '@/services/tx/tx-sender/nestedSafeTx'
@@ -242,6 +243,11 @@ export const useTxActions = (): TxActions => {
       assertProvider(signer?.provider)
       assertOnboard(onboard)
       assertChainInfo(chain)
+
+      // Catch the three GS026 causes (stale nonce, non-signer executor, bad
+      // signature) before anything is signed or broadcast — an on-chain GS026
+      // revert would cost the user gas for a guaranteed failure (WA-3005).
+      await runExecutionPreChecks({ safeTx, safe, signerAddress: signer.address })
 
       let tx: TransactionDetails | undefined
       let rePropose = false

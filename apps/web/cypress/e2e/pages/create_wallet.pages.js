@@ -7,7 +7,6 @@ import * as owner from './owners.pages'
 
 const ownerInput = 'input[name^="owners"][name$="name"]'
 const ownerAddress = 'input[name^="owners"][name$="address"]'
-const thresholdInput = 'input[name="threshold"]'
 export const removeOwnerBtn = 'button[aria-label="Remove signer"]'
 // Welcome "My accounts" redesign (V2): creation lives behind the "Add accounts" chooser rather than a
 // standalone create-safe button.
@@ -36,7 +35,6 @@ export const addFundsSection = '[data-testid="add-funds-section"]'
 export const noTokensAlert = '[data-testid="no-tokens-alert"]'
 const networkCheckbox = '[data-testid="network-checkbox"]'
 const cancelIcon = '[data-testid="CancelIcon"]'
-const thresholdItem = '[data-testid="threshold-item"]'
 export const payNowLaterMessageBox = '[data-testid="pay-now-later-message-box"]'
 export const safeSetupOverview = '[data-testid="safe-setup-overview"]'
 export const networksLogoList = '[data-testid="network-list"]'
@@ -65,23 +63,50 @@ export function waitForConnectionMsgDisappear() {
   cy.contains(noWalletConnectedMsg).should('not.exist')
 }
 export function checkNotificationsSwitchIs(status) {
-  cy.get(notificationsSwitch).find('input').should(`be.${status}`)
+  cy.get(notificationsSwitch).should(
+    status === constants.enabledStates.disabled ? 'have.attr' : 'not.have.attr',
+    'data-disabled',
+  )
 }
 
 export function clickOnActivateAccountBtn(index) {
-  cy.get(activateAccountBtn).eq(index).click()
+  // Wallet checks gate this button; it starts disabled and a click then is a silent no-op.
+  cy.get(activateAccountBtn).eq(index).should('be.enabled').click()
 }
 
-export function clickOnFinalActivateAccountBtn(index) {
-  cy.get(activateFlowAccountBtn).click()
+const submitErrorMsg = 'Error submitting the transaction. Please try again.'
+
+export function clickOnFinalActivateAccountBtn(retriesLeft = 2) {
+  cy.get(activateFlowAccountBtn).should('be.enabled').click()
+  // Wait for the submission to resolve: on success the tx-flow modal closes; on RPC
+  // throttling (429) the app shows a retryable submission error and re-enables the button.
+  cy.get('body', { timeout: 180000 }).should(($body) => {
+    const flowStillOpen = $body.find(activateFlowAccountBtn).length > 0
+    const hasSubmitError = $body.text().includes(submitErrorMsg)
+    expect(!flowStillOpen || hasSubmitError, 'deployment submitted or retryable error shown').to.be.true
+  })
+  cy.get('body').then(($body) => {
+    const needsRetry = $body.find(activateFlowAccountBtn).length > 0 && $body.text().includes(submitErrorMsg)
+    if (!needsRetry) return
+    if (retriesLeft === 0) {
+      throw new Error('Safe activation kept failing to submit — likely RPC rate limiting (429)')
+    }
+    cy.wait(10000)
+    clickOnFinalActivateAccountBtn(retriesLeft - 1)
+  })
 }
 
 export function clickOnQRCodeSwitch() {
-  cy.get(qrCodeSwitch).click()
+  // Force: the dialog overlay covers the switch while the open animation settles
+  cy.get(qrCodeSwitch).click({ force: true })
 }
 
 export function checkQRCodeSwitchStatus(state) {
-  cy.get(qrCodeSwitch).find('input').should(state)
+  cy.get(qrCodeSwitch).should(
+    'have.attr',
+    'aria-checked',
+    state === constants.checkboxStates.checked ? 'true' : 'false',
+  )
 }
 
 export function checkInitialStepsDisplayed() {
@@ -137,7 +162,9 @@ export function clickOnReviewStepNextBtn() {
 }
 
 export function clickOnLetsGoBtn() {
-  cy.get(creationModalLetsGoBtn).click()
+  // After activation the modal only opens once the deployment is mined and indexed, which can
+  // take well over a minute on Sepolia when the RPC is throttled.
+  cy.get(creationModalLetsGoBtn, { timeout: 180000 }).click()
   return cy.get(creationModalLetsGoBtn, { timeout: 60000 }).should('not.exist')
 }
 
@@ -176,6 +203,12 @@ export function verifyNextBtnIsEnabled() {
 export function clickOnCreateNewSafeBtn() {
   // Open the "Add accounts" chooser, then pick "Create new" to enter the create-safe flow.
   cy.get(addAccountsChooserBtn).should('be.visible').click()
+  cy.wait(1000)
+  cy.get('body').then(($body) => {
+    if (!$body.find(`${createNewAccountOption}:visible`).length) {
+      cy.get(addAccountsChooserBtn).filter(':visible').first().click()
+    }
+  })
   cy.get(createNewAccountOption).should('be.visible').click()
   cy.wait(1000)
 }
@@ -213,7 +246,17 @@ export function selectMultiNetwork(index, network) {
 }
 
 export function clickOnNetwrokCheckbox() {
-  cy.get(networkCheckbox).eq(0).click()
+  // The checkbox itself is decorative (pointer-events: none); the click handler is on the option row.
+  // Selecting is a toggle — only click if the network isn't already selected
+  // (it's pre-seeded from the connected wallet's chain).
+  cy.get(networkCheckbox)
+    .eq(0)
+    .closest('li[role="option"]')
+    .then(($option) => {
+      if ($option.attr('aria-selected') !== 'true') {
+        cy.wrap($option).click()
+      }
+    })
 }
 export function enterNetwork(index, network) {
   cy.get('input').eq(index).type(network)
@@ -245,10 +288,6 @@ export function verifyOwnerName(name, index) {
 
 export function verifyOwnerAddress(address, index) {
   cy.get(ownerAddress).eq(index).should('have.value', address)
-}
-
-export function verifyThreshold(number) {
-  cy.get(thresholdInput).should('have.value', number)
 }
 
 export function clickOnSignerAddressInput(index) {
@@ -284,8 +323,8 @@ export function addNewOwner(name, address, index) {
 }
 
 export function updateThreshold(number) {
-  cy.get(thresholdInput).parent().click()
-  cy.get(thresholdItem).contains(number).click()
+  owner.clickOnThresholdDropdown()
+  owner.getThresholdOptions().contains(number).trigger('mousemove').click()
 }
 
 export function removeOwner(index) {

@@ -10,13 +10,14 @@ import {
   SidebarSeparator,
 } from '@/components/ui/sidebar'
 import css from '../../styles.module.css'
-import type { SpaceSelectorProps, ResolvedSidebarItem, ResolvedSidebarGroup } from '../../types'
+import type { SpaceSelectorProps, ResolvedSidebarNavItem, ResolvedSidebarGroup } from '../../types'
 import { NavItem } from '../NavItem'
+import { SidebarDeveloperGroup } from '../SidebarDeveloperGroup'
 import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
 import { containerVariants, itemVariants } from '../../constants'
 
 interface SpacesSidebarVariantProps extends SpaceSelectorProps {
-  mainNavItems: ResolvedSidebarItem[] | null
+  mainNavItems: ResolvedSidebarNavItem[] | null
   setupGroup: ResolvedSidebarGroup | null
   isLoading?: boolean
 }
@@ -71,7 +72,7 @@ export const SpacesSidebarVariant = ({
             <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
               {setupGroup?.label ?? ''}
             </SidebarGroupLabel>
-            <SidebarSeparator className="my-2 mx-0 px-[18px] hidden group-data-[collapsible=icon]:block group-data-[collapsible=icon]:self-stretch" />
+            <SidebarSeparator className={css.collapsedSeparator} />
             <SidebarGroupContent>
               <SidebarMenu className="gap-0">
                 {displaySetupItems.map((item, index) => (
@@ -86,6 +87,8 @@ export const SpacesSidebarVariant = ({
             </SidebarGroupContent>
           </SidebarGroup>
         </motion.div>
+
+        <SidebarDeveloperGroup isLoading={isLoading} />
       </motion.div>
     </SidebarContent>
   )

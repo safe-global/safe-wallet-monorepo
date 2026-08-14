@@ -5,7 +5,8 @@ import Track from '@/components/common/Track'
 import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
 import { useAppDispatch } from '@/store'
 import EditIcon from '@/public/images/common/edit.svg'
-import { Box, Button, DialogActions, DialogContent, IconButton, Tooltip, SvgIcon } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
@@ -50,34 +51,41 @@ export const EditOwnerDialog = ({ chainId, address, name }: { chainId: string; a
   return (
     <>
       <Track {...SETTINGS_EVENTS.SETUP.EDIT_OWNER}>
-        <Tooltip title="Edit signer">
-          <span>
-            <IconButton onClick={() => setOpen(true)} size="small">
-              <SvgIcon component={EditIcon} inheritViewBox color="border" fontSize="small" />
-            </IconButton>
-          </span>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <span>
+                <Button variant="ghost" size="icon-sm" onClick={() => setOpen(true)}>
+                  <EditIcon className="size-4 text-muted-foreground" />
+                </Button>
+              </span>
+            }
+          />
+          <TooltipContent>Edit signer</TooltipContent>
         </Tooltip>
       </Track>
 
       <ModalDialog open={open} onClose={handleClose} dialogTitle="Edit signer name">
         <FormProvider {...formMethods}>
           <form onSubmit={handleSubmit(onSubmit)}>
-            <DialogContent>
-              <Box py={2}>
+            <div className="p-6">
+              <div className="py-4">
                 <NameInput label="Signer name" name="name" required />
-              </Box>
+              </div>
 
-              <Box py={2}>
+              <div className="py-4">
                 <EthHashInfo address={address} showCopyButton shortAddress={false} />
-              </Box>
-            </DialogContent>
+              </div>
+            </div>
 
-            <DialogActions>
-              <Button onClick={handleClose}>Cancel</Button>
-              <Button type="submit" variant="contained" disabled={buttonDisabled}>
+            <div className="flex justify-end gap-2 p-6 pt-0">
+              <Button variant="outline" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={buttonDisabled}>
                 Save
               </Button>
-            </DialogActions>
+            </div>
           </form>
         </FormProvider>
       </ModalDialog>

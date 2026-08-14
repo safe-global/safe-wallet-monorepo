@@ -1,19 +1,34 @@
-import type { ReactElement, SyntheticEvent } from 'react'
-import React, { useCallback, useEffect } from 'react'
+import type { ReactElement, ReactNode, SyntheticEvent } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import groupBy from 'lodash/groupBy'
 import { useAppDispatch, useAppSelector } from '@/store'
 import type { Notification } from '@/store/notificationsSlice'
 import { closeNotification, readNotification, selectNotifications } from '@/store/notificationsSlice'
-import type { AlertColor, SnackbarCloseReason } from '@mui/material'
-import { Alert, Box, Link, Snackbar, Typography } from '@mui/material'
+import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Link } from '@/components/ui/link'
+import { Button } from '@/components/ui/button'
 import css from './styles.module.css'
 import NextLink from 'next/link'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import { ChevronRight, X, CircleAlert, CircleCheck, TriangleAlert, Info } from 'lucide-react'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import Track from '../Track'
 import { isRelativeUrl } from '@/utils/url'
 
-const toastStyle = { position: 'static', margin: 1 }
+type NotificationVariant = 'success' | 'info' | 'warning' | 'error'
+
+const alertVariant: Record<NotificationVariant, 'success' | 'info' | 'warning' | 'destructive'> = {
+  success: 'success',
+  info: 'info',
+  warning: 'warning',
+  error: 'destructive',
+}
+
+const variantIcon: Record<NotificationVariant, ReactNode> = {
+  success: <CircleCheck />,
+  info: <Info />,
+  warning: <TriangleAlert />,
+  error: <CircleAlert />,
+}
 
 export const NotificationLink = ({
   link,
@@ -32,7 +47,7 @@ export const NotificationLink = ({
         {children}
       </NextLink>
     ) : (
-      <Box display="flex">{children}</Box>
+      <div className="flex">{children}</div>
     )
 
   const handleClick = (event: SyntheticEvent) => {
@@ -51,16 +66,62 @@ export const NotificationLink = ({
       <LinkWrapper>
         <Link
           className={css.link}
+          variant="inherit"
           onClick={handleClick}
-          sx={{ cursor: 'pointer' }}
           {...(isExternal && { target: '_blank', rel: 'noopener noreferrer' })}
         >
           {link.title}
-          <ChevronRightIcon />
+          <ChevronRight />
         </Link>
       </LinkWrapper>
     </Track>
   )
+}
+
+const AUTO_HIDE_MS = 5000
+
+const getAutoHideDuration = (
+  variant: NotificationVariant,
+  override: Notification['autoHideDuration'],
+): number | undefined => {
+  if (override !== undefined) return override ?? undefined
+  return variant === 'info' || variant === 'success' ? AUTO_HIDE_MS : undefined
+}
+
+/**
+ * Owns a toast's auto-hide countdown, and returns the handlers that pause it.
+ *
+ * `onHide` is read through a ref because the parent rebuilds it on every render: depending on it
+ * directly restarted the countdown each time anything else in the app re-rendered. Pointer or keyboard
+ * focus pauses the timer so a toast cannot disappear from under the cursor on its way to the link
+ * inside it, then resumes at half the duration — both what MUI's Snackbar did before the migration.
+ */
+const useAutoHide = (duration: number | undefined, onHide: () => void) => {
+  const onHideRef = useRef(onHide)
+  const wasPausedRef = useRef(false)
+  const [isPaused, setIsPaused] = useState(false)
+
+  useEffect(() => {
+    onHideRef.current = onHide
+  })
+
+  useEffect(() => {
+    if (duration === undefined || isPaused) {
+      return
+    }
+
+    const timer = setTimeout(() => onHideRef.current(), wasPausedRef.current ? duration / 2 : duration)
+    return () => clearTimeout(timer)
+  }, [duration, isPaused])
+
+  const pause = useCallback(() => {
+    wasPausedRef.current = true
+    setIsPaused(true)
+  }, [])
+
+  const resume = useCallback(() => setIsPaused(false), [])
+
+  return { onMouseEnter: pause, onMouseLeave: resume, onFocus: pause, onBlur: resume }
 }
 
 const Toast = ({
@@ -74,49 +135,42 @@ const Toast = ({
   icon = false,
   autoHideDuration: autoHideDurationOverride,
 }: {
-  variant: AlertColor
+  variant: NotificationVariant
   onClose: () => void
 } & Notification) => {
   const dispatch = useAppDispatch()
 
-  const handleClose = (_: Event | SyntheticEvent, reason?: SnackbarCloseReason) => {
-    if (reason === 'clickaway') return
-
-    // Manually closed
-    if (!reason) {
-      dispatch(readNotification({ id }))
-    }
-
+  // Manual dismiss: mark the notification as read, then close
+  const handleManualClose = useCallback(() => {
+    dispatch(readNotification({ id }))
     onClose()
-  }
+  }, [dispatch, id, onClose])
 
-  const autoHideDuration =
-    autoHideDurationOverride !== undefined
-      ? (autoHideDurationOverride ?? undefined)
-      : variant === 'info' || variant === 'success'
-        ? 5000
-        : undefined
+  // Auto-hide info/success toasts (or any toast with an explicit duration) without marking them as read
+  const autoHideProps = useAutoHide(getAutoHideDuration(variant, autoHideDurationOverride), onClose)
 
   return (
-    <Snackbar open onClose={handleClose} sx={toastStyle} autoHideDuration={autoHideDuration}>
-      <Alert severity={variant} onClose={handleClose} elevation={3} sx={{ width: '340px' }} {...(icon && { icon })}>
-        {title && (
-          <Typography variant="body2" fontWeight="700">
-            {title}
-          </Typography>
-        )}
+    <Alert variant={alertVariant[variant]} outlined={false} className="w-[340px] shadow-lg" {...autoHideProps}>
+      {icon ? (icon as ReactNode) : variantIcon[variant]}
+      <AlertAction>
+        <Button variant="ghost" size="icon-xs" aria-label="Close" onClick={handleManualClose}>
+          <X />
+        </Button>
+      </AlertAction>
+      {title && <AlertTitle>{title}</AlertTitle>}
 
+      <AlertDescription>
         {message}
 
         {detailedMessage && (
           <details>
-            <Link component="summary">Details</Link>
+            <Link render={<summary />}>Details</Link>
             <pre>{detailedMessage}</pre>
           </details>
         )}
-        <NotificationLink link={link} onClick={handleClose} />
-      </Alert>
-    </Snackbar>
+        <NotificationLink link={link} onClick={handleManualClose} />
+      </AlertDescription>
+    </Alert>
   )
 }
 

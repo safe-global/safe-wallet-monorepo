@@ -14,7 +14,9 @@ import { usePortalContainerElement } from '@/components/ui/ShadcnProvider'
  * @example
  * ```tsx
  * <Drawer>
- *   <DrawerTrigger>Open</DrawerTrigger>
+ *   <DrawerTrigger asChild>
+ *     <Button>Open</Button>
+ *   </DrawerTrigger>
  *   <DrawerContent>
  *     <DrawerHeader>
  *       <DrawerTitle>Title</DrawerTitle>
@@ -22,7 +24,7 @@ import { usePortalContainerElement } from '@/components/ui/ShadcnProvider'
  *     </DrawerHeader>
  *     <DrawerFooter>
  *       <Button>Submit</Button>
- *       <DrawerClose>
+ *       <DrawerClose asChild>
  *         <Button variant="outline">Cancel</Button>
  *       </DrawerClose>
  *     </DrawerFooter>

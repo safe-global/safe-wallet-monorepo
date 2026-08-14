@@ -38,6 +38,14 @@ import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/Sa
 
 const chainInfo = chainBuilder().with({ chainId: '1' }).build()
 
+// The GS026 pre-checks have their own suite (services/tx/__tests__/executionPreChecks.test.ts);
+// these tests exercise the dispatch orchestration, where the mocked wallet is not
+// an owner of the mocked Safe and would otherwise be blocked by NOT_SIGNER.
+jest.mock('@/services/tx/executionPreChecks', () => ({
+  ...jest.requireActual('@/services/tx/executionPreChecks'),
+  runExecutionPreChecks: jest.fn(() => Promise.resolve()),
+}))
+
 describe('SignOrExecute hooks', () => {
   const extendedSafeInfo = extendedSafeInfoBuilder().build()
 
@@ -522,6 +530,46 @@ describe('SignOrExecute hooks', () => {
       expect(proposeSpy).not.toHaveBeenCalled()
       expect(executeSpy).toHaveBeenCalled()
       expect(id).toEqual('455')
+    })
+
+    it('should block the broadcast when a GS026 pre-check fails', async () => {
+      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+        safe: {
+          ...extendedSafeInfo,
+          version: '1.3.0',
+          address: { value: zeroPadValue('0x0000', 20) },
+          nonce: 100,
+          threshold: 2,
+          owners: [{ value: zeroPadValue('0x0123', 20) }, { value: zeroPadValue('0x0456', 20) }],
+          chainId: '1',
+        },
+        safeAddress: '0x123',
+        safeError: undefined,
+        safeLoading: false,
+        safeLoaded: true,
+      }))
+
+      const { runExecutionPreChecks } = jest.requireMock('@/services/tx/executionPreChecks')
+      const { Gs026PreCheckError } = jest.requireActual('@/services/tx/executionPreChecks')
+      runExecutionPreChecks.mockRejectedValueOnce(new Gs026PreCheckError('STALE_NONCE'))
+
+      const proposeSpy = jest
+        .spyOn(txSender, 'dispatchTxProposal')
+        .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+      const executeSpy = jest
+        .spyOn(txSender, 'dispatchTxExecution')
+        .mockImplementation((() => Promise.resolve(createSafeTx())) as unknown as typeof txSender.dispatchTxExecution)
+
+      const { result } = renderHook(() => useTxActions())
+      const { executeTx } = result.current
+
+      await expect(executeTx({ gasPrice: 1 }, createSafeTx(), '455')).rejects.toThrow(
+        'Another transaction used this nonce. Refresh to get the current one.',
+      )
+
+      // Nothing was proposed or broadcast
+      expect(proposeSpy).not.toHaveBeenCalled()
+      expect(executeSpy).not.toHaveBeenCalled()
     })
 
     it('should throw an error if the tx is undefined', async () => {

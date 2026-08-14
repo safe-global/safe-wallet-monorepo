@@ -5,6 +5,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import TxCard from '@/components/tx-flow/common/TxCard'
 import TxLayout from '@/components/tx-flow/common/TxLayout'
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import TxSubmitError from '@/components/tx/TxSubmitError'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import { safeCreationDispatch, SafeCreationEvent } from '../../services/safeCreationEvents'
 import { selectUndeployedSafe } from '../../store/undeployedSafesSlice'
@@ -25,14 +26,16 @@ import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useAppSelector } from '@/store'
 import { hasRemainingRelays } from '@/utils/relaying'
-import { Box, Button, CircularProgress, Divider, Grid, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Separator } from '@/components/ui/separator'
+import { Typography } from '@/components/ui/typography'
 import React, { useContext, useMemo, useState } from 'react'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { getSafeToL2SetupVersionByAddress } from '@safe-global/utils/services/contracts/deployments'
 import { useEstimateSafeCreationGas } from '@/components/new-safe/create/useEstimateSafeCreationGas'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import CheckWallet from '@/components/common/CheckWallet'
-import { getSafeToL2SetupDeployment } from '@safe-global/safe-deployments'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { useNativeTokenDisplay } from '@/hooks/useNativeTokenDisplay'
 import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
@@ -43,13 +46,7 @@ import useGasPrice from '@/hooks/useGasPrice'
 const useActivateAccount = (undeployedSafe: UndeployedSafe | undefined) => {
   const chain = useCurrentChain()
   const [gasPrice] = useGasPrice()
-  const safeVersion =
-    undeployedSafe &&
-    (isPredictedSafeProps(undeployedSafe?.props)
-      ? undeployedSafe?.props.safeDeploymentConfig?.safeVersion
-      : undeployedSafe?.props.safeVersion)
-
-  const { gasLimit } = useEstimateSafeCreationGas(undeployedSafe?.props, safeVersion)
+  const { gasLimit } = useEstimateSafeCreationGas(undeployedSafe?.props)
 
   const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
   const maxFeePerGas = gasPrice?.maxFeePerGas
@@ -103,9 +100,7 @@ const ActivateAccountFlow = () => {
 
   const { owners, threshold } = undeployedSafeSetup
 
-  const safeToL2SetupDeployment = getSafeToL2SetupDeployment({ version: '1.4.1' })
-  const safeToL2SetupAddress = safeToL2SetupDeployment?.defaultAddress
-  const isMultichainSafe = sameAddress(safeAccountConfig?.to, safeToL2SetupAddress)
+  const isMultichainSafe = Boolean(getSafeToL2SetupVersionByAddress(safeAccountConfig?.to))
 
   const onSubmit = (txHash?: string) => {
     const mixpanelProps = {
@@ -165,7 +160,7 @@ const ActivateAccountFlow = () => {
           wallet.
         </Typography>
 
-        <Divider sx={{ mx: -3, my: 2 }} />
+        <Separator className="-mx-6 my-4 w-auto" />
 
         <SafeSetupOverview
           owners={owners.map((owner) => ({ name: '', address: owner }))}
@@ -173,10 +168,10 @@ const ActivateAccountFlow = () => {
           networks={chain ? [chain] : []}
         />
 
-        {showGasFeeEstimation && <Divider sx={{ mx: -3, mt: 2, mb: 1 }} />}
-        <Box display="flex" flexDirection="column" gap={3}>
+        {showGasFeeEstimation && <Separator className="-mx-6 mt-4 mb-2 w-auto" />}
+        <div className="flex flex-col gap-6">
           {canRelay && (
-            <Grid container spacing={3}>
+            <div>
               <ReviewRow
                 name="Execution method"
                 value={
@@ -187,11 +182,11 @@ const ActivateAccountFlow = () => {
                   />
                 }
               />
-            </Grid>
+            </div>
           )}
 
           {showGasFeeEstimation && (
-            <Grid data-testid="network-fee-section" container spacing={3}>
+            <div data-testid="network-fee-section">
               <ReviewRow
                 name="Est. network fee"
                 value={
@@ -199,7 +194,7 @@ const ActivateAccountFlow = () => {
                     <NetworkFee totalFee={totalFee} isWaived={willRelay || isWrongChain} chain={chain} />
 
                     {!willRelay && (
-                      <Typography variant="body2" color="text.secondary" mt={1}>
+                      <Typography variant="paragraph-small" color="muted" className="block mt-2">
                         {isWrongChain
                           ? `Switch your connected wallet to ${chain?.chainName} to see the correct estimated network fee`
                           : 'You will have to confirm a transaction with your connected wallet.'}
@@ -208,13 +203,13 @@ const ActivateAccountFlow = () => {
                   </>
                 }
               />
-            </Grid>
+            </div>
           )}
 
           {submitError && (
-            <Box mt={1}>
-              <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
-            </Box>
+            <div className="mt-2">
+              <TxSubmitError error={submitError} />
+            </div>
           )}
           {isWrongChain && <NetworkWarning />}
           {!walletCanPay && !willRelay && showInsufficientFundsWarning && (
@@ -222,25 +217,24 @@ const ActivateAccountFlow = () => {
               Your connected wallet doesn&apos;t have enough funds to execute this transaction
             </ErrorMessage>
           )}
-        </Box>
+        </div>
 
-        <Divider sx={{ mx: -3, mt: 2, mb: 1 }} />
+        <Separator className="-mx-6 mt-4 mb-2 w-auto" />
 
-        <Box display="flex" flexDirection="row" justifyContent="flex-end" gap={3}>
+        <div className="flex flex-row justify-end gap-6">
           <CheckWallet checkNetwork={!submitDisabled} allowNonOwner allowUndeployedSafe>
             {(isOk) => (
               <Button
                 data-testid="activate-account-flow-btn"
                 onClick={createSafe}
-                variant="contained"
-                size="xlarge"
+                size="lg"
                 disabled={!isOk || submitDisabled}
               >
-                {!isSubmittable ? <CircularProgress size={20} /> : 'Activate'}
+                {!isSubmittable ? <Spinner className="size-5" /> : 'Activate'}
               </Button>
             )}
           </CheckWallet>
-        </Box>
+        </div>
       </TxCard>
     </TxLayout>
   )

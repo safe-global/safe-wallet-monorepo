@@ -64,6 +64,37 @@ describe('SafeInfoDisplay', () => {
     expect(screen.getByText('My Safe').className).toContain('font-semibold')
   })
 
+  it('renders the name as a navigation link when nameLink is provided', () => {
+    render(<SafeInfoDisplay {...baseProps} nameLink={{ href: '/home?safe=eth:0xaaa', testId: 'row-link' }} />)
+
+    const link = screen.getByTestId('row-link')
+    expect(link).toHaveAttribute('href', '/home?safe=eth:0xaaa')
+    expect(link).toContainElement(screen.getByText('My Safe'))
+  })
+
+  it('keeps the copy/explorer/rename controls OUTSIDE the navigation link (no nested <a>)', () => {
+    render(
+      <SafeInfoDisplay
+        {...baseProps}
+        nameLink={{ href: '/home?safe=eth:0xaaa', testId: 'row-link' }}
+        explorerLink={{ href: 'https://etherscan.io/address/0xaaa', title: 'View on Etherscan' }}
+        onRename={jest.fn()}
+      />,
+    )
+
+    const link = screen.getByTestId('row-link')
+    // Nesting any of these inside the row link is invalid HTML — the explorer's <a> in particular
+    // triggers a hydration error. They must stay siblings of the link, not descendants.
+    expect(link).not.toContainElement(screen.getByTestId('safe-item-row-explorer-link'))
+    expect(link).not.toContainElement(screen.getByTestId('safe-item-copy-address'))
+    expect(link).not.toContainElement(screen.getByTestId('safe-item-rename-btn'))
+  })
+
+  it('renders the name as plain text (no link) without nameLink', () => {
+    render(<SafeInfoDisplay {...baseProps} />)
+    expect(screen.getByText('My Safe').closest('a')).toBeNull()
+  })
+
   it('moves the explorer link next to the name when the address is hidden (and drops the copy button)', () => {
     render(
       <SafeInfoDisplay

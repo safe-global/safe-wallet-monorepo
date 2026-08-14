@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { useMemo } from 'react'
 import type { ReactElement } from 'react'
 
@@ -53,7 +53,7 @@ export default function RecoveryDescription({ item }: { item: RecoveryQueueItem 
       ))}
 
       <div>
-        <Typography fontWeight={700} gutterBottom>
+        <Typography variant="paragraph-bold" className="mb-2">
           Required confirmations for new transactions:
         </Typography>
         <Typography>

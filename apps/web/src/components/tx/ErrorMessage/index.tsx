@@ -1,16 +1,30 @@
 import { type ReactElement, type ReactNode, type SyntheticEvent, useState } from 'react'
-import { Link, Typography, SvgIcon, AlertTitle } from '@mui/material'
-import classNames from 'classnames'
-import WarningIcon from '@/public/images/notifications/warning.svg'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import { getGsCodeFromError } from '@safe-global/utils/services/exceptions/contractErrors'
+import { CircleAlert, TriangleAlert, Info } from 'lucide-react'
 import { getGuardErrorInfo } from '@/utils/transaction-errors'
 import { getBlockExplorerLink } from '@/utils/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
 import ExternalLink from '@/components/common/ExternalLink'
-import css from './styles.module.css'
+import ErrorDetails from '@/components/common/ErrorDetails'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Typography } from '@/components/ui/typography'
+import { Link } from '@/components/ui/link'
+import { cn } from '@/utils/cn'
 
 const ETHERS_PREFIX = 'could not coalesce error'
+
+const alertVariant: Record<'error' | 'warning' | 'info', 'destructive' | 'warning' | 'info'> = {
+  error: 'destructive',
+  warning: 'warning',
+  info: 'info',
+}
+
+const levelIcon: Record<'error' | 'warning' | 'info', ReactNode> = {
+  error: <CircleAlert />,
+  warning: <TriangleAlert />,
+  info: <Info />,
+}
 
 const ErrorMessage = ({
   children,
@@ -31,6 +45,11 @@ const ErrorMessage = ({
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
 
+  // On-chain (GS) errors show an always-visible, code-only support reference;
+  // every other error keeps its raw message behind the Details toggle, as
+  // before (WA-3005 is on-chain-scoped).
+  const gsCode = error ? getGsCodeFromError(error) : undefined
+
   // Check if this is a Guard error that should get special treatment
   const guardErrorName = error && context ? getGuardErrorInfo(error) : undefined
   const guardExplorerLink =
@@ -42,68 +61,58 @@ const ErrorMessage = ({
   }
 
   return (
-    <div data-testid="error-message" className={classNames(css.container, css[level], className, 'errorMessage')}>
-      <div className={css.message}>
-        <SvgIcon
-          component={level === 'info' ? InfoIcon : WarningIcon}
-          inheritViewBox
-          fontSize="medium"
-          sx={{ color: ({ palette }) => `${palette[level].main} !important` }}
-        />
+    <Alert
+      data-testid="error-message"
+      variant={alertVariant[level]}
+      outlined={false}
+      className={cn('errorMessage', className)}
+    >
+      {levelIcon[level]}
 
-        <div>
-          <Typography variant="body2" component="span">
-            {title && (
-              <AlertTitle>
-                <Typography
-                  variant="subtitle1"
-                  sx={{
-                    fontWeight: 700,
-                  }}
-                >
-                  {title}
-                </Typography>
-              </AlertTitle>
-            )}
-            {children}
+      {title && <AlertTitle>{title}</AlertTitle>}
 
-            {guardErrorName && (
-              <Typography variant="body2" component="div" sx={{ mt: 1 }}>
-                <strong>
-                  {guardExplorerLink ? (
-                    <>
-                      <ExternalLink href={guardExplorerLink.href}>Guard</ExternalLink> reverted the transaction (
-                      {guardErrorName})
-                    </>
-                  ) : (
-                    <>Guard reverted the transaction ({guardErrorName})</>
-                  )}
-                </strong>
-              </Typography>
-            )}
+      <AlertDescription>
+        <span>
+          {children}
 
-            {error && (
-              <Link
-                component="button"
-                onClick={onDetailsToggle}
-                sx={{
-                  display: 'block',
-                  mt: guardErrorName ? 0.5 : 0,
-                }}
-              >
-                Details
-              </Link>
-            )}
-          </Typography>
+          {guardErrorName && (
+            <span className="mt-2 block">
+              <strong>
+                {guardExplorerLink ? (
+                  <>
+                    <ExternalLink href={guardExplorerLink.href}>Guard</ExternalLink> reverted the transaction (
+                    {guardErrorName})
+                  </>
+                ) : (
+                  <>Guard reverted the transaction ({guardErrorName})</>
+                )}
+              </strong>
+            </span>
+          )}
 
-          {error && showDetails && (
-            <Typography variant="body2" className={css.details}>
+          {error && !gsCode && (
+            <Link
+              render={<button type="button" />}
+              onClick={onDetailsToggle}
+              className={cn('block', guardErrorName && 'mt-1')}
+            >
+              Details
+            </Link>
+          )}
+        </span>
+
+        {gsCode ? (
+          <ErrorDetails code={gsCode} />
+        ) : (
+          error &&
+          showDetails && (
+            <Typography variant="paragraph-small" color="muted" className="mt-2 block break-words">
               {error.message.replace(ETHERS_PREFIX, '').trim().slice(0, 500)}
             </Typography>
-          )}
-        </div>
-      </div>
-    </div>
+          )
+        )}
+      </AlertDescription>
+    </Alert>
   )
 }
 

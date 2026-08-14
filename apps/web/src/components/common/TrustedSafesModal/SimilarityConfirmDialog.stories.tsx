@@ -15,7 +15,7 @@ const baseSafe: SelectableSafe = {
 }
 
 const meta = {
-  title: 'Common/SimilarityConfirmDialog',
+  title: 'Components/Common/TrustedSafesModal/SimilarityConfirmDialog',
   component: SimilarityConfirmDialog,
   decorators: [withMockProvider()],
   parameters: {

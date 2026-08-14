@@ -1,5 +1,6 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Box, Divider, Typography } from '@mui/material'
+import { Separator } from '@/components/ui/separator'
+import { Typography } from '@/components/ui/typography'
 
 import React from 'react'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
@@ -21,7 +22,7 @@ function ChangeThreshold({ txInfo }: ChangeThresholdProps) {
       <ChangeSignerSetupWarning />
 
       <div>
-        <Typography variant="body2" color="text.secondary" mb={0.5}>
+        <Typography variant="paragraph-small" className="block text-muted-foreground mb-1">
           Any transaction will require the confirmation of:
         </Typography>
 
@@ -32,13 +33,9 @@ function ChangeThreshold({ txInfo }: ChangeThresholdProps) {
           </b>
         </Typography>
       </div>
-      <Box
-        sx={{
-          my: 1,
-        }}
-      >
-        <Divider className={commonCss.nestedDivider} />
-      </Box>
+      <div className="my-2">
+        <Separator className={commonCss.nestedDivider} />
+      </div>
     </>
   )
 }

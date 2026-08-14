@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { Progress as ProgressPrimitive } from '@base-ui/react/progress'
 
 import { cn } from '@/utils/cn'
@@ -26,7 +27,18 @@ import { cn } from '@/utils/cn'
  * - ProgressValue: displays percentage
  */
 
-function Progress({ className, children, value, ...props }: ProgressPrimitive.Root.Props) {
+function Progress({
+  className,
+  children,
+  value,
+  indicatorClassName,
+  ...props
+}: ProgressPrimitive.Root.Props & { indicatorClassName?: string }) {
+  // The track is auto-rendered for the bare `<Progress value={n} />` API, but skipped
+  // when the caller composes `<ProgressTrack>` themselves (custom height/indicator).
+  const hasOwnTrack = React.Children.toArray(children).some(
+    (child) => React.isValidElement(child) && child.type === ProgressTrack,
+  )
   return (
     <ProgressPrimitive.Root
       value={value}
@@ -35,9 +47,11 @@ function Progress({ className, children, value, ...props }: ProgressPrimitive.Ro
       {...props}
     >
       {children}
-      <ProgressTrack>
-        <ProgressIndicator />
-      </ProgressTrack>
+      {!hasOwnTrack && (
+        <ProgressTrack>
+          <ProgressIndicator className={indicatorClassName} />
+        </ProgressTrack>
+      )}
     </ProgressPrimitive.Root>
   )
 }

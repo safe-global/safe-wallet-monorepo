@@ -1,7 +1,6 @@
-import { Button, CardActions, Divider, Grid, Typography } from '@mui/material'
 import type { ReactElement } from 'react'
 
-import TxCard from '../../common/TxCard'
+import TxCard, { TxCardActions } from '../../common/TxCard'
 import RecoveryRecoverers from '@/public/images/settings/spending-limit/beneficiary.svg'
 import RecoveryRecoverer from '@/public/images/transactions/recovery-recoverer.svg'
 import RecoveryDelay from '@/public/images/settings/spending-limit/time.svg'
@@ -11,6 +10,9 @@ import css from './styles.module.css'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { useContext } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 
 const RecoverySteps = [
   {
@@ -41,47 +43,31 @@ export function UpsertRecoveryFlowIntro(): ReactElement {
   const { onNext, data } = useContext(TxFlowContext)
   return (
     <TxCard>
-      <Grid
-        container
-        className={css.connector}
-        sx={{
-          display: 'flex',
-          gap: 4,
-        }}
-      >
+      <div className={`${css.connector} flex flex-col gap-8`}>
         {RecoverySteps.map(({ Icon, title, subtitle }, index) => (
-          <Grid item xs={12} key={index}>
-            <Grid
-              container
-              sx={{
-                display: 'flex',
-                gap: 3,
-              }}
-            >
-              <Grid item className={css.icon}>
+          <div key={index}>
+            <div className="flex gap-6">
+              <div className={css.icon}>
                 <Icon />
-              </Grid>
-              <Grid item xs>
-                <Typography
-                  variant="h5"
-                  sx={{
-                    mb: 0.5,
-                  }}
-                >
+              </div>
+              <div className="flex-1">
+                <Typography variant="h4" className="mb-1">
                   {title}
                 </Typography>
-                <Typography variant="body2">{subtitle}</Typography>
-              </Grid>
-            </Grid>
-          </Grid>
+                <Typography variant="paragraph-small" className="block">
+                  {subtitle}
+                </Typography>
+              </div>
+            </div>
+          </div>
         ))}
-      </Grid>
-      <Divider className={commonCss.nestedDivider} />
-      <CardActions sx={{ mt: 'var(--space-1) !important' }}>
-        <Button data-testid="next-btn" variant="contained" onClick={() => onNext(data)}>
+      </div>
+      <Separator className={commonCss.nestedDivider} />
+      <TxCardActions>
+        <Button data-testid="next-btn" variant="default" onClick={() => onNext(data)}>
           Next
         </Button>
-      </CardActions>
+      </TxCardActions>
     </TxCard>
   )
 }

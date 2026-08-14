@@ -2,17 +2,12 @@ import { Interface } from 'ethers'
 import { CheckEventType, OracleGeneration } from './types'
 
 /**
- * Event fragments copied verbatim (field names + types) from the protocol repo:
- *   - Consensus: `explorer/src/lib/consensus/abi.ts` + `validator/src/types/abis.ts`
- *   - V1 sentinel: `contracts/src/libraries/{SentinelOracleRequests,SentinelOracleCommitments}.sol`
- *   - V2 sentinel: `contracts/src/libraries/{SentinelOracleRequestsV2,SentinelOracleCommitmentsV2}.sol`
- *   - Shared: `contracts/src/interfaces/IOracle.sol` + `SentinelOracle(V2).sol`
- *
- * The two generations' `NewRequest`/`Committed` have genuinely different
- * signatures (and therefore different topic0s), which is what lets a single
- * topic0→generation map disambiguate them. `DisputeResolved` and `OracleResult`
- * are identical across generations, so they live in one shared bucket (defining
- * them per-generation would collide on topic0).
+ * Event fragments copied verbatim from the protocol repo (Consensus:
+ * `explorer/src/lib/consensus/abi.ts`; sentinel V1/V2: the
+ * `SentinelOracle{Requests,Commitments}(V2)` libraries; shared: `IOracle.sol`).
+ * The V1/V2 `NewRequest`/`Committed` signatures differ, so their topic0s
+ * disambiguate the generation; `OracleResult`/`DisputeResolved` are identical
+ * across generations and live in one shared bucket.
  */
 
 const TX_TUPLE =
@@ -25,13 +20,9 @@ export const CONSENSUS_EVENT_FRAGMENTS = [
 ] as const
 
 /**
- * The **non-oracle** Consensus events: same shape as the oracle pair minus the
- * `oracle` field, so they hash to different topic0s. Confirmed 2026-07-28 as
- * what the live Gnosis beta actually emits — in a 10k-block sample the deployed
- * Consensus emitted ~3k `TransactionProposed` / ~2.9k `TransactionAttested` and
- * zero `OracleTransaction*`. The validator set runs its own deterministic checks
- * on this path and attests the result; the sentinel oracle adds richer checks
- * later. Both resolve to `BENIGN` once the FROST signature verifies.
+ * The non-oracle Consensus events — what live beta traffic emits: the validator
+ * set runs its own deterministic checks and attests, no sentinel oracle in the
+ * loop. Same shape as the oracle pair minus `oracle`, hence distinct topic0s.
  */
 export const CONSENSUS_PLAIN_EVENT_FRAGMENTS = [
   `event TransactionProposed(bytes32 indexed safeTxHash, uint256 indexed chainId, address indexed safe, uint64 epoch, ${TX_TUPLE} transaction)`,
@@ -54,16 +45,8 @@ export const SHARED_ORACLE_EVENT_FRAGMENTS = [
   'event DisputeResolved(bytes32 indexed requestId, uint8 outcome, uint256 slashed)',
 ] as const
 
-/**
- * Read (view) functions the reader calls with `ethers.Contract`. Copied from the
- * protocol explorer's `consensus`/`coordinator` ABIs. `getEpochGroupId` maps an
- * epoch to its FROST group id; `groupKey` returns that group's public key;
- * `getCoordinator` discovers the FROSTCoordinator when no override is configured.
- */
-export const CONSENSUS_READ_ABI = [
-  'function getCoordinator() view returns (address)',
-  'function getEpochGroupId(uint64 epoch) view returns (bytes32 groupId)',
-] as const
+/** Read (view) functions the reader calls, from the protocol explorer's ABIs. */
+export const CONSENSUS_READ_ABI = ['function getEpochGroupId(uint64 epoch) view returns (bytes32 groupId)'] as const
 
 export const COORDINATOR_READ_ABI = [
   'function groupKey(bytes32 gid) view returns ((uint256 x, uint256 y) key)',
@@ -164,20 +147,12 @@ export const TOPICS: Readonly<Record<string, TopicDispatch>> = Object.freeze(
   Object.fromEntries(EVENT_DISPATCH.map((dispatch) => [topicHashOf(dispatch), dispatch])),
 )
 
-/**
- * The two Consensus event topic0s (`OracleTransactionProposed` /
- * `OracleTransactionAttested`) — indexed by `safeTxHash` (topic1). Used as the
- * topic0 filter for the first `getLogs`.
- */
+/** Consensus event topic0s — indexed by `safeTxHash` (topic1). */
 export const CONSENSUS_TOPIC0S: readonly string[] = EVENT_DISPATCH.filter(
   (dispatch) => dispatch.iface === consensusInterface || dispatch.iface === consensusPlainInterface,
 ).map(topicHashOf)
 
-/**
- * Every sentinel/oracle event topic0 (V1 + V2 `NewRequest`/`Committed`/
- * `Revealed`, plus the shared `OracleResult`/`DisputeResolved`) — all indexed by
- * `requestId` (topic1). Used as the topic0 filter for the second `getLogs`.
- */
+/** Sentinel/oracle event topic0s — indexed by `requestId` (topic1). */
 export const SENTINEL_TOPIC0S: readonly string[] = EVENT_DISPATCH.filter(
   (dispatch) => dispatch.iface !== consensusInterface && dispatch.iface !== consensusPlainInterface,
 ).map(topicHashOf)

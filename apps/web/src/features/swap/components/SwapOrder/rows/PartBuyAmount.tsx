@@ -1,8 +1,7 @@
 import type { TwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { DataRow } from '@/components/common/Table/DataRow'
-import { Box } from '@mui/system'
 
 export const PartBuyAmount = ({
   order,
@@ -14,14 +13,12 @@ export const PartBuyAmount = ({
   const { minPartLimit, buyToken } = order
   return (
     <DataRow title="Buy amount" key="buy_amount_part">
-      <Box>
-        <Typography component="span" fontWeight="bold">
+      <div>
+        <Typography variant="paragraph-bold" className="inline">
           {formatVisualAmount(minPartLimit, buyToken.decimals)} {buyToken.symbol}
         </Typography>
-        <Typography component="span" color="var(--color-primary-light)">
-          {` ${addonText}`}
-        </Typography>
-      </Box>
+        <Typography className="inline text-[var(--color-primary-light)]">{` ${addonText}`}</Typography>
+      </div>
     </DataRow>
   )
 }

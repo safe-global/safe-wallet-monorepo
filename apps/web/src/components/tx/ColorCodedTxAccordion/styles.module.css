@@ -1,0 +1,43 @@
+.item {
+  gap: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  /* The tx-type colour coding rides on the border, not a full tint: the fill stays the card surface
+     so this panel reads like every other card instead of washing the whole block in colour. */
+  background-color: var(--card);
+  border: 1px solid var(--accordion-border-active);
+  box-shadow: none;
+}
+
+/* No hover fill: greying the panel made the nested "Advanced details" block blend into it. The
+   border already marks the region, and the trigger itself is the affordance. */
+
+.trigger {
+  min-height: 56px;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none;
+  background-color: transparent !important;
+}
+
+.trigger:hover {
+  background-color: transparent !important;
+}
+
+.content {
+  background-color: transparent;
+}
+
+.methodChip {
+  border-color: color-mix(in srgb, var(--foreground) 12%, transparent);
+  background-color: color-mix(in srgb, var(--background) 72%, transparent);
+}
+
+.divider {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-2);
+  margin-left: calc(-1 * var(--space-2));
+  width: calc(100% + var(--space-4));
+}

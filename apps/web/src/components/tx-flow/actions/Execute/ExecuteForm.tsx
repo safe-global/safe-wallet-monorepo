@@ -1,10 +1,13 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext, useState, useEffect } from 'react'
-import { Box, Button, CardActions, DialogActions, DialogContent, Divider, Tooltip } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Separator } from '@/components/ui/separator'
+import { Button } from '@/components/ui/button'
+import ModalDialog from '@/components/common/ModalDialog'
 import classNames from 'classnames'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import ModalDialog from '@/components/common/ModalDialog'
+import TxCheckError from '@/components/tx/TxCheckError'
 import { trackError, Errors } from '@/services/exceptions'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -36,7 +39,6 @@ import SplitMenuButton from '@/components/common/SplitMenuButton'
 import type { SlotComponentProps, SlotName } from '../../slots'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
-import { isRateLimitError, RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
 import { SafeTxContext } from '../../SafeTxProvider'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
@@ -52,7 +54,6 @@ export const ExecuteForm = ({
   disableSubmit = false,
   origin,
   onlyExecute,
-  isCreation,
   isOwner,
   isExecutionLoop,
   slotId,
@@ -190,6 +191,9 @@ export const ExecuteForm = ({
     advancedParams.gasLimit ? advancedParams.gasLimit : undefined,
   )
 
+  // Pre-execution check error (validity simulation or gas estimation).
+  const checkError = executionValidationError || gasLimitError
+
   // CGW pre-relay simulation outcome (SIMULATION_FAILED blocks; INDETERMINATE offers an override).
   const [relaySimError, setRelaySimError] = useState<RelaySimulationError | undefined>(undefined)
 
@@ -271,7 +275,7 @@ export const ExecuteForm = ({
         {/* For a nested approveHash we keep requiresRelay (relay is sponsored) but still show the
             options block so the user can pick relay (default) or pay gas from the EOA. */}
         {(!requiresRelay || isNestedApproveHash) && (
-          <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: canRelay })}>
+          <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: showExecutionSelector })}>
             <AdvancedParams
               willExecute
               params={advancedParams}
@@ -321,20 +325,9 @@ export const ExecuteForm = ({
           <ErrorMessage level="info">
             Your connected wallet doesn&apos;t have enough funds to execute this transaction.
           </ErrorMessage>
-        ) : (
-          (executionValidationError || gasLimitError) && (
-            <ErrorMessage error={executionValidationError || gasLimitError} context="estimation">
-              {isRateLimitError(executionValidationError || gasLimitError) ? (
-                RATE_LIMIT_USER_MESSAGE
-              ) : (
-                <>
-                  This transaction will most likely fail.
-                  {` To save gas costs, ${isCreation ? 'avoid creating' : 'reject'} this transaction.`}
-                </>
-              )}
-            </ErrorMessage>
-          )
-        )}
+        ) : checkError ? (
+          <TxCheckError error={checkError} context="estimation" />
+        ) : null}
 
         {/* CGW pre-relay simulation verdict */}
         {relaySimError?.code === 'SIMULATION_FAILED' && (
@@ -351,35 +344,49 @@ export const ExecuteForm = ({
           chainId={currentChain?.chainId}
           data-testid="relay-indeterminate-dialog"
         >
-          <DialogContent sx={{ mt: 1 }}>
+          <div className="px-6 pt-2 pb-4">
             We couldn&apos;t review this transaction. If you execute and it fails, you&apos;ll still pay the network
             fee. You can run the simulation yourself from the Safe Shield panel before deciding.
-          </DialogContent>
+          </div>
 
-          <DialogActions>
-            <Button data-testid="relay-go-back-btn" onClick={() => setRelaySimError(undefined)}>
+          <div className="flex justify-end gap-2 p-6 pt-2">
+            <Button data-testid="relay-go-back-btn" variant="ghost" onClick={() => setRelaySimError(undefined)}>
               Back
             </Button>
-            <Button
-              data-testid="relay-accept-unverified-btn"
-              variant="contained"
-              disableElevation
-              disabled={isSubmitLoading}
-              onClick={() => submitTx(true)}
-            >
+            <Button data-testid="relay-accept-unverified-btn" disabled={isSubmitLoading} onClick={() => submitTx(true)}>
               Execute anyway
             </Button>
-          </DialogActions>
+          </div>
         </ModalDialog>
 
-        <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
+        <div className="pt-6">
+          <Separator className={commonCss.nestedDivider} />
+        </div>
 
-        <CardActions>
+        <div className="txCardActions">
           {/* Submit button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
-            {(isOk) => (
-              <Tooltip title={tooltip} placement="top">
-                <Box sx={{ minWidth: '112px', width: ['100%', '100%', '100%', 'auto'] }}>
+            {(isOk) =>
+              tooltip ? (
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <div className="w-full lg:w-auto">
+                        <SplitMenuButton
+                          selected={slotId}
+                          onChange={({ id }) => onChange?.(id)}
+                          options={options}
+                          disabled={!isOk || submitDisabled}
+                          loading={isSubmitLoading}
+                          tooltip={tooltip}
+                        />
+                      </div>
+                    }
+                  />
+                  <TooltipContent side="top">{tooltip}</TooltipContent>
+                </Tooltip>
+              ) : (
+                <div className="w-full lg:w-auto">
                   <SplitMenuButton
                     selected={slotId}
                     onChange={({ id }) => onChange?.(id)}
@@ -388,11 +395,11 @@ export const ExecuteForm = ({
                     loading={isSubmitLoading}
                     tooltip={tooltip}
                   />
-                </Box>
-              </Tooltip>
-            )}
+                </div>
+              )
+            }
           </CheckWallet>
-        </CardActions>
+        </div>
       </form>
     </>
   )

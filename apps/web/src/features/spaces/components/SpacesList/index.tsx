@@ -7,10 +7,11 @@ import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import SafeMarkIcon from '@/public/images/logo-no-text.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { Box, Card, Link, Stack, Typography } from '@mui/material'
 import { Check } from 'lucide-react'
-import { buttonVariants } from '@/components/ui/button'
-import { Typography as ShadcnTypography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Link } from '@/components/ui/link'
+import { Typography } from '@/components/ui/typography'
 import { type GetSpaceResponse, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import SpaceListInvite from '../InviteBanner'
@@ -45,14 +46,21 @@ const AddSpaceButton = ({
   variant?: 'default' | 'outline'
   label?: string
 }) => {
-  const className = cn(
-    buttonVariants({ variant, size }),
-    size === 'lg' && 'h-full rounded-lg px-6 py-3 text-base',
-    disabled && 'cursor-not-allowed opacity-50 grayscale',
-  )
-
-  const content = (
-    <>
+  const button = (
+    <Button
+      data-testid="create-space-button"
+      variant={variant}
+      size={size}
+      className={cn(
+        // eslint-disable-next-line no-restricted-syntax -- bespoke full-height create-workspace CTA sizing from dev's #8271 redesign
+        size === 'lg' && 'h-full rounded-lg px-6 py-3 text-base',
+        variant === 'outline' && 'hover:bg-muted',
+        disabled && 'cursor-not-allowed opacity-50 grayscale',
+      )}
+      render={disabled ? <span /> : <NextLink href={AppRoutes.welcome.createSpace} />}
+      disabled={disabled}
+      onClick={disabled ? undefined : onClick}
+    >
       <AddIcon
         className={cn(
           variant === 'default' ? 'fill-primary-foreground' : 'fill-foreground',
@@ -60,29 +68,14 @@ const AddSpaceButton = ({
         )}
       />
       {label}
-    </>
+    </Button>
   )
 
-  if (!disabled) {
-    return (
-      <NextLink
-        data-testid="create-space-button"
-        href={AppRoutes.welcome.createSpace}
-        className={className}
-        onClick={onClick}
-      >
-        {content}
-      </NextLink>
-    )
-  }
+  if (!disabled) return button
 
   return (
     <Tooltip>
-      <TooltipTrigger render={<div className="inline-flex" />}>
-        <span data-testid="create-space-button" aria-disabled="true" className={className}>
-          {content}
-        </span>
-      </TooltipTrigger>
+      <TooltipTrigger render={<div className="inline-flex" />}>{button}</TooltipTrigger>
       <TooltipContent>Limit of {SPACES_LIMIT} workspaces reached</TooltipContent>
     </Tooltip>
   )
@@ -105,9 +98,9 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
                 <SafeMarkIcon className="size-10" />
               </div>
 
-              <ShadcnTypography variant="h3" className="mb-6 text-center">
+              <Typography variant="h3" className="mb-6 text-center">
                 Sign in to your workspace
-              </ShadcnTypography>
+              </Typography>
 
               <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
             </div>
@@ -147,26 +140,27 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
   return (
     <>
-      <Card sx={{ p: 5, textAlign: 'center', width: 1 }}>
-        <Box display="flex" justifyContent="center" mb={2}>
+      {/* eslint-disable-next-line no-restricted-syntax -- 40px empty-state padding; no p-10 Card size variant */}
+      <Card className="w-full p-10 text-center">
+        <div className="mb-4 flex justify-center">
           <SpacesIcon />
-        </Box>
+        </div>
 
-        <Typography variant="h4" fontWeight="bold" mb={1}>
+        <Typography variant="h4" className="mb-2 font-bold">
           Create your first workspace
         </Typography>
-        <Typography color="text.secondary" mb={3}>
+        <Typography color="muted" className="mb-3">
           Collaborate on your Safe accounts with your team.
         </Typography>
 
-        <Stack spacing={1.5} sx={{ mx: 'auto', mb: 4, maxWidth: 360, textAlign: 'left' }}>
+        <div className="mx-auto mb-4 flex max-w-[360px] flex-col gap-1.5 text-left">
           {WORKSPACE_BENEFITS.map((benefit) => (
-            <Stack key={benefit} direction="row" spacing={1.5} alignItems="center">
+            <div key={benefit} className="flex flex-row items-center gap-1.5">
               <Check className="size-4 shrink-0 text-primary" />
-              <Typography variant="body2">{benefit}</Typography>
-            </Stack>
+              <Typography variant="paragraph-small">{benefit}</Typography>
+            </div>
           ))}
-        </Stack>
+        </div>
 
         <div className="h-12">
           <AddSpaceButton
@@ -177,11 +171,11 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
           />
         </div>
 
-        <Box mt={2}>
+        <div className="mt-2">
           <Link onClick={() => setIsInfoOpen(true)} href="#">
             What are workspaces?
           </Link>
-        </Box>
+        </div>
       </Card>
       {isInfoOpen && <SpaceInfoModal onClose={() => setIsInfoOpen(false)} />}
     </>
@@ -239,11 +233,11 @@ const SpacesList = () => {
       : null
 
   return (
-    <Box className={css.container}>
-      <Box className={css.mySpaces}>
-        <Box className={css.spacesHeader}>
+    <div className={css.container}>
+      <div className={css.mySpaces}>
+        <div className={css.spacesHeader}>
           <AccountsNavigation />
-        </Box>
+        </div>
 
         {!isUserSignedIn ? (
           <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
@@ -278,8 +272,8 @@ const SpacesList = () => {
             <NoSpacesState isAtLimit={isAtSpacesLimit} />
           </>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

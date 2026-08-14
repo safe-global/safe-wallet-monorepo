@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { useCallback, useContext, useEffect, type PropsWithChildren } from 'react'
 import { Errors, logError } from '@/services/exceptions'
 import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
@@ -32,11 +32,11 @@ export const ReviewRemoveModule = ({
 
   return (
     <ReviewTransaction onSubmit={onFormSubmit}>
-      <Typography color="primary.light">Module</Typography>
+      <Typography className="text-[var(--color-primary-light)]">Module</Typography>
 
       <EthHashInfo address={params.address} showCopyButton hasExplorer shortAddress={false} />
 
-      <Typography my={2}>
+      <Typography className="my-4">
         After removing this module, any feature or app that uses this module might no longer work. If this Safe account
         requires more than one signature, the module removal will have to be confirmed by other signers as well.
       </Typography>
