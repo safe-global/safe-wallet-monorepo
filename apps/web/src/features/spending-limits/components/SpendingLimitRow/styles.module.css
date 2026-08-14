@@ -8,6 +8,7 @@
   margin: 0;
   padding: 12px 3px;
   flex: 1;
+  justify-content: center;
 }
 
 .spendingLimit {

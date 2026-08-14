@@ -5,6 +5,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import TxCard from '@/components/tx-flow/common/TxCard'
 import TxLayout from '@/components/tx-flow/common/TxLayout'
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import TxSubmitError from '@/components/tx/TxSubmitError'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import { safeCreationDispatch, SafeCreationEvent } from '../../services/safeCreationEvents'
 import { selectUndeployedSafe } from '../../store/undeployedSafesSlice'
@@ -207,7 +208,7 @@ const ActivateAccountFlow = () => {
 
           {submitError && (
             <div className="mt-2">
-              <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
+              <TxSubmitError error={submitError} />
             </div>
           )}
           {isWrongChain && <NetworkWarning />}

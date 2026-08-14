@@ -21,6 +21,7 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import NotificationsPopover, { type NotificationsPopoverRef } from './NotificationsPopover'
+import { ICON_STROKE } from '@/components/common/iconStroke'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -141,7 +142,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
             onClick={() => onMenuToggle?.((open) => !open)}
             aria-label="Open sidebar menu"
           >
-            <Menu className="size-5" />
+            <Menu className="size-5" strokeWidth={ICON_STROKE} />
           </Button>
         ) : null}
 

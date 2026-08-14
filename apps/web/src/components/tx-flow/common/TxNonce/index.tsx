@@ -174,7 +174,7 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
             inputRef={field.ref}
           >
             <Tooltip open={!!message}>
-              <TooltipTrigger render={<div className="contents" />}>
+              <TooltipTrigger render={<div className="inline-flex" />}>
                 <ComboboxInput
                   name={field.name}
                   aria-label={message || undefined}
