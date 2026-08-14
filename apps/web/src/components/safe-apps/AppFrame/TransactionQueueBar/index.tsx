@@ -49,7 +49,7 @@ const TransactionQueueBar = ({
                 chevron inside this fixed-height bar instead of centring them on it. */}
             <AccordionTrigger
               aria-label="expand transaction queue bar"
-              className="items-center pl-4 pr-12"
+              className="items-center pl-4 pr-12 **:data-[slot=accordion-trigger-icon]:rotate-180"
               style={{ height: TRANSACTION_BAR_HEIGHT }}
             >
               <Typography variant="paragraph-bold" className="mr-auto text-[var(--color-primary-main)]">
