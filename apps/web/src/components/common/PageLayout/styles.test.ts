@@ -100,6 +100,26 @@ describe('PageLayout topbar elevation', () => {
   })
 })
 
+// The toggle strip restates the sidebar offset as a transform rather than inheriting it, so both
+// widths have to stay in step with the page offsets or the strip strands itself over the content.
+describe('PageLayout sidebar toggle offset', () => {
+  it.each([
+    ['.sidebarTogglePosition.sidebarOpen', '.main', 'padding-left'],
+    ['.sidebarTogglePosition.sidebarCollapsed', '.mainSidebarCollapsed', 'padding-left'],
+  ])('offsets %s by the same width as %s', (toggleSelector, mainSelector, mainProp) => {
+    const offset = declOf(findRule(mainSelector), mainProp)
+
+    expect(offset).toBeDefined()
+    expect(declOf(findRule(toggleSelector), 'transform')).toBe(`translateX(${offset})`)
+  })
+
+  it('keeps the collapsed toggle aligned with the collapsed topbar', () => {
+    expect(declOf(findRule('.sidebarTogglePosition.sidebarCollapsed'), 'transform')).toBe(
+      `translateX(${declOf(findRule('.topbarCollapsed'), '--topbar-offset')})`,
+    )
+  })
+})
+
 describe('PageLayout responsive spacing', () => {
   it('emits the tablet top-bar reset after the desktop height reserve', () => {
     const root = postcss.parse(styles)
