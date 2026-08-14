@@ -11,7 +11,8 @@ import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShi
 import NameInput from '@/components/common/NameInput'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { uniqueAddress, addressIsNotCurrentSafe } from '@safe-global/utils/utils/validation'
+import { uniqueAddress, addressIsNotCurrentSafe, addressIsNotReserved } from '@safe-global/utils/utils/validation'
+import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import type { AddOwnerFlowProps } from '.'
 import type { ReplaceOwnerFlowProps } from '../ReplaceOwner'
 import TxCard from '../../common/TxCard'
@@ -46,9 +47,17 @@ export const ChooseOwner = ({
   const { handleSubmit, formState, watch, control } = formMethods
   const isValid = Object.keys(formState.errors).length === 0 // do not use formState.isValid because names can be empty
 
-  const notAlreadyOwner = uniqueAddress(safe.owners.map((owner) => owner.value))
+  // Inline validation for the GS204/GS203 on-chain reverts (WA-3005 Bucket A):
+  // duplicate signer, the Safe itself, and reserved (zero/sentinel) addresses
+  // are blocked here so they never reach signing.
+  const notAlreadyOwner = uniqueAddress(
+    safe.owners.map((owner) => owner.value),
+    getContractErrorMessage('GS204'),
+  )
   const notCurrentSafe = addressIsNotCurrentSafe(safeAddress)
-  const combinedValidate = (address: string) => notAlreadyOwner(address) || notCurrentSafe(address)
+  const notReserved = addressIsNotReserved()
+  const combinedValidate = (address: string) =>
+    notAlreadyOwner(address) || notCurrentSafe(address) || notReserved(address)
 
   const address = watch('newOwner.address')
 
@@ -140,6 +149,14 @@ export const ChooseOwner = ({
                   <Controller
                     control={control}
                     name="threshold"
+                    rules={{
+                      validate: (value) => {
+                        // Blocks the GS202/GS201 on-chain reverts if the owner
+                        // set changed while the flow was open (WA-3005 Bucket A)
+                        if (value < 1) return getContractErrorMessage('GS202')
+                        if (value > newNumberOfOwners) return getContractErrorMessage('GS201')
+                      },
+                    }}
                     render={({ field }) => (
                       <Select value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger data-testid="owner-number-dropdown">

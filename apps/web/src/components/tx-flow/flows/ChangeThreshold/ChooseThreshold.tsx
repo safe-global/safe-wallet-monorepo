@@ -8,6 +8,7 @@ import { useContext, useEffect } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import TxCard from '@/components/tx-flow/common/TxCard'
 import { ChangeThresholdFlowFieldNames } from '@/components/tx-flow/flows/ChangeThreshold'
+import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import type { ChangeThresholdFlowProps } from '@/components/tx-flow/flows/ChangeThreshold'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { TOOLTIP_TITLES } from '@/components/tx-flow/common/constants'
@@ -60,6 +61,14 @@ export const ChooseThreshold = () => {
               validate: (value) => {
                 if (value === safe.threshold) {
                   return `Current policy is already set to ${safe.threshold}.`
+                }
+                // Blocks the GS202/GS201 on-chain reverts if the owner set
+                // changed while the flow was open (WA-3005 Bucket A)
+                if (value < 1) {
+                  return getContractErrorMessage('GS202')
+                }
+                if (value > safe.owners.length) {
+                  return getContractErrorMessage('GS201')
                 }
               },
             }}

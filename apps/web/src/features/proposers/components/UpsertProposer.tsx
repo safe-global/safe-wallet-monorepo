@@ -28,7 +28,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { sanitizeName } from '@safe-global/utils/validation/names'
-import { addressIsNotCurrentSafe, addressIsNotOwner } from '@safe-global/utils/utils/validation'
+import { addressIsNotCurrentSafe, addressIsNotOwner, addressIsNotReserved } from '@safe-global/utils/utils/validation'
 import { isEthSignWallet } from '@/utils/wallets'
 import { XIcon } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -108,11 +108,12 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
   const validateAddress = useCallback<Validate<string>>(
     async (value) => {
+      const notReserved = addressIsNotReserved('This proposer address is not valid')
       const notCurrentSafe = addressIsNotCurrentSafe(safeAddress, 'Cannot add Safe account itself as proposer')
       const notOwner = addressIsNotOwner(safeOwnerAddresses, 'Cannot add Safe Owner as proposer')
       const notSmartContract = addressIsNotSmartContract(chainId, SMART_CONTRACT_PROPOSER_ERROR)
 
-      return notCurrentSafe(value) ?? notOwner(value) ?? (await notSmartContract(value))
+      return notReserved(value) ?? notCurrentSafe(value) ?? notOwner(value) ?? (await notSmartContract(value))
     },
     [safeAddress, safeOwnerAddresses, chainId],
   )

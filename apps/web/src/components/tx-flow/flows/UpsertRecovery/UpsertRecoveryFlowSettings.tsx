@@ -11,6 +11,7 @@ import { UpsertRecoveryFlowFields, type UpsertRecoveryFlowProps } from '.'
 import AddressBookInput from '@/components/common/AddressBookInput'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { addressIsNotReserved } from '@safe-global/utils/utils/validation'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { RecovererWarning } from './RecovererSmartContractWarning'
@@ -97,6 +98,12 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
       recoverer && delay && expiry
 
   const validateRecoverer = (recoverer: string) => {
+    // Reserved (zero/sentinel) addresses would break the module on-chain
+    const reservedError = addressIsNotReserved()(recoverer)
+    if (reservedError) {
+      return reservedError
+    }
+
     if (sameAddress(recoverer, safeAddress)) {
       return 'The Safe account cannot be a Recoverer of itself'
     }

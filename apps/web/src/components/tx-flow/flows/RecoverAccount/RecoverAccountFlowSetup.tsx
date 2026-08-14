@@ -11,6 +11,8 @@ import { TOOLTIP_TITLES } from '../../common/constants'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { addressIsNotReserved } from '@safe-global/utils/utils/validation'
+import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import type { RecoverAccountFlowProps } from '.'
 import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
@@ -105,13 +107,19 @@ export function RecoverAccountFlowSetup({
                     fullWidth
                     key={field.id}
                     validate={(value) => {
-                      if (sameAddress(value, safeAddress)) {
-                        return 'The Safe account cannot own itself'
+                      // Blocks the GS203/GS204 on-chain reverts before signing (WA-3005 Bucket A)
+                      const reservedError = addressIsNotReserved()(value)
+                      if (reservedError) {
+                        return reservedError
                       }
 
-                      const isDuplicate = newOwners.filter((owner) => owner.value === value).length > 1
+                      if (sameAddress(value, safeAddress)) {
+                        return 'Cannot use Safe account itself as signer.'
+                      }
+
+                      const isDuplicate = newOwners.filter((owner) => sameAddress(owner.value, value)).length > 1
                       if (isDuplicate) {
-                        return 'Already designated to be a signer'
+                        return getContractErrorMessage('GS204')
                       }
                     }}
                   />

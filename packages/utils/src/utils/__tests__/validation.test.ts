@@ -6,9 +6,41 @@ import {
   validateDecimalLength,
   isValidAddress,
   isValidURL,
+  uniqueAddress,
+  addressIsNotReserved,
 } from '@safe-global/utils/utils/validation'
+import { ZERO_ADDRESS, SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
+import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 
 describe('validation', () => {
+  describe('addressIsNotReserved (WA-3005 Bucket A / GS203)', () => {
+    it('rejects the zero address and the sentinel with the shared GS203 copy', () => {
+      expect(addressIsNotReserved()(ZERO_ADDRESS)).toBe(getContractErrorMessage('GS203'))
+      expect(addressIsNotReserved()(SENTINEL_ADDRESS)).toBe(getContractErrorMessage('GS203'))
+    })
+
+    it('supports a custom message', () => {
+      expect(addressIsNotReserved('Nope')(ZERO_ADDRESS)).toBe('Nope')
+    })
+
+    it('accepts a normal address', () => {
+      expect(addressIsNotReserved()('0x1234567890123456789012345678901234567890')).toBeUndefined()
+    })
+  })
+
+  describe('uniqueAddress', () => {
+    it('rejects a duplicate (case-insensitive) with the given message', () => {
+      const validate = uniqueAddress(['0xAb1234567890123456789012345678901234567890'.slice(0, 42)], 'Duplicate')
+      expect(validate('0xab1234567890123456789012345678901234567890'.slice(0, 42))).toBe('Duplicate')
+    })
+
+    it('falls back to the default message and accepts new addresses', () => {
+      const list = ['0x1234567890123456789012345678901234567890']
+      expect(uniqueAddress(list)(list[0])).toBe('Address already added')
+      expect(uniqueAddress(list)('0x0987654321098765432109876543210987654321')).toBeUndefined()
+    })
+  })
+
   describe('Ethereum address validation', () => {
     it('should return undefined if the address is valid', () => {
       expect(validateAddress('0x1234567890123456789012345678901234567890')).toBeUndefined()

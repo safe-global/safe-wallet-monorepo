@@ -15,6 +15,7 @@ import type { RemoveOwnerFlowProps } from '.'
 
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 
 export const SetThreshold = ({
   params,
@@ -30,12 +31,23 @@ export const SetThreshold = ({
     if (value != null) setSelectedThreshold(value)
   }
 
+  const newNumberOfOwners = safe ? safe.owners.length - 1 : 1
+
+  // The threshold lives outside a form, so guard it at submit: blocks the
+  // GS202/GS201 on-chain reverts if the owner set changed while the flow was
+  // open (WA-3005 Bucket A).
+  const thresholdError =
+    selectedThreshold < 1
+      ? getContractErrorMessage('GS202')
+      : selectedThreshold > newNumberOfOwners
+        ? getContractErrorMessage('GS201')
+        : undefined
+
   const onSubmitHandler = (e: SyntheticEvent) => {
     e.preventDefault()
+    if (thresholdError) return
     onSubmit({ ...params, threshold: selectedThreshold })
   }
-
-  const newNumberOfOwners = safe ? safe.owners.length - 1 : 1
 
   return (
     <TxCard>
@@ -86,10 +98,12 @@ export const SetThreshold = ({
           </div>
         </div>
 
+        {thresholdError && <Typography className="mb-4 text-destructive">{thresholdError}</Typography>}
+
         <Separator className={commonCss.nestedDivider} />
 
         <div className="flex items-center p-2">
-          <Button data-testid="next-btn" type="submit">
+          <Button data-testid="next-btn" type="submit" disabled={!!thresholdError}>
             Next
           </Button>
         </div>
