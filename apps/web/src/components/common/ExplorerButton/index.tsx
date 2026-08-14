@@ -38,11 +38,15 @@ const ExplorerButton = ({
             target="_blank"
             rel="noreferrer"
             onClick={onClick}
-            className={cn(buttonVariants({ variant: 'ghost', size: 'icon-sm' }), 'text-inherit', className)}
+            className={cn(
+              buttonVariants({ variant: 'ghost', size: 'icon-xs' }),
+              'text-inherit hover:text-inherit',
+              className,
+            )}
           />
         }
       >
-        <Icon className="size-5" />
+        <Icon className="size-4" />
       </TooltipTrigger>
       <TooltipContent side="top">{title}</TooltipContent>
     </Tooltip>
