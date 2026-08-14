@@ -86,9 +86,9 @@ describe('isSafeMigrationCall', () => {
 })
 
 describe('createUpdateMigration', () => {
-  const l1Chain = { chainId: '1', l2: false, zk: false } as unknown as Chain
-  const l2Chain = { chainId: '137', l2: true, zk: false } as unknown as Chain
-  const zkChain = { chainId: '324', l2: true, zk: true } as unknown as Chain
+  const l1Chain = { chainId: '1', l2: false, zk: false, features: [] } as unknown as Chain
+  const l2Chain = { chainId: '137', l2: true, zk: false, features: [] } as unknown as Chain
+  const zkChain = { chainId: '324', l2: true, zk: true, features: [] } as unknown as Chain
 
   it('targets the canonical 1.4.1 singleton via migrateWithFallbackHandler on an L1 chain (default handler)', () => {
     const result = createUpdateMigration(l1Chain, '1.3.0')
@@ -150,7 +150,7 @@ describe('createUpdateMigration', () => {
   })
 
   it('resolves the zksync variant from an official zksync master copy even without the chain zk flag', () => {
-    const zkChainNoFlag = { chainId: '324', l2: true, zk: false } as unknown as Chain
+    const zkChainNoFlag = { chainId: '324', l2: true, zk: false, features: [] } as unknown as Chain
     const result = createUpdateMigration(zkChainNoFlag, '1.4.1', CUSTOM_FALLBACK_HANDLER, OFFICIAL_L2_141_ZKSYNC)
 
     expect(result.to).toBe(ZKSYNC_MIGRATION)
@@ -187,12 +187,29 @@ describe('createUpdateMigration', () => {
     expect(result.data).toBe(SELECTORS.migrateL2WithFallbackHandler)
   })
 
+  it('falls back to the canonical migration while no SafeMigrationExtensible deployment is published', () => {
+    // The SAFE_MIGRATION_BY_EFH feature can only take effect once the
+    // EFH-flavoured SafeMigration ships in @safe-global/safe-deployments; until then the flag
+    // must degrade to the canonical contract instead of building a broken transaction
+    const flaggedChain = {
+      chainId: '1',
+      l2: false,
+      zk: false,
+      features: ['SAFE_MIGRATION_BY_EFH'],
+    } as unknown as Chain
+
+    const result = createUpdateMigration(flaggedChain, '1.3.0', DEFAULT_FALLBACK_HANDLER)
+
+    expect(result.to).toBe(CANONICAL_MIGRATION)
+    expect(result.data).toBe(SELECTORS.migrateWithFallbackHandler)
+  })
+
   it('resolves an official eip155 master copy to the canonical migration address without throwing', () => {
     // SafeMigration ships no eip155 variant. Using an unregistered chain means the
     // lookup cannot fall back to networkAddresses[0], so an un-collapsed 'eip155'
     // deployment type would resolve to undefined and throw. It must collapse to canonical.
     const OFFICIAL_L2_130_EIP155 = '0xfb1bffC9d739B8D520DaF37dF666da4C687191EA'
-    const unregisteredL2Chain = { chainId: '111222333', l2: true, zk: false } as unknown as Chain
+    const unregisteredL2Chain = { chainId: '111222333', l2: true, zk: false, features: [] } as unknown as Chain
 
     expect(() => createUpdateMigration(unregisteredL2Chain, '1.3.0', undefined, OFFICIAL_L2_130_EIP155)).not.toThrow()
 

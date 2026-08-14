@@ -5,13 +5,14 @@ import {
   getChainAgnosticAddress,
   getDeploymentTypeForMasterCopy,
   hasMatchingDeployment,
+  identifyOfficialFallbackHandler,
   type DeploymentType,
 } from '@safe-global/utils/services/contracts/deployments'
 import { type MetaTransactionData, OperationType, type SafeVersion } from '@safe-global/types-kit'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
-import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/utils/chains'
 import { SAFE_VERSIONS } from '@safe-global/utils/services/contracts/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 
@@ -28,6 +29,17 @@ const MIGRATION_METHOD_BY_FLAVOUR = {
   l1: { keep: 'migrateSingleton', reset: 'migrateWithFallbackHandler' },
   l2: { keep: 'migrateL2Singleton', reset: 'migrateL2WithFallbackHandler' },
 } as const satisfies Record<'l1' | 'l2', Record<'keep' | 'reset', MigrationMethod>>
+
+// The SafeMigration instance constructed with the ExtensibleFallbackHandler (same bytecode as the
+// canonical SafeMigration, EFH baked into the constructor) is not yet published in
+// @safe-global/safe-deployments. Until it is, this map stays empty, so no chain resolves an address
+// and the upgrade falls back to the canonical SafeMigration (CompatibilityFallbackHandler end-state).
+// Fill point: replace with the getSafeMigrationExtensibleDeployments getter once released.
+// Only canonical deployments exist at 1.5.0 (no zksync variant), so a per-chain address map suffices.
+const SAFE_MIGRATION_EXTENSIBLE_ADDRESSES: Record<string, string> = {}
+
+const getSafeMigrationExtensibleAddress = (chain: Chain): string | undefined =>
+  SAFE_MIGRATION_EXTENSIBLE_ADDRESSES[chain.chainId]
 
 /**
  * Resolves the SafeMigration contract address for the chain and master copy.
@@ -76,15 +88,23 @@ export const createUpdateMigration = (
   fallbackHandler?: string,
   implementation?: string,
 ): MetaTransactionData => {
-  const to = getMigrationAddress(chain, safeVersion, implementation)
+  const extensibleMigrationAddress = hasFeature(chain, FEATURES.SAFE_MIGRATION_BY_EFH)
+    ? getSafeMigrationExtensibleAddress(chain)
+    : undefined
 
-  // Keep fallback handler if it's not a default one
-  const keepFallbackHandler =
-    !!fallbackHandler &&
-    !!safeVersion &&
-    !hasMatchingDeployment(getCompatibilityFallbackHandlerDeployments, fallbackHandler, chain.chainId, [
-      safeVersion as SafeVersion,
-    ])
+  const to = extensibleMigrationAddress ?? getMigrationAddress(chain, safeVersion, implementation)
+
+  // Keep the fallback handler only if it's a custom one. With the ExtensibleFallbackHandler
+  // end-state, any official handler (Compatibility or Extensible, any trusted version) is reset to
+  // the target contract's baked-in EFH; with the canonical contract, the pre-existing rule applies
+  // (reset only the official CompatibilityFallbackHandler of the Safe's own version).
+  const keepFallbackHandler = extensibleMigrationAddress
+    ? !!fallbackHandler && !identifyOfficialFallbackHandler(fallbackHandler, chain.chainId)
+    : !!fallbackHandler &&
+      !!safeVersion &&
+      !hasMatchingDeployment(getCompatibilityFallbackHandlerDeployments, fallbackHandler, chain.chainId, [
+        safeVersion as SafeVersion,
+      ])
 
   const method = MIGRATION_METHOD_BY_FLAVOUR[chain.l2 ? 'l2' : 'l1'][keepFallbackHandler ? 'keep' : 'reset']
 
@@ -104,16 +124,27 @@ export const createUpdateMigration = (
  * (canonical / zksync) address it targets. Used to avoid flagging the migration
  * tx itself as an unsupported-contract interaction.
  */
+/**
+ * Whether the address is any known SafeMigration deployment — any version, any variant
+ * (canonical / zksync), including the ExtensibleFallbackHandler-flavoured instance.
+ */
+export const isKnownSafeMigrationAddress = (address: string): boolean => {
+  const migrationAddresses = [
+    ...SAFE_VERSIONS.flatMap((version) =>
+      Object.values(getSafeMigrationDeployments({ version })?.deployments ?? {}).map((variant) => variant?.address),
+    ),
+    ...Object.values(SAFE_MIGRATION_EXTENSIBLE_ADDRESSES),
+  ]
+  return migrationAddresses.some((migrationAddress) => sameAddress(address, migrationAddress))
+}
+
 export const isSafeMigrationCall = (txData: TransactionData): boolean => {
   const { hexData } = txData
   if (hexData == null) {
     return false
   }
 
-  const migrationAddresses = SAFE_VERSIONS.flatMap((version) =>
-    Object.values(getSafeMigrationDeployments({ version })?.deployments ?? {}).map((variant) => variant?.address),
-  )
-  if (!migrationAddresses.some((address) => sameAddress(txData.to.value, address))) {
+  if (!isKnownSafeMigrationAddress(txData.to.value)) {
     return false
   }
 

@@ -14,19 +14,32 @@ import { decodeMultiSendData } from '@safe-global/protocol-kit'
 import { Gnosis_safe__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.1.1'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { determineMasterCopyVersion } from '@safe-global/utils/utils/safe'
-import { getSafeMigrationDeployments } from '@safe-global/safe-deployments'
-import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { getExtensibleFallbackHandlerDeployments, getSafeMigrationDeployments } from '@safe-global/safe-deployments'
+import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/utils/chains'
+import { getChainAgnosticAddress } from '@safe-global/utils/services/contracts/deployments'
 import { assertValidSafeVersion, SAFE_VERSIONS } from '@safe-global/utils/services/contracts/utils'
 
 const getChangeFallbackHandlerCallData = async (
   safeContractInstance: SafeContractImplementationType,
   chain: Chain,
 ): Promise<string> => {
-  if (!hasSafeFeature(SafeFeature.SAFE_FALLBACK_HANDLER, getLatestSafeVersion(chain))) {
+  const latestSafeVersion = getLatestSafeVersion(chain)
+  if (!hasSafeFeature(SafeFeature.SAFE_FALLBACK_HANDLER, latestSafeVersion)) {
     return '0x'
   }
 
-  const fallbackHandlerAddress = (await getReadOnlyFallbackHandlerContract(getLatestSafeVersion(chain))).getAddress()
+  // ExtensibleFallbackHandler only exists at >=1.5.0 and ships canonical deployments only
+  const extensibleFallbackHandlerAddress =
+    hasFeature(chain, FEATURES.SAFE_MIGRATION_BY_EFH) && semverSatisfies(latestSafeVersion, '>=1.5.0')
+      ? getChainAgnosticAddress(
+          getExtensibleFallbackHandlerDeployments({ version: latestSafeVersion }),
+          chain.chainId,
+          'canonical',
+        )
+      : undefined
+
+  const fallbackHandlerAddress =
+    extensibleFallbackHandlerAddress ?? (await getReadOnlyFallbackHandlerContract(latestSafeVersion)).getAddress()
   // @ts-ignore
   return safeContractInstance.encode('setFallbackHandler', [fallbackHandlerAddress])
 }
