@@ -61,17 +61,11 @@ export const CookieAndTermBanner = ({
     <div data-testid="cookies-popup" className={classnames(css.container, { [css.inverted]: inverted })}>
       {warning && <WarningMessage message={warning} />}
       <form>
-        <div className="flex items-center">
-          <div className="flex-1">
-            <IntroText lastUpdated={metadata.lastUpdated} />
+        <IntroText lastUpdated={metadata.lastUpdated} />
 
-            <div className="flex items-center gap-8">
-              <CookieOptionsList control={control} />
-            </div>
+        <CookieOptionsList control={control} />
 
-            <CookieBannerActions onAccept={handleAccept} onAcceptAll={handleAcceptAll} />
-          </div>
-        </div>
+        <CookieBannerActions onAccept={handleAccept} onAcceptAll={handleAcceptAll} />
       </form>
     </div>
   )
