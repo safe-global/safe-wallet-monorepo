@@ -5,7 +5,6 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as txs from '../pages/transactions.page.js'
 import * as createtx from '../pages/create_tx.pages.js'
 import * as safeapps from '../pages/safeapps.pages'
-import * as ls from '../../support/localstorage_data.js'
 
 let staticSafes = []
 
@@ -22,11 +21,7 @@ describe('Transaction details create tests', { defaultCommandTimeout: 30000 }, (
   })
 
   beforeEach(() => {
-    // tx-builder keeps its form disabled until the address book permission prompt is answered:
-    // pre-grant it before the visit
-    main.addToLocalStorage(constants.SAFE_PERMISSIONS_KEY, ls.safeAppSafePermissions(appUrl))
-    cy.visit(`/apps/open?safe=${staticSafes.SEP_STATIC_SAFE_36}&appUrl=${encodeURIComponent(appUrl)}`)
-    safeapps.verifySafeAppIframeVisible(appUrl)
+    safeapps.openSafeAppWithAddressBookPermission(staticSafes.SEP_STATIC_SAFE_36, appUrl)
   })
 
   it('Verify that there is an error if tx contain unofficial fallbackhandler on tx confirmation screen', () => {

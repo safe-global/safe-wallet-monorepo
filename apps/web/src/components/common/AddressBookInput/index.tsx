@@ -79,10 +79,10 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
   const flatEntries = useMemo(() => groupedEntries.flatMap(([, entries]) => entries), [groupedEntries])
   const optionIndexes = useMemo(() => new Map(flatEntries.map((entry, index) => [entry, index])), [flatEntries])
 
-  const hasVisibleOptions = useMemo(
-    () => !!allAddressBookEntries.filter((entry) => entry.label.includes(addressValue)).length,
-    [allAddressBookEntries, addressValue],
-  )
+  // Must stay the same set the list renders from, or the pointer paths disagree with the typed one:
+  // a name query or a lower-cased address fragment would open on input and then collapse on the
+  // next click, and the chevron would do nothing.
+  const hasVisibleOptions = filteredEntries.length > 0
 
   const isInAddressBook = useMemo(
     () => allAddressBookEntries.some((entry) => sameAddress(entry.label, addressValue)),
@@ -121,11 +121,6 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
         closeList()
       }
     }
-    const onEscape = (event: globalThis.KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        closeList()
-      }
-    }
     // Options `preventDefault` on mousedown to keep focus, so selecting one never fires focusout —
     // only genuinely leaving the field (tab away, focus elsewhere) closes the list here.
     const onFocusOut = (event: FocusEvent) => {
@@ -136,11 +131,9 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
     }
 
     document.addEventListener('pointerdown', onPointerDown)
-    document.addEventListener('keydown', onEscape)
     wrapper?.addEventListener('focusout', onFocusOut)
     return () => {
       document.removeEventListener('pointerdown', onPointerDown)
-      document.removeEventListener('keydown', onEscape)
       wrapper?.removeEventListener('focusout', onFocusOut)
     }
   }, [open, closeList])
@@ -197,6 +190,16 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
       }
       case 'Tab': {
         if (showList) closeList()
+        return
+      }
+      case 'Escape': {
+        // Dismissing the suggestions must not also close the surrounding tx modal. Handled here
+        // rather than on `document` so the event can be stopped before the dialog's own Escape
+        // handler sees it; with the list shut, Escape falls through and closes the modal as usual.
+        if (!showList) return
+        event.preventDefault()
+        event.stopPropagation()
+        closeList()
         return
       }
     }

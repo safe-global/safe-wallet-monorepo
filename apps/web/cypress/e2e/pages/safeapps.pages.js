@@ -1,5 +1,7 @@
 import * as constants from '../../support/constants'
 import { accordionActionItem } from '../pages/nfts.pages'
+import * as main from '../pages/main.page'
+import * as ls from '../../support/localstorage_data.js'
 
 const searchAppInput = 'input[id="search-by-name"]'
 const appUrlInput = 'input[name="appUrl"]'
@@ -363,4 +365,17 @@ export function getSafeAppIframeSelector(appUrl) {
 
 export function verifySafeAppIframeVisible(appUrl) {
   cy.get(getSafeAppIframeSelector(appUrl), { timeout: 30000 }).should('be.visible')
+}
+
+/**
+ * Opens a Safe App with the address book permission already granted.
+ *
+ * Without the pre-grant the app sends wallet_requestPermissions on first use of its address field,
+ * and the host's modal prompt traps focus and inerts the iframe — cy.type() then fails with a
+ * misleading "disabled element" error. Specs that exercise the prompt itself should not use this.
+ */
+export function openSafeAppWithAddressBookPermission(safeAddress, appUrl) {
+  main.addToLocalStorage(constants.SAFE_PERMISSIONS_KEY, ls.safeAppSafePermissions(appUrl))
+  cy.visit(`/apps/open?safe=${safeAddress}&appUrl=${encodeURIComponent(appUrl)}`)
+  verifySafeAppIframeVisible(appUrl)
 }

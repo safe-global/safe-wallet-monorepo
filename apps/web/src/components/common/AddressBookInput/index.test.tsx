@@ -435,11 +435,72 @@ describe('AddressBookInput', () => {
       await openList(utils, input)
 
       act(() => {
-        fireEvent.keyDown(document, { key: 'Escape' })
+        fireEvent.keyDown(input, { key: 'Escape' })
       })
 
       await waitFor(() => expect(utils.queryByRole('listbox')).not.toBeInTheDocument())
       expect(input).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    it('does not let Escape reach an enclosing dialog while the list is open', async () => {
+      const { input, utils } = setup('', {
+        [checksumAddress(faker.finance.ethereumAddress())]: 'Alice',
+      })
+      // Stands in for the tx modal's own document-level Escape handler.
+      const dialogEscape = jest.fn()
+      document.addEventListener('keydown', dialogEscape)
+
+      try {
+        await openList(utils, input)
+
+        act(() => {
+          fireEvent.keyDown(input, { key: 'Escape' })
+        })
+
+        // The list swallows this one, so the modal stays open.
+        await waitFor(() => expect(input).toHaveAttribute('aria-expanded', 'false'))
+        expect(dialogEscape).not.toHaveBeenCalled()
+
+        // With the list already shut, Escape belongs to the modal again.
+        act(() => {
+          fireEvent.keyDown(input, { key: 'Escape' })
+        })
+        expect(dialogEscape).toHaveBeenCalledTimes(1)
+      } finally {
+        document.removeEventListener('keydown', dialogEscape)
+      }
+    })
+
+    it('keeps the list open when clicking the field after typing a name query', async () => {
+      const address = checksumAddress(faker.finance.ethereumAddress())
+      const { input } = setup('', { [address]: 'Tim Testermann' })
+
+      // A name query matches on name, which the pointer path used to ignore — it gated on a
+      // case-sensitive match against the address only, so the click collapsed what typing opened.
+      act(() => {
+        fireEvent.input(input, { target: { value: 'tim' } })
+      })
+      expect(input).toHaveAttribute('aria-expanded', 'true')
+
+      act(() => {
+        fireEvent.mouseDown(input)
+      })
+      expect(input).toHaveAttribute('aria-expanded', 'true')
+    })
+
+    it('keeps the list open when clicking the field after typing a lowercased address fragment', async () => {
+      const address = checksumAddress(faker.finance.ethereumAddress())
+      const { input } = setup('', { [address]: 'Tim Testermann' })
+
+      act(() => {
+        fireEvent.input(input, { target: { value: address.slice(30).toLowerCase() } })
+      })
+      expect(input).toHaveAttribute('aria-expanded', 'true')
+
+      act(() => {
+        fireEvent.mouseDown(input)
+      })
+      expect(input).toHaveAttribute('aria-expanded', 'true')
     })
 
     it('closes when pointing down outside the field', async () => {
