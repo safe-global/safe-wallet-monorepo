@@ -71,16 +71,29 @@ Infura 401/429/5xx, exactly the "our RPC is degraded" cases this attribution exi
 `CodedException` then interpolates that message unsanitised and `logger.warn` / `logger.error`
 forward it to `datadogRum.addAction` / `addError`.
 
-`sanitizeErrorMessage` does not cover this on two counts: its `/0x[a-fA-F0-9]{40,}/g` pattern does
-not match an Infura project ID (32 hex chars, no `0x` prefix), and its output is only consumed on
-the Mixpanel path — `services/exceptions/index.ts` calls `normalizeError` purely for
-`{ domain, type, layer }` / `{ isUserFacing }` and discards `sanitizedMessage`. **Mixpanel is
-clean; the Datadog message field is not.**
+`sanitizeErrorMessage` does not cover this: its `/0x[a-fA-F0-9]{40,}/g` pattern does not match an
+Infura project ID (32 hex chars, no `0x` prefix). Its output has no production consumer at all —
+`sanitizedMessage` is computed by `normalizeError` but never read outside its own unit tests.
+Mixpanel is clean for a stronger reason: `trackErrorSurfaced` emits enums (`domain`/`type`/`layer`/
+`code`/`isUserFacing`) and whitelisted context only, and never emits a message field in the first
+place. **Mixpanel is clean; the Datadog message field is not.**
 
 This is pre-existing and is tracked separately — it is not introduced or widened by the
 attribution work described here. Practical consequence for anyone adding a call site: do not pass
 a raw provider error into `logError` / `trackError` on an RPC path until that is fixed. That is
 why `useSiwe` passes `undefined` as the thrown error and reports context only.
+
+Five call sites still do pass a raw provider error message today — all pre-existing, none
+introduced or widened by this PR:
+
+- `apps/web/src/hooks/useGasLimit.ts:87` — `Errors._612`
+- `apps/web/src/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks.ts:335` —
+  `Errors._612`
+- `apps/web/src/features/gtf/hooks/useHistoryFeesBreakdown.ts:123` — `Errors._612`
+- `apps/web/src/features/spending-limits/hooks/useSpendingLimits.ts:47` — `Errors._609`
+- `apps/web/src/hooks/coreSDK/useInitSafeCoreSDK.ts:57` — `ErrorCodes._105`
+
+These are the inventory for the follow-up sanitisation ticket.
 
 ## Datadog set-up (not yet done — console configuration)
 
