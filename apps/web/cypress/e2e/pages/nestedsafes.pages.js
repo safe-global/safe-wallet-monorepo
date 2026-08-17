@@ -1,3 +1,4 @@
+import * as constants from '../../support/constants'
 import { setMaxAmount, tokenSelector } from '../pages/create_tx.pages.js'
 import { cardContent } from '../pages/modals.page.js'
 import { addToBatchBtn } from '../pages/create_tx.pages.js'
@@ -16,8 +17,11 @@ const selectItem = '[data-slot="select-item"]'
 const removeAssetIcon = '[data-testid="remove-asset-icon"]'
 const advancedDetailsSummary = '[data-testid="decoded-tx-summary"]'
 
-export const fundAssetsActions = ['SafeProxyFactory 1.5.0: createProxyWithNonce', /2\s*Send.*0\.00002\s*ETH.*to/]
-export const nonfundAssetsActions = ['createProxyWithNonce', 'SafeProxyFactory 1.5.0']
+export const fundAssetsActions = [
+  `${constants.safeProxyFactoryLabel}: createProxyWithNonce`,
+  /2\s*Send.*0\.00002\s*ETH.*to/,
+]
+export const nonfundAssetsActions = ['createProxyWithNonce', constants.safeProxyFactoryLabel]
 
 export function clickOnAdvancedDetails() {
   cy.get(advancedDetailsSummary).click()
