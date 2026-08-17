@@ -62,7 +62,13 @@
   height: 18px;
 }
 
+.actionLink {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
 .settingsLink {
+  composes: actionLink;
   margin-left: auto;
   display: flex;
   align-items: center;
