@@ -15,6 +15,8 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { SafeTransaction, SafeTransactionData } from '@safe-global/types-kit'
+import * as safenetChecksModule from '@/features/safenet-checks'
+import * as safenetCheckApiModule from '@safe-global/store/safenet/safenetCheckApi'
 
 // Keeps the Safe-pays suite below as live-relaying coverage; the last describe flips it off.
 let mockRelayingLive = true
@@ -220,6 +222,10 @@ describe('useFeesPreview', () => {
     jest
       .spyOn(useGasPriceModule, 'default')
       .mockReturnValue([{ maxFeePerGas: BigInt(20000000000), maxPriorityFeePerGas: undefined }, undefined, false])
+    // Default: flag off, no fee — individual tests override both.
+    jest
+      .spyOn(safenetCheckApiModule, 'useGetSafenetRequestFeeQuery')
+      .mockReturnValue({ data: undefined, refetch: jest.fn() } as never)
   })
 
   it('returns execution fee as FREE with no amount/currency/percentage label', () => {
@@ -230,6 +236,62 @@ describe('useFeesPreview', () => {
     expect(result.current.executionFee).toEqual({ label: 'Execution fee', isFree: true })
     expect(result.current.executionFee.amount).toBeUndefined()
     expect(result.current.executionFee.currency).toBeUndefined()
+  })
+
+  it('adds the Safenet check fee row when the flag is on and an oracle fee exists', () => {
+    jest.spyOn(safenetChecksModule, 'useIsSafenetChecksEnabled').mockReturnValue(true)
+    jest.spyOn(safenetCheckApiModule, 'useGetSafenetRequestFeeQuery').mockReturnValue({
+      data: {
+        amount: '400000000000000000',
+        tokenAddress: '0x1375A61e0d2640b904b844Ae53a7990b3317Ab52',
+        tokenSymbol: 'MTK',
+        tokenDecimals: 18,
+      },
+      refetch: jest.fn(),
+    } as never)
+    jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    expect(result.current.safenetFee).toEqual({ label: 'Safenet check', amount: '0.4', currency: 'MTK' })
+  })
+
+  it('skips the fee query while the flag is off', () => {
+    const spy = jest
+      .spyOn(safenetCheckApiModule, 'useGetSafenetRequestFeeQuery')
+      .mockReturnValue({ data: undefined, refetch: jest.fn() } as never)
+    jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+
+    renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    // Presence gating is pinned by the tests above; only the skip argument matters here.
+    expect(spy.mock.calls.at(-1)?.[1]).toEqual(expect.objectContaining({ skip: true }))
+  })
+
+  it('carries the fee row into the signer-mode variant via base (per-tx cost, any gas payer)', () => {
+    jest.spyOn(safenetChecksModule, 'useIsSafenetChecksEnabled').mockReturnValue(true)
+    jest.spyOn(safenetCheckApiModule, 'useGetSafenetRequestFeeQuery').mockReturnValue({
+      data: { amount: '400000000000000000', tokenAddress: '0x1', tokenSymbol: 'MTK', tokenDecimals: 18 },
+      refetch: jest.fn(),
+    } as never)
+    jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx, 'signer') })
+
+    expect(result.current.safenetFee).toEqual({ label: 'Safenet check', amount: '0.4', currency: 'MTK' })
+  })
+
+  it('renders no row for a zero REQUEST_FEE (charging disabled on the deployment)', () => {
+    jest.spyOn(safenetChecksModule, 'useIsSafenetChecksEnabled').mockReturnValue(true)
+    jest.spyOn(safenetCheckApiModule, 'useGetSafenetRequestFeeQuery').mockReturnValue({
+      data: { amount: '0', tokenAddress: '0x1', tokenSymbol: 'MTK', tokenDecimals: 18 },
+      refetch: jest.fn(),
+    } as never)
+    jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    expect(result.current.safenetFee).toBeUndefined()
   })
 
   it('renders signer mode and never queries the preview when the chain has no RELAY_FEE relayer', () => {

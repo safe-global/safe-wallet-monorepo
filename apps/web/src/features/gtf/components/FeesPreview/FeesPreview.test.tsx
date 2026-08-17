@@ -74,6 +74,19 @@ describe('FeesPreview', () => {
     expect(screen.getByText('$1,768.85')).toBeInTheDocument()
   })
 
+  it('renders the Safenet check fee row when provided', () => {
+    render(<FeesPreview {...defaultProps} safenetFee={{ label: 'Safenet check', amount: '0.4', currency: 'MTK' }} />)
+
+    expect(screen.getByText('Safenet check')).toBeInTheDocument()
+    expect(screen.getByText(/0\.4 MTK/)).toBeInTheDocument()
+  })
+
+  it('omits the Safenet check row when absent (flag off or no oracle)', () => {
+    render(<FeesPreview {...defaultProps} />)
+
+    expect(screen.queryByText('Safenet check')).not.toBeInTheDocument()
+  })
+
   it('keeps total outgoing visible after switching payment source to Signer', () => {
     render(<FeesPreview {...defaultProps} />)
 

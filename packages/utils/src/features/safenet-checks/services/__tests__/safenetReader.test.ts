@@ -1,4 +1,5 @@
 import { setupServer, type SetupServerApi } from 'msw/node'
+import { getAddress } from 'ethers'
 import { SafenetReader, type SafenetReaderConfig } from '../safenetReader'
 import { CONSENSUS_TOPIC0S } from '../../abi'
 import { transactionProposalHash } from '../../utils/proposalHash'
@@ -608,3 +609,70 @@ describe('SafenetReader chain-id assertion (dev-only, one-shot)', () => {
   })
 })
 
+describe('SafenetReader.fetchRequestFee', () => {
+  it('returns null without touching the RPC when no oracle is configured', async () => {
+    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 10 })
+    server = setupServer(endpoint.handler)
+    server.listen()
+
+    const fee = await makeReader({ oracles: [] }).fetchRequestFee()
+
+    expect(fee).toBeNull()
+    expect(endpoint.methods).toHaveLength(0)
+  })
+
+  it('reads fee, token, symbol and decimals from the configured oracle', async () => {
+    const endpoint = makeEndpoint({
+      url: 'http://rpc.test/1',
+      head: 10,
+      requestFee: 400000000000000000n,
+      feeToken: '0x' + 'fe'.repeat(20),
+      feeTokenSymbol: 'USDC',
+      feeTokenDecimals: 6,
+    })
+    server = setupServer(endpoint.handler)
+    server.listen()
+
+    const fee = await makeReader({ oracles: [ORACLE] }).fetchRequestFee()
+
+    expect(fee).toEqual({
+      amount: '400000000000000000',
+      // ethers checksums decoded addresses.
+      tokenAddress: getAddress('0x' + 'fe'.repeat(20)),
+      tokenSymbol: 'USDC',
+      tokenDecimals: 6,
+    })
+  })
+
+  it('caches the first successful read for the reader lifetime', async () => {
+    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 10 })
+    server = setupServer(endpoint.handler)
+    server.listen()
+
+    const reader = makeReader({ oracles: [ORACLE] })
+    const first = await reader.fetchRequestFee()
+    const callsAfterFirst = endpoint.methods.length
+    const second = await reader.fetchRequestFee()
+
+    expect(second).toEqual(first)
+    expect(endpoint.methods.length).toBe(callsAfterFirst)
+  })
+
+  it('throws on a failed read and does not poison the cache', async () => {
+    const failing = makeEndpoint({ url: 'http://rpc.test/1', head: 10, failFeeReads: true })
+    server = setupServer(failing.handler)
+    server.listen()
+
+    const reader = makeReader({ oracles: [ORACLE] })
+    await expect(reader.fetchRequestFee()).rejects.toThrow()
+
+    // Same endpoint recovers — the next call retries instead of serving a cached failure.
+    server.close()
+    const healthy = makeEndpoint({ url: 'http://rpc.test/1', head: 10, feeTokenSymbol: 'MTK' })
+    server = setupServer(healthy.handler)
+    server.listen()
+
+    const fee = await reader.fetchRequestFee()
+    expect(fee?.tokenSymbol).toBe('MTK')
+  })
+})

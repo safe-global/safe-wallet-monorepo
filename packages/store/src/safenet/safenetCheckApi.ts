@@ -10,6 +10,7 @@ import {
   type OracleAttestedEvent,
   type PlainAttestedEvent,
   type SafenetCheckSnapshot,
+  type SafenetRequestFee,
 } from '@safe-global/utils/features/safenet-checks'
 import { pinVerdict, selectPinnedVerdict, type SafenetCheckPartialState } from './safenetCheckSlice'
 
@@ -96,7 +97,22 @@ export const safenetCheckApi = createApi({
       serializeQueryArgs: ({ endpointName, queryArgs }) => `${endpointName}(${queryArgs.safeTxHash})`,
       keepUnusedDataFor: 300,
     }),
+    /**
+     * The oracle's per-check fee for fee breakdowns. All values are deployment
+     * immutables and cached inside the reader; RTK only adds the subscription
+     * surface. `null` = no oracle configured, so no fee to show.
+     */
+    getSafenetRequestFee: builder.query<SafenetRequestFee | null, void>({
+      async queryFn() {
+        try {
+          return { data: await getSafenetReader().fetchRequestFee() }
+        } catch (error) {
+          return { error: { message: error instanceof Error ? error.message : String(error) } }
+        }
+      },
+      keepUnusedDataFor: 3600,
+    }),
   }),
 })
 
-export const { useGetSafenetCheckQuery } = safenetCheckApi
+export const { useGetSafenetCheckQuery, useGetSafenetRequestFeeQuery } = safenetCheckApi

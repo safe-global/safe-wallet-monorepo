@@ -80,6 +80,13 @@ export const TwoCurrencies: Story = {
   },
 }
 
+export const WithSafenetFee: Story = {
+  args: {
+    ...defaultArgs,
+    safenetFee: { label: 'Safenet check', amount: '0.4', currency: 'MTK' },
+  },
+}
+
 export const Loading: Story = {
   args: { ...defaultArgs, loading: true },
 }

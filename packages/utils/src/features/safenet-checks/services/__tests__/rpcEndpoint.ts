@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import { Interface } from 'ethers'
-import { CONSENSUS_READ_ABI, COORDINATOR_READ_ABI } from '../../abi'
+import { CONSENSUS_READ_ABI, COORDINATOR_READ_ABI, ERC20_READ_ABI, ORACLE_READ_ABI } from '../../abi'
 import type { RawLog } from '../../utils/decodeLogs'
 
 /**
@@ -37,13 +37,22 @@ export type RpcConfig = {
   groupKey?: { x: string; y: string }
   /** `groupKey` calls revert (an epoch the coordinator has not seen). */
   failGroupKey?: boolean
-
+  /** `fee()` result (default 0.4e18). */
+  requestFee?: bigint
+  /** `FEE_TOKEN()` result. */
+  feeToken?: string
+  feeTokenSymbol?: string
+  feeTokenDecimals?: number
+  /** Fee-read `eth_call`s revert. */
+  failFeeReads?: boolean
 }
 
 const hexToNum = (value: string): number => Number(BigInt(value))
 
 const consensusRead = new Interface([...CONSENSUS_READ_ABI])
 const coordinatorRead = new Interface([...COORDINATOR_READ_ABI])
+const oracleRead = new Interface([...ORACLE_READ_ABI])
+const erc20Read = new Interface([...ERC20_READ_ABI])
 
 const filterLogs = (logs: RawLog[], filter: GetLogsFilter): RawLog[] => {
   const topic0s = (Array.isArray(filter.topics[0]) ? filter.topics[0] : [filter.topics[0]]) as string[]
@@ -140,7 +149,20 @@ export const makeEndpoint = (config: RpcConfig) => {
           const gk = config.groupKey ?? { x: '1', y: '2' }
           return ok(coordinatorRead.encodeFunctionResult('groupKey', [[BigInt(gk.x), BigInt(gk.y)]]))
         }
-
+        if (selector === oracleRead.getFunction('fee')!.selector) {
+          if (config.failFeeReads) return err('fee read failed')
+          return ok(oracleRead.encodeFunctionResult('fee', [config.requestFee ?? 400000000000000000n]))
+        }
+        if (selector === oracleRead.getFunction('FEE_TOKEN')!.selector) {
+          if (config.failFeeReads) return err('fee read failed')
+          return ok(oracleRead.encodeFunctionResult('FEE_TOKEN', [config.feeToken ?? '0x' + 'fe'.repeat(20)]))
+        }
+        if (selector === erc20Read.getFunction('symbol')!.selector) {
+          return ok(erc20Read.encodeFunctionResult('symbol', [config.feeTokenSymbol ?? 'MTK']))
+        }
+        if (selector === erc20Read.getFunction('decimals')!.selector) {
+          return ok(erc20Read.encodeFunctionResult('decimals', [config.feeTokenDecimals ?? 18]))
+        }
         return err('unexpected eth_call')
       }
       default:

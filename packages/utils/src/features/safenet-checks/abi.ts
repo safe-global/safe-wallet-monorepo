@@ -48,6 +48,17 @@ export const COORDINATOR_READ_ABI = [
 ] as const
 
 
+/** Fee reads on the sentinel oracle. `fee` is mutable behind a governance delay. */
+export const ORACLE_READ_ABI = [
+  'function fee() view returns (uint96)',
+  'function FEE_TOKEN() view returns (address)',
+] as const
+
+export const ERC20_READ_ABI = [
+  'function symbol() view returns (string)',
+  'function decimals() view returns (uint8)',
+] as const
+
 export const consensusInterface = new Interface(CONSENSUS_EVENT_FRAGMENTS)
 export const consensusPlainInterface = new Interface(CONSENSUS_PLAIN_EVENT_FRAGMENTS)
 export const sentinelInterface = new Interface(SENTINEL_EVENT_FRAGMENTS)

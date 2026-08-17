@@ -1,5 +1,12 @@
 import { Contract, isCallException, JsonRpcProvider } from 'ethers'
-import { CONSENSUS_READ_ABI, CONSENSUS_TOPIC0S, COORDINATOR_READ_ABI, SENTINEL_TOPIC0S } from '../abi'
+import {
+  CONSENSUS_READ_ABI,
+  CONSENSUS_TOPIC0S,
+  COORDINATOR_READ_ABI,
+  ERC20_READ_ABI,
+  ORACLE_READ_ABI,
+  SENTINEL_TOPIC0S,
+} from '../abi'
 import {
   BLOCK_ESTIMATE_MAX_REFINEMENTS,
   BLOCK_ESTIMATE_TOLERANCE_SECONDS,
@@ -51,6 +58,15 @@ export type CheckReadResult = {
   deadlineBlock: string | null
 }
 
+/** The oracle's per-check request fee, denominated in its ERC-20 fee token. */
+export type SafenetRequestFee = {
+  /** Fee in the token's smallest unit, as a decimal string (Redux-serializable). */
+  amount: string
+  tokenAddress: string
+  tokenSymbol: string
+  tokenDecimals: number
+}
+
 export type SafenetReaderConfig = {
   /** Pinned endpoints, rotated on failure. */
   rpcUrls: string[]
@@ -97,6 +113,7 @@ export class SafenetReader {
   private currentProvider: JsonRpcProvider | null = null
   private chainIdChecked = false
   private readonly groupKeyCache = new Map<string, { x: string; y: string }>()
+  private requestFee: SafenetRequestFee | null | undefined
 
   constructor(config: SafenetReaderConfig) {
     this.rpcUrls = config.rpcUrls
@@ -393,7 +410,37 @@ export class SafenetReader {
   }
 
   /**
+   * The allowlisted oracle's per-check fee in `FEE_TOKEN` units. The first
+   * successful read is cached for the reader's lifetime — display-only, and
+   * fee changes sit behind the oracle's governance delay. `null` when no
+   * oracle is configured — without an oracle-backed check there is no fee to
+   * show. A failed read throws and is not cached, so the next call retries.
+   */
+  async fetchRequestFee(): Promise<SafenetRequestFee | null> {
+    if (this.requestFee !== undefined) return this.requestFee
+    // The allowlist supports several oracles, but one deployment charges one
+    // fee — the first configured oracle is the active one.
+    const oracle = this.oracles[0]
+    if (!oracle) {
+      this.requestFee = null
+      return null
+    }
 
+    const fee = await this.withProvider(async (provider) => {
+      const oracleContract = new Contract(oracle, [...ORACLE_READ_ABI], provider)
+      const [amount, tokenAddress] = (await Promise.all([oracleContract.fee(), oracleContract.FEE_TOKEN()])) as [
+        bigint,
+        string,
+      ]
+      const token = new Contract(tokenAddress, [...ERC20_READ_ABI], provider)
+      const [tokenSymbol, decimals] = (await Promise.all([token.symbol(), token.decimals()])) as [string, bigint]
+      return { amount: amount.toString(), tokenAddress, tokenSymbol, tokenDecimals: Number(decimals) }
+    })
+    this.requestFee = fee
+    return fee
+  }
+
+  /**
    * Verify an attested event's FROST signature against its epoch group key.
    * A group-key fetch failure is retryable (`PENDING`); a signature that does
    * not verify is terminal (`INVALID`).

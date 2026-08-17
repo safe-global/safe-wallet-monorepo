@@ -13,6 +13,8 @@ import useBalances from '@/hooks/useBalances'
 import useGasLimit from '@/hooks/useGasLimit'
 import useGasPrice from '@/hooks/useGasPrice'
 import { useGtfFeePreview } from './useGtfFeePreview'
+import { useIsSafenetChecksEnabled } from '@/features/safenet-checks'
+import { useGetSafenetRequestFeeQuery } from '@safe-global/store/safenet/safenetCheckApi'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
 import { formatCurrencyMinimal } from '@safe-global/utils/utils/formatNumber'
 import type { SafeTransaction } from '@safe-global/types-kit'
@@ -73,6 +75,8 @@ export type FeesPreviewData = {
    * enough gas token to cover refund" don't fall through with default zero values.
    */
   previewedSafeTx?: SafeTransaction
+  /** Safenet per-check fee, present when the feature is on and an oracle is configured. */
+  safenetFee?: FeeRow
 }
 
 const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
@@ -106,6 +110,10 @@ export const useFeesPreview = (): FeesPreviewData => {
   // payload alone (both have zero gasPrice/baseGas + ZERO_ADDRESS refundReceiver), so we lock
   // the UI for confirmers regardless of how the tx got there.
   const isLegacySigned = !!safeTx && safeTx.signatures.size > 0 && !isGtfSafePaid(safeTx.data)
+
+  // Deployment immutables (reader-cached); the query only exists while the flag is on.
+  const isSafenetEnabled = useIsSafenetChecksEnabled()
+  const { data: safenetRequestFee } = useGetSafenetRequestFeeQuery(undefined, { skip: !isSafenetEnabled })
 
   const { candidates, defaultAddress } = useGasTokenCandidates(isConfirmation ? undefined : txPayload)
 
@@ -234,6 +242,15 @@ export const useFeesPreview = (): FeesPreviewData => {
     selectedGasToken: selectedAddress,
     onGasTokenChange: isConfirmation || !feePreviewAvailable ? undefined : setGtfSelectedGasToken,
     isConfirmation: isConfirmation || undefined,
+    // A zero REQUEST_FEE (charging disabled on the deployment) renders no row.
+    safenetFee:
+      safenetRequestFee && safenetRequestFee.amount !== '0'
+        ? {
+            label: 'Safenet check',
+            amount: formatVisualAmount(safenetRequestFee.amount, safenetRequestFee.tokenDecimals),
+            currency: safenetRequestFee.tokenSymbol,
+          }
+        : undefined,
   }
 
   if (isConfirmation && safeTx) {

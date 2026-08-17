@@ -209,6 +209,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
     isLegacySigned,
     executionFee,
     gasFee,
+    safenetFee,
     totalOutgoing,
     availableGasTokens,
     selectedGasToken,
@@ -315,6 +316,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
         )}
 
         <FeeBreakdownRow {...executionFee} loading={props.loading} />
+        {safenetFee && <FeeBreakdownRow {...safenetFee} loading={props.loading} />}
         <FeeBreakdownRow {...gasFee} loading={props.loading} error={props.error} tooltip={GAS_FEE_TOOLTIP} />
       </div>
 

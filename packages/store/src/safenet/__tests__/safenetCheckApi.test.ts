@@ -30,7 +30,12 @@ const mockedGetReader = getSafenetReader as jest.MockedFunction<typeof getSafene
 const HASH = ('0x' + 'cd'.repeat(32)) as `0x${string}`
 const REQUEST_ID = ('0x' + 'ef'.repeat(32)) as `0x${string}`
 
-const fakeReader = { fetchCheckState: jest.fn(), verifyAttestation: jest.fn(), blockTimeMs: jest.fn() }
+const fakeReader = {
+  fetchCheckState: jest.fn(),
+  verifyAttestation: jest.fn(),
+  blockTimeMs: jest.fn(),
+  fetchRequestFee: jest.fn(),
+}
 
 const baseRead = (over: Partial<CheckReadResult> = {}): CheckReadResult => ({
   safeTxHash: HASH,
@@ -61,6 +66,7 @@ beforeEach(() => {
   fakeReader.verifyAttestation.mockReset()
   fakeReader.blockTimeMs.mockReset()
   fakeReader.blockTimeMs.mockResolvedValue(null)
+  fakeReader.fetchRequestFee.mockReset()
   mockedGetReader.mockReturnValue(fakeReader as unknown as ReturnType<typeof getSafenetReader>)
 })
 
@@ -296,5 +302,37 @@ describe('safenetCheckApi.getSafenetCheck', () => {
     const queries = store.getState()[safenetCheckApi.reducerPath].queries
     expect(Object.keys(queries)).toHaveLength(1)
     expect(fakeReader.fetchCheckState).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('safenetCheckApi.getSafenetRequestFee', () => {
+  it('returns the reader fee', async () => {
+    const fee = { amount: '400000000000000000', tokenAddress: '0x1', tokenSymbol: 'MTK', tokenDecimals: 18 }
+    fakeReader.fetchRequestFee.mockResolvedValue(fee)
+
+    const store = makeTestStore()
+    const result = await store.dispatch(safenetCheckApi.endpoints.getSafenetRequestFee.initiate())
+
+    expect(result.data).toEqual(fee)
+  })
+
+  it('maps null (no oracle configured) through as data, not an error', async () => {
+    fakeReader.fetchRequestFee.mockResolvedValue(null)
+
+    const store = makeTestStore()
+    const result = await store.dispatch(safenetCheckApi.endpoints.getSafenetRequestFee.initiate())
+
+    expect(result.data).toBeNull()
+    expect(result.isError).toBe(false)
+  })
+
+  it('returns a serializable error on a failed read', async () => {
+    fakeReader.fetchRequestFee.mockRejectedValue(new Error('rpc down'))
+
+    const store = makeTestStore()
+    const result = await store.dispatch(safenetCheckApi.endpoints.getSafenetRequestFee.initiate())
+
+    expect(result.isError).toBe(true)
+    expect(result.error).toEqual({ message: 'rpc down' })
   })
 })
