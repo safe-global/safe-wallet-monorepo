@@ -1,7 +1,8 @@
 import { type ReactElement, type ReactNode, type SyntheticEvent, useState } from 'react'
 import { getGsCodeFromError } from '@safe-global/utils/services/exceptions/contractErrors'
 import { CircleAlert, TriangleAlert, Info } from 'lucide-react'
-import { getGuardErrorInfo } from '@/utils/transaction-errors'
+import { getGuardErrorInfo, isRevertError } from '@/utils/transaction-errors'
+import { decodeCustomError } from '@/utils/customErrorRegistry'
 import { getBlockExplorerLink } from '@/utils/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -50,6 +51,14 @@ const ErrorMessage = ({
   // before (WA-3005 is on-chain-scoped).
   const gsCode = error ? getGsCodeFromError(error) : undefined
 
+  // GS013 family: the inner call reverted with a module/guard custom error. A
+  // custom-error revert without a GS string is still a GS013 — decode its
+  // selector against the known ABIs; undecodable ones keep the raw selector in
+  // the support reference, never in the message.
+  const customError =
+    error && (gsCode === 'GS013' || (!gsCode && isRevertError(error))) ? decodeCustomError(error) : undefined
+  const effectiveGsCode = gsCode ?? (customError ? 'GS013' : undefined)
+
   // Check if this is a Guard error that should get special treatment
   const guardErrorName = error && context ? getGuardErrorInfo(error) : undefined
   const guardExplorerLink =
@@ -90,7 +99,7 @@ const ErrorMessage = ({
             </span>
           )}
 
-          {error && !gsCode && (
+          {error && !effectiveGsCode && (
             <Link
               render={<button type="button" />}
               onClick={onDetailsToggle}
@@ -101,8 +110,8 @@ const ErrorMessage = ({
           )}
         </span>
 
-        {gsCode ? (
-          <ErrorDetails code={gsCode} />
+        {effectiveGsCode ? (
+          <ErrorDetails code={effectiveGsCode} customError={customError} />
         ) : (
           error &&
           showDetails && (

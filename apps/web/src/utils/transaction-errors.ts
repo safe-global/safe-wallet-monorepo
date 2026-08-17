@@ -2,6 +2,7 @@
  * Utilities for detecting and handling specific transaction errors
  */
 import { BaseError } from 'viem'
+import { getKnownCustomError } from '@/utils/customErrorRegistry'
 import { getGsCodeFromError } from '@safe-global/utils/services/exceptions/contractErrors'
 
 /**
@@ -47,12 +48,7 @@ export const extractGuardErrorCode = (error: Error): string | undefined => {
  * @returns {string} Human-readable error name
  */
 export const getGuardErrorName = (errorCode: string): string => {
-  switch (errorCode) {
-    case GUARD_ERROR_CODES.UNAPPROVED_HASH:
-      return 'UnapprovedHash'
-    default:
-      return 'Unknown'
-  }
+  return getKnownCustomError(errorCode)?.name ?? 'Unknown'
 }
 
 /**
