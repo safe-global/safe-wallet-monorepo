@@ -181,8 +181,13 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
                   name={field.name}
                   aria-label={message || undefined}
                   showTrigger
-                  className="[&_input]:font-bold"
-                  style={{ minWidth: getFieldMinWidth(field.value) }}
+                  // `w-full`/`min-w-0` make the inner <input> fill this clamped box instead of
+                  // falling back to the browser's intrinsic ~20ch width (the wrapping InputGroup has
+                  // no width of its own, so an unconstrained input renders far wider than its value).
+                  // `width` (not `minWidth`) is what actually clamps it — the reset button is a sibling
+                  // addon in the same row, not layered over the input, so it doesn't eat into this box.
+                  className="[&_input]:font-bold [&_input]:w-full [&_input]:min-w-0"
+                  style={{ width: getFieldMinWidth(field.value) }}
                   onBlur={() => {
                     field.onBlur()
 

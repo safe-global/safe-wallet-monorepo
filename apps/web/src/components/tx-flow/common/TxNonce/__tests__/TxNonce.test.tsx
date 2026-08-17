@@ -139,6 +139,16 @@ describe('TxNonce', () => {
       expect(input.value).toBe('42')
     })
 
+    // Regression: the InputGroup wrapper has no width of its own, so without a forced `w-full` the
+    // inner <input> fell back to the browser's intrinsic ~20ch size instead of hugging its value.
+    // (The clamped `width` style itself isn't assertable here: jsdom's CSS engine doesn't recognise
+    // `clamp()` on `width` and silently drops it, even though real browsers apply it correctly.)
+    it('forces the inner input to fill its clamped box', () => {
+      renderTxNonce({ nonce: 42, recommendedNonce: 42 })
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      expect(input.closest('[data-slot="input-group"]')).toHaveClass('[&_input]:w-full', '[&_input]:min-w-0')
+    })
+
     it('shows reset button when nonce differs from recommended', () => {
       renderTxNonce({ nonce: 10, recommendedNonce: 5 })
       // Reset to recommended nonce button appears as an IconButton
