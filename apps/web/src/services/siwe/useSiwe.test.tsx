@@ -1,6 +1,14 @@
 import { renderHook, act } from '@testing-library/react'
+import type { AbstractProvider } from 'ethers'
 import { useSiwe } from './useSiwe'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
+import { rememberRpcEndpoint, WALLET_RPC_ENDPOINT_INFO } from '@/hooks/wallets/rpcEndpointInfo'
+import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
+
+const mockLogError = jest.fn()
+jest.mock('../exceptions', () => ({
+  logError: (...args: unknown[]) => mockLogError(...args),
+}))
 
 const mockFetchNonce = jest.fn()
 const mockVerify = jest.fn()
@@ -80,6 +88,20 @@ describe('useSiwe', () => {
     expect(mockVerify).toHaveBeenCalledWith(
       expect.objectContaining({ siweDto: expect.objectContaining({ signature: '0xsig' }) }),
     )
+  })
+
+  it('attributes a sign-in failure to the wallet provider', async () => {
+    const provider = buildProvider()
+    provider.getSigner.mockRejectedValue(new Error('user provider unreachable'))
+    rememberRpcEndpoint(provider as unknown as AbstractProvider, WALLET_RPC_ENDPOINT_INFO)
+    mockUseWeb3.mockReturnValue(provider)
+
+    const { result } = renderHook(() => useSiwe())
+    await act(async () => {
+      await expect(result.current.signIn()).rejects.toThrow('user provider unreachable')
+    })
+
+    expect(mockLogError).toHaveBeenCalledWith(ErrorCodes._640, undefined, { rpcEndpointKind: 'wallet' })
   })
 
   it('does nothing when no wallet is connected', async () => {
