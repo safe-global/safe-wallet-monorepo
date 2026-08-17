@@ -118,7 +118,7 @@ const WcInput = ({ uri }: { uri: string }) => {
             placeholder="wc:"
             spellCheck={false}
           />
-          <InputGroupAddon align="inline-end">
+          <InputGroupAddon align="inline-end" className="pr-0">
             <Track {...WALLETCONNECT_EVENTS.PASTE_CLICK}>
               <Button variant="default" size="sm" onClick={onPaste} disabled={!!loading}>
                 {loading === WCLoadingState.CONNECT || loading === WCLoadingState.APPROVE ? (
