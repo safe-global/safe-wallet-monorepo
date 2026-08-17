@@ -12,7 +12,7 @@
 }
 
 .topbarCollapsed {
-  --topbar-offset: 4rem;
+  --topbar-offset: 52px;
 }
 
 .topbarNoSidebar {
@@ -49,10 +49,11 @@
 }
 
 @media (max-width: 899.95px) {
-  /* The sidebar is a temporary overlay below `md`, so nothing is reserved for it. */
+  /* The sidebar is a temporary overlay below `md`, so nothing is reserved for it.
+     `relative` keeps the topbar in flow yet unpinned, so sticky sub-headers can own the top. */
   .topbar {
     --topbar-offset: 0px;
-    position: sticky;
+    position: relative;
     top: 0;
   }
 
@@ -113,11 +114,9 @@
   background-color: var(--background);
 }
 
-/* Reduce left padding when the sidebar is collapsed to icon mode so the content
-   reclaims the freed space. 4rem matches the floating sidebar's collapsed width
-   (--sidebar-width-icon 3rem + 1rem padding). */
+/* 52px matches the collapsed (icon-mode) sidebar width. */
 .mainSidebarCollapsed {
-  padding-left: 4rem;
+  padding-left: 52px;
 }
 
 .mainNoHeader {
@@ -164,12 +163,18 @@
   z-index: 4;
   left: 0;
   top: 0;
-  /* mimics MUI drawer animation */
-  transition: transform 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+  /* Matches the sidebar's own transition; anything slower makes the strip trail its edge. */
+  transition: transform 200ms linear 0ms;
 }
 
 .sidebarTogglePosition.sidebarOpen {
   transform: translateX(230px);
+}
+
+/* Tracks the sidebar's icon-rail width, the same offset `.mainSidebarCollapsed` and
+   `.topbarCollapsed` use — otherwise the strip strands itself out over the page content. */
+.sidebarTogglePosition.sidebarCollapsed {
+  transform: translateX(52px);
 }
 
 .sidebarToggle {

@@ -10,6 +10,8 @@ import type { ReactElement } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { getRecoveryProposalTransactions } from '../../services/transaction'
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import TxCheckError from '@/components/tx/TxCheckError'
+import TxSubmitError from '@/components/tx/TxSubmitError'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/shared/ConfirmationTitle'
 import TxCard from '@/components/tx-flow/common/TxCard'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -156,21 +158,11 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
 
         <ConfirmationTitle variant={ConfirmationTitleTypes.execute} />
 
-        {safeTxError && (
-          <ErrorMessage error={safeTxError}>
-            This recovery will most likely fail. To save gas costs, avoid executing the transaction.
-          </ErrorMessage>
-        )}
+        {safeTxError && <TxCheckError error={safeTxError} />}
 
-        {executionValidationError && (
-          <ErrorMessage error={executionValidationError}>
-            This transaction will most likely fail. To save gas costs, avoid executing the transaction.
-          </ErrorMessage>
-        )}
+        {executionValidationError && <TxCheckError error={executionValidationError} />}
 
-        {submitError && (
-          <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
-        )}
+        {submitError && <TxSubmitError error={submitError} />}
 
         <NetworkWarning />
 

@@ -3,6 +3,7 @@ import {
   getOwnerAwaitingConfirmations,
   isExecTxData,
   isExecTxInfo,
+  isMigrateToL2TxData,
   isOnChainConfirmationTxData,
   isOnChainConfirmationTxInfo,
   isOnChainSignMessageTxData,
@@ -10,11 +11,23 @@ import {
 } from '../transaction-guards'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { faker } from '@faker-js/faker'
-import { Safe__factory, Sign_message_lib__factory } from '@safe-global/utils/types/contracts'
+import {
+  Safe__factory,
+  Safe_to_l2_migration__factory,
+  Sign_message_lib__factory,
+} from '@safe-global/utils/types/contracts'
+import { Multi_send__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.3.0'
 import { TransactionTokenType, TransferDirection } from '@safe-global/store/gateway/types'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { txDataBuilder } from '@/tests/builders/safeTx'
-import { getSignMessageLibDeployment } from '@safe-global/safe-deployments'
+import {
+  getMultiSendDeployment,
+  getSafeL2SingletonDeployment,
+  getSafeToL2MigrationDeployment,
+  getSignMessageLibDeployment,
+} from '@safe-global/safe-deployments'
+import { encodeMultiSendData } from '@safe-global/protocol-kit'
+import { OperationType } from '@safe-global/types-kit'
 import type { Operation } from '@safe-global/store/gateway/types'
 
 describe('transaction-guards', () => {
@@ -331,6 +344,24 @@ describe('transaction-guards', () => {
       expect(isOnChainSignMessageTxData(mockTxData, '1')).toBeFalsy()
     })
 
+    it('should return true for signMessage calls to the 1.5.0 SignMessageLib', () => {
+      const signMessageInterface = Sign_message_lib__factory.createInterface()
+      const signMessageLibAddress = getSignMessageLibDeployment({ version: '1.5.0' })?.defaultAddress!
+
+      const mockTxData = txDataBuilder()
+        .with({
+          hexData: signMessageInterface.encodeFunctionData('signMessage', [faker.string.hexadecimal({ length: 64 })]),
+          to: { value: signMessageLibAddress },
+          addressInfoIndex: {},
+          value: '0',
+          operation: 1,
+          trustedDelegateCallTarget: true,
+        })
+        .build()
+
+      expect(isOnChainSignMessageTxData(mockTxData, '1')).toBeTruthy()
+    })
+
     it('should return false for signMessage calls that are not delegate calls', () => {
       const signMessageInterface = Sign_message_lib__factory.createInterface()
       const signMessageLibAddress = getSignMessageLibDeployment({ version: '1.3.0' })?.defaultAddress!
@@ -347,6 +378,50 @@ describe('transaction-guards', () => {
         .build()
 
       expect(isOnChainSignMessageTxData(mockTxData, '1')).toBeFalsy()
+    })
+  })
+
+  describe('isMigrateToL2TxData', () => {
+    const buildMigrationViaMultiSend = (multiSendAddress: string, l2SingletonVersion: string) => {
+      const migrationAddress = getSafeToL2MigrationDeployment()?.defaultAddress!
+      const l2SingletonAddress = getSafeL2SingletonDeployment({ version: l2SingletonVersion })?.defaultAddress!
+      const migrationInterface = Safe_to_l2_migration__factory.createInterface()
+
+      const multiSendData = encodeMultiSendData([
+        {
+          to: migrationAddress,
+          value: '0',
+          data: migrationInterface.encodeFunctionData('migrateToL2', [l2SingletonAddress]),
+          operation: OperationType.DelegateCall,
+        },
+      ])
+
+      return txDataBuilder()
+        .with({
+          hexData: Multi_send__factory.createInterface().encodeFunctionData('multiSend', [multiSendData]),
+          to: { value: multiSendAddress },
+          addressInfoIndex: {},
+          value: '0',
+          operation: 1,
+          trustedDelegateCallTarget: true,
+        })
+        .build()
+    }
+
+    it('should return true for a migrateToL2 batch sent to the 1.4.1 MultiSend', () => {
+      const multiSendAddress = getMultiSendDeployment({ version: '1.4.1' })?.defaultAddress!
+
+      expect(isMigrateToL2TxData(buildMigrationViaMultiSend(multiSendAddress, '1.4.1'), '1')).toBeTruthy()
+    })
+
+    it('should return true for a migrateToL2 batch sent to the 1.5.0 MultiSend', () => {
+      const multiSendAddress = getMultiSendDeployment({ version: '1.5.0' })?.defaultAddress!
+
+      expect(isMigrateToL2TxData(buildMigrationViaMultiSend(multiSendAddress, '1.5.0'), '1')).toBeTruthy()
+    })
+
+    it('should return false for a migrateToL2 batch sent to an unknown MultiSend address', () => {
+      expect(isMigrateToL2TxData(buildMigrationViaMultiSend(faker.finance.ethereumAddress(), '1.4.1'), '1')).toBeFalsy()
     })
   })
 

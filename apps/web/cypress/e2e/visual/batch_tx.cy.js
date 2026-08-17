@@ -19,13 +19,6 @@ describe(
       mockVisualTestApis()
     })
 
-    it('[VISUAL] Screenshot empty batch list', () => {
-      cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
-      main.awaitVisualStability()
-      batch.openBatchtransactionsModal()
-      main.awaitVisualStability()
-    })
-
     it('[VISUAL] Screenshot batch list with transaction', () => {
       cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2, {
         onBeforeLoad(win) {

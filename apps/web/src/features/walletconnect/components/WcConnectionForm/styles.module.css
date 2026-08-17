@@ -1,5 +1,8 @@
+/* Span the same 50px row as the WalletConnect logo and center the button in it */
 .infoIcon {
   position: absolute;
-  top: var(--space-3);
+  top: 0;
   right: var(--space-3);
+  height: 50px;
+  align-items: center;
 }

@@ -25,7 +25,6 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
-import SettingsCard from '@/components/settings/SettingsCard'
 
 const headCells = [
   {
@@ -123,29 +122,28 @@ const ProposersList = () => {
   }
 
   return (
-    <SettingsCard
-      title="Proposers"
-      className="mt-4"
-      contentClassName="flex flex-col gap-4"
-      data-testid="proposer-section"
-    >
-      <div>
-        <Typography className="mb-4">
-          Proposers can suggest transactions but cannot approve or execute them. Signers should review and approve
-          transactions first. <ExternalLink href={HelpCenterArticle.PROPOSERS}>Learn more</ExternalLink>
-        </Typography>
+    <div data-testid="proposer-section">
+      <Typography variant="paragraph-bold" className="mb-4">
+        Proposers
+      </Typography>
+      <Typography className="mb-4">
+        Proposers can suggest transactions but cannot approve or execute them. Signers should review and approve
+        transactions first.{' '}
+        <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.PROPOSERS}>
+          Learn more
+        </ExternalLink>
+      </Typography>
 
-        {showPendingDelegations && <PendingDelegationsList />}
+      {showPendingDelegations && <PendingDelegationsList />}
 
-        {isEnabled && <AddProposerButton onAdd={onAdd} isUndeployedSafe={isUndeployedSafe} />}
+      {isEnabled && <AddProposerButton onAdd={onAdd} isUndeployedSafe={isUndeployedSafe} />}
 
-        {rows.length > 0 && <EnhancedTable rows={rows} headCells={headCells} />}
-      </div>
+      {rows.length > 0 && <EnhancedTable rows={rows} headCells={headCells} />}
 
       {isAddDialogOpen && (
         <UpsertProposer onClose={() => setIsAddDialogOpen(false)} onSuccess={() => setIsAddDialogOpen(false)} />
       )}
-    </SettingsCard>
+    </div>
   )
 }
 

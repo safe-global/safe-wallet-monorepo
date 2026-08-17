@@ -111,7 +111,7 @@ describe('Alert', () => {
     expect(alert.className).toContain('*:[svg]:text-muted-foreground')
   })
 
-  it('renders the action slot vertically centered on the right', () => {
+  it('renders the action slot anchored to the top right', () => {
     render(
       <Alert>
         <AlertTitle>Item added successfully</AlertTitle>
@@ -123,7 +123,7 @@ describe('Alert', () => {
 
     const action = screen.getByRole('button', { name: 'Undo' }).parentElement
     expect(action).toHaveAttribute('data-slot', 'alert-action')
-    expect(action).toHaveClass('top-1/2', '-translate-y-1/2')
+    expect(action).toHaveClass('top-6', '-translate-y-1/2')
   })
 
   it('does not let the action inherit the variant text color', () => {

@@ -69,7 +69,7 @@ const AdvancedParamsForm = ({ params, ...props }: AdvancedParamsFormProps) => {
   }
 
   return (
-    <ModalDialog open dialogTitle="Advanced parameters" hideChainIndicator>
+    <ModalDialog open dialogTitle="Advanced parameters" hideChainIndicator forceBackdrop>
       <FormProvider {...formMethods}>
         <form onSubmit={onFormSubmit}>
           <div className="p-6">

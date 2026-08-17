@@ -8,7 +8,9 @@
   z-index: 1200;
 
   /*this rule is needed to prevent the bar from being expanded outside the screen without scrolling on mobile devices*/
-  max-height: 90vh;
+  max-height: 70vh;
+
+  overflow: hidden auto;
 
   /* The bar's own surface. It never needed one here before: MUI's <Accordion> rendered as a Paper,
      which brought its background with it. The shadcn Accordion is an unstyled div, so the bar came

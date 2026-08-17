@@ -31,7 +31,10 @@ const LegalDisclaimerContent = ({
 
       <Typography>
         I have read and understood the{' '}
-        <ExternalLink href={AppRoutes.terms} className="no-underline hover:no-underline">
+        <ExternalLink
+          href={AppRoutes.terms}
+          className="font-bold no-underline hover:text-muted-foreground hover:no-underline"
+        >
           Terms
         </ExternalLink>{' '}
         and this Disclaimer, and agree to be bound by them.

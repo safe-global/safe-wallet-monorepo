@@ -259,5 +259,12 @@ describe('TxNonce', () => {
         container.querySelector('[aria-label="Nonce is much higher than the current nonce"]'),
       ).not.toBeInTheDocument()
     })
+
+    it('anchors the warning tooltip to a laid-out element, not a display:contents box', () => {
+      const { container } = renderTxNonce({ nonce: 10, recommendedNonce: 5 })
+      const trigger = container.querySelector('[data-slot="tooltip-trigger"]')
+      expect(trigger).toBeInTheDocument()
+      expect(trigger).not.toHaveClass('contents')
+    })
   })
 })
