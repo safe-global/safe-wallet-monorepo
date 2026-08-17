@@ -66,11 +66,15 @@ describe('StatusStepper', () => {
     expect(icons).toHaveLength(4)
     expect(avatars).toHaveLength(4)
 
-    icons.forEach((icon) => {
-      // The rail (icon's parent) pushes the dot down by half the icon/avatar height
-      // difference instead of leaving it flush with the row's top edge.
-      const rail = icon.parentElement
-      expect(rail?.className).toContain('pt-3')
+    // Every rail carries a 12px top stub that centers the dot against the avatar; it is
+    // painted as connector line on all rows except the first, so the previous row's
+    // segment visually touches this row's dot.
+    const topStubs = Array.from(container.querySelectorAll('[data-testid="status-step-connector-top"]'))
+    expect(topStubs).toHaveLength(4)
+    const [firstStub, ...laterStubs] = topStubs
+    expect(firstStub.className).not.toContain('bg-[var(--color-border-light)]')
+    laterStubs.forEach((stub) => {
+      expect(stub.className).toContain('bg-[var(--color-border-light)]')
     })
 
     avatars.forEach((avatar) => {

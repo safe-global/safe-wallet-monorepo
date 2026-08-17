@@ -13,7 +13,7 @@ const StatusStepper = ({ status, txHash }: { status?: PendingStatus; txHash?: st
 
   return (
     <div data-testid="status-stepper" className="flex flex-col">
-      <StatusStep isLoading={!isProcessing} safeAddress={safeAddress}>
+      <StatusStep isLoading={!isProcessing} safeAddress={safeAddress} isFirst>
         <div>
           <Typography variant="paragraph-small-bold">Your transaction</Typography>
           {txHash && (

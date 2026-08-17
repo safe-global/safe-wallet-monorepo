@@ -8,11 +8,14 @@ const StatusStep = ({
   isLoading,
   safeAddress,
   children,
+  isFirst,
   isLast,
 }: {
   isLoading: boolean
   safeAddress?: string
   children: ReactNode
+  /** Hides the connector stub above the icon for the first step in the list */
+  isFirst?: boolean
   /** Omits the connector line below the icon for the final step in the list */
   isLast?: boolean
 }) => {
@@ -20,14 +23,16 @@ const StatusStep = ({
 
   return (
     <div className={`${css.label} flex items-start gap-2`}>
-      {/* Icon rail: the bullet sits on top of the connector line in normal flow (no absolute
-          positioning), so it never gets painted over. Rows stack with zero gap, so each segment
-          touches the next one and the line reads as one continuous rule behind every bullet.
-          pt-3 shifts the dot down so its center lines up with the avatar's center: the avatar is
-          pinned to the top of its own column below (self-start, ~32-37px tall depending on
-          Identicon vs. loading Skeleton) while the dot is ~12px (see .icon in styles.module.css),
-          so half the height difference is ~10-12px. */}
-      <div className="flex flex-col items-center self-stretch pt-3">
+      {/* Icon rail: the bullet sits between two connector segments in normal flow (no absolute
+          positioning), so it never gets painted over. The 12px top stub shifts the dot down so its
+          center lines up with the avatar's center (avatar ~32-37px pinned to its column top, dot
+          ~12px, half the difference ≈ 12px) and, on every row but the first, is painted as line so
+          the segment coming from the previous row visually touches this row's dot. */}
+      <div className="flex flex-col items-center self-stretch">
+        <div
+          data-testid="status-step-connector-top"
+          className={`h-3 w-px shrink-0 ${isFirst ? '' : 'bg-[var(--color-border-light)]'}`}
+        />
         <Circle
           data-testid="status-step-icon"
           className={`${css.icon} size-4 shrink-0 rounded-full bg-[var(--color-background-paper)] ${colorClass} ${isLoading ? '' : 'fill-current'}`}
