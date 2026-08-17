@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import { useRegisterServiceWorker } from './useRegisterServiceWorker'
+import { useRegisterServiceWorker } from '@/hooks/useRegisterServiceWorker'
 import { registerServiceWorker } from '@/services/pwa/registerServiceWorker'
 
 jest.mock('@/services/pwa/registerServiceWorker', () => ({
