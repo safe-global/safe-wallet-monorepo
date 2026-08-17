@@ -6,6 +6,7 @@ import {
   PendingStatus,
   PendingTxType,
   type PendingProcessingTx,
+  type PendingTx,
 } from '@/store/pendingTxsSlice'
 import { useEffect, useMemo, useRef } from 'react'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
@@ -19,33 +20,60 @@ import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
 
 const FINAL_PENDING_STATUSES = [TxEvent.SIGNATURE_INDEXED, TxEvent.SUCCESS, TxEvent.REVERTED, TxEvent.FAILED]
 
+type MonitorTarget = { type: 'tx'; id: string } | { type: 'relay'; id: string }
+
+/** What a pending tx is currently watched by: its on-chain hash, or the relay task id */
+const getMonitorTarget = (pendingTx: PendingTx): MonitorTarget | undefined => {
+  if (pendingTx.status === PendingStatus.PROCESSING) return { type: 'tx', id: pendingTx.txHash }
+  if (pendingTx.status === PendingStatus.RELAYING) return { type: 'relay', id: pendingTx.taskId }
+}
+
 export const useTxMonitor = (): void => {
   const chainId = useChainId()
   const pendingTxs = useAppSelector(selectPendingTxs)
   const pendingTxEntriesOnChain = Object.entries(pendingTxs).filter(([, pendingTx]) => pendingTx.chainId === chainId)
   const provider = useWeb3ReadOnly()
 
-  // Prevent `waitForTx` from monitoring the same tx more than once
-  const monitoredTxs = useRef<{ [txId: string]: boolean }>({})
+  // What is currently being watched per txId, so the same attempt is never watched twice
+  const monitoredTxs = useRef<{ [txId: string]: MonitorTarget }>({})
+
+  /**
+   * A stable, value-compared dependency: it changes when a pending tx appears, disappears, becomes
+   * monitorable, or is replaced by a sped up one. Depending on the number of pending txs instead
+   * would miss the SUBMITTING -> PROCESSING transition, leaving the tx unwatched forever.
+   */
+  const monitorKey = pendingTxEntriesOnChain
+    .map(([txId, pendingTx]) => {
+      const target = getMonitorTarget(pendingTx)
+      return `${txId}:${target?.type ?? ''}:${target?.id ?? ''}`
+    })
+    .join(',')
 
   // Monitor pending transaction mining/validating progress
   useEffect(() => {
-    if (!provider || !pendingTxEntriesOnChain) {
+    if (!provider) {
       return
     }
 
     for (const [txId, pendingTx] of pendingTxEntriesOnChain) {
-      const isProcessing = pendingTx.status === PendingStatus.PROCESSING
-      const isMonitored = monitoredTxs.current[txId]
-      const isRelaying = pendingTx.status === PendingStatus.RELAYING
-
-      if (!(isProcessing || isRelaying) || isMonitored) {
+      const target = getMonitorTarget(pendingTx)
+      if (!target) {
         continue
       }
 
-      monitoredTxs.current[txId] = true
+      const monitored = monitoredTxs.current[txId]
+      if (monitored?.type === target.type && monitored.id === target.id) {
+        continue
+      }
 
-      if (isProcessing) {
+      // The tx was sped up: stop watching the replaced hash so it cannot report on the old attempt
+      if (monitored?.type === 'tx') {
+        SimpleTxWatcher.getInstance().stopWatchingTxHash(monitored.id)
+      }
+
+      monitoredTxs.current[txId] = target
+
+      if (pendingTx.status === PendingStatus.PROCESSING) {
         waitForTx(
           provider,
           [txId],
@@ -59,13 +87,13 @@ export const useTxMonitor = (): void => {
         continue
       }
 
-      if (isRelaying) {
+      if (pendingTx.status === PendingStatus.RELAYING) {
         waitForRelayedTx(pendingTx.taskId, [txId], pendingTx.chainId, pendingTx.safeAddress, pendingTx.nonce)
       }
     }
-    // `provider` is updated when switching chains, re-running this effect
+    // `monitorKey` stands in for `pendingTxEntriesOnChain`/`chainId`; `provider` is updated when switching chains
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingTxEntriesOnChain.length, provider])
+  }, [monitorKey, provider])
 }
 
 const useTxPendingStatuses = (): void => {

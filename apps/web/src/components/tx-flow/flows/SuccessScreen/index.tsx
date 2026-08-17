@@ -51,14 +51,18 @@ const SuccessScreen = ({ txId, txHash }: Props) => {
   }, [pendingTxHash])
 
   useEffect(() => {
+    if (!txId) return
+
+    // Deliberately independent of `pendingTx`: the same events clear it from the store, so reading it
+    // here would tie the error state to the order in which the subscribers happen to run
     const unsubFns: Array<() => void> = ([TxEvent.FAILED, TxEvent.REVERTED] as const).map((event) =>
       txSubscribe(event, (detail) => {
-        if (detail.txId === txId && pendingTx) setError(detail.error)
+        if (detail.txId === txId) setError(detail.error)
       }),
     )
 
     return () => unsubFns.forEach((unsubscribe) => unsubscribe())
-  }, [txId, pendingTx])
+  }, [txId])
 
   const onClose = useCallback(() => {
     setTxFlow(undefined)
@@ -67,8 +71,12 @@ const SuccessScreen = ({ txId, txHash }: Props) => {
   const isSuccess = status === undefined
   const spinnerStatus = error ? SpinnerStatus.ERROR : isSuccess ? SpinnerStatus.SUCCESS : SpinnerStatus.PROCESSING
 
+  // A known error wins over any pending status: the tx is already mined, so it can neither keep
+  // processing nor be sped up
+  const displayedStatus = error ? undefined : status
+
   let StatusComponent
-  switch (status) {
+  switch (displayedStatus) {
     case PendingStatus.PROCESSING:
     case PendingStatus.RELAYING:
       // status can only have these values if txId & pendingTx are defined
