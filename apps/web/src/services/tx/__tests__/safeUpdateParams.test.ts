@@ -2,10 +2,12 @@ import * as sdkHelpers from '@/services/tx/tx-sender/sdk'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SafeProvider } from '@safe-global/protocol-kit'
 import {
+  getExtensibleFallbackHandlerDeployment,
   getFallbackHandlerDeployment,
   getSafeL2SingletonDeployment,
   getSafeSingletonDeployment,
 } from '@safe-global/safe-deployments'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { Interface, JsonRpcProvider } from 'ethers'
 import { createUpdateSafeTxs, extractTargetVersionFromUpdateSafeTx } from '../safeUpdateParams'
@@ -64,6 +66,29 @@ describe('safeUpgradeParams', () => {
       sameAddress(
         decodeSetFallbackHandlerAddress(fallbackHandlerTx.data),
         getFallbackHandlerDeployment({ version: getLatestSafeVersion(mockChainInfo), network: '1' })?.defaultAddress,
+      ),
+    ).toBeTruthy()
+  })
+
+  it('Should set the ExtensibleFallbackHandler for pre-1.3.0 Safes when the feature is enabled and 1.5.0 is recommended', async () => {
+    const mockSafe = {
+      address: {
+        value: MOCK_SAFE_ADDRESS,
+      },
+      version: '1.1.1',
+    } as SafeState
+
+    const mockChainInfo = chainBuilder()
+      .with({ chainId: '1', l2: false, recommendedMasterCopyVersion: '1.5.0' })
+      .with({ features: [FEATURES.SAFE_MIGRATION_BY_EFH] as any })
+      .build()
+    const txs = await createUpdateSafeTxs(mockSafe, mockChainInfo)
+    const [, fallbackHandlerTx] = txs
+
+    expect(
+      sameAddress(
+        decodeSetFallbackHandlerAddress(fallbackHandlerTx.data),
+        getExtensibleFallbackHandlerDeployment({ version: '1.5.0', network: '1' })?.defaultAddress,
       ),
     ).toBeTruthy()
   })
