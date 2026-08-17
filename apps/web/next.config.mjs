@@ -44,6 +44,13 @@ const withPWA = withPWAInit({
     mode: 'production',
   },
   reloadOnOnline: false,
+  // We register the service worker ourselves (see `useRegisterServiceWorker`)
+  // instead of relying on next-pwa's auto-register: its register script
+  // (workbox-window) attaches an `updatefound` listener to the registration
+  // without checking that `register()` actually returned one, throwing in
+  // private-browsing modes/in-app WebViews. Registering it ourselves lets us
+  // guard both that and a transient `AbortError` on script fetch. See WA-2949.
+  register: false,
   publicExcludes: [],
   buildExcludes: [/./],
   customWorkerSrc: SERVICE_WORKERS_PATH,
