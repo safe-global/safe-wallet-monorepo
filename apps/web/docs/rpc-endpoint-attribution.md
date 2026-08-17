@@ -46,14 +46,41 @@ different token, so current-chain state is the wrong answer at those call sites.
 ## `rpcHost` never contains a credential
 
 Our keyed RPC URLs carry the Infura token **in the path** (`API_KEY_PATH`). `getRpcHost` is the
-only place a host is derived, and it returns `URL.host` — which by construction excludes path,
+only place `rpcHost` is derived, and it returns `URL.host` — which by construction excludes path,
 query, fragment and userinfo — behind an allow-list pattern for the resulting value. Unit tests
 in `apps/web/src/hooks/wallets/__tests__/rpcEndpointInfo.test.ts` assert the token is absent for
 path, query and userinfo placements. Never widen this to `URL.href`, `URL.pathname` or the raw
 URL.
 
+This property is scoped to `rpcHost`. It is **not** a claim that the Infura token cannot reach
+Datadog by some other route — see the known gap below.
+
 The `wallet` kind deliberately carries **no** host: the wallet's upstream endpoint is the user's
 own and is not ours to record.
+
+`custom` hostnames are the user's own endpoint and are reported as-is. Several hosted providers
+put a per-tenant identifier in the subdomain (`<node-id>.p2pify.com`, `<name>-<rand>.quiknode.pro`),
+so a `custom` `rpcHost` can be a weak account identifier. It is kept because attributing a user's
+own RPC is the point of the `custom` kind; revisit if that trade-off changes.
+
+### Known gap — the error _message_ channel is not sanitised
+
+`rpcHost` is safe; `CodedException.message` is not, and it is a separate path into Datadog.
+`ethers` folds `info.requestUrl` into `error.message` for any non-2xx `SERVER_ERROR` — including
+Infura 401/429/5xx, exactly the "our RPC is degraded" cases this attribution exists to measure.
+`CodedException` then interpolates that message unsanitised and `logger.warn` / `logger.error`
+forward it to `datadogRum.addAction` / `addError`.
+
+`sanitizeErrorMessage` does not cover this on two counts: its `/0x[a-fA-F0-9]{40,}/g` pattern does
+not match an Infura project ID (32 hex chars, no `0x` prefix), and its output is only consumed on
+the Mixpanel path — `services/exceptions/index.ts` calls `normalizeError` purely for
+`{ domain, type, layer }` / `{ isUserFacing }` and discards `sanitizedMessage`. **Mixpanel is
+clean; the Datadog message field is not.**
+
+This is pre-existing and is tracked separately — it is not introduced or widened by the
+attribution work described here. Practical consequence for anyone adding a call site: do not pass
+a raw provider error into `logError` / `trackError` on an RPC path until that is fixed. That is
+why `useSiwe` passes `undefined` as the thrown error and reports context only.
 
 ## Datadog set-up (not yet done — console configuration)
 
@@ -73,7 +100,9 @@ Queries these facets enable, replacing the report's manual message-pattern match
 # Public-node noise that must never page us
 @context.rpc_endpoint_kind:chain_default @context.rpc_host:bsc-dataseed.binance.org
 
-# Wallet-side failures (the code 804 family)
+# Wallet-side failures. Currently SIWE (640) only — the 804 tx-execution
+# family is not instrumented yet because those paths can also be relayed.
+# User-declined signatures are excluded at the call site, not by this query.
 @context.rpc_endpoint_kind:wallet
 
 # Call sites still missing attribution

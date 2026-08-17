@@ -4,6 +4,8 @@ import { useCallback, useState } from 'react'
 import { getSignableMessage } from './utils'
 import { logError } from '../exceptions'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
+import { matchUserOutcome } from '@safe-global/utils/services/exceptions/normalizeError'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import useWallet from '@/hooks/wallets/useWallet'
 import { isPKWallet } from '@/utils/wallets'
@@ -55,7 +57,12 @@ export const useSiwe = () => {
       return verifyAuthMutation({ siweDto: { message: signableMessage, signature } })
     } catch (error) {
       setLoading(false)
-      logError(ErrorCodes._640, undefined, getRpcErrorContext(signingProvider))
+      // A declined signature is the dominant path through here and is not an
+      // endpoint failure. `logError` drops the thrown error to keep the ethers
+      // message (which can embed the RPC URL) out of Datadog, so the WA-2950
+      // message-based filter can't see it — classify before discarding it.
+      const isUserOutcome = Boolean(matchUserOutcome(asError(error).message))
+      logError(ErrorCodes._640, undefined, isUserOutcome ? undefined : getRpcErrorContext(signingProvider))
       throw error
     }
   }, [fetchNonce, provider, verifyAuthMutation, wallet])

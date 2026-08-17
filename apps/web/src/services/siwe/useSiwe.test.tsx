@@ -104,6 +104,25 @@ describe('useSiwe', () => {
     expect(mockLogError).toHaveBeenCalledWith(ErrorCodes._640, undefined, { rpcEndpointKind: 'wallet' })
   })
 
+  it.each([
+    ['MetaMask', 'MetaMask Tx Signature: User denied message signature.'],
+    ['a bare reply', 'Rejected'],
+    ['EIP-1193', 'user rejected action (action="signMessage", code=ACTION_REJECTED, version=6.13.0)'],
+  ])('does not tag a declined signature (%s) as a wallet endpoint failure', async (_label, message) => {
+    const provider = buildProvider()
+    const signer = await provider.getSigner()
+    signer.signMessage.mockRejectedValue(new Error(message))
+    rememberRpcEndpoint(provider as unknown as AbstractProvider, WALLET_RPC_ENDPOINT_INFO)
+    mockUseWeb3.mockReturnValue(provider)
+
+    const { result } = renderHook(() => useSiwe())
+    await act(async () => {
+      await expect(result.current.signIn()).rejects.toThrow(message)
+    })
+
+    expect(mockLogError).toHaveBeenCalledWith(ErrorCodes._640, undefined, undefined)
+  })
+
   it('does nothing when no wallet is connected', async () => {
     mockUseWallet.mockReturnValue(null)
     mockUseWeb3.mockReturnValue(undefined)
