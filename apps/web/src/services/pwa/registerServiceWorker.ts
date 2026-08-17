@@ -12,14 +12,15 @@ let hasAttemptedRegistration = false
  * `navigator.serviceWorker.register()` resolved with — without checking it's
  * actually a usable `ServiceWorkerRegistration`. The production
  * `TypeError: l.fn.addEventListener is not a function` tells us that value was
- * *truthy* (reading `.waiting` off it didn't throw, or the `updatefound`
- * TypeError would read "Cannot read properties of undefined" instead) but not
- * a real registration — e.g. a stub some in-app WebView's `register()`
- * polyfill returns. Because `register()` is `async`, that throw rejects the
- * promise it returns; nothing catches it, so it surfaces as an uncaught
- * error. Registration can also reject outright with an `AbortError` when
- * `sw.js` is transiently unreachable (deploy-time cache churn, offline first
- * paint) — the same "uncaught rejection" shape.
+ * *truthy* (an actually-`undefined` registration would throw ~70 lines
+ * earlier, at the `.waiting` read, with "Cannot read properties of undefined
+ * (reading 'waiting')" — a different error, never reaching the
+ * `updatefound` line at all) but not a real registration — e.g. a stub some
+ * in-app WebView's `register()` polyfill returns. Because `register()` is
+ * `async`, that throw rejects the promise it returns; nothing catches it, so
+ * it surfaces as an uncaught error. Registration can also reject outright
+ * with an `AbortError` when `sw.js` is transiently unreachable (deploy-time
+ * cache churn, offline first paint) — the same "uncaught rejection" shape.
  *
  * We call `window.workbox.register()` ourselves and catch any rejection —
  * covering both the WebView-stub `TypeError` and the `AbortError` — logging
@@ -45,15 +46,7 @@ export const registerServiceWorker = async (): Promise<void> => {
   }
 
   try {
-    const registration = await window.workbox.register()
-
-    // Defense-in-depth for a `register()` that resolves falsy instead of
-    // rejecting — the shape WA-2949's proposed fix anticipated. Not
-    // reachable via `workbox-window`'s current implementation, which always
-    // rejects on failure (see the module doc above), but cheap to keep in
-    // case a future version — or a different registration path — changes
-    // that.
-    if (!registration) return
+    await window.workbox.register()
   } catch (error) {
     logger.info('Service worker registration failed', {
       error: error instanceof Error ? error.message : String(error),
