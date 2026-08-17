@@ -49,10 +49,11 @@
 }
 
 @media (max-width: 899.95px) {
-  /* The sidebar is a temporary overlay below `md`, so nothing is reserved for it. */
+  /* The sidebar is a temporary overlay below `md`, so nothing is reserved for it.
+     `relative` keeps the topbar in flow yet unpinned, so sticky sub-headers can own the top. */
   .topbar {
     --topbar-offset: 0px;
-    position: sticky;
+    position: relative;
     top: 0;
   }
 

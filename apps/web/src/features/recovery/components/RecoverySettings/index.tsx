@@ -117,7 +117,11 @@ function RecoverySettings(): ReactElement {
               ? 'The trusted Recoverer will be able to recover your Safe account if you ever lose access. You can change Recoverers or alter your recovery setup at any time.'
               : 'Choose a trusted Recoverer to recover your Safe account if you ever lose access. Enabling the Account recovery module will require a transaction.'}{' '}
             <Track {...RECOVERY_EVENTS.LEARN_MORE} label="settings">
-              <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
+              <ExternalLink
+                className="font-bold hover:text-muted-foreground"
+                href={HelpCenterArticle.RECOVERY}
+                title={HelperCenterArticleTitles.RECOVERY}
+              >
                 Learn more
               </ExternalLink>
             </Track>
