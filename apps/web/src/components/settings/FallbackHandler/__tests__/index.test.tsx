@@ -135,7 +135,7 @@ describe('FallbackHandler', () => {
     })
   })
 
-  it('should label the TWAP fallback handler as ExtensibleFallbackHandler, not CompatibilityFallbackHandler', async () => {
+  it('should label the TWAP fallback handler distinctly from the official ExtensibleFallbackHandler', async () => {
     jest.spyOn(useSafeInfoHook, 'default').mockImplementation(
       () =>
         ({
@@ -152,7 +152,7 @@ describe('FallbackHandler', () => {
     const fbHandler = render(<FallbackHandler />)
 
     await waitFor(() => {
-      expect(fbHandler.getByText('ExtensibleFallbackHandler')).toBeDefined()
+      expect(fbHandler.getByText('ExtensibleFallbackHandler (CoW Swap)')).toBeDefined()
       expect(fbHandler.queryByText('CompatibilityFallbackHandler')).not.toBeInTheDocument()
     })
   })

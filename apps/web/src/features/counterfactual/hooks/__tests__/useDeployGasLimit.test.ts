@@ -3,7 +3,7 @@ import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import * as onboard from '@/hooks/wallets/useOnboard'
 import * as useWallet from '@/hooks/wallets/useWallet'
 import * as sdk from '@/services/tx/tx-sender/sdk'
-import { safeTxBuilder } from '@/tests/builders/safeTx'
+import { safeTxBuilder, safeTxDataBuilder } from '@/tests/builders/safeTx'
 import * as protocolKit from '@safe-global/protocol-kit'
 import type Safe from '@safe-global/protocol-kit'
 
@@ -151,5 +151,109 @@ describe('useDeployGasLimit hook', () => {
     })
 
     getSimulateTxAccessorDeploymentSpy.mockRestore()
+  })
+
+  it('falls back to simulateAndRevert via Multicall3 when the handler simulation is unavailable', async () => {
+    const mockOnboard = {} as OnboardAPI
+    jest.spyOn(onboard, 'default').mockReturnValue(mockOnboard)
+    jest.spyOn(sdk, 'getSafeSDKWithSigner').mockResolvedValue({
+      getSafeProvider: () => ({
+        estimateGas: () => Promise.resolve('500000'),
+        getSignerAddress: () => Promise.resolve(faker.finance.ethereumAddress()),
+        isContractDeployed: () => Promise.resolve(true),
+      }),
+      getContractManager: () =>
+        ({
+          contractNetworks: {},
+        }) as any,
+      getContractVersion: () => '1.5.0',
+      getAddress: () => Promise.resolve(faker.finance.ethereumAddress()),
+      createSafeDeploymentTransaction: () =>
+        Promise.resolve({
+          to: faker.finance.ethereumAddress(),
+          value: '0',
+          data: '0x1234',
+        }),
+      createTransactionBatch: () =>
+        Promise.resolve({
+          to: faker.finance.ethereumAddress(),
+          value: '0',
+          data: '0x2345',
+        }),
+    } as unknown as Safe)
+    // An ExtensibleFallbackHandler Safe has no `simulate` entrypoint
+    ;(
+      protocolKit.getCompatibilityFallbackHandlerContract as jest.MockedFunction<
+        typeof protocolKit.getCompatibilityFallbackHandlerContract
+      >
+    ).mockRejectedValue(new Error('CompatibilityFallbackHandler contract is not deployed on the current network'))
+    const getSimulateTxAccessorDeploymentSpy = jest
+      .spyOn(safeDeploymentsAccessors, 'getSimulateTxAccessorDeployment')
+      .mockReturnValue({
+        defaultAddress: '0x3d4BA2E0884aa488718476ca2FB8Efc291A46199',
+      } as unknown as ReturnType<typeof safeDeploymentsAccessors.getSimulateTxAccessorDeployment>)
+    ;(
+      protocolKit.estimateSafeDeploymentGas as jest.MockedFunction<typeof protocolKit.estimateSafeDeploymentGas>
+    ).mockResolvedValue('100')
+    ;(protocolKit.estimateTxBaseGas as jest.MockedFunction<typeof protocolKit.estimateTxBaseGas>).mockResolvedValue(
+      '21000',
+    )
+
+    // The tx data must be valid bytes (even-length hex) as this path ABI-encodes it
+    const safeTx = safeTxBuilder()
+      .with({
+        data: safeTxDataBuilder()
+          .with({ data: faker.string.hexadecimal({ length: 64 }) })
+          .build(),
+      })
+      .build()
+    const { result } = renderHook(() => useDeployGasLimit(safeTx))
+
+    await waitFor(() => {
+      // baseGas + (batch estimate - simulation overhead)
+      expect(result.current.gasLimit?.totalGas).toEqual(21000n + (500000n - 20_000n))
+    })
+
+    getSimulateTxAccessorDeploymentSpy.mockRestore()
+  })
+
+  it('falls back to an additive estimation when no simulation path is available', async () => {
+    const mockOnboard = {} as OnboardAPI
+    jest.spyOn(onboard, 'default').mockReturnValue(mockOnboard)
+    jest.spyOn(sdk, 'getSafeSDKWithSigner').mockResolvedValue({
+      getSafeProvider: () => ({
+        estimateGas: () => Promise.resolve('420000'),
+        getSignerAddress: () => Promise.resolve(faker.finance.ethereumAddress()),
+        // No Multicall3 on this network, so the simulateAndRevert path is unavailable too
+        isContractDeployed: () => Promise.resolve(false),
+      }),
+      getContractManager: () =>
+        ({
+          contractNetworks: {},
+        }) as any,
+      getContractVersion: () => '1.5.0',
+      getAddress: () => Promise.resolve(faker.finance.ethereumAddress()),
+    } as unknown as Safe)
+    // A Safe set up with the ExtensibleFallbackHandler has no `simulate` entrypoint, which
+    // surfaces as the simulation-based batch estimation rejecting
+    ;(
+      protocolKit.getCompatibilityFallbackHandlerContract as jest.MockedFunction<
+        typeof protocolKit.getCompatibilityFallbackHandlerContract
+      >
+    ).mockRejectedValue(new Error('CompatibilityFallbackHandler contract is not deployed on the current network'))
+    ;(
+      protocolKit.estimateSafeDeploymentGas as jest.MockedFunction<typeof protocolKit.estimateSafeDeploymentGas>
+    ).mockResolvedValue('100')
+    ;(protocolKit.estimateTxBaseGas as jest.MockedFunction<typeof protocolKit.estimateTxBaseGas>).mockResolvedValue(
+      '21000',
+    )
+
+    const safeTx = safeTxBuilder().build()
+    const { result } = renderHook(() => useDeployGasLimit(safeTx))
+
+    await waitFor(() => {
+      // baseGas + (deployment gas + inner tx gas + execTransaction overhead)
+      expect(result.current.gasLimit?.totalGas).toEqual(21000n + (100n + 420000n + 60_000n))
+    })
   })
 })

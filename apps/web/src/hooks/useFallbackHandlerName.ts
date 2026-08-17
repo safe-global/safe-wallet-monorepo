@@ -24,9 +24,14 @@ export const useFallbackHandlerName = (): string | undefined => {
       return 'CompatibilityFallbackHandler'
     }
 
-    // CoW's TWAP handler is CoW's own instance of the ExtensibleFallbackHandler
-    if (officialHandler === 'extensible' || sameAddress(address, twapFallbackHandler)) {
+    if (officialHandler === 'extensible') {
       return 'ExtensibleFallbackHandler'
+    }
+
+    // CoW's TWAP handler is CoW's own instance of the ExtensibleFallbackHandler; label it
+    // distinctly so replacing the official one with it is visible in the UI
+    if (sameAddress(address, twapFallbackHandler)) {
+      return 'ExtensibleFallbackHandler (CoW Swap)'
     }
 
     return undefined

@@ -16,12 +16,14 @@ import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import {
   getCompatibilityFallbackHandlerDeployment,
   getCompatibilityFallbackHandlerDeployments,
+  getExtensibleFallbackHandlerDeployments,
   getProxyFactoryDeployment,
   getProxyFactoryDeployments,
   getSafeL2SingletonDeployments,
   getSafeSingletonDeployments,
   getSafeToL2SetupDeployments,
 } from '@safe-global/safe-deployments'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
 import type { ReplayedSafeProps, UndeployedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { isPredictedSafeProps } from '@/features/counterfactual/services'
@@ -245,7 +247,14 @@ export const createNewUndeployedSafeWithoutSalt = (
   // Resolve contract addresses (per-chain for registered chains, chain-agnostic fallback for new chains)
   const deploymentType = chain.zk ? 'zksync' : 'canonical'
 
-  const fallbackHandlerDeployments = getCompatibilityFallbackHandlerDeployments({ version: safeVersion })
+  // ExtensibleFallbackHandler only exists at >=1.5.0; the handler address is part of the CREATE2
+  // initializer, so this choice is only applied to newly created setups, never to stored ones
+  const useExtensibleFallbackHandler =
+    hasFeature(chain, FEATURES.SAFE_CREATION_BY_EFH) && semverSatisfies(safeVersion, '>=1.5.0')
+
+  const fallbackHandlerDeployments = useExtensibleFallbackHandler
+    ? getExtensibleFallbackHandlerDeployments({ version: safeVersion })
+    : getCompatibilityFallbackHandlerDeployments({ version: safeVersion })
   const fallbackHandlerAddress = getChainAgnosticAddress(fallbackHandlerDeployments, chain.chainId, deploymentType)
 
   const safeL2Deployments = getSafeL2SingletonDeployments({ version: safeVersion })

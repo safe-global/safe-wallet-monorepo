@@ -12,6 +12,7 @@ import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactu
 import { faker } from '@faker-js/faker'
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
 import {
+  getExtensibleFallbackHandlerDeployment,
   getFallbackHandlerDeployment,
   getProxyFactoryDeployment,
   getSafeL2SingletonDeployment,
@@ -386,6 +387,48 @@ describe('create/logic', () => {
         masterCopy: getSafeSingletonDeployment({ version: '1.5.0', network: '137' })?.defaultAddress,
         factoryAddress: getProxyFactoryDeployment({ version: '1.5.0', network: '137' })?.defaultAddress,
       })
+    })
+
+    it('should use the ExtensibleFallbackHandler for 1.5.0 creations when the feature is enabled', () => {
+      const safeSetup = {
+        owners: [faker.finance.ethereumAddress()],
+        threshold: 1,
+      }
+      const chainSetup = chainBuilder()
+        .with({ chainId: '137' })
+        .with({
+          features: [FEATURES.COUNTERFACTUAL, FEATURES.SAFE_CREATION_BY_EFH] as any,
+        })
+        .with({ recommendedMasterCopyVersion: '1.5.0' })
+        .with({ l2: true })
+        .build()
+
+      const result = createNewUndeployedSafeWithoutSalt('1.5.0', safeSetup, chainSetup)
+
+      expect(result.safeAccountConfig.fallbackHandler).toEqual(
+        getExtensibleFallbackHandlerDeployment({ version: '1.5.0', network: '137' })?.defaultAddress,
+      )
+    })
+
+    it('should keep the CompatibilityFallbackHandler below 1.5.0 even when the extensible feature is enabled', () => {
+      const safeSetup = {
+        owners: [faker.finance.ethereumAddress()],
+        threshold: 1,
+      }
+      const chainSetup = chainBuilder()
+        .with({ chainId: '137' })
+        .with({
+          features: [FEATURES.COUNTERFACTUAL, FEATURES.SAFE_CREATION_BY_EFH] as any,
+        })
+        .with({ recommendedMasterCopyVersion: '1.4.1' })
+        .with({ l2: true })
+        .build()
+
+      const result = createNewUndeployedSafeWithoutSalt('1.4.1', safeSetup, chainSetup)
+
+      expect(result.safeAccountConfig.fallbackHandler).toEqual(
+        getFallbackHandlerDeployment({ version: '1.4.1', network: '137' })?.defaultAddress,
+      )
     })
 
     it('should use l2 masterCopy and no migration on zkSync', () => {
