@@ -113,7 +113,13 @@ const FileUpload = ({
       <div className="flex items-center gap-2">
         <FileIcon className="size-5 fill-none text-[var(--color-primary-light)]" />
         <Typography>
-          Drag and drop a {fileType} file or <Link variant="muted">choose a file</Link>
+          Drag and drop a {fileType} file or{' '}
+          <Link
+            variant="default"
+            className="font-bold text-[var(--color-secondary-dark)] decoration-current hover:text-muted-foreground dark:text-primary dark:hover:text-muted-foreground"
+          >
+            choose a file
+          </Link>
         </Typography>
       </div>
     </div>

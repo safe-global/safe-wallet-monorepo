@@ -14,7 +14,7 @@ const NavTabs = ({ tabs }: { tabs: NavItem[] }) => {
 
   return (
     <Tabs value={activeHref}>
-      <TabsList variant="underline" tone="brand" className="overflow-x-auto overflow-y-hidden">
+      <TabsList variant="underline" tone="brand">
         {tabs.map((tab) => (
           <TabsTrigger
             key={tab.href}
@@ -24,10 +24,8 @@ const NavTabs = ({ tabs }: { tabs: NavItem[] }) => {
             className="whitespace-nowrap"
             render={<NextLink href={{ pathname: tab.href, query }} />}
           >
-            <span className="flex items-center gap-2">
-              {tab.label}
-              {tab.tag}
-            </span>
+            {tab.label}
+            {tab.tag}
           </TabsTrigger>
         ))}
       </TabsList>

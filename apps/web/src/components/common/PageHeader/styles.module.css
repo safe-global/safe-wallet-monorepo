@@ -41,6 +41,10 @@
   row-gap: var(--space-3);
 }
 
+.navWrapper {
+  min-width: 0;
+}
+
 .actionsWrapper {
   gap: var(--space-2);
 }
