@@ -24,7 +24,10 @@ export const SafeAppsSigningMethod = () => {
       <Typography className="mb-4">
         This setting determines how the {BRAND_NAME} will sign message requests from Safe Apps. Gasless, off-chain
         signing is used by default. Learn more about message signing{' '}
-        <ExternalLink href={HelpCenterArticle.SIGNED_MESSAGES}>here</ExternalLink>.
+        <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.SIGNED_MESSAGES}>
+          here
+        </ExternalLink>
+        .
       </Typography>
       <Field orientation="horizontal" className="w-fit">
         <Checkbox
