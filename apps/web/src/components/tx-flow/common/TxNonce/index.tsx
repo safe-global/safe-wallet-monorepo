@@ -211,7 +211,11 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
               {message && <TooltipContent side="top">{message}</TooltipContent>}
             </Tooltip>
 
-            <ComboboxContent>
+            {/* The input itself is tiny (clamped to a few characters), but the shared default ties
+                the popup width to it via --anchor-width. Options show full labels like "12 - New
+                transaction", so size the popup to that content instead — matching the pre-migration
+                MUI Popper, which explicitly opted out of the anchor-width tie for this field. */}
+            <ComboboxContent className="w-max min-w-40 max-w-[300px]">
               <ComboboxList>
                 {/* Each label must live inside its own ComboboxGroup — Base UI's GroupLabel throws
                     without a Group ancestor, which previously crashed the popup on open. */}

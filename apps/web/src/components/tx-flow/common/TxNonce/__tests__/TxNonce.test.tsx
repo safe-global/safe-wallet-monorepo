@@ -227,6 +227,23 @@ describe('TxNonce', () => {
         expect(screen.getByRole('listbox')).toBeInTheDocument()
       })
     })
+
+    // Regression: the popup used the shared Combobox default, which ties its width to the tiny
+    // nonce input (--anchor-width) — sizing it to a couple of characters instead of the option
+    // labels ("12 - New transaction") it needs to show.
+    it('sizes the popup to fit its content instead of the tiny input', async () => {
+      const user = userEvent.setup()
+      renderTxNonce({ nonce: 5, recommendedNonce: 5 })
+
+      await user.click(screen.getByRole('combobox'))
+
+      const content = await waitFor(() => {
+        const el = document.querySelector('[data-slot="combobox-content"]')
+        expect(el).toBeInTheDocument()
+        return el as HTMLElement
+      })
+      expect(content).toHaveClass('w-max', 'min-w-40', 'max-w-[300px]')
+    })
   })
 
   describe('warning states', () => {
