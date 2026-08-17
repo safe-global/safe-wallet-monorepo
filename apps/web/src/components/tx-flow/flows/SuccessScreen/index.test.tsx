@@ -45,10 +45,25 @@ const dispatchReverted = (txId: string | undefined) =>
   })
 
 describe('SuccessScreen', () => {
+  const originalAnimationApi: Record<string, PropertyDescriptor | undefined> = {
+    getAnimations: Object.getOwnPropertyDescriptor(Element.prototype, 'getAnimations'),
+    animate: Object.getOwnPropertyDescriptor(Element.prototype, 'animate'),
+  }
+
   beforeAll(() => {
     // jsdom does not implement the Web Animations API used by the status spinner
     Object.defineProperty(Element.prototype, 'getAnimations', { value: () => [], writable: true })
     Object.defineProperty(Element.prototype, 'animate', { value: () => undefined, writable: true })
+  })
+
+  afterAll(() => {
+    for (const [name, descriptor] of Object.entries(originalAnimationApi)) {
+      if (descriptor) {
+        Object.defineProperty(Element.prototype, name, descriptor)
+      } else {
+        delete (Element.prototype as unknown as Record<string, unknown>)[name]
+      }
+    }
   })
 
   beforeEach(() => {
@@ -105,6 +120,7 @@ describe('SuccessScreen', () => {
 
     dispatchReverted(undefined)
 
-    expect(screen.getByTestId('transaction-status')).not.toHaveTextContent('Transaction failed')
+    // A module tx renders the indexing status; a `groupKey`-only failure must not hijack it
+    expect(screen.getByTestId('transaction-status')).toHaveTextContent('Transaction was processed')
   })
 })

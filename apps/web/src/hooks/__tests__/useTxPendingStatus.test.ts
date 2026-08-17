@@ -397,7 +397,62 @@ describe('useTxMonitor with live transaction events', () => {
       })
     })
 
-  it('starts watching a tx that moves from submitting to processing', () => {
+  it('starts watching a tx already tracked as SIGNING when it starts processing', () => {
+    // The production repro: `SIGNATURE_PROPOSED` (sign-then-execute) or a rehydrated persisted entry
+    // already holds this txId, so executing it replaces that entry instead of adding one. Both
+    // dispatches land in the same tick, exactly like `dispatchTxExecution` does.
+    const mockWaitForTx = jest.spyOn(txMonitor, 'waitForTx').mockResolvedValue(undefined)
+
+    const pendingTxs: PendingTxsState = {
+      [TX_ID]: {
+        chainId: TEST_CHAIN_ID,
+        safeAddress: TEST_SAFE_ADDRESS,
+        nonce: 1,
+        status: PendingStatus.SIGNING,
+        signerAddress,
+      },
+    }
+
+    renderHook(() => useTxPendingStatuses(), { initialReduxState: { pendingTxs } })
+
+    act(() => {
+      txDispatch(TxEvent.EXECUTING, {
+        nonce: 1,
+        txId: TX_ID,
+        chainId: TEST_CHAIN_ID,
+        safeAddress: TEST_SAFE_ADDRESS,
+      })
+      txDispatch(TxEvent.PROCESSING, {
+        nonce: 1,
+        txId: TX_ID,
+        chainId: TEST_CHAIN_ID,
+        safeAddress: TEST_SAFE_ADDRESS,
+        txHash: FIRST_HASH,
+        signerNonce: 7,
+        signerAddress,
+        txType: 'SafeTx',
+        gasLimit: '50000',
+      })
+    })
+
+    expect(mockWaitForTx).toHaveBeenCalledTimes(1)
+    expect(mockWaitForTx).toHaveBeenCalledWith(
+      expect.anything(),
+      [TX_ID],
+      FIRST_HASH,
+      TEST_SAFE_ADDRESS,
+      signerAddress,
+      7,
+      1,
+      TEST_CHAIN_ID,
+    )
+  })
+
+  it('starts watching a tx whose processing status only arrives in a later render', () => {
+    // Not the ordinary execute path: `dispatchTxExecution` emits EXECUTING and PROCESSING in the
+    // same tick, and React batches them into one render, so from an empty store the entry is
+    // already PROCESSING by the time the effect runs. This covers callers that let a render happen
+    // in between, leaving the entry at SUBMITTING for one render.
     const mockWaitForTx = jest.spyOn(txMonitor, 'waitForTx').mockResolvedValue(undefined)
 
     renderHook(() => useTxPendingStatuses())

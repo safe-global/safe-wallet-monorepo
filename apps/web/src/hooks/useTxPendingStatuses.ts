@@ -39,15 +39,17 @@ export const useTxMonitor = (): void => {
 
   /**
    * A stable, value-compared dependency: it changes when a pending tx appears, disappears, becomes
-   * monitorable, or is replaced by a sped up one. Depending on the number of pending txs instead
-   * would miss the SUBMITTING -> PROCESSING transition, leaving the tx unwatched forever.
+   * monitorable, or is replaced by a sped up one.
+   *
+   * Keying the effect on the *number* of pending txs instead silently skipped a tx whenever the
+   * count stayed the same while its status changed: an entry that already existed for this txId
+   * (SIGNING, from `SIGNATURE_PROPOSED` on the sign-then-execute path, or a leftover rehydrated from
+   * the persisted slice) was merely replaced by the PROCESSING one, and a sped up tx replaced its
+   * own entry with a new hash. In both cases the tx was never watched, so its receipt was never read.
    */
-  const monitorKey = pendingTxEntriesOnChain
-    .map(([txId, pendingTx]) => {
-      const target = getMonitorTarget(pendingTx)
-      return `${txId}:${target?.type ?? ''}:${target?.id ?? ''}`
-    })
-    .join(',')
+  const monitorKey = JSON.stringify(
+    pendingTxEntriesOnChain.map(([txId, pendingTx]) => [txId, getMonitorTarget(pendingTx)]),
+  )
 
   // Monitor pending transaction mining/validating progress
   useEffect(() => {
@@ -66,7 +68,10 @@ export const useTxMonitor = (): void => {
         continue
       }
 
-      // The tx was sped up: stop watching the replaced hash so it cannot report on the old attempt
+      // The tx was sped up: stop watching the replaced hash so it cannot report on the old attempt.
+      // Only reliable for a hash watched by a single txId — a batch execution dispatches PROCESSING
+      // for every txId with the same hash, and `SimpleTxWatcher` keeps one unsubscribe per hash, so
+      // the stale block listeners of the other txIds in the batch survive this call.
       if (monitored?.type === 'tx') {
         SimpleTxWatcher.getInstance().stopWatchingTxHash(monitored.id)
       }
@@ -91,9 +96,9 @@ export const useTxMonitor = (): void => {
         waitForRelayedTx(pendingTx.taskId, [txId], pendingTx.chainId, pendingTx.safeAddress, pendingTx.nonce)
       }
     }
-    // `monitorKey` stands in for `pendingTxEntriesOnChain`/`chainId`; `provider` is updated when switching chains
+    // `monitorKey` stands in for `pendingTxEntriesOnChain`; `provider` is updated when switching chains
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [monitorKey, provider])
+  }, [monitorKey, chainId, provider])
 }
 
 const useTxPendingStatuses = (): void => {
