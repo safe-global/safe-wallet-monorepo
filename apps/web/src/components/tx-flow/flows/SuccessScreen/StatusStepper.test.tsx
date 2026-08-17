@@ -57,6 +57,30 @@ describe('StatusStepper', () => {
     expect(iconClasses).toContain('rounded-full')
   })
 
+  it('offsets the bullet down within its rail so its center lines up with the avatar center, on every row (regression for dots floating above the avatars)', () => {
+    const { container } = render(<StatusStepper status={PendingStatus.PROCESSING} />)
+
+    const icons = container.querySelectorAll('[data-testid="status-step-icon"]')
+    const avatars = container.querySelectorAll('[data-testid="status-step-avatar"]')
+
+    expect(icons).toHaveLength(4)
+    expect(avatars).toHaveLength(4)
+
+    icons.forEach((icon) => {
+      // The rail (icon's parent) pushes the dot down by half the icon/avatar height
+      // difference instead of leaving it flush with the row's top edge.
+      const rail = icon.parentElement
+      expect(rail?.className).toContain('pt-3')
+    })
+
+    avatars.forEach((avatar) => {
+      // The avatar must stay pinned to the row's top edge regardless of how tall the
+      // sibling text block grows (e.g. a wrapped tx hash on the first step) — otherwise
+      // its center would drift and no single rail offset could track it.
+      expect(avatar.className).toContain('self-start')
+    })
+  })
+
   it.each([
     [PendingStatus.PROCESSING, 'Processing'],
     [PendingStatus.INDEXING, 'Indexing'],

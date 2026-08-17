@@ -22,8 +22,12 @@ const StatusStep = ({
     <div className={`${css.label} flex items-start gap-2`}>
       {/* Icon rail: the bullet sits on top of the connector line in normal flow (no absolute
           positioning), so it never gets painted over. Rows stack with zero gap, so each segment
-          touches the next one and the line reads as one continuous rule behind every bullet. */}
-      <div className="flex flex-col items-center self-stretch">
+          touches the next one and the line reads as one continuous rule behind every bullet.
+          pt-3 shifts the dot down so its center lines up with the avatar's center: the avatar is
+          pinned to the top of its own column below (self-start, ~32-37px tall depending on
+          Identicon vs. loading Skeleton) while the dot is ~12px (see .icon in styles.module.css),
+          so half the height difference is ~10-12px. */}
+      <div className="flex flex-col items-center self-stretch pt-3">
         <Circle
           data-testid="status-step-icon"
           className={`${css.icon} size-4 shrink-0 rounded-full bg-[var(--color-background-paper)] ${colorClass} ${isLoading ? '' : 'fill-current'}`}
@@ -33,7 +37,10 @@ const StatusStep = ({
         )}
       </div>
       <div className={`flex items-center gap-4 ${colorClass}`}>
-        <div className="shrink-0">
+        {/* self-start: the avatar's own center must stay fixed (avatarHeight / 2) regardless of
+            how tall the sibling text block gets (e.g. the first step's tx hash can wrap to
+            multiple lines) — otherwise the dot above would need a different offset per row. */}
+        <div data-testid="status-step-avatar" className="shrink-0 self-start">
           {safeAddress && !isLoading ? (
             <Identicon address={safeAddress} size={32} />
           ) : (
