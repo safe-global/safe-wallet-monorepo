@@ -4,6 +4,12 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { PendingStatus } from '@/store/pendingTxsSlice'
 import { Typography } from '@/components/ui/typography'
 
+// Vertical gap between step rows, matching the pre-migration MUI StepConnector's 24px min-height.
+// Non-last rows get the extra bottom padding so the connector line (::after) has room to reach the
+// next step's icon instead of stopping flush against it.
+const STEP_CONNECTOR_CLASSES =
+  '[&>*:not(:last-child)]:relative [&>*:not(:last-child)]:pb-6 [&>*:not(:last-child)]:after:absolute [&>*:not(:last-child)]:after:left-[6px] [&>*:not(:last-child)]:after:top-4 [&>*:not(:last-child)]:after:bottom-0 [&>*:not(:last-child)]:after:border-l [&>*:not(:last-child)]:after:border-[var(--color-border-light)]'
+
 const StatusStepper = ({ status, txHash }: { status?: PendingStatus; txHash?: string }) => {
   const { safeAddress } = useSafeInfo()
 
@@ -12,7 +18,7 @@ const StatusStepper = ({ status, txHash }: { status?: PendingStatus; txHash?: st
   const isSuccess = status === undefined
 
   return (
-    <div className="flex flex-col [&>*:not(:last-child)]:relative [&>*:not(:last-child)]:after:absolute [&>*:not(:last-child)]:after:left-[6px] [&>*:not(:last-child)]:after:top-4 [&>*:not(:last-child)]:after:h-full [&>*:not(:last-child)]:after:border-l [&>*:not(:last-child)]:after:border-[var(--color-border-light)]">
+    <div data-testid="status-stepper" className={`flex flex-col ${STEP_CONNECTOR_CLASSES}`}>
       <div>
         <StatusStep isLoading={!isProcessing} safeAddress={safeAddress}>
           <div>
