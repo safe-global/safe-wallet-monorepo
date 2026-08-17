@@ -79,9 +79,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
   const flatEntries = useMemo(() => groupedEntries.flatMap(([, entries]) => entries), [groupedEntries])
   const optionIndexes = useMemo(() => new Map(flatEntries.map((entry, index) => [entry, index])), [flatEntries])
 
-  // Must stay the same set the list renders from, or the pointer paths disagree with the typed one:
-  // a name query or a lower-cased address fragment would open on input and then collapse on the
-  // next click, and the chevron would do nothing.
+  // Same set the list renders from, so the click and chevron paths agree with the typed one.
   const hasVisibleOptions = filteredEntries.length > 0
 
   const isInAddressBook = useMemo(
@@ -101,11 +99,8 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
     setActiveIndex(-1)
   }, [filteredEntries])
 
-  // MUI's Autocomplete opened the list as the user typed. Nothing else here reacts to input, so
-  // without this a typed query never surfaces its matches — only a click or arrow-down would.
-  // Keyed off the input event rather than the value: a programmatic change (a form reset such as
-  // TxFilterForm's Clear, or a prefilled recipient) must not pop the list open over the page,
-  // and an empty value matches every contact so it would be the whole address book.
+  // Keyed off the input event, not the value: a programmatic reset would otherwise reopen the list,
+  // and an empty value matches every contact.
   const onUserInput = useCallback(() => setOpen(true), [])
 
   // Restores the three dismissal paths MUI's Autocomplete provided. Without them the suggestion
@@ -193,9 +188,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
         return
       }
       case 'Escape': {
-        // Dismissing the suggestions must not also close the surrounding tx modal. Handled here
-        // rather than on `document` so the event can be stopped before the dialog's own Escape
-        // handler sees it; with the list shut, Escape falls through and closes the modal as usual.
+        // Must stop here, or the enclosing tx modal closes too. With the list shut it falls through.
         if (!showList) return
         event.preventDefault()
         event.stopPropagation()

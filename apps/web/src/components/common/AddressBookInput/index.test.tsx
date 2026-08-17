@@ -184,14 +184,12 @@ describe('AddressBookInput', () => {
     })
     expect(input).toHaveAttribute('aria-expanded', 'true')
 
-    // Clicking Clear closes the list, then resets the field value from outside the input.
     act(() => {
       fireEvent.pointerDown(utils.getByText('Clear'))
       fireEvent.click(utils.getByText('Clear'))
     })
 
-    // An empty value matches every contact, so a value-driven effect would pop the list back open
-    // over the surrounding form even though the input is not focused.
+    // An empty value matches every contact, so a value-driven effect would reopen the whole book.
     expect(input).toHaveAttribute('aria-expanded', 'false')
   })
 
@@ -457,11 +455,10 @@ describe('AddressBookInput', () => {
           fireEvent.keyDown(input, { key: 'Escape' })
         })
 
-        // The list swallows this one, so the modal stays open.
         await waitFor(() => expect(input).toHaveAttribute('aria-expanded', 'false'))
         expect(dialogEscape).not.toHaveBeenCalled()
 
-        // With the list already shut, Escape belongs to the modal again.
+        // Second Escape, list already shut, so it belongs to the modal.
         act(() => {
           fireEvent.keyDown(input, { key: 'Escape' })
         })
@@ -475,8 +472,6 @@ describe('AddressBookInput', () => {
       const address = checksumAddress(faker.finance.ethereumAddress())
       const { input } = setup('', { [address]: 'Tim Testermann' })
 
-      // A name query matches on name, which the pointer path used to ignore — it gated on a
-      // case-sensitive match against the address only, so the click collapsed what typing opened.
       act(() => {
         fireEvent.input(input, { target: { value: 'tim' } })
       })

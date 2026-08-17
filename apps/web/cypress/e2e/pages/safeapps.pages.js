@@ -368,11 +368,8 @@ export function verifySafeAppIframeVisible(appUrl) {
 }
 
 /**
- * Opens a Safe App with the address book permission already granted.
- *
- * Without the pre-grant the app sends wallet_requestPermissions on first use of its address field,
- * and the host's modal prompt traps focus and inerts the iframe — cy.type() then fails with a
- * misleading "disabled element" error. Specs that exercise the prompt itself should not use this.
+ * Opens a Safe App with the address book permission already granted, so the host's consent prompt
+ * never appears and blocks the iframe. Specs that test the prompt itself should not use this.
  */
 export function openSafeAppWithAddressBookPermission(safeAddress, appUrl) {
   main.addToLocalStorage(constants.SAFE_PERMISSIONS_KEY, ls.safeAppSafePermissions(appUrl))

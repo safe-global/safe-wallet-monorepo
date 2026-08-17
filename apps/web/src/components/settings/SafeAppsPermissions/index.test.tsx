@@ -86,8 +86,6 @@ describe('SafeAppsPermissions', () => {
   it('renders each app name as a heading, not just bold text', () => {
     render(<SafeAppsPermissions />)
 
-    // The migration dropped this to a <p>, which reads identically to getByText but takes the app
-    // name out of the accessibility tree.
     expect(screen.getByRole('heading', { level: 5, name: 'Safe App' })).toBeInTheDocument()
   })
 
