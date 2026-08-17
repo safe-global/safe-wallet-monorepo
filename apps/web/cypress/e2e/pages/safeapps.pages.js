@@ -119,7 +119,9 @@ export const transactiobUilderHeadlinePreview = 'Transaction Builder'
 export const availableNetworksPreview = 'Available networks'
 export const connecttextPreview = 'Compose custom contract interactions and batch them into a single transaction'
 export const AddressEmptyCodeStr = 'AddressEmptyCode'
-export const gridItem = 'main .MuiPaper-root > .MuiGrid-item'
+// Post-shadcn-migration: SafeAppsPermissions now renders each app's permission card as a plain
+// div (mb-4 rounded-lg border) inside SettingsCard's content wrapper, not an MUI Paper/Grid item.
+export const gridItem = 'main [data-slot="settings-card-content"]:first > div:last-child > div'
 export const linkNames = {
   wcLogo: /WalletConnect logo/i,
   txBuilderLogo: /Transaction Builder logo/i,
