@@ -206,7 +206,7 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
                 {isEligible && isNoFeeCampaignEnabled && <NoFeeCampaignTransactionCard />}
 
                 {hasInsufficientFunds && (
-                  <Alert data-testid="insufficient-balance-error" variant="destructive">
+                  <Alert data-testid="insufficient-balance-error" variant="destructive" outlined={false}>
                     <AlertSeverityIcon variant="destructive" />
                     <AlertTitle>Insufficient balance</AlertTitle>
                     <AlertDescription>
@@ -236,7 +236,7 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
                 )}
 
                 {!canAddMoreRecipients && (
-                  <Alert data-testid="max-recipients-reached" variant="warning">
+                  <Alert data-testid="max-recipients-reached" variant="warning" outlined={false}>
                     <AlertSeverityIcon variant="warning" />
                     <AlertDescription>
                       No more recipients can be added.

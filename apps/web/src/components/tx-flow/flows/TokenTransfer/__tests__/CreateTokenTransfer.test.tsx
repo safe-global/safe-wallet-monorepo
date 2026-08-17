@@ -556,6 +556,20 @@ describe('CreateTokenTransfer', () => {
       expect(maxReached).toBeInTheDocument()
       expect(maxReached.querySelector('svg.lucide-triangle-alert')).toBeInTheDocument()
     })
+
+    // WA-3185: filled (outlined=false) alerts use the Obra design system's borderless
+    // severity-tinted background — matching the pre-migration MUI standard alert.
+    it('renders the max-recipients-reached alert filled (tinted background, no border)', () => {
+      const { getByTestId } = renderCreateTokenTransfer()
+
+      for (let i = 0; i < 4; i++) {
+        fireEvent.click(getByTestId('add-recipient-btn'))
+      }
+
+      const maxReached = getByTestId('max-recipients-reached')
+      expect(maxReached).toHaveClass('bg-warning-subtle', 'border-transparent', 'text-warning-strong')
+      expect(maxReached).not.toHaveClass('bg-card')
+    })
   })
 
   // WA-3185: lock in that the destructive insufficient-balance alert carries the standard
@@ -629,6 +643,38 @@ describe('CreateTokenTransfer', () => {
       })
 
       expect(getByTestId('insufficient-balance-error').querySelector('svg.lucide-circle-alert')).toBeInTheDocument()
+    })
+
+    // WA-3185: filled (outlined=false) alerts use the Obra design system's borderless
+    // severity-tinted background — matching the pre-migration MUI standard alert.
+    it('renders the insufficient-balance alert filled (tinted background, no border)', async () => {
+      const twoRecipientParams = {
+        recipients: [
+          { recipient: '', tokenAddress: USDC_ADDRESS, amount: '' },
+          { recipient: '', tokenAddress: USDC_ADDRESS, amount: '' },
+        ],
+        type: TokenTransferType.multiSig,
+      }
+
+      const { getByTestId, getAllByTestId } = render(
+        <SafeShieldProvider>
+          <TxFlowProvider step={0} data={twoRecipientParams} prevStep={() => {}} nextStep={jest.fn()}>
+            <CreateTokenTransfer />
+          </TxFlowProvider>
+        </SafeShieldProvider>,
+      )
+
+      const amountFields = getAllByTestId('token-amount-field')
+      fireEvent.change(amountFields[0], { target: { value: '0.6' } })
+      fireEvent.change(amountFields[1], { target: { value: '0.6' } })
+
+      await waitFor(() => {
+        expect(getByTestId('insufficient-balance-error')).toBeInTheDocument()
+      })
+
+      const alert = getByTestId('insufficient-balance-error')
+      expect(alert).toHaveClass('bg-error-subtle', 'border-transparent', 'text-error-strong')
+      expect(alert).not.toHaveClass('bg-card')
     })
   })
 })
