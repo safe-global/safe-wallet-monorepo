@@ -216,7 +216,7 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
                 )}
 
                 {canAddMoreRecipients && maxRecipientsInfo && !!csvAirdropAppUrl && (
-                  <Alert variant="default">
+                  <Alert data-testid="csv-airdrop-hint" variant="info">
                     <AlertDescription>
                       If you want to add more than {MAX_RECIPIENTS} recipients, use <CsvAirdropLink />
                     </AlertDescription>

@@ -127,7 +127,7 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
         </div>
 
         {showFeeBanner && (
-          <Alert data-testid="gtf-fee-banner" className="items-center">
+          <Alert data-testid="gtf-fee-banner" variant="info" className="items-center">
             <AlertDescription className="flex w-full items-center justify-between gap-2">
               <span>
                 Your max send amount accounts for fees paid in {selectedToken?.tokenInfo.symbol}. This updates if fees

@@ -16,6 +16,9 @@ import * as useBalances from '@/hooks/useBalances'
 import * as useTrustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
 import * as chainHooks from '@/hooks/useChains'
 import * as gtfHooks from '@/features/gtf'
+import * as remoteSafeAppsHooks from '@/hooks/safe-apps/useRemoteSafeApps'
+import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { fireEvent, waitFor } from '@testing-library/react'
 
 // Mock the SpendingLimitRowWrapper component with the same "Send as" label as the real component
@@ -449,6 +452,72 @@ describe('CreateTokenTransfer', () => {
       fireEvent.click(getByLabelText('Dismiss fee banner'))
 
       expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
+    })
+
+    // WA-3185: the fee banner must render as a toned-down "info" alert (matching the pre-migration
+    // MUI `severity="info"`), not the plain/unstyled default alert it silently fell back to post-migration.
+    it('renders the fee banner with the info alert styling, not the plain default alert', async () => {
+      useHasFeatureSpy.mockImplementation(() => true)
+      mockBalancesForGtf()
+      mockResolvedToSentToken()
+
+      const { getByTestId } = renderCreateTokenTransfer()
+
+      fireEvent.click(getByTestId('max-btn'))
+
+      await waitFor(() => {
+        expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
+      })
+
+      expect(getByTestId('gtf-fee-banner')).toHaveClass('bg-muted', 'text-foreground', 'border-transparent')
+    })
+  })
+
+  // WA-3185: the CSV airdrop hint must render as a toned-down "info" alert (matching the pre-migration
+  // MUI `severity="info"`), not the plain/unstyled default alert it silently fell back to post-migration.
+  describe('CSV airdrop hint', () => {
+    const useHasFeatureSpy = jest.spyOn(chainHooks, 'useHasFeature')
+    const useRemoteSafeAppsSpy = jest.spyOn(remoteSafeAppsHooks, 'useRemoteSafeApps')
+
+    const csvApp: SafeApp = {
+      id: 1,
+      name: 'CSV Airdrop',
+      url: 'https://example.com/csv-airdrop',
+      description: '',
+      chainIds: [],
+      accessControl: { type: 'NO_RESTRICTIONS' },
+      tags: [],
+      features: [],
+      socialProfiles: [],
+      featured: false,
+    }
+
+    beforeEach(() => {
+      // Only enable MASS_PAYOUTS (needed to show "Add recipient"/the CSV hint) — leave GTF off so
+      // the unrelated fee-preview machinery in RecipientRow stays inert for this describe block.
+      useHasFeatureSpy.mockImplementation((feature) => feature === FEATURES.MASS_PAYOUTS)
+      useRemoteSafeAppsSpy.mockReturnValue([[csvApp], undefined, false])
+    })
+
+    it('shows the CSV hint as an info alert after adding a second recipient', () => {
+      const { getByTestId } = renderCreateTokenTransfer()
+
+      fireEvent.click(getByTestId('add-recipient-btn'))
+
+      const csvHint = getByTestId('csv-airdrop-hint')
+      expect(csvHint).toBeInTheDocument()
+      expect(csvHint).toHaveClass('bg-muted', 'text-foreground', 'border-transparent')
+    })
+
+    it('dismisses the CSV hint on close button click', () => {
+      const { getByTestId, queryByTestId, getByLabelText } = renderCreateTokenTransfer()
+
+      fireEvent.click(getByTestId('add-recipient-btn'))
+      expect(getByTestId('csv-airdrop-hint')).toBeInTheDocument()
+
+      fireEvent.click(getByLabelText('close'))
+
+      expect(queryByTestId('csv-airdrop-hint')).not.toBeInTheDocument()
     })
   })
 })
