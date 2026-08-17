@@ -5,6 +5,7 @@ import { TxModalContext } from '../../'
 import TokenTransferFlow from '../TokenTransfer'
 import { ProgressBar } from '@/components/common/ProgressBar'
 import ChainIndicator from '@/components/common/ChainIndicator'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import NewTxIcon from '@/public/images/transactions/new-tx.svg'
 import { HypernativeFeature } from '@/features/hypernative'
 import { useLoadFeature } from '@/features/__core__'
@@ -14,6 +15,7 @@ import css from './styles.module.css'
 const NewTxFlow = () => {
   const { setTxFlow } = useContext(TxModalContext)
   const hn = useLoadFeature(HypernativeFeature)
+  const isDarkMode = useDarkMode()
 
   const onTokensClick = useCallback(() => {
     setTxFlow(<TokenTransferFlow />)
@@ -34,7 +36,7 @@ const NewTxFlow = () => {
             className={`relative grid grid-cols-1 overflow-hidden rounded-xl bg-card shadow-sm md:grid-cols-12 ${css.surface}`}
           >
             <div className={`md:col-span-12 ${css.progressBar}`}>
-              <ProgressBar value={progress} />
+              <ProgressBar value={progress} color={isDarkMode ? 'primary' : 'secondary'} />
             </div>
             <div className={`md:col-span-6 ${css.pane}`}>
               <div className={css.globs}>
