@@ -18,9 +18,7 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
     const appUrl = constants.TX_Builder_url
     iframeSelector = safeapps.getSafeAppIframeSelector(appUrl)
     const visitUrl = `/apps/open?safe=${safeAppSafes.SEP_SAFEAPP_SAFE_1}&appUrl=${encodeURIComponent(appUrl)}`
-    // Pre-grant the address book permission so tx-builder never sends wallet_requestPermissions.
-    // Without it, the first click on the address field opens the host's modal prompt, which traps
-    // focus and inerts the iframe — cy.type() then fails with a misleading "disabled element" error.
+    // Pre-grant the permission so the host's consent prompt never blocks the iframe.
     main.addToLocalStorage(constants.SAFE_PERMISSIONS_KEY, ls.safeAppSafePermissions(appUrl))
     cy.visit(visitUrl)
     safeapps.verifySafeAppIframeVisible(appUrl)
@@ -238,12 +236,8 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
     cy.reload()
     safeapps.verifySafeAppIframeVisible(constants.TX_Builder_url)
 
-    // The host only renders the prompt in reaction to a wallet_requestPermissions postMessage.
-    // tx-builder sends it lazily from the address Autocomplete's onOpen, and MUI opens that popup
-    // on the first mousedown while the field is empty — so a bare click is what summons it.
-    // It has to be .click() rather than .type(): cy.type() force-clicks and then asserts the element
-    // is still document.activeElement, which fails once the modal traps focus. Cypress reports that
-    // as "targeted a disabled element", which is why this looked like a disabled field.
+    // Must be .click(), not .type(): clicking the empty field is what triggers the permission
+    // request, and cy.type() additionally asserts the element still has focus, which the prompt takes.
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findByLabelText(safeapps.enterAddressStr).click()
     })
@@ -252,8 +246,7 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
     safeapps.verifyAccessToAddressBookExists()
     safeapps.clickOnPermissionsAcceptBtn()
 
-    // Prompt answered, so the modal unmounts and the iframe is interactive again. Re-enter rather
-    // than reusing the handle above, which resolved against the inerted document.
+    // Re-enter: the handle above resolved against the document while the modal was blocking it.
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findByLabelText(safeapps.enterAddressStr).type(constants.SAFE_APP_ADDRESS)
       getBody().find(safeapps.contractMethodIndex).parent().click()

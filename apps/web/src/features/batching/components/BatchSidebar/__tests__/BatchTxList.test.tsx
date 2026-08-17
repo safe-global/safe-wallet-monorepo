@@ -55,8 +55,7 @@ describe('BatchTxList', () => {
 
     render(<BatchTxList txItems={txItems} />)
 
-    // Let any effect that was going to fire, fire — a bare waitFor on a negative assertion would
-    // pass on its first tick and prove nothing.
+    // Flush effects first; waitFor on a negative assertion passes immediately and proves nothing.
     await act(async () => {
       await Promise.resolve()
     })
@@ -85,8 +84,7 @@ describe('BatchTxList', () => {
 
     const { getByTitle } = render(<BatchTxList txItems={txItems} onDelete={jest.fn()} />)
 
-    // The delete control only exists on a decoded row, so this distinguishes real content from the
-    // permanent-skeleton state the SDK race used to leave behind.
+    // The delete control only exists on a decoded row, so this rules out the skeleton state.
     await waitFor(() => expect(getByTitle('Delete transaction')).toBeInTheDocument())
   })
 })

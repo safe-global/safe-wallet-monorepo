@@ -337,7 +337,5 @@ export const sessionStorageKeys = {
   SAFE_v2__privateKeyModulePK: 'SAFE_v2__privateKeyModulePK',
 }
 
-// Decoded label for the factory that deploys new Safes. Tracks the chain config's
-// recommendedMasterCopyVersion, so it moves when the Config Service starts recommending a newer
-// Safe version — see #8458 / #8493, which took it from 1.4.1 to 1.5.0.
+// Follows the chain config's recommendedMasterCopyVersion, so it changes when that does.
 export const safeProxyFactoryLabel = 'SafeProxyFactory 1.5.0'

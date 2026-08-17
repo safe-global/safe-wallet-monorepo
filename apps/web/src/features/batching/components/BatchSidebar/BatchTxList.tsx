@@ -55,9 +55,8 @@ const extractMultiSendActions = (txPreview: TransactionPreview | undefined): Mul
 }
 
 const BatchTxList = ({ txItems, onDelete }: { txItems: DraftBatchItem[]; onDelete?: (id: string) => void }) => {
-  // `createTx` throws if the SDK singleton is not ready yet. `txItems` alone never changes
-  // afterwards, so opening the sidebar before the SDK initialised left every row a permanent
-  // skeleton. Depending on the SDK re-runs this once it lands.
+  // `createTx` throws until the SDK is ready, and `txItems` never changes, so without this
+  // dependency an early open left every row a permanent skeleton.
   const safeSDK = useSafeSDK()
 
   const [batchSafeTx] = useAsync(() => {
