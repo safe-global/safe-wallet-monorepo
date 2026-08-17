@@ -471,6 +471,22 @@ describe('CreateTokenTransfer', () => {
 
       expect(getByTestId('gtf-fee-banner')).toHaveClass('bg-muted', 'text-foreground', 'border-transparent')
     })
+
+    it('renders the standard info icon inside the fee banner', async () => {
+      useHasFeatureSpy.mockImplementation(() => true)
+      mockBalancesForGtf()
+      mockResolvedToSentToken()
+
+      const { getByTestId } = renderCreateTokenTransfer()
+
+      fireEvent.click(getByTestId('max-btn'))
+
+      await waitFor(() => {
+        expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
+      })
+
+      expect(getByTestId('gtf-fee-banner').querySelector('svg.lucide-info')).toBeInTheDocument()
+    })
   })
 
   // WA-3185: the CSV airdrop hint must render as a toned-down "info" alert (matching the pre-migration
@@ -509,6 +525,14 @@ describe('CreateTokenTransfer', () => {
       expect(csvHint).toHaveClass('bg-muted', 'text-foreground', 'border-transparent')
     })
 
+    it('renders the standard info icon inside the CSV hint', () => {
+      const { getByTestId } = renderCreateTokenTransfer()
+
+      fireEvent.click(getByTestId('add-recipient-btn'))
+
+      expect(getByTestId('csv-airdrop-hint').querySelector('svg.lucide-info')).toBeInTheDocument()
+    })
+
     it('dismisses the CSV hint on close button click', () => {
       const { getByTestId, queryByTestId, getByLabelText } = renderCreateTokenTransfer()
 
@@ -518,6 +542,93 @@ describe('CreateTokenTransfer', () => {
       fireEvent.click(getByLabelText('close'))
 
       expect(queryByTestId('csv-airdrop-hint')).not.toBeInTheDocument()
+    })
+
+    it('renders the standard warning icon on the max-recipients-reached alert', () => {
+      const { getByTestId } = renderCreateTokenTransfer()
+
+      // MAX_RECIPIENTS is 5 — starting from 1 recipient, 4 more clicks fills the cap.
+      for (let i = 0; i < 4; i++) {
+        fireEvent.click(getByTestId('add-recipient-btn'))
+      }
+
+      const maxReached = getByTestId('max-recipients-reached')
+      expect(maxReached).toBeInTheDocument()
+      expect(maxReached.querySelector('svg.lucide-triangle-alert')).toBeInTheDocument()
+    })
+  })
+
+  // WA-3185: lock in that the destructive insufficient-balance alert carries the standard
+  // severity icon, matching its warning/info siblings in this same form.
+  describe('Insufficient balance alert', () => {
+    const useHasFeatureSpy = jest.spyOn(chainHooks, 'useHasFeature')
+
+    beforeEach(() => {
+      useHasFeatureSpy.mockImplementation((feature) => feature === FEATURES.MASS_PAYOUTS)
+
+      const balances = {
+        fiatTotal: '0',
+        items: [
+          {
+            balance: '1000000', // 1 USDC
+            tokenInfo: {
+              address: USDC_ADDRESS,
+              decimals: 6,
+              logoUri: '',
+              name: 'USD Coin',
+              symbol: 'USDC',
+              type: TokenType.ERC20,
+            },
+            fiatBalance: '1',
+            fiatConversion: '1',
+          },
+        ],
+      }
+
+      jest.spyOn(useTrustedTokenBalances, 'useTrustedTokenBalances').mockReturnValue([balances, undefined, false])
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances,
+        loaded: true,
+        loading: false,
+        error: undefined,
+      })
+      // Another test in this file (`should display a type selection...`) mocks `useTokenAmount`
+      // with a fixed totalAmount and never restores it, which otherwise leaks a stale balance into
+      // this describe when the full suite runs. Re-derive it from *this* test's balances so the
+      // "exceeds available balance" assertion below is deterministic regardless of run order.
+      jest.spyOn(tokenUtils, 'useTokenAmount').mockImplementation((selectedToken) => ({
+        totalAmount: BigInt(selectedToken?.balance || 0),
+        spendingLimitAmount: 0n,
+      }))
+    })
+
+    it('renders the standard destructive icon once the assigned total exceeds the balance', async () => {
+      const twoRecipientParams = {
+        recipients: [
+          { recipient: '', tokenAddress: USDC_ADDRESS, amount: '' },
+          { recipient: '', tokenAddress: USDC_ADDRESS, amount: '' },
+        ],
+        type: TokenTransferType.multiSig,
+      }
+
+      const { getByTestId, getAllByTestId } = render(
+        <SafeShieldProvider>
+          <TxFlowProvider step={0} data={twoRecipientParams} prevStep={() => {}} nextStep={jest.fn()}>
+            <CreateTokenTransfer />
+          </TxFlowProvider>
+        </SafeShieldProvider>,
+      )
+
+      const amountFields = getAllByTestId('token-amount-field')
+      // 0.6 + 0.6 USDC assigned against a 1 USDC balance — sum exceeds what's available.
+      fireEvent.change(amountFields[0], { target: { value: '0.6' } })
+      fireEvent.change(amountFields[1], { target: { value: '0.6' } })
+
+      await waitFor(() => {
+        expect(getByTestId('insufficient-balance-error')).toBeInTheDocument()
+      })
+
+      expect(getByTestId('insufficient-balance-error').querySelector('svg.lucide-circle-alert')).toBeInTheDocument()
     })
   })
 })
