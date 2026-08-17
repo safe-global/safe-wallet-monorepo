@@ -34,7 +34,7 @@ const Popup = ({ children, open, onClose, anchorEl, modal = true }: PopupProps):
         side="bottom"
         sideOffset={12}
         collisionAvoidance={{ fallbackAxisSide: 'none' }}
-        className="max-h-[var(--available-height)] w-[454px] overflow-y-auto rounded-3xl"
+        className="max-h-[var(--available-height)] w-[454px] max-w-[calc(100vw-1rem)] overflow-y-auto rounded-3xl"
       >
         {children}
       </PopoverContent>
