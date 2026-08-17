@@ -86,6 +86,21 @@ describe('PageLayout topbar elevation', () => {
     expect(IN_FLOW).not.toContain(elevatedPosition)
   })
 
+  it('keeps the base topbar in flow but unpinned below md, so sticky sub-headers own the top', () => {
+    const tabletIndex = stylesRoot.nodes.findIndex(
+      (node) => node.type === 'atrule' && node.name === 'media' && node.params === '(max-width: 899.95px)',
+    )
+    const tabletTopbar = (stylesRoot.nodes[tabletIndex] as AtRule | undefined)?.nodes?.find(
+      (node): node is Rule => node.type === 'rule' && node.selector === '.topbar',
+    )
+    const position = declOf(tabletTopbar, 'position')
+
+    // Nothing is reserved below md, so out of flow would drop content behind the topbar; `sticky`
+    // is in flow but pins, and page sub-headers (z-index: 2) then pin on top of it.
+    expect(IN_FLOW).toContain(position)
+    expect(position).not.toBe('sticky')
+  })
+
   it('returns the elevated topbar to flow below md, after the fixed rule so it wins', () => {
     const tabletIndex = stylesRoot.nodes.findIndex(
       (node) => node.type === 'atrule' && node.name === 'media' && node.params === '(max-width: 899.95px)',
