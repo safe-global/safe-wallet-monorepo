@@ -92,7 +92,10 @@ export const PushNotifications = (): ReactElement => {
           <Typography>
             Enable push notifications for {safeLoaded ? 'this Safe account' : 'your Safe accounts'} in your browser with
             your signature. You will need to enable them again if you clear your browser cache. Learn more about push
-            notifications <ExternalLink href={HelpCenterArticle.PUSH_NOTIFICATIONS}>here</ExternalLink>
+            notifications{' '}
+            <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.PUSH_NOTIFICATIONS}>
+              here
+            </ExternalLink>
           </Typography>
 
           {shouldShowMacHelper && (
@@ -147,7 +150,7 @@ export const PushNotifications = (): ReactElement => {
               <div className={css.globalInfo}>
                 <Typography variant="paragraph-small">
                   Want to setup notifications for different or all Safe accounts? You can do so in your{' '}
-                  <ShadcnLink render={<NextLink href={AppRoutes.settings.notifications} />}>
+                  <ShadcnLink className="font-bold" render={<NextLink href={AppRoutes.settings.notifications} />}>
                     global preferences
                   </ShadcnLink>
                   .

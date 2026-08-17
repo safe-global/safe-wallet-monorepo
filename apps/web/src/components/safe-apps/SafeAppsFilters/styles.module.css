@@ -2,7 +2,7 @@
   background-color: var(--color-background-main);
   z-index: 2;
   position: sticky !important;
-  top: 49px;
+  top: 36px;
   padding: var(--space-3) 0 var(--space-4);
   margin-bottom: var(--space-2);
 }

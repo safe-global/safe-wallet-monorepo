@@ -17,9 +17,15 @@ type SideDrawerProps = {
   isOpen: boolean
   onToggle: (isOpen: boolean) => void
   onSidebarOpenChange?: (open: boolean) => void
+  isSidebarExpanded?: boolean
 }
 
-const SideDrawer = ({ isOpen, onToggle, onSidebarOpenChange }: SideDrawerProps): ReactElement => {
+const SideDrawer = ({
+  isOpen,
+  onToggle,
+  onSidebarOpenChange,
+  isSidebarExpanded = true,
+}: SideDrawerProps): ReactElement => {
   const isSmallScreen = useIsBelowMd()
   const isTabletDrawer = useMediaQuery('(min-width:768px) and (max-width:899.95px)')
   const [, isSafeAppRoute] = useIsSidebarRoute()
@@ -102,7 +108,12 @@ const SideDrawer = ({ isOpen, onToggle, onSidebarOpenChange }: SideDrawerProps):
       )}
 
       {showSidebarToggle && (
-        <div className={classnames(css.sidebarTogglePosition, isOpen && css.sidebarOpen)}>
+        <div
+          className={classnames(
+            css.sidebarTogglePosition,
+            isOpen && (isSidebarExpanded ? css.sidebarOpen : css.sidebarCollapsed),
+          )}
+        >
           <div className={css.sidebarToggle} role="button" onClick={() => onToggle(!isOpen)}>
             <Button variant="ghost" size="icon-sm" aria-label="collapse sidebar">
               {isOpen ? <ChevronsLeft className="size-5" /> : <ChevronsRight className="size-5" />}

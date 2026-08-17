@@ -38,7 +38,7 @@ const PermissionsPrompt = ({
           <Typography>
             <b>{origin}</b> is requesting permissions for:
           </Typography>
-          <ul>
+          <ul className="mt-4 flex list-disc flex-col gap-1 pl-10">
             {permissions.map((permission, index) => (
               <li key={index}>
                 <Typography>{getSafePermissionDisplayValues(Object.keys(permission)[0]).description}</Typography>

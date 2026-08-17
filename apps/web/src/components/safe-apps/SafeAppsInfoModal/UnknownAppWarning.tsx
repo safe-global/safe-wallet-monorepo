@@ -20,7 +20,7 @@ const UnknownAppWarning = ({ url, onHideWarning }: UnknownAppWarningProps): Reac
 
   return (
     <div className="flex h-full flex-col items-center">
-      <div className="mt-12 block items-center">
+      <div className="mt-12 flex flex-col items-center">
         <TriangleAlert className="size-9 text-[var(--color-warning-main)]" />
         <Typography variant="h3" className="mt-4 text-[var(--color-warning-main)]">
           Warning
