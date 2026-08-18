@@ -18,8 +18,7 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
     const appUrl = constants.TX_Builder_url
     iframeSelector = safeapps.getSafeAppIframeSelector(appUrl)
     const visitUrl = `/apps/open?safe=${safeAppSafes.SEP_SAFEAPP_SAFE_1}&appUrl=${encodeURIComponent(appUrl)}`
-    // tx-builder keeps its form disabled until the address book permission prompt is answered:
-    // pre-grant it before the visit
+    // Pre-grant the permission so the host's consent prompt never blocks the iframe.
     main.addToLocalStorage(constants.SAFE_PERMISSIONS_KEY, ls.safeAppSafePermissions(appUrl))
     cy.visit(visitUrl)
     safeapps.verifySafeAppIframeVisible(appUrl)
@@ -235,8 +234,19 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
     // Fresh user: drop the permission the beforeEach pre-grants, then reload so the app forgets it
     cy.window().then((win) => win.localStorage.removeItem(constants.SAFE_PERMISSIONS_KEY))
     cy.reload()
-    cy.get(iframeSelector, { timeout: 30000 }).should('be.visible')
+    safeapps.verifySafeAppIframeVisible(constants.TX_Builder_url)
 
+    // Must be .click(), not .type(): clicking the empty field is what triggers the permission
+    // request, and cy.type() additionally asserts the element still has focus, which the prompt takes.
+    cy.enter(iframeSelector).then((getBody) => {
+      getBody().findByLabelText(safeapps.enterAddressStr).click()
+    })
+
+    safeapps.verifyPermissionsRequestVisible()
+    safeapps.verifyAccessToAddressBookExists()
+    safeapps.clickOnPermissionsAcceptBtn()
+
+    // Re-enter: the handle above resolved against the document while the modal was blocking it.
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findByLabelText(safeapps.enterAddressStr).type(constants.SAFE_APP_ADDRESS)
       getBody().find(safeapps.contractMethodIndex).parent().click()
@@ -246,10 +256,6 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
       getBody().findByText(safeapps.createBatchStr).click()
       getBody().findByText(safeapps.sendBatchStr).click()
     })
-
-    safeapps.verifyPermissionsRequestVisible()
-    safeapps.verifyAccessToAddressBookExists()
-    safeapps.clickOnPermissionsAcceptBtn()
 
     cy.get('h4').contains(safeapps.transactionBuilderStr).should('be.visible')
   })
