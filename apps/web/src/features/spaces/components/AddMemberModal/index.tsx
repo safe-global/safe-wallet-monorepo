@@ -183,7 +183,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
                 Invite a member by email or wallet address.
               </Typography>
 
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-8">
                 <MemberInfoForm />
 
                 <AddMemberInput
