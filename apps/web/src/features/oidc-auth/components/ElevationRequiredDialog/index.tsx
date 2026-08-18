@@ -7,6 +7,7 @@ import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { clearElevationRequired, selectIsElevationRequired } from '../../store'
 import { useStepUp } from '../../hooks/useStepUp'
+import { clearPendingStepUpAction } from '../../utils/stepUpReplay'
 
 /**
  * Prompts for a second factor after CGW rejected a sensitive Workspace action
@@ -17,11 +18,8 @@ import { useStepUp } from '../../hooks/useStepUp'
  * instead of each call site growing its own step-up branch.
  *
  * Confirming leaves the app for the provider's hosted challenge and returns to
- * the current page with the session elevated. The interrupted action is not
- * replayed: it is the user who decides whether to repeat it, and re-firing a
- * destructive Workspace mutation on page load with no surrounding UI would be
- * the wrong default. Elevation lasts for CGW's whole window, so the action
- * succeeds on the next attempt.
+ * the current page with the session elevated, where `useStepUpCallback` completes
+ * the action that was interrupted. Dismissing abandons it.
  */
 const ElevationRequiredDialog = () => {
   const dispatch = useAppDispatch()
@@ -35,6 +33,7 @@ const ElevationRequiredDialog = () => {
   }
 
   const handleClose = () => {
+    clearPendingStepUpAction()
     dispatch(clearElevationRequired())
   }
 

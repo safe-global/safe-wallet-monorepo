@@ -20,6 +20,14 @@ jest.mock('@/store/notificationsSlice', () => ({
   showNotification: (payload: Record<string, string>) => ({ type: 'notifications/showNotification', payload }),
 }))
 
+const mockReplayPendingStepUpAction = jest.fn()
+const mockClearPendingStepUpAction = jest.fn()
+
+jest.mock('../../utils/stepUpReplay', () => ({
+  replayPendingStepUpAction: (...args: unknown[]) => mockReplayPendingStepUpAction(...args),
+  clearPendingStepUpAction: () => mockClearPendingStepUpAction(),
+}))
+
 jest.mock('next/router', () => ({
   useRouter: () => ({
     query: {},
@@ -44,6 +52,7 @@ describe('useStepUpCallback', () => {
     jest.clearAllMocks()
     sessionStorage.clear()
     mockReconcileAuth.mockResolvedValue('authenticated')
+    mockReplayPendingStepUpAction.mockResolvedValue(undefined)
     setSearch('')
   })
 
@@ -111,5 +120,48 @@ describe('useStepUpCallback', () => {
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith(CLEAR_ELEVATION)
     })
+  })
+
+  // The point of the round-trip: the action the challenge interrupted has to
+  // actually happen, not leave the user back in the app with nothing done.
+  it('should complete the interrupted action on a successful return', async () => {
+    sessionStorage.setItem(STEP_UP_PENDING_KEY, '1')
+
+    renderHook(() => useStepUpCallback())
+
+    await waitFor(() => {
+      expect(mockReplayPendingStepUpAction).toHaveBeenCalledWith(mockDispatch)
+    })
+  })
+
+  it('should replay only after the session has been reconciled', async () => {
+    sessionStorage.setItem(STEP_UP_PENDING_KEY, '1')
+    const order: string[] = []
+    mockReconcileAuth.mockImplementation(() => {
+      order.push('reconcile')
+      return Promise.resolve('authenticated')
+    })
+    mockReplayPendingStepUpAction.mockImplementation(() => {
+      order.push('replay')
+      return Promise.resolve()
+    })
+
+    renderHook(() => useStepUpCallback())
+
+    await waitFor(() => {
+      expect(order).toEqual(['reconcile', 'replay'])
+    })
+  })
+
+  it('should discard the interrupted action when the step-up failed', async () => {
+    sessionStorage.setItem(STEP_UP_PENDING_KEY, '1')
+    setSearch('?error=access_denied')
+
+    renderHook(() => useStepUpCallback())
+
+    await waitFor(() => {
+      expect(mockClearPendingStepUpAction).toHaveBeenCalled()
+    })
+    expect(mockReplayPendingStepUpAction).not.toHaveBeenCalled()
   })
 })

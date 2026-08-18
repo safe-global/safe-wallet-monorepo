@@ -9,16 +9,17 @@ import {
   selectIsElevationRequired,
 } from '../elevationSlice'
 import { ELEVATION_REQUIRED_ERROR } from '../../utils/elevation'
+import { takePendingStepUpAction } from '../../utils/stepUpReplay'
 
 // Mirrors how RTK Query reports a baseQuery failure: a rejected thunk action
 // whose payload is the FetchBaseQueryError. `requestId` and `requestStatus` are
 // part of the shape RTK's `isRejectedWithValue` matcher keys on, so omitting
 // them would make the listener silently never fire.
-const rejectedWithValue = (payload: unknown): UnknownAction => ({
+const rejectedWithValue = (payload: unknown, arg?: unknown): UnknownAction => ({
   type: 'cgwClient/executeMutation/rejected',
   payload,
   error: { message: 'Rejected' },
-  meta: { requestId: 'test-request-id', requestStatus: 'rejected', rejectedWithValue: true },
+  meta: { requestId: 'test-request-id', requestStatus: 'rejected', rejectedWithValue: true, arg },
 })
 
 // The store under test holds only the elevation slice, so the listener
@@ -59,12 +60,43 @@ describe('elevationSlice', () => {
 })
 
 describe('elevationListener', () => {
+  beforeEach(() => {
+    sessionStorage.clear()
+  })
+
   it('should require elevation when a request is rejected with elevation_required', () => {
     const store = createTestStore()
 
     store.dispatch(rejectedWithValue({ status: 403, data: { message: ELEVATION_REQUIRED_ERROR } }))
 
     expect(isRequired(store)).toBe(true)
+  })
+
+  it('stores the failed request so it can be completed after the challenge', () => {
+    const store = createTestStore()
+    const args = { spaceId: '9', createSpaceSafesDto: { safes: [] } }
+
+    store.dispatch(
+      rejectedWithValue(
+        { status: 403, data: { message: ELEVATION_REQUIRED_ERROR } },
+        { type: 'mutation', endpointName: 'spaceSafesCreateV1', originalArgs: args },
+      ),
+    )
+
+    expect(takePendingStepUpAction()).toEqual({ endpoint: 'spaceSafesCreateV1', args })
+  })
+
+  it('stores nothing for an unrelated 403', () => {
+    const store = createTestStore()
+
+    store.dispatch(
+      rejectedWithValue(
+        { status: 403, data: { message: 'Signer address not authorized' } },
+        { type: 'mutation', endpointName: 'spaceSafesCreateV1', originalArgs: {} },
+      ),
+    )
+
+    expect(takePendingStepUpAction()).toBeUndefined()
   })
 
   it.each([
