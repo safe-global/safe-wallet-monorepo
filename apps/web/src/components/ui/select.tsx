@@ -69,6 +69,10 @@ const selectTriggerVariants = cva(
         // Filled like Input/InputGroup: a select and a text input share a row by design (see the
         // `inputSize` note in input.tsx), so they must carry the same field surface.
         default: 'border-border hover:bg-muted/50 rounded-md border bg-input px-3 shadow-xs',
+        // Mirrors the Button `outline` skin, for a select that sits in a toolbar row of outline
+        // buttons rather than in a form (assets toolbar: currency select beside Manage tokens).
+        outline:
+          'border-border rounded-md border bg-transparent px-4 font-medium shadow-xs hover:bg-foreground/[0.06] hover:text-foreground data-popup-open:bg-foreground/[0.06] data-popup-open:text-foreground',
         ghost:
           'rounded-md border-0 bg-transparent px-0 shadow-none hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent',
       },
