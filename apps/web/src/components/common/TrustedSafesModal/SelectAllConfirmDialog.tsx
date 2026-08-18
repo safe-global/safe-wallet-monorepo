@@ -1,7 +1,7 @@
 import { TriangleAlert } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import type { SelectableItem } from './useTrustedSafesModal.types'
 
@@ -29,7 +29,7 @@ const SelectAllConfirmDialog = ({
 
         <div className="flex flex-col gap-4 px-4">
           <Alert variant="warning">
-            <TriangleAlert />
+            <AlertSeverityIcon variant="warning" />
             <AlertDescription>
               {similarAddresses.length} Safe{similarAddresses.length === 1 ? '' : 's'} in your list closely resemble
               other addresses. Review them carefully before continuing.

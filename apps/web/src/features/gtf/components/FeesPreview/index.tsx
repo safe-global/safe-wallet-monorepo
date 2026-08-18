@@ -1,11 +1,11 @@
 import type { ReactElement } from 'react'
 import { useContext } from 'react'
-import { ChevronDown, TriangleAlert } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import ArrowUpRightIcon from '@/public/images/common/arrow-up-right.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -325,7 +325,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
           may bring the balance up before execution; otherwise execution reverts with GS013. */}
       {safeHasEnoughGas === false && !props.loading && (
         <Alert variant="warning" className="mt-2">
-          <TriangleAlert />
+          <AlertSeverityIcon variant="warning" />
           <AlertDescription>
             Insufficient {gasFee.currency} balance to cover the gas fee. Top up before execution, otherwise the
             transaction will fail.

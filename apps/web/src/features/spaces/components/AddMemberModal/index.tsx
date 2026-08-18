@@ -5,8 +5,7 @@ import DialogActions from '@/components/common/DialogActions'
 import memberIcon from '@/public/images/spaces/member.svg'
 import adminIcon from '@/public/images/spaces/admin.svg'
 import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { CircleAlert } from 'lucide-react'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import css from './styles.module.css'
@@ -197,7 +196,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
 
               {error && (
                 <Alert variant="destructive" className="mt-4">
-                  <CircleAlert />
+                  <AlertSeverityIcon variant="destructive" />
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}

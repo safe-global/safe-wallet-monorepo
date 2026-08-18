@@ -11,9 +11,8 @@ import madProps from '@/utils/mad-props'
 import React, { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
 import SubmitButton from '@/components/common/SubmitButton'
 import { Separator } from '@/components/ui/separator'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import classNames from 'classnames'
-import { Info } from 'lucide-react'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import TxCheckError from '@/components/tx/TxCheckError'
@@ -117,7 +116,7 @@ export const CounterfactualForm = ({
     <>
       <form onSubmit={handleSubmit}>
         <Alert variant="info" className="mb-4 border-0">
-          <Info />
+          <AlertSeverityIcon variant="info" />
           <AlertDescription>
             Executing this transaction will activate your account.
             <br />

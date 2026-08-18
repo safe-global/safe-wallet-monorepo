@@ -3,8 +3,7 @@ import { useForm, useWatch } from 'react-hook-form'
 import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Input } from '@/components/ui/input'
 import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { CircleAlert } from 'lucide-react'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Spinner } from '@/components/ui/spinner'
 import {
   OnboardingLayout,
@@ -124,7 +123,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
 
         {error && (
           <Alert variant="destructive">
-            <CircleAlert />
+            <AlertSeverityIcon variant="destructive" />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}

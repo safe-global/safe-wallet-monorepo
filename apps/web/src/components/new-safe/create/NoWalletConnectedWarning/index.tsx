@@ -1,5 +1,4 @@
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { TriangleAlert } from 'lucide-react'
+import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import useWallet from '@/hooks/wallets/useWallet'
 import ConnectWalletButton from '@/components/common/ConnectWallet/ConnectWalletButton'
 
@@ -12,7 +11,7 @@ const NoWalletConnectedWarning = () => {
 
   return (
     <Alert variant="warning" className="mt-6">
-      <TriangleAlert />
+      <AlertSeverityIcon variant="warning" />
       <AlertTitle className="font-bold">No wallet connected</AlertTitle>
       <AlertDescription>
         You need to connect a wallet to create a Safe account.

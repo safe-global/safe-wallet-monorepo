@@ -2,17 +2,7 @@ import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { useRouter } from 'next/router'
-import {
-  ArrowLeftRight,
-  BarChart3,
-  CircleAlert,
-  FileCode,
-  HelpCircle,
-  Send,
-  Shield,
-  Sparkles,
-  type LucideIcon,
-} from 'lucide-react'
+import { ArrowLeftRight, BarChart3, FileCode, HelpCircle, Send, Shield, Sparkles, type LucideIcon } from 'lucide-react'
 import {
   useSurveysGetStateV1Query,
   useSurveysSubmitResponseV1Mutation,
@@ -22,7 +12,7 @@ import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATE
 import { AppRoutes } from '@/config/routes'
 import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Spinner } from '@/components/ui/spinner'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Typography } from '@/components/ui/typography'
 import {
   OnboardingLayout,
@@ -142,7 +132,7 @@ const SurveyOnboarding = (): ReactElement | null => {
 
       {error && !isNotFoundError(error) && (
         <Alert variant="destructive">
-          <CircleAlert />
+          <AlertSeverityIcon variant="destructive" />
           <AlertDescription>Failed to load survey. Please refresh.</AlertDescription>
         </Alert>
       )}
@@ -163,7 +153,7 @@ const SurveyOnboarding = (): ReactElement | null => {
 
       {submitError && (
         <Alert variant="destructive">
-          <CircleAlert />
+          <AlertSeverityIcon variant="destructive" />
           <AlertDescription>Failed to submit. Please try again.</AlertDescription>
         </Alert>
       )}

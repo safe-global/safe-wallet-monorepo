@@ -24,14 +24,14 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import React, { useState } from 'react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Typography } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
 import DialogActions from '@/components/common/DialogActions'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { XIcon, Info } from 'lucide-react'
+import { XIcon } from 'lucide-react'
 import madProps from '@/utils/mad-props'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -230,7 +230,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
             {multiSigInitiated ? (
               <>
                 <Alert variant="info" className="mb-4">
-                  <Info />
+                  <AlertSeverityIcon variant="info" />
                   <AlertDescription>1 of {parentThreshold} signatures collected</AlertDescription>
                 </Alert>
 
@@ -248,7 +248,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
               <>
                 {isMultiSigRequired && (
                   <Alert variant="info" className="mb-4">
-                    <Info />
+                    <AlertSeverityIcon variant="info" />
                     <AlertDescription>
                       This requires {parentThreshold} of {parentOwners?.length ?? '?'} parent Safe owner signatures to
                       complete.

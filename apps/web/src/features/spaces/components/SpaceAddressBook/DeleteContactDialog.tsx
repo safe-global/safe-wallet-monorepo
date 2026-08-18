@@ -5,8 +5,7 @@ import { ChainIndicatorList } from '@/features/multichain'
 import { useAddressBooksDeleteByAddressV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId, useWorkspaceAddressBookLabel } from '@/features/spaces'
 import { useState } from 'react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { CircleAlert } from 'lucide-react'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { Typography } from '@/components/ui/typography'
@@ -81,7 +80,7 @@ const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContact
 
           {error && (
             <Alert variant="destructive" className="mt-4">
-              <CircleAlert />
+              <AlertSeverityIcon variant="destructive" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}

@@ -1,8 +1,6 @@
 import type { WalletKitTypes } from '@reown/walletkit'
-import type { ReactNode } from 'react'
-import { CircleAlert, Info, TriangleAlert } from 'lucide-react'
 
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Typography } from '@/components/ui/typography'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { useCompatibilityWarning, type CompatibilityWarningSeverity } from './useCompatibilityWarning'
@@ -14,12 +12,6 @@ const SEVERITY_TO_VARIANT: Record<CompatibilityWarningSeverity, 'info' | 'destru
   error: 'destructive',
   warning: 'warning',
   info: 'info',
-}
-
-const SEVERITY_TO_ICON: Record<CompatibilityWarningSeverity, ReactNode> = {
-  error: <CircleAlert />,
-  warning: <TriangleAlert />,
-  info: <Info />,
 }
 
 export const CompatibilityWarning = ({
@@ -36,7 +28,7 @@ export const CompatibilityWarning = ({
   return (
     <>
       <Alert variant={SEVERITY_TO_VARIANT[severity]} className={css.alert}>
-        {SEVERITY_TO_ICON[severity]}
+        <AlertSeverityIcon variant={SEVERITY_TO_VARIANT[severity]} />
         <AlertDescription>{message}</AlertDescription>
       </Alert>
 

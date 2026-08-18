@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
-import { ChevronRight, TriangleAlert } from 'lucide-react'
-import { Alert } from '@/components/ui/alert'
+import { ChevronRight } from 'lucide-react'
+import { Alert, AlertSeverityIcon } from '@/components/ui/alert'
 import { Link } from '@/components/ui/link'
 import { Typography } from '@/components/ui/typography'
 import { trackEvent } from '@/services/analytics'
@@ -32,7 +32,7 @@ export const HnViewMoreOnHypernativeRow = ({
       className="block text-[var(--color-text-primary)] no-underline hover:no-underline"
     >
       <Alert variant="warning" className="flex items-center gap-2 px-2 py-0">
-        <TriangleAlert />
+        <AlertSeverityIcon variant="warning" />
         <div className="flex items-center justify-center rounded-lg bg-[var(--color-warning-light)] px-1.5 py-0.5 text-xs font-semibold whitespace-nowrap text-[var(--color-warning-dark)]">
           +{overflowCount}
         </div>

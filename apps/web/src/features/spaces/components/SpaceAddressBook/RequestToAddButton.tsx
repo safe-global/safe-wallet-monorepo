@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { TriangleAlert } from 'lucide-react'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { Badge } from '@/components/ui/badge'
@@ -146,7 +145,7 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
 
             {nameError && (
               <Alert variant="warning">
-                <TriangleAlert />
+                <AlertSeverityIcon variant="warning" />
                 <AlertDescription>Rename this contact to share it with the workspace. {nameError}.</AlertDescription>
               </Alert>
             )}

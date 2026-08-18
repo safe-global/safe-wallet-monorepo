@@ -1,7 +1,7 @@
-import { XIcon, InfoIcon } from 'lucide-react'
+import { XIcon } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import CopyButton from '@/components/common/CopyButton'
 import DialogActions from '@/components/common/DialogActions'
@@ -41,7 +41,7 @@ const LedgerHashComparison = () => {
 
         <div className="px-4">
           <Alert variant="info" className="mb-6">
-            <InfoIcon />
+            <AlertSeverityIcon variant="info" />
             <AlertDescription>{DIALOG_DESCRIPTION}</AlertDescription>
           </Alert>
 

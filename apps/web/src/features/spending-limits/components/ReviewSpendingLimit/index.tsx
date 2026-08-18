@@ -2,8 +2,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useEffect, useMemo, useContext } from 'react'
 import { Typography } from '@/components/ui/typography'
-import { Alert } from '@/components/ui/alert'
-import { TriangleAlert } from 'lucide-react'
+import { Alert, AlertSeverityIcon } from '@/components/ui/alert'
 
 import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
 import { getResetTimeOptions } from '../../constants'
@@ -155,7 +154,7 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
 
       {existingSpendingLimit && (
         <Alert variant="warning" className="border-none">
-          <TriangleAlert />
+          <AlertSeverityIcon variant="warning" />
           <Typography data-testid="limit-replacement-warning" className="font-bold">
             You are about to replace an existing spending limit
           </Typography>

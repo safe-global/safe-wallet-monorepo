@@ -5,9 +5,8 @@ import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { COUNTERFACTUAL_EVENTS } from '@/services/analytics/events/counterfactual'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import { Alert } from '@/components/ui/alert'
+import { Alert, AlertSeverityIcon } from '@/components/ui/alert'
 import { Typography } from '@/components/ui/typography'
-import { Info } from 'lucide-react'
 
 const CheckBalance = () => {
   const { safe, safeAddress } = useSafeInfo()
@@ -19,7 +18,7 @@ const CheckBalance = () => {
 
   return (
     <Alert data-testid="no-tokens-alert" variant="info" className="mx-auto mt-6 flex max-w-[600px] flex-col px-6 py-4">
-      <Info />
+      <AlertSeverityIcon variant="info" />
       <Typography variant="paragraph-bold" className="mb-2">
         Don&apos;t see your tokens?
       </Typography>

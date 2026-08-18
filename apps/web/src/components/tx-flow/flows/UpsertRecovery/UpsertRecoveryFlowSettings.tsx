@@ -1,6 +1,6 @@
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { ChevronUp as ExpandLessIcon, ChevronDown as ExpandMoreIcon, TriangleAlert } from 'lucide-react'
+import { ChevronUp as ExpandLessIcon, ChevronDown as ExpandMoreIcon } from 'lucide-react'
 import { useForm, FormProvider, Controller } from 'react-hook-form'
 import { useContext, useState } from 'react'
 import type { ReactElement } from 'react'
@@ -33,7 +33,7 @@ import useChainId from '@/hooks/useChainId'
 import { Typography } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
@@ -134,7 +134,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
       <FormProvider {...formMethods}>
         <form onSubmit={formMethods.handleSubmit(handleSubmit)}>
           <Alert variant="warning" outlined={false}>
-            <TriangleAlert />
+            <AlertSeverityIcon variant="warning" />
             <AlertDescription>
               Your Recoverer will be able to reset your Account setup. Only select an address that you trust.{' '}
               <Track {...RECOVERY_EVENTS.LEARN_MORE} label="recover-setup-flow">

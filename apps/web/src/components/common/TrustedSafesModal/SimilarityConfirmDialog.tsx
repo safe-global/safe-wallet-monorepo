@@ -1,6 +1,6 @@
 import { TriangleAlert } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import DialogActions from '@/components/common/DialogActions'
 import EthHashInfo from '@/components/common/EthHashInfo'
 
@@ -26,7 +26,7 @@ const SimilarityConfirmDialog = ({ open, safe, onConfirm, onCancel }: Similarity
 
         <div className="flex flex-col gap-4 px-4">
           <Alert variant="warning">
-            <TriangleAlert />
+            <AlertSeverityIcon variant="warning" />
             <AlertDescription>
               This address is similar to another safe in your list. This could indicate an address poisoning attack.
             </AlertDescription>

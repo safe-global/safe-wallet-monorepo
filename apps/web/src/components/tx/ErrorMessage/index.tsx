@@ -1,13 +1,12 @@
 import { type ReactElement, type ReactNode, type SyntheticEvent, useState } from 'react'
 import { getGsCodeFromError } from '@safe-global/utils/services/exceptions/contractErrors'
-import { CircleAlert, TriangleAlert, Info } from 'lucide-react'
 import { getGuardErrorInfo } from '@/utils/transaction-errors'
 import { getBlockExplorerLink } from '@/utils/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
 import ExternalLink from '@/components/common/ExternalLink'
 import ErrorDetails from '@/components/common/ErrorDetails'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertTitle, AlertSeverityIcon } from '@/components/ui/alert'
 import { Typography } from '@/components/ui/typography'
 import { Link } from '@/components/ui/link'
 import { cn } from '@/utils/cn'
@@ -18,12 +17,6 @@ const alertVariant: Record<'error' | 'warning' | 'info', 'destructive' | 'warnin
   error: 'destructive',
   warning: 'warning',
   info: 'info',
-}
-
-const levelIcon: Record<'error' | 'warning' | 'info', ReactNode> = {
-  error: <CircleAlert />,
-  warning: <TriangleAlert />,
-  info: <Info />,
 }
 
 const ErrorMessage = ({
@@ -67,7 +60,7 @@ const ErrorMessage = ({
       outlined={false}
       className={cn('errorMessage', className)}
     >
-      {levelIcon[level]}
+      <AlertSeverityIcon variant={alertVariant[level]} />
 
       {title && <AlertTitle>{title}</AlertTitle>}
 

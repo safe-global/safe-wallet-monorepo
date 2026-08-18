@@ -1,8 +1,8 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { type ReactElement } from 'react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Copy as CopyIcon, Info } from 'lucide-react'
+import { Copy as CopyIcon } from 'lucide-react'
 import TxConfirmations from '@/components/transactions/TxConfirmations'
 import { AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
 import CopyTooltip from '@/components/common/CopyTooltip'
@@ -67,7 +67,7 @@ const MsgAuditLog = ({ msg }: { msg: MessageItem }): ReactElement => {
 
       {!isConfirmed && (
         <Alert variant="info" className="mt-4">
-          <Info />
+          <AlertSeverityIcon variant="info" />
           <AlertDescription>Can be confirmed once the threshold is reached.</AlertDescription>
         </Alert>
       )}

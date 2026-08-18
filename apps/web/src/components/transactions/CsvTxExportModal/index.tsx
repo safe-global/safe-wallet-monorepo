@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Info, TriangleAlert } from 'lucide-react'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { subMonths, startOfYear, isBefore, isAfter, startOfDay, addMonths, endOfDay } from 'date-fns'
 import ExportIcon from '@/public/images/common/export.svg'
 import UpdateIcon from '@/public/images/notifications/update.svg'
@@ -274,7 +273,7 @@ const YearRangeAlert = ({ isOverYear }: { isOverYear: boolean }): ReactElement =
 
   return (
     <Alert variant={variant}>
-      {isOverYear ? <TriangleAlert /> : <Info />}
+      <AlertSeverityIcon variant={variant} />
       <AlertDescription>{message}</AlertDescription>
     </Alert>
   )

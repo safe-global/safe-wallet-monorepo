@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
+import { CircleAlertIcon, CircleCheckIcon, InfoIcon, TriangleAlertIcon, type LucideIcon } from 'lucide-react'
 
 import { cn } from '@/utils/cn'
 
@@ -12,8 +13,8 @@ import { cn } from '@/utils/cn'
  *
  * @example
  * ```tsx
- * <Alert variant="default">
- *   <InfoIcon />
+ * <Alert variant="warning">
+ *   <AlertSeverityIcon variant="warning" />
  *   <AlertTitle>Heads up!</AlertTitle>
  *   <AlertDescription>You can add components using the cli.</AlertDescription>
  *   <AlertAction>
@@ -28,6 +29,8 @@ import { cn } from '@/utils/cn'
  * - Alert: `outlined` (destructive & warning only; default true = card surface with border,
  *   false = borderless severity tint)
  * - AlertAction: for action buttons (positioned top-right)
+ * - AlertSeverityIcon: renders the standard lucide icon for a given `variant` (opt-in child —
+ *   pass it your own icon, or none, if a consumer needs something different)
  */
 
 const alertVariants = cva(
@@ -109,4 +112,18 @@ function AlertAction({ className, ...props }: React.ComponentProps<'div'>) {
   )
 }
 
-export { Alert, AlertTitle, AlertDescription, AlertAction }
+// Standard icon per severity, mirroring the Sonner toast icon map. `default` has none.
+const alertSeverityIcons: Partial<Record<NonNullable<VariantProps<typeof alertVariants>['variant']>, LucideIcon>> = {
+  destructive: CircleAlertIcon,
+  warning: TriangleAlertIcon,
+  success: CircleCheckIcon,
+  info: InfoIcon,
+}
+
+/** Standard lucide icon for an Alert's severity `variant` — an opt-in child of `<Alert>`. */
+function AlertSeverityIcon({ variant, ...props }: React.ComponentProps<'svg'> & VariantProps<typeof alertVariants>) {
+  const Icon = variant ? alertSeverityIcons[variant] : undefined
+  return Icon ? <Icon {...props} /> : null
+}
+
+export { Alert, AlertTitle, AlertDescription, AlertAction, AlertSeverityIcon }

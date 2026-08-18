@@ -1,7 +1,7 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type ReactElement } from 'react'
-import { Copy, Info, TriangleAlert } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Copy } from 'lucide-react'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import TxConfirmations from '@/components/transactions/TxConfirmations'
@@ -291,7 +291,7 @@ const TxSigners = ({
 
       {confirmationsNeeded > 0 && !executor && !isExpired && (
         <Alert variant="info" className="mt-4">
-          <Info />
+          <AlertSeverityIcon variant="info" />
           <AlertDescription>
             {isCancellation
               ? 'Cancellation can be executed once the required approvals are collected.'
@@ -302,7 +302,7 @@ const TxSigners = ({
 
       {isTxFromProposer && !executor && !isExpired && (
         <Alert variant="info" className="mt-4">
-          <Info />
+          <AlertSeverityIcon variant="info" />
           <AlertDescription>
             {isCancellation
               ? 'This on-chain rejection was initiated by a proposer. Please review and approve or dismiss it.'
@@ -313,7 +313,7 @@ const TxSigners = ({
 
       {isExpired && !executor && (
         <Alert variant="warning" className="mt-4">
-          <TriangleAlert />
+          <AlertSeverityIcon variant="warning" />
           <AlertDescription>This order has expired. Reject this transaction and try again.</AlertDescription>
         </Alert>
       )}

@@ -16,9 +16,12 @@ import { cn } from '@/utils/cn'
  * Skins: `default` (`bg-input`) is the filled field — white in light mode, a translucent lift in dark
  * that works over any parent surface. `surface` (`bg-card`) is the opaque card-coloured fill; reach
  * for it only when translucency would show through (over images, gradients or coloured strips).
+ *
+ * `text-foreground` is explicit because an invalid `Field` ancestor sets `text-destructive`,
+ * which the typed value would otherwise inherit — only border/ring and label carry the error colour.
  */
 const inputVariants = cva(
-  'border-border border shadow-none focus-visible:ring-0 focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md py-1.5 text-base transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+  'border-border border shadow-none focus-visible:ring-0 focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md py-1.5 text-base text-foreground transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       // Named `inputSize` (not `size`) so it doesn't collide with the native numeric `size` attr

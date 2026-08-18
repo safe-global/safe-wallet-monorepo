@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Alert, AlertTitle, AlertDescription, AlertAction } from '../alert'
-import { AlertCircle, Check, Info, TriangleAlert, Wallet, X } from 'lucide-react'
+import { Alert, AlertTitle, AlertDescription, AlertAction, AlertSeverityIcon } from '../alert'
+import { AlertCircle, Check, TriangleAlert, Wallet, X } from 'lucide-react'
 import { Button } from '../button'
 
 /**
@@ -141,7 +141,7 @@ export const AllVariants: Story = {
           </div>
           <div style={{ width: '400px' }}>
             <Alert variant="info">
-              <Info />
+              <AlertSeverityIcon variant="info" />
               <AlertTitle>Info Alert</AlertTitle>
               <AlertDescription>This is an info alert message.</AlertDescription>
             </Alert>
@@ -171,6 +171,51 @@ export const AllVariants: Story = {
               <AlertCircle />
               <AlertTitle>Destructive with Icon</AlertTitle>
               <AlertDescription>This destructive alert includes an icon.</AlertDescription>
+            </Alert>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Severity Icons</h3>
+        <p className="mb-4 text-sm text-muted-foreground">
+          <code>AlertSeverityIcon</code> renders the standard icon for a given `variant` — opt in per alert, existing
+          consumers with their own icon (or none) are unaffected.
+        </p>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(400px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <div style={{ width: '400px' }}>
+            <Alert variant="destructive">
+              <AlertSeverityIcon variant="destructive" />
+              <AlertTitle>Destructive Alert</AlertTitle>
+              <AlertDescription>Uses the standard destructive icon.</AlertDescription>
+            </Alert>
+          </div>
+          <div style={{ width: '400px' }}>
+            <Alert variant="warning">
+              <AlertSeverityIcon variant="warning" />
+              <AlertTitle>Warning Alert</AlertTitle>
+              <AlertDescription>Uses the standard warning icon.</AlertDescription>
+            </Alert>
+          </div>
+          <div style={{ width: '400px' }}>
+            <Alert variant="success">
+              <AlertSeverityIcon variant="success" />
+              <AlertTitle>Success Alert</AlertTitle>
+              <AlertDescription>Uses the standard success icon.</AlertDescription>
+            </Alert>
+          </div>
+          <div style={{ width: '400px' }}>
+            <Alert variant="info">
+              <AlertSeverityIcon variant="info" />
+              <AlertTitle>Info Alert</AlertTitle>
+              <AlertDescription>Uses the standard info icon.</AlertDescription>
             </Alert>
           </div>
         </div>
