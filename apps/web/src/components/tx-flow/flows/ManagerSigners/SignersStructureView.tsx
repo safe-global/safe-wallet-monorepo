@@ -49,7 +49,7 @@ export function SignersStructureView(props: Props): ReactElement {
 
           <Separator className={commonCss.nestedDivider} />
 
-          <div className="flex items-center p-2">
+          <div className="flex items-center justify-end pt-4">
             <Button
               data-testId="submit-next"
               type="submit"

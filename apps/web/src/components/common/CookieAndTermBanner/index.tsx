@@ -19,13 +19,10 @@ import IntroText from './IntroText'
 import CookieOptionsList from './CookieOptionsList'
 import CookieBannerActions from './CookieBannerActions'
 
-export const CookieAndTermBanner = ({
-  warningKey,
-  inverted,
-}: {
-  warningKey?: CookieAndTermType
-  inverted?: boolean
-}): ReactElement => {
+/** Overlay chrome for the first-visit popup, matching the other overlays in the design system. */
+export const POPUP_SURFACE = 'bg-popover text-popover-foreground rounded-lg shadow-lg ring-foreground/10 ring-1'
+
+export const CookieAndTermBanner = ({ warningKey }: { warningKey?: CookieAndTermType }): ReactElement => {
   const warning = warningKey ? COOKIE_AND_TERM_WARNING[warningKey] : undefined
   const dispatch = useAppDispatch()
   const cookies = useAppSelector(selectCookies)
@@ -58,20 +55,14 @@ export const CookieAndTermBanner = ({
   }
 
   return (
-    <div data-testid="cookies-popup" className={classnames(css.container, { [css.inverted]: inverted })}>
+    <div data-testid="cookies-popup" className={css.container}>
       {warning && <WarningMessage message={warning} />}
       <form>
-        <div className="flex items-center">
-          <div className="flex-1">
-            <IntroText lastUpdated={metadata.lastUpdated} />
+        <IntroText lastUpdated={metadata.lastUpdated} />
 
-            <div className="flex items-center gap-8">
-              <CookieOptionsList control={control} />
-            </div>
+        <CookieOptionsList control={control} />
 
-            <CookieBannerActions onAccept={handleAccept} onAcceptAll={handleAcceptAll} />
-          </div>
-        </div>
+        <CookieBannerActions onAccept={handleAccept} onAcceptAll={handleAcceptAll} />
       </form>
     </div>
   )
@@ -92,8 +83,8 @@ const CookieBannerPopup = (): ReactElement | null => {
   }, [dispatch, shouldOpen])
 
   return cookiePopup.open ? (
-    <div className={css.popup}>
-      <CookieAndTermBanner warningKey={cookiePopup.warningKey} inverted />
+    <div className={classnames(css.popup, POPUP_SURFACE)}>
+      <CookieAndTermBanner warningKey={cookiePopup.warningKey} />
     </div>
   ) : null
 }

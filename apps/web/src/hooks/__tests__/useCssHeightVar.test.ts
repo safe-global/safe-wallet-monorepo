@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react'
-import { useTopbarHeight } from '../useTopbarHeight'
+import { useCssHeightVar } from '../useCssHeightVar'
 
-const TOPBAR_HEIGHT_VAR = '--topbar-height'
+const CSS_VAR = '--topbar-height'
 
 const makeNode = (height: number): HTMLDivElement => {
   const node = document.createElement('div')
@@ -9,9 +9,9 @@ const makeNode = (height: number): HTMLDivElement => {
   return node
 }
 
-const readVar = () => document.documentElement.style.getPropertyValue(TOPBAR_HEIGHT_VAR)
+const readVar = () => document.documentElement.style.getPropertyValue(CSS_VAR)
 
-describe('useTopbarHeight', () => {
+describe('useCssHeightVar', () => {
   let observeMock: jest.Mock
   let disconnectMock: jest.Mock
   let resizeCallback: ResizeObserverCallback
@@ -27,13 +27,13 @@ describe('useTopbarHeight', () => {
   })
 
   afterEach(() => {
-    document.documentElement.style.removeProperty(TOPBAR_HEIGHT_VAR)
+    document.documentElement.style.removeProperty(CSS_VAR)
     ;(globalThis as unknown as { ResizeObserver: unknown }).ResizeObserver = originalResizeObserver
     jest.clearAllMocks()
   })
 
   it('publishes the node height to the CSS variable and observes it', () => {
-    const { result } = renderHook(() => useTopbarHeight())
+    const { result } = renderHook(() => useCssHeightVar(CSS_VAR))
     const node = makeNode(88)
 
     result.current(node)
@@ -43,7 +43,7 @@ describe('useTopbarHeight', () => {
   })
 
   it('updates the variable when the observed element resizes', () => {
-    const { result } = renderHook(() => useTopbarHeight())
+    const { result } = renderHook(() => useCssHeightVar(CSS_VAR))
     const node = makeNode(88)
     result.current(node)
 
@@ -54,7 +54,7 @@ describe('useTopbarHeight', () => {
   })
 
   it('removes the variable and disconnects when the node detaches', () => {
-    const { result } = renderHook(() => useTopbarHeight())
+    const { result } = renderHook(() => useCssHeightVar(CSS_VAR))
     result.current(makeNode(88))
 
     result.current(null)
@@ -64,7 +64,7 @@ describe('useTopbarHeight', () => {
   })
 
   it('rebinds to a new node, disconnecting the previous observer', () => {
-    const { result } = renderHook(() => useTopbarHeight())
+    const { result } = renderHook(() => useCssHeightVar(CSS_VAR))
     result.current(makeNode(88))
 
     result.current(makeNode(120))
@@ -75,11 +75,20 @@ describe('useTopbarHeight', () => {
 
   it('keeps the static default when ResizeObserver is unavailable', () => {
     ;(globalThis as unknown as { ResizeObserver: unknown }).ResizeObserver = undefined
-    const { result } = renderHook(() => useTopbarHeight())
+    const { result } = renderHook(() => useCssHeightVar(CSS_VAR))
 
     result.current(makeNode(88))
 
     expect(readVar()).toBe('')
     expect(observeMock).not.toHaveBeenCalled()
+  })
+
+  it('publishes to whichever variable it is given', () => {
+    const { result } = renderHook(() => useCssHeightVar('--page-header-height'))
+
+    result.current(makeNode(84))
+
+    expect(document.documentElement.style.getPropertyValue('--page-header-height')).toBe('84px')
+    document.documentElement.style.removeProperty('--page-header-height')
   })
 })

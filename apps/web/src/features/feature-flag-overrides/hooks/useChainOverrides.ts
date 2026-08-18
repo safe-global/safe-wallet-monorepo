@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useAppSelector } from '@/store'
 import { selectFeatureFlagOverrides, type FeatureFlagOverridesState } from '@/features/feature-flag-overrides/store'
+import { isKnownFeature } from '@/features/feature-flag-overrides/knownFeatures'
 
 /**
  * The single production check governing override behaviour — overrides are dev-only.
@@ -17,9 +18,12 @@ const IS_PRODUCTION_BUILD = process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true'
 /**
  * Applies local overrides to a chain's `features` array. Pure: whether overrides apply at all is
  * decided by the hooks below, not here.
+ *
+ * Overrides of flags this build does not declare are skipped, so a leftover from another branch
+ * cannot reach `chain.features` — every reader of the overrides honours the same rule.
  */
 export const applyFeatureOverrides = (chain: Chain, overrides: FeatureFlagOverridesState): Chain => {
-  const entries = Object.entries(overrides)
+  const entries = Object.entries(overrides).filter(([feature]) => isKnownFeature(feature))
   if (entries.length === 0) return chain
 
   const features = new Set(chain.features)
