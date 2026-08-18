@@ -1,4 +1,4 @@
-import { memo, type ReactElement, useContext, useMemo, useState, useEffect } from 'react'
+import { memo, type CSSProperties, type ReactElement, useContext, useMemo, useState, useEffect } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
 
@@ -180,9 +180,9 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
                   name={field.name}
                   aria-label={message || undefined}
                   showTrigger
-                  // w-full/min-w-0 keep the inner <input> inside the clamped box instead of its intrinsic ~20ch width
-                  className="[&_input]:font-bold [&_input]:w-full [&_input]:min-w-0"
-                  style={{ width: getFieldMinWidth(field.value) }}
+                  // The clamp sizes the text input itself; the group grows to fit the trigger/reset addons
+                  className="[&_input]:font-bold [&_input]:w-(--nonce-width) [&_input]:min-w-0"
+                  style={{ '--nonce-width': getFieldMinWidth(field.value) } as CSSProperties}
                   onBlur={() => {
                     field.onBlur()
 

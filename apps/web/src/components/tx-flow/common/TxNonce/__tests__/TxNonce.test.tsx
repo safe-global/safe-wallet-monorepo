@@ -139,11 +139,12 @@ describe('TxNonce', () => {
       expect(input.value).toBe('42')
     })
 
-    // The clamp() width style isn't assertable — jsdom drops clamp() on `width` — so assert the classes.
-    it('forces the inner input to fill its clamped box', () => {
+    // jsdom drops both clamp() values and custom properties, so assert the class wiring only.
+    it('sizes the inner input to the value-width variable, leaving room for the addons', () => {
       renderTxNonce({ nonce: 42, recommendedNonce: 42 })
       const input = screen.getByRole('combobox') as HTMLInputElement
-      expect(input.closest('[data-slot="input-group"]')).toHaveClass('[&_input]:w-full', '[&_input]:min-w-0')
+      const group = input.closest('[data-slot="input-group"]') as HTMLElement
+      expect(group).toHaveClass('[&_input]:w-(--nonce-width)', '[&_input]:min-w-0')
     })
 
     it('shows reset button when nonce differs from recommended', () => {

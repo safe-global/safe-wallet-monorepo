@@ -13,7 +13,7 @@ jest.mock('@/hooks/useAddressBook', () => ({
   default: () => ({}),
 }))
 
-// Regression for WA-3193: both reset paths must propagate to SafeTxContext, not only the rendered text.
+// Regression: both reset paths must propagate to SafeTxContext, not only the rendered text.
 
 const mockUseSafeInfo = jest.requireMock('@/hooks/useSafeInfo').default as jest.Mock
 const mockUsePreviousNonces = jest.requireMock('@/hooks/usePreviousNonces').default as jest.Mock
@@ -60,7 +60,7 @@ const renderTxNonce = (contextOverrides: Partial<SafeTxContextParams> = {}) => {
 
 const getNonceInput = () => screen.getByRole('combobox') as HTMLInputElement
 
-describe('TxNonce context sync (WA-3193)', () => {
+describe('TxNonce context sync', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     const safe = extendedSafeInfoBuilder().with({ nonce: SAFE_NONCE }).build()
