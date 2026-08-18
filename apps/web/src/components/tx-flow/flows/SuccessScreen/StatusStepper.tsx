@@ -12,41 +12,33 @@ const StatusStepper = ({ status, txHash }: { status?: PendingStatus; txHash?: st
   const isSuccess = status === undefined
 
   return (
-    <div className="flex flex-col [&>*:not(:last-child)]:relative [&>*:not(:last-child)]:after:absolute [&>*:not(:last-child)]:after:left-[6px] [&>*:not(:last-child)]:after:top-4 [&>*:not(:last-child)]:after:h-full [&>*:not(:last-child)]:after:border-l [&>*:not(:last-child)]:after:border-[var(--color-border-light)]">
-      <div>
-        <StatusStep isLoading={!isProcessing} safeAddress={safeAddress}>
-          <div>
-            <Typography variant="paragraph-small-bold">Your transaction</Typography>
-            {txHash && (
-              <EthHashInfo
-                address={txHash}
-                hasExplorer
-                showCopyButton
-                showName={false}
-                shortAddress={false}
-                showAvatar={false}
-              />
-            )}
-          </div>
-        </StatusStep>
-      </div>
-      <div>
-        <StatusStep isLoading={!isProcessed} safeAddress={safeAddress}>
-          <div>
-            <Typography variant="paragraph-small-bold">{isProcessed ? 'Processed' : 'Processing'}</Typography>
-          </div>
-        </StatusStep>
-      </div>
-      <div>
-        <StatusStep isLoading={!isSuccess} safeAddress={safeAddress}>
-          <Typography variant="paragraph-small-bold">{isSuccess ? 'Indexed' : 'Indexing'}</Typography>
-        </StatusStep>
-      </div>
-      <div>
-        <StatusStep isLoading={!isSuccess} safeAddress={safeAddress}>
-          <Typography variant="paragraph-small-bold">Transaction is executed</Typography>
-        </StatusStep>
-      </div>
+    <div data-testid="status-stepper" className="flex flex-col">
+      <StatusStep isLoading={!isProcessing} safeAddress={safeAddress} isFirst>
+        <div>
+          <Typography variant="paragraph-small-bold">Your transaction</Typography>
+          {txHash && (
+            <EthHashInfo
+              address={txHash}
+              hasExplorer
+              showCopyButton
+              showName={false}
+              shortAddress={false}
+              showAvatar={false}
+            />
+          )}
+        </div>
+      </StatusStep>
+      <StatusStep isLoading={!isProcessed} safeAddress={safeAddress}>
+        <div>
+          <Typography variant="paragraph-small-bold">{isProcessed ? 'Processed' : 'Processing'}</Typography>
+        </div>
+      </StatusStep>
+      <StatusStep isLoading={!isSuccess} safeAddress={safeAddress}>
+        <Typography variant="paragraph-small-bold">{isSuccess ? 'Indexed' : 'Indexing'}</Typography>
+      </StatusStep>
+      <StatusStep isLoading={!isSuccess} safeAddress={safeAddress} isLast>
+        <Typography variant="paragraph-small-bold">Transaction is executed</Typography>
+      </StatusStep>
     </div>
   )
 }
