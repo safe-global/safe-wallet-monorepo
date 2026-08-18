@@ -79,10 +79,8 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
   const flatEntries = useMemo(() => groupedEntries.flatMap(([, entries]) => entries), [groupedEntries])
   const optionIndexes = useMemo(() => new Map(flatEntries.map((entry, index) => [entry, index])), [flatEntries])
 
-  const hasVisibleOptions = useMemo(
-    () => !!allAddressBookEntries.filter((entry) => entry.label.includes(addressValue)).length,
-    [allAddressBookEntries, addressValue],
-  )
+  // Same set the list renders from, so the click and chevron paths agree with the typed one.
+  const hasVisibleOptions = filteredEntries.length > 0
 
   const isInAddressBook = useMemo(
     () => allAddressBookEntries.some((entry) => sameAddress(entry.label, addressValue)),
@@ -101,6 +99,10 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
     setActiveIndex(-1)
   }, [filteredEntries])
 
+  // Keyed off the input event, not the value: a programmatic reset would otherwise reopen the list,
+  // and an empty value matches every contact.
+  const onUserInput = useCallback(() => setOpen(true), [])
+
   // Restores the three dismissal paths MUI's Autocomplete provided. Without them the suggestion
   // list stays open over the rest of the form, and a click aimed at the next field lands on a
   // contact instead — silently writing it in as the recipient.
@@ -114,11 +116,6 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
         closeList()
       }
     }
-    const onEscape = (event: globalThis.KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        closeList()
-      }
-    }
     // Options `preventDefault` on mousedown to keep focus, so selecting one never fires focusout —
     // only genuinely leaving the field (tab away, focus elsewhere) closes the list here.
     const onFocusOut = (event: FocusEvent) => {
@@ -129,11 +126,9 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
     }
 
     document.addEventListener('pointerdown', onPointerDown)
-    document.addEventListener('keydown', onEscape)
     wrapper?.addEventListener('focusout', onFocusOut)
     return () => {
       document.removeEventListener('pointerdown', onPointerDown)
-      document.removeEventListener('keydown', onEscape)
       wrapper?.removeEventListener('focusout', onFocusOut)
     }
   }, [open, closeList])
@@ -192,12 +187,20 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
         if (showList) closeList()
         return
       }
+      case 'Escape': {
+        // Must stop here, or the enclosing tx modal closes too. With the list shut it falls through.
+        if (!showList) return
+        event.preventDefault()
+        event.stopPropagation()
+        closeList()
+        return
+      }
     }
   }
 
   return (
     <>
-      <div ref={wrapperRef} className={css.wrapper}>
+      <div ref={wrapperRef} className={css.wrapper} onInput={onUserInput}>
         <AddressInput
           {...props}
           data-testid={props['data-testid'] ?? 'address-book-input'}
