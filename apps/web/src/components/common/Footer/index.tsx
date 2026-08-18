@@ -25,13 +25,7 @@ const footerPages = [
 ]
 
 const FooterLink = ({ children, href }: { children: ReactNode; href: string }): ReactElement => {
-  return href ? (
-    <Link variant="inherit" render={<NextLink href={href} />}>
-      {children}
-    </Link>
-  ) : (
-    <Link variant="inherit">{children}</Link>
-  )
+  return href ? <Link render={<NextLink href={href} />}>{children}</Link> : <Link>{children}</Link>
 }
 
 const Footer: React.FC<FooterProps> = ({
@@ -85,7 +79,11 @@ const Footer: React.FC<FooterProps> = ({
             )}
             {helpCenter && (
               <li>
-                <ExternalLink href={HELP_CENTER_URL} noIcon className="[&_span]:underline">
+                <ExternalLink
+                  href={HELP_CENTER_URL}
+                  noIcon
+                  className="[&_span]:underline [&_span]:decoration-primary/40"
+                >
                   Help
                 </ExternalLink>
               </li>
