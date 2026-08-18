@@ -29,13 +29,6 @@
   padding: var(--space-3);
 }
 
-.listIcon {
-  min-width: unset;
-  margin-right: var(--space-3);
-  padding-top: var(--space-1);
-  align-self: flex-start;
-}
-
 .networkIcon {
   width: 10px;
   height: 10px;
