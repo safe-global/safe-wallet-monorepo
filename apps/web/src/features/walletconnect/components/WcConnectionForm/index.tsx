@@ -38,9 +38,9 @@ const WcConnectionForm = ({ sessions, uri }: { sessions: SessionTypes.Struct[]; 
         <Tooltip>
           <TooltipTrigger
             render={
-              <span className="inline-flex">
+              <span className={`inline-flex ${css.infoIcon}`}>
                 <Track {...(showHints ? WALLETCONNECT_EVENTS.HINTS_HIDE : WALLETCONNECT_EVENTS.HINTS_SHOW)}>
-                  <Button variant="ghost" size="icon" onClick={onToggle} className={css.infoIcon}>
+                  <Button variant="ghost" size="icon" onClick={onToggle}>
                     <InfoIcon className="size-6 text-[var(--color-border-main)]" />
                   </Button>
                 </Track>
