@@ -454,8 +454,7 @@ describe('CreateTokenTransfer', () => {
       expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
     })
 
-    // WA-3185: the fee banner must render as a toned-down "info" alert (matching the pre-migration
-    // MUI `severity="info"`), not the plain/unstyled default alert it silently fell back to post-migration.
+    // WA-3185: the fee banner renders as an info alert, not the plain default
     it('renders the fee banner with the info alert styling, not the plain default alert', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
       mockBalancesForGtf()
@@ -489,8 +488,7 @@ describe('CreateTokenTransfer', () => {
     })
   })
 
-  // WA-3185: the CSV airdrop hint must render as a toned-down "info" alert (matching the pre-migration
-  // MUI `severity="info"`), not the plain/unstyled default alert it silently fell back to post-migration.
+  // WA-3185: the CSV airdrop hint renders as an info alert, not the plain default
   describe('CSV airdrop hint', () => {
     const useHasFeatureSpy = jest.spyOn(chainHooks, 'useHasFeature')
     const useRemoteSafeAppsSpy = jest.spyOn(remoteSafeAppsHooks, 'useRemoteSafeApps')
@@ -509,8 +507,6 @@ describe('CreateTokenTransfer', () => {
     }
 
     beforeEach(() => {
-      // Only enable MASS_PAYOUTS (needed to show "Add recipient"/the CSV hint) — leave GTF off so
-      // the unrelated fee-preview machinery in RecipientRow stays inert for this describe block.
       useHasFeatureSpy.mockImplementation((feature) => feature === FEATURES.MASS_PAYOUTS)
       useRemoteSafeAppsSpy.mockReturnValue([[csvApp], undefined, false])
     })
@@ -557,8 +553,6 @@ describe('CreateTokenTransfer', () => {
       expect(maxReached.querySelector('svg.lucide-triangle-alert')).toBeInTheDocument()
     })
 
-    // WA-3185: filled (outlined=false) alerts use the Obra design system's borderless
-    // severity-tinted background — matching the pre-migration MUI standard alert.
     it('renders the max-recipients-reached alert filled (tinted background, no border)', () => {
       const { getByTestId } = renderCreateTokenTransfer()
 
@@ -572,8 +566,6 @@ describe('CreateTokenTransfer', () => {
     })
   })
 
-  // WA-3185: lock in that the destructive insufficient-balance alert carries the standard
-  // severity icon, matching its warning/info siblings in this same form.
   describe('Insufficient balance alert', () => {
     const useHasFeatureSpy = jest.spyOn(chainHooks, 'useHasFeature')
 
@@ -606,10 +598,8 @@ describe('CreateTokenTransfer', () => {
         loading: false,
         error: undefined,
       })
-      // Another test in this file (`should display a type selection...`) mocks `useTokenAmount`
-      // with a fixed totalAmount and never restores it, which otherwise leaks a stale balance into
-      // this describe when the full suite runs. Re-derive it from *this* test's balances so the
-      // "exceeds available balance" assertion below is deterministic regardless of run order.
+      // `should display a type selection...` mocks useTokenAmount without restoring it — re-mock
+      // here so this describe is immune to run order.
       jest.spyOn(tokenUtils, 'useTokenAmount').mockImplementation((selectedToken) => ({
         totalAmount: BigInt(selectedToken?.balance || 0),
         spendingLimitAmount: 0n,
@@ -645,8 +635,6 @@ describe('CreateTokenTransfer', () => {
       expect(getByTestId('insufficient-balance-error').querySelector('svg.lucide-circle-alert')).toBeInTheDocument()
     })
 
-    // WA-3185: filled (outlined=false) alerts use the Obra design system's borderless
-    // severity-tinted background — matching the pre-migration MUI standard alert.
     it('renders the insufficient-balance alert filled (tinted background, no border)', async () => {
       const twoRecipientParams = {
         recipients: [

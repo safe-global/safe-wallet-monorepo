@@ -97,8 +97,7 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
   })
 
   const resetNonce = () => {
-    // shouldValidate re-runs the `validate` rule below, which is what propagates the new
-    // value to SafeTxContext via `setNonce` — a plain `setValue` only updates the input.
+    // shouldValidate re-runs the `validate` rule, which propagates the value to SafeTxContext
     formMethods.setValue(TxNonceFormFieldNames.NONCE, recommendedNonce, { shouldValidate: true })
   }
 
@@ -181,11 +180,7 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
                   name={field.name}
                   aria-label={message || undefined}
                   showTrigger
-                  // `w-full`/`min-w-0` make the inner <input> fill this clamped box instead of
-                  // falling back to the browser's intrinsic ~20ch width (the wrapping InputGroup has
-                  // no width of its own, so an unconstrained input renders far wider than its value).
-                  // `width` (not `minWidth`) is what actually clamps it — the reset button is a sibling
-                  // addon in the same row, not layered over the input, so it doesn't eat into this box.
+                  // w-full/min-w-0 keep the inner <input> inside the clamped box instead of its intrinsic ~20ch width
                   className="[&_input]:font-bold [&_input]:w-full [&_input]:min-w-0"
                   style={{ width: getFieldMinWidth(field.value) }}
                   onBlur={() => {

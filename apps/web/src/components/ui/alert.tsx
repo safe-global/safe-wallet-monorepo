@@ -112,11 +112,7 @@ function AlertAction({ className, ...props }: React.ComponentProps<'div'>) {
   )
 }
 
-// The de-facto standard icon per severity, as already established by the Sonner toast icon map
-// (`@/components/ui/sonner.tsx`) and the dominant existing `<Alert>` usage (`TriangleAlert` is the
-// icon every warning alert reaches for). `default` intentionally has no icon — no consumer pairs
-// one with it today. Icon colour is already handled by `alertVariants`'s `*:[svg]:text-*` classes,
-// so this only needs to pick the right glyph.
+// Standard icon per severity, mirroring the Sonner toast icon map. `default` has none.
 const alertSeverityIcons: Partial<Record<NonNullable<VariantProps<typeof alertVariants>['variant']>, LucideIcon>> = {
   destructive: CircleAlertIcon,
   warning: TriangleAlertIcon,
@@ -124,21 +120,7 @@ const alertSeverityIcons: Partial<Record<NonNullable<VariantProps<typeof alertVa
   info: InfoIcon,
 }
 
-/**
- * AlertSeverityIcon
- *
- * Renders the standard lucide icon for an Alert's severity `variant`. Purely additive — it is an
- * opt-in child a consumer places inside `<Alert>`, not a change to `Alert` itself, so existing
- * consumers that pass their own icon (or none) are entirely unaffected.
- *
- * @example
- * ```tsx
- * <Alert variant="warning">
- *   <AlertSeverityIcon variant="warning" />
- *   <AlertDescription>Heads up!</AlertDescription>
- * </Alert>
- * ```
- */
+/** Standard lucide icon for an Alert's severity `variant` — an opt-in child of `<Alert>`. */
 function AlertSeverityIcon({ variant, ...props }: React.ComponentProps<'svg'> & VariantProps<typeof alertVariants>) {
   const Icon = variant ? alertSeverityIcons[variant] : undefined
   return Icon ? <Icon {...props} /> : null

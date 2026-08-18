@@ -16,9 +16,6 @@ describe('Input invalid state', () => {
     expect(screen.getByPlaceholderText('Explicitly invalid')).toHaveAttribute('aria-invalid', 'true')
   })
 
-  // The computed attribute used to be overwritten by the `{...props}` spread that followed it, so a
-  // caller passing an undefined/false `aria-invalid` alongside `error` silently erased the invalid
-  // state. AdvancedOptionsStep passes both and was only safe because they shared one boolean.
   it('keeps the error-driven invalid state when aria-invalid is passed as undefined', () => {
     render(<Input error="Boom" aria-invalid={undefined} placeholder="Undefined aria" />)
 
@@ -45,10 +42,7 @@ describe('Input invalid state', () => {
     expect(input.className).not.toContain('text-destructive')
   })
 
-  // Reproduces the real bug report: a `Field` ancestor turns red in error state
-  // (`data-[invalid=true]:text-destructive` in field.tsx) which, without an explicit colour on the
-  // input itself, cascades down via CSS inheritance and turns the typed value red too. The label
-  // and border must still redden — only the value text stays neutral.
+  // A Field ancestor turns red when invalid; the input's own text-foreground must win over inheritance.
   it('keeps the value text neutral even nested inside an invalid Field, while the label stays destructive', () => {
     render(
       <Field data-invalid>
@@ -57,9 +51,6 @@ describe('Input invalid state', () => {
       </Field>,
     )
 
-    // The Field wrapper carries `data-[invalid=true]:text-destructive`, which would cascade its red
-    // `color` down via CSS inheritance onto any descendant that doesn't set its own — the label
-    // opts into that colour explicitly, the input's own `text-foreground` class overrides it.
     expect(screen.getByText('Amount')).toHaveClass('text-destructive')
     expect(screen.getByPlaceholderText('Nested in invalid field')).toHaveClass('text-foreground')
   })

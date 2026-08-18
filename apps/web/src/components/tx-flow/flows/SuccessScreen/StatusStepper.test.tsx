@@ -37,8 +37,6 @@ describe('StatusStepper', () => {
     const { container } = render(<StatusStepper status={PendingStatus.PROCESSING} />)
 
     const connector = container.querySelector('[data-testid="status-step-connector"]')
-    // flex-1 + min-h-6: the line always spans at least 24px and stretches with row content,
-    // rather than being clipped to whatever height the row's own box happens to have.
     expect(connector?.className).toContain('flex-1')
     expect(connector?.className).toContain('min-h-6')
   })
@@ -47,11 +45,7 @@ describe('StatusStepper', () => {
     const { container } = render(<StatusStepper status={PendingStatus.PROCESSING} />)
 
     const icon = container.querySelector('[data-testid="status-step-icon"]')
-    // Icon and connector are siblings within the same flex column, in this DOM order — the icon
-    // is laid out before the line, and an opaque, rounded backing keeps the line from ever
-    // reading as if it were drawn in front of (or through) the bullet.
-    // (Read via getAttribute, not .className — for an <svg> element className is an
-    // SVGAnimatedString, not a plain string.)
+    // getAttribute, not .className — an <svg> className is an SVGAnimatedString, not a string
     const iconClasses = icon?.getAttribute('class') ?? ''
     expect(iconClasses).toContain('bg-[var(--color-background-paper)]')
     expect(iconClasses).toContain('rounded-full')
@@ -66,9 +60,6 @@ describe('StatusStepper', () => {
     expect(icons).toHaveLength(4)
     expect(avatars).toHaveLength(4)
 
-    // Every rail carries a 12px top stub that centers the dot against the avatar; it is
-    // painted as connector line on all rows except the first, so the previous row's
-    // segment visually touches this row's dot.
     const topStubs = Array.from(container.querySelectorAll('[data-testid="status-step-connector-top"]'))
     expect(topStubs).toHaveLength(4)
     const [firstStub, ...laterStubs] = topStubs
@@ -78,9 +69,6 @@ describe('StatusStepper', () => {
     })
 
     avatars.forEach((avatar) => {
-      // The avatar must stay pinned to the row's top edge regardless of how tall the
-      // sibling text block grows (e.g. a wrapped tx hash on the first step) — otherwise
-      // its center would drift and no single rail offset could track it.
       expect(avatar.className).toContain('self-start')
     })
   })

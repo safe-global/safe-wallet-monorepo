@@ -139,10 +139,7 @@ describe('TxNonce', () => {
       expect(input.value).toBe('42')
     })
 
-    // Regression: the InputGroup wrapper has no width of its own, so without a forced `w-full` the
-    // inner <input> fell back to the browser's intrinsic ~20ch size instead of hugging its value.
-    // (The clamped `width` style itself isn't assertable here: jsdom's CSS engine doesn't recognise
-    // `clamp()` on `width` and silently drops it, even though real browsers apply it correctly.)
+    // The clamp() width style isn't assertable — jsdom drops clamp() on `width` — so assert the classes.
     it('forces the inner input to fill its clamped box', () => {
       renderTxNonce({ nonce: 42, recommendedNonce: 42 })
       const input = screen.getByRole('combobox') as HTMLInputElement
@@ -238,9 +235,6 @@ describe('TxNonce', () => {
       })
     })
 
-    // Regression: the popup used the shared Combobox default, which ties its width to the tiny
-    // nonce input (--anchor-width) — sizing it to a couple of characters instead of the option
-    // labels ("12 - New transaction") it needs to show.
     it('sizes the popup to fit its content instead of the tiny input', async () => {
       const user = userEvent.setup()
       renderTxNonce({ nonce: 5, recommendedNonce: 5 })

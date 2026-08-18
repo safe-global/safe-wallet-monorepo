@@ -17,11 +17,8 @@ import { cn } from '@/utils/cn'
  * that works over any parent surface. `surface` (`bg-card`) is the opaque card-coloured fill; reach
  * for it only when translucency would show through (over images, gradients or coloured strips).
  *
- * `text-foreground` is set explicitly (not left to inherit) because a `Field` ancestor turns red
- * (`data-[invalid=true]:text-destructive`) in error state — without an explicit colour here the
- * typed value would inherit that red via CSS cascade. Only the border/ring (`aria-invalid:*` above)
- * and the label/description are meant to carry the error colour; the value text stays neutral,
- * matching the pre-migration MUI input, which never coloured the value on error.
+ * `text-foreground` is explicit because an invalid `Field` ancestor sets `text-destructive`,
+ * which the typed value would otherwise inherit — only border/ring and label carry the error colour.
  */
 const inputVariants = cva(
   'border-border border shadow-none focus-visible:ring-0 focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md py-1.5 text-base text-foreground transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',

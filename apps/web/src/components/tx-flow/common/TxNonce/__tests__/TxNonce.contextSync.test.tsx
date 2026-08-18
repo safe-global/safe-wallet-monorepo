@@ -13,13 +13,7 @@ jest.mock('@/hooks/useAddressBook', () => ({
   default: () => ({}),
 }))
 
-/**
- * Regression for WA-3193: both nonce-reset paths update the rendered input via RHF's
- * `setValue`, which does not re-run the `validate` rule that calls `setNonce`. The input
- * can therefore show the recommended nonce while `SafeTxContext.nonce` — and the SafeTx
- * actually signed — still holds the stale value. These tests assert on the propagated
- * `setNonce` call, not just the rendered text.
- */
+// Regression for WA-3193: both reset paths must propagate to SafeTxContext, not only the rendered text.
 
 const mockUseSafeInfo = jest.requireMock('@/hooks/useSafeInfo').default as jest.Mock
 const mockUsePreviousNonces = jest.requireMock('@/hooks/usePreviousNonces').default as jest.Mock

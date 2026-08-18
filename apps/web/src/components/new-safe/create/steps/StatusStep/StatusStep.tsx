@@ -23,11 +23,8 @@ const StatusStep = ({
 
   return (
     <div className={`${css.label} flex items-start gap-2`}>
-      {/* Icon rail: the bullet sits between two connector segments in normal flow (no absolute
-          positioning), so it never gets painted over. The 12px top stub shifts the dot down so its
-          center lines up with the avatar's center (avatar ~32-37px pinned to its column top, dot
-          ~12px, half the difference ≈ 12px) and, on every row but the first, is painted as line so
-          the segment coming from the previous row visually touches this row's dot. */}
+      {/* The 12px top stub centers the dot against the avatar and, on all rows but the first,
+          paints as line so the previous row's connector touches this dot. */}
       <div className="flex flex-col items-center self-stretch">
         <div
           data-testid="status-step-connector-top"
@@ -42,9 +39,7 @@ const StatusStep = ({
         )}
       </div>
       <div className={`flex items-center gap-4 ${colorClass}`}>
-        {/* self-start: the avatar's own center must stay fixed (avatarHeight / 2) regardless of
-            how tall the sibling text block gets (e.g. the first step's tx hash can wrap to
-            multiple lines) — otherwise the dot above would need a different offset per row. */}
+        {/* self-start keeps the avatar's center fixed even when the text block wraps taller */}
         <div data-testid="status-step-avatar" className="shrink-0 self-start">
           {safeAddress && !isLoading ? (
             <Identicon address={safeAddress} size={32} />
