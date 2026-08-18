@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '../dropdown-menu'
 import { Button } from '../button'
-import { Settings, User, LogOut, CreditCard } from 'lucide-react'
+import { Settings, User, LogOut, CreditCard, EllipsisVertical, Plus, Trash2 } from 'lucide-react'
 
 /**
  * DropdownMenu Component Stories
@@ -63,6 +63,32 @@ export const Open: Story = {
               Logout
             </DropdownMenuItem>
           </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  ),
+}
+
+/**
+ * A narrow icon-only trigger must not force menu items to wrap. The menu sizes to
+ * its longest item while staying at least as wide as the trigger.
+ */
+export const NarrowTrigger: Story = {
+  render: () => (
+    <div className="flex min-h-64 items-start justify-end pt-2">
+      <DropdownMenu defaultOpen>
+        <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" />}>
+          <EllipsisVertical />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem>
+            <Plus />
+            Add another network
+          </DropdownMenuItem>
+          <DropdownMenuItem variant="destructive">
+            <Trash2 />
+            Remove from workspace
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
