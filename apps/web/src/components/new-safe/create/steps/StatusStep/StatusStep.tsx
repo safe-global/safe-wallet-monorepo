@@ -23,12 +23,12 @@ const StatusStep = ({
 
   return (
     <div className={`${css.label} flex items-start gap-2`}>
-      {/* The 12px top stub centers the dot against the avatar and, on all rows but the first,
-          paints as line so the previous row's connector touches this dot. */}
+      {/* The 10px top stub centers the 12px dot against the 32px avatar and, on all rows but the
+          first, paints as line so the previous row's connector touches this dot. */}
       <div className="flex flex-col items-center self-stretch">
         <div
           data-testid="status-step-connector-top"
-          className={`h-3 w-px shrink-0 ${isFirst ? '' : 'bg-[var(--color-border-light)]'}`}
+          className={`h-2.5 w-px shrink-0 ${isFirst ? '' : 'bg-[var(--color-border-light)]'}`}
         />
         <Circle
           data-testid="status-step-icon"
@@ -44,7 +44,7 @@ const StatusStep = ({
           {safeAddress && !isLoading ? (
             <Identicon address={safeAddress} size={32} />
           ) : (
-            <Skeleton className="h-[2.3em] w-[2.3em] rounded-full" />
+            <Skeleton className="h-8 w-8 rounded-full" />
           )}
         </div>
         {children}
