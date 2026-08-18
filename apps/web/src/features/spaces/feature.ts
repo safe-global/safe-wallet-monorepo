@@ -21,7 +21,6 @@ import SpaceSafeAccounts from './components/SafeAccounts'
 import SpaceAddressBook from './components/SpaceAddressBook'
 import SpaceBreadcrumbs from './components/SpaceBreadcrumbs'
 import SpacesList from './components/SpacesList'
-import SpaceSidebar from './components/SpaceSidebar'
 import SpaceSettings from './components/SpaceSettings'
 import SpaceSafeContextMenu from './components/SafeAccounts/SpaceSafeContextMenu'
 import SendTransactionButton from './components/SafeAccounts/SendTransactionButton'
@@ -55,7 +54,6 @@ const feature: SpacesContract = {
   SpaceAddressBook,
   SpaceBreadcrumbs,
   SpacesList,
-  SpaceSidebar,
   SpaceSettings,
   SpaceSafeContextMenu,
   SendTransactionButton,
