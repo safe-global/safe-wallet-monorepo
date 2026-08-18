@@ -56,9 +56,7 @@ describe('Permissions settings tests', () => {
   })
 
   it('Verify for each stored app the permissions configuration is shown', () => {
-    // Post-shadcn-migration: the app name is no longer a <h5> (was MUI Typography variant="h5"),
-    // it's a shadcn Typography paragraph-bold <p>, tagged with data-variant for querying.
-    cy.get('[data-slot="typography"][data-variant="paragraph-bold"]').should('have.length', 4)
+    cy.findAllByRole('heading', { level: 5 }).should('have.length', 4)
   })
 
   describe('Permissions for each Safe app', () => {
