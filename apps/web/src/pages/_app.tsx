@@ -91,7 +91,7 @@ import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import { HnQueueAssessmentProvider } from '@/features/hypernative'
-import { useOidcLoginCallback } from '@/features/oidc-auth'
+import { ElevationRequiredDialog, useOidcLoginCallback, useStepUpCallback } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
@@ -140,6 +140,7 @@ const InitApp = (): ReactElement | null => {
   useBeamer()
   useVisitedSafes()
   useOidcLoginCallback()
+  useStepUpCallback()
   useLogoutCallback()
   useSessionExpiryGuard()
   useUnlockBodyScroll()
@@ -209,6 +210,8 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
           <Analytics />
 
           <PkModulePopup />
+
+          <ElevationRequiredDialog />
         </CaptchaProvider>
       </AppProviders>
     </Provider>
