@@ -25,7 +25,10 @@ jest.mock('@/utils/chains', () => ({
   isRouteEnabled: () => true,
 }))
 
+// Keeps the real module — the developer group's override count reads the real `FEATURES` enum — and
+// stubs only the version check this tree would otherwise run.
 jest.mock('@safe-global/utils/utils/chains', () => ({
+  ...jest.requireActual('@safe-global/utils/utils/chains'),
   isNonCriticalUpdate: () => false,
 }))
 
