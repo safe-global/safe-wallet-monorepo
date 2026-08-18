@@ -97,8 +97,7 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
   })
 
   const resetNonce = () => {
-    // shouldValidate re-runs the `validate` rule below, which is what propagates the new
-    // value to SafeTxContext via `setNonce` — a plain `setValue` only updates the input.
+    // shouldValidate re-runs the `validate` rule, which propagates the value to SafeTxContext
     formMethods.setValue(TxNonceFormFieldNames.NONCE, recommendedNonce, { shouldValidate: true })
   }
 
@@ -181,8 +180,9 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
                   name={field.name}
                   aria-label={message || undefined}
                   showTrigger
-                  className="[&_input]:font-bold"
-                  style={{ minWidth: getFieldMinWidth(field.value) }}
+                  // w-full/min-w-0 keep the inner <input> inside the clamped box instead of its intrinsic ~20ch width
+                  className="[&_input]:font-bold [&_input]:w-full [&_input]:min-w-0"
+                  style={{ width: getFieldMinWidth(field.value) }}
                   onBlur={() => {
                     field.onBlur()
 
@@ -211,7 +211,11 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
               {message && <TooltipContent side="top">{message}</TooltipContent>}
             </Tooltip>
 
-            <ComboboxContent>
+            {/* The input itself is tiny (clamped to a few characters), but the shared default ties
+                the popup width to it via --anchor-width. Options show full labels like "12 - New
+                transaction", so size the popup to that content instead — matching the pre-migration
+                MUI Popper, which explicitly opted out of the anchor-width tie for this field. */}
+            <ComboboxContent className="w-max min-w-40 max-w-[300px]">
               <ComboboxList>
                 {/* Each label must live inside its own ComboboxGroup — Base UI's GroupLabel throws
                     without a Group ancestor, which previously crashed the popup on open. */}
