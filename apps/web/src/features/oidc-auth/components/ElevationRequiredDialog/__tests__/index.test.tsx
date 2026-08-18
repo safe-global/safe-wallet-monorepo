@@ -7,6 +7,12 @@ jest.mock('../../../hooks/useStepUp', () => ({
   useStepUp: () => ({ stepUpWithRedirect: mockStepUpWithRedirect }),
 }))
 
+const mockClearPendingStepUpAction = jest.fn()
+
+jest.mock('../../../utils/stepUpReplay', () => ({
+  clearPendingStepUpAction: () => mockClearPendingStepUpAction(),
+}))
+
 const elevationRequired = { initialReduxState: { elevation: { isRequired: true } } }
 
 describe('ElevationRequiredDialog', () => {
@@ -44,5 +50,13 @@ describe('ElevationRequiredDialog', () => {
 
     expect(mockStepUpWithRedirect).not.toHaveBeenCalled()
     expect(screen.queryByText("Verify it's you")).not.toBeInTheDocument()
+  })
+
+  it('abandons the interrupted action when dismissed', () => {
+    render(<ElevationRequiredDialog />, elevationRequired)
+
+    fireEvent.click(screen.getByTestId('elevation-cancel-btn'))
+
+    expect(mockClearPendingStepUpAction).toHaveBeenCalled()
   })
 })

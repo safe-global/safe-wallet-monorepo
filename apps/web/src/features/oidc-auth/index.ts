@@ -60,6 +60,7 @@ export { default as ElevationRequiredDialog } from './components/ElevationRequir
 // ─────────────────────────────────────────────────────────────────
 
 export { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE, isElevationRequiredError } from './utils/elevation'
+export { clearPendingStepUpAction, replayPendingStepUpAction } from './utils/stepUpReplay'
 
 // ─────────────────────────────────────────────────────────────────
 // 2FA STATUS DERIVATION (shared with the spaces Team page)

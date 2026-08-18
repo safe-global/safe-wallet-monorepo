@@ -1,6 +1,7 @@
 import { createSlice, isRejectedWithValue } from '@reduxjs/toolkit'
 import type { listenerMiddlewareInstance, RootState } from '@/store/index'
 import { isElevationRequiredError } from '../utils/elevation'
+import { getReplayableAction, savePendingStepUpAction } from '../utils/stepUpReplay'
 
 type ElevationState = {
   /** Whether a sensitive action was rejected for want of a fresh second factor. */
@@ -47,9 +48,14 @@ export const elevationListener = (listenerMiddleware: typeof listenerMiddlewareI
     // FetchBaseQueryError is the action payload.
     matcher: isRejectedWithValue(),
     effect: (action, { dispatch }) => {
-      if (isElevationRequiredError(action.payload)) {
-        dispatch(requireElevation())
-      }
+      if (!isElevationRequiredError(action.payload)) return
+
+      // Held for the redirect so the action completes on the way back instead of
+      // dropping the user into the app with nothing done.
+      const replayable = getReplayableAction(action)
+      if (replayable) savePendingStepUpAction(replayable)
+
+      dispatch(requireElevation())
     },
   })
 }
