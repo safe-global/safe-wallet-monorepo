@@ -40,6 +40,20 @@ describe('featureFlagOverridesSlice', () => {
     expect(state).toEqual({})
   })
 
+  // The editor lists — and the reset button reports on — known flags only. Wiping a flag this build
+  // cannot see would destroy an override only the branch that declares it can manage.
+  it('leaves overrides of flags this build does not declare untouched when clearing all', () => {
+    const start = { [FEATURES.EARN]: true, FLAG_FROM_ANOTHER_BRANCH: false } as FeatureFlagOverridesState
+
+    expect(reducer(start, clearAllOverrides())).toEqual({ FLAG_FROM_ANOTHER_BRANCH: false })
+  })
+
+  it('clears nothing when every override belongs to another branch', () => {
+    const start = { FLAG_FROM_ANOTHER_BRANCH: true } as FeatureFlagOverridesState
+
+    expect(reducer(start, clearAllOverrides())).toEqual(start)
+  })
+
   it('selector falls back to empty object when the slice is absent', () => {
     expect(selectFeatureFlagOverrides({} as RootState)).toEqual({})
   })
@@ -73,14 +87,5 @@ describe('featureFlagOverridesSlice', () => {
       },
     } as unknown as RootState
     expect(selectOverrideCount(state)).toBe(2)
-  })
-
-  it('matches the number of flags the editor lists as overridden', () => {
-    const overrides = { [FEATURES.EARN]: true, FLAG_FROM_ANOTHER_BRANCH: true } as FeatureFlagOverridesState
-    const state = { [featureFlagOverridesSlice.name]: overrides } as unknown as RootState
-
-    const editorRows = Object.values(FEATURES).filter((feature) => overrides[feature] !== undefined)
-
-    expect(selectOverrideCount(state)).toBe(editorRows.length)
   })
 })

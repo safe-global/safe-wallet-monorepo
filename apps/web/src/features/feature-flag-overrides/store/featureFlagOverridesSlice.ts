@@ -1,6 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSelector, createSlice } from '@reduxjs/toolkit'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import type { FEATURES } from '@safe-global/utils/utils/chains'
+import { isKnownFeature } from '@/features/feature-flag-overrides/knownFeatures'
 import type { RootState } from '@/store'
 
 export type FeatureFlagOverridesState = Partial<Record<FEATURES, boolean>>
@@ -17,7 +18,13 @@ export const featureFlagOverridesSlice = createSlice({
     clearOverride: (state, { payload }: PayloadAction<FEATURES>) => {
       delete state[payload]
     },
-    clearAllOverrides: () => ({}),
+    /**
+     * Resets the flags this build declares, and only those. Overrides of flags it does not know
+     * belong to the branch that declared them — that branch's editor is the only place they can be
+     * seen, so this one must not silently wipe them.
+     */
+    clearAllOverrides: (state): FeatureFlagOverridesState =>
+      Object.fromEntries(Object.entries(state).filter(([feature]) => !isKnownFeature(feature))),
   },
 })
 
@@ -26,17 +33,9 @@ export const { setOverride, clearOverride, clearAllOverrides } = featureFlagOver
 export const selectFeatureFlagOverrides = (state: RootState): FeatureFlagOverridesState =>
   state[featureFlagOverridesSlice.name] || initialState
 
-const KNOWN_FEATURES = new Set<string>(Object.values(FEATURES))
-
-export const isKnownFeature = (feature: string): feature is FEATURES => KNOWN_FEATURES.has(feature)
-
 /**
- * Counts only overrides of flags this build declares.
- *
- * Overrides are persisted, so they outlive the enum: a flag overridden on a branch that adds it
- * stays in localStorage after switching to a branch that never declared it. The editor lists
- * `FEATURES` and nothing else, so counting those leftovers badges overrides the user can neither
- * see nor clear individually.
+ * Counts only overrides of flags this build declares — the editor lists `FEATURES` and nothing
+ * else, so counting a leftover would badge an override the user can neither see nor clear.
  */
 export const selectOverrideCount = createSelector(
   selectFeatureFlagOverrides,
