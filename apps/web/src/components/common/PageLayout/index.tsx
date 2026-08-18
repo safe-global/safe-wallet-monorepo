@@ -18,7 +18,7 @@ import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
 import { useIsTopbarElevated, useIsTopbarAboveOverlay } from '@/hooks/useTopbarElevation'
-import { useTopbarHeight } from '@/hooks/useTopbarHeight'
+import { useCssHeightVar } from '@/hooks/useCssHeightVar'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -66,7 +66,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   // `--topbar-height` CSS var. That height is not constant: below the header's `@1100px`
   // container query the safe selector wraps onto its own row, doubling the topbar height.
   // A fixed reserve then lets the topbar overlap the page (WA: dashboard cards clipped).
-  const setTopbarNode = useTopbarHeight()
+  const setTopbarNode = useCssHeightVar('--topbar-height')
 
   // Hide sidebar when transaction flow is open
   const isSidebarVisible = isSidebarOpen && !txFlow
