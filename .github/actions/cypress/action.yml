@@ -4,7 +4,7 @@ description: 'Run Cypress'
 
 inputs:
   secrets:
-    description: 'GitHub secrets as JSON'
+    description: 'JSON object with the individual secrets this action needs (enumerated at the call site)'
     required: true
 
   spec:
@@ -80,7 +80,7 @@ runs:
       env:
         NODE_ENV: cypress
         CYPRESS_RECORD_KEY: ${{ inputs.record_key || fromJSON(inputs.secrets).CYPRESS_RECORD_KEY }}
-        GITHUB_TOKEN: ${{ fromJSON(inputs.secrets).GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
         CYPRESS_PROJECT_ID: ${{ inputs.project_id }}
         CYPRESS_WALLET_CREDENTIALS: ${{ fromJSON(inputs.secrets).CYPRESS_WALLET_CREDENTIALS }}
         BEAMER_DATA_E2E: ${{ fromJSON(inputs.secrets).BEAMER_DATA_E2E }}

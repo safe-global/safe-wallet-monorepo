@@ -5,7 +5,7 @@ description: 'Build the app'
 inputs:
   secrets:
     required: true
-    description: 'GitHub secrets as JSON'
+    description: 'JSON object with the individual secrets this action needs (enumerated at the call site)'
 
   prod: # id of input
     description: 'Production build flag'
@@ -28,8 +28,8 @@ runs:
       run: |
         set -euo pipefail
 
-        # Auto-export all NEXT_PUBLIC_* secrets.
-        # New secrets with this prefix are picked up automatically.
+        # Export all NEXT_PUBLIC_* keys from the enumerated secrets input.
+        # New secrets must also be added to each workflow that calls this action.
         # Uses per-key heredoc delimiters to safely handle multi-line values
         # (e.g. NEXT_PUBLIC_FIREBASE_OPTIONS_* are JSON strings).
         EXPORTED=$(echo "$SECRETS_JSON" | jq -r '
