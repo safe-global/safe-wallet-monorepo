@@ -27,7 +27,7 @@ export const CompatibilityWarning = ({
 
   return (
     <>
-      <Alert variant={SEVERITY_TO_VARIANT[severity]} className={css.alert}>
+      <Alert variant={SEVERITY_TO_VARIANT[severity]} outlined={severity !== 'warning'} className={css.alert}>
         <AlertSeverityIcon variant={SEVERITY_TO_VARIANT[severity]} />
         <AlertDescription>{message}</AlertDescription>
       </Alert>

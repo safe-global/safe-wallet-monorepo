@@ -25,7 +25,7 @@ const SimilarityConfirmDialog = ({ open, safe, onConfirm, onCancel }: Similarity
         </DialogHeader>
 
         <div className="flex flex-col gap-4 px-4">
-          <Alert variant="warning">
+          <Alert variant="warning" outlined={false}>
             <AlertSeverityIcon variant="warning" />
             <AlertDescription>
               This address is similar to another safe in your list. This could indicate an address poisoning attack.

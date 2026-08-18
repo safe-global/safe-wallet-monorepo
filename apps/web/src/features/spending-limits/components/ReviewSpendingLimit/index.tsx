@@ -153,7 +153,7 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
       </TxDetailsRow>
 
       {existingSpendingLimit && (
-        <Alert variant="warning" className="border-none">
+        <Alert variant="warning" outlined={false} className="border-none">
           <AlertSeverityIcon variant="warning" />
           <Typography data-testid="limit-replacement-warning" className="font-bold">
             You are about to replace an existing spending limit

@@ -54,7 +54,7 @@ const StakingConfirmationTxExit = ({ order }: StakingOrderConfirmationViewProps)
       <Typography variant="paragraph-small" color="muted" className="block mt-4">
         The selected amount and any rewards will be withdrawn from Dedicated Staking for ETH after the validator exit.
       </Typography>
-      <Alert variant="warning" className="mb-2">
+      <Alert variant="warning" outlined={false} className="mb-2">
         <AlertSeverityIcon variant="warning" />
         <AlertDescription>
           This transaction is a withdrawal request. After it&apos;s executed, you&apos;ll need to complete a separate

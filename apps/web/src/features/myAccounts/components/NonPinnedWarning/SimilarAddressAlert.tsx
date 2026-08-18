@@ -12,7 +12,7 @@ interface SimilarAddressAlertProps {
 const SimilarAddressAlert = ({ similarAddresses }: SimilarAddressAlertProps) => {
   return (
     <>
-      <Alert variant="warning" className="mb-4">
+      <Alert variant="warning" outlined={false} className="mb-4">
         <AlertSeverityIcon variant="warning" />
         <AlertTitle>Similar address detected</AlertTitle>
         <AlertDescription>

@@ -144,7 +144,7 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
             </div>
 
             {nameError && (
-              <Alert variant="warning">
+              <Alert variant="warning" outlined={false}>
                 <AlertSeverityIcon variant="warning" />
                 <AlertDescription>Rename this contact to share it with the workspace. {nameError}.</AlertDescription>
               </Alert>

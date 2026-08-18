@@ -27,7 +27,7 @@ const NotificationRenewal = (): ReactElement => {
 
   return (
     <>
-      <Alert variant="warning">
+      <Alert variant="warning" outlined={false}>
         <AlertSeverityIcon variant="warning" />
         <AlertTitle className="mb-2">Signature needed</AlertTitle>
         <AlertDescription>{RENEWAL_MESSAGE}</AlertDescription>

@@ -42,7 +42,7 @@ export default function RecoverySigners({ item }: { item: RecoveryQueueItem }): 
 
         <AuditRow label={executionLabel} actionType={executionActionType} isLast />
 
-        <Alert variant={isExpired ? 'warning' : 'info'} className="mt-4">
+        <Alert variant={isExpired ? 'warning' : 'info'} outlined={false} className="mt-4">
           <AlertSeverityIcon variant={isExpired ? 'warning' : 'info'} />
           <AlertDescription>{desc}</AlertDescription>
         </Alert>

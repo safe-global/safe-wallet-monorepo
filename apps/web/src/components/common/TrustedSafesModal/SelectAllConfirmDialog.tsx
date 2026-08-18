@@ -28,7 +28,7 @@ const SelectAllConfirmDialog = ({
         </DialogHeader>
 
         <div className="flex flex-col gap-4 px-4">
-          <Alert variant="warning">
+          <Alert variant="warning" outlined={false}>
             <AlertSeverityIcon variant="warning" />
             <AlertDescription>
               {similarAddresses.length} Safe{similarAddresses.length === 1 ? '' : 's'} in your list closely resemble

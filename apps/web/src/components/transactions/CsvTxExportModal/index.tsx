@@ -272,7 +272,7 @@ const YearRangeAlert = ({ isOverYear }: { isOverYear: boolean }): ReactElement =
       }
 
   return (
-    <Alert variant={variant}>
+    <Alert variant={variant} outlined={false}>
       <AlertSeverityIcon variant={variant} />
       <AlertDescription>{message}</AlertDescription>
     </Alert>

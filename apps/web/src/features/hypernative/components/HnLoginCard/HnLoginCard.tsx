@@ -34,7 +34,7 @@ export const HnLoginCard = (): ReactElement | null => {
 
   if (showLoginCard) {
     return (
-      <Alert variant="warning" className="min-w-[303px] items-center px-4 py-0">
+      <Alert variant="warning" outlined={false} className="min-w-[303px] items-center px-4 py-0">
         <AlertIcon className="size-4 text-[var(--color-warning-main)]" />
         <AlertDescription>Hypernative not connected.</AlertDescription>
         <AlertAction>

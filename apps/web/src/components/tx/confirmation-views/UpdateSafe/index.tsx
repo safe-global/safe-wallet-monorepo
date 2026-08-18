@@ -73,7 +73,7 @@ export function _UpdateSafe({
       )}
 
       {showQueueWarning && (
-        <Alert variant="warning">
+        <Alert variant="warning" outlined={false}>
           <AlertSeverityIcon variant="warning" />
           <AlertTitle>This upgrade will invalidate all queued transactions!</AlertTitle>
           <AlertDescription>

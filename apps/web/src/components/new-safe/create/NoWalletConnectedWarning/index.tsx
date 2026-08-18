@@ -10,13 +10,13 @@ const NoWalletConnectedWarning = () => {
   }
 
   return (
-    <Alert variant="warning" className="mt-6">
+    <Alert variant="warning" outlined={false} className="mt-6">
       <AlertSeverityIcon variant="warning" />
       <AlertTitle className="font-bold">No wallet connected</AlertTitle>
       <AlertDescription>
         You need to connect a wallet to create a Safe account.
         <div className="mt-4">
-          <ConnectWalletButton fullWidth />
+          <ConnectWalletButton />
         </div>
       </AlertDescription>
     </Alert>

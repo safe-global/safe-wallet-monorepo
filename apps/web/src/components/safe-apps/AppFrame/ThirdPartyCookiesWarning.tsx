@@ -12,7 +12,11 @@ type ThirdPartyCookiesWarningProps = {
 
 export const ThirdPartyCookiesWarning = ({ onClose }: ThirdPartyCookiesWarningProps): React.ReactElement => {
   return (
-    <Alert variant="warning" className="rounded-none border-0 border-b border-[var(--color-warning-main)]">
+    <Alert
+      variant="warning"
+      outlined={false}
+      className="rounded-none border-0 border-b border-[var(--color-warning-main)]"
+    >
       <AlertSeverityIcon variant="warning" />
       <AlertTitle>
         Third party cookies are disabled. Safe Apps may therefore not work properly. You can find out more information
