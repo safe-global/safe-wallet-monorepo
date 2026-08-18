@@ -29,6 +29,7 @@ const SelectAllConfirmDialog = ({
 
         <div className="flex flex-col gap-4 px-4">
           <Alert variant="warning">
+            <TriangleAlert />
             <AlertDescription>
               {similarAddresses.length} Safe{similarAddresses.length === 1 ? '' : 's'} in your list closely resemble
               other addresses. Review them carefully before continuing.

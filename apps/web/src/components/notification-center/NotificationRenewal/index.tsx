@@ -1,5 +1,6 @@
 import { useState, type ReactElement } from 'react'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { TriangleAlert } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import CheckWalletWithPermission from '@/components/common/CheckWalletWithPermission'
@@ -28,6 +29,7 @@ const NotificationRenewal = (): ReactElement => {
   return (
     <>
       <Alert variant="warning">
+        <TriangleAlert />
         <AlertTitle className="mb-2">Signature needed</AlertTitle>
         <AlertDescription>{RENEWAL_MESSAGE}</AlertDescription>
       </Alert>

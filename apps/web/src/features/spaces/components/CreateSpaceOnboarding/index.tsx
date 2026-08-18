@@ -4,6 +4,7 @@ import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Input } from '@/components/ui/input'
 import { Typography } from '@/components/ui/typography'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { CircleAlert } from 'lucide-react'
 import { Spinner } from '@/components/ui/spinner'
 import {
   OnboardingLayout,
@@ -123,6 +124,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
 
         {error && (
           <Alert variant="destructive">
+            <CircleAlert />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}

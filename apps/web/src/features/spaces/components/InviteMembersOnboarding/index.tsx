@@ -1,5 +1,5 @@
 import { useMemo, type ReactElement } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, CircleAlert } from 'lucide-react'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Typography } from '@/components/ui/typography'
@@ -79,6 +79,7 @@ const InviteMembersOnboarding = (): ReactElement => {
 
       {error && (
         <Alert variant="destructive">
+          <CircleAlert />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}

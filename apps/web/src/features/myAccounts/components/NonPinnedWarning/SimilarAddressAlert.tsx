@@ -1,4 +1,5 @@
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { TriangleAlert } from 'lucide-react'
 import { Typography } from '@/components/ui/typography'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -13,6 +14,7 @@ const SimilarAddressAlert = ({ similarAddresses }: SimilarAddressAlertProps) => 
   return (
     <>
       <Alert variant="warning" className="mb-4">
+        <TriangleAlert />
         <AlertTitle>Similar address detected</AlertTitle>
         <AlertDescription>
           <p>

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { AlertTriangle, Check, X } from 'lucide-react'
+import { AlertTriangle, Check, X, CircleAlert } from 'lucide-react'
 import { type GetSpaceResponse, useSpacesDeleteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import {
   AlertDialog,
@@ -111,6 +111,7 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
 
         {error && (
           <Alert variant="destructive">
+            <CircleAlert />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}

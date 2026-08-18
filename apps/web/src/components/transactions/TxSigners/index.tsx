@@ -1,6 +1,6 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type ReactElement } from 'react'
-import { Copy, Info } from 'lucide-react'
+import { Copy, Info, TriangleAlert } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -313,7 +313,8 @@ const TxSigners = ({
 
       {isExpired && !executor && (
         <Alert variant="warning" className="mt-4">
-          This order has expired. Reject this transaction and try again.
+          <TriangleAlert />
+          <AlertDescription>This order has expired. Reject this transaction and try again.</AlertDescription>
         </Alert>
       )}
     </div>

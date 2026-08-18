@@ -1,6 +1,6 @@
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Plus, CircleAlert } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
@@ -188,6 +188,7 @@ const AddContactDialog = ({
 
                 {error && (
                   <Alert variant="destructive" className="mt-4">
+                    <CircleAlert />
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}

@@ -10,6 +10,7 @@ import NameInput from '@/components/common/NameInput'
 import DialogActions from '@/components/common/DialogActions'
 import { Typography } from '@/components/ui/typography'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { CircleAlert } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { MEMBER_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
@@ -102,6 +103,7 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
 
               {error && (
                 <Alert variant="destructive" className="mt-4">
+                  <CircleAlert />
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}

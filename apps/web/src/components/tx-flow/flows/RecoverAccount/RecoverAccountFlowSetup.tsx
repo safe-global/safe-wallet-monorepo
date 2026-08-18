@@ -20,6 +20,7 @@ import { Typography } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { CircleAlert } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
@@ -185,6 +186,7 @@ export function RecoverAccountFlowSetup({
 
           {isSameSetup && (
             <Alert variant="destructive" className="border-0">
+              <CircleAlert />
               <AlertDescription>The proposed Account setup is the same as the current one.</AlertDescription>
             </Alert>
           )}

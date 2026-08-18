@@ -6,6 +6,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import DialogActions from '@/components/common/DialogActions'
 import { Typography } from '@/components/ui/typography'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { CircleAlert } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useSpaceSafesDeleteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -77,6 +78,7 @@ const RemoveSafeDialog = ({
           </Typography>
           {error && (
             <Alert variant="destructive" className="mt-4">
+              <CircleAlert />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}

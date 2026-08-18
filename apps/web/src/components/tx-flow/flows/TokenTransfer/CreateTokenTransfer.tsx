@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Link } from '@/components/ui/link'
 import { Typography } from '@/components/ui/typography'
-import { X as CloseIcon, Info } from 'lucide-react'
+import { X as CloseIcon, Info, CircleAlert, TriangleAlert } from 'lucide-react'
 import TokenIcon from '@/components/common/TokenIcon'
 import AddIcon from '@/public/images/common/add.svg'
 import {
@@ -207,6 +207,7 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
 
                 {hasInsufficientFunds && (
                   <Alert data-testid="insufficient-balance-error" variant="destructive">
+                    <CircleAlert />
                     <AlertTitle>Insufficient balance</AlertTitle>
                     <AlertDescription>
                       The total amount assigned to all recipients exceeds your available balance. Please adjust the
@@ -236,6 +237,7 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
 
                 {!canAddMoreRecipients && (
                   <Alert data-testid="max-recipients-reached" variant="warning">
+                    <TriangleAlert />
                     <AlertDescription>
                       No more recipients can be added.
                       {!!csvAirdropAppUrl && (

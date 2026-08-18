@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { useContext } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, TriangleAlert } from 'lucide-react'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import ArrowUpRightIcon from '@/public/images/common/arrow-up-right.svg'
@@ -325,6 +325,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
           may bring the balance up before execution; otherwise execution reverts with GS013. */}
       {safeHasEnoughGas === false && !props.loading && (
         <Alert variant="warning" className="mt-2">
+          <TriangleAlert />
           <AlertDescription>
             Insufficient {gasFee.currency} balance to cover the gas fee. Top up before execution, otherwise the
             transaction will fail.

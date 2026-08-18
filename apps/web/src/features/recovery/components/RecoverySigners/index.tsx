@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Info } from 'lucide-react'
+import { Info, TriangleAlert } from 'lucide-react'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
@@ -45,7 +45,7 @@ export default function RecoverySigners({ item }: { item: RecoveryQueueItem }): 
         <AuditRow label={executionLabel} actionType={executionActionType} isLast />
 
         <Alert variant={isExpired ? 'warning' : 'info'} className="mt-4">
-          {!isExpired && <Info />}
+          {isExpired ? <TriangleAlert /> : <Info />}
           <AlertDescription>{desc}</AlertDescription>
         </Alert>
 

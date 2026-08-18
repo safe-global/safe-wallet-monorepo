@@ -1,4 +1,5 @@
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { CircleAlert } from 'lucide-react'
 import type { ReactElement } from 'react'
 
 const ErrorAlert = ({ error }: { error?: string }): ReactElement | null => {
@@ -8,6 +9,7 @@ const ErrorAlert = ({ error }: { error?: string }): ReactElement | null => {
 
   return (
     <Alert variant="destructive" className="mt-4">
+      <CircleAlert />
       <AlertDescription>{error}</AlertDescription>
     </Alert>
   )

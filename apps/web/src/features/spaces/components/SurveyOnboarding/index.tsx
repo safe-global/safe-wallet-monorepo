@@ -2,7 +2,17 @@ import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { useRouter } from 'next/router'
-import { ArrowLeftRight, BarChart3, FileCode, HelpCircle, Send, Shield, Sparkles, type LucideIcon } from 'lucide-react'
+import {
+  ArrowLeftRight,
+  BarChart3,
+  CircleAlert,
+  FileCode,
+  HelpCircle,
+  Send,
+  Shield,
+  Sparkles,
+  type LucideIcon,
+} from 'lucide-react'
 import {
   useSurveysGetStateV1Query,
   useSurveysSubmitResponseV1Mutation,
@@ -132,6 +142,7 @@ const SurveyOnboarding = (): ReactElement | null => {
 
       {error && !isNotFoundError(error) && (
         <Alert variant="destructive">
+          <CircleAlert />
           <AlertDescription>Failed to load survey. Please refresh.</AlertDescription>
         </Alert>
       )}
@@ -152,6 +163,7 @@ const SurveyOnboarding = (): ReactElement | null => {
 
       {submitError && (
         <Alert variant="destructive">
+          <CircleAlert />
           <AlertDescription>Failed to submit. Please try again.</AlertDescription>
         </Alert>
       )}

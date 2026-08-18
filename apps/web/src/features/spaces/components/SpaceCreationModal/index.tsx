@@ -14,6 +14,7 @@ import { setLastUsedSpace } from '@/store/authSlice'
 import { useAppDispatch } from '@/store'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { CircleAlert } from 'lucide-react'
 import DialogActions from '@/components/common/DialogActions'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
@@ -100,6 +101,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
 
               {error && (
                 <Alert variant="destructive" className="mt-4">
+                  <CircleAlert />
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}

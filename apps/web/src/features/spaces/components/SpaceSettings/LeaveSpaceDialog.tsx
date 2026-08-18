@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { LogOut } from 'lucide-react'
+import { LogOut, CircleAlert } from 'lucide-react'
 import { type GetSpaceResponse, useMembersSelfRemoveV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import {
   AlertDialog,
@@ -69,6 +69,7 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
 
         {error && (
           <Alert variant="destructive">
+            <CircleAlert />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}

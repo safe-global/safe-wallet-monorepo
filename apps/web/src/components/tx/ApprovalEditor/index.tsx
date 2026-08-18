@@ -4,6 +4,7 @@ import Approvals from '@/components/tx/ApprovalEditor/Approvals'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { decodeSafeTxToBaseTransactions } from '@/utils/transactions'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { CircleAlert } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { type SafeTransaction } from '@safe-global/types-kit'
@@ -69,6 +70,7 @@ const ApprovalEditor = ({
       <Title isErc721={isErc721Approval} />
       {error ? (
         <Alert variant="destructive">
+          <CircleAlert />
           <AlertDescription>Error while decoding approval transactions.</AlertDescription>
         </Alert>
       ) : loading || !readableApprovals ? (
