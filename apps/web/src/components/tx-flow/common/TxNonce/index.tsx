@@ -97,7 +97,9 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
   })
 
   const resetNonce = () => {
-    formMethods.setValue(TxNonceFormFieldNames.NONCE, recommendedNonce)
+    // shouldValidate re-runs the `validate` rule below, which is what propagates the new
+    // value to SafeTxContext via `setNonce` — a plain `setValue` only updates the input.
+    formMethods.setValue(TxNonceFormFieldNames.NONCE, recommendedNonce, { shouldValidate: true })
   }
 
   useEffect(() => {
@@ -185,7 +187,7 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
                     field.onBlur()
 
                     if (fieldState.error) {
-                      formMethods.setValue(field.name, recommendedNonce.toString())
+                      formMethods.setValue(field.name, recommendedNonce.toString(), { shouldValidate: true })
                     }
                   }}
                 >
