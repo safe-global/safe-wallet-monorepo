@@ -140,21 +140,22 @@ const TokenAmountInput = ({
           fullWidth
           inputSize="hero"
           endAdornment={
-            <div className="flex items-center gap-1">
+            // items-stretch so Max and the divider take their height from the token select, which is
+            // content-sized (a two-line name + balance row) rather than a fixed token height.
+            <div className="flex items-stretch gap-1">
               {maxAmount !== undefined && (
                 <Button
                   variant="ghost"
                   size="sm"
                   data-testid="max-btn"
-                  className="uppercase"
+                  // eslint-disable-next-line no-restricted-syntax -- h-auto drops size="sm"'s fixed h-8 so Max matches the adjacent token select, whose height is content-driven and has no matching Button size token.
+                  className="h-auto uppercase"
                   onClick={onMaxAmountClick}
                 >
                   Max
                 </Button>
               )}
-              {/* data-[orientation=vertical]:self-center replaces Separator's base self-stretch (same variant,
-                  so tailwind-merge drops it), centering the fixed-height divider in the tall amount field. */}
-              <Separator orientation="vertical" className="mx-1 h-8 data-[orientation=vertical]:self-center" />
+              <Separator orientation="vertical" className="mx-1" />
               <div data-testid="token-selector" className={css.select}>
                 <Select name={tokenAddressField} value={tokenAddress} onValueChange={handleTokenChange} required>
                   {/* size="sm" lines the trigger up with the Max button and the h-8 divider beside it;

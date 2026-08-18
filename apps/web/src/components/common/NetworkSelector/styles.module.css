@@ -67,22 +67,24 @@
 
 /* Compact chip (24px tall) that fits inside the 36px control without growing it —
    selecting networks must not change the field height. */
+/* Sized for the hero control it sits in: 66px box with py-3 leaves 42px of inner height. Radius
+   matches the token pill inside the hero amount field so both read as the same class of chip. */
 .multiChainChip {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  height: 24px;
-  padding: 0 8px;
+  height: 40px;
+  padding: 0 12px;
   font-size: 14px;
   border: 1px solid var(--color-border-main);
-  border-radius: 6px;
+  border-radius: 12px;
 }
 
 .multiChainChip img[data-testid='chain-indicator-network-logo-img'] {
-  width: 16px;
-  height: 16px;
+  width: 24px;
+  height: 24px;
   /* The logo img carries an inline min-width from ChainIndicator. */
-  min-width: 16px !important;
+  min-width: 24px !important;
 }
 
 .chipDelete {
@@ -98,34 +100,6 @@
 .multiSelectWrapper {
   position: relative;
   width: 100%;
-}
-
-/* Mirrors the InputGroup default variant (h-9, bg-input, border-border, rounded-md, shadow-xs,
-   focus ring) so the control matches the standard text fields in the same form. */
-.multiSelectControl {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1);
-  min-height: 36px;
-  padding: 3px 12px;
-  background-color: var(--input);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  transition:
-    color 0.15s,
-    box-shadow 0.15s;
-  cursor: text;
-}
-
-.multiSelectControl:focus-within {
-  border-color: var(--ring);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent);
-}
-
-.multiSelectError {
-  border-color: var(--color-error-main);
 }
 
 .multiSelectInput {

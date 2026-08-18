@@ -118,7 +118,12 @@ const OwnerRow = ({
         )}
       </div>
       {!readOnly && (
-        <div className="col-span-1 -ml-4 flex shrink-0 items-center self-stretch">
+        // Centre on the 66px field box, not on the whole cell: both columns are label-above-control
+        // and the name field can carry a "Your connected wallet" caption below, so `self-stretch` +
+        // `items-center` drifts with that caption. Offset past the label block instead — its line box
+        // (text-sm 0.875rem x leading-snug 1.375) plus the Field's gap-3 (Tailwind's 0.75rem, not the
+        // app's --space-3). Mirrors CreateNestedSafe's .removeAsset.
+        <div className="col-span-1 -ml-4 mt-[calc(0.875rem*1.375+0.75rem)] flex h-[66px] shrink-0 items-center">
           {removable && (
             <Button
               variant="ghost"
