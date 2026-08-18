@@ -96,10 +96,10 @@ describe('Alert', () => {
       </Alert>,
     )
 
-    expect(screen.getByRole('alert')).toHaveClass('bg-muted', 'border-transparent')
+    expect(screen.getByRole('alert')).toHaveClass('bg-[var(--color-info-background)]', 'border-transparent')
   })
 
-  it('applies the muted fill and muted icon color on the info variant', () => {
+  it('applies the info tint and info icon color on the info variant', () => {
     render(
       <Alert variant="info">
         <AlertTitle>Item added successfully</AlertTitle>
@@ -107,8 +107,9 @@ describe('Alert', () => {
     )
 
     const alert = screen.getByRole('alert')
-    expect(alert).toHaveClass('bg-muted', 'text-foreground', 'border-transparent')
-    expect(alert.className).toContain('*:[svg]:text-muted-foreground')
+    expect(alert).toHaveClass('bg-[var(--color-info-background)]', 'text-foreground', 'border-transparent')
+    expect(alert.className).toContain('[&>svg]:text-[var(--color-info-dark)]')
+    expect(alert).not.toHaveClass('bg-muted')
   })
 
   it('renders the action slot anchored to the top right', () => {

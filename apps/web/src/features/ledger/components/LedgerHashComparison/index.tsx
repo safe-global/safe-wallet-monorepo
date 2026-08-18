@@ -40,7 +40,7 @@ const LedgerHashComparison = () => {
         </DialogHeader>
 
         <div className="px-4">
-          <Alert className="mb-6">
+          <Alert variant="info" className="mb-6">
             <InfoIcon />
             <AlertDescription>{DIALOG_DESCRIPTION}</AlertDescription>
           </Alert>

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Link } from '@/components/ui/link'
 import { Typography } from '@/components/ui/typography'
-import { X as CloseIcon } from 'lucide-react'
+import { X as CloseIcon, Info } from 'lucide-react'
 import TokenIcon from '@/components/common/TokenIcon'
 import AddIcon from '@/public/images/common/add.svg'
 import {
@@ -216,7 +216,8 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
                 )}
 
                 {canAddMoreRecipients && maxRecipientsInfo && !!csvAirdropAppUrl && (
-                  <Alert variant="default">
+                  <Alert variant="info">
+                    <Info />
                     <AlertDescription>
                       If you want to add more than {MAX_RECIPIENTS} recipients, use <CsvAirdropLink />
                     </AlertDescription>

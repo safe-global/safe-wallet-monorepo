@@ -1,5 +1,6 @@
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { Info } from 'lucide-react'
 
 interface MigrationPromptProps {
   /** Callback when user wants to proceed with selecting safes */
@@ -12,7 +13,8 @@ interface MigrationPromptProps {
  */
 const MigrationPrompt = ({ onProceed }: MigrationPromptProps) => {
   return (
-    <Alert data-testid="migration-prompt" className="mb-4">
+    <Alert data-testid="migration-prompt" variant="info" className="mb-4">
+      <Info />
       <AlertTitle>Add to my accounts</AlertTitle>
       <AlertDescription>Only Safes you add will appear in your account list.</AlertDescription>
       <div className="mt-4">

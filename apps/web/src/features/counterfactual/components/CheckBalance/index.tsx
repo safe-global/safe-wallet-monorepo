@@ -7,6 +7,7 @@ import { COUNTERFACTUAL_EVENTS } from '@/services/analytics/events/counterfactua
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { Alert } from '@/components/ui/alert'
 import { Typography } from '@/components/ui/typography'
+import { Info } from 'lucide-react'
 
 const CheckBalance = () => {
   const { safe, safeAddress } = useSafeInfo()
@@ -17,7 +18,8 @@ const CheckBalance = () => {
   const blockExplorerLink = chain ? getBlockExplorerLink(chain, safeAddress) : undefined
 
   return (
-    <Alert data-testid="no-tokens-alert" className="mx-auto mt-6 flex max-w-[600px] flex-col px-6 py-4">
+    <Alert data-testid="no-tokens-alert" variant="info" className="mx-auto mt-6 flex max-w-[600px] flex-col px-6 py-4">
+      <Info />
       <Typography variant="paragraph-bold" className="mb-2">
         Don&apos;t see your tokens?
       </Typography>

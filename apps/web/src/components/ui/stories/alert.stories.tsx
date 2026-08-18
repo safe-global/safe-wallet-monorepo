@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Alert, AlertTitle, AlertDescription, AlertAction } from '../alert'
-import { AlertCircle, Check, TriangleAlert, Wallet, X } from 'lucide-react'
+import { AlertCircle, Check, Info, TriangleAlert, Wallet, X } from 'lucide-react'
 import { Button } from '../button'
 
 /**
@@ -141,7 +141,7 @@ export const AllVariants: Story = {
           </div>
           <div style={{ width: '400px' }}>
             <Alert variant="info">
-              <AlertCircle />
+              <Info />
               <AlertTitle>Info Alert</AlertTitle>
               <AlertDescription>This is an info alert message.</AlertDescription>
             </Alert>

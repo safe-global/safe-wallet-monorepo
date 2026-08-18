@@ -31,7 +31,7 @@ import { Button } from '@/components/ui/button'
 import DialogActions from '@/components/common/DialogActions'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { XIcon } from 'lucide-react'
+import { XIcon, Info } from 'lucide-react'
 import madProps from '@/utils/mad-props'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -229,7 +229,8 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
           <div className="p-4">
             {multiSigInitiated ? (
               <>
-                <Alert variant="default" className="mb-4">
+                <Alert variant="info" className="mb-4">
+                  <Info />
                   <AlertDescription>1 of {parentThreshold} signatures collected</AlertDescription>
                 </Alert>
 
@@ -246,7 +247,8 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
             ) : (
               <>
                 {isMultiSigRequired && (
-                  <Alert variant="default" className="mb-4">
+                  <Alert variant="info" className="mb-4">
+                    <Info />
                     <AlertDescription>
                       This requires {parentThreshold} of {parentOwners?.length ?? '?'} parent Safe owner signatures to
                       complete.

@@ -4,7 +4,7 @@ import { Info } from 'lucide-react'
 export const MigrateToL2Information = ({ variant }: { variant: 'history' | 'queue' }) => {
   return (
     <div>
-      <Alert variant="default">
+      <Alert variant="info">
         <Info />
         <AlertTitle>Migration to compatible base contract</AlertTitle>
         <AlertDescription>

@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
+import { Info } from 'lucide-react'
 
-import { Alert } from '@/components/ui/alert'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 import { AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
 import { Countdown } from '@/components/common/Countdown'
@@ -43,8 +44,9 @@ export default function RecoverySigners({ item }: { item: RecoveryQueueItem }): 
 
         <AuditRow label={executionLabel} actionType={executionActionType} isLast />
 
-        <Alert variant={isExpired ? 'warning' : 'default'} className="mt-4 py-1">
-          {desc}
+        <Alert variant={isExpired ? 'warning' : 'info'} className="mt-4">
+          {!isExpired && <Info />}
+          <AlertDescription>{desc}</AlertDescription>
         </Alert>
 
         {isNext && remainingSeconds > 0 && (

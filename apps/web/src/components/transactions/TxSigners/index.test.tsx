@@ -194,6 +194,9 @@ describe('TxSigners (Audit Log)', () => {
     render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
 
     expect(screen.getByText('Can be executed once the threshold is reached.')).toBeInTheDocument()
+    const alert = screen.getByText('Can be executed once the threshold is reached.').closest('[role="alert"]')
+    expect(alert).toHaveClass('bg-[var(--color-info-background)]')
+    expect(alert?.querySelector('svg.lucide-info')).toBeTruthy()
   })
 
   it('shows proposer review banner when proposer-submitted and below threshold', () => {

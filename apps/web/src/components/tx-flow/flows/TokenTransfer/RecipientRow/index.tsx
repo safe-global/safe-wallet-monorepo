@@ -19,7 +19,7 @@ import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import SpendingLimitRow from '../SpendingLimitRow'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { X } from 'lucide-react'
+import { X, Info } from 'lucide-react'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useResolvedGasToken, type FeePreviewTx } from '@/features/gtf'
@@ -127,7 +127,8 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
         </div>
 
         {showFeeBanner && (
-          <Alert data-testid="gtf-fee-banner" className="items-center">
+          <Alert data-testid="gtf-fee-banner" variant="info" className="items-center">
+            <Info />
             <AlertDescription className="flex w-full items-center justify-between gap-2">
               <span>
                 Your max send amount accounts for fees paid in {selectedToken?.tokenInfo.symbol}. This updates if fees

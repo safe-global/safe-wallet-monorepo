@@ -1,7 +1,7 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type ReactElement } from 'react'
-import { Copy } from 'lucide-react'
-import { Alert } from '@/components/ui/alert'
+import { Copy, Info } from 'lucide-react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import TxConfirmations from '@/components/transactions/TxConfirmations'
@@ -290,23 +290,29 @@ const TxSigners = ({
       )}
 
       {confirmationsNeeded > 0 && !executor && !isExpired && (
-        <Alert className="mt-4 py-1">
-          {isCancellation
-            ? 'Cancellation can be executed once the required approvals are collected.'
-            : 'Can be executed once the threshold is reached.'}
+        <Alert variant="info" className="mt-4">
+          <Info />
+          <AlertDescription>
+            {isCancellation
+              ? 'Cancellation can be executed once the required approvals are collected.'
+              : 'Can be executed once the threshold is reached.'}
+          </AlertDescription>
         </Alert>
       )}
 
       {isTxFromProposer && !executor && !isExpired && (
-        <Alert className="mt-4 py-1">
-          {isCancellation
-            ? 'This on-chain rejection was initiated by a proposer. Please review and approve or dismiss it.'
-            : 'This transaction was created by a proposer. Please review and either confirm or reject it.'}
+        <Alert variant="info" className="mt-4">
+          <Info />
+          <AlertDescription>
+            {isCancellation
+              ? 'This on-chain rejection was initiated by a proposer. Please review and approve or dismiss it.'
+              : 'This transaction was created by a proposer. Please review and either confirm or reject it.'}
+          </AlertDescription>
         </Alert>
       )}
 
       {isExpired && !executor && (
-        <Alert variant="warning" className="mt-4 py-1">
+        <Alert variant="warning" className="mt-4">
           This order has expired. Reject this transaction and try again.
         </Alert>
       )}
