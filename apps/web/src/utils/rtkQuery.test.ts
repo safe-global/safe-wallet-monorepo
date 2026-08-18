@@ -1,6 +1,7 @@
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { getRtkQueryErrorMessage, RTK_QUERY_ERROR_MESSAGES, getGenericErrorWithStatus } from './rtkQuery'
+import { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/utils/elevation'
 
 describe('getRtkQueryErrorMessage', () => {
   it('returns a friendly message for a network failure instead of the raw JS error', () => {
@@ -41,6 +42,16 @@ describe('getRtkQueryErrorMessage', () => {
   it('surfaces the backend message for an HTTP error response', () => {
     const error: FetchBaseQueryError = { status: 400, data: { message: 'Names must be at least 3 characters long' } }
     expect(getRtkQueryErrorMessage(error)).toBe('Names must be at least 3 characters long')
+  })
+
+  it("replaces CGW's elevation_required marker with copy written for users", () => {
+    const error: FetchBaseQueryError = { status: 403, data: { message: ELEVATION_REQUIRED_ERROR } }
+    expect(getRtkQueryErrorMessage(error)).toBe(ELEVATION_REQUIRED_MESSAGE)
+  })
+
+  it('still surfaces the backend message for an unrelated 403', () => {
+    const error: FetchBaseQueryError = { status: 403, data: { message: 'Signer address not authorized' } }
+    expect(getRtkQueryErrorMessage(error)).toBe('Signer address not authorized')
   })
 
   it('returns a generic message with the status code for an HTTP error with no message', () => {

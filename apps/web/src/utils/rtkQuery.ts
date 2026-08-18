@@ -1,5 +1,6 @@
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
+import { ELEVATION_REQUIRED_MESSAGE, isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 const HTTP_TOO_MANY_REQUESTS = 429
 
@@ -37,6 +38,11 @@ export const getRtkQueryErrorMessage = (error: FetchBaseQueryError | SerializedE
         ? RTK_QUERY_ERROR_MESSAGES.rateLimit
         : RTK_QUERY_ERROR_MESSAGES.generic
     }
+
+    // CGW's step-up challenge is a protocol marker, not copy for users. The
+    // recovery flow is owned by ElevationRequiredDialog; this only keeps the raw
+    // token out of whichever inline error the calling dialog also renders.
+    if (isElevationRequiredError(error)) return ELEVATION_REQUIRED_MESSAGE
 
     // HTTP error response: prefer the backend's own message when present.
     if ('data' in error && typeof error.data === 'object' && error.data) {

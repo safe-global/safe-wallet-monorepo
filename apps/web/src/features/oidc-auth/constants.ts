@@ -1,6 +1,15 @@
 export const OIDC_AUTH_PENDING_KEY = 'oidc_auth_pending'
 export const OIDC_AUTH_CONNECTION_KEY = 'oidc_auth_connection'
 
+/**
+ * Marks a step-up (elevation) round-trip in progress. Kept separate from
+ * `OIDC_AUTH_PENDING_KEY` so returning from a step-up is not reported as a
+ * sign-in: the user was already signed in when it started.
+ */
+export const STEP_UP_PENDING_KEY = 'oidc_step_up_pending'
+
+export const STEP_UP_FAILED_MESSAGE = 'Verification was not completed. Please try again.'
+
 export enum OidcConnection {
   EMAIL = 'email',
   GOOGLE = 'google-oauth2',

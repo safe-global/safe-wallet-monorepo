@@ -48,6 +48,13 @@ export {
   selectGlobalSearchOpen,
 } from '@/features/global-search/store'
 export {
+  elevationSlice,
+  elevationListener,
+  requireElevation,
+  clearElevationRequired,
+  selectIsElevationRequired,
+} from '@/features/oidc-auth/store'
+export {
   safeActionsModalSlice,
   ESafeAction,
   openSafeActionsModal,
