@@ -82,11 +82,23 @@ describe('applyFeatureOverrides', () => {
     expect(result.features).toContain(forcedOn)
   })
 
-  it('handles an override key that is not a known feature (string cast)', () => {
+  // Overrides are persisted, so one set on a branch that declares the flag outlives the switch to a
+  // branch that does not. It must not reach `chain.features` here any more than it is counted or
+  // listed elsewhere.
+  it('ignores an override of a flag this build does not declare', () => {
     const chain = makeChain([])
     const overrides = { CUSTOM_UNKNOWN_FLAG: true } as unknown as FeatureFlagOverridesState
-    const result = applyFeatureOverrides(chain, overrides)
-    expect(result.features).toContain('CUSTOM_UNKNOWN_FLAG')
+
+    expect(applyFeatureOverrides(chain, overrides)).toBe(chain)
+  })
+
+  it('applies the known overrides alongside one from another branch', () => {
+    const [overridden] = pickFeatures()
+    const overrides = { [overridden]: true, CUSTOM_UNKNOWN_FLAG: true } as unknown as FeatureFlagOverridesState
+    const result = applyFeatureOverrides(makeChain([]), overrides)
+
+    expect(result.features).toContain(overridden)
+    expect(result.features).not.toContain('CUSTOM_UNKNOWN_FLAG')
   })
 
   // The production policy lives in the hooks, not here. Pinning the purity keeps the guard from
