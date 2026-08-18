@@ -2,10 +2,11 @@ import { useMemo } from 'react'
 import partition from 'lodash/partition'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { type FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { useAppSelector } from '@/store'
 import { selectFeatureFlagOverrides } from '@/features/feature-flag-overrides/store'
+import { SORTED_FEATURES } from '@/features/feature-flag-overrides/knownFeatures'
 import useChainId from '@/hooks/useChainId'
 
 export type FeatureFlagRowData = {
@@ -28,9 +29,6 @@ const getChainScope = (chains: Chain[], feature: FEATURES): FeatureFlagRowData['
   if (withFeature.length === chains.length) return 'global'
   return withFeature
 }
-
-// The flag list is a fixed enum, so sort it once at module scope rather than on every render.
-const SORTED_FEATURES: FEATURES[] = [...Object.values(FEATURES)].sort((a, b) => a.localeCompare(b))
 
 /**
  * Derives the editor's per-flag display data.

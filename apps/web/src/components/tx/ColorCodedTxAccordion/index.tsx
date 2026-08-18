@@ -24,15 +24,15 @@ const TX_INFO_LEVEL = {
   [ColorLevel.success]: ['Transfer', 'SwapTransfer', 'TwapOrder', 'NativeStakingDeposit'],
 }
 
-/** `main` inks the method chip; `border` outlines the panel and uses the palette's `*-light` tier,
- * which is our border weight everywhere else (shadcn.css maps `--color-*-muted` to it). */
-const TxInfoColors: Record<ColorLevel, { main: string; mainDark?: string; border: string }> = {
-  [ColorLevel.info]: { main: 'info.dark', border: 'info.light' },
-  [ColorLevel.warning]: { main: 'warning.main', border: 'warning.light' },
+/** `main` inks the chip text, `background` tints its fill, `border` outlines the panel. */
+const TxInfoColors: Record<ColorLevel, { main: string; mainDark?: string; border: string; background: string }> = {
+  [ColorLevel.info]: { main: 'info.dark', border: 'info.light', background: 'info.background' },
+  [ColorLevel.warning]: { main: 'warning.main', border: 'warning.light', background: 'warning.background' },
   [ColorLevel.success]: {
     main: 'success.main',
     mainDark: 'primary.main',
     border: 'success.light',
+    background: 'background.light',
   },
 }
 
@@ -93,6 +93,7 @@ const ColorCodedTxAccordion = ({ txInfo, txData, children, defaultExpanded }: De
                   className={css.methodChip}
                   style={{
                     color: isDarkMode ? toCssVar(colors.mainDark ?? colors.main) : toCssVar(colors.main),
+                    backgroundColor: toCssVar(colors.background),
                   }}
                 >
                   {methodLabel}
