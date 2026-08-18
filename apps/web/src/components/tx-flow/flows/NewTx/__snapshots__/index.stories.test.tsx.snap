@@ -64,7 +64,7 @@ exports[`./index.stories Default 1`] = `
                         data-slot="progress-track"
                       >
                         <div
-                          class="bg-primary h-full transition-all"
+                          class="h-full transition-all bg-[var(--color-secondary-main)]"
                           data-progressing=""
                           data-slot="progress-indicator"
                           style="inset-inline-start: 0; height: inherit; width: 10%;"
@@ -215,7 +215,7 @@ exports[`./index.stories SendTokensJourney 1`] = `
                         data-slot="progress-track"
                       >
                         <div
-                          class="bg-primary h-full transition-all"
+                          class="h-full transition-all bg-[var(--color-secondary-main)]"
                           data-progressing=""
                           data-slot="progress-indicator"
                           style="inset-inline-start: 0; height: inherit; width: 10%;"
