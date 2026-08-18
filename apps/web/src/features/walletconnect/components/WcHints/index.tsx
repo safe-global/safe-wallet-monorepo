@@ -20,15 +20,18 @@ const HintAccordion = ({
 }): ReactElement => {
   return (
     <Accordion value={expanded ? ['item'] : []} onValueChange={onExpand}>
-      <AccordionItem value="item">
-        <AccordionTrigger>
+      <AccordionItem
+        value="item"
+        className="overflow-hidden rounded-lg border border-transparent transition-colors hover:border-[var(--color-success-light)] data-open:border-[var(--color-success-light)]"
+      >
+        <AccordionTrigger className="px-4 transition-colors hover:bg-[var(--color-success-background)] aria-expanded:bg-[var(--color-success-background)]">
           <Typography className={css.title}>
             <Question className={`size-4 ${css.questionIcon}`} />
             {title}
           </Typography>
         </AccordionTrigger>
 
-        <AccordionContent className="p-0">
+        <AccordionContent className="px-4 pb-4 pt-0">
           <div className={css.list}>
             {items.map((item, i) => (
               <div key={i} className="flex items-center">

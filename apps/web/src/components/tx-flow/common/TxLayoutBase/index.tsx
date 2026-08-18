@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useIsBelowMd, useMediaQuery } from '@/hooks/useMediaQuery'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import { ProgressBar } from '@/components/common/ProgressBar'
 import { SafeTxContext } from '../../SafeTxProvider'
 import TxNonce from '../TxNonce'
@@ -103,6 +104,7 @@ const TxLayoutBase = ({
 }: TxLayoutBaseProps): ReactElement => {
   const isSmallScreen = useIsBelowMd()
   const isDesktop = useMediaQuery('(min-width:1200px)')
+  const isDarkMode = useDarkMode()
 
   return (
     <div className={classnames('flex flex-wrap', css.container)}>
@@ -150,7 +152,7 @@ const TxLayoutBase = ({
               >
                 {!hideProgress && (
                   <div className={css.progressBar}>
-                    <ProgressBar value={progress} />
+                    <ProgressBar value={progress} color={isDarkMode ? 'primary' : 'secondary'} />
                   </div>
                 )}
 

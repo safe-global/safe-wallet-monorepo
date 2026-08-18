@@ -50,6 +50,39 @@ describe('TabsList', () => {
     expect(list).toHaveAttribute('data-variant', 'line')
   })
 
+  it('spaces nav triggers with padding and keeps the first one flush left', () => {
+    render(
+      <Tabs defaultValue="assets">
+        <TabsList data-testid="list" variant="underline" tone="brand">
+          <TabsTrigger value="assets">Assets</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
+        </TabsList>
+        <TabsContent value="assets">Assets panel</TabsContent>
+      </Tabs>,
+    )
+
+    expect(screen.getByTestId('list').className).not.toMatch(/(^|\s)gap-/)
+    expect(screen.getByRole('tab', { name: 'Assets' })).toHaveClass(
+      'group-data-[variant=nav]/tabs-list:px-6',
+      'group-data-[variant=nav]/tabs-list:first:pl-0',
+    )
+  })
+
+  it('scrolls nav tabs that do not fit instead of overflowing the page', () => {
+    render(
+      <Tabs defaultValue="assets">
+        <TabsList data-testid="list" variant="underline" tone="brand">
+          <TabsTrigger value="assets">Assets</TabsTrigger>
+        </TabsList>
+        <TabsContent value="assets">Assets panel</TabsContent>
+      </Tabs>,
+    )
+
+    const list = screen.getByTestId('list')
+    expect(list).toHaveClass('w-full', 'min-w-0', 'overflow-x-auto', 'justify-start')
+    expect(list.className).not.toMatch(/(^|\s)w-fit(\s|$)/)
+  })
+
   it('defaults to the default variant', () => {
     render(
       <Tabs defaultValue="one">

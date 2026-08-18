@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { Alert, AlertTitle, AlertDescription, AlertAction } from './alert'
+import { Alert, AlertTitle, AlertDescription, AlertAction, AlertSeverityIcon } from './alert'
 
 describe('Alert', () => {
   it('renders as an alert with title and description', () => {
@@ -137,5 +137,36 @@ describe('Alert', () => {
     )
 
     expect(screen.getByRole('button', { name: 'Retry' }).parentElement).toHaveClass('text-foreground')
+  })
+})
+
+describe('AlertSeverityIcon', () => {
+  it.each([
+    ['destructive', 'lucide-circle-alert'],
+    ['warning', 'lucide-triangle-alert'],
+    ['success', 'lucide-circle-check'],
+    ['info', 'lucide-info'],
+  ] as const)('renders the standard icon for the %s variant', (variant, iconClass) => {
+    const { container } = render(<AlertSeverityIcon variant={variant} />)
+
+    expect(container.querySelector(`svg.${iconClass}`)).toBeInTheDocument()
+  })
+
+  it('renders nothing for the default variant, which has no standard icon', () => {
+    const { container } = render(<AlertSeverityIcon variant="default" />)
+
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('renders nothing when no variant is given', () => {
+    const { container } = render(<AlertSeverityIcon />)
+
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('forwards props (e.g. className) to the rendered icon', () => {
+    render(<AlertSeverityIcon variant="warning" className="size-6" data-testid="severity-icon" />)
+
+    expect(screen.getByTestId('severity-icon')).toHaveClass('size-6', 'lucide-triangle-alert')
   })
 })

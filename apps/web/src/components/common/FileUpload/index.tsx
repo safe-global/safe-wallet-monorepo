@@ -2,6 +2,7 @@ import css from './styles.module.css'
 import { XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Link } from '@/components/ui/link'
+import { cn } from '@/utils/cn'
 import { Typography } from '@/components/ui/typography'
 import FileIcon from '@/public/images/settings/data/file.svg'
 import type { MouseEventHandler, ReactElement } from 'react'
@@ -80,6 +81,7 @@ const FileUpload = ({
   fileType,
   fileInfo,
   onRemove,
+  className,
 }: {
   isDragReject?: boolean
   isDragActive?: boolean
@@ -88,6 +90,8 @@ const FileUpload = ({
   getRootProps: <T extends DropzoneRootProps>(props?: T | undefined) => T
   fileInfo?: FileInfo
   onRemove: (() => void) | MouseEventHandler
+  /** Sizing for the dropzone. `getRootProps` can't carry it — it is spread before these props. */
+  className?: string
 }) => {
   if (fileInfo) {
     return <UploadSummary fileInfo={fileInfo} onRemove={onRemove} />
@@ -96,7 +100,7 @@ const FileUpload = ({
     <div
       data-testid="file-upload-section"
       {...getRootProps()}
-      className={css.dropbox}
+      className={cn(css.dropbox, className)}
       style={{
         cursor: isDragReject ? 'not-allowed' : undefined,
         background: isDragReject ? 'var(--color-error-light)' : undefined,
@@ -113,7 +117,13 @@ const FileUpload = ({
       <div className="flex items-center gap-2">
         <FileIcon className="size-5 fill-none text-[var(--color-primary-light)]" />
         <Typography>
-          Drag and drop a {fileType} file or <Link variant="muted">choose a file</Link>
+          Drag and drop a {fileType} file or{' '}
+          <Link
+            variant="default"
+            className="font-bold text-[var(--color-secondary-dark)] decoration-current hover:text-muted-foreground dark:text-primary dark:hover:text-muted-foreground"
+          >
+            choose a file
+          </Link>
         </Typography>
       </div>
     </div>
