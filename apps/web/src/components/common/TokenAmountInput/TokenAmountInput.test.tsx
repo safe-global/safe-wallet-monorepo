@@ -420,7 +420,7 @@ describe('TokenAmountInput', () => {
   })
 
   describe('Error state styling', () => {
-    // WA-3185: the amount FIELD (label + border) must turn destructive on error, but the typed
+    // The amount FIELD (label + border) must turn destructive on error, but the typed
     // VALUE text must stay neutral — the invalid `Field` ancestor would otherwise cascade its red
     // colour onto the value via CSS inheritance (see ui/input.tsx's `text-foreground`).
     const ErroredWrapper = ({ defaultAmount }: { defaultAmount: string }) => {

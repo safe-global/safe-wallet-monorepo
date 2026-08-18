@@ -454,7 +454,7 @@ describe('CreateTokenTransfer', () => {
       expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
     })
 
-    // WA-3185: the fee banner renders as an info alert, not the plain default
+    // The fee banner renders as an info alert, not the plain default
     it('renders the fee banner with the info alert styling, not the plain default alert', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
       mockBalancesForGtf()
@@ -488,7 +488,7 @@ describe('CreateTokenTransfer', () => {
     })
   })
 
-  // WA-3185: the CSV airdrop hint renders as an info alert, not the plain default
+  // The CSV airdrop hint renders as an info alert, not the plain default
   describe('CSV airdrop hint', () => {
     const useHasFeatureSpy = jest.spyOn(chainHooks, 'useHasFeature')
     const useRemoteSafeAppsSpy = jest.spyOn(remoteSafeAppsHooks, 'useRemoteSafeApps')
