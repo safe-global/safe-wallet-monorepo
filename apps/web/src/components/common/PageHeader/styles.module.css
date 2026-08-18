@@ -10,7 +10,7 @@
   z-index: 2;
   width: 100%;
   position: sticky !important;
-  top: calc(var(--header-height) - 76px);
+  top: var(--page-header-top);
 }
 
 /* In dark mode the page background is black (var(--background), set on .mainSpace),
@@ -39,6 +39,10 @@
 
 .pageHeader {
   row-gap: var(--space-3);
+}
+
+.navWrapper {
+  min-width: 0;
 }
 
 .actionsWrapper {
