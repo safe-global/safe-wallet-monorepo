@@ -16,6 +16,9 @@ import * as useBalances from '@/hooks/useBalances'
 import * as useTrustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
 import * as chainHooks from '@/hooks/useChains'
 import * as gtfHooks from '@/features/gtf'
+import * as remoteSafeAppsHooks from '@/hooks/safe-apps/useRemoteSafeApps'
+import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { fireEvent, waitFor } from '@testing-library/react'
 
 // Mock the SpendingLimitRowWrapper component with the same "Send as" label as the real component
@@ -449,6 +452,217 @@ describe('CreateTokenTransfer', () => {
       fireEvent.click(getByLabelText('Dismiss fee banner'))
 
       expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
+    })
+
+    // The fee banner renders as an info alert, not the plain default
+    it('renders the fee banner with the info alert styling, not the plain default alert', async () => {
+      useHasFeatureSpy.mockImplementation(() => true)
+      mockBalancesForGtf()
+      mockResolvedToSentToken()
+
+      const { getByTestId } = renderCreateTokenTransfer()
+
+      fireEvent.click(getByTestId('max-btn'))
+
+      await waitFor(() => {
+        expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
+      })
+
+      expect(getByTestId('gtf-fee-banner')).toHaveClass('bg-muted', 'text-foreground', 'border-transparent')
+    })
+
+    it('renders the standard info icon inside the fee banner', async () => {
+      useHasFeatureSpy.mockImplementation(() => true)
+      mockBalancesForGtf()
+      mockResolvedToSentToken()
+
+      const { getByTestId } = renderCreateTokenTransfer()
+
+      fireEvent.click(getByTestId('max-btn'))
+
+      await waitFor(() => {
+        expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
+      })
+
+      expect(getByTestId('gtf-fee-banner').querySelector('svg.lucide-info')).toBeInTheDocument()
+    })
+  })
+
+  // The CSV airdrop hint renders as an info alert, not the plain default
+  describe('CSV airdrop hint', () => {
+    const useHasFeatureSpy = jest.spyOn(chainHooks, 'useHasFeature')
+    const useRemoteSafeAppsSpy = jest.spyOn(remoteSafeAppsHooks, 'useRemoteSafeApps')
+
+    const csvApp: SafeApp = {
+      id: 1,
+      name: 'CSV Airdrop',
+      url: 'https://example.com/csv-airdrop',
+      description: '',
+      chainIds: [],
+      accessControl: { type: 'NO_RESTRICTIONS' },
+      tags: [],
+      features: [],
+      socialProfiles: [],
+      featured: false,
+    }
+
+    beforeEach(() => {
+      useHasFeatureSpy.mockImplementation((feature) => feature === FEATURES.MASS_PAYOUTS)
+      useRemoteSafeAppsSpy.mockReturnValue([[csvApp], undefined, false])
+    })
+
+    it('shows the CSV hint as an info alert after adding a second recipient', () => {
+      const { getByTestId } = renderCreateTokenTransfer()
+
+      fireEvent.click(getByTestId('add-recipient-btn'))
+
+      const csvHint = getByTestId('csv-airdrop-hint')
+      expect(csvHint).toBeInTheDocument()
+      expect(csvHint).toHaveClass('bg-muted', 'text-foreground', 'border-transparent')
+    })
+
+    it('renders the standard info icon inside the CSV hint', () => {
+      const { getByTestId } = renderCreateTokenTransfer()
+
+      fireEvent.click(getByTestId('add-recipient-btn'))
+
+      expect(getByTestId('csv-airdrop-hint').querySelector('svg.lucide-info')).toBeInTheDocument()
+    })
+
+    it('dismisses the CSV hint on close button click', () => {
+      const { getByTestId, queryByTestId, getByLabelText } = renderCreateTokenTransfer()
+
+      fireEvent.click(getByTestId('add-recipient-btn'))
+      expect(getByTestId('csv-airdrop-hint')).toBeInTheDocument()
+
+      fireEvent.click(getByLabelText('close'))
+
+      expect(queryByTestId('csv-airdrop-hint')).not.toBeInTheDocument()
+    })
+
+    it('renders the standard warning icon on the max-recipients-reached alert', () => {
+      const { getByTestId } = renderCreateTokenTransfer()
+
+      // MAX_RECIPIENTS is 5 — starting from 1 recipient, 4 more clicks fills the cap.
+      for (let i = 0; i < 4; i++) {
+        fireEvent.click(getByTestId('add-recipient-btn'))
+      }
+
+      const maxReached = getByTestId('max-recipients-reached')
+      expect(maxReached).toBeInTheDocument()
+      expect(maxReached.querySelector('svg.lucide-triangle-alert')).toBeInTheDocument()
+    })
+
+    it('renders the max-recipients-reached alert filled (tinted background, no border)', () => {
+      const { getByTestId } = renderCreateTokenTransfer()
+
+      for (let i = 0; i < 4; i++) {
+        fireEvent.click(getByTestId('add-recipient-btn'))
+      }
+
+      const maxReached = getByTestId('max-recipients-reached')
+      expect(maxReached).toHaveClass('bg-warning-subtle', 'border-transparent', 'text-warning-strong')
+      expect(maxReached).not.toHaveClass('bg-card')
+    })
+  })
+
+  describe('Insufficient balance alert', () => {
+    const useHasFeatureSpy = jest.spyOn(chainHooks, 'useHasFeature')
+
+    beforeEach(() => {
+      useHasFeatureSpy.mockImplementation((feature) => feature === FEATURES.MASS_PAYOUTS)
+
+      const balances = {
+        fiatTotal: '0',
+        items: [
+          {
+            balance: '1000000', // 1 USDC
+            tokenInfo: {
+              address: USDC_ADDRESS,
+              decimals: 6,
+              logoUri: '',
+              name: 'USD Coin',
+              symbol: 'USDC',
+              type: TokenType.ERC20,
+            },
+            fiatBalance: '1',
+            fiatConversion: '1',
+          },
+        ],
+      }
+
+      jest.spyOn(useTrustedTokenBalances, 'useTrustedTokenBalances').mockReturnValue([balances, undefined, false])
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances,
+        loaded: true,
+        loading: false,
+        error: undefined,
+      })
+      // `should display a type selection...` mocks useTokenAmount without restoring it — re-mock
+      // here so this describe is immune to run order.
+      jest.spyOn(tokenUtils, 'useTokenAmount').mockImplementation((selectedToken) => ({
+        totalAmount: BigInt(selectedToken?.balance || 0),
+        spendingLimitAmount: 0n,
+      }))
+    })
+
+    it('renders the standard destructive icon once the assigned total exceeds the balance', async () => {
+      const twoRecipientParams = {
+        recipients: [
+          { recipient: '', tokenAddress: USDC_ADDRESS, amount: '' },
+          { recipient: '', tokenAddress: USDC_ADDRESS, amount: '' },
+        ],
+        type: TokenTransferType.multiSig,
+      }
+
+      const { getByTestId, getAllByTestId } = render(
+        <SafeShieldProvider>
+          <TxFlowProvider step={0} data={twoRecipientParams} prevStep={() => {}} nextStep={jest.fn()}>
+            <CreateTokenTransfer />
+          </TxFlowProvider>
+        </SafeShieldProvider>,
+      )
+
+      const amountFields = getAllByTestId('token-amount-field')
+      // 0.6 + 0.6 USDC assigned against a 1 USDC balance — sum exceeds what's available.
+      fireEvent.change(amountFields[0], { target: { value: '0.6' } })
+      fireEvent.change(amountFields[1], { target: { value: '0.6' } })
+
+      await waitFor(() => {
+        expect(getByTestId('insufficient-balance-error')).toBeInTheDocument()
+      })
+
+      expect(getByTestId('insufficient-balance-error').querySelector('svg.lucide-circle-alert')).toBeInTheDocument()
+    })
+
+    it('renders the insufficient-balance alert filled (tinted background, no border)', async () => {
+      const twoRecipientParams = {
+        recipients: [
+          { recipient: '', tokenAddress: USDC_ADDRESS, amount: '' },
+          { recipient: '', tokenAddress: USDC_ADDRESS, amount: '' },
+        ],
+        type: TokenTransferType.multiSig,
+      }
+
+      const { getByTestId, getAllByTestId } = render(
+        <SafeShieldProvider>
+          <TxFlowProvider step={0} data={twoRecipientParams} prevStep={() => {}} nextStep={jest.fn()}>
+            <CreateTokenTransfer />
+          </TxFlowProvider>
+        </SafeShieldProvider>,
+      )
+
+      const amountFields = getAllByTestId('token-amount-field')
+      fireEvent.change(amountFields[0], { target: { value: '0.6' } })
+      fireEvent.change(amountFields[1], { target: { value: '0.6' } })
+
+      await waitFor(() => {
+        expect(getByTestId('insufficient-balance-error')).toBeInTheDocument()
+      })
+
+      const alert = getByTestId('insufficient-balance-error')
+      expect(alert).toHaveClass('bg-error-subtle', 'border-transparent', 'text-error-strong')
+      expect(alert).not.toHaveClass('bg-card')
     })
   })
 })
