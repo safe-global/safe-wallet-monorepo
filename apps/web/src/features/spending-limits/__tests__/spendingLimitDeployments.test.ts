@@ -59,10 +59,12 @@ describe('getLatestSpendingLimitAddress', () => {
   })
 
   // WA-2305 (Pharos) and CUS-132 (Optimism, Arbitrum) were all reported as "spending limit setup
-  // hangs on an infinite spinner". The shared cause was that the AllowanceModule was not registered
-  // for those chains in the pinned @safe-global/safe-modules-deployments, so this resolver returned
-  // undefined and the tx builder bailed out silently. Optimism and Arbitrum were only registered in
-  // v3.0.9. Pin it: if a deployments bump ever drops them again, that regresses both tickets.
+  // hangs on an infinite spinner": the shared cause was that all three chains resolved no
+  // AllowanceModule address in the pinned @safe-global/safe-modules-deployments, so this resolver
+  // returned undefined and the tx builder bailed out silently. Optimism and Arbitrum were only added
+  // to the package in v3.0.9; Pharos was added in v3.0.4, but the app was still pinned at v3.0.2 when
+  // WA-2305 was filed, so it was equally unresolvable in practice. Pin it: if a deployments bump ever
+  // drops any of them again, that regresses both tickets.
   it.each([
     ['Pharos', '1672'],
     ['Optimism', '10'],
