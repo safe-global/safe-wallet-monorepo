@@ -58,6 +58,22 @@ describe('getLatestSpendingLimitAddress', () => {
     expect(result).toBeUndefined()
   })
 
+  // WA-2305 (Pharos) and CUS-132 (Optimism, Arbitrum) were all reported as "spending limit setup
+  // hangs on an infinite spinner". The shared cause was that the AllowanceModule was not registered
+  // for those chains in the pinned @safe-global/safe-modules-deployments, so this resolver returned
+  // undefined and the tx builder bailed out silently. Optimism and Arbitrum were only registered in
+  // v3.0.9. Pin it: if a deployments bump ever drops them again, that regresses both tickets.
+  it.each([
+    ['Pharos', '1672'],
+    ['Optimism', '10'],
+    ['Arbitrum One', '42161'],
+  ])('should resolve a module address on %s (chainId %s)', (_name, chainId) => {
+    expect(getLatestSpendingLimitAddress(chainId)).toBe(
+      getAllowanceModuleDeployment({ version: '0.1.1' })?.networkAddresses[chainId],
+    )
+    expect(getLatestSpendingLimitAddress(chainId)).toBeDefined()
+  })
+
   it('should return v0.1.0 address for Sepolia (chainId 11155111)', () => {
     const v010 = getAllowanceModuleDeployment({ version: '0.1.0' })
     const expectedAddress = v010?.networkAddresses['11155111']
