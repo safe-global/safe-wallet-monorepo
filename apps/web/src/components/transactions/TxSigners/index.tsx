@@ -5,7 +5,7 @@ import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/aler
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import TxConfirmations from '@/components/transactions/TxConfirmations'
-import { AuditRow, AuditLogHeader, useCopyToClipboard } from '@/components/common/AuditLog'
+import { AuditLog, AuditRow, AuditLogHeader, useCopyToClipboard } from '@/components/common/AuditLog'
 
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsPending from '@/hooks/useIsPending'
@@ -190,7 +190,7 @@ const TxSigners = ({
     if (!txDetails.executedAt) return null
 
     return (
-      <div data-testid="transaction-actions-list">
+      <AuditLog data-testid="transaction-actions-list">
         <AuditLogHeader
           actions={<TxAuditLogActions txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />}
         />
@@ -202,7 +202,7 @@ const TxSigners = ({
           timestamp={txDetails.executedAt}
           isLast
         />
-      </div>
+      </AuditLog>
     )
   }
 
@@ -213,7 +213,7 @@ const TxSigners = ({
     const moduleName = detailedExecutionInfo.address.name?.replace(/([a-z])([A-Z])/g, '$1 $2')
 
     return (
-      <div data-testid="transaction-actions-list">
+      <AuditLog data-testid="transaction-actions-list">
         <AuditLogHeader
           actions={<TxAuditLogActions txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />}
         />
@@ -234,7 +234,7 @@ const TxSigners = ({
           timestamp={txDetails.executedAt}
           isLast
         />
-      </div>
+      </AuditLog>
     )
   }
 
@@ -261,7 +261,7 @@ const TxSigners = ({
   const showExecutionRow = isConfirmed || !!executor || txDetails.txStatus !== 'AWAITING_CONFIRMATIONS'
 
   return (
-    <div data-testid="transaction-actions-list">
+    <AuditLog data-testid="transaction-actions-list">
       <AuditLogHeader
         chip={
           <TxConfirmations
@@ -342,7 +342,7 @@ const TxSigners = ({
           <AlertDescription>This order has expired. Reject this transaction and try again.</AlertDescription>
         </Alert>
       )}
-    </div>
+    </AuditLog>
   )
 }
 

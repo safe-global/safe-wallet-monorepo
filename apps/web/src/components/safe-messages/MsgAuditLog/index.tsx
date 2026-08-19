@@ -4,7 +4,7 @@ import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/aler
 import { Button } from '@/components/ui/button'
 import { Copy as CopyIcon } from 'lucide-react'
 import TxConfirmations from '@/components/transactions/TxConfirmations'
-import { AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
+import { AuditLog, AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
 import CopyTooltip from '@/components/common/CopyTooltip'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
@@ -26,7 +26,7 @@ const MsgAuditLog = ({ msg }: { msg: MessageItem }): ReactElement => {
   const signingLabel = (idx: number) => `Signed (${idx + 1}/${confirmationsRequired})`
 
   return (
-    <div className="mb-4" data-testid="msg-audit-log">
+    <AuditLog className="mb-4" data-testid="msg-audit-log">
       <AuditLogHeader
         chip={
           <TxConfirmations
@@ -71,7 +71,7 @@ const MsgAuditLog = ({ msg }: { msg: MessageItem }): ReactElement => {
           <AlertDescription>Can be confirmed once the threshold is reached.</AlertDescription>
         </Alert>
       )}
-    </div>
+    </AuditLog>
   )
 }
 
