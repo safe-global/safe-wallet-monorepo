@@ -49,14 +49,13 @@
   display: none;
 }
 
-/* `--tx-details-edge-inset` is the horizontal room the surrounding panel gives up so the rules
-   below can reach the card's edges — set by the transaction list item, 0 elsewhere (message and
-   recovery details already render in an unpadded panel, so they are unaffected). Each block re-adds
-   it on the side that meets a card edge: a border spans its element's border box, so padding moves
-   the text without moving the rule. */
+/* `--tx-details-edge-inset` is the horizontal padding the transaction list item drops so these
+   borders span the card; 0 elsewhere. Blocks re-add it where their text would otherwise hug an edge:
+   a border spans the border box, so padding moves the text without moving the line. */
+
 .txNote {
   margin: var(--space-1) 0;
-  padding: 0 var(--space-2) var(--space-2) calc(var(--space-2) + var(--tx-details-edge-inset, 0px));
+  padding: 0 var(--space-2) var(--space-2);
   border-bottom: 1px solid var(--border);
 }
 

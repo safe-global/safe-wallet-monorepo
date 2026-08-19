@@ -14,7 +14,7 @@ export default function TxNote({ txDetails }: { txDetails: TransactionDetails | 
 
   return (
     <div>
-      <Typography variant="h4" className="flex items-center">
+      <Typography variant="paragraph-bold" as="h4" className="flex items-center">
         Note
         <Tooltip>
           <TooltipTrigger
