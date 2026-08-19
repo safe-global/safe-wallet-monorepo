@@ -3,8 +3,8 @@ import { useRouter } from 'next/router'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import reconcileAuth from '@/store/reconcileAuth'
-import { clearElevationRequired } from '../store'
 import { STEP_UP_FAILED_MESSAGE, STEP_UP_PENDING_KEY } from '../constants'
+import { markStepUpReturnHandled } from '../utils/stepUp'
 import { clearPendingStepUpAction, replayPendingStepUpAction } from '../utils/stepUpReplay'
 
 /**
@@ -33,6 +33,9 @@ export const useStepUpCallback = () => {
 
     hasProcessed.current = true
     sessionStorage.removeItem(STEP_UP_PENDING_KEY)
+    // The challenge for this page load is spent; a replay that is itself rejected
+    // must surface as an error rather than redirecting out again.
+    markStepUpReturnHandled()
 
     const processCallback = async () => {
       // Read from `window.location` rather than `router.query`, which can still
@@ -61,8 +64,6 @@ export const useStepUpCallback = () => {
         await reconcileAuth(dispatch)
         await replayPendingStepUpAction(dispatch)
       }
-
-      dispatch(clearElevationRequired())
     }
 
     void processCallback()

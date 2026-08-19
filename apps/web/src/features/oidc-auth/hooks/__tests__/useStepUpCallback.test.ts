@@ -22,6 +22,11 @@ jest.mock('@/store/notificationsSlice', () => ({
 
 const mockReplayPendingStepUpAction = jest.fn()
 const mockClearPendingStepUpAction = jest.fn()
+const mockMarkStepUpReturnHandled = jest.fn()
+
+jest.mock('../../utils/stepUp', () => ({
+  markStepUpReturnHandled: () => mockMarkStepUpReturnHandled(),
+}))
 
 jest.mock('../../utils/stepUpReplay', () => ({
   replayPendingStepUpAction: (...args: unknown[]) => mockReplayPendingStepUpAction(...args),
@@ -35,8 +40,6 @@ jest.mock('next/router', () => ({
     replace: mockReplace,
   }),
 }))
-
-const CLEAR_ELEVATION = { type: 'elevation/clearElevationRequired', payload: undefined }
 
 describe('useStepUpCallback', () => {
   const originalLocation = window.location
@@ -69,7 +72,7 @@ describe('useStepUpCallback', () => {
     expect(mockDispatch).not.toHaveBeenCalled()
   })
 
-  it('should reconcile the session and clear the prompt on a successful return', async () => {
+  it('should reconcile the session on a successful return', async () => {
     sessionStorage.setItem(STEP_UP_PENDING_KEY, '1')
 
     renderHook(() => useStepUpCallback())
@@ -77,7 +80,6 @@ describe('useStepUpCallback', () => {
     await waitFor(() => {
       expect(mockReconcileAuth).toHaveBeenCalledTimes(1)
     })
-    expect(mockDispatch).toHaveBeenCalledWith(CLEAR_ELEVATION)
   })
 
   it('should consume the pending marker so a reload does not re-process it', async () => {
@@ -109,16 +111,15 @@ describe('useStepUpCallback', () => {
     })
   })
 
-  // The dialog must not outlive a failed attempt, or the user is left staring at
-  // a prompt for a request that is no longer in flight.
-  it('should clear the prompt even when the step-up failed', async () => {
+  // Without this, an `elevation_required` raised by the replayed action would
+  // send the user straight back out to the provider, on and on.
+  it('should spend the challenge for this page load so a rejected replay cannot redirect again', async () => {
     sessionStorage.setItem(STEP_UP_PENDING_KEY, '1')
-    setSearch('?error=access_denied')
 
     renderHook(() => useStepUpCallback())
 
     await waitFor(() => {
-      expect(mockDispatch).toHaveBeenCalledWith(CLEAR_ELEVATION)
+      expect(mockMarkStepUpReturnHandled).toHaveBeenCalledTimes(1)
     })
   })
 

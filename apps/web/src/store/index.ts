@@ -69,9 +69,6 @@ const rootReducer = combineReducers({
   [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
   [slices.gtfPaymentSourcePreferenceSlice.name]: slices.gtfPaymentSourcePreferenceSlice.reducer,
   [slices.featureFlagOverridesSlice.name]: slices.featureFlagOverridesSlice.reducer,
-  // Not added to `persistedSlices`: elevation belongs to the live session, so a
-  // stale step-up prompt must not survive a reload.
-  [slices.elevationSlice.name]: slices.elevationSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,

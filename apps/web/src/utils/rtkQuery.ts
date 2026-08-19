@@ -62,8 +62,8 @@ export const getRtkQueryErrorMessage = (error: FetchBaseQueryError | SerializedE
     }
 
     // CGW's step-up challenge is a protocol marker, not copy for users. The
-    // recovery flow is owned by ElevationRequiredDialog; this only keeps the raw
-    // token out of whichever inline error the calling dialog also renders.
+    // store listener redirects to the provider on its own; this only keeps the
+    // raw token out of any inline error rendered before the page unloads.
     if (isElevationRequiredError(error)) return ELEVATION_REQUIRED_MESSAGE
 
     // HTTP error response: prefer the backend's own message when present.
