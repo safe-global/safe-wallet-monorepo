@@ -5,7 +5,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import DialogActions from '@/components/common/DialogActions'
 import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useSpaceSafesDeleteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -77,6 +77,7 @@ const RemoveSafeDialog = ({
           </Typography>
           {error && (
             <Alert variant="destructive" className="mt-4">
+              <AlertSeverityIcon variant="destructive" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}

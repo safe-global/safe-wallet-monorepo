@@ -2,12 +2,11 @@ import { usePendingTxIds } from '@/hooks/usePendingTxs'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import { useAppDispatch } from '@/store'
 import { clearPendingTx } from '@/store/pendingTxsSlice'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { useCallback } from 'react'
-import { TriangleAlert } from 'lucide-react'
 
 export const ClearPendingTxs = () => {
   const pendingTxIds = usePendingTxIds()
@@ -24,7 +23,7 @@ export const ClearPendingTxs = () => {
     <div className="flex flex-col gap-4">
       <Typography>Clear this Safe account&apos;s pending transactions.</Typography>
       <Alert variant="warning" outlined={false}>
-        <TriangleAlert />
+        <AlertSeverityIcon variant="warning" />
         <AlertDescription>
           This action does not delete any transactions but only resets their local state. It does not stop any pending
           transactions from executing. If you want to cancel an execution, you have to do so in your connected wallet.

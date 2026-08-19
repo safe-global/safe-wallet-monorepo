@@ -1,6 +1,6 @@
 import type { WalletKitTypes } from '@reown/walletkit'
 
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Typography } from '@/components/ui/typography'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { useCompatibilityWarning, type CompatibilityWarningSeverity } from './useCompatibilityWarning'
@@ -8,10 +8,10 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 
 import css from './styles.module.css'
 
-const SEVERITY_TO_VARIANT: Record<CompatibilityWarningSeverity, 'default' | 'destructive' | 'warning'> = {
+const SEVERITY_TO_VARIANT: Record<CompatibilityWarningSeverity, 'info' | 'destructive' | 'warning'> = {
   error: 'destructive',
   warning: 'warning',
-  info: 'default',
+  info: 'info',
 }
 
 export const CompatibilityWarning = ({
@@ -27,7 +27,8 @@ export const CompatibilityWarning = ({
 
   return (
     <>
-      <Alert variant={SEVERITY_TO_VARIANT[severity]} className={css.alert}>
+      <Alert variant={SEVERITY_TO_VARIANT[severity]} outlined={severity !== 'warning'} className={css.alert}>
+        <AlertSeverityIcon variant={SEVERITY_TO_VARIANT[severity]} />
         <AlertDescription>{message}</AlertDescription>
       </Alert>
 

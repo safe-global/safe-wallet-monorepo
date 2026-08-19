@@ -114,7 +114,7 @@ const SwapOrderConfirmation = ({ order, decodedData, settlementContract }: SwapO
                 <EthHashInfo address={receiver} hasExplorer={true} avatarSize={24} />
               </DataRow>
               <div key="recipient">
-                <Alert data-testid="recipient-alert" variant="warning">
+                <Alert data-testid="recipient-alert" variant="warning" outlined={false}>
                   <AlertIcon />
                   <AlertDescription>
                     <Typography variant="paragraph-small">
