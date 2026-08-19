@@ -3,10 +3,6 @@ name: 'Cypress'
 description: 'Run Cypress'
 
 inputs:
-  secrets:
-    description: 'JSON object with the individual secrets this action needs (enumerated at the call site)'
-    required: true
-
   spec:
     description: 'A glob pattern for which tests to run'
     required: true
@@ -17,10 +13,6 @@ inputs:
 
   project_id:
     description: 'Cypress cloud project id'
-    required: false
-
-  record_key:
-    description: 'Cypress cloud record key'
     required: false
 
   tag:
@@ -53,9 +45,9 @@ runs:
         chrome-version: '134'
       id: setup-chrome
 
+    # Secrets (CYPRESS_*, BEAMER_DATA_E2E, NEXT_PUBLIC_*) come from the calling
+    # workflow's `env:` block on the step that uses this action.
     - uses: ./.github/actions/build
-      with:
-        secrets: ${{ inputs.secrets }}
       env:
         NODE_ENV: cypress
         # `next build` overrides NODE_ENV to 'production' in client bundles, so
@@ -79,8 +71,5 @@ runs:
         working-directory: apps/web
       env:
         NODE_ENV: cypress
-        CYPRESS_RECORD_KEY: ${{ inputs.record_key || fromJSON(inputs.secrets).CYPRESS_RECORD_KEY }}
         GITHUB_TOKEN: ${{ github.token }}
         CYPRESS_PROJECT_ID: ${{ inputs.project_id }}
-        CYPRESS_WALLET_CREDENTIALS: ${{ fromJSON(inputs.secrets).CYPRESS_WALLET_CREDENTIALS }}
-        BEAMER_DATA_E2E: ${{ fromJSON(inputs.secrets).BEAMER_DATA_E2E }}
