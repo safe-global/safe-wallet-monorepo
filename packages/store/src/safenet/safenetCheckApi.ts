@@ -75,7 +75,6 @@ export const safenetCheckApi = createApi({
             safeTxHash: read.safeTxHash,
             chainId: read.chainId,
             status,
-            generation: read.generation,
             requestId: read.requestId,
             epoch: read.epoch,
             oracle: read.oracle,

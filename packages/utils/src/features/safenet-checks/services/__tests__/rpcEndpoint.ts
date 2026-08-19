@@ -37,6 +37,7 @@ export type RpcConfig = {
   groupKey?: { x: string; y: string }
   /** `groupKey` calls revert (an epoch the coordinator has not seen). */
   failGroupKey?: boolean
+
 }
 
 const hexToNum = (value: string): number => Number(BigInt(value))
@@ -139,6 +140,7 @@ export const makeEndpoint = (config: RpcConfig) => {
           const gk = config.groupKey ?? { x: '1', y: '2' }
           return ok(coordinatorRead.encodeFunctionResult('groupKey', [[BigInt(gk.x), BigInt(gk.y)]]))
         }
+
         return err('unexpected eth_call')
       }
       default:

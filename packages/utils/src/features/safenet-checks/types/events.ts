@@ -8,15 +8,6 @@ import type { Hex } from '@safe-global/types-kit'
 
 export type { Hex }
 
-/** Which contract generation produced an event (`STABLE` = agnostic). */
-export enum OracleGeneration {
-  V1 = 'V1',
-  V2 = 'V2',
-  /** The 2026-08 testnet relaunch contracts (unified consensus events). */
-  V3 = 'V3',
-  STABLE = 'STABLE',
-}
-
 export enum CheckEventType {
   /** Consensus `OracleTransactionProposed`. */
   ORACLE_PROPOSED = 'ORACLE_PROPOSED',
@@ -43,7 +34,6 @@ export type CheckEventBase = {
   blockNumber: number
   logIndex: number
   transactionHash: string
-  generation: OracleGeneration
 }
 
 export type OracleProposedEvent = CheckEventBase & {
@@ -53,8 +43,8 @@ export type OracleProposedEvent = CheckEventBase & {
   safe: string
   epoch: string
   oracle: string
-  /** V3 only — keccak256 of the proposal's `oracleData`; derives the V3 requestId. */
-  oracleDataHash: Hex | null
+  /** keccak256 of the proposal's `oracleData`; derives the requestId. */
+  oracleDataHash: Hex
 }
 
 type FrostSignature = {
@@ -71,8 +61,8 @@ export type OracleAttestedEvent = CheckEventBase & {
   oracle: string
   signatureId: Hex
   attestation: FrostSignature
-  /** V3 only — the EIP-712 encoding of `oracleData`, needed for the V3 preimage. */
-  oracleDataHash: Hex | null
+  /** The EIP-712 encoding of `oracleData`, needed for the attestation preimage. */
+  oracleDataHash: Hex
 }
 
 export type PlainProposedEvent = CheckEventBase & {
@@ -99,20 +89,17 @@ export type RequestCreatedEvent = CheckEventBase & {
   proposer: string
   fee: string
   bondTarget: string
-  /** Normalized across generations: V1 `deadline`, V2 `revealDeadline`. */
+  /** The reveal deadline — past it an unattested request can only time out. */
   deadlineBlock: string
-  commitDeadlineBlock: string | null
+  commitDeadlineBlock: string
 }
 
 export type SentinelCommittedEvent = CheckEventBase & {
   type: CheckEventType.SENTINEL_COMMITTED
   requestId: Hex
   sentinel: string
+  /** Commits are blind — the verdict only appears in `Revealed`. */
   bondAmount: string
-  /** V1 only — V1 commits carry the verdict directly. */
-  approved: boolean | null
-  /** V1 only. */
-  position: string | null
 }
 
 export type SentinelRevealedEvent = CheckEventBase & {

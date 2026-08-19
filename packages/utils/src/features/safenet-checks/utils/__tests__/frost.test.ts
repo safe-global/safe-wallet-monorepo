@@ -4,7 +4,7 @@ import { secp256k1 } from '@noble/curves/secp256k1'
 import { concatBytes } from '@noble/hashes/utils'
 import { getBytes, keccak256, toBeHex, toUtf8Bytes } from 'ethers'
 import { h2, verifyAttestation, type AttestationInput } from '../frost'
-import { oracleProposalHash, plainProposalHash, transactionProposalHash } from '../oracleProposalHash'
+import { plainProposalHash, transactionProposalHash } from '../proposalHash'
 import type { Hex } from '../../types'
 
 const N = secp256k1.Point.Fn.ORDER
@@ -15,8 +15,8 @@ const N = secp256k1.Point.Fn.ORDER
  * `provenance` field records where it came from and how to re-capture it.
  *
  * Two vectors because the paths sign different preimages AND live on different
- * contracts: the beta Consensus has no oracle path in its bytecode at all, so
- * the oracle vector has to come from the devnet (repo HEAD).
+ * contracts: the Gnosis beta Consensus emits only the plain pair, so the
+ * oracle vector comes from the relaunched Sepolia deployment.
  */
 type Vector = {
   chainId: string
@@ -31,9 +31,6 @@ type Vector = {
 const load = <T extends Vector>(name: string): T =>
   JSON.parse(readFileSync(join(__dirname, '../../__fixtures__', name), 'utf8'))
 
-const devnet = load<Vector & { oracle: string; requestId: Hex; oracleProposalHash: Hex }>(
-  'devnet-attestation.golden.json',
-)
 const gnosis = load<Vector & { safeChainId: string }>('gnosis-plain-attestation.golden.json')
 const relaunch = load<Vector & { oracle: string; oracleDataHash: Hex; signatureId: Hex }>(
   'sepolia-relaunch-attestation.golden.json',
@@ -48,36 +45,22 @@ const inputFor = (vector: Vector, message: Hex): AttestationInput => ({
 const plainMessage = (chainId: string): Hex =>
   plainProposalHash({ chainId, consensus: gnosis.consensus, epoch: gnosis.epoch, safeTxHash: gnosis.safeTxHash })
 
+const relaunchMessage: Hex = transactionProposalHash({
+  chainId: relaunch.chainId,
+  consensus: relaunch.consensus,
+  epoch: relaunch.epoch,
+  oracle: relaunch.oracle,
+  oracleDataHash: relaunch.oracleDataHash,
+  safeTxHash: relaunch.safeTxHash,
+})
+
 describe('verifyAttestation — live golden vectors', () => {
   it('verifies the Gnosis beta non-oracle attestation against the derived plain preimage', () => {
     expect(verifyAttestation(inputFor(gnosis, plainMessage(gnosis.chainId)))).toBe(true)
   })
 
-  it('verifies the devnet oracle attestation against its onchain requestId', () => {
-    expect(verifyAttestation(inputFor(devnet, devnet.requestId))).toBe(true)
-  })
-
-  it('verifies the Sepolia relaunch (V3) attestation against the derived unified preimage', () => {
-    const message = transactionProposalHash({
-      chainId: relaunch.chainId,
-      consensus: relaunch.consensus,
-      epoch: relaunch.epoch,
-      oracle: relaunch.oracle,
-      oracleDataHash: relaunch.oracleDataHash,
-      safeTxHash: relaunch.safeTxHash,
-    })
-    expect(verifyAttestation(inputFor(relaunch, message))).toBe(true)
-  })
-
-  it('rejects the pre-relaunch oracle preimage for a V3 attestation (generations never cross)', () => {
-    const crossed = oracleProposalHash({
-      chainId: relaunch.chainId,
-      consensus: relaunch.consensus,
-      epoch: relaunch.epoch,
-      oracle: relaunch.oracle,
-      safeTxHash: relaunch.safeTxHash,
-    })
-    expect(verifyAttestation(inputFor(relaunch, crossed))).toBe(false)
+  it('verifies the Sepolia relaunch oracle attestation against the derived unified preimage', () => {
+    expect(verifyAttestation(inputFor(relaunch, relaunchMessage))).toBe(true)
   })
 
   it('h2 matches the RFC-9591 known-answer vector from the protocol repo', () => {
@@ -95,15 +78,26 @@ describe('verifyAttestation — the preimage must match the path and the domain'
     expect(verifyAttestation(inputFor(gnosis, plainMessage(gnosis.safeChainId)))).toBe(false)
   })
 
-  it('rejects the oracle preimage for a non-oracle attestation (paths never cross)', () => {
-    const crossed = oracleProposalHash({
+  it('rejects the oracle-transaction preimage for a non-oracle attestation (paths never cross)', () => {
+    const crossed = transactionProposalHash({
       chainId: gnosis.chainId,
       consensus: gnosis.consensus,
       epoch: gnosis.epoch,
       oracle: '0x0000000000000000000000000000000000000000',
+      oracleDataHash: keccak256('0x') as Hex,
       safeTxHash: gnosis.safeTxHash,
     })
     expect(verifyAttestation(inputFor(gnosis, crossed))).toBe(false)
+  })
+
+  it('rejects the plain preimage for an oracle attestation (paths never cross)', () => {
+    const crossed = plainProposalHash({
+      chainId: relaunch.chainId,
+      consensus: relaunch.consensus,
+      epoch: relaunch.epoch,
+      safeTxHash: relaunch.safeTxHash,
+    })
+    expect(verifyAttestation(inputFor(relaunch, crossed))).toBe(false)
   })
 })
 
@@ -113,17 +107,17 @@ describe('verifyAttestation — total over malformed input', () => {
   // and off-curve points are also rejected by @noble/curves before our own
   // guards see them, so passing here does not prove those guards work.
   it.each([
-    ['z = N', inputFor({ ...devnet, z: N.toString() }, devnet.requestId)],
-    ['z = 0', inputFor({ ...devnet, z: '0' }, devnet.requestId)],
-    ['z negative', inputFor({ ...devnet, z: '-1' }, devnet.requestId)],
-    ['z not a number', inputFor({ ...devnet, z: 'not-a-number' }, devnet.requestId)],
+    ['z = N', inputFor({ ...relaunch, z: N.toString() }, relaunchMessage)],
+    ['z = 0', inputFor({ ...relaunch, z: '0' }, relaunchMessage)],
+    ['z negative', inputFor({ ...relaunch, z: '-1' }, relaunchMessage)],
+    ['z not a number', inputFor({ ...relaunch, z: 'not-a-number' }, relaunchMessage)],
     [
       'off-curve points',
-      { groupKey: { x: '1', y: '1' }, attestation: { r: { x: '2', y: '2' }, z: '3' }, message: devnet.requestId },
+      { groupKey: { x: '1', y: '1' }, attestation: { r: { x: '2', y: '2' }, z: '3' }, message: relaunchMessage },
     ],
     [
       'identity group key',
-      { groupKey: { x: '0', y: '0' }, attestation: { r: { ...devnet.r }, z: devnet.z }, message: devnet.requestId },
+      { groupKey: { x: '0', y: '0' }, attestation: { r: { ...relaunch.r }, z: relaunch.z }, message: relaunchMessage },
     ],
   ] as Array<[string, AttestationInput]>)('returns false without throwing for %s', (_name, input) => {
     expect(verifyAttestation(input)).toBe(false)

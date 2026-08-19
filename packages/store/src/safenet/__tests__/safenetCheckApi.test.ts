@@ -37,7 +37,6 @@ const baseRead = (over: Partial<CheckReadResult> = {}): CheckReadResult => ({
   chainId: '100',
   events: [],
   headBlock: '100',
-  generation: null,
   requestId: null,
   epoch: null,
   oracle: null,
