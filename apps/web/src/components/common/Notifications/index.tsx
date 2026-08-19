@@ -156,19 +156,21 @@ const Toast = ({
           <X />
         </Button>
       </AlertAction>
-      {title && <AlertTitle>{title}</AlertTitle>}
+      <AlertTitle>{title || message}</AlertTitle>
 
-      <AlertDescription>
-        {message}
+      {(title || detailedMessage || link) && (
+        <AlertDescription>
+          {title && message}
 
-        {detailedMessage && (
-          <details>
-            <Link render={<summary />}>Details</Link>
-            <pre>{detailedMessage}</pre>
-          </details>
-        )}
-        <NotificationLink link={link} onClick={handleManualClose} />
-      </AlertDescription>
+          {detailedMessage && (
+            <details>
+              <Link render={<summary />}>Details</Link>
+              <pre>{detailedMessage}</pre>
+            </details>
+          )}
+          <NotificationLink link={link} onClick={handleManualClose} />
+        </AlertDescription>
+      )}
     </Alert>
   )
 }

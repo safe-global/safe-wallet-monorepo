@@ -42,7 +42,7 @@ const alertVariants = cva(
         destructive: 'text-foreground *:data-[slot=alert-description]:text-muted-foreground *:[svg]:text-destructive',
         warning: 'text-foreground *:data-[slot=alert-description]:text-muted-foreground *:[svg]:text-warning-accent',
         success:
-          'bg-success-subtle text-success-strong border-success-muted *:data-[slot=alert-description]:text-success-strong *:[svg]:text-current',
+          'bg-success-subtle text-foreground border-success-muted *:data-[slot=alert-description]:text-muted-foreground *:[svg]:text-success-strong',
         info: 'bg-[var(--color-info-background)] text-foreground border-transparent *:data-[slot=alert-description]:text-foreground [&>svg]:text-[var(--color-info-dark)]',
       },
       // Only `destructive` and `warning` have both designs (see compoundVariants); the other
