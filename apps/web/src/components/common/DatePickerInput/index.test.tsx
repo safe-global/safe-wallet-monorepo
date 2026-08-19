@@ -118,15 +118,23 @@ describe('DatePickerInput', () => {
       await waitFor(() => expect(screen.getByTestId('form-valid')).toHaveTextContent('true'))
     })
 
-    it('reports an unfinished entry only once the field is left', async () => {
+    it('reports an unfinished entry right away, without waiting for blur', async () => {
       renderInput()
-      const input = screen.getByLabelText('Start date')
 
-      await userEvent.type(input, '01/01')
-      expect(screen.queryByText('Invalid date')).not.toBeInTheDocument()
+      await userEvent.type(screen.getByLabelText('Start date'), '01/01')
 
-      await userEvent.tab()
+      // Deferring this to blur moves the field when the message appears, which swallows the click
+      // that opens the calendar
       expect(await screen.findByText('Invalid date')).toBeInTheDocument()
+    })
+
+    it('opens the calendar on the first click even with an unfinished entry (WA-3231)', async () => {
+      renderInput()
+
+      await userEvent.type(screen.getByLabelText('Start date'), '01/01')
+      await userEvent.click(screen.getByRole('button', { name: /start date/i }))
+
+      expect(await screen.findByRole('grid')).toBeInTheDocument()
     })
 
     it('reports a complete but impossible date', async () => {
@@ -134,7 +142,6 @@ describe('DatePickerInput', () => {
       const input = screen.getByLabelText('Start date')
 
       await userEvent.type(input, '32/13/2023')
-      await userEvent.tab()
 
       expect(await screen.findByText('Invalid date')).toBeInTheDocument()
       expect(screen.getByTestId('value')).toHaveTextContent('invalid')
@@ -164,13 +171,12 @@ describe('DatePickerInput', () => {
       const input = screen.getByLabelText('Start date')
 
       await userEvent.type(input, '01/01')
-      await userEvent.tab()
       expect(await screen.findByText('Invalid date')).toBeInTheDocument()
 
       await userEvent.click(screen.getByRole('button', { name: 'Clear' }))
 
       await waitFor(() => expect(input).toHaveValue(''))
-      expect(screen.queryByText('Invalid date')).not.toBeInTheDocument()
+      await waitFor(() => expect(screen.queryByText('Invalid date')).not.toBeInTheDocument())
       expect(screen.getByTestId('value')).toHaveTextContent('empty')
     })
   })

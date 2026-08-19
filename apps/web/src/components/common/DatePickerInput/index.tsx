@@ -141,7 +141,6 @@ const DatePickerField = ({
   const fieldRef = useRef<HTMLDivElement>(null)
   const [text, setText] = useState(() => toText(value))
   const [isOpen, setIsOpen] = useState(false)
-  const [isFocused, setIsFocused] = useState(false)
 
   // Resync only when the value changed outside the input (calendar pick, form reset), so a
   // half-typed entry is never reformatted under the cursor.
@@ -149,10 +148,14 @@ const DatePickerField = ({
     setText((current) => (toKey(_fromText(current)) === toKey(value) ? current : toText(value)))
   }, [value])
 
-  // The form already knows an unfinished entry is invalid; don't nag about it mid-typing
-  const digitCount = text.replace(/\D/g, '').length
-  const isEntryUnfinished = digitCount > 0 && digitCount < DATE_DIGITS
-  const errorMessage = isEntryUnfinished && isFocused ? undefined : fieldState.error?.message
+  // Reported as soon as the entry stops being a date, never deferred to blur: revealing the message
+  // later grows the field's block, and in a vertically centred dialog that moves the calendar button
+  // between pointerdown and pointerup, so the click that opened it lands on nothing.
+  //
+  // An empty field is never in error (the rules skip empty values), and saying so explicitly drops a
+  // stale message: validation started by the blur that precedes a reset resolves after it.
+  const isEmpty = text === '' && value === null
+  const errorMessage = isEmpty ? undefined : fieldState.error?.message
   const hasError = !!errorMessage
 
   // Never hand the calendar an invalid date — react-day-picker formats it and throws
@@ -189,11 +192,7 @@ const DatePickerField = ({
             inputMode="numeric"
             aria-invalid={hasError}
             onChange={(event) => handleTextChange(event.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => {
-              setIsFocused(false)
-              field.onBlur()
-            }}
+            onBlur={field.onBlur}
           />
           <InputGroupAddon align="inline-end">
             <PopoverTrigger
