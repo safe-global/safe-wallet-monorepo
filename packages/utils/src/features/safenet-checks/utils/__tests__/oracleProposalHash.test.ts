@@ -6,6 +6,7 @@ import {
   PLAIN_PROPOSAL_TYPES,
   oracleProposalHash,
   plainProposalHash,
+  transactionProposalHash,
   type OracleProposal,
 } from '../oracleProposalHash'
 import type { Hex } from '../../types'
@@ -68,5 +69,36 @@ describe('plainProposalHash', () => {
       ],
     }).encodeType('EIP712Domain')
     expect(keccak256(toUtf8Bytes(encoded))).toBe('0x47e79534a245952e8b16893a336b85a3d9ea9fa8c573f3d803afb92a79469218')
+  })
+})
+
+describe('transactionProposalHash (V3 relaunch)', () => {
+  // Live capture: proposal tx 0x94b9f9b3…30b1 (Sepolia relaunch, 2026-08-19).
+  // The contract uses this hash as the oracle requestId, so the NewRequest
+  // event pins the whole derivation on-chain.
+  const live = {
+    chainId: '11155111',
+    consensus: '0xc0856A2e4084212459aa9C4408962eA6Ff03bb05',
+    epoch: '38394',
+    oracle: '0x78C13Af7697f6fD4cCA05DED3D436Fa21308E8cE',
+    // keccak256('0x') — the proposal carried empty oracleData.
+    oracleDataHash: '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470' as Hex,
+    safeTxHash: '0x3545e6df004878589ee07c02a9c7d832f230de5e7ee20493feb62b4fde0a5e3e' as Hex,
+  }
+
+  it('matches the onchain V3 requestId captured live from the Sepolia relaunch', () => {
+    expect(transactionProposalHash(live)).toBe('0x9cc6584852bee0ef2fad7ea848ca124a2ba99639ae8b22352868b11b97984ee0')
+  })
+
+  it('is distinct from the pre-relaunch oracle hash for the same fields', () => {
+    expect(transactionProposalHash(live)).not.toBe(
+      oracleProposalHash({
+        chainId: live.chainId,
+        consensus: live.consensus,
+        epoch: live.epoch,
+        oracle: live.oracle,
+        safeTxHash: live.safeTxHash,
+      }),
+    )
   })
 })

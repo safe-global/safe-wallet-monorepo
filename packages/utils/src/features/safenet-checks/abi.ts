@@ -4,10 +4,11 @@ import { CheckEventType, OracleGeneration } from './types'
 /**
  * Event fragments copied verbatim from the protocol repo (Consensus:
  * `explorer/src/lib/consensus/abi.ts`; sentinel V1/V2: the
- * `SentinelOracle{Requests,Commitments}(V2)` libraries; shared: `IOracle.sol`).
- * The V1/V2 `NewRequest`/`Committed` signatures differ, so their topic0s
- * disambiguate the generation; `OracleResult`/`DisputeResolved` are identical
- * across generations and live in one shared bucket.
+ * `SentinelOracle{Requests,Commitments}(V2)` libraries; shared: `IOracle.sol`;
+ * V3: the 2026-08 testnet relaunch contracts, topic0s pinned to live logs).
+ * The `NewRequest`/`Committed` signatures differ per generation, so their
+ * topic0s disambiguate it; `OracleResult` is identical across generations and
+ * lives in the shared bucket.
  */
 
 const TX_TUPLE =
@@ -45,6 +46,25 @@ export const SHARED_ORACLE_EVENT_FRAGMENTS = [
   'event DisputeResolved(bytes32 indexed requestId, uint8 outcome, uint256 slashed)',
 ] as const
 
+/**
+ * The 2026-08 relaunch generation. Consensus collapses the oracle/plain event
+ * pairs into one: `safeId` packs `chainId << 160 | safe`, the attested event
+ * carries `oracleDataHash` instead of the data (its EIP-712 encoding — the
+ * V3 preimage needs it). The oracle renames proposer → sponsor, adds
+ * `slashAmount`, narrows uints, and `DisputeResolved` gains a reason string.
+ */
+export const V3_CONSENSUS_EVENT_FRAGMENTS = [
+  `event TransactionProposed(bytes32 indexed safeTxHash, bytes32 indexed safeId, address indexed oracle, uint64 epoch, bytes oracleData, ${TX_TUPLE} transaction)`,
+  `event TransactionAttested(bytes32 indexed safeTxHash, bytes32 indexed safeId, address indexed oracle, uint64 epoch, bytes32 oracleDataHash, bytes32 signatureId, ${FROST_SIG_TUPLE} attestation)`,
+] as const
+
+export const V3_SENTINEL_EVENT_FRAGMENTS = [
+  'event NewRequest(bytes32 indexed requestId, address indexed sponsor, uint96 fee, uint96 bondTarget, uint96 slashAmount, uint64 commitDeadline, uint64 revealDeadline)',
+  'event Committed(bytes32 indexed requestId, address indexed sentinel, uint96 bondAmount)',
+  'event Revealed(bytes32 indexed requestId, address indexed sentinel, bool approved, uint96 bondAmount, string reason)',
+  'event DisputeResolved(bytes32 indexed requestId, uint8 outcome, uint128 slashed, string reason)',
+] as const
+
 /** Read (view) functions the reader calls, from the protocol explorer's ABIs. */
 export const CONSENSUS_READ_ABI = ['function getEpochGroupId(uint64 epoch) view returns (bytes32 groupId)'] as const
 
@@ -54,8 +74,10 @@ export const COORDINATOR_READ_ABI = [
 
 export const consensusInterface = new Interface(CONSENSUS_EVENT_FRAGMENTS)
 export const consensusPlainInterface = new Interface(CONSENSUS_PLAIN_EVENT_FRAGMENTS)
+export const v3ConsensusInterface = new Interface(V3_CONSENSUS_EVENT_FRAGMENTS)
 export const v1SentinelInterface = new Interface(V1_SENTINEL_EVENT_FRAGMENTS)
 export const v2SentinelInterface = new Interface(V2_SENTINEL_EVENT_FRAGMENTS)
+export const v3SentinelInterface = new Interface(V3_SENTINEL_EVENT_FRAGMENTS)
 export const sharedOracleInterface = new Interface(SHARED_ORACLE_EVENT_FRAGMENTS)
 
 export type TopicDispatch = {
@@ -133,6 +155,42 @@ export const EVENT_DISPATCH: readonly TopicDispatch[] = [
     type: CheckEventType.DISPUTE_RESOLVED,
     generation: OracleGeneration.STABLE,
   },
+  {
+    iface: v3ConsensusInterface,
+    eventName: 'TransactionProposed',
+    type: CheckEventType.ORACLE_PROPOSED,
+    generation: OracleGeneration.V3,
+  },
+  {
+    iface: v3ConsensusInterface,
+    eventName: 'TransactionAttested',
+    type: CheckEventType.ORACLE_ATTESTED,
+    generation: OracleGeneration.V3,
+  },
+  {
+    iface: v3SentinelInterface,
+    eventName: 'NewRequest',
+    type: CheckEventType.REQUEST_CREATED,
+    generation: OracleGeneration.V3,
+  },
+  {
+    iface: v3SentinelInterface,
+    eventName: 'Committed',
+    type: CheckEventType.SENTINEL_COMMITTED,
+    generation: OracleGeneration.V3,
+  },
+  {
+    iface: v3SentinelInterface,
+    eventName: 'Revealed',
+    type: CheckEventType.SENTINEL_REVEALED,
+    generation: OracleGeneration.V3,
+  },
+  {
+    iface: v3SentinelInterface,
+    eventName: 'DisputeResolved',
+    type: CheckEventType.DISPUTE_RESOLVED,
+    generation: OracleGeneration.V3,
+  },
 ]
 
 /** Compute an event's topic0 from its interface + name. */
@@ -148,11 +206,11 @@ export const TOPICS: Readonly<Record<string, TopicDispatch>> = Object.freeze(
 )
 
 /** Consensus event topic0s — indexed by `safeTxHash` (topic1). */
-export const CONSENSUS_TOPIC0S: readonly string[] = EVENT_DISPATCH.filter(
-  (dispatch) => dispatch.iface === consensusInterface || dispatch.iface === consensusPlainInterface,
+export const CONSENSUS_TOPIC0S: readonly string[] = EVENT_DISPATCH.filter((dispatch) =>
+  [consensusInterface, consensusPlainInterface, v3ConsensusInterface].includes(dispatch.iface),
 ).map(topicHashOf)
 
 /** Sentinel/oracle event topic0s — indexed by `requestId` (topic1). */
 export const SENTINEL_TOPIC0S: readonly string[] = EVENT_DISPATCH.filter(
-  (dispatch) => dispatch.iface !== consensusInterface && dispatch.iface !== consensusPlainInterface,
+  (dispatch) => ![consensusInterface, consensusPlainInterface, v3ConsensusInterface].includes(dispatch.iface),
 ).map(topicHashOf)

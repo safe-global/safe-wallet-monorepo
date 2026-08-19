@@ -4,7 +4,7 @@ import { secp256k1 } from '@noble/curves/secp256k1'
 import { concatBytes } from '@noble/hashes/utils'
 import { getBytes, keccak256, toBeHex, toUtf8Bytes } from 'ethers'
 import { h2, verifyAttestation, type AttestationInput } from '../frost'
-import { oracleProposalHash, plainProposalHash } from '../oracleProposalHash'
+import { oracleProposalHash, plainProposalHash, transactionProposalHash } from '../oracleProposalHash'
 import type { Hex } from '../../types'
 
 const N = secp256k1.Point.Fn.ORDER
@@ -35,6 +35,9 @@ const devnet = load<Vector & { oracle: string; requestId: Hex; oracleProposalHas
   'devnet-attestation.golden.json',
 )
 const gnosis = load<Vector & { safeChainId: string }>('gnosis-plain-attestation.golden.json')
+const relaunch = load<Vector & { oracle: string; oracleDataHash: Hex; signatureId: Hex }>(
+  'sepolia-relaunch-attestation.golden.json',
+)
 
 const inputFor = (vector: Vector, message: Hex): AttestationInput => ({
   groupKey: { ...vector.groupKey },
@@ -52,6 +55,29 @@ describe('verifyAttestation — live golden vectors', () => {
 
   it('verifies the devnet oracle attestation against its onchain requestId', () => {
     expect(verifyAttestation(inputFor(devnet, devnet.requestId))).toBe(true)
+  })
+
+  it('verifies the Sepolia relaunch (V3) attestation against the derived unified preimage', () => {
+    const message = transactionProposalHash({
+      chainId: relaunch.chainId,
+      consensus: relaunch.consensus,
+      epoch: relaunch.epoch,
+      oracle: relaunch.oracle,
+      oracleDataHash: relaunch.oracleDataHash,
+      safeTxHash: relaunch.safeTxHash,
+    })
+    expect(verifyAttestation(inputFor(relaunch, message))).toBe(true)
+  })
+
+  it('rejects the pre-relaunch oracle preimage for a V3 attestation (generations never cross)', () => {
+    const crossed = oracleProposalHash({
+      chainId: relaunch.chainId,
+      consensus: relaunch.consensus,
+      epoch: relaunch.epoch,
+      oracle: relaunch.oracle,
+      safeTxHash: relaunch.safeTxHash,
+    })
+    expect(verifyAttestation(inputFor(relaunch, crossed))).toBe(false)
   })
 
   it('h2 matches the RFC-9591 known-answer vector from the protocol repo', () => {

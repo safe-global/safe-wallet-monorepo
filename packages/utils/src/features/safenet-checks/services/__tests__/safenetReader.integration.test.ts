@@ -51,6 +51,7 @@ const goldenAttested = (): OracleAttestedEvent => ({
   oracle: golden.oracle,
   signatureId: golden.signatureId,
   attestation: { r: { x: golden.r.x, y: golden.r.y }, z: golden.z },
+  oracleDataHash: null,
 })
 
 const makeReader = () =>

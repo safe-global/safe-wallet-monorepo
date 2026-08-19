@@ -28,7 +28,7 @@ import {
 import { decodeLogs, type RawLog } from '../utils/decodeLogs'
 import { deadlineBlockOf } from '../utils/deriveCheckState'
 import { isValidPoint, verifyAttestation as verifyFrostAttestation } from '../utils/frost'
-import { oracleProposalHash, plainProposalHash } from '../utils/oracleProposalHash'
+import { oracleProposalHash, plainProposalHash, transactionProposalHash } from '../utils/oracleProposalHash'
 
 /**
  * Everything one poll reads off-chain for a single check. Numeric values are
@@ -301,13 +301,18 @@ export class SafenetReader {
 
       const requestIdsByOracle = new Map<string, Hex[]>()
       for (const proposal of proposals) {
-        const id = oracleProposalHash({
+        // A V3 proposal carries its oracleDataHash; the hash IS the requestId.
+        const shared = {
           chainId: this.chainId,
           consensus: this.consensus,
           epoch: proposal.epoch,
           oracle: proposal.oracle,
           safeTxHash: safeTxHash as Hex,
-        })
+        }
+        const id =
+          proposal.oracleDataHash !== null
+            ? transactionProposalHash({ ...shared, oracleDataHash: proposal.oracleDataHash })
+            : oracleProposalHash(shared)
         // Keyed by the normalized address so one oracle cannot occupy two buckets.
         const key = proposal.oracle.toLowerCase()
         const ids = requestIdsByOracle.get(key) ?? []
@@ -406,16 +411,27 @@ export class SafenetReader {
    * not verify is terminal (`INVALID`).
    */
   async verifyAttestation(attested: OracleAttestedEvent | PlainAttestedEvent): Promise<AttestationVerification> {
-    // The two paths sign different EIP-712 preimages; the event type decides.
+    // The three preimages differ; the event decides: a V3 attested event
+    // carries its oracleDataHash, older oracle events use the two-field type,
+    // and non-oracle events use the plain type.
     const message =
       attested.type === CheckEventType.ORACLE_ATTESTED
-        ? oracleProposalHash({
-            chainId: this.chainId,
-            consensus: this.consensus,
-            epoch: attested.epoch,
-            oracle: attested.oracle,
-            safeTxHash: attested.safeTxHash,
-          })
+        ? attested.oracleDataHash !== null
+          ? transactionProposalHash({
+              chainId: this.chainId,
+              consensus: this.consensus,
+              epoch: attested.epoch,
+              oracle: attested.oracle,
+              oracleDataHash: attested.oracleDataHash,
+              safeTxHash: attested.safeTxHash,
+            })
+          : oracleProposalHash({
+              chainId: this.chainId,
+              consensus: this.consensus,
+              epoch: attested.epoch,
+              oracle: attested.oracle,
+              safeTxHash: attested.safeTxHash,
+            })
         : plainProposalHash({
             chainId: this.chainId,
             consensus: this.consensus,

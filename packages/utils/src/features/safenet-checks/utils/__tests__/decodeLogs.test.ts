@@ -195,3 +195,51 @@ describe('decodeLogs — totality (never throws)', () => {
     expect(decodeLogs([good1, bad, good2])).toHaveLength(2)
   })
 })
+
+describe('decodeLogs — V3 (relaunch) lifecycle, live-captured Sepolia logs', () => {
+  const fixture = JSON.parse(
+    readFileSync(join(__dirname, '../../__fixtures__', 'sepolia-relaunch-lifecycle.json'), 'utf8'),
+  ) as { logs: RawLog[]; safeTxHash: string; requestId: string; chainId: string; epoch: string }
+  const events = decodeLogs(fixture.logs)
+
+  it('decodes the full lifecycle, skipping unknown topics (Claimed)', () => {
+    // 9 raw logs: 1 proposal + 6 decodable oracle events + 2 Claimed (unknown).
+    expect(events).toHaveLength(7)
+  })
+
+  it('reads chainId and safe from the transaction tuple on the V3 proposal', () => {
+    const [proposed] = byType(events, CheckEventType.ORACLE_PROPOSED)
+    expect(proposed.generation).toBe(OracleGeneration.V3)
+    expect(proposed.safeTxHash).toBe(fixture.safeTxHash)
+    expect(proposed.chainId).toBe(fixture.chainId)
+    expect(proposed.safe.toLowerCase()).toBe('0xbf30f749fc027a5d79c4710d988f0d3c8e217a4f')
+    expect(proposed.epoch).toBe(fixture.epoch)
+    // keccak256 of the empty oracleData — derives the V3 requestId.
+    expect(proposed.oracleDataHash).toBe('0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470')
+  })
+
+  it('maps sponsor to proposer and both deadlines on the V3 NewRequest', () => {
+    const [request] = byType(events, CheckEventType.REQUEST_CREATED)
+    expect(request.generation).toBe(OracleGeneration.V3)
+    expect(request.requestId).toBe(fixture.requestId)
+    expect(request.proposer.toLowerCase()).toBe('0xfc0233bc3e33d58c0a8a40f19efcf0e04dd55622')
+    expect(request.fee).toBe('400000000000000000')
+    expect(request.commitDeadlineBlock).toBe('11521044')
+    expect(request.deadlineBlock).toBe('11521047')
+  })
+
+  it('keeps V3 commits blind and carries the verdict on reveals', () => {
+    const commits = byType(events, CheckEventType.SENTINEL_COMMITTED)
+    expect(commits).toHaveLength(2)
+    expect(commits.every((commit) => commit.approved === null && commit.position === null)).toBe(true)
+    const reveals = byType(events, CheckEventType.SENTINEL_REVEALED)
+    expect(reveals).toHaveLength(2)
+    expect(reveals.every((reveal) => reveal.approved)).toBe(true)
+  })
+
+  it('decodes the shared OracleResult for the V3 request', () => {
+    const [result] = byType(events, CheckEventType.ORACLE_RESULT)
+    expect(result.requestId).toBe(fixture.requestId)
+    expect(result.approved).toBe(true)
+  })
+})

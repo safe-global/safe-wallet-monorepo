@@ -8,10 +8,12 @@ import type { Hex } from '@safe-global/types-kit'
 
 export type { Hex }
 
-/** Which sentinel-oracle generation produced an event (`STABLE` = agnostic). */
+/** Which contract generation produced an event (`STABLE` = agnostic). */
 export enum OracleGeneration {
   V1 = 'V1',
   V2 = 'V2',
+  /** The 2026-08 testnet relaunch contracts (unified consensus events). */
+  V3 = 'V3',
   STABLE = 'STABLE',
 }
 
@@ -51,6 +53,8 @@ export type OracleProposedEvent = CheckEventBase & {
   safe: string
   epoch: string
   oracle: string
+  /** V3 only — keccak256 of the proposal's `oracleData`; derives the V3 requestId. */
+  oracleDataHash: Hex | null
 }
 
 type FrostSignature = {
@@ -67,6 +71,8 @@ export type OracleAttestedEvent = CheckEventBase & {
   oracle: string
   signatureId: Hex
   attestation: FrostSignature
+  /** V3 only — the EIP-712 encoding of `oracleData`, needed for the V3 preimage. */
+  oracleDataHash: Hex | null
 }
 
 export type PlainProposedEvent = CheckEventBase & {
