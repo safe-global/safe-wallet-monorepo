@@ -19,14 +19,14 @@ const StatusStep = ({
     <div className={`${css.label} flex items-center gap-2`}>
       <Circle
         data-testid="status-step-icon"
-        className={`${css.icon} size-4 shrink-0 ${colorClass} ${isLoading ? '' : 'fill-current'}`}
+        className={`size-3.5 shrink-0 ${colorClass} ${isLoading ? '' : 'fill-current'}`}
       />
       <div className={`flex items-center gap-4 ${colorClass}`}>
         <div data-testid="status-step-avatar" className="shrink-0">
           {safeAddress && !isLoading ? (
             <Identicon address={safeAddress} size={32} />
           ) : (
-            <Skeleton className="h-8 w-8 rounded-full" />
+            <Skeleton className="h-[2.3em] w-[2.3em] rounded-full" />
           )}
         </div>
         {children}

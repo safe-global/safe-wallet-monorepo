@@ -48,7 +48,10 @@ const StatusStepper = ({ status, txHash }: { status?: PendingStatus; txHash?: st
           {/* Standalone segment between rows, like MUI's StepConnector: it does not touch the
               dots — the gap comes from the dot sitting centered within its row. */}
           {index > 0 && (
-            <div data-testid="status-step-connector" className="ml-[6px] min-h-6 w-px bg-[var(--color-border-light)]" />
+            <div
+              data-testid="status-step-connector"
+              className="ml-[6.5px] min-h-9 w-px bg-[var(--color-border-light)]"
+            />
           )}
           {step}
         </Fragment>

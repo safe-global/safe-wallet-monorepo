@@ -33,9 +33,9 @@ describe('StatusStepper', () => {
     const { container } = render(<StatusStepper status={PendingStatus.PROCESSING} />)
 
     const connector = container.querySelector('[data-testid="status-step-connector"]')
-    expect(connector?.className).toContain('min-h-6')
-    // ml-[6px] lines the segment up under the 12px dot's horizontal center.
-    expect(connector?.className).toContain('ml-[6px]')
+    expect(connector?.className).toContain('min-h-9')
+    // ml-[6.5px] lines the segment up under the dot's horizontal center.
+    expect(connector?.className).toContain('ml-[6.5px]')
   })
 
   it('centers the dot and content within each row, like the pre-migration StepLabel', () => {
