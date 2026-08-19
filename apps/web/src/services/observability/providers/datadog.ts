@@ -69,6 +69,47 @@ const isKnownNoise = (message: string | undefined): boolean => {
   return KNOWN_NOISE_PATTERNS.some((pattern) => message.includes(pattern))
 }
 
+// Our own webpack output — anything reported from here is first-party and must
+// stay visible even if its `error.type` happens to be `EvalError` (see below).
+const FIRST_PARTY_BUNDLE_PATH = '_next/static/'
+
+/**
+ * `error.type === 'EvalError'` is not proof of a CSP-blocked eval() on its
+ * own: a thrown string `"EvalError: …"`, an explicit `new EvalError()`, or any
+ * custom class that sets `name = 'EvalError'` all produce the same `type` in
+ * `@datadog/browser-core`'s `computeRawError` (`stackTrace.name`). So this is
+ * additionally gated on the stack *not* pointing at our own bundle
+ * (`_next/static/`) — mirrors `originatesFromExtension`'s pattern-matching,
+ * inverted. We ship no eval()/Function() call of our own today (grepped
+ * `apps/web/src` and `packages/`), so a same-bundle `EvalError` would mean
+ * something new started calling eval() and is worth surfacing, not silencing.
+ * A missing stack defaults to "not first-party": we have no eval() call site
+ * of our own to attribute it to, so there is nothing here that a stack could
+ * be pointing at.
+ */
+const isNotFirstPartyStack = (stack: string | undefined): boolean => {
+  if (!stack) return true
+  return !stack.includes(FIRST_PARTY_BUNDLE_PATH)
+}
+
+/**
+ * Real-world `EvalError`s reaching RUM are third-party vendor scripts (Beamer,
+ * GTM, Calendly, Cloudflare Turnstile, HubSpot forms, etc.) whose eval() /
+ * `new Function()` call our `script-src` CSP correctly blocks in production —
+ * the block is the intended behaviour and nothing is broken for the user, so
+ * it is dropped rather than counted as a real error (WA-2952).
+ *
+ * Trade-off this accepts: `'unsafe-eval'` **is** permitted in dev/Cypress
+ * (`config/securityHeaders.ts`), so a first-party eval()/Function() call would
+ * pass locally and only throw — as this same `EvalError` type — in
+ * production, where this filter would otherwise hide it. Accepted because (a)
+ * no current bundle path constructs code dynamically, and (b)
+ * `isNotFirstPartyStack` still surfaces it if the stack ever does point at our
+ * own `_next/static/` output.
+ */
+const isCspBlockedEval = (errorEvent: RumErrorEvent): boolean =>
+  errorEvent.error.type === 'EvalError' && isNotFirstPartyStack(errorEvent.error.stack)
+
 const NON_USER_IMPACTING_SOURCES = new Set(['console', 'report'])
 
 /**
@@ -113,6 +154,12 @@ const isExpectedResourceFailure = (event: RumResourceEvent): boolean => {
  *   not indicative of user-blocking failure; CSP visibility belongs on a
  *   `report-uri`/`report-to` endpoint, not the SLO.
  *
+ * We also drop, regardless of source:
+ * - `EvalError`s whose stack doesn't point at our own bundle (see
+ *   `isCspBlockedEval`): a third-party vendor script's eval()/Function() call
+ *   correctly blocked by our `script-src` CSP (WA-2952). The CSP doing its
+ *   job is not a Safe{Wallet} failure.
+ *
  * Genuine user failures continue to flow through `trackError` /
  * `captureException` (source: `custom`), unhandled exceptions (`source`), and
  * network failures (`network`).
@@ -124,6 +171,7 @@ export const filterRumEvent = (event: RumEvent, context: RumEventDomainContext):
   const errorEvent = event as RumErrorEvent
   if (NON_USER_IMPACTING_SOURCES.has(errorEvent.error.source)) return false
   if (isKnownNoise(errorEvent.error.message)) return false
+  if (isCspBlockedEval(errorEvent)) return false
   if (originatesFromExtension(errorEvent.error.stack)) return false
 
   // User-driven outcomes surfaced as unhandled errors by third-party SDKs
