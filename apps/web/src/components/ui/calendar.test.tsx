@@ -53,6 +53,23 @@ describe('Calendar', () => {
     expect(dropdowns.length).toBeGreaterThanOrEqual(1)
   })
 
+  // The day button owns its own focus: react-day-picker only flags which day should be focused, so a
+  // CalendarDayButton that drops its ref leaves focus stuck and kills arrow-key navigation.
+  it('moves focus with the arrow keys', async () => {
+    render(<Calendar mode="single" defaultMonth={defaultMonth} />)
+
+    const day = (label: string) => screen.getByRole('button', { name: label })
+
+    day('Tuesday, March 10th, 2026').focus()
+    expect(day('Tuesday, March 10th, 2026')).toHaveFocus()
+
+    await userEvent.keyboard('{ArrowRight}')
+    expect(day('Wednesday, March 11th, 2026')).toHaveFocus()
+
+    await userEvent.keyboard('{ArrowDown}')
+    expect(day('Wednesday, March 18th, 2026')).toHaveFocus()
+  })
+
   it('disables specified dates', () => {
     const disabledDate = new Date(2026, 2, 10)
     render(<Calendar mode="single" defaultMonth={defaultMonth} disabled={disabledDate} />)

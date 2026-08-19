@@ -148,6 +148,27 @@ describe('DatePickerInput', () => {
       expect(screen.getByTestId('value')).toHaveTextContent('invalid')
     })
 
+    it('rejects a year the calendar cannot reach', async () => {
+      renderInput()
+
+      // The mask allows a 4-digit year, so this is a complete, real, but absurd date. The MUI picker
+      // this replaced clamped to 1900-2099.
+      await userEvent.type(screen.getByLabelText('Start date'), '01/01/0002')
+
+      expect(await screen.findByText('Date is out of range')).toBeInTheDocument()
+      await waitFor(() => expect(screen.getByTestId('form-valid')).toHaveTextContent('false'))
+    })
+
+    it('accepts a date inside the selectable range', async () => {
+      renderInput()
+
+      await userEvent.type(screen.getByLabelText('Start date'), '09/03/2020')
+
+      await waitFor(() => expect(screen.getByTestId('value')).toHaveTextContent('2020-03-09'))
+      expect(screen.queryByText('Date is out of range')).not.toBeInTheDocument()
+      expect(screen.queryByText('Invalid date')).not.toBeInTheDocument()
+    })
+
     it('rejects a future date', async () => {
       renderInput()
 

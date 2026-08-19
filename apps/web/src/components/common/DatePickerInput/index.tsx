@@ -1,6 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFormContext, Controller, type ControllerFieldState, type ControllerRenderProps } from 'react-hook-form'
-import { addYears, endOfYear, format, isFuture, isValid, parse, startOfDay, startOfYear, subYears } from 'date-fns'
+import {
+  addYears,
+  endOfYear,
+  format,
+  isAfter,
+  isBefore,
+  isFuture,
+  isValid,
+  parse,
+  startOfDay,
+  startOfYear,
+  subYears,
+} from 'date-fns'
 import { Calendar as CalendarIcon } from 'lucide-react'
 
 import { Calendar } from '@/components/ui/calendar'
@@ -64,6 +76,16 @@ export const _fromText = (text: string): Date | null => {
   return isValid(parsed) ? parsed : INVALID_DATE
 }
 
+/**
+ * The window a date may fall in. Bounds the calendar's month/year dropdowns, and the typed entry with
+ * it — the MUI picker this replaced clamped to 1900-2099, so without this you can type a year the
+ * calendar cannot even display.
+ */
+const getSelectableRange = (disableFuture: boolean, now = new Date()) => ({
+  start: startOfYear(subYears(now, YEARS_SELECTABLE)),
+  end: disableFuture ? now : endOfYear(addYears(now, YEARS_SELECTABLE)),
+})
+
 /** Identity of a field value, so the input only resyncs on a change that came from outside it. */
 const toKey = (value: Date | null) => {
   if (value === null) {
@@ -106,6 +128,11 @@ const DatePickerInput = ({
           // Compare days using `startOfDay` to ignore timezone offset
           if (disableFuture && isFuture(startOfDay(val))) {
             return 'Date cannot be in the future'
+          }
+
+          const { start, end } = getSelectableRange(disableFuture)
+          if (isBefore(startOfDay(val), startOfDay(start)) || isAfter(startOfDay(val), startOfDay(end))) {
+            return 'Date is out of range'
           }
 
           return validate?.(val)
@@ -168,13 +195,7 @@ const DatePickerField = ({
 
   // Bounds the month/year dropdowns, and lets the nav arrows disable at the ends instead of paging
   // into months where every day is disabled.
-  const [startMonth, endMonth] = useMemo(() => {
-    const today = new Date()
-    return [
-      startOfYear(subYears(today, YEARS_SELECTABLE)),
-      disableFuture ? today : endOfYear(addYears(today, YEARS_SELECTABLE)),
-    ]
-  }, [disableFuture])
+  const { start: startMonth, end: endMonth } = useMemo(() => getSelectableRange(disableFuture), [disableFuture])
 
   const handleTextChange = (raw: string) => {
     const masked = _toMaskedText(raw)
