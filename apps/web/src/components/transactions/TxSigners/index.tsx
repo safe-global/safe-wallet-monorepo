@@ -62,12 +62,12 @@ const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
             <span tabIndex={0}>
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="icon-xs"
                 className="text-inherit"
                 disabled
                 aria-label="Copy transaction hash"
               >
-                <HashIcon className="size-5" />
+                <HashIcon className="size-4" />
               </Button>
             </span>
           }
@@ -84,14 +84,14 @@ const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
           <Button
             data-testid="copy-tx-hash-btn"
             variant="ghost"
-            size="icon-sm"
+            size="icon-xs"
             className="text-inherit"
             onClick={handleCopy}
             // MUI's Tooltip put its `title` on the child as an aria-label; Base UI's wires no ARIA at
             // all, so an icon-only trigger needs its own name or it announces as just "button".
             aria-label="Copy transaction hash"
           >
-            <HashIcon className="size-5" />
+            <HashIcon className="size-4" />
           </Button>
         }
       />
@@ -118,11 +118,11 @@ const TxAuditLogActions = ({
       <Button
         data-testid="share-tx-link-btn"
         variant="ghost"
-        size="icon-sm"
+        size="icon-xs"
         className="text-inherit"
         aria-label="Copy transaction link"
       >
-        <Copy className="size-5" />
+        <Copy className="size-4" />
       </Button>
     </TxShareLinkWrapper>
     {explorerLink ? (
@@ -132,8 +132,8 @@ const TxAuditLogActions = ({
         <TooltipTrigger
           render={
             <span tabIndex={0}>
-              <Button variant="ghost" size="icon-sm" disabled aria-label="View on block explorer">
-                <ExplorerFallbackIcon className="size-5" />
+              <Button variant="ghost" size="icon-xs" disabled aria-label="View on block explorer">
+                <ExplorerFallbackIcon className="size-4" />
               </Button>
             </span>
           }

@@ -36,8 +36,8 @@ const MsgAuditLog = ({ msg }: { msg: MessageItem }): ReactElement => {
         }
         actions={
           <CopyTooltip text={msgUrl} initialToolTipText="Copy message link">
-            <Button variant="ghost" size="icon-sm" className="text-inherit">
-              <CopyIcon className="size-5" />
+            <Button variant="ghost" size="icon-xs" className="text-inherit">
+              <CopyIcon className="size-4" />
             </Button>
           </CopyTooltip>
         }

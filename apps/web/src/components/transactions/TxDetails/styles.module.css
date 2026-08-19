@@ -63,7 +63,6 @@
 .advancedDetails,
 .txModule {
   padding: var(--space-2);
-  padding-left: calc(var(--space-2) + var(--tx-details-edge-inset, 0px));
 }
 
 /* No column split in these states, so both sides sit on a card edge. */
@@ -90,7 +89,6 @@
   width: 33.3%;
   flex-direction: column;
   padding: var(--space-3);
-  padding-right: calc(var(--space-3) + var(--tx-details-edge-inset, 0px));
   border-left: 1px solid var(--border);
   gap: var(--space-2);
   position: relative;
@@ -136,8 +134,6 @@
     width: 100%;
     border-left: 0;
     border-top: 1px solid var(--border);
-    /* Stacked, so the side that used to face the vertical rule is now a card edge as well. */
-    padding-left: calc(var(--space-3) + var(--tx-details-edge-inset, 0px));
   }
 
   .txNote,
