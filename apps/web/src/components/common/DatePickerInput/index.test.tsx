@@ -1,14 +1,26 @@
 import type { ReactNode } from 'react'
-import { FormProvider, useForm, useWatch } from 'react-hook-form'
+import { format, isValid } from 'date-fns'
+import { FormProvider, useForm, useFormState, useWatch } from 'react-hook-form'
 import { render, screen, waitFor } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import DatePickerInput, { _fromText, _toMaskedText } from './index'
 
 type FormValues = { date: Date | null }
 
-const ValueProbe = () => {
+const describeValue = (value: Date | null | undefined) => {
+  if (value === null || value === undefined) return 'empty'
+  return isValid(value) ? format(value, 'yyyy-MM-dd') : 'invalid'
+}
+
+const FormProbe = () => {
   const value = useWatch<FormValues, 'date'>({ name: 'date' })
-  return <output data-testid="value">{value === null || value === undefined ? 'null' : String(value)}</output>
+  const { isValid: isFormValid } = useFormState<FormValues>()
+  return (
+    <>
+      <output data-testid="value">{describeValue(value)}</output>
+      <output data-testid="form-valid">{String(isFormValid)}</output>
+    </>
+  )
 }
 
 const Wrapper = ({ children, defaultValue = null }: { children: ReactNode; defaultValue?: Date | null }) => {
@@ -17,7 +29,10 @@ const Wrapper = ({ children, defaultValue = null }: { children: ReactNode; defau
     <FormProvider {...methods}>
       <form>
         {children}
-        <ValueProbe />
+        <FormProbe />
+        <button type="button" onClick={() => methods.reset({ date: defaultValue })}>
+          Clear
+        </button>
       </form>
     </FormProvider>
   )
@@ -79,16 +94,28 @@ describe('DatePickerInput', () => {
       expect(input).toHaveValue('01/01/2036')
     })
 
-    it('keeps the form value empty until the entry is complete', async () => {
+    it('holds no real date until the entry is complete', async () => {
       renderInput()
       const input = screen.getByLabelText('Start date')
 
       await userEvent.type(input, '01/01/20')
-      expect(screen.getByTestId('value')).toHaveTextContent('null')
+      expect(screen.getByTestId('value')).toHaveTextContent('invalid')
 
       await userEvent.type(input, '23')
-      await waitFor(() => expect(screen.getByTestId('value')).not.toHaveTextContent('null'))
+      await waitFor(() => expect(screen.getByTestId('value')).toHaveTextContent('2023-01-01'))
       expect(input).toHaveValue('01/01/2023')
+    })
+
+    it('marks the form invalid while the entry is unfinished, so it cannot be submitted', async () => {
+      renderInput()
+
+      await waitFor(() => expect(screen.getByTestId('form-valid')).toHaveTextContent('true'))
+
+      await userEvent.type(screen.getByLabelText('Start date'), '01/01')
+      await waitFor(() => expect(screen.getByTestId('form-valid')).toHaveTextContent('false'))
+
+      await userEvent.type(screen.getByLabelText('Start date'), '/2023')
+      await waitFor(() => expect(screen.getByTestId('form-valid')).toHaveTextContent('true'))
     })
 
     it('reports an unfinished entry only once the field is left', async () => {
@@ -110,7 +137,7 @@ describe('DatePickerInput', () => {
       await userEvent.tab()
 
       expect(await screen.findByText('Invalid date')).toBeInTheDocument()
-      expect(screen.getByTestId('value')).toHaveTextContent('null')
+      expect(screen.getByTestId('value')).toHaveTextContent('invalid')
     })
 
     it('rejects a future date', async () => {
@@ -128,8 +155,23 @@ describe('DatePickerInput', () => {
       await userEvent.clear(input)
 
       expect(input).toHaveValue('')
-      await waitFor(() => expect(screen.getByTestId('value')).toHaveTextContent('null'))
+      await waitFor(() => expect(screen.getByTestId('value')).toHaveTextContent('empty'))
       expect(screen.queryByText('Invalid date')).not.toBeInTheDocument()
+    })
+
+    it('clears an unfinished entry and its error when the form is reset', async () => {
+      renderInput()
+      const input = screen.getByLabelText('Start date')
+
+      await userEvent.type(input, '01/01')
+      await userEvent.tab()
+      expect(await screen.findByText('Invalid date')).toBeInTheDocument()
+
+      await userEvent.click(screen.getByRole('button', { name: 'Clear' }))
+
+      await waitFor(() => expect(input).toHaveValue(''))
+      expect(screen.queryByText('Invalid date')).not.toBeInTheDocument()
+      expect(screen.getByTestId('value')).toHaveTextContent('empty')
     })
   })
 
@@ -173,14 +215,18 @@ describe('_toMaskedText', () => {
 })
 
 describe('_fromText', () => {
-  it('returns null for an incomplete entry instead of a bogus year', () => {
-    expect(_fromText('01/01/2')).toBeNull()
-    expect(_fromText('01/01/203')).toBeNull()
+  it('returns an invalid date for an incomplete entry instead of a bogus year', () => {
+    expect(isValid(_fromText('01/01/2'))).toBe(false)
+    expect(isValid(_fromText('01/01/203'))).toBe(false)
   })
 
-  it('returns null for an impossible date', () => {
-    expect(_fromText('31/02/2023')).toBeNull()
-    expect(_fromText('32/13/2023')).toBeNull()
+  it('returns an invalid date for an impossible date', () => {
+    expect(isValid(_fromText('31/02/2023'))).toBe(false)
+    expect(isValid(_fromText('32/13/2023'))).toBe(false)
+  })
+
+  it('returns null for an empty entry', () => {
+    expect(_fromText('')).toBeNull()
   })
 
   it('parses a complete entry', () => {

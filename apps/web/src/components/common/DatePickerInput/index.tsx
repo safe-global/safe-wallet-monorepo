@@ -37,19 +37,39 @@ export const _toMaskedText = (raw: string) => {
 }
 
 /**
- * A date is only derived from a complete entry. Parsing a partial one would silently succeed with a
+ * Stands in for an entry that is not a real date yet. Keeping it in the form value (rather than only
+ * in local state) is what makes react-hook-form report the field as invalid, so a form cannot be
+ * submitted while the user is looking at "Invalid date". Shared so the value identity stays stable
+ * across keystrokes; nothing ever mutates it.
+ */
+const INVALID_DATE = new Date(NaN)
+
+/**
+ * A real date only comes out of a complete entry. Parsing a partial one would silently succeed with a
  * nonsense year, because date-fns' `yyyy` token matches a single digit (`2` becomes the year 0002).
  */
 export const _fromText = (text: string): Date | null => {
-  if (text.replace(/\D/g, '').length < DATE_DIGITS) {
+  const digits = text.replace(/\D/g, '')
+
+  if (digits.length === 0) {
     return null
   }
+
+  if (digits.length < DATE_DIGITS) {
+    return INVALID_DATE
+  }
+
   const parsed = parse(text, DATE_FORMAT, new Date())
-  return isValid(parsed) ? parsed : null
+  return isValid(parsed) ? parsed : INVALID_DATE
 }
 
 /** Identity of a field value, so the input only resyncs on a change that came from outside it. */
-const toKey = (value: Date | null) => (value && isValid(value) ? String(value.getTime()) : '')
+const toKey = (value: Date | null) => {
+  if (value === null) {
+    return 'empty'
+  }
+  return isValid(value) ? String(value.getTime()) : 'invalid'
+}
 
 const DatePickerInput = ({
   name,
@@ -129,9 +149,10 @@ const DatePickerField = ({
     setText((current) => (toKey(_fromText(current)) === toKey(value) ? current : toText(value)))
   }, [value])
 
-  // An unfinished entry is not an error until the user leaves the field
-  const isIncomplete = text !== '' && value === null
-  const errorMessage = fieldState.error?.message ?? (isIncomplete && !isFocused ? INVALID_DATE_ERROR : undefined)
+  // The form already knows an unfinished entry is invalid; don't nag about it mid-typing
+  const digitCount = text.replace(/\D/g, '').length
+  const isEntryUnfinished = digitCount > 0 && digitCount < DATE_DIGITS
+  const errorMessage = isEntryUnfinished && isFocused ? undefined : fieldState.error?.message
   const hasError = !!errorMessage
 
   // Never hand the calendar an invalid date — react-day-picker formats it and throws
