@@ -118,13 +118,14 @@ describe('DatePickerInput', () => {
       await waitFor(() => expect(screen.getByTestId('form-valid')).toHaveTextContent('true'))
     })
 
-    it('reports an unfinished entry right away, without waiting for blur', async () => {
+    it('does not nag about an unfinished entry until the field is left', async () => {
       renderInput()
+      const input = screen.getByLabelText('Start date')
 
-      await userEvent.type(screen.getByLabelText('Start date'), '01/01')
+      await userEvent.type(input, '30')
+      expect(screen.queryByText('Invalid date')).not.toBeInTheDocument()
 
-      // Deferring this to blur moves the field when the message appears, which swallows the click
-      // that opens the calendar
+      await userEvent.tab()
       expect(await screen.findByText('Invalid date')).toBeInTheDocument()
     })
 
@@ -171,6 +172,7 @@ describe('DatePickerInput', () => {
       const input = screen.getByLabelText('Start date')
 
       await userEvent.type(input, '01/01')
+      await userEvent.tab()
       expect(await screen.findByText('Invalid date')).toBeInTheDocument()
 
       await userEvent.click(screen.getByRole('button', { name: 'Clear' }))
@@ -191,6 +193,18 @@ describe('DatePickerInput', () => {
 
       expect(screen.getByLabelText('Start date')).toHaveValue('11/03/2026')
       await waitFor(() => expect(screen.queryByRole('grid')).not.toBeInTheDocument())
+    })
+
+    it('offers bounded month and year dropdowns', async () => {
+      renderInput(new Date('2026-03-09T00:00:00'))
+
+      await userEvent.click(screen.getByRole('button', { name: /start date/i }))
+      await screen.findByRole('grid')
+
+      const [months, years] = screen.getAllByRole('combobox')
+      expect(months.querySelectorAll('option')).toHaveLength(12)
+      // 20 years back plus the current one, capped at today because the field disables the future
+      expect(years.querySelectorAll('option')).toHaveLength(21)
     })
 
     it('opens without crashing when the form holds an invalid date (WA-3231)', async () => {

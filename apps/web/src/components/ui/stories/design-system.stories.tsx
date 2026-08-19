@@ -806,8 +806,15 @@ export const Dates: Story = {
         </div>
       </Row>
 
-      <Row label="Calendar" note="the popover contents, on its own">
-        <Calendar mode="single" defaultMonth={new Date(2026, 0, 1)} selected={new Date(2026, 0, 15)} />
+      <Row label="Calendar" note="the popover contents, on its own — arrows plus month/year dropdowns">
+        <Calendar
+          mode="single"
+          captionLayout="dropdown"
+          startMonth={new Date(2016, 0)}
+          endMonth={new Date(2026, 11)}
+          defaultMonth={new Date(2026, 0, 1)}
+          selected={new Date(2026, 0, 15)}
+        />
       </Row>
 
       <WhereUsed>

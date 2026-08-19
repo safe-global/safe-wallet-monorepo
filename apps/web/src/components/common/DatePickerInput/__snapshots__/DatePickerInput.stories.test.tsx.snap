@@ -97,6 +97,9 @@ exports[`./DatePickerInput.stories AllowFutureDates 1`] = `
             </button>
           </div>
         </div>
+        <div
+          class="min-h-5"
+        />
       </div>
     </div>
   </div>
@@ -203,6 +206,9 @@ exports[`./DatePickerInput.stories CalendarOpen 1`] = `
               </button>
             </div>
           </div>
+          <div
+            class="min-h-5"
+          />
         </div>
       </div>
     </div>
@@ -307,6 +313,9 @@ exports[`./DatePickerInput.stories Default 1`] = `
             </button>
           </div>
         </div>
+        <div
+          class="min-h-5"
+        />
       </div>
     </div>
   </div>
@@ -410,6 +419,9 @@ exports[`./DatePickerInput.stories DisableFutureDates 1`] = `
             </button>
           </div>
         </div>
+        <div
+          class="min-h-5"
+        />
       </div>
     </div>
   </div>
@@ -513,6 +525,9 @@ exports[`./DatePickerInput.stories InvalidEntry 1`] = `
             </button>
           </div>
         </div>
+        <div
+          class="min-h-5"
+        />
       </div>
     </div>
   </div>
@@ -619,6 +634,9 @@ exports[`./DatePickerInput.stories WithValue 1`] = `
               </button>
             </div>
           </div>
+          <div
+            class="min-h-5"
+          />
         </div>
       </div>
     </div>

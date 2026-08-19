@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFormContext, Controller, type ControllerFieldState, type ControllerRenderProps } from 'react-hook-form'
-import { format, isFuture, isValid, parse, startOfDay } from 'date-fns'
+import { addYears, endOfYear, format, isFuture, isValid, parse, startOfDay, startOfYear, subYears } from 'date-fns'
 import { Calendar as CalendarIcon } from 'lucide-react'
 
 import { Calendar } from '@/components/ui/calendar'
@@ -11,6 +11,7 @@ import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '
 const DATE_FORMAT = 'dd/MM/yyyy'
 const DATE_DIGITS = 8
 const INVALID_DATE_ERROR = 'Invalid date'
+const YEARS_SELECTABLE = 20
 
 const toText = (value: Date | null) => (value && isValid(value) ? format(value, DATE_FORMAT) : '')
 
@@ -141,6 +142,7 @@ const DatePickerField = ({
   const fieldRef = useRef<HTMLDivElement>(null)
   const [text, setText] = useState(() => toText(value))
   const [isOpen, setIsOpen] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
 
   // Resync only when the value changed outside the input (calendar pick, form reset), so a
   // half-typed entry is never reformatted under the cursor.
@@ -148,19 +150,31 @@ const DatePickerField = ({
     setText((current) => (toKey(_fromText(current)) === toKey(value) ? current : toText(value)))
   }, [value])
 
-  // Reported as soon as the entry stops being a date, never deferred to blur: revealing the message
-  // later grows the field's block, and in a vertically centred dialog that moves the calendar button
-  // between pointerdown and pointerup, so the click that opened it lands on nothing.
-  //
   // An empty field is never in error (the rules skip empty values), and saying so explicitly drops a
   // stale message: validation started by the blur that precedes a reset resolves after it.
   const isEmpty = text === '' && value === null
-  const errorMessage = isEmpty ? undefined : fieldState.error?.message
+
+  // Don't nag about an entry that is simply unfinished until the user leaves the field. The message
+  // slot below keeps its height either way, so revealing it never moves the field — an earlier
+  // version of this shifted the calendar button between pointerdown and pointerup and ate the click.
+  const digitCount = text.replace(/\D/g, '').length
+  const isEntryUnfinished = digitCount > 0 && digitCount < DATE_DIGITS
+  const errorMessage = isEmpty || (isEntryUnfinished && isFocused) ? undefined : fieldState.error?.message
   const hasError = !!errorMessage
 
   // Never hand the calendar an invalid date — react-day-picker formats it and throws
   const selectedDate = value && isValid(value) ? value : undefined
   const disabledDays = useMemo(() => (disableFuture ? { after: startOfDay(new Date()) } : undefined), [disableFuture])
+
+  // Bounds the month/year dropdowns, and lets the nav arrows disable at the ends instead of paging
+  // into months where every day is disabled.
+  const [startMonth, endMonth] = useMemo(() => {
+    const today = new Date()
+    return [
+      startOfYear(subYears(today, YEARS_SELECTABLE)),
+      disableFuture ? today : endOfYear(addYears(today, YEARS_SELECTABLE)),
+    ]
+  }, [disableFuture])
 
   const handleTextChange = (raw: string) => {
     const masked = _toMaskedText(raw)
@@ -192,7 +206,11 @@ const DatePickerField = ({
             inputMode="numeric"
             aria-invalid={hasError}
             onChange={(event) => handleTextChange(event.target.value)}
-            onBlur={field.onBlur}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => {
+              setIsFocused(false)
+              field.onBlur()
+            }}
           />
           <InputGroupAddon align="inline-end">
             <PopoverTrigger
@@ -207,6 +225,9 @@ const DatePickerField = ({
         <PopoverContent className="w-auto p-0" align="start" anchor={fieldRef}>
           <Calendar
             mode="single"
+            captionLayout="dropdown"
+            startMonth={startMonth}
+            endMonth={endMonth}
             selected={selectedDate}
             defaultMonth={selectedDate}
             onSelect={handleSelect}
@@ -216,7 +237,10 @@ const DatePickerField = ({
         </PopoverContent>
       </Popover>
 
-      <FieldError>{errorMessage}</FieldError>
+      {/* Fixed height: the message appearing must never change the field's layout */}
+      <div className="min-h-5">
+        <FieldError>{errorMessage}</FieldError>
+      </div>
     </Field>
   )
 }
