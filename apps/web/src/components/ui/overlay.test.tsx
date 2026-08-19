@@ -5,6 +5,7 @@ import { AlertDialog, AlertDialogContent } from './alert-dialog'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from './sheet'
 import { Select, SelectContent, SelectItem } from './select'
 import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from './drawer'
+import { Popover, PopoverContent } from './popover'
 
 /** The tint + blur pair that makes a scrim a Safe scrim. Every modal surface must carry both. */
 const SCRIM = ['bg-backdrop', 'supports-backdrop-filter:backdrop-blur-xs']
@@ -46,6 +47,13 @@ const SURFACES: [name: string, ui: React.ReactElement, slot: string][] = [
       </DrawerContent>
     </Drawer>,
     'drawer-overlay',
+  ],
+  [
+    'popover panel',
+    <Popover open key="popover">
+      <PopoverContent showBackdrop>Body</PopoverContent>
+    </Popover>,
+    'popover-backdrop',
   ],
   [
     'select',
@@ -97,5 +105,17 @@ describe('modal surfaces', () => {
     })
 
     expect(new Set(scrims).size).toBe(1)
+  })
+})
+
+describe('anchored surfaces', () => {
+  it('a popover has no scrim unless it opts in', () => {
+    const { baseElement } = render(
+      <Popover open>
+        <PopoverContent>Body</PopoverContent>
+      </Popover>,
+    )
+
+    expect(baseElement.querySelector('[data-slot="popover-backdrop"]')).toBeNull()
   })
 })

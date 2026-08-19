@@ -57,6 +57,7 @@ const NotificationsPopover = forwardRef<NotificationsPopoverRef>((_props, ref): 
       }}
     >
       <PopoverContent
+        showBackdrop
         anchor={anchorEl}
         side="bottom"
         align="start"

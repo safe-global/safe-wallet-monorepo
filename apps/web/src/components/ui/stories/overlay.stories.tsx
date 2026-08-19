@@ -8,6 +8,7 @@ import {
 } from '../alert-dialog'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../dialog'
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '../drawer'
+import { Popover, PopoverContent, PopoverDescription, PopoverTitle } from '../popover'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '../sheet'
 
 /**
@@ -129,6 +130,26 @@ export const DrawerBackdrop: Story = {
           </DrawerHeader>
         </DrawerContent>
       </Drawer>
+    </>
+  ),
+}
+
+/**
+ * A popover panel — a titled card with its own close button, like the header's Nested Safes,
+ * notifications, wallet and WalletConnect popups. Those are modals that happen to be anchored, so
+ * they opt into the same scrim via `showBackdrop`. A true dropdown (menu, select, date picker,
+ * filter) never does; see the Popover story for that shape.
+ */
+export const PopoverPanelBackdrop: Story = {
+  render: () => (
+    <>
+      <PageBehind />
+      <Popover open>
+        <PopoverContent showBackdrop anchor={{ getBoundingClientRect: () => new DOMRect(640, 320, 0, 0) }}>
+          <PopoverTitle>Popover panel</PopoverTitle>
+          <PopoverDescription>Opted into the one scrim via showBackdrop.</PopoverDescription>
+        </PopoverContent>
+      </Popover>
     </>
   ),
 }
