@@ -13,6 +13,7 @@ import { ChevronRight, X } from 'lucide-react'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import Track from '../Track'
 import { isRelativeUrl } from '@/utils/url'
+import { cn } from '@/utils/cn'
 
 type NotificationVariant = 'success' | 'info' | 'warning' | 'error'
 
@@ -143,7 +144,12 @@ const Toast = ({
   const autoHideProps = useAutoHide(getAutoHideDuration(variant, autoHideDurationOverride), onClose)
 
   return (
-    <Alert variant={alertVariant[variant]} outlined={false} className="w-[340px] shadow-lg" {...autoHideProps}>
+    <Alert
+      variant={alertVariant[variant]}
+      outlined={false}
+      className={cn('w-[340px] shadow-lg', variant === 'error' && css.errorToast)}
+      {...autoHideProps}
+    >
       {icon ? (icon as ReactNode) : <AlertSeverityIcon variant={alertVariant[variant]} />}
       <AlertAction>
         <Button variant="ghost" size="icon-xs" aria-label="Close" onClick={handleManualClose}>
