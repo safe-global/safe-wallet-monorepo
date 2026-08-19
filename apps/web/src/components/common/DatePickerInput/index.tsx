@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFormContext, Controller, type ControllerFieldState, type ControllerRenderProps } from 'react-hook-form'
 import { format, isFuture, isValid, parse, startOfDay } from 'date-fns'
 import { Calendar as CalendarIcon } from 'lucide-react'
@@ -9,8 +9,47 @@ import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
 
 const DATE_FORMAT = 'dd/MM/yyyy'
+const DATE_DIGITS = 8
+const INVALID_DATE_ERROR = 'Invalid date'
 
 const toText = (value: Date | null) => (value && isValid(value) ? format(value, DATE_FORMAT) : '')
+
+const SEGMENTED_DATE = /^(\d{1,2})\D(\d{1,2})\D(\d{1,4})$/
+
+/**
+ * Keeps the entry a well-formed `dd/MM/yyyy` prefix: digits only, separators inserted as the user
+ * types, and never more than 8 digits — so a year cannot grow past four digits. An already-separated
+ * entry (a pasted `1/1/2036`) keeps its groups, so a short day or month is not read as digits.
+ */
+export const _toMaskedText = (raw: string) => {
+  const segments = raw.trim().match(SEGMENTED_DATE)
+
+  if (segments) {
+    const [, day, month, year] = segments
+    return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`
+  }
+
+  return raw
+    .replace(/\D/g, '')
+    .slice(0, DATE_DIGITS)
+    .replace(/^(\d{2})(\d)/, '$1/$2')
+    .replace(/^(\d{2}\/\d{2})(\d)/, '$1/$2')
+}
+
+/**
+ * A date is only derived from a complete entry. Parsing a partial one would silently succeed with a
+ * nonsense year, because date-fns' `yyyy` token matches a single digit (`2` becomes the year 0002).
+ */
+export const _fromText = (text: string): Date | null => {
+  if (text.replace(/\D/g, '').length < DATE_DIGITS) {
+    return null
+  }
+  const parsed = parse(text, DATE_FORMAT, new Date())
+  return isValid(parsed) ? parsed : null
+}
+
+/** Identity of a field value, so the input only resyncs on a change that came from outside it. */
+const toKey = (value: Date | null) => (value && isValid(value) ? String(value.getTime()) : '')
 
 const DatePickerInput = ({
   name,
@@ -38,8 +77,9 @@ const DatePickerInput = ({
             return
           }
 
+          // Values seeded from outside the input (e.g. a date in the URL query) can be invalid
           if (!isValid(val)) {
-            return 'Invalid date'
+            return INVALID_DATE_ERROR
           }
 
           // Compare days using `startOfDay` to ignore timezone offset
@@ -77,29 +117,37 @@ const DatePickerField = ({
   name: string
 }) => {
   const value: Date | null = field.value ?? null
-  const hasError = !!fieldState.error
   const inputId = `${name}-date`
+  const fieldRef = useRef<HTMLDivElement>(null)
   const [text, setText] = useState(() => toText(value))
+  const [isOpen, setIsOpen] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
 
-  // Reflect external value changes (calendar selection, form reset) without clobbering in-progress typing.
+  // Resync only when the value changed outside the input (calendar pick, form reset), so a
+  // half-typed entry is never reformatted under the cursor.
   useEffect(() => {
-    setText((current) => {
-      const next = toText(value)
-      if (next) {
-        return next
-      }
-      return value === null ? '' : current
-    })
+    setText((current) => (toKey(_fromText(current)) === toKey(value) ? current : toText(value)))
   }, [value])
 
+  // An unfinished entry is not an error until the user leaves the field
+  const isIncomplete = text !== '' && value === null
+  const errorMessage = fieldState.error?.message ?? (isIncomplete && !isFocused ? INVALID_DATE_ERROR : undefined)
+  const hasError = !!errorMessage
+
+  // Never hand the calendar an invalid date — react-day-picker formats it and throws
+  const selectedDate = value && isValid(value) ? value : undefined
+  const disabledDays = useMemo(() => (disableFuture ? { after: startOfDay(new Date()) } : undefined), [disableFuture])
+
   const handleTextChange = (raw: string) => {
-    setText(raw)
-    if (raw.trim() === '') {
-      field.onChange(null)
-      return
-    }
-    // Parse a complete dd/MM/yyyy string; an incomplete entry yields an Invalid Date that validation reports.
-    field.onChange(parse(raw, DATE_FORMAT, new Date()))
+    const masked = _toMaskedText(raw)
+    setText(masked)
+    field.onChange(_fromText(masked))
+  }
+
+  const handleSelect = (date: Date | undefined) => {
+    setText(toText(date ?? null))
+    field.onChange(date ?? null)
+    setIsOpen(false)
   }
 
   return (
@@ -108,8 +156,8 @@ const DatePickerField = ({
         {label}
       </FieldLabel>
 
-      <Popover>
-        <InputGroup inputSize="hero" variant="surface" aria-invalid={hasError}>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <InputGroup ref={fieldRef} inputSize="hero" variant="surface" aria-invalid={hasError}>
           <InputGroupInput
             id={inputId}
             name={field.name}
@@ -117,9 +165,14 @@ const DatePickerField = ({
             value={text}
             placeholder="DD/MM/YYYY"
             autoComplete="off"
+            inputMode="numeric"
             aria-invalid={hasError}
             onChange={(event) => handleTextChange(event.target.value)}
-            onBlur={field.onBlur}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => {
+              setIsFocused(false)
+              field.onBlur()
+            }}
           />
           <InputGroupAddon align="inline-end">
             <PopoverTrigger
@@ -130,22 +183,20 @@ const DatePickerField = ({
           </InputGroupAddon>
         </InputGroup>
 
-        <PopoverContent className="w-auto p-0" align="start">
+        {/* Anchored to the field, not the icon button, so the calendar lines up with the input */}
+        <PopoverContent className="w-auto p-0" align="start" anchor={fieldRef}>
           <Calendar
             mode="single"
-            selected={value ?? undefined}
-            defaultMonth={value ?? undefined}
-            onSelect={(date) => {
-              setText(toText(date ?? null))
-              field.onChange(date ?? null)
-            }}
-            disabled={disableFuture ? { after: new Date() } : undefined}
+            selected={selectedDate}
+            defaultMonth={selectedDate}
+            onSelect={handleSelect}
+            disabled={disabledDays}
             autoFocus
           />
         </PopoverContent>
       </Popover>
 
-      <FieldError>{fieldState.error?.message}</FieldError>
+      <FieldError>{errorMessage}</FieldError>
     </Field>
   )
 }

@@ -6,7 +6,7 @@ import type {
 import { useMemo } from 'react'
 import { useRouter } from 'next/router'
 import type { ParsedUrlQuery } from 'querystring'
-import { startOfDay, endOfDay } from 'date-fns'
+import { startOfDay, endOfDay, isValid } from 'date-fns'
 
 import type { TxFilterFormState } from '@/components/transactions/TxFilterForm'
 import { getModuleTransactions, getIncomingTransfers, getMultisigTransactions } from '@/utils/transactions'
@@ -64,6 +64,14 @@ export const _isModuleFilter = (filter: TxFilter['filter']): filter is ModuleTxF
   return 'module' in filter
 }
 
+// The query string is user-editable, so a date in it may be nonsense — drop it rather than seeding
+// the filter form with an invalid `Date`
+const parseFilterDate = (value: string | undefined): Date | null => {
+  if (!value) return null
+  const date = new Date(value)
+  return isValid(date) ? date : null
+}
+
 // Spread TxFilter basically
 type TxFilterUrlQuery = {
   type: TxFilter['type']
@@ -110,8 +118,8 @@ export const txFilter = {
     return {
       type,
       ...filter,
-      execution_date__gte: !isModule && filter.execution_date__gte ? new Date(filter.execution_date__gte) : null,
-      execution_date__lte: !isModule && filter.execution_date__lte ? new Date(filter.execution_date__lte) : null,
+      execution_date__gte: isModule ? null : parseFilterDate(filter.execution_date__gte),
+      execution_date__lte: isModule ? null : parseFilterDate(filter.execution_date__lte),
       value: isModule ? '' : filter.value,
     }
   },

@@ -8,6 +8,7 @@ import { Textarea } from '../textarea'
 import { Field, FieldLabel, FieldDescription, FieldError } from '../field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select'
 import { SearchInput } from '../search-input'
+import { Calendar } from '../calendar'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import TableCard from '@/components/common/TableCard'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../card'
@@ -25,6 +26,8 @@ import {
 import { Tooltip, TooltipTrigger, TooltipContent } from '../tooltip'
 import { Typography } from '../typography'
 import TokenIcon from '@/components/common/TokenIcon'
+import { FormProvider, useForm } from 'react-hook-form'
+import DatePickerInput from '@/components/common/DatePickerInput'
 import { linkTo } from '@storybook/addon-links'
 import SubmitButton from '@/components/common/SubmitButton'
 import { ActionButton } from '@/components/common/ActionBar'
@@ -733,6 +736,86 @@ export const Dropdowns: Story = {
         <LinkGroup label="Reference">
           <StoryLink title="UI/Select">Select</StoryLink>
           <StoryLink title="UI/Combobox">Combobox</StoryLink>
+        </LinkGroup>
+      </WhereUsed>
+    </Family>
+  ),
+}
+
+/* ==================================================================== DATES */
+
+/** DatePickerInput reads its value from the form context, so stories give it one. */
+const DateField = ({
+  name,
+  label,
+  value = null,
+  disableFuture = true,
+}: {
+  name: string
+  label: string
+  value?: Date | null
+  disableFuture?: boolean
+}) => {
+  const methods = useForm({ mode: 'all', defaultValues: { [name]: value } })
+  return (
+    <FormProvider {...methods}>
+      <DatePickerInput name={name} label={label} disableFuture={disableFuture} />
+    </FormProvider>
+  )
+}
+
+export const Dates: Story = {
+  render: () => (
+    <Family
+      title="Dates"
+      review={[
+        'One date field for the whole app: DatePickerInput (masked dd/MM/yyyy entry + calendar popover). Reach for it instead of a bare Input for any date.',
+        'The field is the tall hero height because both current uses are big filter surfaces — should there also be a default (h-9) date field for inline/settings use?',
+        "Ranges are two fields (From / To), not the Calendar's range mode — worth revisiting if a third range surface appears.",
+      ]}
+      lead={
+        <>
+          Dates are typed or picked, never both at once. The field masks the entry to a well-formed{' '}
+          <code>dd/MM/yyyy</code> prefix as you type — the year stops at four digits and a half-typed date is never
+          reformatted under the cursor — and only hands the form a date once the entry is complete and real.
+        </>
+      }
+    >
+      <Row label="Date field" note="masked entry + calendar in the trailing slot · past dates only by default">
+        <Swatch label="empty">
+          <div className="w-56">
+            <DateField name="dsDateEmpty" label="From" />
+          </div>
+        </Swatch>
+        <Swatch label="value">
+          <div className="w-56">
+            <DateField name="dsDateValue" label="From" value={new Date(2026, 0, 15)} />
+          </div>
+        </Swatch>
+        <Swatch label="future allowed">
+          <div className="w-56">
+            <DateField name="dsDateFuture" label="Expires" value={new Date(2027, 5, 1)} disableFuture={false} />
+          </div>
+        </Swatch>
+      </Row>
+
+      <Row label="Range" note="two fields, not one range field">
+        <div className="grid w-[29rem] grid-cols-2 gap-6">
+          <DateField name="dsDateFrom" label="From" value={new Date(2026, 0, 1)} />
+          <DateField name="dsDateTo" label="To" value={new Date(2026, 0, 31)} />
+        </div>
+      </Row>
+
+      <Row label="Calendar" note="the popover contents, on its own">
+        <Calendar mode="single" defaultMonth={new Date(2026, 0, 1)} selected={new Date(2026, 0, 15)} />
+      </Row>
+
+      <WhereUsed>
+        <LinkGroup label="Components">
+          <StoryLink title="Components/Common/DatePickerInput">DatePickerInput</StoryLink>
+        </LinkGroup>
+        <LinkGroup label="Reference">
+          <StoryLink title="UI/Calendar">Calendar</StoryLink>
         </LinkGroup>
       </WhereUsed>
     </Family>
