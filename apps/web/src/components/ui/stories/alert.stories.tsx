@@ -141,7 +141,7 @@ export const AllVariants: Story = {
           </div>
           <div style={{ width: '400px' }}>
             <Alert variant="info">
-              <AlertCircle />
+              <AlertSeverityIcon variant="info" />
               <AlertTitle>Info Alert</AlertTitle>
               <AlertDescription>This is an info alert message.</AlertDescription>
             </Alert>

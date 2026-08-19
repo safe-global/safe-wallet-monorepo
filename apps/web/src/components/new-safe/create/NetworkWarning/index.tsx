@@ -1,5 +1,4 @@
-import { TriangleAlert } from 'lucide-react'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { useCurrentChain } from '@/hooks/useChains'
 import ChainSwitcher from '@/components/common/ChainSwitcher'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
@@ -12,7 +11,7 @@ const NetworkWarning = ({ action }: { action?: string }) => {
 
   return (
     <Alert variant="warning" outlined={false}>
-      <TriangleAlert />
+      <AlertSeverityIcon variant="warning" />
       <AlertTitle className="font-bold">Change your wallet network</AlertTitle>
       <AlertDescription>
         You are trying to {action || 'sign or execute a transaction'} on {chain.chainName}. Make sure that your wallet

@@ -34,7 +34,7 @@ import { cn } from '@/utils/cn'
  */
 
 const alertVariants = cva(
-  "grid gap-0.5 rounded-md border px-4 py-3 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-14 has-[>svg]:grid-cols-[auto_minmax(0,1fr)] has-[>svg]:gap-x-3 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert",
+  "grid gap-0.5 rounded-md border px-4 py-4 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-14 has-[>svg]:grid-cols-[auto_minmax(0,1fr)] has-[>svg]:gap-x-3 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert",
   {
     variants: {
       variant: {
@@ -43,7 +43,7 @@ const alertVariants = cva(
         warning: 'text-warning-strong *:data-[slot=alert-description]:text-warning-strong *:[svg]:text-warning-accent',
         success:
           'bg-success-subtle text-success-strong border-success-muted *:data-[slot=alert-description]:text-success-strong *:[svg]:text-current',
-        info: 'bg-muted text-foreground border-transparent *:data-[slot=alert-description]:text-foreground *:[svg]:text-muted-foreground',
+        info: 'bg-[var(--color-info-background)] text-foreground border-transparent *:data-[slot=alert-description]:text-foreground [&>svg]:text-[var(--color-info-dark)]',
       },
       // Only `destructive` and `warning` have both designs (see compoundVariants); the other
       // variants ignore this.

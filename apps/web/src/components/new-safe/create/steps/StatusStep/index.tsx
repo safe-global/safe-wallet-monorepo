@@ -101,7 +101,7 @@ export const CreateSafeStatus = ({
         <StatusMessage status={status} isError={isError} pendingSafe={pendingSafe} />
 
         {counter && counter > SPEED_UP_THRESHOLD_IN_SECONDS && !isError && (
-          <Alert variant="warning" className="mt-10">
+          <Alert variant="warning" outlined={false} className="mt-10">
             <Rocket />
             <AlertTitle className="text-left font-bold">Transaction is taking too long</AlertTitle>
             <AlertDescription className="text-left">
