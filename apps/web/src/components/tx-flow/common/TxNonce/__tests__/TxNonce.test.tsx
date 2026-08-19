@@ -139,6 +139,14 @@ describe('TxNonce', () => {
       expect(input.value).toBe('42')
     })
 
+    // jsdom drops both clamp() values and custom properties, so assert the class wiring only.
+    it('sizes the inner input to the value-width variable, leaving room for the addons', () => {
+      renderTxNonce({ nonce: 42, recommendedNonce: 42 })
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      const group = input.closest('[data-slot="input-group"]') as HTMLElement
+      expect(group).toHaveClass('[&_input]:w-(--nonce-width)', '[&_input]:min-w-0')
+    })
+
     it('shows reset button when nonce differs from recommended', () => {
       renderTxNonce({ nonce: 10, recommendedNonce: 5 })
       // Reset to recommended nonce button appears as an IconButton
@@ -227,6 +235,20 @@ describe('TxNonce', () => {
         expect(screen.getByRole('listbox')).toBeInTheDocument()
       })
     })
+
+    it('sizes the popup to fit its content instead of the tiny input', async () => {
+      const user = userEvent.setup()
+      renderTxNonce({ nonce: 5, recommendedNonce: 5 })
+
+      await user.click(screen.getByRole('combobox'))
+
+      const content = await waitFor(() => {
+        const el = document.querySelector('[data-slot="combobox-content"]')
+        expect(el).toBeInTheDocument()
+        return el as HTMLElement
+      })
+      expect(content).toHaveClass('w-max', 'min-w-40', 'max-w-[300px]')
+    })
   })
 
   describe('warning states', () => {
@@ -258,6 +280,13 @@ describe('TxNonce', () => {
       expect(
         container.querySelector('[aria-label="Nonce is much higher than the current nonce"]'),
       ).not.toBeInTheDocument()
+    })
+
+    it('anchors the warning tooltip to a laid-out element, not a display:contents box', () => {
+      const { container } = renderTxNonce({ nonce: 10, recommendedNonce: 5 })
+      const trigger = container.querySelector('[data-slot="tooltip-trigger"]')
+      expect(trigger).toBeInTheDocument()
+      expect(trigger).not.toHaveClass('contents')
     })
   })
 })

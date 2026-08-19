@@ -27,12 +27,13 @@ import { getDelay, isCustomDelaySelected } from './utils'
 import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import { isSmartContractWallet } from '@/utils/wallets'
+import { clickOnEnterOrSpace } from '@/utils/keyboard'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useChainId from '@/hooks/useChainId'
 import { Typography } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
@@ -52,6 +53,8 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
   const [showAdvanced, setShowAdvanced] = useState(data?.[UpsertRecoveryFlowFields.expiry] !== '0')
   const [understandsRisk, setUnderstandsRisk] = useState(false)
   const periods = useRecoveryPeriods()
+  const delayItems = Object.fromEntries(periods.delay.map(({ value, label }) => [value, label]))
+  const expirationItems = Object.fromEntries(periods.expiration.map(({ value, label }) => [value, label]))
   const [triggerGetSafe] = useLazySafesGetSafeV1Query()
 
   const getAddressType = async (address: string, chainId: string) => {
@@ -130,7 +133,8 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
     <TxCard>
       <FormProvider {...formMethods}>
         <form onSubmit={formMethods.handleSubmit(handleSubmit)}>
-          <Alert variant="warning" className="border-0">
+          <Alert variant="warning" outlined={false}>
+            <AlertSeverityIcon variant="warning" />
             <AlertDescription>
               Your Recoverer will be able to reset your Account setup. Only select an address that you trust.{' '}
               <Track {...RECOVERY_EVENTS.LEARN_MORE} label="recover-setup-flow">
@@ -185,7 +189,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
               control={formMethods.control}
               name={UpsertRecoveryFlowFields.selectedDelay}
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select value={field.value} onValueChange={field.onChange} items={delayItems}>
                   <SelectTrigger data-testid="recovery-delay-select" className="w-[55%] max-w-[240px]">
                     <SelectValue />
                   </SelectTrigger>
@@ -228,7 +232,10 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
               data-testid="advanced-btn"
               variant="paragraph-small"
               onClick={onShowAdvanced}
+              onKeyDown={clickOnEnterOrSpace}
               role="button"
+              tabIndex={0}
+              aria-expanded={showAdvanced}
               className={css.advanced}
             >
               Advanced {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
@@ -258,7 +265,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
                   // Don't reset value if advanced section is collapsed
                   shouldUnregister={false}
                   render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
+                    <Select value={field.value} onValueChange={field.onChange} items={expirationItems}>
                       <SelectTrigger data-testid="recovery-expiry-select" className="w-[55%] max-w-[240px]">
                         <SelectValue />
                       </SelectTrigger>

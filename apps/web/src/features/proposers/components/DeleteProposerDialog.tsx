@@ -24,7 +24,7 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import React, { useState } from 'react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Typography } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
@@ -229,7 +229,8 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
           <div className="p-4">
             {multiSigInitiated ? (
               <>
-                <Alert variant="default" className="mb-4">
+                <Alert variant="info" className="mb-4">
+                  <AlertSeverityIcon variant="info" />
                   <AlertDescription>1 of {parentThreshold} signatures collected</AlertDescription>
                 </Alert>
 
@@ -246,7 +247,8 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
             ) : (
               <>
                 {isMultiSigRequired && (
-                  <Alert variant="default" className="mb-4">
+                  <Alert variant="info" className="mb-4">
+                    <AlertSeverityIcon variant="info" />
                     <AlertDescription>
                       This requires {parentThreshold} of {parentOwners?.length ?? '?'} parent Safe owner signatures to
                       complete.

@@ -72,7 +72,7 @@ const NotificationCenterItem = ({
           {getNotificationIcon(variant)}
         </UnreadBadge>
       </div>
-      <div className="flex min-w-0 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         {primaryText}
         {secondaryText}
       </div>

@@ -1,6 +1,6 @@
 import { type ReactElement, type ReactNode, type TransitionEvent, useMemo, useState, useEffect, useRef } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Typography } from '@/components/ui/typography'
 import {
   ContractStatus,
@@ -91,6 +91,7 @@ export const AnalysisGroupCard = ({
   return (
     <Collapsible
       open={isOpen}
+      onOpenChange={setIsOpen}
       data-testid={dataTestId}
       onTransitionEnd={handleRevealTransitionEnd}
       style={{
@@ -103,7 +104,7 @@ export const AnalysisGroupCard = ({
       }}
     >
       {/* Card header - always visible */}
-      <div className="flex cursor-pointer flex-row items-center justify-between p-3" onClick={() => setIsOpen(!isOpen)}>
+      <CollapsibleTrigger render={<div className="flex cursor-pointer flex-row items-center justify-between p-3" />}>
         <div className="flex flex-row items-center gap-2">
           <SeverityIcon severity={primaryResult.severity} muted={!isHighlighted} />
           <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
@@ -114,7 +115,7 @@ export const AnalysisGroupCard = ({
         <ChevronDown
           className={`size-4 text-[var(--color-text-secondary)] transition-transform ${isOpen ? 'rotate-180' : ''}`}
         />
-      </div>
+      </CollapsibleTrigger>
 
       {/* Expanded content */}
       <CollapsibleContent keepMounted>

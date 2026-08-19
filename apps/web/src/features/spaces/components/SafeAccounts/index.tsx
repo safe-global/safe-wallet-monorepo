@@ -88,7 +88,10 @@ const SpaceSafeAccounts = () => {
                 data-testid="space-safe-accounts-search-input"
               />
             </InputGroup>
-            <SafeListSortToggle size="lg" className="border-border shadow-xs" />
+            <SafeListSortToggle
+              size="lg"
+              className="border-border shadow-xs hover:bg-foreground/[0.06] aria-expanded:bg-foreground/[0.06]"
+            />
           </>
         )}
       </div>

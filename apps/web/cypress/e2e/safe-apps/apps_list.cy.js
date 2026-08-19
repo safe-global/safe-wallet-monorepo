@@ -24,13 +24,13 @@ describe('Safe Apps list tests', () => {
     // Wait for /safe-apps response
     cy.intercept('GET', constants.appsEndpoint).then(() => {
       safeapps.typeAppName(constants.appNames.txbuilder)
-      safeapps.verifyLinkName(safeapps.linkNames.txBuilderLogo)
+      safeapps.verifyLinkName(safeapps.linkNames.txBuilderLink)
     })
   })
 
   it('Verify app list can be filtered by app description', () => {
     safeapps.typeAppName(constants.appNames.customContract)
-    safeapps.verifyLinkName(safeapps.linkNames.txBuilderLogo)
+    safeapps.verifyLinkName(safeapps.linkNames.txBuilderLink)
   })
 
   it('Verify error message is displayed when no app found', () => {

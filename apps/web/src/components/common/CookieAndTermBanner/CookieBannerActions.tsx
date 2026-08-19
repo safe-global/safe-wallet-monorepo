@@ -9,7 +9,7 @@ const CookieBannerActions = ({
   onAcceptAll: () => void
 }): ReactElement => {
   return (
-    <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+    <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
       <Button onClick={onAccept} variant="secondary" size="action">
         Save settings
       </Button>

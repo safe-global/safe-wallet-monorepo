@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
+import { CircleAlertIcon, CircleCheckIcon, InfoIcon, TriangleAlertIcon, type LucideIcon } from 'lucide-react'
 
 import { cn } from '@/utils/cn'
 
@@ -12,8 +13,8 @@ import { cn } from '@/utils/cn'
  *
  * @example
  * ```tsx
- * <Alert variant="default">
- *   <InfoIcon />
+ * <Alert variant="warning">
+ *   <AlertSeverityIcon variant="warning" />
  *   <AlertTitle>Heads up!</AlertTitle>
  *   <AlertDescription>You can add components using the cli.</AlertDescription>
  *   <AlertAction>
@@ -28,10 +29,12 @@ import { cn } from '@/utils/cn'
  * - Alert: `outlined` (destructive & warning only; default true = card surface with border,
  *   false = borderless severity tint)
  * - AlertAction: for action buttons (positioned top-right)
+ * - AlertSeverityIcon: renders the standard lucide icon for a given `variant` (opt-in child —
+ *   pass it your own icon, or none, if a consumer needs something different)
  */
 
 const alertVariants = cva(
-  "grid gap-0.5 rounded-md border px-4 py-3 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-24 has-[>svg]:grid-cols-[auto_minmax(0,1fr)] has-[>svg]:gap-x-3 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert",
+  "grid gap-0.5 rounded-md border px-4 py-4 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-14 has-[>svg]:grid-cols-[auto_minmax(0,1fr)] has-[>svg]:gap-x-3 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert",
   {
     variants: {
       variant: {
@@ -40,7 +43,7 @@ const alertVariants = cva(
         warning: 'text-warning-strong *:data-[slot=alert-description]:text-warning-strong *:[svg]:text-warning-accent',
         success:
           'bg-success-subtle text-success-strong border-success-muted *:data-[slot=alert-description]:text-success-strong *:[svg]:text-current',
-        info: 'bg-muted text-foreground border-transparent *:data-[slot=alert-description]:text-foreground *:[svg]:text-muted-foreground',
+        info: 'bg-[var(--color-info-background)] text-foreground border-transparent *:data-[slot=alert-description]:text-foreground [&>svg]:text-[var(--color-info-dark)]',
       },
       // Only `destructive` and `warning` have both designs (see compoundVariants); the other
       // variants ignore this.
@@ -103,10 +106,24 @@ function AlertAction({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="alert-action"
-      className={cn('text-foreground absolute top-1/2 right-4 -translate-y-1/2', className)}
+      className={cn('text-foreground absolute top-6 right-4 -translate-y-1/2', className)}
       {...props}
     />
   )
 }
 
-export { Alert, AlertTitle, AlertDescription, AlertAction }
+// Standard icon per severity, mirroring the Sonner toast icon map. `default` has none.
+const alertSeverityIcons: Partial<Record<NonNullable<VariantProps<typeof alertVariants>['variant']>, LucideIcon>> = {
+  destructive: CircleAlertIcon,
+  warning: TriangleAlertIcon,
+  success: CircleCheckIcon,
+  info: InfoIcon,
+}
+
+/** Standard lucide icon for an Alert's severity `variant` — an opt-in child of `<Alert>`. */
+function AlertSeverityIcon({ variant, ...props }: React.ComponentProps<'svg'> & VariantProps<typeof alertVariants>) {
+  const Icon = variant ? alertSeverityIcons[variant] : undefined
+  return Icon ? <Icon {...props} /> : null
+}
+
+export { Alert, AlertTitle, AlertDescription, AlertAction, AlertSeverityIcon }

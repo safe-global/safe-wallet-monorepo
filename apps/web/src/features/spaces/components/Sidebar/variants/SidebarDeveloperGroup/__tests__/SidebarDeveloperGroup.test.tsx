@@ -10,6 +10,7 @@ jest.mock('@/components/ui/sidebar', () => ({
   SidebarGroupLabel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroupContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SidebarSeparator: ({ className }: { className?: string }) => <hr className={className} />,
 }))
 
 jest.mock('../../NavItem', () => ({

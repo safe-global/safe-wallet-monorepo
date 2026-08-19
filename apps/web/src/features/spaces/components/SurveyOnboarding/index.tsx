@@ -12,7 +12,7 @@ import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATE
 import { AppRoutes } from '@/config/routes'
 import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Spinner } from '@/components/ui/spinner'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Typography } from '@/components/ui/typography'
 import {
   OnboardingLayout,
@@ -132,6 +132,7 @@ const SurveyOnboarding = (): ReactElement | null => {
 
       {error && !isNotFoundError(error) && (
         <Alert variant="destructive">
+          <AlertSeverityIcon variant="destructive" />
           <AlertDescription>Failed to load survey. Please refresh.</AlertDescription>
         </Alert>
       )}
@@ -152,6 +153,7 @@ const SurveyOnboarding = (): ReactElement | null => {
 
       {submitError && (
         <Alert variant="destructive">
+          <AlertSeverityIcon variant="destructive" />
           <AlertDescription>Failed to submit. Please try again.</AlertDescription>
         </Alert>
       )}

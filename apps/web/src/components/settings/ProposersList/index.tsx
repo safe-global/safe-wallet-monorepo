@@ -128,7 +128,10 @@ const ProposersList = () => {
       </Typography>
       <Typography className="mb-4">
         Proposers can suggest transactions but cannot approve or execute them. Signers should review and approve
-        transactions first. <ExternalLink href={HelpCenterArticle.PROPOSERS}>Learn more</ExternalLink>
+        transactions first.{' '}
+        <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.PROPOSERS}>
+          Learn more
+        </ExternalLink>
       </Typography>
 
       {showPendingDelegations && <PendingDelegationsList />}
