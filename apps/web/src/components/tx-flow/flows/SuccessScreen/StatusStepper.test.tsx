@@ -37,6 +37,9 @@ describe('StatusStepper', () => {
       expect(row.className).toContain('[&:not(:first-child)]:mt-9')
       // Rows center the dot and content vertically, like the pre-migration StepLabel.
       expect(row.className).toContain('items-center')
+      // The SuccessScreen card sets text-center; rows must opt out or wide content
+      // (e.g. a full tx hash) centers the label above it.
+      expect(row.className).toContain('text-left')
     })
   })
 

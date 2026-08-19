@@ -22,7 +22,7 @@ const StatusStep = ({
   const colorClass = isLoading ? 'text-[var(--color-border-main)]' : 'text-[var(--color-primary-main)]'
 
   return (
-    <div className={`${css.label} relative flex items-center gap-2 [&:not(:first-child)]:mt-9`}>
+    <div className={`${css.label} relative flex items-center gap-2 text-left [&:not(:first-child)]:mt-9`}>
       {/* The segments run from the dot's edge (50% of the row ± the 7px dot radius) through the
           36px inter-row margin, so the line touches every dot and reads as continuous. */}
       {!isFirst && (
