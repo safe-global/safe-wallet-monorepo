@@ -1,5 +1,5 @@
 import { useState, type ReactElement } from 'react'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import CheckWalletWithPermission from '@/components/common/CheckWalletWithPermission'
@@ -27,7 +27,8 @@ const NotificationRenewal = (): ReactElement => {
 
   return (
     <>
-      <Alert variant="warning">
+      <Alert variant="warning" outlined={false}>
+        <AlertSeverityIcon variant="warning" />
         <AlertTitle className="mb-2">Signature needed</AlertTitle>
         <AlertDescription>{RENEWAL_MESSAGE}</AlertDescription>
       </Alert>

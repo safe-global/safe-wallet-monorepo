@@ -1,4 +1,4 @@
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 
 interface MigrationPromptProps {
@@ -12,7 +12,8 @@ interface MigrationPromptProps {
  */
 const MigrationPrompt = ({ onProceed }: MigrationPromptProps) => {
   return (
-    <Alert data-testid="migration-prompt" className="mb-4">
+    <Alert data-testid="migration-prompt" variant="info" className="mb-4">
+      <AlertSeverityIcon variant="info" />
       <AlertTitle>Add to my accounts</AlertTitle>
       <AlertDescription>Only Safes you add will appear in your account list.</AlertDescription>
       <div className="mt-4">

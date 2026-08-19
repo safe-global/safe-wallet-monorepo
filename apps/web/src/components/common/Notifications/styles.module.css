@@ -50,3 +50,12 @@
 .container summary::-webkit-details-marker {
   display: none;
 }
+
+[data-theme='dark'] .container .errorToast [data-slot='alert-description'] {
+  color: var(--color-error-main);
+}
+
+.container .errorToast [data-slot='alert-description'] summary {
+  color: inherit;
+  font-weight: 700;
+}

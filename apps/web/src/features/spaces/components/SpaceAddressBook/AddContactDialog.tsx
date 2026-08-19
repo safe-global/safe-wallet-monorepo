@@ -1,4 +1,4 @@
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { cn } from '@/utils/cn'
@@ -188,6 +188,7 @@ const AddContactDialog = ({
 
                 {error && (
                   <Alert variant="destructive" className="mt-4">
+                    <AlertSeverityIcon variant="destructive" />
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}

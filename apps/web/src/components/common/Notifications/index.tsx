@@ -4,15 +4,16 @@ import groupBy from 'lodash/groupBy'
 import { useAppDispatch, useAppSelector } from '@/store'
 import type { Notification } from '@/store/notificationsSlice'
 import { closeNotification, readNotification, selectNotifications } from '@/store/notificationsSlice'
-import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Alert, AlertAction, AlertDescription, AlertTitle, AlertSeverityIcon } from '@/components/ui/alert'
 import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import css from './styles.module.css'
 import NextLink from 'next/link'
-import { ChevronRight, X, CircleAlert, CircleCheck, TriangleAlert, Info } from 'lucide-react'
+import { ChevronRight, X } from 'lucide-react'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import Track from '../Track'
 import { isRelativeUrl } from '@/utils/url'
+import { cn } from '@/utils/cn'
 
 type NotificationVariant = 'success' | 'info' | 'warning' | 'error'
 
@@ -21,13 +22,6 @@ const alertVariant: Record<NotificationVariant, 'success' | 'info' | 'warning' |
   info: 'info',
   warning: 'warning',
   error: 'destructive',
-}
-
-const variantIcon: Record<NotificationVariant, ReactNode> = {
-  success: <CircleCheck />,
-  info: <Info />,
-  warning: <TriangleAlert />,
-  error: <CircleAlert />,
 }
 
 export const NotificationLink = ({
@@ -150,8 +144,13 @@ const Toast = ({
   const autoHideProps = useAutoHide(getAutoHideDuration(variant, autoHideDurationOverride), onClose)
 
   return (
-    <Alert variant={alertVariant[variant]} outlined={false} className="w-[340px] shadow-lg" {...autoHideProps}>
-      {icon ? (icon as ReactNode) : variantIcon[variant]}
+    <Alert
+      variant={alertVariant[variant]}
+      outlined={false}
+      className={cn('w-[340px] shadow-lg', variant === 'error' && css.errorToast)}
+      {...autoHideProps}
+    >
+      {icon ? (icon as ReactNode) : <AlertSeverityIcon variant={alertVariant[variant]} />}
       <AlertAction>
         <Button variant="ghost" size="icon-xs" aria-label="Close" onClick={handleManualClose}>
           <X />

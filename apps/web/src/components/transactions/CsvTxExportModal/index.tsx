@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Alert } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { subMonths, startOfYear, isBefore, isAfter, startOfDay, addMonths, endOfDay } from 'date-fns'
 import ExportIcon from '@/public/images/common/export.svg'
 import UpdateIcon from '@/public/images/notifications/update.svg'
@@ -267,11 +267,16 @@ const YearRangeAlert = ({ isOverYear }: { isOverYear: boolean }): ReactElement =
         message: 'Date range cannot exceed 12 months.',
       }
     : {
-        variant: 'default' as const,
+        variant: 'info' as const,
         message: 'You can select up to 12 months.',
       }
 
-  return <Alert variant={variant}>{message}</Alert>
+  return (
+    <Alert variant={variant} outlined={false}>
+      <AlertSeverityIcon variant={variant} />
+      <AlertDescription>{message}</AlertDescription>
+    </Alert>
+  )
 }
 
 export default CsvTxExportModal
