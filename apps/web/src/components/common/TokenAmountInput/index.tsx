@@ -121,10 +121,14 @@ const TokenAmountInput = ({
 
   const handleTokenChange = useCallback(
     (value: string) => {
+      // Re-picking the token that is already selected is a no-op, not a change. Without this guard it
+      // would still run onChangeToken and wipe an amount the user had already typed.
+      if (sameAddress(value, tokenAddress)) return
+
       setValue(tokenAddressField, value, { shouldValidate: true })
       onChangeToken()
     },
-    [setValue, tokenAddressField, onChangeToken],
+    [setValue, tokenAddressField, onChangeToken, tokenAddress],
   )
 
   const selectedBalance = balances.find((item) => item.tokenInfo.address === tokenAddress)

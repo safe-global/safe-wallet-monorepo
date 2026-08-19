@@ -122,6 +122,18 @@ describe('SetUpNestedSafe', () => {
     })
   })
 
+  it('keeps the amount when the row re-picks the token it already has', async () => {
+    // Opening the dropdown and confirming the same token is a no-op, so a typed amount must survive it.
+    renderSetup([{ tokenAddress: ZERO_ADDRESS, amount: '0.5' }])
+
+    await userEvent.click(within(screen.getByTestId('token-selector')).getByRole('combobox'))
+    await userEvent.click(await screen.findByRole('option', { name: /Ether/ }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('token-amount-field')).toHaveValue('0.5')
+    })
+  })
+
   it('renders one field per asset row', () => {
     renderSetup([
       { tokenAddress: ZERO_ADDRESS, amount: '' },
