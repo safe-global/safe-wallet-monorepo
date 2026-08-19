@@ -1,9 +1,8 @@
-import { renderHook, act } from '@testing-library/react'
 import { GATEWAY_URL } from '@/config/gateway'
-import { useStepUp } from '../useStepUp'
+import { markStepUpReturnHandled, resetStepUpReturnGuard, startStepUp } from '../stepUp'
 import { OIDC_AUTH_PENDING_KEY, STEP_UP_PENDING_KEY } from '../../constants'
 
-describe('useStepUp', () => {
+describe('startStepUp', () => {
   const originalLocation = window.location
 
   const setLocation = (href: string) => {
@@ -12,6 +11,7 @@ describe('useStepUp', () => {
 
   beforeEach(() => {
     sessionStorage.clear()
+    resetStepUpReturnGuard()
     setLocation('https://app.safe.global/spaces/members?spaceId=42')
   })
 
@@ -20,11 +20,7 @@ describe('useStepUp', () => {
   })
 
   it('should redirect to the CGW authorize endpoint with elevate=true', () => {
-    const { result } = renderHook(() => useStepUp())
-
-    act(() => {
-      result.current.stepUpWithRedirect()
-    })
+    startStepUp()
 
     const url = new URL(window.location.href)
     expect(url.origin + url.pathname).toBe(`${GATEWAY_URL}/v1/auth/oidc/authorize`)
@@ -32,11 +28,7 @@ describe('useStepUp', () => {
   })
 
   it('should return to the current page', () => {
-    const { result } = renderHook(() => useStepUp())
-
-    act(() => {
-      result.current.stepUpWithRedirect()
-    })
+    startStepUp()
 
     expect(new URL(window.location.href).searchParams.get('redirect_url')).toBe(
       'https://app.safe.global/spaces/members?spaceId=42',
@@ -44,11 +36,7 @@ describe('useStepUp', () => {
   })
 
   it('should use an explicit redirect URL when provided', () => {
-    const { result } = renderHook(() => useStepUp())
-
-    act(() => {
-      result.current.stepUpWithRedirect('https://app.safe.global/spaces/settings?spaceId=7')
-    })
+    startStepUp('https://app.safe.global/spaces/settings?spaceId=7')
 
     expect(new URL(window.location.href).searchParams.get('redirect_url')).toBe(
       'https://app.safe.global/spaces/settings?spaceId=7',
@@ -59,11 +47,8 @@ describe('useStepUp', () => {
   // failure that did not happen this time round.
   it('should strip stale error params from the return URL', () => {
     setLocation('https://app.safe.global/spaces/members?spaceId=42&error=access_denied&error_description=nope')
-    const { result } = renderHook(() => useStepUp())
 
-    act(() => {
-      result.current.stepUpWithRedirect()
-    })
+    startStepUp()
 
     const returnUrl = new URL(new URL(window.location.href).searchParams.get('redirect_url') ?? '')
     expect(returnUrl.searchParams.has('error')).toBe(false)
@@ -72,13 +57,29 @@ describe('useStepUp', () => {
   })
 
   it('should mark a step-up as pending without marking a sign-in as pending', () => {
-    const { result } = renderHook(() => useStepUp())
-
-    act(() => {
-      result.current.stepUpWithRedirect()
-    })
+    startStepUp()
 
     expect(sessionStorage.getItem(STEP_UP_PENDING_KEY)).toBe('1')
     expect(sessionStorage.getItem(OIDC_AUTH_PENDING_KEY)).toBeNull()
+  })
+
+  it('should not start a second redirect while one is already pending', () => {
+    startStepUp()
+    const afterFirst = window.location.href
+
+    setLocation('https://app.safe.global/spaces/members?spaceId=42')
+    expect(startStepUp()).toBe(false)
+    expect(window.location.href).toBe('https://app.safe.global/spaces/members?spaceId=42')
+    expect(afterFirst).toContain('elevate=true')
+  })
+
+  // A replayed action that is itself rejected must surface as an error rather
+  // than bouncing the user back out to the provider indefinitely.
+  it('should not redirect again once a return has been handled', () => {
+    markStepUpReturnHandled()
+
+    expect(startStepUp()).toBe(false)
+    expect(window.location.href).toBe('https://app.safe.global/spaces/members?spaceId=42')
+    expect(sessionStorage.getItem(STEP_UP_PENDING_KEY)).toBeNull()
   })
 })

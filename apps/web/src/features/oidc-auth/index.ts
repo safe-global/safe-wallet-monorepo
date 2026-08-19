@@ -38,7 +38,6 @@ export type { OidcAuthContract } from './contract'
 export { useOidcLogin } from './hooks/useOidcLogin'
 export { useOidcLoginCallback } from './hooks/useOidcLoginCallback'
 export { useAuthenticators } from './hooks/useAuthenticators'
-export { useStepUp } from './hooks/useStepUp'
 export { useStepUpCallback } from './hooks/useStepUpCallback'
 
 // Direct (non-lazy) component export: the spaces account settings page is
@@ -49,18 +48,13 @@ export { default as WalletTwoFactorSection } from './components/WalletTwoFactorS
 export { default as WorkspaceTwoFactorSection } from './components/WorkspaceTwoFactorSection'
 export { default as MemberTwoFactorBadge } from './components/MemberTwoFactorBadge'
 
-// Mounted at app root, and driven purely by a `403 elevation_required` from
-// CGW. Deliberately not behind the chain-based OIDC_AUTH feature handle: this
-// is a session-scoped prompt, and Workspace pages have no current chain, so
-// gating it would leave an enforcing gateway with no way to recover.
-export { default as ElevationRequiredDialog } from './components/ElevationRequiredDialog'
-
 // ─────────────────────────────────────────────────────────────────
 // STEP-UP AUTHENTICATION (elevation)
 // ─────────────────────────────────────────────────────────────────
 
 export { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE, isElevationRequiredError } from './utils/elevation'
 export { clearPendingStepUpAction, replayPendingStepUpAction } from './utils/stepUpReplay'
+export { startStepUp } from './utils/stepUp'
 
 // ─────────────────────────────────────────────────────────────────
 // 2FA STATUS DERIVATION (shared with the spaces Team page)
