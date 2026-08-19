@@ -37,15 +37,17 @@
   background-color: var(--card);
 }
 
-.listItem:hover [data-slot='accordion-trigger'] {
+/* Child combinators throughout: a descendant match tints the accordion triggers nested inside the row
+   — transaction details, fee breakdowns — along with the row's own. */
+.listItem:hover > * > [data-slot='accordion-trigger'] {
   background-color: var(--color-background-light);
 }
 
-.listItem[data-open] [data-slot='accordion-trigger'] {
+.listItem[data-open] > * > [data-slot='accordion-trigger'] {
   background-color: var(--color-background-light);
 }
 
-.listItemNested:hover [data-slot='accordion-trigger'],
-.listItemNested[data-open] [data-slot='accordion-trigger'] {
+.listItemNested:hover > * > [data-slot='accordion-trigger'],
+.listItemNested[data-open] > * > [data-slot='accordion-trigger'] {
   background-color: color-mix(in srgb, var(--card) 72%, var(--muted) 28%);
 }

@@ -117,10 +117,6 @@ const Summary = ({
               )}
 
               <div>
-                <Typography variant="paragraph-small-bold" className="mb-4 block">
-                  Advanced details
-                </Typography>
-
                 <DecoderLinks />
 
                 <Receipt

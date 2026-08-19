@@ -24,7 +24,7 @@ const TX_INFO_LEVEL = {
   [ColorLevel.success]: ['Transfer', 'SwapTransfer', 'TwapOrder', 'NativeStakingDeposit'],
 }
 
-/** `main` inks the chip text, `background` tints its fill, `border` outlines the panel. */
+/** `main` inks the chip text, `background` tints the chip and the open row, `border` outlines the panel. */
 const TxInfoColors: Record<ColorLevel, { main: string; mainDark?: string; border: string; background: string }> = {
   [ColorLevel.info]: { main: 'info.dark', border: 'info.light', background: 'info.background' },
   [ColorLevel.warning]: { main: 'warning.main', border: 'warning.light', background: 'warning.background' },
@@ -73,13 +73,17 @@ const ColorCodedTxAccordion = ({ txInfo, txData, children, defaultExpanded }: De
 
   const accordionVars = {
     '--accordion-border-active': toCssVar(colors.border),
+    '--accordion-fill-active': toCssVar(colors.background),
   } as CSSProperties
 
   return (
     <Card style={accordionVars} className={css.item}>
       <Accordion defaultValue={defaultExpanded ? ['tx-details'] : []} onValueChange={onValueChange}>
         <AccordionItem value="tx-details" className="border-0">
-          <AccordionTrigger data-testid="decoded-tx-summary" className={cn(css.trigger, 'px-4 hover:no-underline')}>
+          <AccordionTrigger
+            data-testid="decoded-tx-summary"
+            className={cn(css.trigger, 'items-center px-4 hover:no-underline')}
+          >
             <div className="flex w-full flex-row items-center justify-between">
               <Typography variant="paragraph-small-bold" data-testid="tx-advanced-details">
                 Transaction details
@@ -102,7 +106,7 @@ const ColorCodedTxAccordion = ({ txInfo, txData, children, defaultExpanded }: De
             </div>
           </AccordionTrigger>
 
-          <AccordionContent data-testid="decoded-tx-details" className={cn(css.content, 'px-4')}>
+          <AccordionContent data-testid="decoded-tx-details" className={cn(css.content, 'p-4')}>
             {children}
           </AccordionContent>
         </AccordionItem>
