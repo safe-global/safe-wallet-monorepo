@@ -4,6 +4,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/utils/cn'
 import { usePortalContainer } from '@/components/ui/ShadcnProvider'
+import { overlayVariants } from '@/components/ui/overlay'
 import { Button } from '@/components/ui/button'
 import { XIcon } from 'lucide-react'
 
@@ -106,16 +107,7 @@ function DialogPortal({ ...props }: DialogPrimitive.Portal.Props) {
 }
 
 function DialogOverlay({ className, ...props }: DialogPrimitive.Backdrop.Props) {
-  return (
-    <DialogPrimitive.Backdrop
-      data-slot="dialog-overlay"
-      className={cn(
-        'data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-starting-style:opacity-0 data-ending-style:opacity-0 bg-backdrop fixed inset-0 z-[var(--z-overlay)]',
-        className,
-      )}
-      {...props}
-    />
-  )
+  return <DialogPrimitive.Backdrop data-slot="dialog-overlay" className={cn(overlayVariants(), className)} {...props} />
 }
 
 function DialogContent({
