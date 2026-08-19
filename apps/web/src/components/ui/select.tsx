@@ -146,7 +146,13 @@ function SelectContent({
     | 'collisionBoundary'
     | 'collisionAvoidance'
   > & {
-    /** Dims the rest of the page while the select is open (same look as the dialog overlay). */
+    /**
+     * Dims the rest of the page while the select is open (the shared overlay scrim).
+     *
+     * Do NOT set this on a select rendered inside a dialog or sheet. The scrim paints above that
+     * surface, so it blurs the very form the dropdown belongs to — and the dialog's own backdrop
+     * already handles the dimming, the scroll lock and the outside click.
+     */
     showBackdrop?: boolean
   }) {
   const portalContainer = usePortalContainer()
