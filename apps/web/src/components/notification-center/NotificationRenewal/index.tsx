@@ -39,9 +39,9 @@ const NotificationRenewal = (): ReactElement => {
         >
           {(isOk) => (
             <Button
-              variant="default"
+              variant="outline"
               size="sm"
-              className="w-[200px]"
+              className="w-[200px] text-foreground"
               onClick={handeSignClick}
               disabled={!isOk || isRegistering || !safe.deployed}
             >

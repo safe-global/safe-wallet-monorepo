@@ -40,7 +40,7 @@ const alertVariants = cva(
       variant: {
         default: 'bg-card text-card-foreground',
         destructive: 'text-error-strong *:data-[slot=alert-description]:text-error-strong *:[svg]:text-destructive',
-        warning: 'text-warning-strong *:data-[slot=alert-description]:text-warning-strong *:[svg]:text-warning-accent',
+        warning: 'text-foreground *:data-[slot=alert-description]:text-muted-foreground *:[svg]:text-warning-accent',
         success:
           'bg-success-subtle text-success-strong border-success-muted *:data-[slot=alert-description]:text-success-strong *:[svg]:text-current',
         info: 'bg-[var(--color-info-background)] text-foreground border-transparent *:data-[slot=alert-description]:text-foreground [&>svg]:text-[var(--color-info-dark)]',

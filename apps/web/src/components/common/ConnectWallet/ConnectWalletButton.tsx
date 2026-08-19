@@ -5,6 +5,7 @@ import { cn } from '@/utils/cn'
 const ConnectWalletButton = ({
   onConnect,
   contained = true,
+  variant,
   size = 'default',
   text,
   className,
@@ -12,6 +13,7 @@ const ConnectWalletButton = ({
 }: {
   onConnect?: () => void
   contained?: boolean
+  variant?: React.ComponentProps<typeof Button>['variant']
   size?: React.ComponentProps<typeof Button>['size']
   text?: string
   className?: string
@@ -28,7 +30,7 @@ const ConnectWalletButton = ({
     <Button
       data-testid="connect-wallet-btn"
       onClick={handleConnect}
-      variant={contained ? 'default' : 'ghost'}
+      variant={variant ?? (contained ? 'default' : 'ghost')}
       size={size}
       className={cn(fullWidth && 'w-full', className)}
     >

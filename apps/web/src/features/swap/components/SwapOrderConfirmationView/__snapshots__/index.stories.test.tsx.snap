@@ -514,7 +514,7 @@ exports[`./index.stories CustomRecipient 1`] = `
         </div>
         <div>
           <div
-            class="grid gap-0.5 rounded-md border px-4 py-4 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-14 has-[>svg]:grid-cols-[auto_minmax(0,1fr)] has-[>svg]:gap-x-3 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert text-warning-strong *:data-[slot=alert-description]:text-warning-strong *:[svg]:text-warning-accent bg-warning-subtle border-transparent"
+            class="grid gap-0.5 rounded-md border px-4 py-4 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-14 has-[>svg]:grid-cols-[auto_minmax(0,1fr)] has-[>svg]:gap-x-3 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert text-foreground *:data-[slot=alert-description]:text-muted-foreground *:[svg]:text-warning-accent bg-warning-subtle border-transparent"
             data-slot="alert"
             data-testid="recipient-alert"
             role="alert"
