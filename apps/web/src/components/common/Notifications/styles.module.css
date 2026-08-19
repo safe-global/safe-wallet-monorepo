@@ -51,11 +51,7 @@
   display: none;
 }
 
-[data-theme='dark'] .container .errorToast [data-slot='alert-description'] {
-  color: var(--color-error-main);
-}
-
 .container .errorToast [data-slot='alert-description'] summary {
-  color: inherit;
+  color: var(--foreground);
   font-weight: 700;
 }
