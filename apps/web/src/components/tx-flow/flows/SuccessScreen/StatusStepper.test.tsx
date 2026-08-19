@@ -16,36 +16,27 @@ describe('StatusStepper', () => {
     expect(container.querySelectorAll('[data-testid="status-step-icon"]')).toHaveLength(4)
   })
 
-  it('renders a standalone connector between every step but not before the first or after the last', () => {
+  it('draws connector segments that touch the dots: none above the first or below the last', () => {
     const { container } = render(<StatusStepper status={PendingStatus.PROCESSING} />)
 
-    const stepper = container.querySelector('[data-testid="status-stepper"]') as HTMLElement
-    const children = Array.from(stepper.children)
-    const icons = container.querySelectorAll('[data-testid="status-step-icon"]')
+    const segments = Array.from(container.querySelectorAll('[data-testid="status-step-connector"]'))
+    // 1 below the first row, 2 on each middle row, 1 above the last row.
+    expect(segments).toHaveLength(6)
 
-    // One connector per gap between steps, like MUI's StepConnector.
-    expect(container.querySelectorAll('[data-testid="status-step-connector"]')).toHaveLength(icons.length - 1)
-    expect(children[0].getAttribute('data-testid')).not.toBe('status-step-connector')
-    expect(children[children.length - 1].getAttribute('data-testid')).not.toBe('status-step-connector')
+    // Every segment is anchored to the dot's edge (50% of the row ± the dot radius).
+    const anchored = segments.filter((el) => el.className.includes('calc(50%+7px)'))
+    expect(anchored).toHaveLength(6)
   })
 
-  it('gives the connector a guaranteed minimum length so steps never look cramped', () => {
-    const { container } = render(<StatusStepper status={PendingStatus.PROCESSING} />)
-
-    const connector = container.querySelector('[data-testid="status-step-connector"]')
-    expect(connector?.className).toContain('min-h-9')
-    // ml-[6.5px] lines the segment up under the dot's horizontal center.
-    expect(connector?.className).toContain('ml-[6.5px]')
-  })
-
-  it('centers the dot and content within each row, like the pre-migration StepLabel', () => {
+  it('spaces the rows apart while the segments span the gap', () => {
     const { container } = render(<StatusStepper status={PendingStatus.PROCESSING} />)
 
     const icons = container.querySelectorAll('[data-testid="status-step-icon"]')
-    expect(icons).toHaveLength(4)
-
     icons.forEach((icon) => {
-      expect(icon.parentElement?.className).toContain('items-center')
+      const row = icon.parentElement as HTMLElement
+      expect(row.className).toContain('[&:not(:first-child)]:mt-9')
+      // Rows center the dot and content vertically, like the pre-migration StepLabel.
+      expect(row.className).toContain('items-center')
     })
   })
 
