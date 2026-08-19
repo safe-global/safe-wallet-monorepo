@@ -191,3 +191,32 @@ describe('SafenetReader.verifyAttestation — non-oracle path (live Gnosis beta 
     })
   })
 })
+
+describe('SafenetReader.blockTimeMs', () => {
+  it('returns the block timestamp in milliseconds', async () => {
+    // head 1,000 at t=1,000,000s with 5s blocks → block 900 is 500s earlier.
+    const { reader } = readerForGolden(gnosis, { head: 1_000, headTimestamp: 1_000_000 })
+
+    expect(await reader.blockTimeMs(900)).toBe(999_500_000)
+  })
+
+  it('costs exactly one header read', async () => {
+    const { reader, endpoint } = readerForGolden(gnosis, { head: 1_000, headTimestamp: 1_000_000 })
+
+    await reader.blockTimeMs(900)
+
+    expect(endpoint.methods.filter((method) => method === 'eth_getBlockByNumber')).toHaveLength(1)
+  })
+
+  it('degrades to null rather than failing a read whose verdict already verified', async () => {
+    const { reader } = readerForGolden(gnosis, { head: 1_000, failBlockProbes: 'error' })
+
+    expect(await reader.blockTimeMs(900)).toBeNull()
+  })
+
+  it('returns null when no endpoint can serve the header', async () => {
+    const { reader } = readerForGolden(gnosis, { head: 1_000, failBlockProbes: 'null' })
+
+    expect(await reader.blockTimeMs(900)).toBeNull()
+  })
+})
