@@ -45,19 +45,8 @@ describe('createNewSpendingLimitTx', () => {
     jest.spyOn(safeCoreSDK, 'getSafeSDK').mockReturnValue(mockSDK)
   })
 
-  it('returns undefined if there is no sdk instance', async () => {
-    jest.spyOn(safeCoreSDK, 'getSafeSDK').mockReturnValue(undefined)
-    const result = await createNewSpendingLimitTx(mockData, [], '4', mockChain, mockModules, true, 18)
-
-    expect(result).toBeUndefined()
-  })
-
-  it('returns undefined if there is no contract address', async () => {
-    jest.spyOn(safeCoreSDK, 'getSafeSDK').mockReturnValue(mockSDK)
-    const result = await createNewSpendingLimitTx(mockData, [], '4', mockChain, mockModules, true, 18)
-
-    expect(result).toBeUndefined()
-  })
+  // The unmet-precondition cases (no SDK, no module address for the chain) live in the colocated
+  // spendingLimitExecution.test.ts — they assert a rejection now, not a resolved `undefined`.
 
   it('creates a tx to enable the spending limit module if its not registered yet', async () => {
     await createNewSpendingLimitTx(mockData, [], '4', mockChain, [], true, 18)
