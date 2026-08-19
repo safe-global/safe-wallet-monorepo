@@ -137,7 +137,7 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                   style="--accordion-panel-height: auto; --accordion-panel-width: auto;"
                 >
                   <div
-                    class="pt-0 pb-4 [&_a]:hover:text-foreground h-(--accordion-panel-height) data-ending-style:h-0 data-starting-style:h-0 [&_a]:underline [&_a]:underline-offset-3 [&_p:not(:last-child)]:mb-4 px-4"
+                    class="pt-0 pb-4 [&_:where(a:hover)]:text-foreground h-(--accordion-panel-height) data-ending-style:h-0 data-starting-style:h-0 [&_a]:underline [&_a]:underline-offset-3 [&_p:not(:last-child)]:mb-4 px-4"
                   >
                     <div
                       class="flex flex-col items-end"
@@ -823,7 +823,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                   style="--accordion-panel-height: auto; --accordion-panel-width: auto;"
                 >
                   <div
-                    class="pt-0 pb-4 [&_a]:hover:text-foreground h-(--accordion-panel-height) data-ending-style:h-0 data-starting-style:h-0 [&_a]:underline [&_a]:underline-offset-3 [&_p:not(:last-child)]:mb-4 px-4"
+                    class="pt-0 pb-4 [&_:where(a:hover)]:text-foreground h-(--accordion-panel-height) data-ending-style:h-0 data-starting-style:h-0 [&_a]:underline [&_a]:underline-offset-3 [&_p:not(:last-child)]:mb-4 px-4"
                   >
                     <div
                       class="flex flex-col items-end"
@@ -1513,7 +1513,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                   style="--accordion-panel-height: auto; --accordion-panel-width: auto;"
                 >
                   <div
-                    class="pt-0 pb-4 [&_a]:hover:text-foreground h-(--accordion-panel-height) data-ending-style:h-0 data-starting-style:h-0 [&_a]:underline [&_a]:underline-offset-3 [&_p:not(:last-child)]:mb-4 px-4"
+                    class="pt-0 pb-4 [&_:where(a:hover)]:text-foreground h-(--accordion-panel-height) data-ending-style:h-0 data-starting-style:h-0 [&_a]:underline [&_a]:underline-offset-3 [&_p:not(:last-child)]:mb-4 px-4"
                   >
                     <div
                       class="flex flex-col items-end"

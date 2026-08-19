@@ -36,11 +36,17 @@
 .inlineSimulation {
   display: flex;
   justify-content: flex-end;
-  margin: var(--space-2);
+  margin: var(--space-2) var(--space-2) 0;
   position: absolute;
   right: 0;
   top: 0;
   z-index: 1;
+}
+
+/* QueuedTxSimulation renders nothing when it cannot simulate, 
+   and below 1350px this wrapper is in flow — so its margin left a gap. */
+.inlineSimulation:empty {
+  display: none;
 }
 
 /* `--tx-details-edge-inset` is the horizontal room the surrounding panel gives up so the rules
