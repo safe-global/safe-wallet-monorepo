@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 
 import { Input } from './input'
+import { Field, FieldLabel } from './field'
 
 describe('Input invalid state', () => {
   it('marks the field invalid from the error prop', () => {
@@ -15,9 +16,6 @@ describe('Input invalid state', () => {
     expect(screen.getByPlaceholderText('Explicitly invalid')).toHaveAttribute('aria-invalid', 'true')
   })
 
-  // The computed attribute used to be overwritten by the `{...props}` spread that followed it, so a
-  // caller passing an undefined/false `aria-invalid` alongside `error` silently erased the invalid
-  // state. AdvancedOptionsStep passes both and was only safe because they shared one boolean.
   it('keeps the error-driven invalid state when aria-invalid is passed as undefined', () => {
     render(<Input error="Boom" aria-invalid={undefined} placeholder="Undefined aria" />)
 
@@ -34,5 +32,26 @@ describe('Input invalid state', () => {
     render(<Input placeholder="Valid" />)
 
     expect(screen.getByPlaceholderText('Valid')).not.toHaveAttribute('aria-invalid')
+  })
+
+  it('sets its own text-foreground colour so the typed value never inherits red text', () => {
+    render(<Input error="Boom" placeholder="With error" />)
+
+    const input = screen.getByPlaceholderText('With error')
+    expect(input).toHaveClass('text-foreground')
+    expect(input.className).not.toContain('text-destructive')
+  })
+
+  // A Field ancestor turns red when invalid; the input's own text-foreground must win over inheritance.
+  it('keeps the value text neutral even nested inside an invalid Field, while the label stays destructive', () => {
+    render(
+      <Field data-invalid>
+        <FieldLabel className="text-destructive">Amount</FieldLabel>
+        <Input aria-invalid placeholder="Nested in invalid field" />
+      </Field>,
+    )
+
+    expect(screen.getByText('Amount')).toHaveClass('text-destructive')
+    expect(screen.getByPlaceholderText('Nested in invalid field')).toHaveClass('text-foreground')
   })
 })
