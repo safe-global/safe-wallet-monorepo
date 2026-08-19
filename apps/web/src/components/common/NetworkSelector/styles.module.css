@@ -73,11 +73,11 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  height: 40px;
+  height: var(--space-5);
   padding: 0 12px;
   font-size: 14px;
   border: 1px solid var(--color-border-main);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
 }
 
 .multiChainChip img[data-testid='chain-indicator-network-logo-img'] {

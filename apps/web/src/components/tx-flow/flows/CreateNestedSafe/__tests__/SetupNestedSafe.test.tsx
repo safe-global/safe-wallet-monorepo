@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@/tests/test-utils'
+import { render, screen, waitFor, within } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
@@ -10,7 +10,9 @@ const USDC_ADDRESS = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 
 const mockBalances: Balances['items'] = [
   {
-    balance: '1000000000000000000',
+    // Deliberately not a round number: '1.23456' can only come from formatting this balance, so the
+    // Max test cannot pass against a hardcoded value.
+    balance: '1234560000000000000',
     tokenInfo: {
       address: ZERO_ADDRESS,
       decimals: 18,
@@ -89,9 +91,8 @@ describe('SetUpNestedSafe', () => {
 
     await userEvent.click(screen.getByTestId('max-btn'))
 
-    // NumberField normalises the "1.0" that safeFormatUnits returns down to "1" for display.
     await waitFor(() => {
-      expect(screen.getByTestId('token-amount-field')).toHaveValue('1')
+      expect(screen.getByTestId('token-amount-field')).toHaveValue('1.23456')
     })
   })
 
@@ -100,8 +101,24 @@ describe('SetUpNestedSafe', () => {
 
     await userEvent.type(screen.getByTestId('token-amount-field'), '2')
 
+    // The number matters: it proves this row's own decimals and balance reached the validator.
     await waitFor(() => {
-      expect(screen.getByText(/Maximum value/)).toBeInTheDocument()
+      expect(screen.getByText('Maximum value is 1.23456')).toBeInTheDocument()
+    })
+  })
+
+  it('clears a prefilled amount when the row switches token', async () => {
+    // Back-navigation from the review step re-seeds defaultValues with the row as submitted, so a
+    // token change must not restore that old figure against the newly chosen token.
+    renderSetup([{ tokenAddress: ZERO_ADDRESS, amount: '0.5' }])
+
+    expect(screen.getByTestId('token-amount-field')).toHaveValue('0.5')
+
+    await userEvent.click(within(screen.getByTestId('token-selector')).getByRole('combobox'))
+    await userEvent.click(await screen.findByRole('option', { name: /USD Coin/ }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('token-amount-field')).toHaveValue('')
     })
   })
 

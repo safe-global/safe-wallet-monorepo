@@ -48,7 +48,7 @@ const TokenAmountInput = ({
   onMaxClick,
 }: TokenAmountInputProps) => {
   const {
-    formState: { errors, defaultValues },
+    formState: { errors },
     register,
     resetField,
     watch,
@@ -110,15 +110,14 @@ const TokenAmountInput = ({
   }, [maxAmount, selectedToken, setValue, amountField, trigger, deps, onMaxClick])
 
   const onChangeToken = useCallback(() => {
-    const amountDefaultValue = get(
-      defaultValues,
-      getFieldName(TokenAmountFields.amount, fieldArray ? { ...fieldArray, index: 0 } : undefined),
-    )
-
-    resetField(amountField, amountDefaultValue)
+    // An amount typed against the previous token is meaningless once the token changes, so clear it.
+    // Restoring the field's default instead would put the OLD token's amount back whenever
+    // defaultValues is prefilled — e.g. navigating back from a review step re-seeds the form with the
+    // row as previously submitted, so switching its token would silently keep the old figure.
+    resetField(amountField, { defaultValue: '' })
 
     trigger(deps)
-  }, [resetField, amountField, trigger, deps, defaultValues, fieldArray])
+  }, [resetField, amountField, trigger, deps])
 
   const handleTokenChange = useCallback(
     (value: string) => {
