@@ -103,10 +103,14 @@ export const MastercopyWarning = ({ variant = 'dashboard' }: MastercopyWarningPr
     // Settings intentionally prompts non-critical updates too, hence no `isCritical` gate here.
     if (variant === 'settings') {
       return (
-        <Alert>
-          <InfoIcon className="size-4 text-[var(--color-secondary-main)]" />
+        <Alert variant="success">
+          <InfoIcon className="size-4" />
           <AlertTitle>
-            New version is available: {latestVersion} (<ExternalLink href={changelogUrl}>changelog</ExternalLink>)
+            New version is available: {latestVersion} (
+            <ExternalLink href={changelogUrl} className="font-bold [&_span]:underline">
+              changelog
+            </ExternalLink>
+            )
           </AlertTitle>
 
           <AlertDescription>
