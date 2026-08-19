@@ -37,12 +37,18 @@ export const MultisendActionsHeader = ({
 
   return (
     <div data-testid="all-actions" className={classnames(css.actionsHeader, { [css.compactHeader]: compact })}>
-      {title}
+      <span className="text-base">{title}</span>
       <div className="flex flex-row">
-        <Button data-testid="expande-all-btn" onClick={onClickAll(true)} variant="ghost">
+        <Button data-testid="expande-all-btn" onClick={onClickAll(true)} variant="ghost" size="sm" className="text-xs">
           Expand all
         </Button>
-        <Button data-testid="collapse-all-btn" onClick={onClickAll(false)} variant="ghost">
+        <Button
+          data-testid="collapse-all-btn"
+          onClick={onClickAll(false)}
+          variant="ghost"
+          size="sm"
+          className="text-xs"
+        >
           Collapse all
         </Button>
       </div>
