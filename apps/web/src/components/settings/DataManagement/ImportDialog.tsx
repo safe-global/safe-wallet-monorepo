@@ -18,6 +18,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import { visitedSafesSlice } from '@/store/visitedSafesSlice'
 
 import css from './styles.module.css'
+import { TriangleAlert } from 'lucide-react'
 
 export const ImportDialog = ({
   onClose,
@@ -119,8 +120,9 @@ export const ImportDialog = ({
               showPreview
             />
             {!isDisabled && (
-              <Alert variant="warning">
-                <AlertTitle>Overwrite your current data?</AlertTitle>
+              <Alert variant="warning" outlined={false}>
+                <TriangleAlert />
+                <AlertTitle className="font-bold">Overwrite your current data?</AlertTitle>
                 <AlertDescription>
                   This action will overwrite your currently added Safe accounts, address book and settings with those
                   from the imported file.
@@ -130,7 +132,7 @@ export const ImportDialog = ({
           </>
         )}
       </div>
-      <div className="flex justify-end gap-2 p-6 pt-0">
+      <div className="flex justify-between gap-2 p-6 pt-0">
         <Button data-testid="dialog-cancel-btn" variant="outline" onClick={handleClose}>
           Cancel
         </Button>

@@ -49,6 +49,13 @@ export const SAFENET_ORACLE_ADDRESSES = parseCsv(
   process.env.NEXT_PUBLIC_SAFENET_ORACLE_ADDRESSES || process.env.EXPO_PUBLIC_SAFENET_ORACLE_ADDRESSES,
 )
 
+/** Safenet explorer base URL — display-only deep links to a check's attestation. */
+export const SAFENET_EXPLORER_URL = (
+  process.env.NEXT_PUBLIC_SAFENET_EXPLORER_URL ||
+  process.env.EXPO_PUBLIC_SAFENET_EXPLORER_URL ||
+  'https://explorer.safenet-beta.eth.limo'
+).replace(/\/$/, '')
+
 // --- Lookback tuning ------------------------------------------------------
 
 /** Hard cap on how far back the reader scans for a check's first event. */
