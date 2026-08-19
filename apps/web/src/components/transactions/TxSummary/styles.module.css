@@ -162,13 +162,6 @@
     align-items: center;
   }
 
-  /* Undo the flex fallback's rules: in the grid the middle column does the pushing. */
-  .gridContainer.queue .date,
-  .gridContainer.queue .confirmations {
-    width: auto;
-    margin-left: 0;
-  }
-
   .gridContainer.queue .status {
     margin: 0;
   }

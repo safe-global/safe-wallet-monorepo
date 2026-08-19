@@ -22,6 +22,7 @@ const meta = {
         'info',
         'positive',
         'negative',
+        'subtle',
         'ghost',
         'link',
       ],
@@ -63,6 +64,7 @@ export const AllVariants: Story = {
           <Badge variant="info">Info</Badge>
           <Badge variant="positive">+4.31%</Badge>
           <Badge variant="negative">-2.10%</Badge>
+          <Badge variant="subtle">Subtle</Badge>
           <Badge variant="ghost">Ghost</Badge>
           <Badge variant="link">Link</Badge>
         </div>

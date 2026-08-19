@@ -33,9 +33,6 @@
   border-color: var(--color-secondary-light);
 }
 
-/* Expanded card stays solid white/card (declared after :hover so it wins when an open item is
-   also hovered) — the tinted fill hurt contrast on the detail content. Border stays transparent:
-   the card sits on the grey page, so its own edge is already legible without an outline. */
 .listItem[data-open] {
   background-color: var(--card);
 }
@@ -45,7 +42,7 @@
 }
 
 .listItem[data-open] [data-slot='accordion-trigger'] {
-  background-color: var(--card);
+  background-color: var(--color-background-light);
 }
 
 .listItemNested:hover [data-slot='accordion-trigger'],
