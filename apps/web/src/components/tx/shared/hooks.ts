@@ -7,8 +7,10 @@
  * @module tx/shared/hooks
  */
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { assertTx, assertOnboard, assertChainInfo, assertProvider } from '@/utils/helpers'
+import { assertTx, assertOnboard, assertChainInfo, assertProvider, assertWallet } from '@/utils/helpers'
 import { useContext, useMemo } from 'react'
+import { type JsonRpcProvider } from 'ethers'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { type TransactionOptions, type SafeTransaction } from '@safe-global/types-kit'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -26,9 +28,16 @@ import {
 import { useHasPendingTxs } from '@/hooks/usePendingTxs'
 import { runExecutionPreChecks } from '@/services/tx/executionPreChecks'
 import { getSafeTxGas, getNonces } from '@/services/tx/tx-sender/recommendedNonce'
+import { getAndValidateSafeSDK } from '@/services/tx/tx-sender/sdk'
+import { prepareNestedApproveHashTx } from '@/services/tx/tx-sender/nestedSafeTx'
+import { confirmNestedApprovalOnExecution } from '@/services/tx/confirmNestedApproval'
+import proposeTransaction from '@/services/tx/proposeTransaction'
+import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useUpdateBatch } from '@/features/batching'
 import { useCurrentChain } from '@/hooks/useChains'
+import { hasFeature, FEATURES } from '@safe-global/utils/utils/chains'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { useLoadFeature } from '@/features/__core__'
 import { GTFFeature } from '@/features/gtf'
 import { mergeGtfFeeParams } from '@/features/gtf/services'
@@ -63,6 +72,7 @@ export const useTxActions = (): TxActions => {
   const wallet = useWallet()
   const [addTxToBatch] = useUpdateBatch()
   const chain = useCurrentChain()
+  const web3ReadOnly = useWeb3ReadOnly()
   const dispatch = useAppDispatch()
   const gtfFeature = useLoadFeature(GTFFeature)
   const { gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
@@ -125,12 +135,66 @@ export const useTxActions = (): TxActions => {
       return await dispatchTxSigning(safeTx, signer.provider, txId)
     }
 
+    // Nested signer (parent Safe P): instead of executing the approveHash from the connected EOA,
+    // propose the child tx unsigned, then build + off-chain sign the parent's approveHash (TX_P) and
+    // propose it to P's queue. The user relays TX_P separately via Execute; on its execution the
+    // parent's confirmation is posted to the child (see confirmNestedApprovalOnExecution).
+    const signNestedApproval = async (
+      parentSafe: SafeState,
+      parentSafeAddress: string,
+      readOnlyProvider: JsonRpcProvider,
+      childSafeTx: SafeTransaction,
+      childTxId?: string,
+      origin?: string,
+    ) => {
+      assertWallet(wallet)
+      assertProvider(wallet.provider)
+
+      const childSafeTxHash = await getAndValidateSafeSDK().getTransactionHash(childSafeTx)
+
+      // Propose the child tx so a txId exists and the parent link resolves
+      const id = childTxId || (await _propose(parentSafeAddress, childSafeTx, childTxId, origin)).txId
+
+      const { parentSafeTx, parentSafeTxHash } = await prepareNestedApproveHashTx({
+        parentSafe,
+        childSafeAddress: safeAddress,
+        childSafeTxHash,
+        connectedWalletProvider: wallet.provider,
+        readOnlyProvider,
+      })
+
+      await proposeTransaction(
+        parentSafe.chainId,
+        parentSafe.address.value,
+        wallet.address,
+        parentSafeTx,
+        parentSafeTxHash,
+        origin,
+      )
+
+      txDispatch(TxEvent.NESTED_SAFE_TX_CREATED, {
+        txId: id,
+        nonce: childSafeTx.data.nonce,
+        chainId,
+        safeAddress,
+        parentSafeAddress,
+        txHashOrParentSafeTxHash: parentSafeTxHash,
+      })
+
+      return id
+    }
+
     const signTx: TxActions['signTx'] = async (safeTx, txId, origin) => {
       assertTx(safeTx)
       assertProvider(signer?.provider)
       assertOnboard(onboard)
 
       safeTx = await withGtfFeeParams(safeTx)
+
+      // Nested signer on a GTF chain: sign + propose the parent's approveHash (no EOA gas)
+      if (signer.isSafe && signer.safeInfo && chain && hasFeature(chain, FEATURES.GTF) && web3ReadOnly) {
+        return signNestedApproval(signer.safeInfo, signer.address, web3ReadOnly, safeTx, txId, origin)
+      }
 
       // Smart contract wallets must sign via an on-chain tx
       if (signer.isSafe || (await isSmartContractWallet(signer.chainId, signer.address))) {
@@ -201,6 +265,12 @@ export const useTxActions = (): TxActions => {
 
       // Relay or execute the tx via connected wallet
       if (isRelayed) {
+        // No-op unless this is a parent Safe's approveHash (TX_P): once relayed, post the parent's
+        // confirmation to the child so its approval shows immediately without waiting on indexing.
+        // Only on GTF chains, where the split sign/execute flow produces TX_P in the first place.
+        if (hasFeature(chain, FEATURES.GTF)) {
+          confirmNestedApprovalOnExecution(txId, safeAddress, chainId, safeTx)
+        }
         await dispatchTxRelay(safeTx, safe, txId, chain, txOptions.gasLimit, acceptUnverifiedSimulation)
       } else {
         const isSmartAccount = await isSmartContractWallet(signer.chainId, signer.address)
@@ -227,6 +297,8 @@ export const useTxActions = (): TxActions => {
     signer?.address,
     signer?.chainId,
     signer?.isSafe,
+    signer?.safeInfo,
+    web3ReadOnly,
     addTxToBatch,
     onboard,
     chain,

@@ -1,9 +1,10 @@
 import { useContext, useEffect, type ReactElement } from 'react'
 import { useLoadFeature } from '@/features/__core__'
-import { GTFFeature, useFeesPreview, useIsGtfSlotVisible } from '@/features/gtf'
+import { GTFFeature, useFeesPreview } from '@/features/gtf'
 import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 import { TxFlowContext } from '../TxFlowProvider'
 import { SlotName, withSlot } from '../slots'
+import { useIsGtfFeeSlotVisible } from './useIsGtfFeeSlotVisible'
 
 const FeesPreview = (): ReactElement => {
   const { FeesPreview: FeesPreviewComponent } = useLoadFeature(GTFFeature)
@@ -30,7 +31,7 @@ const FeesPreviewSlot = withSlot({
   Component: FeesPreview,
   slotName: SlotName.Main,
   id: 'feesPreview',
-  useSlotCondition: useIsGtfSlotVisible,
+  useSlotCondition: useIsGtfFeeSlotVisible,
 })
 
 export default FeesPreviewSlot

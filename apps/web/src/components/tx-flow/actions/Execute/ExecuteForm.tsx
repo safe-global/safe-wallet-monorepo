@@ -12,6 +12,8 @@ import { trackError, Errors } from '@/services/exceptions'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSigner } from '@/hooks/wallets/useWallet'
+import useAsync from '@safe-global/utils/hooks/useAsync'
+import { isSmartContractWallet } from '@/utils/wallets'
 import { getTxOptions } from '@/utils/transactions'
 import useIsValidExecution from '@/hooks/useIsValidExecution'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -31,6 +33,7 @@ import { isWalletRejection } from '@/utils/wallets'
 import css from './styles.module.css'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
+import useSafeInfo from '@/hooks/useSafeInfo'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
 import type { SlotComponentProps, SlotName } from '../../slots'
@@ -39,6 +42,7 @@ import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { SafeTxContext } from '../../SafeTxProvider'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
+import { decodeNestedApproval } from '@/services/tx/confirmNestedApproval'
 
 export const ExecuteForm = ({
   safeTx,
@@ -71,6 +75,7 @@ export const ExecuteForm = ({
 }): ReactElement => {
   // Hooks
   const currentChain = useCurrentChain()
+  const { safe } = useSafeInfo()
   const { executeTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
   const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
@@ -90,9 +95,34 @@ export const ExecuteForm = ({
   // relay path on a tx whose payload doesn't carry the GTF fee fields (would fail in handlePayment).
   const { gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
   const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
+
+  // TX_P: the zero-fee parent approveHash from the nested split-sign and execute flow. It is NOT GtfSafePaid
+  // (carries no fee fields), but it must be relayed — sponsored, so the parent's EOA needs no gas. The
+  // split flow only exists on GTF chains; elsewhere a parent approveHash is an ordinary tx that draws
+  // from the daily relay quota, so it must keep the standard behavior.
+  const isNestedApproveHash = isGtfChain && !!safeTx && !!decodeNestedApproval(safeTx)
+
   const requiresRelay =
     (safeTx && isGtfSafePaid(safeTx.data)) ||
-    (isGtfChain && !!safeTx && safeTx.signatures.size === 0 && gtfPaymentMode === 'safe' && !!gtfSelectedGasToken)
+    (isGtfChain && !!safeTx && safeTx.signatures.size === 0 && gtfPaymentMode === 'safe' && !!gtfSelectedGasToken) ||
+    isNestedApproveHash
+
+  // `signer.isSafe` is only set for the in-app nested signer, so a parent Safe connected over
+  // WalletConnect looks like a plain wallet — fall back to an on-chain check of the signer address.
+  const signer = useSigner()
+  const [isSignerSmartAccount, , isSignerSmartAccountLoading] = useAsync(
+    () => (!signer || signer.isSafe ? undefined : isSmartContractWallet(signer.chainId, signer.address)),
+    [signer],
+  )
+  // A fully signed tx needs nothing from the executor: the relay submits it on-chain and pays the gas,
+  // so a smart account executor is fine. Scoped to GTF chains — that is where this branch's split
+  // sign/execute flow lives, and daily-limit relay chains must keep their existing behavior.
+  const relayNeedsNothingFromExecutor = isGtfChain && !!safeTx && safeTx.signatures.size >= safe.threshold
+
+  // A smart account executor (a parent Safe) can't add its own signature inline while executing, so a
+  // Safe-paid tx that still needs signatures would dead end at sign time — block Execute there.
+  const blockSafePaysFromNestedExecutor =
+    (signer?.isSafe === true || isSignerSmartAccount === true) && !!requiresRelay && !relayNeedsNothingFromExecutor
 
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
@@ -121,16 +151,21 @@ export const ExecuteForm = ({
     setExecutionMethod(newMethod)
   }
 
-  // Show execution selector when either no-fee campaign OR relay is available
-  // Also show if gas is too high but feature is otherwise available (to show disabled state)
-  // Or if limit is reached (to show 0/X available state)
+  // A nested approveHash always shows the selector so the user can select between:
+  //   - relay (default, so no gas cost to the user), or
+  //   - pay gas from the EOA
+  // Otherwise (non-relay-forced, non-GTF chain) show the selector when:
+  //   - the no-fee campaign or relay is available, or
+  //   - gas is too high but the no-fee campaign is otherwise available (to show the disabled state), or
+  //   - the daily relay limit is reached (to show 0/X available state)
   const showExecutionSelector =
-    !requiresRelay &&
-    !isGtfChain &&
-    (canNoFeeCampaign ||
-      canRelay ||
-      (isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress && gasTooHigh) ||
-      isLimitReached)
+    isNestedApproveHash ||
+    (!requiresRelay &&
+      !isGtfChain &&
+      (canNoFeeCampaign ||
+        canRelay ||
+        (isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress && gasTooHigh) ||
+        isLimitReached))
 
   // Determine which method will be used
   const willRelay = !!(canRelay && executionMethod === ExecutionMethod.RELAY)
@@ -139,8 +174,9 @@ export const ExecuteForm = ({
     canNoFeeCampaign &&
     executionMethod === ExecutionMethod.NO_FEE_CAMPAIGN
   )
-  // Wait for the async SC-wallet check to settle — `walletCanRelay` is undefined while loading.
-  const relayUnavailableForGtf = requiresRelay && !canRelay && !walletCanRelayLoading
+  // Wait for the async SC-wallet checks to settle — `walletCanRelay` and `isSignerSmartAccount` are
+  // undefined while loading, and a smart account signer gets its own, more specific error.
+  const relayUnavailableForGtf = requiresRelay && !canRelay && !walletCanRelayLoading && !isSignerSmartAccountLoading
 
   // Estimate gas limit
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)
@@ -221,12 +257,6 @@ export const ExecuteForm = ({
 
   const cannotPropose = !isOwner && !onlyExecute
 
-  // Parent Safe as executor cannot pay gas from the (child) Safe. The relay path doesn't
-  // support this nested execution flow at this moment. Block Execute when both conditions hold so
-  // the user can't submit a tx that would dead end at sign time.
-  const signer = useSigner()
-  const blockSafePaysFromNestedExecutor = signer?.isSafe === true && !!requiresRelay
-
   const submitDisabled =
     !safeTx ||
     isSubmitDisabled ||
@@ -242,7 +272,9 @@ export const ExecuteForm = ({
   return (
     <>
       <form onSubmit={handleSubmit}>
-        {!requiresRelay && (
+        {/* For a nested approveHash we keep requiresRelay (relay is sponsored) but still show the
+            options block so the user can pick relay (default) or pay gas from the EOA. */}
+        {(!requiresRelay || isNestedApproveHash) && (
           <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: showExecutionSelector })}>
             <AdvancedParams
               willExecute
@@ -257,13 +289,12 @@ export const ExecuteForm = ({
                   : undefined
               }
             />
-
             {showExecutionSelector && (
               <div className={css.noTopBorder}>
                 <ExecutionMethodSelector
                   executionMethod={executionMethod}
                   setExecutionMethod={handleExecutionMethodChange}
-                  relays={canNoFeeCampaign ? undefined : relays[0]}
+                  relays={canNoFeeCampaign || (isNestedApproveHash && isGtfChain) ? undefined : relays[0]}
                   noFeeCampaign={
                     isNoFeeCampaign && !blockedAddress
                       ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 }
@@ -283,13 +314,13 @@ export const ExecuteForm = ({
           <ErrorMessage>
             Cannot execute a transaction from the Safe account itself, please connect a different account.
           </ErrorMessage>
-        ) : relayUnavailableForGtf ? (
-          <ErrorMessage>Safe-paid fees require Gelato relay, which is currently unavailable.</ErrorMessage>
         ) : blockSafePaysFromNestedExecutor ? (
           <ErrorMessage level="info">
-            Can&apos;t pay gas from this Safe account when executing through a parent Safe account. Sign the
+            Can&apos;t pay gas from this Safe account when executing through a smart contract account. Sign the
             transaction, or switch to another signer to execute.
           </ErrorMessage>
+        ) : relayUnavailableForGtf ? (
+          <ErrorMessage>Safe-paid fees require Gelato relay, which is currently unavailable.</ErrorMessage>
         ) : !walletCanPay && !willRelay && !willNoFeeCampaign ? (
           <ErrorMessage level="info">
             Your connected wallet doesn&apos;t have enough funds to execute this transaction.

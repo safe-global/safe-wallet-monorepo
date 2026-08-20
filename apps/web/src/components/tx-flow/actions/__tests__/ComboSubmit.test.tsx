@@ -8,6 +8,7 @@ import * as slotsHooks from '@/components/tx-flow/slots/hooks'
 import { SlotProvider } from '@/components/tx-flow/slots'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/types-kit'
+import { generatePreValidatedSignature } from '@safe-global/protocol-kit'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import * as useValidateTxData from '@/hooks/useValidateTxData'
 
@@ -42,6 +43,13 @@ describe('ComboSubmit', () => {
       owners: [{ value: '0xOwner1' }, { value: '0xOwner2' }],
     },
     safeAddress: '0xSafeAddress',
+  }
+
+  // One signature short of the threshold — signing it now completes the tx.
+  const lastSignatureTx = () => {
+    const tx = createMockSafeTransaction({ to: '0x1', data: '0x', operation: OperationType.Call })
+    tx.addSignature(generatePreValidatedSignature('0x0000000000000000000000000000000000000001'))
+    return tx
   }
 
   beforeEach(() => {
@@ -85,7 +93,7 @@ describe('ComboSubmit', () => {
     const { getByText } = render(
       <ComboSubmit onSubmit={jest.fn()} slotId="" />,
       { canExecute: true },
-      { safeTx: safeTransaction },
+      { safeTx: lastSignatureTx() },
     )
 
     expect(getByText(/You're providing the last signature/)).toBeInTheDocument()
@@ -101,13 +109,13 @@ describe('ComboSubmit', () => {
     const { queryByText } = render(
       <ComboSubmit onSubmit={jest.fn()} slotId="" />,
       { canExecute: true },
-      { safeTx: safeTransaction },
+      { safeTx: lastSignatureTx() },
     )
 
     expect(queryByText(/You're providing the last signature/)).not.toBeInTheDocument()
   })
 
-  it('does not show warning when Execute is not available', () => {
+  it('does not show warning when more signatures are still needed', () => {
     jest.spyOn(hooks, 'useAlreadySigned').mockReturnValue(false)
     jest.spyOn(slotsHooks, 'useSlotIds').mockReturnValue(['sign'])
 
@@ -133,7 +141,7 @@ describe('ComboSubmit', () => {
     const { queryByText } = render(
       <ComboSubmit onSubmit={jest.fn()} slotId="" />,
       { canExecute: true },
-      { safeTx: safeTransaction },
+      { safeTx: lastSignatureTx() },
     )
 
     expect(queryByText(/You're providing the last signature/)).not.toBeInTheDocument()
@@ -149,7 +157,7 @@ describe('ComboSubmit', () => {
     const { getByText } = render(
       <ComboSubmit onSubmit={jest.fn()} slotId="" />,
       { canExecute: true },
-      { safeTx: safeTransaction },
+      { safeTx: lastSignatureTx() },
     )
 
     // Should show warning when user has stored preference for Sign
@@ -172,6 +180,24 @@ describe('ComboSubmit', () => {
 
     // Component should fall back to first option ('sign')
     expect(container).toBeInTheDocument()
+  })
+
+  // A nested signer (parent Safe) on a split sign/execute chain never gets the Execute slot
+  // (TxFlowProvider clears `canExecute`), so the warning must not depend on Execute being offered.
+  it('shows the warning when Sign is the only available action and it is the last signature', () => {
+    jest.spyOn(hooks, 'useAlreadySigned').mockReturnValue(false)
+    jest.spyOn(slotsHooks, 'useSlotIds').mockReturnValue(['sign'])
+
+    const mockUseLocalStorage = require('@/services/local-storage/useLocalStorage').default
+    mockUseLocalStorage.mockReturnValue([undefined, jest.fn()])
+
+    const { getByText } = render(
+      <ComboSubmit onSubmit={jest.fn()} slotId="" />,
+      { canExecute: false },
+      { safeTx: lastSignatureTx() },
+    )
+
+    expect(getByText(/You're providing the last signature/)).toBeInTheDocument()
   })
 
   it('does not auto-select Execute when validation is loading', () => {
