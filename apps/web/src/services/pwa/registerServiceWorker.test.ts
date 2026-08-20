@@ -24,9 +24,8 @@ describe('registerServiceWorker', () => {
     })
   })
 
-  // `'serviceWorker' in navigator` checks for the property key regardless of its
-  // value, so simulating "unsupported" requires deleting the property, not just
-  // setting it to `undefined`.
+  // `'serviceWorker' in navigator` is a key check, so "unsupported" means
+  // deleting the property, not setting it to `undefined`.
   const setServiceWorkerSupport = (supported: boolean) => {
     Object.defineProperty(navigator, 'serviceWorker', {
       value: {},
@@ -60,11 +59,6 @@ describe('registerServiceWorker', () => {
   })
 
   it('logs a warning and does nothing when serviceWorker is supported but window.workbox is unavailable', async () => {
-    // Should be impossible in practice — next-pwa's injected script always
-    // assigns `window.workbox` whenever `serviceWorker` is supported. This
-    // guards against that invariant silently breaking (e.g. a next-pwa
-    // version bump), which would otherwise stop SW registration for every
-    // user with zero telemetry.
     setServiceWorkerSupport(true)
 
     await expect(registerServiceWorker()).resolves.toBeUndefined()
@@ -84,13 +78,9 @@ describe('registerServiceWorker', () => {
     expect(logger.info).toHaveBeenCalledWith('Service worker registration failed', { error: abortError.message })
   })
 
-  it('catches the TypeError workbox-window throws when the resolved value is not a real ServiceWorkerRegistration (WebView stub) and logs it at info level', async () => {
-    // This is the actual shape of the production `updatefound` cluster:
-    // `navigator.serviceWorker.register()` resolves with something truthy
-    // (some in-app WebViews return a stub), so workbox-window's own
-    // `.waiting` read doesn't throw — but the stub has no `addEventListener`,
-    // so workbox-window's later `registration.addEventListener('updatefound', ...)`
-    // throws, rejecting the promise `window.workbox.register()` returns.
+  it('catches the TypeError from a WebView stub registration and logs it at info level', async () => {
+    // The production cluster: the stub resolves truthy but has no
+    // `addEventListener`, so workbox-window throws and rejects `register()`.
     setServiceWorkerSupport(true)
     const typeError = new TypeError('l.fn.addEventListener is not a function')
     const register = jest.fn().mockRejectedValue(typeError)
