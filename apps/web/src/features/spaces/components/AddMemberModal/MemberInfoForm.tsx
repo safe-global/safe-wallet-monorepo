@@ -50,7 +50,10 @@ const MemberInfoForm = ({
               <SelectTrigger aria-label="Role" className="min-h-[66px]! min-w-[150px]">
                 <SelectValue>{(role) => <RoleMenuItem role={role as MemberRole} />}</SelectValue>
               </SelectTrigger>
-              <SelectContent align="end" alignItemWithTrigger={false} showBackdrop className=" min-h-[66px] w-[340px]">
+              {/* No `showBackdrop`: both consumers (Add member, Edit member) are ModalDialogs, so the
+                  dialog already owns the scrim. A second one paints over the dialog and blurs the
+                  very form the dropdown belongs to. */}
+              <SelectContent align="end" alignItemWithTrigger={false} className=" min-h-[66px] w-[340px]">
                 <SelectItem value={MemberRole.ADMIN}>
                   <RoleMenuItem role={MemberRole.ADMIN} hasDescription />
                 </SelectItem>

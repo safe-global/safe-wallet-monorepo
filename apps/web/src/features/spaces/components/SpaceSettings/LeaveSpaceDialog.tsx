@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import DialogActions from '@/components/common/DialogActions'
 import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
@@ -69,6 +69,7 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
 
         {error && (
           <Alert variant="destructive">
+            <AlertSeverityIcon variant="destructive" />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}

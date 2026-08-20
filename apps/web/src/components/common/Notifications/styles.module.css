@@ -50,3 +50,8 @@
 .container summary::-webkit-details-marker {
   display: none;
 }
+
+.container .errorToast [data-slot='alert-description'] summary {
+  color: var(--foreground);
+  font-weight: 700;
+}

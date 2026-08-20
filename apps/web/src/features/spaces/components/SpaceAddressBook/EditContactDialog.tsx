@@ -1,4 +1,4 @@
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Typography } from '@/components/ui/typography'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
@@ -172,6 +172,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
 
               {error && (
                 <Alert variant="destructive" className="mt-4">
+                  <AlertSeverityIcon variant="destructive" />
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}

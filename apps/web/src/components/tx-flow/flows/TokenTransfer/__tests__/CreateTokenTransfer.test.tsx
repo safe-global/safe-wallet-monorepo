@@ -468,7 +468,11 @@ describe('CreateTokenTransfer', () => {
         expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
       })
 
-      expect(getByTestId('gtf-fee-banner')).toHaveClass('bg-muted', 'text-foreground', 'border-transparent')
+      expect(getByTestId('gtf-fee-banner')).toHaveClass(
+        'bg-[var(--color-info-background)]',
+        'text-foreground',
+        'border-transparent',
+      )
     })
 
     it('renders the standard info icon inside the fee banner', async () => {
@@ -518,7 +522,7 @@ describe('CreateTokenTransfer', () => {
 
       const csvHint = getByTestId('csv-airdrop-hint')
       expect(csvHint).toBeInTheDocument()
-      expect(csvHint).toHaveClass('bg-muted', 'text-foreground', 'border-transparent')
+      expect(csvHint).toHaveClass('bg-[var(--color-info-background)]', 'text-foreground', 'border-transparent')
     })
 
     it('renders the standard info icon inside the CSV hint', () => {
@@ -561,7 +565,7 @@ describe('CreateTokenTransfer', () => {
       }
 
       const maxReached = getByTestId('max-recipients-reached')
-      expect(maxReached).toHaveClass('bg-warning-subtle', 'border-transparent', 'text-warning-strong')
+      expect(maxReached).toHaveClass('bg-warning-subtle', 'border-transparent', 'text-foreground')
       expect(maxReached).not.toHaveClass('bg-card')
     })
   })
@@ -661,7 +665,7 @@ describe('CreateTokenTransfer', () => {
       })
 
       const alert = getByTestId('insufficient-balance-error')
-      expect(alert).toHaveClass('bg-error-subtle', 'border-transparent', 'text-error-strong')
+      expect(alert).toHaveClass('bg-error-subtle', 'border-transparent', 'text-foreground')
       expect(alert).not.toHaveClass('bg-card')
     })
   })

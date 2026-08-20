@@ -23,7 +23,9 @@
   --popover: #ffffff;
   --popover-foreground: #0a0a0a;
   --dialog: #ffffff;
-  --backdrop: rgba(99, 102, 105, 0.75);
+  /* The one modal scrim (see components/ui/overlay.ts). A light tint carries the blur;
+     the old MUI-era rgba(99, 102, 105, 0.75) was opaque enough to hide it entirely. */
+  --backdrop: rgba(0, 0, 0, 0.1);
   --primary: #171717;
   --primary-foreground: #fafafa;
   --secondary: #f5f5f5;
@@ -91,7 +93,8 @@
   --popover: #171717;
   --popover-foreground: #f5f5f5;
   --dialog: #1c1c1c;
-  --backdrop: rgba(99, 102, 105, 0.75);
+  /* Same scrim in dark mode: the blur, not the tint, is what separates the surface. */
+  --backdrop: rgba(0, 0, 0, 0.1);
   --primary: #12ff80;
   --primary-foreground: #0a0a0a;
   --secondary: #262626;
