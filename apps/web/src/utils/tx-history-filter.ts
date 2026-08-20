@@ -48,7 +48,7 @@ export type TxFilter = {
   filter: IncomingTxFilter | MultisigTxFilter | ModuleTxFilter // CGW filter
 }
 
-export const _omitNullish = (data: { [key: string]: any }) => {
+export const _omitNullish = (data: { [key: string]: unknown }) => {
   return Object.fromEntries(
     Object.entries(data).filter(([, value]) => {
       return value !== '' && value != null
