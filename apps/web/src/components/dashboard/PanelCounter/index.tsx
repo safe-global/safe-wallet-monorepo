@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 
 import { cn } from '@/utils/cn'
 
-export const SidebarListItemCounter = ({
+export const PanelCounter = ({
   count,
   variant = 'warning',
 }: {
