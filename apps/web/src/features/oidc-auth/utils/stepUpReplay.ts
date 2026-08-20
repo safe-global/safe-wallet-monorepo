@@ -144,6 +144,11 @@ export const replayPendingStepUpAction = async (dispatch: AppDispatch): Promise<
     return
   }
 
+  // The mutation's `invalidatesTags` has started refetches by now; the success
+  // toast must not appear while lists still show pre-mutation data. Dispatching
+  // the thunk returns one promise per running query, not a single promise.
+  await Promise.all(dispatch(cgwApi.util.getRunningQueriesThunk()))
+
   dispatch(
     showNotification({
       message: REPLAYABLE_ENDPOINTS[pending.endpoint],

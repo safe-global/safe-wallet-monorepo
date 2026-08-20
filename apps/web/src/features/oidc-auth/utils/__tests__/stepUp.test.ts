@@ -75,11 +75,21 @@ describe('startStepUp', () => {
 
   // A replayed action that is itself rejected must surface as an error rather
   // than bouncing the user back out to the provider indefinitely.
-  it('should not redirect again once a return has been handled', () => {
+  it('should not redirect while a return is being processed', () => {
     markStepUpReturnHandled()
 
     expect(startStepUp()).toBe(false)
     expect(window.location.href).toBe('https://app.safe.global/spaces/members?spaceId=42')
     expect(sessionStorage.getItem(STEP_UP_PENDING_KEY)).toBeNull()
+  })
+
+  // Regression: the guard once outlived the return processing, so the SECOND
+  // gated action of a session failed with an inline error and no redirect.
+  it('should redirect again once the return has been processed', () => {
+    markStepUpReturnHandled()
+    resetStepUpReturnGuard()
+
+    expect(startStepUp()).toBe(true)
+    expect(new URL(window.location.href).searchParams.get('elevate')).toBe('true')
   })
 })

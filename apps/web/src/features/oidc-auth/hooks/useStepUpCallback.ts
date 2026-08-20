@@ -5,7 +5,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import reconcileAuth from '@/store/reconcileAuth'
 import { STEP_UP_FAILED_MESSAGE, STEP_UP_PENDING_KEY } from '../constants'
 import { stepUpReturning, stepUpSettled } from '../store'
-import { markStepUpReturnHandled } from '../utils/stepUp'
+import { markStepUpReturnHandled, resetStepUpReturnGuard } from '../utils/stepUp'
 import { clearPendingStepUpAction, replayPendingStepUpAction } from '../utils/stepUpReplay'
 
 /**
@@ -34,9 +34,11 @@ export const useStepUpCallback = () => {
 
     hasProcessed.current = true
     sessionStorage.removeItem(STEP_UP_PENDING_KEY)
-    // The challenge for this page load is spent; a replay that is itself rejected
-    // must surface as an error rather than redirecting out again.
+    // While this return is being processed, a replay that is itself rejected must
+    // surface as an error rather than redirecting out again.
     markStepUpReturnHandled()
+    // The first render races the replay: lists paint pre-mutation data until the
+    // refetches land. The splash stays up until the world is consistent.
     dispatch(stepUpReturning())
 
     const processCallback = async () => {
@@ -67,6 +69,11 @@ export const useStepUpCallback = () => {
         await replayPendingStepUpAction(dispatch)
       }
 
+      // The guard covers only the processing above. Left set, it would swallow
+      // every later challenge in this tab until a full reload — the second
+      // gated action of a session would fail with an inline error and no
+      // redirect.
+      resetStepUpReturnGuard()
       dispatch(stepUpSettled())
     }
 

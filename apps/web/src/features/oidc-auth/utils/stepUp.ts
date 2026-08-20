@@ -4,20 +4,20 @@ import { STEP_UP_PENDING_KEY } from '../constants'
 const AUTHORIZE_PATH = '/v1/auth/oidc/authorize'
 
 /**
- * Set once a step-up return has been handled in this page load, so an
- * `elevation_required` raised by the replayed action cannot bounce the user
- * straight back out to the provider. Deliberately module state rather than
- * storage: the guard is only meant to last until the next navigation.
+ * Set while a step-up return is being processed, so an `elevation_required`
+ * raised by the replayed action itself cannot bounce the user straight back out
+ * to the provider. `useStepUpCallback` sets it before replaying and resets it
+ * once processing ends — left set, it would swallow every later challenge in
+ * the tab until a full reload.
  */
-let hasReturnedFromStepUp = false
+let isHandlingStepUpReturn = false
 
 export const markStepUpReturnHandled = (): void => {
-  hasReturnedFromStepUp = true
+  isHandlingStepUpReturn = true
 }
 
-/** Test seam — the flag is module state that would otherwise leak between cases. */
 export const resetStepUpReturnGuard = (): void => {
-  hasReturnedFromStepUp = false
+  isHandlingStepUpReturn = false
 }
 
 /**
@@ -38,7 +38,7 @@ export const resetStepUpReturnGuard = (): void => {
  */
 export const startStepUp = (redirectUrl?: string): boolean => {
   // Already on the way out, or the challenge just failed for this page load.
-  if (hasReturnedFromStepUp || sessionStorage.getItem(STEP_UP_PENDING_KEY)) return false
+  if (isHandlingStepUpReturn || sessionStorage.getItem(STEP_UP_PENDING_KEY)) return false
 
   // Strip any stale `error` param so the return leg can trust that an `error` in
   // the URL genuinely came from the provider this time round.
