@@ -25,6 +25,8 @@ describe('useTxMonitor', () => {
   let mockProvider
   beforeEach(() => {
     jest.clearAllMocks()
+    // The pending txs slice is persisted, so leftovers would be rehydrated into the next test
+    localStorage.clear()
 
     jest.spyOn(useChainIdHook, 'default').mockReturnValue(TEST_CHAIN_ID)
 
@@ -484,6 +486,31 @@ describe('useTxMonitor with live transaction events', () => {
     dispatchProcessing(FIRST_HASH)
 
     expect(mockWaitForTx).toHaveBeenCalledTimes(1)
+  })
+
+  it('watches a tx again after its pending entry was cleared and it re-enters processing', () => {
+    // What a txId is watched by is only remembered while it is pending: a final event clears the
+    // entry, so the same txId re-entering PROCESSING must be watched again even on the same hash.
+    const mockWaitForTx = jest.spyOn(txMonitor, 'waitForTx').mockResolvedValue(undefined)
+
+    renderHook(() => useTxPendingStatuses())
+
+    dispatchProcessing(FIRST_HASH)
+    expect(mockWaitForTx).toHaveBeenCalledTimes(1)
+
+    act(() => {
+      txDispatch(TxEvent.FAILED, {
+        nonce: 1,
+        txId: TX_ID,
+        chainId: TEST_CHAIN_ID,
+        safeAddress: TEST_SAFE_ADDRESS,
+        error: new Error('Transaction not found'),
+      })
+    })
+
+    dispatchProcessing(FIRST_HASH)
+
+    expect(mockWaitForTx).toHaveBeenCalledTimes(2)
   })
 
   it('watches the new hash and stops the replaced one when the tx is sped up', () => {
