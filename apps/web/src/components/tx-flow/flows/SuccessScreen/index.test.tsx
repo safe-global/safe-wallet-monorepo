@@ -1,5 +1,6 @@
 import SuccessScreen from '@/components/tx-flow/flows/SuccessScreen'
 import * as useChainIdHook from '@/hooks/useChainId'
+import * as usePredictSafeAddressHook from '@/hooks/usePredictSafeAddressFromTxDetails'
 import * as useChainsHook from '@/hooks/useChains'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
@@ -44,6 +45,39 @@ const dispatchReverted = (txId: string | undefined) =>
     })
   })
 
+const dispatchFailed = (txId: string) =>
+  act(() => {
+    txDispatch(TxEvent.FAILED, {
+      nonce: 1,
+      txId,
+      chainId: TEST_CHAIN_ID,
+      safeAddress: TEST_SAFE_ADDRESS,
+      error: new Error('Transaction not found. It might have been replaced or cancelled in the connected wallet.'),
+    })
+  })
+
+const dispatchProcessed = (txId: string) =>
+  act(() => {
+    txDispatch(TxEvent.PROCESSED, {
+      nonce: 1,
+      txId,
+      chainId: TEST_CHAIN_ID,
+      safeAddress: TEST_SAFE_ADDRESS,
+      txHash: '0xdeadbeef',
+    })
+  })
+
+const dispatchSuccess = (txId: string) =>
+  act(() => {
+    txDispatch(TxEvent.SUCCESS, {
+      nonce: 1,
+      txId,
+      chainId: TEST_CHAIN_ID,
+      safeAddress: TEST_SAFE_ADDRESS,
+      txHash: '0xdeadbeef',
+    })
+  })
+
 describe('SuccessScreen', () => {
   const originalAnimationApi: Record<string, PropertyDescriptor | undefined> = {
     getAnimations: Object.getOwnPropertyDescriptor(Element.prototype, 'getAnimations'),
@@ -64,6 +98,10 @@ describe('SuccessScreen', () => {
         delete (Element.prototype as unknown as Record<string, unknown>)[name]
       }
     }
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   beforeEach(() => {
@@ -105,6 +143,58 @@ describe('SuccessScreen', () => {
 
     expect(screen.getByTestId('transaction-status')).toHaveTextContent('Transaction failed')
     expect(screen.getByText('Transaction reverted by EVM.')).toBeInTheDocument()
+  })
+
+  it.each([
+    ['a receipt without a revert', dispatchProcessed],
+    ['the tx being indexed', dispatchSuccess],
+  ])('ignores a late failure for a tx already settled by %s', (_label, dispatchSettled) => {
+    render(<SuccessScreen txId={TX_ID} />, { initialReduxState: { pendingTxs: processingTxs } })
+
+    dispatchSettled(TX_ID)
+    // A stale watcher on a replaced hash, or the relay timeout, can report a failure minutes later
+    dispatchFailed(TX_ID)
+    dispatchReverted(TX_ID)
+
+    expect(screen.queryByText('Transaction reverted by EVM.')).not.toBeInTheDocument()
+    expect(screen.getByTestId('transaction-status')).not.toHaveTextContent('Transaction failed')
+  })
+
+  it('clears a failure that a later success supersedes', () => {
+    const predictedSafeAddress = faker.finance.ethereumAddress()
+    jest
+      .spyOn(usePredictSafeAddressHook, 'usePredictSafeAddressFromTxDetails')
+      .mockReturnValue([predictedSafeAddress, undefined, false])
+
+    render(<SuccessScreen txId={TX_ID} />, { initialReduxState: { pendingTxs: {} } })
+
+    // A sped-up tx makes the watcher on the replaced hash report a failure the replacement disproves
+    dispatchFailed(TX_ID)
+
+    expect(screen.getByTestId('transaction-status')).toHaveTextContent('Transaction failed')
+    expect(screen.getByTestId('open-nested-safe-btn')).toHaveAttribute('aria-disabled', 'true')
+
+    dispatchSuccess(TX_ID)
+
+    expect(screen.getByTestId('transaction-status')).not.toHaveTextContent('Transaction failed')
+    expect(screen.getByTestId('open-nested-safe-btn')).not.toHaveAttribute('aria-disabled', 'true')
+  })
+
+  it('does not offer the nested Safe when the deployment transaction failed', () => {
+    const predictedSafeAddress = faker.finance.ethereumAddress()
+    jest
+      .spyOn(usePredictSafeAddressHook, 'usePredictSafeAddressFromTxDetails')
+      .mockReturnValue([predictedSafeAddress, undefined, false])
+
+    // The pending tx is cleared once the tx is mined, so the status alone reads as a success here
+    render(<SuccessScreen txId={TX_ID} />, { initialReduxState: { pendingTxs: {} } })
+
+    // Rendered as a link, so the disabled state is conveyed via `aria-disabled`
+    expect(screen.getByTestId('open-nested-safe-btn')).not.toHaveAttribute('aria-disabled', 'true')
+
+    dispatchReverted(TX_ID)
+
+    expect(screen.getByTestId('open-nested-safe-btn')).toHaveAttribute('aria-disabled', 'true')
   })
 
   it('ignores events belonging to another transaction', () => {
