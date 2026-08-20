@@ -112,6 +112,7 @@ export const ChooseOwner = ({
 
           <div className="mb-7 w-full">
             <NameInput
+              inputSize="hero"
               label="New signer"
               name="newOwner.name"
               placeholder={fallbackName || 'Signer name'}

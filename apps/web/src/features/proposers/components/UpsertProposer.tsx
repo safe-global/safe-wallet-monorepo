@@ -319,7 +319,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
               </div>
 
               <div className="mb-4">
-                <NameInput name="name" label="Name" required />
+                <NameInput name="name" label="Name" required inputSize="hero" />
               </div>
 
               {error && (

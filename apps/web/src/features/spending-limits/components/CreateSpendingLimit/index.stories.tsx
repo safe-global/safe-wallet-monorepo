@@ -3,6 +3,8 @@ import type { ReactElement } from 'react'
 import { mswLoader } from 'msw-storybook-addon'
 import { createMockStory } from '@/stories/mocks'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
+import SafeTxProvider from '@/components/tx-flow/SafeTxProvider'
+import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../types'
 import CreateSpendingLimit from './index'
 
@@ -30,7 +32,15 @@ const TxFlowContextWrapper = ({
     data,
     onNext: () => {},
   }
-  return <TxFlowContext.Provider value={value}>{children}</TxFlowContext.Provider>
+  // The address-poisoning check needs SafeShieldProvider, which TxFlow supplies in the real tree.
+  // SafeTxProvider stays outside it, as in TxFlow — SafeShieldProvider reads SafeTxContext.
+  return (
+    <SafeTxProvider>
+      <SafeShieldProvider>
+        <TxFlowContext.Provider value={value}>{children}</TxFlowContext.Provider>
+      </SafeShieldProvider>
+    </SafeTxProvider>
+  )
 }
 
 const withTxFlowContext = (data?: NewSpendingLimitFlowProps): Decorator => {
