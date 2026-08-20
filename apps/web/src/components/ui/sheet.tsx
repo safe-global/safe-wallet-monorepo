@@ -4,6 +4,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/utils/cn'
 import { usePortalContainer } from '@/components/ui/ShadcnProvider'
+import { overlayVariants } from '@/components/ui/overlay'
 import { Button } from '@/components/ui/button'
 import { XIcon } from 'lucide-react'
 
@@ -116,22 +117,7 @@ function SheetPortal({ ...props }: SheetPrimitive.Portal.Props) {
 }
 
 function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
-  return (
-    <SheetPrimitive.Backdrop
-      data-slot="sheet-overlay"
-      // `data-closed:pointer-events-none` is load-bearing, not a nicety: a Sheet that mounts already
-      // open and closes in the same commit never runs its enter animation, so Base UI waits forever
-      // for an `animationend` and leaves the backdrop mounted at `opacity: 0` with
-      // `pointer-events: auto` — an invisible full-viewport shield that swallows every click on the
-      // page (this is what broke the topbar's "Open sidebar menu" button below `md`). A closed
-      // backdrop must never capture pointer events, however it got there.
-      className={cn(
-        'data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:pointer-events-none bg-black/10 duration-100 data-ending-style:opacity-0 data-starting-style:opacity-0 supports-backdrop-filter:backdrop-blur-xs fixed inset-0 z-[var(--z-overlay)]',
-        className,
-      )}
-      {...props}
-    />
-  )
+  return <SheetPrimitive.Backdrop data-slot="sheet-overlay" className={cn(overlayVariants(), className)} {...props} />
 }
 
 function SheetContent({

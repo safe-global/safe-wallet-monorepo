@@ -311,6 +311,7 @@ export function NestedSafesPopover({
       }}
     >
       <PopoverContent
+        showBackdrop
         anchor={centered ? centeredAnchor : anchorEl}
         side="bottom"
         align="start"

@@ -28,7 +28,14 @@ const WalletPopover = ({
         if (!isOpen) onClose()
       }}
     >
-      <PopoverContent anchor={anchorEl} side="bottom" align="center" sideOffset={12} className="w-[300px] rounded-3xl">
+      <PopoverContent
+        showBackdrop
+        anchor={anchorEl}
+        side="bottom"
+        align="center"
+        sideOffset={12}
+        className="w-[300px] rounded-3xl"
+      >
         <WalletInfo
           wallet={wallet}
           balance={wallet.balance}
