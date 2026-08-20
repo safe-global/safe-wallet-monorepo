@@ -9,7 +9,7 @@
 
 .compactHeader {
   border: 0;
-  padding: 0 0 var(--space-2);
+  padding: 0 0;
 }
 
 .compact {

@@ -124,7 +124,7 @@ const Multisend = ({
       />
 
       {compact ? (
-        <Card variant="muted" size="none" className="mt-2">
+        <Card variant="muted" size="none">
           <CardContent>
             {/* Same padding-outside / clipping-inside pair as ExecuteBatch's DecodedTxs, which renders
                 this identical block: 8px = the card's 16px less the 8px inset, so the white action
@@ -135,7 +135,7 @@ const Multisend = ({
           </CardContent>
         </Card>
       ) : (
-        <div className="flex flex-col divide-y divide-border pb-4 [&_[data-slot=card]]:rounded-none [&_[data-slot=accordion-content]>*]:px-4 [&_[data-slot=accordion-trigger]]:px-4">
+        <div className="flex flex-col divide-y divide-border [&_[data-slot=card]]:rounded-none [&_[data-slot=accordion-content]>*]:px-4 [&_[data-slot=accordion-trigger]]:px-4">
           {actionItems}
         </div>
       )}
