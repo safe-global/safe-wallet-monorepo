@@ -31,6 +31,10 @@ export const useInitSafeCoreSDK = () => {
       return
     }
 
+    // Runs can overlap and settle out of order, so a superseded one must not
+    // write to the store — see the mobile twin of this hook.
+    let cancelled = false
+
     // A read-only instance of the SDK is sufficient because we connect the signer to it when needed
     initSafeSDK({
       provider: web3ReadOnly,
@@ -43,8 +47,17 @@ export const useInitSafeCoreSDK = () => {
       isL2Chain: chain?.l2,
       isZkChain: chain?.zk,
     })
-      .then(setSafeSDK)
+      .then((safeSDK) => {
+        if (cancelled) return
+        setSafeSDK(safeSDK)
+      })
       .catch((_e) => {
+        if (cancelled) return
+
+        // Leaving the previous SDK in the store would silently serve a stale
+        // instance (e.g. a counterfactual one after the Safe was deployed).
+        setSafeSDK(undefined)
+
         const e = asError(_e)
         dispatch(
           showNotification({
@@ -56,6 +69,10 @@ export const useInitSafeCoreSDK = () => {
         )
         trackError(ErrorCodes._105, e.message, getRpcErrorContext(web3ReadOnly))
       })
+
+    return () => {
+      cancelled = true
+    }
   }, [
     address,
     chain?.l2,
