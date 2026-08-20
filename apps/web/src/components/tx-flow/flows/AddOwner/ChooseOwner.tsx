@@ -11,7 +11,12 @@ import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShi
 import NameInput from '@/components/common/NameInput'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { uniqueAddress, addressIsNotCurrentSafe, addressIsNotReserved } from '@safe-global/utils/utils/validation'
+import {
+  uniqueAddress,
+  addressIsNotCurrentSafe,
+  addressIsNotReserved,
+  validateThreshold,
+} from '@safe-global/utils/utils/validation'
 import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import type { AddOwnerFlowProps } from '.'
 import type { ReplaceOwnerFlowProps } from '../ReplaceOwner'
@@ -82,6 +87,10 @@ export const ChooseOwner = ({
 
   const newNumberOfOwners = safe.owners.length + (!params.removedOwner ? 1 : 0)
 
+  // Derived rather than read from RHF: the owner set can change on-chain while
+  // the flow is open, which does not re-run the threshold field's validation.
+  const thresholdError = validateThreshold(watch('threshold'), newNumberOfOwners)
+
   return (
     <TxCard>
       <FormProvider {...formMethods}>
@@ -149,17 +158,10 @@ export const ChooseOwner = ({
                   <Controller
                     control={control}
                     name="threshold"
-                    rules={{
-                      validate: (value) => {
-                        // Blocks the GS202/GS201 on-chain reverts if the owner
-                        // set changed while the flow was open (WA-3005 Bucket A)
-                        if (value < 1) return getContractErrorMessage('GS202')
-                        if (value > newNumberOfOwners) return getContractErrorMessage('GS201')
-                      },
-                    }}
+                    rules={{ validate: (value) => validateThreshold(value, newNumberOfOwners) }}
                     render={({ field }) => (
                       <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger data-testid="owner-number-dropdown">
+                        <SelectTrigger data-testid="owner-number-dropdown" aria-invalid={!!thresholdError}>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -187,10 +189,14 @@ export const ChooseOwner = ({
             </div>
           )}
 
+          {/* Outside the threshold block on purpose: Replace signer has no
+              threshold selector, so the gate below must never be silent. */}
+          {thresholdError && <Typography className="mb-2 text-destructive">{thresholdError}</Typography>}
+
           <Separator className={commonCss.nestedDivider} />
 
           <div className="flex items-center p-2">
-            <Button data-testid="add-owner-next-btn" type="submit" disabled={!isValid || resolving}>
+            <Button data-testid="add-owner-next-btn" type="submit" disabled={!isValid || resolving || !!thresholdError}>
               Next
             </Button>
           </div>

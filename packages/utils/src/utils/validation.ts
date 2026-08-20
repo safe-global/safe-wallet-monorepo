@@ -54,6 +54,27 @@ export const addressIsNotReserved =
     return isReserved ? RESERVED_ADDRESS_ERROR : undefined
   }
 
+/**
+ * Rejects a threshold the Safe contracts would reject on-chain: below 1 (GS202)
+ * or above the signer count (GS201). Dropdowns normally only offer valid
+ * values, so this catches the cases where the signer set changes after the
+ * threshold was picked — a signer row removed, or the owners changing on-chain
+ * while the flow is open (WA-3005 Bucket A).
+ *
+ * Accepts a string because some flows keep the threshold as form-field text.
+ */
+export const validateThreshold = (threshold: number | string, signerCount: number): string | undefined => {
+  const value = Number(threshold)
+
+  if (!Number.isInteger(value) || value < 1) {
+    return getContractErrorMessage('GS202')
+  }
+
+  if (value > signerCount) {
+    return getContractErrorMessage('GS201')
+  }
+}
+
 export const addressIsNotCurrentSafe =
   (safeAddress: string, message?: string) =>
   (address: string): string | undefined => {

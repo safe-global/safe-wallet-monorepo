@@ -15,7 +15,7 @@ import type { RemoveOwnerFlowProps } from '.'
 
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
+import { validateThreshold } from '@safe-global/utils/utils/validation'
 
 export const SetThreshold = ({
   params,
@@ -36,12 +36,7 @@ export const SetThreshold = ({
   // The threshold lives outside a form, so guard it at submit: blocks the
   // GS202/GS201 on-chain reverts if the owner set changed while the flow was
   // open (WA-3005 Bucket A).
-  const thresholdError =
-    selectedThreshold < 1
-      ? getContractErrorMessage('GS202')
-      : selectedThreshold > newNumberOfOwners
-        ? getContractErrorMessage('GS201')
-        : undefined
+  const thresholdError = validateThreshold(selectedThreshold, newNumberOfOwners)
 
   const onSubmitHandler = (e: SyntheticEvent) => {
     e.preventDefault()

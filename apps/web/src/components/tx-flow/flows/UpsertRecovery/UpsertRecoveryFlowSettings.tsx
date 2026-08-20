@@ -47,6 +47,19 @@ enum AddressType {
   Other = 'Other',
 }
 
+export function _validateRecoverer(recoverer: string, safeAddress: string): string | undefined {
+  // Reserved (zero/sentinel) addresses would break the module on-chain. The
+  // shared GS203 copy names a signer, which a Recoverer is not.
+  const reservedError = addressIsNotReserved('This Recoverer address is not valid')(recoverer)
+  if (reservedError) {
+    return reservedError
+  }
+
+  if (sameAddress(recoverer, safeAddress)) {
+    return 'The Safe account cannot be a Recoverer of itself'
+  }
+}
+
 export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: RecoveryStateItem }): ReactElement {
   const chainId = useChainId()
   const { safeAddress } = useSafeInfo()
@@ -97,17 +110,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
     : // Setting up recovery
       recoverer && delay && expiry
 
-  const validateRecoverer = (recoverer: string) => {
-    // Reserved (zero/sentinel) addresses would break the module on-chain
-    const reservedError = addressIsNotReserved()(recoverer)
-    if (reservedError) {
-      return reservedError
-    }
-
-    if (sameAddress(recoverer, safeAddress)) {
-      return 'The Safe account cannot be a Recoverer of itself'
-    }
-  }
+  const validateRecoverer = (recoverer: string) => _validateRecoverer(recoverer, safeAddress)
 
   const validateCustomDelay = (delay: string) => {
     if (!delay) return ''
