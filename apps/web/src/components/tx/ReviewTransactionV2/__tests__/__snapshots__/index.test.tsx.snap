@@ -111,7 +111,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
           data-size="default"
           data-slot="card"
           data-variant="default"
-          style="--accordion-border-active: var(--color-info-light); --accordion-fill-active: var(--color-info-background);"
+          style="--accordion-border-active: var(--color-info-background); --accordion-fill-active: var(--color-info-background);"
         >
           <div
             class="flex w-full flex-col"

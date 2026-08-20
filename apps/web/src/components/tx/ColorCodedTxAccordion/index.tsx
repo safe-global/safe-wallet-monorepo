@@ -24,14 +24,15 @@ const TX_INFO_LEVEL = {
   [ColorLevel.success]: ['Transfer', 'SwapTransfer', 'TwapOrder', 'NativeStakingDeposit'],
 }
 
-/** `main` inks the chip text, `background` tints the chip and the open row, `border` outlines the panel. */
+/** `main` inks the chip, `background` tints the chip and the open row, `border` outlines the panel. */
 const TxInfoColors: Record<ColorLevel, { main: string; mainDark?: string; border: string; background: string }> = {
-  [ColorLevel.info]: { main: 'info.dark', border: 'info.light', background: 'info.background' },
-  [ColorLevel.warning]: { main: 'warning.main', border: 'warning.light', background: 'warning.background' },
+  [ColorLevel.info]: { main: 'info.dark', border: 'info.background', background: 'info.background' },
+  // The shadcn warning pair, which light mode pins to the Figma yellows rather than the brand coral.
+  [ColorLevel.warning]: { main: '--warning-strong', border: '--warning-subtle', background: '--warning-subtle' },
   [ColorLevel.success]: {
     main: 'success.main',
     mainDark: 'primary.main',
-    border: 'success.light',
+    border: 'background.light',
     background: 'background.light',
   },
 }
@@ -45,7 +46,10 @@ const getMethodLevel = (txInfo?: TransactionDetails['txInfo']['type']): ColorLev
   return (methodLevels.find((key) => TX_INFO_LEVEL[key].includes(txInfo)) as ColorLevel) || ColorLevel.info
 }
 
-const toCssVar = (color: string) => `var(--color-${color.replace('.', '-')})`
+// Dotted names map onto Safe's `--color-*` scale; a leading `--` passes through for the shadcn
+// tokens, whose `--color-*` aliases are `@theme inline` and so have no runtime value.
+const toCssVar = (color: string) =>
+  color.startsWith('--') ? `var(${color})` : `var(--color-${color.replace('.', '-')})`
 
 type DecodedTxProps = {
   txInfo?: TransactionDetails['txInfo']
@@ -91,7 +95,6 @@ const ColorCodedTxAccordion = ({ txInfo, txData, children, defaultExpanded }: De
               </Typography>
 
               {methodLabel && (
-                // runtime color-mix per tx level (css.methodChip + inline style); not a fixed Badge variant
                 <Badge
                   variant="outline"
                   className={css.methodChip}
