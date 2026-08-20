@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Badge } from '../badge'
+import { Badge, BadgeDot } from '../badge'
 
 /**
  * Badge Component Stories
@@ -28,11 +28,11 @@ const meta = {
     },
     size: {
       control: 'select',
-      options: ['sm', 'default', 'lg', 'auto'],
+      options: ['sm', 'default', 'lg', 'auto', 'status'],
     },
     shape: {
       control: 'select',
-      options: ['pill', 'tag'],
+      options: ['pill', 'tag', 'status'],
     },
   },
 } satisfies Meta<typeof Badge>
@@ -78,6 +78,9 @@ export const AllVariants: Story = {
           <Badge size="default">default</Badge>
           <Badge size="lg">lg</Badge>
           <Badge size="auto">auto (multi&#8209;line content)</Badge>
+          <Badge size="status" shape="status">
+            status
+          </Badge>
         </div>
       </div>
 
@@ -86,6 +89,31 @@ export const AllVariants: Story = {
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <Badge shape="pill">pill</Badge>
           <Badge shape="tag">tag</Badge>
+          <Badge shape="status" size="status">
+            status
+          </Badge>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Status badges</h3>
+        <p className="text-muted-foreground mb-4 text-sm">
+          The Obra DS status badge: <code>size=&quot;status&quot; shape=&quot;status&quot;</code> with a{' '}
+          <code>BadgeDot</code> in place of an icon. The dot takes its colour from the variant.
+        </p>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <Badge variant="success" size="status" shape="status">
+            <BadgeDot />
+            Active
+          </Badge>
+          <Badge variant="warning" size="status" shape="status">
+            <BadgeDot />
+            Not available for wallet sign-in
+          </Badge>
+          <Badge variant="secondary" size="status" shape="status">
+            <BadgeDot />
+            Invite pending
+          </Badge>
         </div>
       </div>
 

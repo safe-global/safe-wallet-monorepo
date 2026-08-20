@@ -1,10 +1,11 @@
-import { ShieldCheck } from 'lucide-react'
+import { Info } from 'lucide-react'
 import NextLink from 'next/link'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
-import { Badge } from '@/components/ui/badge'
+import { Badge, BadgeDot } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
 import { useHasFeature } from '@/hooks/useChains'
 import { getTwoFactorCoverage } from '../../utils/twoFactor'
@@ -32,7 +33,7 @@ const WorkspaceTwoFactorSection = ({
     return null
   }
 
-  const { enabled, total } = getTwoFactorCoverage(members)
+  const { enabled, total, walletOnly } = getTwoFactorCoverage(members)
 
   return (
     <section className="bg-card rounded-2xl p-6 mb-3" data-testid="settings-workspace-2fa">
@@ -40,8 +41,8 @@ const WorkspaceTwoFactorSection = ({
         <Typography variant="paragraph-bold" className="block tracking-tight">
           Two-factor authentication
         </Typography>
-        <Badge variant="success">
-          <ShieldCheck />
+        <Badge variant="success" size="status" shape="status">
+          <BadgeDot />
           Required for everyone
         </Badge>
       </div>
@@ -52,9 +53,27 @@ const WorkspaceTwoFactorSection = ({
       </Typography>
 
       <div className="border-border mt-6 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <Typography variant="paragraph-small-bold" data-testid="workspace-2fa-count">
-          {enabled}/{total} users have 2FA enabled
-        </Typography>
+        <div className="flex items-center gap-1.5">
+          <Typography variant="paragraph-small-bold" data-testid="workspace-2fa-count">
+            {enabled}/{total} users have 2FA enabled
+          </Typography>
+
+          {walletOnly > 0 && (
+            <Tooltip>
+              <TooltipTrigger
+                aria-label={`Why ${walletOnly} ${walletOnly === 1 ? 'member cannot' : 'members cannot'} enable 2FA`}
+                data-testid="workspace-2fa-coverage-info"
+                className="text-muted-foreground flex items-center"
+              >
+                <Info className="size-4" />
+              </TooltipTrigger>
+              <TooltipContent>
+                {walletOnly} {walletOnly === 1 ? 'member cannot' : 'members cannot'} enable 2FA. 2FA not supported for
+                wallet login.
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
 
         <Button
           variant="outline"

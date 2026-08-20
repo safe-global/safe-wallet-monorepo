@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
 import { ChevronDown } from 'lucide-react'
 
-import { SidebarListItemCounter } from '@/components/common/SidebarList'
+import { PanelCounter } from '@/components/dashboard/PanelCounter'
 import classnames from 'classnames'
 import { useWarningCount } from './useWarningCount'
 import css from './styles.module.css'
@@ -89,7 +89,7 @@ export const ActionRequiredPanel = ({ children, defaultExpanded = false }: Actio
         data-testid="action-required-panel-toggle"
       >
         <Typography variant="paragraph-bold" className={css.headerText}>
-          Action required <SidebarListItemCounter count={warningCount.toString()} variant="subtle" />
+          Action required <PanelCounter count={warningCount.toString()} variant="subtle" />
         </Typography>
 
         <Button

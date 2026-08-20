@@ -41,6 +41,7 @@ jest.mock('@/features/__core__', () => ({
       )
     },
     HnCustomChecksCard: () => null,
+    SafenetChecksSection: () => null,
   })),
 }))
 
