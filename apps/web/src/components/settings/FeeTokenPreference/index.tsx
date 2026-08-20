@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { Typography } from '@/components/ui/typography'
 import { Label } from '@/components/ui/label'
-import { Alert, AlertAction, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertAction, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { XIcon } from 'lucide-react'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -258,6 +258,7 @@ export const FeeTokenPreference = () => {
 
           {error && (
             <Alert variant="destructive" className="mb-4">
+              <AlertSeverityIcon variant="destructive" />
               <AlertDescription>{error}</AlertDescription>
               <AlertAction>
                 <Button variant="ghost" size="icon-xs" aria-label="Dismiss" onClick={() => setError(undefined)}>
@@ -268,7 +269,8 @@ export const FeeTokenPreference = () => {
           )}
 
           {success && (
-            <Alert className="mb-4">
+            <Alert variant="success" className="mb-4">
+              <AlertSeverityIcon variant="success" />
               <AlertDescription>Fee token preference updated successfully!</AlertDescription>
               <AlertAction>
                 <Button variant="ghost" size="icon-xs" aria-label="Dismiss" onClick={() => setSuccess(false)}>

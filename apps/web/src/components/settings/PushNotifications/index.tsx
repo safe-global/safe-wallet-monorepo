@@ -1,12 +1,11 @@
 import { Typography } from '@/components/ui/typography'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Link as ShadcnLink } from '@/components/ui/link'
 import NextLink from 'next/link'
-import { Info } from 'lucide-react'
 import { useState } from 'react'
 import type { ReactElement } from 'react'
 
@@ -100,7 +99,7 @@ export const PushNotifications = (): ReactElement => {
 
           {shouldShowMacHelper && (
             <Alert variant="info">
-              <Info />
+              <AlertSeverityIcon variant="info" />
               <AlertDescription>
                 <Typography variant="paragraph-small-bold" className="mb-2 block">
                   For macOS users

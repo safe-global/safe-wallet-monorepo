@@ -242,7 +242,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
           </>
         ) : null}
 
-        <Alert variant="warning">
+        <Alert variant="warning" outlined={false}>
           Be aware that if any of the included transactions revert, none of them will be executed. This will result in
           the loss of the allocated transaction fees.
         </Alert>

@@ -24,13 +24,8 @@ const CurrencySelect = (): ReactElement => {
 
   return (
     <Select value={currency.toUpperCase()} onValueChange={handleChange} onOpenChange={handleOpenChange}>
-      {/* size="sm" matches the ManageTokensButton (size="sm") it shares the assets toolbar row with */}
-      <SelectTrigger
-        data-testid="currency-selector"
-        id="currency"
-        size="sm"
-        className="min-w-[72px] font-medium shadow-none"
-      >
+      {/* Matches the ManageTokensButton (outline, sm) it shares the assets toolbar row with */}
+      <SelectTrigger data-testid="currency-selector" id="currency" variant="outline" size="sm" className="min-w-[72px]">
         <SelectValue />
       </SelectTrigger>
       <SelectContent

@@ -42,9 +42,13 @@ function PopoverContent({
   side = 'bottom',
   sideOffset = 4,
   anchor,
+  collisionAvoidance,
   ...props
 }: PopoverPrimitive.Popup.Props &
-  Pick<PopoverPrimitive.Positioner.Props, 'align' | 'alignOffset' | 'side' | 'sideOffset' | 'anchor'>) {
+  Pick<
+    PopoverPrimitive.Positioner.Props,
+    'align' | 'alignOffset' | 'side' | 'sideOffset' | 'anchor' | 'collisionAvoidance'
+  >) {
   const portalContainer = usePortalContainer()
   return (
     <PopoverPrimitive.Portal container={portalContainer}>
@@ -54,6 +58,7 @@ function PopoverContent({
         side={side}
         sideOffset={sideOffset}
         anchor={anchor}
+        collisionAvoidance={collisionAvoidance}
         className="isolate z-[var(--z-overlay)]"
       >
         <PopoverPrimitive.Popup
