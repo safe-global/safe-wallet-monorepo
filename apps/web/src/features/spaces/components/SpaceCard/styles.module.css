@@ -1,15 +1,6 @@
-.spaceInfo {
-  grid-area: info;
-}
-
 .dot {
   width: 2px;
   height: 2px;
   background-color: var(--color-border-main);
   border-radius: 50%;
-}
-
-.spaceActions {
-  grid-area: actions;
-  align-self: start;
 }

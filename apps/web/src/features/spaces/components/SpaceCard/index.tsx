@@ -16,7 +16,7 @@ export const SpaceSummary = ({
   isCompact?: boolean
 }) => {
   return (
-    <div className={css.spaceInfo}>
+    <div>
       <Typography variant="paragraph-bold" data-testid="org-name">
         {name}
       </Typography>
