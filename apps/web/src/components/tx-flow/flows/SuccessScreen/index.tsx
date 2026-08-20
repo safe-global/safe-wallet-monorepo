@@ -4,7 +4,7 @@ import NextLink from 'next/link'
 import css from './styles.module.css'
 import { useAppSelector } from '@/store'
 import { PendingStatus, selectPendingTxById } from '@/store/pendingTxsSlice'
-import { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -33,6 +33,7 @@ interface Props {
 const SuccessScreen = ({ txId, txHash }: Props) => {
   const [localTxHash, setLocalTxHash] = useState<string | undefined>(txHash)
   const [error, setError] = useState<Error>()
+  const hasSucceededRef = useRef(false)
   const { setTxFlow } = useContext(TxModalContext)
   const chain = useCurrentChain()
   const pendingTx = useAppSelector((state) => (txId ? selectPendingTxById(state, txId) : undefined))
@@ -51,24 +52,47 @@ const SuccessScreen = ({ txId, txHash }: Props) => {
   }, [pendingTxHash])
 
   useEffect(() => {
-    const unsubFns: Array<() => void> = ([TxEvent.FAILED, TxEvent.REVERTED] as const).map((event) =>
-      txSubscribe(event, (detail) => {
-        if (detail.txId === txId && pendingTx) setError(detail.error)
-      }),
-    )
+    if (!txId) return
+
+    hasSucceededRef.current = false
+
+    // Deliberately independent of `pendingTx`: the same events clear it from the store, so reading it
+    // here would tie the error state to the order in which the subscribers happen to run.
+    // Success is authoritative instead — `PROCESSED` needs a receipt that did not revert and `SUCCESS`
+    // needs the tx indexed, so it both clears a failure already reported by a stale watcher (the
+    // replaced hash of a sped-up tx, the relay timeout) and suppresses any later one.
+    const unsubFns: Array<() => void> = [
+      ...([TxEvent.PROCESSED, TxEvent.SUCCESS] as const).map((event) =>
+        txSubscribe(event, (detail) => {
+          if (detail.txId !== txId) return
+
+          hasSucceededRef.current = true
+          setError(undefined)
+        }),
+      ),
+      ...([TxEvent.FAILED, TxEvent.REVERTED] as const).map((event) =>
+        txSubscribe(event, (detail) => {
+          if (detail.txId === txId && !hasSucceededRef.current) setError(detail.error)
+        }),
+      ),
+    ]
 
     return () => unsubFns.forEach((unsubscribe) => unsubscribe())
-  }, [txId, pendingTx])
+  }, [txId])
 
   const onClose = useCallback(() => {
     setTxFlow(undefined)
   }, [setTxFlow])
 
-  const isSuccess = status === undefined
+  const isSuccess = !error && status === undefined
   const spinnerStatus = error ? SpinnerStatus.ERROR : isSuccess ? SpinnerStatus.SUCCESS : SpinnerStatus.PROCESSING
 
+  // A known error wins over any pending status: the tx is already mined, so it can neither keep
+  // processing nor be sped up
+  const displayedStatus = error ? undefined : status
+
   let StatusComponent
-  switch (status) {
+  switch (displayedStatus) {
     case PendingStatus.PROCESSING:
     case PendingStatus.RELAYING:
       // status can only have these values if txId & pendingTx are defined
