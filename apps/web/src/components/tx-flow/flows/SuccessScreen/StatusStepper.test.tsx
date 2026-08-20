@@ -16,16 +16,27 @@ describe('StatusStepper', () => {
     expect(container.querySelectorAll('[data-testid="status-step-icon"]')).toHaveLength(4)
   })
 
-  it('draws connector segments that touch the dots: none above the first or below the last', () => {
+  it('draws one connector segment between rows, stopping short of the dots like the prod StepConnector', () => {
     const { container } = render(<StatusStepper status={PendingStatus.PROCESSING} />)
 
     const segments = Array.from(container.querySelectorAll('[data-testid="status-step-connector"]'))
-    // 1 below the first row, 2 on each middle row, 1 above the last row.
-    expect(segments).toHaveLength(6)
+    // One per row except the first — the segment sits in the margin above its row.
+    expect(segments).toHaveLength(3)
 
-    // Every segment is anchored to the dot's edge (50% of the row ± the dot radius).
-    const anchored = segments.filter((el) => el.className.includes('calc(50%+7px)'))
-    expect(anchored).toHaveLength(6)
+    // Every segment spans exactly the inter-row margin, so it never reaches a dot.
+    const marginSpanning = segments.filter(
+      (el) => el.className.includes('bottom-full') && el.className.includes('top-[-36px]'),
+    )
+    expect(marginSpanning).toHaveLength(3)
+  })
+
+  it('renders the tx hash in a monospace font', () => {
+    const txHash = '0x56414a98b401d63ca2cc800e96fd3fa9b6e14357db08da8053bfb0407070f5db'
+    const { container } = render(<StatusStepper status={PendingStatus.PROCESSING} txHash={txHash} />)
+
+    const monoWrapper = container.querySelector('.font-mono')
+    expect(monoWrapper).not.toBeNull()
+    expect(monoWrapper?.textContent).toContain(txHash)
   })
 
   it('spaces the rows apart while the segments span the gap', () => {

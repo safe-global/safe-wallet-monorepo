@@ -9,32 +9,23 @@ const StatusStep = ({
   safeAddress,
   children,
   isFirst,
-  isLast,
 }: {
   isLoading: boolean
   safeAddress?: string
   children: ReactNode
   /** Hides the connector segment above the dot on the first step */
   isFirst?: boolean
-  /** Hides the connector segment below the dot on the last step */
-  isLast?: boolean
 }) => {
   const colorClass = isLoading ? 'text-[var(--color-border-main)]' : 'text-[var(--color-primary-main)]'
 
   return (
     <div className={`${css.label} relative flex items-center gap-2 text-left [&:not(:first-child)]:mt-9`}>
-      {/* The segments run from the dot's edge (50% of the row ± the 7px dot radius) through the
-          36px inter-row margin, so the line touches every dot and reads as continuous. */}
+      {/* Like the pre-migration StepConnector, the segment spans only the 36px margin between
+          rows, so it stops short of the dots above and below it. */}
       {!isFirst && (
         <div
           data-testid="status-step-connector"
-          className="absolute bottom-[calc(50%+7px)] left-[6.5px] top-[-36px] w-px bg-[var(--color-border-light)]"
-        />
-      )}
-      {!isLast && (
-        <div
-          data-testid="status-step-connector"
-          className="absolute bottom-0 left-[6.5px] top-[calc(50%+7px)] w-px bg-[var(--color-border-light)]"
+          className="absolute bottom-full left-[6.5px] top-[-36px] w-px bg-[var(--color-border-light)]"
         />
       )}
       <Circle

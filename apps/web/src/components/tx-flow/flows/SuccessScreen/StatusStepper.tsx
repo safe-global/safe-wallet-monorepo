@@ -16,14 +16,16 @@ const StatusStepper = ({ status, txHash }: { status?: PendingStatus; txHash?: st
       <div>
         <Typography variant="paragraph-small-bold">Your transaction</Typography>
         {txHash && (
-          <EthHashInfo
-            address={txHash}
-            hasExplorer
-            showCopyButton
-            showName={false}
-            shortAddress={false}
-            showAvatar={false}
-          />
+          <div className="font-mono">
+            <EthHashInfo
+              address={txHash}
+              hasExplorer
+              showCopyButton
+              showName={false}
+              shortAddress={false}
+              showAvatar={false}
+            />
+          </div>
         )}
       </div>
     </StatusStep>,
@@ -35,7 +37,7 @@ const StatusStepper = ({ status, txHash }: { status?: PendingStatus; txHash?: st
     <StatusStep key="indexing" isLoading={!isSuccess} safeAddress={safeAddress}>
       <Typography variant="paragraph-small-bold">{isSuccess ? 'Indexed' : 'Indexing'}</Typography>
     </StatusStep>,
-    <StatusStep key="executed" isLoading={!isSuccess} safeAddress={safeAddress} isLast>
+    <StatusStep key="executed" isLoading={!isSuccess} safeAddress={safeAddress}>
       <Typography variant="paragraph-small-bold">Transaction is executed</Typography>
     </StatusStep>,
   ]
