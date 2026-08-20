@@ -10,8 +10,7 @@ const USDC_ADDRESS = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 
 const mockBalances: Balances['items'] = [
   {
-    // Deliberately not a round number: '1.23456' can only come from formatting this balance, so the
-    // Max test cannot pass against a hardcoded value.
+    // Not a round number, so the Max assertion can only pass against formatted output.
     balance: '1234560000000000000',
     tokenInfo: {
       address: ZERO_ADDRESS,
@@ -66,8 +65,6 @@ describe('SetUpNestedSafe', () => {
   it('renders the shared TokenAmountInput for a funded asset row', () => {
     renderSetup([{ tokenAddress: ZERO_ADDRESS, amount: '' }])
 
-    // The shared field, not the previous hand-rolled one — this is what broke when the
-    // borrowed CSS module classes were deleted.
     expect(screen.getByTestId('token-amount-field')).toBeInTheDocument()
     expect(screen.getByTestId('token-selector')).toBeInTheDocument()
     expect(screen.getByTestId('max-btn')).toBeInTheDocument()
@@ -101,15 +98,14 @@ describe('SetUpNestedSafe', () => {
 
     await userEvent.type(screen.getByTestId('token-amount-field'), '2')
 
-    // The number matters: it proves this row's own decimals and balance reached the validator.
+    // The number proves this row's own decimals and balance reached the validator.
     await waitFor(() => {
       expect(screen.getByText('Maximum value is 1.23456')).toBeInTheDocument()
     })
   })
 
   it('clears a prefilled amount when the row switches token', async () => {
-    // Back-navigation from the review step re-seeds defaultValues with the row as submitted, so a
-    // token change must not restore that old figure against the newly chosen token.
+    // Back-navigation re-seeds defaultValues, so the old amount must not return with a new token.
     renderSetup([{ tokenAddress: ZERO_ADDRESS, amount: '0.5' }])
 
     expect(screen.getByTestId('token-amount-field')).toHaveValue('0.5')
@@ -123,7 +119,6 @@ describe('SetUpNestedSafe', () => {
   })
 
   it('keeps the amount when the row re-picks the token it already has', async () => {
-    // Opening the dropdown and confirming the same token is a no-op, so a typed amount must survive it.
     renderSetup([{ tokenAddress: ZERO_ADDRESS, amount: '0.5' }])
 
     await userEvent.click(within(screen.getByTestId('token-selector')).getByRole('combobox'))

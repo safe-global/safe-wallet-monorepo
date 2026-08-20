@@ -134,7 +134,6 @@ function AssetInputs({ name }: { name: SetupNestedSafeFormFields.assets }) {
         })
         return (
           <div data-testid="asset-data" className={css.assetInput} key={field.id}>
-            {/* min-w-0 so the hero field can shrink instead of pushing the delete button off the row */}
             <div className="min-w-0 flex-1">
               <TokenAmountInput
                 fieldArray={{ name, index }}

@@ -32,9 +32,8 @@ const TxFlowContextWrapper = ({
     data,
     onNext: () => {},
   }
-  // CreateSpendingLimit registers its beneficiary for the address-poisoning check via
-  // useSafeShieldForAddressPoisoning, so it needs SafeShieldProvider — which the real tree gets from
-  // TxFlow. Mirror TxFlow's nesting (SafeTxProvider outside, since the provider reads SafeTxContext).
+  // The address-poisoning check needs SafeShieldProvider, which TxFlow supplies in the real tree.
+  // SafeTxProvider stays outside it, as in TxFlow — SafeShieldProvider reads SafeTxContext.
   return (
     <SafeTxProvider>
       <SafeShieldProvider>

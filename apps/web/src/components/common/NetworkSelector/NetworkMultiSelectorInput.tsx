@@ -212,8 +212,7 @@ const NetworkMultiSelectorInput = ({
 
           <input
             ref={inputRef}
-            /* Marks this as InputGroup's control so the group's own focus ring and
-               aria-invalid border styling apply, replacing the hand-rolled ones. */
+            /* Lets InputGroup apply its focus ring and aria-invalid border to this input. */
             data-slot="input-group-control"
             role="combobox"
             aria-expanded={open}

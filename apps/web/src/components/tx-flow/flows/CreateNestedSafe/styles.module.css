@@ -6,11 +6,8 @@
   align-items: flex-start;
 }
 
-/* TokenAmountInput stacks a label above its 66px hero field inside a `gap-3` Field, and appends a
-   fiat line below only when the token has a conversion rate. Centring the whole row would therefore
-   drift with the fiat line's presence, so skip the label block and centre on the field itself.
-   Both offsets are Tailwind's scale, NOT the app's --space-* tokens (web's --space-3 is 24px,
-   Tailwind's gap-3 is 12px): label line box (text-sm 0.875rem x leading-snug 1.375) + gap-3. */
+/* Centres the delete button on the 66px field by skipping TokenAmountInput's label block. Offsets
+   are Tailwind's scale (label line box + gap-3), not the app's --space-* tokens. */
 .removeAsset {
   display: flex;
   align-items: center;

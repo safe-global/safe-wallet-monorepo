@@ -69,11 +69,8 @@ export const AllVariants: Story = {
             </InputGroup>
           </div>
           <div style={{ width: '300px' }}>
-            {/* heroWrap is hero without the fixed height, for controls whose content wraps: the chips
-                below push it past 66px instead of being clipped. Reach for it over hero + a height
-                override, which the design-system lint rule rejects. */}
             <InputGroup inputSize="heroWrap">
-              <span className="rounded-md border px-2 py-1 text-sm">chip one</span>
+              <span className="rounded-md border px-2 py-1 text-sm">heroWrap (wraps)</span>
               <span className="rounded-md border px-2 py-1 text-sm">chip two</span>
               <span className="rounded-md border px-2 py-1 text-sm">chip three</span>
               <span className="rounded-md border px-2 py-1 text-sm">chip four</span>

@@ -5,8 +5,6 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { createMockStory } from '@/stories/mocks'
 import OwnerRow from './index'
 
-// The row resolves ENS, reads the connected wallet, and renders an address book input, so it needs
-// the mock harness. It also reads its own field through form context.
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
@@ -44,7 +42,7 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-/** Editable row. The delete button is centred on the 66px field boxes, not on the whole grid cell. */
+/** Editable row — the delete button centres on the 66px field boxes. */
 export const Default: Story = {
   args: { remove: () => {} },
 }
