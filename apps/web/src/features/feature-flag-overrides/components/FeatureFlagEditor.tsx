@@ -22,6 +22,7 @@ export const FeatureFlagEditor = (): ReactElement => {
     <div className="flex min-h-0 flex-1 flex-col">
       <Alert
         variant="warning"
+        outlined={false}
         className="mb-4 dark:bg-[var(--color-warning-background)] dark:text-[var(--color-text-primary)]"
       >
         <TriangleAlert className="dark:text-[var(--color-warning-main)]" />

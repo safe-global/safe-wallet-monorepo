@@ -57,7 +57,10 @@ const TransactionGuards = () => {
           Transaction guards impose additional constraints that are checked prior to executing a Safe transaction.
           Transaction guards are potentially risky, so make sure to only use transaction guards from trusted sources.
           Learn more about transaction guards{' '}
-          <ExternalLink href={HelpCenterArticle.TRANSACTION_GUARD}>here</ExternalLink>.
+          <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.TRANSACTION_GUARD}>
+            here
+          </ExternalLink>
+          .
         </Typography>
         {safe.guard ? <GuardDisplay guardAddress={safe.guard.value} chainId={safe.chainId} /> : <NoTransactionGuard />}
       </div>

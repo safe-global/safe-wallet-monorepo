@@ -26,6 +26,11 @@ export type SafenetCheckSnapshot = {
   /** Chain head observed at snapshot time — the deadline is compared to this. */
   headBlock: string | null
   attestation: AttestationVerification
+  /**
+   * When the attestation landed on chain, in ms. Null until attested, and
+   * when the header read failed — a missing date never suppresses a verdict.
+   */
+  attestedAtMs: number | null
   /** All decoded lifecycle events, sorted ascending by (block, logIndex). */
   events: NormalizedCheckEvent[]
 }

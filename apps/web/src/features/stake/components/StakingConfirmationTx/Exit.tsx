@@ -1,6 +1,5 @@
 import type { NativeStakingValidatorsExitTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { TriangleAlert } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Typography } from '@/components/ui/typography'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'
@@ -55,8 +54,8 @@ const StakingConfirmationTxExit = ({ order }: StakingOrderConfirmationViewProps)
       <Typography variant="paragraph-small" color="muted" className="block mt-4">
         The selected amount and any rewards will be withdrawn from Dedicated Staking for ETH after the validator exit.
       </Typography>
-      <Alert variant="warning" className="mb-2">
-        <TriangleAlert />
+      <Alert variant="warning" outlined={false} className="mb-2">
+        <AlertSeverityIcon variant="warning" />
         <AlertDescription>
           This transaction is a withdrawal request. After it&apos;s executed, you&apos;ll need to complete a separate
           withdrawal transaction.

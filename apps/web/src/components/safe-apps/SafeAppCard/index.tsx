@@ -160,7 +160,7 @@ export const SafeAppCardContainer = ({
   }
 
   return (
-    <Card size="none" className={classNames(css.safeAppContainer, 'relative', className)} style={{ height }}>
+    <Card size="none" className={classNames(css.safeAppContainer, 'relative isolate', className)} style={{ height }}>
       <Link
         href={safeAppUrl}
         rel="noreferrer"

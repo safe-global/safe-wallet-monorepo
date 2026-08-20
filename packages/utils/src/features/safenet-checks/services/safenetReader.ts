@@ -437,6 +437,25 @@ export class SafenetReader {
       message,
     }
   }
+
+  /**
+   * Wall-clock time of a block in ms — dates the audit-log step. `eth_getLogs`
+   * carries no timestamps, so this is one extra header read; call it only for
+   * settled checks (polling stops there, so it costs one RPC per check).
+   * Returns null on failure: a missing date must never suppress a verdict.
+   */
+  async blockTimeMs(blockNumber: number): Promise<number | null> {
+    try {
+      return await this.withProvider(async (provider) => {
+        const block = await provider.getBlock(blockNumber)
+        // Thrown so the failure reaches withProvider and the next endpoint.
+        if (!block) throw new Error(`Safenet reader: no header for block ${blockNumber}`)
+        return block.timestamp * 1000
+      })
+    } catch {
+      return null
+    }
+  }
 }
 
 let defaultReader: SafenetReader | null = null

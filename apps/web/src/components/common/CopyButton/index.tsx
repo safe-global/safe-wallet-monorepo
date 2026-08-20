@@ -25,8 +25,8 @@ const CopyButton = ({
   return (
     <CopyTooltip text={text} onCopy={onCopy} initialToolTipText={initialToolTipText} dialogContent={dialogContent}>
       {children ?? (
-        <Button variant="ghost" size="icon-sm" aria-label={initialToolTipText} className={className}>
-          <CopyIcon data-testid="copy-btn-icon" className="size-5 text-[var(--color-border-main)]" />
+        <Button variant="ghost" size="icon-xs" aria-label={initialToolTipText} className={className}>
+          <CopyIcon data-testid="copy-btn-icon" className="size-4 text-[var(--color-border-main)]" />
         </Button>
       )}
     </CopyTooltip>

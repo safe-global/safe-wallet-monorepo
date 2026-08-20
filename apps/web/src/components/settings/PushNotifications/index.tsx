@@ -1,12 +1,11 @@
 import { Typography } from '@/components/ui/typography'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Link as ShadcnLink } from '@/components/ui/link'
 import NextLink from 'next/link'
-import { Info } from 'lucide-react'
 import { useState } from 'react'
 import type { ReactElement } from 'react'
 
@@ -92,12 +91,15 @@ export const PushNotifications = (): ReactElement => {
           <Typography>
             Enable push notifications for {safeLoaded ? 'this Safe account' : 'your Safe accounts'} in your browser with
             your signature. You will need to enable them again if you clear your browser cache. Learn more about push
-            notifications <ExternalLink href={HelpCenterArticle.PUSH_NOTIFICATIONS}>here</ExternalLink>
+            notifications{' '}
+            <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.PUSH_NOTIFICATIONS}>
+              here
+            </ExternalLink>
           </Typography>
 
           {shouldShowMacHelper && (
             <Alert variant="info">
-              <Info />
+              <AlertSeverityIcon variant="info" />
               <AlertDescription>
                 <Typography variant="paragraph-small-bold" className="mb-2 block">
                   For macOS users
@@ -147,7 +149,7 @@ export const PushNotifications = (): ReactElement => {
               <div className={css.globalInfo}>
                 <Typography variant="paragraph-small">
                   Want to setup notifications for different or all Safe accounts? You can do so in your{' '}
-                  <ShadcnLink render={<NextLink href={AppRoutes.settings.notifications} />}>
+                  <ShadcnLink className="font-bold" render={<NextLink href={AppRoutes.settings.notifications} />}>
                     global preferences
                   </ShadcnLink>
                   .

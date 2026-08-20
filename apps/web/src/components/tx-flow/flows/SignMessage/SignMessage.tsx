@@ -182,7 +182,7 @@ const SuccessCard = ({ safeMessage, onContinue }: { safeMessage: MessageItem; on
         Message successfully signed
       </Typography>
       <MsgSigners msg={safeMessage} showOnlyConfirmations showMissingSignatures />
-      <div className="flex items-center p-2">
+      <div className="flex items-center justify-end p-2">
         <Button onClick={onContinue} disabled={!safeMessage.preparedSignature}>
           Continue
         </Button>
@@ -359,7 +359,7 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
             {!safe.deployed && <ErrorMessage>Your Safe account is not activated yet.</ErrorMessage>}
           </TxCard>
           <TxCard>
-            <div className="flex items-center p-2">
+            <div className="flex items-center justify-end p-2">
               <CheckWallet checkNetwork={!isDisabled}>
                 {(isOk) => (
                   <Button onClick={handleSign} disabled={!isOk || isDisabled}>

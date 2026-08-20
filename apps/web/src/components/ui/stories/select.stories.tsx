@@ -45,9 +45,10 @@ export const AllVariants: Story = {
       <div style={{ marginBottom: '2rem' }}>
         <h3 className="mb-4 text-lg font-semibold">Variants</h3>
         <p className="text-muted-foreground mb-4 text-sm">
-          <b>default</b> — bordered field on the page background. <b>ghost</b> — border/shadow/bg reset for
-          inline/embedded triggers. Heights use <code>min-h-*</code> so a trigger still grows for rich multi-line
-          values.
+          <b>default</b> — bordered field on the page background. <b>outline</b> — the <code>Button</code>{' '}
+          <code>outline</code> skin, for a select in a toolbar row of outline buttons rather than in a form.{' '}
+          <b>ghost</b> — border/shadow/bg reset for inline/embedded triggers. Heights use <code>min-h-*</code> so a
+          trigger still grows for rich multi-line values.
         </p>
         <div
           style={{
@@ -60,6 +61,15 @@ export const AllVariants: Story = {
           <Select defaultValue="option-1" items={OPTION_ITEMS}>
             <SelectTrigger variant="default" className="w-48">
               <SelectValue placeholder="Default" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="option-1">Option 1</SelectItem>
+              <SelectItem value="option-2">Option 2</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select defaultValue="option-1" items={OPTION_ITEMS}>
+            <SelectTrigger variant="outline" className="w-48">
+              <SelectValue placeholder="Outline" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="option-1">Option 1</SelectItem>

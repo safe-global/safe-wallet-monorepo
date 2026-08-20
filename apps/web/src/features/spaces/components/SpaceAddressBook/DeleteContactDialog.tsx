@@ -5,7 +5,7 @@ import { ChainIndicatorList } from '@/features/multichain'
 import { useAddressBooksDeleteByAddressV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId, useWorkspaceAddressBookLabel } from '@/features/spaces'
 import { useState } from 'react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { Typography } from '@/components/ui/typography'
@@ -80,12 +80,13 @@ const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContact
 
           {error && (
             <Alert variant="destructive" className="mt-4">
+              <AlertSeverityIcon variant="destructive" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
         </div>
 
-        <div className="flex justify-end gap-2 p-4 pt-0">
+        <div className="flex justify-between gap-2 p-4 pt-0 pb-6">
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>

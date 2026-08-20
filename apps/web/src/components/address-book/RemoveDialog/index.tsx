@@ -28,7 +28,7 @@ const RemoveDialog = ({ handleClose, address }: { handleClose: () => void; addre
         </Typography>
       </div>
 
-      <div className="flex items-center justify-end gap-2 p-2">
+      <div className="flex items-center justify-between gap-2 p-6 pt-2">
         <Button variant="ghost" onClick={handleClose}>
           Cancel
         </Button>

@@ -5,6 +5,7 @@ import { Popover as PopoverPrimitive } from '@base-ui/react/popover'
 
 import { cn } from '@/utils/cn'
 import { usePortalContainer } from '@/components/ui/ShadcnProvider'
+import { overlayVariants } from '@/components/ui/overlay'
 
 /**
  * Popover Component
@@ -23,7 +24,7 @@ import { usePortalContainer } from '@/components/ui/ShadcnProvider'
  *
  * @remarks
  * Key Props:
- * - PopoverContent: `align`, `alignOffset`, `side`, `sideOffset`
+ * - PopoverContent: `align`, `alignOffset`, `side`, `sideOffset`, `showBackdrop`
  * - Root / Trigger: see Base UI popover
  */
 
@@ -42,18 +43,40 @@ function PopoverContent({
   side = 'bottom',
   sideOffset = 4,
   anchor,
+  collisionAvoidance,
+  showBackdrop = false,
   ...props
 }: PopoverPrimitive.Popup.Props &
-  Pick<PopoverPrimitive.Positioner.Props, 'align' | 'alignOffset' | 'side' | 'sideOffset' | 'anchor'>) {
+  Pick<
+    PopoverPrimitive.Positioner.Props,
+    'align' | 'alignOffset' | 'side' | 'sideOffset' | 'anchor' | 'collisionAvoidance'
+  > & {
+    /**
+     * Dims and blurs the page behind the popover with the shared overlay scrim.
+     *
+     * Set this on a popover that reads as a panel — a titled card with its own close button, like
+     * the header's Nested Safes, notifications, wallet and WalletConnect popups. Those are modals
+     * that happen to be anchored, and without a scrim they float on a page that still looks live.
+     *
+     * Leave it off for a true dropdown: a menu, a select, a date picker, a filter, a tooltip. Those
+     * belong to the control that opened them, and dimming the page around a menu item is wrong.
+     *
+     * Do NOT set it on a popover opened from inside a dialog or sheet — the scrim paints above that
+     * surface and would blur the content the popover belongs to.
+     */
+    showBackdrop?: boolean
+  }) {
   const portalContainer = usePortalContainer()
   return (
     <PopoverPrimitive.Portal container={portalContainer}>
+      {showBackdrop && <PopoverPrimitive.Backdrop data-slot="popover-backdrop" className={overlayVariants()} />}
       <PopoverPrimitive.Positioner
         align={align}
         alignOffset={alignOffset}
         side={side}
         sideOffset={sideOffset}
         anchor={anchor}
+        collisionAvoidance={collisionAvoidance}
         className="isolate z-[var(--z-overlay)]"
       >
         <PopoverPrimitive.Popup

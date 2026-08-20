@@ -65,7 +65,7 @@ export function SimilarityConfirmDialog({
             Please verify this is the correct address before proceeding.
           </Typography>
         </div>
-        <div className="flex justify-end gap-2 p-4 pt-0">
+        <div className="flex justify-between gap-2 p-4 pt-0 pb-6">
           <Button variant="outline" onClick={onCancel} data-testid="similarity-cancel-button">
             Cancel
           </Button>
