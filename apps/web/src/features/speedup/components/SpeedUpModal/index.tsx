@@ -197,7 +197,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-2 p-4">
+        <div className="flex items-center justify-between gap-2 p-4 pb-6">
           <Button variant="ghost" onClick={onCancel}>
             Cancel
           </Button>
