@@ -20,6 +20,7 @@ import useTxNotifications from '@/hooks/useTxNotifications'
 import useSafeNotifications from '@/hooks/useSafeNotifications'
 import useTxPendingStatuses from '@/hooks/useTxPendingStatuses'
 import { useInitSession } from '@/hooks/useInitSession'
+import { useRegisterServiceWorker } from '@/hooks/useRegisterServiceWorker'
 import Notifications from '@/components/common/Notifications'
 import CookieAndTermBanner from 'src/components/common/CookieAndTermBanner'
 import { useDarkMode } from '@/hooks/useDarkMode'
@@ -142,6 +143,7 @@ const InitApp = (): ReactElement | null => {
   useLogoutCallback()
   useSessionExpiryGuard()
   useUnlockBodyScroll()
+  useRegisterServiceWorker()
 
   return <SafeScopedSubscriptions />
 }
