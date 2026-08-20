@@ -64,8 +64,7 @@ export const _isModuleFilter = (filter: TxFilter['filter']): filter is ModuleTxF
   return 'module' in filter
 }
 
-// The query string is user-editable, so a date in it may be nonsense — drop it rather than seeding
-// the filter form with an invalid `Date`
+// The query string is user-editable, so drop a nonsense date rather than seeding the form with it
 const parseFilterDate = (value: string | undefined): Date | null => {
   if (!value) return null
   const date = new Date(value)

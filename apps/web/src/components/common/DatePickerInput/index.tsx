@@ -30,9 +30,8 @@ const toText = (value: Date | null) => (value && isValid(value) ? format(value, 
 const SEGMENTED_DATE = /^(\d{1,2})\D(\d{1,2})\D(\d{1,4})$/
 
 /**
- * Keeps the entry a well-formed `dd/MM/yyyy` prefix: digits only, separators inserted as the user
- * types, and never more than 8 digits — so a year cannot grow past four digits. An already-separated
- * entry (a pasted `1/1/2036`) keeps its groups, so a short day or month is not read as digits.
+ * Masks the entry to a `dd/MM/yyyy` prefix, capped at 8 digits so the year cannot grow past four. An
+ * already-separated entry (a pasted `1/1/2036`) keeps its groups instead of becoming a digit stream.
  */
 export const _toMaskedText = (raw: string) => {
   const segments = raw.trim().match(SEGMENTED_DATE)
@@ -50,10 +49,8 @@ export const _toMaskedText = (raw: string) => {
 }
 
 /**
- * Stands in for an entry that is not a real date yet. Keeping it in the form value (rather than only
- * in local state) is what makes react-hook-form report the field as invalid, so a form cannot be
- * submitted while the user is looking at "Invalid date". Shared so the value identity stays stable
- * across keystrokes; nothing ever mutates it.
+ * Stands in for an entry that is not a real date yet. Living in the form value, not just local state,
+ * is what makes react-hook-form hold the field invalid. Shared so its identity is stable per keystroke.
  */
 const INVALID_DATE = new Date(NaN)
 
@@ -76,11 +73,7 @@ export const _fromText = (text: string): Date | null => {
   return isValid(parsed) ? parsed : INVALID_DATE
 }
 
-/**
- * The window a date may fall in. Bounds the calendar's month/year dropdowns, and the typed entry with
- * it — the MUI picker this replaced clamped to 1900-2099, so without this you can type a year the
- * calendar cannot even display.
- */
+/** The window a date may fall in. Bounds the calendar's dropdowns and the typed entry alike. */
 const getSelectableRange = (disableFuture: boolean, now = new Date()) => ({
   start: startOfYear(subYears(now, YEARS_SELECTABLE)),
   end: disableFuture ? now : endOfYear(addYears(now, YEARS_SELECTABLE)),
@@ -120,7 +113,7 @@ const DatePickerInput = ({
             return
           }
 
-          // Values seeded from outside the input (e.g. a date in the URL query) can be invalid
+          // A seeded value (e.g. a date in the URL query) can arrive invalid
           if (!isValid(val)) {
             return INVALID_DATE_ERROR
           }
@@ -172,9 +165,8 @@ const DatePickerField = ({
   const [isOpen, setIsOpen] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
 
-  // A value seeded from outside the input (a date in the URL query) is never "touched", so
-  // react-hook-form marks the form invalid without filling in the field's error — leaving a disabled
-  // submit button and nothing on screen explaining it. Validate once on mount so the field speaks.
+  // A seeded value is never "touched", so react-hook-form holds the form invalid without filling in
+  // the field's error: a disabled submit button and nothing explaining it. Validate once on mount.
   const hasSeededValue = useRef(value !== null)
   useEffect(() => {
     if (hasSeededValue.current) {
@@ -182,19 +174,16 @@ const DatePickerField = ({
     }
   }, [name, trigger])
 
-  // Resync only when the value changed outside the input (calendar pick, form reset), so a
-  // half-typed entry is never reformatted under the cursor.
+  // Resync only on a change from outside, so a half-typed entry is never reformatted under the cursor.
   useEffect(() => {
     setText((current) => (toKey(_fromText(current)) === toKey(value) ? current : toText(value)))
   }, [value])
 
-  // An empty field is never in error (the rules skip empty values), and saying so explicitly drops a
-  // stale message: validation started by the blur that precedes a reset resolves after it.
+  // An empty field is never in error, and saying so explicitly drops a stale message: validation
+  // from the blur that precedes a reset resolves after it.
   const isEmpty = text === '' && value === null
 
-  // Don't nag about an entry that is simply unfinished until the user leaves the field. The message
-  // slot below keeps its height either way, so revealing it never moves the field — an earlier
-  // version of this shifted the calendar button between pointerdown and pointerup and ate the click.
+  // Don't nag about an entry that is simply unfinished until the user leaves the field.
   const digitCount = text.replace(/\D/g, '').length
   const isEntryUnfinished = digitCount > 0 && digitCount < DATE_DIGITS
   const errorMessage = isEmpty || (isEntryUnfinished && isFocused) ? undefined : fieldState.error?.message
@@ -203,8 +192,7 @@ const DatePickerField = ({
   // Never hand the calendar an invalid date — react-day-picker formats it and throws
   const selectedDate = value && isValid(value) ? value : undefined
 
-  // Bounds the month/year dropdowns, and lets the nav arrows disable at the ends instead of paging
-  // into months where every day is disabled.
+  // Bounds the dropdowns, so the nav arrows disable at the ends instead of paging into dead months.
   const { start: startMonth, end: endMonth } = useMemo(() => getSelectableRange(disableFuture), [disableFuture])
 
   // The same bound the validate rule uses, so the calendar can never offer a day it would reject.
@@ -271,7 +259,7 @@ const DatePickerField = ({
         </PopoverContent>
       </Popover>
 
-      {/* Fixed height: the message appearing must never change the field's layout */}
+      {/* Fixed height: a message appearing must never move the field, or it eats the calendar click */}
       <div className="min-h-5">
         <FieldError>{errorMessage}</FieldError>
       </div>
