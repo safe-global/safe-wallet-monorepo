@@ -23,6 +23,7 @@ interface Manifest {
   githubSecrets: string[]
   defaultsOnly: string[]
   buildTime: string[]
+  workflowSecrets: Record<string, Record<string, string>>
 }
 
 const manifest: Manifest = JSON.parse(fs.readFileSync(path.join(__dirname, 'ci-env-manifest.json'), 'utf8'))
@@ -61,6 +62,30 @@ const workflowEnvVars = (workflow: string): Map<string, string> => {
     entries.set(match[1], match[2])
   }
   return entries
+}
+
+const buildStepSecrets = (workflow: string): Map<string, string> => {
+  const content = fs.readFileSync(path.join(REPO_ROOT, '.github/workflows', workflow), 'utf8')
+  const blocks: string[][] = []
+  let current: string[] = []
+  for (const line of content.split('\n')) {
+    if (/^\s+[A-Z0-9_]+: .+$/.test(line)) {
+      current.push(line)
+    } else if (current.length > 0) {
+      blocks.push(current)
+      current = []
+    }
+  }
+  if (current.length > 0) blocks.push(current)
+
+  const secrets = new Map<string, string>()
+  for (const block of blocks.filter((b) => b.some((l) => l.includes('NEXT_PUBLIC_')))) {
+    for (const line of block) {
+      const match = line.match(/^\s+([A-Z0-9_]+): \$\{\{ secrets\.([A-Z0-9_]+) \}\}$/)
+      if (match && !match[1].startsWith('NEXT_PUBLIC_')) secrets.set(match[1], match[2])
+    }
+  }
+  return secrets
 }
 
 const report = (hint: string, problems: string[]): string =>
@@ -115,6 +140,33 @@ describe('CI build env consistency', () => {
     )
     const dead = [...enumerated].filter((v) => !codeVars.has(v) && !scriptConsumed.has(v))
     expect(report('Passed by the workflows but nothing consumes them — remove', dead)).toBe('')
+  })
+
+  it('passes exactly the non-NEXT_PUBLIC secrets the manifest declares for each workflow', () => {
+    const problems: string[] = []
+    for (const workflow of WORKFLOWS) {
+      const expected = manifest.workflowSecrets[workflow]
+      if (!expected) {
+        problems.push(`${workflow} has no workflowSecrets entry in ${MANIFEST}`)
+        continue
+      }
+      const actual = buildStepSecrets(workflow)
+      for (const [name, secret] of Object.entries(expected)) {
+        if (actual.get(name) !== secret) {
+          problems.push(`${workflow} must pass \`${name}: \${{ secrets.${secret} }}\` on its build/cypress step`)
+        }
+      }
+      for (const [name, secret] of actual) {
+        if (!(name in expected)) {
+          problems.push(
+            `${workflow} passes unregistered secret ${name} (secrets.${secret}) — add it to workflowSecrets`,
+          )
+        }
+      }
+    }
+    const unknown = Object.keys(manifest.workflowSecrets).filter((w) => !WORKFLOWS.includes(w))
+    problems.push(...unknown.map((w) => `${w} is in workflowSecrets but not in the WORKFLOWS list`))
+    expect(report(`Build-step secrets diverged from workflowSecrets in ${MANIFEST}`, problems)).toBe('')
   })
 
   it('keeps the manifest lists disjoint', () => {

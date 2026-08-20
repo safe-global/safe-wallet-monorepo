@@ -1,5 +1,5 @@
 {
-  "$comment": "Source of truth for CI build-env consistency, enforced by ci-env-consistency.test.ts. `githubSecrets` are the NEXT_PUBLIC_* Actions secrets that exist in the repo settings AND are consumed by the build; each must be enumerated in every workflow that builds the web app. `defaultsOnly` are read by code but deliberately not configured in CI (code default applies); creating a secret for one of these requires adding it to the workflow env blocks AND moving it to githubSecrets. `buildTime` are derived or injected at build time, never secrets.",
+  "$comment": "Source of truth for CI build-env consistency, enforced by ci-env-consistency.test.ts. `githubSecrets` are the NEXT_PUBLIC_* Actions secrets that exist in the repo settings AND are consumed by the build; each must be enumerated in every workflow that builds the web app. `defaultsOnly` are read by code but deliberately not configured in CI (code default applies); creating a secret for one of these requires adding it to the workflow env blocks AND moving it to githubSecrets. `buildTime` are derived or injected at build time, never secrets. `workflowSecrets` are the non-NEXT_PUBLIC secret-backed env vars each workflow's build/cypress step must pass (env var name -> secret name); the sets differ per workflow on purpose, e.g. argos runs with record disabled so it needs no CYPRESS_RECORD_KEY.",
   "githubSecrets": [
     "NEXT_PUBLIC_BEAMER_ID",
     "NEXT_PUBLIC_BLOCKAID_CLIENT_ID",
@@ -58,5 +58,34 @@
     "NEXT_PUBLIC_COMMIT_HASH",
     "NEXT_PUBLIC_IS_PRODUCTION",
     "NEXT_PUBLIC_IS_TEST_E2E"
-  ]
+  ],
+  "workflowSecrets": {
+    "web-deploy-dev.yml": {
+      "DATADOG_API_KEY": "DATADOG_API_KEY"
+    },
+    "web-tag-release.yml": {
+      "DATADOG_API_KEY": "DATADOG_API_KEY"
+    },
+    "web-nextjs-bundle-analysis.yml": {},
+    "web-e2e-smoke.yml": {
+      "BEAMER_DATA_E2E": "BEAMER_DATA_E2E",
+      "CYPRESS_RECORD_KEY": "CYPRESS_RECORD_KEY",
+      "CYPRESS_WALLET_CREDENTIALS": "CYPRESS_WALLET_CREDENTIALS"
+    },
+    "web-e2e-full-ondemand.yml": {
+      "BEAMER_DATA_E2E": "BEAMER_DATA_E2E",
+      "CYPRESS_RECORD_KEY": "CYPRESS_RECORD_KEY",
+      "CYPRESS_WALLET_CREDENTIALS": "CYPRESS_WALLET_CREDENTIALS"
+    },
+    "web-e2e-hp-ondemand.yml": {
+      "BEAMER_DATA_E2E": "BEAMER_DATA_E2E",
+      "CYPRESS_RECORD_KEY": "CYPRESS_RECORD_KEY",
+      "CYPRESS_WALLET_CREDENTIALS": "CYPRESS_WALLET_CREDENTIALS"
+    },
+    "web-argos-e2e.yml": {
+      "ARGOS_TOKEN": "ARGOS_TOKEN_E2E",
+      "BEAMER_DATA_E2E": "BEAMER_DATA_E2E",
+      "CYPRESS_WALLET_CREDENTIALS": "CYPRESS_WALLET_CREDENTIALS"
+    }
+  }
 }
