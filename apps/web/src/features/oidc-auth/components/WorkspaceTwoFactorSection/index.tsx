@@ -61,15 +61,15 @@ const WorkspaceTwoFactorSection = ({
           {walletOnly > 0 && (
             <Tooltip>
               <TooltipTrigger
-                aria-label={`Why ${walletOnly} ${walletOnly === 1 ? 'member cannot' : 'members cannot'} enable 2FA`}
+                aria-label={`Why ${walletOnly} ${walletOnly === 1 ? 'signer' : 'signers'} can't enable 2FA`}
                 data-testid="workspace-2fa-coverage-info"
                 className="text-muted-foreground flex items-center"
               >
                 <Info className="size-4" />
               </TooltipTrigger>
               <TooltipContent>
-                {walletOnly} {walletOnly === 1 ? 'member cannot' : 'members cannot'} enable 2FA. 2FA not supported for
-                wallet login.
+                {walletOnly} {walletOnly === 1 ? 'signer' : 'signers'} can&apos;t enable 2FA because wallet login
+                doesn&apos;t support it.
               </TooltipContent>
             </Tooltip>
           )}
