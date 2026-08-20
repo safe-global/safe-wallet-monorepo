@@ -5,8 +5,8 @@ import { AttestationVerificationStatus, CheckEventType, type Hex, type OracleAtt
 
 /**
  * Opt-in integration spec — runs only under `yarn test:integration` against a
- * live Safenet network. Defaults target the relaunched (2026-08) Sepolia
- * deployment the golden vector was captured from:
+ * live Safenet network. Defaults target the redeployed (2026-08-20) Sepolia
+ * contracts the golden vector was captured from:
  *
  *   SAFENET_IT_RPC=https://ethereum-sepolia-rpc.publicnode.com \
  *     SAFENET_IT_CHAIN_ID=11155111 \
