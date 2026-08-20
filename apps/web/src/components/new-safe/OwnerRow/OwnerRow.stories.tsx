@@ -5,8 +5,6 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { createMockStory } from '@/stories/mocks'
 import OwnerRow from './index'
 
-// The row resolves ENS, reads the connected wallet, and renders an address book input, so it needs
-// the mock harness. It also reads its own field through form context.
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',

@@ -10,8 +10,7 @@ const USDC_ADDRESS = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 
 const mockBalances: Balances['items'] = [
   {
-    // Deliberately not a round number: '1.23456' can only come from formatting this balance, so the
-    // Max test cannot pass against a hardcoded value.
+    // Deliberately not round: '1.23456' can only come from formatting this balance.
     balance: '1234560000000000000',
     tokenInfo: {
       address: ZERO_ADDRESS,
@@ -66,8 +65,7 @@ describe('SetUpNestedSafe', () => {
   it('renders the shared TokenAmountInput for a funded asset row', () => {
     renderSetup([{ tokenAddress: ZERO_ADDRESS, amount: '' }])
 
-    // The shared field, not the previous hand-rolled one — this is what broke when the
-    // borrowed CSS module classes were deleted.
+    // The shared field, not the hand-rolled one that broke when the borrowed CSS classes went.
     expect(screen.getByTestId('token-amount-field')).toBeInTheDocument()
     expect(screen.getByTestId('token-selector')).toBeInTheDocument()
     expect(screen.getByTestId('max-btn')).toBeInTheDocument()
@@ -108,8 +106,7 @@ describe('SetUpNestedSafe', () => {
   })
 
   it('clears a prefilled amount when the row switches token', async () => {
-    // Back-navigation from the review step re-seeds defaultValues with the row as submitted, so a
-    // token change must not restore that old figure against the newly chosen token.
+    // Back-navigation re-seeds defaultValues, so a token change must not restore the old figure.
     renderSetup([{ tokenAddress: ZERO_ADDRESS, amount: '0.5' }])
 
     expect(screen.getByTestId('token-amount-field')).toHaveValue('0.5')

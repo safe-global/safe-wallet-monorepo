@@ -110,10 +110,7 @@ const TokenAmountInput = ({
   }, [maxAmount, selectedToken, setValue, amountField, trigger, deps, onMaxClick])
 
   const onChangeToken = useCallback(() => {
-    // An amount typed against the previous token is meaningless once the token changes, so clear it.
-    // Restoring the field's default instead would put the OLD token's amount back whenever
-    // defaultValues is prefilled — e.g. navigating back from a review step re-seeds the form with the
-    // row as previously submitted, so switching its token would silently keep the old figure.
+    // Clear rather than reset: a prefilled default would restore the previous token's amount.
     resetField(amountField, { defaultValue: '' })
 
     trigger(deps)
@@ -121,8 +118,7 @@ const TokenAmountInput = ({
 
   const handleTokenChange = useCallback(
     (value: string) => {
-      // Re-picking the token that is already selected is a no-op, not a change. Without this guard it
-      // would still run onChangeToken and wipe an amount the user had already typed.
+      // Re-picking the same token is a no-op — without this it would wipe the typed amount.
       if (sameAddress(value, tokenAddress)) return
 
       setValue(tokenAddressField, value, { shouldValidate: true })
@@ -143,15 +139,14 @@ const TokenAmountInput = ({
           fullWidth
           inputSize="hero"
           endAdornment={
-            // items-stretch so Max and the divider take their height from the token select, which is
-            // content-sized (a two-line name + balance row) rather than a fixed token height.
+            // items-stretch so Max and the divider take their height from the content-sized token select.
             <div className="flex items-stretch gap-1">
               {maxAmount !== undefined && (
                 <Button
                   variant="ghost"
                   size="sm"
                   data-testid="max-btn"
-                  // eslint-disable-next-line no-restricted-syntax -- h-auto drops size="sm"'s fixed h-8 so Max matches the adjacent token select, whose height is content-driven and has no matching Button size token.
+                  // eslint-disable-next-line no-restricted-syntax -- h-auto drops size="sm"'s h-8 so Max matches the content-sized token select
                   className="h-auto uppercase"
                   onClick={onMaxAmountClick}
                 >

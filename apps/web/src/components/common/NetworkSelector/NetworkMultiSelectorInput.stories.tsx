@@ -6,8 +6,6 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { createMockStory } from '@/stories/mocks'
 import NetworkMultiSelectorInput from './NetworkMultiSelectorInput'
 
-// The control lists every configured chain and renders a logo per selected chip, so it needs the
-// mock harness for chain config. It also reads its field through form context.
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
@@ -53,10 +51,7 @@ export const WithSelection: Story = {
   args: { value: [chain('11155111', 'Sepolia')] },
 }
 
-/**
- * Enough chips to wrap onto a second line — the control grows past its 66px resting height rather
- * than clipping them, which is what the `heroWrap` input size exists for.
- */
+/** Chips wrapping onto a second line — `heroWrap` grows the control past 66px instead of clipping. */
 export const Wrapping: Story = {
   args: {
     value: [

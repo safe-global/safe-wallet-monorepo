@@ -44,9 +44,7 @@ const inputGroupVariants = cva(
         default: 'h-9',
         lg: 'h-10 [&_[data-slot=input-group-control]]:h-10',
         hero: 'h-[66px] min-h-[66px] rounded-[calc(var(--radius)-2px)] px-4 [&_[data-slot=input-group-addon][data-align=inline-end]]:pr-0 [&_[data-slot=input-group-control]]:px-0 [&_[data-slot=input-group-control]]:shadow-none [&_[data-slot=input-group-control]]:focus-visible:ring-0',
-        // `hero` for controls whose content wraps — chip / multi-select surfaces. Same 66px
-        // resting height and padding, but no fixed `h-*`, so the box grows with a second row of
-        // chips instead of clipping them.
+        // `hero` without a fixed height, so chip and multi-select content wraps instead of clipping.
         heroWrap:
           'min-h-[66px] flex-wrap gap-1 rounded-[calc(var(--radius)-2px)] px-4 py-3 [&_[data-slot=input-group-addon][data-align=inline-end]]:pr-0 [&_[data-slot=input-group-control]]:px-0 [&_[data-slot=input-group-control]]:shadow-none [&_[data-slot=input-group-control]]:focus-visible:ring-0',
       },
