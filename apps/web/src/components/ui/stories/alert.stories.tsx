@@ -146,9 +146,7 @@ export const AllVariants: Story = {
               <AlertDescription>This is an info alert message.</AlertDescription>
             </Alert>
           </div>
-
-          <div>
-            <h4 className="mb-2 text-sm font-medium">Subtle</h4>
+          <div style={{ width: '400px' }}>
             <Alert variant="subtle">
               <AlertTitle>Subtle Alert</AlertTitle>
               <AlertDescription>A neutral tint for messages that carry no status.</AlertDescription>
