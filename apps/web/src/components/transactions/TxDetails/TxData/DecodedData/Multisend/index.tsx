@@ -135,7 +135,9 @@ const Multisend = ({
           </CardContent>
         </Card>
       ) : (
-        <div className="mt-3 flex flex-col gap-2 px-4 pb-4">{actionItems}</div>
+        <div className="flex flex-col divide-y divide-border pb-4 [&_[data-slot=card]]:rounded-none [&_[data-slot=accordion-content]>*]:px-4 [&_[data-slot=accordion-trigger]]:px-4">
+          {actionItems}
+        </div>
       )}
     </>
   )

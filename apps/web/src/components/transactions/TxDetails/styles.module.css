@@ -106,8 +106,6 @@
 
 .multiSend {
   border-bottom: 1px solid var(--border);
-  /* No padding of its own — the batch rows bring theirs — so it only owes the edge inset. */
-  padding-left: var(--tx-details-edge-inset, 0px);
 }
 
 .buttons {

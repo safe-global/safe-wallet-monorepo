@@ -41,7 +41,6 @@ exports[`HexEncodedData should not cut the text in case the limit option is high
               0xed2ad31e
             </b>
             d00088fc64d00c49774b2fe3fb7fd7db1c2a714700892607b9f77dc1
-             
           </span>
         </span>
       </div>
@@ -85,7 +84,6 @@ exports[`HexEncodedData should not highlight the data if highlight option is fal
             class="monospace"
           >
             0x102384763718984309876
-             
           </span>
         </span>
       </div>
@@ -137,11 +135,10 @@ exports[`HexEncodedData should render the default component markup 1`] = `
               0xed2ad31e
             </b>
             d00088fc64…
-             
           </span>
         </span>
         <button
-          class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current showMore"
+          class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 underline hover:decoration-current showMore cursor-pointer font-bold text-[var(--color-text-primary)] decoration-current hover:text-[var(--color-primary-light)]"
           data-slot="link"
           data-testid="show-more"
           data-variant="default"

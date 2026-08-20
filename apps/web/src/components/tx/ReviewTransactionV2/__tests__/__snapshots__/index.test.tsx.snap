@@ -111,7 +111,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
           data-size="default"
           data-slot="card"
           data-variant="default"
-          style="--accordion-border-active: var(--color-info-light);"
+          style="--accordion-border-active: var(--color-info-light); --accordion-fill-active: var(--color-info-background);"
         >
           <div
             class="flex w-full flex-col"
@@ -136,7 +136,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                 <button
                   aria-disabled="false"
                   aria-expanded="false"
-                  class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground cursor-pointer rounded-md py-4 text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 items-start justify-between border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 trigger px-4 hover:no-underline"
+                  class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground cursor-pointer rounded-md py-4 text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 justify-between border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 trigger items-center px-4 hover:no-underline"
                   data-orientation="vertical"
                   data-slot="accordion-trigger"
                   data-testid="decoded-tx-summary"

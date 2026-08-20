@@ -23,6 +23,7 @@ const SendToBlock = ({
           shortAddress={false}
           hasExplorer
           showCopyButton
+          showPrefix={false}
           avatarSize={avatarSize}
           customAvatar={customAvatar}
         />

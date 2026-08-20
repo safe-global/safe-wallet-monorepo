@@ -83,7 +83,7 @@ const SingleTxDecoded = ({
         render={<div />}
         className={cn(
           'flex min-h-12 items-center px-4 py-3 hover:no-underline',
-          isGrouped ? css.groupedTrigger : css.outlinedTrigger,
+          isGrouped ? css.groupedTrigger : css.elevationTrigger,
           isGrouped && expanded && css.groupedTriggerOpen,
         )}
       >
@@ -107,7 +107,7 @@ const SingleTxDecoded = ({
         {actions !== undefined && <div className={css.actions}>{actions}</div>}
       </AccordionTrigger>
 
-      <AccordionContent className={cn('px-4', isGrouped && 'border-t border-border bg-card')}>
+      <AccordionContent className={cn('p-4', isGrouped && 'border-t border-border bg-card')}>
         <div className="flex flex-col gap-2">
           <DecodedData txData={singleTxData} toInfo={{ value: tx.to }} isTxExecuted={isExecuted} />
         </div>
@@ -117,7 +117,7 @@ const SingleTxDecoded = ({
 
   return (
     <Accordion data-testid="action-accordion" {...accordionProps}>
-      <AccordionItem value="action" className={cn(isGrouped ? 'border-0' : 'border-b border-border last:border-b-0')}>
+      <AccordionItem value="action" className="border-0">
         {isGrouped ? accordionBody : <Card size="none">{accordionBody}</Card>}
       </AccordionItem>
     </Accordion>
