@@ -14,6 +14,7 @@ import { TOOLTIP_TITLES } from '@/components/tx-flow/common/constants'
 import type { RemoveOwnerFlowProps } from '.'
 
 import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { validateThreshold } from '@safe-global/utils/utils/validation'
 
 export const SetThreshold = ({
   params,
@@ -29,12 +30,18 @@ export const SetThreshold = ({
     if (value != null) setSelectedThreshold(value)
   }
 
+  const newNumberOfOwners = safe ? safe.owners.length - 1 : 1
+
+  // The threshold lives outside a form, so guard it at submit: blocks the
+  // GS202/GS201 on-chain reverts if the owner set changed while the flow was
+  // open (WA-3005 Bucket A).
+  const thresholdError = validateThreshold(selectedThreshold, newNumberOfOwners)
+
   const onSubmitHandler = (e: SyntheticEvent) => {
     e.preventDefault()
+    if (thresholdError) return
     onSubmit({ ...params, threshold: selectedThreshold })
   }
-
-  const newNumberOfOwners = safe ? safe.owners.length - 1 : 1
 
   return (
     <TxCard>
@@ -85,10 +92,12 @@ export const SetThreshold = ({
           </div>
         </div>
 
+        {thresholdError && <Typography className="mb-4 text-destructive">{thresholdError}</Typography>}
+
         <Separator bleed="6" />
 
         <TxCardActions>
-          <Button data-testid="next-btn" type="submit">
+          <Button data-testid="next-btn" type="submit" disabled={!!thresholdError}>
             Next
           </Button>
         </TxCardActions>

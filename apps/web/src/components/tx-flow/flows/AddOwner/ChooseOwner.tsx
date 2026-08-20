@@ -11,7 +11,13 @@ import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShi
 import NameInput from '@/components/common/NameInput'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { uniqueAddress, addressIsNotCurrentSafe } from '@safe-global/utils/utils/validation'
+import {
+  uniqueAddress,
+  addressIsNotCurrentSafe,
+  addressIsNotReserved,
+  validateThreshold,
+} from '@safe-global/utils/utils/validation'
+import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import type { AddOwnerFlowProps } from '.'
 import type { ReplaceOwnerFlowProps } from '../ReplaceOwner'
 import TxCard, { TxCardActions } from '../../common/TxCard'
@@ -46,9 +52,17 @@ export const ChooseOwner = ({
   const { handleSubmit, formState, watch, control } = formMethods
   const isValid = Object.keys(formState.errors).length === 0 // do not use formState.isValid because names can be empty
 
-  const notAlreadyOwner = uniqueAddress(safe.owners.map((owner) => owner.value))
+  // Inline validation for the GS204/GS203 on-chain reverts (WA-3005 Bucket A):
+  // duplicate signer, the Safe itself, and reserved (zero/sentinel) addresses
+  // are blocked here so they never reach signing.
+  const notAlreadyOwner = uniqueAddress(
+    safe.owners.map((owner) => owner.value),
+    getContractErrorMessage('GS204'),
+  )
   const notCurrentSafe = addressIsNotCurrentSafe(safeAddress)
-  const combinedValidate = (address: string) => notAlreadyOwner(address) || notCurrentSafe(address)
+  const notReserved = addressIsNotReserved()
+  const combinedValidate = (address: string) =>
+    notAlreadyOwner(address) || notCurrentSafe(address) || notReserved(address)
 
   const address = watch('newOwner.address')
 
@@ -72,6 +86,10 @@ export const ChooseOwner = ({
   })
 
   const newNumberOfOwners = safe.owners.length + (!params.removedOwner ? 1 : 0)
+
+  // Derived rather than read from RHF: the owner set can change on-chain while
+  // the flow is open, which does not re-run the threshold field's validation.
+  const thresholdError = validateThreshold(watch('threshold'), newNumberOfOwners)
 
   return (
     <TxCard>
@@ -140,9 +158,10 @@ export const ChooseOwner = ({
                   <Controller
                     control={control}
                     name="threshold"
+                    rules={{ validate: (value) => validateThreshold(value, newNumberOfOwners) }}
                     render={({ field }) => (
                       <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger data-testid="owner-number-dropdown">
+                        <SelectTrigger data-testid="owner-number-dropdown" aria-invalid={!!thresholdError}>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -170,10 +189,14 @@ export const ChooseOwner = ({
             </div>
           )}
 
+          {/* Outside the threshold block on purpose: Replace signer has no
+              threshold selector, so the gate below must never be silent. */}
+          {thresholdError && <Typography className="mb-2 text-destructive">{thresholdError}</Typography>}
+
           <Separator bleed="6" />
 
           <TxCardActions>
-            <Button data-testid="add-owner-next-btn" type="submit" disabled={!isValid || resolving}>
+            <Button data-testid="add-owner-next-btn" type="submit" disabled={!isValid || resolving || !!thresholdError}>
               Next
             </Button>
           </TxCardActions>

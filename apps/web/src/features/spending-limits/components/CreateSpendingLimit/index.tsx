@@ -88,7 +88,7 @@ const CreateSpendingLimit = () => {
           <Typography>
             Set a reset time so the allowance automatically refills after the defined time period.
           </Typography>
-          <div className="mt-2 flex w-full items-center justify-between gap-2">
+          <div className="mt-2 flex items-center justify-start gap-2">
             <Label>Time Period</Label>
             <Controller
               rules={{ required: true }}

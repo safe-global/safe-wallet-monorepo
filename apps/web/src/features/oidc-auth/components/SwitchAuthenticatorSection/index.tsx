@@ -1,6 +1,6 @@
-import { Plus, ShieldCheck, Smartphone } from 'lucide-react'
+import { Plus, Smartphone } from 'lucide-react'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { Badge } from '@/components/ui/badge'
+import { Badge, BadgeDot } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
@@ -45,8 +45,8 @@ const SwitchAuthenticatorSection = () => {
           Two-factor authentication
         </Typography>
         {authenticator && (
-          <Badge variant="success">
-            <ShieldCheck />
+          <Badge variant="success" size="status" shape="status">
+            <BadgeDot />
             Active
           </Badge>
         )}

@@ -84,7 +84,7 @@ export const ExecuteForm = ({
   const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
   const gasTooHigh = useGasTooHigh(safeTx)
 
-  // GTF Safe-pays must go via Gelato — WALLET execution would double-charge (network gas + Safe fee).
+  // GTF Safe-pays must go via relayer. WALLET execution would double-charge (network gas + Safe fee).
   // For confirmers, the structural fingerprint of the signed payload is the only source of truth:
   // a stale `gtfPaymentMode === 'safe'` from the user's persisted preference must NOT force the
   // relay path on a tx whose payload doesn't carry the GTF fee fields (would fail in handlePayment).
@@ -146,7 +146,7 @@ export const ExecuteForm = ({
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)
   const [advancedParams, setAdvancedParams] = useAdvancedParams(gasLimit)
 
-  // Safe-pays runs via Gelato (not the wallet), so the simulated `from` doesn't match the
+  // Safe-pays runs via relayer (not the wallet), so the simulated `from` doesn't match the
   // real msg.sender on execTransaction. We still run the check, the inner-call revert that
   // catches issues like spam-token transfers fails regardless of who calls execTransaction,
   // and missing that signal silently in Safe-pays is worse than the simulated-from drift.
@@ -284,7 +284,7 @@ export const ExecuteForm = ({
             Cannot execute a transaction from the Safe account itself, please connect a different account.
           </ErrorMessage>
         ) : relayUnavailableForGtf ? (
-          <ErrorMessage>Safe-paid fees require Gelato relay, which is currently unavailable.</ErrorMessage>
+          <ErrorMessage>Safe-paid fees requires a relayer, which is currently unavailable.</ErrorMessage>
         ) : blockSafePaysFromNestedExecutor ? (
           <ErrorMessage level="info">
             Can&apos;t pay gas from this Safe account when executing through a parent Safe account. Sign the
@@ -318,7 +318,7 @@ export const ExecuteForm = ({
             fee. You can run the simulation yourself from the Safe Shield panel before deciding.
           </div>
 
-          <div className="flex justify-end gap-2 p-6 pt-2">
+          <div className="flex justify-between gap-2 p-6 pt-2">
             <Button data-testid="relay-go-back-btn" variant="ghost" onClick={() => setRelaySimError(undefined)}>
               Back
             </Button>

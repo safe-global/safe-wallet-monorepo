@@ -11,6 +11,7 @@ import { UpsertRecoveryFlowFields, type UpsertRecoveryFlowProps } from '.'
 import AddressBookInput from '@/components/common/AddressBookInput'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { addressIsNotReserved } from '@safe-global/utils/utils/validation'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { RecovererWarning } from './RecovererSmartContractWarning'
@@ -43,6 +44,19 @@ enum AddressType {
   EOA = 'EOA',
   Safe = 'Safe',
   Other = 'Other',
+}
+
+export function _validateRecoverer(recoverer: string, safeAddress: string): string | undefined {
+  // Reserved (zero/sentinel) addresses would break the module on-chain. The
+  // shared GS203 copy names a signer, which a Recoverer is not.
+  const reservedError = addressIsNotReserved('This Recoverer address is not valid')(recoverer)
+  if (reservedError) {
+    return reservedError
+  }
+
+  if (sameAddress(recoverer, safeAddress)) {
+    return 'The Safe account cannot be a Recoverer of itself'
+  }
 }
 
 export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: RecoveryStateItem }): ReactElement {
@@ -95,11 +109,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
     : // Setting up recovery
       recoverer && delay && expiry
 
-  const validateRecoverer = (recoverer: string) => {
-    if (sameAddress(recoverer, safeAddress)) {
-      return 'The Safe account cannot be a Recoverer of itself'
-    }
-  }
+  const validateRecoverer = (recoverer: string) => _validateRecoverer(recoverer, safeAddress)
 
   const validateCustomDelay = (delay: string) => {
     if (!delay) return ''

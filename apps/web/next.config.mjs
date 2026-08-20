@@ -44,6 +44,9 @@ const withPWA = withPWAInit({
     mode: 'production',
   },
   reloadOnOnline: false,
+  // We register the SW ourselves in `useRegisterServiceWorker` so registration
+  // failures are caught and logged instead of thrown uncaught. See WA-2949.
+  register: false,
   publicExcludes: [],
   buildExcludes: [/./],
   customWorkerSrc: SERVICE_WORKERS_PATH,
