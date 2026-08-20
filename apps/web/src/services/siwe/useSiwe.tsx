@@ -57,10 +57,8 @@ export const useSiwe = () => {
       return verifyAuthMutation({ siweDto: { message: signableMessage, signature } })
     } catch (error) {
       setLoading(false)
-      // A declined signature is the dominant path through here and is not an
-      // endpoint failure. `logError` drops the thrown error to keep the ethers
-      // message (which can embed the RPC URL) out of Datadog, so the WA-2950
-      // message-based filter can't see it — classify before discarding it.
+      // `logError` discards the error, so a declined signature must be
+      // classified here or it gets reported as an RPC endpoint failure.
       const isUserOutcome = Boolean(matchUserOutcome(asError(error).message))
       logError(ErrorCodes._640, undefined, isUserOutcome ? undefined : getRpcErrorContext(signingProvider))
       throw error
