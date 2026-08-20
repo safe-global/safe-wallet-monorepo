@@ -3,7 +3,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Typography } from '@/components/ui/typography'
 // eslint-disable-next-line no-restricted-imports -- deep import keeps this lazy chunk from pulling the whole safe-shield barrel (same as HnQueueAssessment)
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
-import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
 import { STATUS_PRESENTATION } from '../statusPresentation'
 
@@ -23,9 +22,10 @@ export type SafenetQueueStatusProps = {
  * check has been observed for the hash.
  */
 export const SafenetQueueStatus = ({ safeTxHash, timestampMs }: SafenetQueueStatusProps): ReactElement | null => {
-  const { publicStatus } = useSafenetDisplayStatus(safeTxHash, timestampMs)
-  if (publicStatus === CheckStatus.UNAVAILABLE) return null
+  const display = useSafenetDisplayStatus(safeTxHash, timestampMs)
+  if (!display) return null
 
+  const { publicStatus } = display
   const { severity, label, copy } = STATUS_PRESENTATION[publicStatus]
 
   return (

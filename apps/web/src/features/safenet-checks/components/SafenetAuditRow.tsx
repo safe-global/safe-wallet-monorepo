@@ -53,12 +53,13 @@ export const SafenetAuditRow = ({
   timestampMs,
   isLast,
 }: SafenetAuditRowProps): ReactElement | null => {
-  const { publicStatus, snapshot } = useSafenetDisplayStatus(safeTxHash, timestampMs)
+  const display = useSafenetDisplayStatus(safeTxHash, timestampMs)
   // The Safenet chain (the chain the attestation landed on), not the Safe's.
-  const safenetChain = useChain(snapshot?.chainId ?? '')
+  const safenetChain = useChain(display?.snapshot.chainId ?? '')
   const isDarkMode = useDarkMode()
 
-  if (!safeTxHash || publicStatus === CheckStatus.UNAVAILABLE) return null
+  if (!safeTxHash || !display) return null
+  const { publicStatus, snapshot } = display
 
   // Link only on BENIGN: it is underivable without a FROST-verified
   // attestation, so "No issues found" and the proof link always travel together.
@@ -69,8 +70,8 @@ export const SafenetAuditRow = ({
   // verifies. The Safenet explorer's hash route is the fallback when the
   // chain config or the attested event is unavailable.
   const attested =
-    snapshot?.events.find((event) => event.type === CheckEventType.ORACLE_ATTESTED) ??
-    snapshot?.events.find((event) => event.type === CheckEventType.PLAIN_ATTESTED)
+    snapshot.events.find((event) => event.type === CheckEventType.ORACLE_ATTESTED) ??
+    snapshot.events.find((event) => event.type === CheckEventType.PLAIN_ATTESTED)
   const attestationTxLink =
     attested && safenetChain ? getExplorerLink(attested.transactionHash, safenetChain.blockExplorerUriTemplate) : null
   const href = attestationTxLink?.href ?? `${SAFENET_EXPLORER_URL}/#/safeTx?chainId=${chainId}&safeTxHash=${safeTxHash}`
@@ -95,7 +96,7 @@ export const SafenetAuditRow = ({
         }
         isLast={isLast}
         // Null while running or when the header read failed — column stays empty.
-        timestamp={snapshot?.attestedAtMs ?? null}
+        timestamp={snapshot.attestedAtMs ?? null}
       />
     </div>
   )

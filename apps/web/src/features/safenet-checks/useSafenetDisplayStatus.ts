@@ -3,22 +3,21 @@ import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hook
 import type { SafenetCheckSnapshot } from '@safe-global/utils/features/safenet-checks'
 
 export type SafenetDisplayStatus = {
-  /** UNAVAILABLE means render nothing — no check observed (or snapshot not yet loaded). */
-  publicStatus: PublicCheckStatus
-  snapshot: SafenetCheckSnapshot | undefined
+  publicStatus: Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>
+  snapshot: SafenetCheckSnapshot
 }
 
 /**
- * The check status as every Safenet surface renders it: without a snapshot the
- * status collapses to UNAVAILABLE — a session-pinned verdict alone never
- * renders, the refetch restores its snapshot within one poll.
+ * The check status as every Safenet surface renders it. `null` means render
+ * nothing: no check observed, or no snapshot yet — a session-pinned verdict
+ * alone never renders, the refetch restores its snapshot within one poll.
  */
 export const useSafenetDisplayStatus = (
   safeTxHash: string | undefined,
   timestampMs?: number | null,
-): SafenetDisplayStatus => {
+): SafenetDisplayStatus | null => {
   const { publicStatus, snapshot } = useSafenetCheck(safeTxHash, timestampMs)
 
-  if (!snapshot) return { publicStatus: CheckStatus.UNAVAILABLE, snapshot: undefined }
+  if (!snapshot || publicStatus === CheckStatus.UNAVAILABLE) return null
   return { publicStatus, snapshot }
 }

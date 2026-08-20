@@ -5,7 +5,6 @@ import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
-import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
 import { STATUS_PRESENTATION } from '../statusPresentation'
 
@@ -25,9 +24,10 @@ export const SafenetChecksSection = (): ReactElement | null => {
       ? txDetails.detailedExecutionInfo.submittedAt
       : undefined
 
-  const { publicStatus } = useSafenetDisplayStatus(submittedAt !== undefined ? safeTxHash : undefined, submittedAt)
-  if (publicStatus === CheckStatus.UNAVAILABLE) return null
+  const display = useSafenetDisplayStatus(submittedAt !== undefined ? safeTxHash : undefined, submittedAt)
+  if (!display) return null
 
+  const { publicStatus } = display
   const { severity, copy } = STATUS_PRESENTATION[publicStatus]
 
   return (
