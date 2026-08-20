@@ -16,7 +16,7 @@ const NoWalletConnectedWarning = () => {
       <AlertDescription>
         You need to connect a wallet to create a Safe account.
         <div className="mt-4">
-          <ConnectWalletButton />
+          <ConnectWalletButton variant="outline" className="text-foreground" />
         </div>
       </AlertDescription>
     </Alert>

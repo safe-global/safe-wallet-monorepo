@@ -33,7 +33,7 @@ const ChainSwitcher = ({
     <Button
       onClick={handleChainSwitch}
       variant={primaryCta ? 'default' : 'outline'}
-      className={cn('min-w-[200px]', fullWidth && 'w-full')}
+      className={cn('min-w-[200px]', !primaryCta && 'text-foreground', fullWidth && 'w-full')}
       size={primaryCta ? 'default' : 'sm'}
       disabled={loading}
     >

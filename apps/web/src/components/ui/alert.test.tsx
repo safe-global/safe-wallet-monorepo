@@ -47,7 +47,8 @@ describe('Alert', () => {
     )
 
     const alert = screen.getByRole('alert')
-    expect(alert).toHaveClass('bg-card', 'text-error-strong')
+    expect(alert).toHaveClass('bg-card', 'text-foreground')
+    expect(alert.className).toContain('*:data-[slot=alert-description]:text-muted-foreground')
     expect(alert.className).toContain('*:[svg]:text-destructive')
   })
 
@@ -59,7 +60,7 @@ describe('Alert', () => {
     )
 
     const alert = screen.getByRole('alert')
-    expect(alert).toHaveClass('bg-error-subtle', 'border-transparent', 'text-error-strong')
+    expect(alert).toHaveClass('bg-error-subtle', 'border-transparent', 'text-foreground')
     expect(alert).not.toHaveClass('bg-card')
   })
 
@@ -72,7 +73,8 @@ describe('Alert', () => {
     )
 
     const alert = screen.getByRole('alert')
-    expect(alert).toHaveClass('bg-card', 'text-warning-strong')
+    expect(alert).toHaveClass('bg-card', 'text-foreground')
+    expect(alert.className).toContain('*:data-[slot=alert-description]:text-muted-foreground')
     expect(alert.className).toContain('*:[svg]:text-warning-accent')
     expect(alert.className).not.toContain('yellow')
   })
@@ -85,7 +87,7 @@ describe('Alert', () => {
     )
 
     const alert = screen.getByRole('alert')
-    expect(alert).toHaveClass('bg-warning-subtle', 'border-transparent', 'text-warning-strong')
+    expect(alert).toHaveClass('bg-warning-subtle', 'border-transparent', 'text-foreground')
     expect(alert).not.toHaveClass('bg-card')
   })
 
