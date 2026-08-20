@@ -1,5 +1,8 @@
 import { render } from '@/tests/test-utils'
-import { UpsertRecoveryFlowSettings } from './UpsertRecoveryFlowSettings'
+import { faker } from '@faker-js/faker'
+import { ZERO_ADDRESS, SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
+import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
+import { UpsertRecoveryFlowSettings, _validateRecoverer } from './UpsertRecoveryFlowSettings'
 import { UpsertRecoveryFlowFields, type UpsertRecoveryFlowProps } from '.'
 import { DAY_IN_SECONDS } from './useRecoveryPeriods'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
@@ -60,6 +63,26 @@ const renderSettings = (data: Partial<UpsertRecoveryFlowProps>) => {
 }
 
 describe('UpsertRecoveryFlowSettings', () => {
+  describe('validateRecoverer (WA-3005 Bucket A)', () => {
+    const safeAddress = faker.finance.ethereumAddress()
+
+    it('rejects the reserved addresses with Recoverer-specific copy, not the signer copy', () => {
+      expect(_validateRecoverer(ZERO_ADDRESS, safeAddress)).toBe('This Recoverer address is not valid')
+      expect(_validateRecoverer(SENTINEL_ADDRESS, safeAddress)).toBe('This Recoverer address is not valid')
+
+      // A Recoverer is not a signer, so the shared GS203 copy would be wrong here
+      expect(_validateRecoverer(ZERO_ADDRESS, safeAddress)).not.toBe(getContractErrorMessage('GS203'))
+    })
+
+    it('rejects the Safe account itself', () => {
+      expect(_validateRecoverer(safeAddress, safeAddress)).toBe('The Safe account cannot be a Recoverer of itself')
+    })
+
+    it('accepts a valid recoverer', () => {
+      expect(_validateRecoverer(faker.finance.ethereumAddress(), safeAddress)).toBeUndefined()
+    })
+  })
+
   it('shows the human-readable label in the review window trigger, not the raw seconds value', () => {
     const { getByTestId } = renderSettings({
       [UpsertRecoveryFlowFields.selectedDelay]: `${DAY_IN_SECONDS * 28}`,

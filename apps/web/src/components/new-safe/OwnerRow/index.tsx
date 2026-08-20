@@ -11,6 +11,8 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import useWallet from '@/hooks/wallets/useWallet'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { addressIsNotCurrentSafe, addressIsNotReserved } from '@safe-global/utils/utils/validation'
+import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import css from './styles.module.css'
 import classNames from 'classnames'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -45,17 +47,23 @@ const OwnerRow = ({
     return Array.from({ length: owners.length }, (_, i) => `${groupName}.${i}`)
   }, [owners, groupName])
 
+  // Blocks the GS203/GS204 on-chain reverts before signing (WA-3005 Bucket A)
   const validateOwnerAddress = useCallback(
     async (address: string) => {
-      if (sameAddress(address, safeAddress)) {
-        return 'The Safe account cannot own itself'
+      const reservedError = addressIsNotReserved()(address)
+      if (reservedError) {
+        return reservedError
       }
-      const owners = getValues('owners')
-      if (owners.filter((owner: NamedAddress) => sameAddress(owner.address, address)).length > 1) {
-        return 'Signer is already added'
+      const currentSafeError = addressIsNotCurrentSafe(safeAddress)(address)
+      if (currentSafeError) {
+        return currentSafeError
+      }
+      const owners: NamedAddress[] = getValues(groupName)
+      if (owners.filter((owner) => sameAddress(owner.address, address)).length > 1) {
+        return getContractErrorMessage('GS204')
       }
     },
-    [getValues, safeAddress],
+    [getValues, groupName, safeAddress],
   )
 
   const { name, ens, resolving } = useAddressResolver(owner.address)
