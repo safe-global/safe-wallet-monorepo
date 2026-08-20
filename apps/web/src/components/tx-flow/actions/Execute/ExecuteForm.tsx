@@ -318,7 +318,7 @@ export const ExecuteForm = ({
             fee. You can run the simulation yourself from the Safe Shield panel before deciding.
           </div>
 
-          <div className="flex justify-end gap-2 p-6 pt-2">
+          <div className="flex justify-between gap-2 p-6 pt-2">
             <Button data-testid="relay-go-back-btn" variant="ghost" onClick={() => setRelaySimError(undefined)}>
               Back
             </Button>

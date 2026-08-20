@@ -78,7 +78,7 @@ export const EditOwnerDialog = ({ chainId, address, name }: { chainId: string; a
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 p-6 pt-0">
+            <div className="flex justify-between gap-2 p-6 pt-0">
               <Button variant="outline" onClick={handleClose}>
                 Cancel
               </Button>

@@ -83,7 +83,7 @@ export const ReportFalseResultModal = ({ open, onClose, requestId }: ReportFalse
         </div>
       </div>
 
-      <div className="flex flex-row justify-end gap-2 p-6 pt-0">
+      <div className="flex flex-row justify-between gap-2 p-6 pt-0">
         <Button variant="ghost" onClick={onClose} disabled={isLoading}>
           Cancel
         </Button>
