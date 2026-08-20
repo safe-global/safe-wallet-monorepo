@@ -41,8 +41,8 @@ type DialogActionsProps = {
  * Owns the button order, variants, sizes and responsive layout so every dialog
  * footer looks and behaves the same: Cancel is `variant="outline"`, Confirm is
  * `default` (or `destructive`), both `size="submit"`. On mobile they stack with
- * the confirm on top; on desktop they sit in a right-aligned row. Reach for this
- * instead of hand-building a Cancel/Confirm row.
+ * the confirm on top; on desktop Cancel sits at the left and Confirm at the
+ * right. Reach for this instead of hand-building a Cancel/Confirm row.
  *
  * Set `confirmCheckWallet` to gate the confirm on the connected wallet, and
  * `confirmTooltip` to explain a disabled confirm for non-wallet reasons.
@@ -105,6 +105,7 @@ const DialogActions = ({
           onClick={onCancel}
           disabled={cancelDisabled || confirmLoading}
           data-testid={cancelTestId}
+          className="sm:mr-auto"
         >
           {cancelLabel}
         </Button>

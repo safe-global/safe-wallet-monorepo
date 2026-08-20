@@ -133,7 +133,7 @@ const AdvancedParamsForm = ({ params, ...props }: AdvancedParamsFormProps) => {
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-end gap-2 px-6 pb-6">
+          <div className="flex justify-between gap-2 px-6 pb-6">
             <Button variant="ghost" onClick={onBack}>
               Back
             </Button>
