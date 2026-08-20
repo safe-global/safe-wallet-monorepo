@@ -134,7 +134,7 @@ exports[`./index.stories LegalDisclaimer 1`] = `
                   I have read and understood the
                    
                   <a
-                    class="underline-offset-4 transition-colors outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 text-primary decoration-primary/40 hover:decoration-current no-underline hover:no-underline"
+                    class="underline-offset-4 transition-colors outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 text-primary decoration-primary/40 hover:decoration-current font-bold no-underline hover:text-muted-foreground hover:no-underline"
                     data-slot="link"
                     data-variant="default"
                     href="/terms"

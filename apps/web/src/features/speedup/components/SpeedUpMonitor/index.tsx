@@ -63,14 +63,14 @@ const SpeedUpMonitor = ({ txId, pendingTx, modalTrigger = 'alertBox' }: SpeedUpM
         signerNonce={pendingTx.signerNonce}
       />
       {modalTrigger === 'alertBox' ? (
-        <Alert variant="warning">
+        <Alert variant="warning" outlined={false}>
           <Rocket className="size-4" />
           <AlertTitle>
             <Typography align="left">Taking too long?</Typography>
           </AlertTitle>
           <AlertDescription>Try to speed up with better gas parameters.</AlertDescription>
           <AlertAction>
-            <Button variant="ghost" onClick={onOpen}>{`Speed up >`}</Button>
+            <Button variant="outline" className="text-foreground" onClick={onOpen}>{`Speed up >`}</Button>
           </AlertAction>
         </Alert>
       ) : (

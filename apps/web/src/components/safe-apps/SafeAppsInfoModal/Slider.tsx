@@ -68,7 +68,7 @@ const Slider: React.FC<SliderProps> = ({ onSlideChange, children, initialStep })
           ))}
         </div>
       </div>
-      <div className="mt-4 flex w-full gap-2 border-t border-border pt-4">
+      <div className="mt-4 flex w-full gap-2 border-border pt-4">
         <Button variant="outline" size="sm" className="min-w-0 flex-1" onClick={prevSlide}>
           {isFirstStep ? 'Cancel' : 'Back'}
         </Button>

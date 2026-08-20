@@ -418,4 +418,40 @@ describe('TokenAmountInput', () => {
       expect(screen.queryByTestId('fiat-display')).not.toBeInTheDocument()
     })
   })
+
+  describe('Error state styling', () => {
+    // The amount FIELD (label + border) must turn destructive on error, but the typed
+    // VALUE text must stay neutral — the invalid `Field` ancestor would otherwise cascade its red
+    // colour onto the value via CSS inheritance (see ui/input.tsx's `text-foreground`).
+    const ErroredWrapper = ({ defaultAmount }: { defaultAmount: string }) => {
+      const methods = useForm({
+        defaultValues: { [TokenAmountFields.tokenAddress]: USDC_ADDRESS, [TokenAmountFields.amount]: defaultAmount },
+      })
+
+      React.useEffect(() => {
+        methods.setError(TokenAmountFields.amount, { type: 'validate', message: 'Insufficient funds' })
+      }, [methods])
+
+      const selectedToken = mockBalances.find((b) => b.tokenInfo.address === USDC_ADDRESS)
+
+      return (
+        <FormProvider {...methods}>
+          <TokenAmountInput balances={mockBalances} selectedToken={selectedToken} maxAmount={0n} />
+        </FormProvider>
+      )
+    }
+
+    it('keeps the typed value neutral while the label goes destructive on an insufficient-funds error', () => {
+      render(<ErroredWrapper defaultAmount="0.0159" />)
+
+      const amountField = screen.getByTestId('token-amount-field')
+
+      // The label swaps in the error message and turns destructive...
+      expect(screen.getByText('Insufficient funds')).toHaveClass('text-destructive')
+      // ...but the typed value stays the normal foreground colour, not red.
+      expect(amountField).toHaveDisplayValue('0.0159')
+      expect(amountField).toHaveClass('text-foreground')
+      expect(amountField.className).not.toContain('text-destructive')
+    })
+  })
 })

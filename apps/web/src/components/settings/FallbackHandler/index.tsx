@@ -77,7 +77,9 @@ export const FallbackHandler = (): ReactElement | null => {
         <Typography>
           The fallback handler adds fallback logic for funtionality that may not be present in the Safe account
           contract. Learn more about the fallback handler{' '}
-          <ExternalLink href={HelpCenterArticle.FALLBACK_HANDLER}>here</ExternalLink>
+          <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.FALLBACK_HANDLER}>
+            here
+          </ExternalLink>
         </Typography>
 
         <div

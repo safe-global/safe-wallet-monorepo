@@ -336,3 +336,6 @@ export const sessionStorageKeys = {
   SAFE_v2__classicViewEnabled: 'SAFE_v2__classicViewEnabled',
   SAFE_v2__privateKeyModulePK: 'SAFE_v2__privateKeyModulePK',
 }
+
+// Follows the chain config's recommendedMasterCopyVersion, so it changes when that does.
+export const safeProxyFactoryLabel = 'SafeProxyFactory 1.5.0'

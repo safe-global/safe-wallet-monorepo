@@ -83,7 +83,7 @@ export const HnQueueAssessmentBanner = ({
   const alertVariant = ALERT_SEVERITIES[severity]
 
   return (
-    <Alert variant={alertVariant}>
+    <Alert variant={alertVariant} outlined={alertVariant !== 'warning'}>
       <SeverityIcon severity={severity} width={20} height={20} />
       <AlertDescription>
         <div className="flex flex-col gap-2">

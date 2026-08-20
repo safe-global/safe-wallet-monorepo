@@ -3,7 +3,7 @@ import InfoOutlinedIcon from '@/public/images/notifications/info.svg'
 
 export const TwapFallbackHandlerWarning = () => {
   return (
-    <Alert variant="warning" className="mb-2">
+    <Alert variant="warning" outlined={false} className="mb-2">
       <InfoOutlinedIcon />
       <AlertDescription>
         <b>Enable TWAPs and submit order.</b>

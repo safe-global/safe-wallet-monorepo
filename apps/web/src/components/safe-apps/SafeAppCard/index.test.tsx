@@ -23,4 +23,14 @@ describe('SafeAppCardContainer', () => {
     expect(onCardClick).not.toHaveBeenCalled()
     expect(container.querySelector('a button')).not.toBeInTheDocument()
   })
+
+  it('isolates its stacking context so content cannot paint over sticky page bars', () => {
+    const { container } = render(
+      <SafeAppCardContainer safeAppUrl="/apps/open">
+        <span>App name</span>
+      </SafeAppCardContainer>,
+    )
+
+    expect(container.querySelector('[data-slot="card"]')).toHaveClass('isolate')
+  })
 })

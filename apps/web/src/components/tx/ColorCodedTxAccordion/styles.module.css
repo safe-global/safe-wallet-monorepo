@@ -30,9 +30,10 @@
   background-color: transparent;
 }
 
+/* Fill is a per-tx-level tint set inline (see TxInfoColors.background); no border, matching the
+   pre-shadcn chip which was a plain tinted label. */
 .methodChip {
-  border-color: color-mix(in srgb, var(--foreground) 12%, transparent);
-  background-color: color-mix(in srgb, var(--background) 72%, transparent);
+  border-color: transparent;
 }
 
 .divider {

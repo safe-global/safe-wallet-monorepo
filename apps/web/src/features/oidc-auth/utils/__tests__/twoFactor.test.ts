@@ -55,14 +55,28 @@ describe('getTwoFactorCoverage', () => {
   it('counts only active members, and only email/Google ones as enabled', () => {
     const members = [oidcMember(1), oidcMember(2), walletMember(3), invitedMember(4), declinedMember(5)]
 
-    expect(getTwoFactorCoverage(members)).toEqual({ enabled: 2, total: 3 })
+    expect(getTwoFactorCoverage(members)).toEqual({ enabled: 2, total: 3, walletOnly: 1 })
   })
 
   it('reports full coverage when every active member signs in with email or Google', () => {
-    expect(getTwoFactorCoverage([oidcMember(1), oidcMember(2)])).toEqual({ enabled: 2, total: 2 })
+    expect(getTwoFactorCoverage([oidcMember(1), oidcMember(2)])).toEqual({ enabled: 2, total: 2, walletOnly: 0 })
   })
 
   it('reports zero coverage for an empty member list', () => {
-    expect(getTwoFactorCoverage([])).toEqual({ enabled: 0, total: 0 })
+    expect(getTwoFactorCoverage([])).toEqual({ enabled: 0, total: 0, walletOnly: 0 })
+  })
+
+  it('counts every wallet member as unable to enable 2FA', () => {
+    const members = [oidcMember(1), walletMember(2), walletMember(3)]
+
+    expect(getTwoFactorCoverage(members)).toEqual({ enabled: 1, total: 3, walletOnly: 2 })
+  })
+
+  it('excludes pending and declined invites from the wallet-only count', () => {
+    expect(getTwoFactorCoverage([invitedMember(1), declinedMember(2)])).toEqual({
+      enabled: 0,
+      total: 0,
+      walletOnly: 0,
+    })
   })
 })
