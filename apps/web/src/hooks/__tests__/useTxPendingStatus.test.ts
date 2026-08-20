@@ -13,8 +13,9 @@ import {
 } from '@/store/pendingTxsSlice'
 import { pendingTxBuilder } from '@/tests/builders/pendingTx'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { renderHook } from '@/tests/test-utils'
+import { act, renderHook } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
+import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
 import type { JsonRpcProvider } from 'ethers'
 
 const TEST_CHAIN_ID = '11155111'
@@ -24,6 +25,8 @@ describe('useTxMonitor', () => {
   let mockProvider
   beforeEach(() => {
     jest.clearAllMocks()
+    // The pending txs slice is persisted, so leftovers would be rehydrated into the next test
+    localStorage.clear()
 
     jest.spyOn(useChainIdHook, 'default').mockReturnValue(TEST_CHAIN_ID)
 
@@ -346,5 +349,190 @@ describe('useTxPendingStatuses', () => {
 
     expect(setPendingTx).not.toHaveBeenCalled()
     expect(clearPendingTx).toHaveBeenCalled()
+  })
+})
+
+describe('useTxMonitor with live transaction events', () => {
+  const TX_ID = 'multisig_0xabc'
+  const FIRST_HASH = '0x1111111111111111111111111111111111111111111111111111111111111111'
+  const SPED_UP_HASH = '0x2222222222222222222222222222222222222222222222222222222222222222'
+  const signerAddress = faker.finance.ethereumAddress()
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    // The pending txs slice is persisted, so leftovers would be rehydrated into the next test
+    localStorage.clear()
+
+    jest.spyOn(useChainIdHook, 'default').mockReturnValue(TEST_CHAIN_ID)
+    jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValue(jest.fn() as unknown as JsonRpcProvider)
+    jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+      safe: { ...extendedSafeInfoBuilder().build(), chainId: TEST_CHAIN_ID },
+      safeAddress: TEST_SAFE_ADDRESS,
+      safeError: undefined,
+      safeLoaded: true,
+      safeLoading: false,
+    })
+  })
+
+  const dispatchExecuting = () =>
+    act(() => {
+      txDispatch(TxEvent.EXECUTING, {
+        nonce: 1,
+        txId: TX_ID,
+        chainId: TEST_CHAIN_ID,
+        safeAddress: TEST_SAFE_ADDRESS,
+      })
+    })
+
+  const dispatchProcessing = (txHash: string) =>
+    act(() => {
+      txDispatch(TxEvent.PROCESSING, {
+        nonce: 1,
+        txId: TX_ID,
+        chainId: TEST_CHAIN_ID,
+        safeAddress: TEST_SAFE_ADDRESS,
+        txHash,
+        signerNonce: 7,
+        signerAddress,
+        txType: 'SafeTx',
+        gasLimit: '50000',
+      })
+    })
+
+  it('starts watching a tx already tracked as SIGNING when it starts processing', () => {
+    // The production repro: `SIGNATURE_PROPOSED` (sign-then-execute) or a rehydrated persisted entry
+    // already holds this txId, so executing it replaces that entry instead of adding one. Both
+    // dispatches land in the same tick, exactly like `dispatchTxExecution` does.
+    const mockWaitForTx = jest.spyOn(txMonitor, 'waitForTx').mockResolvedValue(undefined)
+
+    const pendingTxs: PendingTxsState = {
+      [TX_ID]: {
+        chainId: TEST_CHAIN_ID,
+        safeAddress: TEST_SAFE_ADDRESS,
+        nonce: 1,
+        status: PendingStatus.SIGNING,
+        signerAddress,
+      },
+    }
+
+    renderHook(() => useTxPendingStatuses(), { initialReduxState: { pendingTxs } })
+
+    act(() => {
+      txDispatch(TxEvent.EXECUTING, {
+        nonce: 1,
+        txId: TX_ID,
+        chainId: TEST_CHAIN_ID,
+        safeAddress: TEST_SAFE_ADDRESS,
+      })
+      txDispatch(TxEvent.PROCESSING, {
+        nonce: 1,
+        txId: TX_ID,
+        chainId: TEST_CHAIN_ID,
+        safeAddress: TEST_SAFE_ADDRESS,
+        txHash: FIRST_HASH,
+        signerNonce: 7,
+        signerAddress,
+        txType: 'SafeTx',
+        gasLimit: '50000',
+      })
+    })
+
+    expect(mockWaitForTx).toHaveBeenCalledTimes(1)
+    expect(mockWaitForTx).toHaveBeenCalledWith(
+      expect.anything(),
+      [TX_ID],
+      FIRST_HASH,
+      TEST_SAFE_ADDRESS,
+      signerAddress,
+      7,
+      1,
+      TEST_CHAIN_ID,
+    )
+  })
+
+  it('starts watching a tx whose processing status only arrives in a later render', () => {
+    // Not the ordinary execute path: `dispatchTxExecution` emits EXECUTING and PROCESSING in the
+    // same tick, and React batches them into one render, so from an empty store the entry is
+    // already PROCESSING by the time the effect runs. This covers callers that let a render happen
+    // in between, leaving the entry at SUBMITTING for one render.
+    const mockWaitForTx = jest.spyOn(txMonitor, 'waitForTx').mockResolvedValue(undefined)
+
+    renderHook(() => useTxPendingStatuses())
+
+    dispatchExecuting()
+    expect(mockWaitForTx).not.toHaveBeenCalled()
+
+    dispatchProcessing(FIRST_HASH)
+
+    expect(mockWaitForTx).toHaveBeenCalledTimes(1)
+    expect(mockWaitForTx).toHaveBeenCalledWith(
+      expect.anything(),
+      [TX_ID],
+      FIRST_HASH,
+      TEST_SAFE_ADDRESS,
+      signerAddress,
+      7,
+      1,
+      TEST_CHAIN_ID,
+    )
+  })
+
+  it('does not watch the same attempt twice', () => {
+    const mockWaitForTx = jest.spyOn(txMonitor, 'waitForTx').mockResolvedValue(undefined)
+
+    renderHook(() => useTxPendingStatuses())
+
+    dispatchProcessing(FIRST_HASH)
+    dispatchProcessing(FIRST_HASH)
+
+    expect(mockWaitForTx).toHaveBeenCalledTimes(1)
+  })
+
+  it('watches a tx again after its pending entry was cleared and it re-enters processing', () => {
+    // What a txId is watched by is only remembered while it is pending: a final event clears the
+    // entry, so the same txId re-entering PROCESSING must be watched again even on the same hash.
+    const mockWaitForTx = jest.spyOn(txMonitor, 'waitForTx').mockResolvedValue(undefined)
+
+    renderHook(() => useTxPendingStatuses())
+
+    dispatchProcessing(FIRST_HASH)
+    expect(mockWaitForTx).toHaveBeenCalledTimes(1)
+
+    act(() => {
+      txDispatch(TxEvent.FAILED, {
+        nonce: 1,
+        txId: TX_ID,
+        chainId: TEST_CHAIN_ID,
+        safeAddress: TEST_SAFE_ADDRESS,
+        error: new Error('Transaction not found'),
+      })
+    })
+
+    dispatchProcessing(FIRST_HASH)
+
+    expect(mockWaitForTx).toHaveBeenCalledTimes(2)
+  })
+
+  it('watches the new hash and stops the replaced one when the tx is sped up', () => {
+    const mockWaitForTx = jest.spyOn(txMonitor, 'waitForTx').mockResolvedValue(undefined)
+    const mockStopWatching = jest.spyOn(SimpleTxWatcher.getInstance(), 'stopWatchingTxHash').mockResolvedValue()
+
+    renderHook(() => useTxPendingStatuses())
+
+    dispatchProcessing(FIRST_HASH)
+    dispatchProcessing(SPED_UP_HASH)
+
+    expect(mockStopWatching).toHaveBeenCalledWith(FIRST_HASH)
+    expect(mockWaitForTx).toHaveBeenCalledTimes(2)
+    expect(mockWaitForTx).toHaveBeenLastCalledWith(
+      expect.anything(),
+      [TX_ID],
+      SPED_UP_HASH,
+      TEST_SAFE_ADDRESS,
+      signerAddress,
+      7,
+      1,
+      TEST_CHAIN_ID,
+    )
   })
 })
