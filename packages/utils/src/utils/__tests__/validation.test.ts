@@ -8,6 +8,7 @@ import {
   isValidURL,
   uniqueAddress,
   addressIsNotReserved,
+  validateThreshold,
 } from '@safe-global/utils/utils/validation'
 import { ZERO_ADDRESS, SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
 import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
@@ -25,6 +26,34 @@ describe('validation', () => {
 
     it('accepts a normal address', () => {
       expect(addressIsNotReserved()('0x1234567890123456789012345678901234567890')).toBeUndefined()
+    })
+  })
+
+  describe('validateThreshold (WA-3005 Bucket A / GS201-GS202)', () => {
+    it('accepts a threshold within bounds', () => {
+      expect(validateThreshold(1, 3)).toBeUndefined()
+      expect(validateThreshold(3, 3)).toBeUndefined()
+    })
+
+    it('rejects a threshold above the signer count with the shared GS201 copy', () => {
+      expect(validateThreshold(4, 3)).toBe(getContractErrorMessage('GS201'))
+    })
+
+    it('rejects a threshold below 1 with the shared GS202 copy', () => {
+      expect(validateThreshold(0, 3)).toBe(getContractErrorMessage('GS202'))
+      expect(validateThreshold(-1, 3)).toBe(getContractErrorMessage('GS202'))
+    })
+
+    it('coerces string thresholds, as the recovery flow keeps them as text', () => {
+      expect(validateThreshold('2', 3)).toBeUndefined()
+      expect(validateThreshold('4', 3)).toBe(getContractErrorMessage('GS201'))
+      expect(validateThreshold('0', 3)).toBe(getContractErrorMessage('GS202'))
+    })
+
+    it('rejects non-integer and unparseable thresholds', () => {
+      expect(validateThreshold(1.5, 3)).toBe(getContractErrorMessage('GS202'))
+      expect(validateThreshold('', 3)).toBe(getContractErrorMessage('GS202'))
+      expect(validateThreshold('abc', 3)).toBe(getContractErrorMessage('GS202'))
     })
   })
 

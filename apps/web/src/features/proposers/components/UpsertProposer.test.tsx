@@ -15,6 +15,7 @@ import { useDelegatorSelection } from '../hooks/useDelegatorSelection'
 import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import { useDelegatesPostDelegateV2Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
+import { ZERO_ADDRESS, SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
 
 jest.mock('@/hooks/wallets/useWallet')
 jest.mock('../hooks/useDelegatorSelection')
@@ -179,6 +180,28 @@ describe('UpsertProposer signing logic', () => {
 
       mockUseAddDelegateV2.mockReturnValue([addDelegateV2, {} as never])
       useDelegatesPostDelegateV1Mutation.mockReturnValue([jest.fn(), {}])
+    })
+
+    it.each([
+      ['the zero address', ZERO_ADDRESS],
+      ['the sentinel address', SENTINEL_ADDRESS],
+    ])('shows an error and keeps submit disabled for %s', async (_label, reservedAddress) => {
+      // Both contain no hex letters, so they pass checksum validation and used
+      // to reach the backend as "Error adding proposer" (WA-3005 Bucket A)
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
+
+      const { getByLabelText, getByTestId, findByText } = render(
+        <UpsertProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
+      )
+
+      act(() => {
+        fireEvent.change(getByLabelText(/Address/i), { target: { value: reservedAddress } })
+        fireEvent.change(getByLabelText(/Name/i), { target: { value: 'Reserved' } })
+      })
+
+      expect(await findByText('This proposer address is not valid')).toBeInTheDocument()
+      expect(getByTestId('submit-proposer-btn')).toBeDisabled()
+      expect(addDelegateV2).not.toHaveBeenCalled()
     })
 
     it('shows an error and keeps submit disabled when the address is a smart contract', async () => {
