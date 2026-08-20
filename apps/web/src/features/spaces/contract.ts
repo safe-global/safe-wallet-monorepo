@@ -17,7 +17,6 @@ import type SpaceSafeAccounts from './components/SafeAccounts'
 import type SpaceAddressBook from './components/SpaceAddressBook'
 import type SpaceBreadcrumbs from './components/SpaceBreadcrumbs'
 import type SpacesList from './components/SpacesList'
-import type SpaceSidebar from './components/SpaceSidebar'
 import type SpaceSettings from './components/SpaceSettings'
 import type SpaceSafeContextMenu from './components/SafeAccounts/SpaceSafeContextMenu'
 import type SendTransactionButton from './components/SafeAccounts/SendTransactionButton'
@@ -52,7 +51,6 @@ export interface SpacesContract {
   SpaceAddressBook: typeof SpaceAddressBook
   SpaceBreadcrumbs: typeof SpaceBreadcrumbs
   SpacesList: typeof SpacesList
-  SpaceSidebar: typeof SpaceSidebar
   SpaceSettings: typeof SpaceSettings
   SpaceSafeContextMenu: typeof SpaceSafeContextMenu
   SendTransactionButton: typeof SendTransactionButton
