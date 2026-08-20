@@ -5,7 +5,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EditIcon from '@/public/images/common/edit.svg'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import css from './styles.module.css'
 import DeleteSpaceDialog from '../SpaceSettings/DeleteSpaceDialog'
 import UpdateSpaceDialog from '../SpaceSettings/UpdateSpaceDialog'
 import Track from '@/components/common/Track'
@@ -38,7 +37,7 @@ const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
             <Button
               variant="ghost"
               size="icon-sm"
-              className={`${css.spaceActions} text-muted-foreground`}
+              className="text-muted-foreground"
               onClick={(e) => e.stopPropagation()}
               aria-label="Open space actions"
               data-testid="space-card-context-menu-button"

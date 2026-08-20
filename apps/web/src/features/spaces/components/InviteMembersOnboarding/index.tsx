@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import {
   OnboardingLayout,
   StepCounter,
@@ -79,6 +79,7 @@ const InviteMembersOnboarding = (): ReactElement => {
 
       {error && (
         <Alert variant="destructive">
+          <AlertSeverityIcon variant="destructive" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}

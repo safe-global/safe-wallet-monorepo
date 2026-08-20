@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Typography } from '@/components/ui/typography'
 import { Spinner } from '@/components/ui/spinner'
+import { overlayVariants } from '@/components/ui/overlay'
 import { cn } from '@/utils/cn'
 
 // Types
@@ -232,7 +233,9 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
 
   return (
     <>
-      <div aria-hidden onClick={onClose} className="fixed inset-0 z-[1300] bg-black/20 dark:bg-black/40" />
+      {/* Same scrim as every dialog/sheet/drawer; only the layer differs (the chat panel above
+          sits at 1301, below the overlay layer the modal surfaces share). */}
+      <div aria-hidden onClick={onClose} className={cn(overlayVariants({ transition: 'mount' }), 'z-[1300]')} />
       <div
         className="fixed bottom-0 left-0 z-[1301] h-screen max-h-screen w-screen max-w-[100vw] origin-bottom-left animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-150 sm:bottom-[72px] sm:left-6 sm:h-auto sm:max-h-[calc(100vh-88px)] sm:w-[var(--chat-w)] sm:max-w-[var(--chat-w)]"
         style={{ ['--chat-w' as string]: `${chatWidth}px` }}

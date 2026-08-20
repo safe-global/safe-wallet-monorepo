@@ -1,6 +1,8 @@
 import { useIsMultichainSafe } from '../../hooks/useIsMultichainSafe'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
-import { ActionCard } from '@/components/common/ActionCard'
+import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { trackEvent } from '@/services/analytics'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useAppSelector } from '@/store'
 import { selectCurrency, selectUndeployedSafes, useGetMultipleSafeOverviewsQuery } from '@/store/slices'
@@ -75,13 +77,27 @@ export const InconsistentSignerSetupWarning = () => {
   }
 
   return (
-    <ActionCard
-      severity="warning"
-      title="You have different signers across different networks."
-      content="This could break approvals and you may risk losing control of this Safe. First, switch to the affected network and review the signer setup for this Safe."
-      action={{ label: 'Review signers', onClick: handleReviewSigners }}
-      trackingEvent={ATTENTION_PANEL_EVENTS.REVIEW_SIGNERS}
-      actionTestId="review-signers-btn"
-    />
+    <Alert variant="warning" outlined={false}>
+      <AlertSeverityIcon variant="warning" />
+      <AlertTitle className="font-bold">You have different signers across different networks.</AlertTitle>
+      <AlertDescription>
+        This could break approvals and you may risk losing control of this Safe. First, switch to the affected network
+        and review the signer setup for this Safe.
+        <div className="mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-foreground"
+            data-testid="review-signers-btn"
+            onClick={() => {
+              trackEvent(ATTENTION_PANEL_EVENTS.REVIEW_SIGNERS)
+              handleReviewSigners()
+            }}
+          >
+            Review signers
+          </Button>
+        </div>
+      </AlertDescription>
+    </Alert>
   )
 }

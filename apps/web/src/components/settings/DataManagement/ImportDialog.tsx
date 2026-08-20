@@ -1,5 +1,5 @@
 import { undeployedSafesSlice } from '@/features/counterfactual/store'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import type { ReactElement, Dispatch, SetStateAction } from 'react'
 
@@ -18,7 +18,6 @@ import { showNotification } from '@/store/notificationsSlice'
 import { visitedSafesSlice } from '@/store/visitedSafesSlice'
 
 import css from './styles.module.css'
-import { TriangleAlert } from 'lucide-react'
 
 export const ImportDialog = ({
   onClose,
@@ -121,7 +120,7 @@ export const ImportDialog = ({
             />
             {!isDisabled && (
               <Alert variant="warning" outlined={false}>
-                <TriangleAlert />
+                <AlertSeverityIcon variant="warning" />
                 <AlertTitle className="font-bold">Overwrite your current data?</AlertTitle>
                 <AlertDescription>
                   This action will overwrite your currently added Safe accounts, address book and settings with those

@@ -1,13 +1,13 @@
-import { ShieldCheck, Wallet, type LucideIcon } from 'lucide-react'
+import { Wallet, type LucideIcon } from 'lucide-react'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { Badge } from '@/components/ui/badge'
+import { Badge, BadgeDot } from '@/components/ui/badge'
 import { getMemberTwoFactorStatus, MemberTwoFactorStatus } from '../../utils/twoFactor'
 
 const BADGE_BY_STATUS: Record<
   MemberTwoFactorStatus,
-  { label: string; variant: 'success' | 'secondary'; icon?: LucideIcon }
+  { label: string; variant: 'success' | 'secondary'; icon?: LucideIcon; dot?: boolean }
 > = {
-  [MemberTwoFactorStatus.ACTIVE]: { label: 'Active', variant: 'success', icon: ShieldCheck },
+  [MemberTwoFactorStatus.ACTIVE]: { label: 'Active', variant: 'success', dot: true },
   [MemberTwoFactorStatus.WALLET_SIGN_IN]: { label: 'Wallet sign-in', variant: 'secondary', icon: Wallet },
   [MemberTwoFactorStatus.INVITE_PENDING]: { label: 'Invite pending', variant: 'secondary' },
 }
@@ -23,10 +23,11 @@ const MemberTwoFactorBadge = ({ member }: { member: MemberDto }) => {
     return null
   }
 
-  const { label, variant, icon: Icon } = BADGE_BY_STATUS[status]
+  const { label, variant, icon: Icon, dot } = BADGE_BY_STATUS[status]
 
   return (
-    <Badge variant={variant} data-testid="member-2fa-badge">
+    <Badge variant={variant} size="status" shape="status" data-testid="member-2fa-badge">
+      {dot && <BadgeDot />}
       {Icon && <Icon />}
       {label}
     </Badge>

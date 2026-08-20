@@ -4,6 +4,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/utils/cn'
 import { usePortalContainer } from '@/components/ui/ShadcnProvider'
+import { overlayVariants } from '@/components/ui/overlay'
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from 'lucide-react'
 
 /**
@@ -145,18 +146,19 @@ function SelectContent({
     | 'collisionBoundary'
     | 'collisionAvoidance'
   > & {
-    /** Dims the rest of the page while the select is open (same look as the dialog overlay). */
+    /**
+     * Dims the rest of the page while the select is open (the shared overlay scrim).
+     *
+     * Do NOT set this on a select rendered inside a dialog or sheet. The scrim paints above that
+     * surface, so it blurs the very form the dropdown belongs to — and the dialog's own backdrop
+     * already handles the dimming, the scroll lock and the outside click.
+     */
     showBackdrop?: boolean
   }) {
   const portalContainer = usePortalContainer()
   return (
     <SelectPrimitive.Portal container={portalContainer}>
-      {showBackdrop && (
-        <SelectPrimitive.Backdrop
-          data-slot="select-backdrop"
-          className="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-starting-style:opacity-0 data-ending-style:opacity-0 bg-backdrop fixed inset-0 z-[var(--z-overlay)]"
-        />
-      )}
+      {showBackdrop && <SelectPrimitive.Backdrop data-slot="select-backdrop" className={overlayVariants()} />}
       <SelectPrimitive.Positioner
         side={side}
         sideOffset={sideOffset}
