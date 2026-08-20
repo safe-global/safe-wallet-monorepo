@@ -56,6 +56,29 @@ describe('DatePickerInput', () => {
     expect(screen.getByDisplayValue('09/03/2026')).toBeInTheDocument()
   })
 
+  it('explains a seeded date that is out of range before the field is touched (WA-3231)', async () => {
+    // A bookmarked transaction-history URL can carry a date the previous picker allowed but this one
+    // does not. Without the mount validation the form is invalid with nothing on screen saying why.
+    renderInput(new Date('1999-01-01T00:00:00'))
+
+    expect(await screen.findByText('Date is out of range')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByTestId('form-valid')).toHaveTextContent('false'))
+  })
+
+  it('stays quiet when the seeded date is inside the range', async () => {
+    renderInput(new Date('2020-03-09T00:00:00'))
+
+    await waitFor(() => expect(screen.getByTestId('form-valid')).toHaveTextContent('true'))
+    expect(screen.queryByText('Date is out of range')).not.toBeInTheDocument()
+  })
+
+  it('stays quiet on mount when there is no seeded date', async () => {
+    renderInput()
+
+    await waitFor(() => expect(screen.getByTestId('form-valid')).toHaveTextContent('true'))
+    expect(screen.queryByText('Invalid date')).not.toBeInTheDocument()
+  })
+
   it('opens the calendar grid when the trigger is clicked', async () => {
     renderInput()
     await userEvent.click(screen.getByRole('button', { name: /start date/i }))

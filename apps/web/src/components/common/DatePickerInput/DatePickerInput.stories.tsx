@@ -99,6 +99,26 @@ export const CalendarOpen: Story = {
   },
 }
 
+/**
+ * A date seeded from outside the input, for example from a bookmarked filter URL, that falls outside
+ * the selectable range. The field says so on mount rather than leaving the form quietly unsubmittable.
+ */
+export const SeededOutOfRange: Story = {
+  args: {
+    name: 'staleDate',
+    label: 'From',
+  },
+  decorators: [
+    (Story) => (
+      <div className="w-[300px]">
+        <FormWrapper defaultValues={{ staleDate: new Date(1999, 0, 1) }}>
+          <Story />
+        </FormWrapper>
+      </div>
+    ),
+  ],
+}
+
 export const AllowFutureDates: Story = {
   args: {
     name: 'expiryDate',

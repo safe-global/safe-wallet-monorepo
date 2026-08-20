@@ -164,12 +164,23 @@ const DatePickerField = ({
   disableFuture: boolean
   name: string
 }) => {
+  const { trigger } = useFormContext()
   const value: Date | null = field.value ?? null
   const inputId = `${name}-date`
   const fieldRef = useRef<HTMLDivElement>(null)
   const [text, setText] = useState(() => toText(value))
   const [isOpen, setIsOpen] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
+
+  // A value seeded from outside the input (a date in the URL query) is never "touched", so
+  // react-hook-form marks the form invalid without filling in the field's error — leaving a disabled
+  // submit button and nothing on screen explaining it. Validate once on mount so the field speaks.
+  const hasSeededValue = useRef(value !== null)
+  useEffect(() => {
+    if (hasSeededValue.current) {
+      trigger(name)
+    }
+  }, [name, trigger])
 
   // Resync only when the value changed outside the input (calendar pick, form reset), so a
   // half-typed entry is never reformatted under the cursor.
@@ -191,11 +202,13 @@ const DatePickerField = ({
 
   // Never hand the calendar an invalid date — react-day-picker formats it and throws
   const selectedDate = value && isValid(value) ? value : undefined
-  const disabledDays = useMemo(() => (disableFuture ? { after: startOfDay(new Date()) } : undefined), [disableFuture])
 
   // Bounds the month/year dropdowns, and lets the nav arrows disable at the ends instead of paging
   // into months where every day is disabled.
   const { start: startMonth, end: endMonth } = useMemo(() => getSelectableRange(disableFuture), [disableFuture])
+
+  // The same bound the validate rule uses, so the calendar can never offer a day it would reject.
+  const disabledDays = useMemo(() => (disableFuture ? { after: endMonth } : undefined), [disableFuture, endMonth])
 
   const handleTextChange = (raw: string) => {
     const masked = _toMaskedText(raw)
