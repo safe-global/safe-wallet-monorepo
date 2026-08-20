@@ -29,6 +29,7 @@ const Popup = ({ children, open, onClose, anchorEl, modal = true }: PopupProps):
       }}
     >
       <PopoverContent
+        showBackdrop
         anchor={anchorEl ?? undefined}
         align="center"
         side="bottom"

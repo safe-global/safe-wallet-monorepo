@@ -1,6 +1,6 @@
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactNode } from 'react'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/ui/typography'
 import semverSatisfies from 'semver/functions/satisfies'
@@ -63,6 +63,7 @@ export function _UpdateSafe({
         </Typography>
       ) : (
         <Alert variant="destructive">
+          <AlertSeverityIcon variant="destructive" />
           <AlertTitle>Unknown contract</AlertTitle>
           <AlertDescription>
             The target contract for this upgrade is unknown. Verify the transaction data and the target contract address
@@ -72,7 +73,8 @@ export function _UpdateSafe({
       )}
 
       {showQueueWarning && (
-        <Alert variant="warning">
+        <Alert variant="warning" outlined={false}>
+          <AlertSeverityIcon variant="warning" />
           <AlertTitle>This upgrade will invalidate all queued transactions!</AlertTitle>
           <AlertDescription>
             You have {queueSize} unexecuted transaction{maybePlural(parseInt(queueSize))}. Please make sure to execute

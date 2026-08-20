@@ -4,7 +4,7 @@ import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATE
 import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Typography } from '@/components/ui/typography'
 import { SearchInput } from '@/components/ui/search-input'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Info } from 'lucide-react'
 import SimilarityConfirmDialog from '@/components/common/TrustedSafesModal/SimilarityConfirmDialog'
@@ -95,7 +95,8 @@ const SelectSafesOnboarding = (): ReactElement => {
       {!wallet && <ConnectWalletHint testId="select-safes-connect-wallet-button" />}
 
       {hasNoSafes ? (
-        <Alert className="shrink-0">
+        <Alert variant="info" className="shrink-0">
+          <AlertSeverityIcon variant="info" />
           <AlertDescription>You don&apos;t have any safes yet</AlertDescription>
         </Alert>
       ) : (
@@ -151,6 +152,7 @@ const SelectSafesOnboarding = (): ReactElement => {
 
           {error && (
             <Alert variant="destructive" className="shrink-0">
+              <AlertSeverityIcon variant="destructive" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}

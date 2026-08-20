@@ -210,9 +210,9 @@ export const FileListCard = ({
       <div className={css.content}>
         <ul className="m-0 flex list-none flex-col p-0">
           {items.map((item, i) => (
-            <li key={i} className="flex items-start p-0">
-              <span className={css.listIcon}>
-                <FileIcon className="size-4 fill-none" />
+            <li key={i} className="flex items-start p-1">
+              <span className="mt-0.5 mr-6 shrink-0">
+                <FileIcon className="block size-4 fill-none" />
               </span>
               <div className="flex min-w-0 flex-col">
                 <span className="text-sm text-foreground">{item.primary}</span>

@@ -21,6 +21,7 @@ export const buildSnapshot = (over: Partial<SafenetCheckSnapshot> = {}): Safenet
   deadlineBlock: null,
   headBlock: null,
   attestation: UNVERIFIED_ATTESTATION,
+  attestedAtMs: null,
   events: [],
   ...over,
 })
@@ -29,6 +30,7 @@ export const buildSnapshot = (over: Partial<SafenetCheckSnapshot> = {}): Safenet
 export const buildBenignSnapshot = (over: Partial<SafenetCheckSnapshot> = {}): SafenetCheckSnapshot =>
   buildSnapshot({
     status: CheckStatus.BENIGN,
+    attestedAtMs: 1_785_749_985_000,
     attestation: { status: AttestationVerificationStatus.VERIFIED, signatureId: hexHash(), message: hexHash() },
     ...over,
   })

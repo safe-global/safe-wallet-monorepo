@@ -10,6 +10,7 @@ Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide r
 - When making a new component, create a Storybook story file for it
 - Use theme variables from vars.css instead of hard-coded CSS values
 - Build UI from the shadcn/ui primitives in `@/components/ui/*` (Tailwind); MUI/Emotion are removed
+- **Never hand-roll a modal scrim.** Anything that dims the page behind it — a dialog, alert dialog, sheet, drawer, backdrop-ed select — renders `overlayVariants()` from [`@/components/ui/overlay`](src/components/ui/overlay.ts). Tint lives in the `--backdrop` token, the blur and the stacking layer live in that one cva. `overlay.test.tsx` fails if a surface drifts. Anchored surfaces (popovers, dropdowns, menus, tooltips) have no scrim by design.
 - **Prefer a component's variant/size prop over one-off `className` overrides.** If you find yourself hand-rolling padding, height, border color, or hover on a `Button`/`Input`/etc., there is probably a variant for it — and if a pattern recurs, add a variant rather than repeating the classes. Watch the tokens: `--input` is white in light mode, so a visible field border needs `border-border`, not `border-input`. The `Button` and `Input` stories are the canonical variant reference; see [.storybook/AGENTS.md](.storybook/AGENTS.md#component-variants-over-custom-styling).
 
 ## Feature Architecture Import Rules

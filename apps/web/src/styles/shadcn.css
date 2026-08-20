@@ -23,7 +23,9 @@
   --popover: #ffffff;
   --popover-foreground: #0a0a0a;
   --dialog: #ffffff;
-  --backdrop: rgba(99, 102, 105, 0.75);
+  /* The one modal scrim (see components/ui/overlay.ts). A light tint carries the blur;
+     the old MUI-era rgba(99, 102, 105, 0.75) was opaque enough to hide it entirely. */
+  --backdrop: rgba(0, 0, 0, 0.1);
   --primary: #171717;
   --primary-foreground: #fafafa;
   --secondary: #f5f5f5;
@@ -71,6 +73,10 @@
   /* Figma error/background (alert node 1255-183763) — the brand token drifted to #ffe6ea, so the
      Figma hex is pinned here. Dark mode below keeps the brand tint (no dark spec in the file). */
   --error-subtle: #fff4f6;
+  /* Obra DS Badge status dots (nodes 4033-8332 / 4033-8415). One value per status, shared by both
+     themes: in dark the nearest theme tokens drift off the DS hue. */
+  --badge-dot-success: #22c55e; /* green-500 */
+  --badge-dot-warning: #eab308; /* yellow-500 */
   --z-sidebar: 1300;
   --z-overlay: 1400;
   /* A dialog opened from inside another overlay (e.g. Rename from a modal or an open dropdown). Both
@@ -91,7 +97,8 @@
   --popover: #171717;
   --popover-foreground: #f5f5f5;
   --dialog: #1c1c1c;
-  --backdrop: rgba(99, 102, 105, 0.75);
+  /* Same scrim in dark mode: the blur, not the tint, is what separates the surface. */
+  --backdrop: rgba(0, 0, 0, 0.1);
   --primary: #12ff80;
   --primary-foreground: #0a0a0a;
   --secondary: #262626;
@@ -184,6 +191,8 @@
   /* Icon accent on the warning tint — brighter than the `warning-strong` ink, mirroring how
      `destructive` pairs its icon accent with `error-strong` text. */
   --color-warning-accent: var(--warning-accent);
+  --color-badge-dot-success: var(--badge-dot-success);
+  --color-badge-dot-warning: var(--badge-dot-warning);
   --color-info-subtle: var(--color-info-background);
   --color-info-muted: var(--color-info-light);
   --color-info-strong: var(--color-info-dark);

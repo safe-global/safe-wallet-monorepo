@@ -70,11 +70,24 @@ export type AuditRowProps = {
   actionType: ActionType
   address?: string
   name?: string | null
+  /** Actor label (e.g. a service name, optionally linked) when there is no address to copy. */
+  actor?: ReactNode
   timestamp?: number | null
   isLast?: boolean
+  /** CSS color for the timeline icon (e.g. 'var(--color-error-main)'); defaults to primary. */
+  iconColor?: string
 }
 
-export const AuditRow = ({ label, actionType, address, name, timestamp, isLast }: AuditRowProps): ReactElement => {
+export const AuditRow = ({
+  label,
+  actionType,
+  address,
+  name,
+  actor,
+  timestamp,
+  isLast,
+  iconColor,
+}: AuditRowProps): ReactElement => {
   const displayText = address ? name || shortenAddress(address) : undefined
   const [copied, handleCopy] = useCopyToClipboard(address)
 
@@ -90,14 +103,17 @@ export const AuditRow = ({ label, actionType, address, name, timestamp, isLast }
 
   const ActionIcon = ACTION_ICONS[actionType]
   const showActor = displayText && address
-  const showDash = !showActor && !isLast
+  const showDash = !showActor && !actor && !isLast
 
   return (
     <div className={css.auditRow}>
       {/* Column 1: Timeline icon with vertical connector */}
       <div className={css.timelineCol}>
         <div className={css.timelineIcon}>
-          <ActionIcon className="size-3.5 text-[var(--color-primary-main)]" />
+          <ActionIcon
+            className="size-3.5 text-[var(--color-primary-main)]"
+            style={iconColor ? { color: iconColor } : undefined}
+          />
         </div>
         {!isLast && <div className={css.timelineLine} />}
       </div>
@@ -107,7 +123,7 @@ export const AuditRow = ({ label, actionType, address, name, timestamp, isLast }
         <Typography variant="paragraph-small" className="truncate font-semibold leading-[1.4]">
           {label}
         </Typography>
-        {(showActor || showDash) && (
+        {(showActor || actor || showDash) && (
           <div className={css.actorRow}>
             {showActor ? (
               <Tooltip>
@@ -128,6 +144,10 @@ export const AuditRow = ({ label, actionType, address, name, timestamp, isLast }
                 />
                 <TooltipContent side="top">{copied ? 'Copied' : 'Click to copy address'}</TooltipContent>
               </Tooltip>
+            ) : actor ? (
+              <Typography variant="paragraph-mini" className="text-muted-foreground">
+                By {actor}
+              </Typography>
             ) : (
               <Typography variant="paragraph-mini" className="text-muted-foreground">
                 —

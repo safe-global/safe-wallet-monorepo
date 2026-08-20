@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./HnModal.stories Default 1`] = `
 <div
@@ -20,7 +20,7 @@ exports[`./HnModal.stories Default 1`] = `
       />
       <div
         aria-hidden="true"
-        class="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-starting-style:opacity-0 data-ending-style:opacity-0 bg-backdrop fixed inset-0 z-[var(--z-overlay)]"
+        class="bg-backdrop supports-backdrop-filter:backdrop-blur-xs fixed inset-0 z-[var(--z-overlay)] duration-100 data-open:animate-in data-closed:animate-out data-open:fade-in-0 data-closed:fade-out-0 data-starting-style:opacity-0 data-ending-style:opacity-0 data-closed:pointer-events-none"
         data-base-ui-inert=""
         data-open=""
         data-slot="dialog-overlay"
