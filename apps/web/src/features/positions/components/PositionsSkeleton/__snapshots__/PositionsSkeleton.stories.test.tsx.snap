@@ -123,7 +123,7 @@ exports[`./PositionsSkeleton.stories Default 1`] = `
                 style="--accordion-panel-height: auto; --accordion-panel-width: auto;"
               >
                 <div
-                  class="[&_:where(a:hover)]:text-foreground h-(--accordion-panel-height) data-ending-style:h-0 data-starting-style:h-0 [&_a]:underline [&_a]:underline-offset-3 [&_p:not(:last-child)]:mb-4 px-6 pb-4 pt-0"
+                  class="[&_:where(a:hover)]:text-foreground h-(--accordion-panel-height) data-ending-style:h-0 data-starting-style:h-0 [&_a]:underline [&_a]:underline-offset-3 [&>p:not(:last-child)]:mb-4 px-6 pb-4 pt-0"
                 >
                   <div>
                     <div

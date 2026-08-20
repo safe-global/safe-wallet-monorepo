@@ -21,7 +21,7 @@ const EXECUTED_AT = 1_755_507_200_000
 
 const OWNER = '0x1234567890123456789012345678901234567890'
 
-const atWidth = (width: number) => () => (
+const AtWidth = ({ width }: { width: number }) => (
   <div className="bg-card rounded-lg py-4" style={{ width, maxWidth: '100%' }}>
     <AuditLog>
       <AuditLogHeader />
@@ -40,16 +40,16 @@ const atWidth = (width: number) => () => (
 )
 
 /** Wide panel: label/actor and timestamp share one line. */
-export const Default: Story = { render: atWidth(720) }
+export const Default: Story = { render: () => <AtWidth width={720} /> }
 
 /** The 33.3% side column on a desktop window. */
-export const SideColumn: Story = { render: atWidth(454) }
+export const SideColumn: Story = { render: () => <AtWidth width={454} /> }
 
 /** A 390px phone: the column still has room to keep the timestamp on the right. */
-export const Mobile: Story = { render: atWidth(310) }
+export const Mobile: Story = { render: () => <AtWidth width={310} /> }
 
 /** A 375px phone — the widest column that stacks, where label and address would start truncating. */
-export const AtBreakpoint: Story = { render: atWidth(295) }
+export const AtBreakpoint: Story = { render: () => <AtWidth width={295} /> }
 
 /** The 33.3% side column at a mid-size desktop window, where it collapses hardest. */
-export const NarrowSideColumn: Story = { render: atWidth(220) }
+export const NarrowSideColumn: Story = { render: () => <AtWidth width={220} /> }

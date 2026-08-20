@@ -1,12 +1,7 @@
 import type { OrderStatuses } from '@safe-global/store/gateway/types'
 import type { ReactElement } from 'react'
-import CheckIcon from '@/public/images/common/circle-check.svg'
-import ClockIcon from '@/public/images/common/clock.svg'
-import BlockIcon from '@/public/images/common/block.svg'
-import SignatureIcon from '@/public/images/common/document_signature.svg'
-import CircleIPartialFillcon from '@/public/images/common/circle-partial-fill.svg'
+import { CircleCheck, CircleX, Clock, Contrast, FileSignature, type LucideIcon } from 'lucide-react'
 import TxStatusChip, { type TxStatusChipProps } from '@/components/transactions/TxStatusChip'
-import type { SvgrComponent } from '@/components/common/icons/types'
 
 type CustomOrderStatuses = OrderStatuses | 'partiallyFilled'
 type Props = {
@@ -16,45 +11,45 @@ type Props = {
 type StatusProps = {
   label: string
   color: TxStatusChipProps['color']
-  icon: SvgrComponent
+  icon: LucideIcon
 }
 
 const statusMap: Record<CustomOrderStatuses, StatusProps> = {
   presignaturePending: {
     label: 'Execution needed',
     color: 'warning',
-    icon: SignatureIcon,
+    icon: FileSignature,
   },
   fulfilled: {
     label: 'Filled',
     color: 'success',
-    icon: CheckIcon,
+    icon: CircleCheck,
   },
   open: {
     label: 'Open',
     color: 'warning',
-    icon: ClockIcon,
+    icon: Clock,
   },
   cancelled: {
     label: 'Cancelled',
     color: 'error',
-    icon: BlockIcon,
+    icon: CircleX,
   },
   expired: {
     label: 'Expired',
     color: 'primary',
-    icon: ClockIcon,
+    icon: Clock,
   },
   partiallyFilled: {
     label: 'Partially filled',
     color: 'success',
-    icon: CircleIPartialFillcon,
+    icon: Contrast,
   },
   // CGW claims it can return unknown status, but in reality I've never seen it
   unknown: {
     label: 'Unknown',
     color: 'error',
-    icon: BlockIcon,
+    icon: CircleX,
   },
 }
 const StatusLabel = (props: Props): ReactElement => {
@@ -63,7 +58,7 @@ const StatusLabel = (props: Props): ReactElement => {
 
   return (
     <TxStatusChip color={color}>
-      <Icon className="size-5" />
+      <Icon />
       {label}
     </TxStatusChip>
   )
