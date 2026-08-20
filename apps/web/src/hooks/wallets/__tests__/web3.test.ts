@@ -71,3 +71,18 @@ describe('createSafeAppsWeb3Provider endpoint attribution', () => {
     expect(JSON.stringify(context)).not.toContain(SAFE_APPS_INFURA_TOKEN)
   })
 })
+
+describe('missing Infura token', () => {
+  it('builds no provider rather than one with an empty token in its URL', async () => {
+    jest.resetModules()
+    jest.doMock('@safe-global/utils/config/constants', () => ({ INFURA_TOKEN: '', SAFE_APPS_INFURA_TOKEN: '' }))
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const { createWeb3ReadOnly: create, createSafeAppsWeb3Provider: createSafeApps } = await import('../web3')
+
+    expect(create(mockChain(infuraUri))).toBeUndefined()
+    expect(createSafeApps(mockChain(infuraUri))).toBeUndefined()
+
+    warn.mockRestore()
+  })
+})
