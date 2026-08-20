@@ -5,7 +5,7 @@ import { dispatchRecoveryExecution } from '@/features/recovery/services'
 import useWallet from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import TxSubmitError from '@/components/tx/TxSubmitError'
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import { TxModalContext } from '@/components/tx-flow'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { RecoveryFeature } from '@/features/recovery'
@@ -82,7 +82,7 @@ const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
             <EthHashInfo address={item.executor} showName showCopyButton hasExplorer />
           </FieldsGrid>
 
-          <Separator className="-mx-6" />
+          <Separator bleed="6" />
 
           <RecoveryDescription item={item} />
 
@@ -93,9 +93,9 @@ const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
           {error && <TxSubmitError error={error} />}
         </div>
 
-        <Separator className="-mx-6 my-7" />
+        <Separator bleed="6" className="my-7" />
 
-        <div className="flex items-center">
+        <TxCardActions>
           {/* Submit button, also available to non-owner role members */}
           <CheckWallet allowNonOwner>
             {(isOk) => (
@@ -110,7 +110,7 @@ const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
               </Button>
             )}
           </CheckWallet>
-        </div>
+        </TxCardActions>
       </form>
     </TxCard>
   )

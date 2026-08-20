@@ -39,7 +39,14 @@
   bottom: var(--space-3);
 }
 
-.step > :global(.txCardRoot:first-child) {
+/* The step's first card butts up against the header above it. Some steps wrap their card in a
+   `<form>` (ReviewSpendingLimitTx, RecoverAccountFlowSetup), so the rule has to reach through that
+   one level too — otherwise those steps keep their rounded top and `my-4`, and read as a separate
+   card floating below the header. Deliberately NOT a descendant combinator: `:first-child` is
+   evaluated against the element's own parent, so a loose version would square the top of any card
+   that happens to be first inside an arbitrary wrapper deeper in the step. */
+.step > :global(.txCardRoot:first-child),
+.step > form:first-child > :global(.txCardRoot:first-child) {
   border-top-right-radius: 0;
   border-top-left-radius: 0;
   margin-top: 0;

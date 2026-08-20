@@ -329,7 +329,7 @@ export const ExecuteForm = ({
         </ModalDialog>
 
         <div className="pt-6">
-          <Separator className={commonCss.nestedDivider} />
+          <Separator bleed="6" />
         </div>
 
         <div className="txCardActions">

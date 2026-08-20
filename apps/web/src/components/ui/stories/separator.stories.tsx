@@ -14,6 +14,10 @@ const meta = {
       control: 'select',
       options: ['horizontal', 'vertical'],
     },
+    bleed: {
+      control: 'select',
+      options: ['none', '3', '4', '6'],
+    },
   },
 } satisfies Meta<typeof Separator>
 
@@ -50,6 +54,21 @@ export const AllVariants: Story = {
           <span className="text-sm">Right</span>
         </div>
       </div>
+    </div>
+  ),
+}
+
+/** Each `bleed` value cancels the matching container padding so the rule spans edge to edge. */
+export const Bleed: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '400px' }}>
+      {(['none', '3', '4', '6'] as const).map((bleed) => (
+        <div key={bleed} className="border-border bg-card rounded-md border px-6 py-4">
+          <p className="text-sm mb-2">bleed=&quot;{bleed}&quot; in a px-6 container</p>
+          <Separator bleed={bleed} />
+          <p className="text-sm mt-2">Only bleed=&quot;6&quot; reaches both edges here.</p>
+        </div>
+      ))}
     </div>
   ),
 }

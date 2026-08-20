@@ -20,7 +20,6 @@ import { TOOLTIP_TITLES } from '../../common/constants'
 import Track from '@/components/common/Track'
 import type { RecoveryStateItem } from '@/features/recovery'
 
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import css from './styles.module.css'
 import NumberField from '@/components/common/NumberField'
 import { getDelay, isCustomDelaySelected } from './utils'
@@ -283,7 +282,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
             </Collapsible>
           </div>
 
-          <Separator className={commonCss.nestedDivider} />
+          <Separator bleed="6" />
 
           <div data-testid="warning-section" className="my-4 flex items-start gap-2 pl-2">
             <Checkbox

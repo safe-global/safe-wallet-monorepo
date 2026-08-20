@@ -107,6 +107,13 @@
   padding-left: var(--tx-details-edge-inset, 0px);
 }
 
+/* Just the rule, for blocks that already own their horizontal padding. `.multiSend` cannot be
+   reused there: its `padding-left` is declared later in this file, so it silently zeroes whatever
+   padding the block brought — including a Tailwind `px-*` utility. */
+.blockBorder {
+  border-bottom: 1px solid var(--border);
+}
+
 .buttons {
   display: flex;
   flex-wrap: wrap;

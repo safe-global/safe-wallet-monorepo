@@ -4,6 +4,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { Typography } from '@/components/ui/typography'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import TxSectionTitle from '@/components/tx-flow/common/TxSectionTitle'
 
 const MAX_NOTE_LENGTH = 60
 
@@ -34,9 +35,7 @@ export default function TxNoteInput({ onChange }: { onChange: (note: string) => 
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-row items-end gap-2">
-        <Typography variant="h4">Note</Typography>
-      </div>
+      <TxSectionTitle>Note</TxSectionTitle>
 
       <Controller
         name="note"

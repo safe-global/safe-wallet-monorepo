@@ -6,12 +6,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useContext, useEffect } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import { ChangeThresholdFlowFieldNames } from '@/components/tx-flow/flows/ChangeThreshold'
 import type { ChangeThresholdFlowProps } from '@/components/tx-flow/flows/ChangeThreshold'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { TOOLTIP_TITLES } from '@/components/tx-flow/common/constants'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { createUpdateThresholdTx } from '@/services/tx/tx-sender'
@@ -107,9 +106,9 @@ export const ChooseThreshold = () => {
           />
         </div>
 
-        <Separator className={commonCss.nestedDivider} />
+        <Separator bleed="6" />
 
-        <div className="flex items-center p-2">
+        <TxCardActions>
           <Button
             data-testid="threshold-next-btn"
             type="submit"
@@ -121,7 +120,7 @@ export const ChooseThreshold = () => {
           >
             Next
           </Button>
-        </div>
+        </TxCardActions>
       </form>
     </TxCard>
   )

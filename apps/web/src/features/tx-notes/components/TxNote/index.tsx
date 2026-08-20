@@ -4,6 +4,7 @@ import { Typography } from '@/components/ui/typography'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import TxSectionTitle from '@/components/tx-flow/common/TxSectionTitle'
 
 export default function TxNote({ txDetails }: { txDetails: TransactionDetails | undefined }) {
   const note = txDetails?.note
@@ -14,7 +15,7 @@ export default function TxNote({ txDetails }: { txDetails: TransactionDetails | 
 
   return (
     <div>
-      <Typography variant="h4" className="flex items-center">
+      <TxSectionTitle>
         Note
         <Tooltip>
           <TooltipTrigger
@@ -34,7 +35,7 @@ export default function TxNote({ txDetails }: { txDetails: TransactionDetails | 
             </div>
           </TooltipContent>
         </Tooltip>
-      </Typography>
+      </TxSectionTitle>
 
       <Typography
         data-testid="tx-note"

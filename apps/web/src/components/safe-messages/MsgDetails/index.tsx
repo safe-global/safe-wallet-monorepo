@@ -84,12 +84,12 @@ const MsgDetails = ({ msg }: { msg: MessageItem }): ReactElement => {
         </div>
 
         {msg.preparedSignature && (
-          <div className={classNames(txDetailsCss.txSummary, txDetailsCss.multiSend)}>
+          <div className={classNames(txDetailsCss.txSummary, txDetailsCss.blockBorder)}>
             <TxDataRow title="Prepared signature:">{generateDataRowValue(msg.preparedSignature, 'hash')}</TxDataRow>
           </div>
         )}
 
-        <div className={classNames(txDetailsCss.multiSend, 'px-4')}>
+        <div className={classNames(txDetailsCss.blockBorder, 'px-4')}>
           <Accordion
             multiple
             defaultValue={msg.confirmations

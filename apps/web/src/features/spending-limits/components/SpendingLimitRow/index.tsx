@@ -1,5 +1,6 @@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
+import { Field, FieldLabel } from '@/components/ui/field'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/utils/cn'
 import { Controller, useFormContext } from 'react-hook-form'
@@ -43,10 +44,10 @@ const SpendingLimitRow = ({
   }, [resetField])
 
   return (
-    <div className="flex flex-col">
-      <Label className="mb-1">
+    <Field>
+      <FieldLabel>
         Send as <span className="text-destructive">*</span>
-      </Label>
+      </FieldLabel>
       <Controller
         rules={{ required: true }}
         control={control}
@@ -121,7 +122,7 @@ const SpendingLimitRow = ({
           </RadioGroup>
         )}
       />
-    </div>
+    </Field>
   )
 }
 

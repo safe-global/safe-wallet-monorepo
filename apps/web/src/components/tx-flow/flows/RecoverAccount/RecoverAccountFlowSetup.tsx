@@ -82,7 +82,7 @@ export function RecoverAccountFlowSetup({
   return (
     <FormProvider {...formMethods}>
       <form onSubmit={formMethods.handleSubmit(onSubmit)} className={commonCss.form}>
-        <TxCard sx={{ mt: 0, borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+        <TxCard>
           <div>
             <Typography variant="h4" className="mb-2">
               Add signer(s)
@@ -133,7 +133,7 @@ export function RecoverAccountFlowSetup({
             Add new signer
           </Button>
 
-          <Separator className={commonCss.nestedDivider} />
+          <Separator bleed="6" />
 
           <div>
             <Typography variant="h4" className="mb-2">
@@ -190,7 +190,7 @@ export function RecoverAccountFlowSetup({
             </Alert>
           )}
 
-          <Separator className={commonCss.nestedDivider} />
+          <Separator bleed="6" />
 
           <TxCardActions className="!mt-0">
             <Button data-testid="next-btn" variant="default" type="submit" className="mt-2" disabled={isSameSetup}>

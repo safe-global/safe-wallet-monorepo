@@ -20,7 +20,7 @@ import { getTxOptions } from '@/utils/transactions'
 import { MODALS_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import { TxModalContext } from '@/components/tx-flow'
 import { type SubmitCallback } from '@/components/tx/shared/types'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
@@ -125,7 +125,7 @@ const ReviewSpendingLimitTx = ({
 
   return (
     <form onSubmit={handleSubmit}>
-      <TxCard sx={{ mt: 0, borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+      <TxCard>
         <Typography variant="paragraph-small">
           Spending limit transactions only appear in the interface once they are successfully processed and indexed.
           Pending transactions can only be viewed in your signer wallet application or under your wallet address on a
@@ -148,7 +148,7 @@ const ReviewSpendingLimitTx = ({
           You&apos;re about to create a transaction and will need to confirm it with your currently connected wallet.
         </Typography>
 
-        <div className="flex p-2">
+        <TxCardActions>
           <CheckWallet allowNonOwner checkNetwork={!submitDisabled}>
             {(isOk) => (
               <Button type="submit" disabled={!isOk || submitDisabled}>
@@ -156,7 +156,7 @@ const ReviewSpendingLimitTx = ({
               </Button>
             )}
           </CheckWallet>
-        </div>
+        </TxCardActions>
       </TxCard>
     </form>
   )

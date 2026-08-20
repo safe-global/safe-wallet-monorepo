@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`ReviewTransaction should display a confirmation screen 1`] = `
 <div>
@@ -209,7 +209,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
       </div>
       <div
         aria-orientation="horizontal"
-        class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch mt-4 -mx-6"
+        class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:-mx-6 data-[orientation=horizontal]:w-[calc(100%+(2*(var(--spacing)*6)))] mt-4"
         data-orientation="horizontal"
         data-slot="separator"
         role="separator"

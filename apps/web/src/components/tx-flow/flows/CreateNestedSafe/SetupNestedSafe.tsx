@@ -10,7 +10,7 @@ import { useContext, type ReactElement } from 'react'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import AddIcon from '@/public/images/common/add.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useAddressBook from '@/hooks/useAddressBook'
 import NameInput from '@/components/common/NameInput'
@@ -22,7 +22,6 @@ import { validateDecimalLength, validateLimitedAmount } from '@safe-global/utils
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import { useMnemonicPrefixedSafeName } from '@/hooks/useMnemonicName'
 import css from '@/components/tx-flow/flows/CreateNestedSafe/styles.module.css'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 
 export type SetupNestedSafeForm = {
@@ -96,13 +95,13 @@ export function SetUpNestedSafe(): ReactElement {
 
           <AssetInputs name={SetupNestedSafeFormFields.assets} />
 
-          <Separator className={commonCss.nestedDivider} />
+          <Separator bleed="6" />
 
-          <div className="flex items-center p-2">
+          <TxCardActions>
             <Button data-testid="next-button" type="submit">
               Next
             </Button>
-          </div>
+          </TxCardActions>
         </form>
       </FormProvider>
     </TxCard>
