@@ -17,6 +17,7 @@ const Disclaimer = () => (
       href={HelpCenterArticle.CONFLICTING_TRANSACTIONS}
       title="Why are transactions with the same nonce conflicting with each other?"
       noIcon
+      className="font-bold hover:text-muted-foreground"
     >
       Why did this happen?
     </ExternalLink>
