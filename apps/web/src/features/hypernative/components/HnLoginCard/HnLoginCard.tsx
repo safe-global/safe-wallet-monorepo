@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Alert, AlertAction, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Typography } from '@/components/ui/typography'
 import { useHypernativeOAuth } from '../../hooks/useHypernativeOAuth'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -34,14 +34,12 @@ export const HnLoginCard = (): ReactElement | null => {
 
   if (showLoginCard) {
     return (
-      <Alert variant="warning" outlined={false} className="min-w-[303px] items-center px-4 py-0">
-        <AlertIcon className="size-4 text-[var(--color-warning-main)]" />
+      <Alert variant="warning" outlined={false} className="flex w-auto min-w-[303px] items-center gap-3 px-4 py-0">
+        <AlertIcon className="size-4 translate-y-0! text-[var(--color-warning-main)]" />
         <AlertDescription>Hypernative not connected.</AlertDescription>
-        <AlertAction>
-          <ExternalLink href="#" onClick={handleLogin}>
-            Log in
-          </ExternalLink>
-        </AlertAction>
+        <ExternalLink className="font-bold hover:text-muted-foreground" href="#" onClick={handleLogin}>
+          Log in
+        </ExternalLink>
       </Alert>
     )
   }
