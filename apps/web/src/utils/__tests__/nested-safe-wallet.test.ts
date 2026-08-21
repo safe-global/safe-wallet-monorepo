@@ -126,4 +126,39 @@ describe('getNestedWallet send', () => {
 
     expect(getCreatedTxData()).toBe(concat([APPROVE_HASH_SELECTOR, approvedHash]))
   })
+
+  it('proposes the parent tx with the verified child tx attached', async () => {
+    const proposeTxMock = jest.requireMock('@/services/tx/proposeTransaction').default as jest.Mock
+    const approvedHash = deriveEnvelopeSafeTxHash(childEnvelope)
+    const data = concat([APPROVE_HASH_SELECTOR, approvedHash, encodeNestedTxPayload([childEnvelope])])
+
+    await sendTransaction(data)
+
+    expect(proposeTxMock).toHaveBeenCalledWith(
+      safeInfo.chainId,
+      PARENT_SAFE,
+      SIGNER,
+      expect.anything(),
+      expect.anything(),
+      undefined,
+      childEnvelope,
+    )
+  })
+
+  it('proposes the parent tx without a child tx when there is no envelope', async () => {
+    const proposeTxMock = jest.requireMock('@/services/tx/proposeTransaction').default as jest.Mock
+    const data = concat([APPROVE_HASH_SELECTOR, keccak256('0x01')])
+
+    await sendTransaction(data)
+
+    expect(proposeTxMock).toHaveBeenCalledWith(
+      safeInfo.chainId,
+      PARENT_SAFE,
+      SIGNER,
+      expect.anything(),
+      expect.anything(),
+      undefined,
+      undefined,
+    )
+  })
 })

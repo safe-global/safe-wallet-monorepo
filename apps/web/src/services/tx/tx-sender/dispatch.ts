@@ -37,12 +37,8 @@ import { createExistingTx } from './create'
 import { getRelaySimulationError } from '@safe-global/utils/services/relayErrors'
 
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
-import semverSatisfies from 'semver/functions/satisfies'
 import { concat, dataLength } from 'ethers'
-import { encodeNestedTxPayload } from '../nestedTxEnvelope'
-
-// The envelope hash derivation (EIP-712 domain with chainId) only holds for Safes >= 1.3.0
-const NESTED_TX_ENVELOPE_SAFE_VERSION = '>=1.3.0'
+import { encodeNestedTxPayload, supportsNestedTxEnvelope, type NestedTxEnvelope } from '../nestedTxEnvelope'
 
 /**
  * Propose a transaction
@@ -55,6 +51,7 @@ export const dispatchTxProposal = async ({
   safeTx,
   txId,
   origin,
+  nestedTransaction,
 }: {
   chainId: string
   safeAddress: string
@@ -62,13 +59,15 @@ export const dispatchTxProposal = async ({
   safeTx: SafeTransaction
   txId?: string
   origin?: string
+  // Verified child tx of a nested approveHash, proposed alongside the parent tx
+  nestedTransaction?: NestedTxEnvelope
 }): Promise<TransactionDetails> => {
   const safeSDK = getAndValidateSafeSDK()
   const safeTxHash = await safeSDK.getTransactionHash(safeTx)
 
   let proposedTx: TransactionDetails | undefined
   try {
-    proposedTx = await proposeTx(chainId, safeAddress, sender, safeTx, safeTxHash, origin)
+    proposedTx = await proposeTx(chainId, safeAddress, sender, safeTx, safeTxHash, origin, nestedTransaction)
   } catch (error) {
     if (txId) {
       txDispatch(TxEvent.SIGNATURE_PROPOSE_FAILED, { txId, chainId, safeAddress, error: asError(error) })
@@ -143,7 +142,7 @@ const ZK_SYNC_ON_CHAIN_SIGNATURE_GAS_LIMIT = 4_500_000
  */
 export const dispatchOnChainSigning = async (
   safeTx: SafeTransaction,
-  txId: string,
+  txId: string | undefined,
   provider: Eip1193Provider,
   chainId: SafeState['chainId'],
   signerAddress: string,
@@ -151,10 +150,13 @@ export const dispatchOnChainSigning = async (
   isSafeSigner: boolean,
   executed: boolean,
   safeVersion?: SafeState['version'],
-) => {
+): Promise<string> => {
   const sdk = await getSafeSDKWithSigner(provider)
   const safeTxHash = await sdk.getTransactionHash(safeTx)
-  const eventParams = { txId, nonce: safeTx.data.nonce, chainId, safeAddress }
+  // The envelope flow skips the CGW proposal, so there is no service-assigned id yet; derive the
+  // deterministic id CGW will use once it learns about the tx
+  const id = txId ?? `multisig_${safeAddress}_${safeTxHash}`
+  const eventParams = { txId: id, nonce: safeTx.data.nonce, chainId, safeAddress }
 
   const options =
     chainId === chains.zksync || chainId === chains.lens
@@ -168,7 +170,7 @@ export const dispatchOnChainSigning = async (
     // A parent Safe signer queues this approveHash as an unsigned proposal; append the full child
     // tx as a self-verifying envelope so receivers can verify and display it without a service
     // lookup. approveHash(bytes32) ABI decoding ignores trailing calldata, so appending is safe.
-    if (isSafeSigner && safeVersion && semverSatisfies(safeVersion, NESTED_TX_ENVELOPE_SAFE_VERSION)) {
+    if (isSafeSigner && supportsNestedTxEnvelope(safeVersion)) {
       const payload = encodeNestedTxPayload([{ chainId, safe: safeAddress, ...safeTx.data }])
       encodedApproveHashTx = concat([encodedApproveHashTx, payload])
       console.info('[NestedTxEnvelope] appended child tx envelope to approveHash calldata', {
@@ -179,7 +181,6 @@ export const dispatchOnChainSigning = async (
     } else if (isSafeSigner) {
       console.info('[NestedTxEnvelope] NOT appending envelope, child Safe version does not qualify', {
         safeVersion: safeVersion ?? 'unknown',
-        required: NESTED_TX_ENVELOPE_SAFE_VERSION,
       })
     }
 
@@ -212,7 +213,8 @@ export const dispatchOnChainSigning = async (
   }
 
   // Until the on-chain signature is/has been executed, the safeTx is not
-  // signed so we don't return it
+  // signed so we only return its id
+  return id
 }
 
 export const dispatchSafeTxSpeedUp = async (
@@ -315,7 +317,7 @@ export const dispatchTxExecution = async (
   chainId: string,
   safeTx: SafeTransaction,
   txOptions: TransactionOptions,
-  txId: string,
+  txId: string | undefined,
   provider: Eip1193Provider,
   signerAddress: string,
   safeAddress: string,
@@ -323,7 +325,10 @@ export const dispatchTxExecution = async (
   executed: boolean,
 ): Promise<string> => {
   const sdk = await getSafeSDKWithSigner(provider)
-  const eventParams = { txId, nonce: safeTx.data.nonce, chainId, safeAddress }
+  // A Safe executor's tx is never proposed to CGW, so no service-assigned id exists yet; derive
+  // the deterministic id CGW will use once it learns about the tx
+  const id = txId ?? `multisig_${safeAddress}_${await sdk.getTransactionHash(safeTx)}`
+  const eventParams = { txId: id, nonce: safeTx.data.nonce, chainId, safeAddress }
 
   const signerNonce = txOptions.nonce ?? (await getUserNonce(signerAddress))
 
@@ -363,7 +368,7 @@ export const dispatchTxExecution = async (
       method: 'execTransaction',
     })
 
-    return result.hash
+    return id
   }
 
   txDispatch(TxEvent.EXECUTING, { ...eventParams })
@@ -378,7 +383,7 @@ export const dispatchTxExecution = async (
     txType: 'SafeTx',
   })
 
-  return result.hash
+  return id
 }
 
 export const dispatchBatchExecution = async (

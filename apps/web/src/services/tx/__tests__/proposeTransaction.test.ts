@@ -283,4 +283,92 @@ describe('proposeTx', () => {
     expect(capturedRequest.baseGas).toBeDefined()
     expect(capturedRequest.gasPrice).toBeDefined()
   })
+
+  it('should include the nested transaction in the request when given', async () => {
+    let capturedRequest: any
+
+    server.use(
+      http.post(`${GATEWAY_URL}/v1/chains/${CHAIN_ID}/transactions/${SAFE_ADDRESS}/propose`, async ({ request }) => {
+        capturedRequest = await request.json()
+        return HttpResponse.json({
+          txId: '123',
+          safeAddress: SAFE_ADDRESS,
+          txInfo: {
+            type: 'Custom',
+            to: { value: '0x123' },
+            dataSize: '100',
+            isCancellation: false,
+          },
+          txStatus: 'AWAITING_CONFIRMATIONS',
+        })
+      }),
+    )
+
+    const tx = createMockSafeTransaction({
+      to: '0x999',
+      value: '0',
+      data: '0xd4d9bdcd',
+    })
+
+    const nestedChildTx = {
+      chainId: CHAIN_ID,
+      safe: '0x0000000000000000000000000000000000000def',
+      nonce: 7,
+      to: '0x0000000000000000000000000000000000000456',
+      value: '1000000000000000000',
+      data: '0xabcdef',
+      operation: 0,
+      safeTxGas: '0',
+      baseGas: '0',
+      gasPrice: '0',
+      gasToken: '0x0000000000000000000000000000000000000000',
+      refundReceiver: '0x0000000000000000000000000000000000000000',
+    }
+
+    await proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH, undefined, nestedChildTx)
+
+    expect(capturedRequest.nestedTransaction).toEqual({
+      to: '0x0000000000000000000000000000000000000456',
+      value: '1000000000000000000',
+      data: '0xabcdef',
+      operation: 0,
+      safeTxGas: '0',
+      baseGas: '0',
+      gasPrice: '0',
+      gasToken: '0x0000000000000000000000000000000000000000',
+      refundReceiver: '0x0000000000000000000000000000000000000000',
+      nonce: '7',
+    })
+  })
+
+  it('should omit the nested transaction field when none is given', async () => {
+    let capturedRequest: any
+
+    server.use(
+      http.post(`${GATEWAY_URL}/v1/chains/${CHAIN_ID}/transactions/${SAFE_ADDRESS}/propose`, async ({ request }) => {
+        capturedRequest = await request.json()
+        return HttpResponse.json({
+          txId: '123',
+          safeAddress: SAFE_ADDRESS,
+          txInfo: {
+            type: 'Custom',
+            to: { value: '0x123' },
+            dataSize: '100',
+            isCancellation: false,
+          },
+          txStatus: 'AWAITING_CONFIRMATIONS',
+        })
+      }),
+    )
+
+    const tx = createMockSafeTransaction({
+      to: '0x999',
+      value: '0',
+      data: '0xd4d9bdcd',
+    })
+
+    await proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH)
+
+    expect(capturedRequest).not.toHaveProperty('nestedTransaction')
+  })
 })

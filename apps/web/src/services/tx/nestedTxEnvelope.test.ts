@@ -7,6 +7,7 @@ import {
   deriveEnvelopeSafeTxHash,
   encodeNestedTxPayload,
   splitApproveHashCalldata,
+  supportsNestedTxEnvelope,
   verifyAndStripNestedTxCalldata,
   verifyNestedTxPayload,
 } from './nestedTxEnvelope'
@@ -38,6 +39,22 @@ describe('nestedTxEnvelope', () => {
   it('magic constant equals bytes4(keccak256("SafeNestedChildTxV1"))', () => {
     expect(NESTED_TX_MAGIC).toBe(dataSlice(keccak256(toUtf8Bytes('SafeNestedChildTxV1')), 0, 4))
     expect(NESTED_TX_MAGIC).toBe('0xfb4e87b0')
+  })
+
+  describe('supportsNestedTxEnvelope', () => {
+    it.each(['1.3.0', '1.3.0+L2', '1.4.1'])('returns true for Safe version %s', (version) => {
+      expect(supportsNestedTxEnvelope(version)).toBe(true)
+    })
+
+    it.each(['1.0.0', '1.1.1', '1.2.0'])('returns false for Safe version %s', (version) => {
+      expect(supportsNestedTxEnvelope(version)).toBe(false)
+    })
+
+    it('returns false for unknown versions', () => {
+      expect(supportsNestedTxEnvelope(null)).toBe(false)
+      expect(supportsNestedTxEnvelope(undefined)).toBe(false)
+      expect(supportsNestedTxEnvelope('')).toBe(false)
+    })
   })
 
   describe('encode/decode round-trip', () => {
