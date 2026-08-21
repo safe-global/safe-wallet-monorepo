@@ -68,7 +68,7 @@ export const HnQueueAssessmentBanner = ({
               onClick={handleLogin}
               href="#"
               noIcon={false}
-              className="inline-flex self-start font-bold hover:text-[var(--color-primary-light)]!"
+              className="inline-flex self-start hover:text-[var(--color-primary-light)]!"
             >
               Log in
             </ExternalLink>
@@ -97,7 +97,7 @@ export const HnQueueAssessmentBanner = ({
               trackEvent(HYPERNATIVE_EVENTS.SECURITY_REPORT_CLICKED)
             }}
             href={assessmentUrl}
-            className="inline-flex self-start underline"
+            className="inline-flex self-start"
           >
             <Typography variant="paragraph-small-bold">View details</Typography>
           </ExternalLink>

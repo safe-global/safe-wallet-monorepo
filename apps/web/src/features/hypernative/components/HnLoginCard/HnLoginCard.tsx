@@ -37,7 +37,7 @@ export const HnLoginCard = (): ReactElement | null => {
       <Alert variant="warning" outlined={false} className="flex w-auto min-w-[303px] items-center gap-3 px-4 py-0">
         <AlertIcon className="size-4 translate-y-0! text-[var(--color-warning-main)]" />
         <AlertDescription>Hypernative not connected.</AlertDescription>
-        <ExternalLink className="font-bold hover:text-muted-foreground" href="#" onClick={handleLogin}>
+        <ExternalLink className="hover:text-muted-foreground" href="#" onClick={handleLogin}>
           Log in
         </ExternalLink>
       </Alert>

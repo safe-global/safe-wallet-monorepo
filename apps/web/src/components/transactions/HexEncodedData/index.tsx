@@ -21,8 +21,7 @@ const ZEROES_PATTERN = /^0+$/
 const SHOW_MORE = 'Show more'
 const SHOW_LESS = 'Show less'
 
-const TOGGLE_CLASSES =
-  'cursor-pointer font-bold text-[var(--color-text-primary)] decoration-current hover:text-[var(--color-primary-light)]'
+const TOGGLE_CLASSES = 'cursor-pointer text-[var(--color-text-primary)] decoration-current'
 
 export const HexEncodedData = ({ hexData, title, highlightFirstBytes = true, limit = 20 }: Props): ReactElement => {
   const [showTxData, setShowTxData] = useState(false)

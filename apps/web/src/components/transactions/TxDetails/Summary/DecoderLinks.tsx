@@ -4,7 +4,7 @@ import { Typography } from '@/components/ui/typography'
 const TX_DECODER_URL = 'https://transaction-decoder.pages.dev'
 const SAFE_UTILS_URL = 'https://safeutils.openzeppelin.com'
 
-const linkClasses = 'font-bold text-[var(--color-text-primary)] hover:text-[var(--color-primary-light)]'
+const linkClasses = 'text-[var(--color-text-primary)]'
 
 const DecoderLinks = () => (
   <Typography variant="paragraph-small" className="block mb-6 text-[var(--color-primary-light)]">
