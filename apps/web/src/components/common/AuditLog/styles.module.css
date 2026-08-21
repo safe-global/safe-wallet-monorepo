@@ -1,3 +1,11 @@
+/* The rule spans the signer column edge to edge. That column (TxDetails' .txSigners) pads 24px on
+   the left and 24px + the page edge inset on the right, so the two sides cancel differently. Pair
+   with <Separator bleed="auto">, whose width:auto lets these margins widen the rule. */
+.headerDivider {
+  margin-left: calc(-1 * var(--space-3));
+  margin-right: calc(-1 * (var(--space-3) + var(--tx-details-edge-inset, 0px)));
+}
+
 .auditRow {
   display: grid;
   grid-template-columns: 28px 1fr auto;

@@ -156,7 +156,13 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
       {removable && (
         <div>
           <Track {...MODALS_EVENTS.REMOVE_RECIPIENT}>
-            <Button data-testid="remove-recipient-btn" onClick={onRemove} aria-label="Remove recipient" variant="ghost">
+            <Button
+              data-testid="remove-recipient-btn"
+              onClick={onRemove}
+              aria-label="Remove recipient"
+              variant="ghost"
+              size="lg"
+            >
               <DeleteIcon className="size-4" />
               Remove recipient
             </Button>

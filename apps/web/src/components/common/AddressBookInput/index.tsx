@@ -1,4 +1,5 @@
 import { type KeyboardEvent, type ReactElement, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useFormContext, useWatch } from 'react-hook-form'
 import AddressInput, { type AddressInputProps } from '../AddressInput'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -15,6 +16,8 @@ import { useMemberNameResolver } from '@/features/spaces'
 import RecipientOption from './RecipientOption'
 import RecipientGroupHeader from './RecipientGroupHeader'
 import useWorkspaceName from './useWorkspaceName'
+import { useAnchoredList } from './useAnchoredList'
+import { usePortalContainerElement } from '@/components/ui/ShadcnProvider'
 
 type AddressBookEntry = { label: string; name: string; source: ContactSource; contact: ExtendedContact }
 
@@ -88,6 +91,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
   )
 
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const portalContainer = usePortalContainerElement()
 
   const closeList = useCallback(() => {
     setOpen(false)
@@ -144,6 +148,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
     : undefined
 
   const showList = open && !props.disabled && !props.InputProps?.readOnly && filteredEntries.length > 0
+  const listStyle = useAnchoredList(wrapperRef, showList)
 
   const onSelectOption = (entry: AddressBookEntry) => {
     setValue(name, entry.label, { shouldValidate: true })
@@ -218,44 +223,48 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
           onMouseDown={() => setOpen(hasVisibleOptions)}
         />
 
-        {showList && (
-          <ul className={css.options} role="listbox" id={listId}>
-            {groupedEntries.map(([source, entries]) => (
-              <li key={source}>
-                <RecipientGroupHeader source={source} workspaceName={workspaceName} count={entries.length} />
-                <ul className={css.groupList}>
-                  {entries.map((entry) => {
-                    const index = optionIndexes.get(entry) ?? -1
+        {showList &&
+          /* Portalled so the surrounding Card's overflow-hidden cannot clip it; useAnchoredList
+             positions it against the field and flips it above when there is no room below. */
+          createPortal(
+            <ul className={css.options} role="listbox" id={listId} style={listStyle}>
+              {groupedEntries.map(([source, entries]) => (
+                <li key={source}>
+                  <RecipientGroupHeader source={source} workspaceName={workspaceName} count={entries.length} />
+                  <ul className={css.groupList}>
+                    {entries.map((entry) => {
+                      const index = optionIndexes.get(entry) ?? -1
 
-                    return (
-                      <li
-                        key={entry.label}
-                        id={optionId(index)}
-                        data-testid="address-item"
-                        role="option"
-                        aria-selected={index === activeIndex}
-                        className={css.option}
-                        ref={(node) => {
-                          if (index === activeIndex) node?.scrollIntoView({ block: 'nearest' })
-                        }}
-                        // Keep input focus on press so the click lands before blur removes the option
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={() => onSelectOption(entry)}
-                      >
-                        <RecipientOption
-                          contact={entry.contact}
-                          prefix={prefix}
-                          memberName={resolveMemberName(entry.contact.createdByUserId)}
-                          resolveName={(address) => resolveSafeName(address, chainId)}
-                        />
-                      </li>
-                    )
-                  })}
-                </ul>
-              </li>
-            ))}
-          </ul>
-        )}
+                      return (
+                        <li
+                          key={entry.label}
+                          id={optionId(index)}
+                          data-testid="address-item"
+                          role="option"
+                          aria-selected={index === activeIndex}
+                          className={css.option}
+                          ref={(node) => {
+                            if (index === activeIndex) node?.scrollIntoView({ block: 'nearest' })
+                          }}
+                          // Keep input focus on press so the click lands before blur removes the option
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => onSelectOption(entry)}
+                        >
+                          <RecipientOption
+                            contact={entry.contact}
+                            prefix={prefix}
+                            memberName={resolveMemberName(entry.contact.createdByUserId)}
+                            resolveName={(address) => resolveSafeName(address, chainId)}
+                          />
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </li>
+              ))}
+            </ul>,
+            portalContainer ?? document.body,
+          )}
       </div>
 
       {canAdd && !isInAddressBook ? (

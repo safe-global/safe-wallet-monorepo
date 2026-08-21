@@ -1,5 +1,6 @@
 import { type ReactElement, type ReactNode, useState, useCallback, useRef, useEffect } from 'react'
 import { type LucideIcon, Plus, Check, PenLine, Clock, CircleAlert } from 'lucide-react'
+import classNames from 'classnames'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
@@ -61,7 +62,7 @@ export const AuditLogHeader = ({ chip, actions }: { chip?: ReactNode; actions?: 
       {chip}
       {actions && <div className="ml-auto flex items-center gap-1">{actions}</div>}
     </div>
-    <Separator className="mb-4" />
+    <Separator bleed="auto" className={classNames('mb-4', css.headerDivider)} />
   </>
 )
 

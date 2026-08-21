@@ -3,18 +3,13 @@
   width: 100%;
 }
 
+/* Appearance only. Position, width and max-height come from useAnchoredList as inline styles,
+   because the list is portalled out of this wrapper and no longer positions against it. */
 .options {
-  position: absolute;
   z-index: var(--z-overlay);
-  top: 100%;
-  left: 0;
-  right: 0;
-  margin: 4px 0 0;
+  margin: 0;
   padding: 4px 0;
   list-style: none;
-  /* 4 full rows + a partial 5th at the 81px row pitch, plus the sticky group header. The vh
-     floor keeps a short window from overflowing instead of scrolling. */
-  max-height: min(400px, 60vh);
   overflow-y: auto;
   background-color: var(--color-background-paper);
   border-radius: 6px;

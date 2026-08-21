@@ -1,7 +1,11 @@
+/* The rule spans the panel edge to edge, so it cancels the wrapper's edge inset with a negative
+   margin and adds it back as padding: the text stays put, only the border grows. */
 .actionsHeader {
   border-bottom: 1px solid var(--border);
   cursor: auto !important;
   padding: var(--space-2);
+  padding-left: calc(var(--space-2) + var(--tx-details-edge-inset, 0px));
+  margin-left: calc(-1 * var(--tx-details-edge-inset, 0px));
   display: flex;
   justify-content: space-between;
   align-items: center;
