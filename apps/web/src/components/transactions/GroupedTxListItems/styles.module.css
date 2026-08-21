@@ -1,7 +1,7 @@
 .container {
   position: relative;
   padding: var(--space-2);
-  border: 1px solid var(--color-warning-light);
+  border: 1px solid var(--warning-subtle);
   border-radius: var(--radius-xl, 1.5rem);
   background-color: var(--color-background-paper);
   display: grid;
@@ -16,9 +16,10 @@
 }
 
 .disclaimerContainer {
-  background-color: var(--color-warning-background);
+  background-color: var(--warning-subtle);
+  color: var(--warning-strong);
   padding: var(--space-1) var(--space-2);
-  border-radius: var(--space-1);
+  border-radius: var(--space-2);
   flex: 1;
 }
 

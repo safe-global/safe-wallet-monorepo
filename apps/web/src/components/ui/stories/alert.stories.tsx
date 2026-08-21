@@ -14,7 +14,7 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'destructive', 'warning', 'success', 'info'],
+      options: ['default', 'destructive', 'warning', 'success', 'info', 'subtle'],
     },
   },
 } satisfies Meta<typeof Alert>
@@ -29,7 +29,7 @@ const playgroundIcons = {
 } as const
 
 type PlaygroundArgs = {
-  variant: 'default' | 'destructive' | 'warning' | 'success' | 'info'
+  variant: 'default' | 'destructive' | 'warning' | 'success' | 'info' | 'subtle'
   outlined: boolean
   title: string
   description: string
@@ -49,7 +49,7 @@ export const Playground: StoryObj<PlaygroundArgs> = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'destructive', 'warning', 'success', 'info'],
+      options: ['default', 'destructive', 'warning', 'success', 'info', 'subtle'],
     },
     outlined: { control: 'boolean' },
     icon: {
@@ -144,6 +144,12 @@ export const AllVariants: Story = {
               <AlertSeverityIcon variant="info" />
               <AlertTitle>Info Alert</AlertTitle>
               <AlertDescription>This is an info alert message.</AlertDescription>
+            </Alert>
+          </div>
+          <div style={{ width: '400px' }}>
+            <Alert variant="subtle">
+              <AlertTitle>Subtle Alert</AlertTitle>
+              <AlertDescription>A neutral tint for messages that carry no status.</AlertDescription>
             </Alert>
           </div>
         </div>

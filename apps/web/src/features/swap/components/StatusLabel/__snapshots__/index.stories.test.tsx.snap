@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./index.stories Cancelled 1`] = `
 <div
@@ -11,13 +11,32 @@ exports[`./index.stories Cancelled 1`] = `
       class="bg-background rounded-lg p-4"
     >
       <span
-        class="gap-1 border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-destructive/10 [a]:hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 text-destructive dark:bg-destructive/20 border-transparent h-6 px-2.5 py-0 text-sm rounded-4xl font-bold"
+        class="gap-1 border font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-destructive/10 [a]:hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 text-destructive dark:bg-destructive/20 border-transparent h-5 px-2 py-0.5 text-xs rounded-4xl"
         data-slot="badge"
         data-variant="destructive"
       >
-        <mock-icon
-          class="size-5"
-        />
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-ban"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M4.929 4.929 19.07 19.071"
+          />
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+        </svg>
         Cancelled
       </span>
     </div>
@@ -36,13 +55,32 @@ exports[`./index.stories Expired 1`] = `
       class="bg-background rounded-lg p-4"
     >
       <span
-        class="gap-1 border border-transparent transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-primary text-primary-foreground [a]:hover:bg-primary/80 h-6 px-2.5 py-0 text-sm rounded-4xl font-bold"
+        class="gap-1 border border-transparent font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-primary text-primary-foreground [a]:hover:bg-primary/80 h-5 px-2 py-0.5 text-xs rounded-4xl"
         data-slot="badge"
         data-variant="default"
       >
-        <mock-icon
-          class="size-5"
-        />
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-clock"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 6v6l4 2"
+          />
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+        </svg>
         Expired
       </span>
     </div>
@@ -61,13 +99,32 @@ exports[`./index.stories Filled 1`] = `
       class="bg-background rounded-lg p-4"
     >
       <span
-        class="gap-1 border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-accent-secondary text-accent-secondary-foreground border-transparent dark:bg-accent-secondary/20 dark:text-accent-success h-6 px-2.5 py-0 text-sm rounded-4xl font-bold"
+        class="gap-1 border font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-accent-secondary text-accent-secondary-foreground border-transparent dark:bg-accent-secondary/20 dark:text-accent-success h-5 px-2 py-0.5 text-xs rounded-4xl"
         data-slot="badge"
         data-variant="success"
       >
-        <mock-icon
-          class="size-5"
-        />
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-check"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="m9 12 2 2 4-4"
+          />
+        </svg>
         Filled
       </span>
     </div>
@@ -86,13 +143,32 @@ exports[`./index.stories Open 1`] = `
       class="bg-background rounded-lg p-4"
     >
       <span
-        class="gap-1 border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-warning-subtle text-warning-strong border-transparent h-6 px-2.5 py-0 text-sm rounded-4xl font-bold"
+        class="gap-1 border font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-warning-subtle text-warning-strong border-transparent h-5 px-2 py-0.5 text-xs rounded-4xl"
         data-slot="badge"
         data-variant="warning"
       >
-        <mock-icon
-          class="size-5"
-        />
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-clock"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 6v6l4 2"
+          />
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+        </svg>
         Open
       </span>
     </div>
@@ -111,13 +187,32 @@ exports[`./index.stories PartiallyFilled 1`] = `
       class="bg-background rounded-lg p-4"
     >
       <span
-        class="gap-1 border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-accent-secondary text-accent-secondary-foreground border-transparent dark:bg-accent-secondary/20 dark:text-accent-success h-6 px-2.5 py-0 text-sm rounded-4xl font-bold"
+        class="gap-1 border font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-accent-secondary text-accent-secondary-foreground border-transparent dark:bg-accent-secondary/20 dark:text-accent-success h-5 px-2 py-0.5 text-xs rounded-4xl"
         data-slot="badge"
         data-variant="success"
       >
-        <mock-icon
-          class="size-5"
-        />
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-contrast"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="M12 18a6 6 0 0 0 0-12v12z"
+          />
+        </svg>
         Partially filled
       </span>
     </div>
@@ -136,13 +231,33 @@ exports[`./index.stories Pending 1`] = `
       class="bg-background rounded-lg p-4"
     >
       <span
-        class="gap-1 border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-warning-subtle text-warning-strong border-transparent h-6 px-2.5 py-0 text-sm rounded-4xl font-bold"
+        class="gap-1 border font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-warning-subtle text-warning-strong border-transparent h-5 px-2 py-0.5 text-xs rounded-4xl"
         data-slot="badge"
         data-variant="warning"
       >
-        <mock-icon
-          class="size-5"
-        />
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-file-pen-line"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m18.226 5.226-2.52-2.52A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-.351"
+          />
+          <path
+            d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"
+          />
+          <path
+            d="M8 18h1"
+          />
+        </svg>
         Execution needed
       </span>
     </div>

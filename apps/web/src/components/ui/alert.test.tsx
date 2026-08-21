@@ -114,6 +114,19 @@ describe('Alert', () => {
     expect(alert).not.toHaveClass('bg-muted')
   })
 
+  it('applies a neutral tint, primary title and secondary description on the subtle variant', () => {
+    render(
+      <Alert variant="subtle">
+        <AlertTitle>Item added successfully</AlertTitle>
+        <AlertDescription>No status implied.</AlertDescription>
+      </Alert>,
+    )
+
+    const alert = screen.getByRole('alert')
+    expect(alert).toHaveClass('bg-foreground/5', 'text-foreground', 'border-transparent')
+    expect(alert.className).toContain('*:data-[slot=alert-description]:text-[var(--color-text-secondary)]')
+  })
+
   it('renders the action slot anchored to the top right', () => {
     render(
       <Alert>

@@ -19,7 +19,7 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - `variant` ('default' | 'secondary' | 'destructive' | 'outline' | 'warning' | 'success' | 'info' | 'positive' | 'negative' | 'ghost' | 'link')
+ * - `variant` ('default' | 'secondary' | 'destructive' | 'outline' | 'warning' | 'success' | 'info' | 'positive' | 'negative' | 'subtle' | 'ghost' | 'link')
  * - `size` ('sm' | 'default' | 'lg' | 'auto' | 'status')
  * - `shape` ('pill' | 'tag' | 'status')
  * - `render`
@@ -46,6 +46,9 @@ const badgeVariants = cva(
         info: 'bg-info-subtle text-foreground border-transparent',
         positive: 'bg-success-subtle text-foreground border-transparent',
         negative: 'bg-destructive/10 text-destructive border-transparent dark:bg-destructive/20',
+        // Neutral tint for counts and metadata that carry no status — the fill only lifts the pill
+        // off the surface, so it follows the foreground colour in both themes.
+        subtle: 'bg-foreground/5 text-muted-foreground border-transparent',
         ghost: 'hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50',
         link: 'text-primary underline-offset-4 hover:underline',
       },
