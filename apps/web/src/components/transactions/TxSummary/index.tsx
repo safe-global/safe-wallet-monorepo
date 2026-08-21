@@ -116,7 +116,7 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
       </div>
 
       {isQueue && executionInfo && (
-        <div className={css.confirmations} style={{ gridArea: 'confirmations' }}>
+        <div style={{ gridArea: 'confirmations' }}>
           {executionInfo.confirmationsSubmitted > 0 || isPending ? (
             <TxConfirmations
               submittedConfirmations={executionInfo.confirmationsSubmitted}

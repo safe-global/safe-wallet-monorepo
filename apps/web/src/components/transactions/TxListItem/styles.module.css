@@ -33,22 +33,21 @@
   border-color: var(--color-secondary-light);
 }
 
-/* Expanded card stays solid white/card (declared after :hover so it wins when an open item is
-   also hovered) — the tinted fill hurt contrast on the detail content. Border stays transparent:
-   the card sits on the grey page, so its own edge is already legible without an outline. */
 .listItem[data-open] {
   background-color: var(--card);
 }
 
-.listItem:hover [data-slot='accordion-trigger'] {
+/* Child combinators throughout: a descendant match tints the accordion triggers nested inside the row
+   — transaction details, fee breakdowns — along with the row's own. */
+.listItem:hover > * > [data-slot='accordion-trigger'] {
   background-color: var(--color-background-light);
 }
 
-.listItem[data-open] [data-slot='accordion-trigger'] {
-  background-color: var(--card);
+.listItem[data-open] > * > [data-slot='accordion-trigger'] {
+  background-color: var(--color-background-light);
 }
 
-.listItemNested:hover [data-slot='accordion-trigger'],
-.listItemNested[data-open] [data-slot='accordion-trigger'] {
+.listItemNested:hover > * > [data-slot='accordion-trigger'],
+.listItemNested[data-open] > * > [data-slot='accordion-trigger'] {
   background-color: color-mix(in srgb, var(--card) 72%, var(--muted) 28%);
 }

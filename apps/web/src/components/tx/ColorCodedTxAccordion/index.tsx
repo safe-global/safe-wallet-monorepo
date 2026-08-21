@@ -24,14 +24,15 @@ const TX_INFO_LEVEL = {
   [ColorLevel.success]: ['Transfer', 'SwapTransfer', 'TwapOrder', 'NativeStakingDeposit'],
 }
 
-/** `main` inks the chip text, `background` tints its fill, `border` outlines the panel. */
+/** `main` inks the chip, `background` tints the chip and the open row, `border` outlines the panel. */
 const TxInfoColors: Record<ColorLevel, { main: string; mainDark?: string; border: string; background: string }> = {
-  [ColorLevel.info]: { main: 'info.dark', border: 'info.light', background: 'info.background' },
-  [ColorLevel.warning]: { main: 'warning.main', border: 'warning.light', background: 'warning.background' },
+  [ColorLevel.info]: { main: 'info.dark', border: 'info.background', background: 'info.background' },
+  // The shadcn warning pair, which light mode pins to the Figma yellows rather than the brand coral.
+  [ColorLevel.warning]: { main: '--warning-strong', border: '--warning-subtle', background: '--warning-subtle' },
   [ColorLevel.success]: {
     main: 'success.main',
     mainDark: 'primary.main',
-    border: 'success.light',
+    border: 'background.light',
     background: 'background.light',
   },
 }
@@ -45,7 +46,10 @@ const getMethodLevel = (txInfo?: TransactionDetails['txInfo']['type']): ColorLev
   return (methodLevels.find((key) => TX_INFO_LEVEL[key].includes(txInfo)) as ColorLevel) || ColorLevel.info
 }
 
-const toCssVar = (color: string) => `var(--color-${color.replace('.', '-')})`
+// Dotted names map onto Safe's `--color-*` scale; a leading `--` passes through for the shadcn
+// tokens, whose `--color-*` aliases are `@theme inline` and so have no runtime value.
+const toCssVar = (color: string) =>
+  color.startsWith('--') ? `var(${color})` : `var(--color-${color.replace('.', '-')})`
 
 type DecodedTxProps = {
   txInfo?: TransactionDetails['txInfo']
@@ -73,13 +77,17 @@ const ColorCodedTxAccordion = ({ txInfo, txData, children, defaultExpanded }: De
 
   const accordionVars = {
     '--accordion-border-active': toCssVar(colors.border),
+    '--accordion-fill-active': toCssVar(colors.background),
   } as CSSProperties
 
   return (
     <Card style={accordionVars} className={css.item}>
       <Accordion defaultValue={defaultExpanded ? ['tx-details'] : []} onValueChange={onValueChange}>
         <AccordionItem value="tx-details" className="border-0">
-          <AccordionTrigger data-testid="decoded-tx-summary" className={cn(css.trigger, 'px-4 hover:no-underline')}>
+          <AccordionTrigger
+            data-testid="decoded-tx-summary"
+            className={cn(css.trigger, 'items-center px-4 hover:no-underline')}
+          >
             <div className="flex w-full flex-row items-center justify-between">
               <Typography variant="paragraph-small-bold" data-testid="tx-advanced-details">
                 Transaction details
@@ -87,7 +95,6 @@ const ColorCodedTxAccordion = ({ txInfo, txData, children, defaultExpanded }: De
               </Typography>
 
               {methodLabel && (
-                // runtime color-mix per tx level (css.methodChip + inline style); not a fixed Badge variant
                 <Badge
                   variant="outline"
                   className={css.methodChip}
@@ -102,7 +109,7 @@ const ColorCodedTxAccordion = ({ txInfo, txData, children, defaultExpanded }: De
             </div>
           </AccordionTrigger>
 
-          <AccordionContent data-testid="decoded-tx-details" className={cn(css.content, 'px-4')}>
+          <AccordionContent data-testid="decoded-tx-details" className={cn(css.content, 'p-4')}>
             {children}
           </AccordionContent>
         </AccordionItem>
