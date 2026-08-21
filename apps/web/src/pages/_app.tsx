@@ -90,7 +90,7 @@ import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import { HnQueueAssessmentProvider } from '@/features/hypernative'
-import { useOidcLoginCallback, useStepUpCallback } from '@/features/oidc-auth'
+import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
@@ -171,6 +171,13 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
   return <ObservabilityErrorBoundary onError={handleError}>{content}</ObservabilityErrorBoundary>
 }
 
+// Inside the Redux provider, so the step-up phase can be read.
+const AppLaunchScreen = (): ReactElement | null => {
+  const stepUpCaption = useStepUpSplash()
+
+  return <LaunchScreen stepUpCaption={stepUpCaption} />
+}
+
 const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement => {
   const safeKey = useChangedValue(router.query.safe?.toString())
 
@@ -187,7 +194,7 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
 
           <LazyWeb3Init />
 
-          <LaunchScreen />
+          <AppLaunchScreen />
 
           <PageLayout pathname={router.pathname}>
             <Component {...pageProps} key={safeKey} />

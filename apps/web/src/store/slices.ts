@@ -47,7 +47,14 @@ export {
   toggleGlobalSearch,
   selectGlobalSearchOpen,
 } from '@/features/global-search/store'
-export { elevationListener } from '@/features/oidc-auth/store'
+export {
+  elevationListener,
+  stepUpSlice,
+  stepUpLeaving,
+  stepUpReturning,
+  stepUpSettled,
+  selectStepUpPhase,
+} from '@/features/oidc-auth/store'
 export {
   safeActionsModalSlice,
   ESafeAction,

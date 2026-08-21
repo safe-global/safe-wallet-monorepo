@@ -1,14 +1,10 @@
 import { configureStore, createListenerMiddleware } from '@reduxjs/toolkit'
 import type { UnknownAction } from '@reduxjs/toolkit'
 import { elevationListener } from '../elevationListener'
+import { stepUpSlice } from '../stepUpSlice'
 import { ELEVATION_REQUIRED_ERROR } from '../../utils/elevation'
 
-const mockStartStepUp = jest.fn()
 const mockSavePendingStepUpAction = jest.fn()
-
-jest.mock('../../utils/stepUp', () => ({
-  startStepUp: () => mockStartStepUp(),
-}))
 
 jest.mock('../../utils/stepUpReplay', () => ({
   getReplayableAction: jest.requireActual('../../utils/stepUpReplay').getReplayableAction,
@@ -37,10 +33,13 @@ const createTestStore = () => {
   elevationListener(listenerMiddleware as unknown as Parameters<typeof elevationListener>[0])
 
   return configureStore({
-    reducer: { noop: () => null },
+    reducer: { [stepUpSlice.name]: stepUpSlice.reducer },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend(listenerMiddleware.middleware),
   })
 }
+
+type TestStore = ReturnType<typeof createTestStore>
+const phaseOf = (store: TestStore) => store.getState()[stepUpSlice.name].phase
 
 const ELEVATION_REQUIRED = { status: 403, data: { message: ELEVATION_REQUIRED_ERROR } }
 
@@ -49,10 +48,12 @@ describe('elevationListener', () => {
     jest.clearAllMocks()
   })
 
-  it('should send the user to the provider when a request needs a fresh second factor', () => {
-    createTestStore().dispatch(rejectedWithValue(ELEVATION_REQUIRED))
+  it('should start a step-up when a request needs a fresh second factor', () => {
+    const store = createTestStore()
 
-    expect(mockStartStepUp).toHaveBeenCalledTimes(1)
+    store.dispatch(rejectedWithValue(ELEVATION_REQUIRED))
+
+    expect(phaseOf(store)).toBe('leaving')
   })
 
   it('should store the interrupted request so it can be completed on the way back', () => {
@@ -63,12 +64,15 @@ describe('elevationListener', () => {
     expect(mockSavePendingStepUpAction).toHaveBeenCalledWith({ endpoint: 'spaceSafesCreateV1', args: originalArgs })
   })
 
-  // A route CGW does not gate has no business being replayed on a redirect.
+  // A route CGW does not gate has no business being replayed on a redirect, but
+  // the user still needs elevating to get anywhere.
   it('should not store a request for an endpoint outside the gated set', () => {
-    createTestStore().dispatch(rejectedWithValue(ELEVATION_REQUIRED, 'spacesGetOneV1'))
+    const store = createTestStore()
+
+    store.dispatch(rejectedWithValue(ELEVATION_REQUIRED, 'spacesGetOneV1'))
 
     expect(mockSavePendingStepUpAction).not.toHaveBeenCalled()
-    expect(mockStartStepUp).toHaveBeenCalledTimes(1)
+    expect(phaseOf(store)).toBe('leaving')
   })
 
   it.each([
@@ -76,9 +80,11 @@ describe('elevationListener', () => {
     ['a 401', { status: 401, data: { message: 'Unauthorized' } }],
     ['a network failure', { status: 'FETCH_ERROR', error: 'TypeError: Failed to fetch' }],
   ])('should ignore %s', (_label, payload) => {
-    createTestStore().dispatch(rejectedWithValue(payload))
+    const store = createTestStore()
 
-    expect(mockStartStepUp).not.toHaveBeenCalled()
+    store.dispatch(rejectedWithValue(payload))
+
+    expect(phaseOf(store)).toBe('idle')
     expect(mockSavePendingStepUpAction).not.toHaveBeenCalled()
   })
 })
