@@ -107,6 +107,8 @@ jobs:
           NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL: ${{ secrets.NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL }}
 
       - uses: ./.github/actions/build-storybook
+        env:
+          NEXT_PUBLIC_HUBSPOT_CONFIG: ${{ secrets.NEXT_PUBLIC_HUBSPOT_CONFIG }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
