@@ -33,14 +33,14 @@
   text-overflow: ellipsis;
 }
 
-/* Radius tracks ColorCodedTxAccordion (--radius-lg), the block this one is always stacked under
-   on the review step. */
+/* Radius and horizontal inset track ColorCodedTxAccordion (--radius-lg, px-4), the block this one
+   is always stacked under on the review step, so the two labels line up. */
 .box {
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border-light);
   display: grid;
   grid-template-columns: 35% auto;
-  padding: var(--space-2) 12px;
+  padding: var(--space-2);
 }
 
 @keyframes popup {
