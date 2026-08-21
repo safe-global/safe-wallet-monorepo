@@ -62,10 +62,10 @@ import type { RecoveryQueueItem } from '@/features/recovery'
 import { id } from 'ethers'
 import {
   getSafeToL2MigrationDeployment,
-  getSafeMigrationDeployment,
   getMultiSendDeployments,
   getSignMessageLibDeployments,
 } from '@safe-global/safe-deployments'
+import { isSafeMigrationCall } from '@/utils/safe-migrations'
 import {
   Safe__factory,
   Safe_to_l2_migration__factory,
@@ -75,7 +75,6 @@ import { hasMatchingDeployment, TRUSTED_DEPLOYMENT_VERSIONS } from '@safe-global
 import { isMultiSendCalldata } from './transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit'
 import { OperationType } from '@safe-global/types-kit'
-import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import type {
   BridgeAndSwapTransactionInfo,
   SwapTransactionInfo,
@@ -448,9 +447,9 @@ export const isSafeUpdateTxData = (data?: TransactionData | null): boolean => {
     return false
   }
 
-  // For 1.3.0+ Safes
-  const migrationContract = getSafeMigrationDeployment({ version: LATEST_SAFE_VERSION })
-  if (migrationContract && sameAddress(data.to.value, migrationContract.defaultAddress)) {
+  // For 1.3.0+ Safes: a delegate call to any official SafeMigration deployment
+  // (any version, canonical or zksync variant) calling one of its migrate methods
+  if (isSafeMigrationCall(data)) {
     return true
   }
 

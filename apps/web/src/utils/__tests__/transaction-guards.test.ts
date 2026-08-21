@@ -202,6 +202,36 @@ describe('transaction-guards', () => {
       expect(isSafeUpdateTxData(mockTxData)).toBeTruthy()
     })
 
+    it('should return true for 1.5.0 migrations', () => {
+      const mockTxData = {
+        hexData: '0x68cb3d94', // migrateL2WithFallbackHandler
+        to: {
+          value: '0x6439e7ABD8Bb915A5263094784C5CF561c4172AC',
+          name: 'SafeMigration 1.5.0',
+          logoUri: '',
+        },
+        value: '0',
+        operation: 1 as Operation,
+        trustedDelegateCallTarget: true,
+      }
+      expect(isSafeUpdateTxData(mockTxData)).toBeTruthy()
+    })
+
+    it('should return false for non-migration calldata sent to a SafeMigration contract', () => {
+      const mockTxData = {
+        hexData: '0xdeadbeef',
+        to: {
+          value: '0x526643F69b81B008F46d95CD5ced5eC0edFFDaC6',
+          name: 'SafeMigration 1.4.1',
+          logoUri: '',
+        },
+        value: '0',
+        operation: 1 as Operation,
+        trustedDelegateCallTarget: true,
+      }
+      expect(isSafeUpdateTxData(mockTxData)).toBeFalsy()
+    })
+
     it('should return false for arbitrary txData', () => {
       expect(
         isSafeUpdateTxData({
