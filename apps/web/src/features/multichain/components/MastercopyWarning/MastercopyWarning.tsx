@@ -107,7 +107,7 @@ export const MastercopyWarning = ({ variant = 'dashboard' }: MastercopyWarningPr
           <InfoIcon className="size-4" />
           <AlertTitle>
             New version is available: {latestVersion} (
-            <ExternalLink href={changelogUrl} className="font-bold [&_span]:underline">
+            <ExternalLink href={changelogUrl} className="font-bold hover:!text-[var(--color-primary-light)]">
               changelog
             </ExternalLink>
             )
