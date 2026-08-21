@@ -108,9 +108,12 @@ const OwnerRow = ({
           />
         </div>
       </div>
-      {/* `self-end` in read-only mode: the address readout carries no label of its own, so it can't
-          share the row's top baseline — it has to hang off the bottom to sit level with the name box. */}
-      <div className={classNames('col-span-11 md:col-span-7', readOnly && `${largeFormFieldRowClassName} self-end`)}>
+      <div
+        className={classNames(
+          'col-span-11 md:col-span-7',
+          readOnly && `${largeFormFieldRowClassName} mt-[calc(0.875rem*1.375+0.75rem)]`,
+        )}
+      >
         {readOnly ? (
           <EthHashInfo address={owner.address} shortAddress hasExplorer showCopyButton />
         ) : (
