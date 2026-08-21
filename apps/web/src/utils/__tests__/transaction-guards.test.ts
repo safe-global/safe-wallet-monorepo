@@ -217,6 +217,36 @@ describe('transaction-guards', () => {
       expect(isSafeUpdateTxData(mockTxData)).toBeTruthy()
     })
 
+    it('should return true for migrations via the zksync SafeMigration variant', () => {
+      const mockTxData = {
+        hexData: '0x07f464a4', // migrateL2Singleton
+        to: {
+          value: '0x817756C6c555A94BCEE39eB5a102AbC1678b09A7',
+          name: 'SafeMigration 1.4.1 (zksync)',
+          logoUri: '',
+        },
+        value: '0',
+        operation: 1 as Operation,
+        trustedDelegateCallTarget: true,
+      }
+      expect(isSafeUpdateTxData(mockTxData)).toBeTruthy()
+    })
+
+    it('should return false for migration calldata sent to a non-SafeMigration contract', () => {
+      const mockTxData = {
+        hexData: '0xed007fc6', // migrateWithFallbackHandler
+        to: {
+          value: faker.finance.ethereumAddress(),
+          name: 'Some contract',
+          logoUri: '',
+        },
+        value: '0',
+        operation: 1 as Operation,
+        trustedDelegateCallTarget: true,
+      }
+      expect(isSafeUpdateTxData(mockTxData)).toBeFalsy()
+    })
+
     it('should return false for non-migration calldata sent to a SafeMigration contract', () => {
       const mockTxData = {
         hexData: '0xdeadbeef',
