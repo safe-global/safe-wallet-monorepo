@@ -64,6 +64,13 @@ const badgeVariants = cva(
         status: 'rounded-lg',
       },
     },
+    // The Obra DS status badge recolours the shared tints (Figma nodes 4033-8332 / 4033-8415):
+    // success is the brand success pairing (theme-flipping), warning gets a badge-scoped dark
+    // pairing. Scoped to `size="status"` so the plain variants stay as they are everywhere else.
+    compoundVariants: [
+      { variant: 'success', size: 'status', className: 'bg-success-subtle text-success-strong' },
+      { variant: 'warning', size: 'status', className: 'bg-badge-warning-subtle text-badge-warning-strong' },
+    ],
     defaultVariants: {
       variant: 'default',
       size: 'default',
