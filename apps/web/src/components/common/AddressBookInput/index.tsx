@@ -5,6 +5,7 @@ import AddressInput, { type AddressInputProps } from '../AddressInput'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
 import css from './styles.module.css'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -227,7 +228,15 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
           /* Portalled so the surrounding Card's overflow-hidden cannot clip it; useAnchoredList
              positions it against the field and flips it above when there is no room below. */
           createPortal(
-            <ul className={css.options} role="listbox" id={listId} style={listStyle}>
+            <ul
+              className={cn(
+                'bg-popover text-popover-foreground ring-foreground/10 rounded-lg shadow-lg ring-1',
+                css.options,
+              )}
+              role="listbox"
+              id={listId}
+              style={listStyle}
+            >
               {groupedEntries.map(([source, entries]) => (
                 <li key={source}>
                   <RecipientGroupHeader source={source} workspaceName={workspaceName} count={entries.length} />

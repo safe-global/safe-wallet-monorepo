@@ -3,17 +3,15 @@
   width: 100%;
 }
 
-/* Appearance only. Position, width and max-height come from useAnchoredList as inline styles,
-   because the list is portalled out of this wrapper and no longer positions against it. */
+/* Layout only. Position, width and max-height come from useAnchoredList as inline styles (the list
+   is portalled, so it no longer positions against this wrapper), and the panel surface itself comes
+   from the shared anchored-surface utilities on the element (see ui/anchored-surface.test.tsx). */
 .options {
   z-index: var(--z-overlay);
   margin: 0;
   padding: 4px 0;
   list-style: none;
   overflow-y: auto;
-  background-color: var(--color-background-paper);
-  border-radius: 6px;
-  box-shadow: var(--box-shadow-md, 0 2px 10px rgba(0, 0, 0, 0.1));
 }
 
 .groupHeader {
