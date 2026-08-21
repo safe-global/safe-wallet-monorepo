@@ -56,7 +56,7 @@ const NestedTxSuccessScreen = ({ txId }: Props) => {
   const parentSafeAddress = addressBook[cachedPendingTx.signerAddress]
 
   return (
-    <div className="mx-auto w-full max-w-[825px] rounded-lg bg-[var(--color-background-paper)] text-center">
+    <div className="mx-auto w-full max-w-[825px] rounded-xl bg-[var(--color-background-paper)] text-center">
       <div className="mt-6 flex flex-col items-center gap-4 p-6">
         <div className={css.icon}>
           <NestedSafeIcon className="size-9" aria-label="Nested Safe" />

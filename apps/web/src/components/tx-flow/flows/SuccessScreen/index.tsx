@@ -106,7 +106,7 @@ const SuccessScreen = ({ txId, txHash }: Props) => {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[825px] rounded-lg bg-[var(--color-background-paper)] text-center">
+    <div className="mx-auto w-full max-w-[825px] rounded-xl bg-[var(--color-background-paper)] text-center">
       <div className={css.row}>
         <LoadingSpinner status={spinnerStatus} />
         {StatusComponent}
