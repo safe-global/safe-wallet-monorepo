@@ -11,12 +11,33 @@
   margin: 0;
 }
 
-/* Bleeds a divider through TxCard's horizontal padding. Deliberately `margin-inline` rather than
-   the `margin` shorthand: the shorthand also set the block margins to 0, which collided with the
-   `my-*`/`mt-*` utilities call sites compose with it — same specificity, so which one won came
-   down to stylesheet order. Scoping it to one axis removes the conflict. */
-.nestedDivider {
+/* --- Card slots ------------------------------------------------------------------------
+   .cardContent above owns the card's inline padding, so anything that must span the full card
+   width has to bleed back out through it. .bleed does that; .slot also re-applies the padding,
+   so a slot that holds content keeps that content aligned with the rest of the card.
+
+   This arithmetic lives here once, tied to the same --space-3 the padding uses. Call sites use
+   TxCard.Divider / .Section / .Footer and never hand-roll a negative margin — which is what
+   left the old hand-rolled dividers 48px short of the card's right edge, since a <Separator>
+   carries its own `width: 100%` that a negative right margin cannot stretch. A border on a
+   full-width slot has no width to fight. */
+.bleed {
   margin-inline: calc(-1 * var(--space-3));
+}
+
+.slot {
+  margin-inline: calc(-1 * var(--space-3));
+  padding-inline: var(--space-3);
+}
+
+.ruled {
+  border-top: 1px solid var(--border);
+}
+
+/* The submit row sits further from its rule than a content section does — the card's own padding
+   rhythm, so the buttons don't crowd the divider. */
+.footer {
+  padding-top: var(--space-3);
 }
 
 .form > :global(.MuiFormControl-root) {

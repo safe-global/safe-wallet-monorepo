@@ -1,18 +1,16 @@
 import type { ReactElement } from 'react'
 
-import TxCard, { TxCardActions } from '../../common/TxCard'
+import TxCard, { TxCardFooter } from '../../common/TxCard'
 import RecoveryRecoverers from '@/public/images/settings/spending-limit/beneficiary.svg'
 import RecoveryRecoverer from '@/public/images/transactions/recovery-recoverer.svg'
 import RecoveryDelay from '@/public/images/settings/spending-limit/time.svg'
 import RecoveryExecution from '@/public/images/transactions/recovery-execution.svg'
 
 import css from './styles.module.css'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { useContext } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { Typography } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 
 const RecoverySteps = [
   {
@@ -62,12 +60,11 @@ export function UpsertRecoveryFlowIntro(): ReactElement {
           </div>
         ))}
       </div>
-      <Separator className={commonCss.nestedDivider} />
-      <TxCardActions>
+      <TxCardFooter>
         <Button data-testid="next-btn" variant="default" onClick={() => onNext(data)}>
           Next
         </Button>
-      </TxCardActions>
+      </TxCardFooter>
     </TxCard>
   )
 }

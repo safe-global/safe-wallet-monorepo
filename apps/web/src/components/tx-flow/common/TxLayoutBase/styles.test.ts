@@ -43,7 +43,7 @@ describe('TxLayoutBase page gutter', () => {
 /**
  * The submit row's bottom margin only exists to clear the Back button, which is centred below the
  * card at this width. Reserving it on every step left a phantom gap under single-step flows, which
- * is why several of them hand-rolled their own action rows rather than reusing TxCardActions.
+ * is why several of them hand-rolled their own action rows rather than reusing the shared footer.
  */
 describe('TxLayoutBase submit row spacing', () => {
   it('reserves room below the submit row only on steps that render a back button', () => {

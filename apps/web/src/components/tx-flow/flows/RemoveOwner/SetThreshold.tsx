@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -13,9 +12,9 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 import { TOOLTIP_TITLES } from '@/components/tx-flow/common/constants'
 import type { RemoveOwnerFlowProps } from '.'
 
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { validateThreshold } from '@safe-global/utils/utils/validation'
+import { TxCardDivider, TxCardFooter } from '@/components/tx-flow/common/TxCard'
 
 export const SetThreshold = ({
   params,
@@ -53,7 +52,7 @@ export const SetThreshold = ({
           <EthHashInfo address={params.removedOwner.address} shortAddress={false} showCopyButton hasExplorer />
         </div>
 
-        <Separator className={commonCss.nestedDivider} />
+        <TxCardDivider />
 
         <div className="my-6">
           <Typography variant="h4" className="inline-flex items-center gap-1 font-bold">
@@ -95,13 +94,11 @@ export const SetThreshold = ({
 
         {thresholdError && <Typography className="mb-4 text-destructive">{thresholdError}</Typography>}
 
-        <Separator className={commonCss.nestedDivider} />
-
-        <div className="flex items-center p-2">
+        <TxCardFooter>
           <Button data-testid="next-btn" type="submit" disabled={!!thresholdError}>
             Next
           </Button>
-        </div>
+        </TxCardFooter>
       </form>
     </TxCard>
   )

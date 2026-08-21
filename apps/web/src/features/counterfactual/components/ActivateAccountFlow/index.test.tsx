@@ -77,12 +77,12 @@ describe('ActivateAccountFlow', () => {
     expect(header).toHaveTextContent('Deploy Safe account')
   })
 
-  it('renders the submit button in the shared action row', () => {
+  it('renders the submit button in the shared card footer', () => {
     render(<ActivateAccountFlow />)
 
     const button = screen.getByTestId('activate-account-flow-btn')
     expect(button).toBeEnabled()
-    expect(button.closest('.txCardActions')).not.toBeNull()
+    expect(button.closest('[data-slot="tx-card-footer"]')).not.toBeNull()
   })
 
   it('renders nothing when the Safe has no undeployed setup to activate', () => {

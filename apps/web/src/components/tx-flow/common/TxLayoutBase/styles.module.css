@@ -64,18 +64,6 @@
   border-top-right-radius: var(--radius-xl);
 }
 
-/* Submit button */
-.step :global(.txCardActions) {
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  margin-top: var(--space-3);
-}
-
-.step :global(.txCardActions) > * {
-  align-self: flex-end;
-}
-
 .icon {
   width: 32px;
   height: 32px;
@@ -130,10 +118,11 @@
     transform: translateX(-50%);
   }
 
-  /* Room for the Back button, which is centred below the card at this width. Scoped to steps that
-     actually render one — reserving it unconditionally left a phantom gap under single-step flows,
-     which is why they hand-rolled their own action rows instead of reusing TxCardActions. */
-  .stepWithBackButton :global(.txCardActions) {
+  /* Room for the Back button, which is centred below the card at this width — the one thing about
+     the submit row that is the layout's business rather than the card's. Scoped to steps that
+     actually render a Back button; reserving it unconditionally left a phantom gap under every
+     single-step flow. */
+  .stepWithBackButton :global(.txCardFooter) {
     margin-bottom: var(--space-8);
   }
 }

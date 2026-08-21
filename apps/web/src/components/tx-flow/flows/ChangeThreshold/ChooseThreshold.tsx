@@ -1,6 +1,5 @@
 import { Controller, useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -12,11 +11,11 @@ import { validateThreshold } from '@safe-global/utils/utils/validation'
 import type { ChangeThresholdFlowProps } from '@/components/tx-flow/flows/ChangeThreshold'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { TOOLTIP_TITLES } from '@/components/tx-flow/common/constants'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { createUpdateThresholdTx } from '@/services/tx/tx-sender'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
+import { TxCardFooter } from '@/components/tx-flow/common/TxCard'
 
 export const ChooseThreshold = () => {
   const { onNext, data } = useContext(TxFlowContext)
@@ -115,9 +114,7 @@ export const ChooseThreshold = () => {
           />
         </div>
 
-        <Separator className={commonCss.nestedDivider} />
-
-        <div className="flex items-center p-2">
+        <TxCardFooter>
           <Button
             data-testid="threshold-next-btn"
             type="submit"
@@ -130,7 +127,7 @@ export const ChooseThreshold = () => {
           >
             Next
           </Button>
-        </div>
+        </TxCardFooter>
       </form>
     </TxCard>
   )

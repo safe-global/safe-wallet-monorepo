@@ -10,7 +10,6 @@ import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import madProps from '@/utils/mad-props'
 import React, { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
 import SubmitButton from '@/components/common/SubmitButton'
-import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import classNames from 'classnames'
 
@@ -32,6 +31,7 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { TxCardFooter } from '@/components/tx-flow/common/TxCard'
 
 export const CounterfactualForm = ({
   safeTx,
@@ -169,9 +169,7 @@ export const CounterfactualForm = ({
           </div>
         )}
 
-        <Separator className={classNames(commonCss.nestedDivider, 'mt-6')} />
-
-        <div className="flex items-center p-2">
+        <TxCardFooter className="mt-6">
           {/* Submit button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
             {(isOk) => (
@@ -180,7 +178,7 @@ export const CounterfactualForm = ({
               </SubmitButton>
             )}
           </CheckWallet>
-        </div>
+        </TxCardFooter>
       </form>
     </>
   )

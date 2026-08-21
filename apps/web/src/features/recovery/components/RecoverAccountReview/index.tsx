@@ -31,7 +31,6 @@ import { useIsValidRecoveryExecTransactionFromModule } from '../../hooks/useIsVa
 import { isWalletRejection } from '@/utils/wallets'
 import WalletRejectionError from '@/components/tx/shared/errors/WalletRejectionError'
 
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { BalanceChanges } from '@/components/tx/security/BalanceChanges'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
@@ -40,6 +39,7 @@ import useGasPrice from '@/hooks/useGasPrice'
 import { useCurrentChain } from '@/hooks/useChains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TxCardDivider, TxCardFooter } from '@/components/tx-flow/common/TxCard'
 
 type RecoverAccountReviewProps = {
   threshold: string
@@ -137,7 +137,7 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
 
         <OwnerList owners={newOwners} />
 
-        <Separator className={commonCss.nestedDivider} style={{ marginTop: 'var(--space-2)' }} />
+        <TxCardDivider style={{ marginTop: 'var(--space-2)' }} />
 
         <div className="my-2">
           <Typography variant="paragraph-small" color="muted" className="block mb-2">
@@ -148,7 +148,7 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
           </Typography>
         </div>
 
-        <Separator className={commonCss.nestedDivider} />
+        <TxCardDivider />
 
         {txPreview && <Summary safeTxData={safeTx?.data} {...txPreview} />}
 
@@ -176,9 +176,7 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
 
         {isRejectedByUser && <WalletRejectionError />}
 
-        <Separator className={commonCss.nestedDivider} />
-
-        <div className="flex items-center p-2" style={{ marginTop: 'var(--space-1)' }}>
+        <TxCardFooter>
           <CheckWallet allowNonOwner checkNetwork>
             {(isOk) => (
               <Button data-testid="execute-btn" variant="default" disabled={!isOk || submitDisabled} onClick={onSubmit}>
@@ -186,7 +184,7 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
               </Button>
             )}
           </CheckWallet>
-        </div>
+        </TxCardFooter>
       </TxCard>
     </>
   )

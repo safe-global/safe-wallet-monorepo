@@ -5,7 +5,7 @@ import { useForm, FormProvider, Controller } from 'react-hook-form'
 import { useContext, useState } from 'react'
 import type { ReactElement } from 'react'
 
-import TxCard, { TxCardActions } from '../../common/TxCard'
+import TxCard, { TxCardDivider, TxCardFooter } from '../../common/TxCard'
 import { useRecoveryPeriods } from './useRecoveryPeriods'
 import { UpsertRecoveryFlowFields, type UpsertRecoveryFlowProps } from '.'
 import AddressBookInput from '@/components/common/AddressBookInput'
@@ -21,7 +21,6 @@ import { TOOLTIP_TITLES } from '../../common/constants'
 import Track from '@/components/common/Track'
 import type { RecoveryStateItem } from '@/features/recovery'
 
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import css from './styles.module.css'
 import NumberField from '@/components/common/NumberField'
 import { getDelay, isCustomDelaySelected } from './utils'
@@ -33,7 +32,6 @@ import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENE
 import useChainId from '@/hooks/useChainId'
 import { Typography } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -293,7 +291,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
             </Collapsible>
           </div>
 
-          <Separator className={commonCss.nestedDivider} />
+          <TxCardDivider />
 
           <div data-testid="warning-section" className="my-4 flex items-start gap-2 pl-2">
             <Checkbox
@@ -306,11 +304,11 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
             </Label>
           </div>
 
-          <TxCardActions>
+          <TxCardFooter divided={false}>
             <Button data-testid="next-btn" variant="default" type="submit" disabled={isDisabled}>
               Next
             </Button>
-          </TxCardActions>
+          </TxCardFooter>
         </form>
       </FormProvider>
     </TxCard>

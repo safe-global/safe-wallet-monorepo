@@ -1,6 +1,5 @@
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext } from 'react'
-import { Separator } from '@/components/ui/separator'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
@@ -8,14 +7,13 @@ import CheckWallet from '@/components/common/CheckWallet'
 import { useAlreadySigned, useTxActions } from '@/components/tx/shared/hooks'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import { TxCardActions } from '@/components/tx-flow/common/TxCard'
+import { TxCardFooter } from '@/components/tx-flow/common/TxCard'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
 import type { SlotComponentProps, SlotName } from '../../slots'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
@@ -110,10 +108,8 @@ export const SignForm = ({
       {cannotPropose && <NonOwnerError />}
 
       <div>
-        <Separator className={commonCss.nestedDivider} />
-
         {/* Submit button */}
-        <TxCardActions>
+        <TxCardFooter>
           <form onSubmit={handleSubmit}>
             <CheckWallet checkNetwork={!submitDisabled}>
               {(isOk) => (
@@ -128,7 +124,7 @@ export const SignForm = ({
               )}
             </CheckWallet>
           </form>
-        </TxCardActions>
+        </TxCardFooter>
       </div>
     </div>
   )

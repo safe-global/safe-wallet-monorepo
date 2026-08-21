@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -21,6 +20,7 @@ import Track from '@/components/common/Track'
 import type { TxFlowContextType } from '../../TxFlowProvider'
 import type { ManageSignersForm } from '.'
 import type { UseFormReturn, UseFieldArrayReturn } from 'react-hook-form'
+import { TxCardDivider, TxCardFooter } from '@/components/tx-flow/common/TxCard'
 
 type Props = {
   formMethods: UseFormReturn<ManageSignersForm>
@@ -43,13 +43,11 @@ export function SignersStructureView(props: Props): ReactElement {
         <form onSubmit={props.formMethods.handleSubmit(onNext)} className={commonCss.form}>
           <Signers {...props} />
 
-          <Separator className={commonCss.nestedDivider} />
+          <TxCardDivider />
 
           <Threshold {...props} />
 
-          <Separator className={commonCss.nestedDivider} />
-
-          <div className="flex items-center justify-end pt-4">
+          <TxCardFooter>
             <Button
               data-testId="submit-next"
               type="submit"
@@ -57,7 +55,7 @@ export function SignersStructureView(props: Props): ReactElement {
             >
               Next
             </Button>
-          </div>
+          </TxCardFooter>
         </form>
       </FormProvider>
     </TxCard>

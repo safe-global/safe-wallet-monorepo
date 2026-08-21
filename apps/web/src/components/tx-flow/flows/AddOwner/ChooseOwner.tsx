@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { Spinner } from '@/components/ui/spinner'
 import { Typography } from '@/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -26,6 +25,7 @@ import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TOOLTIP_TITLES } from '@/components/tx-flow/common/constants'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { TxCardDivider, TxCardFooter } from '@/components/tx-flow/common/TxCard'
 
 type FormData = Pick<AddOwnerFlowProps | ReplaceOwnerFlowProps, 'newOwner' | 'threshold'>
 
@@ -132,7 +132,7 @@ export const ChooseOwner = ({
             />
           </div>
 
-          <Separator className={commonCss.nestedDivider} />
+          <TxCardDivider />
 
           {mode === ChooseOwnerMode.ADD && (
             <div className="mb-7 w-full">
@@ -194,13 +194,11 @@ export const ChooseOwner = ({
               threshold selector, so the gate below must never be silent. */}
           {thresholdError && <Typography className="mb-2 text-destructive">{thresholdError}</Typography>}
 
-          <Separator className={commonCss.nestedDivider} />
-
-          <div className="flex items-center p-2">
+          <TxCardFooter>
             <Button data-testid="add-owner-next-btn" type="submit" disabled={!isValid || resolving || !!thresholdError}>
               Next
             </Button>
-          </div>
+          </TxCardFooter>
         </form>
       </FormProvider>
     </TxCard>

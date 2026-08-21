@@ -26,7 +26,6 @@ import type { ExecuteBatchFlowProps } from '.'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import SendToBlock from '@/components/tx/SendToBlock'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/shared/ConfirmationTitle'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxModalContext } from '@/components/tx-flow'
 import useGasPrice from '@/hooks/useGasPrice'
 import type { Overrides } from 'ethers'
@@ -43,6 +42,7 @@ import { useSafeShield, useSafeShieldForTxData } from '@/features/safe-shield/Sa
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { fetchRecommendedParams } from '@/services/tx/tx-sender/recommendedNonce'
 import { useMultiSendContract } from './useMultiSendContract'
+import { TxCardFooter } from '@/components/tx-flow/common/TxCard'
 
 /**
  * Build gas overrides for batch execution based on chain EIP-1559 support
@@ -249,21 +249,15 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
 
         <BatchErrorMessages estimationError={error} submitError={submitError} isRejectedByUser={isRejectedByUser} />
 
-        <div>
-          <div className="pt-4">
-            <Separator className={commonCss.nestedDivider} />
-          </div>
-
-          <div className="flex items-center gap-2 p-2">
-            <CheckWallet allowNonOwner={true} checkNetwork>
-              {(isOk) => (
-                <Button type="submit" size="submit" disabled={!isOk || submitDisabled} onClick={handleSubmit}>
-                  {!isSubmittable ? <Spinner className="size-5" /> : 'Submit'}
-                </Button>
-              )}
-            </CheckWallet>
-          </div>
-        </div>
+        <TxCardFooter className="mt-4">
+          <CheckWallet allowNonOwner={true} checkNetwork>
+            {(isOk) => (
+              <Button type="submit" size="submit" disabled={!isOk || submitDisabled} onClick={handleSubmit}>
+                {!isSubmittable ? <Spinner className="size-5" /> : 'Submit'}
+              </Button>
+            )}
+          </CheckWallet>
+        </TxCardFooter>
       </TxCard>
     </>
   )

@@ -1,7 +1,7 @@
 import { useForm, FormProvider, useFieldArray, Controller } from 'react-hook-form'
 import type { ReactElement } from 'react'
 
-import TxCard, { TxCardActions } from '../../common/TxCard'
+import TxCard, { TxCardDivider, TxCardFooter } from '../../common/TxCard'
 import AddIcon from '@/public/images/common/add.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { RecoverAccountFlowFields } from '.'
@@ -20,7 +20,6 @@ import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { Typography } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -155,7 +154,7 @@ export function RecoverAccountFlowSetup({
             Add new signer
           </Button>
 
-          <Separator className={commonCss.nestedDivider} />
+          <TxCardDivider />
 
           <div>
             <Typography variant="h4" className="mb-2">
@@ -215,9 +214,7 @@ export function RecoverAccountFlowSetup({
             </Alert>
           )}
 
-          <Separator className={commonCss.nestedDivider} />
-
-          <TxCardActions className="!mt-0">
+          <TxCardFooter>
             <Button
               data-testid="next-btn"
               variant="default"
@@ -227,7 +224,7 @@ export function RecoverAccountFlowSetup({
             >
               Next
             </Button>
-          </TxCardActions>
+          </TxCardFooter>
         </TxCard>
       </form>
     </FormProvider>

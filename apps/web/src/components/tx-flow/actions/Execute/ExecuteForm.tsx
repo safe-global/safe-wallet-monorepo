@@ -2,7 +2,6 @@ import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext, useState, useEffect } from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import ModalDialog from '@/components/common/ModalDialog'
 import classNames from 'classnames'
@@ -39,6 +38,7 @@ import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { SafeTxContext } from '../../SafeTxProvider'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
+import { TxCardFooter } from '@/components/tx-flow/common/TxCard'
 
 export const ExecuteForm = ({
   safeTx,
@@ -328,11 +328,7 @@ export const ExecuteForm = ({
           </div>
         </ModalDialog>
 
-        <div className="pt-6">
-          <Separator className={commonCss.nestedDivider} />
-        </div>
-
-        <div className="txCardActions">
+        <TxCardFooter className="mt-6">
           {/* Submit button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
             {(isOk) =>
@@ -368,7 +364,7 @@ export const ExecuteForm = ({
               )
             }
           </CheckWallet>
-        </div>
+        </TxCardFooter>
       </form>
     </>
   )

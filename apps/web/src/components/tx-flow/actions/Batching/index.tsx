@@ -11,9 +11,7 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { Errors, logError } from '@/services/exceptions'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
 import { BATCH_EVENTS, trackEvent } from '@/services/analytics'
-import { TxCardActions } from '../../common/TxCard'
-import { Separator } from '@/components/ui/separator'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
+import { TxCardFooter } from '../../common/TxCard'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { SafeAppsName } from '@/config/constants'
 import { useHasFeature } from '@/hooks/useChains'
@@ -66,9 +64,7 @@ const Batching = ({
 
   return (
     <div>
-      <Separator className={commonCss.nestedDivider} />
-
-      <TxCardActions>
+      <TxCardFooter>
         <SplitMenuButton
           onClick={(_, e) => handleSubmit(e)}
           selected={slotId}
@@ -77,7 +73,7 @@ const Batching = ({
           disabled={isSubmitDisabled || disabled}
           loading={isSubmitLoading}
         />
-      </TxCardActions>
+      </TxCardFooter>
     </div>
   )
 }

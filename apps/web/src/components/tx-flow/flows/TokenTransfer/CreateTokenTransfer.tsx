@@ -5,7 +5,6 @@ import { FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form'
 
 import { Alert, AlertTitle, AlertDescription, AlertAction, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { Link } from '@/components/ui/link'
 import { Typography } from '@/components/ui/typography'
 import { X as CloseIcon } from 'lucide-react'
@@ -18,7 +17,7 @@ import {
   TokenTransferType,
   MultiTransfersFields,
 } from './types'
-import TxCard, { TxCardActions } from '../../common/TxCard'
+import TxCard, { TxCardFooter } from '../../common/TxCard'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -257,13 +256,11 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
             )}
 
             <div>
-              <Separator className={commonCss.nestedDivider} />
-
-              <TxCardActions>
+              <TxCardFooter>
                 <Button type="submit" size="submit" disabled={!formState.isValid} className="w-full lg:w-auto">
                   Next
                 </Button>
-              </TxCardActions>
+              </TxCardFooter>
             </div>
           </div>
         </form>

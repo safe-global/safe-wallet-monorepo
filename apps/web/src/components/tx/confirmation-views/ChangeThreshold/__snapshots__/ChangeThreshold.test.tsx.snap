@@ -31,10 +31,9 @@ exports[`ChangeThreshold should display the ChangeThreshold component with the n
     class="my-2"
   >
     <div
-      aria-orientation="horizontal"
-      class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch nestedDivider"
-      data-orientation="horizontal"
-      data-slot="separator"
+      class="bleed ruled"
+      data-slot="tx-card-divider"
+      data-testid="tx-card-divider"
       role="separator"
     />
   </div>

@@ -3,19 +3,17 @@ import { isWalletRejection } from '@/utils/wallets'
 import { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/ui/typography'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { useTxActions } from '@/components/tx/shared/hooks'
 import type { SignOrExecuteProps } from '@/components/tx/shared/types'
 import useWallet from '@/hooks/wallets/useWallet'
 import { Errors, trackError } from '@/services/exceptions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import madProps from '@/utils/mad-props'
-import { TxCardActions } from '@/components/tx-flow/common/TxCard'
+import { TxCardFooter } from '@/components/tx-flow/common/TxCard'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 
 export const ProposerForm = ({
@@ -81,11 +79,7 @@ export const ProposerForm = ({
         </div>
       )}
 
-      <div className="pt-6">
-        <Separator className={commonCss.nestedDivider} />
-      </div>
-
-      <TxCardActions>
+      <TxCardFooter className="mt-6">
         {/* Submit button */}
         <CheckWallet checkNetwork>
           {(isOk) => (
@@ -100,7 +94,7 @@ export const ProposerForm = ({
             </Button>
           )}
         </CheckWallet>
-      </TxCardActions>
+      </TxCardFooter>
     </form>
   )
 }

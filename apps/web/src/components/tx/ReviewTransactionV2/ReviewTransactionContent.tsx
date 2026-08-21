@@ -4,7 +4,7 @@ import { useCallback, useContext } from 'react'
 import madProps from '@/utils/mad-props'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import TxCheckError from '../TxCheckError'
-import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardDivider, TxCardFooter } from '@/components/tx-flow/common/TxCard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import ApprovalEditor from '../ApprovalEditor'
 import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
@@ -16,7 +16,6 @@ import { Slot, SlotName } from '@/components/tx-flow/slots'
 import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { Separator } from '@/components/ui/separator'
 import CheckWallet from '@/components/common/CheckWallet'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
@@ -73,7 +72,7 @@ export const ReviewTransactionContent = ({
 
         <Slot name={SlotName.Main} />
 
-        <Separator className="mt-4 -mx-6" />
+        <TxCardDivider className="mt-4" />
 
         {safeTxError && <TxCheckError error={safeTxError} />}
 
@@ -81,7 +80,7 @@ export const ReviewTransactionContent = ({
         <NetworkWarning />
         <UnknownContractError txData={txDetails?.txData ?? txPreview?.txData} />
 
-        <TxCardActions className="!mt-0">
+        <TxCardFooter divided={false}>
           {/* Continue button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!isSubmitDisabled}>
             {(isOk) => {
@@ -99,7 +98,7 @@ export const ReviewTransactionContent = ({
               )
             }}
           </CheckWallet>
-        </TxCardActions>
+        </TxCardFooter>
       </TxCard>
     </>
   )

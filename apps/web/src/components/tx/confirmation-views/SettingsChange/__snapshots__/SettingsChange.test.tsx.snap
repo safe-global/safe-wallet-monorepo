@@ -162,10 +162,9 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
     </div>
   </div>
   <div
-    aria-orientation="horizontal"
-    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch nestedDivider"
-    data-orientation="horizontal"
-    data-slot="separator"
+    class="bleed ruled"
+    data-slot="tx-card-divider"
+    data-testid="tx-card-divider"
     role="separator"
   />
 </div>
@@ -253,10 +252,9 @@ exports[`SettingsChange should display the SettingsChange component with owner d
     </div>
   </div>
   <div
-    aria-orientation="horizontal"
-    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch nestedDivider"
-    data-orientation="horizontal"
-    data-slot="separator"
+    class="bleed ruled"
+    data-slot="tx-card-divider"
+    data-testid="tx-card-divider"
     role="separator"
   />
   <div>
@@ -284,10 +282,9 @@ exports[`SettingsChange should display the SettingsChange component with owner d
     </p>
   </div>
   <div
-    aria-orientation="horizontal"
-    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch nestedDivider"
-    data-orientation="horizontal"
-    data-slot="separator"
+    class="bleed ruled"
+    data-slot="tx-card-divider"
+    data-testid="tx-card-divider"
     role="separator"
   />
 </div>

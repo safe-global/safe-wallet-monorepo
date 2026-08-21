@@ -1,17 +1,16 @@
 import type { SettingsChangeTransaction as SettingsChangeType } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SettingsInfoType } from '@safe-global/store/gateway/types'
-import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/ui/typography'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import type { NarrowConfirmationViewProps } from '../types'
 import { OwnerList } from '@/components/tx-flow/common/OwnerList'
 import MinusIcon from '@/public/images/common/minus.svg'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { ChangeSignerSetupWarning } from '@/features/multichain'
 import { useContext } from 'react'
 import { SettingsChangeContext } from '@/components/tx-flow/flows/AddOwner/context'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { TxCardDivider } from '@/components/tx-flow/common/TxCard'
 
 export interface SettingsChangeProps extends NarrowConfirmationViewProps {
   txInfo: SettingsChangeType
@@ -52,7 +51,7 @@ const SettingsChange: React.FC<SettingsChangeProps> = ({ txInfo: { settingsInfo 
 
       {'threshold' in settingsInfo && (
         <>
-          <Separator className={commonCss.nestedDivider} />
+          <TxCardDivider />
 
           <div>
             <Typography variant="paragraph-small">Any transaction requires the confirmation of:</Typography>
@@ -65,7 +64,7 @@ const SettingsChange: React.FC<SettingsChangeProps> = ({ txInfo: { settingsInfo 
           </div>
         </>
       )}
-      <Separator className={commonCss.nestedDivider} />
+      <TxCardDivider />
     </>
   )
 }

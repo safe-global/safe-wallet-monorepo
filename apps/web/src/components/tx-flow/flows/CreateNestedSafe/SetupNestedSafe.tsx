@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { FormProvider, useFieldArray, useForm, useFormContext } from 'react-hook-form'
@@ -17,8 +16,8 @@ import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { validateDecimalLength, validateLimitedAmount } from '@safe-global/utils/utils/validation'
 import { useMnemonicPrefixedSafeName } from '@/hooks/useMnemonicName'
 import css from '@/components/tx-flow/flows/CreateNestedSafe/styles.module.css'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
+import { TxCardFooter } from '@/components/tx-flow/common/TxCard'
 
 export type SetupNestedSafeForm = {
   [SetupNestedSafeFormFields.name]: string
@@ -92,13 +91,11 @@ export function SetUpNestedSafe(): ReactElement {
 
           <AssetInputs name={SetupNestedSafeFormFields.assets} />
 
-          <Separator className={commonCss.nestedDivider} />
-
-          <div className="flex items-center p-2">
+          <TxCardFooter>
             <Button data-testid="next-button" type="submit">
               Next
             </Button>
-          </div>
+          </TxCardFooter>
         </form>
       </FormProvider>
     </TxCard>

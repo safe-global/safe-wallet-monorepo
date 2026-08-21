@@ -2,7 +2,6 @@ import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext } from 'react'
 import { Typography } from '@/components/ui/typography'
-import { Separator } from '@/components/ui/separator'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import TxCheckError from '@/components/tx/TxCheckError'
@@ -34,6 +33,7 @@ import SplitMenuButton from '@/components/common/SplitMenuButton'
 import type { SlotComponentProps, SlotName } from '../../../slots'
 import { TxFlowContext } from '../../../TxFlowProvider'
 import type { SubmitCallback } from '../../../TxFlow'
+import { TxCardFooter } from '@/components/tx-flow/common/TxCard'
 
 const RoleChip = ({ children }: { children: string }) => {
   let humanReadableRoleKey = children
@@ -209,11 +209,7 @@ export const ExecuteThroughRoleForm = ({
           )
         )}
 
-        <div className="pt-6">
-          <Separator className={commonCss.nestedDivider} />
-        </div>
-
-        <div className="txCardActions">
+        <TxCardFooter className="mt-6">
           {/* Submit button, also available to non-owner role members */}
           <CheckWallet allowNonOwner checkNetwork={!submitDisabled}>
             {(isOk) => (
@@ -228,7 +224,7 @@ export const ExecuteThroughRoleForm = ({
               </div>
             )}
           </CheckWallet>
-        </div>
+        </TxCardFooter>
       </form>
     </>
   )

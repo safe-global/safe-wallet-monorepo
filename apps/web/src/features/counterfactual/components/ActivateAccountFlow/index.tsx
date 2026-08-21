@@ -2,9 +2,8 @@ import { createNewSafe, relaySafeCreation } from '@/components/new-safe/create/l
 import { NetworkFee, SafeSetupOverview } from '@/components/new-safe/create/steps/ReviewStep'
 import ReviewRow from '@/components/new-safe/ReviewRow'
 import { TxModalContext } from '@/components/tx-flow'
-import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardDivider, TxCardFooter } from '@/components/tx-flow/common/TxCard'
 import TxLayout from '@/components/tx-flow/common/TxLayout'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import TxSubmitError from '@/components/tx/TxSubmitError'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
@@ -29,10 +28,8 @@ import { useAppSelector } from '@/store'
 import { hasRemainingRelays } from '@/utils/relaying'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/ui/typography'
 import { Rocket } from 'lucide-react'
-import classNames from 'classnames'
 import React, { useContext, useMemo, useState } from 'react'
 import { getSafeToL2SetupVersionByAddress } from '@safe-global/utils/services/contracts/deployments'
 import { useEstimateSafeCreationGas } from '@/components/new-safe/create/useEstimateSafeCreationGas'
@@ -163,7 +160,7 @@ const ActivateAccountFlow = () => {
           wallet.
         </Typography>
 
-        <Separator className={classNames(commonCss.nestedDivider, 'my-4')} />
+        <TxCardDivider className="my-4" />
 
         <SafeSetupOverview
           owners={owners.map((owner) => ({ name: '', address: owner }))}
@@ -171,7 +168,7 @@ const ActivateAccountFlow = () => {
           networks={chain ? [chain] : []}
         />
 
-        {showGasFeeEstimation && <Separator className={classNames(commonCss.nestedDivider, 'mt-4 mb-2')} />}
+        {showGasFeeEstimation && <TxCardDivider className="mt-4 mb-2" />}
         <div className="flex flex-col gap-6">
           {canRelay && (
             <div>
@@ -222,9 +219,7 @@ const ActivateAccountFlow = () => {
           )}
         </div>
 
-        <Separator className={classNames(commonCss.nestedDivider, 'mt-4 mb-2')} />
-
-        <TxCardActions className="!mt-0">
+        <TxCardFooter>
           <CheckWallet checkNetwork={!submitDisabled} allowNonOwner allowUndeployedSafe>
             {(isOk) => (
               <Button
@@ -237,7 +232,7 @@ const ActivateAccountFlow = () => {
               </Button>
             )}
           </CheckWallet>
-        </TxCardActions>
+        </TxCardFooter>
       </TxCard>
     </TxLayout>
   )

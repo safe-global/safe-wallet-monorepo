@@ -2,15 +2,13 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { Rocket } from 'lucide-react'
 import { faker } from '@faker-js/faker'
 import TxLayoutBase from './index'
-import TxCard, { TxCardActions } from '../TxCard'
+import TxCard from '../TxCard'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/ui/typography'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import { createInitialState } from '@/stories/mocks/defaults'
 import { safeFixtures } from '@safe-global/test/msw/fixtures'
-import commonCss from '../styles.module.css'
 
 faker.seed(456)
 
@@ -21,11 +19,9 @@ const ReviewStep = () => (
       You&apos;re about to deploy this Safe account and will have to confirm the transaction with your connected wallet.
     </Typography>
 
-    <Separator className={commonCss.nestedDivider} />
-
-    <TxCardActions className="!mt-0">
+    <TxCard.Footer>
       <Button size="submit">Activate</Button>
-    </TxCardActions>
+    </TxCard.Footer>
   </TxCard>
 )
 
