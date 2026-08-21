@@ -18,10 +18,11 @@ const CSVAirdropAppModal = ({ onClose, appUrl }: { onClose: () => void; appUrl?:
       dialogTitle="Limit reached"
       hideChainIndicator
       maxWidth="xs"
+      forceBackdrop
     >
       <div className="mt-6 px-6 pb-5 text-center">
         <div>
-          <CSVAirdropLogo />
+          <CSVAirdropLogo className="mx-auto" />
           <Typography variant="paragraph-bold" className="mt-4 mb-4">
             Use CSV Airdrop
           </Typography>
