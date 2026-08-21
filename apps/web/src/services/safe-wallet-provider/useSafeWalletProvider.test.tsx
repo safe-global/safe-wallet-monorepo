@@ -12,7 +12,13 @@ import type { RootState } from '@/store'
 import { makeStore } from '@/store'
 import * as messages from '@safe-global/utils/utils/safe-messages'
 import { faker } from '@faker-js/faker'
-import { Interface } from 'ethers'
+import { Interface, concat, getAddress, keccak256, toBeHex } from 'ethers'
+import {
+  APPROVE_HASH_SELECTOR,
+  type NestedTxEnvelope,
+  deriveEnvelopeSafeTxHash,
+  encodeNestedTxPayload,
+} from '@/services/tx/nestedTxEnvelope'
 import { getCreateCallDeployment } from '@safe-global/safe-deployments'
 import * as chainHooks from '@/hooks/useChains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -424,6 +430,91 @@ describe('useSafeWalletProvider', () => {
       })
 
       expect(resp).toBeInstanceOf(Promise)
+    })
+
+    describe('nested tx envelope handling', () => {
+      const SAFE_ADDRESS = '0x1234567890000000000000000000000000000000'
+
+      const childEnvelope: NestedTxEnvelope = {
+        chainId: '1',
+        safe: getAddress(toBeHex('0xdef', 20)),
+        nonce: 7,
+        to: getAddress(toBeHex('0x123', 20)),
+        value: '1000000000000000000',
+        data: '0xabcdef',
+        operation: 0,
+        safeTxGas: '0',
+        baseGas: '0',
+        gasPrice: '0',
+        gasToken: getAddress(toBeHex('0x0', 20)),
+        refundReceiver: getAddress(toBeHex('0x0', 20)),
+      }
+
+      const renderSendApi = () => {
+        jest.spyOn(router, 'useRouter').mockReturnValue({} as unknown as router.NextRouter)
+        const mockSetTxFlow = jest.fn()
+
+        const { result } = renderHook(() => useTxFlowApi('1', SAFE_ADDRESS), {
+          wrapper: ({ children }) => (
+            <Provider store={makeStore(undefined, { skipBroadcast: true })}>
+              <TxModalContext.Provider
+                value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() } as TxModalContextType}
+              >
+                {children}
+              </TxModalContext.Provider>
+            </Provider>
+          ),
+        })
+
+        const send = (data: string) =>
+          result.current?.send({ txs: [{ to: SAFE_ADDRESS, value: '0', data }], params: { safeTxGas: 0 } }, appInfo)
+
+        return { send, mockSetTxFlow }
+      }
+
+      const getFlowData = (mockSetTxFlow: jest.Mock) => mockSetTxFlow.mock.calls[0][0].props.data
+
+      it('passes plain 36-byte approveHash calldata through unchanged', () => {
+        const { send, mockSetTxFlow } = renderSendApi()
+        const data = concat([APPROVE_HASH_SELECTOR, keccak256('0x01')])
+
+        send(data)
+
+        expect(getFlowData(mockSetTxFlow).txs[0].data).toBe(data)
+        expect(getFlowData(mockSetTxFlow).nestedChildTx).toBeUndefined()
+      })
+
+      it('passes approveHash calldata with unknown trailing bytes through unchanged', () => {
+        const { send, mockSetTxFlow } = renderSendApi()
+        const data = concat([APPROVE_HASH_SELECTOR, keccak256('0x01'), '0x001122'])
+
+        send(data)
+
+        expect(getFlowData(mockSetTxFlow).txs[0].data).toBe(data)
+        expect(getFlowData(mockSetTxFlow).nestedChildTx).toBeUndefined()
+      })
+
+      it('rejects with an RPC error when the envelope does not match the approved hash', async () => {
+        const { send, mockSetTxFlow } = renderSendApi()
+        const data = concat([APPROVE_HASH_SELECTOR, keccak256('0x01'), encodeNestedTxPayload([childEnvelope])])
+
+        await expect(send(data)).rejects.toEqual({
+          code: RpcErrorCode.INVALID_PARAMS,
+          message: 'Nested transaction payload does not match the approved hash',
+        })
+        expect(mockSetTxFlow).not.toHaveBeenCalled()
+      })
+
+      it('strips a verified envelope and passes the child tx into the flow', () => {
+        const { send, mockSetTxFlow } = renderSendApi()
+        const approvedHash = deriveEnvelopeSafeTxHash(childEnvelope)
+        const data = concat([APPROVE_HASH_SELECTOR, approvedHash, encodeNestedTxPayload([childEnvelope])])
+
+        send(data)
+
+        expect(getFlowData(mockSetTxFlow).txs[0].data).toBe(concat([APPROVE_HASH_SELECTOR, approvedHash]))
+        expect(getFlowData(mockSetTxFlow).nestedChildTx).toEqual(childEnvelope)
+      })
     })
 
     it('should get tx by safe tx hash', async () => {

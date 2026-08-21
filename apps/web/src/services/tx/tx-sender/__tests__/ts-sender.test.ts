@@ -18,11 +18,13 @@ import {
 import * as sdk from '../sdk'
 import {
   BrowserProvider,
+  concat,
   type TransactionReceipt,
   zeroPadValue,
   type JsonRpcProvider,
   type JsonRpcSigner,
 } from 'ethers'
+import { encodeNestedTxPayload } from '../../nestedTxEnvelope'
 import * as safeContracts from '@/services/contracts/safeContracts'
 
 import * as web3 from '@/hooks/wallets/web3'
@@ -726,6 +728,161 @@ describe('txSender', () => {
       )
       expect(txEvents.txDispatch).not.toHaveBeenCalledWith('PROCESSING', expect.anything())
       expect(txEvents.txDispatch).not.toHaveBeenCalledWith('EXECUTING', expect.anything())
+    })
+
+    it('dispatchTxExecution derives and returns the deterministic CGW id when no txId is given', async () => {
+      jest.spyOn(sdk, 'prepareTxExecution').mockResolvedValue('0xexecdata')
+      ;(MockEip1193Provider.request as jest.Mock).mockResolvedValue(zeroPadValue('0x03', 32))
+
+      const safeTx = await createTx({ to: '0x123', value: '1', data: '0x0', nonce: 1 })
+      const expectedId = `multisig_${CHILD_SAFE}_0x1234567890`
+
+      const txId = await dispatchTxExecution(
+        '1',
+        safeTx,
+        { nonce: 1 },
+        undefined,
+        MockEip1193Provider,
+        PARENT_SAFE,
+        CHILD_SAFE,
+        true, // isSmartAccount
+        false, // executed
+      )
+
+      expect(txId).toBe(expectedId)
+      expect(txEvents.txDispatch).toHaveBeenCalledWith(
+        'NESTED_SAFE_TX_CREATED',
+        expect.objectContaining({ txId: expectedId }),
+      )
+    })
+
+    describe('nested tx envelope appending', () => {
+      const APPROVE_HASH_CALLDATA = concat(['0xd4d9bdcd', zeroPadValue('0x0badc0de', 32)])
+
+      const buildSafeTx = () => createMockSafeTransaction({ to: toBeHex('0x123', 20), data: '0xabcdef', value: '1' })
+
+      const getSentData = (): string => (MockEip1193Provider.request as jest.Mock).mock.calls[0][0].params[0].data
+
+      beforeEach(() => {
+        jest.spyOn(sdk, 'prepareApproveTxHash').mockResolvedValue(APPROVE_HASH_CALLDATA)
+        ;(MockEip1193Provider.request as jest.Mock).mockResolvedValue(zeroPadValue('0x01', 32))
+      })
+
+      it('appends the child tx envelope for a Safe signer when the child Safe is >= 1.3.0', async () => {
+        const safeTx = buildSafeTx()
+
+        await dispatchOnChainSigning(
+          safeTx,
+          'tx_id_123',
+          MockEip1193Provider,
+          '1',
+          PARENT_SAFE,
+          CHILD_SAFE,
+          true,
+          false,
+          '1.3.0',
+        )
+
+        const expectedPayload = encodeNestedTxPayload([{ chainId: '1', safe: CHILD_SAFE, ...safeTx.data }])
+        expect(getSentData()).toBe(concat([APPROVE_HASH_CALLDATA, expectedPayload]))
+      })
+
+      it('keeps plain 36-byte calldata for a non-Safe smart-account signer', async () => {
+        await dispatchOnChainSigning(
+          buildSafeTx(),
+          'tx_id_123',
+          MockEip1193Provider,
+          '1',
+          PARENT_SAFE,
+          CHILD_SAFE,
+          false,
+          false,
+          '1.4.1',
+        )
+
+        expect(getSentData()).toBe(APPROVE_HASH_CALLDATA)
+      })
+
+      it('keeps plain calldata when the child Safe is < 1.3.0', async () => {
+        await dispatchOnChainSigning(
+          buildSafeTx(),
+          'tx_id_123',
+          MockEip1193Provider,
+          '1',
+          PARENT_SAFE,
+          CHILD_SAFE,
+          true,
+          false,
+          '1.1.1',
+        )
+
+        expect(getSentData()).toBe(APPROVE_HASH_CALLDATA)
+      })
+
+      it('keeps plain calldata when the child Safe version is unknown', async () => {
+        await dispatchOnChainSigning(
+          buildSafeTx(),
+          'tx_id_123',
+          MockEip1193Provider,
+          '1',
+          PARENT_SAFE,
+          CHILD_SAFE,
+          true,
+          false,
+          null,
+        )
+
+        expect(getSentData()).toBe(APPROVE_HASH_CALLDATA)
+      })
+    })
+
+    describe('dispatchOnChainSigning txId derivation', () => {
+      const buildSafeTx = () => createMockSafeTransaction({ to: toBeHex('0x123', 20), data: '0xabcdef', value: '1' })
+
+      beforeEach(() => {
+        jest
+          .spyOn(sdk, 'prepareApproveTxHash')
+          .mockResolvedValue(concat(['0xd4d9bdcd', zeroPadValue('0x0badc0de', 32)]))
+        ;(MockEip1193Provider.request as jest.Mock).mockResolvedValue(zeroPadValue('0x01', 32))
+      })
+
+      it('returns the given txId unchanged', async () => {
+        const txId = await dispatchOnChainSigning(
+          buildSafeTx(),
+          'tx_id_123',
+          MockEip1193Provider,
+          '1',
+          PARENT_SAFE,
+          CHILD_SAFE,
+          true,
+          false,
+          '1.3.0',
+        )
+
+        expect(txId).toBe('tx_id_123')
+      })
+
+      it('derives the deterministic CGW id when no txId is given (envelope flow skips the proposal)', async () => {
+        const expectedId = `multisig_${CHILD_SAFE}_0x1234567890`
+
+        const txId = await dispatchOnChainSigning(
+          buildSafeTx(),
+          undefined,
+          MockEip1193Provider,
+          '1',
+          PARENT_SAFE,
+          CHILD_SAFE,
+          true,
+          false,
+          '1.3.0',
+        )
+
+        expect(txId).toBe(expectedId)
+        expect(txEvents.txDispatch).toHaveBeenCalledWith(
+          'NESTED_SAFE_TX_CREATED',
+          expect.objectContaining({ txId: expectedId }),
+        )
+      })
     })
   })
 })
