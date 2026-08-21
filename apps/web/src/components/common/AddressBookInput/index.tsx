@@ -92,6 +92,9 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
   )
 
   const wrapperRef = useRef<HTMLDivElement>(null)
+  // The list is portalled, so it is NOT inside wrapperRef. Dismissal has to check it separately
+  // or a pointerdown on an option counts as "outside" and closes the list before the click lands.
+  const listRef = useRef<HTMLUListElement>(null)
   const portalContainer = usePortalContainerElement()
 
   const closeList = useCallback(() => {
@@ -116,8 +119,10 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
 
     const wrapper = wrapperRef.current
 
+    const isInside = (node: Node | null) => !!node && (!!wrapper?.contains(node) || !!listRef.current?.contains(node))
+
     const onPointerDown = (event: PointerEvent) => {
-      if (wrapper && !wrapper.contains(event.target as Node)) {
+      if (!isInside(event.target as Node)) {
         closeList()
       }
     }
@@ -125,7 +130,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
     // only genuinely leaving the field (tab away, focus elsewhere) closes the list here.
     const onFocusOut = (event: FocusEvent) => {
       const next = event.relatedTarget as Node | null
-      if (wrapper && (!next || !wrapper.contains(next))) {
+      if (wrapper && !isInside(next)) {
         closeList()
       }
     }
@@ -229,8 +234,13 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
              positions it against the field and flips it above when there is no room below. */
           createPortal(
             <ul
+              ref={listRef}
               className={cn(
                 'bg-popover text-popover-foreground ring-foreground/10 rounded-lg shadow-lg ring-1',
+                // Slim scrollbar, same treatment as the Safe selector dropdown
+                // (features/spaces/.../SafeDropdownContainer.tsx): the browser default draws a chunky
+                // grey track that reads as a second UI element inside a small panel.
+                '[scrollbar-color:var(--border)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5',
                 css.options,
               )}
               role="listbox"
