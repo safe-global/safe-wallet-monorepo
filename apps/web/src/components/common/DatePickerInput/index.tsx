@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useFormContext, Controller, type ControllerFieldState, type ControllerRenderProps } from 'react-hook-form'
 import {
   addYears,
@@ -18,10 +18,20 @@ import { Calendar as CalendarIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
+import {
+  clearRange,
+  DATE_DIGITS,
+  EMPTY_SLOTS,
+  slotAtTextIndex,
+  slotsToText,
+  textIndexAtSlot,
+  textToSlots,
+  writeDigits,
+  type SlotState,
+} from './slots'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
 
 const DATE_FORMAT = 'dd/MM/yyyy'
-const DATE_DIGITS = 8
 const INVALID_DATE_ERROR = 'Invalid date'
 const YEARS_SELECTABLE = 20
 
@@ -161,9 +171,26 @@ const DatePickerField = ({
   const value: Date | null = field.value ?? null
   const inputId = `${name}-date`
   const fieldRef = useRef<HTMLDivElement>(null)
-  const [text, setText] = useState(() => toText(value))
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const [entry, setEntry] = useState<SlotState>(() => ({ slots: textToSlots(toText(value)), caret: 0 }))
   const [isOpen, setIsOpen] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
+  const text = slotsToText(entry.slots)
+
+  const commit = (next: SlotState) => {
+    setEntry(next)
+    field.onChange(_fromText(slotsToText(next.slots)))
+  }
+
+  // Put the caret back where the edit left it. Rendering from slots replaces the whole value, which
+  // would otherwise drop the caret at the end and make the next keystroke land in the wrong segment.
+  useLayoutEffect(() => {
+    const input = inputRef.current
+    if (input && document.activeElement === input) {
+      const at = textIndexAtSlot(entry.caret)
+      input.setSelectionRange(at, at)
+    }
+  }, [entry])
 
   // A seeded value is never "touched", so react-hook-form holds the form invalid without filling in
   // the field's error: a disabled submit button and nothing explaining it. Validate once on mount.
@@ -176,7 +203,11 @@ const DatePickerField = ({
 
   // Resync only on a change from outside, so a half-typed entry is never reformatted under the cursor.
   useEffect(() => {
-    setText((current) => (toKey(_fromText(current)) === toKey(value) ? current : toText(value)))
+    setEntry((current) =>
+      toKey(_fromText(slotsToText(current.slots))) === toKey(value)
+        ? current
+        : { slots: textToSlots(toText(value)), caret: 0 },
+    )
   }, [value])
 
   // An empty field is never in error, and saying so explicitly drops a stale message: validation
@@ -198,14 +229,40 @@ const DatePickerField = ({
   // The same bound the validate rule uses, so the calendar can never offer a day it would reject.
   const disabledDays = useMemo(() => (disableFuture ? { after: endMonth } : undefined), [disableFuture, endMonth])
 
-  const handleTextChange = (raw: string) => {
-    const masked = _toMaskedText(raw)
-    setText(masked)
-    field.onChange(_fromText(masked))
+  // Every edit is a slot operation, so any segment of a complete date can be changed in place.
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    const input = event.currentTarget
+    const from = slotAtTextIndex(input.selectionStart ?? 0)
+    const to = slotAtTextIndex(input.selectionEnd ?? 0)
+    const selection = to > from ? clearRange(entry.slots, from, to) : null
+
+    if (/^\d$/.test(event.key)) {
+      event.preventDefault()
+      commit(writeDigits(selection?.slots ?? entry.slots, from, event.key))
+      return
+    }
+
+    if (event.key === 'Backspace') {
+      event.preventDefault()
+      commit(selection ?? clearRange(entry.slots, Math.max(0, from - 1), from))
+      return
+    }
+
+    if (event.key === 'Delete') {
+      event.preventDefault()
+      commit(selection ?? clearRange(entry.slots, from, from + 1))
+    }
+  }
+
+  // Bulk input (paste, autofill, a mobile keyboard that fires no keydown) is normalised, then fills
+  // the slots from the start. `_toMaskedText` is what reads a pasted `1/1/2036` as day, month, year.
+  const handleReplace = (raw: string) => {
+    const slots = raw === '' ? EMPTY_SLOTS : textToSlots(_toMaskedText(raw))
+    commit({ slots, caret: raw === '' ? 0 : DATE_DIGITS })
   }
 
   const handleSelect = (date: Date | undefined) => {
-    setText(toText(date ?? null))
+    setEntry({ slots: textToSlots(toText(date ?? null)), caret: DATE_DIGITS })
     field.onChange(date ?? null)
     setIsOpen(false)
   }
@@ -221,13 +278,21 @@ const DatePickerField = ({
           <InputGroupInput
             id={inputId}
             name={field.name}
-            ref={field.ref}
+            ref={(node) => {
+              inputRef.current = node
+              field.ref(node)
+            }}
             value={text}
             placeholder="DD/MM/YYYY"
             autoComplete="off"
             inputMode="numeric"
             aria-invalid={hasError}
-            onChange={(event) => handleTextChange(event.target.value)}
+            onChange={(event) => handleReplace(event.target.value)}
+            onKeyDown={handleKeyDown}
+            onPaste={(event) => {
+              event.preventDefault()
+              handleReplace(event.clipboardData.getData('text'))
+            }}
             onFocus={() => setIsFocused(true)}
             onBlur={() => {
               setIsFocused(false)

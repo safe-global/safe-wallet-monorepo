@@ -79,6 +79,69 @@ describe('DatePickerInput', () => {
     expect(screen.queryByText('Invalid date')).not.toBeInTheDocument()
   })
 
+  describe('editing a complete date in place', () => {
+    const selectMonth = (input: HTMLInputElement) => input.setSelectionRange(3, 5)
+
+    it('changes the month without disturbing the day or year', async () => {
+      renderInput(new Date('2025-12-10T00:00:00'))
+      const input = screen.getByLabelText<HTMLInputElement>('Start date')
+      expect(input).toHaveValue('10/12/2025')
+
+      await userEvent.click(input)
+      selectMonth(input)
+      await userEvent.keyboard('10')
+
+      expect(input).toHaveValue('10/10/2025')
+      await waitFor(() => expect(screen.getByTestId('value')).toHaveTextContent('2025-10-10'))
+    })
+
+    it('holds the entry invalid while a segment is half retyped', async () => {
+      renderInput(new Date('2025-12-10T00:00:00'))
+      const input = screen.getByLabelText<HTMLInputElement>('Start date')
+
+      await userEvent.click(input)
+      selectMonth(input)
+      await userEvent.keyboard('1')
+
+      // the hole is visible, so the remaining digits cannot slide across it
+      expect(input).toHaveValue('10/1_/2025')
+      await waitFor(() => expect(screen.getByTestId('form-valid')).toHaveTextContent('false'))
+    })
+
+    it('leaves a hole when a segment is deleted instead of resequencing the digits', async () => {
+      renderInput(new Date('2025-12-10T00:00:00'))
+      const input = screen.getByLabelText<HTMLInputElement>('Start date')
+
+      await userEvent.click(input)
+      selectMonth(input)
+      await userEvent.keyboard('{Backspace}')
+
+      expect(input).toHaveValue('10/__/2025')
+    })
+
+    it('overwrites a single digit rather than inserting it', async () => {
+      renderInput(new Date('2025-12-10T00:00:00'))
+      const input = screen.getByLabelText<HTMLInputElement>('Start date')
+
+      await userEvent.click(input)
+      input.setSelectionRange(9, 10) // the last digit of the year
+      await userEvent.keyboard('9')
+
+      expect(input).toHaveValue('10/12/2029')
+    })
+
+    it('changes the day of a complete date', async () => {
+      renderInput(new Date('2025-12-10T00:00:00'))
+      const input = screen.getByLabelText<HTMLInputElement>('Start date')
+
+      await userEvent.click(input)
+      input.setSelectionRange(0, 2)
+      await userEvent.keyboard('05')
+
+      expect(input).toHaveValue('05/12/2025')
+    })
+  })
+
   it('opens the calendar grid when the trigger is clicked', async () => {
     renderInput()
     await userEvent.click(screen.getByRole('button', { name: /start date/i }))
