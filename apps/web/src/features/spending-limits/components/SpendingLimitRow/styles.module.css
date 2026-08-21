@@ -1,5 +1,4 @@
-/* Matches the field shells this control is stacked with — AddressInput's .inputWrapper and the
-   `hero` input tier both use a 66px box, `calc(var(--radius) - 2px)` and the `--border` token. */
+/* 66px box and `--radius` - 2px match AddressInput's .inputWrapper, the field above this one. */
 .group {
   display: flex;
   align-items: stretch;

@@ -7,9 +7,8 @@ const VIEWPORT_HEIGHT = 900
 type Box = { top: number; height?: number; left?: number; width?: number }
 
 /**
- * jsdom has no layout, so the anchor's box has to be supplied. The ref object is created once and
- * reused across renders, the way `useRef` gives it to the real component: a fresh ref each render
- * would re-run the positioning effect every time.
+ * jsdom has no layout, so the box is stubbed. The ref is created once and reused across renders the
+ * way `useRef` does: a fresh ref each render re-runs the positioning effect and loops.
  */
 const anchorAt = (initial: Box) => {
   const el = document.createElement('div')

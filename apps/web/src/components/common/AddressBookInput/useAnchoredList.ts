@@ -6,15 +6,10 @@ const OFFSET = 4
 const MAX_HEIGHT = 400
 
 /**
- * Positions the option list against the input while rendering it in a portal.
+ * Positions the option list against the input while it renders in a portal.
  *
- * The list used to be `position: absolute` inside the field wrapper, which the surrounding `Card`
- * clipped: every card carries `overflow-hidden`, so a list taller than the room left below the
- * input was cut off at the card's edge. Portalling escapes that, but a portalled element no longer
- * inherits the wrapper's position, so it has to be measured and placed here instead.
- *
- * Flips above the input when there is more room up than down, and caps the height to whichever side
- * it lands on so the list scrolls internally rather than running off screen.
+ * The list is portalled because every `Card` has `overflow-hidden` and clipped it. A portalled
+ * element no longer inherits the wrapper's position, so the geometry has to be computed here.
  */
 export const useAnchoredList = (anchorRef: RefObject<HTMLElement | null>, isOpen: boolean) => {
   const [style, setStyle] = useState<CSSProperties>({ visibility: 'hidden' })
@@ -47,8 +42,7 @@ export const useAnchoredList = (anchorRef: RefObject<HTMLElement | null>, isOpen
   useEffect(() => {
     if (!isOpen) return
 
-    // `true` for the capture phase: the list has to follow the input when any ancestor scrolls,
-    // not just the window.
+    // Capture phase, so the list follows the input when any ancestor scrolls, not just the window.
     const onChange = () => {
       cancelAnimationFrame(frame.current)
       frame.current = requestAnimationFrame(reposition)

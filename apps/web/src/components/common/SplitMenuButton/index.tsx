@@ -71,8 +71,8 @@ export default function SplitMenuButton({
               disabled={disabled}
               // Corner reset carries the same `in-data-[slot=button-group]` variant as Button's own
               // `rounded-md`, otherwise that variant outranks a bare `rounded-r-none` and the halves
-              // meet on two 12px curves instead of a flat seam. `bg-clip-border` paints the fill under
-              // Button's 1px transparent border, which otherwise let the white card through at the seam.
+              // `bg-clip-border` paints the fill under Button's 1px transparent border, which
+              // otherwise lets the card background through as a white gap at the seam.
               className={cn(
                 // eslint-disable-next-line no-restricted-syntax -- split-button halves fill the button-group row height and paint their fill to the border box so the seam stays a single hairline
                 'h-full min-w-0 flex-1 shrink bg-clip-border',

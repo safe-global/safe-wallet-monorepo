@@ -33,8 +33,7 @@
   text-overflow: ellipsis;
 }
 
-/* Radius and horizontal inset track ColorCodedTxAccordion (--radius-lg, px-4), the block this one
-   is always stacked under on the review step, so the two labels line up. */
+/* Radius and inset track ColorCodedTxAccordion, the block this is stacked under, so labels line up. */
 .box {
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border-light);

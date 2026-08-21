@@ -92,8 +92,8 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
   )
 
   const wrapperRef = useRef<HTMLDivElement>(null)
-  // The list is portalled, so it is NOT inside wrapperRef. Dismissal has to check it separately
-  // or a pointerdown on an option counts as "outside" and closes the list before the click lands.
+  // The portalled list is not inside wrapperRef, so dismissal has to check it separately or a
+  // pointerdown on an option counts as "outside" and closes the list before the click lands.
   const listRef = useRef<HTMLUListElement>(null)
   const portalContainer = usePortalContainerElement()
 
@@ -230,16 +230,13 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
         />
 
         {showList &&
-          /* Portalled so the surrounding Card's overflow-hidden cannot clip it; useAnchoredList
-             positions it against the field and flips it above when there is no room below. */
           createPortal(
             <ul
               ref={listRef}
               className={cn(
                 'bg-popover text-popover-foreground ring-foreground/10 rounded-lg shadow-lg ring-1',
-                // Slim scrollbar, same treatment as the Safe selector dropdown
-                // (features/spaces/.../SafeDropdownContainer.tsx): the browser default draws a chunky
-                // grey track that reads as a second UI element inside a small panel.
+                // Slim scrollbar, matching SafeDropdownContainer; the OS default reads as a second
+                // UI element inside a small panel.
                 '[scrollbar-color:var(--border)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5',
                 css.options,
               )}

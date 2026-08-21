@@ -30,15 +30,9 @@ const separatorVariants = cva(
   {
     variants: {
       /**
-       * Extends a horizontal separator past the parent's horizontal padding so the rule spans the
-       * container edge to edge. The value names the padding it cancels: `bleed="6"` for a `px-6`
-       * (24px) container, and so on.
-       *
-       * A bare negative margin is not enough — it only shifts the box, leaving the rule short on
-       * the right by twice the padding, so the width has to grow with it. Setting the width from a
-       * call-site class does not work either: the base `w-full` carries a `data-[orientation=…]`
-       * prefix and outranks a plain utility (0-2-0 vs 0-1-0) whatever the order. That is why the
-       * width lives here, as a branch that replaces `w-full` instead of competing with it.
+       * Spans the rule past the parent's horizontal padding; the value names the padding it cancels.
+       * The width must live here rather than at the call site: `w-full` above carries a
+       * `data-[orientation=…]` prefix, so it outranks any plain utility (0-2-0 vs 0-1-0).
        */
       bleed: {
         none: 'data-[orientation=horizontal]:w-full',
