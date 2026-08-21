@@ -1,10 +1,10 @@
-import { type ReactElement, type ReactNode, useState, useCallback, useRef, useEffect } from 'react'
+import { type ComponentProps, type ReactElement, type ReactNode, useState, useCallback, useRef, useEffect } from 'react'
 import { type LucideIcon, Plus, Check, PenLine, Clock, CircleAlert } from 'lucide-react'
-import classNames from 'classnames'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { cn } from '@/utils/cn'
 
 import css from './styles.module.css'
 
@@ -53,6 +53,16 @@ export const useCopyToClipboard = (text?: string | null): [boolean, () => void] 
   return [copied, handleCopy]
 }
 
+/**
+ * Wraps a header and its rows, and is the container their breakpoint resolves against — so the log
+ * reflows on its own width, not the viewport's. Every audit log must go through it.
+ */
+export const AuditLog = ({ children, className, ...props }: ComponentProps<'div'>): ReactElement => (
+  <div className={cn(css.auditLog, className)} {...props}>
+    {children}
+  </div>
+)
+
 export const AuditLogHeader = ({ chip, actions }: { chip?: ReactNode; actions?: ReactNode }): ReactElement => (
   <>
     <div className="mb-2 flex items-center gap-2">
@@ -62,7 +72,7 @@ export const AuditLogHeader = ({ chip, actions }: { chip?: ReactNode; actions?: 
       {chip}
       {actions && <div className="ml-auto flex items-center gap-1">{actions}</div>}
     </div>
-    <Separator bleed="auto" className={classNames('mb-4', css.headerDivider)} />
+    <Separator bleed="6" className="mb-4" />
   </>
 )
 
@@ -119,46 +129,46 @@ export const AuditRow = ({
         {!isLast && <div className={css.timelineLine} />}
       </div>
 
-      {/* Column 2: Action label + actor/origin */}
-      <div className={css.infoCol}>
-        <Typography variant="paragraph-small" className="truncate font-semibold leading-[1.4]">
-          {label}
-        </Typography>
-        {(showActor || actor || showDash) && (
-          <div className={css.actorRow}>
-            {showActor ? (
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <div
-                      className={css.actorCopy}
-                      onClick={handleCopy}
-                      onKeyDown={handleKeyDown}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      <Typography variant="paragraph-mini" className={`${css.actorText} text-muted-foreground`}>
-                        By {displayText}
-                      </Typography>
-                    </div>
-                  }
-                />
-                <TooltipContent side="top">{copied ? 'Copied' : 'Click to copy address'}</TooltipContent>
-              </Tooltip>
-            ) : actor ? (
-              <Typography variant="paragraph-mini" className="text-muted-foreground">
-                By {actor}
-              </Typography>
-            ) : (
-              <Typography variant="paragraph-mini" className="text-muted-foreground">
-                —
-              </Typography>
-            )}
-          </div>
-        )}
-      </div>
+      {/* Action label */}
+      <Typography variant="paragraph-small" className={`${css.label} truncate font-semibold leading-[1.4]`}>
+        {label}
+      </Typography>
 
-      {/* Column 3: Timestamp */}
+      {/* Actor / origin, beneath the label */}
+      {(showActor || actor || showDash) && (
+        <div className={css.actorRow}>
+          {showActor ? (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <div
+                    className={css.actorCopy}
+                    onClick={handleCopy}
+                    onKeyDown={handleKeyDown}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <Typography variant="paragraph-mini" className={`${css.actorText} text-muted-foreground`}>
+                      By {displayText}
+                    </Typography>
+                  </div>
+                }
+              />
+              <TooltipContent side="top">{copied ? 'Copied' : 'Click to copy address'}</TooltipContent>
+            </Tooltip>
+          ) : actor ? (
+            <Typography variant="paragraph-mini" className="text-muted-foreground">
+              By {actor}
+            </Typography>
+          ) : (
+            <Typography variant="paragraph-mini" className="text-muted-foreground">
+              —
+            </Typography>
+          )}
+        </div>
+      )}
+
+      {/* Timestamp — beside the label, or beneath both on narrow panels */}
       <Typography variant="paragraph-mini" className={`${css.timestamp} text-muted-foreground`}>
         {timestamp != null ? formatAuditDateTime(timestamp) : ''}
       </Typography>

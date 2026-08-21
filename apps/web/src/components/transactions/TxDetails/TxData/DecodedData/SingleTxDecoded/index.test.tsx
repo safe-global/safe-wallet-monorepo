@@ -169,4 +169,13 @@ describe('SingleTxDecoded', () => {
     expect(result.getByTestId('action-item')).toHaveAttribute('aria-expanded', 'true')
     expect(await result.findByText('spender')).toBeInTheDocument()
   })
+
+  it('expands the action on click', async () => {
+    const result = renderApproveAction()
+
+    await userEvent.click(result.getByTestId('action-item'))
+
+    expect(result.getByTestId('action-item')).toHaveAttribute('aria-expanded', 'true')
+    expect(await result.findByText('spender')).toBeInTheDocument()
+  })
 })

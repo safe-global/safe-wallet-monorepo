@@ -69,7 +69,7 @@ const StakingStatus = ({ status }: { status: NativeStakingValidatorsExitTransact
 
   return (
     <TxStatusChip color={config?.color}>
-      {config?.icon && <config.icon className="size-4" />}
+      {config?.icon && <config.icon />}
       {config?.text || capitalizedStatus(status)}
     </TxStatusChip>
   )

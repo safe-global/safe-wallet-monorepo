@@ -8,11 +8,9 @@ const TxProposalChip = () => {
       <TooltipTrigger
         render={
           <span tabIndex={0}>
-            <Badge variant="secondary" className="text-primary gap-1">
+            <Badge variant="subtle">
               <InfoIcon className="size-3" />
-              <span data-testid="proposal-status" className="font-bold">
-                Proposal
-              </span>
+              <span data-testid="proposal-status">Proposal</span>
             </Badge>
           </span>
         }

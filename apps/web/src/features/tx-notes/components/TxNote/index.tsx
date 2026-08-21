@@ -15,7 +15,7 @@ export default function TxNote({ txDetails }: { txDetails: TransactionDetails | 
 
   return (
     <div>
-      <TxSectionTitle>
+      <TxSectionTitle className="gap-0">
         Note
         <Tooltip>
           <TooltipTrigger
@@ -40,7 +40,7 @@ export default function TxNote({ txDetails }: { txDetails: TransactionDetails | 
       <Typography
         data-testid="tx-note"
         variant="paragraph"
-        className="mt-2 rounded bg-[var(--color-background-main)] p-4"
+        className="mt-2 rounded-lg bg-[var(--color-background-main)] p-4"
       >
         {note}
       </Typography>

@@ -21,7 +21,7 @@ import { cn } from '@/utils/cn'
  * @remarks
  * Key Props:
  * - `orientation` ('horizontal' | 'vertical')
- * - `bleed` ('none' | '3' | '4' | '6' | 'auto') — see below
+ * - `bleed` ('none' | '3' | '4' | '6') — see below
  * - `className` — see Base UI
  */
 
@@ -42,13 +42,6 @@ const separatorVariants = cva(
        */
       bleed: {
         none: 'data-[orientation=horizontal]:w-full',
-        /**
-         * Width only, no margins: the caller supplies them. For containers whose padding is not a
-         * single Tailwind step or is asymmetric (e.g. TxDetails' signer column, which adds the page
-         * edge inset to its right padding only). `w-auto` is what lets a negative margin actually
-         * widen the rule instead of just shifting it.
-         */
-        auto: 'data-[orientation=horizontal]:w-auto',
         '3': 'data-[orientation=horizontal]:-mx-3 data-[orientation=horizontal]:w-[calc(100%+(2*(var(--spacing)*3)))]',
         '4': 'data-[orientation=horizontal]:-mx-4 data-[orientation=horizontal]:w-[calc(100%+(2*(var(--spacing)*4)))]',
         '6': 'data-[orientation=horizontal]:-mx-6 data-[orientation=horizontal]:w-[calc(100%+(2*(var(--spacing)*6)))]',

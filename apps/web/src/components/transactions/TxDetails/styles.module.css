@@ -36,21 +36,26 @@
 .inlineSimulation {
   display: flex;
   justify-content: flex-end;
-  margin: var(--space-2);
+  margin: var(--space-2) var(--space-2) 0;
   position: absolute;
   right: 0;
   top: 0;
   z-index: 1;
 }
 
-/* `--tx-details-edge-inset` is the horizontal room the surrounding panel gives up so the rules
-   below can reach the card's edges — set by the transaction list item, 0 elsewhere (message and
-   recovery details already render in an unpadded panel, so they are unaffected). Each block re-adds
-   it on the side that meets a card edge: a border spans its element's border box, so padding moves
-   the text without moving the rule. */
+/* QueuedTxSimulation renders nothing when it cannot simulate, 
+   and below 1350px this wrapper is in flow — so its margin left a gap. */
+.inlineSimulation:empty {
+  display: none;
+}
+
+/* `--tx-details-edge-inset` is the horizontal padding the transaction list item drops so these
+   borders span the card; 0 elsewhere. Blocks re-add it where their text would otherwise hug an edge:
+   a border spans the border box, so padding moves the text without moving the line. */
+
 .txNote {
   margin: var(--space-1) 0;
-  padding: 0 var(--space-2) var(--space-2) calc(var(--space-2) + var(--tx-details-edge-inset, 0px));
+  padding: 0 var(--space-2) var(--space-2);
   border-bottom: 1px solid var(--border);
 }
 
@@ -63,7 +68,6 @@
 .advancedDetails,
 .txModule {
   padding: var(--space-2);
-  padding-left: calc(var(--space-2) + var(--tx-details-edge-inset, 0px));
 }
 
 /* No column split in these states, so both sides sit on a card edge. */
@@ -90,7 +94,6 @@
   width: 33.3%;
   flex-direction: column;
   padding: var(--space-3);
-  padding-right: calc(var(--space-3) + var(--tx-details-edge-inset, 0px));
   border-left: 1px solid var(--border);
   gap: var(--space-2);
   position: relative;
@@ -101,15 +104,7 @@
   padding: 0 var(--space-1);
 }
 
-.multiSend {
-  border-bottom: 1px solid var(--border);
-  /* No padding of its own — the batch rows bring theirs — so it only owes the edge inset. */
-  padding-left: var(--tx-details-edge-inset, 0px);
-}
-
-/* Just the rule, for blocks that already own their horizontal padding. `.multiSend` cannot be
-   reused there: its `padding-left` is declared later in this file, so it silently zeroes whatever
-   padding the block brought — including a Tailwind `px-*` utility. */
+/* Just the rule, for blocks that already own their horizontal padding. */
 .blockBorder {
   border-bottom: 1px solid var(--border);
 }
@@ -143,8 +138,6 @@
     width: 100%;
     border-left: 0;
     border-top: 1px solid var(--border);
-    /* Stacked, so the side that used to face the vertical rule is now a card edge as well. */
-    padding-left: calc(var(--space-3) + var(--tx-details-edge-inset, 0px));
   }
 
   .txNote,

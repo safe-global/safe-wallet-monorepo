@@ -59,15 +59,18 @@ export const HnQueueAssessmentBanner = ({
     }
 
     return (
-      <Alert variant="default">
+      <Alert variant="subtle">
         <LockIcon />
         <AlertDescription>
           <div className="flex flex-col gap-2">
-            <Typography variant="paragraph-small" className="text-[var(--color-text-secondary)]">
-              Log in to Hypernative to view security scan result.
-            </Typography>
-            <ExternalLink onClick={handleLogin} href="#" noIcon={false} className="inline-flex self-start underline">
-              <Typography variant="paragraph-small-bold">Log in</Typography>
+            <Typography variant="paragraph-small">Log in to Hypernative to view security scan result.</Typography>
+            <ExternalLink
+              onClick={handleLogin}
+              href="#"
+              noIcon={false}
+              className="inline-flex self-start hover:text-[var(--color-primary-light)]!"
+            >
+              Log in
             </ExternalLink>
           </div>
         </AlertDescription>
@@ -94,7 +97,7 @@ export const HnQueueAssessmentBanner = ({
               trackEvent(HYPERNATIVE_EVENTS.SECURITY_REPORT_CLICKED)
             }}
             href={assessmentUrl}
-            className="inline-flex self-start underline"
+            className="inline-flex self-start"
           >
             <Typography variant="paragraph-small-bold">View details</Typography>
           </ExternalLink>

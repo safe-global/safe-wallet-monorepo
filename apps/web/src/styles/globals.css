@@ -65,7 +65,7 @@ button {
      `--page-header-height` is an SSR/first-paint fallback — useCssHeightVar overwrites it with the
      measured height, since the header grows when its actions wrap. */
   --page-header-top: calc(var(--header-height) - 76px);
-  --page-header-height: 84px;
+  --page-header-height: 68px;
   --page-header-bottom: calc(var(--page-header-top) + var(--page-header-height));
 }
 

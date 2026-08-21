@@ -4,8 +4,8 @@
   padding-bottom: 0;
   overflow: hidden;
   border-radius: var(--radius-lg);
-  /* The tx-type colour coding rides on the border, not a full tint: the fill stays the card surface
-     so this panel reads like every other card instead of washing the whole block in colour. */
+  /* The tx-type colour coding rides on the border and the open row's tint; the card fill itself stays
+     neutral so the whole block is never washed in colour. */
   background-color: var(--card);
   border: 1px solid var(--accordion-border-active);
   box-shadow: none;
@@ -24,6 +24,12 @@
 
 .trigger:hover {
   background-color: transparent !important;
+}
+
+/* Open row takes the tx-type tint. Child combinators: a descendant match would let an enclosing open
+   accordion tint this row while it is closed. */
+[data-slot='accordion-item'][data-open] > * > .trigger {
+  background-color: var(--accordion-fill-active) !important;
 }
 
 .content {

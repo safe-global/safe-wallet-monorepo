@@ -51,7 +51,9 @@ function TooltipTrigger({ ...props }: TooltipPrimitive.Trigger.Props) {
 function TooltipContent({
   className,
   side = 'top',
-  sideOffset = 4,
+  // The arrow tip protrudes ~4px past the popup edge, so the DS's 4px visual gap
+  // between tooltip and trigger needs an 8px offset on the popup box.
+  sideOffset = 8,
   align = 'center',
   alignOffset = 0,
   children,

@@ -5,7 +5,7 @@ import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/aler
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import TxConfirmations from '@/components/transactions/TxConfirmations'
-import { AuditRow, AuditLogHeader, useCopyToClipboard } from '@/components/common/AuditLog'
+import { AuditLog, AuditRow, AuditLogHeader, useCopyToClipboard } from '@/components/common/AuditLog'
 
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsPending from '@/hooks/useIsPending'
@@ -62,12 +62,12 @@ const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
             <span tabIndex={0}>
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="icon-xs"
                 className="text-inherit"
                 disabled
                 aria-label="Copy transaction hash"
               >
-                <HashIcon className="size-5" />
+                <HashIcon className="size-4" />
               </Button>
             </span>
           }
@@ -84,14 +84,14 @@ const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
           <Button
             data-testid="copy-tx-hash-btn"
             variant="ghost"
-            size="icon-sm"
+            size="icon-xs"
             className="text-inherit"
             onClick={handleCopy}
             // MUI's Tooltip put its `title` on the child as an aria-label; Base UI's wires no ARIA at
             // all, so an icon-only trigger needs its own name or it announces as just "button".
             aria-label="Copy transaction hash"
           >
-            <HashIcon className="size-5" />
+            <HashIcon className="size-4" />
           </Button>
         }
       />
@@ -118,11 +118,11 @@ const TxAuditLogActions = ({
       <Button
         data-testid="share-tx-link-btn"
         variant="ghost"
-        size="icon-sm"
+        size="icon-xs"
         className="text-inherit"
         aria-label="Copy transaction link"
       >
-        <Copy className="size-5" />
+        <Copy className="size-4" />
       </Button>
     </TxShareLinkWrapper>
     {explorerLink ? (
@@ -132,8 +132,8 @@ const TxAuditLogActions = ({
         <TooltipTrigger
           render={
             <span tabIndex={0}>
-              <Button variant="ghost" size="icon-sm" disabled aria-label="View on block explorer">
-                <ExplorerFallbackIcon className="size-5" />
+              <Button variant="ghost" size="icon-xs" disabled aria-label="View on block explorer">
+                <ExplorerFallbackIcon className="size-4" />
               </Button>
             </span>
           }
@@ -190,7 +190,7 @@ const TxSigners = ({
     if (!txDetails.executedAt) return null
 
     return (
-      <div data-testid="transaction-actions-list">
+      <AuditLog data-testid="transaction-actions-list">
         <AuditLogHeader
           actions={<TxAuditLogActions txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />}
         />
@@ -202,7 +202,7 @@ const TxSigners = ({
           timestamp={txDetails.executedAt}
           isLast
         />
-      </div>
+      </AuditLog>
     )
   }
 
@@ -213,7 +213,7 @@ const TxSigners = ({
     const moduleName = detailedExecutionInfo.address.name?.replace(/([a-z])([A-Z])/g, '$1 $2')
 
     return (
-      <div data-testid="transaction-actions-list">
+      <AuditLog data-testid="transaction-actions-list">
         <AuditLogHeader
           actions={<TxAuditLogActions txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />}
         />
@@ -234,7 +234,7 @@ const TxSigners = ({
           timestamp={txDetails.executedAt}
           isLast
         />
-      </div>
+      </AuditLog>
     )
   }
 
@@ -261,7 +261,7 @@ const TxSigners = ({
   const showExecutionRow = isConfirmed || !!executor || txDetails.txStatus !== 'AWAITING_CONFIRMATIONS'
 
   return (
-    <div data-testid="transaction-actions-list">
+    <AuditLog data-testid="transaction-actions-list">
       <AuditLogHeader
         chip={
           <TxConfirmations
@@ -342,7 +342,7 @@ const TxSigners = ({
           <AlertDescription>This order has expired. Reject this transaction and try again.</AlertDescription>
         </Alert>
       )}
-    </div>
+    </AuditLog>
   )
 }
 
