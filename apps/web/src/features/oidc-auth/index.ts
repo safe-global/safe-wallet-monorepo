@@ -55,6 +55,7 @@ export { default as MemberTwoFactorBadge } from './components/MemberTwoFactorBad
 export { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE, isElevationRequiredError } from './utils/elevation'
 export { clearPendingStepUpAction, replayPendingStepUpAction } from './utils/stepUpReplay'
 export { startStepUp } from './utils/stepUp'
+export { useStepUpSplash } from './hooks/useStepUpSplash'
 
 // ─────────────────────────────────────────────────────────────────
 // 2FA STATUS DERIVATION (shared with the spaces Team page)
