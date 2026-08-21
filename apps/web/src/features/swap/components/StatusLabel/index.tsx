@@ -1,6 +1,6 @@
 import type { OrderStatuses } from '@safe-global/store/gateway/types'
 import type { ReactElement } from 'react'
-import { CircleCheck, CircleX, Clock, Contrast, FileSignature, type LucideIcon } from 'lucide-react'
+import { Ban, CircleCheck, CircleX, Clock, Contrast, FileSignature, type LucideIcon } from 'lucide-react'
 import TxStatusChip, { type TxStatusChipProps } from '@/components/transactions/TxStatusChip'
 
 type CustomOrderStatuses = OrderStatuses | 'partiallyFilled'
@@ -33,7 +33,7 @@ const statusMap: Record<CustomOrderStatuses, StatusProps> = {
   cancelled: {
     label: 'Cancelled',
     color: 'error',
-    icon: CircleX,
+    icon: Ban,
   },
   expired: {
     label: 'Expired',

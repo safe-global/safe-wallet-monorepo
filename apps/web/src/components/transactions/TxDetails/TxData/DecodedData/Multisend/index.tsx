@@ -102,6 +102,7 @@ const Multisend = ({
           txData={txData}
           actionTitle={`${index + 1}`}
           variant={compact ? 'outlined' : 'elevation'}
+          radius="none"
           expanded={openMap?.[index] ?? false}
           onChange={onChange}
           isExecuted={isExecuted}
@@ -129,9 +130,7 @@ const Multisend = ({
           </CardContent>
         </Card>
       ) : (
-        <div className="flex flex-col divide-y divide-border [&_[data-slot=card]]:rounded-none [&_[data-slot=accordion-content]>*]:px-4 [&_[data-slot=accordion-trigger]]:px-4">
-          {actionItems}
-        </div>
+        <div className="flex flex-col divide-y divide-border">{actionItems}</div>
       )}
     </>
   )

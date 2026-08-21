@@ -17,7 +17,7 @@ exports[`./index.stories Cancelled 1`] = `
       >
         <svg
           aria-hidden="true"
-          class="lucide lucide-circle-x"
+          class="lucide lucide-ban"
           fill="none"
           height="24"
           stroke="currentColor"
@@ -28,16 +28,13 @@ exports[`./index.stories Cancelled 1`] = `
           width="24"
           xmlns="http://www.w3.org/2000/svg"
         >
+          <path
+            d="M4.929 4.929 19.07 19.071"
+          />
           <circle
             cx="12"
             cy="12"
             r="10"
-          />
-          <path
-            d="m15 9-6 6"
-          />
-          <path
-            d="m9 9 6 6"
           />
         </svg>
         Cancelled

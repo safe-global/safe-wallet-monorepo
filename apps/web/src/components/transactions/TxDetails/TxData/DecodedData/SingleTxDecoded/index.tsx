@@ -22,6 +22,8 @@ type SingleTxDecodedProps = {
   txData: TransactionData
   actionTitle: string
   variant?: 'elevation' | 'outlined'
+  // Pass 'none' when stacking rows in a divided list, so their corners stay flush.
+  radius?: 'lg' | 'xl' | 'none'
   expanded?: boolean
   onChange?: OnAccordionChange
   isExecuted?: boolean
@@ -33,6 +35,7 @@ const SingleTxDecoded = ({
   txData,
   actionTitle,
   variant,
+  radius,
   expanded,
   onChange,
   isExecuted = false,
@@ -118,7 +121,13 @@ const SingleTxDecoded = ({
   return (
     <Accordion data-testid="action-accordion" {...accordionProps}>
       <AccordionItem value="action" className="border-0">
-        {isGrouped ? accordionBody : <Card size="none">{accordionBody}</Card>}
+        {isGrouped ? (
+          accordionBody
+        ) : (
+          <Card size="none" radius={radius}>
+            {accordionBody}
+          </Card>
+        )}
       </AccordionItem>
     </Accordion>
   )

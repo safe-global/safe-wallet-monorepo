@@ -32,14 +32,14 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background-color: var(--color-background-main);
+  background-color: var(--muted);
   flex-shrink: 0;
 }
 
 .timelineLine {
   width: 2px;
   flex: 1;
-  background-color: var(--color-background-main);
+  background-color: var(--border);
   min-height: 8px;
 }
 
