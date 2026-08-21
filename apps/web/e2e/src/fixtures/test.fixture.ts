@@ -16,7 +16,7 @@ import { SafeApiClient } from '../api/safe-api-client'
 import { LS_KEYS, STAGING_CGW_URL } from '../data/constants'
 import { WalletPage } from '../pages/wallet.page'
 import { getWalletCredentials, type WalletCredentials } from '../data/credentials'
-import { version as TERMS_VERSION } from '../../../src/markdown/terms/version'
+import { version as TERMS_VERSION } from '@/markdown/terms/version'
 
 // Cookie consent state — mirrors Cypress localstorage_data.js.
 // `hasAcceptedTerms` only treats consent as valid when `termsVersion` matches
