@@ -149,32 +149,33 @@ The project uses `@safe-global/theme` package as a single source of truth for al
 
 - **Unified Palettes**: Light and dark mode color palettes shared between platforms
 - **Dual Spacing Systems**: 4px base for mobile, 8px base for web (with overlapping values using same names)
-- **Platform Generators**: Automatic generation of MUI themes (web) and Tamagui tokens (mobile)
+- **Platform Generators**: Automatic generation of CSS variables (web) and Tamagui tokens (mobile)
 - **Static Colors**: Theme-independent brand colors available to both platforms
 
 ### Usage
 
-**Web (MUI)**:
+The package has no barrel export — always import from a sub-path.
+
+**Web (shadcn/ui + Tailwind)**:
+
+Web consumes the theme as CSS variables, not a JS theme object: `packages/theme` → `yarn css-vars` → `src/styles/vars.css` → `src/styles/shadcn.css` → Tailwind utilities. Style with Tailwind classes and the `cva` variants on the `@/components/ui/*` primitives. Read a palette in JS only for non-CSS consumers (canvas, QR codes, meta tags, third-party widgets):
 
 ```typescript
-import { generateMuiTheme } from '@safe-global/theme'
-
-const theme = generateMuiTheme('light') // or 'dark'
+import { lightPalette, darkPalette } from '@safe-global/theme/palettes'
 ```
 
 **Mobile (Tamagui)**:
 
 ```typescript
-import { generateTamaguiTokens, generateTamaguiThemes } from '@safe-global/theme'
-
-const tokens = generateTamaguiTokens()
-const themes = generateTamaguiThemes()
+import { generateTamaguiColorTokens, generateTamaguiFontSizes } from '@safe-global/theme/generators/tamagui'
 ```
 
 **Direct Token Access**:
 
 ```typescript
-import { lightPalette, darkPalette, spacingMobile, spacingWeb, typography } from '@safe-global/theme'
+import { lightPalette, darkPalette } from '@safe-global/theme/palettes'
+import { spacingMobile, spacingWeb } from '@safe-global/theme/tokens/spacing'
+import { typography } from '@safe-global/theme/tokens/typography'
 ```
 
 ### Modifying Theme
@@ -202,7 +203,7 @@ To add or modify colors/tokens:
 - Treat code comments as tech debt! Add them only when really necessary & the code at hand is hard to understand.
 - **Use sentence case for UI text** – Buttons, headings, labels, warnings, and other UI copy should use sentence case (e.g., "Add new owner") not Title Case (e.g., "Add New Owner")
 
-Web-specific principles (feature architecture, MUI theme, vars.css, feature flags, Storybook story requirement) live in [apps/web/AGENTS.md](apps/web/AGENTS.md). Mobile-specific principles live in [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md).
+Web-specific principles (feature architecture, shadcn/ui + Tailwind styling, vars.css, feature flags, Storybook story requirement) live in [apps/web/AGENTS.md](apps/web/AGENTS.md). Mobile-specific principles live in [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md).
 
 ## Testing Requirements
 
