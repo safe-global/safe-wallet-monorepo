@@ -1,0 +1,30 @@
+name: Web Playwright full regression on demand tests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * 1-5'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    name: Playwright full regression on demand tests
+    permissions:
+      contents: read
+
+    # Single job while the suite is small. If the migration makes this run too long,
+    # shard it the way ./.github/actions/cypress does: a matrix plus an integer index
+    # input used for the artifact name (Playwright takes `--shard=<index>/<total>`).
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/playwright
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          grep: '@regression|@smoke|@api'
+          name: regression

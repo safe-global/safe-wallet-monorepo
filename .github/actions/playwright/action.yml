@@ -1,0 +1,59 @@
+name: 'Playwright'
+
+description: 'Run Playwright E2E tests'
+
+inputs:
+  secrets:
+    description: 'GitHub secrets as JSON'
+    required: true
+
+  grep:
+    description: 'Tag expression selecting which tests to run (e.g. "@smoke|@api")'
+    required: true
+
+  name:
+    description: 'Short run name, used for artifact names (e.g. "smoke")'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: ./.github/actions/yarn
+
+    - uses: ./.github/actions/build
+      with:
+        secrets: ${{ inputs.secrets }}
+      env:
+        # `next build` rewrites NODE_ENV to 'production' in client bundles, so APP_ENV-based
+        # IS_TEST_E2E never survives a build anyway — this NEXT_PUBLIC_ flag is what actually
+        # sets it, keeping Datadog RUM off during test runs.
+        NEXT_PUBLIC_IS_TEST_E2E: 'true'
+
+    - name: Install Playwright browser
+      shell: bash
+      working-directory: apps/web
+      run: npx playwright install --with-deps chromium
+
+    - name: Run Playwright tests
+      shell: bash
+      working-directory: apps/web
+      # The config's `webServer` block serves ./out on :8080 when CI is set and
+      # PLAYWRIGHT_BASE_URL is not — no separate serve step needed here.
+      run: |
+        npx playwright test \
+          --config=e2e/playwright.config.ts \
+          --grep "${{ inputs.grep }}"
+      env:
+        CI: 'true'
+        CYPRESS_WALLET_CREDENTIALS: ${{ fromJSON(inputs.secrets).CYPRESS_WALLET_CREDENTIALS }}
+
+    - name: Upload report
+      if: failure()
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: playwright-${{ inputs.name }}
+        path: |
+          apps/web/e2e/reports
+          apps/web/e2e/test-results
+        retention-days: 7
+        if-no-files-found: ignore
