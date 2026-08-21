@@ -43,7 +43,7 @@ export default function TxNoteInput({ onChange }: { onChange: (note: string) => 
         render={({ field }) => (
           <Field>
             <FieldLabel htmlFor="tx-note-input">Optional</FieldLabel>
-            <InputGroup data-testid="tx-note-textfield">
+            <InputGroup inputSize="hero" data-testid="tx-note-textfield">
               <InputGroupInput
                 name={field.name}
                 id="tx-note-input"

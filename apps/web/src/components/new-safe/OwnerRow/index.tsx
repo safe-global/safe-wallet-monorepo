@@ -126,7 +126,9 @@ const OwnerRow = ({
         )}
       </div>
       {!readOnly && (
-        <div className="col-span-1 -ml-4 flex shrink-0 items-center self-stretch">
+        // Offset past the label (text-sm x leading-snug + Field's gap-3, Tailwind's scale) so the
+        // button centres on the 66px field, not the cell — which grows with the wallet caption.
+        <div className="col-span-1 -ml-4 mt-[calc(0.875rem*1.375+0.75rem)] flex h-[66px] shrink-0 items-center">
           {removable && (
             <Button
               variant="ghost"

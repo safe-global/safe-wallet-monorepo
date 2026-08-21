@@ -121,6 +121,7 @@ function SetNameStep({
           <div className="grid grid-cols-12 gap-2">
             <div className="col-span-12">
               <NameInput
+                inputSize="hero"
                 name={SetNameStepFields.name}
                 label={errors?.[SetNameStepFields.name]?.message || 'Name'}
                 placeholder={fallbackName}
