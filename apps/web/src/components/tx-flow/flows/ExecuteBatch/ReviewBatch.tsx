@@ -42,6 +42,7 @@ import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/u
 import { useSafeShield, useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { fetchRecommendedParams } from '@/services/tx/tx-sender/recommendedNonce'
+import { runBatchExecutionPreChecks } from '@/services/tx/executionPreChecks'
 import { useMultiSendContract } from './useMultiSendContract'
 
 /**
@@ -181,6 +182,14 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
     setIsRejectedByUser(false)
 
     try {
+      // MultiSendCallOnly reverts with no data when an inner execTransaction
+      // fails, so a broken batch costs gas and tells the user nothing. Catch
+      // the causes we can name — a queue that moved, a signature that no longer
+      // verifies — before broadcasting either way (WA-3267).
+      if (txsWithDetails) {
+        await runBatchExecutionPreChecks({ txs: txsWithDetails, safe })
+      }
+
       await (willRelay ? onRelay() : onExecute())
       setTxFlow(undefined)
     } catch (_err) {

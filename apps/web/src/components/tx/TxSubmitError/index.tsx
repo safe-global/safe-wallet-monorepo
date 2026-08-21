@@ -1,8 +1,9 @@
 import type { ReactElement } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
-import { getGs026Message } from '@safe-global/utils/services/exceptions/contractErrors'
+import { getGs026Message, OPAQUE_REVERT_MESSAGE } from '@safe-global/utils/services/exceptions/contractErrors'
 import {
   isNonceTooLowError,
+  isOpaqueRevertError,
   isRateLimitError,
   isRevertError,
   RATE_LIMIT_USER_MESSAGE,
@@ -70,6 +71,18 @@ const TxSubmitError = ({
     return (
       <ErrorMessage error={error} level="error" context={context}>
         {getRevertedMessage(chain?.chainName)}
+      </ErrorMessage>
+    )
+  }
+
+  // A revert with no decodable reason. The toast says the same thing, and the
+  // two render together on a failed bulk execution — they must not offer two
+  // different explanations for one failure (WA-3267). Checked after the receipt
+  // so a mined revert keeps its gas-was-spent copy if it ever matches both.
+  if (isOpaqueRevertError(error)) {
+    return (
+      <ErrorMessage error={error} level="error" context={context}>
+        {OPAQUE_REVERT_MESSAGE}
       </ErrorMessage>
     )
   }

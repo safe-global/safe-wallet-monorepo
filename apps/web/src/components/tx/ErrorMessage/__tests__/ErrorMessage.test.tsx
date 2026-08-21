@@ -59,4 +59,45 @@ describe('ErrorMessage', () => {
     // The selector belongs in the support reference, never in the message body
     expect(queryByText(/0xdeadbeef.*failed|failed.*0xdeadbeef/)).not.toBeInTheDocument()
   })
+  it('offers no Details for a revert that carries no decodable payload', () => {
+    // MultiSendCallOnly swallows the inner reason, so ethers hands us the whole
+    // request as the message. There is nothing to reference and nothing safe to
+    // show (WA-3267).
+    const error = Object.assign(
+      new Error(
+        'execution reverted (no data present; likely require(false) occurred (action="estimateGas", data="0x", reason="require(false)", transaction={ "data": "0x0075fe14a68278bda1623e877aa155a9c97d106e7", "to": "0x9641d764fc13c8B624cO4430C7356C1C7C8102e2" }, code=CALL_EXCEPTION, version=6.17.0)',
+      ),
+      { code: 'CALL_EXCEPTION', data: '0x', reason: 'require(false)' },
+    )
+
+    const { getByText, queryByText } = render(
+      <ErrorMessage error={error}>Could not submit the transaction.</ErrorMessage>,
+    )
+
+    expect(getByText('Could not submit the transaction.')).toBeInTheDocument()
+    expect(queryByText('Details')).not.toBeInTheDocument()
+    expect(queryByText(/require\(false\)/)).not.toBeInTheDocument()
+    expect(queryByText(/version=6\.17\.0/)).not.toBeInTheDocument()
+    expect(queryByText(/0x9641d764/)).not.toBeInTheDocument()
+  })
+  it('keeps a decoded revert reason but not the payload around it', () => {
+    const error = Object.assign(
+      new Error(
+        'execution reverted: ERC20: transfer amount exceeds balance (action="estimateGas", data="0x08c379a0deadbeef", code=CALL_EXCEPTION, version=6.17.0)',
+      ),
+      {
+        code: 'CALL_EXCEPTION',
+        data: `0x08c379a0${'00'.repeat(64)}`,
+        reason: 'ERC20: transfer amount exceeds balance',
+      },
+    )
+
+    const { getByText, queryByText } = render(<ErrorMessage error={error}>Could not submit.</ErrorMessage>)
+
+    fireEvent.click(getByText('Details'))
+
+    expect(getByText('ERC20: transfer amount exceeds balance')).toBeInTheDocument()
+    expect(queryByText(/version=6\.17\.0/)).not.toBeInTheDocument()
+    expect(queryByText(/0x08c379a0deadbeef/)).not.toBeInTheDocument()
+  })
 })

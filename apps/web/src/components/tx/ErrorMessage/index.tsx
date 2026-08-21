@@ -1,6 +1,6 @@
 import { type ReactElement, type ReactNode, type SyntheticEvent, useState } from 'react'
 import { getGsCodeFromError } from '@safe-global/utils/services/exceptions/contractErrors'
-import { getGuardErrorInfo, isRevertError } from '@/utils/transaction-errors'
+import { getErrorReference, getGuardErrorInfo, isRevertError } from '@/utils/transaction-errors'
 import { decodeCustomError } from '@/utils/customErrorRegistry'
 import { getBlockExplorerLink } from '@/utils/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -52,6 +52,12 @@ const ErrorMessage = ({
     error && (gsCode === 'GS013' || (!gsCode && isRevertError(error))) ? decodeCustomError(error) : undefined
   const effectiveGsCode = gsCode ?? (customError ? 'GS013' : undefined)
 
+  // What is safe to show behind "Details" — the same rule the transaction
+  // toast follows, so the two surfaces cannot drift (WA-3267). A revert never
+  // yields its raw dump; when there is nothing left to reference the
+  // affordance is hidden rather than offered empty.
+  const reference = error ? getErrorReference(error) : undefined
+
   // Check if this is a Guard error that should get special treatment
   const guardErrorName = error && context ? getGuardErrorInfo(error) : undefined
   const guardExplorerLink =
@@ -92,7 +98,7 @@ const ErrorMessage = ({
             </span>
           )}
 
-          {error && !effectiveGsCode && (
+          {error && !effectiveGsCode && reference && (
             <Link
               render={<button type="button" />}
               onClick={onDetailsToggle}
@@ -106,10 +112,10 @@ const ErrorMessage = ({
         {effectiveGsCode ? (
           <ErrorDetails code={effectiveGsCode} customError={customError} />
         ) : (
-          error &&
+          reference &&
           showDetails && (
             <Typography variant="paragraph-small" color="muted" className="mt-2 block break-words">
-              {error.message.replace(ETHERS_PREFIX, '').trim().slice(0, 500)}
+              {reference.replace(ETHERS_PREFIX, '').trim().slice(0, 500)}
             </Typography>
           )
         )}

@@ -2,7 +2,7 @@
  * Utilities for detecting and handling specific transaction errors
  */
 import { BaseError } from 'viem'
-import { getKnownCustomError } from '@/utils/customErrorRegistry'
+import { extractRevertSelector, getKnownCustomError } from '@/utils/customErrorRegistry'
 import { getGsCodeFromError } from '@safe-global/utils/services/exceptions/contractErrors'
 
 /**
@@ -97,6 +97,71 @@ export const isRateLimitError = (error: unknown): boolean => {
   }
 
   return false
+}
+
+/**
+ * Detects a revert that carries no reason anyone can decode.
+ *
+ * MultiSend and MultiSendCallOnly do `revert(0, 0)` when an inner call fails,
+ * destroying the child's revert data. A failing batch therefore reaches us as a
+ * bare `require(false)` with an empty payload: no GS code, no custom-error
+ * selector, nothing to look up. The only honest thing we can tell the user is
+ * that something in the transaction fails on-chain, and that splitting the
+ * batch is what surfaces the real reason.
+ *
+ * Deliberately narrow — it demands positive proof that the payload is empty.
+ * A revert with anything decodable (a GS code, an `Error(string)`, a module or
+ * guard custom error) keeps its own specific message.
+ */
+export const isOpaqueRevertError = (error: unknown): boolean => {
+  if (!isRevertError(error)) return false
+
+  // Anything we can name is not opaque.
+  if (getGsCodeFromError(error as { message?: string; reason?: string; code?: unknown })) return false
+  if (extractRevertSelector(error)) return false
+
+  const { data, message } = error as { data?: unknown; message?: string }
+
+  // ethers: an empty revert payload, reported either structurally or in text
+  if (data === '0x') return true
+
+  // viem: `ExecutionRevertedError` folds the missing reason into its message
+  // ("Execution reverted for an unknown reason.") rather than a field. It is
+  // the shape the protocol-kit execution paths throw, where ethers' never
+  // reach us.
+  return typeof message === 'string' && /no data present|require\(false\)|for an unknown reason/i.test(message)
+}
+
+/**
+ * The `Error(string)` selector: a plain `require(cond, "reason")` revert, which
+ * ethers and viem both decode into a human sentence on the error itself.
+ */
+const STRING_REVERT_SELECTOR = '0x08c379a0'
+
+/**
+ * What may be shown behind "Details" for an error — the one rule both the toast
+ * and the inline alert follow, so the two surfaces cannot drift (WA-3267).
+ *
+ * A revert never gets its raw message: that string is the ethers/viem dump,
+ * carrying calldata, contract addresses and the library version (WA-3005 #6).
+ * What survives is what we can name — the GS code, or a decoded
+ * `Error(string)` reason, which the chain wrote for a human to read. Anything
+ * else gets no Details at all rather than an empty one.
+ *
+ * Non-revert errors keep their message: those are usually sentences we wrote
+ * ourselves (a relay timeout, "transaction not found") and are the only
+ * explanation the user gets.
+ */
+export const getErrorReference = (error: Error): string | undefined => {
+  if (!isRevertError(error)) return error.message
+
+  const gsCode = getGsCodeFromError(error)
+  if (gsCode) return `Error code ${gsCode}`
+
+  if (extractRevertSelector(error) === STRING_REVERT_SELECTOR) {
+    const { reason } = error as Error & { reason?: string }
+    return reason || undefined
+  }
 }
 
 /**

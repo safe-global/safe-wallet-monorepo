@@ -1,9 +1,12 @@
 import { ethers } from 'ethers'
 import type { SafeTransaction, SafeSignature } from '@safe-global/types-kit'
-import { GS026_MESSAGES } from '@safe-global/utils/services/exceptions/contractErrors'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
+import { getGs026BatchMessage, GS026_MESSAGES } from '@safe-global/utils/services/exceptions/contractErrors'
 import {
   Gs026PreCheckError,
   isGs026PreCheckError,
+  runBatchExecutionPreChecks,
   runExecutionPreChecks,
   validateTxSignatures,
 } from '../executionPreChecks'
@@ -240,6 +243,114 @@ describe('executionPreChecks', () => {
       expect(isGs026PreCheckError(new Gs026PreCheckError('STALE_NONCE'))).toBe(true)
       expect(isGs026PreCheckError(new Error(GS026_MESSAGES.STALE_NONCE))).toBe(false)
       expect(isGs026PreCheckError(undefined)).toBe(false)
+    })
+  })
+  const createBatchTx = (
+    nonce: number,
+    signatures: SafeSignature[] = [validSignature()],
+    safeTxHash: string = SAFE_TX_HASH,
+  ): TransactionDetails =>
+    ({
+      txId: `multisig_0x5AFE_${nonce}`,
+      detailedExecutionInfo: {
+        type: DetailedExecutionInfoType.MULTISIG,
+        nonce,
+        safeTxHash,
+        confirmations: signatures.map((sig) => ({ signer: { value: sig.signer }, signature: sig.staticPart() })),
+      },
+    }) as unknown as TransactionDetails
+
+  describe('runBatchExecutionPreChecks', () => {
+    const safe = createSafe()
+
+    it('passes a batch whose nonces start at the chain nonce and run sequentially', async () => {
+      mockGetNonces.mockResolvedValue({ currentNonce: 17, recommendedNonce: 19 })
+
+      await expect(
+        runBatchExecutionPreChecks({ txs: [createBatchTx(17), createBatchTx(18)], safe }),
+      ).resolves.toBeUndefined()
+    })
+
+    it('blocks a batch whose first transaction already used its nonce', async () => {
+      mockGetNonces.mockResolvedValue({ currentNonce: 18, recommendedNonce: 20 })
+
+      await expect(runBatchExecutionPreChecks({ txs: [createBatchTx(17), createBatchTx(18)], safe })).rejects.toThrow(
+        getGs026BatchMessage('STALE_NONCE', 1),
+      )
+    })
+
+    it('names the offending position when a later nonce is out of sequence', async () => {
+      mockGetNonces.mockResolvedValue({ currentNonce: 17, recommendedNonce: 20 })
+
+      // 17, then 19 — the queue moved under us and 18 is gone
+      await expect(runBatchExecutionPreChecks({ txs: [createBatchTx(17), createBatchTx(19)], safe })).rejects.toThrow(
+        getGs026BatchMessage('STALE_NONCE', 2),
+      )
+    })
+
+    it('blocks a batch carrying a signature that does not recover to its signer', async () => {
+      mockGetNonces.mockResolvedValue({ currentNonce: 17, recommendedNonce: 19 })
+
+      await expect(
+        runBatchExecutionPreChecks({
+          txs: [createBatchTx(17), createBatchTx(18, [wrongSignerSignature()])],
+          safe,
+        }),
+      ).rejects.toThrow(getGs026BatchMessage('BAD_SIGNATURE', 2))
+    })
+
+    it('throws an error the UI can recognise as a GS026 pre-check', async () => {
+      mockGetNonces.mockResolvedValue({ currentNonce: 18, recommendedNonce: 20 })
+
+      const error = await runBatchExecutionPreChecks({ txs: [createBatchTx(17)], safe }).catch((e) => e)
+
+      expect(isGs026PreCheckError(error)).toBe(true)
+      expect(error.reason).toBe('STALE_NONCE')
+      expect(error.code).toBe('GS026')
+    })
+
+    it('skips the nonce check rather than blocking when the nonce cannot be fetched', async () => {
+      mockGetNonces.mockResolvedValue(undefined)
+
+      await expect(runBatchExecutionPreChecks({ txs: [createBatchTx(99)], safe })).resolves.toBeUndefined()
+    })
+
+    it('skips the nonce check for a counterfactual Safe, which has no chain nonce', async () => {
+      await expect(
+        runBatchExecutionPreChecks({ txs: [createBatchTx(3)], safe: createSafe({ deployed: false }) }),
+      ).resolves.toBeUndefined()
+      expect(mockGetNonces).not.toHaveBeenCalled()
+    })
+
+    it('does not flag a nested-Safe (contract) signature it cannot verify locally', async () => {
+      mockGetNonces.mockResolvedValue({ currentNonce: 17, recommendedNonce: 18 })
+
+      // CGW returns the full dynamic blob for a contract signature; its trailing
+      // byte is data, not a `v` value, so it must not be read as one
+      const nestedSafeSig: SafeSignature = {
+        ...validSignature(),
+        staticPart: () => `${validSignature().staticPart()}${'ab'.repeat(32)}`,
+      }
+
+      await expect(
+        runBatchExecutionPreChecks({ txs: [createBatchTx(17, [nestedSafeSig])], safe }),
+      ).resolves.toBeUndefined()
+    })
+
+    it('does not flag an on-chain approval, which carries no signature to verify', async () => {
+      mockGetNonces.mockResolvedValue({ currentNonce: 17, recommendedNonce: 18 })
+
+      const approved = {
+        txId: 'multisig_0x5AFE_17',
+        detailedExecutionInfo: {
+          type: DetailedExecutionInfoType.MULTISIG,
+          nonce: 17,
+          safeTxHash: SAFE_TX_HASH,
+          confirmations: [{ signer: { value: signerWallet.address }, signature: null }],
+        },
+      } as unknown as TransactionDetails
+
+      await expect(runBatchExecutionPreChecks({ txs: [approved], safe })).resolves.toBeUndefined()
     })
   })
 })

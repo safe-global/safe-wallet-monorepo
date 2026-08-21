@@ -1,4 +1,4 @@
-import { BaseError } from 'viem'
+import { BaseError, ExecutionRevertedError } from 'viem'
 import {
   isGuardError,
   extractGuardErrorCode,
@@ -7,6 +7,8 @@ import {
   isNonceTooLowError,
   isRateLimitError,
   isRevertError,
+  isOpaqueRevertError,
+  getErrorReference,
   GUARD_ERROR_CODES,
 } from '../transaction-errors'
 
@@ -172,6 +174,114 @@ describe('transaction-errors', () => {
       const inner = Object.assign(new BaseError('inner'), { code: -32602 })
       const outer = new BaseError('outer', { cause: inner })
       expect(isRateLimitError(outer)).toBe(false)
+    })
+  })
+  // The real shape ethers produces when MultiSendCallOnly does `revert(0, 0)`:
+  // a revert with an empty data payload, so there is nothing to decode.
+  const dataLessRevert = () =>
+    Object.assign(
+      new Error(
+        'execution reverted (no data present; likely require(false) occurred (action="estimateGas", data="0x", reason="require(false)", code=CALL_EXCEPTION, version=6.17.0)',
+      ),
+      { code: 'CALL_EXCEPTION', data: '0x', reason: 'require(false)' },
+    )
+
+  describe('isOpaqueRevertError', () => {
+    it('detects a revert that carries no decodable payload', () => {
+      expect(isOpaqueRevertError(dataLessRevert())).toBe(true)
+    })
+
+    it('detects an empty revert payload even without the explanatory message text', () => {
+      expect(
+        isOpaqueRevertError(Object.assign(new Error('execution reverted'), { code: 'CALL_EXCEPTION', data: '0x' })),
+      ).toBe(true)
+    })
+
+    it('does not match a revert we can already decode', () => {
+      // GS013: the code is in the message, so the GS mapping handles it
+      expect(
+        isOpaqueRevertError(Object.assign(new Error('execution reverted: GS013'), { code: 'CALL_EXCEPTION' })),
+      ).toBe(false)
+      // A GS revert carrying its Error(string) payload
+      expect(
+        isOpaqueRevertError(
+          Object.assign(new Error('execution reverted'), {
+            code: 'CALL_EXCEPTION',
+            reason: 'GS026',
+            data: '0x08c379a000000000000000000000000000000000000000000000000000000000000000204753303236',
+          }),
+        ),
+      ).toBe(false)
+      // A module/guard custom error — the selector is shown in the support reference
+      expect(
+        isOpaqueRevertError(
+          Object.assign(new Error('execution reverted'), { code: 'CALL_EXCEPTION', data: '0x70cc6907' }),
+        ),
+      ).toBe(false)
+    })
+
+    it('does not match an infrastructure failure', () => {
+      expect(isOpaqueRevertError(new Error('The request timed out.'))).toBe(false)
+      expect(isOpaqueRevertError(Object.assign(new Error('HTTP request failed.'), { status: 429 }))).toBe(false)
+      expect(isOpaqueRevertError(null)).toBe(false)
+      expect(isOpaqueRevertError(undefined)).toBe(false)
+    })
+
+    it('does not match a wallet rejection', () => {
+      expect(isOpaqueRevertError(Object.assign(new Error('user rejected action'), { code: 'ACTION_REJECTED' }))).toBe(
+        false,
+      )
+    })
+    it('detects the viem shape too — protocol-kit execution paths never throw ethers errors', () => {
+      // viem folds a missing reason into the message rather than a field
+      const executionReverted = new ExecutionRevertedError({})
+
+      expect(executionReverted.message).toContain('for an unknown reason')
+      expect(isOpaqueRevertError(executionReverted)).toBe(true)
+    })
+
+    it('does not match a viem revert that reports a reason', () => {
+      const withReason = new ExecutionRevertedError({ message: 'execution reverted: GS013' })
+      expect(isOpaqueRevertError(withReason)).toBe(false)
+    })
+  })
+
+  describe('getErrorReference', () => {
+    it('keeps our own message for a non-revert failure', () => {
+      const timeout = new Error('Transaction not relayed in 3 minutes.')
+      expect(getErrorReference(timeout)).toBe(timeout.message)
+    })
+
+    it('reduces a GS revert to its code, dropping the payload', () => {
+      const gs = Object.assign(new Error('execution reverted: GS013 (data="0xdead", version=6.17.0)'), {
+        code: 'CALL_EXCEPTION',
+        reason: 'GS013',
+      })
+      expect(getErrorReference(gs)).toBe('Error code GS013')
+    })
+
+    it('keeps a decoded Error(string) reason — the chain wrote it for a human', () => {
+      const stringRevert = Object.assign(
+        new Error('execution reverted: ERC20: transfer amount exceeds balance (data="0x08c379a0...", version=6.17.0)'),
+        {
+          code: 'CALL_EXCEPTION',
+          data: `0x08c379a0${'00'.repeat(64)}`,
+          reason: 'ERC20: transfer amount exceeds balance',
+        },
+      )
+      expect(getErrorReference(stringRevert)).toBe('ERC20: transfer amount exceeds balance')
+    })
+
+    it('gives nothing at all for a revert with no decodable reason', () => {
+      expect(getErrorReference(dataLessRevert())).toBeUndefined()
+    })
+
+    it('never returns a payload, address or library version for any revert', () => {
+      const custom = Object.assign(new Error('execution reverted (unknown custom error) version=6.17.0'), {
+        code: 'CALL_EXCEPTION',
+        data: '0x1234abcd',
+      })
+      expect(getErrorReference(custom)).toBeUndefined()
     })
   })
 })

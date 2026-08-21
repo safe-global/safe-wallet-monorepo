@@ -3,9 +3,11 @@ import CONTRACT_ERRORS, {
   GS026_MESSAGES,
   getContractErrorHandling,
   getContractErrorMessage,
+  getGs026BatchMessage,
   getGs026Message,
   getGsCodeFromError,
   isGsCode,
+  OPAQUE_REVERT_MESSAGE,
   type GsCode,
 } from '../contractErrors'
 
@@ -16,6 +18,10 @@ const ALL_USER_FACING_STRINGS = [
   ...Object.values(CONTRACT_ERRORS).map((meta) => meta.message),
   ...Object.values(GS026_MESSAGES),
   CONTRACT_ERROR_FALLBACK,
+  OPAQUE_REVERT_MESSAGE,
+  // Rendered, so the content rules run over the text a user actually sees
+  getGs026BatchMessage('STALE_NONCE', 2),
+  getGs026BatchMessage('BAD_SIGNATURE', 2),
 ]
 
 describe('contractErrors', () => {
@@ -49,6 +55,32 @@ describe('contractErrors', () => {
       expect(message).not.toMatch(/GS\d{3}/) // no GS code in the body
       expect(message).not.toMatch(/eth_[a-z]/i) // no RPC method names
       expect(message).not.toMatch(/0x[0-9a-f]{4,}/i) // no hex blobs / selectors
+    })
+  })
+
+  describe('getGs026BatchMessage', () => {
+    it('names the offending transaction by its position in the batch', () => {
+      expect(getGs026BatchMessage('STALE_NONCE', 2)).toBe(
+        'Transaction 2 in this batch no longer matches the queue. Refresh to get the current one.',
+      )
+      expect(getGs026BatchMessage('BAD_SIGNATURE', 1)).toBe(
+        'Could not verify a signature on transaction 1 in this batch. It has to be signed again.',
+      )
+    })
+
+    it('reads differently from the single-transaction message for the same cause', () => {
+      expect(getGs026BatchMessage('STALE_NONCE', 1)).not.toBe(getGs026Message('STALE_NONCE'))
+    })
+  })
+
+  describe('OPAQUE_REVERT_MESSAGE', () => {
+    it('does not claim anything about gas, which is unknowable at that point', () => {
+      expect(OPAQUE_REVERT_MESSAGE).not.toMatch(/gas/i)
+    })
+
+    it('never leaks the raw revert wording', () => {
+      expect(OPAQUE_REVERT_MESSAGE).not.toMatch(/require\(false\)/i)
+      expect(OPAQUE_REVERT_MESSAGE).not.toMatch(/revert/i)
     })
   })
 

@@ -16,12 +16,14 @@ import { getTxLink } from '@/utils/tx-link'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import {
+  getErrorReference,
   getGuardErrorInfo,
   isNonceTooLowError,
+  isOpaqueRevertError,
   isRateLimitError,
   RATE_LIMIT_USER_MESSAGE,
 } from '@/utils/transaction-errors'
-import { getGs026Message } from '@safe-global/utils/services/exceptions/contractErrors'
+import { getGs026Message, OPAQUE_REVERT_MESSAGE } from '@safe-global/utils/services/exceptions/contractErrors'
 
 const TxNotifications = {
   [TxEvent.SIGN_FAILED]: 'Failed to sign. Please try again.',
@@ -91,6 +93,12 @@ const useTxNotifications = (): void => {
           // being rate limited"); we replace the message but keep the original
           // in detailedMessage for debugging.
           message = RATE_LIMIT_USER_MESSAGE
+        } else if (isError && isOpaqueRevertError(detail.error)) {
+          // A revert with no decodable payload — typically MultiSend swallowing
+          // an inner failure. Checked last so every branch that CAN name a
+          // cause wins; `formatError` would otherwise surface the raw
+          // "Require(false)" here (WA-3267).
+          message = OPAQUE_REVERT_MESSAGE
         }
 
         const txId = 'txId' in detail ? detail.txId : undefined
@@ -110,7 +118,7 @@ const useTxNotifications = (): void => {
           showNotification({
             title: humanDescription,
             message,
-            detailedMessage: isError ? detail.error.message : undefined,
+            detailedMessage: isError ? getErrorReference(detail.error) : undefined,
             groupKey,
             variant: isError ? Variant.ERROR : isSuccess ? Variant.SUCCESS : Variant.INFO,
             link: txId

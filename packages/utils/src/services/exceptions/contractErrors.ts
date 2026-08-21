@@ -79,6 +79,26 @@ export const GS026_MESSAGES: Record<Gs026Reason, string> = {
   BAD_SIGNATURE: 'Could not verify your signature. Sign the transaction again.',
 }
 
+export const OPAQUE_REVERT_MESSAGE =
+  'This transaction fails on-chain without reporting a reason. If it bundles several transactions, execute them one at a time to find the one that fails.'
+
+/**
+ * The GS026 causes that are detectable per transaction inside a bulk
+ * execution. `NOT_SIGNER` is absent by construction: every batched transaction
+ * is already fully signed, and the batch is executed by MultiSendCallOnly
+ * rather than by the connected wallet, so the executor is never a signer.
+ *
+ * These name the offending transaction by its position in the batch — the same
+ * number the review screen shows — because the batch fails as a whole and the
+ * user otherwise cannot tell which one to fix.
+ */
+export type Gs026BatchReason = Extract<Gs026Reason, 'STALE_NONCE' | 'BAD_SIGNATURE'>
+
+const GS026_BATCH_MESSAGES: Record<Gs026BatchReason, string> = {
+  STALE_NONCE: 'Transaction {position} in this batch no longer matches the queue. Refresh to get the current one.',
+  BAD_SIGNATURE: 'Could not verify a signature on transaction {position} in this batch. It has to be signed again.',
+}
+
 const CONTRACT_ERRORS: Record<GsCode, ContractErrorMeta> = {
   // --- Bucket A: inline field validation, never an error state ---
   GS001: { message: 'Set a threshold before you continue', handling: 'inline-validation' },
@@ -181,5 +201,12 @@ export const getContractErrorHandling = (code: GsCode): ContractErrorHandling =>
 
 /** Resolve a specific GS026 cause to its message. */
 export const getGs026Message = (reason: Gs026Reason): string => GS026_MESSAGES[reason]
+
+/**
+ * Resolve a GS026 cause detected inside a bulk execution, naming the offending
+ * transaction by its 1-based position in the batch.
+ */
+export const getGs026BatchMessage = (reason: Gs026BatchReason, position: number): string =>
+  GS026_BATCH_MESSAGES[reason].replace('{position}', String(position))
 
 export default CONTRACT_ERRORS

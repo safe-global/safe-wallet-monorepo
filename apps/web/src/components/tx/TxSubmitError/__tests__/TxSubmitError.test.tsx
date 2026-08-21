@@ -3,6 +3,7 @@ import type { EthersError } from '@/utils/ethers-utils'
 import type { TransactionReceipt } from 'ethers'
 import { Gs026PreCheckError } from '@/services/tx/executionPreChecks'
 import TxSubmitError from '..'
+import { OPAQUE_REVERT_MESSAGE } from '@safe-global/utils/services/exceptions/contractErrors'
 
 describe('TxSubmitError', () => {
   it('shows the cause-specific message for a failed GS026 pre-check', () => {
@@ -65,5 +66,21 @@ describe('TxSubmitError', () => {
     const { getByText } = render(<TxSubmitError error={error} />)
 
     expect(getByText('Could not submit the transaction. Try again.')).toBeInTheDocument()
+  })
+  it('gives a data-less revert the same explanation as the toast', () => {
+    // Both surfaces render together on a failed bulk execution — one failure
+    // must not produce two different stories (WA-3267).
+    const error = Object.assign(
+      new Error(
+        'execution reverted (no data present; likely require(false) occurred (action="estimateGas", data="0x")',
+      ),
+      { code: 'CALL_EXCEPTION', data: '0x', reason: 'require(false)' },
+    )
+
+    const { getByText, queryByText } = render(<TxSubmitError error={error} />)
+
+    expect(getByText(OPAQUE_REVERT_MESSAGE)).toBeInTheDocument()
+    expect(queryByText('Could not submit the transaction.')).not.toBeInTheDocument()
+    expect(queryByText(/require\(false\)/)).not.toBeInTheDocument()
   })
 })
