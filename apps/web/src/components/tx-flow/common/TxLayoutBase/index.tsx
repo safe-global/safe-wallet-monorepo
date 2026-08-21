@@ -14,21 +14,26 @@ import TxStatusWidget from '../TxStatusWidget'
 import SafeShieldWidget from '@/features/safe-shield'
 import css from './styles.module.css'
 
-export const TxLayoutHeader = ({
-  hideNonce,
-  fixedNonce,
-  icon,
-  subtitle,
-}: {
+type TxLayoutHeaderProps = {
   hideNonce?: boolean
   fixedNonce?: boolean
   icon?: ComponentType
   subtitle?: ReactNode
-}) => {
+}
+
+/**
+ * Whether the header row renders anything at all. TxLayoutBase needs the same answer the header
+ * gives itself: the row is what makes the strip above the card tall enough to show the 24px card
+ * radius, so when it is empty the strip has to go and the card owns its own rounded top instead.
+ */
+export const hasTxLayoutHeader = ({ hideNonce, icon, subtitle }: TxLayoutHeaderProps): boolean =>
+  Boolean(icon || subtitle) || !hideNonce
+
+export const TxLayoutHeader = ({ hideNonce, fixedNonce, icon, subtitle }: TxLayoutHeaderProps) => {
   const { safe } = useSafeInfo()
   const { nonceNeeded } = useContext(SafeTxContext)
 
-  if (hideNonce && !icon && !subtitle) return null
+  if (!hasTxLayoutHeader({ hideNonce, icon, subtitle })) return null
 
   const Icon = icon
 
@@ -105,6 +110,11 @@ const TxLayoutBase = ({
   const isSmallScreen = useIsBelowMd()
   const isDesktop = useMediaQuery('(min-width:1200px)')
   const isDarkMode = useDarkMode()
+  const hasHeader = hasTxLayoutHeader({ hideNonce, icon, subtitle })
+  const hasBackButton = Boolean(onBack) && step > 0
+  const progressBar = hideProgress ? null : (
+    <ProgressBar value={progress} color={isDarkMode ? 'primary' : 'secondary'} />
+  )
 
   return (
     <div className={classnames('flex flex-wrap', css.container)}>
@@ -144,25 +154,33 @@ const TxLayoutBase = ({
                 </Typography>
               </div>
 
+              {hasHeader && (
+                <div
+                  data-testid="modal-header"
+                  /* 24px is the app-wide card radius (every dashboard card computes to it). TxCard
+                     below must use `radius="xl"` to match, or the bottom reads flatter than the top. */
+                  className={classnames('overflow-hidden rounded-t-xl bg-card', css.header)}
+                >
+                  {progressBar && <div className={css.progressBar}>{progressBar}</div>}
+
+                  <TxLayoutHeader subtitle={subtitle} icon={icon} hideNonce={hideNonce} fixedNonce={fixedNonce} />
+                </div>
+              )}
+
               <div
-                data-testid="modal-header"
-                /* 24px is the app-wide card radius (every dashboard card computes to it). TxCard
-                   below must use `radius="xl"` to match, or the bottom reads flatter than the top. */
-                className={classnames('overflow-hidden rounded-t-xl bg-card', css.header)}
+                className={classnames(css.step, {
+                  [css.stepUnderHeader]: hasHeader,
+                  [css.stepWithBackButton]: hasBackButton,
+                })}
               >
-                {!hideProgress && (
-                  <div className={css.progressBar}>
-                    <ProgressBar value={progress} color={isDarkMode ? 'primary' : 'secondary'} />
-                  </div>
-                )}
-
-                <TxLayoutHeader subtitle={subtitle} icon={icon} hideNonce={hideNonce} fixedNonce={fixedNonce} />
-              </div>
-
-              <div className={css.step}>
                 {children}
 
-                {onBack && step > 0 && (
+                {/* With no header row above it there is no strip tall enough to show a 24px corner, so
+                    the bar rides the first card's own rounded top instead of a 6px sliver of its own.
+                    Rendered last, like the Back button, so it does not take `:first-child` off the card. */}
+                {!hasHeader && progressBar && <div className={css.floatingProgressBar}>{progressBar}</div>}
+
+                {hasBackButton && (
                   <Button
                     data-testid="modal-back-btn"
                     variant={isDesktop ? 'outline' : 'ghost'}

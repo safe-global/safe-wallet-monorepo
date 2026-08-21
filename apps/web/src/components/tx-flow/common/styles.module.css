@@ -11,8 +11,12 @@
   margin: 0;
 }
 
+/* Bleeds a divider through TxCard's horizontal padding. Deliberately `margin-inline` rather than
+   the `margin` shorthand: the shorthand also set the block margins to 0, which collided with the
+   `my-*`/`mt-*` utilities call sites compose with it — same specificity, so which one won came
+   down to stylesheet order. Scoping it to one axis removes the conflict. */
 .nestedDivider {
-  margin: 0 calc(-1 * var(--space-3));
+  margin-inline: calc(-1 * var(--space-3));
 }
 
 .form > :global(.MuiFormControl-root) {

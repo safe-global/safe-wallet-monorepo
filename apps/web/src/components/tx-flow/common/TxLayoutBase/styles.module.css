@@ -40,9 +40,28 @@
 }
 
 .step > :global(.txCardRoot:first-child) {
+  margin-top: 0;
+}
+
+/* The rounded top is dropped only when a header strip above supplies it. With no header (see
+   .floatingProgressBar) the card keeps its own radius, or the flow reads as a square-topped box
+   with a stray bar glued to it. */
+.stepUnderHeader > :global(.txCardRoot:first-child) {
   border-top-right-radius: 0;
   border-top-left-radius: 0;
-  margin-top: 0;
+}
+
+/* Pinned over the first card's top edge, clipped to the same 24px radius the card uses, so the bar
+   tapers into a visible corner instead of being the only rounded thing on screen. */
+.floatingProgressBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  overflow: hidden;
+  border-top-left-radius: var(--radius-xl);
+  border-top-right-radius: var(--radius-xl);
 }
 
 /* Submit button */
@@ -111,7 +130,10 @@
     transform: translateX(-50%);
   }
 
-  .step :global(.txCardActions) {
+  /* Room for the Back button, which is centred below the card at this width. Scoped to steps that
+     actually render one — reserving it unconditionally left a phantom gap under single-step flows,
+     which is why they hand-rolled their own action rows instead of reusing TxCardActions. */
+  .stepWithBackButton :global(.txCardActions) {
     margin-bottom: var(--space-8);
   }
 }
@@ -129,7 +151,8 @@
   }
 
   .step :global(.txCardRoot),
-  .header {
+  .header,
+  .floatingProgressBar {
     border-radius: 0;
   }
 }

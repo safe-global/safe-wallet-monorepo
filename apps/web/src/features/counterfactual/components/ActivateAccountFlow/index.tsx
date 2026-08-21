@@ -2,8 +2,9 @@ import { createNewSafe, relaySafeCreation } from '@/components/new-safe/create/l
 import { NetworkFee, SafeSetupOverview } from '@/components/new-safe/create/steps/ReviewStep'
 import ReviewRow from '@/components/new-safe/ReviewRow'
 import { TxModalContext } from '@/components/tx-flow'
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import TxLayout from '@/components/tx-flow/common/TxLayout'
+import commonCss from '@/components/tx-flow/common/styles.module.css'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import TxSubmitError from '@/components/tx/TxSubmitError'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
@@ -30,6 +31,8 @@ import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/ui/typography'
+import { Rocket } from 'lucide-react'
+import classNames from 'classnames'
 import React, { useContext, useMemo, useState } from 'react'
 import { getSafeToL2SetupVersionByAddress } from '@safe-global/utils/services/contracts/deployments'
 import { useEstimateSafeCreationGas } from '@/components/new-safe/create/useEstimateSafeCreationGas'
@@ -153,14 +156,14 @@ const ActivateAccountFlow = () => {
   const submitDisabled = !isSubmittable || isWrongChain
 
   return (
-    <TxLayout title="Activate account" hideNonce hideSafeShield>
+    <TxLayout title="Activate account" subtitle="Deploy Safe account" icon={Rocket} hideNonce hideSafeShield>
       <TxCard>
         <Typography>
           You&apos;re about to deploy this Safe account and will have to confirm the transaction with your connected
           wallet.
         </Typography>
 
-        <Separator className="-mx-6 my-4 w-auto" />
+        <Separator className={classNames(commonCss.nestedDivider, 'my-4')} />
 
         <SafeSetupOverview
           owners={owners.map((owner) => ({ name: '', address: owner }))}
@@ -168,7 +171,7 @@ const ActivateAccountFlow = () => {
           networks={chain ? [chain] : []}
         />
 
-        {showGasFeeEstimation && <Separator className="-mx-6 mt-4 mb-2 w-auto" />}
+        {showGasFeeEstimation && <Separator className={classNames(commonCss.nestedDivider, 'mt-4 mb-2')} />}
         <div className="flex flex-col gap-6">
           {canRelay && (
             <div>
@@ -219,22 +222,22 @@ const ActivateAccountFlow = () => {
           )}
         </div>
 
-        <Separator className="-mx-6 mt-4 mb-2 w-auto" />
+        <Separator className={classNames(commonCss.nestedDivider, 'mt-4 mb-2')} />
 
-        <div className="flex flex-row justify-end gap-6">
+        <TxCardActions className="!mt-0">
           <CheckWallet checkNetwork={!submitDisabled} allowNonOwner allowUndeployedSafe>
             {(isOk) => (
               <Button
                 data-testid="activate-account-flow-btn"
                 onClick={createSafe}
-                size="lg"
+                size="submit"
                 disabled={!isOk || submitDisabled}
               >
                 {!isSubmittable ? <Spinner className="size-5" /> : 'Activate'}
               </Button>
             )}
           </CheckWallet>
-        </div>
+        </TxCardActions>
       </TxCard>
     </TxLayout>
   )
