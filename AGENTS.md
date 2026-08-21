@@ -288,22 +288,12 @@ Before writing code for any non-trivial change (anything beyond a typo, doc twea
 
    Then verify with `yarn workspace @safe-global/web prettier` (the check-only command). **CI will reject unformatted code.**
 
-4. **Linting and tests**: when you change any source code under `apps/` or `packages/`, execute, for web:
+4. **Linting and tests**: when you change any source code under `apps/` or `packages/`, run the `verify` scripts from the "Fast Feedback Loop" section above — they run type-check, lint, prettier and tests for you:
 
    ```bash
-   yarn workspace @safe-global/web type-check
-   yarn workspace @safe-global/web lint
-   yarn workspace @safe-global/web prettier   # verify formatting (CI runs this)
-   yarn workspace @safe-global/web test
-   ```
-
-   For mobile:
-
-   ```bash
-   yarn workspace @safe-global/mobile type-check
-   yarn workspace @safe-global/mobile lint
-   yarn workspace @safe-global/mobile prettier
-   yarn workspace @safe-global/mobile test
+   yarn verify:changed:web                        # scoped to your changed files
+   yarn verify:web                                # full check before committing
+   node scripts/verify.mjs --changed --workspace=mobile   # same, for mobile
    ```
 
 5. **Commit messages**: use [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/) as described in `CONTRIBUTING.md`.
