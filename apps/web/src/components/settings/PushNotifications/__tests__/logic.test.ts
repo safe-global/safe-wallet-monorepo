@@ -64,58 +64,58 @@ describe('Notifications', () => {
   })
 
   describe('requestNotificationPermission', () => {
-    let requestPermissionMock = jest.fn()
-
     it('should return false if the Notification API is unavailable', async () => {
-      delete (globalThis as { Notification?: unknown }).Notification
-
       await expect(logic.requestNotificationPermission()).resolves.toBe(false)
     })
 
-    beforeEach(() => {
-      globalThis.Notification = {
-        requestPermission: requestPermissionMock,
-        permission: 'default',
-      } as unknown as jest.Mocked<typeof Notification>
-    })
+    describe('when the Notification API is available', () => {
+      let requestPermissionMock = jest.fn()
 
-    it('should return true and not request permission again if already granted', async () => {
-      globalThis.Notification = {
-        requestPermission: requestPermissionMock,
-        permission: 'granted',
-      } as unknown as jest.Mocked<typeof Notification>
+      beforeEach(() => {
+        globalThis.Notification = {
+          requestPermission: requestPermissionMock,
+          permission: 'default',
+        } as unknown as jest.Mocked<typeof Notification>
+      })
 
-      const result = await logic.requestNotificationPermission()
+      it('should return true and not request permission again if already granted', async () => {
+        globalThis.Notification = {
+          requestPermission: requestPermissionMock,
+          permission: 'granted',
+        } as unknown as jest.Mocked<typeof Notification>
 
-      expect(requestPermissionMock).not.toHaveBeenCalled()
-      expect(result).toBe(true)
-    })
+        const result = await logic.requestNotificationPermission()
 
-    it('should return false if permission is denied', async () => {
-      requestPermissionMock.mockResolvedValue('denied')
+        expect(requestPermissionMock).not.toHaveBeenCalled()
+        expect(result).toBe(true)
+      })
 
-      const result = await logic.requestNotificationPermission()
+      it('should return false if permission is denied', async () => {
+        requestPermissionMock.mockResolvedValue('denied')
 
-      expect(requestPermissionMock).toHaveBeenCalledTimes(1)
-      expect(result).toBe(false)
-    })
+        const result = await logic.requestNotificationPermission()
 
-    it('should return false if permission request throw', async () => {
-      requestPermissionMock.mockImplementation(Promise.reject)
+        expect(requestPermissionMock).toHaveBeenCalledTimes(1)
+        expect(result).toBe(false)
+      })
 
-      const result = await logic.requestNotificationPermission()
+      it('should return false if permission request throw', async () => {
+        requestPermissionMock.mockImplementation(Promise.reject)
 
-      expect(requestPermissionMock).toHaveBeenCalledTimes(1)
-      expect(result).toBe(false)
-    })
+        const result = await logic.requestNotificationPermission()
 
-    it('should return true if permission are granted', async () => {
-      requestPermissionMock.mockResolvedValue('granted')
+        expect(requestPermissionMock).toHaveBeenCalledTimes(1)
+        expect(result).toBe(false)
+      })
 
-      const result = await logic.requestNotificationPermission()
+      it('should return true if permission are granted', async () => {
+        requestPermissionMock.mockResolvedValue('granted')
 
-      expect(requestPermissionMock).toHaveBeenCalledTimes(1)
-      expect(result).toBe(true)
+        const result = await logic.requestNotificationPermission()
+
+        expect(requestPermissionMock).toHaveBeenCalledTimes(1)
+        expect(result).toBe(true)
+      })
     })
   })
 

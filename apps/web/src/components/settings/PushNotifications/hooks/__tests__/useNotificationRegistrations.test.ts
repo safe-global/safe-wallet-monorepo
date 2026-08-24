@@ -6,7 +6,7 @@ import { useNotificationRegistrations } from '../useNotificationRegistrations'
 import * as web3 from '@/hooks/wallets/web3'
 import * as wallet from '@/hooks/wallets/useWallet'
 import * as logic from '../../logic'
-import { PERMISSION_BLOCKED_MESSAGE, PERMISSION_REQUIRED_MESSAGE } from '../../constants'
+import { PERMISSION_BLOCKED_MESSAGE, PERMISSION_REQUIRED_MESSAGE, SIGNATURE_REJECTED_MESSAGE } from '../../constants'
 import * as preferences from '../useNotificationPreferences'
 import * as tokenVersion from '../useNotificationsTokenVersion'
 import * as notificationsSlice from '@/store/notificationsSlice'
@@ -96,8 +96,9 @@ describe('useNotificationRegistrations', () => {
 
       const { result } = renderHook(() => useNotificationRegistrations())
 
-      await result.current.registerNotifications({})
+      const registered = await result.current.registerNotifications({})
 
+      expect(registered).toBe(false)
       expect(setTokenVersionMock).not.toHaveBeenCalled()
     })
 
@@ -225,12 +226,57 @@ describe('useNotificationRegistrations', () => {
           }) as unknown as ReturnType<typeof preferences.useNotificationPreferences>,
       )
 
+      const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
+
       const { result } = renderHook(() => useNotificationRegistrations())
 
-      await result.current.registerNotifications(safesToRegister)
+      const registered = await result.current.registerNotifications(safesToRegister)
 
+      expect(registered).toBe(false)
       expect(createPreferencesMock).not.toHaveBeenCalled()
       expect(setTokenVersionMock).not.toHaveBeenCalled()
+      expect(showNotificationSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'Failed to enable push notifications. Please try again.',
+          variant: 'error',
+          groupKey: 'notifications-error',
+        }),
+      )
+    })
+
+    it('shows a rejection message if the user rejects the signature request', async () => {
+      const safesToRegister: logic.NotifiableSafes = {
+        '1': [toBeHex('0x1', 20)],
+      }
+
+      const rejectionError = Object.assign(new Error('user rejected action'), { code: 'ACTION_REJECTED' })
+      jest.spyOn(logic, 'getRegisterDevicePayload').mockImplementation(() => Promise.reject(rejectionError))
+
+      const createPreferencesMock = jest.fn()
+
+      ;(preferences.useNotificationPreferences as jest.Mock).mockImplementation(
+        () =>
+          ({
+            uuid: self.crypto.randomUUID(),
+            createPreferences: createPreferencesMock,
+          }) as unknown as ReturnType<typeof preferences.useNotificationPreferences>,
+      )
+
+      const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
+
+      const { result } = renderHook(() => useNotificationRegistrations())
+
+      const registered = await result.current.registerNotifications(safesToRegister)
+
+      expect(registered).toBe(false)
+      expect(createPreferencesMock).not.toHaveBeenCalled()
+      expect(showNotificationSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: SIGNATURE_REJECTED_MESSAGE,
+          variant: 'error',
+          groupKey: 'notifications-error',
+        }),
+      )
     })
 
     it('creates preferences/notifies if registration succeeded', async () => {
@@ -258,7 +304,7 @@ describe('useNotificationRegistrations', () => {
 
       const { result } = renderHook(() => useNotificationRegistrations())
 
-      await result.current.registerNotifications(safesToRegister, true)
+      await result.current.registerNotifications(safesToRegister)
 
       expect(createPreferencesMock).toHaveBeenCalled()
 

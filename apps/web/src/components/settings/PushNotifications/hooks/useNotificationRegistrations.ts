@@ -11,7 +11,8 @@ import { useNotificationPreferences } from './useNotificationPreferences'
 import { trackEvent } from '@/services/analytics'
 import { PUSH_NOTIFICATION_EVENTS } from '@/services/analytics/events/push-notifications'
 import { getRegisterDevicePayload, isPermissionBlocked, requestNotificationPermission } from '../logic'
-import { PERMISSION_BLOCKED_MESSAGE, PERMISSION_REQUIRED_MESSAGE } from '../constants'
+import { PERMISSION_BLOCKED_MESSAGE, PERMISSION_REQUIRED_MESSAGE, SIGNATURE_REJECTED_MESSAGE } from '../constants'
+import { isWalletRejection } from '@/utils/wallets'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -22,9 +23,10 @@ import { useNotificationsTokenVersion } from './useNotificationsTokenVersion'
 const registrationFlow = async (
   registrationFn: Promise<{ data?: unknown; error?: unknown }>,
   callback: () => void,
-  onError: () => void,
+  onError: (error?: unknown) => void,
 ): Promise<boolean> => {
   let success = false
+  let error: unknown
 
   try {
     const response = await registrationFn
@@ -33,22 +35,23 @@ const registrationFlow = async (
     // Gateway will return empty data if the device was (un-)registered successfully
     // @see https://github.com/safe-global/safe-client-gateway-nest/blob/27b6b3846b4ecbf938cdf5d0595ca464c10e556b/src/routes/notifications/notifications.service.ts#L29
     // Success only if no error and data is empty/undefined
-    success = !response.error && (isEmpty(response.data) || response.data === undefined)
+    success = !response.error && isEmpty(response.data)
   } catch (e) {
+    error = e
     logError(ErrorCodes._633, e)
   }
 
   if (success) {
     callback()
   } else {
-    onError()
+    onError(error)
   }
 
   return success
 }
 
 export const useNotificationRegistrations = (): {
-  registerNotifications: (safesToRegister: NotifiableSafes, withSignature?: boolean) => Promise<boolean | undefined>
+  registerNotifications: (safesToRegister: NotifiableSafes) => Promise<boolean>
   unregisterSafeNotifications: (chainId: string, safeAddress: string) => Promise<boolean | undefined>
   unregisterDeviceNotifications: (chainId: string) => Promise<boolean | undefined>
 } => {
@@ -78,7 +81,7 @@ export const useNotificationRegistrations = (): {
 
   const registerNotifications = async (safesToRegister: NotifiableSafes) => {
     if (!uuid || !wallet) {
-      return
+      return false
     }
 
     // Request permission before the first await so the browser prompt opens within the click's
@@ -128,7 +131,12 @@ export const useNotificationRegistrations = (): {
           }),
         )
       },
-      () => showErrorNotification('Failed to enable push notifications. Please try again.'),
+      (error) =>
+        showErrorNotification(
+          error instanceof Error && isWalletRejection(error)
+            ? SIGNATURE_REJECTED_MESSAGE
+            : 'Failed to enable push notifications. Please try again.',
+        ),
     )
   }
 

@@ -342,7 +342,7 @@ export const GlobalPushNotifications = (): ReactElement | null => {
       const isRegistered = await registerNotifications(safesToRegister)
 
       // A denied permission prompt or failed registration must not strip existing subscriptions
-      if (isRegistered === false) {
+      if (!isRegistered) {
         setIsLoading(false)
         return
       }

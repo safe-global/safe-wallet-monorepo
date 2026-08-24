@@ -6,9 +6,6 @@ import { NotificationsTokenVersion } from '@/services/push-notifications/prefere
 import { useIsNotificationsRenewalEnabled, useNotificationsTokenVersion } from './useNotificationsTokenVersion'
 import type { NotifiableSafes } from '../logic'
 import { flatten, isEmpty } from 'lodash'
-import { useAppDispatch } from '@/store'
-import { showNotification } from '@/store/notificationsSlice'
-import { RENEWAL_NOTIFICATION_KEY } from '../constants'
 
 /**
  * Hook to manage the renewal of notifications
@@ -22,7 +19,6 @@ export const useNotificationsRenewal = () => {
   const { getAllPreferences, getChainPreferences } = useNotificationPreferences()
   const { allTokenVersions } = useNotificationsTokenVersion()
   const isNotificationsRenewalEnabled = useIsNotificationsRenewalEnabled()
-  const dispatch = useAppDispatch()
 
   /**
    * Function to check if a renewal is needed for a specific Safe based on the locally stored token version
@@ -109,18 +105,10 @@ export const useNotificationsRenewal = () => {
    */
   const renewNotifications = useCallback(async () => {
     if (safesForRenewal) {
-      return registerNotifications(safesForRenewal).catch((err) => {
-        dispatch(
-          showNotification({
-            message: 'Failed to renew notifications',
-            variant: 'error',
-            detailedMessage: err.message,
-            groupKey: RENEWAL_NOTIFICATION_KEY,
-          }),
-        )
-      })
+      // Failures are surfaced as error toasts by registerNotifications itself; it never rejects
+      return registerNotifications(safesForRenewal)
     }
-  }, [safesForRenewal, dispatch, registerNotifications])
+  }, [safesForRenewal, registerNotifications])
 
   return { safesForRenewal, numberChainsForRenewal, numberSafesForRenewal, renewNotifications, needsRenewal }
 }
