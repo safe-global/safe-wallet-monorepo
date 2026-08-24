@@ -1,5 +1,5 @@
 import type { AttestationVerification, CheckStatus } from './status'
-import type { Hex, NormalizedCheckEvent, OracleGeneration } from './events'
+import type { Hex, NormalizedCheckEvent } from './events'
 
 /**
  * The full read-layer view of one check at one poll. Everything numeric is a
@@ -11,8 +11,6 @@ export type SafenetCheckSnapshot = {
   /** The Safenet chain the Consensus contract lives on (e.g. Gnosis '100'). */
   chainId: string
   status: CheckStatus
-  /** Which oracle generation drove the active request, once a sentinel event lands. */
-  generation: OracleGeneration | null
   /**
    * Correlation for the latest allowlisted proposal, once known. Proposals are
    * permissionless — do not render these as provenance or branch a verdict on
@@ -21,7 +19,7 @@ export type SafenetCheckSnapshot = {
   requestId: Hex | null
   epoch: string | null
   oracle: string | null
-  /** Block the check times out at (V1 `deadline` / V2 `revealDeadline`). */
+  /** Block the check times out at (the request's reveal deadline). */
   deadlineBlock: string | null
   /** Chain head observed at snapshot time — the deadline is compared to this. */
   headBlock: string | null
