@@ -180,6 +180,8 @@ const AddressInput = ({
   const labelText =
     error?.message || resolvedFromLabel || label || `Recipient address${isDomainLookupEnabled ? ' or ENS' : ''}`
 
+  const resolvedPlaceholder = placeholder ?? (required ? undefined : 'Optional')
+
   const registerProps = register(name, {
     deps,
 
@@ -246,7 +248,7 @@ const AddressInput = ({
           spellCheck={false}
           disabled={disabled}
           required={required}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           readOnly={InputProps?.readOnly}
           aria-invalid={!!error || undefined}
           // Workaround for a bug in react-hook-form when `register().value` is cached after `setValueAs`
