@@ -1,14 +1,16 @@
-import type { ReactElement, BaseSyntheticEvent } from 'react'
+import { useState, type ReactElement, type BaseSyntheticEvent } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
 import AddressInput from '@/components/common/AddressInput'
 import DialogActions from '@/components/common/DialogActions'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import useChainId from '@/hooks/useChainId'
 import { useAppDispatch } from '@/store'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { useChain } from '@/hooks/useChains'
+import { useUpsertWorkspaceSafeName, type AddressBookWriteScope } from '@/features/spaces'
 
 export type AddressEntry = {
   name: string
@@ -24,6 +26,7 @@ function EntryDialog({
   disableAddressInput = false,
   chainIds,
   currentChainId,
+  scope = 'local',
   className,
   overlayClassName,
 }: {
@@ -32,6 +35,7 @@ function EntryDialog({
   disableAddressInput?: boolean
   chainIds?: string[]
   currentChainId?: string
+  scope?: AddressBookWriteScope
   /** Opened from inside another overlay? Pass `z-[var(--z-nested-overlay)]` to both of these. */
   className?: string
   overlayClassName?: string
@@ -40,6 +44,9 @@ function EntryDialog({
   const actualChainId = currentChainId ?? chainId
   const currentChain = useChain(actualChainId)
   const dispatch = useAppDispatch()
+  const upsertWorkspaceName = useUpsertWorkspaceSafeName()
+  const [error, setError] = useState<string>()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const methods = useForm<AddressEntry>({
     defaultValues,
@@ -48,8 +55,19 @@ function EntryDialog({
 
   const { handleSubmit, formState } = methods
 
-  const submitCallback = handleSubmit((data: AddressEntry) => {
-    dispatch(upsertAddressBookEntries({ ...data, chainIds: chainIds ?? [actualChainId], notify: true }))
+  const submitCallback = handleSubmit(async (data: AddressEntry) => {
+    const targetChainIds = chainIds ?? [actualChainId]
+
+    if (scope === 'workspace') {
+      setError(undefined)
+      setIsSubmitting(true)
+      const result = await upsertWorkspaceName({ ...data, chainIds: targetChainIds })
+      setIsSubmitting(false)
+      if (result.error) return setError(result.error)
+    } else {
+      dispatch(upsertAddressBookEntries({ ...data, chainIds: targetChainIds, notify: true }))
+    }
+
     handleClose()
   })
 
@@ -72,6 +90,12 @@ function EntryDialog({
       <FormProvider {...methods}>
         <form onSubmit={onSubmit}>
           <div className="p-6">
+            {scope === 'workspace' && (
+              <p data-testid="entry-scope-notice" className="text-muted-foreground mb-4 text-sm">
+                This name is visible to everyone in this workspace.
+              </p>
+            )}
+
             <div className="mb-4">
               {/* `hero` (66px) to match the AddressInput below, whose wrapper is min-height 66px —
                   the same pairing SetAddressStep already uses. The default h-9 left this field
@@ -91,6 +115,13 @@ function EntryDialog({
                 showPrefix={!!currentChainId}
               />
             </div>
+
+            {error && (
+              <Alert variant="destructive" className="mt-4">
+                <AlertSeverityIcon variant="destructive" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
           </div>
 
           <DialogActions
@@ -100,6 +131,7 @@ function EntryDialog({
             confirmType="submit"
             confirmTestId="save-btn"
             confirmDisabled={!formState.isValid}
+            confirmLoading={isSubmitting}
             className="p-6 pt-2"
           />
         </form>

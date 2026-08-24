@@ -10,6 +10,7 @@ import CheckWallet from '@/components/common/CheckWallet'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { CreateNestedSafeFlow } from '@/components/tx-flow/flows'
 import EntryDialog from '@/components/address-book/EntryDialog'
+import { useAddressBookWriteScope } from '@/features/spaces'
 import { TxModalContext } from '@/components/tx-flow'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -26,6 +27,7 @@ export function NestedSafesList(): ReactElement | null {
   const isEnabled = useHasFeature(FEATURES.NESTED_SAFES)
   const { setTxFlow } = useContext(TxModalContext)
   const [addressToRename, setAddressToRename] = useState<string | null>(null)
+  const { scope: renameScope } = useAddressBookWriteScope(addressToRename ?? '')
 
   const { safe, safeLoaded, safeAddress } = useSafeInfo()
   const { currentData: ownedSafes } = useOwnersGetSafesByOwnerV1Query(
@@ -117,6 +119,7 @@ export function NestedSafesList(): ReactElement | null {
           handleClose={() => setAddressToRename(null)}
           defaultValues={{ name: '', address: addressToRename }}
           chainIds={[safe.chainId]}
+          scope={renameScope}
           disableAddressInput
         />
       )}

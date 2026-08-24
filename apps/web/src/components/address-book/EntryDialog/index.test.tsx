@@ -1,5 +1,13 @@
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import EntryDialog from './index'
+import { useUpsertWorkspaceSafeName } from '@/features/spaces'
+import * as addressBookSlice from '@/store/addressBookSlice'
+
+// Mock the source module, not the barrel: `requireActual` on the barrel trips the myAccounts <->
+// spaces import cycle (see the note in useAllAddressBooks). The barrel re-export picks this up.
+jest.mock('@/features/spaces/hooks/useUpsertWorkspaceSafeName', () => ({
+  useUpsertWorkspaceSafeName: jest.fn(),
+}))
 
 jest.mock('@/hooks/use-mobile', () => ({
   useIsMobile: jest.fn(() => false),
@@ -30,5 +38,71 @@ describe('EntryDialog', () => {
     expect(popup).not.toHaveClass('overlay-marker')
     expect(overlay).toHaveClass('overlay-marker')
     expect(overlay).not.toHaveClass('popup-marker')
+  })
+})
+
+describe('EntryDialog scope', () => {
+  const ADDRESS = '0x1111111111111111111111111111111111111111'
+  const upsertWorkspaceName = jest.fn().mockResolvedValue({})
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    upsertWorkspaceName.mockResolvedValue({})
+    ;(useUpsertWorkspaceSafeName as jest.Mock).mockReturnValue(upsertWorkspaceName)
+  })
+
+  const renderDialog = (scope?: 'local' | 'workspace') =>
+    render(
+      <EntryDialog
+        handleClose={jest.fn()}
+        scope={scope}
+        chainIds={['1']}
+        defaultValues={{ name: 'Old name', address: ADDRESS }}
+        disableAddressInput
+      />,
+    )
+
+  const save = async () => {
+    const field = screen.getByTestId('name-input')
+    const input = (field.tagName === 'INPUT' ? field : field.querySelector('input')) as HTMLInputElement
+    fireEvent.change(input, { target: { value: 'Treasury' } })
+    await waitFor(() => expect(screen.getByTestId('save-btn')).not.toBeDisabled())
+    fireEvent.click(screen.getByTestId('save-btn'))
+  }
+
+  it('writes to the workspace address book when scoped to workspace', async () => {
+    renderDialog('workspace')
+    await save()
+
+    await waitFor(() =>
+      expect(upsertWorkspaceName).toHaveBeenCalledWith({ name: 'Treasury', address: ADDRESS, chainIds: ['1'] }),
+    )
+  })
+
+  it('writes locally by default', async () => {
+    const spy = jest.spyOn(addressBookSlice, 'upsertAddressBookEntries')
+    renderDialog()
+    await save()
+
+    await waitFor(() => expect(spy).toHaveBeenCalled())
+    expect(upsertWorkspaceName).not.toHaveBeenCalled()
+  })
+
+  it('states the workspace target before saving, and stays silent for a local write', () => {
+    const { unmount } = renderDialog('workspace')
+    expect(screen.getByTestId('entry-scope-notice')).toHaveTextContent('visible to everyone in this workspace')
+    unmount()
+
+    renderDialog('local')
+    expect(screen.queryByTestId('entry-scope-notice')).not.toBeInTheDocument()
+  })
+
+  it('keeps the dialog open and shows the reason when the workspace write is rejected', async () => {
+    upsertWorkspaceName.mockResolvedValue({ error: 'Only ADMINs can edit' })
+    renderDialog('workspace')
+    await save()
+
+    await waitFor(() => expect(screen.getByText('Only ADMINs can edit')).toBeInTheDocument())
+    expect(screen.getByTestId('entry-dialog')).toBeInTheDocument()
   })
 })

@@ -15,6 +15,7 @@ import {
   TRUSTED_ORDER_SCOPE,
 } from '@/store/orderByPreferenceSlice'
 import EntryDialog from '@/components/address-book/EntryDialog'
+import { useAddressBookWriteScope } from '@/features/spaces'
 import TrustedSafesModal from '@/components/common/TrustedSafesModal'
 import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import { Button } from '@/components/ui/button'
@@ -172,6 +173,7 @@ function SpaceSafeBar() {
   const [selectedTab, setSelectedTab] = useState<DropdownTab | null>(null)
   const [search, setSearch] = useState('')
   const [renameTarget, setRenameTarget] = useState<SafeRenameTarget | null>(null)
+  const { scope: renameScope } = useAddressBookWriteScope(renameTarget?.address ?? '')
   const connectWallet = useConnectWallet()
   const trustedSafesModal = useTrustedSafesModal()
   const isAboveOverlay = useIsTopbarAboveOverlay()
@@ -326,6 +328,7 @@ function SpaceSafeBar() {
           handleClose={() => setRenameTarget(null)}
           defaultValues={{ name: renameTarget.name, address: renameTarget.address }}
           chainIds={renameTarget.chainIds}
+          scope={renameScope}
           disableAddressInput
           // Above the safe-selector popup (shadcn --z-overlay) so the rename dialog layers on
           // top of the open dropdown instead of behind it.
