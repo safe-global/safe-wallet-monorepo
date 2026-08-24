@@ -139,6 +139,7 @@ export const makeEndpoint = (config: RpcConfig) => {
           const gk = config.groupKey ?? { x: '1', y: '2' }
           return ok(coordinatorRead.encodeFunctionResult('groupKey', [[BigInt(gk.x), BigInt(gk.y)]]))
         }
+
         return err('unexpected eth_call')
       }
       default:

@@ -31,6 +31,8 @@
   justify-content: flex-end;
   margin: var(--space-1);
   margin-bottom: -40px;
+  position: relative;
+  z-index: 1;
 }
 
 .inlineSimulation {
@@ -102,11 +104,6 @@
 .delegateCall .alert {
   width: fit-content;
   padding: 0 var(--space-1);
-}
-
-/* Just the rule, for blocks that already own their horizontal padding. */
-.blockBorder {
-  border-bottom: 1px solid var(--border);
 }
 
 .buttons {

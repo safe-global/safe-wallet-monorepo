@@ -84,12 +84,12 @@ const MsgDetails = ({ msg }: { msg: MessageItem }): ReactElement => {
         </div>
 
         {msg.preparedSignature && (
-          <div className={classNames(txDetailsCss.txSummary, txDetailsCss.blockBorder)}>
+          <div className={classNames(txDetailsCss.txSummary, txDetailsCss.multiSend)}>
             <TxDataRow title="Prepared signature:">{generateDataRowValue(msg.preparedSignature, 'hash')}</TxDataRow>
           </div>
         )}
 
-        <div className={txDetailsCss.blockBorder}>
+        <div className={classNames(txDetailsCss.multiSend, 'border-t border-border')}>
           <Accordion
             multiple
             defaultValue={msg.confirmations
@@ -98,14 +98,18 @@ const MsgDetails = ({ msg }: { msg: MessageItem }): ReactElement => {
           >
             {msg.confirmations.map((confirmation, i) => (
               <AccordionItem value={confirmation.signature} key={confirmation.signature}>
-                <AccordionTrigger className="px-4">
+                <AccordionTrigger
+                  className={classNames('flex min-h-12 items-center px-4 py-3', singleTxDecodedCss.elevationTrigger)}
+                >
                   <div className={singleTxDecodedCss.summary}>
-                    <CodeIcon className="size-5" />
-                    <Typography>{`Confirmation ${i + 1}`}</Typography>
+                    <CodeIcon className="size-4 shrink-0 text-muted-foreground" />
+                    <Typography className={singleTxDecodedCss.summaryLabel}>
+                      <b>{`Confirmation ${i + 1}`}</b>
+                    </Typography>
                   </div>
                 </AccordionTrigger>
 
-                <AccordionContent className="px-4">
+                <AccordionContent className="p-4">
                   <div className={infoDetailsCss.container}>
                     <EthHashInfo
                       address={confirmation.owner.value || ''}

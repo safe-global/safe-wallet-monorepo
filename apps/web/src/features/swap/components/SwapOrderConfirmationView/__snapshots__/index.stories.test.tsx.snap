@@ -197,7 +197,7 @@ exports[`./index.stories CustomRecipient 1`] = `
             </span>
           </div>
           <div
-            class="flex-1"
+            class="max-w-full flex-1 xl:min-w-0"
             data-testid="tx-data-row"
           >
             <div
@@ -229,7 +229,7 @@ exports[`./index.stories CustomRecipient 1`] = `
             </span>
           </div>
           <div
-            class="flex-1"
+            class="max-w-full flex-1 xl:min-w-0"
             data-testid="tx-data-row"
           >
             <div
@@ -256,7 +256,7 @@ exports[`./index.stories CustomRecipient 1`] = `
             </span>
           </div>
           <div
-            class="flex-1"
+            class="max-w-full flex-1 xl:min-w-0"
             data-testid="tx-data-row"
           >
             <div
@@ -335,7 +335,7 @@ exports[`./index.stories CustomRecipient 1`] = `
             </span>
           </div>
           <div
-            class="flex-1"
+            class="max-w-full flex-1 xl:min-w-0"
             data-testid="tx-data-row"
           >
             <div
@@ -363,7 +363,7 @@ exports[`./index.stories CustomRecipient 1`] = `
             </span>
           </div>
           <div
-            class="flex-1"
+            class="max-w-full flex-1 xl:min-w-0"
             data-testid="tx-data-row"
           >
             <div
@@ -446,7 +446,7 @@ exports[`./index.stories CustomRecipient 1`] = `
             </span>
           </div>
           <div
-            class="flex-1"
+            class="max-w-full flex-1 xl:min-w-0"
             data-testid="tx-data-row"
           >
             <div
@@ -745,7 +745,7 @@ exports[`./index.stories Default 1`] = `
             </span>
           </div>
           <div
-            class="flex-1"
+            class="max-w-full flex-1 xl:min-w-0"
             data-testid="tx-data-row"
           >
             <div
@@ -777,7 +777,7 @@ exports[`./index.stories Default 1`] = `
             </span>
           </div>
           <div
-            class="flex-1"
+            class="max-w-full flex-1 xl:min-w-0"
             data-testid="tx-data-row"
           >
             <div
@@ -804,7 +804,7 @@ exports[`./index.stories Default 1`] = `
             </span>
           </div>
           <div
-            class="flex-1"
+            class="max-w-full flex-1 xl:min-w-0"
             data-testid="tx-data-row"
           >
             <div
@@ -883,7 +883,7 @@ exports[`./index.stories Default 1`] = `
             </span>
           </div>
           <div
-            class="flex-1"
+            class="max-w-full flex-1 xl:min-w-0"
             data-testid="tx-data-row"
           >
             <div
@@ -911,7 +911,7 @@ exports[`./index.stories Default 1`] = `
             </span>
           </div>
           <div
-            class="flex-1"
+            class="max-w-full flex-1 xl:min-w-0"
             data-testid="tx-data-row"
           >
             <div
