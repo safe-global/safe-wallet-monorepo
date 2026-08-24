@@ -31,6 +31,7 @@ exports[`./NameInput.stories Default 1`] = `
             data-slot="input"
             id="_r_0_"
             name="ownerName"
+            placeholder="Optional"
             value=""
           />
         </div>
@@ -73,6 +74,7 @@ exports[`./NameInput.stories Disabled 1`] = `
             disabled=""
             id="_r_2_"
             name="ownerName"
+            placeholder="Optional"
             value=""
           />
         </div>
