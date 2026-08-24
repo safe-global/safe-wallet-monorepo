@@ -9,9 +9,9 @@ import type { Hex } from '@safe-global/types-kit'
 export type { Hex }
 
 export enum CheckEventType {
-  /** Consensus `OracleTransactionProposed`. */
+  /** Consensus `TransactionProposed` from the unified oracle pair (`safeId` + oracle). */
   ORACLE_PROPOSED = 'ORACLE_PROPOSED',
-  /** Consensus `OracleTransactionAttested` — carries the FROST signature. */
+  /** Consensus `TransactionAttested` from the oracle pair — carries the FROST signature. */
   ORACLE_ATTESTED = 'ORACLE_ATTESTED',
   /** Consensus `TransactionProposed` — the non-oracle path live beta uses. */
   PLAIN_PROPOSED = 'PLAIN_PROPOSED',
@@ -19,9 +19,9 @@ export enum CheckEventType {
   PLAIN_ATTESTED = 'PLAIN_ATTESTED',
   /** Sentinel `NewRequest` — carries the per-check deadline block. */
   REQUEST_CREATED = 'REQUEST_CREATED',
-  /** Sentinel `Committed` — V1 carries the verdict, V2 is activity-only. */
+  /** Sentinel `Committed` — a blind commitment; the verdict arrives with the reveal. */
   SENTINEL_COMMITTED = 'SENTINEL_COMMITTED',
-  /** Sentinel `Revealed` (V2 only) — carries the per-sentinel verdict. */
+  /** Sentinel `Revealed` — carries the per-sentinel verdict. */
   SENTINEL_REVEALED = 'SENTINEL_REVEALED',
   /** `OracleResult` — the oracle's final approved flag. */
   ORACLE_RESULT = 'ORACLE_RESULT',

@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { SafenetReader } from '../safenetReader'
+import { decodeLogs, type RawLog } from '../../utils/decodeLogs'
 import { AttestationVerificationStatus, CheckEventType, type Hex, type OracleAttestedEvent } from '../../types'
 
 /**
@@ -29,6 +30,7 @@ type Golden = {
   groupKey: { x: string; y: string }
   r: { x: string; y: string }
   z: string
+  logs: RawLog[]
 }
 
 const golden: Golden = JSON.parse(
@@ -38,20 +40,14 @@ const golden: Golden = JSON.parse(
 // `|| undefined` so an empty string (a common way to "unset" in CI) still skips.
 const RPC = process.env.SAFENET_IT_RPC || undefined
 
-const goldenAttested = (): OracleAttestedEvent => ({
-  blockNumber: 0,
-  logIndex: 0,
-  transactionHash: '0x' + '00'.repeat(32),
-  type: CheckEventType.ORACLE_ATTESTED,
-  safeTxHash: golden.safeTxHash,
-  chainId: golden.chainId,
-  safe: golden.oracle,
-  epoch: golden.epoch,
-  oracle: golden.oracle,
-  signatureId: golden.signatureId,
-  attestation: { r: { x: golden.r.x, y: golden.r.y }, z: golden.z },
-  oracleDataHash: golden.oracleDataHash,
-})
+/** The captured `TransactionAttested` log, decoded by the production path. */
+const goldenAttested = (): OracleAttestedEvent => {
+  const attested = decodeLogs(golden.logs).find(
+    (event): event is OracleAttestedEvent => event.type === CheckEventType.ORACLE_ATTESTED,
+  )
+  if (!attested) throw new Error('golden fixture carries no decodable TransactionAttested log')
+  return attested
+}
 
 const makeReader = () =>
   new SafenetReader({
