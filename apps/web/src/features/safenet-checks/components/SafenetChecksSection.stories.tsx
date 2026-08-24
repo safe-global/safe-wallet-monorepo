@@ -40,7 +40,6 @@ const blockAt = (number: number) => ({
   transactions: [],
 })
 
-/** A healthy Gnosis endpoint holding exactly `logs` for this check. */
 const rpcHolding = (logs: RawLog[]) =>
   http.post(SAFENET_RPC_URLS[0], async ({ request }) => {
     const answer = (req: RpcRequest) => {
@@ -75,7 +74,6 @@ const rpcHolding = (logs: RawLog[]) =>
     return HttpResponse.json(Array.isArray(body) ? body.map(answer) : answer(body))
   })
 
-/** Every endpoint in the rotation is down — the read cannot resolve at all. */
 const unreachableRpc = http.post(SAFENET_RPC_URLS[0], () => new HttpResponse(null, { status: 503 }))
 
 const txDetails = {
@@ -108,7 +106,6 @@ const meta: Meta<typeof SafenetChecksSection> = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** RFC W10: the chain answered, and it holds no check for this transaction. */
 export const NoCheckRequested: Story = {
   loaders: [mswLoader],
   parameters: {
@@ -117,7 +114,6 @@ export const NoCheckRequested: Story = {
   },
 }
 
-/** RFC W10: the read itself failed, so the check's state is unknown. */
 export const ReadFailed: Story = {
   loaders: [mswLoader],
   parameters: {
@@ -126,7 +122,6 @@ export const ReadFailed: Story = {
   },
 }
 
-/** A real verdict state, for contrast: the unavailable copy must not look like one. */
 export const Submitted: Story = {
   loaders: [mswLoader],
   parameters: {

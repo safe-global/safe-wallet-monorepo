@@ -4,15 +4,15 @@ import { CheckStatus, type PublicCheckStatus, type UnavailableReason } from '@sa
 type SafenetStatusPresentation = {
   /** Safe Shield severity vocabulary — drives SeverityIcon and its colors. */
   severity: Severity
-  /** Short state name (PRD states table) for compact placements. */
+  /** Short state name for compact placements. */
   label: string
-  /** Full-sentence copy (PRD states table, verbatim) for the flow surface. */
+  /** Full-sentence copy for the flow surface. */
   copy: string
 }
 
 /**
- * The PRD "States & Warnings" table. UNAVAILABLE has no verdict presentation —
- * see {@link UNAVAILABLE_PRESENTATION}, which only the flow section renders.
+ * UNAVAILABLE has no verdict presentation — see {@link UNAVAILABLE_PRESENTATION},
+ * which only the flow section renders.
  */
 export const STATUS_PRESENTATION: Record<
   Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>,
@@ -46,9 +46,8 @@ export const STATUS_PRESENTATION: Record<
 }
 
 /**
- * The two meanings of UNAVAILABLE (RFC W10). Neither is a verdict, so both stay
- * neutral: a muted icon and the default text colors, never error or warning
- * ones. Each names itself instead of the shared "Safenet check" heading.
+ * Neither UNAVAILABLE meaning is a verdict, so both stay neutral: a muted icon
+ * and the default text colors, never error or warning ones.
  */
 export const UNAVAILABLE_PRESENTATION: Record<UnavailableReason, { title: string; copy: string }> = {
   NO_CHECK: {

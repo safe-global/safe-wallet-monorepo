@@ -11,15 +11,10 @@ import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { STATUS_PRESENTATION, UNAVAILABLE_PRESENTATION } from '../statusPresentation'
 
 /**
- * Safenet check state as a section in the Safe Shield widget (PRD display
- * rule: reuse the severity components, no new banner UI). Subscribes only for
- * confirm/execute flows of an already-proposed transaction, and only once the
- * submission time is known — the shared cache keys by hash, so a fetch aimed
- * without it would cache a mis-aimed read for every surface.
- *
- * This is the one surface that renders UNAVAILABLE, split per RFC W10 into "no
- * check was requested" and "the status could not be read"; the queue row and
- * the audit row stay silent for both.
+ * Safenet check state as a section in the Safe Shield widget. Subscribes only
+ * for confirm/execute flows of an already-proposed transaction, and only once
+ * the submission time is known — the shared cache keys by hash, so a fetch
+ * aimed without it would cache a mis-aimed read for every surface.
  */
 export const SafenetChecksSection = (): ReactElement | null => {
   const { txId, txDetails } = useContext(TxFlowContext)
@@ -55,7 +50,6 @@ export const SafenetChecksSection = (): ReactElement | null => {
     >
       <div className="flex items-start gap-2">
         <SeverityIcon severity={verdict?.severity ?? Severity.INFO} muted={verdict === undefined} />
-        {/* paragraph-small renders a span; the flex column is what puts the copy on its own line. */}
         <div className="flex flex-1 flex-col gap-1">
           <Typography variant="paragraph-small" className="font-bold leading-4">
             {unavailable?.title ?? 'Safenet check'}

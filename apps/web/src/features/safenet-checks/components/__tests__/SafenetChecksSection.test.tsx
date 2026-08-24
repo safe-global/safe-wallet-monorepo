@@ -70,7 +70,6 @@ describe('SafenetChecksSection', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  // W10: the two meanings of UNAVAILABLE, split. Neither may read as a verdict.
   it('renders the no-check copy when no check was requested', () => {
     const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.UNAVAILABLE })
     mockUseSafenetCheck.mockReturnValue(
@@ -113,7 +112,7 @@ describe('SafenetChecksSection', () => {
     [CheckStatus.BENIGN, 'Safenet found no issues'],
     [CheckStatus.MALICIOUS, 'Safenet flagged this address/transaction as malicious'],
     [CheckStatus.TIMED_OUT, 'Safenet check is unavailable. You can still continue.'],
-  ])('renders %s with the PRD copy', (status, copy) => {
+  ])('renders %s copy', (status, copy) => {
     const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status })
     mockUseSafenetCheck.mockReturnValue(buildCheckView({ snapshot, status, publicStatus: status }))
 

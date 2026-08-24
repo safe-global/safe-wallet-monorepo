@@ -153,8 +153,6 @@ describe('useSafenetCheck', () => {
     })
   })
 
-  // W10: UNAVAILABLE means either "no check was requested" or "we could not
-  // read". Only the reason tells the two apart.
   describe('unavailable reason', () => {
     it('reports NO_CHECK when a snapshot says no check was ever requested', () => {
       mockQuery.mockReturnValue(
