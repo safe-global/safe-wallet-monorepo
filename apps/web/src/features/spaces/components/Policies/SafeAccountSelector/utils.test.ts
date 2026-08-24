@@ -1,4 +1,4 @@
-import { buildSafeAccountId, parseSafeAccountId, groupSafeAccounts } from './utils'
+import { buildSafeAccountId, groupSafeAccounts } from './utils'
 import { isSafeAccountGroup, type SafeAccountOption } from './types'
 import type { ChainInfo } from '@/features/spaces/types'
 
@@ -20,25 +20,9 @@ const option = (chainId: string, address: string, extra: Partial<SafeAccountOpti
   ...extra,
 })
 
-describe('buildSafeAccountId / parseSafeAccountId', () => {
+describe('buildSafeAccountId', () => {
   it('builds the `chainId:address` form value', () => {
     expect(buildSafeAccountId('11155111', SAFE_A)).toBe(`11155111:${SAFE_A}`)
-  })
-
-  it('round-trips a built id', () => {
-    expect(parseSafeAccountId(buildSafeAccountId('137', SAFE_B))).toEqual({ chainId: '137', address: SAFE_B })
-  })
-
-  it.each([
-    ['no separator', '11155111'],
-    ['missing address', '11155111:'],
-    ['missing chain', `:${SAFE_A}`],
-    ['non-numeric chain', `mainnet:${SAFE_A}`],
-    ['not an address', '1:0xnope'],
-    ['extra segments', `1:${SAFE_A}:1`],
-    ['empty', ''],
-  ])('returns undefined for a malformed id (%s)', (_label, id) => {
-    expect(parseSafeAccountId(id)).toBeUndefined()
   })
 })
 
