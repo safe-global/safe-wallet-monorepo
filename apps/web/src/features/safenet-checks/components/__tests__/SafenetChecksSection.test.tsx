@@ -62,12 +62,49 @@ describe('SafenetChecksSection', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('renders nothing when no check was observed', () => {
-    mockUseSafenetCheck.mockReturnValue(buildCheckView())
+  it('renders nothing while the first read is still in flight', () => {
+    mockUseSafenetCheck.mockReturnValue(buildCheckView({ isLoading: true, isFetching: true }))
 
     const { container } = renderInFlow({ txId: TX_ID, txDetails })
 
     expect(container).toBeEmptyDOMElement()
+  })
+
+  // W10: the two meanings of UNAVAILABLE, split. Neither may read as a verdict.
+  it('renders the no-check copy when no check was requested', () => {
+    const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.UNAVAILABLE })
+    mockUseSafenetCheck.mockReturnValue(
+      buildCheckView({
+        snapshot,
+        status: CheckStatus.UNAVAILABLE,
+        publicStatus: CheckStatus.UNAVAILABLE,
+        unavailableReason: 'NO_CHECK',
+      }),
+    )
+
+    renderInFlow({ txId: TX_ID, txDetails })
+
+    const section = screen.getByTestId('safenet-checks-section')
+    expect(section).toHaveAttribute('data-reason', 'NO_CHECK')
+    expect(section).toHaveTextContent('Not checked')
+    expect(section).toHaveTextContent('No Safenet check was requested for this transaction.')
+  })
+
+  it('renders the read-failed copy when the status could not be read', () => {
+    mockUseSafenetCheck.mockReturnValue(
+      buildCheckView({
+        status: CheckStatus.UNAVAILABLE,
+        publicStatus: CheckStatus.UNAVAILABLE,
+        unavailableReason: 'READ_FAILED',
+      }),
+    )
+
+    renderInFlow({ txId: TX_ID, txDetails })
+
+    const section = screen.getByTestId('safenet-checks-section')
+    expect(section).toHaveAttribute('data-reason', 'READ_FAILED')
+    expect(section).toHaveTextContent('Status unavailable')
+    expect(section).toHaveTextContent('The Safenet check status could not be read. Retry later.')
   })
 
   it.each<[Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string]>([

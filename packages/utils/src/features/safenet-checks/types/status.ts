@@ -34,6 +34,13 @@ export type PublicCheckStatus =
   | CheckStatus.UNAVAILABLE
 
 /**
+ * Why a check reads as `UNAVAILABLE` (RFC W10): no check was ever requested —
+ * the normal case on beta — or the chain read failed. `undefined` while the
+ * first read is still in flight, so an unresolved read never claims a failure.
+ */
+export type UnavailableReason = 'NO_CHECK' | 'READ_FAILED'
+
+/**
  * Map an internal status to its public projection: `AWAITING_VERIFICATION`
  * reads as still-working, `VERIFICATION_FAILED` as `TIMED_OUT` — an attestation
  * that cannot be trusted is not-completed, never safe.

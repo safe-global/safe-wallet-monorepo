@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import { useGetSafenetCheckQuery } from '@safe-global/store/safenet/safenetCheckApi'
 import { selectPinnedVerdict, type SafenetCheckPartialState } from '@safe-global/store/safenet/safenetCheckSlice'
 import { POLL_INTERVAL_FAST_MS, POLL_INTERVAL_LATE_MS } from '../constants'
-import { CheckStatus, toPublicStatus, type PublicCheckStatus } from '../types/status'
+import { CheckStatus, toPublicStatus, type PublicCheckStatus, type UnavailableReason } from '../types/status'
 import type { SafenetCheckSnapshot } from '../types/snapshot'
 import { computePollingInterval } from '../utils/computePollingInterval'
 import { mergeMonotonic } from '../utils/mergeMonotonic'
@@ -14,6 +14,12 @@ export type SafenetCheckView = {
   /** Internal merged status. Can be `AWAITING_VERIFICATION` or `VERIFICATION_FAILED`. */
   status: CheckStatus
   publicStatus: PublicCheckStatus
+  /**
+   * Set only while the merged status is `UNAVAILABLE`: `NO_CHECK` when a
+   * snapshot says no check was ever requested, `READ_FAILED` when the read
+   * itself failed. `undefined` before the first read resolves.
+   */
+  unavailableReason: UnavailableReason | undefined
   isLoading: boolean
   isFetching: boolean
   /** Showing a retained snapshot because the latest fetch failed. */
@@ -65,6 +71,11 @@ export const useSafenetCheck = (safeTxHash: string | undefined, timestampMs?: nu
   const status = mergeMonotonic(pinned?.status, base)
   const publicStatus = toPublicStatus(status)
 
+  // A snapshot outranks the error: an error over retained data is a failed
+  // refetch (isStale), and the retained snapshot is still what we know.
+  const unavailableReason: UnavailableReason | undefined =
+    status !== CheckStatus.UNAVAILABLE ? undefined : hasData ? 'NO_CHECK' : hasError ? 'READ_FAILED' : undefined
+
   // Events are sorted ascending, so [0] substitutes for the deadline on the
   // plain path, which does not emit one.
   const firstEventBlock = snapshot?.events[0] !== undefined ? String(snapshot.events[0].blockNumber) : null
@@ -96,6 +107,7 @@ export const useSafenetCheck = (safeTxHash: string | undefined, timestampMs?: nu
     snapshot,
     status,
     publicStatus,
+    unavailableReason,
     isLoading: query.isLoading,
     isFetching: query.isFetching,
     isStale,

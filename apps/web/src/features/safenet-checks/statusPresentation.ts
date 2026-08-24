@@ -1,5 +1,5 @@
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import { CheckStatus, type PublicCheckStatus } from '@safe-global/utils/features/safenet-checks'
+import { CheckStatus, type PublicCheckStatus, type UnavailableReason } from '@safe-global/utils/features/safenet-checks'
 
 type SafenetStatusPresentation = {
   /** Safe Shield severity vocabulary — drives SeverityIcon and its colors. */
@@ -10,7 +10,10 @@ type SafenetStatusPresentation = {
   copy: string
 }
 
-/** The PRD "States & Warnings" table. UNAVAILABLE renders nothing everywhere. */
+/**
+ * The PRD "States & Warnings" table. UNAVAILABLE has no verdict presentation —
+ * see {@link UNAVAILABLE_PRESENTATION}, which only the flow section renders.
+ */
 export const STATUS_PRESENTATION: Record<
   Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>,
   SafenetStatusPresentation
@@ -39,5 +42,21 @@ export const STATUS_PRESENTATION: Record<
     severity: Severity.ERROR,
     label: 'Safenet check failed',
     copy: 'Safenet check is unavailable. You can still continue.',
+  },
+}
+
+/**
+ * The two meanings of UNAVAILABLE (RFC W10). Neither is a verdict, so both stay
+ * neutral: a muted icon and the default text colors, never error or warning
+ * ones. Each names itself instead of the shared "Safenet check" heading.
+ */
+export const UNAVAILABLE_PRESENTATION: Record<UnavailableReason, { title: string; copy: string }> = {
+  NO_CHECK: {
+    title: 'Not checked',
+    copy: 'No Safenet check was requested for this transaction.',
+  },
+  READ_FAILED: {
+    title: 'Status unavailable',
+    copy: 'The Safenet check status could not be read. Retry later.',
   },
 }

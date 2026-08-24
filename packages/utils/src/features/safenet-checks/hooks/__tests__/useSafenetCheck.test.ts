@@ -153,6 +153,58 @@ describe('useSafenetCheck', () => {
     })
   })
 
+  // W10: UNAVAILABLE means either "no check was requested" or "we could not
+  // read". Only the reason tells the two apart.
+  describe('unavailable reason', () => {
+    it('reports NO_CHECK when a snapshot says no check was ever requested', () => {
+      mockQuery.mockReturnValue(
+        queryResult({ data: buildSnapshot({ safeTxHash: HASH, status: CheckStatus.UNAVAILABLE }) }),
+      )
+
+      const { result } = renderHook(() => useSafenetCheck(HASH))
+
+      expect(result.current.unavailableReason).toBe('NO_CHECK')
+    })
+
+    it('reports READ_FAILED when the read failed with nothing to show', () => {
+      mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR }))
+
+      const { result } = renderHook(() => useSafenetCheck(HASH))
+
+      expect(result.current.unavailableReason).toBe('READ_FAILED')
+    })
+
+    it('never reports READ_FAILED while the first read is in flight', () => {
+      mockQuery.mockReturnValue(queryResult({ isLoading: true, isFetching: true }))
+
+      const { result } = renderHook(() => useSafenetCheck(HASH))
+
+      expect(result.current.status).toBe(CheckStatus.UNAVAILABLE)
+      expect(result.current.unavailableReason).toBeUndefined()
+    })
+
+    it('keeps the retained snapshot as NO_CHECK when a refetch fails over it', () => {
+      mockQuery.mockReturnValue(
+        queryResult({
+          error: FETCH_ERROR,
+          data: buildSnapshot({ safeTxHash: HASH, status: CheckStatus.UNAVAILABLE }),
+        }),
+      )
+
+      const { result } = renderHook(() => useSafenetCheck(HASH))
+
+      expect(result.current.unavailableReason).toBe('NO_CHECK')
+    })
+
+    it('reports no reason once a check is observed', () => {
+      mockQuery.mockReturnValue(queryResult({ data: buildBenignSnapshot({ safeTxHash: HASH }) }))
+
+      const { result } = renderHook(() => useSafenetCheck(HASH))
+
+      expect(result.current.unavailableReason).toBeUndefined()
+    })
+  })
+
   describe('read-path pin merge', () => {
     it('never downgrades below the pinned verdict', () => {
       const pinned: PinnedVerdict = { status: CheckStatus.BENIGN, atBlock: '10', verification: UNVERIFIED_ATTESTATION }

@@ -37,7 +37,6 @@ export type RpcConfig = {
   groupKey?: { x: string; y: string }
   /** `groupKey` calls revert (an epoch the coordinator has not seen). */
   failGroupKey?: boolean
-
 }
 
 const hexToNum = (value: string): number => Number(BigInt(value))
