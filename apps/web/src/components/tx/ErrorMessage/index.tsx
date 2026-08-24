@@ -7,6 +7,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
 import ExternalLink from '@/components/common/ExternalLink'
 import ErrorDetails from '@/components/common/ErrorDetails'
+import { getLedgerDeviceError, getLedgerSupportReference } from '@/services/onboard/ledger-errors'
 import { Alert, AlertDescription, AlertTitle, AlertSeverityIcon } from '@/components/ui/alert'
 import { Typography } from '@/components/ui/typography'
 import { Link } from '@/components/ui/link'
@@ -43,6 +44,14 @@ const ErrorMessage = ({
   // every other error keeps its raw message behind the Details toggle, as
   // before (WA-3005 is on-chain-scoped).
   const gsCode = error ? getGsCodeFromError(error) : undefined
+
+  // A Ledger device failure carries its own translated sentence, so the raw
+  // message must never be offered: by the time it reaches us it has been
+  // re-wrapped by ethers and viem and reads as a dump of class names, codes and
+  // library versions (WA-3243). An unmapped device state gets a support
+  // reference instead — the device's own words stay in telemetry.
+  const ledgerError = error ? getLedgerDeviceError(error) : undefined
+  const ledgerReference = ledgerError?.reason === 'unknown' ? getLedgerSupportReference(ledgerError) : undefined
 
   // GS013 family: the inner call reverted with a module/guard custom error. A
   // custom-error revert without a GS string is still a GS013 — decode its
@@ -92,7 +101,7 @@ const ErrorMessage = ({
             </span>
           )}
 
-          {error && !effectiveGsCode && (
+          {error && !effectiveGsCode && !ledgerError && (
             <Link
               render={<button type="button" />}
               onClick={onDetailsToggle}
@@ -105,6 +114,8 @@ const ErrorMessage = ({
 
         {effectiveGsCode ? (
           <ErrorDetails code={effectiveGsCode} customError={customError} />
+        ) : ledgerError ? (
+          ledgerReference && <ErrorDetails code={ledgerReference} />
         ) : (
           error &&
           showDetails && (

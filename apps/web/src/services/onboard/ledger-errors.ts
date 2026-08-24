@@ -1,0 +1,203 @@
+import { makeError } from 'ethers'
+import type { DmkError } from '@ledgerhq/device-management-kit'
+
+/**
+ * Ledger's Device Management Kit reports failures as tagged objects, not as
+ * `Error`s: `{ _tag, originalError?, errorCode? }`. The device's own
+ * explanation lives in `message`, in `originalError.message`, or — for a status
+ * word the kit does not model — inside `originalError`. Dropping it (as a bare
+ * `'unknown'`) leaves both the user and Datadog with nothing to act on, and
+ * serialising the raw object leaks internals onto the screen (WA-3243).
+ *
+ * So: read the reason, classify it, translate it, and keep the raw evidence in
+ * the error's `info` payload, which reaches the debugging sinks but is never
+ * rendered.
+ */
+
+/** What the device is actually telling us, in terms a user can act on. */
+export type LedgerDeviceErrorReason = 'rejected' | 'locked' | 'app_closed' | 'blind_signing' | 'connection' | 'unknown'
+
+/**
+ * Marks an ethers error as originating from a Ledger device. Attached as the
+ * error's `info` so it survives every re-wrap (ethers → viem → protocol-kit)
+ * and can be recovered from the cause chain at the point of display.
+ */
+export interface LedgerDeviceErrorInfo {
+  readonly source: typeof LEDGER_ERROR_SOURCE
+  readonly reason: LedgerDeviceErrorReason
+  /** DMK error class discriminator, e.g. `InvalidStatusWordError`. Debugging sinks only. */
+  readonly tag: string
+  /** APDU status word as reported by the device, e.g. `5515`. */
+  readonly errorCode?: string
+  /** The device's own words, e.g. `no signature returned`. Debugging sinks only. */
+  readonly deviceMessage?: string
+}
+
+const LEDGER_ERROR_SOURCE = 'ledger-device'
+
+/**
+ * APDU status words. The Ethereum app and the DMK global handler both report
+ * these; the same word means the same thing whichever class carries it.
+ */
+const StatusWord = {
+  ACTION_REFUSED: '5501',
+  DEVICE_LOCKED: '5515',
+  SECURITY_STATUS_NOT_SATISFIED: '6982',
+  CONDITION_NOT_SATISFIED: '6985',
+  APP_NOT_OPEN: '6511',
+  UNKNOWN_APP: '6807',
+  NO_APP_NAME: '670a',
+  INVALID_DATA: '6a80',
+  INS_NOT_SUPPORTED: '6d00',
+  CLA_NOT_SUPPORTED: '6e00',
+} as const
+
+const REJECTION_CODES: ReadonlySet<string> = new Set([
+  StatusWord.ACTION_REFUSED,
+  StatusWord.SECURITY_STATUS_NOT_SATISFIED,
+  StatusWord.CONDITION_NOT_SATISFIED,
+])
+
+const APP_CODES: ReadonlySet<string> = new Set([
+  StatusWord.APP_NOT_OPEN,
+  StatusWord.UNKNOWN_APP,
+  StatusWord.NO_APP_NAME,
+  StatusWord.INS_NOT_SUPPORTED,
+  StatusWord.CLA_NOT_SUPPORTED,
+])
+
+/** DMK tags that carry a rejection without a status word. */
+const REJECTION_TAGS: ReadonlySet<string> = new Set(['ActionRefusedError', 'RefusedByUserDAError'])
+
+const LOCKED_TAGS: ReadonlySet<string> = new Set(['DeviceLockedError'])
+
+const APP_TAGS: ReadonlySet<string> = new Set(['OpenAppCommandError'])
+
+/** Transport-level tags: the cable, the WebHID handle or the session went away. */
+const CONNECTION_TAGS: ReadonlySet<string> = new Set([
+  'DeviceDisconnectedBeforeSendingApdu',
+  'DeviceDisconnectedWhileSendingError',
+  'DeviceNotRecognizedError',
+  'DisconnectError',
+  'NoAccessibleDeviceError',
+  'OpeningConnectionError',
+  'ReconnectionFailedError',
+  'SendApduTimeoutError',
+  'WebHidSendReportError',
+])
+
+const USER_MESSAGES: Record<LedgerDeviceErrorReason, string> = {
+  rejected: 'Transaction rejected on your Ledger.',
+  locked: 'Unlock your Ledger and try again.',
+  app_closed: 'Open the Ethereum app on your Ledger.',
+  blind_signing: 'Enable blind signing in the Ethereum app on your Ledger, then try again.',
+  connection: 'Lost connection to your Ledger. Reconnect it and try again.',
+  unknown: 'Your Ledger could not complete the request.',
+}
+
+/**
+ * ethers' message for a rejection. `isWalletRejection` and `matchUserOutcome`
+ * both key off this wording, so a cancellation is suppressed in the UI and
+ * never counted as an error in analytics (WA-2950). The user-facing sentence
+ * for a rejection comes from `USER_MESSAGES`, not from here.
+ */
+const REJECTION_MESSAGE = 'user rejected action'
+
+const readString = (source: unknown, key: string): string | undefined => {
+  if (typeof source !== 'object' || source === null) return undefined
+  const value = (source as Record<string, unknown>)[key]
+  return typeof value === 'string' && value.length > 0 ? value : undefined
+}
+
+/**
+ * The status word, wherever the kit put it: on the error for a
+ * `DeviceExchangeError`, nested in `originalError` for the status words it
+ * does not model (`UnknownDeviceExchangeError`).
+ */
+const readErrorCode = (error: DmkError): string | undefined =>
+  readString(error, 'errorCode') ?? readString(error.originalError, 'errorCode')
+
+/**
+ * The device's own explanation. `InvalidStatusWordError` has no `message` at
+ * all — its text is wrapped in an `Error` under `originalError`, which
+ * serialises to `{}` and is why these failures reached users as `unknown`.
+ */
+const readDeviceMessage = (error: DmkError): string | undefined =>
+  readString(error, 'message') ?? readString(error.originalError, 'message')
+
+const resolveReason = (tag: string, errorCode: string | undefined): LedgerDeviceErrorReason => {
+  if (REJECTION_TAGS.has(tag) || (errorCode && REJECTION_CODES.has(errorCode))) return 'rejected'
+  if (LOCKED_TAGS.has(tag) || errorCode === StatusWord.DEVICE_LOCKED) return 'locked'
+  if (APP_TAGS.has(tag) || (errorCode && APP_CODES.has(errorCode))) return 'app_closed'
+  if (errorCode === StatusWord.INVALID_DATA) return 'blind_signing'
+  if (CONNECTION_TAGS.has(tag)) return 'connection'
+  return 'unknown'
+}
+
+/** Reads what the device said, without interpreting it. */
+export const readLedgerDeviceError = (error: DmkError): LedgerDeviceErrorInfo => {
+  const tag = readString(error, '_tag') ?? 'UnknownDmkError'
+  const errorCode = readErrorCode(error)
+
+  return {
+    source: LEDGER_ERROR_SOURCE,
+    reason: resolveReason(tag, errorCode),
+    tag,
+    errorCode,
+    deviceMessage: readDeviceMessage(error),
+  }
+}
+
+/** The sentence shown to the user. Never contains device or library internals. */
+export const getLedgerUserMessage = (info: LedgerDeviceErrorInfo): string => USER_MESSAGES[info.reason]
+
+/**
+ * Support reference for a device failure we have no sentence for. Only the
+ * status word is exposed — the tag and the device's raw words stay in
+ * telemetry, as they name internals.
+ */
+export const getLedgerSupportReference = (info: LedgerDeviceErrorInfo): string =>
+  `LEDGER-${info.errorCode ? `0x${info.errorCode}` : 'UNKNOWN'}`
+
+const isLedgerDeviceErrorInfo = (value: unknown): value is LedgerDeviceErrorInfo =>
+  typeof value === 'object' && value !== null && (value as LedgerDeviceErrorInfo).source === LEDGER_ERROR_SOURCE
+
+/** Guards against a self-referencing cause chain. */
+const MAX_CAUSE_DEPTH = 10
+
+/**
+ * Recovers the device reason from an error that has since been re-wrapped —
+ * ethers hands the rejection to viem, which wraps it in `UnknownRpcError`, and
+ * protocol-kit may wrap that again. Each wrapper keeps the previous error as
+ * `cause`, so the payload is always reachable from the chain.
+ */
+export const getLedgerDeviceError = (error: unknown): LedgerDeviceErrorInfo | undefined => {
+  let current: unknown = error
+
+  for (let depth = 0; depth < MAX_CAUSE_DEPTH && typeof current === 'object' && current !== null; depth++) {
+    const { info, cause } = current as { info?: unknown; cause?: unknown }
+    if (isLedgerDeviceErrorInfo(info)) return info
+    current = cause
+  }
+
+  return undefined
+}
+
+/**
+ * Converts a DMK failure into the ethers error the EIP-1193 provider must
+ * reject with.
+ *
+ * The message is the user-facing sentence rather than a raw dump, so the
+ * error classifies as a Ledger failure (or a rejection) instead of `unknown`;
+ * the device's own words ride along in `info`, which reaches Datadog but is
+ * never rendered.
+ */
+export const mapLedgerError = (error: DmkError): Error => {
+  const info = readLedgerDeviceError(error)
+
+  if (info.reason === 'rejected') {
+    return makeError(REJECTION_MESSAGE, 'ACTION_REJECTED', { action: 'unknown', reason: 'rejected', info })
+  }
+
+  return makeError(getLedgerUserMessage(info), 'UNKNOWN_ERROR', { info })
+}

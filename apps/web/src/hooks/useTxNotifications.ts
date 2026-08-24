@@ -22,6 +22,7 @@ import {
   RATE_LIMIT_USER_MESSAGE,
 } from '@/utils/transaction-errors'
 import { getGs026Message } from '@safe-global/utils/services/exceptions/contractErrors'
+import { getLedgerDeviceError, getLedgerUserMessage } from '@/services/onboard/ledger-errors'
 
 const TxNotifications = {
   [TxEvent.SIGN_FAILED]: 'Failed to sign. Please try again.',
@@ -72,6 +73,10 @@ const useTxNotifications = (): void => {
 
         // Check if this is a Guard error
         const guardErrorName = isError ? getGuardErrorInfo(detail.error) : undefined
+        // A Ledger device failure states its own reason. Its raw error is a
+        // dump of DMK class names, ethers codes and the viem version, so it is
+        // withheld from `detailedMessage` too (WA-3243).
+        const ledgerError = isError ? getLedgerDeviceError(detail.error) : undefined
         let message = isError ? `${baseMessage} ${formatError(detail.error)}` : baseMessage
 
         // Override message for Guard errors
@@ -85,6 +90,8 @@ const useTxNotifications = (): void => {
           // RPC rejected it pre-mining (no gas spent). Same user story as a
           // stale Safe nonce, so show the same message.
           message = getGs026Message('STALE_NONCE')
+        } else if (ledgerError) {
+          message = getLedgerUserMessage(ledgerError)
         } else if (isError && isRateLimitError(detail.error)) {
           // Translate transient RPC rate-limit failures into friendly copy.
           // The raw error from viem looks like a contract revert ("Request is
@@ -110,7 +117,7 @@ const useTxNotifications = (): void => {
           showNotification({
             title: humanDescription,
             message,
-            detailedMessage: isError ? detail.error.message : undefined,
+            detailedMessage: isError && !ledgerError ? detail.error.message : undefined,
             groupKey,
             variant: isError ? Variant.ERROR : isSuccess ? Variant.SUCCESS : Variant.INFO,
             link: txId

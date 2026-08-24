@@ -1,5 +1,5 @@
 import type { DmkError, ExecuteDeviceActionReturnType } from '@ledgerhq/device-management-kit'
-import { makeError } from 'ethers'
+import { mapLedgerError } from './ledger-errors'
 import type {
   GetAddressDAOutput,
   SignPersonalMessageDAOutput,
@@ -339,10 +339,6 @@ export function ledgerModule(): WalletInit {
   }
 }
 
-const enum LedgerErrorCode {
-  REJECTED = '6985',
-}
-
 // Promisified Ledger SDK
 async function getLedgerSdk() {
   const { DeviceManagementKitBuilder } = await import('@ledgerhq/device-management-kit')
@@ -389,7 +385,7 @@ async function waitForAction<Output, Error extends DmkError, IntermediateValue>(
           if (actionState.status === DeviceActionStatus.Completed) {
             resolve(actionState.output)
           } else if (actionState.status === DeviceActionStatus.Error) {
-            reject(mapEthersError(actionState.error))
+            reject(mapLedgerError(actionState.error))
           } else {
             // Awaiting user action, e.g. device to be unlocked. We could throw
             // an explicit error message but we keep the signing request alive
@@ -400,20 +396,4 @@ async function waitForAction<Output, Error extends DmkError, IntermediateValue>(
   } finally {
     subscription?.unsubscribe()
   }
-}
-
-function mapEthersError(error: DmkError) {
-  const isRejection = 'errorCode' in error ? error.errorCode === LedgerErrorCode.REJECTED : false
-
-  if (!isRejection) {
-    return makeError(error.message ?? 'unknown', 'UNKNOWN_ERROR', {
-      info: error,
-    })
-  }
-
-  return makeError('user rejected action', 'ACTION_REJECTED', {
-    action: 'unknown',
-    reason: 'rejected',
-    info: error,
-  })
 }

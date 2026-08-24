@@ -15,6 +15,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import type { PendingSafeMessagesState } from '@/store/pendingSafeMessagesSlice'
 import { isWalletRejection } from '@/utils/wallets'
+import { getLedgerDeviceError, getLedgerUserMessage } from '@/services/onboard/ledger-errors'
 
 const SafeMessageNotifications: Partial<Record<SafeMsgEvent, string>> = {
   [SafeMsgEvent.PROPOSE]: 'You successfully signed the message.',
@@ -52,12 +53,19 @@ const useSafeMessageNotifications = () => {
         const isError = 'error' in detail
         if (isError && isWalletRejection(detail.error)) return
         const isSuccess = event === SafeMsgEvent.PROPOSE || event === SafeMsgEvent.SIGNATURE_PREPARED
-        const message = isError ? `${baseMessage}${formatError(detail.error)}` : baseMessage
+        // A Ledger device failure states its own reason; its raw error is a
+        // dump of DMK class names, ethers codes and the viem version (WA-3243).
+        const ledgerError = isError ? getLedgerDeviceError(detail.error) : undefined
+        const message = ledgerError
+          ? getLedgerUserMessage(ledgerError)
+          : isError
+            ? `${baseMessage}${formatError(detail.error)}`
+            : baseMessage
 
         dispatch(
           showNotification({
             message,
-            detailedMessage: isError ? detail.error.message : undefined,
+            detailedMessage: isError && !ledgerError ? detail.error.message : undefined,
             groupKey: detail.messageHash,
             variant: isError ? 'error' : isSuccess ? 'success' : 'info',
           }),
