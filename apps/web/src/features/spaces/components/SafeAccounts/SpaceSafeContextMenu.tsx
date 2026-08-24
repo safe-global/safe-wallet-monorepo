@@ -86,7 +86,7 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
       {open[ModalType.RENAME] && (
         <EntryDialog
           handleClose={handleCloseModal}
-          defaultValues={{ name: name || '', address: safeItem.address }}
+          defaultValues={{ name, address: safeItem.address }}
           chainIds={chainIds}
           scope={scope}
           disableAddressInput

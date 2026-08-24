@@ -67,12 +67,8 @@ export { default as useIsQualifiedSafe } from './hooks/useIsQualifiedSafe'
 export { useMembersSearch } from './hooks/useMembersSearch'
 export { useInviteNotification } from './hooks/useInviteNotification'
 export { useWorkspaceAddressBookLabel } from './hooks/useWorkspaceAddressBookLabel'
-export {
-  useAddressBookWriteScope,
-  type AddressBookWriteScope,
-  type AddressBookWriteScopeResult,
-} from './hooks/useAddressBookWriteScope'
-export { useUpsertWorkspaceSafeName, type UpsertWorkspaceSafeName } from './hooks/useUpsertWorkspaceSafeName'
+export { useAddressBookWriteScope, type AddressBookWriteScope } from './hooks/useAddressBookWriteScope'
+export { useUpsertWorkspaceSafeName } from './hooks/useUpsertWorkspaceSafeName'
 export { default as useTrackSpace } from './hooks/useTrackSpace'
 
 // Hooks from useSpaceMembers.tsx

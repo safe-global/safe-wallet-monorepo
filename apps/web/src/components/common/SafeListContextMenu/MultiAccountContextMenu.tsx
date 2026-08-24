@@ -98,7 +98,7 @@ const MultiAccountContextMenu = ({
       {open[ModalType.RENAME] && (
         <EntryDialog
           handleClose={handleCloseModal}
-          defaultValues={{ name: name || '', address }}
+          defaultValues={{ name, address }}
           chainIds={chainIds}
           scope={scope}
           disableAddressInput

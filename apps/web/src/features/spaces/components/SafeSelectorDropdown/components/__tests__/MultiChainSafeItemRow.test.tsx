@@ -15,10 +15,16 @@ jest.mock('@/hooks/useChains', () => ({
 
 // Surface the explorerLink the summary row is (or isn't) given — the multi-chain summary must never
 // receive one, since its chain would be arbitrary.
+const mockWriteScope: jest.Mock = jest.fn(() => ({ scope: 'local', canRename: true }))
+jest.mock('@/features/spaces', () => ({
+  useAddressBookWriteScope: (...args: unknown[]) => mockWriteScope(...args),
+}))
+
 jest.mock('@/components/common/AccountRow/SafeInfoDisplay', () => {
-  const Mock = ({ explorerLink }: { explorerLink?: { href: string } }) => (
+  const Mock = ({ explorerLink, onRename }: { explorerLink?: { href: string }; onRename?: () => void }) => (
     <div data-testid="safe-info-display">
       {explorerLink && <a data-testid="summary-explorer-link" href={explorerLink.href} />}
+      {onRename && <button data-testid="rename-btn" onClick={onRename} />}
     </div>
   )
   Mock.displayName = 'SafeInfoDisplay'
@@ -64,6 +70,23 @@ const createItem = (chains: (string | SafeItemDataChain)[], overrides: Partial<S
   balance: '0',
   chains: chains.map((chain) => (typeof chain === 'string' ? makeChain(chain) : chain)),
   ...overrides,
+})
+
+describe('MultiChainSafeItemRow rename gate', () => {
+  beforeEach(() => mockWriteScope.mockReturnValue({ scope: 'local', canRename: true }))
+
+  it('offers rename when the viewer may rename this Safe', () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} onRename={jest.fn()} />)
+
+    expect(screen.getByTestId('rename-btn')).toBeInTheDocument()
+  })
+
+  it('withholds rename from a member looking at a workspace Safe', () => {
+    mockWriteScope.mockReturnValue({ scope: 'local', canRename: false })
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} onRename={jest.fn()} />)
+
+    expect(screen.queryByTestId('rename-btn')).not.toBeInTheDocument()
+  })
 })
 
 describe('MultiChainSafeItemRow chain icon overflow badge', () => {

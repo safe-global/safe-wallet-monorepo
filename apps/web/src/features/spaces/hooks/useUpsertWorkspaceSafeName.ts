@@ -12,7 +12,7 @@ import { useCurrentSpaceId } from './useCurrentSpaceId'
 import useGetSpaceAddressBook from './useGetSpaceAddressBook'
 import { useWorkspaceAddressBookLabel } from './useWorkspaceAddressBookLabel'
 
-export type UpsertWorkspaceSafeName = (args: {
+type UpsertWorkspaceSafeName = (args: {
   address: string
   name: string
   chainIds: string[]

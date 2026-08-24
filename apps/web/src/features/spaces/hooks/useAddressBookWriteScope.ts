@@ -6,7 +6,7 @@ import { useSpaceSafes } from './useSpaceSafes'
 
 export type AddressBookWriteScope = 'workspace' | 'local'
 
-export type AddressBookWriteScopeResult = {
+type AddressBookWriteScopeResult = {
   scope: AddressBookWriteScope
   canRename: boolean
 }

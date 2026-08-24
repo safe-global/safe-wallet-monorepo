@@ -189,7 +189,7 @@ const SafeListContextMenu = ({
       {open[ModalType.RENAME] && (
         <EntryDialog
           handleClose={handleCloseModal}
-          defaultValues={{ name: name || '', address }}
+          defaultValues={{ name, address }}
           chainIds={[chainId]}
           scope={scope}
           disableAddressInput

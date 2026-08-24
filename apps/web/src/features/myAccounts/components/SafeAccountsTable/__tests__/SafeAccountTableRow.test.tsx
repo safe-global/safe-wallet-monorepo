@@ -1,6 +1,7 @@
 import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import SafeAccountTableRow, { type RowCheckbox } from '../SafeAccountTableRow'
+import { useAddressBookWriteScope } from '@/features/spaces'
 import { SELECT_COLUMN, type SafeAccountColumn } from '../columns'
 import type { AccountLine } from '../useSafeAccountRows'
 
@@ -22,6 +23,7 @@ jest.mock('@/components/common/SafeListContextMenu/MultiAccountContextMenu', () 
   __esModule: true,
   default: () => null,
 }))
+jest.mock('@/features/spaces', () => ({ useAddressBookWriteScope: jest.fn() }))
 jest.mock('@/hooks/useChains', () => ({
   useChain: () => ({
     chainId: '1',
@@ -82,6 +84,7 @@ const checkbox = (over: Partial<RowCheckbox> = {}): RowCheckbox => ({
 describe('SafeAccountTableRow', () => {
   beforeEach(() => {
     mockUseRowOverviews.mockClear()
+    ;(useAddressBookWriteScope as jest.Mock).mockReturnValue({ scope: 'local', canRename: true })
   })
 
   it('renders the name as a navigation link when not in selection mode', () => {
@@ -269,6 +272,13 @@ describe('SafeAccountTableRow', () => {
 
   it('omits the rename pencil without onRename (e.g. inside modals)', () => {
     renderRow({})
+    expect(screen.queryByTestId('safe-item-rename-btn')).not.toBeInTheDocument()
+  })
+
+  it('omits the rename pencil for a member who may not rename a workspace Safe', () => {
+    ;(useAddressBookWriteScope as jest.Mock).mockReturnValue({ scope: 'local', canRename: false })
+    renderRow({ onRename: jest.fn() })
+
     expect(screen.queryByTestId('safe-item-rename-btn')).not.toBeInTheDocument()
   })
 
