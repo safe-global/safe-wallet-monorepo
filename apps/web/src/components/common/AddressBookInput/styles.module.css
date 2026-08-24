@@ -3,9 +3,8 @@
   width: 100%;
 }
 
-/* Layout only. Position, width and max-height come from useAnchoredList as inline styles (the list
-   is portalled, so it no longer positions against this wrapper), and the panel surface itself comes
-   from the shared anchored-surface utilities on the element (see ui/anchored-surface.test.tsx). */
+/* Layout only: the portalled list gets its position, width and max-height inline from
+   useAnchoredList, and its panel surface from Tailwind classes on the element. */
 .options {
   z-index: var(--z-overlay);
   margin: 0;
