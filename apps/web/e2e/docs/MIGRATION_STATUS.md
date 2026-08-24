@@ -4,6 +4,8 @@
 
 **Update this file in the same PR as the migration.** A stage is not done until its rows here are accurate.
 
+> **Review rule:** a PR that changes a row's **Status** without filling in its **Verdict** is incomplete — reviewers should request changes. Nothing in CI enforces the guide's Step 1 classification, so this column is the only thing that makes it real. See [Review rule — Verdict before Status](./CYPRESS_MIGRATION_GUIDE.md#review-rule--verdict-before-status).
+
 ## How to read it
 
 | Column                    | Meaning                                                                                |

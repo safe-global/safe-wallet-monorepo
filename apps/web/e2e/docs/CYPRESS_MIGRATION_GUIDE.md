@@ -119,6 +119,19 @@ For each test, document:
 
 This tracking enables the eventual Cypress removal — we need to know when every valuable test has a Playwright equivalent.
 
+### Review rule — Verdict before Status
+
+**A PR that changes a spec's `Status` without also filling in its `Verdict` is incomplete. Reviewers: request changes.**
+
+A blank `Verdict` next to a changed `Status` means one of two things, and both are worth a review comment:
+
+- the classification never happened, and the spec was translated line by line — the exact failure this guide exists to prevent; or
+- it happened in someone's head and is now lost, so the next person cannot tell whether a thin Playwright spec is thin _because the rest was correctly pushed down the pyramid_, or because it silently dropped coverage.
+
+`Verdict` does not need prose. One line naming the routing decision is enough — `Critical UI flow → @smoke`, `Data assertion → @api test`, `Logic → unit test in useSafeInfo.test.ts`, `Duplicate of smoke/assets → won't-migrate`. What matters is that the decision is written down where the next reader will find it.
+
+The same applies to `won't-migrate`: it is a legitimate and common outcome, but only with a `Verdict` saying which of the 8 questions produced it.
+
 ---
 
 ## Step 4: The Staged Programme
