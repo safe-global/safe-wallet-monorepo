@@ -87,14 +87,11 @@ describe('AddContact', () => {
     expect(trackEvent).toHaveBeenCalledWith({ ...SPACE_EVENTS.ADD_ADDRESS_SUBMIT })
   })
 
-  it('onSuccess tracks ADDRESS_BOOK_ENTRY_CREATED with workspace id and post-insert count', () => {
+  it('onSuccess tracks ADDRESS_BOOK_ENTRY_CREATED with the post-insert count', () => {
     render(<AddContact />)
     lastProps!.onSuccess!()
 
-    expect(trackEvent).toHaveBeenCalledWith(
-      { ...SPACE_EVENTS.ADDRESS_BOOK_ENTRY_CREATED },
-      { workspace_id: MOCK_SPACE_UUID, entry_count_after: 3 },
-    )
+    expect(trackEvent).toHaveBeenCalledWith({ ...SPACE_EVENTS.ADDRESS_BOOK_ENTRY_CREATED }, { 'Entry Count': 3 })
   })
 
   it('renders without crashing when invoked', async () => {

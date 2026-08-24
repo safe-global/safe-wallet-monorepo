@@ -73,9 +73,7 @@ const useMixpanel = () => {
   }, [isMixpanelEnabled, isAnalyticsEnabled])
 
   useEffect(() => {
-    if (currentChain) {
-      mixpanelSetBlockchainNetwork(currentChain.chainName)
-    }
+    mixpanelSetBlockchainNetwork(currentChain?.chainName ?? '')
   }, [currentChain])
 
   useEffect(() => {

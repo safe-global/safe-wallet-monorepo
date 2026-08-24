@@ -183,6 +183,17 @@ describe('useMixpanel', () => {
     expect(mixpanelModule.mixpanelSetBlockchainNetwork).toHaveBeenCalledWith(mockChainName)
   })
 
+  it('should clear the blockchain network when no chain is active', () => {
+    jest.spyOn(useChainHook, 'useChain').mockReturnValue(undefined)
+    jest.spyOn(mixpanelModule, 'mixpanelSetBlockchainNetwork')
+
+    renderHook(() => useMixpanel(), { initialReduxState: getDefaultInitialReduxState() })
+
+    // Space routes have no active Safe; leaving the previous Safe's network registered
+    // would attach it to every workspace event.
+    expect(mixpanelModule.mixpanelSetBlockchainNetwork).toHaveBeenCalledWith('')
+  })
+
   it('should set device type', () => {
     jest.spyOn(mixpanelModule, 'mixpanelSetDeviceType')
 
