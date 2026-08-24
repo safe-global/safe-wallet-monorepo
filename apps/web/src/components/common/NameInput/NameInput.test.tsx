@@ -60,6 +60,38 @@ describe('NameInput', () => {
     })
   })
 
+  describe('optional placeholder', () => {
+    it('defaults to an "Optional" placeholder when not required and none is provided', () => {
+      render(
+        <Wrapper>
+          <NameInput name="name" label="Name" />
+        </Wrapper>,
+      )
+
+      expect(screen.getByRole('textbox', { name: 'Name' })).toHaveAttribute('placeholder', 'Optional')
+    })
+
+    it('keeps the provided placeholder when one is given', () => {
+      render(
+        <Wrapper>
+          <NameInput name="name" label="Name" placeholder="Luxury Sepolia Safe" />
+        </Wrapper>,
+      )
+
+      expect(screen.getByRole('textbox', { name: 'Name' })).toHaveAttribute('placeholder', 'Luxury Sepolia Safe')
+    })
+
+    it('does not add an "Optional" placeholder when the field is required', () => {
+      render(
+        <Wrapper>
+          <NameInput name="name" label="Name" required />
+        </Wrapper>,
+      )
+
+      expect(screen.getByRole('textbox', { name: 'Name' })).not.toHaveAttribute('placeholder')
+    })
+  })
+
   describe('with validateCharset', () => {
     it('rejects disallowed characters with a short label and full tooltip', async () => {
       render(

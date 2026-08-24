@@ -34,7 +34,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
               </span>
             </div>
             <div
-              class="flex-1"
+              class="max-w-full flex-1 xl:min-w-0"
               data-testid="tx-data-row"
             >
               <div
@@ -136,7 +136,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                 <button
                   aria-disabled="false"
                   aria-expanded="false"
-                  class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground cursor-pointer rounded-md py-4 text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 justify-between border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 trigger items-center px-4 hover:no-underline"
+                  class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground cursor-pointer rounded-md py-4 text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 justify-between border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 trigger items-center px-4"
                   data-orientation="vertical"
                   data-slot="accordion-trigger"
                   data-testid="decoded-tx-summary"

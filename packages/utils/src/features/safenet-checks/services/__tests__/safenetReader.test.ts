@@ -1,7 +1,7 @@
 import { setupServer, type SetupServerApi } from 'msw/node'
 import { SafenetReader, type SafenetReaderConfig } from '../safenetReader'
 import { CONSENSUS_TOPIC0S } from '../../abi'
-import { oracleProposalHash } from '../../utils/oracleProposalHash'
+import { transactionProposalHash } from '../../utils/proposalHash'
 import {
   resetLogCounter,
   buildOracleProposedLog,
@@ -9,11 +9,11 @@ import {
   buildPlainProposedLog,
   buildPlainAttestedLog,
   buildOracleResultLog,
-  buildV1Lifecycle,
-  buildV2Lifecycle,
+  buildLifecycle,
+  EMPTY_ORACLE_DATA_HASH,
 } from '../../builders/rawLogs'
 import type { RawLog } from '../../utils/decodeLogs'
-import { CheckEventType, OracleGeneration, type Hex } from '../../types'
+import { CheckEventType, type Hex } from '../../types'
 import { makeEndpoint, type GetLogsFilter } from './rpcEndpoint'
 
 const consensusCalls = (calls: GetLogsFilter[]): GetLogsFilter[] =>
@@ -25,6 +25,17 @@ const oracleCalls = (calls: GetLogsFilter[]): GetLogsFilter[] =>
 const CONSENSUS = '0x223624cBF099e5a8f8cD5aF22aFa424a1d1acEE9'
 const ORACLE = '0x00000000000000000000000000000000000000AA'
 const CHAIN_ID = '100'
+
+// Builders emit empty oracleData, so their requestId derives from its keccak.
+const requestIdFor = (epoch: string, oracle: string = ORACLE): Hex =>
+  transactionProposalHash({
+    chainId: CHAIN_ID,
+    consensus: CONSENSUS,
+    epoch,
+    oracle,
+    oracleDataHash: EMPTY_ORACLE_DATA_HASH as Hex,
+    safeTxHash: SAFE_TX_HASH,
+  })
 
 const makeReader = (over: Partial<SafenetReaderConfig> = {}, url = 'http://rpc.test/1') =>
   new SafenetReader({
@@ -177,35 +188,28 @@ describe('SafenetReader.fetchCheckState', () => {
     for (const result of results) expect(result.headBlock).toBe('25000')
   })
 
-  it('reads a V1 oracle lifecycle: sentinel logs, generation, and the request deadline', async () => {
+  it('reads a full oracle lifecycle: sentinel logs and the request deadline', async () => {
     resetLogCounter()
-    const requestId = oracleProposalHash({
-      chainId: CHAIN_ID,
-      consensus: CONSENSUS,
-      epoch: '1',
-      oracle: ORACLE,
-      safeTxHash: SAFE_TX_HASH,
-    })
-    const logs = buildV1Lifecycle({ safeTxHash: SAFE_TX_HASH, requestId, oracle: ORACLE, epoch: 1n })
+    const requestId = requestIdFor('1')
+    const logs = buildLifecycle({ safeTxHash: SAFE_TX_HASH, requestId, oracle: ORACLE, epoch: 1n })
     const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs })
     server = setupServer(endpoint.handler)
     server.listen()
 
     const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH)
 
-    // Proposed + NewRequest + Committed + OracleResult + Attested.
     expect(result.events.map((e) => e.type)).toEqual([
       CheckEventType.ORACLE_PROPOSED,
       CheckEventType.REQUEST_CREATED,
       CheckEventType.SENTINEL_COMMITTED,
+      CheckEventType.SENTINEL_REVEALED,
       CheckEventType.ORACLE_RESULT,
       CheckEventType.ORACLE_ATTESTED,
     ])
     expect(result.requestId).toBe(requestId)
     expect(result.epoch).toBe('1')
-    expect(result.deadlineBlock).toBe('150')
-    // V1 sentinel events carry the V1 generation marker.
-    expect(result.generation).toBe(OracleGeneration.V1)
+    // The reveal deadline is the request's effective deadline.
+    expect(result.deadlineBlock).toBe('160')
   })
 
   it('returns null correlation fields for the plain pair — the beta path has no oracle', async () => {
@@ -220,7 +224,6 @@ describe('SafenetReader.fetchCheckState', () => {
     expect(result.epoch).toBeNull()
     expect(result.oracle).toBeNull()
     expect(result.deadlineBlock).toBeNull()
-    expect(result.generation).toBeNull()
   })
 
   it('targets Proposed.oracle for the sentinel getLogs when the proposal names an allowlisted oracle', async () => {
@@ -244,7 +247,7 @@ describe('SafenetReader.fetchCheckState', () => {
     // proposeOracleTransaction is permissionless, so the oracle address in the
     // event is attacker-chosen. An unlisted one must not be read from at all.
     resetLogCounter()
-    const logs = buildV1Lifecycle({ safeTxHash: SAFE_TX_HASH, oracle: ORACLE, epoch: 1n })
+    const logs = buildLifecycle({ safeTxHash: SAFE_TX_HASH, oracle: ORACLE, epoch: 1n })
     const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs })
     server = setupServer(endpoint.handler)
     server.listen()
@@ -260,7 +263,7 @@ describe('SafenetReader.fetchCheckState', () => {
 
   it("skips the oracle path entirely when the allowlist is empty (today's default)", async () => {
     resetLogCounter()
-    const logs = buildV1Lifecycle({ safeTxHash: SAFE_TX_HASH, oracle: ORACLE, epoch: 1n })
+    const logs = buildLifecycle({ safeTxHash: SAFE_TX_HASH, oracle: ORACLE, epoch: 1n })
     const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs })
     server = setupServer(endpoint.handler)
     server.listen()
@@ -285,9 +288,7 @@ describe('SafenetReader.fetchCheckState', () => {
 
     const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH)
 
-    const ids = ['1', '2'].map((epoch) =>
-      oracleProposalHash({ chainId: CHAIN_ID, consensus: CONSENSUS, epoch, oracle: ORACLE, safeTxHash: SAFE_TX_HASH }),
-    )
+    const ids = ['1', '2'].map((epoch) => requestIdFor(epoch))
     const orac = oracleCalls(endpoint.getLogsCalls)
     // One getLogs per oracle per chunk, carrying both requestIds (deduped) as a
     // topic1 OR-array. Compared as a set: ethers sorts topic arrays on the way
@@ -326,13 +327,7 @@ describe('SafenetReader.fetchCheckState', () => {
     // The emitting address is what the reader gates on, not the topic filter.
     resetLogCounter()
     const ATTACKER = '0x000000000000000000000000000000000000BEEF'
-    const requestId = oracleProposalHash({
-      chainId: CHAIN_ID,
-      consensus: CONSENSUS,
-      epoch: '1',
-      oracle: ORACLE,
-      safeTxHash: SAFE_TX_HASH,
-    })
+    const requestId = requestIdFor('1')
     const logs = [
       buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE }),
       { ...buildOracleResultLog({ requestId, approved: false }), address: ATTACKER },
@@ -363,13 +358,7 @@ describe('SafenetReader.fetchCheckState', () => {
     const byAddress = new Map(oracleCalls(endpoint.getLogsCalls).map((c) => [c.address?.toLowerCase(), c]))
     expect([...byAddress.keys()].sort()).toEqual([ORACLE.toLowerCase(), OTHER.toLowerCase()].sort())
     for (const [address, call] of byAddress) {
-      const expected = oracleProposalHash({
-        chainId: CHAIN_ID,
-        consensus: CONSENSUS,
-        epoch: '1',
-        oracle: address === ORACLE.toLowerCase() ? ORACLE : OTHER,
-        safeTxHash: SAFE_TX_HASH,
-      })
+      const expected = requestIdFor('1', address === ORACLE.toLowerCase() ? ORACLE : OTHER)
       // Each filter carries only its own oracle's id, not a pooled set.
       expect(call.topics[1]).toEqual([expected])
     }
@@ -393,37 +382,10 @@ describe('SafenetReader.fetchCheckState', () => {
     expect(orac[0].topics[1]).toContain(result.requestId)
   })
 
-  it('reads a V2 lifecycle: the reveal deadline and the V2 generation marker', async () => {
-    resetLogCounter()
-    const requestId = oracleProposalHash({
-      chainId: CHAIN_ID,
-      consensus: CONSENSUS,
-      epoch: '1',
-      oracle: ORACLE,
-      safeTxHash: SAFE_TX_HASH,
-    })
-    const logs = buildV2Lifecycle({ safeTxHash: SAFE_TX_HASH, requestId, oracle: ORACLE, epoch: 1n })
-    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs })
-    server = setupServer(endpoint.handler)
-    server.listen()
-
-    const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH)
-
-    expect(result.generation).toBe(OracleGeneration.V2)
-    // V2's revealDeadline is normalized onto the same deadlineBlock as V1's.
-    expect(result.deadlineBlock).toBe('160')
-  })
-
   it('returns a Redux-serializable result — no bigints survive the read', async () => {
     resetLogCounter()
-    const requestId = oracleProposalHash({
-      chainId: CHAIN_ID,
-      consensus: CONSENSUS,
-      epoch: '1',
-      oracle: ORACLE,
-      safeTxHash: SAFE_TX_HASH,
-    })
-    const logs = buildV1Lifecycle({ safeTxHash: SAFE_TX_HASH, requestId, oracle: ORACLE, epoch: 1n })
+    const requestId = requestIdFor('1')
+    const logs = buildLifecycle({ safeTxHash: SAFE_TX_HASH, requestId, oracle: ORACLE, epoch: 1n })
     const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs })
     server = setupServer(endpoint.handler)
     server.listen()
@@ -645,3 +607,4 @@ describe('SafenetReader chain-id assertion (dev-only, one-shot)', () => {
     spy.mockRestore()
   })
 })
+

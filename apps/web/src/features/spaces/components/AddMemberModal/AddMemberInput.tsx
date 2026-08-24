@@ -88,7 +88,6 @@ const AddMemberInput = ({ error, inputProps, onSelectAddress, value }: AddMember
     <div className="flex flex-col gap-1.5">
       <Label htmlFor="member-invitee-identifier-input" className={cn('gap-1', error && 'text-destructive')}>
         {error || 'Address, email or ENS'}
-        {!error && <span className="text-destructive">*</span>}
       </Label>
 
       <Autocomplete

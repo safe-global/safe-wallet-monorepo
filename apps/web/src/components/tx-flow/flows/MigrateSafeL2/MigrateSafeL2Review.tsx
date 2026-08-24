@@ -23,17 +23,15 @@ export const MigrateSafeL2Review = ({ children, ...props }: ReviewTransactionPro
   }, [chain, safe.version, safe.fallbackHandler?.value, safe.implementation?.value, setSafeTx, setSafeTxError, safeSDK])
 
   return (
-    <div>
-      <ReviewTransaction {...props}>
-        <ErrorMessage level="warning" title="Migration transaction">
-          <Typography>
-            The migration may take a few minutes. Transactions made before or during the migration won&apos;t show up in
-            your transaction history, but all future transactions will appear as usual.
-          </Typography>
-        </ErrorMessage>
+    <ReviewTransaction {...props}>
+      <ErrorMessage level="warning" title="Migration transaction">
+        <Typography>
+          The migration may take a few minutes. Transactions made before or during the migration won&apos;t show up in
+          your transaction history, but all future transactions will appear as usual.
+        </Typography>
+      </ErrorMessage>
 
-        {children}
-      </ReviewTransaction>
-    </div>
+      {children}
+    </ReviewTransaction>
   )
 }

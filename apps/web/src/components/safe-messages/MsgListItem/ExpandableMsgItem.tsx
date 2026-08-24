@@ -18,7 +18,7 @@ const ExpandableMsgItem = ({ msg, expanded = false }: { msg: MessageItem; expand
           nativeButton={false}
           render={<div role="button" tabIndex={0} />}
           data-testid="message-item"
-          className="cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 hover:no-underline sm:px-6"
+          className="cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
         >
           <MsgSummary msg={msg} />
         </AccordionTrigger>
