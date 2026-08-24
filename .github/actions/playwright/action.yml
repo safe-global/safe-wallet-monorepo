@@ -3,10 +3,6 @@ name: 'Playwright'
 description: 'Run Playwright E2E tests'
 
 inputs:
-  secrets:
-    description: 'GitHub secrets as JSON'
-    required: true
-
   grep:
     description: 'Tag expression selecting which tests to run (e.g. "@smoke|@api")'
     required: true
@@ -21,8 +17,6 @@ runs:
     - uses: ./.github/actions/yarn
 
     - uses: ./.github/actions/build
-      with:
-        secrets: ${{ inputs.secrets }}
       env:
         # `next build` rewrites NODE_ENV to 'production' in client bundles, so APP_ENV-based
         # IS_TEST_E2E never survives a build anyway — this NEXT_PUBLIC_ flag is what actually
@@ -45,7 +39,6 @@ runs:
           --grep "${{ inputs.grep }}"
       env:
         CI: 'true'
-        CYPRESS_WALLET_CREDENTIALS: ${{ fromJSON(inputs.secrets).CYPRESS_WALLET_CREDENTIALS }}
 
     - name: Upload report
       if: failure()
