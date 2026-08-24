@@ -78,12 +78,55 @@ describe('ledger-errors', () => {
       expect(readLedgerDeviceError(deviceExchangeError(tag, errorCode, message)).reason).toBe(reason)
     })
 
-    it.each(['WebHidSendReportError', 'DeviceDisconnectedWhileSendingError', 'ReconnectionFailedError'])(
-      'classifies the transport failure %s as a lost connection',
-      (tag) => {
-        expect(readLedgerDeviceError({ _tag: tag, originalError: new Error('boom') }).reason).toBe('connection')
-      },
-    )
+    // Every runtime `_tag` the transport layer can raise. These are read off
+    // the shipped classes, not their export names: `OpeningConnectionError` is
+    // exported under a name that does not match its `_tag`, so trusting the
+    // export name left that state unmapped. Pinning all nine stops a rename or
+    // a typo from silently dropping one back to the fallback sentence.
+    it.each([
+      'ConnectionOpeningError',
+      'DeviceDisconnectedBeforeSendingApdu',
+      'DeviceDisconnectedWhileSendingError',
+      'DeviceNotRecognizedError',
+      'DisconnectError',
+      'NoAccessibleDeviceError',
+      'ReconnectionFailedError',
+      'SendApduTimeoutError',
+      'WebHidSendReportError',
+    ])('classifies the transport failure %s as a lost connection', (tag) => {
+      const info = readLedgerDeviceError({ _tag: tag, originalError: new Error('boom') })
+
+      expect(info.reason).toBe('connection')
+      expect(getLedgerUserMessage(info)).toBe('Lost connection to your Ledger. Reconnect it and try again.')
+    })
+
+    it('does not mistake the SDK export name for the runtime tag', () => {
+      // `OpeningConnectionError` is the export; `ConnectionOpeningError` is what
+      // the instance actually carries. Only the latter may map.
+      expect(readLedgerDeviceError({ _tag: 'OpeningConnectionError' }).reason).toBe('unknown')
+    })
+
+    it('matches a status word whatever its hex casing', () => {
+      const info = readLedgerDeviceError({ _tag: 'EthAppCommandError', errorCode: '6A80' } as DmkError)
+
+      expect(info.reason).toBe('blind_signing')
+      expect(info.errorCode).toBe('6a80')
+      expect(getLedgerSupportReference(readLedgerDeviceError({ _tag: 'X', errorCode: '6F00' } as DmkError))).toBe(
+        'LEDGER-0x6f00',
+      )
+    })
+
+    it('classifies a status word nested in originalError the same as a typed one', () => {
+      // An eth-app code raised outside the app's own table arrives as an
+      // UnknownDeviceExchangeError with a plain-object originalError.
+      const nested = readLedgerDeviceError({
+        _tag: 'UnknownDeviceExchangeError',
+        originalError: { message: 'UnknownError', errorCode: '6982' },
+      } as DmkError)
+
+      expect(nested.reason).toBe('rejected')
+      expect(nested.reason).toBe(readLedgerDeviceError(deviceExchangeError('EthAppCommandError', '6982', 'x')).reason)
+    })
 
     it('classifies a tagless shape without throwing', () => {
       expect(readLedgerDeviceError({} as DmkError)).toEqual({

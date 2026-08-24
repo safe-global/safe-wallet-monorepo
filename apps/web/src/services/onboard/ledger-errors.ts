@@ -73,14 +73,21 @@ const LOCKED_TAGS: ReadonlySet<string> = new Set(['DeviceLockedError'])
 
 const APP_TAGS: ReadonlySet<string> = new Set(['OpenAppCommandError'])
 
-/** Transport-level tags: the cable, the WebHID handle or the session went away. */
+/**
+ * Transport-level tags: the cable, the WebHID handle or the session went away.
+ *
+ * These are runtime `_tag` values, which are not always the SDK's export name —
+ * `OpeningConnectionError` declares `_tag = 'ConnectionOpeningError'`. Every
+ * entry here was read off the shipped class, not off the export, and the table
+ * test below pins all nine so a rename cannot silently un-map one.
+ */
 const CONNECTION_TAGS: ReadonlySet<string> = new Set([
+  'ConnectionOpeningError',
   'DeviceDisconnectedBeforeSendingApdu',
   'DeviceDisconnectedWhileSendingError',
   'DeviceNotRecognizedError',
   'DisconnectError',
   'NoAccessibleDeviceError',
-  'OpeningConnectionError',
   'ReconnectionFailedError',
   'SendApduTimeoutError',
   'WebHidSendReportError',
@@ -113,9 +120,22 @@ const readString = (source: unknown, key: string): string | undefined => {
  * The status word, wherever the kit put it: on the error for a
  * `DeviceExchangeError`, nested in `originalError` for the status words it
  * does not model (`UnknownDeviceExchangeError`).
+ *
+ * A status word nested in `originalError` is worth noting: an eth-app code that
+ * arrives outside the app's own table (e.g. `6982` raised by the global
+ * handler) becomes an `UnknownDeviceExchangeError` whose plain-object
+ * `originalError` still carries the code, so it classifies the same way it
+ * would have on the typed class — a `6982` there maps to `rejected` and is
+ * suppressed everywhere. No shipped DMK-supported firmware does this today
+ * (locked is signalled by `5515` exclusively), but reading the code from both
+ * places is what keeps the two paths consistent if one ever does.
+ *
+ * Lower-cased because the comparison tables are lower-case hex. The kit emits
+ * lower case today (`bufferToHexaString` goes through `toString(16)`); this is
+ * insurance, and the casing of a hex status word carries no information.
  */
 const readErrorCode = (error: DmkError): string | undefined =>
-  readString(error, 'errorCode') ?? readString(error.originalError, 'errorCode')
+  (readString(error, 'errorCode') ?? readString(error.originalError, 'errorCode'))?.toLowerCase()
 
 /**
  * The device's own explanation. `InvalidStatusWordError` has no `message` at
