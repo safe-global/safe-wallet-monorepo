@@ -85,7 +85,7 @@ const SingleTxDecoded = ({
         nativeButton={false}
         render={<div />}
         className={cn(
-          'flex min-h-12 items-center px-4 py-3 hover:no-underline',
+          'flex min-h-12 items-center px-4 py-3',
           isGrouped ? css.groupedTrigger : css.elevationTrigger,
           isGrouped && expanded && css.groupedTriggerOpen,
         )}

@@ -61,7 +61,7 @@ const ExpandableTransactionItem = ({
           // than the viewport's. With the sidebar expanded a 920px viewport leaves the row only 638px,
           // so viewport-based breakpoints kept the one-line grid past the point it fitted and
           // `overflow-x-auto` turned that into a scrollbar.
-          className="@container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 hover:no-underline sm:px-6"
+          className="@container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
         >
           <TxSummary item={item} isConflictGroup={isConflictGroup} isBulkGroup={isBulkGroup} />
         </AccordionTrigger>
@@ -104,7 +104,7 @@ export const TransactionSkeleton = () => (
           // than the viewport's. With the sidebar expanded a 920px viewport leaves the row only 638px,
           // so viewport-based breakpoints kept the one-line grid past the point it fitted and
           // `overflow-x-auto` turned that into a scrollbar.
-          className="@container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 hover:no-underline sm:px-6"
+          className="@container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
         >
           <Skeleton className="h-5 w-full rounded-none bg-[var(--color-background-skeleton)]" />
         </AccordionTrigger>
