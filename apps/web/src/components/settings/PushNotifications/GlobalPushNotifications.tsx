@@ -331,8 +331,6 @@ export const GlobalPushNotifications = (): ReactElement | null => {
 
     setIsLoading(true)
 
-    const registrationPromises: Array<Promise<unknown>> = []
-
     const newlySelectedSafes = _getSafesToRegister(selectedSafes, currentNotifiedSafes)
 
     // Merge Safes that need to be registered with the ones for which notifications need to be renewed
@@ -341,7 +339,13 @@ export const GlobalPushNotifications = (): ReactElement | null => {
     // _mergeNotifiableSafes can return a truthy {}; register only a non-empty set
     // so unregister-only saves never prompt for notification permission
     if (safesToRegister && Object.keys(safesToRegister).length > 0) {
-      registrationPromises.push(registerNotifications(safesToRegister))
+      const isRegistered = await registerNotifications(safesToRegister)
+
+      // A denied permission prompt or failed registration must not strip existing subscriptions
+      if (isRegistered === false) {
+        setIsLoading(false)
+        return
+      }
     }
 
     const safesToUnregister = _getSafesToUnregister(selectedSafes, currentNotifiedSafes)
@@ -353,10 +357,8 @@ export const GlobalPushNotifications = (): ReactElement | null => {
         return safeAddresses.map((safeAddress) => unregisterSafeNotifications(chainId, safeAddress))
       })
 
-      registrationPromises.push(...unregistrationPromises)
+      await Promise.all(unregistrationPromises)
     }
-
-    await Promise.all(registrationPromises)
 
     trackEvent(PUSH_NOTIFICATION_EVENTS.SAVE_SETTINGS)
 

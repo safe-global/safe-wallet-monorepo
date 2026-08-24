@@ -20,7 +20,8 @@ import {
 import type { AddedSafesState } from '@/store/addedSafesSlice'
 import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
 import type { OwnersGetAllSafesByOwnerV2ApiResponse as AllOwnedSafes } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
+import type { PushNotificationPreferences } from '@/services/push-notifications/preferences'
 import useChains from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useAllOwnedSafes } from '@/hooks/safes'
@@ -95,6 +96,88 @@ describe('GlobalPushNotifications', () => {
     expect(screen.getByText('Select all').closest('[data-slot="list"]')).toBeInTheDocument()
     expect(screen.getByText('Ethereum Safe accounts').closest('[data-slot="list-item"]')).toBeInTheDocument()
     expect(screen.getByText(safeAddress).closest('[data-slot="list-item"]')).toBeInTheDocument()
+  })
+
+  describe('onSave', () => {
+    const otherSafeAddress = '0x3333333333333333333333333333333333333333'
+
+    const subscribedPreferences: PushNotificationPreferences = {
+      [`1:${safeAddress}`]: {
+        chainId: '1',
+        safeAddress,
+        preferences: {} as PushNotificationPreferences[keyof PushNotificationPreferences]['preferences'],
+      },
+    }
+
+    let registerNotificationsMock: jest.Mock
+    let unregisterSafeNotificationsMock: jest.Mock
+    let unregisterDeviceNotificationsMock: jest.Mock
+
+    beforeEach(() => {
+      ;(useAllOwnedSafes as jest.MockedFunction<typeof useAllOwnedSafes>).mockReturnValue([
+        { '1': [safeAddress, otherSafeAddress] },
+        undefined,
+        false,
+      ] as ReturnType<typeof useAllOwnedSafes>)
+      ;(useNotificationPreferences as jest.MockedFunction<typeof useNotificationPreferences>).mockReturnValue({
+        uuid: 'uuid',
+        getAllPreferences: jest.fn(() => subscribedPreferences),
+        getPreferences: jest.fn(() => undefined),
+        updatePreferences: jest.fn(),
+        createPreferences: jest.fn(),
+        deletePreferences: jest.fn(),
+        deleteAllChainPreferences: jest.fn(),
+        _getAllPreferenceEntries: jest.fn(() => Promise.resolve([])),
+        _deleteManyPreferenceKeys: jest.fn(),
+        getChainPreferences: jest.fn(() => []),
+      })
+
+      registerNotificationsMock = jest.fn()
+      unregisterSafeNotificationsMock = jest.fn().mockResolvedValue(true)
+      unregisterDeviceNotificationsMock = jest.fn().mockResolvedValue(true)
+      ;(useNotificationRegistrations as jest.MockedFunction<typeof useNotificationRegistrations>).mockReturnValue({
+        registerNotifications: registerNotificationsMock,
+        unregisterSafeNotifications: unregisterSafeNotificationsMock,
+        unregisterDeviceNotifications: unregisterDeviceNotificationsMock,
+      } as ReturnType<typeof useNotificationRegistrations>)
+    })
+
+    // Deselect the currently subscribed Safe and select a new one, then save
+    const saveMixedChanges = () => {
+      render(createElement(GlobalPushNotifications))
+
+      fireEvent.click(screen.getByText(otherSafeAddress))
+      fireEvent.click(screen.getByText(safeAddress))
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    }
+
+    it('does not unregister existing subscriptions if registration fails', async () => {
+      registerNotificationsMock.mockResolvedValue(false)
+
+      saveMixedChanges()
+
+      await waitFor(() => {
+        expect(registerNotificationsMock).toHaveBeenCalledWith({ '1': [otherSafeAddress] })
+      })
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled()
+      })
+
+      expect(unregisterSafeNotificationsMock).not.toHaveBeenCalled()
+      expect(unregisterDeviceNotificationsMock).not.toHaveBeenCalled()
+    })
+
+    it('unregisters existing subscriptions after a successful registration', async () => {
+      registerNotificationsMock.mockResolvedValue(true)
+
+      saveMixedChanges()
+
+      await waitFor(() => {
+        expect(unregisterDeviceNotificationsMock).toHaveBeenCalledWith('1')
+      })
+      expect(registerNotificationsMock).toHaveBeenCalledWith({ '1': [otherSafeAddress] })
+      expect(unregisterSafeNotificationsMock).not.toHaveBeenCalled()
+    })
   })
 
   describe('transformAddedSafes', () => {
