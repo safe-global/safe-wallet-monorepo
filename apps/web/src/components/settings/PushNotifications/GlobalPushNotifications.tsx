@@ -21,7 +21,6 @@ import { useNotificationPreferences } from './hooks/useNotificationPreferences'
 import { useNotificationRegistrations } from './hooks/useNotificationRegistrations'
 import { trackEvent } from '@/services/analytics'
 import { PUSH_NOTIFICATION_EVENTS } from '@/services/analytics/events/push-notifications'
-import { requestNotificationPermission } from './logic'
 import type { NotifiableSafes } from './logic'
 import type { PushNotificationPreferences } from '@/services/push-notifications/preferences'
 import CheckWalletWithPermission from '@/components/common/CheckWalletWithPermission'
@@ -332,15 +331,6 @@ export const GlobalPushNotifications = (): ReactElement | null => {
 
     setIsLoading(true)
 
-    // Although the (un-)registration functions will request permission in getToken we manually
-    // check beforehand to prevent multiple promises in registrationPromises from throwing
-    const isGranted = await requestNotificationPermission()
-
-    if (!isGranted) {
-      setIsLoading(false)
-      return
-    }
-
     const registrationPromises: Array<Promise<unknown>> = []
 
     const newlySelectedSafes = _getSafesToRegister(selectedSafes, currentNotifiedSafes)
@@ -348,7 +338,9 @@ export const GlobalPushNotifications = (): ReactElement | null => {
     // Merge Safes that need to be registered with the ones for which notifications need to be renewed
     const safesToRegister = _mergeNotifiableSafes(newlySelectedSafes, {}, safesForRenewal)
 
-    if (safesToRegister) {
+    // _mergeNotifiableSafes can return a truthy {}; register only a non-empty set
+    // so unregister-only saves never prompt for notification permission
+    if (safesToRegister && Object.keys(safesToRegister).length > 0) {
       registrationPromises.push(registerNotifications(safesToRegister))
     }
 

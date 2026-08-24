@@ -41,8 +41,36 @@ describe('Notifications', () => {
     window.alert = alertMock
   })
 
+  afterEach(() => {
+    delete (globalThis as { Notification?: unknown }).Notification
+  })
+
+  describe('isPermissionBlocked', () => {
+    it('should return true if the permission is denied', () => {
+      globalThis.Notification = { permission: 'denied' } as unknown as jest.Mocked<typeof Notification>
+
+      expect(logic.isPermissionBlocked()).toBe(true)
+    })
+
+    it('should return false if the permission is not denied', () => {
+      globalThis.Notification = { permission: 'default' } as unknown as jest.Mocked<typeof Notification>
+
+      expect(logic.isPermissionBlocked()).toBe(false)
+
+      globalThis.Notification = { permission: 'granted' } as unknown as jest.Mocked<typeof Notification>
+
+      expect(logic.isPermissionBlocked()).toBe(false)
+    })
+  })
+
   describe('requestNotificationPermission', () => {
     let requestPermissionMock = jest.fn()
+
+    it('should return false if the Notification API is unavailable', async () => {
+      delete (globalThis as { Notification?: unknown }).Notification
+
+      await expect(logic.requestNotificationPermission()).resolves.toBe(false)
+    })
 
     beforeEach(() => {
       globalThis.Notification = {
