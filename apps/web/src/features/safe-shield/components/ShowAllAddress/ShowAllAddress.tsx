@@ -58,7 +58,7 @@ export const ShowAllAddress = ({ addresses, showImage }: ShowAllAddressProps) =>
                     <TooltipTrigger render={<span className="inline-flex" />}>
                       <Typography
                         variant="paragraph-mini"
-                        className="flex-1 cursor-pointer leading-5 break-words text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
+                        className="flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
                       >
                         {item.address}
                       </Typography>
