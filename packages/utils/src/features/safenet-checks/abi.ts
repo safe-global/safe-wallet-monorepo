@@ -47,7 +47,6 @@ export const COORDINATOR_READ_ABI = [
   'function groupKey(bytes32 gid) view returns ((uint256 x, uint256 y) key)',
 ] as const
 
-
 export const consensusInterface = new Interface(CONSENSUS_EVENT_FRAGMENTS)
 export const consensusPlainInterface = new Interface(CONSENSUS_PLAIN_EVENT_FRAGMENTS)
 export const sentinelInterface = new Interface(SENTINEL_EVENT_FRAGMENTS)
