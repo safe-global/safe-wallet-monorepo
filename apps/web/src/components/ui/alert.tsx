@@ -25,7 +25,7 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - Alert: `variant` ('default' | 'destructive' | 'warning' | 'success' | 'info')
+ * - Alert: `variant` ('default' | 'destructive' | 'warning' | 'success' | 'info' | 'subtle')
  * - Alert: `outlined` (destructive & warning only; default true = card surface with border,
  *   false = borderless severity tint)
  * - AlertAction: for action buttons (positioned top-right)
@@ -44,6 +44,8 @@ const alertVariants = cva(
         success:
           'bg-success-subtle text-foreground border-success-muted *:data-[slot=alert-description]:text-muted-foreground *:[svg]:text-success-strong',
         info: 'bg-[var(--color-info-background)] text-foreground border-transparent *:data-[slot=alert-description]:text-foreground [&>svg]:text-[var(--color-info-dark)]',
+        subtle:
+          'bg-foreground/5 text-foreground border-transparent *:data-[slot=alert-description]:text-[var(--color-text-secondary)]',
       },
       // Only `destructive` and `warning` have both designs (see compoundVariants); the other
       // variants ignore this.

@@ -17,7 +17,7 @@ const meta = {
     },
     size: {
       control: 'select',
-      options: ['default', 'sm', 'lg', 'action', 'submit', 'xl', 'icon', 'icon-sm', 'icon-xs'],
+      options: ['default', 'xs', 'sm', 'lg', 'action', 'submit', 'xl', 'icon', 'icon-sm', 'icon-xs'],
     },
     disabled: {
       control: 'boolean',
@@ -331,6 +331,14 @@ export const Guidelines: Story = {
                     'Compact / inline / toolbar, list-row actions, cards, dense headers',
                     <Button key="s-sm" size="sm">
                       Small
+                    </Button>,
+                  ],
+                  [
+                    'xs',
+                    'h-8',
+                    "sm's box with a 12px label, for controls sitting beside body text",
+                    <Button key="s-xs" size="xs">
+                      Extra small
                     </Button>,
                   ],
                   [

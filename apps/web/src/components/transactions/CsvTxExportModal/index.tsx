@@ -201,7 +201,11 @@ const CsvTxExportModal = ({ onClose, onExport, hasActiveFilter }: CsvTxExportMod
                 name={CsvTxExportField.RANGE}
                 control={control}
                 render={({ field }) => (
-                  <Select value={field.value || null} onValueChange={(value) => field.onChange(value ?? '')}>
+                  <Select
+                    items={DATE_RANGE_LABELS}
+                    value={field.value || null}
+                    onValueChange={(value) => field.onChange(value ?? '')}
+                  >
                     <SelectTrigger id="csv-export-range" aria-label="Date range" className="w-full">
                       <SelectValue placeholder="Date range" />
                     </SelectTrigger>

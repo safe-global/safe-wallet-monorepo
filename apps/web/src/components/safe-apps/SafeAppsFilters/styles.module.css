@@ -3,7 +3,7 @@
   z-index: 2;
   position: sticky !important;
   top: 36px;
-  padding: var(--space-3) 0 var(--space-4);
+  padding: var(--space-3) 0 var(--space-2);
   margin-bottom: var(--space-2);
 }
 

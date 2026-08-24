@@ -66,6 +66,14 @@ describe('CsvTxExportModal', () => {
     expect(screen.getByRole('button', { name: 'Export' })).toBeEnabled()
   })
 
+  it('shows the range label on the closed trigger, not the raw value', async () => {
+    const { user } = renderComponent()
+
+    await selectRange(user, 'Last 30 days')
+
+    expect(screen.getByLabelText('Date range')).toHaveTextContent('Last 30 days')
+  })
+
   it('requires both custom dates before enabling export', async () => {
     const { user } = renderComponent()
 

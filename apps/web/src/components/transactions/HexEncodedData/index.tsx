@@ -4,6 +4,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import type { ReactElement, SyntheticEvent } from 'react'
 import { Fragment, useState } from 'react'
 import css from './styles.module.css'
+import { cn } from '@/utils/cn'
 import CopyButton from '@/components/common/CopyButton'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 
@@ -19,6 +20,8 @@ const ZEROES_PATTERN = /^0+$/
 
 const SHOW_MORE = 'Show more'
 const SHOW_LESS = 'Show less'
+
+const TOGGLE_CLASSES = 'cursor-pointer text-[var(--color-text-primary)] decoration-current'
 
 export const HexEncodedData = ({ hexData, title, highlightFirstBytes = true, limit = 20 }: Props): ReactElement => {
   const [showTxData, setShowTxData] = useState(false)
@@ -62,7 +65,7 @@ export const HexEncodedData = ({ hexData, title, highlightFirstBytes = true, lim
       <CopyButton text={hexData}>
         <span className={css.monospace}>
           {firstBytes}
-          {showTxData || !showExpandBtn ? fullData : shortenText(restBytes, limit - FIRST_BYTES)}{' '}
+          {showTxData || !showExpandBtn ? fullData : shortenText(restBytes, limit - FIRST_BYTES)}
         </span>
       </CopyButton>
 
@@ -71,7 +74,7 @@ export const HexEncodedData = ({ hexData, title, highlightFirstBytes = true, lim
           render={<button type="button" />}
           data-testid="show-more"
           onClick={toggleExpanded}
-          className={css.showMore}
+          className={cn(css.showMore, TOGGLE_CLASSES)}
         >
           {showTxData ? SHOW_LESS : SHOW_MORE}
         </Link>

@@ -11,6 +11,8 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import useWallet from '@/hooks/wallets/useWallet'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { addressIsNotCurrentSafe, addressIsNotReserved } from '@safe-global/utils/utils/validation'
+import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import css from './styles.module.css'
 import classNames from 'classnames'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -45,17 +47,23 @@ const OwnerRow = ({
     return Array.from({ length: owners.length }, (_, i) => `${groupName}.${i}`)
   }, [owners, groupName])
 
+  // Blocks the GS203/GS204 on-chain reverts before signing (WA-3005 Bucket A)
   const validateOwnerAddress = useCallback(
     async (address: string) => {
-      if (sameAddress(address, safeAddress)) {
-        return 'The Safe account cannot own itself'
+      const reservedError = addressIsNotReserved()(address)
+      if (reservedError) {
+        return reservedError
       }
-      const owners = getValues('owners')
-      if (owners.filter((owner: NamedAddress) => sameAddress(owner.address, address)).length > 1) {
-        return 'Signer is already added'
+      const currentSafeError = addressIsNotCurrentSafe(safeAddress)(address)
+      if (currentSafeError) {
+        return currentSafeError
+      }
+      const owners: NamedAddress[] = getValues(groupName)
+      if (owners.filter((owner) => sameAddress(owner.address, address)).length > 1) {
+        return getContractErrorMessage('GS204')
       }
     },
-    [getValues, safeAddress],
+    [getValues, groupName, safeAddress],
   )
 
   const { name, ens, resolving } = useAddressResolver(owner.address)
@@ -100,9 +108,12 @@ const OwnerRow = ({
           />
         </div>
       </div>
-      {/* `self-end` in read-only mode: the address readout carries no label of its own, so it can't
-          share the row's top baseline — it has to hang off the bottom to sit level with the name box. */}
-      <div className={classNames('col-span-11 md:col-span-7', readOnly && `${largeFormFieldRowClassName} self-end`)}>
+      <div
+        className={classNames(
+          'col-span-11 md:col-span-7',
+          readOnly && `${largeFormFieldRowClassName} mt-[calc(0.875rem*1.375+0.75rem)]`,
+        )}
+      >
         {readOnly ? (
           <EthHashInfo address={owner.address} shortAddress hasExplorer showCopyButton />
         ) : (
@@ -118,7 +129,9 @@ const OwnerRow = ({
         )}
       </div>
       {!readOnly && (
-        <div className="col-span-1 -ml-4 flex shrink-0 items-center self-stretch">
+        // Offset past the label (text-sm x leading-snug + Field's gap-3, Tailwind's scale) so the
+        // button centres on the 66px field, not the cell — which grows with the wallet caption.
+        <div className="col-span-1 -ml-4 mt-[calc(0.875rem*1.375+0.75rem)] flex h-[66px] shrink-0 items-center">
           {removable && (
             <Button
               variant="ghost"

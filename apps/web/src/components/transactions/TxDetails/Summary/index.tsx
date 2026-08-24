@@ -8,7 +8,6 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { Receipt } from '@/components/tx/ConfirmTxDetails/Receipt'
 import DecodedData from '../TxData/DecodedData'
 import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'
-import { Typography } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
 import DecoderLinks from './DecoderLinks'
 import isEqual from 'lodash/isEqual'
@@ -117,10 +116,6 @@ const Summary = ({
               )}
 
               <div>
-                <Typography variant="paragraph-small-bold" className="mb-4 block">
-                  Advanced details
-                </Typography>
-
                 <DecoderLinks />
 
                 <Receipt

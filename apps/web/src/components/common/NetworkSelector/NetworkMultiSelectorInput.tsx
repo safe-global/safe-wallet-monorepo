@@ -5,6 +5,7 @@ import ChainIndicator from '../ChainIndicator'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Typography } from '@/components/ui/typography'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { InputGroup } from '@/components/ui/input-group'
 import css from './styles.module.css'
 import { useFormContext } from 'react-hook-form'
 import useChains from '@/hooks/useChains'
@@ -205,17 +206,14 @@ const NetworkMultiSelectorInput = ({
     <div className={css.multiSelectWrapper}>
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger
-          render={
-            <div
-              className={`${css.multiSelectControl} ${error ? css.multiSelectError : ''}`}
-              onClick={() => inputRef.current?.focus()}
-            />
-          }
+          render={<InputGroup inputSize="heroWrap" className="cursor-text" onClick={() => inputRef.current?.focus()} />}
         >
           {renderChips()}
 
           <input
             ref={inputRef}
+            /* Lets InputGroup apply its focus ring and aria-invalid border to this input. */
+            data-slot="input-group-control"
             role="combobox"
             aria-expanded={open}
             aria-controls={`${name}-listbox`}

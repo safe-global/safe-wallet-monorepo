@@ -11,6 +11,8 @@ import { TOOLTIP_TITLES } from '../../common/constants'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { addressIsNotReserved, validateThreshold } from '@safe-global/utils/utils/validation'
+import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import type { RecoverAccountFlowProps } from '.'
 import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
@@ -47,6 +49,31 @@ export function _isSameSetup({
   })
 }
 
+export function _validateNewOwner({
+  value,
+  safeAddress,
+  newOwners,
+}: {
+  value: string
+  safeAddress: string
+  newOwners: Array<AddressInfo>
+}): string | undefined {
+  // Blocks the GS203/GS204 on-chain reverts before signing (WA-3005 Bucket A)
+  const reservedError = addressIsNotReserved()(value)
+  if (reservedError) {
+    return reservedError
+  }
+
+  if (sameAddress(value, safeAddress)) {
+    return 'Cannot use Safe account itself as signer.'
+  }
+
+  const isDuplicate = newOwners.filter((owner) => sameAddress(owner.value, value)).length > 1
+  if (isDuplicate) {
+    return getContractErrorMessage('GS204')
+  }
+}
+
 export function RecoverAccountFlowSetup({
   params,
   onSubmit,
@@ -79,6 +106,10 @@ export function RecoverAccountFlowSetup({
     newThreshold: Number(newThreshold),
   })
 
+  // Derived rather than read from RHF: removing a signer row does not re-run the
+  // threshold field's validation, which is exactly when it goes stale.
+  const thresholdError = validateThreshold(newThreshold, fields.length)
+
   return (
     <FormProvider {...formMethods}>
       <form onSubmit={formMethods.handleSubmit(onSubmit)} className={commonCss.form}>
@@ -104,22 +135,13 @@ export function RecoverAccountFlowSetup({
                     required
                     fullWidth
                     key={field.id}
-                    validate={(value) => {
-                      if (sameAddress(value, safeAddress)) {
-                        return 'The Safe account cannot own itself'
-                      }
-
-                      const isDuplicate = newOwners.filter((owner) => owner.value === value).length > 1
-                      if (isDuplicate) {
-                        return 'Already designated to be a signer'
-                      }
-                    }}
+                    validate={(value) => _validateNewOwner({ value, safeAddress, newOwners })}
                   />
                 </div>
 
                 <div className="flex items-center justify-center">
                   {index > 0 && (
-                    <Button variant="ghost" size="icon" onClick={() => remove(index)}>
+                    <Button variant="ghost" size="icon" data-testid="remove-signer-btn" onClick={() => remove(index)}>
                       <DeleteIcon className="size-4" />
                     </Button>
                   )}
@@ -156,9 +178,10 @@ export function RecoverAccountFlowSetup({
               <Controller
                 control={formMethods.control}
                 name={RecoverAccountFlowFields.threshold}
+                rules={{ validate: (value) => validateThreshold(value, fields.length) }}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
+                    <SelectTrigger aria-invalid={!!thresholdError} data-testid="recovery-threshold-select">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -183,6 +206,8 @@ export function RecoverAccountFlowSetup({
             </div>
           </div>
 
+          {thresholdError && <Typography className="mb-2 text-destructive">{thresholdError}</Typography>}
+
           {isSameSetup && (
             <Alert variant="destructive" className="border-0">
               <AlertSeverityIcon variant="destructive" />
@@ -193,7 +218,13 @@ export function RecoverAccountFlowSetup({
           <Separator className={commonCss.nestedDivider} />
 
           <TxCardActions className="!mt-0">
-            <Button data-testid="next-btn" variant="default" type="submit" className="mt-2" disabled={isSameSetup}>
+            <Button
+              data-testid="next-btn"
+              variant="default"
+              type="submit"
+              className="mt-2"
+              disabled={isSameSetup || !!thresholdError}
+            >
               Next
             </Button>
           </TxCardActions>

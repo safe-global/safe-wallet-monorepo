@@ -46,7 +46,7 @@ describe('HexEncodedData', () => {
 
     // Initially should show shortened data
     const initialData = screen.getByTestId('tx-hexData')
-    expect(initialData).toHaveTextContent(`${longHexData.slice(0, 20)}… Show more`)
+    expect(initialData).toHaveTextContent(`${longHexData.slice(0, 20)}…Show more`)
 
     // Click show more
     const showMoreButton = screen.getByTestId('show-more')
@@ -68,7 +68,7 @@ describe('HexEncodedData', () => {
     fireEvent.click(showMoreButton)
 
     // Should be back to shortened data
-    expect(initialData).toHaveTextContent(`${longHexData.slice(0, 20)}… Show more`)
+    expect(initialData).toHaveTextContent(`${longHexData.slice(0, 20)}…Show more`)
     expect(showMoreButton).toHaveTextContent('Show more')
   })
 })
