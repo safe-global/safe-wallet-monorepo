@@ -34,7 +34,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
               </span>
             </div>
             <div
-              class="flex-1"
+              class="max-w-full flex-1 xl:min-w-0"
               data-testid="tx-data-row"
             >
               <div
