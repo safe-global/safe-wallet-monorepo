@@ -22,10 +22,13 @@ const SettingsCard = ({
     <Card size="none" radius="lg" className={cn('p-8', className)} {...props}>
       <div
         data-slot="settings-card-content"
-        className={cn('grid grid-cols-1 justify-between gap-6 lg:grid-cols-[1fr_2fr]', contentClassName)}
+        className={cn(
+          'grid grid-cols-1 justify-between gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]',
+          contentClassName,
+        )}
       >
         <div>
-          <Typography variant="h4" className={titleClassName}>
+          <Typography variant="h4" className={cn('font-bold', titleClassName)}>
             {title}
           </Typography>
         </div>
