@@ -31,7 +31,7 @@ describe('useNotificationsRenewal', () => {
   const selectNotificationsSpy = jest.spyOn(notificationsSlice, 'selectNotifications')
 
   const dispatchMock = jest.fn()
-  const registerNotificationsMock = jest.fn().mockResolvedValue(undefined)
+  const registerNotificationsMock = jest.fn().mockResolvedValue(false)
   const preferencesMock = {
     [`${chainId1}:${safeAddress1}`]: {
       chainId: chainId1,
