@@ -13,6 +13,26 @@ let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
+// The networks selected in the creation flow below. A multichain safe is created at the
+// lowest recommendedMasterCopyVersion across the selected networks, so the expected
+// version comes from the same config the app reads (staging CGW) instead of a hardcode.
+const selectedChainIds = ['11155111', '1', '137'] // sepolia, ethereum, polygon
+
+const getExpectedMultichainVersion = () => {
+  const lower = (a, b) => {
+    const [x, y] = [a.split('.').map(Number), b.split('.').map(Number)]
+    for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] < y[i] ? a : b
+    return a
+  }
+  let expected
+  selectedChainIds.forEach((chainId) => {
+    cy.request(constants.stagingCGWUrlv1 + constants.stagingCGWChains + chainId).then(({ body }) => {
+      expected = expected ? lower(expected, body.recommendedMasterCopyVersion) : body.recommendedMasterCopyVersion
+    })
+  })
+  return cy.then(() => expected)
+}
+
 describe('Happy path Multichain safe creation tests', { defaultCommandTimeout: 60000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
@@ -22,7 +42,7 @@ describe('Happy path Multichain safe creation tests', { defaultCommandTimeout: 6
     createwallet.startCreateSafeFlow(signer)
   })
 
-  it('Verify that L2 safe created during multichain safe creation has 1.4.1 L2 contract after deployment', () => {
+  it('Verify that L2 safe created during multichain safe creation has the recommended L2 contract after deployment', () => {
     createwallet.clickOnNetwrokRemoveIcon()
     createwallet.selectMultiNetwork(1, constants.networks.sepolia.toLowerCase())
     createwallet.selectMultiNetwork(1, constants.networks.ethereum.toLowerCase())
@@ -41,7 +61,9 @@ describe('Happy path Multichain safe creation tests', { defaultCommandTimeout: 6
       createwallet.clickOnFinalActivateAccountBtn()
       createwallet.clickOnLetsGoBtn()
       cy.visit(constants.setupUrl + safe)
-      main.verifyValuesExist(navigation.setupSection, [constants.safeContractVersions.v1_4_1_L2])
+      getExpectedMultichainVersion().then((version) => {
+        main.verifyValuesExist(navigation.setupSection, [`${version}+L2`])
+      })
     })
   })
 })
