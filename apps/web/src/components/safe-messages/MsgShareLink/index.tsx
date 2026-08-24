@@ -23,6 +23,7 @@ const MsgShareLink = ({ safeMessageHash, button }: { safeMessageHash: string; bu
             Copy link
           </Button>
         ) : (
+          // eslint-disable-next-line no-restricted-syntax -- circular hover on the icon button; no round icon size variant exists
           <Button data-testid="share-btn" aria-label="Share" variant="ghost" size="icon-xs" className="rounded-full">
             <ShareIcon className="size-4 text-[var(--color-border-main)]" />
           </Button>
