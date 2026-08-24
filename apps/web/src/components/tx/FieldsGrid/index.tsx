@@ -20,7 +20,8 @@ const FieldsGrid = ({
           {title}
         </Typography>
       </div>
-      <div data-testid="tx-data-row" className="flex-1">
+      {/* max-w-full caps the value's flex minimum so wide values wrap below the title; xl is nowrap, so shrink instead */}
+      <div data-testid="tx-data-row" className="max-w-full flex-1 xl:min-w-0">
         {children}
       </div>
     </div>
