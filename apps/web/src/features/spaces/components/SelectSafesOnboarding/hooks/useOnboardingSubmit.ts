@@ -13,7 +13,7 @@ import {
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { getUniqueChainIds } from '../../../utils'
+import { getChainIdsParam } from '../../../utils'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import useChains from '@/hooks/useChains'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -220,11 +220,13 @@ const useOnboardingSubmit = (
 
     try {
       const safesToAdd = getSafesToAdd(data.selectedSafes)
-      trackEvent(SPACE_EVENTS.ADD_ACCOUNTS, {
-        [MixpanelEventParams.ACCOUNT_COUNT]: safesToAdd.length,
-        [MixpanelEventParams.SOURCE]: 'onboarding',
-        [MixpanelEventParams.CHAIN_ID]: getUniqueChainIds(safesToAdd),
-      })
+      if (safesToAdd.length > 0) {
+        trackEvent(SPACE_EVENTS.ADD_ACCOUNTS, {
+          [MixpanelEventParams.ACCOUNT_COUNT]: safesToAdd.length,
+          [MixpanelEventParams.SOURCE]: 'onboarding',
+          [MixpanelEventParams.CHAIN_ID]: getChainIdsParam(safesToAdd),
+        })
+      }
       await processSelectedSafes(safesToAdd, data.selectedSafes, spaceId)
 
       onSuccess()

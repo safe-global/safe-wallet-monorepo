@@ -1,6 +1,6 @@
 import ModalDialog from '@/components/common/ModalDialog'
 import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
-import { getUniqueChainIds, useCurrentSpaceId } from '@/features/spaces'
+import { getChainIdsParam, useCurrentSpaceId } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -40,7 +40,7 @@ const RemoveSafeDialog = ({
     const safeAccounts = getToBeDeletedSafeAccounts(safeItem)
     trackEvent(SPACE_EVENTS.DELETE_ACCOUNT, {
       [MixpanelEventParams.ACCOUNT_COUNT]: safeAccounts.length,
-      [MixpanelEventParams.CHAIN_ID]: getUniqueChainIds(safeAccounts),
+      [MixpanelEventParams.CHAIN_ID]: getChainIdsParam(safeAccounts),
     })
 
     try {

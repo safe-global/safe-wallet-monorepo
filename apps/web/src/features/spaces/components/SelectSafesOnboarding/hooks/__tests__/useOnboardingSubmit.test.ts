@@ -327,18 +327,14 @@ describe('useOnboardingSubmit', () => {
     expect(result.current.error).toBe(getGenericErrorWithStatus(400))
   })
 
-  it('should track analytics event on submit', async () => {
+  it('should not track anything when the submit adds no accounts', async () => {
     const { result } = renderHook(() => useOnboardingSubmit('1', onSuccess))
 
     await act(async () => {
       await result.current.onSubmit()
     })
 
-    // Onboarding submits even with nothing selected, so a zero count is expected here.
-    expect(mockTrackEvent).toHaveBeenCalledWith(
-      { action: 'add_accounts', category: 'spaces' },
-      { 'Account Count': 0, 'Chain ID': [], Source: 'onboarding' },
-    )
+    expect(mockTrackEvent).not.toHaveBeenCalledWith({ action: 'add_accounts', category: 'spaces' }, expect.anything())
   })
 
   it('should track the number of accounts added and their chains', async () => {
@@ -354,7 +350,7 @@ describe('useOnboardingSubmit', () => {
 
     expect(mockTrackEvent).toHaveBeenCalledWith(
       { action: 'add_accounts', category: 'spaces' },
-      { 'Account Count': 2, 'Chain ID': ['1', '11155111'], Source: 'onboarding' },
+      { 'Account Count': 2, 'Chain ID': '1,11155111', Source: 'onboarding' },
     )
   })
 

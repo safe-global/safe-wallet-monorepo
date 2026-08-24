@@ -85,6 +85,6 @@ export function formatDate(dateStr: string): string {
   return `${format(date, 'MMM d')} at ${timeStr}`
 }
 
-export function getUniqueChainIds(safes: Array<{ chainId: string }>): string[] {
-  return Array.from(new Set(safes.map((safe) => safe.chainId)))
+export function getChainIdsParam(safes: Array<{ chainId: string }>): string {
+  return Array.from(new Set(safes.map((safe) => safe.chainId))).join(',')
 }

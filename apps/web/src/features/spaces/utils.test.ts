@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { formatDate, getInvitedByName, getUniqueChainIds } from './utils'
+import { formatDate, getInvitedByName, getChainIdsParam } from './utils'
 import { spaceBuilder, spaceMemberBuilder } from '@/tests/builders/space'
 
 const CURRENT_USER_ID = 1
@@ -68,14 +68,14 @@ describe('formatDate', () => {
   })
 })
 
-describe('getUniqueChainIds', () => {
+describe('getChainIdsParam', () => {
   it('dedupes the chains of a multichain selection', () => {
-    const chainIds = getUniqueChainIds([{ chainId: '1' }, { chainId: '11155111' }, { chainId: '1' }])
+    const chainIds = getChainIdsParam([{ chainId: '1' }, { chainId: '11155111' }, { chainId: '1' }])
 
-    expect(chainIds).toEqual(['1', '11155111'])
+    expect(chainIds).toBe('1,11155111')
   })
 
-  it('returns an empty list when nothing is selected', () => {
-    expect(getUniqueChainIds([])).toEqual([])
+  it('returns an empty string when nothing is selected', () => {
+    expect(getChainIdsParam([])).toBe('')
   })
 })

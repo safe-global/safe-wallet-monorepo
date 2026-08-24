@@ -17,7 +17,7 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 import { useSimilarityClusters } from '@/features/address-poisoning'
-import { getUniqueChainIds, useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
+import { getChainIdsParam, useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import {
   useSpaceSafesCreateV1Mutation,
@@ -230,13 +230,13 @@ const AddAccounts = ({
       trackEvent(SPACE_EVENTS.ADD_ACCOUNTS, {
         [MixpanelEventParams.ACCOUNT_COUNT]: safesToAdd.length,
         [MixpanelEventParams.SOURCE]: SPACE_LABELS.add_accounts_modal,
-        [MixpanelEventParams.CHAIN_ID]: getUniqueChainIds(safesToAdd),
+        [MixpanelEventParams.CHAIN_ID]: getChainIdsParam(safesToAdd),
       })
     }
     if (safesToRemove.length > 0) {
       trackEvent(SPACE_EVENTS.DELETE_ACCOUNT, {
         [MixpanelEventParams.ACCOUNT_COUNT]: safesToRemove.length,
-        [MixpanelEventParams.CHAIN_ID]: getUniqueChainIds(safesToRemove),
+        [MixpanelEventParams.CHAIN_ID]: getChainIdsParam(safesToRemove),
       })
     }
 
