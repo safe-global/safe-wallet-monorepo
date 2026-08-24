@@ -47,7 +47,7 @@ const HistoryFeesAccordion = ({
       >
         <AccordionTrigger
           data-testid="history-fees-summary"
-          className="min-h-[56px] items-center rounded-none border-none px-4 hover:no-underline data-panel-open:bg-[var(--fees-accordion-bg)]"
+          className="min-h-[56px] items-center rounded-none border-none px-4 data-panel-open:bg-[var(--fees-accordion-bg)]"
         >
           <div className={css.summaryContent}>
             <div className={css.summaryLeftColumn}>

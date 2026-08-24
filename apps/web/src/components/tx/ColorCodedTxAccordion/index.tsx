@@ -84,10 +84,7 @@ const ColorCodedTxAccordion = ({ txInfo, txData, children, defaultExpanded }: De
     <Card style={accordionVars} className={css.item}>
       <Accordion defaultValue={defaultExpanded ? ['tx-details'] : []} onValueChange={onValueChange}>
         <AccordionItem value="tx-details" className="border-0">
-          <AccordionTrigger
-            data-testid="decoded-tx-summary"
-            className={cn(css.trigger, 'items-center px-4 hover:no-underline')}
-          >
+          <AccordionTrigger data-testid="decoded-tx-summary" className={cn(css.trigger, 'items-center px-4')}>
             <div className="flex w-full flex-row items-center justify-between">
               <Typography variant="paragraph-small-bold" data-testid="tx-advanced-details">
                 Transaction details
