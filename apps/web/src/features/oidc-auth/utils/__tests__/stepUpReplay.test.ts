@@ -1,10 +1,5 @@
 import { faker } from '@faker-js/faker'
-import {
-  clearPendingStepUpAction,
-  getReplayableAction,
-  savePendingStepUpAction,
-  takePendingStepUpAction,
-} from '../stepUpReplay'
+import { clearStepUpTrip, getReplayableAction, saveStepUpTrip, takeStepUpTrip } from '../stepUpReplay'
 
 // Mirrors the thunk arg RTK Query builds for a mutation.
 const rejectedMutation = (endpointName: string, originalArgs: unknown) => ({
@@ -52,42 +47,75 @@ describe('getReplayableAction', () => {
   })
 })
 
-describe('pending action storage', () => {
+describe('step-up trip storage', () => {
   beforeEach(() => {
     sessionStorage.clear()
+    jest.useRealTimers()
   })
 
   it('round-trips a stored action', () => {
     const action = { endpoint: 'membersInviteUserV1', args: { spaceId: '7' } } as const
-    savePendingStepUpAction(action)
+    saveStepUpTrip(action)
 
-    expect(takePendingStepUpAction()).toEqual(action)
+    expect(takeStepUpTrip()).toEqual({ action })
   })
 
-  it('removes the action as it is taken, so a failing request is not retried forever', () => {
-    savePendingStepUpAction({ endpoint: 'spacesDeleteV1', args: { id: '1' } })
+  it('stores a bare trip for a gated endpoint with no replayable action', () => {
+    saveStepUpTrip(undefined)
 
-    expect(takePendingStepUpAction()).toBeDefined()
-    expect(takePendingStepUpAction()).toBeUndefined()
+    expect(takeStepUpTrip()).toEqual({})
+  })
+
+  // Regression: the payload used to live in its own key, so a return could
+  // consume the in-flight marker and leave the action behind for an unrelated
+  // trip to execute. One record cannot disagree with itself.
+  it('removes the trip as it is taken, so nothing is acted on twice or by a later trip', () => {
+    saveStepUpTrip({ endpoint: 'spacesDeleteV1', args: { id: '1' } })
+
+    expect(takeStepUpTrip()).toBeDefined()
+    expect(takeStepUpTrip()).toBeUndefined()
+    expect(sessionStorage.getItem('oidc_step_up')).toBeNull()
   })
 
   it('returns undefined when nothing is stored', () => {
-    expect(takePendingStepUpAction()).toBeUndefined()
+    expect(takeStepUpTrip()).toBeUndefined()
   })
 
-  it('discards a stored action on clear', () => {
-    savePendingStepUpAction({ endpoint: 'spacesUpdateV1', args: {} })
-    clearPendingStepUpAction()
+  it('discards a stored trip on clear', () => {
+    saveStepUpTrip({ endpoint: 'spacesUpdateV1', args: {} })
+    clearStepUpTrip()
 
-    expect(takePendingStepUpAction()).toBeUndefined()
+    expect(takeStepUpTrip()).toBeUndefined()
+  })
+
+  // A trip cannot validly outlive CGW's 5-minute state cookie; anything older is
+  // residue of an abandoned trip and must never be acted on.
+  it('deletes an expired trip unexamined', () => {
+    jest.useFakeTimers()
+    saveStepUpTrip({ endpoint: 'membersInviteUserV1', args: {} })
+
+    jest.advanceTimersByTime(5 * 60 * 1_000 + 1)
+
+    expect(takeStepUpTrip()).toBeUndefined()
+    expect(sessionStorage.getItem('oidc_step_up')).toBeNull()
   })
 
   it.each([
     ['malformed JSON', '{not json'],
-    ['an endpoint that is no longer gated', JSON.stringify({ endpoint: 'somethingElse', args: {} })],
-  ])('rejects %s rather than replaying it', (_label, raw) => {
-    sessionStorage.setItem('oidc_step_up_action', raw)
+    ['a record with no createdAt', JSON.stringify({ endpoint: 'spacesUpdateV1', args: {} })],
+  ])('rejects %s rather than acting on it', (_label, raw) => {
+    sessionStorage.setItem('oidc_step_up', raw)
 
-    expect(takePendingStepUpAction()).toBeUndefined()
+    expect(takeStepUpTrip()).toBeUndefined()
+    expect(sessionStorage.getItem('oidc_step_up')).toBeNull()
+  })
+
+  it('treats a fresh record whose endpoint is no longer gated as a bare trip', () => {
+    sessionStorage.setItem(
+      'oidc_step_up',
+      JSON.stringify({ endpoint: 'somethingElse', args: {}, createdAt: Date.now() }),
+    )
+
+    expect(takeStepUpTrip()).toEqual({})
   })
 })

@@ -3,10 +3,10 @@ import { useRouter } from 'next/router'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import reconcileAuth from '@/store/reconcileAuth'
-import { STEP_UP_FAILED_MESSAGE, STEP_UP_PENDING_KEY } from '../constants'
+import { STEP_UP_FAILED_MESSAGE } from '../constants'
 import { stepUpReturning, stepUpSettled } from '../store'
 import { markStepUpReturnHandled, resetStepUpReturnGuard } from '../utils/stepUp'
-import { clearPendingStepUpAction, replayPendingStepUpAction } from '../utils/stepUpReplay'
+import { replayStepUpAction, takeStepUpTrip } from '../utils/stepUpReplay'
 
 /**
  * Handles the return leg of a step-up authentication redirect.
@@ -30,10 +30,13 @@ export const useStepUpCallback = () => {
 
   useEffect(() => {
     if (hasProcessed.current) return
-    if (!sessionStorage.getItem(STEP_UP_PENDING_KEY)) return
+    // Consumed — read and deleted — before anything happens, so a record can
+    // never be acted on twice, later, or by another trip. Absent or expired
+    // records mean there is nothing to do.
+    const trip = takeStepUpTrip()
+    if (!trip) return
 
     hasProcessed.current = true
-    sessionStorage.removeItem(STEP_UP_PENDING_KEY)
     // While this return is being processed, a replay that is itself rejected must
     // surface as an error rather than redirecting out again.
     markStepUpReturnHandled()
@@ -55,9 +58,6 @@ export const useStepUpCallback = () => {
           }),
         )
 
-        // The challenge was not met, so the interrupted action must not run.
-        clearPendingStepUpAction()
-
         params.delete('error')
         params.delete('error_description')
         const cleanQuery = Object.fromEntries(params.entries())
@@ -66,17 +66,21 @@ export const useStepUpCallback = () => {
         })
       } else {
         await reconcileAuth(dispatch)
-        await replayPendingStepUpAction(dispatch)
+        if (trip.action) await replayStepUpAction(dispatch, trip.action)
       }
-
-      // The guard covers only the processing above. Left set, it would swallow
-      // every later challenge in this tab until a full reload — the second
-      // gated action of a session would fail with an inline error and no
-      // redirect.
-      resetStepUpReturnGuard()
-      dispatch(stepUpSettled())
     }
 
+    // The guard covers only the processing above and must be released even when
+    // it throws (e.g. the gateway was unreachable during the return). Left set,
+    // it would swallow every later challenge in this tab until a full reload —
+    // the second gated action of a session would fail with an inline error and
+    // no redirect.
     void processCallback()
+      .finally(() => {
+        resetStepUpReturnGuard()
+        dispatch(stepUpSettled())
+      })
+      // The next attempt surfaces the failure through its own error handling.
+      .catch(() => undefined)
   }, [dispatch])
 }

@@ -4,11 +4,16 @@ import { elevationListener } from '../elevationListener'
 import { stepUpSlice } from '../stepUpSlice'
 import { ELEVATION_REQUIRED_ERROR } from '../../utils/elevation'
 
-const mockSavePendingStepUpAction = jest.fn()
+const mockSaveStepUpTrip = jest.fn()
+const mockIsStepUpReturnInFlight = jest.fn()
 
 jest.mock('../../utils/stepUpReplay', () => ({
   getReplayableAction: jest.requireActual('../../utils/stepUpReplay').getReplayableAction,
-  savePendingStepUpAction: (action: unknown) => mockSavePendingStepUpAction(action),
+  saveStepUpTrip: (action: unknown) => mockSaveStepUpTrip(action),
+}))
+
+jest.mock('../../utils/stepUp', () => ({
+  isStepUpReturnInFlight: () => mockIsStepUpReturnInFlight(),
 }))
 
 // Mirrors how RTK Query reports a baseQuery failure: a rejected thunk action
@@ -46,6 +51,7 @@ const ELEVATION_REQUIRED = { status: 403, data: { message: ELEVATION_REQUIRED_ER
 describe('elevationListener', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockIsStepUpReturnInFlight.mockReturnValue(false)
   })
 
   it('should start a step-up when a request needs a fresh second factor', () => {
@@ -61,18 +67,30 @@ describe('elevationListener', () => {
 
     createTestStore().dispatch(rejectedWithValue(ELEVATION_REQUIRED, 'spaceSafesCreateV1', originalArgs))
 
-    expect(mockSavePendingStepUpAction).toHaveBeenCalledWith({ endpoint: 'spaceSafesCreateV1', args: originalArgs })
+    expect(mockSaveStepUpTrip).toHaveBeenCalledWith({ endpoint: 'spaceSafesCreateV1', args: originalArgs })
   })
 
   // A route CGW does not gate has no business being replayed on a redirect, but
   // the user still needs elevating to get anywhere.
-  it('should not store a request for an endpoint outside the gated set', () => {
+  it('should record a bare trip for an endpoint outside the gated set', () => {
     const store = createTestStore()
 
     store.dispatch(rejectedWithValue(ELEVATION_REQUIRED, 'spacesGetOneV1'))
 
-    expect(mockSavePendingStepUpAction).not.toHaveBeenCalled()
+    expect(mockSaveStepUpTrip).toHaveBeenCalledWith(undefined)
     expect(phaseOf(store)).toBe('leaving')
+  })
+
+  // A challenge raised by the replayed action itself must surface inline, not
+  // record a new trip and bounce back out to the provider.
+  it('should do nothing while a return is being processed', () => {
+    mockIsStepUpReturnInFlight.mockReturnValue(true)
+    const store = createTestStore()
+
+    store.dispatch(rejectedWithValue(ELEVATION_REQUIRED))
+
+    expect(mockSaveStepUpTrip).not.toHaveBeenCalled()
+    expect(phaseOf(store)).toBe('idle')
   })
 
   it.each([
@@ -85,6 +103,6 @@ describe('elevationListener', () => {
     store.dispatch(rejectedWithValue(payload))
 
     expect(phaseOf(store)).toBe('idle')
-    expect(mockSavePendingStepUpAction).not.toHaveBeenCalled()
+    expect(mockSaveStepUpTrip).not.toHaveBeenCalled()
   })
 })

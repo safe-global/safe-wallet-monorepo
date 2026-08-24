@@ -1,5 +1,4 @@
 import { GATEWAY_URL } from '@/config/gateway'
-import { STEP_UP_PENDING_KEY } from '../constants'
 
 const AUTHORIZE_PATH = '/v1/auth/oidc/authorize'
 
@@ -20,6 +19,8 @@ export const resetStepUpReturnGuard = (): void => {
   isHandlingStepUpReturn = false
 }
 
+export const isStepUpReturnInFlight = (): boolean => isHandlingStepUpReturn
+
 /**
  * Sends the user to the provider's hosted page to confirm a second factor.
  *
@@ -29,24 +30,22 @@ export const resetStepUpReturnGuard = (): void => {
  * and not RTK Query: the endpoint answers with a redirect to the provider's own
  * HTML pages, which `fetch` would follow and then fail to parse as JSON.
  *
- * A pending marker distinct from `OIDC_AUTH_PENDING_KEY` is set so the return is
- * handled by `useStepUpCallback` without `useOidcLoginCallback` mistaking a
- * step-up for a sign-in and emitting a login event.
+ * Writes nothing persistent: the trip record is the listener's job, and nothing
+ * that outlives this page load may gate a redirect. A persistent gate here was
+ * reproducibly a wedged tab — backing out of the challenge page left the marker
+ * set, and every later attempt then refused to navigate.
  *
  * Returns whether the navigation was started, so callers can tell a suppressed
  * attempt from a real one.
  */
 export const startStepUp = (redirectUrl?: string): boolean => {
-  // Already on the way out, or the challenge just failed for this page load.
-  if (isHandlingStepUpReturn || sessionStorage.getItem(STEP_UP_PENDING_KEY)) return false
+  if (isHandlingStepUpReturn) return false
 
   // Strip any stale `error` param so the return leg can trust that an `error` in
   // the URL genuinely came from the provider this time round.
   const returnUrl = new URL(redirectUrl ?? window.location.href)
   returnUrl.searchParams.delete('error')
   returnUrl.searchParams.delete('error_description')
-
-  sessionStorage.setItem(STEP_UP_PENDING_KEY, '1')
 
   const url = new URL(AUTHORIZE_PATH, GATEWAY_URL)
   url.searchParams.set('redirect_url', returnUrl.toString())

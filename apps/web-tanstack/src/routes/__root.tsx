@@ -38,7 +38,8 @@ import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import { useVisitedSafes } from '@/features/myAccounts'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
-import { useOidcLoginCallback } from '@/features/oidc-auth'
+import LaunchScreen from '@/components/common/LaunchScreen'
+import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import { initObservability } from '@/services/observability'
@@ -83,6 +84,14 @@ const TargetedOutreachPopupLoader = () => {
   return <OutreachPopup />
 }
 
+// Holds the branded launch screen open across a step-up round-trip, and fires
+// the redirect once painted. Inside the Redux provider, so the phase is readable.
+const StepUpSplash = (): ReactElement | null => {
+  const stepUpCaption = useStepUpSplash()
+
+  return stepUpCaption ? <LaunchScreen stepUpCaption={stepUpCaption} /> : null
+}
+
 const InitApp = (): null => {
   useHydrateStore(reduxStore)
   useInitChains()
@@ -104,6 +113,7 @@ const InitApp = (): null => {
   useVisitedSafes()
   usePortfolioRefetchOnTxHistory()
   useOidcLoginCallback()
+  useStepUpCallback()
   useLogoutCallback()
   useSessionExpiryGuard()
   return null
@@ -148,6 +158,7 @@ function RootShell() {
         <AppProviders>
           <CaptchaProvider>
             <InitApp />
+            <StepUpSplash />
             <PwaReloadPrompt />
             <Suspense fallback={null}>
               <LazyWeb3Init />

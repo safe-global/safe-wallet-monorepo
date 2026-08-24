@@ -1,7 +1,8 @@
 import { isRejectedWithValue } from '@reduxjs/toolkit'
 import type { listenerMiddlewareInstance } from '@/store/index'
 import { isElevationRequiredError } from '../utils/elevation'
-import { getReplayableAction, savePendingStepUpAction } from '../utils/stepUpReplay'
+import { isStepUpReturnInFlight } from '../utils/stepUp'
+import { getReplayableAction, saveStepUpTrip } from '../utils/stepUpReplay'
 import { stepUpLeaving } from './stepUpSlice'
 
 /**
@@ -22,10 +23,13 @@ export const elevationListener = (listenerMiddleware: typeof listenerMiddlewareI
     effect: (action, { dispatch }) => {
       if (!isElevationRequiredError(action.payload)) return
 
-      // Stored before leaving so the action completes on the way back instead of
-      // dropping the user into the app with nothing done.
-      const replayable = getReplayableAction(action)
-      if (replayable) savePendingStepUpAction(replayable)
+      // A challenge raised by the replayed action itself must surface inline,
+      // not record a new trip and bounce back out to the provider.
+      if (isStepUpReturnInFlight()) return
+
+      // One record — in-flight marker and payload together — written before
+      // leaving so the action completes on the way back.
+      saveStepUpTrip(getReplayableAction(action))
 
       dispatch(stepUpLeaving())
     },

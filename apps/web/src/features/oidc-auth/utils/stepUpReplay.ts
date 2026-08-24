@@ -4,13 +4,28 @@ import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { AppDispatch, RootState } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { STEP_UP_FAILED_MESSAGE } from '../constants'
+import { isElevationRequiredError } from './elevation'
 
 /**
- * The action interrupted by a step-up challenge, held across the redirect to the
- * provider. `sessionStorage` rather than Redux because the browser leaves the
- * app entirely: an in-memory closure cannot survive the round-trip.
+ * The single record of a step-up round-trip in flight: when it started, and the
+ * action to complete once it returns. `sessionStorage` rather than Redux because
+ * the browser leaves the app entirely.
+ *
+ * One key, not a separate in-flight marker plus payload: those are written and
+ * cleared by different code at different moments, and both ways they can
+ * disagree were reproducible — a marker left behind suppressed every later
+ * redirect in the tab, and a payload left behind waited to be executed by an
+ * unrelated trip's return.
  */
-const STEP_UP_ACTION_KEY = 'oidc_step_up_action'
+const STEP_UP_KEY = 'oidc_step_up'
+
+/**
+ * A trip cannot validly outlive CGW's one-time state cookie (5 minutes), so an
+ * older record is residue of an abandoned trip: deleted on sight, never acted
+ * on. Whatever state a tab is left in, it heals itself within this window.
+ */
+const STEP_UP_MAX_AGE_MS = 5 * 60 * 1_000
 
 /**
  * The mutations CGW guards with its `ElevationGuard`, each with the copy shown
@@ -73,32 +88,45 @@ export const getReplayableAction = (action: unknown): PendingStepUpAction | unde
   }
 }
 
-export const savePendingStepUpAction = (action: PendingStepUpAction): void => {
-  sessionStorage.setItem(STEP_UP_ACTION_KEY, JSON.stringify(action))
+export type StepUpTrip = {
+  /** Absent when the gated endpoint is not on the replay allowlist. */
+  action?: PendingStepUpAction
 }
 
-export const clearPendingStepUpAction = (): void => {
-  sessionStorage.removeItem(STEP_UP_ACTION_KEY)
+/** Wrapped so a storage failure can never block the redirect itself. */
+export const saveStepUpTrip = (action?: PendingStepUpAction): void => {
+  try {
+    sessionStorage.setItem(STEP_UP_KEY, JSON.stringify({ ...action, createdAt: Date.now() }))
+  } catch {
+    // Degrades to a trip with no return handling: the session still elevates.
+  }
+}
+
+export const clearStepUpTrip = (): void => {
+  sessionStorage.removeItem(STEP_UP_KEY)
 }
 
 /**
- * Returns the stored action and removes it in the same breath.
- *
- * Removing before the replay is attempted — not after — is what stops a request
- * that keeps failing from being retried on every subsequent page load.
+ * Returns the trip in flight and removes it in the same breath, so a record can
+ * never be acted on twice, later, or by a different trip's return. Removing
+ * before anything is attempted also stops a request that keeps failing from
+ * being retried on every subsequent page load. Expired or malformed records are
+ * deleted unexamined.
  */
-export const takePendingStepUpAction = (): PendingStepUpAction | undefined => {
-  const raw = sessionStorage.getItem(STEP_UP_ACTION_KEY)
+export const takeStepUpTrip = (): StepUpTrip | undefined => {
+  const raw = sessionStorage.getItem(STEP_UP_KEY)
   if (!raw) return undefined
 
-  clearPendingStepUpAction()
+  clearStepUpTrip()
 
   try {
     const parsed: unknown = JSON.parse(raw)
-    if (typeof parsed !== 'object' || parsed === null || !('endpoint' in parsed)) return undefined
-    if (!isReplayableEndpoint(parsed.endpoint)) return undefined
+    if (typeof parsed !== 'object' || parsed === null) return undefined
+    if (!('createdAt' in parsed) || typeof parsed.createdAt !== 'number') return undefined
+    if (Date.now() - parsed.createdAt > STEP_UP_MAX_AGE_MS) return undefined
+    if (!('endpoint' in parsed) || !isReplayableEndpoint(parsed.endpoint)) return {}
 
-    return { endpoint: parsed.endpoint, args: 'args' in parsed ? parsed.args : undefined }
+    return { action: { endpoint: parsed.endpoint, args: 'args' in parsed ? parsed.args : undefined } }
   } catch {
     return undefined
   }
@@ -127,16 +155,21 @@ const asReplayInitiator = (endpoint: ReplayableEndpoint): ReplayInitiator =>
  * component hook keeps this runnable from the callback, and still runs the
  * endpoint's `invalidatesTags` so the lists on screen refresh.
  */
-export const replayPendingStepUpAction = async (dispatch: AppDispatch): Promise<void> => {
-  const pending = takePendingStepUpAction()
-  if (!pending) return
-
+export const replayStepUpAction = async (dispatch: AppDispatch, pending: PendingStepUpAction): Promise<void> => {
   const result = await dispatch(asReplayInitiator(pending.endpoint)(pending.args))
 
   if (result.error) {
+    // Still gated means the challenge was never completed — the user backed out
+    // of the provider's page and came back. Say that, rather than the inline
+    // "verify your identity" copy, which reads as an instruction with nothing to
+    // act on for an action they walked away from.
+    const message = isElevationRequiredError(result.error)
+      ? STEP_UP_FAILED_MESSAGE
+      : getRtkQueryErrorMessage(result.error) || REPLAY_FAILED_MESSAGE
+
     dispatch(
       showNotification({
-        message: getRtkQueryErrorMessage(result.error) || REPLAY_FAILED_MESSAGE,
+        message,
         variant: 'error',
         groupKey: 'step-up-replay-failed',
       }),

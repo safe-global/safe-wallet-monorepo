@@ -1,6 +1,6 @@
 import { GATEWAY_URL } from '@/config/gateway'
 import { markStepUpReturnHandled, resetStepUpReturnGuard, startStepUp } from '../stepUp'
-import { OIDC_AUTH_PENDING_KEY, STEP_UP_PENDING_KEY } from '../../constants'
+import { OIDC_AUTH_PENDING_KEY } from '../../constants'
 
 describe('startStepUp', () => {
   const originalLocation = window.location
@@ -56,21 +56,22 @@ describe('startStepUp', () => {
     expect(returnUrl.searchParams.get('spaceId')).toBe('42')
   })
 
-  it('should mark a step-up as pending without marking a sign-in as pending', () => {
+  // Regression: a persistent marker here wedged the tab — backing out of the
+  // challenge page left it set, and every later attempt refused to navigate.
+  // Nothing that outlives the page load may gate a redirect. The sign-in flow's
+  // own marker must stay untouched, so a step-up is never read as a login.
+  it('should write nothing to sessionStorage', () => {
     startStepUp()
 
-    expect(sessionStorage.getItem(STEP_UP_PENDING_KEY)).toBe('1')
+    expect(sessionStorage.length).toBe(0)
     expect(sessionStorage.getItem(OIDC_AUTH_PENDING_KEY)).toBeNull()
   })
 
-  it('should not start a second redirect while one is already pending', () => {
-    startStepUp()
-    const afterFirst = window.location.href
+  it('should redirect again after an abandoned attempt left residue behind', () => {
+    sessionStorage.setItem('oidc_step_up', JSON.stringify({ endpoint: 'spacesDeleteV1', createdAt: Date.now() }))
 
-    setLocation('https://app.safe.global/spaces/members?spaceId=42')
-    expect(startStepUp()).toBe(false)
-    expect(window.location.href).toBe('https://app.safe.global/spaces/members?spaceId=42')
-    expect(afterFirst).toContain('elevate=true')
+    expect(startStepUp()).toBe(true)
+    expect(new URL(window.location.href).searchParams.get('elevate')).toBe('true')
   })
 
   // A replayed action that is itself rejected must surface as an error rather
@@ -80,7 +81,6 @@ describe('startStepUp', () => {
 
     expect(startStepUp()).toBe(false)
     expect(window.location.href).toBe('https://app.safe.global/spaces/members?spaceId=42')
-    expect(sessionStorage.getItem(STEP_UP_PENDING_KEY)).toBeNull()
   })
 
   // Regression: the guard once outlived the return processing, so the SECOND
