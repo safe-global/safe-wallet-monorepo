@@ -37,12 +37,12 @@ export const MultisendActionsHeader = ({
 
   return (
     <div data-testid="all-actions" className={classnames(css.actionsHeader, { [css.compactHeader]: compact })}>
-      {title}
+      <span className="text-base">{title}</span>
       <div className="flex flex-row">
-        <Button data-testid="expande-all-btn" onClick={onClickAll(true)} variant="ghost">
+        <Button data-testid="expande-all-btn" onClick={onClickAll(true)} variant="ghost" size="xs">
           Expand all
         </Button>
-        <Button data-testid="collapse-all-btn" onClick={onClickAll(false)} variant="ghost">
+        <Button data-testid="collapse-all-btn" onClick={onClickAll(false)} variant="ghost" size="xs">
           Collapse all
         </Button>
       </div>
@@ -102,6 +102,7 @@ const Multisend = ({
           txData={txData}
           actionTitle={`${index + 1}`}
           variant={compact ? 'outlined' : 'elevation'}
+          radius="none"
           expanded={openMap?.[index] ?? false}
           onChange={onChange}
           isExecuted={isExecuted}
@@ -118,7 +119,7 @@ const Multisend = ({
       />
 
       {compact ? (
-        <Card variant="muted" size="none" className="mt-2">
+        <Card variant="muted" size="none">
           <CardContent>
             {/* Same padding-outside / clipping-inside pair as ExecuteBatch's DecodedTxs, which renders
                 this identical block: 8px = the card's 16px less the 8px inset, so the white action
@@ -129,7 +130,7 @@ const Multisend = ({
           </CardContent>
         </Card>
       ) : (
-        <div className="mt-3 flex flex-col gap-2 px-4 pb-4">{actionItems}</div>
+        <div className="flex flex-col divide-y divide-border">{actionItems}</div>
       )}
     </>
   )

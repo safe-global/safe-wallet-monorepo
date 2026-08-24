@@ -57,6 +57,7 @@ const NotificationsPopover = forwardRef<NotificationsPopoverRef>((_props, ref): 
       }}
     >
       <PopoverContent
+        showBackdrop
         anchor={anchorEl}
         side="bottom"
         align="start"
@@ -64,7 +65,7 @@ const NotificationsPopover = forwardRef<NotificationsPopoverRef>((_props, ref): 
         className={cn('w-auto gap-0 p-0', notificationCss.popoverContainer)}
       >
         <div className={notificationCss.popoverHeader}>
-          <div>
+          <div className="flex items-center">
             <Typography data-testid="notifications-title" variant="h4" className="font-bold">
               Notifications
             </Typography>
@@ -75,7 +76,11 @@ const NotificationsPopover = forwardRef<NotificationsPopoverRef>((_props, ref): 
             )}
           </div>
           {notifications.length > 0 && (
-            <ShadcnLink render={<button type="button" />} onClick={handleClear} className="no-underline">
+            <ShadcnLink
+              render={<button type="button" />}
+              onClick={handleClear}
+              className={cn(notificationCss.actionLink, 'no-underline')}
+            >
               Clear all
             </ShadcnLink>
           )}

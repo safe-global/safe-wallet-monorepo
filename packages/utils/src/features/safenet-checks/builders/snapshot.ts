@@ -14,13 +14,13 @@ export const buildSnapshot = (over: Partial<SafenetCheckSnapshot> = {}): Safenet
   safeTxHash: hexHash(),
   chainId: '100',
   status: CheckStatus.SUBMITTED,
-  generation: null,
   requestId: null,
   epoch: null,
   oracle: null,
   deadlineBlock: null,
   headBlock: null,
   attestation: UNVERIFIED_ATTESTATION,
+  attestedAtMs: null,
   events: [],
   ...over,
 })
@@ -29,6 +29,7 @@ export const buildSnapshot = (over: Partial<SafenetCheckSnapshot> = {}): Safenet
 export const buildBenignSnapshot = (over: Partial<SafenetCheckSnapshot> = {}): SafenetCheckSnapshot =>
   buildSnapshot({
     status: CheckStatus.BENIGN,
+    attestedAtMs: 1_785_749_985_000,
     attestation: { status: AttestationVerificationStatus.VERIFIED, signatureId: hexHash(), message: hexHash() },
     ...over,
   })

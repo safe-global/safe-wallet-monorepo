@@ -46,13 +46,19 @@ export const SpacesEnhancedSidebar = ({
   const isHydrated = useIsHydrated()
   const isDarkMode = useDarkMode()
   const spacesSidebarWidth = 'min(230px, 100%)'
+  const spacesSidebarIconWidth = '34px'
 
   return (
     <SidebarProvider
       open={isContainedInDrawer ? true : undefined}
       openMobile={isDrawerOpen}
       onOpenMobileChange={(open) => !open && onDrawerClose?.()}
-      style={{ '--sidebar-width': spacesSidebarWidth } as CSSProperties}
+      style={
+        {
+          '--sidebar-width': spacesSidebarWidth,
+          '--sidebar-width-icon': spacesSidebarIconWidth,
+        } as CSSProperties
+      }
       className={cn('shadcn-scope', isDarkMode && 'dark', isContainedInDrawer && 'h-dvh')}
     >
       <SidebarStateReporter onOpenChange={onOpenChange} />

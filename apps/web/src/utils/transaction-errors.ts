@@ -2,6 +2,8 @@
  * Utilities for detecting and handling specific transaction errors
  */
 import { BaseError } from 'viem'
+import { getKnownCustomError } from '@/utils/customErrorRegistry'
+import { getGsCodeFromError } from '@safe-global/utils/services/exceptions/contractErrors'
 
 /**
  * Guard error codes
@@ -46,12 +48,7 @@ export const extractGuardErrorCode = (error: Error): string | undefined => {
  * @returns {string} Human-readable error name
  */
 export const getGuardErrorName = (errorCode: string): string => {
-  switch (errorCode) {
-    case GUARD_ERROR_CODES.UNAPPROVED_HASH:
-      return 'UnapprovedHash'
-    default:
-      return 'Unknown'
-  }
+  return getKnownCustomError(errorCode)?.name ?? 'Unknown'
 }
 
 /**
@@ -98,6 +95,55 @@ export const isRateLimitError = (error: unknown): boolean => {
     })
     if (match) return true
   }
+
+  return false
+}
+
+/**
+ * Detects a wallet-level (EOA) nonce conflict rejected by the RPC pre-mining
+ * (no gas spent): the signer account's Ethereum nonce was already consumed
+ * ("nonce too low" — another tx from the same wallet mined first) or is still
+ * occupied by a pending tx that the new one doesn't outbid ("replacement
+ * transaction underpriced" / "already known"). Matched on the RPC error text
+ * (viem wraps these misleadingly as contract reverts) plus ethers' structured
+ * codes.
+ */
+export const isNonceTooLowError = (error: unknown): boolean => {
+  if (!error) return false
+
+  const err = error as { code?: unknown; message?: string }
+
+  if (err.code === 'NONCE_EXPIRED' || err.code === 'REPLACEMENT_UNDERPRICED') return true
+
+  return (
+    typeof err.message === 'string' &&
+    /nonce too low|nonce has already been used|replacement transaction underpriced|already known/i.test(err.message)
+  )
+}
+
+/**
+ * Detects whether an error is a genuine on-chain revert — i.e. a node told us
+ * the transaction reverts — as opposed to an infrastructure failure (RPC down,
+ * timeout, rate-limit) where we simply could not complete the check.
+ *
+ * Only a decodable revert signal counts: a known GS code, an ethers
+ * `CALL_EXCEPTION`, or an "execution reverted" message. Everything else is
+ * treated as infra — the safe default, so we never claim a transaction will
+ * fail unless a node actually reverted it (WA-3005 guideline #2).
+ */
+export const isRevertError = (error: unknown): boolean => {
+  if (!error) return false
+
+  const err = error as { code?: unknown; reason?: string; message?: string }
+
+  // A known GS revert reason is definitive.
+  if (getGsCodeFromError(err)) return true
+
+  // ethers marks a reverted eth_call/estimateGas as CALL_EXCEPTION.
+  if (err.code === 'CALL_EXCEPTION') return true
+
+  // viem/ethers revert text.
+  if (typeof err.message === 'string' && /execution reverted|reverted with/i.test(err.message)) return true
 
   return false
 }

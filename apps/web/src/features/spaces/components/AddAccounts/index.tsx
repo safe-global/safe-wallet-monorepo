@@ -35,7 +35,7 @@ import { ArrowLeft, Info, Plus, Settings2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { SearchInput } from '@/components/ui/search-input'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { SafeAccountsTable, type AccountLine, type SafeAccountColumnId } from '@/features/myAccounts'
 import ManageTrustedSafesContent from '@/components/common/TrustedSafesModal/ManageTrustedSafesContent'
 import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
@@ -508,6 +508,7 @@ const AddAccounts = ({
 
                   {error && (
                     <Alert variant="destructive" className="mt-4 shrink-0">
+                      <AlertSeverityIcon variant="destructive" />
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
                   )}

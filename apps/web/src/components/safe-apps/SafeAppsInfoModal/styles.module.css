@@ -25,18 +25,16 @@
 }
 
 .domainIcon {
-  position: relative;
-  top: 6px;
   padding-right: 4px;
 }
 
 .domainText {
-  display: block;
+  display: flex;
   font-size: 12px;
   font-weight: bold;
   overflow-wrap: anywhere;
   background-color: var(--color-background-light);
-  padding: 0 15px 10px 10px;
+  padding: 10px 15px;
   border-radius: 8px;
   max-width: 75%;
 }

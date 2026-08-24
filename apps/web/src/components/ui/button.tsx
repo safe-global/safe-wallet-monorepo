@@ -19,7 +19,7 @@ import { cn } from '@/utils/cn'
  * @remarks
  * Key Props:
  * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'surface')
- * - `size` ('default' | 'sm' | 'lg' | 'action' | 'submit' | 'xl' | 'icon' | 'icon-xs' | 'icon-sm')
+ * - `size` ('default' | 'xs' | 'sm' | 'lg' | 'action' | 'submit' | 'xl' | 'icon' | 'icon-xs' | 'icon-sm')
  * - `render`
  * - `className`
  */
@@ -42,8 +42,10 @@ const buttonVariants = cva(
         // would be invisible on exactly the surfaces this variant is meant for.
         outline:
           'border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs',
+        // Hover darkens via the `secondary-hover` token: `bg-secondary/80` lightened instead, since
+        // `--secondary` (#f5f5f5) is lighter than the white surfaces this variant sits on.
         secondary:
-          'bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground',
+          'bg-secondary text-secondary-foreground hover:bg-secondary-hover aria-expanded:bg-secondary-hover aria-expanded:text-secondary-foreground',
         ghost:
           'hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground',
         destructive:
@@ -57,6 +59,9 @@ const buttonVariants = cva(
         default:
           'h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2',
         sm: 'h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5',
+        // `sm`'s box with the 12px label scale: for secondary controls that sit beside body text
+        // (a section header's "Expand all"/"Collapse all") and should not compete with it.
+        xs: "h-8 gap-1 px-4 text-xs in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3",
         lg: 'h-10 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3',
         // Prominent call-to-action pill: use for the main action(s) of a surface
         // (Send/Receive/Swap, Confirm/Execute, Save settings, Filter/Export). Pair

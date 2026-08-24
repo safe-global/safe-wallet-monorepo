@@ -57,7 +57,8 @@ export const ImportFileUpload = ({
 
       <FileUpload
         fileType={FileTypes.JSON}
-        getRootProps={() => ({ ...getRootProps(), height: '228px' })}
+        getRootProps={getRootProps}
+        className="h-[228px]"
         getInputProps={getInputProps}
         isDragActive={isDragActive}
         isDragReject={isDragReject}

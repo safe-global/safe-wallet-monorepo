@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { cn } from '@/utils/cn'
 
 type Option = {
   id: string
@@ -56,6 +57,7 @@ export default function SplitMenuButton({
 
   const { label, id } = useMemo(() => options[selectedIndex] || {}, [options, selectedIndex])
   const maxCharLen = Math.max(...options.map(({ id, label }) => (label || id).length)) + 2
+  const hasMenu = options.length > 1
 
   return (
     <div data-slot="button-group" className="flex h-10 w-full" aria-label="Button group with a nested menu">
@@ -71,7 +73,7 @@ export default function SplitMenuButton({
               // `rounded-md`, otherwise that variant outranks a bare `rounded-r-none` and the halves
               // meet on two 12px curves instead of a flat seam.
               // eslint-disable-next-line no-restricted-syntax -- split-button halves flatten inner corners at the join and fill the button-group row height
-              className="h-full min-w-0 flex-1 shrink in-data-[slot=button-group]:rounded-r-none"
+              className={cn('h-full min-w-0 flex-1 shrink', hasMenu && 'in-data-[slot=button-group]:rounded-r-none')}
               // The floor keeps the button from resizing as the selected option's label changes, but
               // an unconditional `${maxCharLen}ch` outgrew narrow rows and shoved the dropdown half
               // outside the group, where TxCard's overflow-hidden clipped it off. Capping it against
@@ -85,7 +87,7 @@ export default function SplitMenuButton({
         {tooltip ? <TooltipContent>{tooltip}</TooltipContent> : null}
       </Tooltip>
 
-      {options.length > 1 && (
+      {hasMenu && (
         <DropdownMenu open={open} onOpenChange={setOpen}>
           <DropdownMenuTrigger
             render={

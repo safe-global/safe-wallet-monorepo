@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./DataTable.stories Default 1`] = `
 <div
@@ -37,7 +37,7 @@ exports[`./DataTable.stories Default 1`] = `
             </span>
           </div>
           <div
-            class="flex-1"
+            class="max-w-full flex-1 xl:min-w-0"
             data-testid="tx-data-row"
           >
             <div
@@ -64,7 +64,7 @@ exports[`./DataTable.stories Default 1`] = `
             </span>
           </div>
           <div
-            class="flex-1"
+            class="max-w-full flex-1 xl:min-w-0"
             data-testid="tx-data-row"
           >
             <div
@@ -91,7 +91,7 @@ exports[`./DataTable.stories Default 1`] = `
             </span>
           </div>
           <div
-            class="flex-1"
+            class="max-w-full flex-1 xl:min-w-0"
             data-testid="tx-data-row"
           >
             <div

@@ -21,11 +21,11 @@ const meta = {
   argTypes: {
     inputSize: {
       control: 'select',
-      options: ['sm', 'default', 'lg', 'hero'],
+      options: ['sm', 'default', 'lg', 'hero', 'heroWrap'],
     },
     variant: {
       control: 'select',
-      options: ['default', 'surface', 'search'],
+      options: ['default', 'surface', 'search', 'outline'],
     },
   },
 } satisfies Meta<typeof InputGroup>
@@ -68,6 +68,15 @@ export const AllVariants: Story = {
               <InputGroupInput placeholder="hero surface (h-66)" />
             </InputGroup>
           </div>
+          <div style={{ width: '300px' }}>
+            <InputGroup inputSize="heroWrap">
+              <span className="rounded-md border px-2 py-1 text-sm">heroWrap (wraps)</span>
+              <span className="rounded-md border px-2 py-1 text-sm">chip two</span>
+              <span className="rounded-md border px-2 py-1 text-sm">chip three</span>
+              <span className="rounded-md border px-2 py-1 text-sm">chip four</span>
+              <span className="rounded-md border px-2 py-1 text-sm">chip five</span>
+            </InputGroup>
+          </div>
         </div>
       </div>
 
@@ -83,6 +92,9 @@ export const AllVariants: Story = {
         >
           <div style={{ width: '300px' }}>
             <SearchInput placeholder="Search..." />
+          </div>
+          <div style={{ width: '300px' }}>
+            <SearchInput variant="outline" placeholder="outline (unfilled)" />
           </div>
         </div>
       </div>

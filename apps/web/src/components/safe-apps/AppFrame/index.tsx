@@ -82,11 +82,19 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
   }
 
   const onRejectPermissionRequest = (requestId?: RequestId) => {
-    if (requestId) {
+    // Reject passes the id and persists a denial. Closing the modal only dismisses, so the app can ask
+    // again — but either way it has to be answered, or its SDK call never settles.
+    const isExplicitReject = requestId !== undefined
+    const id = requestId ?? permissionsRequest?.requestId
+
+    if (isExplicitReject) {
       confirmPermissionRequest(PermissionStatus.DENIED)
-      communicator?.send('Permissions were rejected', requestId as string, true)
     } else {
       setPermissionsRequest(undefined)
+    }
+
+    if (id != null) {
+      communicator?.send('Permissions were rejected', id as string, true)
     }
   }
 

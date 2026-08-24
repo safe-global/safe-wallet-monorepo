@@ -12,7 +12,7 @@ import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParam
 import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { Errors, logError } from '@/services/exceptions'
-import ErrorMessage from '@/components/tx/ErrorMessage'
+import TxSubmitError from '@/components/tx/TxSubmitError'
 import WalletRejectionError from '@/components/tx/shared/errors/WalletRejectionError'
 import { useCurrentChain } from '@/hooks/useChains'
 import { dispatchSpendingLimitTxExecution } from '../../services/spendingLimitExecution'
@@ -140,9 +140,7 @@ const ReviewSpendingLimitTx = ({
 
         <NetworkWarning />
 
-        {submitError && (
-          <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
-        )}
+        {submitError && <TxSubmitError error={submitError} />}
 
         {isRejectedByUser && <WalletRejectionError />}
 

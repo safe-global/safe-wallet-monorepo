@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { Check } from 'lucide-react'
 import OwnersIcon from '@/public/images/common/owners.svg'
-import TxStatusChip from '../TxStatusChip'
+import { Badge } from '@/components/ui/badge'
 
 const TxConfirmations = ({
   requiredConfirmations,
@@ -13,13 +13,10 @@ const TxConfirmations = ({
   const isConfirmed = submittedConfirmations >= requiredConfirmations
 
   return (
-    <TxStatusChip color="secondary">
-      {isConfirmed ? <Check className="size-5" /> : <OwnersIcon className="size-5" />}
-
-      <span className="text-xs font-bold tracking-[1px]">
-        {submittedConfirmations}/{requiredConfirmations}
-      </span>
-    </TxStatusChip>
+    <Badge variant="subtle">
+      {isConfirmed ? <Check /> : <OwnersIcon />}
+      {submittedConfirmations}/{requiredConfirmations}
+    </Badge>
   )
 }
 

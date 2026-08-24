@@ -44,9 +44,7 @@ const SpendingLimitRow = ({
 
   return (
     <div className="flex flex-col">
-      <Label className="mb-1">
-        Send as <span className="text-destructive">*</span>
-      </Label>
+      <Label className="mb-1">Send as</Label>
       <Controller
         rules={{ required: true }}
         control={control}

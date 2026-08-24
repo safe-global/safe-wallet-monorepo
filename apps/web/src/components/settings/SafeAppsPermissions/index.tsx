@@ -102,10 +102,16 @@ const SafeAppsPermissions = (): ReactElement => {
         <Typography className="text-muted-foreground">There are no Safe Apps using permissions.</Typography>
       )}
       {domains.map((domain) => (
-        <div key={domain} className="mb-4 rounded-lg border border-[var(--color-border-light)]">
+        <div
+          key={domain}
+          data-testid="app-permissions-item"
+          className="mb-4 rounded-lg border border-[var(--color-border-light)]"
+        >
           <div className="grid grid-cols-1 border-b border-[var(--color-border-light)] px-6 py-[15px] sm:grid-cols-12">
             <div className="py-[9px] sm:col-span-5">
-              <Typography variant="paragraph-bold">{appNames[domain]}</Typography>
+              <Typography variant="paragraph-bold" as="h5">
+                {appNames[domain]}
+              </Typography>
               <Typography variant="paragraph-small">{domain}</Typography>
             </div>
             <div className="grid grid-cols-1 sm:col-span-7 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

@@ -13,7 +13,7 @@ import useBalances from '@/hooks/useBalances'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { useRpcEndpointInfo } from '@/hooks/wallets/useRpcEndpointInfo'
+import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import { Errors, logError } from '@/services/exceptions'
 import type { FeeRow } from './useFeesPreview'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
@@ -56,7 +56,6 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
   const chain = useCurrentChain()
   const { balances } = useBalances()
   const provider = useWeb3ReadOnly()
-  const rpcInfo = useRpcEndpointInfo()
   const currency = useAppSelector(selectCurrency)
 
   const exec = isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo) ? txDetails.detailedExecutionInfo : null
@@ -121,8 +120,8 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
   }, [isGtfEnabled, executedAt, !!exec, isSafePaid, txHash, provider])
 
   useEffect(() => {
-    if (receiptError) logError(Errors._612, receiptError.message, rpcInfo)
-  }, [receiptError, rpcInfo])
+    if (receiptError) logError(Errors._612, receiptError.message, getRpcErrorContext(provider))
+  }, [receiptError, provider])
 
   const signerPaidData = useMemo<HistoryFeesData | null>(() => {
     if (!receipt) return null

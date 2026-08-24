@@ -18,8 +18,8 @@ const PositionsEmpty = ({ entryPoint = 'Dashboard' }: PositionsEmptyProps) => {
   const isEarnFeatureEnabled = useIsEarnPromoEnabled()
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6 text-center">
-      <DefiIcon />
+    <div className="rounded-xl bg-card p-6 text-center">
+      <DefiIcon className="mx-auto" />
 
       <Typography data-testid="no-tx-text" align="center" className="text-[var(--color-primary-light)]">
         You have no active DeFi positions yet

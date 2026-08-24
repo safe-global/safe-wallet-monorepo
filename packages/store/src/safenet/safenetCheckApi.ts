@@ -50,9 +50,15 @@ export const safenetCheckApi = createApi({
           const attestedEvent =
             read.events.find((event): event is OracleAttestedEvent => event.type === CheckEventType.ORACLE_ATTESTED) ??
             read.events.find((event): event is PlainAttestedEvent => event.type === CheckEventType.PLAIN_ATTESTED)
-          const attestation: AttestationVerification = attestedEvent
-            ? await reader.verifyAttestation(attestedEvent)
-            : UNVERIFIED_ATTESTATION
+          // Both gated on an attestation existing: the header read dates the
+          // audit step, happens on the poll that first observes the
+          // attestation, and polling stops there — one RPC per settled check.
+          const [attestation, attestedAtMs]: [AttestationVerification, number | null] = attestedEvent
+            ? await Promise.all([
+                reader.verifyAttestation(attestedEvent),
+                reader.blockTimeMs(attestedEvent.blockNumber),
+              ])
+            : [UNVERIFIED_ATTESTATION, null]
 
           const derived = deriveCheckState({ events: read.events, attestation, headBlock: read.headBlock })
           const pinned = selectPinnedVerdict(getState() as SafenetCheckPartialState, safeTxHash)
@@ -69,13 +75,13 @@ export const safenetCheckApi = createApi({
             safeTxHash: read.safeTxHash,
             chainId: read.chainId,
             status,
-            generation: read.generation,
             requestId: read.requestId,
             epoch: read.epoch,
             oracle: read.oracle,
             deadlineBlock: read.deadlineBlock,
             headBlock: read.headBlock,
             attestation,
+            attestedAtMs,
             events: read.events,
           }
           return { data: snapshot }

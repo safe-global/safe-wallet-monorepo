@@ -74,9 +74,18 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
       <SidebarMenu className="gap-0.5">
         <ApiCtaSidebar />
 
-        <SidebarMenuItem className={css.footerHelpRow}>
+        <SidebarMenuItem
+          className={cn(
+            css.footerHelpRow,
+            'group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-0.5',
+          )}
+        >
           <SidebarMenuButton
-            className={cn('h-9 min-w-0 flex-1 gap-3', css.sidebarInteractive, css.sidebarNavItem)}
+            className={cn(
+              'h-9 min-w-0 flex-1 gap-3 group-data-[collapsible=icon]:flex-none',
+              css.sidebarInteractive,
+              css.sidebarNavItem,
+            )}
             data-testid="list-item-need-help"
             onClick={handleHelpClick}
           >

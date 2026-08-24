@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { Controller, useForm } from 'react-hook-form'
 import { Typography } from '@/components/ui/typography'
-import { Field, FieldLabel } from '@/components/ui/field'
+import { Field } from '@/components/ui/field'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 
 const MAX_NOTE_LENGTH = 60
@@ -43,11 +43,12 @@ export default function TxNoteInput({ onChange }: { onChange: (note: string) => 
         control={control}
         render={({ field }) => (
           <Field>
-            <FieldLabel htmlFor="tx-note-input">Optional</FieldLabel>
-            <InputGroup data-testid="tx-note-textfield">
+            <InputGroup inputSize="hero" data-testid="tx-note-textfield">
               <InputGroupInput
                 name={field.name}
                 id="tx-note-input"
+                aria-label="Note"
+                placeholder="Optional"
                 value={field.value || ''}
                 maxLength={MAX_NOTE_LENGTH}
                 onChange={(e) => {

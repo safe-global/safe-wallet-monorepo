@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import ModalDialog from '@/components/common/ModalDialog'
 import classNames from 'classnames'
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import TxCheckError from '@/components/tx/TxCheckError'
 import { trackError, Errors } from '@/services/exceptions'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -35,7 +36,6 @@ import SplitMenuButton from '@/components/common/SplitMenuButton'
 import type { SlotComponentProps, SlotName } from '../../slots'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
-import { isRateLimitError, RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
 import { SafeTxContext } from '../../SafeTxProvider'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
@@ -50,7 +50,6 @@ export const ExecuteForm = ({
   disableSubmit = false,
   origin,
   onlyExecute,
-  isCreation,
   isOwner,
   isExecutionLoop,
   slotId,
@@ -85,7 +84,7 @@ export const ExecuteForm = ({
   const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
   const gasTooHigh = useGasTooHigh(safeTx)
 
-  // GTF Safe-pays must go via Gelato — WALLET execution would double-charge (network gas + Safe fee).
+  // GTF Safe-pays must go via relayer. WALLET execution would double-charge (network gas + Safe fee).
   // For confirmers, the structural fingerprint of the signed payload is the only source of truth:
   // a stale `gtfPaymentMode === 'safe'` from the user's persisted preference must NOT force the
   // relay path on a tx whose payload doesn't carry the GTF fee fields (would fail in handlePayment).
@@ -147,7 +146,7 @@ export const ExecuteForm = ({
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)
   const [advancedParams, setAdvancedParams] = useAdvancedParams(gasLimit)
 
-  // Safe-pays runs via Gelato (not the wallet), so the simulated `from` doesn't match the
+  // Safe-pays runs via relayer (not the wallet), so the simulated `from` doesn't match the
   // real msg.sender on execTransaction. We still run the check, the inner-call revert that
   // catches issues like spam-token transfers fails regardless of who calls execTransaction,
   // and missing that signal silently in Safe-pays is worse than the simulated-from drift.
@@ -155,6 +154,9 @@ export const ExecuteForm = ({
     safeTx,
     advancedParams.gasLimit ? advancedParams.gasLimit : undefined,
   )
+
+  // Pre-execution check error (validity simulation or gas estimation).
+  const checkError = executionValidationError || gasLimitError
 
   // CGW pre-relay simulation outcome (SIMULATION_FAILED blocks; INDETERMINATE offers an override).
   const [relaySimError, setRelaySimError] = useState<RelaySimulationError | undefined>(undefined)
@@ -241,7 +243,7 @@ export const ExecuteForm = ({
     <>
       <form onSubmit={handleSubmit}>
         {!requiresRelay && (
-          <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: canRelay })}>
+          <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: showExecutionSelector })}>
             <AdvancedParams
               willExecute
               params={advancedParams}
@@ -282,7 +284,7 @@ export const ExecuteForm = ({
             Cannot execute a transaction from the Safe account itself, please connect a different account.
           </ErrorMessage>
         ) : relayUnavailableForGtf ? (
-          <ErrorMessage>Safe-paid fees require Gelato relay, which is currently unavailable.</ErrorMessage>
+          <ErrorMessage>Safe-paid fees requires a relayer, which is currently unavailable.</ErrorMessage>
         ) : blockSafePaysFromNestedExecutor ? (
           <ErrorMessage level="info">
             Can&apos;t pay gas from this Safe account when executing through a parent Safe account. Sign the
@@ -292,20 +294,9 @@ export const ExecuteForm = ({
           <ErrorMessage level="info">
             Your connected wallet doesn&apos;t have enough funds to execute this transaction.
           </ErrorMessage>
-        ) : (
-          (executionValidationError || gasLimitError) && (
-            <ErrorMessage error={executionValidationError || gasLimitError} context="estimation">
-              {isRateLimitError(executionValidationError || gasLimitError) ? (
-                RATE_LIMIT_USER_MESSAGE
-              ) : (
-                <>
-                  This transaction will most likely fail.
-                  {` To save gas costs, ${isCreation ? 'avoid creating' : 'reject'} this transaction.`}
-                </>
-              )}
-            </ErrorMessage>
-          )
-        )}
+        ) : checkError ? (
+          <TxCheckError error={checkError} context="estimation" />
+        ) : null}
 
         {/* CGW pre-relay simulation verdict */}
         {relaySimError?.code === 'SIMULATION_FAILED' && (
@@ -327,7 +318,7 @@ export const ExecuteForm = ({
             fee. You can run the simulation yourself from the Safe Shield panel before deciding.
           </div>
 
-          <div className="flex justify-end gap-2 p-6 pt-2">
+          <div className="flex justify-between gap-2 p-6 pt-2">
             <Button data-testid="relay-go-back-btn" variant="ghost" onClick={() => setRelaySimError(undefined)}>
               Back
             </Button>

@@ -255,7 +255,7 @@ export default [
         ].map((element) =>
           dsInputClassnameRule(
             element,
-            `Don't set height/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*, border) on <${element}> — use \`inputSize\` ('sm'|'default'|'lg'|'hero' — match the height of the button on the same row) / \`variant\` ('default'|'surface', plus 'search' on InputGroup). \`className\` is layout-only (w-*, margins, flex/grid). See the UI/Input story; add a variant to components/ui/input.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
+            `Don't set height/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*, border) on <${element}> — use \`inputSize\` ('sm'|'default'|'lg'|'hero', plus 'heroWrap' on InputGroup for a hero-height control whose content wraps — match the height of the button on the same row) / \`variant\` ('default'|'surface', plus 'search'|'outline' on InputGroup). \`className\` is layout-only (w-*, margins, flex/grid). See the UI/Input story; add a variant to components/ui/input.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
           ),
         ),
         dsInputClassnameRule(

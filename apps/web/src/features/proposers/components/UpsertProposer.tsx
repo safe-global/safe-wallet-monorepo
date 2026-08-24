@@ -28,10 +28,10 @@ import { showNotification } from '@/store/notificationsSlice'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { sanitizeName } from '@safe-global/utils/validation/names'
-import { addressIsNotCurrentSafe, addressIsNotOwner } from '@safe-global/utils/utils/validation'
+import { addressIsNotCurrentSafe, addressIsNotOwner, addressIsNotReserved } from '@safe-global/utils/utils/validation'
 import { isEthSignWallet } from '@/utils/wallets'
 import { XIcon } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -108,11 +108,12 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
   const validateAddress = useCallback<Validate<string>>(
     async (value) => {
+      const notReserved = addressIsNotReserved('This proposer address is not valid')
       const notCurrentSafe = addressIsNotCurrentSafe(safeAddress, 'Cannot add Safe account itself as proposer')
       const notOwner = addressIsNotOwner(safeOwnerAddresses, 'Cannot add Safe Owner as proposer')
       const notSmartContract = addressIsNotSmartContract(chainId, SMART_CONTRACT_PROPOSER_ERROR)
 
-      return notCurrentSafe(value) ?? notOwner(value) ?? (await notSmartContract(value))
+      return notReserved(value) ?? notCurrentSafe(value) ?? notOwner(value) ?? (await notSmartContract(value))
     },
     [safeAddress, safeOwnerAddresses, chainId],
   )
@@ -235,7 +236,8 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
           <Separator />
 
           <div className="p-4">
-            <Alert variant="default" className="mb-4">
+            <Alert variant="info" className="mb-4">
+              <AlertSeverityIcon variant="info" />
               <AlertDescription>1 of {parentThreshold} signatures collected</AlertDescription>
             </Alert>
 
@@ -278,7 +280,8 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
             <div className="p-4">
               {isMultiSigRequired && (
-                <Alert variant="default" className="mb-4">
+                <Alert variant="info" className="mb-4">
+                  <AlertSeverityIcon variant="info" />
                   <AlertDescription>
                     This requires {parentThreshold} of {parentOwners?.length ?? '?'} parent Safe owner signatures to
                     complete.
@@ -293,7 +296,8 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
                 </Typography>
               </div>
 
-              <Alert variant="default">
+              <Alert variant="info">
+                <AlertSeverityIcon variant="info" />
                 <AlertDescription>Proposer&apos;s name and address are publicly visible.</AlertDescription>
               </Alert>
 
@@ -315,7 +319,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
               </div>
 
               <div className="mb-4">
-                <NameInput name="name" label="Name" required />
+                <NameInput name="name" label="Name" required inputSize="hero" />
               </div>
 
               {error && (

@@ -82,7 +82,7 @@ export const _GasParams = ({
   const EditComponent = (
     <>
       {gasLimitError || !isExecution || (isExecution && !isLoading) ? (
-        <Link render={<button type="button" />} onClick={onEditClick} className="mt-4 text-base">
+        <Link render={<button type="button" />} onClick={onEditClick} className="mt-4 text-base font-bold">
           Edit
         </Link>
       ) : (
@@ -92,15 +92,15 @@ export const _GasParams = ({
   )
 
   return (
-    <div className={classnames({ [css.error]: gasLimitError })}>
+    <div className={classnames(css.container, { [css.error]: gasLimitError })}>
       <Accordion onValueChange={onChangeExpand}>
         <AccordionItem
           value="gas-params"
           className={classnames('border-b-0', { [css.withExecutionMethod]: isExecution })}
         >
-          <AccordionTrigger className={classnames(accordionCss.accordion, 'px-4')}>
+          <AccordionTrigger className={classnames(accordionCss.accordion, 'items-center px-4')}>
             {isExecution ? (
-              <span className="flex w-full items-center text-base font-normal">
+              <span className="flex w-full items-center">
                 <span className="flex-1">Estimated fee </span>
                 {gasLimitError ? (
                   <>
@@ -130,14 +130,14 @@ export const _GasParams = ({
                 )}
               </span>
             ) : (
-              <span className="text-base font-normal">
+              <span>
                 Signing the transaction with nonce&nbsp;
                 {nonce !== undefined ? nonce : <Skeleton className="inline-block h-4 min-w-[2em]" />}
               </span>
             )}
           </AccordionTrigger>
 
-          <AccordionContent className="px-4">
+          <AccordionContent className="px-4 pt-4">
             {nonce !== undefined && (
               <GasDetail isLoading={false} name="Safe account transaction nonce" value={nonce.toString()} />
             )}

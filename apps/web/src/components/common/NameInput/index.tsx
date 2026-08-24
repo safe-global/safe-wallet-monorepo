@@ -72,6 +72,8 @@ const NameInput = ({
   // keystrokes mid-typing. An addon-less InputGroup renders identically to a bare Input.
   const hasAdornment = Boolean(InputProps && ('endAdornment' in InputProps || 'startAdornment' in InputProps))
 
+  const resolvedPlaceholder = placeholder ?? (required ? undefined : 'Optional')
+
   return (
     <Controller
       name={name}
@@ -98,7 +100,7 @@ const NameInput = ({
           ref,
           name: fieldName,
           value: value ?? '',
-          placeholder,
+          placeholder: resolvedPlaceholder,
           disabled,
           readOnly,
           required,

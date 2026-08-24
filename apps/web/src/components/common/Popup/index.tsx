@@ -29,11 +29,13 @@ const Popup = ({ children, open, onClose, anchorEl, modal = true }: PopupProps):
       }}
     >
       <PopoverContent
+        showBackdrop
         anchor={anchorEl ?? undefined}
         align="center"
         side="bottom"
         sideOffset={12}
-        className="max-h-[calc(100vh-var(--header-height))] w-[454px] overflow-y-auto rounded-3xl"
+        collisionAvoidance={{ fallbackAxisSide: 'none' }}
+        className="max-h-[var(--available-height)] w-[454px] max-w-[calc(100vw-1rem)] overflow-y-auto rounded-3xl"
       >
         {children}
       </PopoverContent>

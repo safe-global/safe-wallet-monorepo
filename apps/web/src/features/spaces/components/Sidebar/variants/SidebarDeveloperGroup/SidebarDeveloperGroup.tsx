@@ -1,6 +1,12 @@
 import type { ReactElement } from 'react'
 import { motion } from 'motion/react'
-import { SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarMenu } from '@/components/ui/sidebar'
+import {
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarSeparator,
+} from '@/components/ui/sidebar'
 import css from '../../styles.module.css'
 import { sidebarDeveloperGroup } from '../../developerItems'
 import { SidebarDeveloperItem } from './SidebarDeveloperItem'
@@ -22,6 +28,7 @@ export const SidebarDeveloperGroup = ({ isLoading = false }: SidebarDeveloperGro
     <motion.div variants={itemVariants}>
       <SidebarGroup className={css.sidebarGroup}>
         <SidebarGroupLabel>{sidebarDeveloperGroup.label}</SidebarGroupLabel>
+        <SidebarSeparator className={css.collapsedSeparator} />
         <SidebarGroupContent>
           <SidebarMenu className="gap-0">
             {sidebarDeveloperGroup.items.map((config) => (

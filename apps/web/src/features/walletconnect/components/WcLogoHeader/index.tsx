@@ -8,7 +8,7 @@ import { BRAND_NAME } from '@/config/constants'
 const WcLogoHeader = ({ errorMessage }: { errorMessage?: string }): ReactElement => {
   return (
     <>
-      <div>
+      <div className="flex items-end justify-center">
         <WalletConnect data-testid="wc-icon" className={`size-[50px] ${css.icon}`} />
         {errorMessage && <Alert data-testid="wc-alert" className={`size-5 ${css.errorBadge}`} />}
       </div>

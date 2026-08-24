@@ -100,7 +100,7 @@ function EntryDialog({
             confirmType="submit"
             confirmTestId="save-btn"
             confirmDisabled={!formState.isValid}
-            className="p-2"
+            className="p-6 pt-2"
           />
         </form>
       </FormProvider>

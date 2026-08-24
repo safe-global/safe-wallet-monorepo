@@ -30,14 +30,13 @@ const mockedGetReader = getSafenetReader as jest.MockedFunction<typeof getSafene
 const HASH = ('0x' + 'cd'.repeat(32)) as `0x${string}`
 const REQUEST_ID = ('0x' + 'ef'.repeat(32)) as `0x${string}`
 
-const fakeReader = { fetchCheckState: jest.fn(), verifyAttestation: jest.fn() }
+const fakeReader = { fetchCheckState: jest.fn(), verifyAttestation: jest.fn(), blockTimeMs: jest.fn() }
 
 const baseRead = (over: Partial<CheckReadResult> = {}): CheckReadResult => ({
   safeTxHash: HASH,
   chainId: '100',
   events: [],
   headBlock: '100',
-  generation: null,
   requestId: null,
   epoch: null,
   oracle: null,
@@ -60,6 +59,8 @@ const runQuery = (store: ReturnType<typeof makeTestStore>) =>
 beforeEach(() => {
   fakeReader.fetchCheckState.mockReset()
   fakeReader.verifyAttestation.mockReset()
+  fakeReader.blockTimeMs.mockReset()
+  fakeReader.blockTimeMs.mockResolvedValue(null)
   mockedGetReader.mockReturnValue(fakeReader as unknown as ReturnType<typeof getSafenetReader>)
 })
 
@@ -112,6 +113,39 @@ describe('safenetCheckApi.getSafenetCheck', () => {
     expect(selectPinnedVerdict(store.getState() as SafenetCheckPartialState, HASH)?.status).toBe(
       CheckStatus.IN_PROGRESS,
     )
+  })
+
+  it('dates the snapshot from the attested block, reading that header once', async () => {
+    const attested = attestedEvent({ safeTxHash: HASH })
+    fakeReader.fetchCheckState.mockResolvedValue(baseRead({ events: [attested], requestId: REQUEST_ID, epoch: '1' }))
+    fakeReader.verifyAttestation.mockResolvedValue({
+      status: AttestationVerificationStatus.VERIFIED,
+      signatureId: REQUEST_ID,
+      message: REQUEST_ID,
+    })
+    fakeReader.blockTimeMs.mockResolvedValue(1_785_749_985_000)
+
+    const result = await runQuery(makeTestStore())
+
+    expect(fakeReader.blockTimeMs).toHaveBeenCalledTimes(1)
+    expect(fakeReader.blockTimeMs).toHaveBeenCalledWith(attested.blockNumber)
+    expect(result.data?.attestedAtMs).toBe(1_785_749_985_000)
+  })
+
+  it('keeps the verdict when the attested header cannot be read — only the date is lost', async () => {
+    const attested = attestedEvent({ safeTxHash: HASH })
+    fakeReader.fetchCheckState.mockResolvedValue(baseRead({ events: [attested], requestId: REQUEST_ID, epoch: '1' }))
+    fakeReader.verifyAttestation.mockResolvedValue({
+      status: AttestationVerificationStatus.VERIFIED,
+      signatureId: REQUEST_ID,
+      message: REQUEST_ID,
+    })
+    fakeReader.blockTimeMs.mockResolvedValue(null)
+
+    const result = await runQuery(makeTestStore())
+
+    expect(result.data?.status).toBe(CheckStatus.BENIGN)
+    expect(result.data?.attestedAtMs).toBeNull()
   })
 
   it('never walks a pinned verdict backwards — a later transient re-derivation keeps BENIGN', async () => {

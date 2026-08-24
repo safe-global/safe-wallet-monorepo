@@ -1,11 +1,10 @@
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { Info } from 'lucide-react'
+import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 
 export const MigrateToL2Information = ({ variant }: { variant: 'history' | 'queue' }) => {
   return (
     <div>
-      <Alert variant="default">
-        <Info />
+      <Alert variant="info">
+        <AlertSeverityIcon variant="info" />
         <AlertTitle>Migration to compatible base contract</AlertTitle>
         <AlertDescription>
           {variant === 'history'

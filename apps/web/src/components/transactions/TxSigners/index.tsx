@@ -1,11 +1,11 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type ReactElement } from 'react'
 import { Copy } from 'lucide-react'
-import { Alert } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import TxConfirmations from '@/components/transactions/TxConfirmations'
-import { AuditRow, AuditLogHeader, useCopyToClipboard } from '@/components/common/AuditLog'
+import { AuditLog, AuditRow, AuditLogHeader, useCopyToClipboard } from '@/components/common/AuditLog'
 
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsPending from '@/hooks/useIsPending'
@@ -25,6 +25,10 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { CopyDeeplinkLabels } from '@/services/analytics'
 import TxShareLinkWrapper from '@/components/transactions/TxShareLink/TxShareLink'
+import { useLoadFeature } from '@/features/__core__'
+import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
+import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
+import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
 import ExplorerButton from '@/components/common/ExplorerButton'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import useAsync from '@safe-global/utils/hooks/useAsync'
@@ -58,12 +62,12 @@ const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
             <span tabIndex={0}>
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="icon-xs"
                 className="text-inherit"
                 disabled
                 aria-label="Copy transaction hash"
               >
-                <HashIcon className="size-5" />
+                <HashIcon className="size-4" />
               </Button>
             </span>
           }
@@ -80,14 +84,14 @@ const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
           <Button
             data-testid="copy-tx-hash-btn"
             variant="ghost"
-            size="icon-sm"
+            size="icon-xs"
             className="text-inherit"
             onClick={handleCopy}
             // MUI's Tooltip put its `title` on the child as an aria-label; Base UI's wires no ARIA at
             // all, so an icon-only trigger needs its own name or it announces as just "button".
             aria-label="Copy transaction hash"
           >
-            <HashIcon className="size-5" />
+            <HashIcon className="size-4" />
           </Button>
         }
       />
@@ -114,11 +118,11 @@ const TxAuditLogActions = ({
       <Button
         data-testid="share-tx-link-btn"
         variant="ghost"
-        size="icon-sm"
+        size="icon-xs"
         className="text-inherit"
         aria-label="Copy transaction link"
       >
-        <Copy className="size-5" />
+        <Copy className="size-4" />
       </Button>
     </TxShareLinkWrapper>
     {explorerLink ? (
@@ -128,8 +132,8 @@ const TxAuditLogActions = ({
         <TooltipTrigger
           render={
             <span tabIndex={0}>
-              <Button variant="ghost" size="icon-sm" disabled aria-label="View on block explorer">
-                <ExplorerFallbackIcon className="size-5" />
+              <Button variant="ghost" size="icon-xs" disabled aria-label="View on block explorer">
+                <ExplorerFallbackIcon className="size-4" />
               </Button>
             </span>
           }
@@ -154,9 +158,20 @@ const TxSigners = ({
   const { safe } = useSafeInfo()
   const addressBook = useAddressBook()
   const chain = useCurrentChain()
+  const safenet = useLoadFeature(SafenetChecksFeature)
+  const isSafenetEnabled = useIsSafenetChecksEnabled()
 
   const isMultisig = isMultisigDetailedExecutionInfo(detailedExecutionInfo)
   const isModule = isModuleDetailedExecutionInfo(detailedExecutionInfo)
+
+  // Subscribed here as well as inside the row (same cache entry, one chain
+  // read) so the sibling rows' isLast can account for the Safenet step. The
+  // undefined hash skips the read entirely while the flag is off.
+  const safenetHash = isSafenetEnabled && isMultisig ? detailedExecutionInfo.safeTxHash : undefined
+  const safenetCheck = useSafenetCheck(safenetHash, isMultisig ? detailedExecutionInfo.submittedAt : null)
+  // Must mirror SafenetAuditRow's own render gate, or the connector math drifts.
+  const showsSafenetRow =
+    !!safenetHash && !!safenetCheck.snapshot && safenetCheck.publicStatus !== CheckStatus.UNAVAILABLE
 
   // Lookup the EOA that submitted the transaction on-chain (for module and incoming txs)
   const readOnlyProvider = useWeb3ReadOnly()
@@ -175,7 +190,7 @@ const TxSigners = ({
     if (!txDetails.executedAt) return null
 
     return (
-      <div data-testid="transaction-actions-list">
+      <AuditLog data-testid="transaction-actions-list">
         <AuditLogHeader
           actions={<TxAuditLogActions txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />}
         />
@@ -187,7 +202,7 @@ const TxSigners = ({
           timestamp={txDetails.executedAt}
           isLast
         />
-      </div>
+      </AuditLog>
     )
   }
 
@@ -198,7 +213,7 @@ const TxSigners = ({
     const moduleName = detailedExecutionInfo.address.name?.replace(/([a-z])([A-Z])/g, '$1 $2')
 
     return (
-      <div data-testid="transaction-actions-list">
+      <AuditLog data-testid="transaction-actions-list">
         <AuditLogHeader
           actions={<TxAuditLogActions txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />}
         />
@@ -219,7 +234,7 @@ const TxSigners = ({
           timestamp={txDetails.executedAt}
           isLast
         />
-      </div>
+      </AuditLog>
     )
   }
 
@@ -246,7 +261,7 @@ const TxSigners = ({
   const showExecutionRow = isConfirmed || !!executor || txDetails.txStatus !== 'AWAITING_CONFIRMATIONS'
 
   return (
-    <div data-testid="transaction-actions-list">
+    <AuditLog data-testid="transaction-actions-list">
       <AuditLogHeader
         chip={
           <TxConfirmations
@@ -263,7 +278,7 @@ const TxSigners = ({
         address={proposer}
         name={resolveName(proposer, multisigInfo.proposer?.name || multisigInfo.proposedByDelegate?.name)}
         timestamp={submittedAt}
-        isLast={confirmations.length === 0 && !showExecutionRow}
+        isLast={confirmations.length === 0 && !showsSafenetRow && !showExecutionRow}
       />
 
       {confirmations.map(({ signer, submittedAt: signedAt }, idx) => (
@@ -274,9 +289,19 @@ const TxSigners = ({
           address={signer.value}
           name={resolveName(signer.value, signer.name)}
           timestamp={signedAt}
-          isLast={idx === confirmations.length - 1 && !showExecutionRow}
+          isLast={idx === confirmations.length - 1 && !showsSafenetRow && !showExecutionRow}
         />
       ))}
+
+      {/* Safenet check step (PRD: between the signatures and execution). The
+          feature registry stubs this to null while the flag is off; the row
+          itself renders nothing unless a check was observed for this hash. */}
+      <safenet.SafenetAuditRow
+        safeTxHash={multisigInfo.safeTxHash}
+        chainId={safe.chainId}
+        timestampMs={submittedAt}
+        isLast={!showExecutionRow}
+      />
 
       {showExecutionRow && (
         <AuditRow
@@ -290,27 +315,34 @@ const TxSigners = ({
       )}
 
       {confirmationsNeeded > 0 && !executor && !isExpired && (
-        <Alert className="mt-4 py-1">
-          {isCancellation
-            ? 'Cancellation can be executed once the required approvals are collected.'
-            : 'Can be executed once the threshold is reached.'}
+        <Alert variant="info" className="mt-4">
+          <AlertSeverityIcon variant="info" />
+          <AlertDescription>
+            {isCancellation
+              ? 'Cancellation can be executed once the required approvals are collected.'
+              : 'Can be executed once the threshold is reached.'}
+          </AlertDescription>
         </Alert>
       )}
 
       {isTxFromProposer && !executor && !isExpired && (
-        <Alert className="mt-4 py-1">
-          {isCancellation
-            ? 'This on-chain rejection was initiated by a proposer. Please review and approve or dismiss it.'
-            : 'This transaction was created by a proposer. Please review and either confirm or reject it.'}
+        <Alert variant="info" className="mt-4">
+          <AlertSeverityIcon variant="info" />
+          <AlertDescription>
+            {isCancellation
+              ? 'This on-chain rejection was initiated by a proposer. Please review and approve or dismiss it.'
+              : 'This transaction was created by a proposer. Please review and either confirm or reject it.'}
+          </AlertDescription>
         </Alert>
       )}
 
       {isExpired && !executor && (
-        <Alert variant="warning" className="mt-4 py-1">
-          This order has expired. Reject this transaction and try again.
+        <Alert variant="warning" outlined={false} className="mt-4">
+          <AlertSeverityIcon variant="warning" />
+          <AlertDescription>This order has expired. Reject this transaction and try again.</AlertDescription>
         </Alert>
       )}
-    </div>
+    </AuditLog>
   )
 }
 

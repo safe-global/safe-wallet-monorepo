@@ -157,7 +157,7 @@ const NftGrid = ({
       <Card size="none" className="mb-4 border-4 border-transparent">
         <div
           data-testid="table-container"
-          className="w-full overflow-x-auto bg-[var(--color-background-paper)] md:overflow-x-hidden"
+          className="@container w-full overflow-x-auto bg-[var(--color-background-paper)] md:overflow-x-hidden"
         >
           <Table aria-labelledby="tableTitle" className={enhancedTableCss.compactTable}>
             <TableHeader>
@@ -243,7 +243,7 @@ const NftGrid = ({
                       <div className="flex items-center gap-5">
                         {linkTemplates?.map(({ title, logo, getUrl }) => (
                           <ExternalLink href={getUrl(item)} key={title} onClick={stopPropagation} noIcon>
-                            <img src={logo} width={24} height={24} alt={title} />
+                            <img src={logo} alt={title} className="size-4 @3xl:size-6" />
                           </ExternalLink>
                         ))}
                       </div>

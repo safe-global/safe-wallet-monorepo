@@ -1,12 +1,6 @@
 import { faker } from '@faker-js/faker'
-import { ZeroAddress, type Interface } from 'ethers'
-import {
-  consensusInterface,
-  consensusPlainInterface,
-  sharedOracleInterface,
-  v1SentinelInterface,
-  v2SentinelInterface,
-} from '../abi'
+import { keccak256, toBeHex, ZeroAddress, type Interface } from 'ethers'
+import { consensusInterface, consensusPlainInterface, sentinelInterface } from '../abi'
 import type { RawLog } from '../utils/decodeLogs'
 
 /**
@@ -51,6 +45,12 @@ const encode = (
 const CONSENSUS = '0x223624cBF099e5a8f8cD5aF22aFa424a1d1acEE9'
 const ORACLE = '0x00000000000000000000000000000000000000AA'
 
+/** keccak256 of empty `oracleData` — what every current proposal carries. */
+export const EMPTY_ORACLE_DATA_HASH = keccak256('0x')
+
+/** Pack a `SafeId.T`: `chainId << 160 | safe`. */
+const safeId = (chainId: bigint, safe: string): string => toBeHex((chainId << 160n) | BigInt(safe), 32)
+
 const txTuple = (chainId: bigint, safe: string): unknown[] => [
   chainId,
   safe,
@@ -66,18 +66,32 @@ const txTuple = (chainId: bigint, safe: string): unknown[] => [
   faker.number.bigInt({ min: 0n, max: 1000n }),
 ]
 
-// --- Consensus (generation-agnostic) ------------------------------------------
+// --- Consensus (unified oracle pair) -------------------------------------------
 
 export const buildOracleProposedLog = (
-  spec: { safeTxHash?: string; chainId?: bigint; safe?: string; epoch?: bigint; oracle?: string } = {},
+  spec: {
+    safeTxHash?: string
+    chainId?: bigint
+    safe?: string
+    epoch?: bigint
+    oracle?: string
+    oracleData?: string
+  } = {},
   meta: LogMeta = {},
 ): RawLog => {
   const chainId = spec.chainId ?? 100n
   const safe = spec.safe ?? addr()
   return encode(
     consensusInterface,
-    'OracleTransactionProposed',
-    [spec.safeTxHash ?? hash(), chainId, safe, spec.epoch ?? 1n, spec.oracle ?? ORACLE, txTuple(chainId, safe)],
+    'TransactionProposed',
+    [
+      spec.safeTxHash ?? hash(),
+      safeId(chainId, safe),
+      spec.oracle ?? ORACLE,
+      spec.epoch ?? 1n,
+      spec.oracleData ?? '0x',
+      txTuple(chainId, safe),
+    ],
     meta,
     CONSENSUS,
   )
@@ -90,6 +104,7 @@ export const buildOracleAttestedLog = (
     safe?: string
     epoch?: bigint
     oracle?: string
+    oracleDataHash?: string
     signatureId?: string
     r?: { x: bigint; y: bigint }
     z?: bigint
@@ -99,13 +114,13 @@ export const buildOracleAttestedLog = (
   const r = spec.r ?? { x: faker.number.bigInt(), y: faker.number.bigInt() }
   return encode(
     consensusInterface,
-    'OracleTransactionAttested',
+    'TransactionAttested',
     [
       spec.safeTxHash ?? hash(),
-      spec.chainId ?? 100n,
-      spec.safe ?? addr(),
-      spec.epoch ?? 1n,
+      safeId(spec.chainId ?? 100n, spec.safe ?? addr()),
       spec.oracle ?? ORACLE,
+      spec.epoch ?? 1n,
+      spec.oracleDataHash ?? EMPTY_ORACLE_DATA_HASH,
       spec.signatureId ?? hash(),
       [[r.x, r.y], spec.z ?? faker.number.bigInt()],
     ],
@@ -160,65 +175,29 @@ export const buildPlainAttestedLog = (
   )
 }
 
-// --- V1 sentinel --------------------------------------------------------------
+// --- Sentinel oracle ------------------------------------------------------------
 
-export const buildV1NewRequestLog = (
-  spec: { requestId?: string; proposer?: string; fee?: bigint; bondTarget?: bigint; deadline?: bigint } = {},
-  meta: LogMeta = {},
-): RawLog =>
-  encode(
-    v1SentinelInterface,
-    'NewRequest',
-    [
-      spec.requestId ?? hash(),
-      spec.proposer ?? addr(),
-      spec.fee ?? 1000n,
-      spec.bondTarget ?? 5000n,
-      spec.deadline ?? 150n,
-    ],
-    meta,
-    ORACLE,
-  )
-
-export const buildV1CommittedLog = (
-  spec: { requestId?: string; sentinel?: string; approved?: boolean; bondAmount?: bigint; position?: bigint } = {},
-  meta: LogMeta = {},
-): RawLog =>
-  encode(
-    v1SentinelInterface,
-    'Committed',
-    [
-      spec.requestId ?? hash(),
-      spec.sentinel ?? addr(),
-      spec.approved ?? true,
-      spec.bondAmount ?? 5000n,
-      spec.position ?? 0n,
-    ],
-    meta,
-    ORACLE,
-  )
-
-// --- V2 sentinel --------------------------------------------------------------
-
-export const buildV2NewRequestLog = (
+export const buildNewRequestLog = (
   spec: {
     requestId?: string
-    proposer?: string
+    sponsor?: string
     fee?: bigint
     bondTarget?: bigint
+    slashAmount?: bigint
     commitDeadline?: bigint
     revealDeadline?: bigint
   } = {},
   meta: LogMeta = {},
 ): RawLog =>
   encode(
-    v2SentinelInterface,
+    sentinelInterface,
     'NewRequest',
     [
       spec.requestId ?? hash(),
-      spec.proposer ?? addr(),
+      spec.sponsor ?? addr(),
       spec.fee ?? 1000n,
-      spec.bondTarget ?? 5000n,
+      spec.bondTarget ?? 10000n,
+      spec.slashAmount ?? 100n,
       spec.commitDeadline ?? 150n,
       spec.revealDeadline ?? 160n,
     ],
@@ -226,24 +205,24 @@ export const buildV2NewRequestLog = (
     ORACLE,
   )
 
-export const buildV2CommittedLog = (
+export const buildCommittedLog = (
   spec: { requestId?: string; sentinel?: string; bondAmount?: bigint } = {},
   meta: LogMeta = {},
 ): RawLog =>
   encode(
-    v2SentinelInterface,
+    sentinelInterface,
     'Committed',
     [spec.requestId ?? hash(), spec.sentinel ?? addr(), spec.bondAmount ?? 5000n],
     meta,
     ORACLE,
   )
 
-export const buildV2RevealedLog = (
+export const buildRevealedLog = (
   spec: { requestId?: string; sentinel?: string; approved?: boolean; bondAmount?: bigint; reason?: string } = {},
   meta: LogMeta = {},
 ): RawLog =>
   encode(
-    v2SentinelInterface,
+    sentinelInterface,
     'Revealed',
     [
       spec.requestId ?? hash(),
@@ -256,57 +235,34 @@ export const buildV2RevealedLog = (
     ORACLE,
   )
 
-// --- Shared oracle result / dispute -------------------------------------------
-
 export const buildOracleResultLog = (
-  spec: { requestId?: string; proposer?: string; result?: string; approved?: boolean } = {},
+  spec: { requestId?: string; sponsor?: string; result?: string; approved?: boolean } = {},
   meta: LogMeta = {},
 ): RawLog =>
   encode(
-    sharedOracleInterface,
+    sentinelInterface,
     'OracleResult',
-    [spec.requestId ?? hash(), spec.proposer ?? addr(), spec.result ?? '0x', spec.approved ?? true],
+    [spec.requestId ?? hash(), spec.sponsor ?? addr(), spec.result ?? '0x', spec.approved ?? true],
     meta,
     ORACLE,
   )
 
 export const buildDisputeResolvedLog = (
-  spec: { requestId?: string; outcome?: number; slashed?: bigint } = {},
+  spec: { requestId?: string; outcome?: number; slashed?: bigint; reason?: string } = {},
   meta: LogMeta = {},
 ): RawLog =>
   encode(
-    sharedOracleInterface,
+    sentinelInterface,
     'DisputeResolved',
-    [spec.requestId ?? hash(), spec.outcome ?? 0, spec.slashed ?? 0n],
+    [spec.requestId ?? hash(), spec.outcome ?? 0, spec.slashed ?? 0n, spec.reason ?? ''],
     meta,
     ORACLE,
   )
 
 // --- Lifecycle sequence -------------------------------------------------------
 
-/**
- * A full V1 (direct-commit) lifecycle: proposed → request → sentinel commit →
- * oracle result → attestation.
- */
-export const buildV1Lifecycle = (
-  opts: { safeTxHash?: string; requestId?: string; oracle?: string; epoch?: bigint; deadline?: bigint } = {},
-): RawLog[] => {
-  const safeTxHash = opts.safeTxHash ?? hash()
-  const requestId = opts.requestId ?? hash()
-  const oracle = opts.oracle ?? ORACLE
-  const epoch = opts.epoch ?? 1n
-
-  return [
-    buildOracleProposedLog({ safeTxHash, epoch, oracle }),
-    buildV1NewRequestLog({ requestId, deadline: opts.deadline ?? 150n }),
-    buildV1CommittedLog({ requestId, approved: true }),
-    buildOracleResultLog({ requestId, approved: true }),
-    buildOracleAttestedLog({ safeTxHash, epoch, oracle }),
-  ]
-}
-
-/** A full V2 (commit-reveal) lifecycle: proposed → request → commit → reveal → result → attestation. */
-export const buildV2Lifecycle = (
+/** A full commit-reveal lifecycle: proposed → request → commit → reveal → result → attestation. */
+export const buildLifecycle = (
   opts: { safeTxHash?: string; requestId?: string; oracle?: string; epoch?: bigint; revealDeadline?: bigint } = {},
 ): RawLog[] => {
   const safeTxHash = opts.safeTxHash ?? hash()
@@ -316,9 +272,9 @@ export const buildV2Lifecycle = (
 
   return [
     buildOracleProposedLog({ safeTxHash, epoch, oracle }),
-    buildV2NewRequestLog({ requestId, revealDeadline: opts.revealDeadline ?? 160n }),
-    buildV2CommittedLog({ requestId }),
-    buildV2RevealedLog({ requestId, approved: true }),
+    buildNewRequestLog({ requestId, revealDeadline: opts.revealDeadline ?? 160n }),
+    buildCommittedLog({ requestId }),
+    buildRevealedLog({ requestId, approved: true }),
     buildOracleResultLog({ requestId, approved: true }),
     buildOracleAttestedLog({ safeTxHash, epoch, oracle }),
   ]

@@ -20,11 +20,7 @@ const colorToVariant: Record<
 }
 
 const TxStatusChip = ({ children, color = 'primary' }: TxStatusChipProps): ReactElement => {
-  return (
-    <Badge variant={colorToVariant[color]} size="lg" className="font-bold">
-      {children}
-    </Badge>
-  )
+  return <Badge variant={colorToVariant[color]}>{children}</Badge>
 }
 
 export default TxStatusChip

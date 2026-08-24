@@ -1,5 +1,5 @@
 export const safeShieldSvgClassName = [
-  'size-6',
+  'size-4',
   '[&_.shield-img]:fill-[var(--color-static-text-brand)] [&_.shield-img]:transition-[fill] [&_.shield-img]:duration-200 [&_.shield-img]:ease-in-out',
   '[&_.shield-lines]:!fill-[var(--color-static-main)] [&_.shield-lines]:!stroke-[var(--color-static-main)] [&_.shield-lines]:transition-[fill] [&_.shield-lines]:duration-200 [&_.shield-lines]:ease-in-out',
 ].join(' ')

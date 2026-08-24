@@ -154,7 +154,7 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
         <Separator />
 
         <div className={layoutCss.row}>
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-between gap-2">
             <Button type="button" variant="outline" size="lg" onClick={handleBack}>
               Back
             </Button>

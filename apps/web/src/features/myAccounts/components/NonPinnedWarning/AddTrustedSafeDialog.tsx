@@ -102,7 +102,7 @@ const AddTrustedSafeDialog = ({
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 p-6 pt-0">
+          <div className="flex justify-between gap-2 p-6 pt-0">
             <Button onClick={onCancel} variant="outline">
               Cancel
             </Button>

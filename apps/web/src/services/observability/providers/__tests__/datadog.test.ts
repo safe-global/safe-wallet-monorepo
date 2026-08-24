@@ -383,6 +383,68 @@ describe('DatadogProvider', () => {
       expect(filterRumEvent(event, {} as any)).toBe(false)
     })
 
+    describe('third-party eval() blocked by CSP (WA-2952)', () => {
+      it('drops an EvalError regardless of source, message or vendor stack', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        for (const source of ['source', 'console', undefined]) {
+          const event = buildErrorEvent({
+            type: 'EvalError',
+            source,
+            message:
+              "EvalError: Refused to evaluate a string as JavaScript because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: \"script-src 'self'\".",
+            stack: 'at eval (https://www.googletagmanager.com/gtm.js:1:1)',
+          })
+          expect(filterRumEvent(event, {} as any)).toBe(false)
+        }
+      })
+
+      it('keeps a plain Error whose message merely mentions eval', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        const event = buildErrorEvent({
+          type: 'Error',
+          source: 'source',
+          message: "Refused to evaluate a string as JavaScript because 'unsafe-eval' is not allowed",
+          stack: 'at foo (https://app.safe.global/_next/static/chunks/main.js:1:1)',
+        })
+        expect(filterRumEvent(event, {} as any)).toBe(true)
+      })
+
+      it('keeps other reserved-name errors (TypeError, RangeError) unaffected', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        for (const type of ['TypeError', 'RangeError', undefined]) {
+          const event = buildErrorEvent({
+            type,
+            source: 'source',
+            message: 'Boom',
+            stack: 'at handler (https://app.safe.global/_next/static/chunks/main.js:1:1)',
+          })
+          expect(filterRumEvent(event, {} as any)).toBe(true)
+        }
+      })
+
+      it('keeps an EvalError whose stack points at our own bundle (surfaced, not silenced)', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        const event = buildErrorEvent({
+          type: 'EvalError',
+          source: 'source',
+          message: "EvalError: Refused to evaluate a string as JavaScript because 'unsafe-eval' is not allowed",
+          stack: 'at foo (https://app.safe.global/_next/static/chunks/main-abc123.js:1:1)',
+        })
+        expect(filterRumEvent(event, {} as any)).toBe(true)
+      })
+
+      it('drops an EvalError with no stack at all (defaults to third-party)', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        const event = buildErrorEvent({
+          type: 'EvalError',
+          source: 'source',
+          message: 'EvalError',
+          stack: undefined,
+        })
+        expect(filterRumEvent(event, {} as any)).toBe(false)
+      })
+    })
+
     it('drops errors auto-captured from the Browser Reporting API (source=report)', async () => {
       const { filterRumEvent } = await import('../datadog')
       const event = buildErrorEvent({

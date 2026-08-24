@@ -11,10 +11,12 @@ import madProps from '@/utils/mad-props'
 import React, { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
 import SubmitButton from '@/components/common/SubmitButton'
 import { Separator } from '@/components/ui/separator'
-import { Alert } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import classNames from 'classnames'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import TxCheckError from '@/components/tx/TxCheckError'
+import TxSubmitError from '@/components/tx/TxSubmitError'
 import { trackError, Errors } from '@/services/exceptions'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getTxOptions } from '@/utils/transactions'
@@ -35,7 +37,6 @@ export const CounterfactualForm = ({
   safeTx,
   disableSubmit = false,
   onlyExecute,
-  isCreation,
   isOwner,
   isExecutionLoop,
   txSecurity,
@@ -114,25 +115,28 @@ export const CounterfactualForm = ({
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <Alert className="mb-4 border-0">
-          Executing this transaction will activate your account.
-          <br />
-          <ul style={{ margin: 0, padding: '4px 16px 0' }}>
-            <li>
-              Base fee: &asymp;{' '}
-              <strong>
-                {getTotalFeeFormatted(advancedParams.maxFeePerGas, BigInt(gasLimit?.safeTxGas || '0'), chain)}{' '}
-                {chain?.nativeCurrency.symbol}
-              </strong>
-            </li>
-            <li>
-              One-time activation fee: &asymp;{' '}
-              <strong>
-                {getTotalFeeFormatted(advancedParams.maxFeePerGas, BigInt(gasLimit?.safeDeploymentGas || '0'), chain)}{' '}
-                {chain?.nativeCurrency.symbol}
-              </strong>
-            </li>
-          </ul>
+        <Alert variant="info" className="mb-4 border-0">
+          <AlertSeverityIcon variant="info" />
+          <AlertDescription>
+            Executing this transaction will activate your account.
+            <br />
+            <ul style={{ margin: 0, padding: '4px 16px 0' }}>
+              <li>
+                Base fee: &asymp;{' '}
+                <strong>
+                  {getTotalFeeFormatted(advancedParams.maxFeePerGas, BigInt(gasLimit?.safeTxGas || '0'), chain)}{' '}
+                  {chain?.nativeCurrency.symbol}
+                </strong>
+              </li>
+              <li>
+                One-time activation fee: &asymp;{' '}
+                <strong>
+                  {getTotalFeeFormatted(advancedParams.maxFeePerGas, BigInt(gasLimit?.safeDeploymentGas || '0'), chain)}{' '}
+                  {chain?.nativeCurrency.symbol}
+                </strong>
+              </li>
+            </ul>
+          </AlertDescription>
         </Alert>
 
         <div className={classNames(commonCss.params)}>
@@ -156,17 +160,12 @@ export const CounterfactualForm = ({
         ) : !walletCanPay ? (
           <ErrorMessage>Your connected wallet doesn&apos;t have enough funds to execute this transaction.</ErrorMessage>
         ) : (
-          gasLimitError && (
-            <ErrorMessage error={gasLimitError}>
-              This transaction will most likely fail.
-              {` To save gas costs, ${isCreation ? 'avoid creating' : 'reject'} this transaction.`}
-            </ErrorMessage>
-          )
+          gasLimitError && <TxCheckError error={gasLimitError} />
         )}
 
         {submitError && (
           <div className="mt-2">
-            <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
+            <TxSubmitError error={submitError} />
           </div>
         )}
 

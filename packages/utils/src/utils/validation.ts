@@ -1,4 +1,6 @@
 import { parsePrefixedAddress, sameAddress, isChecksummedAddress } from '@safe-global/utils/utils/addresses'
+import { ZERO_ADDRESS, SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
+import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
 
 export const validateAddress = (address: string) => {
@@ -30,12 +32,48 @@ export const validatePrefixedAddress =
   }
 
 export const uniqueAddress =
-  (addresses: string[] = []) =>
+  (addresses: string[] = [], message?: string) =>
   (address: string): string | undefined => {
-    const ADDRESS_REPEATED_ERROR = 'Address already added'
+    const ADDRESS_REPEATED_ERROR = message || 'Address already added'
     const addressExists = addresses.some((addressFromList) => sameAddress(addressFromList, address))
     return addressExists ? ADDRESS_REPEATED_ERROR : undefined
   }
+
+/**
+ * Rejects the reserved addresses the Safe contracts treat as invalid owners or
+ * modules: the zero address and the sentinel (0x…01, the contracts' linked-list
+ * head). Both pass checksum validation (they contain no hex letters), so
+ * without this check they reach signing and revert on-chain with GS203/GS101
+ * (WA-3005 Bucket A).
+ */
+export const addressIsNotReserved =
+  (message?: string) =>
+  (address: string): string | undefined => {
+    const RESERVED_ADDRESS_ERROR = message || getContractErrorMessage('GS203')
+    const isReserved = sameAddress(address, ZERO_ADDRESS) || sameAddress(address, SENTINEL_ADDRESS)
+    return isReserved ? RESERVED_ADDRESS_ERROR : undefined
+  }
+
+/**
+ * Rejects a threshold the Safe contracts would reject on-chain: below 1 (GS202)
+ * or above the signer count (GS201). Dropdowns normally only offer valid
+ * values, so this catches the cases where the signer set changes after the
+ * threshold was picked — a signer row removed, or the owners changing on-chain
+ * while the flow is open (WA-3005 Bucket A).
+ *
+ * Accepts a string because some flows keep the threshold as form-field text.
+ */
+export const validateThreshold = (threshold: number | string, signerCount: number): string | undefined => {
+  const value = Number(threshold)
+
+  if (!Number.isInteger(value) || value < 1) {
+    return getContractErrorMessage('GS202')
+  }
+
+  if (value > signerCount) {
+    return getContractErrorMessage('GS201')
+  }
+}
 
 export const addressIsNotCurrentSafe =
   (safeAddress: string, message?: string) =>

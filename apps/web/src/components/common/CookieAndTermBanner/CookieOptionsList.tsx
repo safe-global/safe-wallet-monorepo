@@ -25,7 +25,7 @@ const CookieCheckbox = ({
   disabled?: boolean
   onCheckedChange?: (checked: boolean) => void
 }) => (
-  <Label htmlFor={id} className="gap-2">
+  <Label htmlFor={id} className="text-base">
     <Checkbox id={id} aria-label={label} checked={checked} disabled={disabled} onCheckedChange={onCheckedChange} />
     {label}
   </Label>
@@ -34,12 +34,12 @@ const CookieCheckbox = ({
 const CookieOptionsList = ({ control }: { control: Control<CookieFormData> }): ReactElement => {
   return (
     <div className="flex-1">
-      <div className="mb-2">
+      <div className="mb-4">
         <CookieCheckbox id="necessary" disabled label="Necessary" checked />
         <Typography variant="paragraph-small">Locally stored data for core functionality</Typography>
       </div>
 
-      <div className="mb-2">
+      <div className="mb-4">
         <Controller
           name={CookieAndTermType.UPDATES}
           control={control}

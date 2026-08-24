@@ -57,9 +57,16 @@ button {
 :root {
   --header-height: 56px;
   --footer-height: 67px;
-  /* SSR/first-paint fallback only — useTopbarHeight overwrites this with the
+  /* SSR/first-paint fallback only — useCssHeightVar overwrites this with the
      topbar's measured height once it mounts. */
   --topbar-height: 100px;
+
+  /* Sticky offset of the page header (PageHeader), and the offset its sub-headers pin at.
+     `--page-header-height` is an SSR/first-paint fallback — useCssHeightVar overwrites it with the
+     measured height, since the header grows when its actions wrap. */
+  --page-header-top: calc(var(--header-height) - 76px);
+  --page-header-height: 68px;
+  --page-header-bottom: calc(var(--page-header-top) + var(--page-header-height));
 }
 
 input::-webkit-outer-spin-button,

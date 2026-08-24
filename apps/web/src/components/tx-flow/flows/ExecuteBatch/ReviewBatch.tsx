@@ -10,7 +10,8 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { useState, useMemo, useContext, useCallback } from 'react'
 import type { SyntheticEvent } from 'react'
-import ErrorMessage from '@/components/tx/ErrorMessage'
+import TxCheckError from '@/components/tx/TxCheckError'
+import TxSubmitError from '@/components/tx/TxSubmitError'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import DecodedTxs from '@/components/tx-flow/flows/ExecuteBatch/DecodedTxs'
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
@@ -69,16 +70,8 @@ const BatchErrorMessages = ({
   isRejectedByUser: Boolean
 }) => (
   <>
-    {estimationError && (
-      <ErrorMessage error={asError(estimationError)} context="estimation">
-        This transaction will most likely fail. To save gas costs, avoid creating the transaction.
-      </ErrorMessage>
-    )}
-    {submitError && (
-      <ErrorMessage error={submitError} context="execution">
-        Error submitting the transaction. Please try again.
-      </ErrorMessage>
-    )}
+    {estimationError && <TxCheckError error={asError(estimationError)} context="estimation" />}
+    {submitError && <TxSubmitError error={submitError} context="execution" />}
     {isRejectedByUser && <WalletRejectionError />}
   </>
 )
@@ -249,7 +242,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
           </>
         ) : null}
 
-        <Alert variant="warning">
+        <Alert variant="warning" outlined={false}>
           Be aware that if any of the included transactions revert, none of them will be executed. This will result in
           the loss of the allocated transaction fees.
         </Alert>

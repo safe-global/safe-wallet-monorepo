@@ -1,5 +1,5 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import RequiredIcon from '@/public/images/messages/required.svg'
+import { FilePen as RequiredIcon } from 'lucide-react'
 import ImageFallback from '@/components/common/ImageFallback'
 import txTypeCss from '@/components/transactions/TxType/styles.module.css'
 import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
@@ -34,7 +34,7 @@ const MsgType = ({ msg }: { msg: MessageItem }) => {
           height={16}
         />
       ) : (
-        <RequiredIcon viewBox="0 0 32 32" className="size-5" />
+        <RequiredIcon strokeWidth={1.5} className="size-4 shrink-0 text-muted-foreground" />
       )}
       {getMessageName(msg)}
     </div>

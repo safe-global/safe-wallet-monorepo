@@ -64,12 +64,20 @@ const renderBar = (expanded: boolean, setExpanded = jest.fn()) => {
   return setExpanded
 }
 
-const getZIndex = (className: string): number => {
+const getDeclaration = (className: string, prop: string): string | undefined => {
   const css = readFileSync(join(__dirname, 'styles.module.css'), 'utf-8')
   const rule = new RegExp(`\\.${className}\\s*\\{([^}]*)\\}`).exec(css)?.[1]
-  const zIndex = rule && /z-index:\s*(\d+)/.exec(rule)?.[1]
 
-  return zIndex ? Number(zIndex) : NaN
+  return rule ? new RegExp(`(?<![\\w-])${prop}:\\s*([^;]+)`).exec(rule)?.[1].trim() : undefined
+}
+
+const getZIndex = (className: string): number => Number(getDeclaration(className, 'z-index') ?? NaN)
+
+/** Resolves the vertical axis out of the `overflow` shorthand, with the longhand taking precedence. */
+const getOverflowY = (className: string): string | undefined => {
+  const [x, y = x] = getDeclaration(className, 'overflow')?.split(/\s+/) ?? []
+
+  return getDeclaration(className, 'overflow-y') ?? y
 }
 
 describe('TransactionQueueBar', () => {
@@ -92,5 +100,15 @@ describe('TransactionQueueBar', () => {
     fireEvent.click(screen.getByTestId('queue-bar-backdrop'))
 
     expect(setExpanded).toHaveBeenCalledWith(false)
+  })
+})
+
+// The element painting the background is the one capped, so it has to be the one that scrolls or a
+// long queue renders past it. jsdom has no layout, so only the pairing is asserted here.
+describe('TransactionQueueBar surface', () => {
+  it('scrolls the queue rather than letting rows render past its background', () => {
+    expect(getDeclaration('barWrapper', 'background-color')).toBeDefined()
+    expect(getDeclaration('barWrapper', 'max-height')).toBeDefined()
+    expect(['auto', 'scroll']).toContain(getOverflowY('barWrapper'))
   })
 })

@@ -1,7 +1,5 @@
 .container {
-  /* Bottom padding, not 0: the tabs used to sit flush against the scrolling content, so the sticky
-     bar read as a cramped strip once pinned. */
-  padding: var(--space-4) var(--space-3) var(--space-3);
+  padding: var(--space-4) var(--space-3) 0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -10,7 +8,21 @@
   z-index: 2;
   width: 100%;
   position: sticky !important;
-  top: calc(var(--header-height) - 76px);
+  top: var(--page-header-top);
+}
+
+/* Breathing room between the tabs and the content passing under them once the header is pinned.
+   Out of flow and no taller than `main`'s own top padding, so at rest it covers nothing but page
+   background and the tabs stay flush with the content. */
+.container::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: var(--space-2);
+  background-color: inherit;
+  pointer-events: none;
 }
 
 /* In dark mode the page background is black (var(--background), set on .mainSpace),
@@ -39,6 +51,10 @@
 
 .pageHeader {
   row-gap: var(--space-3);
+}
+
+.navWrapper {
+  min-width: 0;
 }
 
 .actionsWrapper {

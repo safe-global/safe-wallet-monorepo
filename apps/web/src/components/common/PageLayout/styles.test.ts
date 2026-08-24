@@ -29,7 +29,7 @@ describe('PageLayout topbar sidebar offset', () => {
   })
 
   it.each([
-    ['.topbarCollapsed', '4rem'],
+    ['.topbarCollapsed', '52px'],
     ['.topbarNoSidebar', '0px'],
   ])('%s overrides the offset to %s', (selector, expected) => {
     expect(declOf(findRule(selector), '--topbar-offset')).toBe(expected)
@@ -86,6 +86,21 @@ describe('PageLayout topbar elevation', () => {
     expect(IN_FLOW).not.toContain(elevatedPosition)
   })
 
+  it('keeps the base topbar in flow but unpinned below md, so sticky sub-headers own the top', () => {
+    const tabletIndex = stylesRoot.nodes.findIndex(
+      (node) => node.type === 'atrule' && node.name === 'media' && node.params === '(max-width: 899.95px)',
+    )
+    const tabletTopbar = (stylesRoot.nodes[tabletIndex] as AtRule | undefined)?.nodes?.find(
+      (node): node is Rule => node.type === 'rule' && node.selector === '.topbar',
+    )
+    const position = declOf(tabletTopbar, 'position')
+
+    // Nothing is reserved below md, so out of flow would drop content behind the topbar; `sticky`
+    // is in flow but pins, and page sub-headers (z-index: 2) then pin on top of it.
+    expect(IN_FLOW).toContain(position)
+    expect(position).not.toBe('sticky')
+  })
+
   it('returns the elevated topbar to flow below md, after the fixed rule so it wins', () => {
     const tabletIndex = stylesRoot.nodes.findIndex(
       (node) => node.type === 'atrule' && node.name === 'media' && node.params === '(max-width: 899.95px)',
@@ -97,6 +112,26 @@ describe('PageLayout topbar elevation', () => {
     // Below md nothing is reserved for the topbar, so out of flow would let content jump up.
     expect(declOf(tabletElevated, 'position')).toBe('sticky')
     expect(tabletIndex).toBeGreaterThan(sourceIndexOf('.topbarElevated'))
+  })
+})
+
+// The toggle strip restates the sidebar offset as a transform rather than inheriting it, so both
+// widths have to stay in step with the page offsets or the strip strands itself over the content.
+describe('PageLayout sidebar toggle offset', () => {
+  it.each([
+    ['.sidebarTogglePosition.sidebarOpen', '.main', 'padding-left'],
+    ['.sidebarTogglePosition.sidebarCollapsed', '.mainSidebarCollapsed', 'padding-left'],
+  ])('offsets %s by the same width as %s', (toggleSelector, mainSelector, mainProp) => {
+    const offset = declOf(findRule(mainSelector), mainProp)
+
+    expect(offset).toBeDefined()
+    expect(declOf(findRule(toggleSelector), 'transform')).toBe(`translateX(${offset})`)
+  })
+
+  it('keeps the collapsed toggle aligned with the collapsed topbar', () => {
+    expect(declOf(findRule('.sidebarTogglePosition.sidebarCollapsed'), 'transform')).toBe(
+      `translateX(${declOf(findRule('.topbarCollapsed'), '--topbar-offset')})`,
+    )
   })
 })
 
