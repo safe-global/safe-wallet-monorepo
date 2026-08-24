@@ -151,6 +151,7 @@ export enum MixpanelEventParams {
   HTTP_STATUS = 'HTTP Status',
   ACCOUNT_COUNT = 'Account Count',
   ENTRY_COUNT = 'Entry Count',
+  MEMBER_ROLE = 'Member Role',
 }
 
 export enum AuthLoginMethod {

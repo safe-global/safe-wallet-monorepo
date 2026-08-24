@@ -49,7 +49,7 @@ const MemberRowActionsMenu = ({ member, disabled, editDisabled, isInvite, canRen
             <Track
               {...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_RENEWED}
               label={SPACE_LABELS.invite_list}
-              mixpanelParams={{ [MixpanelEventParams.RESULT]: member.role }}
+              mixpanelParams={{ [MixpanelEventParams.MEMBER_ROLE]: member.role }}
             >
               <DropdownMenuItem disabled={isLoading} onClick={() => renewInvite()}>
                 Renew invitation
