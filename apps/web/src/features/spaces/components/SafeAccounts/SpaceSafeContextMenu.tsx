@@ -25,7 +25,7 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
 
   const chainIds = isMultiChainSafeItem(safeItem) ? safeItem.safes.map((safe) => safe.chainId) : [safeItem.chainId]
   const name = useSafeDisplayName(safeItem.address, chainIds[0])
-  const { scope, canRename } = useAddressBookWriteScope(safeItem.address)
+  const { scope, canRename } = useAddressBookWriteScope(safeItem.address, chainIds)
 
   const handleOpenModal = (e: MouseEvent, type: keyof typeof open) => {
     e.stopPropagation()

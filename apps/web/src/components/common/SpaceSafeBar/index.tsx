@@ -173,7 +173,7 @@ function SpaceSafeBar() {
   const [selectedTab, setSelectedTab] = useState<DropdownTab | null>(null)
   const [search, setSearch] = useState('')
   const [renameTarget, setRenameTarget] = useState<SafeRenameTarget | null>(null)
-  const { scope: renameScope } = useAddressBookWriteScope(renameTarget?.address ?? '')
+  const { scope: renameScope } = useAddressBookWriteScope(renameTarget?.address ?? '', renameTarget?.chainIds ?? [])
   const connectWallet = useConnectWallet()
   const trustedSafesModal = useTrustedSafesModal()
   const isAboveOverlay = useIsTopbarAboveOverlay()

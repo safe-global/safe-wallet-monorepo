@@ -33,7 +33,7 @@ const MultiAccountContextMenu = ({
   addNetwork: boolean
 }): ReactElement => {
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
-  const { scope, canRename } = useAddressBookWriteScope(address)
+  const { scope, canRename } = useAddressBookWriteScope(address, chainIds)
 
   const handleOpenModal =
     (type: ModalType, event: typeof OVERVIEW_EVENTS.SIDEBAR_RENAME | typeof OVERVIEW_EVENTS.ADD_NEW_NETWORK) =>

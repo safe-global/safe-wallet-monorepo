@@ -70,7 +70,7 @@ const SafeListContextMenu = ({
   )
   const addressBook = useAddressBook()
   const hasName = address in addressBook
-  const { scope, canRename } = useAddressBookWriteScope(address)
+  const { scope, canRename } = useAddressBookWriteScope(address, [chainId])
 
   const nestedSafesForChain = ownedSafes?.safes ?? []
   const { allSafesWithStatus, visibleSafes, hasCompletedCuration, isLoading, startFiltering } =

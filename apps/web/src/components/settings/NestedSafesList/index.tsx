@@ -27,9 +27,9 @@ export function NestedSafesList(): ReactElement | null {
   const isEnabled = useHasFeature(FEATURES.NESTED_SAFES)
   const { setTxFlow } = useContext(TxModalContext)
   const [addressToRename, setAddressToRename] = useState<string | null>(null)
-  const { scope: renameScope } = useAddressBookWriteScope(addressToRename ?? '')
 
   const { safe, safeLoaded, safeAddress } = useSafeInfo()
+  const { scope: renameScope } = useAddressBookWriteScope(addressToRename ?? '', [safe.chainId])
   const { currentData: ownedSafes } = useOwnersGetSafesByOwnerV1Query(
     { chainId: safe.chainId, ownerAddress: safeAddress },
     { skip: !isEnabled || !safeLoaded },

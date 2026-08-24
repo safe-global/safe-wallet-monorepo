@@ -8,6 +8,7 @@ import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNT_COLUMNS, SELECT_COLUMN, type SafeAccountColumnId } from './columns'
 import {
   compareGroups,
+  getContextMenuChainIds,
   overviewKey,
   useSafeAccountRows,
   type AccountGroup,
@@ -29,7 +30,7 @@ type RenameTarget = { name: string; address: string; chainIds: string[] }
 const toRenameTarget = (line: AccountLine): RenameTarget => ({
   name: line.contextMenu.name,
   address: line.contextMenu.address,
-  chainIds: line.contextMenu.type === 'multi' ? line.contextMenu.chainIds : [line.contextMenu.chainId],
+  chainIds: getContextMenuChainIds(line.contextMenu),
 })
 
 type SortState = { orderBy: SafeSortColumn | null; order: 'asc' | 'desc' }
@@ -189,7 +190,7 @@ export default function SafeAccountsTable({
   // "Manage my account list" modal opts back in via `allowRenameInDialog`.
   const canRename = allowRenameInDialog || !selection
   const onRename = canRename ? (line: AccountLine) => setRenameTarget(toRenameTarget(line)) : undefined
-  const { scope: renameScope } = useAddressBookWriteScope(renameTarget?.address ?? '')
+  const { scope: renameScope } = useAddressBookWriteScope(renameTarget?.address ?? '', renameTarget?.chainIds ?? [])
 
   const visibleColumns = useMemo(() => {
     const base = columns ? SAFE_ACCOUNT_COLUMNS.filter((c) => columns.includes(c.id)) : SAFE_ACCOUNT_COLUMNS

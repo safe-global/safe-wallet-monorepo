@@ -22,7 +22,7 @@ import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { cn } from '@/utils/cn'
 import { AccountItem as BaseAccountItem } from '../AccountItem'
 import { NetworkLogosPill } from '@/features/multichain'
-import type { AccountLine } from './useSafeAccountRows'
+import { getContextMenuChainIds, type AccountLine } from './useSafeAccountRows'
 import type { SafeAccountColumn } from './columns'
 import { PendingBadge, ThresholdBadge, formatPendingLabel } from '@/components/common/AccountBadges'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -83,7 +83,7 @@ const NameCellContent = ({
   nameLink?: { href: LinkProps['href']; onClick?: () => void; testId?: string }
 }) => {
   const chainConfig = useChain(line.chainId)
-  const { canRename } = useAddressBookWriteScope(line.address)
+  const { canRename } = useAddressBookWriteScope(line.address, getContextMenuChainIds(line.contextMenu))
   // Explorer links are per-chain, so only single safes and per-chain child rows get one — never the
   // multi-chain parent, whose chainId is just the first network's. On child rows (address hidden) the
   // link rides next to the chain name; SafeInfoDisplay places it there.
