@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useAddressBookWriteScope } from '@/features/spaces'
 import EditIcon from '@/public/images/common/edit.svg'
 import PlusIcon from '@/public/images/common/plus.svg'
-import { trackEvent, OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
+import { trackEvent, OVERVIEW_EVENTS, OVERVIEW_LABELS, type AnalyticsEvent } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
 import router from 'next/router'
 import { CreateSafeOnNewChain } from '@/features/multichain'
@@ -36,8 +36,7 @@ const MultiAccountContextMenu = ({
   const { scope, canRename } = useAddressBookWriteScope(address, chainIds)
 
   const handleOpenModal =
-    (type: ModalType, event: typeof OVERVIEW_EVENTS.SIDEBAR_RENAME | typeof OVERVIEW_EVENTS.ADD_NEW_NETWORK) =>
-    (e: MouseEvent<HTMLElement, globalThis.MouseEvent>) => {
+    (type: ModalType, event: AnalyticsEvent) => (e: MouseEvent<HTMLElement, globalThis.MouseEvent>) => {
       e.stopPropagation()
       const trackingLabel =
         router.pathname === AppRoutes.welcome.accounts ? OVERVIEW_LABELS.login_page : OVERVIEW_LABELS.sidebar

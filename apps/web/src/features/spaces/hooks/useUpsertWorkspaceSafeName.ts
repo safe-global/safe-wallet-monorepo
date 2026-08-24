@@ -1,6 +1,4 @@
 import { useCallback } from 'react'
-import type { SerializedError } from '@reduxjs/toolkit'
-import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { sanitizeName } from '@safe-global/utils/validation/names'
@@ -27,35 +25,31 @@ export const useUpsertWorkspaceSafeName = (): UpsertWorkspaceSafeName => {
 
   return useCallback(
     async ({ address, name, chainIds }) => {
-      if (!spaceId) return { error: 'No workspace selected.' }
+      if (!spaceId) return { error: 'No workspace is selected. Switch to a workspace and try again.' }
 
       // The upsert overwrites `chainIds` wholesale, so an entry that already spans more networks
       // than the Safe being renamed would silently lose them. Merge instead of replace.
       const existing = spaceAddressBook.find((item) => sameAddress(item.address, address))
       const mergedChainIds = Array.from(new Set([...(existing?.chainIds ?? []), ...chainIds]))
 
-      try {
-        const result = await upsertAddressBook({
-          spaceId,
-          upsertAddressBookItemsDto: { items: [{ name: sanitizeName(name), address, chainIds: mergedChainIds }] },
-        })
+      const result = await upsertAddressBook({
+        spaceId,
+        upsertAddressBookItemsDto: { items: [{ name: sanitizeName(name), address, chainIds: mergedChainIds }] },
+      })
 
-        if (result.error) {
-          return { error: getRtkQueryErrorMessage(result.error) }
-        }
-
-        dispatch(
-          showNotification({
-            message: getContactUpdatedMessage(workspaceLabel),
-            variant: 'success',
-            groupKey: 'workspace-safe-rename-success',
-          }),
-        )
-
-        return {}
-      } catch (error) {
-        return { error: getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError) }
+      if (result.error) {
+        return { error: getRtkQueryErrorMessage(result.error) }
       }
+
+      dispatch(
+        showNotification({
+          message: getContactUpdatedMessage(workspaceLabel),
+          variant: 'success',
+          groupKey: 'workspace-safe-rename-success',
+        }),
+      )
+
+      return {}
     },
     [spaceId, spaceAddressBook, workspaceLabel, dispatch, upsertAddressBook],
   )

@@ -3,8 +3,6 @@ import EntryDialog from './index'
 import { useUpsertWorkspaceSafeName } from '@/features/spaces'
 import * as addressBookSlice from '@/store/addressBookSlice'
 
-// Mock the source module, not the barrel: `requireActual` on the barrel trips the myAccounts <->
-// spaces import cycle (see the note in useAllAddressBooks). The barrel re-export picks this up.
 jest.mock('@/features/spaces/hooks/useUpsertWorkspaceSafeName', () => ({
   useUpsertWorkspaceSafeName: jest.fn(),
 }))
