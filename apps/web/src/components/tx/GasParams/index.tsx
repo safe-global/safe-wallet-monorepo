@@ -95,7 +95,7 @@ export const _GasParams = ({
     <div className={classnames(css.container, { [css.error]: gasLimitError })}>
       <Accordion onValueChange={onChangeExpand}>
         <AccordionItem value="gas-params" className="border-b-0">
-          <AccordionTrigger className={classnames(accordionCss.accordion, 'items-center px-4 hover:no-underline')}>
+          <AccordionTrigger className={classnames(accordionCss.accordion, 'items-center px-4')}>
             {isExecution ? (
               <span className="flex w-full items-center">
                 <span className="flex-1">Estimated fee </span>
