@@ -5,6 +5,7 @@ import {
   ELIGIBILITY_HELPER_TEXT,
   ELIGIBILITY_RULE,
   NO_ELIGIBLE_ACCOUNTS_TEXT,
+  NO_WALLET_TEXT,
   SAFE_ACCOUNT_SELECTOR_LABEL,
   SAFE_ACCOUNT_SELECTOR_PLACEHOLDER,
 } from '../constants'
@@ -264,6 +265,25 @@ describe('SafeAccountSelector', () => {
     render(<SafeAccountSelector accounts={[singleChainAccount]} onChange={jest.fn()} />)
 
     expect(screen.getByTestId('safe-account-avatar-placeholder').parentElement).toHaveClass('min-h-9')
+  })
+
+  it('submits under the given name', () => {
+    const { container } = render(
+      <SafeAccountSelector accounts={[singleChainAccount]} name="safeAccount" onChange={jest.fn()} />,
+    )
+
+    expect(container.querySelector('input[name="safeAccount"]')).toBeInTheDocument()
+  })
+
+  it('asks a disconnected visitor to connect rather than blaming their wallet', async () => {
+    const { user } = renderWithUserEvent(
+      <SafeAccountSelector accounts={[]} hasWallet={false} onChange={jest.fn()} onSwitchWallet={jest.fn()} />,
+    )
+
+    await openSelector(user)
+
+    expect(await screen.findByText(NO_WALLET_TEXT)).toBeInTheDocument()
+    expect(screen.queryByText(NO_ELIGIBLE_ACCOUNTS_TEXT)).not.toBeInTheDocument()
   })
 
   it('does not open when disabled', async () => {

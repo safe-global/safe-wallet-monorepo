@@ -28,8 +28,10 @@ export type SafeAccountSelectorProps = {
   disabled?: boolean
   label?: string
   helperText?: ReactNode
-  /** Defaults to `useConnectWallet()`. */
+  /** Defaults to `useConnectWallet()`. Also serves the disconnected state's action. */
   onSwitchWallet?: () => void
+  /** False swaps the empty state for a connect prompt. */
+  hasWallet?: boolean
   /** Replaces the helper text when set. */
   errorMessage?: string
   name?: string
@@ -56,6 +58,7 @@ const SafeAccountSelector = ({
   label = SAFE_ACCOUNT_SELECTOR_LABEL,
   helperText = ELIGIBILITY_HELPER_TEXT,
   onSwitchWallet,
+  hasWallet = true,
   errorMessage,
   name,
   id,
@@ -83,7 +86,7 @@ const SafeAccountSelector = ({
     }
 
     if (accounts.length === 0) {
-      return <NoEligibleAccounts onSwitchWallet={onSwitchWallet ?? connectWallet} />
+      return <NoEligibleAccounts hasWallet={hasWallet} onSwitchWallet={onSwitchWallet ?? connectWallet} />
     }
 
     return accounts.map((entry) =>
@@ -110,10 +113,11 @@ const SafeAccountSelector = ({
           if (next != null) onChange(next)
         }}
         disabled={disabled}
+        // On the root, not the trigger: the root owns the hidden input a form submits.
+        name={name}
       >
         <SelectTrigger
           id={fieldId}
-          name={name}
           aria-label={label}
           aria-invalid={errorMessage ? true : undefined}
           data-testid="safe-account-selector"
