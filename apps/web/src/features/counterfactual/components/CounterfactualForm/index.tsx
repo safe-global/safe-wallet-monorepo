@@ -32,6 +32,7 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 
 export const CounterfactualForm = ({
   safeTx,
@@ -169,9 +170,9 @@ export const CounterfactualForm = ({
           </div>
         )}
 
-        <Separator className={classNames(commonCss.nestedDivider, 'mt-6')} />
+        <Separator bleed="6" />
 
-        <div className="flex items-center p-2">
+        <TxCardActions>
           {/* Submit button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
             {(isOk) => (
@@ -180,7 +181,7 @@ export const CounterfactualForm = ({
               </SubmitButton>
             )}
           </CheckWallet>
-        </div>
+        </TxCardActions>
       </form>
     </>
   )

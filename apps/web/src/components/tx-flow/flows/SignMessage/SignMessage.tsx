@@ -24,7 +24,7 @@ import SuccessMessage from '@/components/tx/SuccessMessage'
 import useHighlightHiddenTab from '@/hooks/useHighlightHiddenTab'
 import InfoBox from '@/components/safe-messages/InfoBox'
 import { DecodedMsg } from '@/components/safe-messages/DecodedMsg'
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import { dispatchPreparedSignature } from '@/services/safe-messages/safeMsgNotifications'
 import { trackEvent } from '@/services/analytics'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
@@ -182,11 +182,11 @@ const SuccessCard = ({ safeMessage, onContinue }: { safeMessage: MessageItem; on
         Message successfully signed
       </Typography>
       <MsgSigners msg={safeMessage} showOnlyConfirmations showMissingSignatures />
-      <div className="flex items-center justify-end p-2">
+      <TxCardActions>
         <Button onClick={onContinue} disabled={!safeMessage.preparedSignature}>
           Continue
         </Button>
-      </div>
+      </TxCardActions>
     </TxCard>
   )
 }
@@ -359,7 +359,7 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
             {!safe.deployed && <ErrorMessage>Your Safe account is not activated yet.</ErrorMessage>}
           </TxCard>
           <TxCard>
-            <div className="flex items-center justify-end p-2">
+            <TxCardActions>
               <CheckWallet checkNetwork={!isDisabled}>
                 {(isOk) => (
                   <Button onClick={handleSign} disabled={!isOk || isDisabled}>
@@ -367,7 +367,7 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
                   </Button>
                 )}
               </CheckWallet>
-            </div>
+            </TxCardActions>
           </TxCard>
         </>
       )}
