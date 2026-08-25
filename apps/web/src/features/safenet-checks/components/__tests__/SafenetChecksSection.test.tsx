@@ -61,7 +61,7 @@ describe('SafenetChecksSection', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('never subscribes before the submission time is known (shared cache aims by the last args)', () => {
+  it('never subscribes before the submission time is known (nothing else aims the shared read)', () => {
     mockUseSafenetCheck.mockReturnValue(buildCheckView())
 
     const { container } = renderInFlow({ txId: TX_ID })

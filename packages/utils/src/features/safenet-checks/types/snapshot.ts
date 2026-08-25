@@ -29,6 +29,13 @@ export type SafenetCheckSnapshot = {
    * when the header read failed — a missing date never suppresses a verdict.
    */
   attestedAtMs: number | null
+  /**
+   * The submission time this read aimed its block window at, in ms — the
+   * earliest one any surface offered for the check. Null when none was offered
+   * and the read scanned back from the head instead. A subscriber that knows an
+   * earlier time compares against this to decide whether to re-aim the read.
+   */
+  aimedAtMs: number | null
   /** All decoded lifecycle events, sorted ascending by (block, logIndex). */
   events: NormalizedCheckEvent[]
 }

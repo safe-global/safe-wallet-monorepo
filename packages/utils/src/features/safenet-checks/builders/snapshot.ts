@@ -21,6 +21,7 @@ export const buildSnapshot = (over: Partial<SafenetCheckSnapshot> = {}): Safenet
   headBlock: null,
   attestation: UNVERIFIED_ATTESTATION,
   attestedAtMs: null,
+  aimedAtMs: null,
   events: [],
   ...over,
 })

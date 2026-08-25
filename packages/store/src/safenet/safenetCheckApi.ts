@@ -9,11 +9,17 @@ import {
   mergeMonotonic,
   type AttestationVerification,
   type AttestedCheckEvent,
-  type CheckTarget,
   type SafenetCheckSnapshot,
   type SafenetReader,
 } from '@safe-global/utils/features/safenet-checks'
-import { checkKey, pinVerdict, selectPinnedVerdict, type SafenetCheckPartialState } from './safenetCheckSlice'
+import {
+  checkKey,
+  pinVerdict,
+  selectPinnedVerdict,
+  type CheckIdentity,
+  type SafenetCheckPartialState,
+} from './safenetCheckSlice'
+import { forgetAim, resolveAim } from './safenetAimRegistry'
 
 /**
  * Standalone chain-reading API for Safenet checks — no HTTP endpoint, the work
@@ -57,27 +63,24 @@ const selectAttestation = async (
 
 /**
  * `chainId` and `safeAddress` are the Safe the check is being viewed for; an
- * attestation that does not name them is not this check's evidence.
- * `timestampMs` is when the Safe transaction was submitted (proposal time, not
- * execution time — checks are proposed around the first signature) and only
- * aims the reader's block window. All callers of one check share a cache entry,
- * so the semantic has to stay canonical. See `serializeQueryArgs` below.
+ * attestation that does not name them is not this check's evidence. There is
+ * deliberately no timestamp here: every surface rendering one check shares this
+ * entry, so the read window is aimed through the aim registry, which keeps the
+ * earliest submission time any surface offered.
  */
-export type SafenetCheckArg = CheckTarget & {
-  safeTxHash: string
-  timestampMs?: number | null
-}
-
 export const safenetCheckApi = createApi({
   reducerPath: 'safenetCheckApi',
   baseQuery: noopBaseQuery,
   endpoints: (builder) => ({
-    getSafenetCheck: builder.query<SafenetCheckSnapshot, SafenetCheckArg>({
-      async queryFn({ safeTxHash, chainId, safeAddress, timestampMs }, { getState, dispatch }) {
-        const identity = { safeTxHash, chainId, safeAddress }
+    getSafenetCheck: builder.query<SafenetCheckSnapshot, CheckIdentity>({
+      async queryFn(identity, { getState, dispatch }) {
+        const { safeTxHash, chainId, safeAddress } = identity
         try {
           const reader = getSafenetReader()
-          const read = await reader.fetchCheckState(safeTxHash, { timestampMs })
+          // Read at execution time, so every poll replays the best aim known
+          // then — never the timestamp of whichever surface subscribed first.
+          const aimedAtMs = resolveAim(identity)
+          const read = await reader.fetchCheckState(safeTxHash, { timestampMs: aimedAtMs })
 
           const { events, candidates } = bindAttestations(read.events, { chainId, safeAddress })
           const selected = await selectAttestation(reader, candidates)
@@ -111,6 +114,7 @@ export const safenetCheckApi = createApi({
             headBlock: read.headBlock,
             attestation,
             attestedAtMs,
+            aimedAtMs,
             events,
           }
           return { data: snapshot }
@@ -119,10 +123,18 @@ export const safenetCheckApi = createApi({
           return { error: { message: error instanceof Error ? error.message : String(error) } }
         }
       },
-      // `timestampMs` only aims the block window — the check's identity is the
-      // Safe plus the hash. Without this, two renderings of the same check with
-      // different timestamps would open a second cache entry and a second poll loop.
+      // The check's identity is the Safe plus the hash, and `checkKey`
+      // normalizes the Safe address case, so two spellings of one Safe cannot
+      // open two entries and two poll loops.
       serializeQueryArgs: ({ endpointName, queryArgs }) => `${endpointName}(${checkKey(queryArgs)})`,
+      // Frees the aim with the entry it aims: once the last subscriber is gone
+      // and the entry is evicted, a later mount rebuilds the aim from its own
+      // offer. Not exact parity — an aim recorded by a discarded render never
+      // opened an entry, so nothing forgets it (see the registry doc).
+      async onCacheEntryAdded(identity, { cacheEntryRemoved }) {
+        await cacheEntryRemoved
+        forgetAim(identity)
+      },
       keepUnusedDataFor: 300,
     }),
   }),

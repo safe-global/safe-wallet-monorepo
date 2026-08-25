@@ -2,6 +2,7 @@ import { renderHook } from '@testing-library/react'
 import { useSelector } from 'react-redux'
 import { useGetSafenetCheckQuery } from '@safe-global/store/safenet/safenetCheckApi'
 import type { PinnedVerdict } from '@safe-global/store/safenet/safenetCheckSlice'
+import { forgetAim, recordAim, resolveAim } from '@safe-global/store/safenet/safenetAimRegistry'
 import { useSafenetCheck } from '../useSafenetCheck'
 import {
   ARBITRATION_POLL_MS,
@@ -24,6 +25,10 @@ const mockSelector = useSelector as unknown as jest.Mock
 
 const HASH = ('0x' + 'ab'.repeat(32)) as `0x${string}`
 const TARGET = { chainId: '100', safeAddress: '0x0000000000000000000000000000000000000abc' }
+const OTHER_HASH = ('0x' + 'cd'.repeat(32)) as `0x${string}`
+/** A transaction's submission date, and a later surrogate a surface might offer. */
+const PROPOSED_AT = 1_700_000_000_000
+const LATER_OFFER = PROPOSED_AT + 3_600_000
 
 /** The slice of the RTK query result the hook consumes, as the mock returns it. */
 type QueryResult = {
@@ -57,6 +62,10 @@ beforeEach(() => {
   mockSelector.mockReset()
   refetchFn.mockReset()
   mockSelector.mockReturnValue(undefined)
+  // The aim registry is module state shared by every surface, so one test's
+  // offer would aim the next test's read.
+  forgetAim({ safeTxHash: HASH, ...TARGET })
+  forgetAim({ safeTxHash: OTHER_HASH, ...TARGET })
 })
 
 describe('useSafenetCheck', () => {
@@ -65,16 +74,105 @@ describe('useSafenetCheck', () => {
 
     renderHook(() => useSafenetCheck(undefined, null, TARGET))
 
-    expect(mockQuery.mock.calls[0][0]).toEqual({ safeTxHash: '', timestampMs: null, ...TARGET })
+    expect(mockQuery.mock.calls[0][0]).toEqual({ safeTxHash: '', ...TARGET })
     expect(mockQuery.mock.calls[0][1]).toMatchObject({ skip: true })
   })
 
-  it('passes the transaction timestamp through so the reader can target its block window', () => {
-    mockQuery.mockReturnValue(queryResult())
+  describe('block window aim', () => {
+    it('offers the submission time to the registry instead of the query arguments', () => {
+      mockQuery.mockReturnValue(queryResult())
 
-    renderHook(() => useSafenetCheck('0xabc', 1_700_000_000_000, TARGET))
+      renderHook(() => useSafenetCheck(HASH, PROPOSED_AT, TARGET))
 
-    expect(mockQuery.mock.calls[0][0]).toEqual({ safeTxHash: '0xabc', timestampMs: 1_700_000_000_000, ...TARGET })
+      // The timestamp is not part of the check's identity, so it must not reach
+      // the arguments the cache entry is keyed from.
+      expect(mockQuery.mock.calls[0][0]).toEqual({ safeTxHash: HASH, ...TARGET })
+      expect(resolveAim({ safeTxHash: HASH, ...TARGET })).toBe(PROPOSED_AT)
+    })
+
+    it('offers nothing while the Safe context is unresolved', () => {
+      mockQuery.mockReturnValue(queryResult())
+
+      renderHook(() => useSafenetCheck(HASH, PROPOSED_AT, { chainId: '', safeAddress: '' }))
+
+      expect(resolveAim({ safeTxHash: HASH, ...TARGET })).toBeNull()
+    })
+
+    it('re-aims the shared read exactly once when a surface knows an earlier time', () => {
+      // One surface mounts first with a later surrogate and its read lands.
+      // A second surface then mounts with the submission date.
+      const aimedWorse = buildSnapshot({ safeTxHash: HASH, aimedAtMs: LATER_OFFER })
+      mockQuery.mockReturnValue(queryResult({ data: aimedWorse }))
+      const queueRow = renderHook(() => useSafenetCheck(HASH, LATER_OFFER, TARGET))
+      expect(refetchFn).not.toHaveBeenCalled()
+
+      const flow = renderHook(() => useSafenetCheck(HASH, PROPOSED_AT, TARGET))
+
+      expect(refetchFn).toHaveBeenCalledTimes(1)
+
+      // The refetch puts the shared entry in flight, and that is what stops the
+      // other surface stacking a second read on the same improved aim.
+      mockQuery.mockReturnValue(queryResult({ data: aimedWorse, isFetching: true }))
+      flow.rerender()
+      queueRow.rerender()
+      expect(refetchFn).toHaveBeenCalledTimes(1)
+
+      // The re-aimed read lands and settles the loop.
+      mockQuery.mockReturnValue(queryResult({ data: buildSnapshot({ safeTxHash: HASH, aimedAtMs: PROPOSED_AT }) }))
+      flow.rerender()
+      queueRow.rerender()
+
+      expect(refetchFn).toHaveBeenCalledTimes(1)
+    })
+
+    it('never re-aims for a surface offering a later time', () => {
+      mockQuery.mockReturnValue(queryResult({ data: buildSnapshot({ safeTxHash: HASH, aimedAtMs: PROPOSED_AT }) }))
+      renderHook(() => useSafenetCheck(HASH, PROPOSED_AT, TARGET))
+
+      renderHook(() => useSafenetCheck(HASH, LATER_OFFER, TARGET))
+
+      expect(refetchFn).not.toHaveBeenCalled()
+      expect(resolveAim({ safeTxHash: HASH, ...TARGET })).toBe(PROPOSED_AT)
+    })
+
+    it('waits for the read in flight instead of stacking a second one', () => {
+      recordAim({ safeTxHash: HASH, ...TARGET }, PROPOSED_AT)
+      mockQuery.mockReturnValue(
+        queryResult({ data: buildSnapshot({ safeTxHash: HASH, aimedAtMs: LATER_OFFER }), isFetching: true }),
+      )
+
+      renderHook(() => useSafenetCheck(HASH, PROPOSED_AT, TARGET))
+
+      expect(refetchFn).not.toHaveBeenCalled()
+    })
+
+    it('does not re-aim before the first read has produced a snapshot', () => {
+      mockQuery.mockReturnValue(queryResult({ isLoading: true, isFetching: true }))
+
+      renderHook(() => useSafenetCheck(HASH, PROPOSED_AT, TARGET))
+
+      expect(refetchFn).not.toHaveBeenCalled()
+    })
+
+    it('anchors the UNAVAILABLE grace window on the earliest offer, not this surface`s', () => {
+      jest.useFakeTimers()
+      // The queue row offers a timestamp one hour later than the proposal. The
+      // grace window is 10 minutes wide, so aiming it at the summary timestamp
+      // would keep polling a check-less transaction an hour past its close.
+      jest.setSystemTime(PROPOSED_AT + UNAVAILABLE_GRACE_MS + 1_000)
+      recordAim({ safeTxHash: HASH, ...TARGET }, PROPOSED_AT)
+      mockQuery.mockReturnValue(
+        queryResult({
+          data: buildSnapshot({ safeTxHash: HASH, status: CheckStatus.UNAVAILABLE, aimedAtMs: PROPOSED_AT }),
+          fulfilledTimeStamp: 1,
+        }),
+      )
+
+      renderHook(() => useSafenetCheck(HASH, LATER_OFFER, TARGET))
+
+      expect(lastOptions().pollingInterval).toBe(0)
+      jest.useRealTimers()
+    })
   })
 
   describe('Safe context gating', () => {
