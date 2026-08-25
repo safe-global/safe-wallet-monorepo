@@ -24,8 +24,8 @@ import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
 import css from '../styles.module.css'
 
 export const ProChip = () => (
-  <span className={`text-foreground -mx-1 flex h-4 w-6 shrink-0 items-center justify-center ${css.proChip}`}>
-    <ProWordmark className="h-auto! w-[15px]!" />
+  <span className={`-mx-1 flex h-4 w-6 shrink-0 items-center justify-center ${css.proChip}`}>
+    <ProWordmark className="text-foreground! h-auto! w-[15px]! stroke-none!" />
   </span>
 )
 
