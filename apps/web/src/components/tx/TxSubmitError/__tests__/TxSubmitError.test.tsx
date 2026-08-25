@@ -2,7 +2,11 @@ import { render } from '@/tests/test-utils'
 import type { EthersError } from '@/utils/ethers-utils'
 import type { TransactionReceipt } from 'ethers'
 import { Gs026PreCheckError } from '@/services/tx/executionPreChecks'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import TxSubmitError from '..'
+
+const HTML_502 =
+  '<html><head><title>502 Bad Gateway</title></head><body><center><h1>502 Bad Gateway</h1></center><hr><center>nginx</center></body></html>'
 
 describe('TxSubmitError', () => {
   it('shows the cause-specific message for a failed GS026 pre-check', () => {
@@ -65,5 +69,64 @@ describe('TxSubmitError', () => {
     const { getByText } = render(<TxSubmitError error={error} />)
 
     expect(getByText('Could not submit the transaction. Try again.')).toBeInTheDocument()
+  })
+
+  describe('CGW response states (WA-3252)', () => {
+    it.each([429, 502, 500, 503, 422])('renders the agreed copy for a %s from CGW', (status) => {
+      const error = asError({ status, data: {} })
+
+      const { getByText } = render(<TxSubmitError error={error} />)
+
+      expect(getByText('Something went wrong on our end. Try again.')).toBeInTheDocument()
+    })
+
+    it('renders the agreed copy — not the raw HTML — for the original 502 defect', () => {
+      const error = asError({
+        status: 'PARSING_ERROR',
+        originalStatus: 502,
+        data: HTML_502,
+        error: "SyntaxError: Unexpected token '<'",
+      })
+
+      const { getByText, queryByText, container } = render(<TxSubmitError error={error} />)
+
+      expect(getByText('Something went wrong on our end. Try again.')).toBeInTheDocument()
+      expect(container.textContent).not.toContain('Bad Gateway')
+      expect(container.textContent).not.toContain('nginx')
+      expect(container.textContent).not.toContain('<')
+      expect(queryByText(/Could not submit/)).not.toBeInTheDocument()
+    })
+
+    it('renders the banned-Safe copy for a 451', () => {
+      const error = asError({ status: 451, data: {} })
+
+      const { getByText } = render(<TxSubmitError error={error} />)
+
+      expect(getByText('This Safe Account is not available.')).toBeInTheDocument()
+    })
+
+    it('shows a code-only support reference instead of a raw Details payload', () => {
+      const error = asError({
+        status: 'PARSING_ERROR',
+        originalStatus: 502,
+        data: HTML_502,
+        error: "SyntaxError: Unexpected token '<'",
+      })
+
+      const { getByTestId, getByText, queryByText } = render(<TxSubmitError error={error} />)
+
+      expect(getByTestId('error-details')).toBeInTheDocument()
+      expect(getByText('CGW-502')).toBeInTheDocument()
+      expect(queryByText('Details')).not.toBeInTheDocument()
+    })
+
+    it('leaves a 404 alone — out of scope for this mapping', () => {
+      const error = asError({ status: 404, data: {} })
+
+      const { getByText, queryByText } = render(<TxSubmitError error={error} />)
+
+      expect(getByText('Could not submit the transaction. Try again.')).toBeInTheDocument()
+      expect(queryByText(/on our end/)).not.toBeInTheDocument()
+    })
   })
 })

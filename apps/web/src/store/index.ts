@@ -37,6 +37,7 @@ import { GATEWAY_URL } from '@/config/gateway'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { migrateBatchTxs } from '@/services/ls-migration/batch'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway'
+import { cgwErrorAlert } from './middleware/cgwErrorAlert'
 
 const rootReducer = combineReducers({
   [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
@@ -107,6 +108,7 @@ export const getPersistedState = () => {
 export const listenerMiddlewareInstance = createListenerMiddleware<RootState>()
 
 const middleware: Middleware<{}, RootState>[] = [
+  cgwErrorAlert,
   persistState(persistedSlices),
   broadcastState(persistedSlices),
   listenerMiddlewareInstance.middleware,
