@@ -5,13 +5,8 @@ export const SAFE_PRO_ANNOUNCEMENT_SEEN_KEY = 'safeProAnnouncementSeen'
 
 const seenStore = localItem<boolean>(SAFE_PRO_ANNOUNCEMENT_SEEN_KEY)
 
-/**
- * One-shot Pro announcement. Read synchronously rather than via useLocalStorage, whose external
- * store hydrates in an effect — a returning visitor would see the modal for one render first.
- *
- * `isReady` is the caller's gate (flag resolved, right screen), so nothing is marked seen while
- * the chain config is still in flight and the announcement still fires once the flag flips.
- */
+// Read synchronously, not via useLocalStorage: its store hydrates in an effect, flashing the modal
+// at returning visitors for one render.
 export function useSafeProAnnouncement(isReady: boolean) {
   const [isOpen, setIsOpen] = useState(false)
 

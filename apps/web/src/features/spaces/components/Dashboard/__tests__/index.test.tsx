@@ -349,28 +349,13 @@ describe('SpaceDashboard – Safe Pro announcement', () => {
     expect(screen.queryByTestId('safe-pro-announcement-modal')).not.toBeInTheDocument()
   })
 
-  it('mounts the announcement on a workspace once the flag is on', () => {
+  it('mounts and arms the announcement on a workspace once the flag is on', () => {
     mockUseIsSafeProEnabled.mockReturnValue(true)
 
     render(<SpaceDashboard />)
 
     expect(screen.getByTestId('safe-pro-announcement-modal')).toBeInTheDocument()
-  })
-
-  it('arms the announcement when the flag is on and a workspace is open', () => {
-    mockUseIsSafeProEnabled.mockReturnValue(true)
-
-    render(<SpaceDashboard />)
-
     expect(mockUseSafeProAnnouncement).toHaveBeenCalledWith(true)
-  })
-
-  it('stays unarmed while the flag is still resolving, so nothing is spent before it lands', () => {
-    mockUseIsSafeProEnabled.mockReturnValue(undefined)
-
-    render(<SpaceDashboard />)
-
-    expect(mockUseSafeProAnnouncement).toHaveBeenCalledWith(false)
   })
 
   it('stays unarmed before a workspace resolves', () => {

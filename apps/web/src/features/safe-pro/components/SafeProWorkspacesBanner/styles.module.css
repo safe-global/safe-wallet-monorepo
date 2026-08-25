@@ -7,17 +7,11 @@
   );
   border: 1px solid transparent;
   transition: border-color 150ms ease;
-  box-shadow:
-    0 10px 15px -3px rgb(0 0 0 / 0.1),
-    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  box-shadow: var(--shadow-lg);
 }
 
 .banner:hover {
   border-color: color-mix(in srgb, var(--color-static-text-brand) 55%, var(--card));
-}
-
-.ctaArrow {
-  color: #4ade80;
 }
 
 .proChip {

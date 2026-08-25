@@ -62,7 +62,7 @@ exports[`./SafeProAnnouncement.stories Default 1`] = `
           Learn more
           <svg
             aria-hidden="true"
-            class="lucide lucide-arrow-up-right ctaArrow"
+            class="lucide lucide-arrow-up-right text-green-400"
             data-icon="inline-end"
             fill="none"
             height="24"

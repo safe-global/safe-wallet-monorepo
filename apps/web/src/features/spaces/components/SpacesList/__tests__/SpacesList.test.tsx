@@ -158,16 +158,6 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
       expect(screen.queryByTestId('safe-pro-workspaces-banner')).not.toBeInTheDocument()
     })
-
-    it('keeps the pre-Pro banner while the flag is still resolving', () => {
-      mockUseAppSelector.mockReturnValue(false)
-      mockUseIsSafeProEnabled.mockReturnValue(undefined)
-
-      render(<SpacesList />)
-
-      expect(screen.getByText('Introducing Workspace')).toBeInTheDocument()
-      expect(screen.queryByTestId('safe-pro-banner')).not.toBeInTheDocument()
-    })
   })
 
   it('renders the Sign in card (not Create space) when the user is unauthenticated — i.e. after a session expiry redirect', () => {

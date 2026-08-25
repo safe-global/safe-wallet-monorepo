@@ -37,15 +37,14 @@ export const SpacesSidebarContent = ({
     return pathname === item.href || pathname.startsWith(`${item.href}/`)
   }
 
-  // Drop flag-gated entries from the Setup group. Security is only dropped when its flag is
-  // explicitly off — `undefined` means the chain config is still loading, and keeping the item
-  // avoids flicker. Plans is the opposite: it only appears once SAFE_PRO is known to be on, so a
-  // slow chain config can't flash an entry in and out.
+  // Security hides only when its flag is explicitly off (`undefined` means the chain config is
+  // still loading, and keeping the item avoids flicker); Plans is the inverse — it appears only
+  // once SAFE_PRO is known to be on, so a slow chain config can't flash an entry in and out.
   const filteredSetupGroup = useMemo(() => {
     const hiddenHrefs = [
       isSecurityHubEnabled === false && AppRoutes.spaces.security,
-      isSafeProEnabled !== true && AppRoutes.spaces.plans,
-    ].filter(Boolean)
+      !isSafeProEnabled && AppRoutes.spaces.plans,
+    ]
 
     return { ...spacesSetupGroup, items: spacesSetupGroup.items.filter((i) => !hiddenHrefs.includes(i.href)) }
   }, [isSecurityHubEnabled, isSafeProEnabled])

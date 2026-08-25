@@ -30,7 +30,7 @@ const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
   const wallet = useWallet()
   const isDarkMode = useDarkMode()
   const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
-  const isSafeProEnabled = useIsSafeProEnabled() === true
+  const isSafeProEnabled = useIsSafeProEnabled()
   const [searchQuery, setSearchQuery] = useState('')
   const modal = useTrustedSafesModal()
   const migration = useMigrationPrompt()

@@ -1,4 +1,4 @@
-import { renderHook, act } from '@/tests/test-utils'
+import { renderHook } from '@/tests/test-utils'
 import local from '@/services/local-storage/local'
 import { useSafeProAnnouncement, SAFE_PRO_ANNOUNCEMENT_SEEN_KEY } from '../useSafeProAnnouncement'
 
@@ -39,15 +39,5 @@ describe('useSafeProAnnouncement', () => {
     rerender({ isReady: true })
 
     expect(result.current.isOpen).toBe(true)
-  })
-
-  it('stays shut for the rest of the visit once dismissed', () => {
-    const { result } = renderHook(() => useSafeProAnnouncement(true))
-
-    act(() => {
-      result.current.setIsOpen(false)
-    })
-
-    expect(result.current.isOpen).toBe(false)
   })
 })

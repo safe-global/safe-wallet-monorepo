@@ -30,7 +30,7 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   const [isProdGateway = false, setIsProdGateway] = useLocalStorage<boolean>(LS_KEY)
   const [helpMenuAnchor, setHelpMenuAnchor] = useState<HTMLElement | null>(null)
   const { SafeProSidebarBanner } = useLoadFeature(SafeProFeature)
-  const isSafeProEnabled = useIsSafeProEnabled() === true
+  const isSafeProEnabled = useIsSafeProEnabled()
   // Workspace announcement: the Safe sidebar has no Workspace to move.
   const showSafeProBanner = isSafeProEnabled && !isSafeSidebar
 

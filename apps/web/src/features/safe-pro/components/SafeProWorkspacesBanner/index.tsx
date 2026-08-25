@@ -33,7 +33,7 @@ const SafeProWorkspacesBanner = ({ className }: { className?: string }) => {
               className="shrink-0"
             >
               Learn more
-              <ArrowUpRight data-icon="inline-end" className={css.ctaArrow} />
+              <ArrowUpRight data-icon="inline-end" className="text-green-400" />
             </Button>
           </div>
         </div>

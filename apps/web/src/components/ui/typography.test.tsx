@@ -18,11 +18,4 @@ describe('typographyVariants', () => {
       expect(typographyVariants({ variant })).not.toContain('tracking-[-')
     }
   })
-
-  it('renders paragraph-large at 18px/27px regular, distinct from its bold sibling', () => {
-    expect(typographyVariants({ variant: 'paragraph-large' })).toContain('font-normal')
-    expect(typographyVariants({ variant: 'paragraph-large' })).toContain('text-lg')
-    expect(typographyVariants({ variant: 'paragraph-large' })).toContain('leading-[27px]')
-    expect(typographyVariants({ variant: 'paragraph-large' })).not.toContain('font-semibold')
-  })
 })

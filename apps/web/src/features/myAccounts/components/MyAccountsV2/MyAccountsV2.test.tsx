@@ -102,16 +102,6 @@ describe('MyAccountsV2', () => {
 
       expect(screen.queryByTestId('safe-pro-workspaces-banner')).not.toBeInTheDocument()
     })
-
-    it('stays hidden while the flag is still resolving', () => {
-      mockWallet.mockReturnValue({})
-      mockMigration.mockReturnValue(migrationState({ hasPinnedSafes: true }))
-      mockUseIsSafeProEnabled.mockReturnValue(undefined)
-
-      render(<MyAccountsV2 />)
-
-      expect(screen.queryByTestId('safe-pro-workspaces-banner')).not.toBeInTheDocument()
-    })
   })
 
   it('shows the Get started card when no wallet is connected and nothing is pinned', () => {

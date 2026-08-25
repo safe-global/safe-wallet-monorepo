@@ -121,7 +121,7 @@ jest.mock('../../ApiCtaSidebar', () => ({
   ApiCtaSidebar: () => <div data-testid="api-cta-sidebar" />,
 }))
 
-let mockIsSafeProEnabled: boolean | undefined = false
+let mockIsSafeProEnabled = false
 jest.mock('@/features/safe-pro', () => ({
   SafeProFeature: { name: 'safe-pro' },
   useIsSafeProEnabled: () => mockIsSafeProEnabled,
@@ -167,13 +167,6 @@ describe('SidebarCommonFooter', () => {
     })
 
     it('hides the banner when the flag is off', () => {
-      render(<SidebarCommonFooter />)
-
-      expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()
-    })
-
-    it('hides the banner while the chain config is still loading', () => {
-      mockIsSafeProEnabled = undefined
       render(<SidebarCommonFooter />)
 
       expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()

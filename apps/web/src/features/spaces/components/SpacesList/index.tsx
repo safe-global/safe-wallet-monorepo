@@ -84,7 +84,7 @@ const AddSpaceButton = ({
 
 const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
   const isDarkMode = useDarkMode()
-  const isSafeProEnabled = useIsSafeProEnabled() === true
+  const isSafeProEnabled = useIsSafeProEnabled()
   const { SafeProBanner } = useLoadFeature(SafeProFeature)
 
   return (
@@ -190,7 +190,7 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
   const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
-  const isSafeProEnabled = useIsSafeProEnabled() === true
+  const isSafeProEnabled = useIsSafeProEnabled()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const {

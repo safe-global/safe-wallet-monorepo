@@ -57,7 +57,7 @@ const SpaceDashboard = () => {
   const isSetupDismissedForSpace = spaceId ? (dismissedSpaces[spaceId] ?? 0) > Date.now() : false
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
-  const isSafeProEnabled = useIsSafeProEnabled() === true
+  const isSafeProEnabled = useIsSafeProEnabled()
   // Not shown over an invite preview: there is no Workspace of theirs to move yet.
   const { isOpen: isAnnouncementOpen, setIsOpen: setIsAnnouncementOpen } = useSafeProAnnouncement(
     isSafeProEnabled && Boolean(spaceId) && !isInvited,

@@ -8,7 +8,7 @@ import css from './styles.module.css'
 
 const SafeProSidebarBanner = ({ className }: { className?: string }) => (
   <div
-    className={cn('flex w-full flex-col items-start gap-3 rounded-xl bg-muted p-4', css.banner, className)}
+    className={cn('flex w-full flex-col items-start gap-3 rounded-xl bg-muted p-4 shadow-lg', css.banner, className)}
     data-testid="safe-pro-sidebar-banner"
   >
     <span className={cn('flex shrink-0 items-center rounded-md px-2 py-1.5 text-foreground', css.proChip)}>
@@ -26,7 +26,7 @@ const SafeProSidebarBanner = ({ className }: { className?: string }) => (
 
     <Button size="xs" render={<a href={SAFE_PRO_ANNOUNCEMENT_URL} target="_blank" rel="noopener noreferrer" />}>
       Learn more
-      <ArrowUpRight data-icon="inline-end" className={css.ctaArrow} />
+      <ArrowUpRight data-icon="inline-end" className="text-green-400" />
     </Button>
   </div>
 )

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { StoreDecorator } from '@/stories/storeDecorator'
 import SafeProWorkspacesBanner from './index'
 
 const meta = {
@@ -6,12 +7,14 @@ const meta = {
   title: 'Features/SafePro/SafeProWorkspacesBanner',
   tags: ['autodocs'],
   decorators: [
-    (Story) => (
-      <div className="flex justify-center bg-background p-6">
-        <div className="w-full max-w-[991px]">
-          <Story />
+    (Story, context) => (
+      <StoreDecorator initialState={{}} context={context}>
+        <div className="flex justify-center bg-background p-6">
+          <div className="w-full max-w-[991px]">
+            <Story />
+          </div>
         </div>
-      </div>
+      </StoreDecorator>
     ),
   ],
 } satisfies Meta<typeof SafeProWorkspacesBanner>

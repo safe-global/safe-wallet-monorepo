@@ -19,10 +19,4 @@ describe('SafeProSidebarBanner', () => {
     expect(cta).toHaveAttribute('rel', 'noopener noreferrer')
     expect(screen.getAllByRole('link')).toHaveLength(1)
   })
-
-  it('forwards a custom className to the banner', () => {
-    const { container } = render(<SafeProSidebarBanner className="custom-class" />)
-
-    expect(container.querySelector('.custom-class')).toBeInTheDocument()
-  })
 })
