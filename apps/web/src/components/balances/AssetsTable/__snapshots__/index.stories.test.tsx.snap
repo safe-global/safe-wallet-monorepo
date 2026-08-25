@@ -15,6 +15,7 @@ exports[`./index.stories Default 1`] = `
         data-radius="lg"
         data-size="none"
         data-slot="card"
+        data-surface="default"
         data-variant="default"
       >
         <div
@@ -587,6 +588,7 @@ exports[`./index.stories EmptyBalance 1`] = `
           data-radius="lg"
           data-size="none"
           data-slot="card"
+          data-surface="default"
           data-variant="default"
         >
           <div
@@ -1160,6 +1162,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
           data-radius="lg"
           data-size="none"
           data-slot="card"
+          data-surface="default"
           data-variant="default"
         >
           <div

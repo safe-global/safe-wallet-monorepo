@@ -19,7 +19,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
             style="max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -183,7 +183,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
             style="max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -347,7 +347,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
             style="max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -555,7 +555,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
             style="max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -763,7 +763,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
             style="max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -893,7 +893,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
             style="max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -1023,7 +1023,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
             style="max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -1153,7 +1153,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
             style="max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -1382,7 +1382,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
             style="width: 360px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -1546,7 +1546,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
             style="width: 360px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -1710,7 +1710,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
             style="width: 360px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -1918,7 +1918,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
             style="width: 360px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -2126,7 +2126,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
             style="width: 360px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -2256,7 +2256,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
             style="width: 360px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -2386,7 +2386,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
             style="width: 360px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -2516,7 +2516,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
             style="width: 360px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -2745,7 +2745,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
             style="width: 600px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -2909,7 +2909,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
             style="width: 600px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -3073,7 +3073,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
             style="width: 600px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -3281,7 +3281,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
             style="width: 600px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -3489,7 +3489,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
             style="width: 600px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -3619,7 +3619,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
             style="width: 600px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -3749,7 +3749,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
             style="width: 600px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -3879,7 +3879,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
             style="width: 600px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -4108,7 +4108,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
             style="width: 1000px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -4272,7 +4272,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
             style="width: 1000px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -4436,7 +4436,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
             style="width: 1000px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -4644,7 +4644,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
             style="width: 1000px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -4852,7 +4852,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
             style="width: 1000px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -4982,7 +4982,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
             style="width: 1000px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -5112,7 +5112,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
             style="width: 1000px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -5242,7 +5242,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
             style="width: 1000px; max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer queue"
@@ -5471,7 +5471,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
             style="max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer history"
@@ -5603,7 +5603,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
             style="max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer history"
@@ -5735,7 +5735,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
             style="max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer history"
@@ -5911,7 +5911,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
             style="max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer history"
@@ -6009,7 +6009,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
             style="max-width: 100%;"
           >
             <div
-              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+              class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
             >
               <div
                 class="gridContainer history"
@@ -6125,7 +6125,7 @@ exports[`./TxSummary.stories Batch 1`] = `
           style="max-width: 100%;"
         >
           <div
-            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
           >
             <div
               class="gridContainer queue"
@@ -6272,7 +6272,7 @@ exports[`./TxSummary.stories CustomTransaction 1`] = `
           style="max-width: 100%;"
         >
           <div
-            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
           >
             <div
               class="gridContainer queue"
@@ -6419,7 +6419,7 @@ exports[`./TxSummary.stories HistorySendNativeToken 1`] = `
           style="max-width: 100%;"
         >
           <div
-            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
           >
             <div
               class="gridContainer history"
@@ -6568,7 +6568,7 @@ exports[`./TxSummary.stories HistorySwapOrder 1`] = `
           style="max-width: 100%;"
         >
           <div
-            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
           >
             <div
               class="gridContainer history"
@@ -6761,7 +6761,7 @@ exports[`./TxSummary.stories SendAt360 1`] = `
           style="width: 360px; max-width: 100%;"
         >
           <div
-            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
           >
             <div
               class="gridContainer queue"
@@ -6942,7 +6942,7 @@ exports[`./TxSummary.stories SendAt600 1`] = `
           style="width: 600px; max-width: 100%;"
         >
           <div
-            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
           >
             <div
               class="gridContainer queue"
@@ -7123,7 +7123,7 @@ exports[`./TxSummary.stories SendAt1000 1`] = `
           style="width: 1000px; max-width: 100%;"
         >
           <div
-            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
           >
             <div
               class="gridContainer queue"
@@ -7304,7 +7304,7 @@ exports[`./TxSummary.stories SendErc20 1`] = `
           style="max-width: 100%;"
         >
           <div
-            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
           >
             <div
               class="gridContainer queue"
@@ -7485,7 +7485,7 @@ exports[`./TxSummary.stories SendNativeToken 1`] = `
           style="max-width: 100%;"
         >
           <div
-            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
           >
             <div
               class="gridContainer queue"
@@ -7666,7 +7666,7 @@ exports[`./TxSummary.stories SettingsChange 1`] = `
           style="max-width: 100%;"
         >
           <div
-            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
           >
             <div
               class="gridContainer queue"
@@ -7813,7 +7813,7 @@ exports[`./TxSummary.stories SwapAt360 1`] = `
           style="width: 360px; max-width: 100%;"
         >
           <div
-            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
           >
             <div
               class="gridContainer queue"
@@ -8038,7 +8038,7 @@ exports[`./TxSummary.stories SwapAt600 1`] = `
           style="width: 600px; max-width: 100%;"
         >
           <div
-            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
           >
             <div
               class="gridContainer queue"
@@ -8263,7 +8263,7 @@ exports[`./TxSummary.stories SwapAt1000 1`] = `
           style="width: 1000px; max-width: 100%;"
         >
           <div
-            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
           >
             <div
               class="gridContainer queue"
@@ -8488,7 +8488,7 @@ exports[`./TxSummary.stories SwapBuyOrder 1`] = `
           style="max-width: 100%;"
         >
           <div
-            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
           >
             <div
               class="gridContainer queue"
@@ -8713,7 +8713,7 @@ exports[`./TxSummary.stories SwapOrderWithLongSymbols 1`] = `
           style="max-width: 100%;"
         >
           <div
-            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
           >
             <div
               class="gridContainer queue"
@@ -8938,7 +8938,7 @@ exports[`./TxSummary.stories SwapSellOrder 1`] = `
           style="max-width: 100%;"
         >
           <div
-            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
+            class="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6"
           >
             <div
               class="gridContainer queue"
