@@ -2,6 +2,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeInfo } from '@/src/types/address'
 import type { SafeVersion } from '@safe-global/types-kit'
 import { LedgerSafeSigningService } from './ledger-safe-signing.service'
+import { FEE_COLLECTORS } from '@safe-global/utils/features/gtf/constants'
 
 const mockGetCurrentSession = jest.fn()
 const mockSignTypedData = jest.fn()
@@ -270,6 +271,35 @@ describe('LedgerSafeSigningService', () => {
       const ledgerTypedData = signCall[2]
 
       expect(typeof ledgerTypedData.domain.chainId).toBe('number')
+    })
+  })
+
+  describe('refundReceiver allowlist', () => {
+    const safePaidTxParams = (refundReceiver: string) => ({
+      ...mockTxParams,
+      baseGas: '79646',
+      gasPrice: '443094379592',
+      refundReceiver,
+    })
+
+    it('should sign a Safe-paid tx refunding a trusted fee collector', async () => {
+      mockExtractTxInfo.mockReturnValue({ txParams: safePaidTxParams(FEE_COLLECTORS[0]), signatures: mockSignatures })
+
+      const service = LedgerSafeSigningService.getInstance()
+
+      await expect(service.signSafeTransaction(defaultParams)).resolves.toBeDefined()
+    })
+
+    it('should refuse to sign a Safe-paid tx refunding an untrusted address', async () => {
+      const attacker = '0x7811208e0811341ce4E56471aEF0c1C78d83c74b'
+      mockExtractTxInfo.mockReturnValue({ txParams: safePaidTxParams(attacker), signatures: mockSignatures })
+
+      const service = LedgerSafeSigningService.getInstance()
+
+      await expect(service.signSafeTransaction(defaultParams)).rejects.toThrow(
+        `Untrusted gas-fee recipient ${attacker}`,
+      )
+      expect(mockSignTypedData).not.toHaveBeenCalled()
     })
   })
 })

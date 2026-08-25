@@ -6,6 +6,7 @@ import { SafeInfo } from '@/src/types/address'
 import type { SafeTransaction, SafeTransactionDataPartial } from '@safe-global/types-kit'
 import { getSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
 import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { assertTrustedRefundReceiver } from '@safe-global/utils/features/gtf/assertTrustedRefundReceiver'
 
 interface CreateTxParams {
   activeSafe: SafeInfo
@@ -64,6 +65,8 @@ export const proposeTx = async ({ activeSafe, txId, privateKey, txDetails, chain
   }
 
   const { txParams, signatures } = extractTxInfo(txDetails, activeSafe.address)
+
+  assertTrustedRefundReceiver(txParams, activeSafe.chainId)
 
   const { protocolKit } = await createConnectedWallet(privateKey, activeSafe, chain)
 

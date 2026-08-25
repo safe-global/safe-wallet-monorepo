@@ -3,6 +3,7 @@ import type { SafeVersion } from '@safe-global/types-kit'
 import type { SafeInfo } from '@/src/types/address'
 import type { Provider } from '@reown/appkit-common-react-native'
 import { signWithWalletConnect } from './walletconnect-signing.service'
+import { FEE_COLLECTORS } from '@safe-global/utils/features/gtf/constants'
 import { SigningMethod } from '@safe-global/types-kit'
 
 const mockFetchTransactionDetails = jest.fn()
@@ -252,6 +253,29 @@ describe('signWithWalletConnect', () => {
       signerAddress: '0xSignerAddress',
       safeTransactionHash: '0xSafeTransactionHash',
       txId: 'tx123',
+    })
+  })
+
+  describe('refundReceiver allowlist', () => {
+    const safePaidTxParams = (refundReceiver: string) => ({
+      ...mockTxParams,
+      baseGas: '79646',
+      gasPrice: '443094379592',
+      refundReceiver,
+    })
+
+    it('signs a Safe-paid tx refunding a trusted fee collector', async () => {
+      mockExtractTxInfo.mockReturnValue({ txParams: safePaidTxParams(FEE_COLLECTORS[0]), signatures: mockSignatures })
+
+      await expect(signWithWalletConnect(defaultParams)).resolves.toBeDefined()
+    })
+
+    it('refuses to sign a Safe-paid tx refunding an untrusted address', async () => {
+      const attacker = '0x7811208e0811341ce4E56471aEF0c1C78d83c74b'
+      mockExtractTxInfo.mockReturnValue({ txParams: safePaidTxParams(attacker), signatures: mockSignatures })
+
+      await expect(signWithWalletConnect(defaultParams)).rejects.toThrow(`Untrusted gas-fee recipient ${attacker}`)
+      expect(mockCreateExistingTx).not.toHaveBeenCalled()
     })
   })
 })

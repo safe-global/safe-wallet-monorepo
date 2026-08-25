@@ -5,6 +5,7 @@ import extractTxInfo from '@/src/services/tx/extractTx'
 import { fetchTransactionDetails } from '@/src/services/tx/fetchTransactionDetails'
 import { getSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
 import { getRelaySimulationError } from '@safe-global/utils/services/relayErrors'
+import { assertTrustedRefundReceiver } from '@safe-global/utils/features/gtf/assertTrustedRefundReceiver'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
@@ -46,6 +47,10 @@ export const executeRelayTx = async ({
 }: ExecuteRelayTxParams): Promise<ExecuteRelayTxResult> => {
   const txDetails = await fetchTransactionDetails(activeSafe.chainId, txId)
   const { txParams, signatures } = extractTxInfo(txDetails, activeSafe.address)
+
+  // Last line of defense before the payload leaves the device: `handlePayment()` pays
+  // `refundReceiver` out of the Safe, so never relay one CGW didn't source from a trusted collector.
+  assertTrustedRefundReceiver(txParams, activeSafe.chainId)
 
   // Get the Safe transaction and signatures
   const safeTx = await createTx(txParams, txParams.nonce)

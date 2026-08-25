@@ -1,6 +1,7 @@
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { executeRelayTx } from './relayExecutor'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
+import { FEE_COLLECTORS } from '@safe-global/utils/features/gtf/constants'
 import {
   generateChecksummedAddress,
   createMockChain,
@@ -303,6 +304,38 @@ describe('executeRelayTx', () => {
         'getReadOnlyCurrentGnosisSafeContract',
         'relayMutation',
       ])
+    })
+  })
+
+  describe('refundReceiver allowlist', () => {
+    const safePaidTxParams = (refundReceiver: string) => ({
+      ...mockTxParams,
+      baseGas: '79646',
+      gasPrice: '443094379592',
+      refundReceiver,
+    })
+
+    it('relays a Safe-paid tx refunding a trusted fee collector', async () => {
+      mockExtractTxInfo.mockReturnValue({ txParams: safePaidTxParams(FEE_COLLECTORS[0]), signatures: mockSignatures })
+
+      await expect(executeRelayTx(defaultParams)).resolves.toMatchObject({ taskId: 'task456' })
+    })
+
+    it('refuses to relay a Safe-paid tx refunding an untrusted address', async () => {
+      const attacker = generateChecksummedAddress()
+      mockExtractTxInfo.mockReturnValue({ txParams: safePaidTxParams(attacker), signatures: mockSignatures })
+
+      await expect(executeRelayTx(defaultParams)).rejects.toThrow(`Untrusted gas-fee recipient ${attacker}`)
+      expect(mockRelayMutation).not.toHaveBeenCalled()
+    })
+
+    it('relays a signer-pays tx regardless of refundReceiver', async () => {
+      mockExtractTxInfo.mockReturnValue({
+        txParams: { ...mockTxParams, refundReceiver: generateChecksummedAddress() },
+        signatures: mockSignatures,
+      })
+
+      await expect(executeRelayTx(defaultParams)).resolves.toMatchObject({ taskId: 'task456' })
     })
   })
 })

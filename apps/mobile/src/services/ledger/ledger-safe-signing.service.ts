@@ -7,6 +7,7 @@ import { ledgerDMKService } from './ledger-dmk.service'
 import { ledgerEthereumService } from './ledger-ethereum.service'
 import { createExistingTx } from '../tx/tx-sender/create'
 import extractTxInfo from '../tx/extractTx'
+import { assertTrustedRefundReceiver } from '@safe-global/utils/features/gtf/assertTrustedRefundReceiver'
 import logger from '@/src/utils/logger'
 import { SafeInfo } from '@/src/types/address'
 import { fetchTransactionDetails } from '../tx/fetchTransactionDetails'
@@ -114,6 +115,8 @@ export class LedgerSafeSigningService {
 
     // Convert them to the Core SDK tx params
     const { txParams, signatures } = extractTxInfo(txDetails, activeSafe.address)
+
+    assertTrustedRefundReceiver(txParams, activeSafe.chainId)
 
     // Create a tx and add pre-approved signatures (no private key needed)
     const safeTx = await createExistingTx(txParams, signatures)

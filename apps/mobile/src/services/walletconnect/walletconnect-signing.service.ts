@@ -5,6 +5,7 @@ import { SigningMethod } from '@safe-global/types-kit'
 import { TypedDataEncoder } from 'ethers'
 import { createExistingTx } from '../tx/tx-sender/create'
 import extractTxInfo from '../tx/extractTx'
+import { assertTrustedRefundReceiver } from '@safe-global/utils/features/gtf/assertTrustedRefundReceiver'
 import logger from '@/src/utils/logger'
 import { SafeInfo } from '@/src/types/address'
 import { fetchTransactionDetails } from '../tx/fetchTransactionDetails'
@@ -53,6 +54,7 @@ export const signWithWalletConnect = async (params: WalletConnectSigningParams):
   } else {
     const txDetails = await fetchTransactionDetails(activeSafe.chainId, txId)
     const { txParams, signatures } = extractTxInfo(txDetails, activeSafe.address)
+    assertTrustedRefundReceiver(txParams, activeSafe.chainId)
     safeTx = await createExistingTx(txParams, signatures)
   }
 

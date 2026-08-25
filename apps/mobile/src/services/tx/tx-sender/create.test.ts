@@ -6,6 +6,7 @@ import { fetchTransactionDetails } from '@/src/services/tx/fetchTransactionDetai
 import extractTxInfo from '@/src/services/tx/extractTx'
 import type { SafeTransactionDataPartial } from '@safe-global/types-kit'
 import type { SafeInfo } from '@/src/types/address'
+import { FEE_COLLECTORS } from '@safe-global/utils/features/gtf/constants'
 import {
   generateChecksummedAddress,
   createMockSafeTx,
@@ -333,6 +334,42 @@ describe('create.ts', () => {
       })
 
       expect(createConnectedWallet).toHaveBeenCalledWith(mockPrivateKey, mockActiveSafe, mockChain)
+    })
+
+    describe('refundReceiver allowlist', () => {
+      const safePaidTxParams = (refundReceiver: string) => ({
+        to: generateChecksummedAddress(),
+        value: '0',
+        data: '0x',
+        baseGas: '79646',
+        gasPrice: '443094379592',
+        refundReceiver,
+      })
+
+      it('signs a Safe-paid tx refunding a trusted fee collector', async () => {
+        ;(fetchTransactionDetails as jest.Mock).mockResolvedValue({ txId: mockTxId })
+        ;(extractTxInfo as jest.Mock).mockReturnValue({
+          txParams: safePaidTxParams(FEE_COLLECTORS[0]),
+          signatures: {},
+        })
+        mockProtocolKit.createTransaction.mockResolvedValue(createMockSafeTx())
+
+        await expect(
+          proposeTx({ activeSafe: mockActiveSafe, txId: mockTxId, privateKey: mockPrivateKey, chain: mockChain }),
+        ).resolves.toBeDefined()
+      })
+
+      it('refuses to sign a Safe-paid tx refunding an untrusted address', async () => {
+        const attacker = generateChecksummedAddress()
+        ;(fetchTransactionDetails as jest.Mock).mockResolvedValue({ txId: mockTxId })
+        ;(extractTxInfo as jest.Mock).mockReturnValue({ txParams: safePaidTxParams(attacker), signatures: {} })
+
+        await expect(
+          proposeTx({ activeSafe: mockActiveSafe, txId: mockTxId, privateKey: mockPrivateKey, chain: mockChain }),
+        ).rejects.toThrow(`Untrusted gas-fee recipient ${attacker}`)
+
+        expect(createConnectedWallet).not.toHaveBeenCalled()
+      })
     })
   })
 })
