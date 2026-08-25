@@ -15,6 +15,7 @@ exports[`./index.stories Collapsed 1`] = `
         data-radius="lg"
         data-size="default"
         data-slot="card"
+        data-surface="default"
         data-variant="default"
         style="--accordion-border-active: var(--color-success-light); --accordion-fill-active: var(--color-background-light);"
       >
@@ -138,6 +139,7 @@ exports[`./index.stories Custom 1`] = `
         data-radius="lg"
         data-size="default"
         data-slot="card"
+        data-surface="default"
         data-variant="default"
         style="--accordion-border-active: var(--color-info-dark); --accordion-fill-active: var(--color-info-background);"
       >
@@ -254,6 +256,7 @@ exports[`./index.stories Expanded 1`] = `
         data-radius="lg"
         data-size="default"
         data-slot="card"
+        data-surface="default"
         data-variant="default"
         style="--accordion-border-active: var(--color-success-light); --accordion-fill-active: var(--color-background-light);"
       >
@@ -401,6 +404,7 @@ exports[`./index.stories SettingsChange 1`] = `
         data-radius="lg"
         data-size="default"
         data-slot="card"
+        data-surface="default"
         data-variant="default"
         style="--accordion-border-active: var(--warning-accent); --accordion-fill-active: var(--warning-subtle);"
       >
