@@ -105,6 +105,7 @@ export const useSafenetCheck = (
         deadlineBlock: snapshot?.deadlineBlock ?? null,
         firstEventBlock,
         submittedAtMs: timestampMs ?? null,
+        attestedAtMs: snapshot?.attestedAtMs ?? null,
         nowMs: Date.now(),
       }),
     )
@@ -114,6 +115,7 @@ export const useSafenetCheck = (
     status,
     snapshot?.headBlock,
     snapshot?.deadlineBlock,
+    snapshot?.attestedAtMs,
     firstEventBlock,
     timestampMs,
     fulfilledAt,

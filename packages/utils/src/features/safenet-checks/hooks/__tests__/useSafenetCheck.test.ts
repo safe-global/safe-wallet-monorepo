@@ -4,6 +4,8 @@ import { useGetSafenetCheckQuery } from '@safe-global/store/safenet/safenetCheck
 import type { PinnedVerdict } from '@safe-global/store/safenet/safenetCheckSlice'
 import { useSafenetCheck } from '../useSafenetCheck'
 import {
+  ARBITRATION_POLL_MS,
+  ARBITRATION_WINDOW_MS,
   POLL_INTERVAL_FAST_MS,
   POLL_INTERVAL_LATE_MS,
   UNAVAILABLE_GRACE_MS,
@@ -76,14 +78,30 @@ describe('useSafenetCheck', () => {
   })
 
   describe('polling interval selection', () => {
-    it('stops polling once a verdict is verified BENIGN, and skips polling while unfocused', () => {
+    const ATTESTED = 1_785_749_985_000
+
+    afterEach(() => jest.useRealTimers())
+
+    it('polls slowly on a verified BENIGN inside the arbitration window, unfocused tabs excepted', () => {
+      jest.useFakeTimers()
+      jest.setSystemTime(ATTESTED + 60_000)
+      mockQuery.mockReturnValue(queryResult({ data: buildBenignSnapshot({ safeTxHash: HASH }) }))
+
+      renderHook(() => useSafenetCheck(HASH, null, TARGET))
+
+      expect(lastOptions().pollingInterval).toBe(ARBITRATION_POLL_MS)
+      // The one deliberate option keeping background tabs off the chain.
+      expect(lastOptions().skipPollingIfUnfocused).toBe(true)
+    })
+
+    it('stops polling once the arbitration window has closed', () => {
+      jest.useFakeTimers()
+      jest.setSystemTime(ATTESTED + ARBITRATION_WINDOW_MS)
       mockQuery.mockReturnValue(queryResult({ data: buildBenignSnapshot({ safeTxHash: HASH }) }))
 
       renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       expect(lastOptions().pollingInterval).toBe(0)
-      // The one deliberate option keeping background tabs off the chain.
-      expect(lastOptions().skipPollingIfUnfocused).toBe(true)
     })
 
     // The plain (non-oracle) path never emits a deadline — the hook substitutes

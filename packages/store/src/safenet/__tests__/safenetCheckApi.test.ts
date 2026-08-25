@@ -10,6 +10,7 @@ import {
 } from '@safe-global/utils/features/safenet-checks'
 import {
   attestedEvent,
+  oracleResultEvent,
   plainProposedEvent,
   plainAttestedEvent,
   requestCreatedEvent,
@@ -187,6 +188,27 @@ describe('safenetCheckApi.getSafenetCheck', () => {
 
     expect(second.data?.status).toBe(CheckStatus.BENIGN)
     expect(selectPinnedVerdict(store.getState() as SafenetCheckPartialState, HASH)?.status).toBe(CheckStatus.BENIGN)
+  })
+
+  it('replaces a pinned BENIGN with MALICIOUS when a late rejection lands', async () => {
+    // The one correction the monotonic merge allows, and the reason a settled
+    // BENIGN keeps polling for the arbitration window.
+    const store = makeTestStore()
+    fakeReader.fetchCheckState.mockResolvedValueOnce(
+      baseRead({ events: [attestedEvent({ safeTxHash: HASH, ...BOUND })], requestId: REQUEST_ID, epoch: '1' }),
+    )
+    fakeReader.verifyAttestation.mockResolvedValueOnce({
+      status: AttestationVerificationStatus.VERIFIED,
+      signatureId: REQUEST_ID,
+      message: REQUEST_ID,
+    })
+    expect((await runQuery(store)).data?.status).toBe(CheckStatus.BENIGN)
+
+    fakeReader.fetchCheckState.mockResolvedValueOnce(baseRead({ events: [oracleResultEvent({ approved: false })] }))
+    const second = await runQuery(store)
+
+    expect(second.data?.status).toBe(CheckStatus.MALICIOUS)
+    expect(selectPinnedVerdict(store.getState() as SafenetCheckPartialState, HASH)?.status).toBe(CheckStatus.MALICIOUS)
   })
 
   it('upgrades the pin forward on a rank increase (IN_PROGRESS → BENIGN)', async () => {
