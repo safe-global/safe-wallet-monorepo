@@ -66,6 +66,25 @@ export enum MixpanelEvent {
   ONBOARDING_WIZARD = 'Onboarding Wizard',
   USE_OLD_UI = 'Use Old UI',
   ERROR_SURFACED = 'Error Surfaced',
+  WORKSPACE_UPDATED = 'Workspace Updated',
+  WORKSPACE_DELETED = 'Workspace Deleted',
+  WORKSPACE_LEFT = 'Workspace Left',
+  WORKSPACE_MEMBER_INVITE_RENEWED = 'Workspace Member Invite Renewed',
+  WORKSPACE_ACCOUNTS_ADDED = 'Workspace Accounts Added',
+  WORKSPACE_ACCOUNT_ADDED_MANUALLY = 'Workspace Account Added Manually',
+  WORKSPACE_ACCOUNT_DELETED = 'Workspace Account Deleted',
+  WORKSPACE_SEND_TX_STARTED = 'Workspace Send Tx Started',
+  WORKSPACE_ADDRESS_EDITED = 'Workspace Address Edited',
+  WORKSPACE_ADDRESS_REMOVED = 'Workspace Address Removed',
+  WORKSPACE_ADDRESS_BOOK_IMPORTED = 'Workspace Address Book Imported',
+  WORKSPACE_ADDRESS_REQUEST_SENT = 'Workspace Address Request Sent',
+  WORKSPACE_ADDRESS_REQUEST_APPROVED = 'Workspace Address Request Approved',
+  WORKSPACE_ADDRESS_REQUEST_REJECTED = 'Workspace Address Request Rejected',
+  WORKSPACE_LOCAL_CONTACT_ADDED = 'Workspace Local Contact Added',
+  SECURITY_HUB_VIEWED = 'Security Hub Viewed',
+  SECURITY_REPORT_OPENED = 'Security Report Opened',
+  ACTIVITY_LOG_VIEWED = 'Activity Log Viewed',
+  ACTIVITY_LOG_FILTERED = 'Activity Log Filtered',
 }
 
 export enum WorkspaceCreateEntryPoint {
@@ -130,6 +149,9 @@ export enum MixpanelEventParams {
   RPC_ENDPOINT_KIND = 'RPC Endpoint Kind',
   RPC_HOST = 'RPC Host',
   HTTP_STATUS = 'HTTP Status',
+  ACCOUNT_COUNT = 'Account Count',
+  ENTRY_COUNT = 'Entry Count',
+  MEMBER_ROLE = 'Member Role',
 }
 
 export enum AuthLoginMethod {

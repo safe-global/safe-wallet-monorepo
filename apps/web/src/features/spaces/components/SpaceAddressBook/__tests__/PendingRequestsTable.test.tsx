@@ -1,4 +1,7 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { faker } from '@faker-js/faker'
 import PendingRequestsTable from '../PendingRequestsTable'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -11,9 +14,15 @@ jest.mock('@/features/spaces', () => ({
   useIsAdmin: () => true,
   useGetSpaceAddressBook: () => [],
 }))
+const mockApprove = jest.fn()
+const mockReject = jest.fn()
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
-  useAddressBookRequestsApproveRequestV1Mutation: () => [jest.fn()],
-  useAddressBookRequestsRejectRequestV1Mutation: () => [jest.fn()],
+  useAddressBookRequestsApproveRequestV1Mutation: () => [mockApprove],
+  useAddressBookRequestsRejectRequestV1Mutation: () => [mockReject],
+}))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
 }))
 jest.mock('@/store', () => ({
   useAppDispatch: () => jest.fn(),
@@ -82,5 +91,39 @@ describe('PendingRequestsTable', () => {
 
     expect(screen.getByText(requestedBy)).toBeInTheDocument()
     expect(screen.getAllByTestId('eth-hash-info').some((el) => el.textContent === requestedBy)).toBe(false)
+  })
+
+  describe('analytics', () => {
+    beforeEach(() => {
+      jest.clearAllMocks()
+    })
+
+    it('tracks an approved request', async () => {
+      mockApprove.mockResolvedValue({ data: {} })
+      render(<PendingRequestsTable requests={[requestBuilder().build()]} />)
+
+      await userEvent.click(screen.getByTestId('approve-request-btn'))
+
+      await waitFor(() => expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ADDRESS_REQUEST_APPROVED))
+    })
+
+    it('tracks a rejected request', async () => {
+      mockReject.mockResolvedValue({ data: {} })
+      render(<PendingRequestsTable requests={[requestBuilder().build()]} />)
+
+      await userEvent.click(screen.getByTestId('reject-request-btn'))
+
+      await waitFor(() => expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ADDRESS_REQUEST_REJECTED))
+    })
+
+    it('does not track when approving fails', async () => {
+      mockApprove.mockResolvedValue({ error: { status: 500 } })
+      render(<PendingRequestsTable requests={[requestBuilder().build()]} />)
+
+      await userEvent.click(screen.getByTestId('approve-request-btn'))
+
+      await waitFor(() => expect(mockApprove).toHaveBeenCalled())
+      expect(trackEvent).not.toHaveBeenCalled()
+    })
   })
 })

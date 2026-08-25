@@ -296,7 +296,6 @@ When you discover new patterns, gotchas, or fixes while working on Storybook sto
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import { mswLoader } from 'msw-storybook-addon'
-import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
 import { safeFixtures, chainFixtures, balancesFixtures } from '../../../../../../config/test/msw/fixtures'
@@ -352,9 +351,9 @@ const meta = {
             },
           }}
         >
-          <Paper sx={{ p: 2 }}>
+          <div className="bg-card rounded-lg p-4">
             <Story />
-          </Paper>
+          </div>
         </StoreDecorator>
       )
     },

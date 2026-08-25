@@ -3,6 +3,9 @@ import { Button } from '@/components/ui/button'
 import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import { Spinner } from '@/components/ui/spinner'
@@ -47,6 +50,7 @@ const AddToWorkspaceButton = ({ address, name, chainIds }: AddToWorkspaceButtonP
         return
       }
 
+      trackEvent(SPACE_EVENTS.LOCAL_CONTACT_ADDED, { [MixpanelEventParams.SOURCE]: 'local_contact_row' })
       setAdded(true)
       dispatch(
         showNotification({

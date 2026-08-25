@@ -23,6 +23,7 @@ import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 
 export type ImportContactsFormValues = {
   contacts: Record<string, string | undefined>
@@ -113,7 +114,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
         }),
       )
 
-      trackEvent(SPACE_EVENTS.IMPORT_ADDRESS_BOOK_SUBMIT)
+      trackEvent(SPACE_EVENTS.IMPORT_ADDRESS_BOOK_SUBMIT, { [MixpanelEventParams.ENTRY_COUNT]: contactCount })
 
       setIsSuccess(true)
     } catch (e) {
