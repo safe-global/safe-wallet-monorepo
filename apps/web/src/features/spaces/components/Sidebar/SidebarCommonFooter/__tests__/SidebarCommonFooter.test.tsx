@@ -121,6 +121,18 @@ jest.mock('../../ApiCtaSidebar', () => ({
   ApiCtaSidebar: () => <div data-testid="api-cta-sidebar" />,
 }))
 
+let mockIsSafeProEnabled: boolean | undefined = false
+jest.mock('@/features/safe-pro', () => ({
+  SafeProFeature: { name: 'safe-pro' },
+  useIsSafeProEnabled: () => mockIsSafeProEnabled,
+}))
+
+jest.mock('@/features/__core__', () => ({
+  useLoadFeature: () => ({
+    SafeProSidebarBanner: () => <div data-testid="safe-pro-sidebar-banner" />,
+  }),
+}))
+
 jest.mock('../../SidebarIndexingStatus', () => ({
   SidebarIndexingStatus: () => <div data-testid="indexing-status" />,
 }))
@@ -136,6 +148,36 @@ describe('SidebarCommonFooter', () => {
     mockHasBeamerConsent = true
     mockUseAppDispatch.mockReturnValue(jest.fn())
     mockUseDarkMode.mockReturnValue(false)
+    mockIsSafeProEnabled = false
+  })
+
+  describe('Safe Pro banner', () => {
+    it('shows the banner on the Workspaces sidebar when the flag is on', () => {
+      mockIsSafeProEnabled = true
+      render(<SidebarCommonFooter />)
+
+      expect(screen.getByTestId('safe-pro-sidebar-banner')).toBeInTheDocument()
+    })
+
+    it('hides the banner on the Safe sidebar, which has no Workspace to move', () => {
+      mockIsSafeProEnabled = true
+      render(<SidebarCommonFooter isSafeSidebar />)
+
+      expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()
+    })
+
+    it('hides the banner when the flag is off', () => {
+      render(<SidebarCommonFooter />)
+
+      expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()
+    })
+
+    it('hides the banner while the chain config is still loading', () => {
+      mockIsSafeProEnabled = undefined
+      render(<SidebarCommonFooter />)
+
+      expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()
+    })
   })
 
   it('fires HELP_CENTER tracking event when clicking the Help button', () => {

@@ -15,6 +15,8 @@ import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
 import { openCookieBanner } from '@/store/popupSlice'
 import { BEAMER_SELECTOR } from '@/services/beamer'
 import { ApiCtaSidebar } from '../ApiCtaSidebar'
+import { SafeProFeature, useIsSafeProEnabled } from '@/features/safe-pro'
+import { useLoadFeature } from '@/features/__core__'
 import { SidebarIndexingStatus } from '../SidebarIndexingStatus'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { LS_KEY } from '@/config/gateway'
@@ -27,6 +29,10 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   const isDarkMode = useDarkMode()
   const [isProdGateway = false, setIsProdGateway] = useLocalStorage<boolean>(LS_KEY)
   const [helpMenuAnchor, setHelpMenuAnchor] = useState<HTMLElement | null>(null)
+  const { SafeProSidebarBanner } = useLoadFeature(SafeProFeature)
+  const isSafeProEnabled = useIsSafeProEnabled() === true
+  // Workspace announcement: the Safe sidebar has no Workspace to move.
+  const showSafeProBanner = isSafeProEnabled && !isSafeSidebar
 
   const onToggleGateway = (checked: boolean) => {
     setIsProdGateway(checked)
@@ -72,6 +78,12 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
       )}
 
       <SidebarMenu className="gap-0.5">
+        {showSafeProBanner && (
+          <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
+            <SafeProSidebarBanner className="mb-2" />
+          </SidebarMenuItem>
+        )}
+
         <ApiCtaSidebar />
 
         <SidebarMenuItem

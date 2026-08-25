@@ -1,0 +1,24 @@
+.banner {
+  background-image: radial-gradient(
+    ellipse 150% 159% at 119% -13%,
+    color-mix(in srgb, var(--color-static-text-brand) 17.8%, transparent) 0%,
+    transparent 100%
+  );
+  border: 1px solid transparent;
+  transition: border-color 150ms ease;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.banner:hover {
+  border-color: color-mix(in srgb, var(--color-static-text-brand) 55%, var(--card));
+}
+
+.ctaArrow {
+  color: #4ade80;
+}
+
+.proChip {
+  background-color: color-mix(in srgb, var(--color-static-text-brand) 20%, transparent);
+}
