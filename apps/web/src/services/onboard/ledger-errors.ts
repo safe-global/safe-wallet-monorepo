@@ -1,6 +1,3 @@
-import { makeError } from 'ethers'
-import type { DmkError } from '@ledgerhq/device-management-kit'
-
 /**
  * Ledger's Device Management Kit reports failures as tagged objects, not as
  * `Error`s: `{ _tag, originalError?, errorCode? }`. The device's own
@@ -14,26 +11,19 @@ import type { DmkError } from '@ledgerhq/device-management-kit'
  * rendered.
  */
 
-/** What the device is actually telling us, in terms a user can act on. */
-export type LedgerDeviceErrorReason = 'rejected' | 'locked' | 'app_closed' | 'blind_signing' | 'connection' | 'unknown'
+import { makeError } from 'ethers'
+import type { DmkError } from '@ledgerhq/device-management-kit'
+
+import type { LedgerDeviceErrorInfo, LedgerDeviceErrorReason } from './types'
 
 /**
- * Marks an ethers error as originating from a Ledger device. Attached as the
- * error's `info` so it survives every re-wrap (ethers → viem → protocol-kit)
- * and can be recovered from the cause chain at the point of display.
+ * The runtime marker written into every mapped error. Annotated with the
+ * interface's own field type so the const and the type cannot drift apart
+ * silently — that marker is what lets `getLedgerDeviceError` recognise the
+ * payload after viem re-wraps the error, so a mismatch would quietly disable
+ * the whole feature.
  */
-export interface LedgerDeviceErrorInfo {
-  readonly source: typeof LEDGER_ERROR_SOURCE
-  readonly reason: LedgerDeviceErrorReason
-  /** DMK error class discriminator, e.g. `InvalidStatusWordError`. Debugging sinks only. */
-  readonly tag: string
-  /** APDU status word as reported by the device, e.g. `5515`. */
-  readonly errorCode?: string
-  /** The device's own words, e.g. `no signature returned`. Debugging sinks only. */
-  readonly deviceMessage?: string
-}
-
-const LEDGER_ERROR_SOURCE = 'ledger-device'
+const LEDGER_ERROR_SOURCE: LedgerDeviceErrorInfo['source'] = 'ledger-device'
 
 /**
  * APDU status words. The Ethereum app and the DMK global handler both report
