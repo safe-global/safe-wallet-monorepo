@@ -74,6 +74,7 @@ const mockSpaceSafes = (allSafes: AllSafeItems, extra: Record<string, unknown> =
 const mockOverviews = (data: SafeOverview[] | undefined, extra: Record<string, unknown> = {}) =>
   mockUseGetMultipleSafeOverviewsQuery.mockReturnValue({
     data,
+    currentData: data,
     isError: false,
     isUninitialized: false,
     refetch: jest.fn(),
@@ -83,6 +84,7 @@ const mockOverviews = (data: SafeOverview[] | undefined, extra: Record<string, u
 const mockProposerSafes = (data: Record<string, string[]> | undefined, extra: Record<string, unknown> = {}) =>
   mockUseGetProposerSafesQuery.mockReturnValue({
     data,
+    currentData: data,
     isError: false,
     isUninitialized: false,
     refetch: jest.fn(),
@@ -336,6 +338,27 @@ describe('useEligibleSafeAccounts', () => {
     expect(result.current.isLoading).toBe(true)
   })
 
+  it('ignores the previous wallet’s proposer result while the new one is in flight', async () => {
+    mockSpaceSafes([safeItem('1', SAFE_A, true)])
+    mockOverviews([overview('1', SAFE_A)])
+    mockProposerSafes({ '1': [SAFE_A] }, { currentData: undefined })
+
+    const { result } = renderHook(() => useEligibleSafeAccounts())
+
+    expect(result.current.isLoading).toBe(true)
+    expect(result.current.accounts).toEqual([])
+  })
+
+  it('ignores the previous args’ overviews while the new ones are in flight', async () => {
+    mockSpaceSafes([safeItem('1', SAFE_A, false)])
+    mockOverviews([overview('1', SAFE_A)], { currentData: undefined })
+
+    const { result } = renderHook(() => useEligibleSafeAccounts())
+
+    expect(result.current.isLoading).toBe(true)
+    expect(result.current.accounts).toEqual([])
+  })
+
   it('refetches the Space safes and both derived queries', async () => {
     const refetchSafes = jest.fn()
     const refetchOverviews = jest.fn()
@@ -350,6 +373,17 @@ describe('useEligibleSafeAccounts', () => {
     expect(refetchSafes).toHaveBeenCalled()
     expect(refetchOverviews).toHaveBeenCalled()
     expect(refetchProposed).toHaveBeenCalled()
+  })
+
+  it('does not refetch the Space safes when that query never started', async () => {
+    const refetchSafes = jest.fn()
+    mockSpaceSafes([safeItem('1', SAFE_A, false)], { refetch: refetchSafes, isUninitialized: true })
+    mockOverviews([overview('1', SAFE_A)])
+
+    const { result } = renderHook(() => useEligibleSafeAccounts())
+    result.current.refetch()
+
+    expect(refetchSafes).not.toHaveBeenCalled()
   })
 
   it('does not refetch a query that never started', async () => {

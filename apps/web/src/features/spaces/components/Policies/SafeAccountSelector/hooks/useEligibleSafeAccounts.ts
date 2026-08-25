@@ -25,7 +25,13 @@ const getEligibility = (isSigner: boolean, isProposer: boolean): SafeAccountElig
  * address. Ineligible Safes are absent rather than disabled.
  */
 export const useEligibleSafeAccounts = () => {
-  const { allSafes, isLoading: isSafesLoading, isError: isSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()
+  const {
+    allSafes,
+    isLoading: isSafesLoading,
+    isError: isSafesError,
+    refetch: refetchSpaceSafes,
+    isUninitialized: isSpaceSafesUninitialized,
+  } = useSpaceSafes()
   const { address: wallet = '' } = useWallet() || {}
   const currency = useAppSelector(selectCurrency)
   const { configs: chains } = useChains()
@@ -47,11 +53,15 @@ export const useEligibleSafeAccounts = () => {
   // A delegates failure only under-reports proposer access, so it degrades instead of failing the field.
   const isError = isSafesError || overviewsQuery.isError
 
-  const isOverviewsResolved = overviewSafes.length === 0 || overviewsQuery.data !== undefined || overviewsQuery.isError
+  // `currentData`: `data` still holds the previous args' result while a new key is in flight.
+  const overviews = overviewsQuery.currentData
+  const proposerSafes = proposerSafesQuery.currentData
+
+  const isOverviewsResolved = overviewSafes.length === 0 || overviews !== undefined || overviewsQuery.isError
   const isProposerStatusResolved =
     chainIds.length === 0 ||
     proposerSafesQuery.isUninitialized ||
-    proposerSafesQuery.data !== undefined ||
+    proposerSafes !== undefined ||
     proposerSafesQuery.isError
 
   // `isReadOnly` is fail-closed until the overviews land, so stay loading rather than flash an empty list.
@@ -59,11 +69,11 @@ export const useEligibleSafeAccounts = () => {
 
   const overviewsByKey = useMemo(() => {
     const map = new Map<string, SafeOverview>()
-    for (const overview of overviewsQuery.data ?? []) {
+    for (const overview of overviews ?? []) {
       map.set(overviewKey(overview.chainId, overview.address.value), overview)
     }
     return map
-  }, [overviewsQuery.data])
+  }, [overviews])
 
   // Resolved here, not per row: a group header renders every chain and cannot call a hook in that loop.
   const chainsById = useMemo(() => {
@@ -80,7 +90,7 @@ export const useEligibleSafeAccounts = () => {
 
     const options = safeItems.flatMap<SafeAccountOption>((item) => {
       const isSigner = !item.isReadOnly
-      const isProposer = (proposerSafesQuery.data?.[item.chainId] ?? []).some((safe) => sameAddress(safe, item.address))
+      const isProposer = (proposerSafes?.[item.chainId] ?? []).some((safe) => sameAddress(safe, item.address))
 
       if (!isSigner && !isProposer) return []
 
@@ -102,18 +112,19 @@ export const useEligibleSafeAccounts = () => {
     })
 
     return groupSafeAccounts(options)
-  }, [wallet, isLoading, safeItems, proposerSafesQuery.data, overviewsByKey, chainsById])
+  }, [wallet, isLoading, safeItems, proposerSafes, overviewsByKey, chainsById])
 
   // Destructured for stable deps: the whole query objects would hand consumers a new `onRetry` per render.
   const { refetch: refetchOverviews, isUninitialized: isOverviewsUninitialized } = overviewsQuery
   const { refetch: refetchProposerSafes, isUninitialized: isProposerSafesUninitialized } = proposerSafesQuery
 
+  // All three skip in normal states, and `refetch()` throws on a query that never started.
   const refetch = useCallback(() => {
-    refetchSpaceSafes()
-    // `refetch()` throws on a query that never started.
+    if (!isSpaceSafesUninitialized) refetchSpaceSafes()
     if (!isOverviewsUninitialized) refetchOverviews()
     if (!isProposerSafesUninitialized) refetchProposerSafes()
   }, [
+    isSpaceSafesUninitialized,
     refetchSpaceSafes,
     refetchOverviews,
     isOverviewsUninitialized,
