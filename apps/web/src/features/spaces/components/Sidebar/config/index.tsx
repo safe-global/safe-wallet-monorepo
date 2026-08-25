@@ -19,7 +19,14 @@ import {
   History,
 } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
+import ProWordmark from '@/public/images/safe-pro/pro-wordmark.svg'
 import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
+
+export const ProChip = () => (
+  <span className="bg-accent-secondary text-accent-secondary-foreground flex h-4 items-center rounded-sm px-1">
+    <ProWordmark className="h-auto! w-4!" />
+  </span>
+)
 
 export const spacesMainNavigation: SidebarItemConfig[] = [
   {
@@ -54,6 +61,11 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
 export const spacesSetupGroup: SidebarGroupConfig = {
   label: 'Setup',
   items: [
+    {
+      icon: ProChip,
+      label: 'Plans',
+      href: AppRoutes.spaces.plans,
+    },
     {
       icon: UsersRound,
       label: 'Team',

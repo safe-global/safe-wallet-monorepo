@@ -48,6 +48,11 @@ jest.mock('../../../config', () => ({
     label: 'Setup',
     items: [
       {
+        icon: () => <div>Pro</div>,
+        label: 'Plans',
+        href: '/spaces/plans',
+      },
+      {
         icon: () => <div>Team</div>,
         label: 'Team',
         href: '/spaces/members',
@@ -198,7 +203,27 @@ describe('SpacesSidebarContent', () => {
       render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
       const [, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
-      expect(setupGroup.items).toHaveLength(2)
+      expect(setupGroup.items).toHaveLength(3)
+    })
+  })
+
+  describe('SAFE_PRO feature flag', () => {
+    it.each([false, undefined])('hides the Plans entry when the flag is %s', (flag) => {
+      mockUseHasFeature.mockImplementation((feature) => (feature === FEATURES.SAFE_PRO ? flag : true))
+
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+      const [, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
+      expect(setupGroup.items.map((i: { href: string }) => i.href)).toEqual(['/spaces/members', '/spaces/security'])
+    })
+
+    it('shows the Plans entry when the flag is enabled', () => {
+      mockUseHasFeature.mockReturnValue(true)
+
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+      const [, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
+      expect(setupGroup.items.map((i: { href: string }) => i.href)).toContain('/spaces/plans')
     })
   })
 
@@ -241,6 +266,6 @@ describe('SpacesSidebarContent', () => {
 
     const [mainNav, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
     expect(mainNav).toHaveLength(3)
-    expect(setupGroup.items).toHaveLength(2)
+    expect(setupGroup.items).toHaveLength(3)
   })
 })

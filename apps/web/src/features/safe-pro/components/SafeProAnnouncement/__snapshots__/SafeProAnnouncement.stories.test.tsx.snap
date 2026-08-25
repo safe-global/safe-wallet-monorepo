@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./SafeProAnnouncement.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="p-1"
+    >
+      <div
+        class="relative aspect-[1058/369] w-full overflow-hidden rounded-t-[calc(var(--radius-xl)-4px)]"
+      >
+        <img
+          alt="A Workspace on the Pro plan, with its accounts, members and transactions"
+          class="object-cover"
+          data-nimg="fill"
+          decoding="async"
+          loading="lazy"
+          sizes="100vw"
+          src="/_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=3840&q=75"
+          srcset="/_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=640&q=75 640w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=750&q=75 750w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=828&q=75 828w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=1080&q=75 1080w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=1200&q=75 1200w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=1920&q=75 1920w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=2048&q=75 2048w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=3840&q=75 3840w"
+          style="position: absolute; height: 100%; width: 100%; left: 0px; top: 0px; right: 0px; bottom: 0px; color: transparent;"
+        />
+      </div>
+      <div
+        class="flex flex-col items-center gap-8 px-8 pt-9 pb-4"
+      >
+        <div
+          class="flex flex-col items-center gap-3"
+        >
+          <h3
+            class="m-0 scroll-m-20 text-2xl font-semibold leading-[28.8px] tracking-normal block w-full text-center"
+            data-slot="typography"
+            data-variant="h3"
+          >
+            Your Workspace moves to 
+            <span
+              class="highlight"
+            >
+              Pro
+            </span>
+             on Oct 1, 2026
+          </h3>
+          <p
+            class="m-0 text-lg leading-[27px] font-normal block w-full text-center text-muted-foreground max-w-[590px]"
+            data-slot="typography"
+            data-variant="paragraph-large"
+          >
+            Pro adds policies, advanced security checks and sponsored transactions. Your Safe accounts stay available outside the Workspace.
+          </p>
+        </div>
+        <a
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-10 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3 shrink-0"
+          data-slot="button"
+          href="https://safe.global/pro"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Learn more
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-arrow-up-right ctaArrow"
+            data-icon="inline-end"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M7 7h10v10"
+            />
+            <path
+              d="M7 17 17 7"
+            />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+`;

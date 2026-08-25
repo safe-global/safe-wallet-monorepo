@@ -4,6 +4,7 @@ import { House, ArrowRightLeft, WalletCards, BookUser, UsersRound, Shield, Setti
 import { SidebarProvider, Sidebar, SidebarHeader } from '@/components/ui/sidebar'
 import { AppRoutes } from '@/config/routes'
 import { withMockProvider } from '@/storybook/preview'
+import { ProChip } from './config'
 import { SpacesSidebarVariant } from './variants/SpacesSidebarVariant'
 import { SidebarTopBar } from './SidebarTopBar'
 import { SidebarCommonFooter } from './SidebarCommonFooter'
@@ -51,6 +52,14 @@ const mockMainNavItems: ResolvedSidebarNavItem[] = [
 const mockSetupGroup: ResolvedSidebarGroup = {
   label: 'Setup',
   items: [
+    {
+      icon: ProChip,
+      label: 'Plans',
+      href: AppRoutes.spaces.plans,
+      isActive: false,
+      disabled: false,
+      link: { pathname: AppRoutes.spaces.plans, query: { spaceId: mockSpaceId } },
+    },
     {
       icon: UsersRound,
       label: 'Team',

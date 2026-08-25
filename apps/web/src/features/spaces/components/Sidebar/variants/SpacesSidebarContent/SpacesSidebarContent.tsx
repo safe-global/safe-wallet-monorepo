@@ -19,6 +19,7 @@ export const SpacesSidebarContent = ({
   const isActiveMember = useIsActiveMember(selectedSpace?.uuid)
   const isSecurityHubEnabled = useHasFeature(FEATURES.SECURITY_HUB)
   const isAuditLogEnabled = useHasFeature(FEATURES.SPACE_AUDIT_LOG)
+  const isSafeProEnabled = useHasFeature(FEATURES.SAFE_PRO)
 
   const getLink = (item: SidebarItemConfig) => ({
     pathname: item.href,
@@ -36,15 +37,18 @@ export const SpacesSidebarContent = ({
     return pathname === item.href || pathname.startsWith(`${item.href}/`)
   }
 
-  // Drop the Security entry from the Setup group when the chain feature flag is explicitly
-  // off. `undefined` means the chain config is still loading — keep the item to avoid flicker.
-  const filteredSetupGroup = useMemo(
-    () =>
-      isSecurityHubEnabled === false
-        ? { ...spacesSetupGroup, items: spacesSetupGroup.items.filter((i) => i.href !== AppRoutes.spaces.security) }
-        : spacesSetupGroup,
-    [isSecurityHubEnabled],
-  )
+  // Drop flag-gated entries from the Setup group. Security is only dropped when its flag is
+  // explicitly off — `undefined` means the chain config is still loading, and keeping the item
+  // avoids flicker. Plans is the opposite: it only appears once SAFE_PRO is known to be on, so a
+  // slow chain config can't flash an entry in and out.
+  const filteredSetupGroup = useMemo(() => {
+    const hiddenHrefs = [
+      isSecurityHubEnabled === false && AppRoutes.spaces.security,
+      isSafeProEnabled !== true && AppRoutes.spaces.plans,
+    ].filter(Boolean)
+
+    return { ...spacesSetupGroup, items: spacesSetupGroup.items.filter((i) => !hiddenHrefs.includes(i.href)) }
+  }, [isSecurityHubEnabled, isSafeProEnabled])
 
   // Same anti-flicker rule for the Activity entry (SPACE_AUDIT_LOG flag).
   const filteredMainNavigation = useMemo(
