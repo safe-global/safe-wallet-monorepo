@@ -186,8 +186,9 @@ export class SafenetReader {
       if (actual !== Number(this.chainId)) {
         console.error(
           `[safenet-reader] chain id mismatch: SAFENET_CHAIN_ID=${this.chainId} but the RPC ` +
-            `reports ${actual}. Request ids derive from SAFENET_CHAIN_ID, so they will be WRONG ` +
-            `and every check will appear stuck at SUBMITTED. Fix SAFENET_CHAIN_ID / SAFENET_RPC_URLS.`,
+            `reports ${actual}. It feeds the EIP-712 domain every attestation is verified ` +
+            `against, so attestations will verify as INVALID and every check will read as ` +
+            `failed. Fix SAFENET_CHAIN_ID / SAFENET_RPC_URLS.`,
         )
       }
     } catch {

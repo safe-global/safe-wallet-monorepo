@@ -15,8 +15,9 @@ const parseCsv = (value: string | undefined): string[] =>
 
 /**
  * The Safenet chain id — feeds both the provider network and the EIP-712 domain
- * request ids derive from. A wrong value leaves every check stuck at SUBMITTED,
- * so the reader asserts it against `eth_chainId` in development.
+ * attestations are verified against. A wrong value makes every attestation
+ * verify as INVALID, so the reader asserts it against `eth_chainId` in
+ * development.
  */
 export const SAFENET_CHAIN_ID =
   process.env.NEXT_PUBLIC_SAFENET_CHAIN_ID || process.env.EXPO_PUBLIC_SAFENET_CHAIN_ID || '100'
