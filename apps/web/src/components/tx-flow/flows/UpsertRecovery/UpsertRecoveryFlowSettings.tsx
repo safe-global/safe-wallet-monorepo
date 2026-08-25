@@ -32,6 +32,7 @@ import { clickOnEnterOrSpace } from '@/utils/keyboard'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useChainId from '@/hooks/useChainId'
 import { Typography } from '@/components/ui/typography'
+import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
@@ -295,16 +296,19 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
 
           <Separator className={commonCss.nestedDivider} />
 
-          <div data-testid="warning-section" className="my-4 flex items-start gap-2 pl-2">
-            <Checkbox
-              id="recovery-understands-risk"
-              checked={understandsRisk}
-              onCheckedChange={(checked) => setUnderstandsRisk(checked === true)}
-            />
-            <Label htmlFor="recovery-understands-risk" className="font-normal">
-              {`I understand that the Recoverer will be able to initiate recovery of this Safe account and that I will only be informed within the ${BRAND_NAME}.`}
+          <Card data-testid="warning-section" size="none" surface="sunken" className="my-4">
+            <Label htmlFor="recovery-understands-risk" className="cursor-pointer gap-3 px-2 py-2 font-normal">
+              <Checkbox
+                id="recovery-understands-risk"
+                checked={understandsRisk}
+                onCheckedChange={(checked) => setUnderstandsRisk(checked === true)}
+                className="bg-[var(--color-background-paper)]"
+              />
+              <Typography variant="paragraph-small">
+                {`I understand that the Recoverer will be able to initiate recovery of this Safe account and that I will only be informed within the ${BRAND_NAME}.`}
+              </Typography>
             </Label>
-          </div>
+          </Card>
 
           <TxCardActions>
             <Button data-testid="next-btn" variant="default" type="submit" disabled={isDisabled}>
