@@ -113,7 +113,9 @@ describe('safenetCheckApi.getSafenetCheck', () => {
     const result = await runQuery(store)
 
     expect(result.data?.status).toBe(CheckStatus.BENIGN)
-    expect(selectPinnedVerdict(store.getState() as SafenetCheckPartialState, HASH)?.status).toBe(CheckStatus.BENIGN)
+    expect(
+      selectPinnedVerdict(store.getState() as SafenetCheckPartialState, { safeTxHash: HASH, ...TARGET })?.status,
+    ).toBe(CheckStatus.BENIGN)
   })
 
   it('does not verify when there is no attestation, and derives IN_PROGRESS from activity', async () => {
@@ -126,9 +128,9 @@ describe('safenetCheckApi.getSafenetCheck', () => {
 
     expect(fakeReader.verifyAttestation).not.toHaveBeenCalled()
     expect(result.data?.status).toBe(CheckStatus.IN_PROGRESS)
-    expect(selectPinnedVerdict(store.getState() as SafenetCheckPartialState, HASH)?.status).toBe(
-      CheckStatus.IN_PROGRESS,
-    )
+    expect(
+      selectPinnedVerdict(store.getState() as SafenetCheckPartialState, { safeTxHash: HASH, ...TARGET })?.status,
+    ).toBe(CheckStatus.IN_PROGRESS)
   })
 
   it('dates the snapshot from the attested block, reading that header once', async () => {
@@ -187,7 +189,9 @@ describe('safenetCheckApi.getSafenetCheck', () => {
     const second = await runQuery(store)
 
     expect(second.data?.status).toBe(CheckStatus.BENIGN)
-    expect(selectPinnedVerdict(store.getState() as SafenetCheckPartialState, HASH)?.status).toBe(CheckStatus.BENIGN)
+    expect(
+      selectPinnedVerdict(store.getState() as SafenetCheckPartialState, { safeTxHash: HASH, ...TARGET })?.status,
+    ).toBe(CheckStatus.BENIGN)
   })
 
   it('replaces a pinned BENIGN with MALICIOUS when a late rejection lands', async () => {
@@ -208,7 +212,9 @@ describe('safenetCheckApi.getSafenetCheck', () => {
     const second = await runQuery(store)
 
     expect(second.data?.status).toBe(CheckStatus.MALICIOUS)
-    expect(selectPinnedVerdict(store.getState() as SafenetCheckPartialState, HASH)?.status).toBe(CheckStatus.MALICIOUS)
+    expect(
+      selectPinnedVerdict(store.getState() as SafenetCheckPartialState, { safeTxHash: HASH, ...TARGET })?.status,
+    ).toBe(CheckStatus.MALICIOUS)
   })
 
   it('upgrades the pin forward on a rank increase (IN_PROGRESS → BENIGN)', async () => {
@@ -218,9 +224,9 @@ describe('safenetCheckApi.getSafenetCheck', () => {
       baseRead({ events: [requestCreatedEvent({ deadlineBlock: '1000' })], deadlineBlock: '1000', headBlock: '100' }),
     )
     await runQuery(store)
-    expect(selectPinnedVerdict(store.getState() as SafenetCheckPartialState, HASH)?.status).toBe(
-      CheckStatus.IN_PROGRESS,
-    )
+    expect(
+      selectPinnedVerdict(store.getState() as SafenetCheckPartialState, { safeTxHash: HASH, ...TARGET })?.status,
+    ).toBe(CheckStatus.IN_PROGRESS)
 
     fakeReader.fetchCheckState.mockResolvedValueOnce(
       baseRead({ events: [attestedEvent({ safeTxHash: HASH, ...BOUND })], requestId: REQUEST_ID, epoch: '1' }),
@@ -233,7 +239,9 @@ describe('safenetCheckApi.getSafenetCheck', () => {
     const second = await runQuery(store)
 
     expect(second.data?.status).toBe(CheckStatus.BENIGN)
-    expect(selectPinnedVerdict(store.getState() as SafenetCheckPartialState, HASH)?.status).toBe(CheckStatus.BENIGN)
+    expect(
+      selectPinnedVerdict(store.getState() as SafenetCheckPartialState, { safeTxHash: HASH, ...TARGET })?.status,
+    ).toBe(CheckStatus.BENIGN)
   })
 
   it('returns an error (RTK Query retains the last snapshot) when the read fails', async () => {
@@ -244,7 +252,9 @@ describe('safenetCheckApi.getSafenetCheck', () => {
 
     expect(result.data).toBeUndefined()
     expect(result.status).toBe('rejected')
-    expect(selectPinnedVerdict(store.getState() as SafenetCheckPartialState, HASH)).toBeUndefined()
+    expect(
+      selectPinnedVerdict(store.getState() as SafenetCheckPartialState, { safeTxHash: HASH, ...TARGET }),
+    ).toBeUndefined()
   })
 
   it('marks the attestation UNVERIFIED in the snapshot when there is no attestation event', async () => {
@@ -284,7 +294,9 @@ describe('safenetCheckApi.getSafenetCheck', () => {
     const result = await runQuery(store)
 
     expect(result.data?.status).toBe(CheckStatus.UNAVAILABLE)
-    expect(selectPinnedVerdict(store.getState() as SafenetCheckPartialState, HASH)).toBeUndefined()
+    expect(
+      selectPinnedVerdict(store.getState() as SafenetCheckPartialState, { safeTxHash: HASH, ...TARGET }),
+    ).toBeUndefined()
   })
 
   it('does not re-dispatch the pin when a re-poll derives the same status', async () => {
@@ -478,6 +490,28 @@ describe('safenetCheckApi.getSafenetCheck', () => {
       const result = await runQuery(makeTestStore())
 
       expect(result.data?.status).toBe(CheckStatus.BENIGN)
+    })
+
+    it('never lets one chain-A verdict float a chain-B view of the same hash', async () => {
+      // The pin is a session floor, so it carries the same identity as the read:
+      // one hash on two chains is two checks, not one verdict.
+      const store = makeTestStore()
+      fakeReader.fetchCheckState.mockResolvedValueOnce(baseRead({ events: [plainAttestedEvent({ ...BOUND })] }))
+      expect((await runQuery(store)).data?.status).toBe(CheckStatus.BENIGN)
+
+      // Chain B's view of the same hash: the only attestation names chain A, so
+      // binding drops it and nothing may lift the result back to BENIGN.
+      fakeReader.fetchCheckState.mockResolvedValueOnce(
+        baseRead({ events: [plainProposedEvent({ ...BOUND }), plainAttestedEvent({ ...BOUND })] }),
+      )
+      const onChainB = await runQuery(store, { chainId: '1' })
+
+      expect(onChainB.data?.status).toBe(CheckStatus.SUBMITTED)
+      const state = store.getState() as SafenetCheckPartialState
+      expect(selectPinnedVerdict(state, { safeTxHash: HASH, ...TARGET, chainId: '1' })?.status).toBe(
+        CheckStatus.SUBMITTED,
+      )
+      expect(selectPinnedVerdict(state, { safeTxHash: HASH, ...TARGET })?.status).toBe(CheckStatus.BENIGN)
     })
   })
 })

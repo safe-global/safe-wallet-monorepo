@@ -1,4 +1,4 @@
-import { delay, http, HttpResponse } from 'msw'
+import { http, HttpResponse } from 'msw'
 import { Interface } from 'ethers'
 import { CONSENSUS_READ_ABI, COORDINATOR_READ_ABI } from '../../abi'
 import type { RawLog } from '../../utils/decodeLogs'

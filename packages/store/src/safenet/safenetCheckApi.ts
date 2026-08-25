@@ -13,7 +13,7 @@ import {
   type SafenetCheckSnapshot,
   type SafenetReader,
 } from '@safe-global/utils/features/safenet-checks'
-import { pinVerdict, selectPinnedVerdict, type SafenetCheckPartialState } from './safenetCheckSlice'
+import { checkKey, pinVerdict, selectPinnedVerdict, type SafenetCheckPartialState } from './safenetCheckSlice'
 
 /**
  * Standalone chain-reading API for Safenet checks — no HTTP endpoint, the work
@@ -74,6 +74,7 @@ export const safenetCheckApi = createApi({
   endpoints: (builder) => ({
     getSafenetCheck: builder.query<SafenetCheckSnapshot, SafenetCheckArg>({
       async queryFn({ safeTxHash, chainId, safeAddress, timestampMs }, { getState, dispatch }) {
+        const identity = { safeTxHash, chainId, safeAddress }
         try {
           const reader = getSafenetReader()
           const read = await reader.fetchCheckState(safeTxHash, { timestampMs })
@@ -89,14 +90,14 @@ export const safenetCheckApi = createApi({
             : [UNVERIFIED_ATTESTATION, null]
 
           const derived = deriveCheckState({ events, attestation, headBlock: read.headBlock })
-          const pinned = selectPinnedVerdict(getState() as SafenetCheckPartialState, safeTxHash)
+          const pinned = selectPinnedVerdict(getState() as SafenetCheckPartialState, identity)
           const status = mergeMonotonic(pinned?.status, derived)
 
           // mergeMonotonic only advances, so a changed status is a rank
           // increase — pin it as the new session floor. UNAVAILABLE is not a
           // verdict and would grow the slice by one inert entry per rendered row.
           if (status !== pinned?.status && status !== CheckStatus.UNAVAILABLE) {
-            dispatch(pinVerdict({ safeTxHash, status, atBlock: read.headBlock, verification: attestation }))
+            dispatch(pinVerdict({ ...identity, status, atBlock: read.headBlock, verification: attestation }))
           }
 
           const snapshot: SafenetCheckSnapshot = {
@@ -121,8 +122,7 @@ export const safenetCheckApi = createApi({
       // `timestampMs` only aims the block window — the check's identity is the
       // Safe plus the hash. Without this, two renderings of the same check with
       // different timestamps would open a second cache entry and a second poll loop.
-      serializeQueryArgs: ({ endpointName, queryArgs }) =>
-        `${endpointName}(${queryArgs.chainId}:${queryArgs.safeAddress.toLowerCase()}:${queryArgs.safeTxHash})`,
+      serializeQueryArgs: ({ endpointName, queryArgs }) => `${endpointName}(${checkKey(queryArgs)})`,
       keepUnusedDataFor: 300,
     }),
   }),

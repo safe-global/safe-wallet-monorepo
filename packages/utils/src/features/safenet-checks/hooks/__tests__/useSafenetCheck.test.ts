@@ -77,6 +77,49 @@ describe('useSafenetCheck', () => {
     expect(mockQuery.mock.calls[0][0]).toEqual({ safeTxHash: '0xabc', timestampMs: 1_700_000_000_000, ...TARGET })
   })
 
+  describe('Safe context gating', () => {
+    // useSafeInfo returns defaultSafeInfo before the Safe resolves, whose chain
+    // id and address are both ''. Subscribing then would aim a read at nothing
+    // and leave a second cache entry behind once the real Safe lands.
+    const UNRESOLVED = { chainId: '', safeAddress: '' }
+
+    it.each([
+      ['no chain id', { chainId: '', safeAddress: TARGET.safeAddress }],
+      ['no Safe address', { chainId: TARGET.chainId, safeAddress: '' }],
+      ['neither', UNRESOLVED],
+    ])('skips the query while the Safe context has %s', (_name, target) => {
+      mockQuery.mockReturnValue(queryResult())
+
+      renderHook(() => useSafenetCheck(HASH, null, target))
+
+      expect(lastOptions().skip).toBe(true)
+    })
+
+    it('opens exactly one subscription, aimed at the resolved Safe', () => {
+      mockQuery.mockReturnValue(queryResult())
+      const { rerender } = renderHook(({ target }) => useSafenetCheck(HASH, null, target), {
+        initialProps: { target: UNRESOLVED },
+      })
+      expect(lastOptions().skip).toBe(true)
+
+      rerender({ target: TARGET })
+
+      expect(lastOptions().skip).toBe(false)
+      const subscribed = mockQuery.mock.calls.filter((call) => call[1].skip === false)
+      expect(subscribed).toHaveLength(1)
+      expect(subscribed[0][0]).toMatchObject(TARGET)
+    })
+
+    it('never reads a pinned verdict for an unresolved Safe', () => {
+      mockQuery.mockReturnValue(queryResult())
+
+      renderHook(() => useSafenetCheck(HASH, null, UNRESOLVED))
+
+      // The selector must not fall back to a hash-only lookup.
+      expect(mockSelector.mock.results[0].value).toBeUndefined()
+    })
+  })
+
   describe('polling interval selection', () => {
     const ATTESTED = 1_785_749_985_000
 

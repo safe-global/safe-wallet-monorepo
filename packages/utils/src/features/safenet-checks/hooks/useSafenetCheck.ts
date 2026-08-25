@@ -43,7 +43,11 @@ export const useSafenetCheck = (
   timestampMs: number | null | undefined,
   target: CheckTarget,
 ): SafenetCheckView => {
-  const skip = !safeTxHash
+  // A check's identity is the Safe plus the hash, so a target that has not
+  // resolved yet is not a subscription worth opening: it would read an empty
+  // block window and, once the real Safe lands, leave a second cache entry and
+  // a second poll loop behind.
+  const skip = !safeTxHash || !target.chainId || !target.safeAddress
 
   // The interval feeds back into the query below, so the (status → interval →
   // next poll) loop is reconfigured from the query's own output via an effect.
@@ -61,7 +65,7 @@ export const useSafenetCheck = (
   )
 
   const pinned = useSelector((state: SafenetCheckPartialState) =>
-    safeTxHash ? selectPinnedVerdict(state, safeTxHash) : undefined,
+    safeTxHash && !skip ? selectPinnedVerdict(state, { safeTxHash, ...target }) : undefined,
   )
 
   const snapshot = query.data
