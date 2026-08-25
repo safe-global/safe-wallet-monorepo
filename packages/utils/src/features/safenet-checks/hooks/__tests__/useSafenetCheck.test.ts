@@ -3,7 +3,12 @@ import { useSelector } from 'react-redux'
 import { useGetSafenetCheckQuery } from '@safe-global/store/safenet/safenetCheckApi'
 import type { PinnedVerdict } from '@safe-global/store/safenet/safenetCheckSlice'
 import { useSafenetCheck } from '../useSafenetCheck'
-import { POLL_INTERVAL_FAST_MS, POLL_INTERVAL_LATE_MS } from '../../constants'
+import {
+  POLL_INTERVAL_FAST_MS,
+  POLL_INTERVAL_LATE_MS,
+  UNAVAILABLE_GRACE_MS,
+  UNAVAILABLE_GRACE_POLL_MS,
+} from '../../constants'
 import { CheckStatus, UNVERIFIED_ATTESTATION, type SafenetCheckSnapshot } from '../../types'
 import { buildBenignSnapshot, buildSnapshot, plainProposedEvent } from '../../builders'
 
@@ -24,6 +29,7 @@ type QueryResult = {
   isError?: boolean
   isLoading?: boolean
   isFetching?: boolean
+  fulfilledTimeStamp?: number
   refetch?: jest.Mock
 }
 
@@ -95,6 +101,79 @@ describe('useSafenetCheck', () => {
 
       renderHook(() => useSafenetCheck(HASH))
 
+      expect(lastOptions().pollingInterval).toBe(POLL_INTERVAL_FAST_MS)
+    })
+  })
+
+  describe('unavailable grace window', () => {
+    const SUBMITTED = 1_700_000_000_000
+
+    afterEach(() => jest.useRealTimers())
+
+    const noCheck = () => buildSnapshot({ safeTxHash: HASH, status: CheckStatus.UNAVAILABLE })
+
+    it('keeps polling slowly while the check request may still be mining', () => {
+      jest.useFakeTimers()
+      jest.setSystemTime(SUBMITTED + 1_000)
+      mockQuery.mockReturnValue(queryResult({ data: noCheck(), fulfilledTimeStamp: 1 }))
+
+      renderHook(() => useSafenetCheck(HASH, SUBMITTED))
+
+      expect(lastOptions().pollingInterval).toBe(UNAVAILABLE_GRACE_POLL_MS)
+    })
+
+    it('stops polling once the grace window has closed', () => {
+      jest.useFakeTimers()
+      jest.setSystemTime(SUBMITTED + UNAVAILABLE_GRACE_MS)
+      mockQuery.mockReturnValue(queryResult({ data: noCheck(), fulfilledTimeStamp: 1 }))
+
+      renderHook(() => useSafenetCheck(HASH, SUBMITTED))
+
+      expect(lastOptions().pollingInterval).toBe(0)
+    })
+
+    it('re-evaluates the window against the clock of the latest landed poll', () => {
+      // Without this the interval would keep the value the first read computed
+      // and poll a check-less transaction forever.
+      jest.useFakeTimers()
+      jest.setSystemTime(SUBMITTED + 1_000)
+      const snapshot = noCheck()
+      mockQuery.mockReturnValue(queryResult({ data: snapshot, fulfilledTimeStamp: 1 }))
+      const { rerender } = renderHook(() => useSafenetCheck(HASH, SUBMITTED))
+      expect(lastOptions().pollingInterval).toBe(UNAVAILABLE_GRACE_POLL_MS)
+
+      jest.setSystemTime(SUBMITTED + UNAVAILABLE_GRACE_MS)
+      mockQuery.mockReturnValue(queryResult({ data: snapshot, fulfilledTimeStamp: 2 }))
+      rerender()
+
+      expect(lastOptions().pollingInterval).toBe(0)
+    })
+
+    it('picks the check up at the fast cadence when it lands inside the window', () => {
+      jest.useFakeTimers()
+      jest.setSystemTime(SUBMITTED + 1_000)
+      mockQuery.mockReturnValue(queryResult({ data: noCheck(), fulfilledTimeStamp: 1 }))
+      const { result, rerender } = renderHook(() => useSafenetCheck(HASH, SUBMITTED))
+      expect(result.current.unavailableReason).toBe('NO_CHECK')
+      // The cadence that gets the check picked up at all: without it the read
+      // below never happens and NO_CHECK stays pinned for the session.
+      expect(lastOptions().pollingInterval).toBe(UNAVAILABLE_GRACE_POLL_MS)
+
+      mockQuery.mockReturnValue(
+        queryResult({
+          data: buildSnapshot({
+            safeTxHash: HASH,
+            status: CheckStatus.SUBMITTED,
+            headBlock: '150',
+            deadlineBlock: null,
+            events: [plainProposedEvent({ blockNumber: 100 })],
+          }),
+          fulfilledTimeStamp: 2,
+        }),
+      )
+      rerender()
+
+      expect(result.current.unavailableReason).toBeUndefined()
       expect(lastOptions().pollingInterval).toBe(POLL_INTERVAL_FAST_MS)
     })
   })

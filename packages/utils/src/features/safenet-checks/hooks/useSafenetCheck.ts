@@ -32,9 +32,9 @@ export type SafenetCheckView = {
  * store's `getSafenetCheck` query with the dynamic poll interval, the merge
  * against the session-pinned verdict, and the stale/UNAVAILABLE error mapping.
  * Platform-neutral (no DOM access). `timestampMs` aims the reader's block
- * window; pass the submission time when known. Callers sharing one hash must
- * agree on supplying it — the cache keys by hash, and the last fetch's args
- * aim every later poll.
+ * window and anchors the UNAVAILABLE grace window; pass the submission time
+ * when known. Callers sharing one hash must agree on supplying it — the cache
+ * keys by hash, and the last fetch's args aim every later poll.
  */
 export const useSafenetCheck = (safeTxHash: string | undefined, timestampMs?: number | null): SafenetCheckView => {
   const skip = !safeTxHash
@@ -80,6 +80,10 @@ export const useSafenetCheck = (safeTxHash: string | undefined, timestampMs?: nu
   // plain path, which does not emit one.
   const firstEventBlock = snapshot?.events[0] !== undefined ? String(snapshot.events[0].blockNumber) : null
 
+  // A landed poll re-runs this, so the grace window below is re-evaluated
+  // against a fresh clock instead of the one from the first read.
+  const fulfilledAt = query.fulfilledTimeStamp
+
   useEffect(() => {
     // A failed fetch with nothing to show is a transient endpoint problem, not
     // "no check exists" — keep retrying at the slow cadence. This is the only
@@ -94,9 +98,20 @@ export const useSafenetCheck = (safeTxHash: string | undefined, timestampMs?: nu
         headBlock: snapshot?.headBlock ?? null,
         deadlineBlock: snapshot?.deadlineBlock ?? null,
         firstEventBlock,
+        submittedAtMs: timestampMs ?? null,
+        nowMs: Date.now(),
       }),
     )
-  }, [hasError, hasData, status, snapshot?.headBlock, snapshot?.deadlineBlock, firstEventBlock])
+  }, [
+    hasError,
+    hasData,
+    status,
+    snapshot?.headBlock,
+    snapshot?.deadlineBlock,
+    firstEventBlock,
+    timestampMs,
+    fulfilledAt,
+  ])
 
   const { refetch: queryRefetch } = query
   const refetch = useCallback(() => {

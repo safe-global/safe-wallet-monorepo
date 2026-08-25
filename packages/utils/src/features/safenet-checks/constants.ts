@@ -106,3 +106,13 @@ export const LATE_WINDOW_BLOCKS = 720
  * would poll a public RPC at the fast interval forever.
  */
 export const PLAIN_DEADLINE_BLOCKS = 240
+
+/**
+ * How long after submission an UNAVAILABLE read keeps polling. Covers the race
+ * where the first read lands before the check request is mined; Gnosis blocks
+ * every ~5s, so a request mines well inside this window.
+ */
+export const UNAVAILABLE_GRACE_MS = 10 * 60_000
+
+/** Poll interval inside {@link UNAVAILABLE_GRACE_MS}. */
+export const UNAVAILABLE_GRACE_POLL_MS = 30_000
