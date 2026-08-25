@@ -33,9 +33,9 @@ const Setup: NextPage = () => {
 
       <main>
         <div data-testid="setup-section" className="mb-4 rounded-lg bg-[var(--color-background-paper)] p-8">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_2fr]">
-            <div>
-              <Typography variant="h4">
+          <div className="flex flex-col justify-between gap-6 lg:flex-row">
+            <div className="lg:w-1/5 lg:shrink-0">
+              <Typography variant="h4" className="font-bold">
                 <Tooltip>
                   <TooltipTrigger
                     render={
@@ -59,19 +59,21 @@ const Setup: NextPage = () => {
               </Typography>
             </div>
 
-            <div>
+            <div className="lg:min-w-0 lg:flex-1">
               <ContractVersion />
             </div>
           </div>
         </div>
 
         <div className="mb-4 rounded-lg bg-[var(--color-background-paper)] p-8">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_2fr]">
-            <div>
-              <Typography variant="h4">Members</Typography>
+          <div className="flex flex-col justify-between gap-6 lg:flex-row">
+            <div className="lg:w-1/5 lg:shrink-0">
+              <Typography variant="h4" className="font-bold">
+                Members
+              </Typography>
             </div>
 
-            <div>
+            <div className="lg:min-w-0 lg:flex-1">
               <div className="flex flex-col gap-4">
                 <OwnerList />
                 <ProposersList />

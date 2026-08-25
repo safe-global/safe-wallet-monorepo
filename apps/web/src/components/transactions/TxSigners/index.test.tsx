@@ -19,6 +19,7 @@ jest.mock('@/hooks/wallets/useWallet')
 jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: jest.fn(),
   useHasFeature: jest.fn(),
+  useChain: jest.fn(),
 }))
 jest.mock('@/hooks/useIsPending', () => jest.fn(() => false))
 jest.mock('@/hooks/useTransactionStatus', () => jest.fn(() => 'Awaiting confirmations'))
@@ -28,6 +29,25 @@ const mockGetTransaction = jest.fn()
 jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
   useWeb3ReadOnly: jest.fn(() => ({ getTransaction: mockGetTransaction })),
 }))
+
+jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => {
+  const actual = jest.requireActual('@safe-global/utils/features/safenet-checks/hooks')
+  const { CheckStatus } = jest.requireActual('@safe-global/utils/features/safenet-checks')
+  return {
+    ...actual,
+    // Default: no check observed — TxSigners subscribes unconditionally for
+    // its isLast math, so every render needs a well-formed view.
+    useSafenetCheck: jest.fn(() => ({
+      snapshot: undefined,
+      status: CheckStatus.UNAVAILABLE,
+      publicStatus: CheckStatus.UNAVAILABLE,
+      isLoading: false,
+      isFetching: false,
+      isStale: false,
+      refetch: jest.fn(),
+    })),
+  }
+})
 
 // Avoid rendering nested share link wrapper logic
 jest.mock('@/components/transactions/TxShareLink/TxShareLink', () => ({
@@ -194,6 +214,9 @@ describe('TxSigners (Audit Log)', () => {
     render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
 
     expect(screen.getByText('Can be executed once the threshold is reached.')).toBeInTheDocument()
+    const alert = screen.getByText('Can be executed once the threshold is reached.').closest('[role="alert"]')
+    expect(alert).toHaveClass('bg-[var(--color-info-background)]')
+    expect(alert?.querySelector('svg.lucide-info')).toBeTruthy()
   })
 
   it('shows proposer review banner when proposer-submitted and below threshold', () => {
@@ -622,6 +645,171 @@ describe('TxSigners (Audit Log)', () => {
       const { container } = render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
 
       expect(container.firstChild).toBeNull()
+    })
+  })
+
+  describe('Safenet audit step', () => {
+    const { useHasFeature } = jest.requireMock('@/hooks/useChains') as { useHasFeature: jest.Mock }
+    const { useSafenetCheck } = jest.requireMock('@safe-global/utils/features/safenet-checks/hooks') as {
+      useSafenetCheck: jest.Mock
+    }
+    const safenetTxHash = `0x${'ab'.repeat(32)}`
+
+    const buildSafenetTx = () => {
+      const { confirmations } = buildConfirmations(1, 1)
+      const txDetails = transactionDetailsBuilder()
+        .with({
+          detailedExecutionInfo: multisigExecutionDetailsBuilder()
+            .with({
+              confirmations,
+              confirmationsRequired: 1,
+              safeTxHash: safenetTxHash,
+              submittedAt: 1_700_000_000_000,
+            })
+            .build(),
+          txStatus: TransactionStatus.SUCCESS,
+        })
+        .build()
+      const txSummary = safeTxSummaryBuilder()
+        .with({
+          txStatus: TransactionStatus.SUCCESS,
+          executionInfo: executionInfoBuilder().with({ confirmationsSubmitted: 1, confirmationsRequired: 1 }).build(),
+        })
+        .build()
+      return { txDetails, txSummary }
+    }
+
+    it('renders the step for THIS transaction hash with the flag on', async () => {
+      useHasFeature.mockReturnValue(true)
+      mockSafeInfo({ chainId: '1', threshold: 1, owners: [{ value: ownerAddress, name: null, logoUri: null }] })
+      const { CheckStatus } = jest.requireActual('@safe-global/utils/features/safenet-checks')
+      const { buildBenignSnapshot, plainAttestedEvent } = jest.requireActual(
+        '@safe-global/utils/features/safenet-checks/builders',
+      )
+      const { AttestationVerificationStatus } = jest.requireActual('@safe-global/utils/features/safenet-checks')
+      const attested = plainAttestedEvent({ safeTxHash: safenetTxHash })
+      useSafenetCheck.mockReturnValue({
+        snapshot: buildBenignSnapshot({
+          safeTxHash: safenetTxHash,
+          events: [attested],
+          attestation: {
+            status: AttestationVerificationStatus.VERIFIED,
+            signatureId: attested.signatureId,
+            message: null,
+          },
+        }),
+        status: CheckStatus.BENIGN,
+        publicStatus: CheckStatus.BENIGN,
+        isLoading: false,
+        isFetching: false,
+        isStale: false,
+        refetch: jest.fn(),
+      })
+      const { txDetails, txSummary } = buildSafenetTx()
+
+      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+
+      // The feature loads lazily — the step appears once the chunk resolves.
+      // Cold CI runners can take seconds to transform the chunk's module graph.
+      await waitFor(() => expect(screen.getByTestId('safenet-attestation-link')).toHaveTextContent('Safenet'), {
+        timeout: 10_000,
+      })
+      expect(screen.getByText('No issues found')).toBeInTheDocument()
+      // The hook watches THIS transaction's hash, aimed at its submission time.
+      expect(useSafenetCheck).toHaveBeenCalledWith(
+        safenetTxHash,
+        1_700_000_000_000,
+        expect.objectContaining({ chainId: expect.any(String) }),
+      )
+      expect(screen.getByTestId('safenet-attestation-link')).toHaveAttribute(
+        'href',
+        `https://explorer.safenet-beta.eth.limo/#/safeTx?chainId=1&safeTxHash=${safenetTxHash}`,
+      )
+    }, 15_000)
+
+    it('renders nothing and never watches a hash with the flag off', () => {
+      useHasFeature.mockReturnValue(false)
+      const { txDetails, txSummary } = buildSafenetTx()
+
+      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+
+      expect(screen.queryByText(/By Safenet|^Safenet$/)).not.toBeInTheDocument()
+      // TxSigners still calls the hook (isLast math) but with no hash — the
+      // hook's skip path, so the chain is never read.
+      for (const call of useSafenetCheck.mock.calls) {
+        expect(call[0]).toBeUndefined()
+      }
+    })
+
+    const buildPendingSafenetTx = () => {
+      const { confirmations } = buildConfirmations(1, 2)
+      const txDetails = transactionDetailsBuilder()
+        .with({
+          detailedExecutionInfo: multisigExecutionDetailsBuilder()
+            .with({
+              confirmations,
+              confirmationsRequired: 2,
+              safeTxHash: safenetTxHash,
+              submittedAt: 1_700_000_000_000,
+            })
+            .build(),
+          txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+        })
+        .build()
+      const txSummary = safeTxSummaryBuilder()
+        .with({
+          txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+          executionInfo: executionInfoBuilder().with({ confirmationsSubmitted: 1, confirmationsRequired: 2 }).build(),
+        })
+        .build()
+      return { txDetails, txSummary }
+    }
+
+    it('moves isLast off the signing row when a pending tx shows a check (connector stays unbroken)', async () => {
+      useHasFeature.mockReturnValue(true)
+      mockSafeInfo({ chainId: '1', threshold: 2, owners: [{ value: ownerAddress, name: null, logoUri: null }] })
+      const { CheckStatus } = jest.requireActual('@safe-global/utils/features/safenet-checks')
+      const { buildBenignSnapshot } = jest.requireActual('@safe-global/utils/features/safenet-checks/builders')
+      useSafenetCheck.mockReturnValue({
+        snapshot: buildBenignSnapshot({ safeTxHash: safenetTxHash }),
+        status: CheckStatus.BENIGN,
+        publicStatus: CheckStatus.BENIGN,
+        isLoading: false,
+        isFetching: false,
+        isStale: false,
+        refetch: jest.fn(),
+      })
+      const { txDetails, txSummary } = buildPendingSafenetTx()
+
+      const { container } = render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+
+      await waitFor(() => expect(screen.getByText('No issues found')).toBeInTheDocument(), { timeout: 10_000 })
+      expect(screen.queryByText('Executed')).not.toBeInTheDocument()
+      // Created + Signed keep their connectors; the Safenet step is the last row.
+      expect(container.getElementsByClassName('timelineLine')).toHaveLength(2)
+    }, 15_000)
+
+    it('keeps isLast on the signing row when no check is observed', async () => {
+      useHasFeature.mockReturnValue(true)
+      mockSafeInfo({ chainId: '1', threshold: 2, owners: [{ value: ownerAddress, name: null, logoUri: null }] })
+      // mockReturnValue survives clearAllMocks — pin the no-check view explicitly.
+      const { CheckStatus } = jest.requireActual('@safe-global/utils/features/safenet-checks')
+      useSafenetCheck.mockReturnValue({
+        snapshot: undefined,
+        status: CheckStatus.UNAVAILABLE,
+        publicStatus: CheckStatus.UNAVAILABLE,
+        isLoading: false,
+        isFetching: false,
+        isStale: false,
+        refetch: jest.fn(),
+      })
+      const { txDetails, txSummary } = buildPendingSafenetTx()
+
+      const { container } = render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+
+      await waitFor(() => expect(screen.getByText(/Signed/)).toBeInTheDocument())
+      // Created connects to Signed; Signed is the last visible row.
+      expect(container.getElementsByClassName('timelineLine')).toHaveLength(1)
     })
   })
 })

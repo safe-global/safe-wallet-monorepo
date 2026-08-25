@@ -1,6 +1,7 @@
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
+import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { getModuleTransactionId } from '@/services/transactions'
 import { backOff } from 'exponential-backoff'
@@ -331,9 +332,9 @@ export const useGasLimit = (
 
   useEffect(() => {
     if (gasLimitError) {
-      logError(Errors._612, gasLimitError.message)
+      logError(Errors._612, gasLimitError.message, getRpcErrorContext(web3ReadOnly))
     }
-  }, [gasLimitError])
+  }, [gasLimitError, web3ReadOnly])
 
   return { gasLimit, gasLimitError, gasLimitLoading }
 }

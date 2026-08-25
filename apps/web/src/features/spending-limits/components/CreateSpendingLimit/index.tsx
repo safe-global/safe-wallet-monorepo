@@ -11,7 +11,7 @@ import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShi
 import useChainId from '@/hooks/useChainId'
 import { getResetTimeOptions } from '../../constants'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import TokenAmountInput from '@/components/common/TokenAmountInput'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
@@ -88,7 +88,7 @@ const CreateSpendingLimit = () => {
           <Typography>
             Set a reset time so the allowance automatically refills after the defined time period.
           </Typography>
-          <div className="mt-2 flex w-full items-center justify-between gap-2">
+          <div className="mt-2 flex items-center justify-start gap-2">
             <Label>Time Period</Label>
             <Controller
               rules={{ required: true }}
@@ -111,11 +111,11 @@ const CreateSpendingLimit = () => {
             />
           </div>
 
-          <div className="flex p-2">
+          <TxCardActions>
             <Button data-testid="next-btn" type="submit">
               Next
             </Button>
-          </div>
+          </TxCardActions>
         </form>
       </FormProvider>
     </TxCard>

@@ -26,6 +26,7 @@ import {
   HypernativeFeature,
 } from '@/features/hypernative'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
+import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 type TxSummaryProps = {
@@ -38,12 +39,15 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const { StatusLabel } = useLoadFeature(SwapFeature)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const { HnQueueAssessment } = useLoadFeature(HypernativeFeature)
+  const safenet = useLoadFeature(SafenetChecksFeature)
+  const isSafenetEnabled = useIsSafenetChecksEnabled()
 
   const tx = item.transaction
   const isQueue = isTxQueued(tx.txStatus)
   const nonce = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo.nonce : undefined
   const isTrusted = !hasDefaultTokenlist || isTrustedTx(tx)
   const isImitationTransaction = isImitation(tx)
+  const showWarning = isImitationTransaction || !isTrusted
   const isPending = useIsPending(tx.id)
   const executionInfo = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo : undefined
   const expiredSwap = useIsExpiredSwap(tx.txInfo)
@@ -53,6 +57,8 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const assessment = useHnQueueAssessmentResult(safeTxHash)
   const { isAuthenticated } = useHypernativeOAuth()
   const showAssessment = useShowHypernativeAssessment() && isQueue
+  // Bulk-group rows hide the cell via CSS; skipping the mount also skips the chain read.
+  const showSafenetStatus = isSafenetEnabled && isQueue && !isBulkGroup && !!safeTxHash
 
   return (
     <div
@@ -63,18 +69,20 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
         [css.history]: !isQueue,
         [css.conflictGroup]: isConflictGroup,
         [css.bulkGroup]: isBulkGroup,
-        [css.untrusted]: !isTrusted || isImitationTransaction,
+        [css.untrusted]: showWarning,
         [css.withAssessment]: showAssessment,
+        [css.withSafenet]: showSafenetStatus,
       })}
       id={tx.id}
     >
-      {nonce !== undefined && !isConflictGroup && !isBulkGroup && (
+      {/* The warning claims the same cell, so the nonce yields to it rather than stacking underneath. */}
+      {nonce !== undefined && !isConflictGroup && !showWarning && (
         <div data-testid="nonce" className={css.nonce} style={{ gridArea: 'nonce' }}>
           {nonce}
         </div>
       )}
 
-      {(isImitationTransaction || !isTrusted) && (
+      {showWarning && (
         <div data-testid="warning" style={{ gridArea: 'nonce' }}>
           <MaliciousTxWarning withTooltip={!isImitationTransaction} />
         </div>
@@ -110,7 +118,7 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
       </div>
 
       {isQueue && executionInfo && (
-        <div className={css.confirmations} style={{ gridArea: 'confirmations' }}>
+        <div style={{ gridArea: 'confirmations' }}>
           {executionInfo.confirmationsSubmitted > 0 || isPending ? (
             <TxConfirmations
               submittedConfirmations={executionInfo.confirmationsSubmitted}
@@ -125,6 +133,12 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
       {showAssessment && safeTxHash && (
         <div style={{ gridArea: 'assessment' }} className={css.assessment}>
           <HnQueueAssessment safeTxHash={safeTxHash} assessment={assessment} isAuthenticated={isAuthenticated} />
+        </div>
+      )}
+
+      {showSafenetStatus && safeTxHash && (
+        <div style={{ gridArea: 'safenet' }} className={css.safenet}>
+          <safenet.SafenetQueueStatus safeTxHash={safeTxHash} timestampMs={tx.timestamp} />
         </div>
       )}
 

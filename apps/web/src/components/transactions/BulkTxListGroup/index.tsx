@@ -1,10 +1,9 @@
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import type { AnyTransactionItem } from '@/utils/tx-list'
 import type { ReactElement } from 'react'
-import { isMultisigExecutionInfo, isSwapTransferOrderTxInfo } from '@/utils/transaction-guards'
+import { isSwapTransferOrderTxInfo } from '@/utils/transaction-guards'
 import { Typography } from '@/components/ui/typography'
 import { Card } from '@/components/ui/card'
-import { cn } from '@/utils/cn'
 import ExpandableTransactionItem from '@/components/transactions/TxListItem/ExpandableTransactionItem'
 import BatchIcon from '@/public/images/common/batch.svg'
 import css from './styles.module.css'
@@ -41,8 +40,7 @@ const GroupedTxListItems = ({
     title = getSettlementOrderTitle(groupedListItems[0].transaction.txInfo as OrderTransactionInfo)
   }
   return (
-    // eslint-disable-next-line no-restricted-syntax -- py-2 tightens the grouped-tx list row; css.container owns the grid layout
-    <Card data-testid="grouped-items" size="none" className={cn(css.container, 'py-2')}>
+    <Card data-testid="grouped-items" size="none" className={css.container}>
       <div style={{ gridArea: 'icon' }}>
         <BatchIcon className="size-6" />
       </div>
@@ -55,17 +53,11 @@ const GroupedTxListItems = ({
       </div>
 
       <div style={{ gridArea: 'items' }} className={css.txItems}>
-        {groupedListItems.map((tx) => {
-          const nonce = isMultisigExecutionInfo(tx.transaction.executionInfo) ? tx.transaction.executionInfo.nonce : ''
-          return (
-            <div className="relative" key={tx.transaction.id}>
-              <div className={css.nonce}>
-                <Typography className={css.nonce}>{nonce}</Typography>
-              </div>
-              <ExpandableTransactionItem item={tx} isBulkGroup={true} />
-            </div>
-          )
-        })}
+        {groupedListItems.map((tx) => (
+          <div key={tx.transaction.id}>
+            <ExpandableTransactionItem item={tx} isBulkGroup={true} />
+          </div>
+        ))}
       </div>
     </Card>
   )

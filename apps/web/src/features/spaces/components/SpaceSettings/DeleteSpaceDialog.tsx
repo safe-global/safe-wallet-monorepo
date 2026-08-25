@@ -14,7 +14,7 @@ import DialogActions from '@/components/common/DialogActions'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
@@ -111,6 +111,7 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
 
         {error && (
           <Alert variant="destructive">
+            <AlertSeverityIcon variant="destructive" />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}

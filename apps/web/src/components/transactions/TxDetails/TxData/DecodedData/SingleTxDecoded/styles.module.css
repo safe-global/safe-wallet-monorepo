@@ -40,15 +40,17 @@
   background-color: var(--card) !important;
 }
 
-.outlinedTrigger {
+/* Applies to the `elevation` variant: a row on a white card, so hover and open tint it. */
+.elevationTrigger {
   border: none !important;
   border-radius: 0 !important;
   box-shadow: none;
   background-color: transparent !important;
 }
 
-.outlinedTrigger:hover {
-  background-color: transparent !important;
+.elevationTrigger:hover,
+.elevationTrigger[aria-expanded='true'] {
+  background-color: var(--color-secondary-background) !important;
 }
 
 .actions {

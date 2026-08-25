@@ -4,6 +4,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/utils/cn'
 import { usePortalContainer } from '@/components/ui/ShadcnProvider'
+import { overlayVariants } from '@/components/ui/overlay'
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from 'lucide-react'
 
 /**
@@ -69,6 +70,10 @@ const selectTriggerVariants = cva(
         // Filled like Input/InputGroup: a select and a text input share a row by design (see the
         // `inputSize` note in input.tsx), so they must carry the same field surface.
         default: 'border-border hover:bg-muted/50 rounded-md border bg-input px-3 shadow-xs',
+        // Mirrors the Button `outline` skin, for a select that sits in a toolbar row of outline
+        // buttons rather than in a form (assets toolbar: currency select beside Manage tokens).
+        outline:
+          'border-border rounded-md border bg-transparent px-4 font-medium shadow-xs hover:bg-foreground/[0.06] hover:text-foreground data-popup-open:bg-foreground/[0.06] data-popup-open:text-foreground',
         ghost:
           'rounded-md border-0 bg-transparent px-0 shadow-none hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent',
       },
@@ -141,18 +146,19 @@ function SelectContent({
     | 'collisionBoundary'
     | 'collisionAvoidance'
   > & {
-    /** Dims the rest of the page while the select is open (same look as the dialog overlay). */
+    /**
+     * Dims the rest of the page while the select is open (the shared overlay scrim).
+     *
+     * Do NOT set this on a select rendered inside a dialog or sheet. The scrim paints above that
+     * surface, so it blurs the very form the dropdown belongs to — and the dialog's own backdrop
+     * already handles the dimming, the scroll lock and the outside click.
+     */
     showBackdrop?: boolean
   }) {
   const portalContainer = usePortalContainer()
   return (
     <SelectPrimitive.Portal container={portalContainer}>
-      {showBackdrop && (
-        <SelectPrimitive.Backdrop
-          data-slot="select-backdrop"
-          className="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-starting-style:opacity-0 data-ending-style:opacity-0 bg-backdrop fixed inset-0 z-[var(--z-overlay)]"
-        />
-      )}
+      {showBackdrop && <SelectPrimitive.Backdrop data-slot="select-backdrop" className={overlayVariants()} />}
       <SelectPrimitive.Positioner
         side={side}
         sideOffset={sideOffset}

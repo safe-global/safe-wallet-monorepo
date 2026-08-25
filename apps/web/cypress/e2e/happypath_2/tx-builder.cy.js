@@ -41,13 +41,12 @@ describe('Transaction Builder happy path tests', { defaultCommandTimeout: 20000 
       ]
 
       const appUrl = constants.TX_Builder_url
-      iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
-      const visitUrl = `/apps/open?safe=${safeAppSafes.SEP_SAFEAPP_SAFE_1}&appUrl=${encodeURIComponent(appUrl)}`
+      iframeSelector = safeapps.getSafeAppIframeSelector(appUrl)
 
       wallet.connectSignerViaStorage(signer, constants.transactionQueueUrl + safeAppSafes.SEP_SAFEAPP_SAFE_1)
       cy.wait(5000)
       createtx.deleteAllTx()
-      cy.visit(visitUrl)
+      safeapps.openSafeAppWithAddressBookPermission(safeAppSafes.SEP_SAFEAPP_SAFE_1, appUrl)
       navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
       cy.enter(iframeSelector).then((getBody) => {
         getBody().findByLabelText(safeapps.enterAddressStr).type(constants.SAFE_APP_ADDRESS)

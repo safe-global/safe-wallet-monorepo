@@ -44,9 +44,7 @@ const SpendingLimitRow = ({
 
   return (
     <div className="flex flex-col">
-      <Label className="mb-1">
-        Send as <span className="text-destructive">*</span>
-      </Label>
+      <Label className="mb-1">Send as</Label>
       <Controller
         rules={{ required: true }}
         control={control}
@@ -74,8 +72,8 @@ const SpendingLimitRow = ({
                 <Tooltip>
                   <TooltipTrigger
                     render={
-                      <span>
-                        <InfoIcon className="text-[var(--color-border-main)] ml-1 inline-block size-4 align-middle" />
+                      <span className="inline-flex items-center">
+                        <InfoIcon className="text-[var(--color-border-main)] ml-1 size-4 shrink-0" />
                       </span>
                     }
                   />
@@ -102,8 +100,8 @@ const SpendingLimitRow = ({
                 <Tooltip>
                   <TooltipTrigger
                     render={
-                      <span>
-                        <InfoIcon className="text-[var(--color-border-main)] ml-1 inline-block size-4 align-middle" />
+                      <span className="inline-flex items-center">
+                        <InfoIcon className="text-[var(--color-border-main)] ml-1 size-4 shrink-0" />
                       </span>
                     }
                   />

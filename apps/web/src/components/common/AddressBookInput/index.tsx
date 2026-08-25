@@ -1,9 +1,11 @@
 import { type KeyboardEvent, type ReactElement, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useFormContext, useWatch } from 'react-hook-form'
 import AddressInput, { type AddressInputProps } from '../AddressInput'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
 import css from './styles.module.css'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -15,6 +17,8 @@ import { useMemberNameResolver } from '@/features/spaces'
 import RecipientOption from './RecipientOption'
 import RecipientGroupHeader from './RecipientGroupHeader'
 import useWorkspaceName from './useWorkspaceName'
+import { useAnchoredList } from './useAnchoredList'
+import { usePortalContainerElement } from '@/components/ui/ShadcnProvider'
 
 type AddressBookEntry = { label: string; name: string; source: ContactSource; contact: ExtendedContact }
 
@@ -79,10 +83,8 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
   const flatEntries = useMemo(() => groupedEntries.flatMap(([, entries]) => entries), [groupedEntries])
   const optionIndexes = useMemo(() => new Map(flatEntries.map((entry, index) => [entry, index])), [flatEntries])
 
-  const hasVisibleOptions = useMemo(
-    () => !!allAddressBookEntries.filter((entry) => entry.label.includes(addressValue)).length,
-    [allAddressBookEntries, addressValue],
-  )
+  // Same set the list renders from, so the click and chevron paths agree with the typed one.
+  const hasVisibleOptions = filteredEntries.length > 0
 
   const isInAddressBook = useMemo(
     () => allAddressBookEntries.some((entry) => sameAddress(entry.label, addressValue)),
@@ -90,6 +92,10 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
   )
 
   const wrapperRef = useRef<HTMLDivElement>(null)
+  // The portalled list is not inside wrapperRef, so dismissal has to check it separately or a
+  // pointerdown on an option counts as "outside" and closes the list before the click lands.
+  const listRef = useRef<HTMLUListElement>(null)
+  const portalContainer = usePortalContainerElement()
 
   const closeList = useCallback(() => {
     setOpen(false)
@@ -101,6 +107,10 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
     setActiveIndex(-1)
   }, [filteredEntries])
 
+  // Keyed off the input event, not the value: a programmatic reset would otherwise reopen the list,
+  // and an empty value matches every contact.
+  const onUserInput = useCallback(() => setOpen(true), [])
+
   // Restores the three dismissal paths MUI's Autocomplete provided. Without them the suggestion
   // list stays open over the rest of the form, and a click aimed at the next field lands on a
   // contact instead — silently writing it in as the recipient.
@@ -109,13 +119,10 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
 
     const wrapper = wrapperRef.current
 
+    const isInside = (node: Node | null) => !!node && (!!wrapper?.contains(node) || !!listRef.current?.contains(node))
+
     const onPointerDown = (event: PointerEvent) => {
-      if (wrapper && !wrapper.contains(event.target as Node)) {
-        closeList()
-      }
-    }
-    const onEscape = (event: globalThis.KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (!isInside(event.target as Node)) {
         closeList()
       }
     }
@@ -123,17 +130,15 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
     // only genuinely leaving the field (tab away, focus elsewhere) closes the list here.
     const onFocusOut = (event: FocusEvent) => {
       const next = event.relatedTarget as Node | null
-      if (wrapper && (!next || !wrapper.contains(next))) {
+      if (wrapper && !isInside(next)) {
         closeList()
       }
     }
 
     document.addEventListener('pointerdown', onPointerDown)
-    document.addEventListener('keydown', onEscape)
     wrapper?.addEventListener('focusout', onFocusOut)
     return () => {
       document.removeEventListener('pointerdown', onPointerDown)
-      document.removeEventListener('keydown', onEscape)
       wrapper?.removeEventListener('focusout', onFocusOut)
     }
   }, [open, closeList])
@@ -149,6 +154,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
     : undefined
 
   const showList = open && !props.disabled && !props.InputProps?.readOnly && filteredEntries.length > 0
+  const listStyle = useAnchoredList(wrapperRef, showList)
 
   const onSelectOption = (entry: AddressBookEntry) => {
     setValue(name, entry.label, { shouldValidate: true })
@@ -192,12 +198,20 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
         if (showList) closeList()
         return
       }
+      case 'Escape': {
+        // Must stop here, or the enclosing tx modal closes too. With the list shut it falls through.
+        if (!showList) return
+        event.preventDefault()
+        event.stopPropagation()
+        closeList()
+        return
+      }
     }
   }
 
   return (
     <>
-      <div ref={wrapperRef} className={css.wrapper}>
+      <div ref={wrapperRef} className={css.wrapper} onInput={onUserInput}>
         <AddressInput
           {...props}
           data-testid={props['data-testid'] ?? 'address-book-input'}
@@ -215,44 +229,58 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
           onMouseDown={() => setOpen(hasVisibleOptions)}
         />
 
-        {showList && (
-          <ul className={css.options} role="listbox" id={listId}>
-            {groupedEntries.map(([source, entries]) => (
-              <li key={source}>
-                <RecipientGroupHeader source={source} workspaceName={workspaceName} count={entries.length} />
-                <ul className={css.groupList}>
-                  {entries.map((entry) => {
-                    const index = optionIndexes.get(entry) ?? -1
+        {showList &&
+          createPortal(
+            <ul
+              ref={listRef}
+              className={cn(
+                'bg-popover text-popover-foreground ring-foreground/10 rounded-lg shadow-lg ring-1',
+                // Slim scrollbar, matching SafeDropdownContainer; the OS default reads as a second
+                // UI element inside a small panel.
+                '[scrollbar-color:var(--border)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5',
+                css.options,
+              )}
+              role="listbox"
+              id={listId}
+              style={listStyle}
+            >
+              {groupedEntries.map(([source, entries]) => (
+                <li key={source}>
+                  <RecipientGroupHeader source={source} workspaceName={workspaceName} count={entries.length} />
+                  <ul className={css.groupList}>
+                    {entries.map((entry) => {
+                      const index = optionIndexes.get(entry) ?? -1
 
-                    return (
-                      <li
-                        key={entry.label}
-                        id={optionId(index)}
-                        data-testid="address-item"
-                        role="option"
-                        aria-selected={index === activeIndex}
-                        className={css.option}
-                        ref={(node) => {
-                          if (index === activeIndex) node?.scrollIntoView({ block: 'nearest' })
-                        }}
-                        // Keep input focus on press so the click lands before blur removes the option
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={() => onSelectOption(entry)}
-                      >
-                        <RecipientOption
-                          contact={entry.contact}
-                          prefix={prefix}
-                          memberName={resolveMemberName(entry.contact.createdByUserId)}
-                          resolveName={(address) => resolveSafeName(address, chainId)}
-                        />
-                      </li>
-                    )
-                  })}
-                </ul>
-              </li>
-            ))}
-          </ul>
-        )}
+                      return (
+                        <li
+                          key={entry.label}
+                          id={optionId(index)}
+                          data-testid="address-item"
+                          role="option"
+                          aria-selected={index === activeIndex}
+                          className={css.option}
+                          ref={(node) => {
+                            if (index === activeIndex) node?.scrollIntoView({ block: 'nearest' })
+                          }}
+                          // Keep input focus on press so the click lands before blur removes the option
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => onSelectOption(entry)}
+                        >
+                          <RecipientOption
+                            contact={entry.contact}
+                            prefix={prefix}
+                            memberName={resolveMemberName(entry.contact.createdByUserId)}
+                            resolveName={(address) => resolveSafeName(address, chainId)}
+                          />
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </li>
+              ))}
+            </ul>,
+            portalContainer ?? document.body,
+          )}
       </div>
 
       {canAdd && !isInAddressBook ? (

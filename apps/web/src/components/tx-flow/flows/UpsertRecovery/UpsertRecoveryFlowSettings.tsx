@@ -1,6 +1,6 @@
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { ChevronUp as ExpandLessIcon, ChevronDown as ExpandMoreIcon, TriangleAlert } from 'lucide-react'
+import { ChevronUp as ExpandLessIcon, ChevronDown as ExpandMoreIcon } from 'lucide-react'
 import { useForm, FormProvider, Controller } from 'react-hook-form'
 import { useContext, useState } from 'react'
 import type { ReactElement } from 'react'
@@ -11,6 +11,7 @@ import { UpsertRecoveryFlowFields, type UpsertRecoveryFlowProps } from '.'
 import AddressBookInput from '@/components/common/AddressBookInput'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { addressIsNotReserved } from '@safe-global/utils/utils/validation'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { RecovererWarning } from './RecovererSmartContractWarning'
@@ -20,7 +21,6 @@ import { TOOLTIP_TITLES } from '../../common/constants'
 import Track from '@/components/common/Track'
 import type { RecoveryStateItem } from '@/features/recovery'
 
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import css from './styles.module.css'
 import NumberField from '@/components/common/NumberField'
 import { getDelay, isCustomDelaySelected } from './utils'
@@ -31,9 +31,10 @@ import { clickOnEnterOrSpace } from '@/utils/keyboard'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useChainId from '@/hooks/useChainId'
 import { Typography } from '@/components/ui/typography'
+import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
@@ -44,6 +45,19 @@ enum AddressType {
   EOA = 'EOA',
   Safe = 'Safe',
   Other = 'Other',
+}
+
+export function _validateRecoverer(recoverer: string, safeAddress: string): string | undefined {
+  // Reserved (zero/sentinel) addresses would break the module on-chain. The
+  // shared GS203 copy names a signer, which a Recoverer is not.
+  const reservedError = addressIsNotReserved('This Recoverer address is not valid')(recoverer)
+  if (reservedError) {
+    return reservedError
+  }
+
+  if (sameAddress(recoverer, safeAddress)) {
+    return 'The Safe account cannot be a Recoverer of itself'
+  }
 }
 
 export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: RecoveryStateItem }): ReactElement {
@@ -96,11 +110,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
     : // Setting up recovery
       recoverer && delay && expiry
 
-  const validateRecoverer = (recoverer: string) => {
-    if (sameAddress(recoverer, safeAddress)) {
-      return 'The Safe account cannot be a Recoverer of itself'
-    }
-  }
+  const validateRecoverer = (recoverer: string) => _validateRecoverer(recoverer, safeAddress)
 
   const validateCustomDelay = (delay: string) => {
     if (!delay) return ''
@@ -134,7 +144,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
       <FormProvider {...formMethods}>
         <form onSubmit={formMethods.handleSubmit(handleSubmit)}>
           <Alert variant="warning" outlined={false}>
-            <TriangleAlert />
+            <AlertSeverityIcon variant="warning" />
             <AlertDescription>
               Your Recoverer will be able to reset your Account setup. Only select an address that you trust.{' '}
               <Track {...RECOVERY_EVENTS.LEARN_MORE} label="recover-setup-flow">
@@ -283,18 +293,21 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
             </Collapsible>
           </div>
 
-          <Separator className={commonCss.nestedDivider} />
+          <Separator bleed="6" />
 
-          <div data-testid="warning-section" className="my-4 flex items-start gap-2 pl-2">
-            <Checkbox
-              id="recovery-understands-risk"
-              checked={understandsRisk}
-              onCheckedChange={(checked) => setUnderstandsRisk(checked === true)}
-            />
-            <Label htmlFor="recovery-understands-risk" className="font-normal">
-              {`I understand that the Recoverer will be able to initiate recovery of this Safe account and that I will only be informed within the ${BRAND_NAME}.`}
+          <Card data-testid="warning-section" size="none" surface="sunken" className="my-4">
+            <Label htmlFor="recovery-understands-risk" className="cursor-pointer gap-3 px-2 py-2 font-normal">
+              <Checkbox
+                id="recovery-understands-risk"
+                checked={understandsRisk}
+                onCheckedChange={(checked) => setUnderstandsRisk(checked === true)}
+                className="bg-[var(--color-background-paper)]"
+              />
+              <Typography variant="paragraph-small">
+                {`I understand that the Recoverer will be able to initiate recovery of this Safe account and that I will only be informed within the ${BRAND_NAME}.`}
+              </Typography>
             </Label>
-          </div>
+          </Card>
 
           <TxCardActions>
             <Button data-testid="next-btn" variant="default" type="submit" disabled={isDisabled}>

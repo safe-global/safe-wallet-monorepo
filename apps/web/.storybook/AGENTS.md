@@ -82,7 +82,7 @@ Highlights so agents don't rediscover them:
   stable min-width for modal/flow submits — replaces magic `min-w-[…]`), `lg` (h-10 form-step buttons),
   `default` (h-9), `sm` (h-8 compact/toolbar/cards), `xl` (h-12 full-screen onboarding footer — via
   `OnboardingFooter`). Full decision matrix + Do/Don't: the **`UI/Button` → Guidelines** story.
-- **Input** — `inputSize` `default` (h-9, mirrors `SelectTrigger`'s default so a field and a select on one row line up) or `hero` (66px Safe-creation / big-filter field); named `inputSize`, not `size`, to dodge the native numeric `size` attr.
+- **Input** — `inputSize` `sm` (h-8), `default` (h-9, mirrors `SelectTrigger`'s default so a field and a select on one row line up), `lg` (h-10) or `hero` (66px Safe-creation / big-filter field, and the size to pair a name field with an address field); named `inputSize`, not `size`, to dodge the native numeric `size` attr. `InputGroup` adds `heroWrap`: hero's height and padding with no fixed `h-*`, so a chip or multi-select control grows past 66px instead of clipping. Note `SelectTrigger` stops at `lg` — there is no hero select.
 - **Surface & token rules (bit you) :** filled `secondary` only reads on white/card surfaces — on the muted
   page background use `variant="outline"` (transparent fill; it reads via its border hairline and a
   translucent hover), or `variant="surface"` when a secondary action must stay filled on a coloured surface.
@@ -296,7 +296,6 @@ When you discover new patterns, gotchas, or fixes while working on Storybook sto
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import { mswLoader } from 'msw-storybook-addon'
-import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
 import { safeFixtures, chainFixtures, balancesFixtures } from '../../../../../../config/test/msw/fixtures'
@@ -352,9 +351,9 @@ const meta = {
             },
           }}
         >
-          <Paper sx={{ p: 2 }}>
+          <div className="bg-card rounded-lg p-4">
             <Story />
-          </Paper>
+          </div>
         </StoreDecorator>
       )
     },

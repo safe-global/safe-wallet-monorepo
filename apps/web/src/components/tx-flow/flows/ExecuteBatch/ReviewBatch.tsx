@@ -20,13 +20,12 @@ import { logError, Errors } from '@/services/exceptions'
 import { createMultiSendCallOnlyTx, dispatchBatchExecution, dispatchBatchExecutionRelay } from '@/services/tx/tx-sender'
 import { hasRemainingRelays } from '@/utils/relaying'
 import { getMultiSendTxs } from '@/utils/transactions'
-import TxCard from '../../common/TxCard'
+import TxCard, { TxCardActions } from '../../common/TxCard'
 import CheckWallet from '@/components/common/CheckWallet'
 import type { ExecuteBatchFlowProps } from '.'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import SendToBlock from '@/components/tx/SendToBlock'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/shared/ConfirmationTitle'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxModalContext } from '@/components/tx-flow'
 import useGasPrice from '@/hooks/useGasPrice'
 import type { Overrides } from 'ethers'
@@ -225,7 +224,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
           <DecodedTxs txs={txsWithDetails} />
         </div>
 
-        <Separator className="mt-4 -mx-6 w-auto" />
+        <Separator bleed="6" className="mt-4" />
 
         <ConfirmationTitle variant={ConfirmationTitleTypes.execute} />
 
@@ -242,7 +241,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
           </>
         ) : null}
 
-        <Alert variant="warning">
+        <Alert variant="warning" outlined={false}>
           Be aware that if any of the included transactions revert, none of them will be executed. This will result in
           the loss of the allocated transaction fees.
         </Alert>
@@ -251,10 +250,10 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
 
         <div>
           <div className="pt-4">
-            <Separator className={commonCss.nestedDivider} />
+            <Separator bleed="6" />
           </div>
 
-          <div className="flex items-center gap-2 p-2">
+          <TxCardActions>
             <CheckWallet allowNonOwner={true} checkNetwork>
               {(isOk) => (
                 <Button type="submit" size="submit" disabled={!isOk || submitDisabled} onClick={handleSubmit}>
@@ -262,7 +261,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
                 </Button>
               )}
             </CheckWallet>
-          </div>
+          </TxCardActions>
         </div>
       </TxCard>
     </>

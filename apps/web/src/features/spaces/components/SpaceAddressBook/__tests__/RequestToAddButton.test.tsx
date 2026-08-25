@@ -1,6 +1,8 @@
 import { render, screen, waitFor } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import RequestToAddButton from '../RequestToAddButton'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { faker } from '@faker-js/faker'
 
@@ -9,6 +11,11 @@ const mockCreateRequest = jest.fn()
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useAddressBookRequestsCreateRequestV1Mutation: () => [mockCreateRequest],
+}))
+
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
 }))
 
 jest.mock('@/features/spaces', () => ({
@@ -105,5 +112,26 @@ describe('RequestToAddButton', () => {
 
     expect(screen.getByText('Requested')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Request to add' })).not.toBeInTheDocument()
+  })
+
+  it('tracks the request once it is created', async () => {
+    mockCreateRequest.mockResolvedValue({ data: {} })
+    render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} />)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Request to add' }))
+    await userEvent.click(screen.getByTestId('confirm-request-btn'))
+
+    await waitFor(() => expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ADDRESS_REQUEST_SENT))
+  })
+
+  it('does not track when a request was already pending (409)', async () => {
+    mockCreateRequest.mockResolvedValue({ error: { status: 409 } })
+    render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} />)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Request to add' }))
+    await userEvent.click(screen.getByTestId('confirm-request-btn'))
+
+    await waitFor(() => expect(screen.getByText('Requested')).toBeInTheDocument())
+    expect(trackEvent).not.toHaveBeenCalled()
   })
 })

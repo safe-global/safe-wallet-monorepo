@@ -5,7 +5,7 @@ import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import ArrowUpRightIcon from '@/public/images/common/arrow-up-right.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -261,7 +261,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
             {isConfirmation && canCoverFees && !isLegacySigned && (
               <>
                 <ConfirmationFeeNotice availableGasTokens={availableGasTokens} selectedGasToken={selectedGasToken} />
-                <Separator className="-mx-4 w-auto" />
+                <Separator bleed="4" />
               </>
             )}
 
@@ -270,7 +270,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
             {(isLegacySigned || noEligibleGasToken) && (
               <>
                 <SignerFeeNotice isLocked />
-                <Separator className="-mx-4 w-auto" />
+                <Separator bleed="4" />
               </>
             )}
 
@@ -300,7 +300,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
                   </div>
                 </div>
 
-                <Separator className="-mx-4 w-auto" />
+                <Separator bleed="4" />
               </>
             )}
 
@@ -308,7 +308,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
             {!canCoverFees && (
               <>
                 <SignerFeeNotice />
-                <Separator className="-mx-4 w-auto" />
+                <Separator bleed="4" />
               </>
             )}
           </>
@@ -324,7 +324,8 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
           token to cover the on-chain fee. Signing isn't blocked, since another signer or a top-up
           may bring the balance up before execution; otherwise execution reverts with GS013. */}
       {safeHasEnoughGas === false && !props.loading && (
-        <Alert variant="warning" className="mt-2">
+        <Alert variant="warning" outlined={false} className="mt-2">
+          <AlertSeverityIcon variant="warning" />
           <AlertDescription>
             Insufficient {gasFee.currency} balance to cover the gas fee. Top up before execution, otherwise the
             transaction will fail.

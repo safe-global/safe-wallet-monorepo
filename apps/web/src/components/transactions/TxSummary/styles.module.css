@@ -13,6 +13,7 @@
   --grid-date: minmax(76px, 2fr);
   --grid-confirmations: minmax(56px, 1fr);
   --grid-assessment: 0;
+  --grid-safenet: 0;
   /* `auto`, not a fixed minimum: queue rows only render a status for pending/expired transactions, so
      a hard min reserved ~72px of dead width on every ordinary row and forced the wrap sooner. */
   --grid-status: auto;
@@ -25,13 +26,18 @@
   white-space: nowrap;
   grid-template-columns:
     var(--grid-nonce) var(--grid-type) var(--grid-info) var(--grid-date) var(--grid-confirmations)
-    var(--grid-assessment) var(--grid-status) var(--grid-actions);
-  grid-template-areas: 'nonce type info date confirmations assessment status actions';
+    var(--grid-assessment) var(--grid-safenet) var(--grid-status) var(--grid-actions);
+  grid-template-areas: 'nonce type info date confirmations assessment safenet status actions';
 }
 
 .gridContainer.withAssessment {
   --grid-confirmations: minmax(90px, 1fr);
   --grid-assessment: minmax(80px, 1.5fr);
+}
+
+.gridContainer.withSafenet {
+  --grid-confirmations: minmax(90px, 1fr);
+  --grid-safenet: minmax(80px, 1.5fr);
 }
 
 /* min-width: 0 lets a cell shrink below its content so the row can hold one line; without it a long
@@ -65,29 +71,30 @@
   grid-template-areas: 'nonce type info date status';
 }
 
-.gridContainer.history .assessment {
+.gridContainer.history .assessment,
+.gridContainer.history .safenet {
   display: none;
 }
 
 .gridContainer.conflictGroup {
   grid-template-columns:
     var(--grid-type) var(--grid-info) var(--grid-date) var(--grid-confirmations) var(--grid-assessment)
-    var(--grid-status) var(--grid-actions);
-  grid-template-areas: 'type info date confirmations assessment status actions';
+    var(--grid-safenet) var(--grid-status) var(--grid-actions);
+  grid-template-areas: 'type info date confirmations assessment safenet status actions';
 }
 
 .gridContainer.bulkGroup {
-  grid-template-columns: var(--grid-type) var(--grid-info) var(--grid-date) var(--grid-status);
-  grid-template-areas: 'type info date status';
+  grid-template-columns: var(--grid-nonce) var(--grid-type) var(--grid-info) var(--grid-date) var(--grid-status);
+  grid-template-areas: 'nonce type info date status';
 }
 
-.gridContainer.bulkGroup .assessment {
+.gridContainer.bulkGroup .assessment,
+.gridContainer.bulkGroup .safenet {
   display: none;
 }
 
 .gridContainer.bulkGroup.untrusted {
   grid-template-columns: var(--grid-nonce) minmax(200px, 2.4fr) var(--grid-info) var(--grid-date) var(--grid-status);
-  grid-template-areas: 'nonce type info date status';
 }
 
 .gridContainer.message {
@@ -154,15 +161,13 @@
     align-items: center;
   }
 
-  /* Undo the flex fallback's rules: in the grid the middle column does the pushing. */
-  .gridContainer.queue .date,
-  .gridContainer.queue .confirmations {
-    width: auto;
-    margin-left: 0;
-  }
-
   .gridContainer.queue .status {
     margin: 0;
+  }
+
+  /* The two-row template has no safenet area; the check state lives in the expanded panel anyway. */
+  .gridContainer.queue .safenet {
+    display: none;
   }
 
   .gridContainer.queue .nonce {

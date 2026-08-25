@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./ExternalLink.stories ButtonMode 1`] = `
 <div
@@ -55,7 +55,7 @@ exports[`./ExternalLink.stories Default 1`] = `
     class="shadcn-scope"
   >
     <a
-      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 text-primary underline decoration-primary/40 hover:decoration-current"
+      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
       data-slot="link"
       data-variant="default"
       href="https://safe.global"
@@ -115,7 +115,7 @@ exports[`./ExternalLink.stories NoChildren 1`] = `
     class="shadcn-scope"
   >
     <a
-      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 text-primary underline decoration-primary/40 hover:decoration-current"
+      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
       data-slot="link"
       data-variant="default"
       href="https://safe.global"
@@ -163,7 +163,7 @@ exports[`./ExternalLink.stories WithCustomStyling 1`] = `
     class="shadcn-scope"
   >
     <a
-      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 underline decoration-primary/40 hover:decoration-current text-[var(--color-secondary-main)] font-bold"
+      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current text-[var(--color-secondary-main)] font-bold"
       data-slot="link"
       data-variant="default"
       href="https://etherscan.io"
@@ -211,7 +211,7 @@ exports[`./ExternalLink.stories WithoutIcon 1`] = `
     class="shadcn-scope"
   >
     <a
-      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 text-primary underline decoration-primary/40 hover:decoration-current"
+      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
       data-slot="link"
       data-variant="default"
       href="https://safe.global"

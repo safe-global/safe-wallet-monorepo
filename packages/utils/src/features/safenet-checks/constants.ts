@@ -15,8 +15,9 @@ const parseCsv = (value: string | undefined): string[] =>
 
 /**
  * The Safenet chain id — feeds both the provider network and the EIP-712 domain
- * request ids derive from. A wrong value leaves every check stuck at SUBMITTED,
- * so the reader asserts it against `eth_chainId` in development.
+ * attestations are verified against. A wrong value makes every attestation
+ * verify as INVALID, so the reader asserts it against `eth_chainId` in
+ * development.
  */
 export const SAFENET_CHAIN_ID =
   process.env.NEXT_PUBLIC_SAFENET_CHAIN_ID || process.env.EXPO_PUBLIC_SAFENET_CHAIN_ID || '100'
@@ -48,6 +49,13 @@ export const SAFENET_COORDINATOR_ADDRESS =
 export const SAFENET_ORACLE_ADDRESSES = parseCsv(
   process.env.NEXT_PUBLIC_SAFENET_ORACLE_ADDRESSES || process.env.EXPO_PUBLIC_SAFENET_ORACLE_ADDRESSES,
 )
+
+/** Safenet explorer base URL — display-only deep links to a check's attestation. */
+export const SAFENET_EXPLORER_URL = (
+  process.env.NEXT_PUBLIC_SAFENET_EXPLORER_URL ||
+  process.env.EXPO_PUBLIC_SAFENET_EXPLORER_URL ||
+  'https://explorer.safenet-beta.eth.limo'
+).replace(/\/$/, '')
 
 // --- Lookback tuning ------------------------------------------------------
 
@@ -99,3 +107,23 @@ export const LATE_WINDOW_BLOCKS = 720
  * would poll a public RPC at the fast interval forever.
  */
 export const PLAIN_DEADLINE_BLOCKS = 240
+
+/**
+ * How long after submission an UNAVAILABLE read keeps polling. Covers the race
+ * where the first read lands before the check request is mined; Gnosis blocks
+ * every ~5s, so a request mines well inside this window.
+ */
+export const UNAVAILABLE_GRACE_MS = 10 * 60_000
+
+/** Poll interval inside {@link UNAVAILABLE_GRACE_MS}. */
+export const UNAVAILABLE_GRACE_POLL_MS = 30_000
+
+/**
+ * How long after the attestation a BENIGN check keeps watching for the late
+ * arbitration result that may replace it with MALICIOUS. Provisional: the real
+ * bound is a protocol-side arbitration SLA that does not exist yet.
+ */
+export const ARBITRATION_WINDOW_MS = 24 * 60 * 60_000
+
+/** Poll interval inside {@link ARBITRATION_WINDOW_MS}. */
+export const ARBITRATION_POLL_MS = 5 * 60_000

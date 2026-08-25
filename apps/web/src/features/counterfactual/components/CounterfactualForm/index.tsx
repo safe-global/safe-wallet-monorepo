@@ -11,7 +11,7 @@ import madProps from '@/utils/mad-props'
 import React, { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
 import SubmitButton from '@/components/common/SubmitButton'
 import { Separator } from '@/components/ui/separator'
-import { Alert } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import classNames from 'classnames'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -32,6 +32,7 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 
 export const CounterfactualForm = ({
   safeTx,
@@ -115,25 +116,28 @@ export const CounterfactualForm = ({
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <Alert className="mb-4 border-0">
-          Executing this transaction will activate your account.
-          <br />
-          <ul style={{ margin: 0, padding: '4px 16px 0' }}>
-            <li>
-              Base fee: &asymp;{' '}
-              <strong>
-                {getTotalFeeFormatted(advancedParams.maxFeePerGas, BigInt(gasLimit?.safeTxGas || '0'), chain)}{' '}
-                {chain?.nativeCurrency.symbol}
-              </strong>
-            </li>
-            <li>
-              One-time activation fee: &asymp;{' '}
-              <strong>
-                {getTotalFeeFormatted(advancedParams.maxFeePerGas, BigInt(gasLimit?.safeDeploymentGas || '0'), chain)}{' '}
-                {chain?.nativeCurrency.symbol}
-              </strong>
-            </li>
-          </ul>
+        <Alert variant="info" className="mb-4 border-0">
+          <AlertSeverityIcon variant="info" />
+          <AlertDescription>
+            Executing this transaction will activate your account.
+            <br />
+            <ul style={{ margin: 0, padding: '4px 16px 0' }}>
+              <li>
+                Base fee: &asymp;{' '}
+                <strong>
+                  {getTotalFeeFormatted(advancedParams.maxFeePerGas, BigInt(gasLimit?.safeTxGas || '0'), chain)}{' '}
+                  {chain?.nativeCurrency.symbol}
+                </strong>
+              </li>
+              <li>
+                One-time activation fee: &asymp;{' '}
+                <strong>
+                  {getTotalFeeFormatted(advancedParams.maxFeePerGas, BigInt(gasLimit?.safeDeploymentGas || '0'), chain)}{' '}
+                  {chain?.nativeCurrency.symbol}
+                </strong>
+              </li>
+            </ul>
+          </AlertDescription>
         </Alert>
 
         <div className={classNames(commonCss.params)}>
@@ -166,9 +170,9 @@ export const CounterfactualForm = ({
           </div>
         )}
 
-        <Separator className={classNames(commonCss.nestedDivider, 'mt-6')} />
+        <Separator bleed="6" />
 
-        <div className="flex items-center p-2">
+        <TxCardActions>
           {/* Submit button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
             {(isOk) => (
@@ -177,7 +181,7 @@ export const CounterfactualForm = ({
               </SubmitButton>
             )}
           </CheckWallet>
-        </div>
+        </TxCardActions>
       </form>
     </>
   )

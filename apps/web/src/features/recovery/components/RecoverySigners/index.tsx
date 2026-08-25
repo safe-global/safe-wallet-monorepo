@@ -1,8 +1,7 @@
 import type { ReactElement } from 'react'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 
-import { Alert } from '@/components/ui/alert'
-
-import { AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
+import { AuditLog, AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
 import { Countdown } from '@/components/common/Countdown'
 import ExecuteRecoveryButton from '../ExecuteRecoveryButton'
 import CancelRecoveryButton from '../CancelRecoveryButton'
@@ -30,7 +29,7 @@ export default function RecoverySigners({ item }: { item: RecoveryQueueItem }): 
 
   return (
     <>
-      <div>
+      <AuditLog>
         <AuditLogHeader />
 
         <AuditRow
@@ -43,8 +42,9 @@ export default function RecoverySigners({ item }: { item: RecoveryQueueItem }): 
 
         <AuditRow label={executionLabel} actionType={executionActionType} isLast />
 
-        <Alert variant={isExpired ? 'warning' : 'default'} className="mt-4 py-1">
-          {desc}
+        <Alert variant={isExpired ? 'warning' : 'info'} outlined={false} className="mt-4">
+          <AlertSeverityIcon variant={isExpired ? 'warning' : 'info'} />
+          <AlertDescription>{desc}</AlertDescription>
         </Alert>
 
         {isNext && remainingSeconds > 0 && (
@@ -52,7 +52,7 @@ export default function RecoverySigners({ item }: { item: RecoveryQueueItem }): 
             <Countdown seconds={remainingSeconds} />
           </div>
         )}
-      </div>
+      </AuditLog>
 
       <div className="flex items-center justify-center gap-2">
         <ExecuteRecoveryButton recovery={item} />

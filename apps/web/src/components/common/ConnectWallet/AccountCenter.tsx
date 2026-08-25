@@ -30,6 +30,7 @@ const AccountCenter = ({ wallet }: { wallet: ConnectedWallet }) => {
       </PopoverTrigger>
 
       <PopoverContent
+        showBackdrop
         align="center"
         side="bottom"
         sideOffset={0}

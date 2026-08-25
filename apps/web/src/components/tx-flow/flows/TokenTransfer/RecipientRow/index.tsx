@@ -18,7 +18,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import SpendingLimitRow from '../SpendingLimitRow'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { X } from 'lucide-react'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -127,7 +127,8 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
         </div>
 
         {showFeeBanner && (
-          <Alert data-testid="gtf-fee-banner" className="items-center">
+          <Alert data-testid="gtf-fee-banner" variant="info" className="items-center">
+            <AlertSeverityIcon variant="info" />
             <AlertDescription className="flex w-full items-center justify-between gap-2">
               <span>
                 Your max send amount accounts for fees paid in {selectedToken?.tokenInfo.symbol}. This updates if fees
@@ -159,7 +160,8 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
               data-testid="remove-recipient-btn"
               onClick={onRemove}
               aria-label="Remove recipient"
-              variant="destructive"
+              variant="ghost"
+              size="lg"
             >
               <DeleteIcon className="size-4" />
               Remove recipient

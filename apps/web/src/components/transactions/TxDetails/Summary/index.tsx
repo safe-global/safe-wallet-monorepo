@@ -8,7 +8,6 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { Receipt } from '@/components/tx/ConfirmTxDetails/Receipt'
 import DecodedData from '../TxData/DecodedData'
 import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'
-import { Typography } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
 import DecoderLinks from './DecoderLinks'
 import isEqual from 'lodash/isEqual'
@@ -107,20 +106,11 @@ const Summary = ({
               {showDecodedData && (
                 <>
                   <DecodedData txData={txData} toInfo={toInfo} />
-                  {/* Full-bleed across the accordion's px-4: the width has to carry Separator's own
-                      `data-[orientation=horizontal]:` prefix, otherwise its base
-                      `data-[orientation=horizontal]:w-full` wins on specificity (0-2-0 vs 0-1-0) no
-                      matter the order, and the rule stops 32px short of the card's right edge.
-                      Matching the variant lets tailwind-merge drop `w-full` instead. */}
-                  <Separator className="-mx-4 my-2 data-[orientation=horizontal]:w-[calc(100%+32px)]" />
+                  <Separator bleed="4" className="my-2" />
                 </>
               )}
 
               <div>
-                <Typography variant="paragraph-small-bold" className="mb-4 block">
-                  Advanced details
-                </Typography>
-
                 <DecoderLinks />
 
                 <Receipt

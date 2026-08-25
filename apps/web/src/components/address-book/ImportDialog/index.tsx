@@ -165,7 +165,7 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
         </Typography>
       </div>
       <DialogActions
-        className="p-2"
+        className="p-6 pt-2"
         onCancel={handleClose}
         cancelTestId="cancel-btn"
         confirmLabel="Import"

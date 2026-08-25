@@ -159,7 +159,7 @@ export const AddCustomAppModal = ({ open, onClose, onSave, safeAppsList }: Props
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 p-6 pt-2">
+        <div className="flex justify-between gap-2 p-6 pt-2">
           <Button variant="ghost" onClick={handleClose}>
             Cancel
           </Button>

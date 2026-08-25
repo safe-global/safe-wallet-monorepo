@@ -6,12 +6,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useContext, useEffect } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import { ChangeThresholdFlowFieldNames } from '@/components/tx-flow/flows/ChangeThreshold'
+import { validateThreshold } from '@safe-global/utils/utils/validation'
 import type { ChangeThresholdFlowProps } from '@/components/tx-flow/flows/ChangeThreshold'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { TOOLTIP_TITLES } from '@/components/tx-flow/common/constants'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { createUpdateThresholdTx } from '@/services/tx/tx-sender'
@@ -20,7 +20,7 @@ import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 export const ChooseThreshold = () => {
   const { onNext, data } = useContext(TxFlowContext)
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
-  const { safe } = useSafeInfo()
+  const { safe, safeLoaded } = useSafeInfo()
 
   const formMethods = useForm<ChangeThresholdFlowProps>({
     defaultValues: data,
@@ -28,6 +28,11 @@ export const ChooseThreshold = () => {
   })
 
   const newThreshold = formMethods.watch(ChangeThresholdFlowFieldNames.threshold)
+
+  // Derived rather than read from RHF: the owner set can change on-chain while
+  // the flow is open, which does not re-run the field's validation. Skipped
+  // until the Safe is loaded, when the owner list is still empty.
+  const boundsError = safeLoaded ? validateThreshold(newThreshold, safe.owners.length) : undefined
 
   useEffect(() => {
     createUpdateThresholdTx(newThreshold).then(setSafeTx).catch(setSafeTxError)
@@ -61,11 +66,13 @@ export const ChooseThreshold = () => {
                 if (value === safe.threshold) {
                   return `Current policy is already set to ${safe.threshold}.`
                 }
+                return validateThreshold(value, safe.owners.length)
               },
             }}
             name={ChangeThresholdFlowFieldNames.threshold}
             render={({ field, fieldState }) => {
-              const isError = !!fieldState.error
+              const error = fieldState.error?.message ?? boundsError
+              const isError = !!error
 
               return (
                 <div className="flex flex-row flex-wrap items-center gap-4">
@@ -90,7 +97,7 @@ export const ChooseThreshold = () => {
                   </div>
                   <div className="w-full">
                     {isError ? (
-                      <Typography className="mb-4 text-destructive">{fieldState.error?.message}</Typography>
+                      <Typography className="mb-4 text-destructive">{error}</Typography>
                     ) : (
                       <Typography className="mb-4">
                         {fieldState.isDirty ? 'Previous policy was ' : 'Current policy is '}
@@ -107,21 +114,22 @@ export const ChooseThreshold = () => {
           />
         </div>
 
-        <Separator className={commonCss.nestedDivider} />
+        <Separator bleed="6" />
 
-        <div className="flex items-center p-2">
+        <TxCardActions>
           <Button
             data-testid="threshold-next-btn"
             type="submit"
             disabled={
               !!formMethods.formState.errors[ChangeThresholdFlowFieldNames.threshold] ||
+              !!boundsError ||
               // Prevent initial submit before field was interacted with
               newThreshold === safe.threshold
             }
           >
             Next
           </Button>
-        </div>
+        </TxCardActions>
       </form>
     </TxCard>
   )

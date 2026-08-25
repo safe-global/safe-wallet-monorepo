@@ -8,7 +8,6 @@ import CheckWallet from '@/components/common/CheckWallet'
 import { useAlreadySigned, useTxActions } from '@/components/tx/shared/hooks'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
@@ -110,7 +109,7 @@ export const SignForm = ({
       {cannotPropose && <NonOwnerError />}
 
       <div>
-        <Separator className={commonCss.nestedDivider} />
+        <Separator bleed="6" />
 
         {/* Submit button */}
         <TxCardActions>

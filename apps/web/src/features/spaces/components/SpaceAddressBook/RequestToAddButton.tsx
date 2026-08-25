@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +10,8 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import { NetworkLogosTooltip } from '@/features/multichain'
 import { useAddressBookRequestsCreateRequestV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'
@@ -71,6 +73,7 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
         return
       }
 
+      trackEvent(SPACE_EVENTS.ADDRESS_REQUEST_SENT)
       setRequested(true)
       setOpen(false)
       dispatch(
@@ -144,7 +147,8 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
             </div>
 
             {nameError && (
-              <Alert variant="warning">
+              <Alert variant="warning" outlined={false}>
+                <AlertSeverityIcon variant="warning" />
                 <AlertDescription>Rename this contact to share it with the workspace. {nameError}.</AlertDescription>
               </Alert>
             )}

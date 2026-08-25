@@ -86,9 +86,8 @@ const AddMemberInput = ({ error, inputProps, onSelectAddress, value }: AddMember
 
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor="member-invitee-identifier-input" className={cn(error && 'text-destructive')}>
+      <Label htmlFor="member-invitee-identifier-input" className={cn('gap-1', error && 'text-destructive')}>
         {error || 'Address, email or ENS'}
-        {!error && <span className="text-destructive"> *</span>}
       </Label>
 
       <Autocomplete
@@ -110,6 +109,7 @@ const AddMemberInput = ({ error, inputProps, onSelectAddress, value }: AddMember
       >
         <ComboboxInput
           id="member-invitee-identifier-input"
+          className="min-h-[66px]"
           name={inputProps.name}
           aria-invalid={!!error}
           autoComplete="off"

@@ -76,11 +76,10 @@ describe('CookieAndTermBanner', () => {
       expect(screen.queryByText(/You attempted to open the "What's new" section/)).not.toBeInTheDocument()
     })
 
-    it('should apply inverted class when inverted prop is true', () => {
-      const { container } = renderWithStore(<CookieAndTermBanner inverted />)
+    it('should render the banner container', () => {
+      const { container } = renderWithStore(<CookieAndTermBanner />)
 
-      const paper = container.querySelector('[data-testid="cookies-popup"]')
-      expect(paper).toHaveClass('inverted')
+      expect(container.querySelector('[data-testid="cookies-popup"]')).toBeInTheDocument()
     })
   })
 

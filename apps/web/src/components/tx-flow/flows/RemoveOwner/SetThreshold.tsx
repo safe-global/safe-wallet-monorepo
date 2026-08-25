@@ -8,13 +8,13 @@ import type { ReactElement, SyntheticEvent } from 'react'
 
 import EthHashInfo from '@/components/common/EthHashInfo'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import TxCard from '../../common/TxCard'
+import TxCard, { TxCardActions } from '../../common/TxCard'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { TOOLTIP_TITLES } from '@/components/tx-flow/common/constants'
 import type { RemoveOwnerFlowProps } from '.'
 
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { validateThreshold } from '@safe-global/utils/utils/validation'
 
 export const SetThreshold = ({
   params,
@@ -30,12 +30,18 @@ export const SetThreshold = ({
     if (value != null) setSelectedThreshold(value)
   }
 
+  const newNumberOfOwners = safe ? safe.owners.length - 1 : 1
+
+  // The threshold lives outside a form, so guard it at submit: blocks the
+  // GS202/GS201 on-chain reverts if the owner set changed while the flow was
+  // open (WA-3005 Bucket A).
+  const thresholdError = validateThreshold(selectedThreshold, newNumberOfOwners)
+
   const onSubmitHandler = (e: SyntheticEvent) => {
     e.preventDefault()
+    if (thresholdError) return
     onSubmit({ ...params, threshold: selectedThreshold })
   }
-
-  const newNumberOfOwners = safe ? safe.owners.length - 1 : 1
 
   return (
     <TxCard>
@@ -46,7 +52,7 @@ export const SetThreshold = ({
           <EthHashInfo address={params.removedOwner.address} shortAddress={false} showCopyButton hasExplorer />
         </div>
 
-        <Separator className={commonCss.nestedDivider} />
+        <Separator bleed="6" />
 
         <div className="my-6">
           <Typography variant="h4" className="inline-flex items-center gap-1 font-bold">
@@ -86,13 +92,15 @@ export const SetThreshold = ({
           </div>
         </div>
 
-        <Separator className={commonCss.nestedDivider} />
+        {thresholdError && <Typography className="mb-4 text-destructive">{thresholdError}</Typography>}
 
-        <div className="flex items-center p-2">
-          <Button data-testid="next-btn" type="submit">
+        <Separator bleed="6" />
+
+        <TxCardActions>
+          <Button data-testid="next-btn" type="submit" disabled={!!thresholdError}>
             Next
           </Button>
-        </div>
+        </TxCardActions>
       </form>
     </TxCard>
   )

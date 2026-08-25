@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./SpendingLimitLabel.stories Default 1`] = `
 <div
@@ -10,9 +10,28 @@ exports[`./SpendingLimitLabel.stories Default 1`] = `
     <div
       class="flex items-center gap-1 "
     >
-      <mock-icon
-        class="size-6 text-[var(--color-border-main)]"
-      />
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-clock size-4 shrink-0 text-[var(--color-border-main)]"
+        fill="none"
+        height="24"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 6v6l4 2"
+        />
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+        />
+      </svg>
       <p
         class="m-0 text-base leading-6 font-normal"
         data-slot="typography"
@@ -57,9 +76,28 @@ exports[`./SpendingLimitLabel.stories WithCustomLabel 1`] = `
     <div
       class="flex items-center gap-1 "
     >
-      <mock-icon
-        class="size-6 text-[var(--color-border-main)]"
-      />
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-clock size-4 shrink-0 text-[var(--color-border-main)]"
+        fill="none"
+        height="24"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 6v6l4 2"
+        />
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+        />
+      </svg>
       <p
         class="m-0 text-base leading-6 font-semibold text-primary"
         data-slot="typography"

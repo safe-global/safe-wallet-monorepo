@@ -3,7 +3,7 @@ import { type ReactElement, useContext, useEffect, useMemo, useState } from 'rea
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form'
 
-import { Alert, AlertTitle, AlertDescription, AlertAction } from '@/components/ui/alert'
+import { Alert, AlertTitle, AlertDescription, AlertAction, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Link } from '@/components/ui/link'
@@ -189,7 +189,13 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
               <>
                 <div className="flex flex-row items-center justify-between">
                   <Track {...MODALS_EVENTS.ADD_RECIPIENT}>
-                    <Button data-testid="add-recipient-btn" onClick={addRecipient} disabled={!canAddMoreRecipients}>
+                    <Button
+                      data-testid="add-recipient-btn"
+                      variant="ghost"
+                      size="lg"
+                      onClick={addRecipient}
+                      disabled={!canAddMoreRecipients}
+                    >
                       <AddIcon className="size-4" />
                       Add recipient
                     </Button>
@@ -206,7 +212,8 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
                 {isEligible && isNoFeeCampaignEnabled && <NoFeeCampaignTransactionCard />}
 
                 {hasInsufficientFunds && (
-                  <Alert data-testid="insufficient-balance-error" variant="destructive">
+                  <Alert data-testid="insufficient-balance-error" variant="destructive" outlined={false}>
+                    <AlertSeverityIcon variant="destructive" />
                     <AlertTitle>Insufficient balance</AlertTitle>
                     <AlertDescription>
                       The total amount assigned to all recipients exceeds your available balance. Please adjust the
@@ -216,7 +223,8 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
                 )}
 
                 {canAddMoreRecipients && maxRecipientsInfo && !!csvAirdropAppUrl && (
-                  <Alert variant="default">
+                  <Alert data-testid="csv-airdrop-hint" variant="info">
+                    <AlertSeverityIcon variant="info" />
                     <AlertDescription>
                       If you want to add more than {MAX_RECIPIENTS} recipients, use <CsvAirdropLink />
                     </AlertDescription>
@@ -234,7 +242,8 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
                 )}
 
                 {!canAddMoreRecipients && (
-                  <Alert data-testid="max-recipients-reached" variant="warning">
+                  <Alert data-testid="max-recipients-reached" variant="warning" outlined={false}>
+                    <AlertSeverityIcon variant="warning" />
                     <AlertDescription>
                       No more recipients can be added.
                       {!!csvAirdropAppUrl && (
@@ -254,7 +263,7 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
             )}
 
             <div>
-              <Separator className={commonCss.nestedDivider} />
+              <Separator bleed="6" />
 
               <TxCardActions>
                 <Button type="submit" size="submit" disabled={!formState.isValid} className="w-full lg:w-auto">

@@ -33,4 +33,30 @@ describe('ErrorMessage', () => {
     // No GS code → the original raw-message Details is kept (unchanged by this ticket).
     expect(queryByText(/rpc\.example\.org/)).toBeInTheDocument()
   })
+
+  it('treats a custom-error revert as GS013 and decodes a known selector', () => {
+    const error = Object.assign(new Error('execution reverted (unknown custom error)'), {
+      code: 'CALL_EXCEPTION',
+      data: '0x70cc6907',
+    })
+
+    const { getByText, queryByText } = render(<ErrorMessage error={error}>This transaction failed.</ErrorMessage>)
+
+    expect(getByText(/GS013 · UnapprovedHash \(Hypernative guard\)/)).toBeInTheDocument()
+    // The reference replaces the raw Details toggle
+    expect(queryByText('Details')).not.toBeInTheDocument()
+  })
+
+  it('keeps the raw selector in the reference for an undecodable custom error', () => {
+    const error = Object.assign(new Error('execution reverted (unknown custom error)'), {
+      code: 'CALL_EXCEPTION',
+      data: '0xdeadbeef',
+    })
+
+    const { getByText, queryByText } = render(<ErrorMessage error={error}>This transaction failed.</ErrorMessage>)
+
+    expect(getByText(/GS013 · 0xdeadbeef/)).toBeInTheDocument()
+    // The selector belongs in the support reference, never in the message body
+    expect(queryByText(/0xdeadbeef.*failed|failed.*0xdeadbeef/)).not.toBeInTheDocument()
+  })
 })

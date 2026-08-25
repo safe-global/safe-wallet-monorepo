@@ -7,7 +7,7 @@ import { Calendar } from '../calendar'
  * Calendar Component Stories
  *
  * Date picker built on react-day-picker (v9), styled with shadcn tokens.
- * Shown in its single, range, and multiple selection modes.
+ * Shown in its single, range, and multiple selection modes, plus the dropdown caption.
  */
 const meta = {
   title: 'UI/Calendar',
@@ -41,6 +41,22 @@ const MultipleDemo = () => {
   return <Calendar mode="multiple" defaultMonth={DEFAULT_MONTH} selected={selected} onSelect={setSelected} />
 }
 
+/** The caption used by the date picker: clickable arrows plus month and year dropdowns. */
+const DropdownDemo = () => {
+  const [selected, setSelected] = useState<Date | undefined>(new Date(2026, 0, 15))
+  return (
+    <Calendar
+      mode="single"
+      captionLayout="dropdown"
+      startMonth={new Date(2016, 0)}
+      endMonth={new Date(2026, 11)}
+      defaultMonth={DEFAULT_MONTH}
+      selected={selected}
+      onSelect={setSelected}
+    />
+  )
+}
+
 export const AllVariants: Story = {
   tags: ['skip-visual-test'],
   render: () => (
@@ -56,6 +72,10 @@ export const AllVariants: Story = {
       <div>
         <h3 className="mb-4 text-lg font-semibold">Multiple</h3>
         <MultipleDemo />
+      </div>
+      <div>
+        <h3 className="mb-4 text-lg font-semibold">Dropdown navigation</h3>
+        <DropdownDemo />
       </div>
     </div>
   ),

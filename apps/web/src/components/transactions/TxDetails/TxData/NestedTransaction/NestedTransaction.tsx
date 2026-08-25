@@ -37,8 +37,7 @@ export const NestedTransaction = ({
         </>
       )}
 
-      {/* eslint-disable-next-line no-restricted-syntax -- nested-tx card sits on the page (main) surface; nested-surface token, pending a `surface` variant */}
-      <Card variant="outlined" size="none" radius="lg" className="bg-[var(--color-background-main)]">
+      <Card variant="outlined" surface="sunken" size="none" radius="lg">
         <div className="border-border-light flex items-center gap-4 border-b p-4">
           <NestedTransactionIcon className="size-4" />
           <Typography variant="h4" className="grow">

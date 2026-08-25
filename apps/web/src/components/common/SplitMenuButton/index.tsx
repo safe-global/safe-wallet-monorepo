@@ -71,9 +71,13 @@ export default function SplitMenuButton({
               disabled={disabled}
               // Corner reset carries the same `in-data-[slot=button-group]` variant as Button's own
               // `rounded-md`, otherwise that variant outranks a bare `rounded-r-none` and the halves
-              // meet on two 12px curves instead of a flat seam.
-              // eslint-disable-next-line no-restricted-syntax -- split-button halves flatten inner corners at the join and fill the button-group row height
-              className={cn('h-full min-w-0 flex-1 shrink', hasMenu && 'in-data-[slot=button-group]:rounded-r-none')}
+              // `bg-clip-border` paints the fill under Button's 1px transparent border, which
+              // otherwise lets the card background through as a white gap at the seam.
+              className={cn(
+                // eslint-disable-next-line no-restricted-syntax -- split-button halves fill the button-group row height and paint their fill to the border box so the seam stays a single hairline
+                'h-full min-w-0 flex-1 shrink bg-clip-border',
+                hasMenu && 'in-data-[slot=button-group]:rounded-r-none',
+              )}
               // The floor keeps the button from resizing as the selected option's label changes, but
               // an unconditional `${maxCharLen}ch` outgrew narrow rows and shoved the dropdown half
               // outside the group, where TxCard's overflow-hidden clipped it off. Capping it against
@@ -96,7 +100,7 @@ export default function SplitMenuButton({
                 disabled={loading}
                 data-testid="combo-submit-dropdown"
                 // eslint-disable-next-line no-restricted-syntax -- split-button halves flatten inner corners at the join and fill the button-group row height
-                className="h-full max-w-12 border-l border-l-[var(--color-border-light)] px-3 in-data-[slot=button-group]:rounded-l-none"
+                className="border-l-primary-foreground/20 h-full max-w-12 border-l bg-clip-border px-3 in-data-[slot=button-group]:rounded-l-none"
               />
             }
           >

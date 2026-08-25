@@ -19,7 +19,7 @@ import { cn } from '@/utils/cn'
  * @remarks
  * Key Props:
  * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'surface')
- * - `size` ('default' | 'sm' | 'lg' | 'action' | 'submit' | 'xl' | 'icon' | 'icon-xs' | 'icon-sm')
+ * - `size` ('default' | 'xs' | 'sm' | 'lg' | 'action' | 'submit' | 'xl' | 'icon' | 'icon-xs' | 'icon-sm')
  * - `render`
  * - `className`
  */
@@ -59,6 +59,9 @@ const buttonVariants = cva(
         default:
           'h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2',
         sm: 'h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5',
+        // `sm`'s box with the 12px label scale: for secondary controls that sit beside body text
+        // (a section header's "Expand all"/"Collapse all") and should not compete with it.
+        xs: "h-8 gap-1 px-4 text-xs in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3",
         lg: 'h-10 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3',
         // Prominent call-to-action pill: use for the main action(s) of a surface
         // (Send/Receive/Swap, Confirm/Execute, Save settings, Filter/Export). Pair

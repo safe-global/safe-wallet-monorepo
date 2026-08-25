@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./WorkspaceHealthCard.stories CriticalFilterActive 1`] = `
 <div
@@ -15,6 +15,7 @@ exports[`./WorkspaceHealthCard.stories CriticalFilterActive 1`] = `
         data-radius="lg"
         data-size="default"
         data-slot="card"
+        data-surface="default"
         data-variant="default"
       >
         <div
@@ -70,6 +71,7 @@ exports[`./WorkspaceHealthCard.stories Healthy 1`] = `
         data-radius="lg"
         data-size="default"
         data-slot="card"
+        data-surface="default"
         data-variant="default"
       >
         <div
@@ -125,6 +127,7 @@ exports[`./WorkspaceHealthCard.stories MixedGrades 1`] = `
         data-radius="lg"
         data-size="default"
         data-slot="card"
+        data-surface="default"
         data-variant="default"
       >
         <div
@@ -180,6 +183,7 @@ exports[`./WorkspaceHealthCard.stories Scanning 1`] = `
         data-radius="lg"
         data-size="default"
         data-slot="card"
+        data-surface="default"
         data-variant="default"
       >
         <div

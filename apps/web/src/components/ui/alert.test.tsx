@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { Alert, AlertTitle, AlertDescription, AlertAction } from './alert'
+import { Alert, AlertTitle, AlertDescription, AlertAction, AlertSeverityIcon } from './alert'
 
 describe('Alert', () => {
   it('renders as an alert with title and description', () => {
@@ -47,7 +47,8 @@ describe('Alert', () => {
     )
 
     const alert = screen.getByRole('alert')
-    expect(alert).toHaveClass('bg-card', 'text-error-strong')
+    expect(alert).toHaveClass('bg-card', 'text-foreground')
+    expect(alert.className).toContain('*:data-[slot=alert-description]:text-muted-foreground')
     expect(alert.className).toContain('*:[svg]:text-destructive')
   })
 
@@ -59,7 +60,7 @@ describe('Alert', () => {
     )
 
     const alert = screen.getByRole('alert')
-    expect(alert).toHaveClass('bg-error-subtle', 'border-transparent', 'text-error-strong')
+    expect(alert).toHaveClass('bg-error-subtle', 'border-transparent', 'text-foreground')
     expect(alert).not.toHaveClass('bg-card')
   })
 
@@ -72,7 +73,8 @@ describe('Alert', () => {
     )
 
     const alert = screen.getByRole('alert')
-    expect(alert).toHaveClass('bg-card', 'text-warning-strong')
+    expect(alert).toHaveClass('bg-card', 'text-foreground')
+    expect(alert.className).toContain('*:data-[slot=alert-description]:text-muted-foreground')
     expect(alert.className).toContain('*:[svg]:text-warning-accent')
     expect(alert.className).not.toContain('yellow')
   })
@@ -85,7 +87,7 @@ describe('Alert', () => {
     )
 
     const alert = screen.getByRole('alert')
-    expect(alert).toHaveClass('bg-warning-subtle', 'border-transparent', 'text-warning-strong')
+    expect(alert).toHaveClass('bg-warning-subtle', 'border-transparent', 'text-foreground')
     expect(alert).not.toHaveClass('bg-card')
   })
 
@@ -96,10 +98,10 @@ describe('Alert', () => {
       </Alert>,
     )
 
-    expect(screen.getByRole('alert')).toHaveClass('bg-muted', 'border-transparent')
+    expect(screen.getByRole('alert')).toHaveClass('bg-[var(--color-info-background)]', 'border-transparent')
   })
 
-  it('applies the muted fill and muted icon color on the info variant', () => {
+  it('applies the info tint and info icon color on the info variant', () => {
     render(
       <Alert variant="info">
         <AlertTitle>Item added successfully</AlertTitle>
@@ -107,8 +109,22 @@ describe('Alert', () => {
     )
 
     const alert = screen.getByRole('alert')
-    expect(alert).toHaveClass('bg-muted', 'text-foreground', 'border-transparent')
-    expect(alert.className).toContain('*:[svg]:text-muted-foreground')
+    expect(alert).toHaveClass('bg-[var(--color-info-background)]', 'text-foreground', 'border-transparent')
+    expect(alert.className).toContain('[&>svg]:text-[var(--color-info-dark)]')
+    expect(alert).not.toHaveClass('bg-muted')
+  })
+
+  it('applies a neutral tint, primary title and secondary description on the subtle variant', () => {
+    render(
+      <Alert variant="subtle">
+        <AlertTitle>Item added successfully</AlertTitle>
+        <AlertDescription>No status implied.</AlertDescription>
+      </Alert>,
+    )
+
+    const alert = screen.getByRole('alert')
+    expect(alert).toHaveClass('bg-foreground/5', 'text-foreground', 'border-transparent')
+    expect(alert.className).toContain('*:data-[slot=alert-description]:text-[var(--color-text-secondary)]')
   })
 
   it('renders the action slot anchored to the top right', () => {
@@ -137,5 +153,36 @@ describe('Alert', () => {
     )
 
     expect(screen.getByRole('button', { name: 'Retry' }).parentElement).toHaveClass('text-foreground')
+  })
+})
+
+describe('AlertSeverityIcon', () => {
+  it.each([
+    ['destructive', 'lucide-circle-alert'],
+    ['warning', 'lucide-triangle-alert'],
+    ['success', 'lucide-circle-check'],
+    ['info', 'lucide-info'],
+  ] as const)('renders the standard icon for the %s variant', (variant, iconClass) => {
+    const { container } = render(<AlertSeverityIcon variant={variant} />)
+
+    expect(container.querySelector(`svg.${iconClass}`)).toBeInTheDocument()
+  })
+
+  it('renders nothing for the default variant, which has no standard icon', () => {
+    const { container } = render(<AlertSeverityIcon variant="default" />)
+
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('renders nothing when no variant is given', () => {
+    const { container } = render(<AlertSeverityIcon />)
+
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('forwards props (e.g. className) to the rendered icon', () => {
+    render(<AlertSeverityIcon variant="warning" className="size-6" data-testid="severity-icon" />)
+
+    expect(screen.getByTestId('severity-icon')).toHaveClass('size-6', 'lucide-triangle-alert')
   })
 })

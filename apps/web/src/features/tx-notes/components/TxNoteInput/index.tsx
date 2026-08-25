@@ -2,8 +2,9 @@ import { useCallback } from 'react'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { Controller, useForm } from 'react-hook-form'
 import { Typography } from '@/components/ui/typography'
-import { Field, FieldLabel } from '@/components/ui/field'
+import { Field } from '@/components/ui/field'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import TxSectionTitle from '@/components/tx-flow/common/TxSectionTitle'
 
 const MAX_NOTE_LENGTH = 60
 
@@ -34,20 +35,19 @@ export default function TxNoteInput({ onChange }: { onChange: (note: string) => 
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-row items-end gap-2">
-        <Typography variant="h4">Note</Typography>
-      </div>
+      <TxSectionTitle>Note</TxSectionTitle>
 
       <Controller
         name="note"
         control={control}
         render={({ field }) => (
           <Field>
-            <FieldLabel htmlFor="tx-note-input">Optional</FieldLabel>
-            <InputGroup data-testid="tx-note-textfield">
+            <InputGroup inputSize="hero" data-testid="tx-note-textfield">
               <InputGroupInput
                 name={field.name}
                 id="tx-note-input"
+                aria-label="Note"
+                placeholder="Optional"
                 value={field.value || ''}
                 maxLength={MAX_NOTE_LENGTH}
                 onChange={(e) => {

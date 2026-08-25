@@ -256,10 +256,10 @@ export const addressBookErrrMsg = {
   invalidFormat: 'Invalid address format',
   invalidChecksum: 'Invalid address checksum',
   exceedChars: 'Maximum 50 symbols',
-  ownSafeManage: 'The Safe account cannot own itself',
+  ownSafeManage: 'Cannot use Safe account itself as signer',
   ownSafe: 'Cannot use Safe account itself as signer',
-  alreadyAdded: 'Address already added',
-  ownerAdded: 'Signer is already added',
+  alreadyAdded: 'This address is already a signer of this Safe Account',
+  ownerAdded: 'This address is already a signer of this Safe Account',
   failedResolve: 'ENS name not available on Sepolia',
   emptyAddress: 'Owner',
   safeAlreadyAdded: 'Safe account is already added',
@@ -336,3 +336,6 @@ export const sessionStorageKeys = {
   SAFE_v2__classicViewEnabled: 'SAFE_v2__classicViewEnabled',
   SAFE_v2__privateKeyModulePK: 'SAFE_v2__privateKeyModulePK',
 }
+
+// Follows the chain config's recommendedMasterCopyVersion, so it changes when that does.
+export const safeProxyFactoryLabel = 'SafeProxyFactory 1.5.0'

@@ -8,6 +8,13 @@ describe('Link', () => {
     expect(link).toHaveAttribute('href', 'https://safe.global')
   })
 
+  it('applies bold weight and hover color on the default variant', () => {
+    render(<Link href="#">Default</Link>)
+    const { className } = screen.getByRole('link', { name: 'Default' })
+    expect(className).toContain('font-bold')
+    expect(className).toContain('hover:text-[var(--color-primary-light)]')
+  })
+
   it('applies the muted variant classes', () => {
     render(
       <Link href="#" variant="muted">

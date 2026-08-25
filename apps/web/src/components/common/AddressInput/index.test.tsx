@@ -47,11 +47,15 @@ const TestForm = ({
   validate,
   disabled,
   chain,
+  required,
+  placeholder,
 }: {
   address: string
   validate?: AddressInputProps['validate']
   disabled?: boolean
   chain?: AddressInputProps['chain']
+  required?: boolean
+  placeholder?: string
 }) => {
   const name = 'recipient'
 
@@ -67,7 +71,15 @@ const TestForm = ({
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(() => null)}>
-        <AddressInput name={name} label="Recipient address" validate={validate} disabled={disabled} chain={chain} />
+        <AddressInput
+          name={name}
+          label="Recipient address"
+          validate={validate}
+          disabled={disabled}
+          chain={chain}
+          required={required}
+          placeholder={placeholder}
+        />
         <button type="submit">Submit</button>
       </form>
     </FormProvider>
@@ -115,6 +127,29 @@ describe('AddressInput tests', () => {
   it('should render with a default prefixed address value', () => {
     const { input } = setup(`eth:${TEST_ADDRESS_A}`)
     expect(input.value).toBe(`eth:${TEST_ADDRESS_A}`)
+  })
+
+  describe('optional placeholder', () => {
+    it('defaults to an "Optional" placeholder when not required and none is provided', () => {
+      const utils = render(<TestForm address="" required={false} />)
+      const input = utils.getByLabelText('Recipient address', { exact: false })
+
+      expect(input).toHaveAttribute('placeholder', 'Optional')
+    })
+
+    it('keeps the provided placeholder when one is given', () => {
+      const utils = render(<TestForm address="" required={false} placeholder="0x... address" />)
+      const input = utils.getByLabelText('Recipient address', { exact: false })
+
+      expect(input).toHaveAttribute('placeholder', '0x... address')
+    })
+
+    it('does not add an "Optional" placeholder when the field is required by default', () => {
+      const utils = render(<TestForm address="" />)
+      const input = utils.getByLabelText('Recipient address', { exact: false })
+
+      expect(input).not.toHaveAttribute('placeholder')
+    })
   })
 
   it('should validate the address on input', async () => {

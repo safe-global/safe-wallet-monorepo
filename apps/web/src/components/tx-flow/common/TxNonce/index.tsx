@@ -1,4 +1,4 @@
-import { memo, type ReactElement, useContext, useMemo, useState, useEffect } from 'react'
+import { memo, type CSSProperties, type ReactElement, useContext, useMemo, useState, useEffect } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
 
@@ -41,7 +41,10 @@ const NonceFormOption = memo(function NonceFormOption({ nonce }: { nonce: string
     }
 
     const [{ transaction }] = latestTransactions
-    return transaction.txInfo.humanDescription || `${getTransactionType(transaction, addressBook).text} transaction`
+    const note = transaction.note?.trim()
+    return (
+      note || transaction.txInfo.humanDescription || `${getTransactionType(transaction, addressBook).text} transaction`
+    )
   }, [addressBook, transactions])
 
   const label = txLabel || 'New transaction'
@@ -97,7 +100,8 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
   })
 
   const resetNonce = () => {
-    formMethods.setValue(TxNonceFormFieldNames.NONCE, recommendedNonce)
+    // shouldValidate re-runs the `validate` rule, which propagates the value to SafeTxContext
+    formMethods.setValue(TxNonceFormFieldNames.NONCE, recommendedNonce, { shouldValidate: true })
   }
 
   useEffect(() => {
@@ -179,13 +183,14 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
                   name={field.name}
                   aria-label={message || undefined}
                   showTrigger
-                  className="[&_input]:font-bold"
-                  style={{ minWidth: getFieldMinWidth(field.value) }}
+                  // The clamp sizes the text input itself; the group grows to fit the trigger/reset addons
+                  className="[&_input]:font-bold [&_input]:w-(--nonce-width) [&_input]:min-w-0"
+                  style={{ '--nonce-width': getFieldMinWidth(field.value) } as CSSProperties}
                   onBlur={() => {
                     field.onBlur()
 
                     if (fieldState.error) {
-                      formMethods.setValue(field.name, recommendedNonce.toString())
+                      formMethods.setValue(field.name, recommendedNonce.toString(), { shouldValidate: true })
                     }
                   }}
                 >
@@ -209,7 +214,11 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
               {message && <TooltipContent side="top">{message}</TooltipContent>}
             </Tooltip>
 
-            <ComboboxContent>
+            {/* The input itself is tiny (clamped to a few characters), but the shared default ties
+                the popup width to it via --anchor-width. Options show full labels like "12 - New
+                transaction", so size the popup to that content instead — matching the pre-migration
+                MUI Popper, which explicitly opted out of the anchor-width tie for this field. */}
+            <ComboboxContent className="w-max min-w-40 max-w-[300px]">
               <ComboboxList>
                 {/* Each label must live inside its own ComboboxGroup — Base UI's GroupLabel throws
                     without a Group ancestor, which previously crashed the popup on open. */}

@@ -8,19 +8,6 @@
   overflow: hidden;
 }
 
-.listItemNested {
-  border: none;
-  background-color: transparent;
-  border-radius: 0;
-}
-
-.listItemNested:hover,
-.listItemNested.batched,
-.listItemNested[data-open] {
-  border: none;
-  background-color: transparent;
-}
-
 /* Interior of the card, not a surface of its own — matches ExpandableMsgItem's panel and the
    pre-shadcn behaviour, where the details area simply inherited the card fill. */
 .accordionContentSurface {
@@ -33,22 +20,50 @@
   border-color: var(--color-secondary-light);
 }
 
-/* Expanded card stays solid white/card (declared after :hover so it wins when an open item is
-   also hovered) — the tinted fill hurt contrast on the detail content. Border stays transparent:
-   the card sits on the grey page, so its own edge is already legible without an outline. */
 .listItem[data-open] {
   background-color: var(--card);
 }
 
-.listItem:hover [data-slot='accordion-trigger'] {
+/* Child combinators throughout: a descendant match tints the accordion triggers nested inside the row
+   — transaction details, fee breakdowns — along with the row's own. */
+.listItem:hover > * > [data-slot='accordion-trigger'] {
   background-color: var(--color-background-light);
 }
 
-.listItem[data-open] [data-slot='accordion-trigger'] {
-  background-color: var(--card);
+.listItem[data-open] > * > [data-slot='accordion-trigger'] {
+  background-color: var(--color-background-light);
 }
 
-.listItemNested:hover [data-slot='accordion-trigger'],
-.listItemNested[data-open] [data-slot='accordion-trigger'] {
-  background-color: color-mix(in srgb, var(--card) 72%, var(--muted) 28%);
+/* Rows nested in a group sit on the group's own surface: unfilled, square, and borderless so
+   consecutive rows stay flush. They take their hover fill from .listItem above, so these must follow
+   those rules — same specificity. */
+.listItemNested,
+.listItemNested:hover,
+.listItemNested.batched,
+.listItemNested[data-open] {
+  background-color: transparent;
+}
+
+.listItemNested {
+  position: relative;
+  border: none;
+  border-radius: 0;
+}
+
+/* The hover ring is an overlay rather than a border, so a row's edge adds no width that could stack
+   with the neighbouring row's or with the divider between them. It has to be positioned: the trigger
+   is `relative`, and a positioned child paints over its parent's border or outline. */
+.listItemNested::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid transparent;
+  border-radius: inherit;
+  pointer-events: none;
+  transition: border-color 0.2s ease;
+}
+
+.listItemNested:hover::after,
+.listItemNested.batched::after {
+  border-color: var(--color-secondary-light);
 }
