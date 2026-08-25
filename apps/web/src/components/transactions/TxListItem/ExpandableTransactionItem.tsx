@@ -85,9 +85,10 @@ const ExpandableTransactionItem = ({
           className={classNames(
             'pt-0 pb-0',
             // Mirrors the trigger's horizontal padding above so the details' text lands on the same
-            // vertical line while their borders still span the card.
+            // vertical line while their borders still span the card. `--spacing(3)` is what `px-3`
+            // resolves to, so the two cannot drift if the spacing scale moves.
             isBulkGroup
-              ? '[--tx-details-edge-inset:12px]'
+              ? '[--tx-details-edge-inset:--spacing(3)]'
               : '[--tx-details-edge-inset:var(--space-2)] sm:[--tx-details-edge-inset:var(--space-3)]',
             css.accordionContentSurface,
           )}
