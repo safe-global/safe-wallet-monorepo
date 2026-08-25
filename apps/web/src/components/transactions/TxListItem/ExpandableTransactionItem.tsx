@@ -61,7 +61,12 @@ const ExpandableTransactionItem = ({
           // than the viewport's. With the sidebar expanded a 920px viewport leaves the row only 638px,
           // so viewport-based breakpoints kept the one-line grid past the point it fitted and
           // `overflow-x-auto` turned that into a scrollbar.
-          className="@container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+          className={classNames(
+            '@container cursor-pointer items-center justify-start overflow-x-auto py-3',
+            // A bulk group's card already insets its row block by 12px, so the row halves its own
+            // padding to land the nonce 24px in — level with a standalone row's nonce.
+            isBulkGroup ? 'px-3' : 'px-4 sm:px-6',
+          )}
         >
           <TxSummary item={item} isConflictGroup={isConflictGroup} isBulkGroup={isBulkGroup} />
         </AccordionTrigger>
@@ -72,11 +77,16 @@ const ExpandableTransactionItem = ({
           // Full-bleed panel: the details draw their separators — and the vertical rule beside the
           // audit log — as borders on their own blocks, so any padding here holds those rules off
           // the card's edges. The inset moves onto each block via `--tx-details-edge-inset` (see
-          // TxDetails/styles.module.css), matching the trigger's px-4 / sm:px-6 above so text
+          // TxDetails/styles.module.css), matching the trigger's horizontal padding above so text
           // lands exactly where it did. `pb-0` for the same reason: the blocks bring their own
           // bottom padding, and padding here would cut the vertical rule short of the card's edge.
           className={classNames(
-            'pt-0 pb-0 [--tx-details-edge-inset:var(--space-2)] sm:[--tx-details-edge-inset:var(--space-3)]',
+            'pt-0 pb-0',
+            // Mirrors the trigger's horizontal padding above so the details' text lands on the same
+            // vertical line while their borders still span the card.
+            isBulkGroup
+              ? '[--tx-details-edge-inset:12px]'
+              : '[--tx-details-edge-inset:var(--space-2)] sm:[--tx-details-edge-inset:var(--space-3)]',
             css.accordionContentSurface,
           )}
         >

@@ -50,11 +50,20 @@
   padding: 0;
   border-radius: var(--radius-lg);
   background-color: var(--surface-sunken);
-  overflow: hidden;
 }
 
 .txItems > div:not(:last-child) {
   border-bottom: 1px solid var(--border);
+}
+
+.txItems > div:first-child > [data-slot='accordion'] > [data-slot='accordion-item'] {
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+}
+
+.txItems > div:last-child > [data-slot='accordion'] > [data-slot='accordion-item'] {
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
 }
 
 .txItems [data-slot='accordion-item'] {

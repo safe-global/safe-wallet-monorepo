@@ -1,12 +1,16 @@
 .container {
+  /* Same value as the rows' own px-3: the two insets together put the nonce 24px from the card
+     border, level with a standalone transaction row's nonce. */
+  --row-inset: calc(var(--spacing) * 3);
+
   position: relative;
-  padding: var(--space-2);
+  padding: var(--space-2) var(--row-inset) var(--row-inset);
   display: grid;
   align-items: center;
   grid-template-columns: minmax(50px, 0.25fr) minmax(240px, 2fr) minmax(150px, 4fr) minmax(170px, 1fr);
   grid-template-areas:
     'icon info action hash'
-    'nonce items items items';
+    'items items items items';
 }
 
 .action {
@@ -19,12 +23,6 @@
   grid-area: hash;
   display: grid;
   justify-content: flex-end;
-}
-
-.nonce {
-  position: absolute;
-  left: -24px;
-  top: var(--space-1);
 }
 
 .txItems {
@@ -46,10 +44,10 @@
   .container {
     grid-template-columns: minmax(30px, 0.25fr) minmax(230px, 3fr);
     grid-template-areas:
-      'icon info '
-      'nonce action'
-      'nonce hash '
-      'nonce items';
+      'icon  info  '
+      'action action'
+      'hash  hash  '
+      'items items ';
   }
 
   .action {
@@ -57,8 +55,5 @@
   }
   .hash {
     justify-content: flex-start;
-  }
-  .nonce {
-    left: -16px;
   }
 }
