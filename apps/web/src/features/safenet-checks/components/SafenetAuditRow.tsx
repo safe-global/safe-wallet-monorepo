@@ -4,9 +4,9 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useChain } from '@/hooks/useChains'
 import {
-  CheckEventType,
   CheckStatus,
   SAFENET_EXPLORER_URL,
+  verdictAttestation,
   type PublicCheckStatus,
 } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
@@ -65,13 +65,10 @@ export const SafenetAuditRow = ({
   // attestation, so "No issues found" and the proof link always travel together.
   const isVerified = publicStatus === CheckStatus.BENIGN
 
-  // Point at the transaction that carried the attestation, on the Safenet
-  // chain's block explorer — oracle-preferred, the same event the api
-  // verifies. The Safenet explorer's hash route is the fallback when the
-  // chain config or the attested event is unavailable.
-  const attested =
-    snapshot.events.find((event) => event.type === CheckEventType.ORACLE_ATTESTED) ??
-    snapshot.events.find((event) => event.type === CheckEventType.PLAIN_ATTESTED)
+  // Point at the transaction that carried the attestation this verdict came
+  // from, on the Safenet chain's block explorer. The Safenet explorer's hash
+  // route is the fallback when the chain config is unavailable.
+  const attested = verdictAttestation(snapshot)
   const attestationTxLink =
     attested && safenetChain ? getExplorerLink(attested.transactionHash, safenetChain.blockExplorerUriTemplate) : null
   const href = attestationTxLink?.href ?? `${SAFENET_EXPLORER_URL}/#/safeTx?chainId=${chainId}&safeTxHash=${safeTxHash}`

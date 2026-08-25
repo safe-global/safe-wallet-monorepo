@@ -1,15 +1,16 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 import {
-  CheckEventType,
+  AttestationVerificationStatus,
   CheckStatus,
   UNVERIFIED_ATTESTATION,
+  attestationCandidates,
   deriveCheckState,
   getSafenetReader,
   mergeMonotonic,
   type AttestationVerification,
-  type OracleAttestedEvent,
-  type PlainAttestedEvent,
+  type AttestedCheckEvent,
   type SafenetCheckSnapshot,
+  type SafenetReader,
 } from '@safe-global/utils/features/safenet-checks'
 import { pinVerdict, selectPinnedVerdict, type SafenetCheckPartialState } from './safenetCheckSlice'
 
@@ -21,6 +22,37 @@ import { pinVerdict, selectPinnedVerdict, type SafenetCheckPartialState } from '
  * last good snapshot.
  */
 const noopBaseQuery = async () => ({ data: null })
+
+/** How much a verification result is worth when no candidate verifies. */
+const VERIFICATION_RANK: Record<AttestationVerificationStatus, number> = {
+  [AttestationVerificationStatus.VERIFIED]: 3,
+  // Retryable, so it outranks the terminal INVALID.
+  [AttestationVerificationStatus.PENDING]: 2,
+  [AttestationVerificationStatus.INVALID]: 1,
+  [AttestationVerificationStatus.UNVERIFIED]: 0,
+}
+
+type SelectedAttestation = { event: AttestedCheckEvent; attestation: AttestationVerification }
+
+/**
+ * Verify candidates in order and stop at the first signature that verifies. An
+ * attestation that does not verify is only this check's verdict when no other
+ * one does, so the strongest result wins rather than the earliest.
+ */
+const selectAttestation = async (
+  reader: SafenetReader,
+  candidates: ReadonlyArray<AttestedCheckEvent>,
+): Promise<SelectedAttestation | null> => {
+  let best: SelectedAttestation | null = null
+  for (const event of candidates) {
+    const attestation = await reader.verifyAttestation(event)
+    if (best === null || VERIFICATION_RANK[attestation.status] > VERIFICATION_RANK[best.attestation.status]) {
+      best = { event, attestation }
+    }
+    if (attestation.status === AttestationVerificationStatus.VERIFIED) break
+  }
+  return best
+}
 
 /**
  * `timestampMs` is when the Safe transaction was submitted (proposal time, not
@@ -43,21 +75,13 @@ export const safenetCheckApi = createApi({
           const reader = getSafenetReader()
           const read = await reader.fetchCheckState(safeTxHash, { timestampMs })
 
-          // Prefer the oracle attestation when both are present: it is the one
-          // backed by sentinel checks, and deriveCheckState consumes the
-          // verification result through its oracle branch first. Plain
-          // events.find would verify whichever attested first on chain.
-          const attestedEvent =
-            read.events.find((event): event is OracleAttestedEvent => event.type === CheckEventType.ORACLE_ATTESTED) ??
-            read.events.find((event): event is PlainAttestedEvent => event.type === CheckEventType.PLAIN_ATTESTED)
-          // Both gated on an attestation existing: the header read dates the
-          // audit step, happens on the poll that first observes the
-          // attestation, and polling stops there — one RPC per settled check.
-          const [attestation, attestedAtMs]: [AttestationVerification, number | null] = attestedEvent
-            ? await Promise.all([
-                reader.verifyAttestation(attestedEvent),
-                reader.blockTimeMs(attestedEvent.blockNumber),
-              ])
+          const selected = await selectAttestation(reader, attestationCandidates(read.events))
+          // The header read only dates the audit step, and it is gated on an
+          // attestation existing. Cost is one extra call per poll that observes
+          // one — for a settled check that is one poll when the group key loads,
+          // and every poll while it does not or while arbitration stays open.
+          const [attestation, attestedAtMs]: [AttestationVerification, number | null] = selected
+            ? [selected.attestation, await reader.blockTimeMs(selected.event.blockNumber)]
             : [UNVERIFIED_ATTESTATION, null]
 
           const derived = deriveCheckState({ events: read.events, attestation, headBlock: read.headBlock })

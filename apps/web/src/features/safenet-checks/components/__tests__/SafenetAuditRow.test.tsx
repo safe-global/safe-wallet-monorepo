@@ -67,7 +67,12 @@ describe('SafenetAuditRow', () => {
 
   it('links the attestation transaction on the Safenet chain block explorer once FROST-verified', () => {
     const attested = plainAttestedEvent({ safeTxHash: HASH as `0x${string}` })
-    const snapshot = buildBenignSnapshot({ safeTxHash: HASH as `0x${string}`, events: [attested] })
+    const snapshot = buildBenignSnapshot({
+      safeTxHash: HASH as `0x${string}`,
+      events: [attested],
+      // The link must point at the event whose signature produced the verdict.
+      attestation: { status: AttestationVerificationStatus.VERIFIED, signatureId: attested.signatureId, message: null },
+    })
     mockUseSafenetCheck.mockReturnValue(
       view({ snapshot, status: CheckStatus.BENIGN, publicStatus: CheckStatus.BENIGN }),
     )

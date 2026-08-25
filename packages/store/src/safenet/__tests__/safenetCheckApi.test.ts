@@ -5,6 +5,7 @@ import {
   UNVERIFIED_ATTESTATION,
   getSafenetReader,
   type CheckReadResult,
+  type PlainAttestedEvent,
 } from '@safe-global/utils/features/safenet-checks'
 import {
   attestedEvent,
@@ -29,6 +30,8 @@ const mockedGetReader = getSafenetReader as jest.MockedFunction<typeof getSafene
 
 const HASH = ('0x' + 'cd'.repeat(32)) as `0x${string}`
 const REQUEST_ID = ('0x' + 'ef'.repeat(32)) as `0x${string}`
+const EARLY_SIG = ('0x' + '11'.repeat(32)) as `0x${string}`
+const LATE_SIG = ('0x' + '22'.repeat(32)) as `0x${string}`
 
 const fakeReader = { fetchCheckState: jest.fn(), verifyAttestation: jest.fn(), blockTimeMs: jest.fn() }
 
@@ -296,5 +299,78 @@ describe('safenetCheckApi.getSafenetCheck', () => {
     const queries = store.getState()[safenetCheckApi.reducerPath].queries
     expect(Object.keys(queries)).toHaveLength(1)
     expect(fakeReader.fetchCheckState).toHaveBeenCalledTimes(1)
+  })
+
+  describe('attestation selection', () => {
+    // A cross-epoch re-proposal is the protocol's only retry, so a check can
+    // carry two attestations for one hash.
+    const pair = () => [
+      plainAttestedEvent({ safeTxHash: HASH, blockNumber: 100, epoch: '10', signatureId: EARLY_SIG }),
+      plainAttestedEvent({ safeTxHash: HASH, blockNumber: 200, epoch: '11', signatureId: LATE_SIG }),
+    ]
+
+    const verifyBy = (statusBySignature: Record<string, AttestationVerificationStatus>) =>
+      fakeReader.verifyAttestation.mockImplementation(async (event: PlainAttestedEvent) => ({
+        status: statusBySignature[event.signatureId],
+        signatureId: event.signatureId,
+        message: REQUEST_ID,
+      }))
+
+    it('settles on a later valid attestation instead of terminalizing on an early invalid one', async () => {
+      fakeReader.fetchCheckState.mockResolvedValue(baseRead({ events: pair() }))
+      verifyBy({
+        [EARLY_SIG]: AttestationVerificationStatus.INVALID,
+        [LATE_SIG]: AttestationVerificationStatus.VERIFIED,
+      })
+
+      const result = await runQuery(makeTestStore())
+
+      expect(result.data?.status).toBe(CheckStatus.BENIGN)
+      expect(result.data?.attestation.signatureId).toBe(LATE_SIG)
+      // Stopped at the first signature that verified — the invalid one is never read.
+      expect(fakeReader.verifyAttestation).toHaveBeenCalledTimes(1)
+      expect(fakeReader.blockTimeMs).toHaveBeenCalledWith(200)
+    })
+
+    it('settles on the earlier valid attestation when the later one is invalid', async () => {
+      fakeReader.fetchCheckState.mockResolvedValue(baseRead({ events: pair() }))
+      verifyBy({
+        [EARLY_SIG]: AttestationVerificationStatus.VERIFIED,
+        [LATE_SIG]: AttestationVerificationStatus.INVALID,
+      })
+
+      const result = await runQuery(makeTestStore())
+
+      expect(result.data?.status).toBe(CheckStatus.BENIGN)
+      expect(result.data?.attestation.signatureId).toBe(EARLY_SIG)
+      expect(fakeReader.verifyAttestation).toHaveBeenCalledTimes(2)
+      expect(fakeReader.blockTimeMs).toHaveBeenCalledWith(100)
+    })
+
+    it('fails verification only when no attestation verifies', async () => {
+      fakeReader.fetchCheckState.mockResolvedValue(baseRead({ events: pair() }))
+      verifyBy({
+        [EARLY_SIG]: AttestationVerificationStatus.INVALID,
+        [LATE_SIG]: AttestationVerificationStatus.INVALID,
+      })
+
+      const result = await runQuery(makeTestStore())
+
+      expect(result.data?.status).toBe(CheckStatus.VERIFICATION_FAILED)
+      expect(fakeReader.verifyAttestation).toHaveBeenCalledTimes(2)
+    })
+
+    it('keeps a retryable result over a terminal one when nothing verifies', async () => {
+      fakeReader.fetchCheckState.mockResolvedValue(baseRead({ events: pair() }))
+      verifyBy({
+        [EARLY_SIG]: AttestationVerificationStatus.PENDING,
+        [LATE_SIG]: AttestationVerificationStatus.INVALID,
+      })
+
+      const result = await runQuery(makeTestStore())
+
+      expect(result.data?.status).toBe(CheckStatus.AWAITING_VERIFICATION)
+      expect(result.data?.attestation.signatureId).toBe(EARLY_SIG)
+    })
   })
 })
