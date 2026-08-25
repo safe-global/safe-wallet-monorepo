@@ -85,7 +85,7 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
                 width: headCell.width ? headCell.width : undefined,
                 textAlign: headCell.align ? (headCell.align as React.CSSProperties['textAlign']) : undefined,
               }}
-              className={classNames('text-sm', { sticky: headCell.sticky })}
+              className={classNames('text-sm first:pl-3', { sticky: headCell.sticky })}
             >
               {headCell.disableSort ? (
                 <span className="text-sm">{headCell.label}</span>
@@ -170,10 +170,13 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
     <div className="mb-4 w-full">
       <div
         data-testid="table-container"
-        className={classNames('w-full overflow-x-auto bg-[var(--color-background-paper)] md:overflow-x-hidden', {
-          'rounded-b-none': showPagination,
-          'rounded-b-3xl': !showPagination,
-        })}
+        className={classNames(
+          'w-full overflow-x-auto rounded-t-3xl bg-[var(--color-background-paper)] md:overflow-x-hidden',
+          {
+            'rounded-b-none': showPagination,
+            'rounded-b-3xl': !showPagination,
+          },
+        )}
       >
         <Table
           aria-labelledby="tableTitle"
@@ -201,7 +204,7 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
                       <TableCell
                         key={key}
                         data-testid={`table-cell-${key}`}
-                        className={classNames({
+                        className={classNames('first:pl-3', {
                           [css.collapsedCell]: row.collapsed,
                         })}
                       >
