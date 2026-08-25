@@ -14,6 +14,8 @@ import {
   useAddressBookRequestsRejectRequestV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId, useGetSpaceAddressBook, useIsAdmin } from '@/features/spaces'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'
@@ -95,6 +97,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
         )
         return
       }
+      trackEvent(SPACE_EVENTS.ADDRESS_REQUEST_APPROVED)
       dispatch(
         showNotification({
           message: 'Contact added to workspace address book',
@@ -118,6 +121,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
         dispatch(showNotification({ message: 'Failed to reject request', variant: 'error', groupKey: 'reject-error' }))
         return
       }
+      trackEvent(SPACE_EVENTS.ADDRESS_REQUEST_REJECTED)
       dispatch(showNotification({ message: 'Request rejected', variant: 'success', groupKey: 'reject-success' }))
     } catch {
       dispatch(showNotification({ message: 'Something went wrong', variant: 'error', groupKey: 'reject-error' }))
@@ -208,7 +212,12 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
               <>
                 <Tooltip>
                   <TooltipTrigger render={<span className="inline-flex" />}>
-                    <Button variant="outline" size="icon-sm" onClick={() => handleApprove(req.id)}>
+                    <Button
+                      variant="outline"
+                      size="icon-sm"
+                      data-testid="approve-request-btn"
+                      onClick={() => handleApprove(req.id)}
+                    >
                       <Check className="size-4" />
                     </Button>
                   </TooltipTrigger>
@@ -216,7 +225,12 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger render={<span className="inline-flex" />}>
-                    <Button variant="outline" size="icon-sm" onClick={() => handleReject(req.id)}>
+                    <Button
+                      variant="outline"
+                      size="icon-sm"
+                      data-testid="reject-request-btn"
+                      onClick={() => handleReject(req.id)}
+                    >
                       <X className="size-4" />
                     </Button>
                   </TooltipTrigger>

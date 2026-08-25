@@ -27,13 +27,13 @@ const SpendingLimitsSettings = () => {
   return (
     <div data-testid="spending-limit-section" className="bg-card text-card-foreground rounded-lg p-8">
       <div className="flex flex-col justify-between gap-6 lg:flex-row">
-        <div className="lg:w-1/3">
+        <div className="lg:w-1/5 lg:shrink-0">
           <Typography variant="h4" className="font-bold">
             Spending limits
           </Typography>
         </div>
 
-        <div className="flex-1">
+        <div className="lg:min-w-0 lg:flex-1">
           {isEnabled ? (
             <div>
               <Typography>

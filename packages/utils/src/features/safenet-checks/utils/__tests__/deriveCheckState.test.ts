@@ -17,7 +17,6 @@ import {
   AttestationVerificationStatus,
   CheckEventType,
   CheckStatus,
-  OracleGeneration,
   UNVERIFIED_ATTESTATION,
   type AttestationVerification,
   type NormalizedCheckEvent,
@@ -85,8 +84,8 @@ describe('deriveCheckState — precedence table', () => {
     expect(derive([proposedEvent(), request()], '140')).toBe(CheckStatus.IN_PROGRESS)
   })
 
-  it('IN_PROGRESS on V2 commit activity (no verdict yet)', () => {
-    const events = [proposedEvent(), request(), sentinelCommittedEvent({ generation: OracleGeneration.V2 })]
+  it('IN_PROGRESS on commit activity (commits are blind, no verdict yet)', () => {
+    const events = [proposedEvent(), request(), sentinelCommittedEvent()]
     expect(derive(events, '140')).toBe(CheckStatus.IN_PROGRESS)
   })
 
@@ -115,16 +114,7 @@ describe('deriveCheckState — precedence table', () => {
     expect(status).not.toBe(CheckStatus.BENIGN)
   })
 
-  it('a lone V1 negative commit is NOT a verdict — one sentinel cannot red-flag a tx', () => {
-    const events = [
-      proposedEvent(),
-      request(),
-      sentinelCommittedEvent({ generation: OracleGeneration.V1, approved: false }),
-    ]
-    expect(derive(events, '140')).toBe(CheckStatus.IN_PROGRESS)
-  })
-
-  it('a lone V2 negative reveal is NOT a verdict — the oracle resolves by unanimity', () => {
+  it('a lone negative reveal is NOT a verdict — the oracle resolves by unanimity', () => {
     const events = [proposedEvent(), request(), sentinelRevealedEvent({ approved: false })]
     expect(derive(events, '140')).toBe(CheckStatus.IN_PROGRESS)
   })

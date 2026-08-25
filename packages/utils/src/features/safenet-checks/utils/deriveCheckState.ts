@@ -51,7 +51,10 @@ const hasOracleActivity = (events: ReadonlyArray<NormalizedCheckEvent>): boolean
 
 /**
  * Derive the check status from its full event set. Recomputed from scratch each
- * poll (idempotent, reorg-self-healing). Precedence, highest first:
+ * poll, so the derivation itself is idempotent and follows a reorg in both
+ * directions. The merged value does not: `mergeMonotonic` only advances, so a
+ * reorg below the deadline leaves a pinned `TIMED_OUT` in place.
+ * Precedence, highest first:
  *
  *  1. Negative verdict → `MALICIOUS` (even late, even past deadline).
  *  2. Attested → `BENIGN` only if the FROST signature verified,
@@ -60,7 +63,9 @@ const hasOracleActivity = (events: ReadonlyArray<NormalizedCheckEvent>): boolean
  *  3. Past the deadline block → `TIMED_OUT` (incl. frozen disputes).
  *  4. Any oracle activity → `IN_PROGRESS` (a positive `OracleResult` alone is
  *     NOT `BENIGN` without a verified attestation).
- *  5. Otherwise → `SUBMITTED`, requiring an actual proposal event.
+ *  5. Any proposal event → `SUBMITTED`.
+ *  6. Otherwise → `UNAVAILABLE`: no event of this check was read at all, which
+ *     is also what a read over too narrow a block window produces.
  */
 export const deriveCheckState = ({ events, attestation, headBlock }: DeriveCheckStateInput): CheckStatus => {
   if (hasNegativeVerdict(events)) return CheckStatus.MALICIOUS

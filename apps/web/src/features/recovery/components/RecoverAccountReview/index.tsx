@@ -13,7 +13,7 @@ import ErrorMessage from '@/components/tx/ErrorMessage'
 import TxCheckError from '@/components/tx/TxCheckError'
 import TxSubmitError from '@/components/tx/TxSubmitError'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/shared/ConfirmationTitle'
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import CheckWallet from '@/components/common/CheckWallet'
 import { dispatchRecoveryProposal } from '../../services/recovery-sender'
@@ -31,7 +31,6 @@ import { useIsValidRecoveryExecTransactionFromModule } from '../../hooks/useIsVa
 import { isWalletRejection } from '@/utils/wallets'
 import WalletRejectionError from '@/components/tx/shared/errors/WalletRejectionError'
 
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { BalanceChanges } from '@/components/tx/security/BalanceChanges'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
@@ -137,7 +136,7 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
 
         <OwnerList owners={newOwners} />
 
-        <Separator className={commonCss.nestedDivider} style={{ marginTop: 'var(--space-2)' }} />
+        <Separator bleed="6" className="mt-4" />
 
         <div className="my-2">
           <Typography variant="paragraph-small" color="muted" className="block mb-2">
@@ -148,7 +147,7 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
           </Typography>
         </div>
 
-        <Separator className={commonCss.nestedDivider} />
+        <Separator bleed="6" />
 
         {txPreview && <Summary safeTxData={safeTx?.data} {...txPreview} />}
 
@@ -176,9 +175,9 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
 
         {isRejectedByUser && <WalletRejectionError />}
 
-        <Separator className={commonCss.nestedDivider} />
+        <Separator bleed="6" />
 
-        <div className="flex items-center p-2" style={{ marginTop: 'var(--space-1)' }}>
+        <TxCardActions>
           <CheckWallet allowNonOwner checkNetwork>
             {(isOk) => (
               <Button data-testid="execute-btn" variant="default" disabled={!isOk || submitDisabled} onClick={onSubmit}>
@@ -186,7 +185,7 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
               </Button>
             )}
           </CheckWallet>
-        </div>
+        </TxCardActions>
       </TxCard>
     </>
   )

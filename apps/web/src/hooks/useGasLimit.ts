@@ -3,7 +3,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { useRpcEndpointInfo } from '@/hooks/wallets/useRpcEndpointInfo'
+import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import chains from '@safe-global/utils/config/chains'
 import { useSigner } from './wallets/useWallet'
 import { useSafeSDK } from './coreSDK/safeCoreSDK'
@@ -33,7 +33,6 @@ const useGasLimit = (
   const walletAddress = wallet?.address
   const isOwner = useIsSafeOwner()
   const currentChainId = useChainId()
-  const rpcInfo = useRpcEndpointInfo()
   const hasSafeTxGas = !!safeTx?.data?.safeTxGas
 
   const [gasLimit, gasLimitError, gasLimitLoading] = useAsync<bigint | undefined>(async () => {
@@ -85,9 +84,9 @@ const useGasLimit = (
 
   useEffect(() => {
     if (gasLimitError) {
-      logError(Errors._612, gasLimitError.message, rpcInfo)
+      logError(Errors._612, gasLimitError.message, getRpcErrorContext(web3ReadOnly))
     }
-  }, [gasLimitError, rpcInfo])
+  }, [gasLimitError, web3ReadOnly])
 
   return { gasLimit, gasLimitError, gasLimitLoading }
 }

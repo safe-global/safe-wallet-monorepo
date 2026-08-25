@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`BatchTransactions should render a list of batch transactions 1`] = `
 <div>
@@ -48,7 +48,7 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
               >
                 <div
                   aria-expanded="false"
-                  class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground cursor-pointer rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex-1 justify-between border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 flex min-h-12 items-center px-4 py-3 hover:no-underline elevationTrigger"
+                  class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground cursor-pointer rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex-1 justify-between border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 flex min-h-12 items-center px-4 py-3 elevationTrigger"
                   data-orientation="vertical"
                   data-slot="accordion-trigger"
                   data-testid="action-item"

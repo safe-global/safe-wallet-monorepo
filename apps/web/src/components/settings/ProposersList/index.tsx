@@ -51,7 +51,13 @@ const AddProposerButton = ({ onAdd, isUndeployedSafe }: { onAdd: () => void; isU
             <TooltipTrigger
               render={
                 <span>
-                  <Button data-testid="add-proposer-btn" onClick={onAdd} disabled={!isOk || isUndeployedSafe}>
+                  <Button
+                    data-testid="add-proposer-btn"
+                    variant="ghost"
+                    size="lg"
+                    onClick={onAdd}
+                    disabled={!isOk || isUndeployedSafe}
+                  >
                     <AddIcon className="size-4" />
                     Add proposer
                   </Button>

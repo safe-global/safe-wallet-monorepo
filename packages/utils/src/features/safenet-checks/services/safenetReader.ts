@@ -17,7 +17,6 @@ import {
 import {
   AttestationVerificationStatus,
   CheckEventType,
-  OracleGeneration,
   type AttestationVerification,
   type Hex,
   type NormalizedCheckEvent,
@@ -28,7 +27,7 @@ import {
 import { decodeLogs, type RawLog } from '../utils/decodeLogs'
 import { deadlineBlockOf } from '../utils/deriveCheckState'
 import { isValidPoint, verifyAttestation as verifyFrostAttestation } from '../utils/frost'
-import { oracleProposalHash, plainProposalHash } from '../utils/oracleProposalHash'
+import { plainProposalHash, transactionProposalHash } from '../utils/proposalHash'
 
 /**
  * Everything one poll reads off-chain for a single check. Numeric values are
@@ -41,8 +40,6 @@ export type CheckReadResult = {
   /** Decoded lifecycle events, sorted ascending by (blockNumber, logIndex). */
   events: NormalizedCheckEvent[]
   headBlock: string
-  /** Generation of the active request, once a sentinel event is seen. */
-  generation: OracleGeneration | null
   /**
    * Correlation metadata from the latest allowlisted proposal. Proposals are
    * permissionless, so do not render these as provenance.
@@ -50,7 +47,7 @@ export type CheckReadResult = {
   requestId: Hex | null
   epoch: string | null
   oracle: string | null
-  /** Block the check times out at (V1 `deadline` / V2 `revealDeadline`). */
+  /** Block the check times out at (the request's reveal deadline). */
   deadlineBlock: string | null
 }
 
@@ -100,6 +97,7 @@ export class SafenetReader {
   private currentProvider: JsonRpcProvider | null = null
   private chainIdChecked = false
   private readonly groupKeyCache = new Map<string, { x: string; y: string }>()
+  private readonly holds = new Map<JsonRpcProvider, number>()
 
   constructor(config: SafenetReaderConfig) {
     this.rpcUrls = config.rpcUrls
@@ -122,12 +120,35 @@ export class SafenetReader {
   }
 
   /**
+   * Take a reference on the current endpoint. Callers MUST release it.
+   *
+   * Invariant: a provider is destroyed only once it is no longer current AND no
+   * read still holds it. ethers' `destroy()` rejects in-flight requests, so
+   * destroying on one read's failure would cancel every concurrent sibling.
+   */
+  private acquire(): JsonRpcProvider {
+    const provider = this.provider()
+    this.holds.set(provider, (this.holds.get(provider) ?? 0) + 1)
+    return provider
+  }
+
+  private release(provider: JsonRpcProvider): void {
+    const held = (this.holds.get(provider) ?? 1) - 1
+    if (held > 0) {
+      this.holds.set(provider, held)
+      return
+    }
+    this.holds.delete(provider)
+    if (this.currentProvider !== provider) provider.destroy()
+  }
+
+  /**
    * Advance to the next endpoint, unless a concurrent read already rotated
-   * (rotating again would skip over healthy endpoints).
+   * (rotating again would skip over healthy endpoints). Uninstalls the failed
+   * provider; its last holder destroys it.
    */
   private rotate(failed: JsonRpcProvider): void {
     if (this.currentProvider !== failed) return
-    failed.destroy()
     this.currentProvider = null
     this.urlIndex = (this.urlIndex + 1) % this.rpcUrls.length
   }
@@ -137,7 +158,7 @@ export class SafenetReader {
     const attempts = Math.max(1, this.rpcUrls.length)
     let lastError: unknown
     for (let attempt = 0; attempt < attempts; attempt++) {
-      const provider = this.provider()
+      const provider = this.acquire()
       try {
         return await op(provider)
       } catch (error) {
@@ -148,6 +169,8 @@ export class SafenetReader {
         // (rate limit, pruned state) deserves the next endpoint.
         if (isCallException(error) && error.data != null) throw error
         this.rotate(provider)
+      } finally {
+        this.release(provider)
       }
     }
     throw lastError
@@ -163,8 +186,9 @@ export class SafenetReader {
       if (actual !== Number(this.chainId)) {
         console.error(
           `[safenet-reader] chain id mismatch: SAFENET_CHAIN_ID=${this.chainId} but the RPC ` +
-            `reports ${actual}. Request ids derive from SAFENET_CHAIN_ID, so they will be WRONG ` +
-            `and every check will appear stuck at SUBMITTED. Fix SAFENET_CHAIN_ID / SAFENET_RPC_URLS.`,
+            `reports ${actual}. It feeds the EIP-712 domain every attestation is verified ` +
+            `against, so attestations will verify as INVALID and every check will read as ` +
+            `failed. Fix SAFENET_CHAIN_ID / SAFENET_RPC_URLS.`,
         )
       }
     } catch {
@@ -301,11 +325,13 @@ export class SafenetReader {
 
       const requestIdsByOracle = new Map<string, Hex[]>()
       for (const proposal of proposals) {
-        const id = oracleProposalHash({
+        // The proposal hash IS the oracle requestId; oracleDataHash aims it.
+        const id = transactionProposalHash({
           chainId: this.chainId,
           consensus: this.consensus,
           epoch: proposal.epoch,
           oracle: proposal.oracle,
+          oracleDataHash: proposal.oracleDataHash,
           safeTxHash: safeTxHash as Hex,
         })
         // Keyed by the normalized address so one oracle cannot occupy two buckets.
@@ -336,11 +362,12 @@ export class SafenetReader {
         null,
       )
       const requestId: Hex | null = active
-        ? oracleProposalHash({
+        ? transactionProposalHash({
             chainId: this.chainId,
             consensus: this.consensus,
             epoch: active.epoch,
             oracle: active.oracle,
+            oracleDataHash: active.oracleDataHash,
             safeTxHash: safeTxHash as Hex,
           })
         : null
@@ -348,13 +375,6 @@ export class SafenetReader {
       const events = [...consensusEvents, ...oracleEvents].sort(
         (a, b) => a.blockNumber - b.blockNumber || a.logIndex - b.logIndex,
       )
-      // Scoped to the active request so a cross-generation re-proposal cannot
-      // pair the first generation seen with the latest request's id.
-      const generation =
-        events.find(
-          (event) =>
-            event.generation !== OracleGeneration.STABLE && 'requestId' in event && event.requestId === requestId,
-        )?.generation ?? null
       // The maximum across all requests: after a cross-epoch re-proposal the
       // latest deadline belongs to the request that can still resolve.
       const deadline = deadlineBlockOf(events)
@@ -364,7 +384,6 @@ export class SafenetReader {
         chainId: this.chainId,
         events,
         headBlock: head.toString(),
-        generation,
         requestId,
         epoch: active?.epoch ?? null,
         oracle: active?.oracle ?? null,
@@ -401,6 +420,7 @@ export class SafenetReader {
   }
 
   /**
+
    * Verify an attested event's FROST signature against its epoch group key.
    * A group-key fetch failure is retryable (`PENDING`); a signature that does
    * not verify is terminal (`INVALID`).
@@ -409,11 +429,12 @@ export class SafenetReader {
     // The two paths sign different EIP-712 preimages; the event type decides.
     const message =
       attested.type === CheckEventType.ORACLE_ATTESTED
-        ? oracleProposalHash({
+        ? transactionProposalHash({
             chainId: this.chainId,
             consensus: this.consensus,
             epoch: attested.epoch,
             oracle: attested.oracle,
+            oracleDataHash: attested.oracleDataHash,
             safeTxHash: attested.safeTxHash,
           })
         : plainProposalHash({
@@ -440,8 +461,9 @@ export class SafenetReader {
 
   /**
    * Wall-clock time of a block in ms — dates the audit-log step. `eth_getLogs`
-   * carries no timestamps, so this is one extra header read; call it only for
-   * settled checks (polling stops there, so it costs one RPC per check).
+   * carries no timestamps, so this is one extra header read on every poll that
+   * observes an attestation, including the slow polls a settled check keeps
+   * making while its arbitration window is open.
    * Returns null on failure: a missing date must never suppress a verdict.
    */
   async blockTimeMs(blockNumber: number): Promise<number | null> {

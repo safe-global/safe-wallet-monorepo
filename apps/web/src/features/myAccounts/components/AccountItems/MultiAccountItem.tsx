@@ -195,7 +195,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
           </div>
           {!isReadOnly && hasReplayableSafe && !isSpaceSafe && (
             <>
-              <Separator className="-mx-3" />
+              <Separator bleed="3" />
               <div className="-mx-3 flex items-center justify-center">
                 <AddNetworkButton
                   currentName={multiSafeAccountItem.name ?? ''}

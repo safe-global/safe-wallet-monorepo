@@ -7,8 +7,7 @@ import NftIcon from '@/public/images/common/nft.svg'
 import AddressBookInput from '@/components/common/AddressBookInput'
 import type { NftTransferParams } from '.'
 import ImageFallback from '@/components/common/ImageFallback'
-import TxCard from '../../common/TxCard'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
+import TxCard, { TxCardActions } from '../../common/TxCard'
 import { useContext, useMemo } from 'react'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
@@ -25,7 +24,7 @@ const NftItem = ({ image, name, description }: { image: string; name: string; de
       <ImageFallback
         src={image}
         fallbackSrc=""
-        fallbackComponent={<NftIcon className="size-full" />}
+        fallbackComponent={<NftIcon className="size-10" />}
         alt={name}
         height={40}
       />
@@ -111,12 +110,12 @@ const SendNftBatch = () => {
           <NftItems tokens={tokens} />
 
           <div className="pt-6">
-            <Separator className={commonCss.nestedDivider} />
+            <Separator bleed="6" />
           </div>
 
-          <div className="flex items-center gap-2 p-2">
+          <TxCardActions>
             <Button type="submit">Next</Button>
-          </div>
+          </TxCardActions>
         </form>
       </FormProvider>
     </TxCard>

@@ -4,7 +4,6 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import TxCard, { TxCardActions } from '../../common/TxCard'
 import type { RecoveryFlowProps } from '.'
 
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { Typography } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
@@ -40,7 +39,7 @@ export function RemoveRecoveryFlowOverview({ delayModifier }: RecoveryFlowProps)
         ))}
       </div>
 
-      <Separator className={commonCss.nestedDivider} />
+      <Separator bleed="6" />
 
       <TxCardActions className="!mt-0">
         <Button data-testid="next-btn" variant="default" onClick={onNext}>

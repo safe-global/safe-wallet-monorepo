@@ -39,7 +39,7 @@ import { cn } from '@/utils/cn'
  *
  * Changelog:
  * - 2026-01-29: Removed shadow-xs and ring-1 to match Figma (no elevation/border)
- * - 2026-07-10: Added `size="lg"` (gap-8/py-8, slot px-8); flipped the default `radius` xl→lg (8px, MUI parity)
+ * - 2026-07-10: Added `size="lg"` (gap-8/py-8, slot px-8); flipped the default `radius` xl→lg (`--radius-lg`, 16px)
  */
 const cardVariants = cva(
   'bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col',
