@@ -28,6 +28,15 @@ describe('PolicyCatalogue', () => {
     expect(within(tiles[3]).getByText('Something missing?')).toBeInTheDocument()
   })
 
+  it('gives every tile a test id of its own', () => {
+    render(<PolicyCatalogue />)
+
+    expect(screen.getByTestId('policy-catalogue-tile-spending-limit')).toBeInTheDocument()
+    expect(screen.getByTestId('policy-catalogue-tile-proposer')).toBeInTheDocument()
+    expect(screen.getByTestId('policy-catalogue-tile-account-recovery')).toBeInTheDocument()
+    expect(screen.getByTestId('policy-catalogue-tile-suggestion')).toBeInTheDocument()
+  })
+
   it('describes what each policy does', () => {
     render(<PolicyCatalogue />)
 
@@ -53,10 +62,13 @@ describe('PolicyCatalogue', () => {
 
     await user.click(screen.getByRole('button', { name: /Proposer/ }))
 
-    expect(mockTrackEvent).toHaveBeenCalledWith(POLICY_EVENTS.POLICY_CATALOGUE_TILE_CLICKED, {
-      [MixpanelEventParams.POLICY_TYPE]: 'proposer',
-      [MixpanelEventParams.IS_AVAILABLE]: true,
-    })
+    expect(mockTrackEvent).toHaveBeenCalledWith(
+      { ...POLICY_EVENTS.POLICY_CATALOGUE_TILE_CLICKED, label: 'proposer' },
+      {
+        [MixpanelEventParams.POLICY_TYPE]: 'proposer',
+        [MixpanelEventParams.IS_AVAILABLE]: true,
+      },
+    )
   })
 
   it('tracks a click on an unavailable tile', async () => {
@@ -64,10 +76,13 @@ describe('PolicyCatalogue', () => {
 
     await user.click(screen.getByRole('button', { name: /Spending limit/ }))
 
-    expect(mockTrackEvent).toHaveBeenCalledWith(POLICY_EVENTS.POLICY_CATALOGUE_TILE_CLICKED, {
-      [MixpanelEventParams.POLICY_TYPE]: 'spending-limit',
-      [MixpanelEventParams.IS_AVAILABLE]: false,
-    })
+    expect(mockTrackEvent).toHaveBeenCalledWith(
+      { ...POLICY_EVENTS.POLICY_CATALOGUE_TILE_CLICKED, label: 'spending-limit' },
+      {
+        [MixpanelEventParams.POLICY_TYPE]: 'spending-limit',
+        [MixpanelEventParams.IS_AVAILABLE]: false,
+      },
+    )
   })
 
   it('opens the flow of an available tile', async () => {

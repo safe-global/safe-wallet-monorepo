@@ -11,10 +11,13 @@ interface PolicyCatalogueProps {
 
 const PolicyCatalogue = ({ onSelect }: PolicyCatalogueProps): ReactElement => {
   const handleClick = ({ id, isAvailable }: PolicyCatalogueEntry) => {
-    trackEvent(POLICY_EVENTS.POLICY_CATALOGUE_TILE_CLICKED, {
-      [MixpanelEventParams.POLICY_TYPE]: id,
-      [MixpanelEventParams.IS_AVAILABLE]: isAvailable,
-    })
+    trackEvent(
+      { ...POLICY_EVENTS.POLICY_CATALOGUE_TILE_CLICKED, label: id },
+      {
+        [MixpanelEventParams.POLICY_TYPE]: id,
+        [MixpanelEventParams.IS_AVAILABLE]: isAvailable,
+      },
+    )
 
     if (isAvailable) onSelect?.(id)
   }
