@@ -168,7 +168,10 @@ const TxSigners = ({
   // read) so the sibling rows' isLast can account for the Safenet step. The
   // undefined hash skips the read entirely while the flag is off.
   const safenetHash = isSafenetEnabled && isMultisig ? detailedExecutionInfo.safeTxHash : undefined
-  const safenetCheck = useSafenetCheck(safenetHash, isMultisig ? detailedExecutionInfo.submittedAt : null)
+  const safenetCheck = useSafenetCheck(safenetHash, isMultisig ? detailedExecutionInfo.submittedAt : null, {
+    chainId: safe.chainId,
+    safeAddress: safe.address.value,
+  })
   // Must mirror SafenetAuditRow's own render gate, or the connector math drifts.
   const showsSafenetRow =
     !!safenetHash && !!safenetCheck.snapshot && safenetCheck.publicStatus !== CheckStatus.UNAVAILABLE

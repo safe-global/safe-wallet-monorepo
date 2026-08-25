@@ -5,10 +5,12 @@ import {
   UNVERIFIED_ATTESTATION,
   getSafenetReader,
   type CheckReadResult,
+  type CheckTarget,
   type PlainAttestedEvent,
 } from '@safe-global/utils/features/safenet-checks'
 import {
   attestedEvent,
+  plainProposedEvent,
   plainAttestedEvent,
   requestCreatedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
@@ -32,6 +34,11 @@ const HASH = ('0x' + 'cd'.repeat(32)) as `0x${string}`
 const REQUEST_ID = ('0x' + 'ef'.repeat(32)) as `0x${string}`
 const EARLY_SIG = ('0x' + '11'.repeat(32)) as `0x${string}`
 const LATE_SIG = ('0x' + '22'.repeat(32)) as `0x${string}`
+const CHAIN_ID = '100'
+const SAFE = '0x0000000000000000000000000000000000000abc'
+const TARGET = { chainId: CHAIN_ID, safeAddress: SAFE }
+/** Attested-event fields that bind an attestation to the Safe under test. */
+const BOUND = { chainId: CHAIN_ID, safe: SAFE }
 
 const fakeReader = { fetchCheckState: jest.fn(), verifyAttestation: jest.fn(), blockTimeMs: jest.fn() }
 
@@ -56,8 +63,13 @@ const makeTestStore = () =>
     middleware: (getDefault) => getDefault().concat(safenetCheckApi.middleware),
   })
 
-const runQuery = (store: ReturnType<typeof makeTestStore>) =>
-  store.dispatch(safenetCheckApi.endpoints.getSafenetCheck.initiate({ safeTxHash: HASH }, { forceRefetch: true }))
+const runQuery = (store: ReturnType<typeof makeTestStore>, over: Partial<CheckTarget> = {}) =>
+  store.dispatch(
+    safenetCheckApi.endpoints.getSafenetCheck.initiate(
+      { safeTxHash: HASH, ...TARGET, ...over },
+      { forceRefetch: true },
+    ),
+  )
 
 beforeEach(() => {
   fakeReader.fetchCheckState.mockReset()
@@ -71,7 +83,7 @@ describe('safenetCheckApi.getSafenetCheck', () => {
   // The non-oracle path is the only one live beta emits, so it needs its own
   // case: it reaches the same verify call, with no requestId in the read.
   it('verifies a non-oracle attestation and derives BENIGN', async () => {
-    const attested = plainAttestedEvent({ safeTxHash: HASH })
+    const attested = plainAttestedEvent({ safeTxHash: HASH, ...BOUND })
     fakeReader.fetchCheckState.mockResolvedValue(baseRead({ events: [attested], requestId: null }))
     fakeReader.verifyAttestation.mockResolvedValue({
       status: AttestationVerificationStatus.VERIFIED,
@@ -88,7 +100,7 @@ describe('safenetCheckApi.getSafenetCheck', () => {
 
   it('derives BENIGN when an attestation verifies, and pins it', async () => {
     fakeReader.fetchCheckState.mockResolvedValue(
-      baseRead({ events: [attestedEvent({ safeTxHash: HASH })], requestId: REQUEST_ID, epoch: '1' }),
+      baseRead({ events: [attestedEvent({ safeTxHash: HASH, ...BOUND })], requestId: REQUEST_ID, epoch: '1' }),
     )
     fakeReader.verifyAttestation.mockResolvedValue({
       status: AttestationVerificationStatus.VERIFIED,
@@ -119,7 +131,7 @@ describe('safenetCheckApi.getSafenetCheck', () => {
   })
 
   it('dates the snapshot from the attested block, reading that header once', async () => {
-    const attested = attestedEvent({ safeTxHash: HASH })
+    const attested = attestedEvent({ safeTxHash: HASH, ...BOUND })
     fakeReader.fetchCheckState.mockResolvedValue(baseRead({ events: [attested], requestId: REQUEST_ID, epoch: '1' }))
     fakeReader.verifyAttestation.mockResolvedValue({
       status: AttestationVerificationStatus.VERIFIED,
@@ -136,7 +148,7 @@ describe('safenetCheckApi.getSafenetCheck', () => {
   })
 
   it('keeps the verdict when the attested header cannot be read — only the date is lost', async () => {
-    const attested = attestedEvent({ safeTxHash: HASH })
+    const attested = attestedEvent({ safeTxHash: HASH, ...BOUND })
     fakeReader.fetchCheckState.mockResolvedValue(baseRead({ events: [attested], requestId: REQUEST_ID, epoch: '1' }))
     fakeReader.verifyAttestation.mockResolvedValue({
       status: AttestationVerificationStatus.VERIFIED,
@@ -156,7 +168,7 @@ describe('safenetCheckApi.getSafenetCheck', () => {
 
     // Poll 1: attested + verified → BENIGN, pinned.
     fakeReader.fetchCheckState.mockResolvedValueOnce(
-      baseRead({ events: [attestedEvent({ safeTxHash: HASH })], requestId: REQUEST_ID, epoch: '1' }),
+      baseRead({ events: [attestedEvent({ safeTxHash: HASH, ...BOUND })], requestId: REQUEST_ID, epoch: '1' }),
     )
     fakeReader.verifyAttestation.mockResolvedValueOnce({
       status: AttestationVerificationStatus.VERIFIED,
@@ -189,7 +201,7 @@ describe('safenetCheckApi.getSafenetCheck', () => {
     )
 
     fakeReader.fetchCheckState.mockResolvedValueOnce(
-      baseRead({ events: [attestedEvent({ safeTxHash: HASH })], requestId: REQUEST_ID, epoch: '1' }),
+      baseRead({ events: [attestedEvent({ safeTxHash: HASH, ...BOUND })], requestId: REQUEST_ID, epoch: '1' }),
     )
     fakeReader.verifyAttestation.mockResolvedValueOnce({
       status: AttestationVerificationStatus.VERIFIED,
@@ -227,8 +239,8 @@ describe('safenetCheckApi.getSafenetCheck', () => {
     // ~5 blocks; the oracle path needs commit/reveal) — the oracle one must
     // still be the event that gets verified, since deriveCheckState consumes
     // the verification result through its oracle branch first.
-    const plain = plainAttestedEvent({ safeTxHash: HASH, blockNumber: 100 })
-    const oracle = attestedEvent({ safeTxHash: HASH, blockNumber: 200 })
+    const plain = plainAttestedEvent({ safeTxHash: HASH, blockNumber: 100, ...BOUND })
+    const oracle = attestedEvent({ safeTxHash: HASH, blockNumber: 200, ...BOUND })
     fakeReader.fetchCheckState.mockResolvedValue(baseRead({ events: [plain, oracle] }))
     fakeReader.verifyAttestation.mockResolvedValue({
       status: AttestationVerificationStatus.VERIFIED,
@@ -265,7 +277,9 @@ describe('safenetCheckApi.getSafenetCheck', () => {
       },
       middleware: (getDefault) => getDefault().concat(safenetCheckApi.middleware),
     })
-    fakeReader.fetchCheckState.mockResolvedValue(baseRead({ events: [plainAttestedEvent({ safeTxHash: HASH })] }))
+    fakeReader.fetchCheckState.mockResolvedValue(
+      baseRead({ events: [plainAttestedEvent({ safeTxHash: HASH, ...BOUND })] }),
+    )
     fakeReader.verifyAttestation.mockResolvedValue({
       status: AttestationVerificationStatus.VERIFIED,
       signatureId: REQUEST_ID,
@@ -283,18 +297,23 @@ describe('safenetCheckApi.getSafenetCheck', () => {
     const store = makeTestStore()
 
     await store.dispatch(
-      safenetCheckApi.endpoints.getSafenetCheck.initiate({ safeTxHash: HASH, timestampMs: 1_700_000_000_000 }),
+      safenetCheckApi.endpoints.getSafenetCheck.initiate({
+        safeTxHash: HASH,
+        ...TARGET,
+        timestampMs: 1_700_000_000_000,
+      }),
     )
 
     expect(fakeReader.fetchCheckState).toHaveBeenCalledWith(HASH, { timestampMs: 1_700_000_000_000 })
   })
 
-  it('keeps ONE cache entry per hash however the timestamp varies (single poll loop)', async () => {
+  it('keeps ONE cache entry per check however the timestamp varies (single poll loop)', async () => {
     fakeReader.fetchCheckState.mockResolvedValue(baseRead())
     const store = makeTestStore()
 
-    await store.dispatch(safenetCheckApi.endpoints.getSafenetCheck.initiate({ safeTxHash: HASH, timestampMs: 1_000 }))
-    await store.dispatch(safenetCheckApi.endpoints.getSafenetCheck.initiate({ safeTxHash: HASH, timestampMs: 2_000 }))
+    const args = { safeTxHash: HASH, ...TARGET }
+    await store.dispatch(safenetCheckApi.endpoints.getSafenetCheck.initiate({ ...args, timestampMs: 1_000 }))
+    await store.dispatch(safenetCheckApi.endpoints.getSafenetCheck.initiate({ ...args, timestampMs: 2_000 }))
 
     const queries = store.getState()[safenetCheckApi.reducerPath].queries
     expect(Object.keys(queries)).toHaveLength(1)
@@ -305,8 +324,8 @@ describe('safenetCheckApi.getSafenetCheck', () => {
     // A cross-epoch re-proposal is the protocol's only retry, so a check can
     // carry two attestations for one hash.
     const pair = () => [
-      plainAttestedEvent({ safeTxHash: HASH, blockNumber: 100, epoch: '10', signatureId: EARLY_SIG }),
-      plainAttestedEvent({ safeTxHash: HASH, blockNumber: 200, epoch: '11', signatureId: LATE_SIG }),
+      plainAttestedEvent({ safeTxHash: HASH, blockNumber: 100, epoch: '10', signatureId: EARLY_SIG, ...BOUND }),
+      plainAttestedEvent({ safeTxHash: HASH, blockNumber: 200, epoch: '11', signatureId: LATE_SIG, ...BOUND }),
     ]
 
     const verifyBy = (statusBySignature: Record<string, AttestationVerificationStatus>) =>
@@ -371,6 +390,72 @@ describe('safenetCheckApi.getSafenetCheck', () => {
 
       expect(result.data?.status).toBe(CheckStatus.AWAITING_VERIFICATION)
       expect(result.data?.attestation.signatureId).toBe(EARLY_SIG)
+    })
+  })
+
+  describe('attestation binding', () => {
+    beforeEach(() =>
+      fakeReader.verifyAttestation.mockResolvedValue({
+        status: AttestationVerificationStatus.VERIFIED,
+        signatureId: REQUEST_ID,
+        message: REQUEST_ID,
+      }),
+    )
+
+    it('accepts an attestation naming the Safe being viewed', async () => {
+      fakeReader.fetchCheckState.mockResolvedValue(baseRead({ events: [plainAttestedEvent({ ...BOUND })] }))
+
+      const result = await runQuery(makeTestStore())
+
+      expect(result.data?.status).toBe(CheckStatus.BENIGN)
+    })
+
+    it('reads an attestation for another chain as no attestation at all', async () => {
+      // Safe <=1.2.0 omits the chain id from its domain hash, so one safeTxHash
+      // can carry a sibling chain's attestation. It proves nothing here.
+      const foreign = plainAttestedEvent({ chainId: '1', safe: SAFE })
+      fakeReader.fetchCheckState.mockResolvedValue(baseRead({ events: [foreign] }))
+
+      const result = await runQuery(makeTestStore())
+
+      expect(fakeReader.verifyAttestation).not.toHaveBeenCalled()
+      expect(result.data?.status).toBe(CheckStatus.UNAVAILABLE)
+      expect(result.data?.attestation).toEqual(UNVERIFIED_ATTESTATION)
+      expect(result.data?.events).toEqual([])
+    })
+
+    it('reads an attestation for another Safe as no attestation at all', async () => {
+      const foreign = plainAttestedEvent({ chainId: CHAIN_ID, safe: '0x00000000000000000000000000000000000000ff' })
+      fakeReader.fetchCheckState.mockResolvedValue(baseRead({ events: [foreign] }))
+
+      const result = await runQuery(makeTestStore())
+
+      expect(fakeReader.verifyAttestation).not.toHaveBeenCalled()
+      expect(result.data?.status).toBe(CheckStatus.UNAVAILABLE)
+    })
+
+    it('falls through to the proposal state instead of failing on an unbound attestation', async () => {
+      // The dangerous direction: an unbound attestation must not read as a
+      // verdict, and must not terminalize the check either.
+      fakeReader.fetchCheckState.mockResolvedValue(
+        baseRead({
+          events: [plainProposedEvent({ ...BOUND }), plainAttestedEvent({ chainId: '1', safe: SAFE })],
+        }),
+      )
+
+      const result = await runQuery(makeTestStore())
+
+      expect(result.data?.status).toBe(CheckStatus.SUBMITTED)
+    })
+
+    it('matches the Safe address case-insensitively', async () => {
+      fakeReader.fetchCheckState.mockResolvedValue(
+        baseRead({ events: [plainAttestedEvent({ chainId: CHAIN_ID, safe: SAFE.toUpperCase().replace('0X', '0x') })] }),
+      )
+
+      const result = await runQuery(makeTestStore())
+
+      expect(result.data?.status).toBe(CheckStatus.BENIGN)
     })
   })
 })

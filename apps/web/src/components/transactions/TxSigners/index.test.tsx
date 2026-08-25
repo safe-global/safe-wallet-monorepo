@@ -704,7 +704,11 @@ describe('TxSigners (Audit Log)', () => {
       })
       expect(screen.getByText('No issues found')).toBeInTheDocument()
       // The hook watches THIS transaction's hash, aimed at its submission time.
-      expect(useSafenetCheck).toHaveBeenCalledWith(safenetTxHash, 1_700_000_000_000)
+      expect(useSafenetCheck).toHaveBeenCalledWith(
+        safenetTxHash,
+        1_700_000_000_000,
+        expect.objectContaining({ chainId: expect.any(String) }),
+      )
       expect(screen.getByTestId('safenet-attestation-link')).toHaveAttribute(
         'href',
         `https://explorer.safenet-beta.eth.limo/#/safeTx?chainId=1&safeTxHash=${safenetTxHash}`,

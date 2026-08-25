@@ -6,6 +6,7 @@ import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
+import useSafeInfo from '@/hooks/useSafeInfo'
 import { resolvePresentation } from '../statusPresentation'
 
 /**
@@ -22,9 +23,11 @@ export const SafenetChecksSection = (): ReactElement | null => {
       ? txDetails.detailedExecutionInfo.submittedAt
       : undefined
 
+  const { safe, safeAddress } = useSafeInfo()
   const { publicStatus, snapshot, unavailableReason } = useSafenetCheck(
     submittedAt !== undefined ? safeTxHash : undefined,
     submittedAt,
+    { chainId: safe.chainId, safeAddress },
   )
 
   const content = resolvePresentation(publicStatus, unavailableReason, snapshot !== undefined)

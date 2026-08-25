@@ -21,6 +21,7 @@ const mockQuery = useGetSafenetCheckQuery as unknown as jest.Mock
 const mockSelector = useSelector as unknown as jest.Mock
 
 const HASH = ('0x' + 'ab'.repeat(32)) as `0x${string}`
+const TARGET = { chainId: '100', safeAddress: '0x0000000000000000000000000000000000000abc' }
 
 /** The slice of the RTK query result the hook consumes, as the mock returns it. */
 type QueryResult = {
@@ -60,25 +61,25 @@ describe('useSafenetCheck', () => {
   it('skips the query when no safeTxHash is given', () => {
     mockQuery.mockReturnValue(queryResult())
 
-    renderHook(() => useSafenetCheck(undefined))
+    renderHook(() => useSafenetCheck(undefined, null, TARGET))
 
-    expect(mockQuery.mock.calls[0][0]).toEqual({ safeTxHash: '', timestampMs: null })
+    expect(mockQuery.mock.calls[0][0]).toEqual({ safeTxHash: '', timestampMs: null, ...TARGET })
     expect(mockQuery.mock.calls[0][1]).toMatchObject({ skip: true })
   })
 
   it('passes the transaction timestamp through so the reader can target its block window', () => {
     mockQuery.mockReturnValue(queryResult())
 
-    renderHook(() => useSafenetCheck('0xabc', 1_700_000_000_000))
+    renderHook(() => useSafenetCheck('0xabc', 1_700_000_000_000, TARGET))
 
-    expect(mockQuery.mock.calls[0][0]).toEqual({ safeTxHash: '0xabc', timestampMs: 1_700_000_000_000 })
+    expect(mockQuery.mock.calls[0][0]).toEqual({ safeTxHash: '0xabc', timestampMs: 1_700_000_000_000, ...TARGET })
   })
 
   describe('polling interval selection', () => {
     it('stops polling once a verdict is verified BENIGN, and skips polling while unfocused', () => {
       mockQuery.mockReturnValue(queryResult({ data: buildBenignSnapshot({ safeTxHash: HASH }) }))
 
-      renderHook(() => useSafenetCheck(HASH))
+      renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       expect(lastOptions().pollingInterval).toBe(0)
       // The one deliberate option keeping background tabs off the chain.
@@ -99,7 +100,7 @@ describe('useSafenetCheck', () => {
         }),
       )
 
-      renderHook(() => useSafenetCheck(HASH))
+      renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       expect(lastOptions().pollingInterval).toBe(POLL_INTERVAL_FAST_MS)
     })
@@ -117,7 +118,7 @@ describe('useSafenetCheck', () => {
       jest.setSystemTime(SUBMITTED + 1_000)
       mockQuery.mockReturnValue(queryResult({ data: noCheck(), fulfilledTimeStamp: 1 }))
 
-      renderHook(() => useSafenetCheck(HASH, SUBMITTED))
+      renderHook(() => useSafenetCheck(HASH, SUBMITTED, TARGET))
 
       expect(lastOptions().pollingInterval).toBe(UNAVAILABLE_GRACE_POLL_MS)
     })
@@ -127,7 +128,7 @@ describe('useSafenetCheck', () => {
       jest.setSystemTime(SUBMITTED + UNAVAILABLE_GRACE_MS)
       mockQuery.mockReturnValue(queryResult({ data: noCheck(), fulfilledTimeStamp: 1 }))
 
-      renderHook(() => useSafenetCheck(HASH, SUBMITTED))
+      renderHook(() => useSafenetCheck(HASH, SUBMITTED, TARGET))
 
       expect(lastOptions().pollingInterval).toBe(0)
     })
@@ -139,7 +140,7 @@ describe('useSafenetCheck', () => {
       jest.setSystemTime(SUBMITTED + 1_000)
       const snapshot = noCheck()
       mockQuery.mockReturnValue(queryResult({ data: snapshot, fulfilledTimeStamp: 1 }))
-      const { rerender } = renderHook(() => useSafenetCheck(HASH, SUBMITTED))
+      const { rerender } = renderHook(() => useSafenetCheck(HASH, SUBMITTED, TARGET))
       expect(lastOptions().pollingInterval).toBe(UNAVAILABLE_GRACE_POLL_MS)
 
       jest.setSystemTime(SUBMITTED + UNAVAILABLE_GRACE_MS)
@@ -153,7 +154,7 @@ describe('useSafenetCheck', () => {
       jest.useFakeTimers()
       jest.setSystemTime(SUBMITTED + 1_000)
       mockQuery.mockReturnValue(queryResult({ data: noCheck(), fulfilledTimeStamp: 1 }))
-      const { result, rerender } = renderHook(() => useSafenetCheck(HASH, SUBMITTED))
+      const { result, rerender } = renderHook(() => useSafenetCheck(HASH, SUBMITTED, TARGET))
       expect(result.current.unavailableReason).toBe('NO_CHECK')
       // The cadence that gets the check picked up at all: without it the read
       // below never happens and NO_CHECK stays pinned for the session.
@@ -182,7 +183,7 @@ describe('useSafenetCheck', () => {
     it('maps an error with no data to UNAVAILABLE', () => {
       mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR }))
 
-      const { result } = renderHook(() => useSafenetCheck(HASH))
+      const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       expect(result.current.status).toBe(CheckStatus.UNAVAILABLE)
       expect(result.current.publicStatus).toBe(CheckStatus.UNAVAILABLE)
@@ -192,7 +193,7 @@ describe('useSafenetCheck', () => {
     it('keeps retrying at the slow cadence when the first fetch failed (nothing to show)', () => {
       mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR }))
 
-      renderHook(() => useSafenetCheck(HASH))
+      renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       // A transient endpoint failure must not read as "no check exists" and
       // stop polling — on mobile this retry is the only recovery path.
@@ -204,14 +205,14 @@ describe('useSafenetCheck', () => {
       // `error`; keying on isError here advertised interval 0 mid-retry.
       mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR, isError: false, isFetching: true }))
 
-      renderHook(() => useSafenetCheck(HASH))
+      renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       expect(lastOptions().pollingInterval).toBe(POLL_INTERVAL_LATE_MS)
     })
 
     it('restores the computed interval once a retry succeeds', () => {
       mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR }))
-      const { rerender } = renderHook(() => useSafenetCheck(HASH))
+      const { rerender } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
       expect(lastOptions().pollingInterval).toBe(POLL_INTERVAL_LATE_MS)
 
       mockQuery.mockReturnValue(queryResult({ data: buildBenignSnapshot({ safeTxHash: HASH }) }))
@@ -224,7 +225,7 @@ describe('useSafenetCheck', () => {
       const snapshot = buildBenignSnapshot({ safeTxHash: HASH })
       mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR, data: snapshot }))
 
-      const { result } = renderHook(() => useSafenetCheck(HASH))
+      const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       expect(result.current.status).toBe(CheckStatus.BENIGN)
       expect(result.current.isStale).toBe(true)
@@ -238,7 +239,7 @@ describe('useSafenetCheck', () => {
         queryResult({ data: buildSnapshot({ safeTxHash: HASH, status: CheckStatus.UNAVAILABLE }) }),
       )
 
-      const { result } = renderHook(() => useSafenetCheck(HASH))
+      const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       expect(result.current.unavailableReason).toBe('NO_CHECK')
     })
@@ -246,7 +247,7 @@ describe('useSafenetCheck', () => {
     it('reports READ_FAILED when the read failed with nothing to show', () => {
       mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR }))
 
-      const { result } = renderHook(() => useSafenetCheck(HASH))
+      const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       expect(result.current.unavailableReason).toBe('READ_FAILED')
     })
@@ -254,7 +255,7 @@ describe('useSafenetCheck', () => {
     it('never reports READ_FAILED while the first read is in flight', () => {
       mockQuery.mockReturnValue(queryResult({ isLoading: true, isFetching: true }))
 
-      const { result } = renderHook(() => useSafenetCheck(HASH))
+      const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       expect(result.current.status).toBe(CheckStatus.UNAVAILABLE)
       expect(result.current.unavailableReason).toBeUndefined()
@@ -268,7 +269,7 @@ describe('useSafenetCheck', () => {
         }),
       )
 
-      const { result } = renderHook(() => useSafenetCheck(HASH))
+      const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       expect(result.current.unavailableReason).toBe('NO_CHECK')
     })
@@ -276,7 +277,7 @@ describe('useSafenetCheck', () => {
     it('reports no reason once a check is observed', () => {
       mockQuery.mockReturnValue(queryResult({ data: buildBenignSnapshot({ safeTxHash: HASH }) }))
 
-      const { result } = renderHook(() => useSafenetCheck(HASH))
+      const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       expect(result.current.unavailableReason).toBeUndefined()
     })
@@ -291,7 +292,7 @@ describe('useSafenetCheck', () => {
         queryResult({ data: buildSnapshot({ status: CheckStatus.IN_PROGRESS, safeTxHash: HASH }) }),
       )
 
-      const { result } = renderHook(() => useSafenetCheck(HASH))
+      const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       expect(result.current.status).toBe(CheckStatus.BENIGN)
       expect(result.current.publicStatus).toBe(CheckStatus.BENIGN)
@@ -306,7 +307,7 @@ describe('useSafenetCheck', () => {
       mockSelector.mockReturnValue(pinned)
       mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR }))
 
-      const { result } = renderHook(() => useSafenetCheck(HASH))
+      const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       expect(result.current.status).toBe(CheckStatus.MALICIOUS)
     })
@@ -315,7 +316,7 @@ describe('useSafenetCheck', () => {
   it('exposes refetch that re-runs the query', () => {
     mockQuery.mockReturnValue(queryResult({ data: buildSnapshot({ safeTxHash: HASH }) }))
 
-    const { result } = renderHook(() => useSafenetCheck(HASH))
+    const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
     result.current.refetch()
 
     expect(refetchFn).toHaveBeenCalledTimes(1)
@@ -324,7 +325,7 @@ describe('useSafenetCheck', () => {
   it('does not call refetch on a skipped query', () => {
     mockQuery.mockReturnValue(queryResult())
 
-    const { result } = renderHook(() => useSafenetCheck(undefined))
+    const { result } = renderHook(() => useSafenetCheck(undefined, null, TARGET))
     result.current.refetch()
 
     expect(refetchFn).not.toHaveBeenCalled()

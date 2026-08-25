@@ -3,12 +3,13 @@ import {
   AttestationVerificationStatus,
   CheckStatus,
   UNVERIFIED_ATTESTATION,
-  attestationCandidates,
+  bindAttestations,
   deriveCheckState,
   getSafenetReader,
   mergeMonotonic,
   type AttestationVerification,
   type AttestedCheckEvent,
+  type CheckTarget,
   type SafenetCheckSnapshot,
   type SafenetReader,
 } from '@safe-global/utils/features/safenet-checks'
@@ -55,12 +56,14 @@ const selectAttestation = async (
 }
 
 /**
+ * `chainId` and `safeAddress` are the Safe the check is being viewed for; an
+ * attestation that does not name them is not this check's evidence.
  * `timestampMs` is when the Safe transaction was submitted (proposal time, not
  * execution time — checks are proposed around the first signature) and only
- * aims the reader's block window. All callers of one hash share a cache entry,
+ * aims the reader's block window. All callers of one check share a cache entry,
  * so the semantic has to stay canonical. See `serializeQueryArgs` below.
  */
-export type SafenetCheckArg = {
+export type SafenetCheckArg = CheckTarget & {
   safeTxHash: string
   timestampMs?: number | null
 }
@@ -70,12 +73,13 @@ export const safenetCheckApi = createApi({
   baseQuery: noopBaseQuery,
   endpoints: (builder) => ({
     getSafenetCheck: builder.query<SafenetCheckSnapshot, SafenetCheckArg>({
-      async queryFn({ safeTxHash, timestampMs }, { getState, dispatch }) {
+      async queryFn({ safeTxHash, chainId, safeAddress, timestampMs }, { getState, dispatch }) {
         try {
           const reader = getSafenetReader()
           const read = await reader.fetchCheckState(safeTxHash, { timestampMs })
 
-          const selected = await selectAttestation(reader, attestationCandidates(read.events))
+          const { events, candidates } = bindAttestations(read.events, { chainId, safeAddress })
+          const selected = await selectAttestation(reader, candidates)
           // The header read only dates the audit step, and it is gated on an
           // attestation existing. Cost is one extra call per poll that observes
           // one — for a settled check that is one poll when the group key loads,
@@ -84,7 +88,7 @@ export const safenetCheckApi = createApi({
             ? [selected.attestation, await reader.blockTimeMs(selected.event.blockNumber)]
             : [UNVERIFIED_ATTESTATION, null]
 
-          const derived = deriveCheckState({ events: read.events, attestation, headBlock: read.headBlock })
+          const derived = deriveCheckState({ events, attestation, headBlock: read.headBlock })
           const pinned = selectPinnedVerdict(getState() as SafenetCheckPartialState, safeTxHash)
           const status = mergeMonotonic(pinned?.status, derived)
 
@@ -106,7 +110,7 @@ export const safenetCheckApi = createApi({
             headBlock: read.headBlock,
             attestation,
             attestedAtMs,
-            events: read.events,
+            events,
           }
           return { data: snapshot }
         } catch (error) {
@@ -114,10 +118,11 @@ export const safenetCheckApi = createApi({
           return { error: { message: error instanceof Error ? error.message : String(error) } }
         }
       },
-      // `timestampMs` only aims the block window — the check's identity is its
-      // hash. Without this, two renderings of the same check with different
-      // timestamps would open a second cache entry and a second poll loop.
-      serializeQueryArgs: ({ endpointName, queryArgs }) => `${endpointName}(${queryArgs.safeTxHash})`,
+      // `timestampMs` only aims the block window — the check's identity is the
+      // Safe plus the hash. Without this, two renderings of the same check with
+      // different timestamps would open a second cache entry and a second poll loop.
+      serializeQueryArgs: ({ endpointName, queryArgs }) =>
+        `${endpointName}(${queryArgs.chainId}:${queryArgs.safeAddress.toLowerCase()}:${queryArgs.safeTxHash})`,
       keepUnusedDataFor: 300,
     }),
   }),

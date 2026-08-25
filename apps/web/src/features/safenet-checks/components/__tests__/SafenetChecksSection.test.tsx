@@ -41,7 +41,11 @@ describe('SafenetChecksSection', () => {
 
     renderInFlow({ txId: TX_ID, txDetails })
 
-    expect(mockUseSafenetCheck).toHaveBeenCalledWith(HASH, SUBMITTED_AT)
+    expect(mockUseSafenetCheck).toHaveBeenCalledWith(
+      HASH,
+      SUBMITTED_AT,
+      expect.objectContaining({ chainId: expect.any(String) }),
+    )
   })
 
   it('renders nothing for a creation flow (no txId, no canonical hash)', () => {
@@ -49,7 +53,11 @@ describe('SafenetChecksSection', () => {
 
     const { container } = renderInFlow({})
 
-    expect(mockUseSafenetCheck).toHaveBeenCalledWith(undefined, undefined)
+    expect(mockUseSafenetCheck).toHaveBeenCalledWith(
+      undefined,
+      undefined,
+      expect.objectContaining({ chainId: expect.any(String) }),
+    )
     expect(container).toBeEmptyDOMElement()
   })
 
@@ -58,7 +66,11 @@ describe('SafenetChecksSection', () => {
 
     const { container } = renderInFlow({ txId: TX_ID })
 
-    expect(mockUseSafenetCheck).toHaveBeenCalledWith(undefined, undefined)
+    expect(mockUseSafenetCheck).toHaveBeenCalledWith(
+      undefined,
+      undefined,
+      expect.objectContaining({ chainId: expect.any(String) }),
+    )
     expect(container).toBeEmptyDOMElement()
   })
 
