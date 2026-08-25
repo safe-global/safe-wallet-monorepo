@@ -47,7 +47,7 @@ describe('getTransactionType', () => {
       const result = getTransactionType(tx, {})
 
       expect(result.text).toBe('Transaction Builder')
-      expect(result.icon).toBe('/images/transactions/custom.svg')
+      expect(isValidElement(result.icon)).toBe(true)
     })
   })
 

@@ -659,7 +659,7 @@ function verifyTokenSymbol($element, expectedToken) {
   expect(found, `Token "${expectedToken}" should be found in token text elements`).to.be.true
 }
 
-export function verifySummaryByName(name, token, data, alt, altToken) {
+export function verifySummaryByName(name, data, { token, alt, altToken } = {}) {
   if (!name) {
     throw new Error('Name parameter is required for verification')
   }
