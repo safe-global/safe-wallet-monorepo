@@ -3822,7 +3822,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                               id="base-ui-_r_1k_"
                                             >
                                               <span
-                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-words text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
+                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
                                                 data-slot="typography"
                                                 data-variant="paragraph-mini"
                                               >
@@ -3940,7 +3940,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                               id="base-ui-_r_1p_"
                                             >
                                               <span
-                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-words text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
+                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
                                                 data-slot="typography"
                                                 data-variant="paragraph-mini"
                                               >
@@ -4058,7 +4058,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                               id="base-ui-_r_1u_"
                                             >
                                               <span
-                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-words text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
+                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
                                                 data-slot="typography"
                                                 data-variant="paragraph-mini"
                                               >
@@ -4101,7 +4101,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                               id="base-ui-_r_22_"
                                             >
                                               <span
-                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-words text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
+                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
                                                 data-slot="typography"
                                                 data-variant="paragraph-mini"
                                               >
@@ -4219,7 +4219,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                               id="base-ui-_r_27_"
                                             >
                                               <span
-                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-words text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
+                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
                                                 data-slot="typography"
                                                 data-variant="paragraph-mini"
                                               >
@@ -4262,7 +4262,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                               id="base-ui-_r_2b_"
                                             >
                                               <span
-                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-words text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
+                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
                                                 data-slot="typography"
                                                 data-variant="paragraph-mini"
                                               >
@@ -4487,7 +4487,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                               id="base-ui-_r_2h_"
                                             >
                                               <span
-                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-words text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
+                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
                                                 data-slot="typography"
                                                 data-variant="paragraph-mini"
                                               >
@@ -4535,7 +4535,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                               id="base-ui-_r_2l_"
                                             >
                                               <span
-                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-words text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
+                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
                                                 data-slot="typography"
                                                 data-variant="paragraph-mini"
                                               >
@@ -4679,7 +4679,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                               id="base-ui-_r_2q_"
                                             >
                                               <span
-                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-words text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
+                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
                                                 data-slot="typography"
                                                 data-variant="paragraph-mini"
                                               >
@@ -4734,7 +4734,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                               id="base-ui-_r_2u_"
                                             >
                                               <span
-                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-words text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
+                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
                                                 data-slot="typography"
                                                 data-variant="paragraph-mini"
                                               >
@@ -4864,7 +4864,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                               id="base-ui-_r_33_"
                                             >
                                               <span
-                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-words text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
+                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
                                                 data-slot="typography"
                                                 data-variant="paragraph-mini"
                                               >
@@ -4919,7 +4919,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                               id="base-ui-_r_37_"
                                             >
                                               <span
-                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-words text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
+                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
                                                 data-slot="typography"
                                                 data-variant="paragraph-mini"
                                               >
@@ -5049,7 +5049,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                               id="base-ui-_r_3c_"
                                             >
                                               <span
-                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-words text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
+                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
                                                 data-slot="typography"
                                                 data-variant="paragraph-mini"
                                               >
@@ -5104,7 +5104,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                               id="base-ui-_r_3g_"
                                             >
                                               <span
-                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-words text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
+                                                class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
                                                 data-slot="typography"
                                                 data-variant="paragraph-mini"
                                               >

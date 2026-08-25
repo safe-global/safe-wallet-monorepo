@@ -39,7 +39,7 @@ Syntax and Formatting
 
 UI and Styling
 - in the mobile project utilise Tamagui for UI compoentns and styling
-- in the nextjs project use Mui
+- in the nextjs project use shadcn/ui + Tailwind (primitives live in `apps/web/src/components/ui/`)
 - Implement responsive design with a mobile-first approach.
 - Ensure styling consistency between web and native applications.
 
