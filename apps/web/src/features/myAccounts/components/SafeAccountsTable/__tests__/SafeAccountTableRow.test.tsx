@@ -23,7 +23,9 @@ jest.mock('@/components/common/SafeListContextMenu/MultiAccountContextMenu', () 
   __esModule: true,
   default: () => null,
 }))
-jest.mock('@/features/spaces', () => ({ useAddressBookWriteScope: jest.fn() }))
+// Mock the module, not the barrel: the re-export picks this up while the rest of `@/features/spaces`
+// stays real. Import stays on the barrel — the deep path is a lint-restricted import from here.
+jest.mock('@/features/spaces/hooks/useAddressBookWriteScope', () => ({ useAddressBookWriteScope: jest.fn() }))
 jest.mock('@/hooks/useChains', () => ({
   useChain: () => ({
     chainId: '1',

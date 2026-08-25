@@ -12,7 +12,7 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 
 const mockWriteScope: jest.Mock = jest.fn(() => ({ scope: 'local', canRename: true }))
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useAddressBookWriteScope', () => ({
   useAddressBookWriteScope: (...args: unknown[]) => mockWriteScope(...args),
 }))
 

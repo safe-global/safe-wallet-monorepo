@@ -7,6 +7,10 @@ jest.mock('@/features/spaces/hooks/useUpsertWorkspaceSafeName', () => ({
   useUpsertWorkspaceSafeName: jest.fn(),
 }))
 
+jest.mock('@/features/spaces/hooks/useWorkspaceAddressBookLabel', () => ({
+  useWorkspaceAddressBookLabel: () => 'Acme address book',
+}))
+
 jest.mock('@/hooks/use-mobile', () => ({
   useIsMobile: jest.fn(() => false),
 }))
@@ -60,10 +64,10 @@ describe('EntryDialog scope', () => {
       />,
     )
 
-  const save = async () => {
+  const save = async (name = 'Treasury') => {
     const field = screen.getByTestId('name-input')
     const input = (field.tagName === 'INPUT' ? field : field.querySelector('input')) as HTMLInputElement
-    fireEvent.change(input, { target: { value: 'Treasury' } })
+    fireEvent.change(input, { target: { value: name } })
     await waitFor(() => expect(screen.getByTestId('save-btn')).not.toBeDisabled())
     fireEvent.click(screen.getByTestId('save-btn'))
   }
@@ -86,9 +90,11 @@ describe('EntryDialog scope', () => {
     expect(upsertWorkspaceName).not.toHaveBeenCalled()
   })
 
-  it('states the workspace target before saving, and stays silent for a local write', () => {
+  it('names the workspace it is about to write to, and stays silent for a local write', () => {
     const { unmount } = renderDialog('workspace')
-    expect(screen.getByTestId('entry-scope-notice')).toHaveTextContent('visible to everyone in this workspace')
+    expect(screen.getByTestId('entry-scope-notice')).toHaveTextContent(
+      'This name is saved to Acme address book and is visible to everyone in the workspace.',
+    )
     unmount()
 
     renderDialog('local')
@@ -102,5 +108,14 @@ describe('EntryDialog scope', () => {
 
     await waitFor(() => expect(screen.getByText('Only ADMINs can edit')).toBeInTheDocument())
     expect(screen.getByTestId('entry-dialog')).toBeInTheDocument()
+  })
+
+  // The workspace write already sanitized; the local one did not, so the same name took two shapes.
+  it('sanitizes the name on the local path too', async () => {
+    const spy = jest.spyOn(addressBookSlice, 'upsertAddressBookEntries')
+    renderDialog('local')
+    await save('  Treasury  ')
+
+    await waitFor(() => expect(spy).toHaveBeenCalledWith(expect.objectContaining({ name: 'Treasury' })))
   })
 })

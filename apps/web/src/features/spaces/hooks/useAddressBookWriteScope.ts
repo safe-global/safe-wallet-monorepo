@@ -1,8 +1,10 @@
-import { useMemo } from 'react'
-import { flattenSafeItems } from '@/hooks/safes'
+import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
+import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
+import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useIsAdmin } from './useSpaceMembers'
-import { useSpaceSafes } from './useSpaceSafes'
 
 export type AddressBookWriteScope = 'workspace' | 'local'
 
@@ -13,18 +15,24 @@ type AddressBookWriteScopeResult = {
 
 export const useAddressBookWriteScope = (address: string, chainIds: string[]): AddressBookWriteScopeResult => {
   const isAdmin = useIsAdmin()
-  const { allSafes } = useSpaceSafes()
+  const spaceId = useCurrentSpaceId()
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  // Row components call this once per rendered Safe, so read the space query directly instead of
+  // useSpaceSafes(), whose grouping and sorting would run per row just to answer a membership check.
+  const { currentData } = useSpaceSafesGetV1Query(
+    { spaceId: spaceId ?? '' },
+    { skip: !isUserSignedIn || !spaceId, ...SPACE_REFRESH_OPTIONS },
+  )
 
-  return useMemo(() => {
-    // Address alone would misclassify: the same address can be a workspace Safe on one chain and a
-    // purely local one on another. Chain must match too before a rename touches the shared book.
-    const isWorkspaceSafe = flattenSafeItems(allSafes).some(
-      (safe) => sameAddress(safe.address, address) && chainIds.includes(safe.chainId),
-    )
+  // One rename, one name, one book: if the workspace holds this Safe on any of the target chains, the
+  // name is workspace-owned for the whole group. Splitting per chain would leave half the rename in the
+  // local book, which workspace pages filter out on read.
+  const isWorkspaceSafe = chainIds.some((chainId) =>
+    currentData?.safes[chainId]?.some((safeAddress) => sameAddress(safeAddress, address)),
+  )
 
-    return {
-      scope: isAdmin && isWorkspaceSafe ? 'workspace' : 'local',
-      canRename: !isWorkspaceSafe || isAdmin,
-    }
-  }, [allSafes, address, chainIds, isAdmin])
+  return {
+    scope: isAdmin && isWorkspaceSafe ? 'workspace' : 'local',
+    canRename: !isWorkspaceSafe || isAdmin,
+  }
 }

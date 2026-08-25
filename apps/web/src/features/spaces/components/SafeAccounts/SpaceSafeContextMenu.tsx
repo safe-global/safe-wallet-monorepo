@@ -24,7 +24,7 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
   const isAdmin = useIsAdmin()
 
   const chainIds = isMultiChainSafeItem(safeItem) ? safeItem.safes.map((safe) => safe.chainId) : [safeItem.chainId]
-  const name = useSafeDisplayName(safeItem.address, chainIds[0])
+  const name = useSafeDisplayName(safeItem.address, chainIds[0], safeItem.name)
   const { scope, canRename } = useAddressBookWriteScope(safeItem.address, chainIds)
 
   const handleOpenModal = (e: MouseEvent, type: keyof typeof open) => {
@@ -65,7 +65,7 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
                 onSelect={(e) => e.stopPropagation()}
               >
                 <Pencil className="size-4 text-muted-foreground" />
-                <span data-testid="rename-btn">Rename</span>
+                <span data-testid="space-safe-rename-btn">Rename</span>
               </DropdownMenuItem>
             </TooltipTrigger>
             {!canRename && <TooltipContent>Only ADMINs can edit</TooltipContent>}

@@ -10,7 +10,8 @@ import useChainId from '@/hooks/useChainId'
 import { useAppDispatch } from '@/store'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { useChain } from '@/hooks/useChains'
-import { useUpsertWorkspaceSafeName, type AddressBookWriteScope } from '@/features/spaces'
+import { sanitizeName } from '@safe-global/utils/validation/names'
+import { useUpsertWorkspaceSafeName, useWorkspaceAddressBookLabel, type AddressBookWriteScope } from '@/features/spaces'
 
 export type AddressEntry = {
   name: string
@@ -45,6 +46,7 @@ function EntryDialog({
   const currentChain = useChain(actualChainId)
   const dispatch = useAppDispatch()
   const upsertWorkspaceName = useUpsertWorkspaceSafeName()
+  const workspaceLabel = useWorkspaceAddressBookLabel()
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -57,15 +59,17 @@ function EntryDialog({
 
   const submitCallback = handleSubmit(async (data: AddressEntry) => {
     const targetChainIds = chainIds ?? [actualChainId]
+    // Both address books store the same string, whichever branch runs.
+    const entry = { ...data, name: sanitizeName(data.name) }
 
     if (scope === 'workspace') {
       setError(undefined)
       setIsSubmitting(true)
-      const result = await upsertWorkspaceName({ ...data, chainIds: targetChainIds })
+      const result = await upsertWorkspaceName({ ...entry, chainIds: targetChainIds })
       setIsSubmitting(false)
       if (result.error) return setError(result.error)
     } else {
-      dispatch(upsertAddressBookEntries({ ...data, chainIds: targetChainIds, notify: true }))
+      dispatch(upsertAddressBookEntries({ ...entry, chainIds: targetChainIds, notify: true }))
     }
 
     handleClose()
@@ -73,7 +77,11 @@ function EntryDialog({
 
   const onSubmit = (e: BaseSyntheticEvent) => {
     e.stopPropagation()
-    submitCallback(e)
+    // `submitCallback` is async, so a rejection here would escape as an unhandled rejection.
+    submitCallback(e).catch(() => {
+      setIsSubmitting(false)
+      setError('Something went wrong. Please try again.')
+    })
   }
 
   return (
@@ -92,7 +100,7 @@ function EntryDialog({
           <div className="p-6">
             {scope === 'workspace' && (
               <p data-testid="entry-scope-notice" className="text-muted-foreground mb-4 text-sm">
-                This name is visible to everyone in this workspace.
+                This name is saved to {workspaceLabel} and is visible to everyone in the workspace.
               </p>
             )}
 

@@ -409,7 +409,11 @@ describe('SafeAccountsTable — selection mode', () => {
       />,
     )
     fireEvent.click(screen.getByTestId('rename-0xB'))
-    expect(screen.getByTestId('entry-dialog')).toBeInTheDocument()
+    const dialog = screen.getByTestId('entry-dialog')
+
+    expect(dialog).toBeInTheDocument()
+    // The row already fixed the address; renaming only edits its name.
+    expect(dialog.querySelector('input[name="address"]')).toBeDisabled()
   })
 })
 

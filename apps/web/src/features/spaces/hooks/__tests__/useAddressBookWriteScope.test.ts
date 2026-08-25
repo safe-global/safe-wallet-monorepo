@@ -1,10 +1,15 @@
 import { renderHook } from '@/tests/test-utils'
+import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAddressBookWriteScope } from '../useAddressBookWriteScope'
+import { useCurrentSpaceId } from '../useCurrentSpaceId'
 import { useIsAdmin } from '../useSpaceMembers'
-import { useSpaceSafes } from '../useSpaceSafes'
 
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
+  ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/spaces'),
+  useSpaceSafesGetV1Query: jest.fn(),
+}))
+jest.mock('../useCurrentSpaceId', () => ({ useCurrentSpaceId: jest.fn() }))
 jest.mock('../useSpaceMembers', () => ({ useIsAdmin: jest.fn() }))
-jest.mock('../useSpaceSafes', () => ({ useSpaceSafes: jest.fn() }))
 
 const WORKSPACE_SAFE = '0x1111111111111111111111111111111111111111'
 const OUTSIDE_SAFE = '0x2222222222222222222222222222222222222222'
@@ -13,8 +18,9 @@ const OTHER_CHAIN = '137'
 
 const setup = ({ isAdmin = false } = {}) => {
   ;(useIsAdmin as jest.Mock).mockReturnValue(isAdmin)
-  ;(useSpaceSafes as jest.Mock).mockReturnValue({
-    allSafes: [{ address: WORKSPACE_SAFE, chainId: WORKSPACE_CHAIN }],
+  ;(useCurrentSpaceId as jest.Mock).mockReturnValue('space-uuid')
+  ;(useSpaceSafesGetV1Query as jest.Mock).mockReturnValue({
+    currentData: { safes: { [WORKSPACE_CHAIN]: [WORKSPACE_SAFE] } },
   })
 }
 
@@ -52,6 +58,13 @@ describe('useAddressBookWriteScope', () => {
       setup({ isAdmin: false })
       const { result } = renderHook(() => useAddressBookWriteScope(WORKSPACE_SAFE, [OTHER_CHAIN]))
       expect(result.current.canRename).toBe(true)
+    })
+
+    it('allows the rename while the space query has no data yet', () => {
+      setup({ isAdmin: false })
+      ;(useSpaceSafesGetV1Query as jest.Mock).mockReturnValue({ currentData: undefined })
+      const { result } = renderHook(() => useAddressBookWriteScope(WORKSPACE_SAFE, [WORKSPACE_CHAIN]))
+      expect(result.current).toEqual({ scope: 'local', canRename: true })
     })
   })
 
