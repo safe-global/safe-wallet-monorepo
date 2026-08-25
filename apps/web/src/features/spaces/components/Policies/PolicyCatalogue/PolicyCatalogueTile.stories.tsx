@@ -25,6 +25,7 @@ type Story = StoryObj<typeof meta>
 
 export const Available: Story = {
   args: {
+    id: 'proposer',
     title: 'Proposer',
     description: 'Let teammates without signing rights propose transactions.',
     Icon: UserRoundPen,
@@ -35,6 +36,7 @@ export const Available: Story = {
 
 export const Unavailable: Story = {
   args: {
+    id: 'spending-limit',
     title: 'Spending limit',
     description: 'Let spenders access assets without collecting signatures.',
     Icon: WalletCards,

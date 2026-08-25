@@ -3,6 +3,7 @@ import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import PolicyCatalogueTile from '../PolicyCatalogueTile'
 
 const defaultProps = {
+  id: 'spending-limit' as const,
   title: 'Spending limit',
   description: 'Let spenders access assets without collecting signatures.',
   Icon: WalletCards,
@@ -13,6 +14,12 @@ const defaultProps = {
 describe('PolicyCatalogueTile', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+  })
+
+  it('gives each tile a test id of its own so a single tile can be targeted', () => {
+    render(<PolicyCatalogueTile {...defaultProps} />)
+
+    expect(screen.getByTestId('policy-catalogue-tile-spending-limit')).toBeInTheDocument()
   })
 
   it('states the policy name and what it does', () => {

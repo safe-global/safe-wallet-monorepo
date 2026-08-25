@@ -2,8 +2,10 @@ import { ArrowRight, type LucideIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
+import { type PolicyCatalogueId } from './catalogue'
 
 export interface PolicyCatalogueTileProps {
+  id: PolicyCatalogueId
   title: string
   description: string
   Icon: LucideIcon
@@ -11,10 +13,10 @@ export interface PolicyCatalogueTileProps {
   onClick: () => void
 }
 
-const PolicyCatalogueTile = ({ title, description, Icon, isAvailable, onClick }: PolicyCatalogueTileProps) => (
+const PolicyCatalogueTile = ({ id, title, description, Icon, isAvailable, onClick }: PolicyCatalogueTileProps) => (
   <button
     type="button"
-    data-testid="policy-catalogue-tile"
+    data-testid={`policy-catalogue-tile-${id}`}
     aria-disabled={isAvailable ? undefined : true}
     onClick={onClick}
     className={cn(
