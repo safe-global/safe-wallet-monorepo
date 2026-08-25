@@ -607,4 +607,3 @@ describe('SafenetReader chain-id assertion (dev-only, one-shot)', () => {
     spy.mockRestore()
   })
 })
-

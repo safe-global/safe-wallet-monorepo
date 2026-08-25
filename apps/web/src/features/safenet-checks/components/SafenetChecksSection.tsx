@@ -5,16 +5,14 @@ import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
-import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
-import { STATUS_PRESENTATION } from '../statusPresentation'
+import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
+import { resolvePresentation } from '../statusPresentation'
 
 /**
- * Safenet check state as a section in the Safe Shield widget (PRD display
- * rule: reuse the severity components, no new banner UI). Subscribes only for
- * confirm/execute flows of an already-proposed transaction, and only once the
- * submission time is known — the shared cache keys by hash, so a fetch aimed
- * without it would cache a mis-aimed read for every surface. Renders nothing
- * until a check has been observed.
+ * Safenet check state as a section in the Safe Shield widget. Subscribes only
+ * for confirm/execute flows of an already-proposed transaction, and only once
+ * the submission time is known — the shared cache keys by hash, so a fetch
+ * aimed without it would cache a mis-aimed read for every surface.
  */
 export const SafenetChecksSection = (): ReactElement | null => {
   const { txId, txDetails } = useContext(TxFlowContext)
@@ -24,11 +22,13 @@ export const SafenetChecksSection = (): ReactElement | null => {
       ? txDetails.detailedExecutionInfo.submittedAt
       : undefined
 
-  const display = useSafenetDisplayStatus(submittedAt !== undefined ? safeTxHash : undefined, submittedAt)
-  if (!display) return null
+  const { publicStatus, snapshot, unavailableReason } = useSafenetCheck(
+    submittedAt !== undefined ? safeTxHash : undefined,
+    submittedAt,
+  )
 
-  const { publicStatus } = display
-  const { severity, copy } = STATUS_PRESENTATION[publicStatus]
+  const content = resolvePresentation(publicStatus, unavailableReason, snapshot !== undefined)
+  if (!content) return null
 
   return (
     // The section appears only once the chain read resolves; the entrance
@@ -36,16 +36,17 @@ export const SafenetChecksSection = (): ReactElement | null => {
     <div
       data-testid="safenet-checks-section"
       data-status={publicStatus}
+      data-reason={unavailableReason}
       className="animate-in fade-in slide-in-from-top-1 p-4 duration-300"
     >
       <div className="flex items-start gap-2">
-        <SeverityIcon severity={severity} />
-        <div>
+        <SeverityIcon severity={content.severity} muted={content.muted} />
+        <div className="flex flex-1 flex-col gap-1">
           <Typography variant="paragraph-small" className="font-bold leading-4">
-            Safenet check
+            {content.label}
           </Typography>
           <Typography variant="paragraph-small" className="text-muted-foreground">
-            {copy}
+            {content.copy}
           </Typography>
         </div>
       </div>

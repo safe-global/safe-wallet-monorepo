@@ -4,6 +4,8 @@ import {
   PLAIN_DEADLINE_BLOCKS,
   POLL_INTERVAL_FAST_MS,
   POLL_INTERVAL_LATE_MS,
+  UNAVAILABLE_GRACE_MS,
+  UNAVAILABLE_GRACE_POLL_MS,
 } from '../../constants'
 import { CheckStatus } from '../../types'
 
@@ -15,15 +17,65 @@ describe('computePollingInterval', () => {
     },
   )
 
-  it('stops polling on UNAVAILABLE (a row with no check must not poll forever)', () => {
-    expect(
-      computePollingInterval({
-        status: CheckStatus.UNAVAILABLE,
-        headBlock: null,
-        deadlineBlock: null,
-        firstEventBlock: null,
-      }),
-    ).toBe(0)
+  describe('UNAVAILABLE — bounded grace window instead of an immediate stop', () => {
+    const SUBMITTED = 1_700_000_000_000
+    const unavailable = { status: CheckStatus.UNAVAILABLE, headBlock: null, deadlineBlock: null, firstEventBlock: null }
+
+    it('polls slowly inside the grace window (the check request may still be mining)', () => {
+      expect(computePollingInterval({ ...unavailable, submittedAtMs: SUBMITTED, nowMs: SUBMITTED + 1_000 })).toBe(
+        UNAVAILABLE_GRACE_POLL_MS,
+      )
+    })
+
+    it('polls slowly right up to the last ms of the grace window', () => {
+      expect(
+        computePollingInterval({
+          ...unavailable,
+          submittedAtMs: SUBMITTED,
+          nowMs: SUBMITTED + UNAVAILABLE_GRACE_MS - 1,
+        }),
+      ).toBe(UNAVAILABLE_GRACE_POLL_MS)
+    })
+
+    it('stops at the grace boundary', () => {
+      expect(
+        computePollingInterval({ ...unavailable, submittedAtMs: SUBMITTED, nowMs: SUBMITTED + UNAVAILABLE_GRACE_MS }),
+      ).toBe(0)
+    })
+
+    it('stops past the grace window (a row with no check must not poll forever)', () => {
+      expect(
+        computePollingInterval({
+          ...unavailable,
+          submittedAtMs: SUBMITTED,
+          nowMs: SUBMITTED + UNAVAILABLE_GRACE_MS + 60_000,
+        }),
+      ).toBe(0)
+    })
+
+    it('stops on a submission stamped in the future (clock skew must not stretch the window)', () => {
+      expect(computePollingInterval({ ...unavailable, submittedAtMs: SUBMITTED + 3_600_000, nowMs: SUBMITTED })).toBe(0)
+    })
+
+    it('stops when the submission time is unknown (nothing anchors the window)', () => {
+      expect(computePollingInterval({ ...unavailable, submittedAtMs: null, nowMs: 1_700_000_000_000 })).toBe(0)
+      expect(computePollingInterval(unavailable)).toBe(0)
+    })
+
+    it('keeps the grace window while a pinned snapshot is present', () => {
+      // NO_CHECK arrives with a snapshot and its head block; the window still
+      // applies, since the missing check is what polling waits for.
+      expect(
+        computePollingInterval({
+          status: CheckStatus.UNAVAILABLE,
+          headBlock: '200',
+          deadlineBlock: '150',
+          firstEventBlock: '100',
+          submittedAtMs: SUBMITTED,
+          nowMs: SUBMITTED + 1_000,
+        }),
+      ).toBe(UNAVAILABLE_GRACE_POLL_MS)
+    })
   })
 
   it('polls fast before the deadline', () => {

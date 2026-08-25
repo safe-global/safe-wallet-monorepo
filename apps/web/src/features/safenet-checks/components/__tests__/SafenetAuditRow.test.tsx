@@ -2,9 +2,10 @@ import { render, screen } from '@/tests/test-utils'
 import { useChain } from '@/hooks/useChains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { AttestationVerificationStatus, CheckStatus } from '@safe-global/utils/features/safenet-checks'
-import { useSafenetCheck, type SafenetCheckView } from '@safe-global/utils/features/safenet-checks/hooks'
+import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
 import {
   buildBenignSnapshot,
+  buildCheckView,
   buildSnapshot,
   plainAttestedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
@@ -24,16 +25,7 @@ const mockUseChain = useChain as jest.MockedFunction<typeof useChain>
 
 const HASH = `0x${'ab'.repeat(32)}`
 
-const view = (over: Partial<SafenetCheckView> = {}): SafenetCheckView => ({
-  snapshot: undefined,
-  status: CheckStatus.UNAVAILABLE,
-  publicStatus: CheckStatus.UNAVAILABLE,
-  isLoading: false,
-  isFetching: false,
-  isStale: false,
-  refetch: jest.fn(),
-  ...over,
-})
+const view = buildCheckView
 
 describe('SafenetAuditRow', () => {
   beforeEach(() => {
