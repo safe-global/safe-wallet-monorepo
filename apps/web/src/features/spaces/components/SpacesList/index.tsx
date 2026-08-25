@@ -92,16 +92,9 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
       {/* The page keeps its Topbar + Accounts/Workspaces tabs, so the sign-in
           card renders inline rather than as a full-screen takeover. */}
       <div
-        className={cn(
-          'relative flex items-center justify-center p-6 pb-10',
-          // Safe Pro tightens the run-in: .spacesHeader already puts 24px below the tabs, and the
-          // design wants 43px from tabs to banner (Figma 13903:88488 → 13992:137072). Gated so the
-          // pre-Pro screen keeps its 40px.
-          isSafeProEnabled ? 'pt-[19px]' : 'pt-10',
-        )}
+        className={cn('relative flex items-center justify-center p-6 pb-10', isSafeProEnabled ? 'pt-[19px]' : 'pt-10')}
       >
         <div className="flex w-full max-w-[440px] flex-col items-center">
-          {/* 16px below the Pro banner per the design; the pre-Pro banner keeps its 12px. */}
           {isSafeProEnabled ? <SafeProBanner className="mb-4" /> : <WorkspaceBanner className="mb-3" />}
 
           <div className="relative w-full">
@@ -196,6 +189,8 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
 const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
+  const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
+  const isSafeProEnabled = useIsSafeProEnabled() === true
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const {
@@ -254,30 +249,33 @@ const SpacesList = () => {
         {!isUserSignedIn ? (
           <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
         ) : activeSpaces.length > 0 ? (
-          <WelcomeContentCard className="flex flex-col gap-4">
-            <div className="flex justify-end">
-              <AddSpaceButton
-                size="default"
-                variant="outline"
-                label="Create"
-                disabled={isAtSpacesLimit}
-                onClick={onAddSpaceBtnClick}
-              />
-            </div>
-
-            {pendingInviteBanners}
-
-            <div className="rounded-lg border border-border bg-card px-4 py-1" data-testid="org-list">
-              {activeSpaces.map((space, index) => (
-                <SpaceRow
-                  key={space.uuid}
-                  space={space}
-                  currentUserId={currentUser?.id}
-                  showDivider={index < activeSpaces.length - 1}
+          <>
+            {isSafeProEnabled && <SafeProWorkspacesBanner className="mb-4" />}
+            <WelcomeContentCard className="flex flex-col gap-4">
+              <div className="flex justify-end">
+                <AddSpaceButton
+                  size="default"
+                  variant="outline"
+                  label="Create"
+                  disabled={isAtSpacesLimit}
+                  onClick={onAddSpaceBtnClick}
                 />
-              ))}
-            </div>
-          </WelcomeContentCard>
+              </div>
+
+              {pendingInviteBanners}
+
+              <div className="rounded-lg border border-border bg-card px-4 py-1" data-testid="org-list">
+                {activeSpaces.map((space, index) => (
+                  <SpaceRow
+                    key={space.uuid}
+                    space={space}
+                    currentUserId={currentUser?.id}
+                    showDivider={index < activeSpaces.length - 1}
+                  />
+                ))}
+              </div>
+            </WelcomeContentCard>
+          </>
         ) : (
           <>
             {pendingInviteBanners}

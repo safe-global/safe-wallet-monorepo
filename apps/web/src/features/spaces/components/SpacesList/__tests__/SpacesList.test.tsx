@@ -39,6 +39,7 @@ jest.mock('@/features/__core__', () => ({
   useLoadFeature: () => ({
     AccountsNavigation: () => <nav data-testid="accounts-nav" />,
     SafeProBanner: () => <div data-testid="safe-pro-banner" />,
+    SafeProWorkspacesBanner: () => <div data-testid="safe-pro-workspaces-banner" />,
   }),
   createFeatureHandle: () => ({}),
 }))
@@ -129,8 +130,35 @@ describe('SpacesList — auth/expiry state rendering', () => {
       expect(screen.queryByText('Introducing Workspace')).not.toBeInTheDocument()
     })
 
-    // useHasFeature returns undefined until the chain config lands — that must not
-    // flash the Pro banner on a chain that never enables it.
+    it('shows the wide Pro banner above the workspaces list when signed in and the flag is on', () => {
+      mockUseAppSelector.mockReturnValue(true)
+      mockUseIsSafeProEnabled.mockReturnValue(true)
+      mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+      mockUseSpacesGetV1Query.mockReturnValue({
+        currentData: [{ uuid: 'a', name: 'Acme', memberStatus: 'ACTIVE' }],
+        isFetching: false,
+        error: undefined,
+      })
+
+      render(<SpacesList />)
+
+      expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
+    })
+
+    it('hides the wide Pro banner when signed in and the flag is off', () => {
+      mockUseAppSelector.mockReturnValue(true)
+      mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+      mockUseSpacesGetV1Query.mockReturnValue({
+        currentData: [{ uuid: 'a', name: 'Acme', memberStatus: 'ACTIVE' }],
+        isFetching: false,
+        error: undefined,
+      })
+
+      render(<SpacesList />)
+
+      expect(screen.queryByTestId('safe-pro-workspaces-banner')).not.toBeInTheDocument()
+    })
+
     it('keeps the pre-Pro banner while the flag is still resolving', () => {
       mockUseAppSelector.mockReturnValue(false)
       mockUseIsSafeProEnabled.mockReturnValue(undefined)
