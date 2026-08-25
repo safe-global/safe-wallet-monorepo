@@ -40,4 +40,21 @@ describe('Policies', () => {
     expect(link.querySelector('.external-link-icon')).toBeInTheDocument()
     expect(link).toHaveClass('font-bold', 'hover:text-muted-foreground')
   })
+
+  it('renders the policy catalogue', () => {
+    render(<Policies />)
+
+    expect(screen.getByText('Spending limit')).toBeInTheDocument()
+    expect(screen.getByText('Proposer')).toBeInTheDocument()
+    expect(screen.getByText('Account recovery')).toBeInTheDocument()
+    expect(screen.getByText('Something missing?')).toBeInTheDocument()
+  })
+
+  it('renders the catalogue only, with no table, create button or search', () => {
+    render(<Policies />)
+
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Create policy/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('searchbox')).not.toBeInTheDocument()
+  })
 })
