@@ -10,6 +10,8 @@ export const NO_ELIGIBLE_ACCOUNTS_TEXT =
 /** Used instead when no wallet is connected — there is none to blame or switch away from. */
 export const NO_WALLET_TEXT = 'Connect a wallet to see the Safe Accounts you can set a policy on.'
 
+export const LOAD_ERROR_TEXT = 'Failed to load Safe Accounts'
+
 export const SAFE_ACCOUNT_SELECTOR_LABEL = 'Which Safe Account does this apply to?'
 
 export const SAFE_ACCOUNT_SELECTOR_PLACEHOLDER = 'Select Safe account'

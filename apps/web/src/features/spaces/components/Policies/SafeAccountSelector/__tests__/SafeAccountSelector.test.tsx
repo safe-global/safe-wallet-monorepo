@@ -4,6 +4,7 @@ import SafeAccountSelector, { type SafeAccountSelectorProps } from '..'
 import {
   ELIGIBILITY_HELPER_TEXT,
   ELIGIBILITY_RULE,
+  LOAD_ERROR_TEXT,
   NO_ELIGIBLE_ACCOUNTS_TEXT,
   NO_WALLET_TEXT,
   SAFE_ACCOUNT_SELECTOR_LABEL,
@@ -192,10 +193,34 @@ describe('SafeAccountSelector', () => {
     )
 
     await openSelector(user)
-    await user.click(await screen.findByRole('button', { name: 'Retry' }))
+    expect(await screen.findByText(LOAD_ERROR_TEXT)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Retry' }))
 
     expect(onRetry).toHaveBeenCalledTimes(1)
     expect(screen.queryByText(NO_ELIGIBLE_ACCOUNTS_TEXT)).not.toBeInTheDocument()
+  })
+
+  it('tones the load error as an error rather than neutral copy', async () => {
+    const { user } = renderWithUserEvent(
+      <SafeAccountSelector accounts={[]} onChange={jest.fn()} isError onRetry={jest.fn()} />,
+    )
+
+    await openSelector(user)
+
+    expect(await screen.findByText(LOAD_ERROR_TEXT)).toHaveClass('text-destructive')
+    expect(screen.getByTestId('safe-accounts-load-error').querySelector('svg')).toBeInTheDocument()
+  })
+
+  // The popup is already a card; an alert inside it reads as a card in a card.
+  it('renders the error as popup content, not as a nested alert card', async () => {
+    const { user } = renderWithUserEvent(
+      <SafeAccountSelector accounts={[]} onChange={jest.fn()} isError onRetry={jest.fn()} />,
+    )
+
+    await openSelector(user)
+
+    const popup = (await screen.findByText(LOAD_ERROR_TEXT)).closest('[data-slot="select-content"]')
+    expect(popup?.querySelector('[data-slot="alert"]')).not.toBeInTheDocument()
   })
 
   it('explains the empty list rather than showing "no results"', async () => {

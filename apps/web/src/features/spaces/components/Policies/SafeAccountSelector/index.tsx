@@ -4,8 +4,8 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
-import InlineRetryError from '@/components/common/InlineRetryError'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
+import LoadError from './components/LoadError'
 import NoEligibleAccounts from './components/NoEligibleAccounts'
 import SafeAccountGroupHeader from './components/SafeAccountGroupHeader'
 import SafeAccountRow, {
@@ -82,7 +82,7 @@ const SafeAccountSelector = ({
     }
 
     if (isError) {
-      return <InlineRetryError message="Failed to load Safe Accounts" onRetry={onRetry} />
+      return <LoadError onRetry={onRetry} />
     }
 
     if (accounts.length === 0) {
