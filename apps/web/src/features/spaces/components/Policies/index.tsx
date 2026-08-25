@@ -14,7 +14,7 @@ const Policies = (): ReactElement => {
         <Typography variant="paragraph-medium">
           Policies are rules that help you manage your Safe accounts. Set them up once and they will run onchain,
           automatically.{' '}
-          <ExternalLink href={HelpCenterArticle.POLICIES} noIcon>
+          <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.POLICIES}>
             Learn more
           </ExternalLink>
         </Typography>

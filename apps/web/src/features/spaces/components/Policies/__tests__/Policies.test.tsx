@@ -29,4 +29,15 @@ describe('Policies', () => {
 
     expect(screen.getByRole('link', { name: 'Learn more' })).toHaveAttribute('href', HelpCenterArticle.POLICIES)
   })
+
+  // Mirrors the `Learn more` link in the Proposers section of Safe settings
+  // (components/settings/ProposersList) — bold, with the external-link icon.
+  it('styles Learn more like the Proposers section', () => {
+    render(<Policies />)
+
+    const link = screen.getByRole('link', { name: 'Learn more' })
+
+    expect(link.querySelector('.external-link-icon')).toBeInTheDocument()
+    expect(link).toHaveClass('font-bold', 'hover:text-muted-foreground')
+  })
 })
