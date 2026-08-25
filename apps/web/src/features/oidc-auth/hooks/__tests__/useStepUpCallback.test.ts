@@ -70,7 +70,7 @@ describe('useStepUpCallback', () => {
     Object.defineProperty(window, 'location', { writable: true, value: originalLocation })
   })
 
-  it('should do nothing when no trip is in flight', async () => {
+  it('should, when no trip is in flight, do nothing', async () => {
     renderHook(() => useStepUpCallback())
 
     await waitFor(() => {
@@ -79,7 +79,7 @@ describe('useStepUpCallback', () => {
     expect(mockDispatch).not.toHaveBeenCalled()
   })
 
-  it('should reconcile the session on a successful return', async () => {
+  it('should, when the return succeeds, reconcile the session', async () => {
     saveStepUpTrip(TRIP_ACTION)
 
     renderHook(() => useStepUpCallback())
@@ -92,7 +92,7 @@ describe('useStepUpCallback', () => {
   // Regression: the in-flight marker and the payload lived in separate keys, so
   // a return could consume one and strand the other for an unrelated trip to
   // execute. One record cannot disagree with itself.
-  it('should consume the whole trip record so nothing is left behind', async () => {
+  it('should, when a trip is processed, consume the whole record so nothing is left behind', async () => {
     saveStepUpTrip(TRIP_ACTION)
 
     renderHook(() => useStepUpCallback())
@@ -102,7 +102,7 @@ describe('useStepUpCallback', () => {
     })
   })
 
-  it('should notify and clean the URL when the provider returned an error', async () => {
+  it('should, when the callback carries an error, notify and clean the URL', async () => {
     saveStepUpTrip(TRIP_ACTION)
     setSearch('?spaceId=42&error=access_denied&error_description=mfa_required')
 
@@ -124,7 +124,7 @@ describe('useStepUpCallback', () => {
 
   // Without this, an `elevation_required` raised by the replayed action would
   // send the user straight back out to the provider, on and on.
-  it('should hold the redirect guard while processing and release it after the replay', async () => {
+  it('should, when processing a return, hold the redirect guard and release it after the replay', async () => {
     saveStepUpTrip(TRIP_ACTION)
     const order: string[] = []
     mockMarkStepUpReturnHandled.mockImplementation(() => order.push('mark'))
@@ -143,7 +143,7 @@ describe('useStepUpCallback', () => {
 
   // The first render races the replay: without the splash held up, lists paint
   // pre-mutation data next to a success toast, then visibly jump.
-  it('should hold the splash until the return is fully processed', async () => {
+  it('should, when a return is in flight, hold the splash until it is fully processed', async () => {
     saveStepUpTrip(TRIP_ACTION)
     let resolveReplay: () => void = () => {}
     mockReplayStepUpAction.mockImplementation(() => new Promise<void>((resolve) => (resolveReplay = resolve)))
@@ -164,7 +164,7 @@ describe('useStepUpCallback', () => {
 
   // Regression: the guard once stayed set for the whole SPA session, so the
   // second gated action after a step-up silently never redirected.
-  it('should release the redirect guard after a failed challenge too', async () => {
+  it('should, when the challenge failed, still release the redirect guard', async () => {
     saveStepUpTrip(TRIP_ACTION)
     setSearch('?error=access_denied')
 
@@ -178,7 +178,7 @@ describe('useStepUpCallback', () => {
   // Regression: a throw (e.g. the gateway unreachable during the return) once
   // skipped the release, so no step-up in the tab could redirect again until a
   // full reload.
-  it('should release the redirect guard even when processing the return throws', async () => {
+  it('should, when processing the return throws, still release the redirect guard', async () => {
     saveStepUpTrip(TRIP_ACTION)
     mockReconcileAuth.mockRejectedValue(new Error('fetch failed'))
 
@@ -191,7 +191,7 @@ describe('useStepUpCallback', () => {
 
   // The point of the round-trip: the action the challenge interrupted has to
   // actually happen, not leave the user back in the app with nothing done.
-  it('should complete the interrupted action on a successful return', async () => {
+  it('should, when the return succeeds, complete the interrupted action', async () => {
     saveStepUpTrip(TRIP_ACTION)
 
     renderHook(() => useStepUpCallback())
@@ -203,7 +203,7 @@ describe('useStepUpCallback', () => {
 
   // A gated endpoint outside the replay allowlist records a bare trip: the
   // session is still reconciled, but nothing is re-fired blindly.
-  it('should reconcile without replaying on a bare trip', async () => {
+  it('should, when the trip is bare, reconcile without replaying', async () => {
     saveStepUpTrip(undefined)
 
     renderHook(() => useStepUpCallback())
@@ -214,7 +214,7 @@ describe('useStepUpCallback', () => {
     expect(mockReplayStepUpAction).not.toHaveBeenCalled()
   })
 
-  it('should replay only after the session has been reconciled', async () => {
+  it('should, when replaying, do so only after the session has been reconciled', async () => {
     saveStepUpTrip(TRIP_ACTION)
     const order: string[] = []
     mockReconcileAuth.mockImplementation(() => {
@@ -233,7 +233,7 @@ describe('useStepUpCallback', () => {
     })
   })
 
-  it('should discard the interrupted action when the step-up failed', async () => {
+  it('should, when the step-up failed, discard the interrupted action', async () => {
     saveStepUpTrip(TRIP_ACTION)
     setSearch('?error=access_denied')
 

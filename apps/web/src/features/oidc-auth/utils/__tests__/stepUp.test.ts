@@ -19,7 +19,7 @@ describe('startStepUp', () => {
     Object.defineProperty(window, 'location', { writable: true, value: originalLocation })
   })
 
-  it('should redirect to the CGW authorize endpoint with elevate=true', () => {
+  it('should, when called, redirect to the CGW authorize endpoint with elevate=true', () => {
     startStepUp()
 
     const url = new URL(window.location.href)
@@ -27,7 +27,7 @@ describe('startStepUp', () => {
     expect(url.searchParams.get('elevate')).toBe('true')
   })
 
-  it('should return to the current page', () => {
+  it('should, when no redirect URL is given, return to the current page', () => {
     startStepUp()
 
     expect(new URL(window.location.href).searchParams.get('redirect_url')).toBe(
@@ -35,7 +35,7 @@ describe('startStepUp', () => {
     )
   })
 
-  it('should use an explicit redirect URL when provided', () => {
+  it('should, when a redirect URL is given, return to that URL instead', () => {
     startStepUp('https://app.safe.global/spaces/settings?spaceId=7')
 
     expect(new URL(window.location.href).searchParams.get('redirect_url')).toBe(
@@ -45,7 +45,7 @@ describe('startStepUp', () => {
 
   // Otherwise the return leg would read a previous attempt's error and report a
   // failure that did not happen this time round.
-  it('should strip stale error params from the return URL', () => {
+  it('should, when the current URL carries stale error params, strip them from the return URL', () => {
     setLocation('https://app.safe.global/spaces/members?spaceId=42&error=access_denied&error_description=nope')
 
     startStepUp()
@@ -60,14 +60,14 @@ describe('startStepUp', () => {
   // challenge page left it set, and every later attempt refused to navigate.
   // Nothing that outlives the page load may gate a redirect. The sign-in flow's
   // own marker must stay untouched, so a step-up is never read as a login.
-  it('should write nothing to sessionStorage', () => {
+  it('should, when called, write nothing to sessionStorage', () => {
     startStepUp()
 
     expect(sessionStorage.length).toBe(0)
     expect(sessionStorage.getItem(OIDC_AUTH_PENDING_KEY)).toBeNull()
   })
 
-  it('should redirect again after an abandoned attempt left residue behind', () => {
+  it('should, when an abandoned attempt left residue behind, redirect again', () => {
     sessionStorage.setItem('oidc_step_up', JSON.stringify({ endpoint: 'spacesDeleteV1', createdAt: Date.now() }))
 
     expect(startStepUp()).toBe(true)
@@ -76,7 +76,7 @@ describe('startStepUp', () => {
 
   // A replayed action that is itself rejected must surface as an error rather
   // than bouncing the user back out to the provider indefinitely.
-  it('should not redirect while a return is being processed', () => {
+  it('should, when a return is being processed, not redirect', () => {
     markStepUpReturnHandled()
 
     expect(startStepUp()).toBe(false)
@@ -85,7 +85,7 @@ describe('startStepUp', () => {
 
   // Regression: the guard once outlived the return processing, so the SECOND
   // gated action of a session failed with an inline error and no redirect.
-  it('should redirect again once the return has been processed', () => {
+  it('should, when the return has been processed, redirect again', () => {
     markStepUpReturnHandled()
     resetStepUpReturnGuard()
 

@@ -123,7 +123,7 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
     await stubProviderChallengePage(safePage)
   })
 
-  test('should send the user to the provider when an action needs a fresh second factor', async ({ safePage }) => {
+  test('that it sends the user to the provider when an action needs a fresh second factor', async ({ safePage }) => {
     await openRemoveDialog(safePage)
 
     const authorizeRequest = captureAuthorizeRequest(safePage)
@@ -141,7 +141,7 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
   // (this app holds connections that disqualify it), so the residue is planted
   // directly after load instead. What matters is the invariant: nothing that
   // outlives a page load may block a redirect.
-  test('should still redirect when a leftover trip record is present', async ({ safePage }) => {
+  test('that it still redirects when a leftover trip record is present', async ({ safePage }) => {
     await openRemoveDialog(safePage)
 
     await safePage.evaluate(
@@ -167,7 +167,9 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
   // Regression: the pending marker and the payload lived in separate keys, so a
   // return could consume one and strand the other for an unrelated round-trip to
   // execute — a deletion nobody pressed at that moment.
-  test('should discard the pending action and report failure when the challenge is abandoned', async ({ safePage }) => {
+  test('that it discards the pending action and reports failure when the challenge is abandoned', async ({
+    safePage,
+  }) => {
     await openRemoveDialog(safePage)
     await safePage.getByRole('button', { name: 'Remove' }).click()
     await expect(safePage.getByRole('heading', { name: 'Provider challenge' })).toBeVisible()
@@ -179,7 +181,7 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
     await expect.poll(() => readStepUpRecord(safePage)).toBeNull()
   })
 
-  test('should ignore a pending action older than the challenge window', async ({ safePage }) => {
+  test('that it ignores a pending action older than the challenge window', async ({ safePage }) => {
     await safePage.addInitScript(
       ({ key, address, spaceId }) => {
         window.sessionStorage.setItem(
@@ -208,7 +210,7 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
     expect(replayAttempted).toBe(false)
   })
 
-  test('should complete the interrupted action when the challenge succeeds', async ({ safePage }) => {
+  test('that it completes the interrupted action when the challenge succeeds', async ({ safePage }) => {
     await stubCompletedChallenge(safePage)
 
     // The gate lifts once the provider has been through: the replay must succeed.
@@ -230,7 +232,7 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
     await expect.poll(() => readStepUpRecord(safePage)).toBeNull()
   })
 
-  test('should report an error when the replayed action fails', async ({ safePage }) => {
+  test('that it reports an error when the replayed action fails', async ({ safePage }) => {
     await stubCompletedChallenge(safePage)
 
     let removalCalls = 0

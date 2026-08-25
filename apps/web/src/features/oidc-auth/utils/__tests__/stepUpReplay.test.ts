@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { clearStepUpTrip, getReplayableAction, saveStepUpTrip, takeStepUpTrip } from '../stepUpReplay'
+import { getReplayableAction, saveStepUpTrip, takeStepUpTrip } from '../stepUpReplay'
 
 // Mirrors the thunk arg RTK Query builds for a mutation.
 const rejectedMutation = (endpointName: string, originalArgs: unknown) => ({
@@ -9,7 +9,7 @@ const rejectedMutation = (endpointName: string, originalArgs: unknown) => ({
 })
 
 describe('getReplayableAction', () => {
-  it('reads the endpoint and args off a rejected gated mutation', () => {
+  it('should, when a rejected gated mutation is given, return its endpoint and args', () => {
     const args = { spaceId: faker.string.numeric(3) }
 
     expect(getReplayableAction(rejectedMutation('spaceSafesCreateV1', args))).toEqual({
@@ -18,32 +18,47 @@ describe('getReplayableAction', () => {
     })
   })
 
-  it.each([
-    'spaceSafesDeleteV1',
-    'spacesUpdateV1',
-    'spacesDeleteV1',
-    'membersInviteUserV1',
-    'membersUpdateRoleV1',
-    'membersRemoveUserV1',
-    'addressBooksUpsertAddressBookItemsV1',
-    'addressBooksDeleteByAddressV1',
-    'addressBookRequestsApproveRequestV1',
-  ])('recognises the gated endpoint %s', (endpoint) => {
-    expect(getReplayableAction(rejectedMutation(endpoint, {}))?.endpoint).toBe(endpoint)
+  it('should, when the rejected mutation targets any gated endpoint, return that endpoint', () => {
+    expect(getReplayableAction(rejectedMutation('spaceSafesCreateV1', {}))?.endpoint).toBe('spaceSafesCreateV1')
+    expect(getReplayableAction(rejectedMutation('spaceSafesDeleteV1', {}))?.endpoint).toBe('spaceSafesDeleteV1')
+    expect(getReplayableAction(rejectedMutation('spacesUpdateV1', {}))?.endpoint).toBe('spacesUpdateV1')
+    expect(getReplayableAction(rejectedMutation('spacesDeleteV1', {}))?.endpoint).toBe('spacesDeleteV1')
+    expect(getReplayableAction(rejectedMutation('membersInviteUserV1', {}))?.endpoint).toBe('membersInviteUserV1')
+    expect(getReplayableAction(rejectedMutation('membersUpdateRoleV1', {}))?.endpoint).toBe('membersUpdateRoleV1')
+    expect(getReplayableAction(rejectedMutation('membersRemoveUserV1', {}))?.endpoint).toBe('membersRemoveUserV1')
+    expect(getReplayableAction(rejectedMutation('addressBooksUpsertAddressBookItemsV1', {}))?.endpoint).toBe(
+      'addressBooksUpsertAddressBookItemsV1',
+    )
+    expect(getReplayableAction(rejectedMutation('addressBooksDeleteByAddressV1', {}))?.endpoint).toBe(
+      'addressBooksDeleteByAddressV1',
+    )
+    expect(getReplayableAction(rejectedMutation('addressBookRequestsApproveRequestV1', {}))?.endpoint).toBe(
+      'addressBookRequestsApproveRequestV1',
+    )
   })
 
-  it('ignores an endpoint that is not gated, so nothing is replayed blindly', () => {
+  it('should, when the rejected mutation targets an endpoint outside the gated set, return undefined', () => {
     expect(getReplayableAction(rejectedMutation('spacesCreateV1', {}))).toBeUndefined()
   })
 
-  it.each([
-    ['null', null],
-    ['a non-object', 'rejected'],
-    ['an action with no meta', { type: 'x' }],
-    ['an action with no arg', { type: 'x', meta: {} }],
-    ['an action with no endpointName', { type: 'x', meta: { arg: {} } }],
-  ])('returns undefined for %s', (_label, action) => {
-    expect(getReplayableAction(action)).toBeUndefined()
+  it('should, when the action is null, return undefined', () => {
+    expect(getReplayableAction(null)).toBeUndefined()
+  })
+
+  it('should, when the action is not an object, return undefined', () => {
+    expect(getReplayableAction('rejected')).toBeUndefined()
+  })
+
+  it('should, when the action has no meta, return undefined', () => {
+    expect(getReplayableAction({ type: 'x' })).toBeUndefined()
+  })
+
+  it('should, when the action has no arg, return undefined', () => {
+    expect(getReplayableAction({ type: 'x', meta: {} })).toBeUndefined()
+  })
+
+  it('should, when the action has no endpointName, return undefined', () => {
+    expect(getReplayableAction({ type: 'x', meta: { arg: {} } })).toBeUndefined()
   })
 })
 
@@ -53,14 +68,14 @@ describe('step-up trip storage', () => {
     jest.useRealTimers()
   })
 
-  it('round-trips a stored action', () => {
+  it('should, when an action was saved, return it on take', () => {
     const action = { endpoint: 'membersInviteUserV1', args: { spaceId: '7' } } as const
     saveStepUpTrip(action)
 
     expect(takeStepUpTrip()).toEqual({ action })
   })
 
-  it('stores a bare trip for a gated endpoint with no replayable action', () => {
+  it('should, when the trip has no replayable action, return a bare trip', () => {
     saveStepUpTrip(undefined)
 
     expect(takeStepUpTrip()).toEqual({})
@@ -69,7 +84,7 @@ describe('step-up trip storage', () => {
   // Regression: the payload used to live in its own key, so a return could
   // consume the in-flight marker and leave the action behind for an unrelated
   // trip to execute. One record cannot disagree with itself.
-  it('removes the trip as it is taken, so nothing is acted on twice or by a later trip', () => {
+  it('should, when a trip is taken, remove it so nothing is acted on twice or by a later trip', () => {
     saveStepUpTrip({ endpoint: 'spacesDeleteV1', args: { id: '1' } })
 
     expect(takeStepUpTrip()).toBeDefined()
@@ -77,20 +92,13 @@ describe('step-up trip storage', () => {
     expect(sessionStorage.getItem('oidc_step_up')).toBeNull()
   })
 
-  it('returns undefined when nothing is stored', () => {
-    expect(takeStepUpTrip()).toBeUndefined()
-  })
-
-  it('discards a stored trip on clear', () => {
-    saveStepUpTrip({ endpoint: 'spacesUpdateV1', args: {} })
-    clearStepUpTrip()
-
+  it('should, when nothing is stored, return undefined', () => {
     expect(takeStepUpTrip()).toBeUndefined()
   })
 
   // A trip cannot validly outlive CGW's 5-minute state cookie; anything older is
   // residue of an abandoned trip and must never be acted on.
-  it('deletes an expired trip unexamined', () => {
+  it('should, when the stored trip is older than the challenge window, return undefined and delete it', () => {
     jest.useFakeTimers()
     saveStepUpTrip({ endpoint: 'membersInviteUserV1', args: {} })
 
@@ -100,17 +108,21 @@ describe('step-up trip storage', () => {
     expect(sessionStorage.getItem('oidc_step_up')).toBeNull()
   })
 
-  it.each([
-    ['malformed JSON', '{not json'],
-    ['a record with no createdAt', JSON.stringify({ endpoint: 'spacesUpdateV1', args: {} })],
-  ])('rejects %s rather than acting on it', (_label, raw) => {
-    sessionStorage.setItem('oidc_step_up', raw)
+  it('should, when the stored record is malformed JSON, return undefined and delete it', () => {
+    sessionStorage.setItem('oidc_step_up', '{not json')
 
     expect(takeStepUpTrip()).toBeUndefined()
     expect(sessionStorage.getItem('oidc_step_up')).toBeNull()
   })
 
-  it('treats a fresh record whose endpoint is no longer gated as a bare trip', () => {
+  it('should, when the stored record has no createdAt, return undefined and delete it', () => {
+    sessionStorage.setItem('oidc_step_up', JSON.stringify({ endpoint: 'spacesUpdateV1', args: {} }))
+
+    expect(takeStepUpTrip()).toBeUndefined()
+    expect(sessionStorage.getItem('oidc_step_up')).toBeNull()
+  })
+
+  it('should, when a fresh record names an endpoint that is no longer gated, return a bare trip', () => {
     sessionStorage.setItem(
       'oidc_step_up',
       JSON.stringify({ endpoint: 'somethingElse', args: {}, createdAt: Date.now() }),

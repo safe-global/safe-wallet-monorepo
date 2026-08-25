@@ -102,10 +102,6 @@ export const saveStepUpTrip = (action?: PendingStepUpAction): void => {
   }
 }
 
-export const clearStepUpTrip = (): void => {
-  sessionStorage.removeItem(STEP_UP_KEY)
-}
-
 /**
  * Returns the trip in flight and removes it in the same breath, so a record can
  * never be acted on twice, later, or by a different trip's return. Removing
@@ -117,7 +113,7 @@ export const takeStepUpTrip = (): StepUpTrip | undefined => {
   const raw = sessionStorage.getItem(STEP_UP_KEY)
   if (!raw) return undefined
 
-  clearStepUpTrip()
+  sessionStorage.removeItem(STEP_UP_KEY)
 
   try {
     const parsed: unknown = JSON.parse(raw)
