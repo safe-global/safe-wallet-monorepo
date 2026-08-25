@@ -6,7 +6,15 @@ import { useNotificationRegistrations } from '../useNotificationRegistrations'
 import * as web3 from '@/hooks/wallets/web3'
 import * as wallet from '@/hooks/wallets/useWallet'
 import * as logic from '../../logic'
-import { PERMISSION_BLOCKED_MESSAGE, PERMISSION_REQUIRED_MESSAGE, SIGNATURE_REJECTED_MESSAGE } from '../../constants'
+import {
+  DISABLE_FAILED_MESSAGE,
+  ENABLE_FAILED_MESSAGE,
+  PERMISSION_BLOCKED_MESSAGE,
+  PERMISSION_REQUIRED_MESSAGE,
+  RETRY_MESSAGE,
+  SIGNATURE_REJECTED_MESSAGE,
+} from '../../constants'
+import { getGenericErrorWithStatus, RTK_QUERY_ERROR_MESSAGES } from '@/utils/rtkQuery'
 import * as preferences from '../useNotificationPreferences'
 import * as tokenVersion from '../useNotificationsTokenVersion'
 import * as notificationsSlice from '@/store/notificationsSlice'
@@ -192,14 +200,14 @@ describe('useNotificationRegistrations', () => {
       expect(setTokenVersionMock).not.toHaveBeenCalled()
       expect(showNotificationSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Failed to enable push notifications. Please try again.',
+          message: `${ENABLE_FAILED_MESSAGE} ${RETRY_MESSAGE}`,
           variant: 'error',
           groupKey: 'notifications-error',
         }),
       )
     })
 
-    it('does not create preferences/notify if registration throws', async () => {
+    it('does not create preferences/notify if the request fails at transport level', async () => {
       const safesToRegister: logic.NotifiableSafes = {
         '1': [toBeHex('0x1', 20)],
         '2': [toBeHex('0x2', 20)],
@@ -237,7 +245,80 @@ describe('useNotificationRegistrations', () => {
       expect(setTokenVersionMock).not.toHaveBeenCalled()
       expect(showNotificationSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Failed to enable push notifications. Please try again.',
+          message: `${ENABLE_FAILED_MESSAGE} ${RTK_QUERY_ERROR_MESSAGES.network}`,
+          variant: 'error',
+          groupKey: 'notifications-error',
+        }),
+      )
+    })
+
+    it('surfaces the reason returned by the gateway', async () => {
+      const safesToRegister: logic.NotifiableSafes = { '1': [toBeHex('0x1', 20)] }
+      const payload = getExampleRegisterDevicePayload(safesToRegister)
+
+      jest.spyOn(logic, 'getRegisterDevicePayload').mockImplementation(() => Promise.resolve(payload))
+
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/register/notifications`, () => {
+          return HttpResponse.json({ message: 'Invalid signature for safe 0x1' }, { status: 422 })
+        }),
+      )
+
+      const createPreferencesMock = jest.fn()
+
+      ;(preferences.useNotificationPreferences as jest.Mock).mockImplementation(
+        () =>
+          ({
+            uuid: self.crypto.randomUUID(),
+            createPreferences: createPreferencesMock,
+          }) as unknown as ReturnType<typeof preferences.useNotificationPreferences>,
+      )
+
+      const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
+
+      const { result } = renderHook(() => useNotificationRegistrations())
+
+      const registered = await result.current.registerNotifications(safesToRegister)
+
+      expect(registered).toBe(false)
+      expect(createPreferencesMock).not.toHaveBeenCalled()
+      expect(showNotificationSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: `${ENABLE_FAILED_MESSAGE} Invalid signature for safe 0x1`,
+          variant: 'error',
+          groupKey: 'notifications-error',
+        }),
+      )
+    })
+
+    it('keeps the status visible if the gateway gives no reason', async () => {
+      const safesToRegister: logic.NotifiableSafes = { '1': [toBeHex('0x1', 20)] }
+      const payload = getExampleRegisterDevicePayload(safesToRegister)
+
+      jest.spyOn(logic, 'getRegisterDevicePayload').mockImplementation(() => Promise.resolve(payload))
+
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/register/notifications`, () => {
+          return HttpResponse.json({}, { status: 500 })
+        }),
+      )
+      ;(preferences.useNotificationPreferences as jest.Mock).mockImplementation(
+        () =>
+          ({
+            uuid: self.crypto.randomUUID(),
+            createPreferences: jest.fn(),
+          }) as unknown as ReturnType<typeof preferences.useNotificationPreferences>,
+      )
+
+      const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
+
+      const { result } = renderHook(() => useNotificationRegistrations())
+
+      await result.current.registerNotifications(safesToRegister)
+
+      expect(showNotificationSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: `${ENABLE_FAILED_MESSAGE} ${getGenericErrorWithStatus(500)}`,
           variant: 'error',
           groupKey: 'notifications-error',
         }),
@@ -364,14 +445,47 @@ describe('useNotificationRegistrations', () => {
       expect(deletePreferencesMock).not.toHaveBeenCalled()
       expect(showNotificationSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Failed to disable push notifications. Please try again.',
+          message: `${DISABLE_FAILED_MESSAGE} ${RETRY_MESSAGE}`,
           variant: 'error',
           groupKey: 'notifications-error',
         }),
       )
     })
 
-    it('does not delete preferences if unregistration throws', async () => {
+    it('surfaces the reason returned by the gateway', async () => {
+      server.use(
+        http.delete(`${GATEWAY_URL}/v1/chains/:chainId/notifications/devices/:uuid/safes/:safeAddress`, () => {
+          return HttpResponse.json({ message: 'Device not found' }, { status: 404 })
+        }),
+      )
+
+      const deletePreferencesMock = jest.fn()
+
+      ;(preferences.useNotificationPreferences as jest.Mock).mockImplementation(
+        () =>
+          ({
+            uuid: self.crypto.randomUUID(),
+            deletePreferences: deletePreferencesMock,
+          }) as unknown as ReturnType<typeof preferences.useNotificationPreferences>,
+      )
+
+      const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
+
+      const { result } = renderHook(() => useNotificationRegistrations())
+
+      await result.current.unregisterSafeNotifications('1', toBeHex('0x1', 20))
+
+      expect(deletePreferencesMock).not.toHaveBeenCalled()
+      expect(showNotificationSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: `${DISABLE_FAILED_MESSAGE} Device not found`,
+          variant: 'error',
+          groupKey: 'notifications-error',
+        }),
+      )
+    })
+
+    it('does not delete preferences if the request fails at transport level', async () => {
       // Mock the endpoint to throw an error
       server.use(
         http.delete(`${GATEWAY_URL}/v1/chains/:chainId/notifications/devices/:uuid/safes/:safeAddress`, () => {
