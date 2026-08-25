@@ -1,5 +1,4 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { useCallback, useContext, useEffect, useMemo } from 'react'
@@ -13,6 +12,7 @@ import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import SignerSelector from '@/components/common/SignerSelector'
+import TxSectionTitle from '@/components/tx-flow/common/TxSectionTitle'
 
 export const SignerForm = ({ willExecute, txId }: { willExecute?: boolean; txId?: string }) => {
   const { signer, setSignerAddress, connectedWallet: wallet } = useWalletContext() ?? {}
@@ -90,7 +90,7 @@ export const SignerForm = ({ willExecute, txId }: { willExecute?: boolean; txId?
 
   return (
     <>
-      <Typography variant="h4" className="flex items-center gap-2">
+      <TxSectionTitle>
         <SignatureIcon className="size-4" />
         {willExecute ? 'Execute' : 'Sign'} with
         <Tooltip>
@@ -101,7 +101,7 @@ export const SignerForm = ({ willExecute, txId }: { willExecute?: boolean; txId?
             } with.`}
           </TooltipContent>
         </Tooltip>
-      </Typography>
+      </TxSectionTitle>
 
       <SignerSelector
         options={options}

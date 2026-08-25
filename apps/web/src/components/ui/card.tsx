@@ -40,7 +40,7 @@ import { cn } from '@/utils/cn'
  *
  * Changelog:
  * - 2026-01-29: Removed shadow-xs and ring-1 to match Figma (no elevation/border)
- * - 2026-07-10: Added `size="lg"` (gap-8/py-8, slot px-8); flipped the default `radius` xl→lg (8px, MUI parity)
+ * - 2026-07-10: Added `size="lg"` (gap-8/py-8, slot px-8); flipped the default `radius` xl→lg (`--radius-lg`, 16px)
  * - 2026-08-25: Added `surface="sunken"` (bg-surface-sunken) for inset cards nested on the page surface;
  *   orthogonal to `variant`, so it composes with `outlined`
  */

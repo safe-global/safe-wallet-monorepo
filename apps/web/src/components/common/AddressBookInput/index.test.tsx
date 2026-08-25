@@ -643,6 +643,44 @@ describe('AddressBookInput', () => {
       expect(onSubmit).not.toHaveBeenCalled()
     })
 
+    // The list is portalled out of the field wrapper, so it is not inside the element the
+    // dismissal handler checks. Each event gets its own act() on purpose: in a real browser the
+    // pointerdown re-renders before the click dispatches, so if pointerdown closes the list the
+    // option is already gone and the click never selects anything.
+    it('keeps the portalled list open on pointerdown so the click can select', async () => {
+      const { addressBook } = twoContacts()
+      const { input, utils } = setup('', addressBook)
+      await openListWithMouse(utils, input)
+
+      const option = utils.getAllByTestId('address-item')[0]
+
+      act(() => {
+        fireEvent.pointerDown(option)
+      })
+
+      expect(utils.queryByRole('listbox')).toBeInTheDocument()
+
+      act(() => {
+        fireEvent.click(option)
+      })
+
+      await waitFor(() => expect(utils.queryByRole('listbox')).not.toBeInTheDocument())
+      expect(input.value).not.toBe('')
+    })
+
+    it('closes without selecting when the pointer lands outside both the field and the list', async () => {
+      const { addressBook } = twoContacts()
+      const { input, utils } = setup('', addressBook)
+      await openListWithMouse(utils, input)
+
+      act(() => {
+        fireEvent.pointerDown(document.body)
+      })
+
+      await waitFor(() => expect(utils.queryByRole('listbox')).not.toBeInTheDocument())
+      expect(input).toHaveValue('')
+    })
+
     it('leaves Enter alone when no option is active', async () => {
       const { addressBook } = twoContacts()
       const { input, utils } = setup('', addressBook)

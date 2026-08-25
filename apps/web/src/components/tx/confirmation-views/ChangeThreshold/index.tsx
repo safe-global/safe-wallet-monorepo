@@ -3,7 +3,6 @@ import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/ui/typography'
 
 import React from 'react'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { ChangeSignerSetupWarning } from '@/features/multichain'
 import { isChangeThresholdView } from '../utils'
@@ -34,7 +33,7 @@ function ChangeThreshold({ txInfo }: ChangeThresholdProps) {
         </Typography>
       </div>
       <div className="my-2">
-        <Separator className={commonCss.nestedDivider} />
+        <Separator bleed="6" />
       </div>
     </>
   )

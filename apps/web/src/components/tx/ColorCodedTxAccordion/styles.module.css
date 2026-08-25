@@ -4,15 +4,19 @@
   padding-bottom: 0;
   overflow: hidden;
   border-radius: var(--radius-lg);
-  /* The tx-type colour coding rides on the border and the open row's tint; the card fill itself stays
-     neutral so the whole block is never washed in colour. */
+  /* Fill stays neutral so the block is never washed in colour; the tx type shows on the border. */
   background-color: var(--card);
-  border: 1px solid var(--accordion-border-active);
+  border: 1px solid var(--color-border-light);
   box-shadow: none;
 }
 
-/* No hover fill: greying the panel made the nested "Advanced details" block blend into it. The
-   border already marks the region, and the trigger itself is the affordance. */
+/* Same token as the BalanceChanges and gtf-fees cards that stack against this one, so the seam
+   between them stays one line. The tx-type tint rides the border only on hover and while open,
+   which is what the block had before #8040 made it unconditional. */
+.item:hover,
+.item:has([data-slot='accordion-item'][data-open]) {
+  border-color: var(--accordion-border-active);
+}
 
 .trigger {
   min-height: 56px;
@@ -22,6 +26,8 @@
   background-color: transparent !important;
 }
 
+/* No hover fill: greying the panel made the nested "Advanced details" block blend into it. The
+   border shift above is the affordance instead. */
 .trigger:hover {
   background-color: transparent !important;
 }

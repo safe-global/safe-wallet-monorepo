@@ -6,6 +6,7 @@ import { POLL_INTERVAL_FAST_MS, POLL_INTERVAL_LATE_MS } from '../constants'
 import { CheckStatus, toPublicStatus, type PublicCheckStatus, type UnavailableReason } from '../types/status'
 import type { SafenetCheckSnapshot } from '../types/snapshot'
 import { computePollingInterval } from '../utils/computePollingInterval'
+import type { CheckTarget } from '../utils/attestations'
 import { mergeMonotonic } from '../utils/mergeMonotonic'
 
 export type SafenetCheckView = {
@@ -31,20 +32,29 @@ export type SafenetCheckView = {
  * Subscribe to a check's chain-read lifecycle for a `safeTxHash`. Wraps the
  * store's `getSafenetCheck` query with the dynamic poll interval, the merge
  * against the session-pinned verdict, and the stale/UNAVAILABLE error mapping.
- * Platform-neutral (no DOM access). `timestampMs` aims the reader's block
- * window and anchors the UNAVAILABLE grace window; pass the submission time
- * when known. Callers sharing one hash must agree on supplying it — the cache
- * keys by hash, and the last fetch's args aim every later poll.
+ * Platform-neutral (no DOM access). `target` is the Safe being viewed, which
+ * every attestation must name. `timestampMs` aims the reader's block window and
+ * anchors the UNAVAILABLE grace window; pass the submission time when known.
+ * Callers sharing one check must agree on supplying it — the cache keys by Safe
+ * and hash, and the last fetch's args aim every later poll.
  */
-export const useSafenetCheck = (safeTxHash: string | undefined, timestampMs?: number | null): SafenetCheckView => {
-  const skip = !safeTxHash
+export const useSafenetCheck = (
+  safeTxHash: string | undefined,
+  timestampMs: number | null | undefined,
+  target: CheckTarget,
+): SafenetCheckView => {
+  // A check's identity is the Safe plus the hash, so a target that has not
+  // resolved yet is not a subscription worth opening: it would read an empty
+  // block window and, once the real Safe lands, leave a second cache entry and
+  // a second poll loop behind.
+  const skip = !safeTxHash || !target.chainId || !target.safeAddress
 
   // The interval feeds back into the query below, so the (status → interval →
   // next poll) loop is reconfigured from the query's own output via an effect.
   const [pollingInterval, setPollingInterval] = useState(POLL_INTERVAL_FAST_MS)
 
   const query = useGetSafenetCheckQuery(
-    { safeTxHash: safeTxHash ?? '', timestampMs: timestampMs ?? null },
+    { safeTxHash: safeTxHash ?? '', timestampMs: timestampMs ?? null, ...target },
     {
       skip,
       pollingInterval,
@@ -55,7 +65,7 @@ export const useSafenetCheck = (safeTxHash: string | undefined, timestampMs?: nu
   )
 
   const pinned = useSelector((state: SafenetCheckPartialState) =>
-    safeTxHash ? selectPinnedVerdict(state, safeTxHash) : undefined,
+    safeTxHash && !skip ? selectPinnedVerdict(state, { safeTxHash, ...target }) : undefined,
   )
 
   const snapshot = query.data
@@ -99,6 +109,7 @@ export const useSafenetCheck = (safeTxHash: string | undefined, timestampMs?: nu
         deadlineBlock: snapshot?.deadlineBlock ?? null,
         firstEventBlock,
         submittedAtMs: timestampMs ?? null,
+        attestedAtMs: snapshot?.attestedAtMs ?? null,
         nowMs: Date.now(),
       }),
     )
@@ -108,6 +119,7 @@ export const useSafenetCheck = (safeTxHash: string | undefined, timestampMs?: nu
     status,
     snapshot?.headBlock,
     snapshot?.deadlineBlock,
+    snapshot?.attestedAtMs,
     firstEventBlock,
     timestampMs,
     fulfilledAt,

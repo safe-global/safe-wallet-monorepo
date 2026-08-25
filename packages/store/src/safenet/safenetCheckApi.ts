@@ -1,17 +1,19 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 import {
-  CheckEventType,
+  AttestationVerificationStatus,
   CheckStatus,
   UNVERIFIED_ATTESTATION,
+  bindAttestations,
   deriveCheckState,
   getSafenetReader,
   mergeMonotonic,
   type AttestationVerification,
-  type OracleAttestedEvent,
-  type PlainAttestedEvent,
+  type AttestedCheckEvent,
+  type CheckTarget,
   type SafenetCheckSnapshot,
+  type SafenetReader,
 } from '@safe-global/utils/features/safenet-checks'
-import { pinVerdict, selectPinnedVerdict, type SafenetCheckPartialState } from './safenetCheckSlice'
+import { checkKey, pinVerdict, selectPinnedVerdict, type SafenetCheckPartialState } from './safenetCheckSlice'
 
 /**
  * Standalone chain-reading API for Safenet checks — no HTTP endpoint, the work
@@ -22,13 +24,46 @@ import { pinVerdict, selectPinnedVerdict, type SafenetCheckPartialState } from '
  */
 const noopBaseQuery = async () => ({ data: null })
 
+/** How much a verification result is worth when no candidate verifies. */
+const VERIFICATION_RANK: Record<AttestationVerificationStatus, number> = {
+  [AttestationVerificationStatus.VERIFIED]: 3,
+  // Retryable, so it outranks the terminal INVALID.
+  [AttestationVerificationStatus.PENDING]: 2,
+  [AttestationVerificationStatus.INVALID]: 1,
+  [AttestationVerificationStatus.UNVERIFIED]: 0,
+}
+
+type SelectedAttestation = { event: AttestedCheckEvent; attestation: AttestationVerification }
+
 /**
+ * Verify candidates in order and stop at the first signature that verifies. An
+ * attestation that does not verify is only this check's verdict when no other
+ * one does, so the strongest result wins rather than the earliest.
+ */
+const selectAttestation = async (
+  reader: SafenetReader,
+  candidates: ReadonlyArray<AttestedCheckEvent>,
+): Promise<SelectedAttestation | null> => {
+  let best: SelectedAttestation | null = null
+  for (const event of candidates) {
+    const attestation = await reader.verifyAttestation(event)
+    if (best === null || VERIFICATION_RANK[attestation.status] > VERIFICATION_RANK[best.attestation.status]) {
+      best = { event, attestation }
+    }
+    if (attestation.status === AttestationVerificationStatus.VERIFIED) break
+  }
+  return best
+}
+
+/**
+ * `chainId` and `safeAddress` are the Safe the check is being viewed for; an
+ * attestation that does not name them is not this check's evidence.
  * `timestampMs` is when the Safe transaction was submitted (proposal time, not
  * execution time — checks are proposed around the first signature) and only
- * aims the reader's block window. All callers of one hash share a cache entry,
+ * aims the reader's block window. All callers of one check share a cache entry,
  * so the semantic has to stay canonical. See `serializeQueryArgs` below.
  */
-export type SafenetCheckArg = {
+export type SafenetCheckArg = CheckTarget & {
   safeTxHash: string
   timestampMs?: number | null
 }
@@ -38,37 +73,31 @@ export const safenetCheckApi = createApi({
   baseQuery: noopBaseQuery,
   endpoints: (builder) => ({
     getSafenetCheck: builder.query<SafenetCheckSnapshot, SafenetCheckArg>({
-      async queryFn({ safeTxHash, timestampMs }, { getState, dispatch }) {
+      async queryFn({ safeTxHash, chainId, safeAddress, timestampMs }, { getState, dispatch }) {
+        const identity = { safeTxHash, chainId, safeAddress }
         try {
           const reader = getSafenetReader()
           const read = await reader.fetchCheckState(safeTxHash, { timestampMs })
 
-          // Prefer the oracle attestation when both are present: it is the one
-          // backed by sentinel checks, and deriveCheckState consumes the
-          // verification result through its oracle branch first. Plain
-          // events.find would verify whichever attested first on chain.
-          const attestedEvent =
-            read.events.find((event): event is OracleAttestedEvent => event.type === CheckEventType.ORACLE_ATTESTED) ??
-            read.events.find((event): event is PlainAttestedEvent => event.type === CheckEventType.PLAIN_ATTESTED)
-          // Both gated on an attestation existing: the header read dates the
-          // audit step, happens on the poll that first observes the
-          // attestation, and polling stops there — one RPC per settled check.
-          const [attestation, attestedAtMs]: [AttestationVerification, number | null] = attestedEvent
-            ? await Promise.all([
-                reader.verifyAttestation(attestedEvent),
-                reader.blockTimeMs(attestedEvent.blockNumber),
-              ])
+          const { events, candidates } = bindAttestations(read.events, { chainId, safeAddress })
+          const selected = await selectAttestation(reader, candidates)
+          // The header read only dates the audit step, and it is gated on an
+          // attestation existing. Cost is one extra call per poll that observes
+          // one — for a settled check that is one poll when the group key loads,
+          // and every poll while it does not or while arbitration stays open.
+          const [attestation, attestedAtMs]: [AttestationVerification, number | null] = selected
+            ? [selected.attestation, await reader.blockTimeMs(selected.event.blockNumber)]
             : [UNVERIFIED_ATTESTATION, null]
 
-          const derived = deriveCheckState({ events: read.events, attestation, headBlock: read.headBlock })
-          const pinned = selectPinnedVerdict(getState() as SafenetCheckPartialState, safeTxHash)
+          const derived = deriveCheckState({ events, attestation, headBlock: read.headBlock })
+          const pinned = selectPinnedVerdict(getState() as SafenetCheckPartialState, identity)
           const status = mergeMonotonic(pinned?.status, derived)
 
           // mergeMonotonic only advances, so a changed status is a rank
           // increase — pin it as the new session floor. UNAVAILABLE is not a
           // verdict and would grow the slice by one inert entry per rendered row.
           if (status !== pinned?.status && status !== CheckStatus.UNAVAILABLE) {
-            dispatch(pinVerdict({ safeTxHash, status, atBlock: read.headBlock, verification: attestation }))
+            dispatch(pinVerdict({ ...identity, status, atBlock: read.headBlock, verification: attestation }))
           }
 
           const snapshot: SafenetCheckSnapshot = {
@@ -82,7 +111,7 @@ export const safenetCheckApi = createApi({
             headBlock: read.headBlock,
             attestation,
             attestedAtMs,
-            events: read.events,
+            events,
           }
           return { data: snapshot }
         } catch (error) {
@@ -90,10 +119,10 @@ export const safenetCheckApi = createApi({
           return { error: { message: error instanceof Error ? error.message : String(error) } }
         }
       },
-      // `timestampMs` only aims the block window — the check's identity is its
-      // hash. Without this, two renderings of the same check with different
-      // timestamps would open a second cache entry and a second poll loop.
-      serializeQueryArgs: ({ endpointName, queryArgs }) => `${endpointName}(${queryArgs.safeTxHash})`,
+      // `timestampMs` only aims the block window — the check's identity is the
+      // Safe plus the hash. Without this, two renderings of the same check with
+      // different timestamps would open a second cache entry and a second poll loop.
+      serializeQueryArgs: ({ endpointName, queryArgs }) => `${endpointName}(${checkKey(queryArgs)})`,
       keepUnusedDataFor: 300,
     }),
   }),

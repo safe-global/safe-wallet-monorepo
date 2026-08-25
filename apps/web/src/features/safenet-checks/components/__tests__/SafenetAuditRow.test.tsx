@@ -67,7 +67,12 @@ describe('SafenetAuditRow', () => {
 
   it('links the attestation transaction on the Safenet chain block explorer once FROST-verified', () => {
     const attested = plainAttestedEvent({ safeTxHash: HASH as `0x${string}` })
-    const snapshot = buildBenignSnapshot({ safeTxHash: HASH as `0x${string}`, events: [attested] })
+    const snapshot = buildBenignSnapshot({
+      safeTxHash: HASH as `0x${string}`,
+      events: [attested],
+      // The link must point at the event whose signature produced the verdict.
+      attestation: { status: AttestationVerificationStatus.VERIFIED, signatureId: attested.signatureId, message: null },
+    })
     mockUseSafenetCheck.mockReturnValue(
       view({ snapshot, status: CheckStatus.BENIGN, publicStatus: CheckStatus.BENIGN }),
     )
@@ -92,7 +97,12 @@ describe('SafenetAuditRow', () => {
   })
 
   it('falls back to the Safenet explorer hash route when the chain config is unknown', () => {
-    const snapshot = buildBenignSnapshot({ safeTxHash: HASH as `0x${string}` })
+    const attested = plainAttestedEvent({ safeTxHash: HASH as `0x${string}` })
+    const snapshot = buildBenignSnapshot({
+      safeTxHash: HASH as `0x${string}`,
+      events: [attested],
+      attestation: { status: AttestationVerificationStatus.VERIFIED, signatureId: attested.signatureId, message: null },
+    })
     mockUseSafenetCheck.mockReturnValue(
       view({ snapshot, status: CheckStatus.BENIGN, publicStatus: CheckStatus.BENIGN }),
     )
@@ -130,9 +140,10 @@ describe('SafenetAuditRow', () => {
     expect(screen.queryByText(/2026/)).not.toBeInTheDocument()
   })
 
-  it('keeps the link when a pinned BENIGN outlives a refetch that lost the attestation', () => {
+  it('drops the proof link when a pinned BENIGN outlives a refetch that lost the attestation', () => {
     // Reorg / flaky-RPC refetch: merged status stays BENIGN (monotonic pin) but
-    // the fresh snapshot no longer carries a verified attestation.
+    // the fresh snapshot no longer carries the attestation. The generic explorer
+    // route is not proof, so the row must not present one.
     const snapshot = buildSnapshot({
       safeTxHash: HASH as `0x${string}`,
       status: CheckStatus.BENIGN,
@@ -145,7 +156,7 @@ describe('SafenetAuditRow', () => {
     render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
 
     expect(screen.getByText('No issues found')).toBeInTheDocument()
-    expect(screen.getByTestId('safenet-attestation-link')).toBeInTheDocument()
+    expect(screen.queryByTestId('safenet-attestation-link')).not.toBeInTheDocument()
   })
 
   it.each([

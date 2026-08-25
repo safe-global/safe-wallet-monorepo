@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`ReviewTransaction should display a confirmation screen 1`] = `
 <div>
@@ -113,7 +113,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
           data-slot="card"
           data-surface="default"
           data-variant="default"
-          style="--accordion-border-active: var(--color-info-background); --accordion-fill-active: var(--color-info-background);"
+          style="--accordion-border-active: var(--color-info-dark); --accordion-fill-active: var(--color-info-background);"
         >
           <div
             class="flex w-full flex-col"
@@ -211,13 +211,13 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
       </div>
       <div
         aria-orientation="horizontal"
-        class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch mt-4 -mx-6"
+        class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:-mx-6 data-[orientation=horizontal]:w-[calc(100%+(2*(var(--spacing)*6)))] mt-4"
         data-orientation="horizontal"
         data-slot="separator"
         role="separator"
       />
       <div
-        class="txCardActions flex items-center !mt-0"
+        class="txCardActions flex items-center justify-end !mt-0"
       >
         <div
           class="flex w-full flex-col-reverse gap-4 lg:w-auto lg:flex-row"

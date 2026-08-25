@@ -178,7 +178,11 @@ describe('TxSummary', () => {
 
       // The feature chunk loads lazily.
       await waitFor(() => expect(getByTestId('safenet-queue-status')).toHaveTextContent('No issues found'))
-      expect(useSafenetCheck).toHaveBeenCalledWith(safenetTxHash, 1_700_000_000_000)
+      expect(useSafenetCheck).toHaveBeenCalledWith(
+        safenetTxHash,
+        1_700_000_000_000,
+        expect.objectContaining({ chainId: expect.any(String) }),
+      )
     })
 
     it('never mounts the indicator on a history row', async () => {

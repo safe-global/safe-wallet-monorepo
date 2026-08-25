@@ -21,7 +21,6 @@ import { TOOLTIP_TITLES } from '../../common/constants'
 import Track from '@/components/common/Track'
 import type { RecoveryStateItem } from '@/features/recovery'
 
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import css from './styles.module.css'
 import NumberField from '@/components/common/NumberField'
 import { getDelay, isCustomDelaySelected } from './utils'
@@ -294,7 +293,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
             </Collapsible>
           </div>
 
-          <Separator className={commonCss.nestedDivider} />
+          <Separator bleed="6" />
 
           <Card data-testid="warning-section" size="none" surface="sunken" className="my-4">
             <Label htmlFor="recovery-understands-risk" className="cursor-pointer gap-3 px-2 py-2 font-normal">
