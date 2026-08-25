@@ -62,7 +62,9 @@ const ExpandableTransactionItem = ({
           // so viewport-based breakpoints kept the one-line grid past the point it fitted and
           // `overflow-x-auto` turned that into a scrollbar.
           className={classNames(
-            '@container cursor-pointer items-center justify-start overflow-x-auto py-3',
+            // rounded-none: the shadcn trigger's own rounded-md would curve its fill inside the row's
+            // square edges. The row owns the corners — only a group's first and last get any.
+            '@container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3',
             // A bulk group's card already insets its row block by 12px, so the row halves its own
             // padding to land the nonce 24px in — level with a standalone row's nonce.
             isBulkGroup ? 'px-3' : 'px-4 sm:px-6',

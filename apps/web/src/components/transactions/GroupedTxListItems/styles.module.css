@@ -54,6 +54,14 @@
 
 .txItems > div:not(:last-child) {
   border-bottom: 1px solid var(--border);
+  transition: border-color 0.2s ease;
+}
+
+/* A hovered row draws its own ring, so the dividers either side of it would double up. Open rows keep
+   theirs: with no border on the row, the divider is the only thing separating two open rows. */
+.txItems > div:hover,
+.txItems > div:has(+ div:hover) {
+  border-bottom-color: transparent;
 }
 
 .txItems > div:first-child > [data-slot='accordion'] > [data-slot='accordion-item'] {
@@ -64,10 +72,6 @@
 .txItems > div:last-child > [data-slot='accordion'] > [data-slot='accordion-item'] {
   border-bottom-left-radius: var(--radius-lg);
   border-bottom-right-radius: var(--radius-lg);
-}
-
-.txItems [data-slot='accordion-item'] {
-  border: none;
 }
 
 .txItems > div {
