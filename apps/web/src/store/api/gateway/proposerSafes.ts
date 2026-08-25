@@ -10,13 +10,14 @@ type GatewayEndpointBuilder = EndpointBuilder<
   'gatewayApi'
 >
 
-/** The delegates endpoint is cursor-paged; follow `next`, but bound it so a form can never hang. */
+/** Cursor-paged: follow `next`, but bound it. The page size is pinned so the bound is a known one. */
 export const MAX_DELEGATE_PAGES = 5
+export const DELEGATE_PAGE_CURSOR = 'limit=100&offset=0'
 
-/** chainId → the Safes the delegate may propose for on that chain. */
-export type ProposedSafes = Record<string, string[]>
+/** chainId → the Safes this wallet may propose transactions for on that chain, without being a signer. */
+export type ProposerSafes = Record<string, string[]>
 
-export type ProposedSafesQueryParams = { chainIds: string[]; delegate: string }
+export type ProposerSafesQueryParams = { chainIds: string[]; delegate: string }
 
 type InitiateThunk = ReturnType<typeof delegatesApi.endpoints.delegatesGetDelegatesV2.initiate>
 type DispatchFn = (action: InitiateThunk) => ReturnType<InitiateThunk>
@@ -33,26 +34,26 @@ const getNextCursor = (next: string | null | undefined): string | undefined => {
 }
 
 const fetchDelegatePage = async (
-  args: { chainId: string; delegate: string; cursor: string | undefined },
+  args: { chainId: string; delegate: string; cursor: string },
   dispatch: DispatchFn,
 ): Promise<DelegatePage> => {
-  const queryAction = dispatch(delegatesApi.endpoints.delegatesGetDelegatesV2.initiate(args))
+  // forceRefetch, as in safeOverviews.ts: unsubscribed below, this entry would otherwise replay stale pages.
+  const queryAction = dispatch(delegatesApi.endpoints.delegatesGetDelegatesV2.initiate(args, { forceRefetch: true }))
 
   try {
     return await queryAction.unwrap()
   } finally {
-    // Read once: drop the subscription so the inner cache entries are not kept alive.
     queryAction.unsubscribe()
   }
 }
 
-const fetchProposedSafesOnChain = async (
+const fetchProposerSafesOnChain = async (
   chainId: string,
   delegate: string,
   dispatch: DispatchFn,
 ): Promise<string[]> => {
   const safes: string[] = []
-  let cursor: string | undefined
+  let cursor: string | undefined = DELEGATE_PAGE_CURSOR
 
   for (let page = 0; page < MAX_DELEGATE_PAGES; page++) {
     const result = await fetchDelegatePage({ chainId, delegate, cursor }, dispatch)
@@ -67,13 +68,14 @@ const fetchProposedSafesOnChain = async (
 }
 
 /**
- * Which Safes the wallet is a proposer (delegate) for, across every chain a Space uses. The fan-out
- * lives in one endpoint because a hook cannot be called per chain when the chain count is dynamic.
+ * The Safes this wallet is a proposer on — a delegate, in gateway terms — across every chain a Space
+ * uses. Not Safes it proposed. The fan-out lives in one endpoint because a hook cannot be called per
+ * chain when the chain count is dynamic.
  *
  * Invalidating the generated `delegates` tag does not re-run this wrapper — use `refetch()`.
  */
-export const proposedSafesEndpoints = (builder: GatewayEndpointBuilder) => ({
-  getProposedSafes: builder.query<ProposedSafes, ProposedSafesQueryParams>({
+export const proposerSafesEndpoints = (builder: GatewayEndpointBuilder) => ({
+  getProposerSafes: builder.query<ProposerSafes, ProposerSafesQueryParams>({
     // One cache entry per set of chains, independent of array order.
     serializeQueryArgs: ({ queryArgs }) => ({ ...queryArgs, chainIds: [...queryArgs.chainIds].sort() }),
     async queryFn({ chainIds, delegate }, { dispatch }) {
@@ -83,12 +85,12 @@ export const proposedSafesEndpoints = (builder: GatewayEndpointBuilder) => ({
 
       const dispatchFn: DispatchFn = (action) => dispatch(action)
       const results = await Promise.allSettled(
-        chainIds.map((chainId) => fetchProposedSafesOnChain(chainId, delegate, dispatchFn)),
+        chainIds.map((chainId) => fetchProposerSafesOnChain(chainId, delegate, dispatchFn)),
       )
 
       // Proposer status only ever ADDS accounts, so a failed chain under-reports quietly rather than
       // taking the signer-eligible Safes down with it.
-      const data: ProposedSafes = {}
+      const data: ProposerSafes = {}
       results.forEach((result, index) => {
         if (result.status === 'fulfilled') data[chainIds[index]] = result.value
       })
