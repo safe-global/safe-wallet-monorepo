@@ -11,6 +11,9 @@ import { balancesFixtures } from '@safe-global/test/msw/fixtures'
 import { balancesBuilder, balanceBuilder, erc20TokenBuilder } from '@/tests/builders/balances'
 import AssetsTable from '../index'
 
+const mockUseIsMobile = jest.fn(() => false)
+jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
+
 const DEFAULT_SETTINGS = {
   currency: 'usd',
   hiddenTokens: { '5': [] },
@@ -56,6 +59,7 @@ describe('AssetsTable', () => {
     window.localStorage.clear()
     jest.clearAllMocks()
     jest.spyOn(useChainIdModule, 'default').mockReturnValue('5')
+    mockUseIsMobile.mockReturnValue(false)
   })
 
   describe('empty state', () => {
@@ -116,6 +120,35 @@ describe('AssetsTable', () => {
       expect(screen.getByText('Price')).toBeInTheDocument()
       expect(screen.getByText('Balance')).toBeInTheDocument()
       expect(screen.getByText('Value')).toBeInTheDocument()
+    })
+  })
+
+  describe('breakpoint gap regression (AUD-48)', () => {
+    // Between 600px and 767.98px, styles.module.css's `@media (max-width: 767.98px)` hides the
+    // desktop `.container` and shows `.mobileContainer` — so whichever branch is built must be the
+    // mobile one once `useIsMobile()` (the shadcn 768px hook, matching that CSS threshold) says so.
+    // Regression: this used to be gated by `useIsBelowSm()` (600px), so nothing was ever built for
+    // CSS to reveal in that 168px gap and the list rendered blank.
+    it('builds the mobile list once useIsMobile reports true, so the CSS-visible branch actually exists', async () => {
+      mockUseIsMobile.mockReturnValue(true)
+
+      const { container } = renderAssetsTable({ balances: balancesFixtures.efSafe })
+
+      await waitFor(() => {
+        expect(screen.queryAllByTestId('token-balance')).toHaveLength(0) // desktop cells not built
+        expect(container.querySelector('.mobileContainer')).toBeInTheDocument()
+      })
+    })
+
+    it('builds the desktop table once useIsMobile reports false', async () => {
+      mockUseIsMobile.mockReturnValue(false)
+
+      const { container } = renderAssetsTable({ balances: balancesFixtures.efSafe })
+
+      await waitFor(() => {
+        expect(screen.getAllByTestId('token-balance').length).toBeGreaterThan(0)
+        expect(container.querySelector('.mobileContainer')).not.toBeInTheDocument()
+      })
     })
   })
 
