@@ -18,19 +18,24 @@ const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 // version comes from the same config the app reads (staging CGW) instead of a hardcode.
 const selectedChainIds = ['11155111', '1', '137'] // sepolia, ethereum, polygon
 
-const getExpectedMultichainVersion = () => {
-  const lower = (a, b) => {
-    const [x, y] = [a.split('.').map(Number), b.split('.').map(Number)]
-    for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] < y[i] ? a : b
-    return a
-  }
-  let expected
-  selectedChainIds.forEach((chainId) => {
-    cy.request(constants.stagingCGWUrlv1 + constants.stagingCGWChains + chainId).then(({ body }) => {
-      expected = expected ? lower(expected, body.recommendedMasterCopyVersion) : body.recommendedMasterCopyVersion
-    })
-  })
-  return cy.then(() => expected)
+// Negative = a is lower, positive = b is lower, 0 = equal
+const compareVersions = (a, b) => {
+  const [x, y] = [a, b].map((v) => v.split('.').map(Number))
+  return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]
+}
+
+const lowestVersion = (versions) => [...versions].sort(compareVersions)[0]
+
+const fetchRecommendedVersion = (chainId) =>
+  cy
+    .request(`${constants.stagingCGWUrlv1}${constants.stagingCGWChains}${chainId}`)
+    .its('body.recommendedMasterCopyVersion')
+
+const getExpectedMultichainVersion = (chainIds = selectedChainIds) => {
+  const versions = []
+  chainIds.forEach((chainId) => fetchRecommendedVersion(chainId).then((v) => versions.push(v)))
+  // Queued after the requests above — runs once `versions` holds one entry per chain.
+  return cy.then(() => lowestVersion(versions))
 }
 
 describe('Happy path Multichain safe creation tests', { defaultCommandTimeout: 60000 }, () => {
