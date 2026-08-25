@@ -97,6 +97,7 @@ export class SafenetReader {
   private currentProvider: JsonRpcProvider | null = null
   private chainIdChecked = false
   private readonly groupKeyCache = new Map<string, { x: string; y: string }>()
+  private readonly holds = new Map<JsonRpcProvider, number>()
 
   constructor(config: SafenetReaderConfig) {
     this.rpcUrls = config.rpcUrls
@@ -119,12 +120,35 @@ export class SafenetReader {
   }
 
   /**
+   * Take a reference on the current endpoint. Callers MUST release it.
+   *
+   * Invariant: a provider is destroyed only once it is no longer current AND no
+   * read still holds it. ethers' `destroy()` rejects in-flight requests, so
+   * destroying on one read's failure would cancel every concurrent sibling.
+   */
+  private acquire(): JsonRpcProvider {
+    const provider = this.provider()
+    this.holds.set(provider, (this.holds.get(provider) ?? 0) + 1)
+    return provider
+  }
+
+  private release(provider: JsonRpcProvider): void {
+    const held = (this.holds.get(provider) ?? 1) - 1
+    if (held > 0) {
+      this.holds.set(provider, held)
+      return
+    }
+    this.holds.delete(provider)
+    if (this.currentProvider !== provider) provider.destroy()
+  }
+
+  /**
    * Advance to the next endpoint, unless a concurrent read already rotated
-   * (rotating again would skip over healthy endpoints).
+   * (rotating again would skip over healthy endpoints). Uninstalls the failed
+   * provider; its last holder destroys it.
    */
   private rotate(failed: JsonRpcProvider): void {
     if (this.currentProvider !== failed) return
-    failed.destroy()
     this.currentProvider = null
     this.urlIndex = (this.urlIndex + 1) % this.rpcUrls.length
   }
@@ -134,7 +158,7 @@ export class SafenetReader {
     const attempts = Math.max(1, this.rpcUrls.length)
     let lastError: unknown
     for (let attempt = 0; attempt < attempts; attempt++) {
-      const provider = this.provider()
+      const provider = this.acquire()
       try {
         return await op(provider)
       } catch (error) {
@@ -145,6 +169,8 @@ export class SafenetReader {
         // (rate limit, pruned state) deserves the next endpoint.
         if (isCallException(error) && error.data != null) throw error
         this.rotate(provider)
+      } finally {
+        this.release(provider)
       }
     }
     throw lastError
@@ -160,8 +186,9 @@ export class SafenetReader {
       if (actual !== Number(this.chainId)) {
         console.error(
           `[safenet-reader] chain id mismatch: SAFENET_CHAIN_ID=${this.chainId} but the RPC ` +
-            `reports ${actual}. Request ids derive from SAFENET_CHAIN_ID, so they will be WRONG ` +
-            `and every check will appear stuck at SUBMITTED. Fix SAFENET_CHAIN_ID / SAFENET_RPC_URLS.`,
+            `reports ${actual}. It feeds the EIP-712 domain every attestation is verified ` +
+            `against, so attestations will verify as INVALID and every check will read as ` +
+            `failed. Fix SAFENET_CHAIN_ID / SAFENET_RPC_URLS.`,
         )
       }
     } catch {
@@ -434,8 +461,9 @@ export class SafenetReader {
 
   /**
    * Wall-clock time of a block in ms — dates the audit-log step. `eth_getLogs`
-   * carries no timestamps, so this is one extra header read; call it only for
-   * settled checks (polling stops there, so it costs one RPC per check).
+   * carries no timestamps, so this is one extra header read on every poll that
+   * observes an attestation, including the slow polls a settled check keeps
+   * making while its arbitration window is open.
    * Returns null on failure: a missing date must never suppress a verdict.
    */
   async blockTimeMs(blockNumber: number): Promise<number | null> {

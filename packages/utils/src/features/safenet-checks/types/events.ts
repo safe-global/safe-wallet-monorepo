@@ -136,3 +136,6 @@ export type NormalizedCheckEvent =
   | SentinelRevealedEvent
   | OracleResultEvent
   | DisputeResolvedEvent
+
+/** The two attesting events. Both carry the attested Safe's chain id and address. */
+export type AttestedCheckEvent = OracleAttestedEvent | PlainAttestedEvent

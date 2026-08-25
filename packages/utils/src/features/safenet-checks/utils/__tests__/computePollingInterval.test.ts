@@ -1,5 +1,7 @@
 import { computePollingInterval } from '../computePollingInterval'
 import {
+  ARBITRATION_POLL_MS,
+  ARBITRATION_WINDOW_MS,
   LATE_WINDOW_BLOCKS,
   PLAIN_DEADLINE_BLOCKS,
   POLL_INTERVAL_FAST_MS,
@@ -10,12 +12,54 @@ import {
 import { CheckStatus } from '../../types'
 
 describe('computePollingInterval', () => {
-  it.each([CheckStatus.BENIGN, CheckStatus.MALICIOUS, CheckStatus.VERIFICATION_FAILED])(
+  it.each([CheckStatus.MALICIOUS, CheckStatus.VERIFICATION_FAILED])(
     'stops polling on the terminal status %s',
     (status) => {
       expect(computePollingInterval({ status, headBlock: '10', deadlineBlock: '150', firstEventBlock: '100' })).toBe(0)
     },
   )
+
+  describe('BENIGN — bounded arbitration window instead of an immediate stop', () => {
+    const ATTESTED = 1_700_000_000_000
+    const benign = { status: CheckStatus.BENIGN, headBlock: '200', deadlineBlock: '150', firstEventBlock: '100' }
+
+    it('polls slowly inside the arbitration window (a rejection can still land)', () => {
+      expect(computePollingInterval({ ...benign, attestedAtMs: ATTESTED, nowMs: ATTESTED + 1_000 })).toBe(
+        ARBITRATION_POLL_MS,
+      )
+    })
+
+    it('polls slowly right up to the last ms of the arbitration window', () => {
+      expect(
+        computePollingInterval({ ...benign, attestedAtMs: ATTESTED, nowMs: ATTESTED + ARBITRATION_WINDOW_MS - 1 }),
+      ).toBe(ARBITRATION_POLL_MS)
+    })
+
+    it('stops at the arbitration boundary', () => {
+      expect(
+        computePollingInterval({ ...benign, attestedAtMs: ATTESTED, nowMs: ATTESTED + ARBITRATION_WINDOW_MS }),
+      ).toBe(0)
+    })
+
+    it('stops past the arbitration window (a settled check must not poll forever)', () => {
+      expect(
+        computePollingInterval({
+          ...benign,
+          attestedAtMs: ATTESTED,
+          nowMs: ATTESTED + ARBITRATION_WINDOW_MS + 60_000,
+        }),
+      ).toBe(0)
+    })
+
+    it('stops on an attestation stamped in the future (clock skew must not stretch the window)', () => {
+      expect(computePollingInterval({ ...benign, attestedAtMs: ATTESTED + 3_600_000, nowMs: ATTESTED })).toBe(0)
+    })
+
+    it('stops when the attestation time is unknown (nothing anchors the window)', () => {
+      expect(computePollingInterval({ ...benign, attestedAtMs: null, nowMs: ATTESTED })).toBe(0)
+      expect(computePollingInterval(benign)).toBe(0)
+    })
+  })
 
   describe('UNAVAILABLE — bounded grace window instead of an immediate stop', () => {
     const SUBMITTED = 1_700_000_000_000
