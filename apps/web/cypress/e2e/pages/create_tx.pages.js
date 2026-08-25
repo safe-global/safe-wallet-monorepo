@@ -988,7 +988,7 @@ export function waitForProposeRequest() {
   cy.wait('@ProposeTx')
 }
 
-const submitTxErrorMsg = 'Error submitting the transaction. Please try again.'
+const submitTxErrorMsg = 'Could not submit the transaction. Try again.'
 
 export function clickViewTransaction(retriesLeft = 2) {
   // Wait for the submitted-tx success screen. Transient RPC/CGW throttling (429) surfaces a

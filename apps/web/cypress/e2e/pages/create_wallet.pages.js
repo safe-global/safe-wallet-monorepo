@@ -74,7 +74,7 @@ export function clickOnActivateAccountBtn(index) {
   cy.get(activateAccountBtn).eq(index).should('be.enabled').click()
 }
 
-const submitErrorMsg = 'Error submitting the transaction. Please try again.'
+const submitErrorMsg = 'Could not submit the transaction. Try again.'
 
 export function clickOnFinalActivateAccountBtn(retriesLeft = 2) {
   cy.get(activateFlowAccountBtn).should('be.enabled').click()
