@@ -41,19 +41,27 @@ const NetworkInput = ({
       name={name}
       rules={{ required }}
       control={control}
-      render={({ field }) => (
+      render={({ field, fieldState }) => (
         <div className="flex w-full flex-col gap-1.5">
-          <Label htmlFor={id}>Network</Label>
+          <Label htmlFor={id} className={fieldState.error ? 'text-destructive' : undefined}>
+            Network
+          </Label>
           <Select
             value={field.value || null}
             onValueChange={field.onChange}
             onOpenChange={(isOpen) => !isOpen && field.onBlur()}
           >
-            <SelectTrigger id={id} aria-label="Network" className="w-full">
+            <SelectTrigger
+              id={id}
+              aria-label="Network"
+              aria-invalid={!!fieldState.error || undefined}
+              className="w-full"
+            >
               <SelectValue>
                 {(value) => {
                   const chain = chainConfigs.find((chain) => chain.chainId === value)
-                  return chain ? <ChainIndicator chainId={chain.chainId} /> : null
+                  if (chain) return <ChainIndicator chainId={chain.chainId} />
+                  return required ? null : 'Optional'
                 }}
               </SelectValue>
             </SelectTrigger>

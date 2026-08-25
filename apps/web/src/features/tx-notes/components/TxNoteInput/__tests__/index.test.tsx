@@ -17,7 +17,7 @@ describe('TxNoteInput', () => {
   // Helper functions to reduce code duplication
   const setupInput = () => {
     render(<TxNoteInput onChange={mockOnChange} />)
-    return screen.getByLabelText('Optional') as HTMLInputElement
+    return screen.getByLabelText('Note') as HTMLInputElement
   }
 
   const changeAndBlur = (input: HTMLInputElement, value: string) => {
@@ -38,9 +38,10 @@ describe('TxNoteInput', () => {
   it('should render with default empty value', () => {
     render(<TxNoteInput onChange={mockOnChange} />)
 
-    const input = screen.getByLabelText('Optional') as HTMLInputElement
+    const input = screen.getByLabelText('Note') as HTMLInputElement
     expect(input).toBeInTheDocument()
     expect(input).toHaveValue('')
+    expect(input).toHaveAttribute('placeholder', 'Optional')
     expect(screen.getByText('0/60')).toBeInTheDocument()
   })
 
@@ -56,7 +57,7 @@ describe('TxNoteInput', () => {
   it('should call onChange when user types', async () => {
     render(<TxNoteInput onChange={mockOnChange} />)
 
-    const input = screen.getByLabelText('Optional') as HTMLInputElement
+    const input = screen.getByLabelText('Note') as HTMLInputElement
 
     fireEvent.change(input, { target: { value: 'Test note' } })
 
@@ -69,7 +70,7 @@ describe('TxNoteInput', () => {
   it('should update character counter as user types', async () => {
     render(<TxNoteInput onChange={mockOnChange} />)
 
-    const input = screen.getByLabelText('Optional') as HTMLInputElement
+    const input = screen.getByLabelText('Note') as HTMLInputElement
 
     fireEvent.change(input, { target: { value: 'Hello' } })
 
@@ -87,7 +88,7 @@ describe('TxNoteInput', () => {
   it('should enforce maximum length of 60 characters', async () => {
     render(<TxNoteInput onChange={mockOnChange} />)
 
-    const input = screen.getByLabelText('Optional') as HTMLInputElement
+    const input = screen.getByLabelText('Note') as HTMLInputElement
     const longText = 'a'.repeat(100) // Try to enter 100 characters
 
     fireEvent.change(input, { target: { value: longText } })
@@ -102,7 +103,7 @@ describe('TxNoteInput', () => {
   it('should not track analytics on focus without changes', () => {
     render(<TxNoteInput onChange={mockOnChange} />)
 
-    const input = screen.getByLabelText('Optional') as HTMLInputElement
+    const input = screen.getByLabelText('Note') as HTMLInputElement
 
     fireEvent.focus(input)
     fireEvent.blur(input)
@@ -113,7 +114,7 @@ describe('TxNoteInput', () => {
   it('should not track analytics when note is empty on blur', async () => {
     render(<TxNoteInput onChange={mockOnChange} />)
 
-    const input = screen.getByLabelText('Optional') as HTMLInputElement
+    const input = screen.getByLabelText('Note') as HTMLInputElement
 
     // Type and then clear
     fireEvent.change(input, { target: { value: 'Test' } })
@@ -128,7 +129,7 @@ describe('TxNoteInput', () => {
   it('should track analytics when note is changed and non-empty on blur', async () => {
     render(<TxNoteInput onChange={mockOnChange} />)
 
-    const input = screen.getByLabelText('Optional') as HTMLInputElement
+    const input = screen.getByLabelText('Note') as HTMLInputElement
 
     fireEvent.change(input, { target: { value: 'Test note' } })
     fireEvent.blur(input)
@@ -176,7 +177,7 @@ describe('TxNoteInput', () => {
   it('should allow clearing the input', async () => {
     render(<TxNoteInput onChange={mockOnChange} />)
 
-    const input = screen.getByLabelText('Optional') as HTMLInputElement
+    const input = screen.getByLabelText('Note') as HTMLInputElement
 
     // Add text
     fireEvent.change(input, { target: { value: 'Some text' } })

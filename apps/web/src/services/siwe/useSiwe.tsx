@@ -3,6 +3,9 @@ import { useAuthVerifyV1Mutation, useLazyAuthGetNonceV1Query } from '@safe-globa
 import { useCallback, useState } from 'react'
 import { getSignableMessage } from './utils'
 import { logError } from '../exceptions'
+import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
+import { matchUserOutcome } from '@safe-global/utils/services/exceptions/normalizeError'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import useWallet from '@/hooks/wallets/useWallet'
 import { isPKWallet } from '@/utils/wallets'
@@ -20,11 +23,12 @@ export const useSiwe = () => {
 
     setLoading(true)
 
+    // Prefer the chain-matched provider, but fall back to one built from the
+    // wallet so sign-in works even when the wallet is connected to a chain
+    // other than the current one — SIWE only needs a message signature.
+    let signingProvider = provider
+
     try {
-      // Prefer the chain-matched provider, but fall back to one built from the
-      // wallet so sign-in works even when the wallet is connected to a chain
-      // other than the current one — SIWE only needs a message signature.
-      let signingProvider = provider
       if (!signingProvider) {
         const { createWeb3 } = await import('@/hooks/wallets/web3')
         signingProvider = createWeb3(wallet.provider)
@@ -53,7 +57,10 @@ export const useSiwe = () => {
       return verifyAuthMutation({ siweDto: { message: signableMessage, signature } })
     } catch (error) {
       setLoading(false)
-      logError(ErrorCodes._640)
+      // `logError` discards the error, so a declined signature must be
+      // classified here or it gets reported as an RPC endpoint failure.
+      const isUserOutcome = Boolean(matchUserOutcome(asError(error).message))
+      logError(ErrorCodes._640, undefined, isUserOutcome ? undefined : getRpcErrorContext(signingProvider))
       throw error
     }
   }, [fetchNonce, provider, verifyAuthMutation, wallet])

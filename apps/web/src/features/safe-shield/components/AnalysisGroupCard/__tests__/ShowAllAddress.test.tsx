@@ -177,6 +177,15 @@ describe('ShowAllAddress', () => {
         expect(screen.getByText(item.address)).toBeInTheDocument()
       })
     })
+
+    it('should allow long addresses to break onto multiple lines', async () => {
+      const longAddress = [{ address: '0x1234567890123456789012345678901234567890' }]
+      const { user } = renderWithUserEvent(<ShowAllAddress addresses={longAddress} />)
+
+      await user.click(screen.getByText('Show all'))
+
+      expect(screen.getByText(longAddress[0].address)).toHaveClass('break-all')
+    })
   })
 
   describe('Edge Cases', () => {

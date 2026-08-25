@@ -11,6 +11,7 @@ import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENE
 import React, { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { trackEvent } from '@/services/analytics'
 
 export type AddManuallyFormValues = {
@@ -43,7 +44,7 @@ const AddManually = ({
   const selectedChain = configs.find((chain) => chain.chainId === chainId)
 
   const onSubmit = handleSubmit((data) => {
-    trackEvent({ ...SPACE_EVENTS.ADD_ACCOUNT_MANUALLY })
+    trackEvent(SPACE_EVENTS.ADD_ACCOUNT_MANUALLY, { [MixpanelEventParams.CHAIN_ID]: data.chainId })
     handleAddSafe(data)
     onClose()
   })

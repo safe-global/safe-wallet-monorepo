@@ -89,7 +89,7 @@ const MsgDetails = ({ msg }: { msg: MessageItem }): ReactElement => {
           </div>
         )}
 
-        <div className={classNames(txDetailsCss.multiSend, 'px-4')}>
+        <div className={classNames(txDetailsCss.multiSend, 'border-t border-border')}>
           <Accordion
             multiple
             defaultValue={msg.confirmations
@@ -98,14 +98,18 @@ const MsgDetails = ({ msg }: { msg: MessageItem }): ReactElement => {
           >
             {msg.confirmations.map((confirmation, i) => (
               <AccordionItem value={confirmation.signature} key={confirmation.signature}>
-                <AccordionTrigger>
+                <AccordionTrigger
+                  className={classNames('flex min-h-12 items-center px-4 py-3', singleTxDecodedCss.elevationTrigger)}
+                >
                   <div className={singleTxDecodedCss.summary}>
-                    <CodeIcon className="size-5" />
-                    <Typography>{`Confirmation ${i + 1}`}</Typography>
+                    <CodeIcon className="size-4 shrink-0 text-muted-foreground" />
+                    <Typography className={singleTxDecodedCss.summaryLabel}>
+                      <b>{`Confirmation ${i + 1}`}</b>
+                    </Typography>
                   </div>
                 </AccordionTrigger>
 
-                <AccordionContent>
+                <AccordionContent className="p-4">
                   <div className={infoDetailsCss.container}>
                     <EthHashInfo
                       address={confirmation.owner.value || ''}

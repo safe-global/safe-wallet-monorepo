@@ -8,17 +8,10 @@ import type { Hex } from '@safe-global/types-kit'
 
 export type { Hex }
 
-/** Which sentinel-oracle generation produced an event (`STABLE` = agnostic). */
-export enum OracleGeneration {
-  V1 = 'V1',
-  V2 = 'V2',
-  STABLE = 'STABLE',
-}
-
 export enum CheckEventType {
-  /** Consensus `OracleTransactionProposed`. */
+  /** Consensus `TransactionProposed` from the unified oracle pair (`safeId` + oracle). */
   ORACLE_PROPOSED = 'ORACLE_PROPOSED',
-  /** Consensus `OracleTransactionAttested` — carries the FROST signature. */
+  /** Consensus `TransactionAttested` from the oracle pair — carries the FROST signature. */
   ORACLE_ATTESTED = 'ORACLE_ATTESTED',
   /** Consensus `TransactionProposed` — the non-oracle path live beta uses. */
   PLAIN_PROPOSED = 'PLAIN_PROPOSED',
@@ -26,9 +19,9 @@ export enum CheckEventType {
   PLAIN_ATTESTED = 'PLAIN_ATTESTED',
   /** Sentinel `NewRequest` — carries the per-check deadline block. */
   REQUEST_CREATED = 'REQUEST_CREATED',
-  /** Sentinel `Committed` — V1 carries the verdict, V2 is activity-only. */
+  /** Sentinel `Committed` — a blind commitment; the verdict arrives with the reveal. */
   SENTINEL_COMMITTED = 'SENTINEL_COMMITTED',
-  /** Sentinel `Revealed` (V2 only) — carries the per-sentinel verdict. */
+  /** Sentinel `Revealed` — carries the per-sentinel verdict. */
   SENTINEL_REVEALED = 'SENTINEL_REVEALED',
   /** `OracleResult` — the oracle's final approved flag. */
   ORACLE_RESULT = 'ORACLE_RESULT',
@@ -41,7 +34,6 @@ export type CheckEventBase = {
   blockNumber: number
   logIndex: number
   transactionHash: string
-  generation: OracleGeneration
 }
 
 export type OracleProposedEvent = CheckEventBase & {
@@ -51,6 +43,8 @@ export type OracleProposedEvent = CheckEventBase & {
   safe: string
   epoch: string
   oracle: string
+  /** keccak256 of the proposal's `oracleData`; derives the requestId. */
+  oracleDataHash: Hex
 }
 
 type FrostSignature = {
@@ -67,6 +61,8 @@ export type OracleAttestedEvent = CheckEventBase & {
   oracle: string
   signatureId: Hex
   attestation: FrostSignature
+  /** The EIP-712 encoding of `oracleData`, needed for the attestation preimage. */
+  oracleDataHash: Hex
 }
 
 export type PlainProposedEvent = CheckEventBase & {
@@ -93,20 +89,17 @@ export type RequestCreatedEvent = CheckEventBase & {
   proposer: string
   fee: string
   bondTarget: string
-  /** Normalized across generations: V1 `deadline`, V2 `revealDeadline`. */
+  /** The reveal deadline — past it an unattested request can only time out. */
   deadlineBlock: string
-  commitDeadlineBlock: string | null
+  commitDeadlineBlock: string
 }
 
 export type SentinelCommittedEvent = CheckEventBase & {
   type: CheckEventType.SENTINEL_COMMITTED
   requestId: Hex
   sentinel: string
+  /** Commits are blind — the verdict only appears in `Revealed`. */
   bondAmount: string
-  /** V1 only — V1 commits carry the verdict directly. */
-  approved: boolean | null
-  /** V1 only. */
-  position: string | null
 }
 
 export type SentinelRevealedEvent = CheckEventBase & {
