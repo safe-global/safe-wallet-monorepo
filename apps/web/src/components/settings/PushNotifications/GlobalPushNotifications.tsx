@@ -198,6 +198,24 @@ export const _getSafesToRegister = (
   }
 }
 
+export const _filterSafesForRenewal = (
+  selectedSafes: NotifiableSafes,
+  safesForRenewal?: NotifiableSafes,
+): NotifiableSafes | undefined => {
+  if (!safesForRenewal) {
+    return
+  }
+
+  const selectedSafesForRenewal = pickBy(
+    mapValues(safesForRenewal, (safeAddresses, chainId) => {
+      return safeAddresses.filter((safeAddress) => selectedSafes[chainId]?.includes(safeAddress))
+    }),
+    (safeAddresses) => safeAddresses.length > 0,
+  )
+
+  return Object.keys(selectedSafesForRenewal).length > 0 ? selectedSafesForRenewal : undefined
+}
+
 // Safes that need to be unregistered with the service
 export const _getSafesToUnregister = (
   selectedSafes: NotifiableSafes,
@@ -228,23 +246,10 @@ export const _getSafesToUnregister = (
   }
 }
 
-// Whether the device needs to be unregistered from the service
-export const _shouldUnregisterDevice = (
-  chainId: string,
-  safeAddresses: Array<string>,
-  currentNotifiedSafes?: NotifiableSafes,
-): boolean => {
-  if (!currentNotifiedSafes) {
-    return false
-  }
-
-  if (safeAddresses.length !== currentNotifiedSafes[chainId].length) {
-    return false
-  }
-
-  return safeAddresses.every((safeAddress) => {
-    return currentNotifiedSafes[chainId]?.includes(safeAddress)
-  })
+// Unregistering the device wipes every subscription on the chain, including Safes registered
+// earlier in the same save, so it is only valid when no Safe remains selected on that chain
+export const _shouldUnregisterDevice = (chainId: string, selectedSafes: NotifiableSafes): boolean => {
+  return !selectedSafes[chainId]?.length
 }
 
 export const GlobalPushNotifications = (): ReactElement | null => {
@@ -332,9 +337,10 @@ export const GlobalPushNotifications = (): ReactElement | null => {
     setIsLoading(true)
 
     const newlySelectedSafes = _getSafesToRegister(selectedSafes, currentNotifiedSafes)
+    const selectedSafesForRenewal = _filterSafesForRenewal(selectedSafes, safesForRenewal)
 
     // Merge Safes that need to be registered with the ones for which notifications need to be renewed
-    const safesToRegister = _mergeNotifiableSafes(newlySelectedSafes, {}, safesForRenewal)
+    const safesToRegister = _mergeNotifiableSafes(newlySelectedSafes, {}, selectedSafesForRenewal)
 
     // _mergeNotifiableSafes can return a truthy {}; register only a non-empty set
     // so unregister-only saves never prompt for notification permission
@@ -351,7 +357,7 @@ export const GlobalPushNotifications = (): ReactElement | null => {
     const safesToUnregister = _getSafesToUnregister(selectedSafes, currentNotifiedSafes)
     if (safesToUnregister) {
       const unregistrationPromises = Object.entries(safesToUnregister).flatMap(([chainId, safeAddresses]) => {
-        if (_shouldUnregisterDevice(chainId, safeAddresses, currentNotifiedSafes)) {
+        if (_shouldUnregisterDevice(chainId, selectedSafes)) {
           return unregisterDeviceNotifications(chainId)
         }
         return safeAddresses.map((safeAddress) => unregisterSafeNotifications(chainId, safeAddress))

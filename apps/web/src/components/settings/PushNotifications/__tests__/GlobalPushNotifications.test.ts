@@ -13,6 +13,7 @@ import {
   _getSafesToRegister,
   _getSafesToUnregister,
   _shouldUnregisterDevice,
+  _filterSafesForRenewal,
   _sanitizeNotifiableSafes,
   _filterUndeployedSafes,
   _transformAddedSafes,
@@ -167,15 +168,49 @@ describe('GlobalPushNotifications', () => {
       expect(unregisterDeviceNotificationsMock).not.toHaveBeenCalled()
     })
 
-    it('unregisters existing subscriptions after a successful registration', async () => {
+    it('unregisters only the deselected Safe when the chain keeps a replacement', async () => {
       registerNotificationsMock.mockResolvedValue(true)
 
       saveMixedChanges()
 
       await waitFor(() => {
-        expect(unregisterDeviceNotificationsMock).toHaveBeenCalledWith('1')
+        expect(unregisterSafeNotificationsMock).toHaveBeenCalledWith('1', safeAddress)
       })
       expect(registerNotificationsMock).toHaveBeenCalledWith({ '1': [otherSafeAddress] })
+      // Unregistering the device would wipe the replacement registered moments earlier
+      expect(unregisterDeviceNotificationsMock).not.toHaveBeenCalled()
+    })
+
+    it('unregisters the device when no Safe remains selected on the chain', async () => {
+      render(createElement(GlobalPushNotifications))
+
+      fireEvent.click(screen.getByText(safeAddress))
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+      await waitFor(() => {
+        expect(unregisterDeviceNotificationsMock).toHaveBeenCalledWith('1')
+      })
+      expect(registerNotificationsMock).not.toHaveBeenCalled()
+      expect(unregisterSafeNotificationsMock).not.toHaveBeenCalled()
+    })
+
+    it('does not renew a deselected Safe before unregistering the device', async () => {
+      ;(useNotificationsRenewal as jest.MockedFunction<typeof useNotificationsRenewal>).mockReturnValue({
+        safesForRenewal: { '1': [safeAddress] },
+        numberChainsForRenewal: 1,
+        numberSafesForRenewal: 1,
+        renewNotifications: jest.fn(),
+        needsRenewal: true,
+      })
+      render(createElement(GlobalPushNotifications))
+
+      fireEvent.click(screen.getByText(safeAddress))
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+      await waitFor(() => {
+        expect(unregisterDeviceNotificationsMock).toHaveBeenCalledWith('1')
+      })
+      expect(registerNotificationsMock).not.toHaveBeenCalled()
       expect(unregisterSafeNotificationsMock).not.toHaveBeenCalled()
     })
   })
@@ -681,6 +716,22 @@ describe('GlobalPushNotifications', () => {
     })
   })
 
+  describe('filterSafesForRenewal', () => {
+    it('keeps only renewal Safes that remain selected', () => {
+      const selectedSafes = { '1': ['0x123'], '4': ['0x789'] }
+      const safesForRenewal = { '1': ['0x123', '0x456'], '5': ['0xabc'] }
+
+      expect(_filterSafesForRenewal(selectedSafes, safesForRenewal)).toEqual({ '1': ['0x123'] })
+    })
+
+    it('returns undefined when no renewal Safe remains selected', () => {
+      const selectedSafes = { '1': ['0x456'] }
+      const safesForRenewal = { '1': ['0x123'] }
+
+      expect(_filterSafesForRenewal(selectedSafes, safesForRenewal)).toBeUndefined()
+    })
+  })
+
   describe('getSafesToUnregister', () => {
     it('returns undefined if there are no current notified safes', () => {
       const currentNotifiedSafes = undefined
@@ -733,31 +784,24 @@ describe('GlobalPushNotifications', () => {
 
   describe('shouldUnregisterDevice', () => {
     const chainId = '1'
-    const safeAddresses = ['0x123', '0x456']
-    const currentNotifiedSafes = {
-      '1': ['0x123', '0x456'],
-      '4': ['0x789'],
-    }
 
-    it('returns true if all safe addresses are included in currentNotifiedSafes', () => {
-      const result = _shouldUnregisterDevice(chainId, safeAddresses, currentNotifiedSafes)
+    it('returns true if no Safe remains selected on the chain', () => {
+      const result = _shouldUnregisterDevice(chainId, { '1': [], '4': ['0x789'] })
       expect(result).toBe(true)
     })
 
-    it('returns false if not all safe addresses are included in currentNotifiedSafes', () => {
-      const invalidSafeAddresses = ['0x123', '0x789']
-      const result = _shouldUnregisterDevice(chainId, invalidSafeAddresses, currentNotifiedSafes)
+    it('returns true if the chain is absent from the selection', () => {
+      const result = _shouldUnregisterDevice(chainId, { '4': ['0x789'] })
+      expect(result).toBe(true)
+    })
+
+    it('returns false if a Safe remains selected on the chain', () => {
+      const result = _shouldUnregisterDevice(chainId, { '1': ['0x456'] })
       expect(result).toBe(false)
     })
 
-    it('returns false if currentNotifiedSafes is undefined', () => {
-      const result = _shouldUnregisterDevice(chainId, safeAddresses)
-      expect(result).toBe(false)
-    })
-
-    it('returns false if the length of safeAddresses is different from the length of currentNotifiedSafes', () => {
-      const invalidSafeAddresses = ['0x123']
-      const result = _shouldUnregisterDevice(chainId, invalidSafeAddresses, currentNotifiedSafes)
+    it('returns false if the chain keeps a replacement Safe while another is removed', () => {
+      const result = _shouldUnregisterDevice(chainId, { '1': ['0x456'], '4': [] })
       expect(result).toBe(false)
     })
   })
