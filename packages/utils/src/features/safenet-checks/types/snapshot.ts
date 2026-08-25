@@ -2,6 +2,17 @@ import type { AttestationVerification, CheckStatus } from './status'
 import type { Hex, NormalizedCheckEvent } from './events'
 
 /**
+ * How much the block window a read used can prove. `proven`: the window was
+ * placed from a real submission timestamp with a converged block estimate AND
+ * still runs to the chain head, so it covers the check's whole possible
+ * lifetime — finding nothing there means nothing is there. `heuristic`: the
+ * window was head-relative, or placed from an estimate that did not converge,
+ * or it ends short of the head, so finding nothing only means the read did not
+ * look everywhere the check could be.
+ */
+export type WindowCoverage = 'proven' | 'heuristic'
+
+/**
  * The full read-layer view of one check at one poll. Everything numeric is a
  * decimal string so the snapshot is safe to hold in Redux. Recomputed from
  * scratch each poll; the monotonic merge is applied on top separately.
@@ -36,6 +47,8 @@ export type SafenetCheckSnapshot = {
    * earlier time compares against this to decide whether to re-aim the read.
    */
   aimedAtMs: number | null
+  /** What an empty event set from this read is allowed to claim. */
+  windowCoverage: WindowCoverage
   /** All decoded lifecycle events, sorted ascending by (block, logIndex). */
   events: NormalizedCheckEvent[]
 }

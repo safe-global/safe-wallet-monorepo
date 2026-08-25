@@ -115,6 +115,7 @@ export const safenetCheckApi = createApi({
             attestation,
             attestedAtMs,
             aimedAtMs,
+            windowCoverage: read.windowCoverage,
             events,
           }
           return { data: snapshot }

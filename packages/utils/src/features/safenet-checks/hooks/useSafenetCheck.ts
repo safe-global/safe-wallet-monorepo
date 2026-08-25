@@ -17,9 +17,8 @@ export type SafenetCheckView = {
   status: CheckStatus
   publicStatus: PublicCheckStatus
   /**
-   * Set only while the merged status is `UNAVAILABLE`: `NO_CHECK` when a
-   * snapshot says no check was ever requested, `READ_FAILED` when the read
-   * itself failed. `undefined` before the first read resolves.
+   * Set only while the merged status is `UNAVAILABLE` — see
+   * {@link UnavailableReason}. `undefined` before the first read resolves.
    */
   unavailableReason: UnavailableReason | undefined
   isLoading: boolean
@@ -27,6 +26,21 @@ export type SafenetCheckView = {
   /** Showing a retained snapshot because the latest fetch failed. */
   isStale: boolean
   refetch: () => void
+}
+
+/**
+ * Which `UNAVAILABLE` a resolved read means. `NO_CHECK` is a factual claim
+ * about the chain, so only a window that covers the check's whole possible
+ * lifetime licenses it; over any other window the read found nothing where it
+ * looked, which is a weaker statement. A snapshot outranks the error: an error
+ * over retained data is a failed refetch, and the snapshot is still what we know.
+ */
+const resolveUnavailableReason = (
+  snapshot: SafenetCheckSnapshot | undefined,
+  hasError: boolean,
+): UnavailableReason | undefined => {
+  if (snapshot !== undefined) return snapshot.windowCoverage === 'proven' ? 'NO_CHECK' : 'WINDOW_UNCERTAIN'
+  return hasError ? 'READ_FAILED' : undefined
 }
 
 /**
@@ -86,10 +100,8 @@ export const useSafenetCheck = (
   const status = mergeMonotonic(pinned?.status, base)
   const publicStatus = toPublicStatus(status)
 
-  // A snapshot outranks the error: an error over retained data is a failed
-  // refetch (isStale), and the retained snapshot is still what we know.
-  const unavailableReason: UnavailableReason | undefined =
-    status !== CheckStatus.UNAVAILABLE ? undefined : hasData ? 'NO_CHECK' : hasError ? 'READ_FAILED' : undefined
+  const unavailableReason =
+    status !== CheckStatus.UNAVAILABLE ? undefined : resolveUnavailableReason(snapshot, hasError)
 
   // Events are sorted ascending, so [0] substitutes for the deadline on the
   // plain path, which does not emit one.

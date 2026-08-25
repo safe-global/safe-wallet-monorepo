@@ -54,6 +54,7 @@ const baseRead = (over: Partial<CheckReadResult> = {}): CheckReadResult => ({
   epoch: null,
   oracle: null,
   deadlineBlock: null,
+  windowCoverage: 'heuristic',
   ...over,
 })
 
@@ -423,6 +424,19 @@ describe('safenetCheckApi.getSafenetCheck', () => {
 
       expect(resolveAim(IDENTITY)).toBeNull()
     })
+
+    it.each(['proven', 'heuristic'] as const)(
+      'carries the read`s %s window coverage onto the snapshot',
+      async (coverage) => {
+        // The snapshot is where the reader's honesty about its window reaches the
+        // presentation layer; dropping it here would restore the false claim.
+        fakeReader.fetchCheckState.mockResolvedValue(baseRead({ windowCoverage: coverage }))
+
+        const result = await runQuery(makeTestStore())
+
+        expect(result.data?.windowCoverage).toBe(coverage)
+      },
+    )
   })
 
   describe('attestation selection', () => {

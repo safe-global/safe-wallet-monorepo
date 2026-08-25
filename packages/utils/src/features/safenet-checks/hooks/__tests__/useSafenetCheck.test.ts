@@ -270,7 +270,9 @@ describe('useSafenetCheck', () => {
 
     afterEach(() => jest.useRealTimers())
 
-    const noCheck = () => buildSnapshot({ safeTxHash: HASH, status: CheckStatus.UNAVAILABLE })
+    // A read aimed from the submission time that reached the head: the empty
+    // result is the real "no check yet" the grace window exists for.
+    const noCheck = () => buildSnapshot({ safeTxHash: HASH, status: CheckStatus.UNAVAILABLE, windowCoverage: 'proven' })
 
     it('keeps polling slowly while the check request may still be mining', () => {
       jest.useFakeTimers()
@@ -393,14 +395,25 @@ describe('useSafenetCheck', () => {
   })
 
   describe('unavailable reason', () => {
-    it('reports NO_CHECK when a snapshot says no check was ever requested', () => {
-      mockQuery.mockReturnValue(
-        queryResult({ data: buildSnapshot({ safeTxHash: HASH, status: CheckStatus.UNAVAILABLE }) }),
-      )
+    const emptyRead = (windowCoverage: 'proven' | 'heuristic') =>
+      buildSnapshot({ safeTxHash: HASH, status: CheckStatus.UNAVAILABLE, windowCoverage })
+
+    it('reports NO_CHECK when a window covering the whole lifetime found nothing', () => {
+      mockQuery.mockReturnValue(queryResult({ data: emptyRead('proven') }))
 
       const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       expect(result.current.unavailableReason).toBe('NO_CHECK')
+    })
+
+    it('reports WINDOW_UNCERTAIN when the empty read cannot support the claim', () => {
+      // The window was head-relative, mis-estimated, or ended short of the head.
+      // Nothing found there is not the same statement as nothing existing.
+      mockQuery.mockReturnValue(queryResult({ data: emptyRead('heuristic') }))
+
+      const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
+
+      expect(result.current.unavailableReason).toBe('WINDOW_UNCERTAIN')
     })
 
     it('reports READ_FAILED when the read failed with nothing to show', () => {
@@ -420,18 +433,16 @@ describe('useSafenetCheck', () => {
       expect(result.current.unavailableReason).toBeUndefined()
     })
 
-    it('keeps the retained snapshot as NO_CHECK when a refetch fails over it', () => {
-      mockQuery.mockReturnValue(
-        queryResult({
-          error: FETCH_ERROR,
-          data: buildSnapshot({ safeTxHash: HASH, status: CheckStatus.UNAVAILABLE }),
-        }),
-      )
+    it.each(['proven', 'heuristic'] as const)(
+      'keeps the retained %s-window snapshot`s reason when a refetch fails over it',
+      (coverage) => {
+        mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR, data: emptyRead(coverage) }))
 
-      const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
+        const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
-      expect(result.current.unavailableReason).toBe('NO_CHECK')
-    })
+        expect(result.current.unavailableReason).toBe(coverage === 'proven' ? 'NO_CHECK' : 'WINDOW_UNCERTAIN')
+      },
+    )
 
     it('reports no reason once a check is observed', () => {
       mockQuery.mockReturnValue(queryResult({ data: buildBenignSnapshot({ safeTxHash: HASH }) }))
