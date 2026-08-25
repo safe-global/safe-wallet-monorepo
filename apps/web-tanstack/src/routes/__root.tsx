@@ -1,8 +1,7 @@
 /**
- * TanStack root route — mirrors apps/web/src/pages/_app.tsx as documented in
- * docs/migration/state/plan.md ("Provider tree to reproduce"). This file is
- * one of the few intentional copies in the migration; the rest of the
- * codebase is re-used from apps/web/src/** via path aliases.
+ * TanStack root route — mirrors the provider tree of apps/web/src/pages/_app.tsx.
+ * This file is one of the few intentional copies in the migration; the rest of
+ * the codebase is re-used from apps/web/src/** via path aliases.
  */
 import { Outlet, createRootRoute } from '@tanstack/react-router'
 import { HelmetProvider, Helmet } from 'react-helmet-async'
