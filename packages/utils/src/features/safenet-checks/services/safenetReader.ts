@@ -97,6 +97,7 @@ export class SafenetReader {
   private currentProvider: JsonRpcProvider | null = null
   private chainIdChecked = false
   private readonly groupKeyCache = new Map<string, { x: string; y: string }>()
+  private readonly holds = new Map<JsonRpcProvider, number>()
 
   constructor(config: SafenetReaderConfig) {
     this.rpcUrls = config.rpcUrls
@@ -119,12 +120,35 @@ export class SafenetReader {
   }
 
   /**
+   * Take a reference on the current endpoint. Callers MUST release it.
+   *
+   * Invariant: a provider is destroyed only once it is no longer current AND no
+   * read still holds it. ethers' `destroy()` rejects in-flight requests, so
+   * destroying on one read's failure would cancel every concurrent sibling.
+   */
+  private acquire(): JsonRpcProvider {
+    const provider = this.provider()
+    this.holds.set(provider, (this.holds.get(provider) ?? 0) + 1)
+    return provider
+  }
+
+  private release(provider: JsonRpcProvider): void {
+    const held = (this.holds.get(provider) ?? 1) - 1
+    if (held > 0) {
+      this.holds.set(provider, held)
+      return
+    }
+    this.holds.delete(provider)
+    if (this.currentProvider !== provider) provider.destroy()
+  }
+
+  /**
    * Advance to the next endpoint, unless a concurrent read already rotated
-   * (rotating again would skip over healthy endpoints).
+   * (rotating again would skip over healthy endpoints). Uninstalls the failed
+   * provider; its last holder destroys it.
    */
   private rotate(failed: JsonRpcProvider): void {
     if (this.currentProvider !== failed) return
-    failed.destroy()
     this.currentProvider = null
     this.urlIndex = (this.urlIndex + 1) % this.rpcUrls.length
   }
@@ -134,7 +158,7 @@ export class SafenetReader {
     const attempts = Math.max(1, this.rpcUrls.length)
     let lastError: unknown
     for (let attempt = 0; attempt < attempts; attempt++) {
-      const provider = this.provider()
+      const provider = this.acquire()
       try {
         return await op(provider)
       } catch (error) {
@@ -145,6 +169,8 @@ export class SafenetReader {
         // (rate limit, pruned state) deserves the next endpoint.
         if (isCallException(error) && error.data != null) throw error
         this.rotate(provider)
+      } finally {
+        this.release(provider)
       }
     }
     throw lastError

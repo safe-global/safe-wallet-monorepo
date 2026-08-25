@@ -188,6 +188,45 @@ describe('SafenetReader.fetchCheckState', () => {
     for (const result of results) expect(result.headBlock).toBe('25000')
   })
 
+  it('does not cancel a concurrent read when one call fails on the shared endpoint', async () => {
+    // ethers' destroy() rejects in-flight requests, so a failure handled at
+    // provider scope takes every sibling read down with it.
+    const endpoint = makeEndpoint({
+      url: 'http://rpc.test/1',
+      head: 25_000,
+      logs: plainPairFor(SAFE_TX_HASH),
+      failBlockProbes: 'error',
+      gateLogs: true,
+    })
+    server = setupServer(endpoint.handler)
+    server.listen()
+    const reader = makeReader()
+
+    const sibling = reader.fetchCheckState(SAFE_TX_HASH)
+    await endpoint.gate.logsArrived
+    // A numeric header probe rejects, so this call rotates while the sibling's
+    // getLogs is still on the wire.
+    expect(await reader.blockTimeMs(500)).toBeNull()
+    endpoint.gate.releaseLogs()
+
+    await expect(sibling).resolves.toMatchObject({ headBlock: '25000' })
+  })
+
+  it('keeps the rotated endpoint for the next read instead of retrying the failed one', async () => {
+    const down = makeEndpoint({ url: 'http://rpc.test/1', failEverything: true })
+    const up = makeEndpoint({ url: 'http://rpc.test/2', head: 25_000, logs: plainPairFor(SAFE_TX_HASH) })
+    server = setupServer(down.handler, up.handler)
+    server.listen()
+    const reader = makeReader({ rpcUrls: ['http://rpc.test/1', 'http://rpc.test/2'] })
+
+    await reader.fetchCheckState(SAFE_TX_HASH)
+    const attemptsOnDown = down.methods.length
+    await reader.fetchCheckState(SAFE_TX_HASH)
+
+    expect(attemptsOnDown).toBeGreaterThan(0)
+    expect(down.methods.length).toBe(attemptsOnDown)
+  })
+
   it('reads a full oracle lifecycle: sentinel logs and the request deadline', async () => {
     resetLogCounter()
     const requestId = requestIdFor('1')

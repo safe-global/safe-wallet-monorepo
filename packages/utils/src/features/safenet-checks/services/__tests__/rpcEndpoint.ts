@@ -1,4 +1,4 @@
-import { http, HttpResponse } from 'msw'
+import { delay, http, HttpResponse } from 'msw'
 import { Interface } from 'ethers'
 import { CONSENSUS_READ_ABI, COORDINATOR_READ_ABI } from '../../abi'
 import type { RawLog } from '../../utils/decodeLogs'
@@ -37,6 +37,8 @@ export type RpcConfig = {
   groupKey?: { x: string; y: string }
   /** `groupKey` calls revert (an epoch the coordinator has not seen). */
   failGroupKey?: boolean
+  /** Hold `eth_getLogs` responses until the returned gate releases them. */
+  gateLogs?: boolean
 }
 
 const hexToNum = (value: string): number => Number(BigInt(value))
@@ -147,13 +149,22 @@ export const makeEndpoint = (config: RpcConfig) => {
     }
   }
 
+  // Signals arrival of the first `eth_getLogs` and holds the response until the
+  // test releases it, so a concurrent read can fail while this one is in flight.
+  const arrival = Promise.withResolvers<void>()
+  const release = Promise.withResolvers<void>()
+
   const handler = http.post(config.url, async ({ request }) => {
     const body = (await request.json()) as
       | { id: number; method: string; params: unknown[] }
       | Array<{ id: number; method: string; params: unknown[] }>
+    const calls = Array.isArray(body) ? body : [body]
     const response = Array.isArray(body) ? body.map(respondOne) : respondOne(body)
+    if (config.gateLogs && calls.some((call) => call.method === 'eth_getLogs')) {
+      arrival.resolve()
+      await release.promise
+    }
     return HttpResponse.json(response)
   })
-
-  return { handler, getLogsCalls, methods }
+  return { handler, getLogsCalls, methods, gate: { logsArrived: arrival.promise, releaseLogs: release.resolve } }
 }
