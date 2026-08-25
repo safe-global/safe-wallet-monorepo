@@ -6,7 +6,7 @@ import { flattenSafeItems } from '@/hooks/safes'
 import useChains from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
-import { useGetMultipleSafeOverviewsQuery, useGetProposedSafesQuery } from '@/store/api/gateway'
+import { useGetMultipleSafeOverviewsQuery, useGetProposerSafesQuery } from '@/store/api/gateway'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useSpaceSafes } from '../../../../hooks/useSpaceSafes'
 import { buildSafeAccountId, groupSafeAccounts } from '../utils'
@@ -40,7 +40,7 @@ export const useEligibleSafeAccounts = () => {
 
   // One delegates request per distinct chain the Space actually uses, not one per Safe.
   const chainIds = useMemo(() => Array.from(new Set(safeItems.map((item) => item.chainId))), [safeItems])
-  const proposedSafesQuery = useGetProposedSafesQuery(
+  const proposerSafesQuery = useGetProposerSafesQuery(
     wallet && chainIds.length > 0 ? { chainIds, delegate: wallet } : skipToken,
   )
 
@@ -50,9 +50,9 @@ export const useEligibleSafeAccounts = () => {
   const isOverviewsResolved = overviewSafes.length === 0 || overviewsQuery.data !== undefined || overviewsQuery.isError
   const isProposerStatusResolved =
     chainIds.length === 0 ||
-    proposedSafesQuery.isUninitialized ||
-    proposedSafesQuery.data !== undefined ||
-    proposedSafesQuery.isError
+    proposerSafesQuery.isUninitialized ||
+    proposerSafesQuery.data !== undefined ||
+    proposerSafesQuery.isError
 
   // `isReadOnly` is fail-closed until the overviews land, so stay loading rather than flash an empty list.
   const isLoading = !!wallet && (isSafesLoading || (!isError && (!isOverviewsResolved || !isProposerStatusResolved)))
@@ -80,7 +80,7 @@ export const useEligibleSafeAccounts = () => {
 
     const options = safeItems.flatMap<SafeAccountOption>((item) => {
       const isSigner = !item.isReadOnly
-      const isProposer = (proposedSafesQuery.data?.[item.chainId] ?? []).some((safe) => sameAddress(safe, item.address))
+      const isProposer = (proposerSafesQuery.data?.[item.chainId] ?? []).some((safe) => sameAddress(safe, item.address))
 
       if (!isSigner && !isProposer) return []
 
@@ -102,23 +102,23 @@ export const useEligibleSafeAccounts = () => {
     })
 
     return groupSafeAccounts(options)
-  }, [wallet, isLoading, safeItems, proposedSafesQuery.data, overviewsByKey, chainsById])
+  }, [wallet, isLoading, safeItems, proposerSafesQuery.data, overviewsByKey, chainsById])
 
   // Destructured for stable deps: the whole query objects would hand consumers a new `onRetry` per render.
   const { refetch: refetchOverviews, isUninitialized: isOverviewsUninitialized } = overviewsQuery
-  const { refetch: refetchProposedSafes, isUninitialized: isProposedSafesUninitialized } = proposedSafesQuery
+  const { refetch: refetchProposerSafes, isUninitialized: isProposerSafesUninitialized } = proposerSafesQuery
 
   const refetch = useCallback(() => {
     refetchSpaceSafes()
     // `refetch()` throws on a query that never started.
     if (!isOverviewsUninitialized) refetchOverviews()
-    if (!isProposedSafesUninitialized) refetchProposedSafes()
+    if (!isProposerSafesUninitialized) refetchProposerSafes()
   }, [
     refetchSpaceSafes,
     refetchOverviews,
     isOverviewsUninitialized,
-    refetchProposedSafes,
-    isProposedSafesUninitialized,
+    refetchProposerSafes,
+    isProposerSafesUninitialized,
   ])
 
   return { accounts, isLoading, isError, hasWallet: !!wallet, refetch }

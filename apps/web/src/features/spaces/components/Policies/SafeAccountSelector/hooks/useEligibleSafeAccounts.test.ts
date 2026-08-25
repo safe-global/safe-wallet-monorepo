@@ -10,11 +10,11 @@ import { isSafeAccountGroup } from '../types'
 
 const mockUseSpaceSafes = jest.fn()
 const mockUseGetMultipleSafeOverviewsQuery = jest.spyOn(gatewayApi, 'useGetMultipleSafeOverviewsQuery')
-const mockUseGetProposedSafesQuery = jest.spyOn(gatewayApi, 'useGetProposedSafesQuery')
+const mockUseGetProposerSafesQuery = jest.spyOn(gatewayApi, 'useGetProposerSafesQuery')
 const mockUseWallet = jest.fn()
 
 type OverviewsQueryResult = ReturnType<typeof gatewayApi.useGetMultipleSafeOverviewsQuery>
-type ProposedSafesQueryResult = ReturnType<typeof gatewayApi.useGetProposedSafesQuery>
+type ProposerSafesQueryResult = ReturnType<typeof gatewayApi.useGetProposerSafesQuery>
 
 jest.mock('../../../../hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => mockUseSpaceSafes(),
@@ -80,14 +80,14 @@ const mockOverviews = (data: SafeOverview[] | undefined, extra: Record<string, u
     ...extra,
   } as unknown as OverviewsQueryResult)
 
-const mockProposedSafes = (data: Record<string, string[]> | undefined, extra: Record<string, unknown> = {}) =>
-  mockUseGetProposedSafesQuery.mockReturnValue({
+const mockProposerSafes = (data: Record<string, string[]> | undefined, extra: Record<string, unknown> = {}) =>
+  mockUseGetProposerSafesQuery.mockReturnValue({
     data,
     isError: false,
     isUninitialized: false,
     refetch: jest.fn(),
     ...extra,
-  } as unknown as ProposedSafesQueryResult)
+  } as unknown as ProposerSafesQueryResult)
 
 describe('useEligibleSafeAccounts', () => {
   beforeEach(() => {
@@ -95,7 +95,7 @@ describe('useEligibleSafeAccounts', () => {
     mockUseWallet.mockReturnValue({ address: WALLET })
     mockSpaceSafes([])
     mockOverviews([])
-    mockProposedSafes({})
+    mockProposerSafes({})
   })
 
   it('includes a Safe the wallet signs for', async () => {
@@ -117,7 +117,7 @@ describe('useEligibleSafeAccounts', () => {
   it('includes a Safe the wallet only proposes for', async () => {
     mockSpaceSafes([safeItem('1', SAFE_A, true)])
     mockOverviews([overview('1', SAFE_A)])
-    mockProposedSafes({ '1': [SAFE_A] })
+    mockProposerSafes({ '1': [SAFE_A] })
 
     const { result } = renderHook(() => useEligibleSafeAccounts())
 
@@ -128,7 +128,7 @@ describe('useEligibleSafeAccounts', () => {
   it('marks a Safe the wallet both signs and proposes for', async () => {
     mockSpaceSafes([safeItem('1', SAFE_A, false)])
     mockOverviews([overview('1', SAFE_A)])
-    mockProposedSafes({ '1': [SAFE_A] })
+    mockProposerSafes({ '1': [SAFE_A] })
 
     const { result } = renderHook(() => useEligibleSafeAccounts())
 
@@ -139,7 +139,7 @@ describe('useEligibleSafeAccounts', () => {
   it('matches proposer safes case-insensitively', async () => {
     mockSpaceSafes([safeItem('1', SAFE_A, true)])
     mockOverviews([overview('1', SAFE_A)])
-    mockProposedSafes({ '1': [SAFE_A.toLowerCase()] })
+    mockProposerSafes({ '1': [SAFE_A.toLowerCase()] })
 
     const { result } = renderHook(() => useEligibleSafeAccounts())
 
@@ -258,7 +258,7 @@ describe('useEligibleSafeAccounts', () => {
 
     renderHook(() => useEligibleSafeAccounts())
 
-    expect(mockUseGetProposedSafesQuery).toHaveBeenCalledWith({ chainIds: ['1', '137'], delegate: WALLET })
+    expect(mockUseGetProposerSafesQuery).toHaveBeenCalledWith({ chainIds: ['1', '137'], delegate: WALLET })
   })
 
   it('subscribes to the overviews with the args the Space dashboard uses, to share its cache entry', async () => {
@@ -276,7 +276,7 @@ describe('useEligibleSafeAccounts', () => {
   it('still returns signer accounts when the delegates request fails', async () => {
     mockSpaceSafes([safeItem('1', SAFE_A, false)])
     mockOverviews([overview('1', SAFE_A)])
-    mockProposedSafes(undefined, { isError: true })
+    mockProposerSafes(undefined, { isError: true })
 
     const { result } = renderHook(() => useEligibleSafeAccounts())
 
@@ -313,7 +313,7 @@ describe('useEligibleSafeAccounts', () => {
     expect(result.current.accounts).toEqual([])
     expect(result.current.hasWallet).toBe(false)
     expect(result.current.isLoading).toBe(false)
-    expect(mockUseGetProposedSafesQuery).toHaveBeenCalledWith(skipToken)
+    expect(mockUseGetProposerSafesQuery).toHaveBeenCalledWith(skipToken)
   })
 
   it('stays loading until the overviews resolve, so the list never flashes empty', async () => {
@@ -329,7 +329,7 @@ describe('useEligibleSafeAccounts', () => {
   it('stays loading until proposer status resolves', async () => {
     mockSpaceSafes([safeItem('1', SAFE_A, true)])
     mockOverviews([overview('1', SAFE_A)])
-    mockProposedSafes(undefined)
+    mockProposerSafes(undefined)
 
     const { result } = renderHook(() => useEligibleSafeAccounts())
 
@@ -342,7 +342,7 @@ describe('useEligibleSafeAccounts', () => {
     const refetchProposed = jest.fn()
     mockSpaceSafes([safeItem('1', SAFE_A, false)], { refetch: refetchSafes })
     mockOverviews([overview('1', SAFE_A)], { refetch: refetchOverviews })
-    mockProposedSafes({}, { refetch: refetchProposed })
+    mockProposerSafes({}, { refetch: refetchProposed })
 
     const { result } = renderHook(() => useEligibleSafeAccounts())
     result.current.refetch()
@@ -356,7 +356,7 @@ describe('useEligibleSafeAccounts', () => {
     const refetchProposed = jest.fn()
     mockSpaceSafes([safeItem('1', SAFE_A, false)])
     mockOverviews([overview('1', SAFE_A)])
-    mockProposedSafes(undefined, { isUninitialized: true, refetch: refetchProposed })
+    mockProposerSafes(undefined, { isUninitialized: true, refetch: refetchProposed })
 
     const { result } = renderHook(() => useEligibleSafeAccounts())
     result.current.refetch()
