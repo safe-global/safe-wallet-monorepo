@@ -1,0 +1,20 @@
+.highlight {
+  position: relative;
+  isolation: isolate;
+}
+
+.highlight::after {
+  content: '';
+  position: absolute;
+  inset-inline: -3px;
+  /* Offset is from the inline box, not the line box — not Figma's 20px. */
+  bottom: 4px;
+  z-index: -1;
+  height: 6px;
+  background-color: color-mix(in srgb, var(--color-static-text-brand) 50%, white);
+}
+
+/* Light mode only — dark mode already paints this legibly. */
+.ctaArrow {
+  color: #4ade80;
+}
