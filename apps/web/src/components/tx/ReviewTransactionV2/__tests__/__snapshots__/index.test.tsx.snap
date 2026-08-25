@@ -7,6 +7,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
     data-radius="xl"
     data-size="none"
     data-slot="card"
+    data-surface="default"
     data-variant="default"
   >
     <div
@@ -110,6 +111,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
           data-radius="lg"
           data-size="default"
           data-slot="card"
+          data-surface="default"
           data-variant="default"
           style="--accordion-border-active: var(--color-info-background); --accordion-fill-active: var(--color-info-background);"
         >
@@ -252,6 +254,7 @@ exports[`ReviewTransaction should display a loading component 1`] = `
     data-radius="xl"
     data-size="none"
     data-slot="card"
+    data-surface="default"
     data-variant="default"
   >
     <div
@@ -321,6 +324,7 @@ exports[`ReviewTransaction should display an error screen 1`] = `
     data-radius="xl"
     data-size="none"
     data-slot="card"
+    data-surface="default"
     data-variant="default"
   >
     <div
