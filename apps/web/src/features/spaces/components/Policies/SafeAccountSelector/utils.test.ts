@@ -78,6 +78,14 @@ describe('groupSafeAccounts', () => {
     expect(group.name).toBe('Treasury')
   })
 
+  it('leaves the group name unset when no chain entry is named', () => {
+    const entries = groupSafeAccounts([option('1', SAFE_A), option('137', SAFE_A)])
+
+    const [group] = entries
+    if (!isSafeAccountGroup(group)) throw new Error('expected a group')
+    expect(group.name).toBeUndefined()
+  })
+
   it('totals the group balance across its chains', () => {
     const entries = groupSafeAccounts([
       option('1', SAFE_A, { fiatTotal: '1200.5' }),
