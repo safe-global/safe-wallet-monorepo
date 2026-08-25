@@ -10,7 +10,7 @@ import { chainBuilder } from '@/tests/builders/chains'
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
-const GELATO_COLLECTOR = '0xc918e75504D1B0c741Eb4236B72Dae7A52401E95'
+const REFUND_RECEIVER = '0x0C51b4d70492D81f9f96B1EB1a826FBfb3fd27d8'
 const TX_HASH = '0x257151cef22c9f9f7b8e1931dda6fe03c8f9dbc0dca3465cb4f4c354b484f1e5'
 
 const mockChain = chainBuilder()
@@ -61,7 +61,7 @@ const mockSafePaysTx = {
     gasPrice: '1301068116',
     gasToken: WETH,
     gasTokenInfo: { symbol: 'WETH', decimals: 18, logoUri: 'https://weth.logo' },
-    refundReceiver: { value: GELATO_COLLECTOR },
+    refundReceiver: { value: REFUND_RECEIVER },
     payment: '102508541265216',
   },
 } as unknown as TransactionDetails

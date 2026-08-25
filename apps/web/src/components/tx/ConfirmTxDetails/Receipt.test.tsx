@@ -3,7 +3,7 @@ import { Receipt } from './Receipt'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import type { SafeTransaction } from '@safe-global/types-kit'
 
-const GELATO = '0xaEf22e5f09980fC1Ba6F2ec3EC34c1B9aeC885b5'
+const REFUND_RECEIVER = '0x0C51b4d70492D81f9f96B1EB1a826FBfb3fd27d8'
 const ZERO = '0x0000000000000000000000000000000000000000'
 const GAS_TOKEN = ZERO
 
@@ -96,7 +96,7 @@ describe('Receipt GTF fee preview', () => {
     mockRelayer = null
     mockUseGtfFeePreview.mockReturnValue({
       data: {
-        txData: { safeTxGas: '12936', baseGas: '72094', gasPrice: '456199317491', refundReceiver: GELATO },
+        txData: { safeTxGas: '12936', baseGas: '72094', gasPrice: '456199317491', refundReceiver: REFUND_RECEIVER },
       },
     })
 
@@ -110,7 +110,7 @@ describe('Receipt GTF fee preview', () => {
   it('previews the resolved gas fields before signing instead of the base zeros', () => {
     mockUseGtfFeePreview.mockReturnValue({
       data: {
-        txData: { safeTxGas: '12936', baseGas: '72094', gasPrice: '456199317491', refundReceiver: GELATO },
+        txData: { safeTxGas: '12936', baseGas: '72094', gasPrice: '456199317491', refundReceiver: REFUND_RECEIVER },
       },
     })
 
