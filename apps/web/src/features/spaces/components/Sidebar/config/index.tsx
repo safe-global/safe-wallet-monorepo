@@ -23,8 +23,8 @@ import ProWordmark from '@/public/images/safe-pro/pro-wordmark.svg'
 import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
 
 export const ProChip = () => (
-  <span className="bg-accent-secondary text-accent-secondary-foreground flex h-4 items-center rounded-sm px-1">
-    <ProWordmark className="h-auto! w-4!" />
+  <span className="bg-accent-secondary text-accent-secondary-foreground rounded-2xs -mx-1 flex h-4 w-6 shrink-0 items-center justify-center">
+    <ProWordmark className="h-auto! w-[18px]!" />
   </span>
 )
 
