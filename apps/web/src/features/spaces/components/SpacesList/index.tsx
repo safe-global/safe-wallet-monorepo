@@ -1,5 +1,6 @@
 import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
+import { SafeProFeature, useIsSafeProEnabled } from '@/features/safe-pro'
 import SpaceRow from './SpaceRow'
 import SignInOptions from '../SignInOptions'
 import WorkspaceBanner from '../WorkspaceBanner'
@@ -83,14 +84,25 @@ const AddSpaceButton = ({
 
 const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
   const isDarkMode = useDarkMode()
+  const isSafeProEnabled = useIsSafeProEnabled() === true
+  const { SafeProBanner } = useLoadFeature(SafeProFeature)
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
       {/* The page keeps its Topbar + Accounts/Workspaces tabs, so the sign-in
           card renders inline rather than as a full-screen takeover. */}
-      <div className="relative flex items-center justify-center p-6 py-10">
+      <div
+        className={cn(
+          'relative flex items-center justify-center p-6 pb-10',
+          // Safe Pro tightens the run-in: .spacesHeader already puts 24px below the tabs, and the
+          // design wants 43px from tabs to banner (Figma 13903:88488 → 13992:137072). Gated so the
+          // pre-Pro screen keeps its 40px.
+          isSafeProEnabled ? 'pt-[19px]' : 'pt-10',
+        )}
+      >
         <div className="flex w-full max-w-[440px] flex-col items-center">
-          <WorkspaceBanner className="mb-3" />
+          {/* 16px below the Pro banner per the design; the pre-Pro banner keeps its 12px. */}
+          {isSafeProEnabled ? <SafeProBanner className="mb-4" /> : <WorkspaceBanner className="mb-3" />}
 
           <div className="relative w-full">
             <div className="relative w-full rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">

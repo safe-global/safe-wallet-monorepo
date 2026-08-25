@@ -1,0 +1,28 @@
+.banner {
+  background-image: radial-gradient(
+    ellipse 143% 250% at 100% 0%,
+    color-mix(in srgb, var(--color-static-text-brand) 14%, transparent) 0%,
+    transparent 100%
+  );
+  padding-left: 12px;
+  padding-right: 8px;
+  border: 1px solid transparent;
+  transition: border-color 150ms ease;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.04),
+    0 4px 12px rgb(0 0 0 / 0.05);
+}
+
+.banner:hover {
+  border-color: color-mix(in srgb, var(--color-static-text-brand) 55%, var(--card));
+}
+
+.tag.tag {
+  background-color: color-mix(in srgb, var(--color-static-text-brand) 10%, transparent);
+  color: var(--badge-dot-success);
+}
+
+.tag.tag > svg {
+  width: 1rem !important;
+  height: 1rem !important;
+}

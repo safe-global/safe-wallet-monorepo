@@ -36,12 +36,22 @@ jest.mock('@/hooks/useDarkMode', () => ({
 }))
 
 jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({ AccountsNavigation: () => <nav data-testid="accounts-nav" /> }),
+  useLoadFeature: () => ({
+    AccountsNavigation: () => <nav data-testid="accounts-nav" />,
+    SafeProBanner: () => <div data-testid="safe-pro-banner" />,
+  }),
   createFeatureHandle: () => ({}),
 }))
 
 jest.mock('@/features/myAccounts', () => ({
   MyAccountsFeature: { name: 'MyAccountsFeature' },
+}))
+
+const mockUseIsSafeProEnabled = jest.fn()
+
+jest.mock('@/features/safe-pro', () => ({
+  SafeProFeature: { name: 'SafeProFeature' },
+  useIsSafeProEnabled: () => mockUseIsSafeProEnabled(),
 }))
 
 jest.mock('@/features/spaces', () => ({
@@ -96,6 +106,40 @@ describe('SpacesList — auth/expiry state rendering', () => {
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: undefined, isFetching: false, error: undefined })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: undefined })
     mockUseSignInRedirect.mockReturnValue({ setHasSignedIn: jest.fn(), redirectLoading: false })
+    mockUseIsSafeProEnabled.mockReturnValue(false)
+  })
+
+  describe('SAFE_PRO banner gating', () => {
+    it('keeps the pre-Pro Workspace banner when the flag is off', () => {
+      mockUseAppSelector.mockReturnValue(false)
+
+      render(<SpacesList />)
+
+      expect(screen.getByText('Introducing Workspace')).toBeInTheDocument()
+      expect(screen.queryByTestId('safe-pro-banner')).not.toBeInTheDocument()
+    })
+
+    it('swaps in the Safe Pro banner when the flag is on', () => {
+      mockUseAppSelector.mockReturnValue(false)
+      mockUseIsSafeProEnabled.mockReturnValue(true)
+
+      render(<SpacesList />)
+
+      expect(screen.getByTestId('safe-pro-banner')).toBeInTheDocument()
+      expect(screen.queryByText('Introducing Workspace')).not.toBeInTheDocument()
+    })
+
+    // useHasFeature returns undefined until the chain config lands — that must not
+    // flash the Pro banner on a chain that never enables it.
+    it('keeps the pre-Pro banner while the flag is still resolving', () => {
+      mockUseAppSelector.mockReturnValue(false)
+      mockUseIsSafeProEnabled.mockReturnValue(undefined)
+
+      render(<SpacesList />)
+
+      expect(screen.getByText('Introducing Workspace')).toBeInTheDocument()
+      expect(screen.queryByTestId('safe-pro-banner')).not.toBeInTheDocument()
+    })
   })
 
   it('renders the Sign in card (not Create space) when the user is unauthenticated — i.e. after a session expiry redirect', () => {
