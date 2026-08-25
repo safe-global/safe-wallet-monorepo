@@ -1,7 +1,7 @@
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { CheckStatus, type PublicCheckStatus, type UnavailableReason } from '@safe-global/utils/features/safenet-checks'
 
-type SafenetStatusPresentation = {
+export type SafenetStatusPresentation = {
   /** Safe Shield severity vocabulary — drives SeverityIcon and its colors. */
   severity: Severity
   /** Short state name for compact placements. */
@@ -47,15 +47,44 @@ export const STATUS_PRESENTATION: Record<
 
 /**
  * Neither UNAVAILABLE meaning is a verdict, so both stay neutral: a muted icon
- * and the default text colors, never error or warning ones.
+ * and the default text colors, never error or warning ones. No severity field:
+ * these states have no verdict to color from.
  */
-export const UNAVAILABLE_PRESENTATION: Record<UnavailableReason, { title: string; copy: string }> = {
+export const UNAVAILABLE_PRESENTATION: Record<UnavailableReason, Pick<SafenetStatusPresentation, 'label' | 'copy'>> = {
   NO_CHECK: {
-    title: 'Not checked',
+    label: 'Not checked',
     copy: 'No Safenet check was requested for this transaction.',
   },
   READ_FAILED: {
-    title: 'Status unavailable',
+    label: 'Status unavailable',
     copy: 'The Safenet check status could not be read. Retry later.',
   },
+}
+
+/** Section heading for every verdict: the state itself is in the copy. */
+const VERDICT_LABEL = 'Safenet check'
+
+export type ResolvedPresentation = SafenetStatusPresentation & {
+  /** Render the icon neutral — set for the non-verdict UNAVAILABLE states. */
+  muted: boolean
+}
+
+/**
+ * What the flow section renders, or `undefined` for the states it must skip:
+ * an unresolved first read, and a pinned verdict whose snapshot a failed
+ * refetch dropped (the next poll restores it).
+ */
+export const resolvePresentation = (
+  publicStatus: PublicCheckStatus,
+  unavailableReason: UnavailableReason | undefined,
+  hasSnapshot: boolean,
+): ResolvedPresentation | undefined => {
+  if (publicStatus === CheckStatus.UNAVAILABLE) {
+    if (!unavailableReason) return undefined
+    return { ...UNAVAILABLE_PRESENTATION[unavailableReason], severity: Severity.INFO, muted: true }
+  }
+
+  if (!hasSnapshot) return undefined
+
+  return { ...STATUS_PRESENTATION[publicStatus], label: VERDICT_LABEL, muted: false }
 }

@@ -5,10 +5,8 @@ import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
-import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
-import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import { STATUS_PRESENTATION, UNAVAILABLE_PRESENTATION } from '../statusPresentation'
+import { resolvePresentation } from '../statusPresentation'
 
 /**
  * Safenet check state as a section in the Safe Shield widget. Subscribes only
@@ -29,14 +27,7 @@ export const SafenetChecksSection = (): ReactElement | null => {
     submittedAt,
   )
 
-  // A pinned verdict without its snapshot renders nothing — the refetch
-  // restores the snapshot within one poll.
-  const unavailable =
-    publicStatus === CheckStatus.UNAVAILABLE && unavailableReason
-      ? UNAVAILABLE_PRESENTATION[unavailableReason]
-      : undefined
-  const verdict = publicStatus !== CheckStatus.UNAVAILABLE && snapshot ? STATUS_PRESENTATION[publicStatus] : undefined
-  const content = unavailable ?? verdict
+  const content = resolvePresentation(publicStatus, unavailableReason, snapshot !== undefined)
   if (!content) return null
 
   return (
@@ -49,10 +40,10 @@ export const SafenetChecksSection = (): ReactElement | null => {
       className="animate-in fade-in slide-in-from-top-1 p-4 duration-300"
     >
       <div className="flex items-start gap-2">
-        <SeverityIcon severity={verdict?.severity ?? Severity.INFO} muted={verdict === undefined} />
+        <SeverityIcon severity={content.severity} muted={content.muted} />
         <div className="flex flex-1 flex-col gap-1">
           <Typography variant="paragraph-small" className="font-bold leading-4">
-            {unavailable?.title ?? 'Safenet check'}
+            {content.label}
           </Typography>
           <Typography variant="paragraph-small" className="text-muted-foreground">
             {content.copy}
