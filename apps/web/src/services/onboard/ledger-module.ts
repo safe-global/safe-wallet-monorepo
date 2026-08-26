@@ -1,5 +1,6 @@
 import type { DmkError, ExecuteDeviceActionReturnType } from '@ledgerhq/device-management-kit'
 import { mapLedgerError } from './ledger-errors'
+import { styleAccountSelectAlert } from './accountSelectAlert'
 import type {
   GetAddressDAOutput,
   SignPersonalMessageDAOutput,
@@ -251,12 +252,18 @@ export function ledgerModule(): WalletInit {
          * and sets the first account as the current account
          */
         async function getAccounts(): Promise<Array<Account>> {
-          const accounts = await accountSelect({
+          const selection = accountSelect({
             basePaths: DEFAULT_BASE_PATHS,
             assets: DEFAULT_ASSETS,
             chains,
             scanAccounts: deriveAccounts,
           })
+
+          // `accountSelect` mounts its widget synchronously before its first
+          // await, so the shadow root is already there to be styled (WA-3243).
+          styleAccountSelectAlert()
+
+          const accounts = await selection
 
           if (accounts.length > 0) {
             setCurrentAccount(accounts[0])
