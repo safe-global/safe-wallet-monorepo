@@ -45,20 +45,28 @@ export const STATUS_PRESENTATION: Record<
   },
 }
 
+/** The shared "we do not know" state — a failed read and an inconclusive one. */
+const STATUS_UNKNOWN: Pick<SafenetStatusPresentation, 'label' | 'copy'> = {
+  label: 'Status unavailable',
+  copy: 'The Safenet check status could not be read. Retry later.',
+}
+
 /**
- * Neither UNAVAILABLE meaning is a verdict, so both stay neutral: a muted icon
- * and the default text colors, never error or warning ones. No severity field:
- * these states have no verdict to color from.
+ * None of the three UNAVAILABLE meanings is a verdict, so all stay neutral: a
+ * muted icon and the default text colors, never error or warning ones. No
+ * severity field: these states have no verdict to color from.
  */
 export const UNAVAILABLE_PRESENTATION: Record<UnavailableReason, Pick<SafenetStatusPresentation, 'label' | 'copy'>> = {
   NO_CHECK: {
     label: 'Not checked',
     copy: 'No Safenet check was requested for this transaction.',
   },
-  READ_FAILED: {
-    label: 'Status unavailable',
-    copy: 'The Safenet check status could not be read. Retry later.',
-  },
+  READ_FAILED: STATUS_UNKNOWN,
+  // A read over a window that cannot cover the check's lifetime found nothing
+  // where it looked; it did not establish that nothing is there. That is the
+  // same "unknown" a failed read reports, so it gets the same copy — never the
+  // definite "no check was requested", and never an error tone.
+  WINDOW_UNCERTAIN: STATUS_UNKNOWN,
 }
 
 /** Section heading for every verdict: the state itself is in the copy. */
