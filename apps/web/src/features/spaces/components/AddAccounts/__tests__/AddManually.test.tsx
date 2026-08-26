@@ -30,8 +30,20 @@ jest.mock('@/components/common/ChainIndicator', () => ({
 
 jest.mock('@/components/common/ModalDialog', () => ({
   __esModule: true,
-  default: ({ open, children }: { open: boolean; children: React.ReactNode }) =>
-    open ? <div data-testid="modal-dialog">{children}</div> : null,
+  default: ({
+    open,
+    children,
+    forceBackdrop,
+  }: {
+    open: boolean
+    children: React.ReactNode
+    forceBackdrop?: boolean
+  }) =>
+    open ? (
+      <div data-testid="modal-dialog" data-force-backdrop={String(Boolean(forceBackdrop))}>
+        {children}
+      </div>
+    ) : null,
 }))
 
 describe('AddManually', () => {
@@ -53,6 +65,16 @@ describe('AddManually', () => {
     fireEvent.click(screen.getByTestId('add-manually-button'))
 
     expect(screen.queryByTestId('modal-dialog')).not.toBeInTheDocument()
+  })
+
+  // The dialog is nested inside the "My accounts" picker dialog, and Base UI drops the backdrop of a
+  // nested dialog. Without forceBackdrop the two surfaces render with nothing between them.
+  it('forces its own backdrop so it does not merge into the dialog behind it', () => {
+    render(<AddManually handleAddSafe={jest.fn()} />)
+
+    fireEvent.click(screen.getByTestId('add-manually-button'))
+
+    expect(screen.getByTestId('modal-dialog')).toHaveAttribute('data-force-backdrop', 'true')
   })
 
   it('shows the network label on the closed network trigger for the default chain', async () => {

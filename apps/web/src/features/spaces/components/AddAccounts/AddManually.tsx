@@ -84,6 +84,7 @@ const AddManually = ({
         dialogTitle="Add safe account"
         onClose={onClose}
         hideChainIndicator
+        forceBackdrop
         PaperProps={{ sx: { maxWidth: '760px' } }}
       >
         <FormProvider {...formMethods}>
