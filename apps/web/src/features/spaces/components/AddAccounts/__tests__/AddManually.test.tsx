@@ -1,9 +1,16 @@
-import { render, screen, fireEvent } from '@/tests/test-utils'
+import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
+import { chainBuilder } from '@/tests/builders/chains'
+import chains from '@safe-global/utils/config/chains'
 import AddManually from '../AddManually'
+
+const chainConfigs = [
+  chainBuilder().with({ chainId: chains.eth, chainName: 'Ethereum' }).build(),
+  chainBuilder().with({ chainId: '137', chainName: 'Polygon' }).build(),
+]
 
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
-  default: () => ({ configs: [] }),
+  default: () => ({ configs: chainConfigs }),
   useHasFeature: () => false,
 }))
 
@@ -18,7 +25,7 @@ jest.mock('@/components/common/AddressInput', () => ({
 
 jest.mock('@/components/common/ChainIndicator', () => ({
   __esModule: true,
-  default: () => <div data-testid="chain-indicator" />,
+  default: ({ chainId }: { chainId: string }) => <span>Chain {chainId}</span>,
 }))
 
 jest.mock('@/components/common/ModalDialog', () => ({
@@ -46,5 +53,15 @@ describe('AddManually', () => {
     fireEvent.click(screen.getByTestId('add-manually-button'))
 
     expect(screen.queryByTestId('modal-dialog')).not.toBeInTheDocument()
+  })
+
+  it('shows the network label on the closed network trigger for the default chain', async () => {
+    render(<AddManually handleAddSafe={jest.fn()} />)
+
+    fireEvent.click(screen.getByTestId('add-manually-button'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('network-selector')).toHaveTextContent(`Chain ${chains.eth}`)
+    })
   })
 })

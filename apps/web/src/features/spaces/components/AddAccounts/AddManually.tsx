@@ -112,7 +112,7 @@ const AddManually = ({
                   >
                     {/* eslint-disable-next-line no-restricted-syntax -- h-full/w-full fill the row cell (layout); skin is variant="ghost" */}
                     <SelectTrigger variant="ghost" className="h-full w-full">
-                      <SelectValue />
+                      <SelectValue>{(value) => <ChainIndicator chainId={value} />}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {configs.map((chain) => (
